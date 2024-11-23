@@ -89,6 +89,11 @@ class PersonFaceWidget extends StatelessWidget {
             await PersonService.instance.getPerson(personId!);
         if (personEntity != null) {
           personAvatarFaceID = personEntity.data.avatarFaceID;
+          if (personAvatarFaceID != null) {
+            final tryCache =
+                await checkGetCachedCropForFaceID(personAvatarFaceID);
+            if (tryCache != null) return tryCache;
+          }
           if (personAvatarFaceID == null && cannotTrustFile) {
             final allFaces =
                 await MLDataDB.instance.getFaceIDsForPerson(personId!);

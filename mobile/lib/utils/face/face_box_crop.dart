@@ -34,6 +34,18 @@ Pool _poolFullFileFaceGenerations =
 Pool _poolThumbnailFaceGenerations =
     Pool(100, timeout: const Duration(seconds: 15));
 
+Future<Uint8List?> checkGetCachedCropForFaceID(String faceID) async {
+  final Uint8List? cachedCover = _faceCropCache.get(faceID);
+  return cachedCover;
+}
+
+Future<void> putCachedCropForFaceID(
+  String faceID,
+  Uint8List data,
+) async {
+  _faceCropCache.put(faceID, data);
+}
+
 Future<Map<String, Uint8List>?> getCachedFaceCrops(
   EnteFile enteFile,
   Iterable<Face> faces, {
@@ -129,44 +141,43 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
 }
 
 Future<Uint8List?> precomputeNextFaceCrops(
-    file,
-    clusterID, {
-    required bool useFullFile,
-  }) async {
-    try {
-      final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
-        recentFileID: file.uploadedFileID!,
-        clusterID: clusterID,
-      );
-      if (face == null) {
-        debugPrint(
-          "No cover face for cluster $clusterID and recentFile ${file.uploadedFileID}",
-        );
-        return null;
-      }
-      EnteFile? fileForFaceCrop = file;
-      if (face.fileID != file.uploadedFileID!) {
-        fileForFaceCrop =
-            await FilesDB.instance.getAnyUploadedFile(face.fileID);
-      }
-      if (fileForFaceCrop == null) {
-        return null;
-      }
-      final cropMap = await getCachedFaceCrops(
-        fileForFaceCrop,
-        [face],
-        useFullFile: useFullFile,
-      );
-      return cropMap?[face.faceID];
-    } catch (e, s) {
-      _logger.severe(
-        "Error getting cover face for cluster $clusterID",
-        e,
-        s,
+  file,
+  clusterID, {
+  required bool useFullFile,
+}) async {
+  try {
+    final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
+      recentFileID: file.uploadedFileID!,
+      clusterID: clusterID,
+    );
+    if (face == null) {
+      debugPrint(
+        "No cover face for cluster $clusterID and recentFile ${file.uploadedFileID}",
       );
       return null;
     }
+    EnteFile? fileForFaceCrop = file;
+    if (face.fileID != file.uploadedFileID!) {
+      fileForFaceCrop = await FilesDB.instance.getAnyUploadedFile(face.fileID);
+    }
+    if (fileForFaceCrop == null) {
+      return null;
+    }
+    final cropMap = await getCachedFaceCrops(
+      fileForFaceCrop,
+      [face],
+      useFullFile: useFullFile,
+    );
+    return cropMap?[face.faceID];
+  } catch (e, s) {
+    _logger.severe(
+      "Error getting cover face for cluster $clusterID",
+      e,
+      s,
+    );
+    return null;
   }
+}
 
 Future<Map<String, Uint8List>?> _getFaceCrops(
   EnteFile file,
