@@ -22,7 +22,6 @@ import { retryAsyncOperation } from "@/gallery/utils/retry-async";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import HTTPService from "@ente/shared/network/HTTPService";
 
 export interface LivePhotoSourceURL {
     image: () => Promise<string | undefined>;
@@ -356,17 +355,18 @@ class DownloadManagerImpl {
             file.info?.fileSize ?? 0,
         );
 
+        const res = await this._downloadFile(file);
+
         if (
             file.metadata.fileType === FileType.image ||
             file.metadata.fileType === FileType.livePhoto
         ) {
-            const array = await this._downloadFile(file, onDownloadProgress);
-            const encryptedArrayBuffer = array.buffer;
+            const encryptedData = new Uint8Array(await res.arrayBuffer());
             this.clearDownloadProgress(file.id);
 
             const decrypted = await decryptStreamBytes(
                 {
-                    encryptedData: new Uint8Array(encryptedArrayBuffer),
+                    encryptedData,
                     decryptionHeader: file.file.decryptionHeader,
                 },
                 file.key,
@@ -374,7 +374,6 @@ class DownloadManagerImpl {
             return new Response(decrypted).body;
         }
 
-        const res = await this._downloadFileStream(file);
         const body = res.body;
         if (!body) return null;
         const reader = body.getReader();
@@ -450,29 +449,14 @@ class DownloadManagerImpl {
         });
     }
 
-    private async _downloadFile(
-        file: EnteFile,
-        onDownloadProgress: OnDownloadProgress,
-    ) {
+    private async _downloadFile(file: EnteFile) {
         if (this.publicAlbumsCredentials) {
             return publicAlbums_downloadFile(
                 file,
                 this.publicAlbumsCredentials,
-                onDownloadProgress,
             );
         } else {
             return photos_downloadFile(file);
-        }
-    }
-
-    private async _downloadFileStream(file: EnteFile) {
-        if (this.publicAlbumsCredentials) {
-            return publicAlbums_downloadFileStream(
-                file,
-                this.publicAlbumsCredentials,
-            );
-        } else {
-            return photos_downloadFileStream(file);
         }
     }
 
@@ -612,8 +596,6 @@ async function getRenderableLivePhotoURL(
     };
 }
 
-type OnDownloadProgress = (event: { loaded: number; total: number }) => void;
-
 /**
  * A helper function to adapt {@link retryAsyncOperation} for HTTP fetches.
  */
@@ -653,32 +635,7 @@ const photos_downloadThumbnail = async (file: EnteFile) => {
     return new Uint8Array(await res.arrayBuffer());
 };
 
-const photos_downloadFile = async (file: EnteFile): Promise<Uint8Array> => {
-    const customOrigin = await customAPIOrigin();
-
-    const getFile = async () => {
-        if (customOrigin) {
-            // See: [Note: Passing credentials for self-hosted file fetches]
-            const token = await ensureAuthToken();
-            const params = new URLSearchParams({ token });
-            return fetch(
-                `${customOrigin}/files/download/${file.id}?${params.toString()}`,
-                {
-                    headers: clientPackageHeader(),
-                },
-            );
-        } else {
-            return fetch(`https://files.ente.io/?fileID=${file.id}`, {
-                headers: await authenticatedRequestHeaders(),
-            });
-        }
-    };
-
-    const res = await retryEnsuringHTTPOk(getFile);
-    return new Uint8Array(await res.arrayBuffer());
-};
-
-const photos_downloadFileStream = async (file: EnteFile): Promise<Response> => {
+const photos_downloadFile = async (file: EnteFile): Promise<Response> => {
     const customOrigin = await customAPIOrigin();
 
     // [Note: Passing credentials for self-hosted file fetches]
@@ -787,54 +744,6 @@ const publicAlbums_downloadThumbnail = async (
 const publicAlbums_downloadFile = async (
     file: EnteFile,
     { accessToken, accessTokenJWT }: PublicAlbumsCredentials,
-    onDownloadProgress: (event: { loaded: number; total: number }) => void,
-) => {
-    const customOrigin = await customAPIOrigin();
-
-    // See: [Note: Passing credentials for self-hosted file fetches]
-    const getFile = () => {
-        const opts = {
-            responseType: "arraybuffer",
-            // timeout: this.timeout,
-            onDownloadProgress,
-        };
-
-        if (customOrigin) {
-            const params = new URLSearchParams({
-                accessToken,
-                ...(accessTokenJWT && { accessTokenJWT }),
-            });
-            return HTTPService.get(
-                `${customOrigin}/public-collection/files/download/${file.id}?${params.toString()}`,
-                undefined,
-                undefined,
-                opts,
-            );
-        } else {
-            return HTTPService.get(
-                `https://public-albums.ente.io/download/?fileID=${file.id}`,
-                undefined,
-                {
-                    "X-Auth-Access-Token": accessToken,
-                    ...(accessTokenJWT && {
-                        "X-Auth-Access-Token-JWT": accessTokenJWT,
-                    }),
-                },
-                opts,
-            );
-        }
-    };
-
-    const resp = await retryAsyncOperation(getFile);
-    if (resp.data === undefined) throw Error("request failed");
-    // TODO: Remove this cast (it won't be needed when we migrate this from
-    // axios to fetch).
-    return new Uint8Array(resp.data as ArrayBuffer);
-};
-
-const publicAlbums_downloadFileStream = async (
-    file: EnteFile,
-    { accessToken, accessTokenJWT }: PublicAlbumsCredentials,
 ) => {
     const customOrigin = await customAPIOrigin();
 
@@ -843,7 +752,7 @@ const publicAlbums_downloadFileStream = async (
         if (customOrigin) {
             const params = new URLSearchParams({
                 accessToken,
-                ...(accessTokenJWT && { accessTokenJWT }),
+                ...(accessTokenJWT ? { accessTokenJWT } : {}),
             });
             return fetch(
                 `${customOrigin}/public-collection/files/download/${file.id}?${params.toString()}`,
@@ -853,15 +762,16 @@ const publicAlbums_downloadFileStream = async (
                 `https://public-albums.ente.io/download/?fileID=${file.id}`,
                 {
                     headers: {
+                        ...clientPackageHeader(),
                         "X-Auth-Access-Token": accessToken,
-                        ...(accessTokenJWT && {
-                            "X-Auth-Access-Token-JWT": accessTokenJWT,
-                        }),
+                        ...(accessTokenJWT
+                            ? { "X-Auth-Access-Token-JWT": accessTokenJWT }
+                            : {}),
                     },
                 },
             );
         }
     };
 
-    return retryAsyncOperation(getFile);
+    return retryEnsuringHTTPOk(getFile);
 };
