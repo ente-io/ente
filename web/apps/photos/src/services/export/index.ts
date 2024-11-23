@@ -928,7 +928,7 @@ class ExportService {
         const electron = ensureElectron();
         try {
             const fileUID = getExportRecordFileUID(file);
-            const originalFileStream = await downloadManager.getFile(file);
+            const originalFileStream = await downloadManager.fileStream(file);
             if (file.metadata.fileType === FileType.livePhoto) {
                 await this.exportLivePhoto(
                     exportDir,

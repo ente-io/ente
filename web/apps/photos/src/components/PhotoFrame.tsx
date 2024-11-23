@@ -362,7 +362,9 @@ const PhotoFrame = ({
                 }
                 log.info(`[${item.id}] doesn't have thumbnail`);
                 thumbFetching[item.id] = true;
-                const url = await DownloadManager.getThumbnailForPreview(item);
+                // URL will always be defined (unless an error is thrown) since
+                // we are not passing the `cachedOnly` option.
+                const url = await DownloadManager.renderableThumbnailURL(item)!;
                 updateThumb(instance, index, item, url, false);
             } catch (e) {
                 log.error("getSlideData failed get msrc url failed", e);

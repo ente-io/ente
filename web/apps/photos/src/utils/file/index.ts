@@ -56,9 +56,7 @@ export enum FILE_OPS_TYPE {
 
 export async function downloadFile(file: EnteFile) {
     try {
-        let fileBlob = await new Response(
-            await DownloadManager.getFile(file),
-        ).blob();
+        let fileBlob = await DownloadManager.fileBlob(file);
         if (file.metadata.fileType === FileType.livePhoto) {
             const { imageFileName, imageData, videoFileName, videoData } =
                 await decodeLivePhoto(file.metadata.title, fileBlob);
@@ -392,7 +390,7 @@ async function downloadFileDesktop(
 ) {
     const fs = electron.fs;
 
-    const stream = await DownloadManager.getFile(file);
+    const stream = await DownloadManager.fileStream(file);
 
     if (file.metadata.fileType === FileType.livePhoto) {
         const fileBlob = await new Response(stream).blob();
