@@ -42,14 +42,15 @@ import {
     Typography,
 } from "@mui/material";
 import { t } from "i18next";
-import type { Dispatch, MutableRefObject, Ref, SetStateAction } from "react";
-import {
+import React, {
     forwardRef,
     Fragment,
     useContext,
     useEffect,
     useRef,
     useState,
+    type MutableRefObject,
+    type Ref,
 } from "react";
 import { getLocalCollections } from "services/collectionService";
 import uploadManager from "services/upload/uploadManager";
@@ -792,10 +793,10 @@ const canvasToFile = async (
 interface CommonMenuProps {
     canvasRef: MutableRefObject<HTMLCanvasElement>;
     originalSizeCanvasRef: MutableRefObject<HTMLCanvasElement>;
-    setTransformationPerformed: Dispatch<SetStateAction<boolean>>;
-    setCanvasLoading: Dispatch<SetStateAction<boolean>>;
+    setTransformationPerformed: (v: boolean) => void;
     canvasLoading: boolean;
-    setCurrentTab: Dispatch<SetStateAction<OperationTab>>;
+    setCanvasLoading: (v: boolean) => void;
+    setCurrentTab: (tab: OperationTab) => void;
 }
 
 type CropMenuProps = CommonMenuProps & {
@@ -923,11 +924,14 @@ const getCropRegionArgs = (
 
 interface FreehandCropRegionProps {
     cropBox: CropBoxProps;
-    setIsDragging: Dispatch<SetStateAction<boolean>>;
+    setIsDragging: (v: boolean) => void;
 }
 
 const FreehandCropRegion = forwardRef(
-    (props: FreehandCropRegionProps, ref: Ref<HTMLDivElement>) => {
+    (
+        { cropBox, setIsDragging }: FreehandCropRegionProps,
+        ref: Ref<HTMLDivElement>,
+    ) => {
         return (
             <>
                 {/* Top overlay */}
@@ -937,7 +941,7 @@ const FreehandCropRegion = forwardRef(
                         top: 0,
                         left: 0,
                         right: 0,
-                        height: props.cropBox.y + "px", // height up to the top of the crop box
+                        height: cropBox.y + "px", // height up to the top of the crop box
                         backgroundColor: "rgba(0,0,0,0.5)",
                         pointerEvents: "none",
                     }}
@@ -950,9 +954,7 @@ const FreehandCropRegion = forwardRef(
                         bottom: 0,
                         left: 0,
                         right: 0,
-                        height: `calc(100% - ${
-                            props.cropBox.y + props.cropBox.height
-                        }px)`, // height from the bottom of the crop box to the bottom of the canvas
+                        height: `calc(100% - ${cropBox.y + cropBox.height}px)`, // height from the bottom of the crop box to the bottom of the canvas
                         backgroundColor: "rgba(0,0,0,0.5)",
                         pointerEvents: "none",
                     }}
@@ -962,10 +964,10 @@ const FreehandCropRegion = forwardRef(
                 <div
                     style={{
                         position: "absolute",
-                        top: props.cropBox.y + "px",
+                        top: cropBox.y + "px",
                         left: 0,
-                        width: props.cropBox.x + "px", // width up to the left side of the crop box
-                        height: props.cropBox.height + "px", // same height as the crop box
+                        width: cropBox.x + "px", // width up to the left side of the crop box
+                        height: cropBox.height + "px", // same height as the crop box
                         backgroundColor: "rgba(0,0,0,0.5)",
                         pointerEvents: "none",
                     }}
@@ -975,12 +977,10 @@ const FreehandCropRegion = forwardRef(
                 <div
                     style={{
                         position: "absolute",
-                        top: props.cropBox.y + "px",
+                        top: cropBox.y + "px",
                         right: 0,
-                        width: `calc(100% - ${
-                            props.cropBox.x + props.cropBox.width
-                        }px)`, // width from the right side of the crop box to the right side of the canvas
-                        height: props.cropBox.height + "px", // same height as the crop box
+                        width: `calc(100% - ${cropBox.x + cropBox.width}px)`, // width from the right side of the crop box to the right side of the canvas
+                        height: cropBox.height + "px", // same height as the crop box
                         backgroundColor: "rgba(0,0,0,0.5)",
                         pointerEvents: "none",
                     }}
@@ -990,10 +990,10 @@ const FreehandCropRegion = forwardRef(
                     style={{
                         display: "grid",
                         position: "absolute",
-                        left: props.cropBox.x + "px",
-                        top: props.cropBox.y + "px",
-                        width: props.cropBox.width + "px",
-                        height: props.cropBox.height + "px",
+                        left: cropBox.x + "px",
+                        top: cropBox.y + "px",
+                        width: cropBox.width + "px",
+                        height: cropBox.height + "px",
                         border: "1px solid white",
                         gridTemplateColumns: "1fr 1fr 1fr",
                         gridTemplateRows: "1fr 1fr 1fr",
@@ -1026,7 +1026,7 @@ const FreehandCropRegion = forwardRef(
                         }}
                         onMouseDown={(e) => {
                             e.preventDefault();
-                            props.setIsDragging(true);
+                            setIsDragging(true);
                         }}
                     ></div>
                 </div>
@@ -1341,11 +1341,11 @@ interface ColoursMenuProps {
     saturation: number;
     blur: number;
     invert: boolean;
-    setBrightness: Dispatch<SetStateAction<number>>;
-    setContrast: Dispatch<SetStateAction<number>>;
-    setSaturation: Dispatch<SetStateAction<number>>;
-    setBlur: Dispatch<SetStateAction<number>>;
-    setInvert: Dispatch<SetStateAction<boolean>>;
+    setBrightness: (v: number) => void;
+    setContrast: (v: number) => void;
+    setSaturation: (v: number) => void;
+    setBlur: (v: number) => void;
+    setInvert: (v: boolean) => void;
 }
 
 const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
