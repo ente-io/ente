@@ -88,6 +88,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
     try {
       EnteFile? fileForFaceCrop = widget.file;
       String? personAvatarFaceID;
+      Iterable<String>? allFaces;
       if (widget.personId != null) {
         final PersonEntity? personEntity =
             await PersonService.instance.getPerson(widget.personId!);
@@ -99,29 +100,34 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
             if (tryCache != null) return tryCache;
           }
           if (personAvatarFaceID == null && widget.cannotTrustFile) {
-            final allFaces =
+            allFaces =
                 await MLDataDB.instance.getFaceIDsForPerson(widget.personId!);
-            final allFileIDs = allFaces.map((e) => getFileIdFromFaceId(e));
-            final fileIDToCreationTime =
-                await FilesDB.instance.getFileIDToCreationTime();
-            // Get the file with the most recent creation time
-            final recentFileID = allFileIDs.reduce((a, b) {
-              final aTime = fileIDToCreationTime[a];
-              final bTime = fileIDToCreationTime[b];
-              if (aTime == null) {
-                return b;
-              }
-              if (bTime == null) {
-                return a;
-              }
-              return (aTime >= bTime) ? a : b;
-            });
-            if (fileForFaceCrop.uploadedFileID != recentFileID) {
-              fileForFaceCrop =
-                  await FilesDB.instance.getAnyUploadedFile(recentFileID);
-              if (fileForFaceCrop == null) return null;
-            }
           }
+        }
+      } else if (widget.clusterID != null && widget.cannotTrustFile) {
+        allFaces =
+            await MLDataDB.instance.getFaceIDsForCluster(widget.clusterID!);
+      }
+      if (allFaces != null) {
+        final allFileIDs = allFaces.map((e) => getFileIdFromFaceId(e));
+        final fileIDToCreationTime =
+            await FilesDB.instance.getFileIDToCreationTime();
+        // Get the file with the most recent creation time
+        final recentFileID = allFileIDs.reduce((a, b) {
+          final aTime = fileIDToCreationTime[a];
+          final bTime = fileIDToCreationTime[b];
+          if (aTime == null) {
+            return b;
+          }
+          if (bTime == null) {
+            return a;
+          }
+          return (aTime >= bTime) ? a : b;
+        });
+        if (fileForFaceCrop.uploadedFileID != recentFileID) {
+          fileForFaceCrop =
+              await FilesDB.instance.getAnyUploadedFile(recentFileID);
+          if (fileForFaceCrop == null) return null;
         }
       }
 
