@@ -44,7 +44,6 @@ import {
 import { t } from "i18next";
 import type { Dispatch, MutableRefObject, Ref, SetStateAction } from "react";
 import {
-    createContext,
     forwardRef,
     Fragment,
     useContext,
@@ -69,17 +68,6 @@ const filterDefaultValues = {
     saturation: 100,
     invert: false,
 };
-
-const ImageEditorOverlayContext = createContext(
-    {} as {
-        canvasRef: MutableRefObject<HTMLCanvasElement>;
-        originalSizeCanvasRef: MutableRefObject<HTMLCanvasElement>;
-        setTransformationPerformed: Dispatch<SetStateAction<boolean>>;
-        setCanvasLoading: Dispatch<SetStateAction<boolean>>;
-        canvasLoading: boolean;
-        setCurrentTab: Dispatch<SetStateAction<OperationTab>>;
-    },
-);
 
 type OperationTab = "crop" | "transform" | "colours";
 
@@ -521,6 +509,15 @@ const ImageEditorOverlay = (props: IProps) => {
         setCurrentTab("transform");
     };
 
+    const menuProps = {
+        originalSizeCanvasRef,
+        canvasRef,
+        setCanvasLoading,
+        canvasLoading,
+        setTransformationPerformed,
+        setCurrentTab,
+    };
+
     return (
         <>
             <Backdrop
@@ -669,26 +666,18 @@ const ImageEditorOverlay = (props: IProps) => {
                             label={t("RESTORE_ORIGINAL")}
                         />
                     </MenuItemGroup>
-                    <ImageEditorOverlayContext.Provider
-                        value={{
-                            originalSizeCanvasRef,
-                            canvasRef,
-                            setCanvasLoading,
-                            canvasLoading,
-                            setTransformationPerformed,
-                            setCurrentTab,
-                        }}
-                    >
-                        {currentTab === "crop" && (
-                            <CropMenu
-                                previewScale={previewCanvasScale}
-                                cropBoxProps={cropBox}
-                                cropBoxRef={cropBoxRef}
-                                resetCropBox={resetCropBox}
-                            />
-                        )}
-                        {currentTab === "transform" && <TransformMenu />}
-                    </ImageEditorOverlayContext.Provider>
+                    {currentTab === "crop" && (
+                        <CropMenu
+                            {...menuProps}
+                            previewScale={previewCanvasScale}
+                            cropBoxProps={cropBox}
+                            cropBoxRef={cropBoxRef}
+                            resetCropBox={resetCropBox}
+                        />
+                    )}
+                    {currentTab === "transform" && (
+                        <TransformMenu {...menuProps} />
+                    )}
                     {currentTab === "colours" && (
                         <ColoursMenu
                             brightness={brightness}
@@ -800,12 +789,21 @@ const canvasToFile = async (
     return new File([blob], fileName);
 };
 
-interface CropMenuProps {
+interface CommonMenuProps {
+    canvasRef: MutableRefObject<HTMLCanvasElement>;
+    originalSizeCanvasRef: MutableRefObject<HTMLCanvasElement>;
+    setTransformationPerformed: Dispatch<SetStateAction<boolean>>;
+    setCanvasLoading: Dispatch<SetStateAction<boolean>>;
+    canvasLoading: boolean;
+    setCurrentTab: Dispatch<SetStateAction<OperationTab>>;
+}
+
+type CropMenuProps = CommonMenuProps & {
     previewScale: number;
     cropBoxProps: CropBoxProps;
     cropBoxRef: MutableRefObject<HTMLDivElement>;
     resetCropBox: () => void;
-}
+};
 
 const CropMenu: React.FC<CropMenuProps> = (props) => {
     const {
@@ -815,7 +813,7 @@ const CropMenu: React.FC<CropMenuProps> = (props) => {
         setCanvasLoading,
         setTransformationPerformed,
         setCurrentTab,
-    } = useContext(ImageEditorOverlayContext);
+    } = props;
 
     return (
         <>
@@ -1055,15 +1053,13 @@ const PRESET_ASPECT_RATIOS = [
     },
 ];
 
-const TransformMenu: React.FC = () => {
-    const {
-        canvasRef,
-        originalSizeCanvasRef,
-        canvasLoading,
-        setCanvasLoading,
-        setTransformationPerformed,
-    } = useContext(ImageEditorOverlayContext);
-
+const TransformMenu: React.FC<CommonMenuProps> = ({
+    canvasRef,
+    originalSizeCanvasRef,
+    canvasLoading,
+    setCanvasLoading,
+    setTransformationPerformed,
+}) => {
     // Crops the canvas according to originalHeight and originalWidth without compounding
     const cropCanvas = (
         canvas: HTMLCanvasElement,
