@@ -78,14 +78,21 @@ interface DownloadClient {
 class DownloadManagerImpl {
     private ready = false;
     private downloadClient: DownloadClient | undefined;
-    /** Local cache for thumbnails. Might not be available. */
-    private thumbnailCache?: BlobCache;
+    /**
+     * Local cache for thumbnail blobs.
+     *
+     * Might not be available.
+     */
+    private thumbnailCache: BlobCache | undefined;
+    /**
+     * An in-memory cache for an object URL to a file's thumbnail.
+     *
+     * This object URL can be directly used to render the thumbnail (e.g. in an
+     * img tag). The entries are keyed by the file ID.
+     */
+    private thumbnailURLs = new Map<number, Promise<string | undefined>>();
     private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
     private fileConversionPromises = new Map<number, Promise<SourceURLs>>();
-    private thumbnailObjectURLPromises = new Map<
-        number,
-        Promise<string | undefined>
-    >();
 
     private fileDownloadProgress = new Map<number, number>();
 
@@ -122,7 +129,7 @@ class DownloadManagerImpl {
         this.downloadClient = undefined;
         this.fileObjectURLPromises.clear();
         this.fileConversionPromises.clear();
-        this.thumbnailObjectURLPromises.clear();
+        this.thumbnailURLs.clear();
         this.fileDownloadProgress.clear();
         this.progressUpdater = () => {};
     }
@@ -144,13 +151,27 @@ class DownloadManagerImpl {
         return decryptThumbnail({ encryptedData, decryptionHeader }, file.key);
     };
 
-    async getThumbnail(file: EnteFile, localOnly = false) {
+    /**
+     * Returns the thumbnail data for a file, downloading it if needed.
+     *
+     * The data is cached on disk for subsequent fetches.
+     *
+     * @param file The {@link EnteFile} whose thumbnail we want.
+     *
+     * @param cachedOnly If true, then the thumbnail is not downloaded if it is
+     * not already present in the disk cache.
+     *
+     * @returns The bytes of the thumbnail. This method can return `undefined`
+     * iff the thumbnail is not already cached, and {@link cachedOnly} is set to
+     * `true`.
+     */
+    async thumbnailBytes(file: EnteFile, cachedOnly = false) {
         this.ensureInitialized();
 
         const key = file.id.toString();
         const cached = await this.thumbnailCache?.get(key);
         if (cached) return new Uint8Array(await cached.arrayBuffer());
-        if (localOnly) return undefined;
+        if (cachedOnly) return undefined;
 
         const thumb = await this.downloadThumb(file);
         await this.thumbnailCache?.put(key, new Blob([thumb]));
@@ -160,42 +181,39 @@ class DownloadManagerImpl {
     /**
      * Resolves with an URL that points to the file's thumbnail.
      *
-     * The thumbnail will be downloaded (unless {@link localOnly} is true) and
-     * cached.
+     * The thumbnail will be downloaded if needed (unless {@link cachedOnly} is
+     * true). It will also be cached for subsequent fetches.
      *
-     * The optional {@link localOnly} parameter can be set to indicate that this
-     * is being called as part of a scroll, so the downloader should not attempt
-     * to download the file but should instead fulfill the request from the
-     * cache. This avoids an unbounded flurry of requests on scroll, only
-     * downloading when the position has quiescized.
+     * The optional {@link cachedOnly} parameter can be set to indicate that
+     * this is being called as part of a scroll, so the downloader should not
+     * attempt to download the file but should instead fulfill the request from
+     * the disk cache. This avoids an unbounded flurry of requests on scroll,
+     * only downloading when the position has quiescized.
      *
      * The returned URL is actually an object URL, but it should not be revoked
      * since the download manager caches it for future use.
      */
-    async getThumbnailForPreview(
+    async renderableThumbnailURL(
         file: EnteFile,
-        localOnly = false,
+        cachedOnly = false,
     ): Promise<string | undefined> {
         this.ensureInitialized();
-        try {
-            if (!this.thumbnailObjectURLPromises.has(file.id)) {
-                const thumbPromise = this.getThumbnail(file, localOnly);
-                const thumbURLPromise = thumbPromise.then(
-                    (thumb) => thumb && URL.createObjectURL(new Blob([thumb])),
-                );
-                this.thumbnailObjectURLPromises.set(file.id, thumbURLPromise);
-            }
-            let thumb = await this.thumbnailObjectURLPromises.get(file.id);
-            if (!thumb && !localOnly) {
-                this.thumbnailObjectURLPromises.delete(file.id);
-                thumb = await this.getThumbnailForPreview(file, localOnly);
-            }
-            return thumb;
-        } catch (e) {
-            this.thumbnailObjectURLPromises.delete(file.id);
-            log.error("get DownloadManager preview Failed", e);
-            throw e;
+
+        if (!this.thumbnailURLs.has(file.id)) {
+            const url = this.thumbnailBytes(file, cachedOnly).then((bytes) =>
+                bytes ? URL.createObjectURL(new Blob([bytes])) : undefined,
+            );
+            this.thumbnailURLs.set(file.id, url);
         }
+
+        let thumb = await this.thumbnailURLs.get(file.id);
+        if (cachedOnly) return thumb;
+
+        if (!thumb) {
+            this.thumbnailURLs.delete(file.id);
+            thumb = await this.renderableThumbnailURL(file);
+        }
+        return thumb;
     }
 
     /**

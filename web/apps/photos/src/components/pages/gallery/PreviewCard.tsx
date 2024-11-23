@@ -274,7 +274,7 @@ export default function PreviewCard(props: IProps) {
                     return;
                 }
                 const url: string =
-                    await DownloadManager.getThumbnailForPreview(
+                    await DownloadManager.renderableThumbnailURL(
                         file,
                         props.showPlaceholder,
                     );
