@@ -8,7 +8,7 @@ import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:provider/provider.dart';
-import '../../providers/theme_provider.dart';
+import '../../theme/ente_theme_provider.dart';
 
 class ThemeSwitchWidget extends StatefulWidget {
   const ThemeSwitchWidget({Key? key}) : super(key: key);
@@ -23,7 +23,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   @override
   void initState() {
     super.initState();
-    currentThemeOption = context.read<ThemeProvider>().currentTheme;
+    currentThemeOption = context.read<EnteThemeProvider>().currentTheme;
   }
 
   @override
@@ -56,7 +56,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   }
 
   Widget _menuItem(BuildContext context, ThemeOptions themeOption, String themeName) {
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final themeProvider = Provider.of<EnteThemeProvider>(context, listen: false);
     
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
