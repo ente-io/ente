@@ -190,7 +190,7 @@ class PreviewVideoStore {
       _logger.info("Writing playlist to ${playlistFile.path}");
 
       return playlistFile;
-    } catch (e, s) {
+    } catch (_) {
       rethrow;
     }
   }

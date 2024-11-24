@@ -4,14 +4,11 @@ import 'dart:io';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
-import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/service_locator.dart";
-import 'package:photos/services/files_service.dart';
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/video_controls.dart';
@@ -43,7 +40,6 @@ class PreviewVideoWidget extends StatefulWidget {
 }
 
 class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
-  final _logger = Logger("VideoWidget");
   VideoPlayerController? _videoPlayerController;
   ChewieController? _chewieController;
   final _progressNotifier = ValueNotifier<double?>(null);
@@ -63,19 +59,6 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
         _isFileSwipeLocked = event.swipeLocked;
       });
     });
-  }
-
-  void _setFileSizeIfNull() {
-    if (widget.file.fileSize == null && widget.file.canEditMetaInfo) {
-      FilesService.instance
-          .getFileSize(widget.file.uploadedFileID!)
-          .then((value) {
-        widget.file.fileSize = value;
-        if (mounted) {
-          setState(() {});
-        }
-      });
-    }
   }
 
   @override
