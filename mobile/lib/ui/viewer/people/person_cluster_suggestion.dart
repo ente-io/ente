@@ -360,7 +360,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             precomputeNextFaceCrops(
               file,
               clusterID,
-              useFullFile: false,
+              useFullFile: true,
             ),
           );
           compCount++;
@@ -498,7 +498,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         precomputeNextFaceCrops(
           file,
           clusterID,
-          useFullFile: false,
+          useFullFile: true,
         ),
       );
     }
