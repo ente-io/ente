@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
+// import 'package:photos/ente_theme_data.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/text_style.dart';
@@ -12,12 +12,12 @@ class EnteTheme extends ThemeExtension<EnteTheme> {
   final List<BoxShadow> shadowButton;
 
   const EnteTheme(
-    this.textTheme,
-    this.colorScheme, {
-    required this.shadowFloat,
-    required this.shadowMenu,
-    required this.shadowButton,
-  });
+      this.textTheme,
+      this.colorScheme, {
+        required this.shadowFloat,
+        required this.shadowMenu,
+        required this.shadowButton,
+      });
 
   @override
   ThemeExtension<EnteTheme> copyWith({
@@ -38,19 +38,13 @@ class EnteTheme extends ThemeExtension<EnteTheme> {
 
   @override
   ThemeExtension<EnteTheme> lerp(
-    covariant ThemeExtension<EnteTheme>? other,
-    double t,
-  ) {
+      covariant ThemeExtension<EnteTheme>? other,
+      double t,
+      ) {
     if (other is! EnteTheme) {
       return this;
     }
-    return EnteTheme(
-      textTheme,
-      colorScheme,
-      shadowFloat: shadowFloat,
-      shadowMenu: shadowMenu,
-      shadowButton: shadowButton,
-    );
+    return this;
   }
 }
 
@@ -70,20 +64,28 @@ EnteTheme darkTheme = EnteTheme(
   shadowButton: shadowButtonDark,
 );
 
+EnteTheme enteDarkTheme = EnteTheme(
+  darkTextTheme,
+  enteDarkScheme,
+  shadowFloat: shadowFloatDark,
+  shadowMenu: shadowMenuDark,
+  shadowButton: shadowButtonDark,
+);
+
 EnteColorScheme getEnteColorScheme(
-  BuildContext context, {
-  bool inverse = false,
-}) {
-  return inverse
-      ? Theme.of(context).colorScheme.inverseEnteTheme.colorScheme
-      : Theme.of(context).colorScheme.enteTheme.colorScheme;
+    BuildContext context, {
+      bool inverse = false,
+    }) {
+  final theme = Theme.of(context).extension<EnteTheme>();
+  if (theme == null) return inverse ? enteDarkScheme : lightScheme;
+  return theme.colorScheme;
 }
 
 EnteTextTheme getEnteTextTheme(
-  BuildContext context, {
-  bool inverse = false,
-}) {
-  return inverse
-      ? Theme.of(context).colorScheme.inverseEnteTheme.textTheme
-      : Theme.of(context).colorScheme.enteTheme.textTheme;
+    BuildContext context, {
+      bool inverse = false,
+    }) {
+  final theme = Theme.of(context).extension<EnteTheme>();
+  if (theme == null) return inverse ? darkTextTheme : lightTextTheme;
+  return theme.textTheme;
 }

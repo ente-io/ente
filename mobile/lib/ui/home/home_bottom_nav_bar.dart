@@ -6,7 +6,9 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/selected_files.dart';
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
+// import 'package:photos/theme/ente_theme_provider.dart';
 import 'package:photos/ui/tabs/nav_bar.dart';
+
 
 class HomeBottomNavigationBar extends StatefulWidget {
   const HomeBottomNavigationBar(
@@ -113,7 +115,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                         GButton(
                           margin: const EdgeInsets.fromLTRB(8, 6, 10, 6),
                           icon: Icons.home_rounded,
-                          iconColor: enteColorScheme.tabIcon,
+                          iconColor: getEnteColorScheme(context).tabIcon,
                           iconActiveColor: strokeBaseLight,
                           text: '',
                           onPressed: () {
@@ -126,7 +128,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                         GButton(
                           margin: const EdgeInsets.fromLTRB(10, 6, 10, 6),
                           icon: Icons.collections_rounded,
-                          iconColor: enteColorScheme.tabIcon,
+                          iconColor: getEnteColorScheme(context).tabIcon,
                           iconActiveColor: strokeBaseLight,
                           text: '',
                           onPressed: () {
@@ -140,7 +142,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                         GButton(
                           margin: const EdgeInsets.fromLTRB(10, 6, 8, 6),
                           icon: Icons.people_outlined,
-                          iconColor: enteColorScheme.tabIcon,
+                          iconColor: getEnteColorScheme(context).tabIcon,
                           iconActiveColor: strokeBaseLight,
                           text: '',
                           onPressed: () {
@@ -154,7 +156,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                         GButton(
                           margin: const EdgeInsets.fromLTRB(10, 6, 8, 6),
                           icon: Icons.search_outlined,
-                          iconColor: enteColorScheme.tabIcon,
+                          iconColor: getEnteColorScheme(context).tabIcon,
                           iconActiveColor: strokeBaseLight,
                           text: '',
                           onPressed: () {

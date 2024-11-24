@@ -95,34 +95,51 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    // context.saveAsCurrentContext(); //remove if not usefull in future
     if (Platform.isAndroid || kDebugMode) {
       return MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ],
-        child: AdaptiveTheme(
-          light: lightThemeData,
-          dark: darkThemeData,
-          initial: widget.savedThemeMode ?? AdaptiveThemeMode.system,
-          builder: (ThemeData light, ThemeData dark) => MaterialApp(
-            title: "ente",
-            themeMode: ThemeMode.system,
-            theme: light,
-            darkTheme: dark,
-            home: AppLifecycleService.instance.mediaExtensionAction.action ==
-                    IntentAction.view
-                ? const FileViewer()
-                : const HomeWidget(),
-            debugShowCheckedModeBanner: false,
-            builder: EasyLoading.init(),
-            locale: locale,
-            supportedLocales: appSupportedLocales,
-            localeListResolutionCallback: localResolutionCallBack,
-            localizationsDelegates: const [
-              ...AppLocalizations.localizationsDelegates,
-              S.delegate,
-            ],
+          ChangeNotifierProvider(
+            create: (context) => ThemeProvider(),
           ),
+        ],
+        child: Builder(
+          builder: (context) {
+            return Consumer<ThemeProvider>(
+              builder: (context, themeProvider, child) {
+                if (themeProvider.currentTheme == ThemeOptions.system) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    themeProvider.initializeTheme(context);
+                  });
+                }
+                
+                return AdaptiveTheme(
+                  light: lightThemeData,
+                  dark: darkThemeData,
+                  initial: AdaptiveThemeMode.system,
+                  builder: (ThemeData light, ThemeData dark) => MaterialApp(
+                    title: "ente",
+                    themeMode: ThemeMode.system,
+                    theme: light,
+                    darkTheme: dark,
+                    home: AppLifecycleService.instance.mediaExtensionAction.action ==
+                            IntentAction.view
+                        ? const FileViewer()
+                        : const HomeWidget(),
+                    debugShowCheckedModeBanner: false,
+                    builder: EasyLoading.init(),
+                    locale: locale,
+                    supportedLocales: appSupportedLocales,
+                    localeListResolutionCallback: localResolutionCallBack,
+                    localizationsDelegates: const [
+                      ...AppLocalizations.localizationsDelegates,
+                      S.delegate,
+                    ],
+                  ),
+                );
+              },
+            );
+          },
         ),
       );
     } else {

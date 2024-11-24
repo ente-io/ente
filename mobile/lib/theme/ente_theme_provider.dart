@@ -24,7 +24,28 @@ enum ThemeOptions {
 class ThemeProvider extends ChangeNotifier {
   ThemeOptions _currentTheme = ThemeOptions.system;
 
+  ThemeProvider() {
+    // No initialization here
+  }
+
   ThemeOptions get currentTheme => _currentTheme;
+
+  Future<void> initializeTheme(BuildContext context) async {
+    try {
+      final adaptiveTheme = AdaptiveTheme.of(context);
+      
+      // Set initial themes without changing mode
+      _updateThemeData(
+        adaptiveTheme,
+        _createCustomThemeFromEnteColorScheme(lightScheme, false),
+        _createCustomThemeFromEnteColorScheme(darkScheme, true),
+      );
+      
+      notifyListeners();
+    } catch (e) {
+      print('Error initializing theme: $e');
+    }
+  }
 
   Future<void> setTheme(ThemeOptions theme, BuildContext context) async {
     _currentTheme = theme;
@@ -38,60 +59,82 @@ class ThemeProvider extends ChangeNotifier {
           adaptiveTheme.setDark();
           await Future.delayed(const Duration(milliseconds: 100));
           adaptiveTheme.setSystem();
-          _updateThemeData(adaptiveTheme, lightThemeData, darkThemeData);
+          _updateThemeData(
+            adaptiveTheme,
+            _createCustomThemeFromEnteColorScheme(lightScheme, false),
+            _createCustomThemeFromEnteColorScheme(darkScheme, true),
+          );
           break;
+
         case ThemeOptions.light:
           adaptiveTheme.setLight();
           await Future.delayed(const Duration(milliseconds: 100));
-          _updateThemeData(adaptiveTheme, lightThemeData, lightThemeData);
+          _updateThemeData(
+            adaptiveTheme,
+            _createCustomThemeFromEnteColorScheme(lightScheme, false),
+            _createCustomThemeFromEnteColorScheme(lightScheme, false),
+          );
           break;
+
         case ThemeOptions.dark:
           adaptiveTheme.setDark();
           await Future.delayed(const Duration(milliseconds: 100));
-          _updateThemeData(adaptiveTheme, darkThemeData, darkThemeData);
+          _updateThemeData(
+            adaptiveTheme, 
+            _createCustomThemeFromEnteColorScheme(enteDarkScheme, true),
+            _createCustomThemeFromEnteColorScheme(enteDarkScheme, true),
+          );
           break;
+
         case ThemeOptions.greenLight:
           final customTheme = _createCustomThemeFromEnteColorScheme(greenLightScheme, false);
           adaptiveTheme.setLight();
           await Future.delayed(const Duration(milliseconds: 100));
           _updateThemeData(adaptiveTheme, customTheme, customTheme);
           break;
+
         case ThemeOptions.greenDark:
           final customTheme = _createCustomThemeFromEnteColorScheme(greenDarkScheme, true);
           adaptiveTheme.setDark();
           await Future.delayed(const Duration(milliseconds: 100));
           _updateThemeData(adaptiveTheme, customTheme, customTheme);
           break;
+
         case ThemeOptions.redLight:
           final customTheme = _createCustomThemeFromEnteColorScheme(redLightScheme, false);
           adaptiveTheme.setLight();
           await Future.delayed(const Duration(milliseconds: 100));
           _updateThemeData(adaptiveTheme, customTheme, customTheme);
           break;
+
         case ThemeOptions.redDark:
           final customTheme = _createCustomThemeFromEnteColorScheme(redDarkScheme, true);
           adaptiveTheme.setDark();
           await Future.delayed(const Duration(milliseconds: 100));
           _updateThemeData(adaptiveTheme, customTheme, customTheme);
           break;
+
         case ThemeOptions.blueLight:
           final customTheme = _createCustomThemeFromEnteColorScheme(blueLightScheme, false);
           adaptiveTheme.setLight();
           await Future.delayed(const Duration(milliseconds: 100));
           _updateThemeData(adaptiveTheme, customTheme, customTheme);
           break;
+
         case ThemeOptions.blueDark:
           final customTheme = _createCustomThemeFromEnteColorScheme(blueDarkScheme, true);
           adaptiveTheme.setDark();
           await Future.delayed(const Duration(milliseconds: 100));
           _updateThemeData(adaptiveTheme, customTheme, customTheme);
           break;
+
         case ThemeOptions.yellowLight:
           final customTheme = _createCustomThemeFromEnteColorScheme(yellowLightScheme, false);
           adaptiveTheme.setLight();
           await Future.delayed(const Duration(milliseconds: 100));
           _updateThemeData(adaptiveTheme, customTheme, customTheme);
           break;
+
         case ThemeOptions.yellowDark:
           final customTheme = _createCustomThemeFromEnteColorScheme(yellowDarkScheme, true);
           adaptiveTheme.setDark();
@@ -108,6 +151,65 @@ class ThemeProvider extends ChangeNotifier {
     }
   }
 
+  // New method for custom themes
+  ThemeData _createCustomTheme(ThemeOptions theme) {
+    late EnteColorScheme colorScheme;
+    bool isDark = false;
+
+    switch (theme) {
+      case ThemeOptions.greenLight:
+        colorScheme = greenLightScheme;
+        break;
+      case ThemeOptions.greenDark:
+        colorScheme = greenDarkScheme;
+        isDark = true;
+        break;
+      case ThemeOptions.redLight:
+        colorScheme = redLightScheme;
+        break;
+      case ThemeOptions.redDark:
+        colorScheme = redDarkScheme;
+        isDark = true;
+        break;
+      case ThemeOptions.blueLight:
+        colorScheme = blueLightScheme;
+        break;
+      case ThemeOptions.blueDark:
+        colorScheme = blueDarkScheme;
+        isDark = true;
+        break;
+      case ThemeOptions.yellowLight:
+        colorScheme = yellowLightScheme;
+        break;
+      case ThemeOptions.yellowDark:
+        colorScheme = yellowDarkScheme;
+        isDark = true;
+        break;
+      default:
+        colorScheme = lightScheme;
+    }
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: isDark ? Brightness.dark : Brightness.light,
+      extensions: [
+        EnteTheme(
+          isDark ? darkTextTheme : lightTextTheme,
+          colorScheme,
+          shadowFloat: isDark ? shadowFloatDark : shadowFloatLight,
+          shadowMenu: isDark ? shadowMenuDark : shadowMenuLight,
+          shadowButton: isDark ? shadowButtonDark : shadowButtonLight,
+        ),
+      ],
+      primaryColor: colorScheme.primary500,
+      primaryColorDark: colorScheme.primary700,
+      primaryColorLight: colorScheme.primary300,
+      scaffoldBackgroundColor: colorScheme.backgroundBase,
+      cardColor: colorScheme.backgroundElevated,
+      // ... add other necessary theme properties
+    );
+  }
+
   void _updateThemeData(AdaptiveThemeManager adaptiveTheme, ThemeData light, ThemeData dark) {
     adaptiveTheme.setTheme(
       light: light,
@@ -116,6 +218,21 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   ThemeData _createCustomThemeFromEnteColorScheme(EnteColorScheme enteColorScheme, bool isDark) {
+    // Special handling for dark theme
+    if (isDark && enteColorScheme == darkScheme) {
+      return ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        extensions: [darkTheme],
+        // Use the original dark theme data
+        primaryColor: darkScheme.primary500,
+        primaryColorDark: darkScheme.primary700,
+        primaryColorLight: darkScheme.primary300,
+        scaffoldBackgroundColor: darkScheme.backgroundBase,
+        // ... other theme properties using darkScheme colors
+      );
+    }
+    
     // Create base theme data
     final baseTheme = isDark ? darkThemeData : lightThemeData;
     

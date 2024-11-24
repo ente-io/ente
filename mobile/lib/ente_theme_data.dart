@@ -3,9 +3,11 @@ import "package:flutter_datetime_picker_bdaya/flutter_datetime_picker_bdaya.dart
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 
-final lightThemeData = ThemeData(
-  fontFamily: 'Inter',
+final ThemeData lightThemeData = ThemeData(
+  useMaterial3: true,
   brightness: Brightness.light,
+  extensions: [lightTheme],
+  fontFamily: 'Inter',
   hintColor: const Color.fromRGBO(158, 158, 158, 1),
   primaryColor: const Color.fromRGBO(255, 110, 64, 1),
   primaryColorLight: const Color.fromRGBO(0, 0, 0, 0.541),
@@ -83,9 +85,11 @@ final lightThemeData = ThemeData(
   ),
 );
 
-final darkThemeData = ThemeData(
-  fontFamily: 'Inter',
+final ThemeData darkThemeData = ThemeData(
+  useMaterial3: true,
   brightness: Brightness.dark,
+  extensions: [darkTheme],
+  fontFamily: 'Inter',
   primaryColorLight: const Color.fromRGBO(255, 255, 255, 0.702),
   iconTheme: const IconThemeData(color: Colors.white),
   primaryIconTheme:

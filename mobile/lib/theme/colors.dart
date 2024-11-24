@@ -12,6 +12,8 @@ class EnteColorScheme {
   final Color backdropBase;
   final Color backdropMuted;
   final Color backdropFaint;
+  final Color xdaColor;
+
 
   // Text Colors
   final Color textBase;
@@ -64,6 +66,7 @@ class EnteColorScheme {
       this.backdropBase,
       this.backdropMuted,
       this.backdropFaint,
+      this.xdaColor,
       this.textBase,
       this.textMuted,
       this.textFaint,
@@ -108,6 +111,7 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   backdropBaseLight,
   backdropMutedLight,
   backdropFaintLight,
+  Color(0xFF1224D3),
   textBaseLight,
   textMutedLight,
   textFaintLight,
@@ -151,6 +155,7 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   backdropBaseDark,
   backdropMutedDark,
   backdropFaintDark,
+  Color(0xFF590000),
   textBaseDark,
   textMutedDark,
   textFaintDark,
@@ -174,10 +179,54 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   fixedStrokeMutedWhite,
   strokeSolidMutedLight,
   strokeSolidFaintLight,
-  Color.fromRGBO(74, 20, 140, 1),    // primary700 - Dark Violet
-  Color.fromRGBO(103, 58, 183, 1),   // primary500 - Medium Violet
-  Color.fromRGBO(126, 87, 194, 1),   // primary400 - Light Violet
-  Color.fromRGBO(149, 117, 205, 1),  // primary300 - Very Light Violet
+  _primary700,
+  _primary500,
+  _primary400,
+  _primary300,
+  _warning700,
+  _warning500,
+  _warning400,
+  _warning800,
+  _caution500,
+  _golden700,
+  _golden500,
+);
+
+const EnteColorScheme enteDarkScheme = EnteColorScheme(
+  backgroundBaseDark,
+  backgroundElevatedDark,
+  backgroundElevated2Dark,
+  backdropBaseDark,
+  backdropMutedDark,
+  backdropFaintDark,
+  Color(0xFF590000),
+  textBaseDark,
+  textMutedDark,
+  textFaintDark,
+  blurTextBaseDark,
+  fillBaseDark,
+  fillBasePressedDark,
+  fillStrongDark,
+  fillMutedDark,
+  fillFaintDark,
+  fillFaintPressedDark,
+  fillBaseGreyDark,
+  strokeBaseDark,
+  strokeMutedDark,
+  strokeFaintDark,
+  strokeFainterDark,
+  blurStrokeBaseDark,
+  blurStrokeFaintDark,
+  blurStrokePressedDark,
+  tabIconDark,
+  avatarDark,
+  fixedStrokeMutedWhite,
+  strokeSolidMutedLight,
+  strokeSolidFaintLight,
+  _primary700,
+  _primary500,
+  _primary400,
+  _primary300,
   _warning700,
   _warning500,
   _warning400,
@@ -194,6 +243,7 @@ const EnteColorScheme greenLightScheme = EnteColorScheme(
   Color(0xFF81C784),
   Color(0xFF66BB6A),
   Color(0xFF4CAF50),
+  Color(0xBDD56060),
   Color(0xFF2E7D32),
   Color(0xFF388E3C),
   Color(0xFF43A047),
@@ -237,6 +287,7 @@ const EnteColorScheme redDarkScheme = EnteColorScheme(
   Color(0xFF400000),
   Color(0xFF4D0000),
   Color(0xFF590000),
+  Color(0xC8289F20),
   Color(0xFFFFCDD2),
   Color(0xFFEF9A9A),
   Color(0xFFE57373),
@@ -280,6 +331,7 @@ const EnteColorScheme greenDarkScheme = EnteColorScheme(
   Color(0xFF0A1F0A),
   Color(0xFF132913),
   Color(0xFF1B331B),
+  Color(0xFF512727),
   Color(0xFFA5D6A7),  // Light text for dark theme
   Color(0xFF81C784),
   Color(0xFF66BB6A),
@@ -323,6 +375,7 @@ const EnteColorScheme redLightScheme = EnteColorScheme(
   Color(0xFFE57373),
   Color(0xFFEF5350),
   Color(0xFFF44336),
+  Color(0xFF2752A8),
   Color(0xFF212121),  // Dark text for light theme
   Color(0xFF424242),
   Color(0xFF616161),
@@ -432,6 +485,11 @@ const Color fixedStrokeMutedWhite = Color.fromRGBO(255, 255, 255, 0.50);
 const Color strokeSolidMutedLight = Color.fromRGBO(147, 147, 147, 1);
 const Color strokeSolidFaintLight = Color.fromRGBO(221, 221, 221, 1);
 
+const Color _primary700 = Color.fromRGBO(0, 179, 60, 1);
+const Color _primary500 = Color.fromRGBO(29, 185, 84, 1);
+const Color _primary400 = Color.fromRGBO(38, 203, 95, 1);
+const Color _primary300 = Color.fromRGBO(1, 222, 77, 1);
+
 const Color _warning700 = Color.fromRGBO(234, 63, 63, 1);
 const Color _warning500 = Color.fromRGBO(255, 101, 101, 1);
 const Color warning500 = Color.fromRGBO(255, 101, 101, 1);
@@ -502,6 +560,7 @@ const EnteColorScheme blueLightScheme = EnteColorScheme(
   Color(0xFF64B5F6),
   Color(0xFF42A5F5),
   Color(0xFF2196F3),
+  Color(0xC81AC69C),
   Color(0xFF1565C0),  // Dark text for light theme
   Color(0xFF1976D2),
   Color(0xFF1E88E5),
@@ -545,6 +604,7 @@ const EnteColorScheme blueDarkScheme = EnteColorScheme(
   Color(0xFF0D47A1),
   Color(0xFF1565C0),
   Color(0xFF1976D2),
+  Color(0xFFEC9292),
   Color(0xFFE3F2FD),  // Light text for dark theme
   Color(0xFFBBDEFB),
   Color(0xFF90CAF9),
@@ -588,6 +648,7 @@ const EnteColorScheme yellowLightScheme = EnteColorScheme(
   Color(0xFFFFEE58),
   Color(0xFFFFEB3B),
   Color(0xFFFDD835),
+  Color(0xFFE6D32F),
   Color(0xFF212121),  // Dark text for light theme
   Color(0xFF424242),
   Color(0xFF616161),
@@ -631,6 +692,7 @@ const EnteColorScheme yellowDarkScheme = EnteColorScheme(
   Color(0xFF5A4D00),
   Color(0xFF665800),
   Color(0xFF736300),
+  Color(0xBD081839),
   Color(0xFFFFF9C4),  // Light text for dark theme
   Color(0xFFFFF59D),
   Color(0xFFFFEE58),
