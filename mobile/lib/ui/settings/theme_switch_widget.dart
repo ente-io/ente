@@ -1,6 +1,4 @@
-// import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -8,7 +6,10 @@ import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:provider/provider.dart';
+
 import '../../theme/ente_theme_provider.dart';
+import 'dark_themes_screen.dart';
+import 'light_themes_screen.dart';
 
 class ThemeSwitchWidget extends StatefulWidget {
   const ThemeSwitchWidget({Key? key}) : super(key: key);
@@ -28,12 +29,17 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return ExpandableMenuItemWidget(
-      title: S.of(context).theme,
-      selectionOptionsWidget: _getSectionOptions(context),
-      leadingIcon: Theme.of(context).brightness == Brightness.light
-          ? Icons.light_mode_outlined
-          : Icons.dark_mode_outlined,
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        currentThemeOption = themeProvider.currentTheme;  // Update current theme
+        return ExpandableMenuItemWidget(
+          title: S.of(context).theme,
+          selectionOptionsWidget: _getSectionOptions(context),
+          leadingIcon: Theme.of(context).brightness == Brightness.light
+              ? Icons.light_mode_outlined
+              : Icons.dark_mode_outlined,
+        );
+      },
     );
   }
 
@@ -43,41 +49,68 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
         sectionOptionSpacing,
         _menuItem(context, ThemeOptions.system, S.of(context).systemTheme),
         sectionOptionSpacing,
-        _menuItem(context, ThemeOptions.light, S.of(context).lightTheme),
+        _navigationItem(
+          context, 
+          'Light Themes', 
+          Icons.light_mode,
+          () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const LightThemesScreen()),
+            );
+          },
+        ),
         sectionOptionSpacing,
-        _menuItem(context, ThemeOptions.dark, S.of(context).darkTheme),
-        sectionOptionSpacing,
-        _menuItem(context, ThemeOptions.greenLight, 'Green Light Theme'),
-        sectionOptionSpacing,
-        _menuItem(context, ThemeOptions.greenDark, 'Green Dark Theme'),
-        sectionOptionSpacing,
-        _menuItem(context, ThemeOptions.redLight, 'Red Light Theme'),
-        sectionOptionSpacing,
-        _menuItem(context, ThemeOptions.redDark, 'Red Dark Theme'),
-        sectionOptionSpacing,
-        _menuItem(context, ThemeOptions.blueLight, 'Blue Light Theme'),
-        sectionOptionSpacing,
-        _menuItem(context, ThemeOptions.blueDark, 'Blue Dark Theme'),
-        sectionOptionSpacing,
-        _menuItem(context, ThemeOptions.yellowLight, 'Yellow Light Theme'),
-        sectionOptionSpacing,
-        _menuItem(context, ThemeOptions.yellowDark, 'Yellow Dark Theme'),
+        _navigationItem(
+          context, 
+          'Dark Themes',
+          Icons.dark_mode,
+          () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const DarkThemesScreen()),
+            );
+          },
+        ),
         sectionOptionSpacing,
       ],
     );
   }
 
+  Widget _navigationItem(
+    BuildContext context, 
+    String title, 
+    IconData icon,
+    Future<void> Function() onTap,
+  ) {
+    return MenuItemWidget(
+      captionedTextWidget: CaptionedTextWidget(
+        title: title,
+        textStyle: getEnteTextTheme(context).body,
+      ),
+      pressedColor: getEnteColorScheme(context).fillFaint,
+      isExpandable: false,
+      trailingIcon: Icons.arrow_forward_ios,
+      trailingExtraMargin: 4,
+      leadingIcon: icon,
+      onTap: onTap,
+    );
+  }
+
   Widget _menuItem(BuildContext context, ThemeOptions themeOption, String themeName) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final isSelected = themeOption == currentThemeOption && 
+                      (themeOption == ThemeOptions.system || 
+                       !_isCustomTheme(currentThemeOption!));
     
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
         title: themeName,
-        textStyle: Theme.of(context).colorScheme.enteTheme.textTheme.body,
+        textStyle: getEnteTextTheme(context).body,
       ),
       pressedColor: getEnteColorScheme(context).fillFaint,
       isExpandable: false,
-      trailingIcon: currentThemeOption == themeOption ? Icons.check : null,
+      trailingIcon: isSelected ? Icons.check : null,
       trailingExtraMargin: 4,
       onTap: () async {
         await themeProvider.setTheme(themeOption, context);
@@ -86,5 +119,11 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
         });
       },
     );
+  }
+
+  bool _isCustomTheme(ThemeOptions theme) {
+    return theme != ThemeOptions.system && 
+           theme != ThemeOptions.light && 
+           theme != ThemeOptions.dark;
   }
 }
