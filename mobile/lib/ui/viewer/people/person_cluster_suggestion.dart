@@ -456,7 +456,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                 child: PersonFaceWidget(
                   files[start + index],
                   clusterID: cluserId,
-                  useFullFile: false,
+                  useFullFile: true,
                   thumbnailFallback: false,
                   faceCrop:
                       faceThumbnails[files[start + index].uploadedFileID!],
