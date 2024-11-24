@@ -23,7 +23,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   @override
   void initState() {
     super.initState();
-    currentThemeOption = context.read<EnteThemeProvider>().currentTheme;
+    currentThemeOption = context.read<ThemeProvider>().currentTheme;
   }
 
   @override
@@ -56,7 +56,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   }
 
   Widget _menuItem(BuildContext context, ThemeOptions themeOption, String themeName) {
-    final themeProvider = Provider.of<EnteThemeProvider>(context, listen: false);
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(

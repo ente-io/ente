@@ -14,7 +14,7 @@ enum ThemeOptions {
   redDark,
 }
 
-class EnteThemeProvider extends ChangeNotifier {
+class ThemeProvider extends ChangeNotifier {
   ThemeOptions _currentTheme = ThemeOptions.system;
 
   ThemeOptions get currentTheme => _currentTheme;
@@ -85,7 +85,7 @@ class EnteThemeProvider extends ChangeNotifier {
       shadowButton: isDark ? shadowButtonDark : shadowButtonLight,
     );
 
-    // Create theme data
+    // Create a new theme data from scratch instead of copying
     return ThemeData(
       useMaterial3: true,
       brightness: isDark ? Brightness.dark : Brightness.light,
@@ -171,4 +171,6 @@ class EnteThemeProvider extends ChangeNotifier {
       highlightColor: enteColorScheme.fillFaintPressed,
     );
   }
-} 
+}
+
+// ... rest of the code remains the same ... 
