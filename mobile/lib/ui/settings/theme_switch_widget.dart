@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/theme/ente_theme_provider.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
+import 'package:photos/ui/settings/dark_themes_screen.dart';
+import 'package:photos/ui/settings/light_themes_screen.dart';
 import 'package:provider/provider.dart';
-
-import '../../theme/ente_theme_provider.dart';
-import 'dark_themes_screen.dart';
-import 'light_themes_screen.dart';
 
 class ThemeSwitchWidget extends StatefulWidget {
   const ThemeSwitchWidget({Key? key}) : super(key: key);

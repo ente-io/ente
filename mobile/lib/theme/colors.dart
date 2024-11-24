@@ -131,10 +131,10 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   fixedStrokeMutedWhite,
   strokeSolidMutedLight,
   strokeSolidFaintLight,
-  _primary700,
-  _primary500,
-  _primary400,
-  _primary300,
+  Color.fromRGBO(13, 71, 161, 1),    // primary700 - Dark Blue
+  Color.fromRGBO(25, 118, 210, 1),   // primary500 - Medium Blue
+  Color.fromRGBO(33, 150, 243, 1),   // primary400 - Light Blue
+  Color.fromRGBO(66, 165, 245, 1),   // primary300 - Very Light Blue
   _warning700,
   _warning500,
   _warning400,
@@ -174,10 +174,10 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   fixedStrokeMutedWhite,
   strokeSolidMutedLight,
   strokeSolidFaintLight,
-  _primary700,
-  _primary500,
-  _primary400,
-  _primary300,
+  Color.fromRGBO(74, 20, 140, 1),    // primary700 - Dark Violet
+  Color.fromRGBO(103, 58, 183, 1),   // primary500 - Medium Violet
+  Color.fromRGBO(126, 87, 194, 1),   // primary400 - Light Violet
+  Color.fromRGBO(149, 117, 205, 1),  // primary300 - Very Light Violet
   _warning700,
   _warning500,
   _warning400,
@@ -346,17 +346,17 @@ const EnteColorScheme redLightScheme = EnteColorScheme(
   fixedStrokeMutedWhite,
   strokeSolidMutedLight,
   strokeSolidFaintLight,
-  Color(0xFFB71C1C),  // primary700 - Darkest Red
-  Color(0xFFC62828),  // primary500 - Dark Red
-  Color(0xFFD32F2F),  // primary400 - Medium Red
-  Color(0xFFE53935),  // primary300 - Light Red
-  Color(0xFF8B0000),  // warning700
-  Color(0xFFA00000),  // warning500
-  Color(0xFFB71C1C),  // warning400
-  Color(0xFF7B1FA2),  // warning800
-  Color(0xFFFF6F00),  // caution500
-  Color(0xFFFF8F00),  // golden700
-  Color(0xFFFFB300),  // golden500
+  Color.fromRGBO(13, 71, 161, 1),    // primary700 - Dark Blue
+  Color.fromRGBO(25, 118, 210, 1),   // primary500 - Medium Blue
+  Color.fromRGBO(33, 150, 243, 1),   // primary400 - Light Blue
+  Color.fromRGBO(66, 165, 245, 1),   // primary300 - Very Light Blue
+  _warning700,
+  _warning500,
+  _warning400,
+  _warning800,
+  _caution500,
+  _golden700,
+  _golden500,
 );
 
 // Background Colors
@@ -431,11 +431,6 @@ const Color tabIconDark = Color.fromRGBO(255, 255, 255, 0.80);
 const Color fixedStrokeMutedWhite = Color.fromRGBO(255, 255, 255, 0.50);
 const Color strokeSolidMutedLight = Color.fromRGBO(147, 147, 147, 1);
 const Color strokeSolidFaintLight = Color.fromRGBO(221, 221, 221, 1);
-
-const Color _primary700 = Color.fromRGBO(27, 94, 32, 1);    // Dark Green
-const Color _primary500 = Color.fromRGBO(56, 142, 60, 1);   // Medium Green
-const Color _primary400 = Color.fromRGBO(67, 160, 71, 1);   // Light Green
-const Color _primary300 = Color.fromRGBO(102, 187, 106, 1); // Very Light Green
 
 const Color _warning700 = Color.fromRGBO(234, 63, 63, 1);
 const Color _warning500 = Color.fromRGBO(255, 101, 101, 1);
