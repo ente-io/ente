@@ -341,8 +341,8 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
       ],
     );
     // Precompute face thumbnails for next suggestions, in case there are
-    const precomputeSuggestions = 8;
-    const maxPrecomputations = 8;
+    const precomputeSuggestions = 6;
+    const maxPrecomputations = 6;
     int compCount = 0;
     if (allSuggestions.length > currentSuggestionIndex + 1) {
       outerLoop:
@@ -355,7 +355,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
       )) {
         final files = suggestion.filesInCluster;
         final clusterID = suggestion.clusterIDToMerge;
-        for (final file in files.sublist(0, min(files.length, 9))) {
+        for (final file in files.sublist(0, min(files.length, 6))) {
           unawaited(
             precomputeNextFaceCrops(
               file,
@@ -409,16 +409,16 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                     start: 3,
                   ),
                 ),
-              if (files.length > 6)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: _buildThumbnailWidgetsRow(
-                    files,
-                    clusterID,
-                    faceThumbnails,
-                    start: 6,
-                  ),
-                ),
+              // if (files.length > 6)
+              //   Row(
+              //     mainAxisAlignment: MainAxisAlignment.center,
+              //     children: _buildThumbnailWidgetsRow(
+              //       files,
+              //       clusterID,
+              //       faceThumbnails,
+              //       start: 6,
+              //     ),
+              //   ),
             ],
           );
         } else if (snapshot.hasError) {
@@ -462,7 +462,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                       faceThumbnails[files[start + index].uploadedFileID!],
                 ),
               ),
-              if (start + index == 8 && files.length > 9)
+              if (start + index == 5 && files.length > 6)
                 ClipPath(
                   clipper: ShapeBorderClipper(
                     shape: ContinuousRectangleBorder(
@@ -475,7 +475,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                     ),
                     child: Center(
                       child: Text(
-                        '+${files.length - 8}',
+                        '+${files.length - 5}',
                         style: darkTheme.textTheme.h3Bold,
                       ),
                     ),
