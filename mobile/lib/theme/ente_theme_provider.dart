@@ -11,7 +11,13 @@ enum ThemeOptions {
   light,
   dark,
   greenLight,
+  greenDark,
+  redLight,
   redDark,
+  blueLight,
+  blueDark,
+  yellowLight,
+  yellowDark,
 }
 
 class ThemeProvider extends ChangeNotifier {
@@ -49,8 +55,44 @@ class ThemeProvider extends ChangeNotifier {
           await Future.delayed(const Duration(milliseconds: 100));
           _updateThemeData(adaptiveTheme, customTheme, customTheme);
           break;
+        case ThemeOptions.greenDark:
+          final customTheme = _createCustomThemeFromEnteColorScheme(greenDarkScheme, true);
+          adaptiveTheme.setDark();
+          await Future.delayed(const Duration(milliseconds: 100));
+          _updateThemeData(adaptiveTheme, customTheme, customTheme);
+          break;
+        case ThemeOptions.redLight:
+          final customTheme = _createCustomThemeFromEnteColorScheme(redLightScheme, false);
+          adaptiveTheme.setLight();
+          await Future.delayed(const Duration(milliseconds: 100));
+          _updateThemeData(adaptiveTheme, customTheme, customTheme);
+          break;
         case ThemeOptions.redDark:
           final customTheme = _createCustomThemeFromEnteColorScheme(redDarkScheme, true);
+          adaptiveTheme.setDark();
+          await Future.delayed(const Duration(milliseconds: 100));
+          _updateThemeData(adaptiveTheme, customTheme, customTheme);
+          break;
+        case ThemeOptions.blueLight:
+          final customTheme = _createCustomThemeFromEnteColorScheme(blueLightScheme, false);
+          adaptiveTheme.setLight();
+          await Future.delayed(const Duration(milliseconds: 100));
+          _updateThemeData(adaptiveTheme, customTheme, customTheme);
+          break;
+        case ThemeOptions.blueDark:
+          final customTheme = _createCustomThemeFromEnteColorScheme(blueDarkScheme, true);
+          adaptiveTheme.setDark();
+          await Future.delayed(const Duration(milliseconds: 100));
+          _updateThemeData(adaptiveTheme, customTheme, customTheme);
+          break;
+        case ThemeOptions.yellowLight:
+          final customTheme = _createCustomThemeFromEnteColorScheme(yellowLightScheme, false);
+          adaptiveTheme.setLight();
+          await Future.delayed(const Duration(milliseconds: 100));
+          _updateThemeData(adaptiveTheme, customTheme, customTheme);
+          break;
+        case ThemeOptions.yellowDark:
+          final customTheme = _createCustomThemeFromEnteColorScheme(yellowDarkScheme, true);
           adaptiveTheme.setDark();
           await Future.delayed(const Duration(milliseconds: 100));
           _updateThemeData(adaptiveTheme, customTheme, customTheme);

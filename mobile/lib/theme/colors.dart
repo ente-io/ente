@@ -273,6 +273,92 @@ const EnteColorScheme redDarkScheme = EnteColorScheme(
   Color(0xFFFFB300),  // golden500
 );
 
+const EnteColorScheme greenDarkScheme = EnteColorScheme(
+  Color(0xFF0A1F0A),  // Very dark green background
+  Color(0xFF132913),
+  Color(0xFF1B331B),
+  Color(0xFF0A1F0A),
+  Color(0xFF132913),
+  Color(0xFF1B331B),
+  Color(0xFFA5D6A7),  // Light text for dark theme
+  Color(0xFF81C784),
+  Color(0xFF66BB6A),
+  Color(0xFFA5D6A7),
+  Color(0xFF2E7D32),
+  Color(0xFF1B5E20),
+  Color(0xFF388E3C),
+  Color(0xFF43A047),
+  Color(0xFF4CAF50),
+  Color(0xFF66BB6A),
+  Color(0xFF1B331B),
+  Color(0xFF2E7D32),
+  Color(0xFF388E3C),
+  Color(0xFF43A047),
+  Color(0xFF4CAF50),
+  Color(0xFF2E7D32),
+  Color(0xFF388E3C),
+  Color(0xFF1B5E20),
+  Color(0xFF81C784),
+  avatarDark,
+  fixedStrokeMutedWhite,
+  strokeSolidMutedLight,
+  strokeSolidFaintLight,
+  Color(0xFF1B5E20),  // primary700 - Darkest Green
+  Color(0xFF2E7D32),  // primary500 - Dark Green
+  Color(0xFF388E3C),  // primary400 - Medium Green
+  Color(0xFF43A047),  // primary300 - Light Green
+  Color(0xFFD32F2F),  // warning700
+  Color(0xFFE53935),  // warning500
+  Color(0xFFEF5350),  // warning400
+  Color(0xFFC62828),  // warning800
+  Color(0xFFFFB300),  // caution500
+  Color(0xFFFFB300),  // golden700
+  Color(0xFFFFCA28),  // golden500
+);
+
+const EnteColorScheme redLightScheme = EnteColorScheme(
+  Color(0xFFFFEBEE),  // Very light red background
+  Color(0xFFFFCDD2),
+  Color(0xFFEF9A9A),
+  Color(0xFFE57373),
+  Color(0xFFEF5350),
+  Color(0xFFF44336),
+  Color(0xFF212121),  // Dark text for light theme
+  Color(0xFF424242),
+  Color(0xFF616161),
+  Color(0xFF212121),
+  Color(0xFFD32F2F),
+  Color(0xFFC62828),
+  Color(0xFFB71C1C),
+  Color(0xFFE53935),
+  Color(0xFFEF5350),
+  Color(0xFFE57373),
+  Color(0xFFFFCDD2),
+  Color(0xFFD32F2F),
+  Color(0xFFE53935),
+  Color(0xFFEF5350),
+  Color(0xFFE57373),
+  Color(0xFFD32F2F),
+  Color(0xFFE53935),
+  Color(0xFFC62828),
+  Color(0xFFD32F2F),
+  avatarLight,
+  fixedStrokeMutedWhite,
+  strokeSolidMutedLight,
+  strokeSolidFaintLight,
+  Color(0xFFB71C1C),  // primary700 - Darkest Red
+  Color(0xFFC62828),  // primary500 - Dark Red
+  Color(0xFFD32F2F),  // primary400 - Medium Red
+  Color(0xFFE53935),  // primary300 - Light Red
+  Color(0xFF8B0000),  // warning700
+  Color(0xFFA00000),  // warning500
+  Color(0xFFB71C1C),  // warning400
+  Color(0xFF7B1FA2),  // warning800
+  Color(0xFFFF6F00),  // caution500
+  Color(0xFFFF8F00),  // golden700
+  Color(0xFFFFB300),  // golden500
+);
+
 // Background Colors
 const Color backgroundBaseLight = Color.fromRGBO(255, 255, 255, 1);
 const Color backgroundElevatedLight = Color.fromRGBO(255, 255, 255, 1);
@@ -413,3 +499,175 @@ const List<Color> avatarDark = [
   Color.fromRGBO(209, 132, 132, 1),
   Color.fromRGBO(120, 181, 167, 1),
 ];
+
+const EnteColorScheme blueLightScheme = EnteColorScheme(
+  Color(0xFFE3F2FD),  // Very light blue background
+  Color(0xFFBBDEFB),
+  Color(0xFF90CAF9),
+  Color(0xFF64B5F6),
+  Color(0xFF42A5F5),
+  Color(0xFF2196F3),
+  Color(0xFF1565C0),  // Dark text for light theme
+  Color(0xFF1976D2),
+  Color(0xFF1E88E5),
+  Color(0xFF1565C0),
+  Color(0xFF2196F3),
+  Color(0xFF1E88E5),
+  Color(0xFF1976D2),
+  Color(0xFF42A5F5),
+  Color(0xFF90CAF9),
+  Color(0xFF64B5F6),
+  Color(0xFFBBDEFB),
+  Color(0xFF2196F3),
+  Color(0xFF42A5F5),
+  Color(0xFF90CAF9),
+  Color(0xFFBBDEFB),
+  Color(0xFF2196F3),
+  Color(0xFF42A5F5),
+  Color(0xFF1E88E5),
+  Color(0xFF1565C0),
+  avatarLight,
+  fixedStrokeMutedWhite,
+  strokeSolidMutedLight,
+  strokeSolidFaintLight,
+  Color(0xFF0D47A1),  // primary700 - Darkest Blue
+  Color(0xFF1565C0),  // primary500 - Dark Blue
+  Color(0xFF1976D2),  // primary400 - Medium Blue
+  Color(0xFF1E88E5),  // primary300 - Light Blue
+  Color(0xFFD32F2F),  // warning700
+  Color(0xFFE53935),  // warning500
+  Color(0xFFEF5350),  // warning400
+  Color(0xFFC62828),  // warning800
+  Color(0xFFFFB300),  // caution500
+  Color(0xFFFFB300),  // golden700
+  Color(0xFFFFCA28),  // golden500
+);
+
+const EnteColorScheme blueDarkScheme = EnteColorScheme(
+  Color(0xFF0D2A4A),  // Very dark blue background
+  Color(0xFF0D3A67),
+  Color(0xFF0D4B84),
+  Color(0xFF0D47A1),
+  Color(0xFF1565C0),
+  Color(0xFF1976D2),
+  Color(0xFFE3F2FD),  // Light text for dark theme
+  Color(0xFFBBDEFB),
+  Color(0xFF90CAF9),
+  Color(0xFFE3F2FD),
+  Color(0xFF2196F3),
+  Color(0xFF1E88E5),
+  Color(0xFF1976D2),
+  Color(0xFF42A5F5),
+  Color(0xFF90CAF9),
+  Color(0xFF64B5F6),
+  Color(0xFF0D4B84),
+  Color(0xFF2196F3),
+  Color(0xFF42A5F5),
+  Color(0xFF90CAF9),
+  Color(0xFFBBDEFB),
+  Color(0xFF2196F3),
+  Color(0xFF42A5F5),
+  Color(0xFF1E88E5),
+  Color(0xFF42A5F5),
+  avatarDark,
+  fixedStrokeMutedWhite,
+  strokeSolidMutedLight,
+  strokeSolidFaintLight,
+  Color(0xFF0D47A1),  // primary700 - Darkest Blue
+  Color(0xFF1565C0),  // primary500 - Dark Blue
+  Color(0xFF1976D2),  // primary400 - Medium Blue
+  Color(0xFF1E88E5),  // primary300 - Light Blue
+  Color(0xFFD32F2F),  // warning700
+  Color(0xFFE53935),  // warning500
+  Color(0xFFEF5350),  // warning400
+  Color(0xFFC62828),  // warning800
+  Color(0xFFFFB300),  // caution500
+  Color(0xFFFFB300),  // golden700
+  Color(0xFFFFCA28),  // golden500
+);
+
+const EnteColorScheme yellowLightScheme = EnteColorScheme(
+  Color(0xFFFFFDE7),  // Very light yellow background
+  Color(0xFFFFF9C4),
+  Color(0xFFFFF59D),
+  Color(0xFFFFEE58),
+  Color(0xFFFFEB3B),
+  Color(0xFFFDD835),
+  Color(0xFF212121),  // Dark text for light theme
+  Color(0xFF424242),
+  Color(0xFF616161),
+  Color(0xFF212121),
+  Color(0xFFFDD835),
+  Color(0xFFFBC02D),
+  Color(0xFFF9A825),
+  Color(0xFFFFEE58),
+  Color(0xFFFFF59D),
+  Color(0xFFFFEE58),
+  Color(0xFFFFF9C4),
+  Color(0xFFFDD835),
+  Color(0xFFFFEE58),
+  Color(0xFFFFF59D),
+  Color(0xFFFFF9C4),
+  Color(0xFFFDD835),
+  Color(0xFFFFEE58),
+  Color(0xFFFBC02D),
+  Color(0xFFFDD835),
+  avatarLight,
+  fixedStrokeMutedWhite,
+  strokeSolidMutedLight,
+  strokeSolidFaintLight,
+  Color(0xFFF57F17),  // primary700 - Darkest Yellow
+  Color(0xFFF9A825),  // primary500 - Dark Yellow
+  Color(0xFFFBC02D),  // primary400 - Medium Yellow
+  Color(0xFFFDD835),  // primary300 - Light Yellow
+  Color(0xFFD32F2F),  // warning700
+  Color(0xFFE53935),  // warning500
+  Color(0xFFEF5350),  // warning400
+  Color(0xFFC62828),  // warning800
+  Color(0xFFFFB300),  // caution500
+  Color(0xFFFFB300),  // golden700
+  Color(0xFFFFCA28),  // golden500
+);
+
+const EnteColorScheme yellowDarkScheme = EnteColorScheme(
+  Color(0xFF332D00),  // Very dark yellow background
+  Color(0xFF403800),
+  Color(0xFF4D4200),
+  Color(0xFF5A4D00),
+  Color(0xFF665800),
+  Color(0xFF736300),
+  Color(0xFFFFF9C4),  // Light text for dark theme
+  Color(0xFFFFF59D),
+  Color(0xFFFFEE58),
+  Color(0xFFFFF9C4),
+  Color(0xFFFDD835),
+  Color(0xFFFBC02D),
+  Color(0xFFF9A825),
+  Color(0xFFFFEE58),
+  Color(0xFFFFF59D),
+  Color(0xFFFFEE58),
+  Color(0xFF4D4200),
+  Color(0xFFFDD835),
+  Color(0xFFFFEE58),
+  Color(0xFFFFF59D),
+  Color(0xFFFFF9C4),
+  Color(0xFFFDD835),
+  Color(0xFFFFEE58),
+  Color(0xFFFBC02D),
+  Color(0xFFFFEE58),
+  avatarDark,
+  fixedStrokeMutedWhite,
+  strokeSolidMutedLight,
+  strokeSolidFaintLight,
+  Color(0xFFF57F17),  // primary700 - Darkest Yellow
+  Color(0xFFF9A825),  // primary500 - Dark Yellow
+  Color(0xFFFBC02D),  // primary400 - Medium Yellow
+  Color(0xFFFDD835),  // primary300 - Light Yellow
+  Color(0xFFD32F2F),  // warning700
+  Color(0xFFE53935),  // warning500
+  Color(0xFFEF5350),  // warning400
+  Color(0xFFC62828),  // warning800
+  Color(0xFFFFB300),  // caution500
+  Color(0xFFFFB300),  // golden700
+  Color(0xFFFFCA28),  // golden500
+);
