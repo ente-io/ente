@@ -1,5 +1,6 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
@@ -127,6 +128,16 @@ class ThemeProvider extends ChangeNotifier {
       shadowButton: isDark ? shadowButtonDark : shadowButtonLight,
     );
 
+    // Create system UI overlay style
+    final overlayStyle = SystemUiOverlayStyle(
+      statusBarColor: enteColorScheme.backgroundBase, // Match background color
+      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      systemNavigationBarColor: enteColorScheme.backgroundBase,
+      systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      systemNavigationBarDividerColor: Colors.transparent,
+    );
+
     // Create a new theme data from scratch instead of copying
     return ThemeData(
       useMaterial3: true,
@@ -165,6 +176,7 @@ class ThemeProvider extends ChangeNotifier {
         iconTheme: IconThemeData(color: enteColorScheme.tabIcon),
         actionsIconTheme: IconThemeData(color: enteColorScheme.tabIcon),
         elevation: 0,
+        systemOverlayStyle: overlayStyle, // Add system overlay style
       ),
       
       // Button themes
