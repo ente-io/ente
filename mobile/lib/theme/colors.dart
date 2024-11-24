@@ -38,19 +38,18 @@ class EnteColorScheme {
   final Color blurStrokePressed;
 
   // Fixed Colors
+  final Color fixedStrokeMutedWhite;
+  final Color strokeSolidMuted;
+  final Color strokeSolidFaint;
   final Color primary700;
   final Color primary500;
   final Color primary400;
   final Color primary300;
-
-  //warning colors
   final Color warning700;
   final Color warning500;
   final Color warning400;
   final Color warning800;
   final Color caution500;
-
-  //golden colors
   final Color golden700;
   final Color golden500;
 
@@ -59,44 +58,47 @@ class EnteColorScheme {
   final List<Color> avatarColors;
 
   const EnteColorScheme(
-    this.backgroundBase,
-    this.backgroundElevated,
-    this.backgroundElevated2,
-    this.backdropBase,
-    this.backdropMuted,
-    this.backdropFaint,
-    this.textBase,
-    this.textMuted,
-    this.textFaint,
-    this.blurTextBase,
-    this.fillBase,
-    this.fillBasePressed,
-    this.fillStrong,
-    this.fillMuted,
-    this.fillFaint,
-    this.fillFaintPressed,
-    this.fillBaseGrey,
-    this.strokeBase,
-    this.strokeMuted,
-    this.strokeFaint,
-    this.strokeFainter,
-    this.blurStrokeBase,
-    this.blurStrokeFaint,
-    this.blurStrokePressed,
-    this.tabIcon,
-    this.avatarColors, {
-    this.primary700 = _primary700,
-    this.primary500 = _primary500,
-    this.primary400 = _primary400,
-    this.primary300 = _primary300,
-    this.warning800 = _warning800,
-    this.warning700 = _warning700,
-    this.warning500 = _warning500,
-    this.warning400 = _warning400,
-    this.caution500 = _caution500,
-    this.golden700 = _golden700,
-    this.golden500 = _golden500,
-  });
+      this.backgroundBase,
+      this.backgroundElevated,
+      this.backgroundElevated2,
+      this.backdropBase,
+      this.backdropMuted,
+      this.backdropFaint,
+      this.textBase,
+      this.textMuted,
+      this.textFaint,
+      this.blurTextBase,
+      this.fillBase,
+      this.fillBasePressed,
+      this.fillStrong,
+      this.fillMuted,
+      this.fillFaint,
+      this.fillFaintPressed,
+      this.fillBaseGrey,
+      this.strokeBase,
+      this.strokeMuted,
+      this.strokeFaint,
+      this.strokeFainter,
+      this.blurStrokeBase,
+      this.blurStrokeFaint,
+      this.blurStrokePressed,
+      this.tabIcon,
+      this.avatarColors,
+      this.fixedStrokeMutedWhite,
+      this.strokeSolidMuted,
+      this.strokeSolidFaint,
+      this.primary700,
+      this.primary500,
+      this.primary400,
+      this.primary300,
+      this.warning700,
+      this.warning500,
+      this.warning400,
+      this.warning800,
+      this.caution500,
+      this.golden700,
+      this.golden500,
+      );
 }
 
 const EnteColorScheme lightScheme = EnteColorScheme(
@@ -126,6 +128,20 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   blurStrokePressedLight,
   tabIconLight,
   avatarLight,
+  fixedStrokeMutedWhite,
+  strokeSolidMutedLight,
+  strokeSolidFaintLight,
+  _primary700,
+  _primary500,
+  _primary400,
+  _primary300,
+  _warning700,
+  _warning500,
+  _warning400,
+  _warning800,
+  _caution500,
+  _golden700,
+  _golden500,
 );
 
 const EnteColorScheme darkScheme = EnteColorScheme(
@@ -155,6 +171,106 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   blurStrokePressedDark,
   tabIconDark,
   avatarDark,
+  fixedStrokeMutedWhite,
+  strokeSolidMutedLight,
+  strokeSolidFaintLight,
+  _primary700,
+  _primary500,
+  _primary400,
+  _primary300,
+  _warning700,
+  _warning500,
+  _warning400,
+  _warning800,
+  _caution500,
+  _golden700,
+  _golden500,
+);
+
+const EnteColorScheme greenLightScheme = EnteColorScheme(
+  Color(0xFFE8F5E9),
+  Color(0xFFC8E6C9),
+  Color(0xFFA5D6A7),
+  Color(0xFF81C784),
+  Color(0xFF66BB6A),
+  Color(0xFF4CAF50),
+  Color(0xFF2E7D32),
+  Color(0xFF388E3C),
+  Color(0xFF43A047),
+  Color(0xFF2E7D32),
+  Color(0xFF4CAF50),
+  Color(0xFF43A047),
+  Color(0xFF388E3C),
+  Color(0xFF66BB6A),
+  Color(0xFFA5D6A7),
+  Color(0xFF81C784),
+  Color(0xFFC8E6C9),
+  Color(0xFF4CAF50),
+  Color(0xFF66BB6A),
+  Color(0xFFA5D6A7),
+  Color(0xFFC8E6C9),
+  Color(0xFF4CAF50),
+  Color(0xFF66BB6A),
+  Color(0xFF43A047),
+  Color(0xFF2E7D32),
+  avatarLight,
+  fixedStrokeMutedWhite,
+  strokeSolidMutedLight,
+  strokeSolidFaintLight,
+  Color(0xFF2E7D32),  // primary700 - Dark Green
+  Color(0xFF388E3C),  // primary500 - Medium Green
+  Color(0xFF43A047),  // primary400 - Light Green
+  Color(0xFF66BB6A),  // primary300 - Very Light Green
+  Color(0xFFD32F2F),  // warning700
+  Color(0xFFE53935),  // warning500
+  Color(0xFFEF5350),  // warning400
+  Color(0xFFC62828),  // warning800
+  Color(0xFFFFB300),  // caution500
+  Color(0xFFFFB300),  // golden700
+  Color(0xFFFFCA28),  // golden500
+);
+
+const EnteColorScheme redDarkScheme = EnteColorScheme(
+  Color(0xFF1A0000),
+  Color(0xFF260000),
+  Color(0xFF330000),
+  Color(0xFF400000),
+  Color(0xFF4D0000),
+  Color(0xFF590000),
+  Color(0xFFFFCDD2),
+  Color(0xFFEF9A9A),
+  Color(0xFFE57373),
+  Color(0xFFFFCDD2),
+  Color(0xFFE53935),
+  Color(0xFFD32F2F),
+  Color(0xFFC62828),
+  Color(0xFFEF5350),
+  Color(0xFFE57373),
+  Color(0xFFEF9A9A),
+  Color(0xFF4D0000),
+  Color(0xFFE53935),
+  Color(0xFFEF5350),
+  Color(0xFFE57373),
+  Color(0xFFEF9A9A),
+  Color(0xFFE53935),
+  Color(0xFFEF5350),
+  Color(0xFFD32F2F),
+  Color(0xFFEF5350),
+  avatarDark,
+  fixedStrokeMutedWhite,
+  strokeSolidMutedLight,
+  strokeSolidFaintLight,
+  Color(0xFFB71C1C),  // primary700 - Dark Red
+  Color(0xFFC62828),  // primary500 - Medium Red
+  Color(0xFFD32F2F),  // primary400 - Light Red
+  Color(0xFFE53935),  // primary300 - Very Light Red
+  Color(0xFF8B0000),  // warning700
+  Color(0xFFA00000),  // warning500
+  Color(0xFFB71C1C),  // warning400
+  Color(0xFF7B1FA2),  // warning800
+  Color(0xFFFF6F00),  // caution500
+  Color(0xFFFF8F00),  // golden700
+  Color(0xFFFFB300),  // golden500
 );
 
 // Background Colors
@@ -230,10 +346,10 @@ const Color fixedStrokeMutedWhite = Color.fromRGBO(255, 255, 255, 0.50);
 const Color strokeSolidMutedLight = Color.fromRGBO(147, 147, 147, 1);
 const Color strokeSolidFaintLight = Color.fromRGBO(221, 221, 221, 1);
 
-const Color _primary700 = Color.fromRGBO(0, 179, 60, 1);
-const Color _primary500 = Color.fromRGBO(29, 185, 84, 1);
-const Color _primary400 = Color.fromRGBO(38, 203, 95, 1);
-const Color _primary300 = Color.fromRGBO(1, 222, 77, 1);
+const Color _primary700 = Color.fromRGBO(27, 94, 32, 1);    // Dark Green
+const Color _primary500 = Color.fromRGBO(56, 142, 60, 1);   // Medium Green
+const Color _primary400 = Color.fromRGBO(67, 160, 71, 1);   // Light Green
+const Color _primary300 = Color.fromRGBO(102, 187, 106, 1); // Very Light Green
 
 const Color _warning700 = Color.fromRGBO(234, 63, 63, 1);
 const Color _warning500 = Color.fromRGBO(255, 101, 101, 1);

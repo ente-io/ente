@@ -20,6 +20,8 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/utils/intent_util.dart";
+import 'package:provider/provider.dart';
+import 'providers/theme_provider.dart';
 
 class EnteApp extends StatefulWidget {
   final Future<void> Function(String) runBackgroundTask;
@@ -94,19 +96,19 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     if (Platform.isAndroid || kDebugMode) {
-      return Listener(
-        onPointerDown: (event) {
-          machineLearningController.onUserInteraction();
-        },
+      return MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ],
         child: AdaptiveTheme(
           light: lightThemeData,
           dark: darkThemeData,
           initial: widget.savedThemeMode ?? AdaptiveThemeMode.system,
-          builder: (lightTheme, dartTheme) => MaterialApp(
+          builder: (ThemeData light, ThemeData dark) => MaterialApp(
             title: "ente",
             themeMode: ThemeMode.system,
-            theme: lightTheme,
-            darkTheme: dartTheme,
+            theme: light,
+            darkTheme: dark,
             home: AppLifecycleService.instance.mediaExtensionAction.action ==
                     IntentAction.view
                 ? const FileViewer()

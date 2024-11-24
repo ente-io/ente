@@ -4,7 +4,7 @@ import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/text_style.dart';
 
-class EnteTheme {
+class EnteTheme extends ThemeExtension<EnteTheme> {
   final EnteTextTheme textTheme;
   final EnteColorScheme colorScheme;
   final List<BoxShadow> shadowFloat;
@@ -18,6 +18,40 @@ class EnteTheme {
     required this.shadowMenu,
     required this.shadowButton,
   });
+
+  @override
+  ThemeExtension<EnteTheme> copyWith({
+    EnteTextTheme? textTheme,
+    EnteColorScheme? colorScheme,
+    List<BoxShadow>? shadowFloat,
+    List<BoxShadow>? shadowMenu,
+    List<BoxShadow>? shadowButton,
+  }) {
+    return EnteTheme(
+      textTheme ?? this.textTheme,
+      colorScheme ?? this.colorScheme,
+      shadowFloat: shadowFloat ?? this.shadowFloat,
+      shadowMenu: shadowMenu ?? this.shadowMenu,
+      shadowButton: shadowButton ?? this.shadowButton,
+    );
+  }
+
+  @override
+  ThemeExtension<EnteTheme> lerp(
+    covariant ThemeExtension<EnteTheme>? other,
+    double t,
+  ) {
+    if (other is! EnteTheme) {
+      return this;
+    }
+    return EnteTheme(
+      textTheme,
+      colorScheme,
+      shadowFloat: shadowFloat,
+      shadowMenu: shadowMenu,
+      shadowButton: shadowButton,
+    );
+  }
 }
 
 EnteTheme lightTheme = EnteTheme(

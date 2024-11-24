@@ -1,4 +1,4 @@
-// import 'package:adaptive_theme/adaptive_theme.dart';
+// import 'package:adaptive_theme/adapt adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
@@ -8,7 +8,7 @@ import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:provider/provider.dart';
-import '../../providers/theme_provider.dart';
+import '../providers/theme_provider.dart';
 
 class ThemeSwitchWidget extends StatefulWidget {
   const ThemeSwitchWidget({Key? key}) : super(key: key);
@@ -75,4 +75,4 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
       },
     );
   }
-}
+} 
