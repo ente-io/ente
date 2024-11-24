@@ -47,7 +47,12 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
     return Column(
       children: [
         sectionOptionSpacing,
-        _menuItem(context, ThemeOptions.system, S.of(context).systemTheme),
+        _menuItem(
+          context, 
+          ThemeOptions.system, 
+          S.of(context).systemTheme,
+          Icons.brightness_auto,
+        ),
         sectionOptionSpacing,
         _navigationItem(
           context, 
@@ -90,14 +95,19 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
       ),
       pressedColor: getEnteColorScheme(context).fillFaint,
       isExpandable: false,
-      trailingIcon: Icons.arrow_forward_ios,
+      trailingIcon: Icons.chevron_right,
       trailingExtraMargin: 4,
       leadingIcon: icon,
       onTap: onTap,
     );
   }
 
-  Widget _menuItem(BuildContext context, ThemeOptions themeOption, String themeName) {
+  Widget _menuItem(
+    BuildContext context, 
+    ThemeOptions themeOption, 
+    String themeName,
+    [IconData? leadingIcon,]
+  ) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     final isSelected = themeOption == currentThemeOption && 
                       (themeOption == ThemeOptions.system || 
@@ -112,6 +122,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
       isExpandable: false,
       trailingIcon: isSelected ? Icons.check : null,
       trailingExtraMargin: 4,
+      leadingIcon: leadingIcon,
       onTap: () async {
         await themeProvider.setTheme(themeOption, context);
         setState(() {
