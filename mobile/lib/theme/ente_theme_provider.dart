@@ -23,131 +23,119 @@ enum ThemeOptions {
 
 class ThemeProvider extends ChangeNotifier {
   ThemeOptions _currentTheme = ThemeOptions.system;
+  bool _isChangingTheme = false;
 
   ThemeProvider() {
     // No initialization here
   }
 
   ThemeOptions get currentTheme => _currentTheme;
+  bool get isChangingTheme => _isChangingTheme;
 
   Future<void> initializeTheme(BuildContext context) async {
+    if (_isChangingTheme) return;
+    
     try {
+      _isChangingTheme = true;
       final adaptiveTheme = AdaptiveTheme.of(context);
       
-      // Set initial themes without changing mode
+      // For system theme, use lightScheme and darkScheme (not enteDarkScheme)
       _updateThemeData(
         adaptiveTheme,
         _createCustomThemeFromEnteColorScheme(lightScheme, false),
         _createCustomThemeFromEnteColorScheme(darkScheme, true),
       );
       
+      adaptiveTheme.setSystem();
       notifyListeners();
     } catch (e) {
       print('Error initializing theme: $e');
+    } finally {
+      _isChangingTheme = false;
     }
   }
 
   Future<void> setTheme(ThemeOptions theme, BuildContext context) async {
-    _currentTheme = theme;
+    if (_isChangingTheme || theme == _currentTheme) return;
     
     try {
+      _isChangingTheme = true;
+      _currentTheme = theme;
       final adaptiveTheme = AdaptiveTheme.of(context);
       
       switch (theme) {
         case ThemeOptions.system:
-          adaptiveTheme.setLight();
-          adaptiveTheme.setDark();
-          await Future.delayed(const Duration(milliseconds: 100));
-          adaptiveTheme.setSystem();
           _updateThemeData(
             adaptiveTheme,
             _createCustomThemeFromEnteColorScheme(lightScheme, false),
             _createCustomThemeFromEnteColorScheme(darkScheme, true),
           );
+          adaptiveTheme.setSystem();
           break;
 
         case ThemeOptions.light:
-          adaptiveTheme.setLight();
-          await Future.delayed(const Duration(milliseconds: 100));
           _updateThemeData(
             adaptiveTheme,
             _createCustomThemeFromEnteColorScheme(lightScheme, false),
             _createCustomThemeFromEnteColorScheme(lightScheme, false),
           );
+          adaptiveTheme.setLight();
           break;
 
         case ThemeOptions.dark:
-          adaptiveTheme.setDark();
-          await Future.delayed(const Duration(milliseconds: 100));
           _updateThemeData(
             adaptiveTheme, 
             _createCustomThemeFromEnteColorScheme(enteDarkScheme, true),
             _createCustomThemeFromEnteColorScheme(enteDarkScheme, true),
           );
-          break;
-
-        case ThemeOptions.greenLight:
-          final customTheme = _createCustomThemeFromEnteColorScheme(greenLightScheme, false);
-          adaptiveTheme.setLight();
-          await Future.delayed(const Duration(milliseconds: 100));
-          _updateThemeData(adaptiveTheme, customTheme, customTheme);
-          break;
-
-        case ThemeOptions.greenDark:
-          final customTheme = _createCustomThemeFromEnteColorScheme(greenDarkScheme, true);
           adaptiveTheme.setDark();
-          await Future.delayed(const Duration(milliseconds: 100));
-          _updateThemeData(adaptiveTheme, customTheme, customTheme);
           break;
 
-        case ThemeOptions.redLight:
-          final customTheme = _createCustomThemeFromEnteColorScheme(redLightScheme, false);
-          adaptiveTheme.setLight();
-          await Future.delayed(const Duration(milliseconds: 100));
+        default:
+          // Handle custom themes more efficiently
+          final isLightTheme = theme.toString().toLowerCase().contains('light');
+          final customTheme = _createCustomThemeFromEnteColorScheme(
+            _getThemeScheme(theme),
+            !isLightTheme,
+          );
           _updateThemeData(adaptiveTheme, customTheme, customTheme);
-          break;
-
-        case ThemeOptions.redDark:
-          final customTheme = _createCustomThemeFromEnteColorScheme(redDarkScheme, true);
-          adaptiveTheme.setDark();
-          await Future.delayed(const Duration(milliseconds: 100));
-          _updateThemeData(adaptiveTheme, customTheme, customTheme);
-          break;
-
-        case ThemeOptions.blueLight:
-          final customTheme = _createCustomThemeFromEnteColorScheme(blueLightScheme, false);
-          adaptiveTheme.setLight();
-          await Future.delayed(const Duration(milliseconds: 100));
-          _updateThemeData(adaptiveTheme, customTheme, customTheme);
-          break;
-
-        case ThemeOptions.blueDark:
-          final customTheme = _createCustomThemeFromEnteColorScheme(blueDarkScheme, true);
-          adaptiveTheme.setDark();
-          await Future.delayed(const Duration(milliseconds: 100));
-          _updateThemeData(adaptiveTheme, customTheme, customTheme);
-          break;
-
-        case ThemeOptions.yellowLight:
-          final customTheme = _createCustomThemeFromEnteColorScheme(yellowLightScheme, false);
-          adaptiveTheme.setLight();
-          await Future.delayed(const Duration(milliseconds: 100));
-          _updateThemeData(adaptiveTheme, customTheme, customTheme);
-          break;
-
-        case ThemeOptions.yellowDark:
-          final customTheme = _createCustomThemeFromEnteColorScheme(yellowDarkScheme, true);
-          adaptiveTheme.setDark();
-          await Future.delayed(const Duration(milliseconds: 100));
-          _updateThemeData(adaptiveTheme, customTheme, customTheme);
+          isLightTheme ? adaptiveTheme.setLight() : adaptiveTheme.setDark();
           break;
       }
 
+      // Notify only after theme is fully applied
+      await Future.delayed(const Duration(milliseconds: 50));
       notifyListeners();
       
     } catch (e) {
       print('Error setting theme: $e');
       rethrow;
+    } finally {
+      _isChangingTheme = false;
+    }
+  }
+
+  // Helper method to get the correct color scheme
+  EnteColorScheme _getThemeScheme(ThemeOptions theme) {
+    switch (theme) {
+      case ThemeOptions.greenLight:
+        return greenLightScheme;
+      case ThemeOptions.greenDark:
+        return greenDarkScheme;
+      case ThemeOptions.redLight:
+        return redLightScheme;
+      case ThemeOptions.redDark:
+        return redDarkScheme;
+      case ThemeOptions.blueLight:
+        return blueLightScheme;
+      case ThemeOptions.blueDark:
+        return blueDarkScheme;
+      case ThemeOptions.yellowLight:
+        return yellowLightScheme;
+      case ThemeOptions.yellowDark:
+        return yellowDarkScheme;
+      default:
+        return lightScheme;
     }
   }
 

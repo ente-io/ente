@@ -88,7 +88,7 @@ final ThemeData lightThemeData = ThemeData(
 final ThemeData darkThemeData = ThemeData(
   useMaterial3: true,
   brightness: Brightness.dark,
-  extensions: [darkTheme],
+  extensions: [enteDarkTheme],
   fontFamily: 'Inter',
   primaryColorLight: const Color.fromRGBO(255, 255, 255, 0.702),
   iconTheme: const IconThemeData(color: Colors.white),

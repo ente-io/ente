@@ -72,12 +72,28 @@ EnteTheme enteDarkTheme = EnteTheme(
   shadowButton: shadowButtonDark,
 );
 
+EnteTheme getInitialTheme(Brightness brightness) {
+  switch (brightness) {
+    case Brightness.dark:
+      return enteDarkTheme;
+    case Brightness.light:
+      return lightTheme;
+  }
+}
+
 EnteColorScheme getEnteColorScheme(
     BuildContext context, {
       bool inverse = false,
     }) {
   final theme = Theme.of(context).extension<EnteTheme>();
-  if (theme == null) return inverse ? enteDarkScheme : lightScheme;
+  if (theme == null) {
+    final isSystemDark = Theme.of(context).brightness == Brightness.dark;
+    if (isSystemDark) {
+      return inverse ? lightScheme : darkScheme;
+    } else {
+      return inverse ? darkScheme : lightScheme;
+    }
+  }
   return theme.colorScheme;
 }
 
