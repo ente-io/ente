@@ -257,12 +257,15 @@ const useCollectionsSortByLocalState = (initialValue: CollectionsSortBy) => {
                 let newValue: CollectionsSortBy | undefined;
                 switch (oldData.value) {
                     case 0:
-                        newValue = "name";
+                        newValue = "name-asc";
                         break;
                     case 1:
-                        newValue = "creation-time-asc";
+                        newValue = "name-desc";
                         break;
                     case 2:
+                        newValue = "creation-time-asc";
+                        break;
+                    case 3:
                         newValue = "updation-time-desc";
                         break;
                 }

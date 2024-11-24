@@ -58,8 +58,11 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
             },
         }}
     >
-        <SortByOption {...optProps} sortBy="name">
-            {t("name")}
+        <SortByOption {...optProps} sortBy="name-asc">
+            {t("name") + " A..Z"}
+        </SortByOption>
+        <SortByOption {...optProps} sortBy="name-desc">
+            {t("name") + " Z..A"}
         </SortByOption>
         <SortByOption {...optProps} sortBy="creation-time-asc">
             {t("oldest")}

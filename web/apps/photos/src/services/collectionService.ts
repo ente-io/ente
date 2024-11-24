@@ -994,8 +994,10 @@ export const sortCollectionSummaries = (
     collectionSummaries
         .sort((a, b) => {
             switch (by) {
-                case "name":
+                case "name-asc":
                     return a.name.localeCompare(b.name);
+                case "name-desc":
+                    return b.name.localeCompare(a.name);
                 case "creation-time-asc":
                     return (
                         -1 *
