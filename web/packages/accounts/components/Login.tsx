@@ -8,9 +8,9 @@ import { LS_KEYS, setData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Input, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { getSRPAttributes } from "../api/srp";
-import { sendOtt } from "../api/user";
 import { PAGES } from "../constants/pages";
+import { getSRPAttributes } from "../services/srp-remote";
+import { sendOtt } from "../services/user";
 
 interface LoginProps {
     signUp: () => void;
@@ -31,10 +31,10 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
             log.debug(() => ["srpAttributes", JSON.stringify(srpAttributes)]);
             if (!srpAttributes || srpAttributes.isEmailMFAEnabled) {
                 await sendOtt(email);
-                router.push(PAGES.VERIFY);
+                void router.push(PAGES.VERIFY);
             } else {
                 setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
-                router.push(PAGES.CREDENTIALS);
+                void router.push(PAGES.CREDENTIALS);
             }
         } catch (e) {
             if (e instanceof Error) {

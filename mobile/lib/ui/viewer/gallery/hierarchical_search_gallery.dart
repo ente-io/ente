@@ -1,4 +1,5 @@
 import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
@@ -176,36 +177,25 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
                             thumbnailFallback: false,
                           ),
                           actionIcon: Icons.add_outlined,
-                          text: S.of(context).addAName,
-                          subText: S.of(context).findPeopleByName,
+                          text: S.of(context).savePerson,
+                          subText: S.of(context).findThemQuickly,
                           onTap: () async {
                             final result = await showAssignPersonAction(
                               context,
                               clusterID:
                                   _firstUnnamedAppliedFaceFilter!.clusterId!,
                             );
-                            if (result != null &&
-                                result is (PersonEntity, EnteFile)) {
-                              Navigator.of(context).pop();
-                              unawaited(
-                                routeToPage(
-                                  context,
-                                  PeoplePage(
-                                    person: result.$1,
-                                    searchResult: null,
-                                  ),
-                                ),
-                              );
-                            } else if (result != null &&
-                                result is PersonEntity) {
-                              Navigator.of(context).pop();
-                              unawaited(
-                                routeToPage(
-                                  context,
-                                  PeoplePage(
-                                    person: result,
-                                    searchResult: null,
-                                  ),
+                            Navigator.of(context).pop();
+                            if (result != null) {
+                              final person = result is (PersonEntity, EnteFile)
+                                  ? result.$1
+                                  : result;
+                              // ignore: unawaited_futures
+                              routeToPage(
+                                context,
+                                PeoplePage(
+                                  person: person,
+                                  searchResult: null,
                                 ),
                               );
                             }

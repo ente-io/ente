@@ -201,7 +201,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
         _setVideoController(file.path);
       }
     }).onError((error, stackTrace) {
-      showErrorDialog(context, "Error", S.of(context).failedToDownloadVideo);
+      showErrorDialog(context, S.of(context).error, S.of(context).failedToDownloadVideo);
     });
   }
 

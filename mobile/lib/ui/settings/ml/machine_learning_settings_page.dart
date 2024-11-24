@@ -510,7 +510,7 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
                             title: S.of(context).clusteringProgress,
                           ),
                           trailingWidget: Text(
-                            "currently running",
+                            S.of(context).currentlyRunning,
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           singleBorderRadius: 8,

@@ -54,7 +54,7 @@ export const MLSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     if (!mlStatus) {
         component = <Loading />;
     } else if (mlStatus.phase == "disabled") {
-        component = <EnableML onEnable={handleEnableML} />;
+        component = <EnableML onEnable={handleEnableML} showMagicSearchHint />;
     } else {
         component = (
             <ManageML {...{ mlStatus }} onDisableML={handleDisableML} />
@@ -77,7 +77,7 @@ export const MLSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 </Stack>
             </NestedSidebarDrawer>
 
-            <FaceConsent
+            <FaceConsentDrawer
                 open={openFaceConsent}
                 onClose={() => setOpenFaceConsent(false)}
                 onRootClose={handleRootClose}
@@ -98,9 +98,16 @@ const Loading: React.FC = () => {
 interface EnableMLProps {
     /** Called when the user enables ML. */
     onEnable: () => void;
+    /**
+     *  If true, a footnote describing the magic search feature will be shown.
+     */
+    showMagicSearchHint?: boolean;
 }
 
-const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
+export const EnableML: React.FC<EnableMLProps> = ({
+    onEnable,
+    showMagicSearchHint,
+}) => {
     const moreDetails = () =>
         openURL("https://help.ente.io/photos/features/machine-learning");
 
@@ -118,34 +125,62 @@ const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
                     {t("more_details")}
                 </Button>
             </Stack>
-            <Typography color="text.faint" variant="small">
-                {t("ml_search_footnote")}
-            </Typography>
+            {showMagicSearchHint && (
+                <Typography color="text.faint" variant="small">
+                    {t("ml_search_footnote")}
+                </Typography>
+            )}
         </Stack>
     );
 };
 
-type FaceConsentProps = NestedSidebarDrawerVisibilityProps & {
-    /** Called when the user provides their consent. */
-    onConsent: () => void;
-};
+type FaceConsentDrawerProps = NestedSidebarDrawerVisibilityProps &
+    Pick<FaceConsentProps, "onConsent">;
 
-const FaceConsent: React.FC<FaceConsentProps> = ({
+const FaceConsentDrawer: React.FC<FaceConsentDrawerProps> = ({
     open,
     onClose,
     onRootClose,
     onConsent,
 }) => {
-    const [acceptTerms, setAcceptTerms] = useState(false);
-
-    useEffect(() => {
-        setAcceptTerms(false);
-    }, [open]);
-
     const handleRootClose = () => {
         onClose();
         onRootClose();
     };
+
+    return (
+        <NestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+        >
+            <Stack spacing={"4px"} py={"12px"}>
+                <SidebarDrawerTitlebar
+                    onClose={onClose}
+                    onRootClose={handleRootClose}
+                    title={t("ml_consent_title")}
+                />
+                <FaceConsent onConsent={onConsent} onCancel={onClose} />
+            </Stack>
+        </NestedSidebarDrawer>
+    );
+};
+
+interface FaceConsentProps {
+    /** Called when the user provides their consent. */
+    onConsent: () => void;
+    /** Called when the user cancels out. */
+    onCancel: () => void;
+}
+
+export const FaceConsent: React.FC<FaceConsentProps> = ({
+    onConsent,
+    onCancel,
+}) => {
+    const [acceptTerms, setAcceptTerms] = useState(false);
+
+    useEffect(() => {
+        setAcceptTerms(false);
+    }, []);
 
     const privacyPolicyLink = (
         <Link
@@ -160,62 +195,44 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
     );
 
     return (
-        <NestedSidebarDrawer
-            {...{ open, onClose }}
-            onRootClose={handleRootClose}
-        >
-            <Stack spacing={"4px"} py={"12px"}>
-                <SidebarDrawerTitlebar
-                    onClose={onClose}
-                    onRootClose={handleRootClose}
-                    title={t("ml_consent_title")}
+        <Stack py={"20px"} px={"8px"} spacing={"32px"}>
+            <Typography component="div" color="text.muted" px={"8px"}>
+                <Trans
+                    i18nKey={"ml_consent_description"}
+                    components={{ a: privacyPolicyLink }}
                 />
-                <Stack py={"20px"} px={"8px"} spacing={"32px"}>
-                    <Typography component="div" color="text.muted" px={"8px"}>
-                        <Trans
-                            i18nKey={"ml_consent_description"}
-                            components={{ a: privacyPolicyLink }}
+            </Typography>
+            <FormGroup sx={{ width: "100%" }}>
+                <FormControlLabel
+                    sx={{
+                        color: "text.muted",
+                        ml: 0,
+                        mt: 2,
+                    }}
+                    control={
+                        <Checkbox
+                            size="small"
+                            checked={acceptTerms}
+                            onChange={(e) => setAcceptTerms(e.target.checked)}
                         />
-                    </Typography>
-                    <FormGroup sx={{ width: "100%" }}>
-                        <FormControlLabel
-                            sx={{
-                                color: "text.muted",
-                                ml: 0,
-                                mt: 2,
-                            }}
-                            control={
-                                <Checkbox
-                                    size="small"
-                                    checked={acceptTerms}
-                                    onChange={(e) =>
-                                        setAcceptTerms(e.target.checked)
-                                    }
-                                />
-                            }
-                            label={t("ml_consent_confirmation")}
-                        />
-                    </FormGroup>
-                    <Stack px={"8px"} spacing={"8px"}>
-                        <Button
-                            color={"accent"}
-                            size="large"
-                            disabled={!acceptTerms}
-                            onClick={onConsent}
-                        >
-                            {t("ml_consent")}
-                        </Button>
-                        <Button
-                            color={"secondary"}
-                            size="large"
-                            onClick={onClose}
-                        >
-                            {t("cancel")}
-                        </Button>
-                    </Stack>
-                </Stack>
+                    }
+                    label={t("ml_consent_confirmation")}
+                />
+            </FormGroup>
+            <Stack px={"8px"} spacing={"8px"}>
+                <Button
+                    color={"accent"}
+                    size="large"
+                    disabled={!acceptTerms}
+                    onClick={onConsent}
+                >
+                    {t("ml_consent")}
+                </Button>
+                <Button color={"secondary"} size="large" onClick={onCancel}>
+                    {t("cancel")}
+                </Button>
             </Stack>
-        </NestedSidebarDrawer>
+        </Stack>
     );
 };
 

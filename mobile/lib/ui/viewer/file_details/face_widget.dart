@@ -6,6 +6,7 @@ import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/extensions/stop_watch.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/base/id.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/ml/face/face.dart";
@@ -37,8 +38,8 @@ class FaceWidget extends StatefulWidget {
     this.clusterID,
     this.highlight = false,
     this.editMode = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<FaceWidget> createState() => _FaceWidgetState();
@@ -204,7 +205,7 @@ class _FaceWidgetState extends State<FaceWidget> {
                 if (widget.person != null)
                   Text(
                     widget.person!.data.isIgnored
-                        ? '(ignored)'
+                        ? '(' + S.of(context).ignored + ')'
                         : widget.person!.data.name.trim(),
                     style: Theme.of(context).textTheme.bodySmall,
                     overflow: TextOverflow.ellipsis,

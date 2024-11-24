@@ -1,19 +1,21 @@
 {
-    "extends": "../../tsconfig.base.json",
+    "extends": "@/build-config/tsconfig-next.json",
     "compilerOptions": {
+        /* Set the base directory from which to resolve bare module names. */
         "baseUrl": "./src",
-        "downlevelIteration": true,
-        "jsx": "preserve",
-        "lib": ["dom", "dom.iterable", "esnext", "webworker"],
+        /* MUI doesn't work with exactOptionalPropertyTypes yet. */
+        "exactOptionalPropertyTypes": false,
+
+        /* Override tsconfig-next.json (TODO: Remove me) */
+        "verbatimModuleSyntax": false,
+        /* Override tsconfig-next.json (TODO: Remove me) */
         "noImplicitAny": false,
         "noUnusedLocals": false,
         "noUnusedParameters": false,
+        "noImplicitReturns": false,
+        "noUncheckedIndexedAccess": false,
         "strictNullChecks": false,
-        "target": "es5",
-        "useUnknownInCatchVariables": false,
-
-        /* TODO(MR): Add to auth */
-        "moduleResolution": "bundler"
+        "useUnknownInCatchVariables": false
     },
     "include": [
         "next-env.d.ts",

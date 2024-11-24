@@ -144,7 +144,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                     errors,
                     handleChange,
                     handleSubmit,
-                }): JSX.Element => (
+                }): React.JSX.Element => (
                     <form noValidate onSubmit={handleSubmit}>
                         <Stack spacing={"24px"}>
                             <DropdownInput

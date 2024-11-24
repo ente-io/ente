@@ -18,11 +18,11 @@
  * ensure that sodium.ready has been called before accessing libsodium's APIs,
  * thus all the functions it exposes are async.
  *
- * The highest layer is this file, `crypto/index.ts`, and the one that our own
- * code should use. These are usually simple compositions of functionality
- * exposed by `crypto/libsodium.ts`, the primary difference being that these
- * functions try to talk in terms of higher-level Ente specific goal we are
- * trying to accomplish instead of the specific underlying crypto algorithms.
+ * The highest layer is this file, `crypto/index.ts`. These are usually simple
+ * compositions of functionality exposed by `crypto/libsodium.ts`, the primary
+ * difference being that these functions try to talk in terms of higher-level
+ * Ente specific goal we are trying to accomplish instead of the specific
+ * underlying crypto algorithms.
  *
  * There is an additional actor in play. Cryptographic operations like
  * encryption are CPU intensive and would cause the UI to stutter if used
@@ -46,11 +46,16 @@
  * of going through this file.
  */
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import { type StateAddress } from "libsodium-wrappers-sumo";
 import { assertionFailed } from "../assert";
 import { inWorker } from "../env";
 import * as ei from "./ente-impl";
-import * as libsodium from "./libsodium";
-import type { BytesOrB64, EncryptedBlob, EncryptedBox } from "./types";
+import type {
+    BytesOrB64,
+    EncryptedBlob,
+    EncryptedBox,
+    EncryptedFile,
+} from "./types";
 import type { CryptoWorker } from "./worker";
 
 /**
@@ -89,16 +94,22 @@ const assertInWorker = <T>(x: T): T => {
 };
 
 /**
- * Return a new randomly generated 256-bit key suitable for use with the *Box
- * encryption functions.
+ * Return a new randomly generated 256-bit key (as a base64 string) suitable for
+ * use with the *Box encryption functions.
  */
-export const generateNewBoxKey = libsodium.generateNewBoxKey;
+export const generateBoxKey = () =>
+    inWorker()
+        ? ei._generateBoxKey()
+        : sharedCryptoWorker().then((w) => w.generateBoxKey());
 
 /**
- * Return a new randomly generated 256-bit key suitable for use with the *Blob
- * or *Stream encryption functions.
+ * Return a new randomly generated 256-bit key (as a base64 string) suitable for
+ * use with the *Blob or *Stream encryption functions.
  */
-export const generateNewBlobOrStreamKey = libsodium.generateNewBlobOrStreamKey;
+export const generateBlobOrStreamKey = () =>
+    inWorker()
+        ? ei._generateBlobOrStreamKey()
+        : sharedCryptoWorker().then((w) => w.generateBlobOrStreamKey());
 
 /**
  * Encrypt the given data, returning a box containing the encrypted data and a
@@ -128,7 +139,7 @@ export const encryptBoxB64 = (data: BytesOrB64, key: BytesOrB64) =>
  * Use {@link decryptBlob} to decrypt the result.
  *
  * > The suffix "Blob" comes from our convention of naming functions that use
- * > the secretstream APIs in one-shot mode.
+ * > the secretstream APIs without breaking the data into chunks.
  * >
  * > See: [Note: 3 forms of encryption (Box | Blob | Stream)]
  */
@@ -142,7 +153,7 @@ export const encryptBlob = (data: BytesOrB64, key: BytesOrB64) =>
 export const encryptBlobB64 = (data: BytesOrB64, key: BytesOrB64) =>
     inWorker()
         ? ei._encryptBlobB64(data, key)
-        : sharedCryptoWorker().then((w) => w._encryptBlobB64(data, key));
+        : sharedCryptoWorker().then((w) => w.encryptBlobB64(data, key));
 
 /**
  * Encrypt the thumbnail for a file.
@@ -154,7 +165,46 @@ export const encryptBlobB64 = (data: BytesOrB64, key: BytesOrB64) =>
  * Use {@link decryptThumbnail} to decrypt the result.
  */
 export const encryptThumbnail = (data: BytesOrB64, key: BytesOrB64) =>
-    assertInWorker(ei._encryptThumbnail(data, key));
+    inWorker()
+        ? ei._encryptThumbnail(data, key)
+        : sharedCryptoWorker().then((w) => w.encryptThumbnail(data, key));
+
+/**
+ * Encrypt the given data using chunked streaming encryption, but process all
+ * the chunks in one go.
+ *
+ * For more details, see {@link encryptStreamBytes} in `libsodium.ts`.
+ */
+export const encryptStreamBytes = async (data: Uint8Array, key: BytesOrB64) =>
+    inWorker()
+        ? ei._encryptStreamBytes(data, key)
+        : sharedCryptoWorker().then((w) => w.encryptStreamBytes(data, key));
+
+/**
+ * Prepare for chunked streaming encryption using {@link encryptStreamChunk}.
+ *
+ * For more details, see {@link initChunkEncryption} in `libsodium.ts`.
+ */
+export const initChunkEncryption = async (key: BytesOrB64) =>
+    inWorker()
+        ? ei._initChunkEncryption(key)
+        : sharedCryptoWorker().then((w) => w.initChunkEncryption(key));
+
+/**
+ * Encrypt a chunk as part of a chunked streaming encryption.
+ *
+ * For more details, see {@link encryptStreamChunk} in `libsodium.ts`.
+ */
+export const encryptStreamChunk = async (
+    data: Uint8Array,
+    state: StateAddress,
+    isFinalChunk: boolean,
+) =>
+    inWorker()
+        ? ei._encryptStreamChunk(data, state, isFinalChunk)
+        : sharedCryptoWorker().then((w) =>
+              w.encryptStreamChunk(data, state, isFinalChunk),
+          );
 
 /**
  * Encrypt the JSON metadata associated with an Ente object (file, collection or
@@ -232,7 +282,42 @@ export const decryptBlobB64 = (blob: EncryptedBlob, key: BytesOrB64) =>
  * Decrypt the thumbnail encrypted using {@link encryptThumbnail}.
  */
 export const decryptThumbnail = (blob: EncryptedBlob, key: BytesOrB64) =>
-    assertInWorker(ei._decryptThumbnail(blob, key));
+    inWorker()
+        ? ei._decryptThumbnail(blob, key)
+        : sharedCryptoWorker().then((w) => w.decryptThumbnail(blob, key));
+
+/**
+ * Decrypt the result of {@link encryptStreamBytes}.
+ */
+export const decryptStreamBytes = async (
+    file: EncryptedFile,
+    key: BytesOrB64,
+) =>
+    inWorker()
+        ? ei._decryptStreamBytes(file, key)
+        : sharedCryptoWorker().then((w) => w.decryptStreamBytes(file, key));
+
+/**
+ * Prepare to decrypt the encrypted result produced using {@link initChunkEncryption} and
+ * {@link encryptStreamChunk}.
+ */
+export const initChunkDecryption = async (header: string, key: BytesOrB64) =>
+    inWorker()
+        ? ei._initChunkDecryption(header, key)
+        : sharedCryptoWorker().then((w) => w.initChunkDecryption(header, key));
+
+/**
+ * Decrypt an individual chunk produced by {@link encryptStreamChunk}.
+ *
+ * This function is used in tandem with {@link initChunkDecryption}.
+ */
+export const decryptStreamChunk = async (
+    data: Uint8Array,
+    state: StateAddress,
+) =>
+    inWorker()
+        ? ei._decryptStreamChunk(data, state)
+        : sharedCryptoWorker().then((w) => w.decryptStreamChunk(data, state));
 
 /**
  * Decrypt the metadata JSON encrypted using {@link encryptMetadataJSON}.

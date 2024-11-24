@@ -1,6 +1,5 @@
 import { Overlay } from "@/base/components/mui/Container";
 import log from "@/base/log";
-import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import {
     GAP_BTW_TILES,
@@ -17,6 +16,7 @@ import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
 import Favorite from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { Tooltip, styled } from "@mui/material";
+import type { DisplayFile } from "components/PhotoFrame";
 import i18n from "i18next";
 import { DeduplicateContext } from "pages/deduplicate";
 import { GalleryContext } from "pages/gallery";
@@ -25,7 +25,7 @@ import { shouldShowAvatar } from "utils/file";
 import Avatar from "./Avatar";
 
 interface IProps {
-    file: EnteFile;
+    file: DisplayFile;
     updateURL: (id: number, url: string) => void;
     onClick: () => void;
     selectable: boolean;
@@ -274,7 +274,7 @@ export default function PreviewCard(props: IProps) {
                     return;
                 }
                 const url: string =
-                    await DownloadManager.getThumbnailForPreview(
+                    await DownloadManager.renderableThumbnailURL(
                         file,
                         props.showPlaceholder,
                     );

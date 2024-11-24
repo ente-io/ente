@@ -183,6 +183,11 @@ class PersonService {
   }) async {
     final person = (await getPerson(personID))!;
     final personData = person.data;
+    final clusterInfo = personData.assigned!.firstWhere(
+      (element) => element.id == clusterID,
+    );
+    personData.rejectedFaceIDs ??= [];
+    personData.rejectedFaceIDs!.addAll(clusterInfo.faces);
     personData.assigned!.removeWhere((element) => element.id != clusterID);
     await entityService.addOrUpdate(
       EntityType.cgroup,
@@ -201,6 +206,8 @@ class PersonService {
     required Set<String> faceIDs,
   }) async {
     final personData = person.data;
+
+    // Remove faces from clusters
     final List<String> emptiedClusters = [];
     for (final cluster in personData.assigned!) {
       cluster.faces.removeWhere((faceID) => faceIDs.contains(faceID));
@@ -218,6 +225,10 @@ class PersonService {
         clusterID: emptyClusterID,
       );
     }
+
+    // Add removed faces to rejected faces
+    personData.rejectedFaceIDs ??= [];
+    personData.rejectedFaceIDs!.addAll(faceIDs);
 
     await entityService.addOrUpdate(
       EntityType.cgroup,
@@ -271,9 +282,16 @@ class PersonService {
     entities.sort((a, b) => a.updatedAt.compareTo(b.updatedAt));
     final Map<String, String> faceIdToClusterID = {};
     final Map<String, String> clusterToPersonID = {};
+    bool shouldCheckRejectedFaces = false;
     for (var e in entities) {
       final personData = PersonData.fromJson(json.decode(e.data));
+      if (personData.rejectedFaceIDs != null &&
+          personData.rejectedFaceIDs!.isNotEmpty) {
+        shouldCheckRejectedFaces = true;
+      }
       int faceCount = 0;
+
+      // Locally store the assignment of faces to clusters and people
       for (var cluster in personData.assigned!) {
         faceCount += cluster.faces.length;
         for (var faceId in cluster.faces) {
@@ -303,10 +321,62 @@ class PersonService {
     logger.info("Storing feedback for ${faceIdToClusterID.length} faces");
     await faceMLDataDB.updateFaceIdToClusterId(faceIdToClusterID);
     await faceMLDataDB.bulkAssignClusterToPersonID(clusterToPersonID);
+
+    if (shouldCheckRejectedFaces) {
+      final dbPeopleClusterInfo =
+          await faceMLDataDB.getPersonToClusterIdToFaceIds();
+      for (var e in entities) {
+        final personData = PersonData.fromJson(json.decode(e.data));
+        if (personData.rejectedFaceIDs != null &&
+            personData.rejectedFaceIDs!.isNotEmpty) {
+          final personFaceIDs =
+              dbPeopleClusterInfo[e.id]!.values.expand((e) => e).toSet();
+          final rejectedFaceIDsSet = personData.rejectedFaceIDs!.toSet();
+          final assignedAndRejectedFaceIDs =
+              rejectedFaceIDsSet.intersection(personFaceIDs);
+
+          if (assignedAndRejectedFaceIDs.isNotEmpty) {
+            // Check that we don't have any empty clusters now
+            final dbPersonClusterInfo = dbPeopleClusterInfo[e.id]!;
+            final faceToClusterToRemove = <String, String>{};
+            for (final clusterIdToFaceIDs in dbPersonClusterInfo.entries) {
+              final clusterID = clusterIdToFaceIDs.key;
+              final faceIDs = clusterIdToFaceIDs.value;
+              final foundRejectedFacesToCluster = <String, String>{};
+              final removeFaceIDs = <String>{};
+              for (final faceID in faceIDs) {
+                if (assignedAndRejectedFaceIDs.contains(faceID)) {
+                  removeFaceIDs.add(faceID);
+                  foundRejectedFacesToCluster[faceID] = clusterID;
+                }
+              }
+              if (faceIDs.length == removeFaceIDs.length) {
+                logger.info(
+                  "Cluster $clusterID for person ${e.id} ${personData.name} is empty due to rejected faces from remote, removing the cluster from person",
+                );
+                await faceMLDataDB.removeClusterToPerson(
+                  personID: e.id,
+                  clusterID: clusterID,
+                );
+                await faceMLDataDB.captureNotPersonFeedback(
+                  personID: e.id,
+                  clusterID: clusterID,
+                );
+              } else {
+                faceToClusterToRemove.addAll(foundRejectedFacesToCluster);
+              }
+            }
+            // Remove the clusterID for the remaining conflicting faces
+            await faceMLDataDB.removeFaceIdToClusterId(faceToClusterToRemove);
+          }
+        }
+      }
+    }
+
     return changed;
   }
 
-  Future<void> updateAvatar(PersonEntity p, EnteFile file) async {
+  Future<PersonEntity> updateAvatar(PersonEntity p, EnteFile file) async {
     final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
       recentFileID: file.uploadedFileID!,
       personID: p.remoteID,
@@ -321,10 +391,11 @@ class PersonService {
     final updatedPerson = person.copyWith(
       data: person.data.copyWith(avatarFaceId: face.faceID),
     );
-    await _updatePerson(updatedPerson);
+    await updatePerson(updatedPerson);
+    return updatedPerson;
   }
 
-  Future<void> updateAttributes(
+  Future<PersonEntity> updateAttributes(
     String id, {
     String? name,
     String? avatarFaceId,
@@ -342,10 +413,11 @@ class PersonService {
         birthDate: birthDate,
       ),
     );
-    await _updatePerson(updatedPerson);
+    await updatePerson(updatedPerson);
+    return updatedPerson;
   }
 
-  Future<void> _updatePerson(PersonEntity updatePerson) async {
+  Future<void> updatePerson(PersonEntity updatePerson) async {
     await entityService.addOrUpdate(
       EntityType.cgroup,
       updatePerson.data.toJson(),

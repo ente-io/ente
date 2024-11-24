@@ -2,13 +2,9 @@ import log from "@/base/log";
 import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
 import { ApiError, isApiErrorResponse } from "../error";
 
-interface IHTTPHeaders {
-    [headerKey: string]: any;
-}
+type IHTTPHeaders = Record<string, any>;
 
-interface IQueryPrams {
-    [paramName: string]: any;
-}
+type IQueryPrams = Record<string, any>;
 
 /**
  * Service to manage all HTTP calls.

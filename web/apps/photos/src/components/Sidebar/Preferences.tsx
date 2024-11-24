@@ -26,8 +26,7 @@ import {
 import { useAppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
-import ScienceIcon from "@mui/icons-material/Science";
-import { Box, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import DropdownInput from "components/DropdownInput";
 import { t } from "i18next";
 import React, { useCallback, useEffect } from "react";
@@ -65,6 +64,15 @@ export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 />
                 <Stack sx={{ px: "16px", py: "20px", gap: "24px" }}>
                     <LanguageSelector />
+                    {isMLSupported && (
+                        <MenuItemGroup>
+                            <EnteMenuItem
+                                endIcon={<ChevronRight />}
+                                onClick={showMLSettings}
+                                label={t("ml_search")}
+                            />
+                        </MenuItemGroup>
+                    )}
                     <EnteMenuItem
                         onClick={showMapSettings}
                         endIcon={<ChevronRight />}
@@ -75,21 +83,6 @@ export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         endIcon={<ChevronRight />}
                         label={t("advanced")}
                     />
-                    {isMLSupported && (
-                        <Box>
-                            <MenuSectionTitle
-                                title={t("labs")}
-                                icon={<ScienceIcon />}
-                            />
-                            <MenuItemGroup>
-                                <EnteMenuItem
-                                    endIcon={<ChevronRight />}
-                                    onClick={showMLSettings}
-                                    label={t("ml_search")}
-                                />
-                            </MenuItemGroup>
-                        </Box>
-                    )}
                 </Stack>
             </Stack>
             <MapSettings
@@ -165,6 +158,8 @@ const localeName = (locale: SupportedLocale) => {
             return "Lietuvių kalba";
         case "uk-UA":
             return "Українська";
+        case "vi-VN":
+            return "Tiếng Việt";
     }
 };
 

@@ -8,7 +8,6 @@
         "@/gallery": "*",
         "@/media": "*",
         "@/new": "*",
-        "@ente/eslint-config": "*",
         "@ente/shared": "*",
         "@stripe/stripe-js": "^1.13.2",
         "bip39": "^3.0.4",
@@ -17,7 +16,6 @@
         "debounce": "^2.1.1",
         "exifreader": "^4",
         "fast-srp-hap": "^2.0.4",
-        "ffmpeg-wasm": "file:./thirdparty/ffmpeg-wasm",
         "leaflet": "^1.9.4",
         "leaflet-defaulticon-compatibility": "^0.1.1",
         "localforage": "^1.9.0",
@@ -38,7 +36,7 @@
         "zxcvbn": "^4.4.2"
     },
     "devDependencies": {
-        "@ente/eslint-config": "*",
+        "@/build-config": "*",
         "@next/bundle-analyzer": "^14.1",
         "@types/bs58": "^4.0.1",
         "@types/leaflet": "^1.9",

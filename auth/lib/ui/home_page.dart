@@ -28,6 +28,7 @@ import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/home/coach_mark_widget.dart';
 import 'package:ente_auth/ui/home/home_empty_state.dart';
 import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
+import 'package:ente_auth/ui/reorder_codes_page.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
@@ -186,6 +187,10 @@ class _HomePageState extends State<HomePage> {
               .toList() ??
           [];
     }
+
+    _filteredCodes
+        .sort((a, b) => a.display.position.compareTo(b.display.position));
+
     if (mounted) {
       setState(() {});
     }
@@ -255,6 +260,18 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> navigateToReorderPage(List<Code> allCodes) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return ReorderCodesPage(codes: _filteredCodes);
+        },
+      ),
+    ).then((value) {
+      setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -310,6 +327,13 @@ class _HomePageState extends State<HomePage> {
                 ),
           centerTitle: PlatformUtil.isDesktop() ? false : true,
           actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.edit),
+              tooltip: l10n.edit,
+              onPressed: () {
+                navigateToReorderPage(_allCodes!);
+              },
+            ),
             PlatformUtil.isDesktop()
                 ? IconButton(
                     icon: const Icon(Icons.lock),

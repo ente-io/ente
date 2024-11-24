@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 const List<Locale> appSupportedLocales = <Locale>[
   Locale('ar'),
   Locale('bg'),
+  Locale('ca'),
   Locale('de'),
   Locale('el'),
   Locale('en'),

@@ -16,7 +16,7 @@ export const getActualKey = async () => {
             encryptionKeyAttributes.key,
         );
         return key;
-    } catch (e) {
+    } catch {
         throw new Error(CustomError.KEY_MISSING);
     }
 };

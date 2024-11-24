@@ -91,7 +91,7 @@ class FileBottomBarState extends State<FileBottomBar> {
         widget.file.ownerID == null || widget.file.ownerID == widget.userID;
     children.add(
       Tooltip(
-        message: "Info",
+        message: S.of(context).info,
         child: Padding(
           padding: const EdgeInsets.only(top: 12),
           child: IconButton(
@@ -121,7 +121,7 @@ class FileBottomBarState extends State<FileBottomBar> {
           (widget.file.fileType == FileType.video)) {
         children.add(
           Tooltip(
-            message: "Edit",
+            message: S.of(context).edit,
             child: Padding(
               padding: const EdgeInsets.only(top: 12),
               child: IconButton(

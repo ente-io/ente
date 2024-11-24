@@ -32,7 +32,6 @@ import {
 import { useAppContext } from "@/new/photos/types/context";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { openURL } from "@/new/photos/utils/web";
-import { ensure } from "@/utils/ensure";
 import {
     FlexWrapper,
     FluidContainer,
@@ -158,8 +157,9 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
             case "buyPlan":
                 try {
                     setLoading(true);
-                    await redirectToPaymentsApp(ensure(plan.stripeID), "buy");
+                    await redirectToPaymentsApp(plan.stripeID!, "buy");
                 } catch (e) {
+                    log.error(e);
                     setLoading(false);
                     showMiniDialog(
                         errorDialogAttributes(
@@ -176,10 +176,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
                     continue: {
                         text: t("update_subscription"),
                         action: () =>
-                            redirectToPaymentsApp(
-                                ensure(plan.stripeID),
-                                "update",
-                            ),
+                            redirectToPaymentsApp(plan.stripeID!, "update"),
                     },
                 });
                 break;

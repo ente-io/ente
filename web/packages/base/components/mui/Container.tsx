@@ -18,7 +18,7 @@ export const SpaceBetweenFlex = styled("div")`
  * A flex child that fills the entire flex direction, and shows its children
  * after centering them both vertically and horizontally.
  */
-export const CenteredBox = styled("div")`
+export const CenteredFill = styled("div")`
     flex: 1;
     display: flex;
     justify-content: center;

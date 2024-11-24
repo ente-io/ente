@@ -468,7 +468,7 @@ Future<List<String>> deleteLocalFilesInBatches(
       }
     }
   }
-  Navigator.of(dialogKey.currentContext!, rootNavigator: true).pop('dialog');
+  Navigator.of(dialogKey.currentContext!).pop('dialog');
   return deletedIDs;
 }
 
