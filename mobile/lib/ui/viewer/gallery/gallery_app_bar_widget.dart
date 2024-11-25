@@ -846,7 +846,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final collection = widget.collection;
     try {
       if (galleryType == GalleryType.sharedPublicCollection &&
-          collection!.isEnableCollect()) {
+          collection!.isCollectEnabledForPublicLink()) {
         final authToken = await CollectionsService.instance
             .getPublicAlbumToken(collection.id);
         final albumKey =

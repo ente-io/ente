@@ -68,6 +68,8 @@ class CollectionsService {
   Collection? cachedUncategorizedCollection;
   final Map<String, EnteFile> _coverCache = <String, EnteFile>{};
   final Map<int, int> _countCache = <int, int>{};
+
+  //Used for links-in-app
   final _cachedPublicAlbumToken = <int, String>{};
   final _cachedPublicAlbumJWT = <int, String>{};
   final _cachedPublicCollectionID = <int>[];
