@@ -207,40 +207,40 @@ const PhotoFrame = ({
         return <div />;
     }
 
-    // Return a function which will return true if the URL was updated (for the
-    // given params), and false otherwise.
-    const updateURL =
+    // Return a (curried) function which will return true if the URL was updated
+    // (for the given params), and false otherwise.
+    const updateThumbURL =
         (index: number) => (id: number, url: string, forceUpdate?: boolean) => {
             const file = displayFiles[index];
-            // this is to prevent outdated updateURL call from updating the wrong file
+            // This is to prevent outdated call from updating the wrong file.
             if (file.id !== id) {
                 log.info(
-                    `[${id}]PhotoSwipe: updateURL: file id mismatch: ${file.id} !== ${id}`,
+                    `Ignoring stale updateThumbURL for display file at index ${index} (file ID ${file.id}, expected ${id})`,
                 );
-                throw Error("update url file id mismatch");
+                throw Error("Update URL file id mismatch");
             }
             if (file.msrc && !forceUpdate) {
                 return false;
             }
-            updateDisplayFileToShowThumbnail(file, url);
+            updateDisplayFileThumbnail(file, url);
             return true;
         };
 
     // Return true if the URL was updated (for the given params), and false
     // otherwise.
-    const updateSrcURL = async (
+    const updateSourceURL = async (
         index: number,
         id: number,
         srcURLs: SourceURLs,
         forceUpdate?: boolean,
     ) => {
         const file = displayFiles[index];
-        // this is to prevent outdate updateSrcURL call from updating the wrong file
+        // This is to prevent outdated call from updating the wrong file.
         if (file.id !== id) {
             log.info(
-                `[${id}]PhotoSwipe: updateSrcURL: file id mismatch: ${file.id}`,
+                `Ignoring stale updateSourceURL for display file at index ${index} (file ID ${file.id}, expected ${id})`,
             );
-            throw Error("update url file id mismatch");
+            throw Error("Update URL file id mismatch");
         }
         if (file.isSourceLoaded && !forceUpdate) {
             return false;
@@ -249,7 +249,7 @@ const PhotoFrame = ({
             throw Error("file conversion failed");
         }
 
-        await updateDisplayFileToShowFile(file, srcURLs, enableDownload);
+        updateDisplayFileSource(file, srcURLs, enableDownload);
         return true;
     };
 
@@ -315,7 +315,7 @@ const PhotoFrame = ({
         <PreviewCard
             key={`tile-${item.id}-selected-${selected[item.id] ?? false}`}
             file={item}
-            updateURL={updateURL(index)}
+            updateURL={updateThumbURL(index)}
             onClick={onThumbnailClick(index)}
             selectable={selectable}
             onSelect={handleSelect(
@@ -366,7 +366,7 @@ const PhotoFrame = ({
                 // URL will always be defined (unless an error is thrown) since
                 // we are not passing the `cachedOnly` option.
                 const url = await downloadManager.renderableThumbnailURL(item)!;
-                updateThumb(instance, index, item, url, false);
+                updateThumbnail(instance, index, item, url, false);
             } catch (e) {
                 log.error("getSlideData failed get msrc url failed", e);
                 thumbFetching[item.id] = false;
@@ -400,7 +400,7 @@ const PhotoFrame = ({
                     type: "normal",
                 };
                 try {
-                    if (await updateSrcURL(index, item.id, dummyImgSrcUrl)) {
+                    if (await updateSourceURL(index, item.id, dummyImgSrcUrl)) {
                         log.info(
                             `[${item.id}] calling invalidateCurrItems for live photo imgSrc, source loaded: ${item.isSourceLoaded}`,
                         );
@@ -426,7 +426,7 @@ const PhotoFrame = ({
                     type: "livePhoto",
                 };
                 try {
-                    const updated = await updateSrcURL(
+                    const updated = await updateSourceURL(
                         index,
                         item.id,
                         loadedLivePhotoSrcURL,
@@ -448,7 +448,7 @@ const PhotoFrame = ({
                     );
                 }
             } else {
-                await updateOrig(instance, index, item, srcURLs, false);
+                await updateSource(instance, index, item, srcURLs, false);
             }
         } catch (e) {
             log.error("getSlideData failed get src url failed", e);
@@ -457,7 +457,7 @@ const PhotoFrame = ({
         }
     };
 
-    const updateThumb = (
+    const updateThumbnail = (
         instance: PhotoSwipe<PhotoSwipe.Options>,
         index: number,
         item: DisplayFile,
@@ -465,7 +465,7 @@ const PhotoFrame = ({
         forceUpdate?: boolean,
     ) => {
         try {
-            if (updateURL(index)(item.id, url, forceUpdate)) {
+            if (updateThumbURL(index)(item.id, url, forceUpdate)) {
                 log.info(
                     `[${item.id}] calling invalidateCurrItems for thumbnail msrc: ${!!item.msrc}`,
                 );
@@ -480,7 +480,7 @@ const PhotoFrame = ({
         }
     };
 
-    const updateOrig = async (
+    const updateSource = async (
         instance: PhotoSwipe<PhotoSwipe.Options>,
         index: number,
         item: DisplayFile,
@@ -488,7 +488,7 @@ const PhotoFrame = ({
         forceUpdate?: boolean,
     ) => {
         try {
-            if (await updateSrcURL(index, item.id, srcURL, forceUpdate)) {
+            if (await updateSourceURL(index, item.id, srcURL, forceUpdate)) {
                 log.info(
                     `[${item.id}] calling invalidateCurrItems for src, source loaded: ${item.isSourceLoaded}`,
                 );
@@ -508,7 +508,7 @@ const PhotoFrame = ({
         index: number,
         item: DisplayFile,
     ) => {
-        updateThumb(instance, index, item, item.msrc, true);
+        updateThumbnail(instance, index, item, item.msrc, true);
 
         try {
             log.info(
@@ -520,7 +520,7 @@ const PhotoFrame = ({
                 forceConvert: true,
             });
 
-            await updateOrig(instance, index, item, srcURL, true);
+            await updateSource(instance, index, item, srcURL, true);
         } catch (e) {
             log.error("getConvertedVideo failed get src url failed", e);
             fetching[item.id] = false;
@@ -581,7 +581,7 @@ const PhotoFrame = ({
 
 export default PhotoFrame;
 
-const updateDisplayFileToShowThumbnail = (file: DisplayFile, url: string) => {
+const updateDisplayFileThumbnail = (file: DisplayFile, url: string) => {
     file.w = window.innerWidth;
     file.h = window.innerHeight;
     file.msrc = url;
@@ -599,7 +599,7 @@ const updateDisplayFileToShowThumbnail = (file: DisplayFile, url: string) => {
     }
 };
 
-const updateDisplayFileToShowFile = (
+const updateDisplayFileSource = (
     file: DisplayFile,
     srcURLs: SourceURLs,
     enableDownload: boolean,
