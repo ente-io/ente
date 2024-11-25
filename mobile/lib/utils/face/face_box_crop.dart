@@ -140,7 +140,7 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
   }
 }
 
-Future<Uint8List?> precomputeNextFaceCrops(
+Future<Uint8List?> precomputeClusterFaceCrop(
   file,
   clusterID, {
   required bool useFullFile,

@@ -358,7 +358,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         final clusterID = suggestion.clusterIDToMerge;
         for (final file in files.sublist(0, min(files.length, 6))) {
           unawaited(
-            precomputeNextFaceCrops(
+            precomputeClusterFaceCrop(
               file,
               clusterID,
               useFullFile: true,
@@ -496,7 +496,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     final futures = <Future<Uint8List?>>[];
     for (final file in files) {
       futures.add(
-        precomputeNextFaceCrops(
+        precomputeClusterFaceCrop(
           file,
           clusterID,
           useFullFile: true,
