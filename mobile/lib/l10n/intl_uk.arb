@@ -879,7 +879,7 @@
   "downloadFailed": "Не вдалося завантажити",
   "deduplicateFiles": "Усунути дублікати файлів",
   "deselectAll": "Зняти виділення",
-  "reviewDeduplicateItems": "Перегляньте та видаліть елементи, які ви вважаєте, є дублікатами.",
+  "reviewDeduplicateItems": "Перегляньте та видаліть елементи, які, на вашу думку, є дублікатами.",
   "clubByCaptureTime": "Клуб за часом захоплення",
   "clubByFileName": "Клуб за назвою файлу",
   "count": "Кількість",
@@ -1246,6 +1246,10 @@
   "locations": "Розташування",
   "descriptions": "Описи",
   "addAName": "Додати ім'я",
+  "findThemQuickly": "Знайдіть їх швидко",
+  "@findThemQuickly": {
+    "description": "Subtitle to indicate that the user can find people quickly by name"
+  },
   "findPeopleByName": "Швидко знаходьте людей за іменами",
   "addViewers": "{count, plural, one {Додано глядача} other {Додано глядачів}}",
   "addCollaborators": "{count, plural, one {Додано співавтора} other {Додано співавторів}}",
@@ -1260,6 +1264,13 @@
   "createCollaborativeLink": "Створити спільне посилання",
   "search": "Пошук",
   "enterPersonName": "Введіть ім'я особи",
+  "enterName": "Введіть ім'я",
+  "savePerson": "Зберегти особу",
+  "editPerson": "Редагувати особу",
+  "mergedPhotos": "Об'єднані фотографії",
+  "orMergeWithExistingPerson": "Або об'єднати з наявними",
+  "enterDateOfBirth": "День народження (необов'язково)",
+  "birthday": "День народження",
   "removePersonLabel": "Видалити мітку особи",
   "autoPairDesc": "Автоматичне створення пари працює лише з пристроями, що підтримують Chromecast.",
   "manualPairDesc": "Створення пари з PIN-кодом працює з будь-яким екраном, на яку ви хочете переглянути альбом.",
@@ -1286,6 +1297,7 @@
   "right": "Праворуч",
   "whatsNew": "Що нового",
   "reviewSuggestions": "Переглянути пропозиції",
+  "review": "Оцінити",
   "useAsCover": "Використати як обкладинку",
   "notPersonLabel": "Не {name}?",
   "@notPersonLabel": {
@@ -1352,10 +1364,17 @@
   "addName": "Додати ім'я",
   "add": "Додати",
   "extraPhotosFoundFor": "Знайдено додаткові фотографії для {text}",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "extraPhotosFound": "Знайдено додаткові фотографії",
   "configuration": "Налаштування",
   "localIndexing": "Локальне індексування",
-  "resetPerson": "Скинути особу",
+  "resetPerson": "Вилучити",
   "areYouSureYouWantToResetThisPerson": "Ви впевнені, що хочете скинути цю особу?",
   "allPersonGroupingWillReset": "Усі групи для цієї особи будуть скинуті, і ви втратите всі пропозиції, зроблені для неї",
   "yesResetPerson": "Так, скинути особу",
@@ -1364,37 +1383,73 @@
   "enableMachineLearningBanner": "Увімкніть машинне навчання для магічного пошуку та розпізнавання облич",
   "searchDiscoverEmptySection": "Зображення будуть показані тут після завершення обробки",
   "searchPersonsEmptySection": "Люди будуть показані тут після завершення обробки",
-  "accountIsAlreadyConfigured": "Account is already configured.",
-  "sessionIdMismatch": "Session ID mismatch",
-  "failedToFetchActiveSessions": "Failed to fetch active sessions",
-  "failedToRefreshStripeSubscription": "Failed to refresh subscription",
-  "failedToPlayVideo": "Failed to play video",
-  "uploadIsIgnoredDueToIgnorereason": "Upload is ignored due to {ignoreReason}",
-  "typeOfGallerGallerytypeIsNotSupportedForRename": "Type of gallery {galleryType} is not supported for rename",
-  "tapToUploadIsIgnoredDue": "Tap to upload, upload is currently ignored due to {ignoreReason}",
-  "tapToUpload": "Tap to upload",
-  "info": "Info",
-  "addFiles": "Add Files",
-  "castAlbum": "Cast album",
-  "imageNotAnalyzed": "Image not analyzed",
-  "noFacesFound": "No faces found",
-  "fileNotUploadedYet": "File not uploaded yet",
-  "noSuggestionsForPerson": "No suggestions for {personName}",
-  "month": "month",
-  "yearShort": "yr",
-  "currentlyRunning": "currently running",
-  "ignored": "ignored",
-  "photosCount": "{count} photos",
-  "file": "File",
-  "searchSectionsLengthMismatch": "Sections length mismatch: {snapshotLenght} != {searchLenght}",
-  "selectMailApp": "Select mail app",
-  "selectAllShort": "All",
-  "changeLogMagicSearchImprovementTitle": "Magic Search Improvement",
-  "changeLogMagicSearchImprovementContent": "We have improved magic search to become much faster, so you don\\'t have to wait to find what you\\'re looking for.",
-  "changeLogBackupStatusTitle": "Backup Status",
-  "changeLogBackupStatusContent": "We\\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.",
-  "changeLogDiscoverTitle": "Discover",
-  "changeLogDiscoverContent": "Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\\'s a place to find photos that might be important for you.\\n\\nOnly available if you have enabled Machine Learning.",
-  "selectCoverPhoto": "Select cover photo",
-  "newLocation": "New location"
+  "viewersSuccessfullyAdded": "{count, plural, one {} few {Додано {count} глядачі} many {Додано {count} глядачів}=0 {Додано 0 глядачів} =1 {Додано 1 глядач} other {Додано {count} глядачів}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, one {} few {Додано {count} співавтора} many {Додано {count} співавторів}=0 {Додано 0 співавторів} =1 {Додано 1 співавтор} other {Додано {count} співавторів}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  },
+  "accountIsAlreadyConfigured": "Обліковий запис уже налаштовано.",
+  "sessionIdMismatch": "Невідповідність ідентифікатора сеансу",
+  "@sessionIdMismatch": {
+    "description": "In passkey page, deeplink is ignored because of session ID mismatch."
+  },
+  "failedToFetchActiveSessions": "Не вдалося отримати активні сеанси",
+  "@failedToFetchActiveSessions": {
+    "description": "In session page, warn user (in toast) that active sessions could not be fetched."
+  },
+  "failedToRefreshStripeSubscription": "Не вдалося поновити підписку",
+  "failedToPlayVideo": "Не вдалося відтворити відео",
+  "uploadIsIgnoredDueToIgnorereason": "Завантаження проігноровано через: {ignoreReason}",
+  "@uploadIsIgnoredDueToIgnorereason": {
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "typeOfGallerGallerytypeIsNotSupportedForRename": "Тип галереї «{galleryType}» не підтримується для перейменування",
+  "@typeOfGallerGallerytypeIsNotSupportedForRename": {
+    "placeholders": {
+      "galleryType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUploadIsIgnoredDue": "Натисніть, щоб завантажити; завантаження наразі ігнорується через: {ignoreReason}",
+  "@tapToUploadIsIgnoredDue": {
+    "description": "Shown in upload icon widet, inside a tooltip.",
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUpload": "Натисніть, щоб завантажити",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
+  "info": "Інформація",
+  "addFiles": "Додати файли",
+  "castAlbum": "Транслювати альбом",
+  "imageNotAnalyzed": "Зображення не проаналізовано",
+  "noFacesFound": "Обличчя не знайдено",
+  "fileNotUploadedYet": "Файл ще не завантажено"
 }
