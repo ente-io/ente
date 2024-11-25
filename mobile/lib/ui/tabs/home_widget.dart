@@ -505,7 +505,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Future<void> _initDeepLinkSubscriptionForPublicAlbums() async {
-    // ... check initialUri
     try {
       final initialUri = await getInitialUri();
       if (initialUri != null) {
@@ -525,7 +524,6 @@ class _HomeWidgetState extends State<HomeWidget> {
       _logger.severe("Error while getting initial public album deep link: $e");
     }
 
-    // Attach a listener to the stream
     _publicAlbumLinkSubscription = uriLinkStream.listen(
       (Uri? uri) {
         if (uri != null) {
@@ -541,7 +539,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         }
       },
       onError: (err) {
-        // Handle exception by warning the user their action did not succeed
         _logger.severe("Error while getting public album deep link: $err");
       },
     );

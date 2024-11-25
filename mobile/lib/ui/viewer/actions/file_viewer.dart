@@ -89,9 +89,6 @@ class FileViewerState extends State<FileViewer> {
           Expanded(
             child: Center(
               child: (() {
-                _logger.info(
-                  "path: sharedMediaFile: ${widget.sharedMediaFile?.path} action: ${action.data}",
-                );
                 if (action.type == MediaType.image ||
                     widget.sharedMediaFile?.type == SharedMediaType.image) {
                   return PhotoView(
