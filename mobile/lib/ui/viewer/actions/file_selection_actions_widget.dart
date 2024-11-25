@@ -89,7 +89,8 @@ class _FileSelectionActionsWidgetState
 
   @override
   void initState() {
-    currentUserID = Configuration.instance.getUserID()!;
+    //User ID will be null if the user is not logged in (links-in-app)
+    currentUserID = Configuration.instance.getUserID() ?? -1;
 
     split = FilesSplit.split(<EnteFile>[], currentUserID);
     widget.selectedFiles.addListener(_selectFileChangeListener);
