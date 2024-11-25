@@ -69,7 +69,7 @@ class CollectionsService {
   final Map<String, EnteFile> _coverCache = <String, EnteFile>{};
   final Map<int, int> _countCache = <int, int>{};
   final _cachedPublicAlbumToken = <int, String>{};
-  final _cachedPublicAlbumJWTToken = <int, String>{};
+  final _cachedPublicAlbumJWT = <int, String>{};
   final _cachedPublicCollectionID = <int>[];
 
   CollectionsService._privateConstructor() {
@@ -180,7 +180,7 @@ class CollectionsService {
     cachedDefaultHiddenCollection = null;
     cachedUncategorizedCollection = null;
     _cachedPublicAlbumToken.clear();
-    _cachedPublicAlbumJWTToken.clear();
+    _cachedPublicAlbumJWT.clear();
     _cachedPublicCollectionID.clear();
     _cachedKeys.clear();
   }
@@ -1122,8 +1122,8 @@ class CollectionsService {
   }
 
   Future<String?> getPublicAlbumTokenJWT(int collectionID) async {
-    if (_cachedPublicAlbumJWTToken.containsKey(collectionID)) {
-      return _cachedPublicAlbumJWTToken[collectionID];
+    if (_cachedPublicAlbumJWT.containsKey(collectionID)) {
+      return _cachedPublicAlbumJWT[collectionID];
     }
     return null;
   }
@@ -1133,7 +1133,7 @@ class CollectionsService {
   }
 
   Future<void> setPublicAlbumTokenJWT(int collectionID, String token) async {
-    _cachedPublicAlbumJWTToken[collectionID] = token;
+    _cachedPublicAlbumJWT[collectionID] = token;
   }
 
   Future<Collection> _fromRemoteCollection(

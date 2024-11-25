@@ -37,8 +37,8 @@ class SharedPublicCollectionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final logger = Logger("SharedPublicCollectionPage");
     logger.info("Building SharedPublicCollectionPage");
-    final bool isPublicDownload = c.collection.isPublicDownload();
-    final bool isisEnableCollect = c.collection.isEnableCollect();
+    final bool isPublicDownload = c.collection.isDownloadEnabledForPublicLink();
+    final bool isisEnableCollect = c.collection.isCollectEnabledForPublicLink();
     final List<EnteFile>? initialFiles =
         c.thumbnail != null ? [c.thumbnail!] : null;
     final gallery = Gallery(

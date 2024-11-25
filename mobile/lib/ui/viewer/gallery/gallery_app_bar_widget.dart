@@ -559,7 +559,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             icon: Icons.delete_sweep_outlined,
           ),
         if (galleryType == GalleryType.sharedPublicCollection &&
-            widget.collection!.isPublicDownload())
+            widget.collection!.isDownloadEnabledForPublicLink())
           EntePopupMenuItem(
             "Download album",
             value: AlbumPopupAction.downloadAlbum,

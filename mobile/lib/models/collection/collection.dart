@@ -137,14 +137,14 @@ class Collection {
     return (owner?.id ?? 0) == userID;
   }
 
-  bool isPublicDownload() {
+  bool isDownloadEnabledForPublicLink() {
     if (publicURLs == null || publicURLs!.isEmpty) {
       return false;
     }
     return publicURLs?.first?.enableDownload ?? true;
   }
 
-  bool isEnableCollect() {
+  bool isCollectEnabledForPublicLink() {
     if (publicURLs == null || publicURLs!.isEmpty) {
       return false;
     }
