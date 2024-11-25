@@ -487,7 +487,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
           break;
         }
         resultFile ??= file;
-        if (resultFile!.creationTime! < file.creationTime!) {
+        if (resultFile.creationTime! < file.creationTime!) {
           resultFile = file;
         }
       }
@@ -498,6 +498,6 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
       );
       return ("", EnteFile());
     }
-    return (person.remoteID, resultFile!);
+    return (person.remoteID, resultFile);
   }
 }
