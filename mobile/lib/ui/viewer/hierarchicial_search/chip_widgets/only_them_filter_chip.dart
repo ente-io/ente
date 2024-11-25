@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
@@ -52,7 +53,7 @@ class OnlyThemFilterChip extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Text(
-                  "Only them",
+                  S.of(context).onlyThem,
                   style: getEnteTextTheme(context).miniBold,
                 ),
               ),

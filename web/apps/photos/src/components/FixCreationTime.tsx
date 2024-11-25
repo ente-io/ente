@@ -324,8 +324,7 @@ const updateEnteFileDate = async (
             timestamp: customDate!.timestamp,
         };
     } else if (enteFile.metadata.fileType == FileType.image) {
-        const stream = await downloadManager.getFile(enteFile);
-        const blob = await new Response(stream).blob();
+        const blob = await downloadManager.fileBlob(enteFile);
         const file = new File([blob], enteFile.metadata.title);
         const { DateTimeOriginal, DateTimeDigitized, MetadataDate, DateTime } =
             await extractExifDates(file);

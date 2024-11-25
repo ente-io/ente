@@ -88,8 +88,8 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
                     child: Column(
                       children: [
                         BottomOfTitleBarWidget(
-                          title: const TitleBarTitleWidget(
-                            title: "Select cover photo",
+                          title: TitleBarTitleWidget(
+                            title: S.of(context).selectCoverPhoto,
                           ),
                           caption: personEntity.data.name,
                           showCloseButton: true,

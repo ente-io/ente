@@ -12,6 +12,7 @@
   "deleteAccountFeedbackPrompt": "ما متاسفیم که می‌بینیم شما می‌روید. لطفا نظرات خود را برای کمک به بهبود ما به اشتراک بگذارید.",
   "feedback": "بازخورد",
   "kindlyHelpUsWithThisInformation": "لطفا با این اطلاعات به ما کمک کنید",
+  "confirmDeletePrompt": "بله، می خواهم این حساب و داده های آن را در همه برنامه ها برای همیشه حذف کنم.",
   "confirmAccountDeletion": "تایید حذف حساب کاربری",
   "deleteAccountPermanentlyButton": "حذف دائمی حساب کاربری",
   "yourAccountHasBeenDeleted": "حساب کاربری شما حذف شده است",

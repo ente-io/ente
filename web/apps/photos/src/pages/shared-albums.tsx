@@ -223,7 +223,6 @@ export default function PublicCollectionGallery() {
             let redirectingToWebsite = false;
             try {
                 const cryptoWorker = await sharedCryptoWorker();
-                await downloadManager.init();
 
                 url.current = window.location.href;
                 const currentURL = new URL(url.current);
@@ -241,7 +240,10 @@ export default function PublicCollectionGallery() {
                         ? await cryptoWorker.toB64(bs58.decode(ck))
                         : await cryptoWorker.fromHex(ck);
                 token.current = t;
-                downloadManager.updateToken(token.current);
+                downloadManager.setPublicAlbumsCredentials(
+                    token.current,
+                    undefined,
+                );
                 await updateShouldDisableCFUploadProxy();
                 collectionKey.current = dck;
                 url.current = window.location.href;
@@ -265,7 +267,7 @@ export default function PublicCollectionGallery() {
                     setPublicFiles(localPublicFiles);
                     passwordJWTToken.current =
                         await getLocalPublicCollectionPassword(collectionUID);
-                    downloadManager.updateToken(
+                    downloadManager.setPublicAlbumsCredentials(
                         token.current,
                         passwordJWTToken.current,
                     );
@@ -417,7 +419,7 @@ export default function PublicCollectionGallery() {
                     hashedPassword,
                 );
                 passwordJWTToken.current = jwtToken;
-                downloadManager.updateToken(
+                downloadManager.setPublicAlbumsCredentials(
                     token.current,
                     passwordJWTToken.current,
                 );

@@ -196,7 +196,7 @@ class _FaceWidgetState extends State<FaceWidget> {
                 if (widget.person != null)
                   Text(
                     widget.person!.data.isIgnored
-                        ? '(ignored)'
+                        ? '(' + S.of(context).ignored + ')'
                         : widget.person!.data.name.trim(),
                     style: Theme.of(context).textTheme.bodySmall,
                     overflow: TextOverflow.ellipsis,

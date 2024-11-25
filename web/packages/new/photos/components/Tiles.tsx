@@ -72,7 +72,7 @@ export const ItemCard: React.FC<React.PropsWithChildren<ItemCardProps>> = ({
             );
         } else {
             void downloadManager
-                .getThumbnailForPreview(coverFile, isScrolling)
+                .renderableThumbnailURL(coverFile, isScrolling)
                 .then((url) => !didCancel && setCoverImageURL(url));
         }
 
