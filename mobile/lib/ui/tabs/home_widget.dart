@@ -263,7 +263,6 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Future<void> _handlePublicAlbumLink(Uri uri) async {
     try {
-      bool result = true;
       final Collection collection =
           await CollectionsService.instance.getPublicCollection(context, uri);
 
@@ -276,7 +275,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         );
         return;
       }
-
+      final dialog = createProgressDialog(context, "Loading...");
       final publicUrl = collection.publicURLs![0];
       if (publicUrl!.passwordEnabled) {
         await showTextInputDialog(
@@ -296,22 +295,39 @@ class _HomeWidgetState extends State<HomeWidget> {
                 publicUrl.opsLimit!,
               );
 
-              result = await CollectionsService.instance
+              final result = await CollectionsService.instance
                   .verifyPublicCollectionPassword(
                 context,
                 CryptoUtil.bin2base64(hashedPassword),
                 collection.id,
               );
+
+              if (result) {
+                await dialog.show();
+
+                final List<EnteFile> sharedFiles =
+                    await _diffFetcher.getPublicFiles(context, collection.id);
+                await dialog.hide();
+
+                await routeToPage(
+                  context,
+                  SharedPublicCollectionPage(
+                    files: sharedFiles,
+                    CollectionWithThumbnail(
+                      collection,
+                      null,
+                    ),
+                  ),
+                );
+              }
             } catch (e, s) {
               _logger.severe("Failed to decrypt password for album", e, s);
               await showGenericErrorDialog(context: context, error: e);
+              return;
             }
           },
         );
-      }
-
-      if (result) {
-        final dialog = createProgressDialog(context, "Loading...");
+      } else {
         await dialog.show();
 
         final List<EnteFile> sharedFiles =
@@ -331,6 +347,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       }
     } catch (e, s) {
       _logger.severe("Failed to handle public album link", e, s);
+      return;
     }
   }
 
