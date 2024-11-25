@@ -295,6 +295,9 @@ extension GalleryAppBarExtn on GalleryType {
         this == GalleryType.hiddenOwnedCollection) {
       return true;
     }
+    if (this == GalleryType.sharedPublicCollection && c!.isEnableCollect()) {
+      return true;
+    }
     if (this == GalleryType.sharedCollection) {
       return c?.getRole(userID) == CollectionParticipantRole.collaborator;
     }

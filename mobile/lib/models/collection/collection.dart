@@ -148,7 +148,7 @@ class Collection {
     if (publicURLs == null || publicURLs!.isEmpty) {
       return false;
     }
-    return publicURLs?.first?.enableDownload ?? false;
+    return publicURLs?.first?.enableCollect ?? false;
   }
 
   CollectionParticipantRole getRole(int userID) {
