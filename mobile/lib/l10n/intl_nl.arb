@@ -1246,6 +1246,10 @@
   "locations": "Locaties",
   "descriptions": "Beschrijvingen",
   "addAName": "Een naam toevoegen",
+  "findThemQuickly": "Vind ze snel",
+  "@findThemQuickly": {
+    "description": "Subtitle to indicate that the user can find people quickly by name"
+  },
   "findPeopleByName": "Mensen snel op naam zoeken",
   "addViewers": "{count, plural, one {Voeg kijker toe} other {Voeg kijkers toe}}",
   "addCollaborators": "{count, plural, zero {Voeg samenwerker toe} one {Voeg samenwerker toe} other {Voeg samenwerkers toe}}",
@@ -1260,6 +1264,13 @@
   "createCollaborativeLink": "Maak een gezamenlijke link",
   "search": "Zoeken",
   "enterPersonName": "Naam van persoon invoeren",
+  "enterName": "Naam invoeren",
+  "savePerson": "Persoon opslaan",
+  "editPerson": "Persoon bewerken",
+  "mergedPhotos": "Samengevoegde foto's",
+  "orMergeWithExistingPerson": "Of samenvoegen met bestaande",
+  "enterDateOfBirth": "Verjaardag (optioneel)",
+  "birthday": "Verjaardag",
   "removePersonLabel": "Verwijder persoonslabel",
   "autoPairDesc": "Automatisch koppelen werkt alleen met apparaten die Chromecast ondersteunen.",
   "manualPairDesc": "Koppelen met de PIN werkt met elk scherm waarop je jouw album wilt zien.",
@@ -1286,6 +1297,7 @@
   "right": "Rechts",
   "whatsNew": "Nieuw",
   "reviewSuggestions": "Suggesties beoordelen",
+  "review": "Beoordelen",
   "useAsCover": "Als cover gebruiken",
   "notPersonLabel": "Niet {name}?",
   "@notPersonLabel": {
@@ -1352,46 +1364,145 @@
   "addName": "Naam toevoegen",
   "add": "Toevoegen",
   "extraPhotosFoundFor": "Extra foto's gevonden voor {text}",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "extraPhotosFound": "Extra foto's gevonden",
   "configuration": "Configuratie",
   "localIndexing": "Lokaal indexeren",
-  "resetPerson": "Reset persoon",
+  "resetPerson": "Verwijderen",
   "areYouSureYouWantToResetThisPerson": "Weet u zeker dat u deze persoon wilt resetten?",
   "allPersonGroupingWillReset": "Alle groepen voor deze persoon worden gereset, en je verliest alle suggesties die voor deze persoon zijn gedaan",
   "yesResetPerson": "Ja, reset persoon",
   "onlyThem": "Alleen hen",
   "checkingModels": "Modellen controleren...",
-  "accountIsAlreadyConfigured": "Account is already configured.",
-  "sessionIdMismatch": "Session ID mismatch",
-  "failedToFetchActiveSessions": "Failed to fetch active sessions",
-  "failedToRefreshStripeSubscription": "Failed to refresh subscription",
-  "failedToPlayVideo": "Failed to play video",
-  "uploadIsIgnoredDueToIgnorereason": "Upload is ignored due to {ignoreReason}",
-  "typeOfGallerGallerytypeIsNotSupportedForRename": "Type of gallery {galleryType} is not supported for rename",
-  "tapToUploadIsIgnoredDue": "Tap to upload, upload is currently ignored due to {ignoreReason}",
-  "tapToUpload": "Tap to upload",
+  "enableMachineLearningBanner": "Schakel machine learning in voor magische zoekopdrachten en gezichtsherkenning",
+  "searchDiscoverEmptySection": "Afbeeldingen worden hier getoond zodra de verwerking voltooid is",
+  "searchPersonsEmptySection": "Mensen worden hier getoond zodra de verwerking voltooid is",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {0 kijkers toegevoegd} =1 {1 kijker toegevoegd} other {{count} kijkers toegevoegd}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 samenwerkers toegevoegd} =1 {1 samenwerker toegevoegd} other {{count} samenwerkers toegevoegd}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  },
+  "accountIsAlreadyConfigured": "Account is al geconfigureerd.",
+  "sessionIdMismatch": "Sessie ID komt niet overeen",
+  "@sessionIdMismatch": {
+    "description": "In passkey page, deeplink is ignored because of session ID mismatch."
+  },
+  "failedToFetchActiveSessions": "Ophalen van actieve sessies mislukt",
+  "@failedToFetchActiveSessions": {
+    "description": "In session page, warn user (in toast) that active sessions could not be fetched."
+  },
+  "failedToRefreshStripeSubscription": "Abonnement vernieuwen mislukt",
+  "failedToPlayVideo": "Afspelen van video mislukt",
+  "uploadIsIgnoredDueToIgnorereason": "Upload wordt genegeerd omdat {ignoreReason}",
+  "@uploadIsIgnoredDueToIgnorereason": {
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "typeOfGallerGallerytypeIsNotSupportedForRename": "Galerijtype {galleryType} wordt niet ondersteund voor hernoemen",
+  "@typeOfGallerGallerytypeIsNotSupportedForRename": {
+    "placeholders": {
+      "galleryType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUploadIsIgnoredDue": "Tik om te uploaden, upload wordt momenteel genegeerd vanwege {ignoreReason}",
+  "@tapToUploadIsIgnoredDue": {
+    "description": "Shown in upload icon widet, inside a tooltip.",
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUpload": "Tik om te uploaden",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
   "info": "Info",
-  "addFiles": "Add Files",
-  "castAlbum": "Cast album",
-  "imageNotAnalyzed": "Image not analyzed",
-  "noFacesFound": "No faces found",
-  "fileNotUploadedYet": "File not uploaded yet",
-  "noSuggestionsForPerson": "No suggestions for {personName}",
-  "month": "month",
-  "yearShort": "yr",
-  "currentlyRunning": "currently running",
-  "ignored": "ignored",
-  "photosCount": "{count} photos",
-  "file": "File",
-  "searchSectionsLengthMismatch": "Sections length mismatch: {snapshotLenght} != {searchLenght}",
-  "selectMailApp": "Select mail app",
-  "selectAllShort": "All",
-  "changeLogMagicSearchImprovementTitle": "Magic Search Improvement",
-  "changeLogMagicSearchImprovementContent": "We have improved magic search to become much faster, so you don\\'t have to wait to find what you\\'re looking for.",
-  "changeLogBackupStatusTitle": "Backup Status",
-  "changeLogBackupStatusContent": "We\\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.",
-  "changeLogDiscoverTitle": "Discover",
-  "changeLogDiscoverContent": "Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\\'s a place to find photos that might be important for you.\\n\\nOnly available if you have enabled Machine Learning.",
-  "selectCoverPhoto": "Select cover photo",
-  "newLocation": "New location"
+  "addFiles": "Bestanden toevoegen",
+  "castAlbum": "Album casten",
+  "imageNotAnalyzed": "Afbeelding niet geanalyseerd",
+  "noFacesFound": "Geen gezichten gevonden",
+  "fileNotUploadedYet": "Bestand nog niet geüpload",
+  "noSuggestionsForPerson": "Geen suggesties voor {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "maand",
+  "yearShort": "jr",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "momenteel bezig",
+  "ignored": "genegeerd",
+  "photosCount": "{count, plural, =0 {0 foto's} =1 {1 foto} other {{count} foto's}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "file": "Bestand",
+  "searchSectionsLengthMismatch": "Lengte van secties komt niet overeen: {snapshotLenght} != {searchLenght}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLenght": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLenght": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "selectMailApp": "Selecteer mail app",
+  "selectAllShort": "Alle",
+  "@selectAllShort": {
+    "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
+  },
+  "changeLogMagicSearchImprovementTitle": "Magisch zoeken verbetering",
+  "changeLogMagicSearchImprovementContent": "We hebben magische zoekopdrachten veel sneller gemaakt zodat je niet hoeft te wachten om te vinden wat je zoekt.",
+  "changeLogBackupStatusTitle": "Back-up status",
+  "changeLogBackupStatusContent": "We hebben een logboek toegevoegd van alle bestanden die zijn geüpload naar Ente, inclusief fouten en wachtrij.",
+  "changeLogDiscoverTitle": "Ontdek",
+  "changeLogDiscoverContent": "Op zoek naar foto's van je identiteitskaarten, notities of zelfs herinneringen? Ga naar het tabblad Zoeken en bekijk ontdekking. Op basis van onze semantische zoekopdracht is het een plek om foto's te vinden die belangrijk voor jou kunnen zijn.\\n\\nAlleen beschikbaar als je Machine Learning hebt ingeschakeld.",
+  "selectCoverPhoto": "Selecteer omslagfoto",
+  "newLocation": "Nieuwe locatie"
 }
