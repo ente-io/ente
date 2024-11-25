@@ -73,7 +73,7 @@ class CollectionsService {
   final _cachedPublicAlbumToken = <int, String>{};
   final _cachedPublicAlbumJWT = <int, String>{};
   final _cachedPublicCollectionID = <int>[];
-  final _cachedPublicAlbumKey = <String, String>{};
+  final _cachedPublicAlbumKey = <int, String>{};
 
   CollectionsService._privateConstructor() {
     _db = CollectionsDB.instance;
@@ -1063,7 +1063,7 @@ class CollectionsService {
       _cachedKeys[collection.id] = collectionKey;
       _cachedPublicAlbumToken[collection.id] = authToken!;
       _cachedPublicCollectionID.add(collection.id);
-      _cachedPublicAlbumKey[authToken] = albumKey;
+      _cachedPublicAlbumKey[collection.id] = albumKey;
       collection.setName(_getDecryptedCollectionName(collection));
       return collection;
     } catch (e, s) {
@@ -1119,9 +1119,9 @@ class CollectionsService {
     }
   }
 
-  Future<String> getPublicAlbumKey(String authToken) async {
-    if (_cachedPublicAlbumKey.containsKey(authToken)) {
-      return _cachedPublicAlbumKey[authToken]!;
+  Future<String> getPublicAlbumKey(int collectionID) async {
+    if (_cachedPublicAlbumKey.containsKey(collectionID)) {
+      return _cachedPublicAlbumKey[collectionID]!;
     }
     return "";
   }
