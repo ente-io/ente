@@ -410,16 +410,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                     start: 3,
                   ),
                 ),
-              // if (files.length > 6)
-              //   Row(
-              //     mainAxisAlignment: MainAxisAlignment.center,
-              //     children: _buildThumbnailWidgetsRow(
-              //       files,
-              //       clusterID,
-              //       faceThumbnails,
-              //       start: 6,
-              //     ),
-              //   ),
             ],
           );
         } else if (snapshot.hasError) {
