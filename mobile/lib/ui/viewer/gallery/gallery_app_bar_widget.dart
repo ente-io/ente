@@ -852,14 +852,24 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         final albumKey =
             await CollectionsService.instance.getPublicAlbumKey(authToken!);
 
-        await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => WebPage(
-              widget.title ?? "",
-              "https://albums.ente.sh/?t=$authToken#$albumKey",
-            ),
-          ),
+        final res = await showChoiceDialog(
+          context,
+          title: 'Please use the web app to add photos to this album',
+          firstButtonLabel: "Open album in browser",
+          secondButtonLabel: "Cancel",
+          firstButtonType: ButtonType.primary,
         );
+
+        if (res != null && res.action == ButtonAction.first) {
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => WebPage(
+                widget.title ?? "",
+                "https://albums.ente.sh/?t=$authToken#$albumKey",
+              ),
+            ),
+          );
+        }
       } else {
         await showAddPhotosSheet(bContext, collection!);
       }
