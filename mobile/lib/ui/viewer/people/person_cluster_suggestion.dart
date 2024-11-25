@@ -170,7 +170,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                           usingMean,
                           files,
                           numberOfDifferentSuggestions,
-                          allSuggestions,
                           generateFacedThumbnails,
                         ),
                       ),
@@ -315,7 +314,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     bool usingMean,
     List<EnteFile> files,
     int numberOfSuggestions,
-    List<ClusterSuggestion> allSuggestions,
     Future<Map<int, Uint8List?>> generateFaceThumbnails,
   ) {
     final widgetToReturn = Column(
@@ -342,34 +340,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
       ],
     );
     // Precompute face thumbnails for next suggestions, in case there are
-    const precomputeSuggestions = 6;
-    const maxPrecomputations = 8;
-    int compCount = 0;
-    if (allSuggestions.length > currentSuggestionIndex + 1) {
-      outerLoop:
-      for (final suggestion in allSuggestions.sublist(
-        currentSuggestionIndex + 1,
-        min(
-          allSuggestions.length,
-          currentSuggestionIndex + precomputeSuggestions,
-        ),
-      )) {
-        final files = suggestion.filesInCluster;
-        final clusterID = suggestion.clusterIDToMerge;
-        final preComputesLeft = maxPrecomputations - compCount;
-        final computeHere = min(files.length, min(preComputesLeft, 6));
-        unawaited(
-          _generateFaceThumbnails(files.sublist(0, computeHere), clusterID),
-        );
-        compCount += computeHere;
-        if (compCount >= maxPrecomputations) {
-          debugPrint(
-            'Prefetching $compCount face thumbnails for suggestions',
-          );
-          break outerLoop;
-        }
-      }
-    }
+    precomputeFaceCrops();
     return widgetToReturn;
   }
 
@@ -495,6 +466,37 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
       faceCrops[files[i].uploadedFileID!] = faceCropsList[i];
     }
     return faceCrops;
+  }
+
+  void precomputeFaceCrops() {
+    const precomputeSuggestions = 6;
+    const maxPrecomputations = 8;
+    int compCount = 0;
+    if (allSuggestions.length > currentSuggestionIndex + 1) {
+      outerLoop:
+      for (final suggestion in allSuggestions.sublist(
+        currentSuggestionIndex + 1,
+        min(
+          allSuggestions.length,
+          currentSuggestionIndex + precomputeSuggestions,
+        ),
+      )) {
+        final files = suggestion.filesInCluster;
+        final clusterID = suggestion.clusterIDToMerge;
+        final preComputesLeft = maxPrecomputations - compCount;
+        final computeHere = min(files.length, min(preComputesLeft, 6));
+        unawaited(
+          _generateFaceThumbnails(files.sublist(0, computeHere), clusterID),
+        );
+        compCount += computeHere;
+        if (compCount >= maxPrecomputations) {
+          debugPrint(
+            'Prefetching $compCount face thumbnails for suggestions',
+          );
+          break outerLoop;
+        }
+      }
+    }
   }
 
   Future<void> _undoLastFeedback() async {
