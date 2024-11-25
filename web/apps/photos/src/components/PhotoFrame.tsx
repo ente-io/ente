@@ -457,19 +457,14 @@ const PhotoFrame = ({
         srcURL: SourceURLs,
         overwrite: boolean,
     ) => {
-        try {
-            if (updateSourceURL(index, item.id, srcURL, overwrite)) {
-                log.info(
-                    `[${item.id}] calling invalidateCurrItems for src, source loaded: ${item.isSourceLoaded}`,
-                );
-                instance.invalidateCurrItems();
-                if ((instance as any).isOpen()) {
-                    instance.updateSize(true);
-                }
+        if (updateSourceURL(index, item.id, srcURL, overwrite)) {
+            log.info(
+                `[${item.id}] calling invalidateCurrItems for src, source loaded: ${item.isSourceLoaded}`,
+            );
+            instance.invalidateCurrItems();
+            if ((instance as any).isOpen()) {
+                instance.updateSize(true);
             }
-        } catch (e) {
-            log.error("updating photoswipe after src url update failed", e);
-            throw e;
         }
     };
 
