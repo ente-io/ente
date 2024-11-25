@@ -118,7 +118,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
             final Future<Map<int, Uint8List?>> generateFacedThumbnails =
                 _generateFaceThumbnails(
-              files.sublist(0, min(files.length, 8)),
+              files.sublist(0, min(files.length, 6)),
               clusterID,
             );
 
