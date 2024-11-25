@@ -43,6 +43,10 @@ class SharedPublicCollectionPage extends StatelessWidget {
         c.thumbnail != null ? [c.thumbnail!] : null;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
+        files!.sort(
+          (a, b) => a.creationTime!.compareTo(b.creationTime!),
+        );
+
         return FileLoadResult(files!, false);
       },
       reloadEvent: Bus.instance
