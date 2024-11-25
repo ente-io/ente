@@ -20,9 +20,11 @@ export const storeCastData = (payload: unknown) => {
     // localStorage. We don't validate here, we'll validate when we read these
     // values back in `readCastData`.
     for (const [key, value] of Object.entries(payload)) {
-        typeof value == "string" || typeof value == "number"
-            ? localStorage.setItem(key, value.toString())
-            : localStorage.removeItem(key);
+        if (typeof value == "string" || typeof value == "number") {
+            localStorage.setItem(key, value.toString());
+        } else {
+            localStorage.removeItem(key);
+        }
     }
 };
 

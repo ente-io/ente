@@ -12,7 +12,6 @@ import { FileType } from "@/media/file-type";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import downloadManager from "@/new/photos/services/download";
 import { extractExifDates } from "@/new/photos/services/exif";
-import { ensure } from "@/utils/ensure";
 import {
     Box,
     Dialog,
@@ -84,10 +83,11 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
                 onClose();
             }}
         >
-            <DialogTitle>{title}</DialogTitle>
+            <DialogTitle sx={{ marginBlockStart: "4px" }}>{title}</DialogTitle>
             <DialogContent
                 style={{
                     minWidth: "310px",
+                    paddingBlockStart: "6px",
                     display: "flex",
                     flexDirection: "column",
                     ...(step == "running" ? { alignItems: "center" } : {}),
@@ -216,7 +216,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
             )}
             <Footer
                 step={step}
-                onSubmit={() => void handleSubmit()}
+                onSubmit={() => handleSubmit()}
                 onClose={onClose}
             />
         </>
@@ -235,7 +235,7 @@ const Footer: React.FC<FooterProps> = ({ step, onSubmit, onClose }) =>
             style={{
                 width: "100%",
                 display: "flex",
-                marginTop: "30px",
+                marginTop: "24px",
                 justifyContent: "space-around",
             }}
         >
@@ -317,15 +317,14 @@ const updateEnteFileDate = async (
 
     if (fixOption == "custom") {
         newDate = {
-            dateTime: ensure(customDate).dateTime,
+            dateTime: customDate!.dateTime,
             // See [Note: Don't modify offsetTime when editing date via picker]
             // for why we don't also set the offset here.
             offset: undefined,
-            timestamp: ensure(customDate).timestamp,
+            timestamp: customDate!.timestamp,
         };
     } else if (enteFile.metadata.fileType == FileType.image) {
-        const stream = await downloadManager.getFile(enteFile);
-        const blob = await new Response(stream).blob();
+        const blob = await downloadManager.fileBlob(enteFile);
         const file = new File([blob], enteFile.metadata.title);
         const { DateTimeOriginal, DateTimeDigitized, MetadataDate, DateTime } =
             await extractExifDates(file);

@@ -49,7 +49,20 @@ export interface SearchOption {
  */
 export interface SearchCollectionsAndFiles {
     collections: Collection[];
+    /**
+     * Unique files (by ID).
+     *
+     * @see {@link uniqueFilesByID}.
+     */
     files: EnteFile[];
+    /**
+     * One entry per collection/file pair.
+     *
+     * Whenever the same file (ID) is in multiple collections, the
+     * {@link collectionFiles} will have multiple entries with the same file ID,
+     * one per collection in which that file (ID) occurs.
+     */
+    collectionFiles: EnteFile[];
 }
 
 export interface LabelledSearchDateComponents {

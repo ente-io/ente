@@ -119,10 +119,14 @@ const App: React.FC = () => {
         const startTime = Date.now();
         try {
             const encodedEmail = encodeURIComponent(email);
-            const encodedToken = encodeURIComponent(token);
-            const url = `${apiOrigin}/admin/user?email=${encodedEmail}&token=${encodedToken}`;
-            console.log(`Fetching data from URL: ${url}`);
-            const response = await fetch(url);
+
+            const url = `${apiOrigin}/admin/user?email=${encodedEmail}`;
+            const response = await fetch(url, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-AUTH-TOKEN": token,
+                },
+            });
             if (!response.ok) {
                 throw new Error("Network response was not ok");
             }

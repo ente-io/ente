@@ -1,6 +1,6 @@
 ## @/base
 
-A base UI layer package for sharing code between our production apps.
+A base (+ UI layer) package for sharing code between our production apps.
 
 This is a higher layer package than `@/utils` (which is framework agnostic).
 This package is meant for sharing code between our Next.js apps that use React

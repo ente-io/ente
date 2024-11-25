@@ -289,11 +289,11 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         context: context,
         title: S.of(context).pleaseLoginAgain,
         body: S.of(context).autoLogoutMessage,
-        buttons: const [
+        buttons: [
           ButtonWidget(
             buttonType: ButtonType.neutral,
             buttonAction: ButtonAction.first,
-            labelText: "OK",
+            labelText: S.of(context).ok,
             isInAlert: true,
           ),
         ],

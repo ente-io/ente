@@ -1,5 +1,6 @@
 import { assertionFailed } from "@/base/assert";
-import { useIsSmallWidth } from "@/base/hooks";
+import type { ButtonishProps } from "@/base/components/mui";
+import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { ItemCard, PreviewItemTile } from "@/new/photos/components/Tiles";
 import { isMLSupported, mlStatusSnapshot } from "@/new/photos/services/ml";
 import { searchOptionsForString } from "@/new/photos/services/search";
@@ -35,7 +36,6 @@ import {
 import AsyncSelect from "react-select/async";
 import { SearchPeopleList } from "./PeopleList";
 import { UnstyledButton } from "./UnstyledButton";
-import type { ButtonishProps } from "./mui";
 import {
     useMLStatusSnapshot,
     usePeopleStateSnapshot,

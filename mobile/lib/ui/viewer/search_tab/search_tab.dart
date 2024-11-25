@@ -3,6 +3,7 @@ import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:logging/logging.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
@@ -104,7 +105,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 72),
                     child: Text(
-                      'Sections length mismatch: ${snapshot.data!.length} != ${searchTypes.length}',
+                      S.of(context).searchSectionsLengthMismatch(snapshot.data!.length, searchTypes.length),
                     ),
                   );
                 }
@@ -188,7 +189,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                 if (kDebugMode) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 72),
-                    child: Text('Error: ${snapshot.error}'),
+                    child: Text(S.of(context).error + ': ${snapshot.error}'),
                   );
                 }
                 //Errors are handled and this else if condition will be false always

@@ -86,7 +86,7 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
         props.onClose();
     };
     const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason === "backdropClick") {
+        if (reason == "backdropClick") {
             handleRootClose();
         } else {
             props.onClose();
@@ -539,7 +539,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
     };
 
     const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason === "backdropClick") {
+        if (reason == "backdropClick") {
             handleRootClose();
         } else {
             onClose();
@@ -853,7 +853,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
         onRootClose();
     };
     const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason === "backdropClick") {
+        if (reason == "backdropClick") {
             handleRootClose();
         } else {
             onClose();
@@ -1037,7 +1037,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
     const galleryContext = useContext(GalleryContext);
 
     const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason === "backdropClick") {
+        if (reason == "backdropClick") {
             onRootClose();
         } else {
             onClose();
@@ -1105,7 +1105,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                 <Trans
                     i18nKey="REMOVE_PARTICIPANT_MESSAGE"
                     values={{
-                        selectedEmail: `${selectedParticipant.email}`,
+                        selectedEmail: selectedParticipant.email,
                     }}
                 />
             ),
@@ -1356,7 +1356,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     publicShareUrl,
 }) => {
     const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason === "backdropClick") {
+        if (reason == "backdropClick") {
             onRootClose();
         } else {
             onClose();
@@ -1552,7 +1552,7 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
     };
 
     const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason === "backdropClick") {
+        if (reason == "backdropClick") {
             onRootClose();
         } else {
             closeShareExpiryOptionsModalView();
@@ -1684,7 +1684,7 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
     };
 
     const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason === "backdropClick") {
+        if (reason == "backdropClick") {
             onRootClose();
         } else {
             closeDeviceLimitChangeModal();
@@ -1897,7 +1897,7 @@ function PublicLinkSetPassword({
             fullWidth
         >
             <Stack spacing={3} p={1.5}>
-                <Typography variant="h3" px={1} py={0.5} fontWeight={"bold"}>
+                <Typography variant="h3" fontWeight={"bold"} px={1} py={0.5}>
                     {t("password_lock")}
                 </Typography>
                 <SingleInputForm

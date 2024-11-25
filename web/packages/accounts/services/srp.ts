@@ -1,18 +1,19 @@
-import type { UserVerificationResponse } from "@/accounts/types/user";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { generateLoginSubKey } from "@ente/shared/crypto/helpers";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import type { KeyAttributes } from "@ente/shared/user/types";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
-import type { SRPAttributes, SRPSetupAttributes } from "../api/srp";
 import {
     completeSRPSetup,
     createSRPSession,
     startSRPSetup,
     verifySRPSession,
-} from "../api/srp";
-import { convertBase64ToBuffer, convertBufferToBase64 } from "../utils";
+    type SRPAttributes,
+    type SRPSetupAttributes,
+} from "./srp-remote";
+import type { UserVerificationResponse } from "./user";
 
 const SRP_PARAMS = SRP.params["4096"];
 
@@ -154,8 +155,75 @@ export const generateSRPClient = async (
 
                 resolve(srpClient);
             } catch (e) {
+                // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
                 reject(e);
             }
         });
     });
 };
+
+export const convertBufferToBase64 = (buffer: Buffer) => {
+    return buffer.toString("base64");
+};
+
+export const convertBase64ToBuffer = (base64: string) => {
+    return Buffer.from(base64, "base64");
+};
+
+export async function generateKeyAndSRPAttributes(passphrase: string): Promise<{
+    keyAttributes: KeyAttributes;
+    masterKey: string;
+    srpSetupAttributes: SRPSetupAttributes;
+}> {
+    const cryptoWorker = await sharedCryptoWorker();
+    const masterKey = await cryptoWorker.generateEncryptionKey();
+    const recoveryKey = await cryptoWorker.generateEncryptionKey();
+    const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
+    const kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
+
+    const masterKeyEncryptedWithKek = await cryptoWorker.encryptToB64(
+        masterKey,
+        kek.key,
+    );
+    const masterKeyEncryptedWithRecoveryKey = await cryptoWorker.encryptToB64(
+        masterKey,
+        recoveryKey,
+    );
+    const recoveryKeyEncryptedWithMasterKey = await cryptoWorker.encryptToB64(
+        recoveryKey,
+        masterKey,
+    );
+
+    const keyPair = await cryptoWorker.generateKeyPair();
+    const encryptedKeyPairAttributes = await cryptoWorker.encryptToB64(
+        keyPair.privateKey,
+        masterKey,
+    );
+
+    const loginSubKey = await generateLoginSubKey(kek.key);
+
+    const srpSetupAttributes = await generateSRPSetupAttributes(loginSubKey);
+
+    const keyAttributes: KeyAttributes = {
+        kekSalt,
+        encryptedKey: masterKeyEncryptedWithKek.encryptedData,
+        keyDecryptionNonce: masterKeyEncryptedWithKek.nonce,
+        publicKey: keyPair.publicKey,
+        encryptedSecretKey: encryptedKeyPairAttributes.encryptedData,
+        secretKeyDecryptionNonce: encryptedKeyPairAttributes.nonce,
+        opsLimit: kek.opsLimit,
+        memLimit: kek.memLimit,
+        masterKeyEncryptedWithRecoveryKey:
+            masterKeyEncryptedWithRecoveryKey.encryptedData,
+        masterKeyDecryptionNonce: masterKeyEncryptedWithRecoveryKey.nonce,
+        recoveryKeyEncryptedWithMasterKey:
+            recoveryKeyEncryptedWithMasterKey.encryptedData,
+        recoveryKeyDecryptionNonce: recoveryKeyEncryptedWithMasterKey.nonce,
+    };
+
+    return {
+        keyAttributes,
+        masterKey,
+        srpSetupAttributes,
+    };
+}

@@ -75,6 +75,7 @@ export interface EnteFile
      */
     pubMagicMetadata?: FilePublicMagicMetadata;
     isTrashed?: boolean;
+    deleteBy?: number;
     /**
      * The base64 encoded encryption key associated with this file.
      *
@@ -82,44 +83,6 @@ export interface EnteFile
      * data (e.g., metadatum, thumbnail) for the file.
      */
     key: string;
-    src?: string;
-    srcURLs?: SourceURLs;
-    msrc?: string;
-    html?: string;
-    w?: number;
-    h?: number;
-    title?: string;
-    deleteBy?: number;
-    isSourceLoaded?: boolean;
-    conversionFailed?: boolean;
-    isConverted?: boolean;
-}
-
-export interface LivePhotoSourceURL {
-    image: () => Promise<string | undefined>;
-    video: () => Promise<string | undefined>;
-}
-
-export interface LoadedLivePhotoSourceURL {
-    image: string;
-    video: string;
-}
-
-export interface SourceURLs {
-    url: string | LivePhotoSourceURL | LoadedLivePhotoSourceURL;
-    isOriginal: boolean;
-    isRenderable: boolean;
-    type: "normal" | "livePhoto";
-    /**
-     * Best effort attempt at obtaining the MIME type.
-     *
-     * Known cases where it is missing:
-     *
-     * - Live photos (these have a different code path for obtaining the URL).
-     * - A video that is passes the isPlayable test in the browser.
-     *
-     */
-    mimeType?: string;
 }
 
 export interface TrashRequest {
@@ -163,6 +126,10 @@ export interface FilePublicMagicMetadataProps {
      * Epoch microseconds.
      */
     editedTime?: number;
+    /** See {@link PublicMagicMetadata} in file-metadata.ts */
+    dateTime?: string;
+    /** See {@link PublicMagicMetadata} in file-metadata.ts */
+    offsetTime?: string;
     /**
      * Edited name of the {@link EnteFile}.
      *

@@ -59,7 +59,6 @@
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Προετοιμασία για μεταφόρτωση",
         "1": "Ανάγνωση αρχείων μεταδεδομένων google",
-        "2": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} μεταδεδομένα των αρχείων εξήχθησαν",
         "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} αρχεία επεξεργάζονται",
         "4": "Ακύρωση των υπολειπόμενων μεταφορτώσεων",
         "5": "Το αντίγραφο ασφαλείας ολοκληρώθηκε"
@@ -307,7 +306,6 @@
     "SKIPPED_INFO": "",
     "UNSUPPORTED_INFO": "",
     "BLOCKED_UPLOADS": "Αποκλεισμένες μεταφορτώσεις",
-    "INPROGRESS_METADATA_EXTRACTION": "Σε εξέλιξη",
     "INPROGRESS_UPLOADS": "Μεταφορτώσεις σε εξέλιξη",
     "TOO_LARGE_UPLOADS": "Μεγάλα αρχεία",
     "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS": "Ανεπαρκής χώρος αποθήκευσης",
@@ -555,8 +553,9 @@
     "feedback_required_found_another_service": "",
     "RECOVER_TWO_FACTOR": "",
     "at": "",
-    "AUTH_NEXT": "",
-    "AUTH_DOWNLOAD_MOBILE_APP": "",
+    "auth_next": "",
+    "auth_download_mobile_app": "",
+    "no_codes_added_yet": "",
     "HIDE": "",
     "UNHIDE": "",
     "sort_by": "",

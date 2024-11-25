@@ -1,3 +1,4 @@
+import { type ButtonishProps } from "@/base/components/mui";
 import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import type { Collection } from "@/media/collection";
@@ -14,7 +15,6 @@ import {
     type CollectionSummaries,
     type CollectionSummary,
 } from "@/new/photos/services/collection/ui";
-import { ensure } from "@/utils/ensure";
 import {
     Dialog,
     DialogContent,
@@ -25,7 +25,6 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import { type ButtonishProps } from "./mui";
 import { DialogCloseIconButton } from "./mui/Dialog";
 
 export type CollectionSelectorAction =
@@ -126,8 +125,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             })
             .sort((a, b) => {
                 return (
-                    ensure(CollectionSummaryOrder.get(a.type)) -
-                    ensure(CollectionSummaryOrder.get(b.type))
+                    CollectionSummaryOrder.get(a.type)! -
+                    CollectionSummaryOrder.get(b.type)!
                 );
             });
 

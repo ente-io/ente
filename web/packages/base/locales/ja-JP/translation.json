@@ -59,7 +59,6 @@
     "UPLOAD_STAGE_MESSAGE": {
         "0": "アップロードの準備中",
         "1": "Googleメタデータファイルを読み込み中",
-        "2": "",
         "3": "",
         "4": "",
         "5": ""
@@ -307,7 +306,6 @@
     "SKIPPED_INFO": "",
     "UNSUPPORTED_INFO": "",
     "BLOCKED_UPLOADS": "",
-    "INPROGRESS_METADATA_EXTRACTION": "",
     "INPROGRESS_UPLOADS": "",
     "TOO_LARGE_UPLOADS": "",
     "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS": "",
@@ -555,8 +553,9 @@
     "feedback_required_found_another_service": "",
     "RECOVER_TWO_FACTOR": "",
     "at": "",
-    "AUTH_NEXT": "",
-    "AUTH_DOWNLOAD_MOBILE_APP": "",
+    "auth_next": "",
+    "auth_download_mobile_app": "",
+    "no_codes_added_yet": "",
     "HIDE": "",
     "UNHIDE": "",
     "sort_by": "",

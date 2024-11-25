@@ -59,7 +59,6 @@
     "UPLOAD_STAGE_MESSAGE": {
         "0": "正在准备上传",
         "1": "正在读取 Google 元数据文件",
-        "2": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} 个文件的元数据已提取",
         "3": "已处理 {{uploadCounter.finished, number}} / {{uploadCounter.total, number}} 个文件",
         "4": "正在取消剩余的上传内容",
         "5": "备份完成"
@@ -307,7 +306,6 @@
     "SKIPPED_INFO": "跳过这些文件，因为同一相册中有名称和内容相匹配的文件",
     "UNSUPPORTED_INFO": "Ente 尚不支持这些文件格式",
     "BLOCKED_UPLOADS": "已阻止上传",
-    "INPROGRESS_METADATA_EXTRACTION": "进行中",
     "INPROGRESS_UPLOADS": "上传进行中",
     "TOO_LARGE_UPLOADS": "大文件",
     "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS": "存储空间不足",
@@ -555,8 +553,9 @@
     "feedback_required_found_another_service": "其他服务做得更好？",
     "RECOVER_TWO_FACTOR": "恢复双重认证",
     "at": "在",
-    "AUTH_NEXT": "下一个",
-    "AUTH_DOWNLOAD_MOBILE_APP": "下载我们的移动应用程序来管理您的密钥",
+    "auth_next": "下一个",
+    "auth_download_mobile_app": "下载我们的移动应用程序来管理您的密钥",
+    "no_codes_added_yet": "",
     "HIDE": "隐藏",
     "UNHIDE": "取消隐藏",
     "sort_by": "排序方式",

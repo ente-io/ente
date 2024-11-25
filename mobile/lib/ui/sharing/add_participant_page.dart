@@ -239,7 +239,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                           results.where((e) => e).length;
                       showToast(
                         context,
-                        "Added $noOfSuccessfullAdds ${widget.isAddingViewer ? "viewers" : "collaborators"}",
+                        widget.isAddingViewer ? S.of(context).viewersSuccessfullyAdded(noOfSuccessfullAdds) : S.of(context).collaboratorsSuccessfullyAdded(noOfSuccessfullAdds),
                       );
 
                       if (!results.any((e) => e == false) && mounted) {
@@ -320,7 +320,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
         ButtonWidget(
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.small,
-          labelText: "Add",
+          labelText: S.of(context).add,
           isDisabled: !_emailIsValid,
           onTap: () async {
             if (_emailIsValid) {

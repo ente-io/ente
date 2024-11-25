@@ -10,7 +10,6 @@ import {
     isHiddenCollection,
 } from "@/new/photos/services/collection";
 import { splitByPredicate } from "@/utils/array";
-import { ensure } from "@/utils/ensure";
 import type { User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import React, { useReducer } from "react";
@@ -33,7 +32,7 @@ import {
     getLatestVersionFiles,
     groupFilesByCollectionID,
 } from "../../services/file";
-import { sortFiles } from "../../services/files";
+import { sortFiles, uniqueFilesByID } from "../../services/files";
 import {
     isArchivedCollection,
     isArchivedFile,
@@ -436,7 +435,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     action.collections.concat(state.hiddenCollections),
                 ),
                 collectionSummaries: deriveCollectionSummaries(
-                    ensure(state.user),
+                    state.user!,
                     action.collections,
                     state.files,
                     state.trashedFiles,
@@ -464,14 +463,14 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     action.collections.concat(action.hiddenCollections),
                 ),
                 collectionSummaries: deriveCollectionSummaries(
-                    ensure(state.user),
+                    state.user!,
                     action.collections,
                     state.files,
                     state.trashedFiles,
                     archivedCollectionIDs,
                 ),
                 hiddenCollectionSummaries: deriveHiddenCollectionSummaries(
-                    ensure(state.user),
+                    state.user!,
                     action.hiddenCollections,
                     state.hiddenFiles,
                 ),
@@ -488,7 +487,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ),
                 fileCollectionIDs: createFileCollectionIDs(action.files),
                 collectionSummaries: deriveCollectionSummaries(
-                    ensure(state.user),
+                    state.user!,
                     state.collections,
                     files,
                     state.trashedFiles,
@@ -511,7 +510,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ),
                 fileCollectionIDs: createFileCollectionIDs(action.files),
                 collectionSummaries: deriveCollectionSummaries(
-                    ensure(state.user),
+                    state.user!,
                     state.collections,
                     files,
                     state.trashedFiles,
@@ -532,7 +531,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 // TODO: Consider batching this instead of doing it per file
                 // upload to speed up uploads. Perf test first though.
                 collectionSummaries: deriveCollectionSummaries(
-                    ensure(state.user),
+                    state.user!,
                     state.collections,
                     files,
                     state.trashedFiles,
@@ -547,7 +546,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 hiddenFiles,
                 hiddenFileIDs: deriveHiddenFileIDs(hiddenFiles),
                 hiddenCollectionSummaries: deriveHiddenCollectionSummaries(
-                    ensure(state.user),
+                    state.user!,
                     state.hiddenCollections,
                     hiddenFiles,
                 ),
@@ -567,7 +566,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 hiddenFiles,
                 hiddenFileIDs: deriveHiddenFileIDs(hiddenFiles),
                 hiddenCollectionSummaries: deriveHiddenCollectionSummaries(
-                    ensure(state.user),
+                    state.user!,
                     state.hiddenCollections,
                     hiddenFiles,
                 ),
@@ -578,7 +577,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ...state,
                 trashedFiles: action.trashedFiles,
                 collectionSummaries: deriveCollectionSummaries(
-                    ensure(state.user),
+                    state.user!,
                     state.collections,
                     state.files,
                     action.trashedFiles,
@@ -762,29 +761,6 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
 
 export const useGalleryReducer = () =>
     useReducer(galleryReducer, initialGalleryState);
-
-/**
- * File IDs themselves are unique across all the files for the user (in fact,
- * they're unique across all the files in an Ente instance). However, we still
- * can have multiple entries for the same file ID in our local database because
- * the unit of account is not actually a file, but a "Collection File": a
- * collection and file pair.
- *
- * For example, if the same file is symlinked into two collections, then we will
- * have two "Collection File" entries for it, both with the same file ID, but
- * with different collection IDs.
- *
- * This function returns files such that only one of these entries (the newer
- * one in case of dupes) is returned.
- */
-export const uniqueFilesByID = (files: EnteFile[]) => {
-    const seen = new Set<number>();
-    return files.filter(({ id }) => {
-        if (seen.has(id)) return false;
-        seen.add(id);
-        return true;
-    });
-};
 
 /**
  * Compute archived collection IDs from their dependencies.
@@ -1213,19 +1189,24 @@ const deriveAlbumsFilteredFiles = (
         if (hiddenFileIDs.has(file.id)) return false;
         if (tempHiddenFileIDs.has(file.id)) return false;
 
-        // Files in archived collections can only be seen in their respective
-        // collection.
-        if (archivedCollectionIDs.has(file.collectionID)) {
-            return activeCollectionSummaryID === file.collectionID;
-        }
-
         // Archived files can only be seen in the archive section, or in their
         // respective collection.
+        //
+        // Note that a file may both be archived, AND be part of an archived
+        // collection. Such files should be shown in both the archive section
+        // and in their respective collection. Thus this (archived file) case
+        // needs to be before the following (archived collection) case.
         if (isArchivedFile(file)) {
             return (
                 activeCollectionSummaryID === ARCHIVE_SECTION ||
                 activeCollectionSummaryID === file.collectionID
             );
+        }
+
+        // Files in archived collections can only be seen in their respective
+        // collection.
+        if (archivedCollectionIDs.has(file.collectionID)) {
+            return activeCollectionSummaryID === file.collectionID;
         }
 
         // Show all remaining (non-hidden, non-archived) files in "All".

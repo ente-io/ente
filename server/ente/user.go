@@ -8,6 +8,7 @@ const (
 	EmailChangedSubject    = "Email address updated"
 
 	ChangeEmailOTTPurpose = "change"
+	SignUpOTTPurpose      = "signup"
 )
 
 // User represents a user in the system
@@ -114,6 +115,7 @@ type DeleteChallengeResponse struct {
 	// AllowDelete indicates whether the user is allowed to delete their account via app
 	AllowDelete        bool    `json:"allowDelete"`
 	EncryptedChallenge *string `json:"encryptedChallenge,omitempty"`
+	Apps               []App   `json:"apps"`
 }
 
 type DeleteAccountRequest struct {
@@ -194,9 +196,10 @@ type TwoFactorRemovalRequest struct {
 
 type ProfileData struct {
 	// CanDisableEmailMFA is used to decide if client should show disable email MFA option
-	CanDisableEmailMFA bool `json:"canDisableEmailMFA"`
-	IsEmailMFAEnabled  bool `json:"isEmailMFAEnabled"`
-	IsTwoFactorEnabled bool `json:"isTwoFactorEnabled"`
+	CanDisableEmailMFA bool  `json:"canDisableEmailMFA"`
+	IsEmailMFAEnabled  bool  `json:"isEmailMFAEnabled"`
+	IsTwoFactorEnabled bool  `json:"isTwoFactorEnabled"`
+	PasskeyCount       int64 `json:"passkeyCount"`
 }
 
 type Session struct {

@@ -31,6 +31,12 @@ export const appName: AppName = process.env.appName as AppName;
  * This is similar to checking for `globalThis.electron`, however the advantage
  * of this check is that it will also work inside web workers (whose globalThis
  * won't have an electron object defined).
+ *
+ * This check can still have false positives during dev mode if someone connects
+ * their browser to port where the desktop app's web app is being served from in
+ * dev mode. If in the future some code needs to definitely rule out those false
+ * positives, it'd need a runtime check of the form
+ * `navigator.userAgent.includes("Electron")`.
  */
 export const isDesktop = process.env.isDesktop == "1";
 

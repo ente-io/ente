@@ -334,6 +334,31 @@ class ClusterFeedbackService {
     return true;
   }
 
+  Future<void> addClusterToExistingPerson({
+    required PersonEntity person,
+    required String clusterID,
+  }) async {
+    if (person.data.rejectedFaceIDs != null &&
+        person.data.rejectedFaceIDs!.isNotEmpty) {
+      final clusterFaceIDs =
+          await MLDataDB.instance.getFaceIDsForCluster(clusterID);
+      final rejectedLengthBefore = person.data.rejectedFaceIDs!.length;
+      person.data.rejectedFaceIDs!
+          .removeWhere((faceID) => clusterFaceIDs.contains(faceID));
+      final rejectedLengthAfter = person.data.rejectedFaceIDs!.length;
+      if (rejectedLengthBefore != rejectedLengthAfter) {
+        _logger.info(
+          'Removed ${rejectedLengthBefore - rejectedLengthAfter} rejected faces from person ${person.data.name} due to adding cluster $clusterID',
+        );
+        await PersonService.instance.updatePerson(person);
+      }
+    }
+    await MLDataDB.instance.assignClusterToPerson(
+      personID: person.remoteID,
+      clusterID: clusterID,
+    );
+  }
+
   Future<void> ignoreCluster(String clusterID) async {
     await PersonService.instance.addPerson('', clusterID, isHidden: true);
     Bus.instance.fire(PeopleChangedEvent());

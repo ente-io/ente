@@ -94,6 +94,7 @@ export const getAuthKey = async (): Promise<AuthKey> => {
     } catch (e) {
         if (
             e instanceof ApiError &&
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
             e.httpStatusCode == HttpStatusCode.NotFound
         ) {
             throw Error(CustomError.AUTH_KEY_NOT_FOUND);

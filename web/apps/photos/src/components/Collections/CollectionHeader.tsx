@@ -535,7 +535,7 @@ const DownloadOption: React.FC<
 > = ({ isDownloadInProgress, onClick, children }) => (
     <OverflowMenuOption
         startIcon={
-            isDownloadInProgress && isDownloadInProgress() ? (
+            isDownloadInProgress?.() ? (
                 <ActivityIndicator size="20px" sx={{ cursor: "not-allowed" }} />
             ) : (
                 <FileDownloadOutlinedIcon />

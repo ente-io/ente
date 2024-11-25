@@ -2,6 +2,8 @@ import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
+import { detectFileTypeInfo } from "@/gallery/utils/detect-type";
+import { writeStream } from "@/gallery/utils/native-stream";
 import {
     EncryptedEnteFile,
     EnteFile,
@@ -20,9 +22,7 @@ import {
     isArchivedFile,
     updateMagicMetadata,
 } from "@/new/photos/services/magic-metadata";
-import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { safeFileName } from "@/new/photos/utils/native-fs";
-import { writeStream } from "@/new/photos/utils/native-stream";
 import { withTimeout } from "@/utils/promise";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
@@ -56,9 +56,7 @@ export enum FILE_OPS_TYPE {
 
 export async function downloadFile(file: EnteFile) {
     try {
-        let fileBlob = await new Response(
-            await DownloadManager.getFile(file),
-        ).blob();
+        let fileBlob = await DownloadManager.fileBlob(file);
         if (file.metadata.fileType === FileType.livePhoto) {
             const { imageFileName, imageData, videoFileName, videoData } =
                 await decodeLivePhoto(file.metadata.title, fileBlob);
@@ -392,7 +390,7 @@ async function downloadFileDesktop(
 ) {
     const fs = electron.fs;
 
-    const stream = await DownloadManager.getFile(file);
+    const stream = await DownloadManager.fileStream(file);
 
     if (file.metadata.fileType === FileType.livePhoto) {
         const fileBlob = await new Response(stream).blob();

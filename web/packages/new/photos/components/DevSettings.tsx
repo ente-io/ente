@@ -1,5 +1,5 @@
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { useIsSmallWidth } from "@/base/hooks";
+import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { ensureOk } from "@/base/http";
 import { getKVS, removeKV, setKV } from "@/base/kv";
 import log from "@/base/log";
@@ -93,6 +93,8 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
         },
         validate: ({ apiOrigin }) => {
             try {
+                // The expression is not unused, it is used to validate the URL.
+                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
                 apiOrigin && new URL(apiOrigin);
             } catch {
                 return { apiOrigin: "Invalid endpoint" };

@@ -627,6 +627,7 @@ func main() {
 		QueueRepo:               queueRepo,
 		UserRepo:                userRepo,
 		CollectionRepo:          collectionRepo,
+		AuthenticatorRepo:       authRepo,
 		UserAuthRepo:            userAuthRepo,
 		UserController:          userController,
 		FamilyController:        familyController,

@@ -32,10 +32,8 @@ const Page: React.FC<PageProps> = () => {
         const response = searchParams.get("response");
         if (!passkeySessionID || !response) return;
 
-        saveCredentialsAndNavigateTo(passkeySessionID, response).then(
-            (slug: string) => {
-                router.push(slug);
-            },
+        void saveCredentialsAndNavigateTo(passkeySessionID, response).then(
+            (slug: string) => router.push(slug),
         );
     }, []);
 

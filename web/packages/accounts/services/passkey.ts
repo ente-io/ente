@@ -5,9 +5,7 @@ import { clientPackageHeader, HTTPError } from "@/base/http";
 import log from "@/base/log";
 import { accountsAppOrigin, apiURL } from "@/base/origins";
 import { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
-import { ensure } from "@/utils/ensure";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
-import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
     getData,
@@ -141,10 +139,10 @@ export const isPasskeyRecoveryEnabled = async () => {
         );
 
         if (typeof resp.data === "undefined") {
-            throw Error(CustomError.REQUEST_FAILED);
+            throw Error("request failed");
         }
 
-        return resp.data["isPasskeyRecoveryEnabled"] as boolean;
+        return resp.data.isPasskeyRecoveryEnabled as boolean;
     } catch (e) {
         log.error("failed to get passkey recovery status", e);
         throw e;
@@ -173,7 +171,7 @@ const configurePasskeyRecovery = async (
         );
 
         if (typeof resp.data === "undefined") {
-            throw Error(CustomError.REQUEST_FAILED);
+            throw Error("request failed");
         }
     } catch (e) {
         log.error("failed to configure passkey recovery", e);
@@ -196,7 +194,7 @@ const getAccountsToken = async () => {
             "X-Auth-Token": token,
         },
     );
-    return resp.data["accountsToken"];
+    return resp.data.accountsToken;
 };
 
 /**
@@ -264,7 +262,7 @@ export const saveCredentialsAndNavigateTo = async (
         encryptedToken,
         id,
     });
-    setData(LS_KEYS.KEY_ATTRIBUTES, ensure(keyAttributes));
+    setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes!);
 
     return unstashRedirect() ?? "/credentials";
 };

@@ -59,7 +59,6 @@
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Preparazione all'upload",
         "1": "Lettura dei file metadati di google",
-        "2": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} file metadati estratti",
         "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} file salvati",
         "4": "Annullamento dei caricamenti rimanenti",
         "5": "Backup completato"
@@ -307,7 +306,6 @@
     "SKIPPED_INFO": "Questi file sono stati ignorati perché ci sono già dei file con lo stesso nome nello stesso album",
     "UNSUPPORTED_INFO": "Ente non supporta ancora questi formati di file",
     "BLOCKED_UPLOADS": "Upload bloccati",
-    "INPROGRESS_METADATA_EXTRACTION": "In corso",
     "INPROGRESS_UPLOADS": "Caricamenti in corso",
     "TOO_LARGE_UPLOADS": "File pesanti",
     "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS": "Spazio insufficiente",
@@ -555,8 +553,9 @@
     "feedback_required_found_another_service": "Cosa fa meglio l'altro servizio?",
     "RECOVER_TWO_FACTOR": "Recupera due fattori",
     "at": "a",
-    "AUTH_NEXT": "successivo",
-    "AUTH_DOWNLOAD_MOBILE_APP": "Scarica la nostra app mobile per gestire i tuoi segreti",
+    "auth_next": "successivo",
+    "auth_download_mobile_app": "Scarica la nostra app mobile per gestire i tuoi segreti",
+    "no_codes_added_yet": "",
     "HIDE": "Nascondi",
     "UNHIDE": "Mostra",
     "sort_by": "Ordina per",

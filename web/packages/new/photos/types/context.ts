@@ -1,5 +1,4 @@
 import type { AccountsContextT } from "@/accounts/types/context";
-import { ensure } from "@/utils/ensure";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { createContext, useContext } from "react";
 import type { SetNotificationAttributes } from "./notification";
@@ -36,10 +35,9 @@ export type AppContextT = AccountsContextT & {
 export const AppContext = createContext<AppContextT | undefined>(undefined);
 
 /**
- * Utility hook to get the photos {@link AppContextT}, throwing an exception if
- * it is not defined.
+ * Utility hook to get the photos {@link AppContextT}.
  *
  * This context is provided at the top level _app component for the photos app,
  * and thus is available to all React components in the Photos app's React tree.
  */
-export const useAppContext = (): AppContextT => ensure(useContext(AppContext));
+export const useAppContext = (): AppContextT => useContext(AppContext)!;

@@ -59,7 +59,6 @@
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Подготовка к загрузке",
         "1": "Чтение файлов метаданных Google",
-        "2": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} файлов извлечены",
         "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} файлов обработано",
         "4": "Отмена оставшихся загрузок",
         "5": "Резервное копирование завершено"
@@ -307,7 +306,6 @@
     "SKIPPED_INFO": "Пропущено, так как в альбоме есть файлы с совпадающими именем и содержимым",
     "UNSUPPORTED_INFO": "Ente пока не поддерживает эти форматы файлов",
     "BLOCKED_UPLOADS": "Заблокированные загрузки",
-    "INPROGRESS_METADATA_EXTRACTION": "В процессе",
     "INPROGRESS_UPLOADS": "Выполняется загрузка данных",
     "TOO_LARGE_UPLOADS": "Большие файлы",
     "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS": "Недостаточный объем памяти",
@@ -555,8 +553,9 @@
     "feedback_required_found_another_service": "Что другой сервис делает лучше?",
     "RECOVER_TWO_FACTOR": "Восстановление двухфакторного",
     "at": "около",
-    "AUTH_NEXT": "следующий",
-    "AUTH_DOWNLOAD_MOBILE_APP": "Скачайте наше мобильное приложение, чтобы управлять своими секретами",
+    "auth_next": "следующий",
+    "auth_download_mobile_app": "Скачайте наше мобильное приложение, чтобы управлять своими секретами",
+    "no_codes_added_yet": "",
     "HIDE": "Скрыть",
     "UNHIDE": "Показать",
     "sort_by": "Сортировать по",

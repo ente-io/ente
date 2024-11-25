@@ -1,11 +1,11 @@
-import { sessionExpiredDialogAttributes } from "@/accounts/components/LoginComponents";
+import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { stashRedirect } from "@/accounts/services/redirect";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { NavbarBase } from "@/base/components/Navbar";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
+import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
-import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
 import { type Collection } from "@/media/collection";
 import { mergeMetadata, type EnteFile } from "@/media/file";
@@ -24,7 +24,6 @@ import {
     SearchResultsHeader,
 } from "@/new/photos/components/gallery";
 import {
-    uniqueFilesByID,
     useGalleryReducer,
     type GalleryBarMode,
 } from "@/new/photos/components/gallery/reducer";
@@ -36,7 +35,6 @@ import {
     isHiddenCollection,
 } from "@/new/photos/services/collection";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
-import downloadManager from "@/new/photos/services/download";
 import {
     getLocalFiles,
     getLocalTrashedFiles,
@@ -56,7 +54,6 @@ import {
 } from "@/new/photos/services/user-details";
 import { useAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
-import { ensure } from "@/utils/ensure";
 import {
     CenteredFlex,
     FlexWrapper,
@@ -90,7 +87,7 @@ import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
-import ExportModal from "components/ExportModal";
+import { Export } from "components/Export";
 import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
@@ -249,8 +246,6 @@ export default function Gallery() {
     const closeSidebar = () => setSidebarView(false);
     const openSidebar = () => setSidebarView(true);
 
-    const [exportModalView, setExportModalView] = useState(false);
-
     const [authenticateUserModalView, setAuthenticateUserModalView] =
         useState(false);
 
@@ -297,6 +292,8 @@ export default function Gallery() {
         useModalVisibility();
     const { show: showFixCreationTime, props: fixCreationTimeVisibilityProps } =
         useModalVisibility();
+    const { show: showExport, props: exportVisibilityProps } =
+        useModalVisibility();
 
     // TODO: Temp
     const user = state.user;
@@ -329,7 +326,7 @@ export default function Gallery() {
         try {
             await getRecoveryKey();
             return true;
-        } catch (e) {
+        } catch {
             logout();
             return false;
         }
@@ -353,7 +350,6 @@ export default function Gallery() {
             }
             initSettings();
             await initUserDetailsOrTriggerSync();
-            await downloadManager.init(token);
             setupSelectAllKeyBoardShortcutHandler();
             dispatch({ type: "showAll" });
             setIsFirstLoad(isFirstLogin());
@@ -401,11 +397,7 @@ export default function Gallery() {
     }, []);
 
     useEffect(
-        () =>
-            setSearchCollectionsAndFiles({
-                collections: collections ?? [],
-                files: uniqueFilesByID(files ?? []),
-            }),
+        () => setSearchCollectionsAndFiles({ collections, files }),
         [collections, files],
     );
 
@@ -496,7 +488,7 @@ export default function Gallery() {
             collectionNamerView ||
             planSelectorVisibilityProps.open ||
             fixCreationTimeVisibilityProps.open ||
-            exportModalView ||
+            exportVisibilityProps.open ||
             authenticateUserModalView ||
             isPhotoSwipeOpen ||
             !filteredFiles?.length ||
@@ -517,7 +509,7 @@ export default function Gallery() {
                       }
                     : {
                           mode: barMode as "albums" | "hidden-albums",
-                          collectionID: ensure(activeCollectionID),
+                          collectionID: activeCollectionID!,
                       },
         };
 
@@ -810,14 +802,6 @@ export default function Gallery() {
         setUploadTypeSelectorIntent(intent ?? "upload");
     };
 
-    const openExportModal = () => {
-        setExportModalView(true);
-    };
-
-    const closeExportModal = () => {
-        setExportModalView(false);
-    };
-
     const handleSetActiveCollectionID = (
         collectionSummaryID: number | undefined,
     ) =>
@@ -858,10 +842,6 @@ export default function Gallery() {
         return <div></div>;
     }
 
-    // `peopleState` will be undefined only when ML is disabled, otherwise it'll
-    // be present, with empty arrays, even if people data is still syncing.
-    const showPeopleSectionButton = peopleState !== undefined;
-
     return (
         <GalleryContext.Provider
             value={{
@@ -876,7 +856,7 @@ export default function Gallery() {
                 syncWithRemote,
                 setBlockingLoad,
                 photoListHeader,
-                openExportModal,
+                openExportModal: showExport,
                 authenticateUser,
                 userIDToEmailMap,
                 user,
@@ -979,7 +959,6 @@ export default function Gallery() {
                         setActiveCollectionID: handleSetActiveCollectionID,
                         hiddenCollectionSummaries:
                             state.hiddenCollectionSummaries,
-                        showPeopleSectionButton,
                         people:
                             (state.view.type == "people"
                                 ? state.view.visiblePeople
@@ -1115,9 +1094,8 @@ export default function Gallery() {
                             isInHiddenSection={barMode == "hidden-albums"}
                         />
                     )}
-                <ExportModal
-                    show={exportModalView}
-                    onHide={closeExportModal}
+                <Export
+                    {...exportVisibilityProps}
                     collectionNameMap={state.allCollectionNameByID}
                 />
                 <AuthenticateUserModal

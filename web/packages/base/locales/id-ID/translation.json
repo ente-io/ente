@@ -59,7 +59,6 @@
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Bersiap untuk mengunggah",
         "1": "Membaca file metadata google",
-        "2": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} metadata file diekstrak",
         "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} file diproses",
         "4": "Membatalkan sisa upload",
         "5": "Cadangan selesai"
@@ -307,7 +306,6 @@
     "SKIPPED_INFO": "",
     "UNSUPPORTED_INFO": "",
     "BLOCKED_UPLOADS": "",
-    "INPROGRESS_METADATA_EXTRACTION": "",
     "INPROGRESS_UPLOADS": "",
     "TOO_LARGE_UPLOADS": "",
     "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS": "",
@@ -555,8 +553,9 @@
     "feedback_required_found_another_service": "",
     "RECOVER_TWO_FACTOR": "",
     "at": "",
-    "AUTH_NEXT": "",
-    "AUTH_DOWNLOAD_MOBILE_APP": "",
+    "auth_next": "",
+    "auth_download_mobile_app": "",
+    "no_codes_added_yet": "",
     "HIDE": "Sembunyikan",
     "UNHIDE": "",
     "sort_by": "Urut berdasarkan",

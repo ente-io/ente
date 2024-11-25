@@ -1,5 +1,6 @@
+import { isDesktop } from "@/base/app";
 import { useModalVisibility } from "@/base/components/utils/modal";
-import { basename } from "@/base/file";
+import { basename } from "@/base/file-name";
 import log from "@/base/log";
 import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
 import type { Collection } from "@/media/collection";
@@ -12,18 +13,16 @@ import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import type {
     FileAndPath,
     UploadItem,
+    UploadPhase,
 } from "@/new/photos/services/upload/types";
-import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
 import { redirectToCustomerPortal } from "@/new/photos/services/user-details";
 import { useAppContext } from "@/new/photos/types/context";
 import { NotificationAttributes } from "@/new/photos/types/notification";
 import { firstNonEmpty } from "@/utils/array";
-import { ensure } from "@/utils/ensure";
 import { CustomError } from "@ente/shared/error";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
 import InfoOutlined from "@mui/icons-material/InfoRounded";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
@@ -46,7 +45,7 @@ import { SetLoading } from "types/gallery";
 import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
-import UploadProgress from "./UploadProgress";
+import { UploadProgress } from "./UploadProgress";
 import {
     UploadTypeSelector,
     type UploadTypeSelectorIntent,
@@ -121,9 +120,7 @@ export default function Uploader({
     );
 
     const [uploadProgressView, setUploadProgressView] = useState(false);
-    const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
-        UPLOAD_STAGES.START,
-    );
+    const [uploadPhase, setUploadPhase] = useState<UploadPhase>("preparing");
     const [uploadFileNames, setUploadFileNames] = useState<UploadFileNames>();
     const [uploadCounter, setUploadCounter] = useState<UploadCounter>({
         finished: 0,
@@ -245,7 +242,7 @@ export default function Uploader({
                 setUploadCounter,
                 setInProgressUploads,
                 setFinishedUploads,
-                setUploadStage,
+                setUploadPhase,
                 setUploadFilenames: setUploadFileNames,
                 setHasLivePhotos,
                 setUploadProgressView,
@@ -266,7 +263,7 @@ export default function Uploader({
             };
 
             const requestSyncWithRemote = () => {
-                props.syncWithRemote().catch((e) => {
+                props.syncWithRemote().catch((e: unknown) => {
                     log.error(
                         "Ignoring error when syncing trash changes with remote",
                         e,
@@ -486,7 +483,7 @@ export default function Uploader({
     const preCollectionCreationAction = async () => {
         props.onCloseCollectionSelector?.();
         props.setShouldDisableDropzone(!uploadManager.shouldAllowNewUpload());
-        setUploadStage(UPLOAD_STAGES.START);
+        setUploadPhase("preparing");
         setUploadProgressView(true);
     };
 
@@ -614,7 +611,7 @@ export default function Uploader({
                 uploaderName,
             );
             if (!wereFilesProcessed) closeUploadProgress();
-            if (isElectron()) {
+            if (isDesktop) {
                 if (watcher.isUploadRunning()) {
                     await watcher.allFileUploadsDone(
                         uploadItemsWithCollection,
@@ -656,7 +653,8 @@ export default function Uploader({
         let notification: NotificationAttributes;
         switch (err) {
             case CustomError.SESSION_EXPIRED:
-                return props.showSessionExpiredMessage();
+                props.showSessionExpiredMessage();
+                return;
             case CustomError.SUBSCRIPTION_EXPIRED:
                 notification = {
                     variant: "critical",
@@ -802,7 +800,7 @@ export default function Uploader({
                 percentComplete={percentComplete}
                 uploadFileNames={uploadFileNames}
                 uploadCounter={uploadCounter}
-                uploadStage={uploadStage}
+                uploadPhase={uploadPhase}
                 inProgressUploads={inProgressUploads}
                 hasLivePhotos={hasLivePhotos}
                 retryFailed={retryFailed}
@@ -855,17 +853,13 @@ const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {
  *    https://github.com/react-dropzone/file-selector/blob/master/src/file.ts#L1214
  */
 const pathLikeForWebFile = (file: File): string =>
-    ensure(
-        firstNonEmpty([
-            // We need to check first, since path is not a property of
-            // the standard File objects.
-            "path" in file && typeof file.path == "string"
-                ? file.path
-                : undefined,
-            file.webkitRelativePath,
-            file.name,
-        ]),
-    );
+    firstNonEmpty([
+        // We need to check first, since path is not a property of
+        // the standard File objects.
+        "path" in file && typeof file.path == "string" ? file.path : undefined,
+        file.webkitRelativePath,
+        file.name,
+    ])!;
 
 // This is used to prompt the user the make upload strategy choice
 interface ImportSuggestion {
@@ -884,14 +878,14 @@ function getImportSuggestion(
     uploadType: PICKED_UPLOAD_TYPE,
     paths: string[],
 ): ImportSuggestion {
-    if (isElectron() && uploadType === PICKED_UPLOAD_TYPE.FILES) {
+    if (isDesktop && uploadType === PICKED_UPLOAD_TYPE.FILES) {
         return DEFAULT_IMPORT_SUGGESTION;
     }
 
     const separatorCounts = new Map(
         paths.map((s) => [s, s.match(/\//g)?.length ?? 0]),
     );
-    const separatorCount = (s: string) => ensure(separatorCounts.get(s));
+    const separatorCount = (s: string) => separatorCounts.get(s)!;
     paths.sort((path1, path2) => separatorCount(path1) - separatorCount(path2));
     const firstPath = paths[0];
     const lastPath = paths[paths.length - 1];

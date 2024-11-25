@@ -1,5 +1,6 @@
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
+import { writeStream } from "@/gallery/utils/native-stream";
 import type { Collection } from "@/media/collection";
 import { mergeMetadata, type EnteFile } from "@/media/file";
 import {
@@ -20,14 +21,9 @@ import {
 } from "@/new/photos/services/export";
 import { getAllLocalFiles } from "@/new/photos/services/files";
 import { safeDirectoryName, safeFileName } from "@/new/photos/utils/native-fs";
-import { writeStream } from "@/new/photos/utils/native-stream";
-import { wait } from "@/utils/promise";
+import { PromiseQueue } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
-import QueueProcessor, {
-    CancellationStatus,
-    RequestCanceller,
-} from "@ente/shared/utils/queueProcessor";
 import i18n from "i18next";
 import {
     CollectionExportNames,
@@ -80,13 +76,20 @@ export interface ExportOpts {
     resync?: boolean;
 }
 
+interface RequestCanceller {
+    exec: () => void;
+}
+
+interface CancellationStatus {
+    status: boolean;
+}
+
 class ExportService {
     private exportSettings: ExportSettings;
     private exportInProgress: RequestCanceller = null;
     private resync = true;
     private reRunNeeded = false;
-    private exportRecordUpdater = new QueueProcessor<ExportRecord>();
-    private fileReader: FileReader = null;
+    private exportRecordUpdater = new PromiseQueue<ExportRecord>();
     private continuousExportEventHandler: () => void;
     private uiUpdater: ExportUIUpdaters = {
         setExportProgress: () => {},
@@ -850,10 +853,9 @@ class ExportService {
     }
 
     async updateExportRecord(folder: string, newData: Partial<ExportRecord>) {
-        const response = this.exportRecordUpdater.queueUpRequest(() =>
+        return this.exportRecordUpdater.add(() =>
             this.updateExportRecordHelper(folder, newData),
         );
-        return response.promise;
     }
 
     async updateExportRecordHelper(
@@ -877,29 +879,18 @@ class ExportService {
         }
     }
 
-    async getExportRecord(folder: string, retry = true): Promise<ExportRecord> {
+    async getExportRecord(folder: string): Promise<ExportRecord> {
         const electron = ensureElectron();
         const fs = electron.fs;
         try {
             await this.verifyExportFolderExists(folder);
             const exportRecordJSONPath = `${folder}/${exportRecordFileName}`;
             if (!(await fs.exists(exportRecordJSONPath))) {
-                return this.createEmptyExportRecord(exportRecordJSONPath);
+                return await this.createEmptyExportRecord(exportRecordJSONPath);
             }
             const recordFile = await fs.readTextFile(exportRecordJSONPath);
-            try {
-                return JSON.parse(recordFile);
-            } catch (e) {
-                throw Error(CustomError.EXPORT_RECORD_JSON_PARSING_FAILED);
-            }
+            return JSON.parse(recordFile);
         } catch (e) {
-            if (
-                e.message === CustomError.EXPORT_RECORD_JSON_PARSING_FAILED &&
-                retry
-            ) {
-                await wait(1000);
-                return await this.getExportRecord(folder, false);
-            }
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
                 log.error("export Record JSON parsing failed", e);
             }
@@ -937,7 +928,7 @@ class ExportService {
         const electron = ensureElectron();
         try {
             const fileUID = getExportRecordFileUID(file);
-            const originalFileStream = await downloadManager.getFile(file);
+            const originalFileStream = await downloadManager.fileStream(file);
             if (file.metadata.fileType === FileType.livePhoto) {
                 await this.exportLivePhoto(
                     exportDir,
@@ -978,7 +969,7 @@ class ExportService {
         exportDir: string,
         fileUID: string,
         collectionExportPath: string,
-        fileStream: ReadableStream<any>,
+        fileStream: ReadableStream,
         file: EnteFile,
     ) {
         const fs = ensureElectron().fs;
@@ -1193,7 +1184,7 @@ const getRenamedExportedCollections = (
             if (currentExportName === collectionExportName) {
                 return false;
             }
-            const hasNumberedSuffix = currentExportName.match(/\(\d+\)$/);
+            const hasNumberedSuffix = /\(\d+\)$/.exec(currentExportName);
             const currentExportNameWithoutNumberedSuffix = hasNumberedSuffix
                 ? currentExportName.replace(/\(\d+\)$/, "")
                 : currentExportName;
@@ -1419,7 +1410,7 @@ export const isLivePhotoExportName = (exportName: string) => {
     try {
         JSON.parse(exportName);
         return true;
-    } catch (e) {
+    } catch {
         return false;
     }
 };

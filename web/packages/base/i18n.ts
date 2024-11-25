@@ -25,12 +25,14 @@ export const supportedLocales = [
     "zh-CN" /* Simplified Chinese */,
     "nl-NL" /* Dutch */,
     "es-ES" /* Spanish */,
+    "pt-PT" /* Portuguese */,
     "pt-BR" /* Portuguese, Brazilian */,
     "ru-RU" /* Russian */,
     "pl-PL" /* Polish */,
     "it-IT" /* Italian */,
     "lt-LT" /* Lithuanian */,
     "uk-UA" /* Ukrainian */,
+    "vi-VN" /* Vietnamese */,
 ] as const;
 
 /** The type of {@link supportedLocales}. */
@@ -176,6 +178,8 @@ const closestSupportedLocale = (
             // We'll never get here (it'd already be an exact match), just kept
             // to keep this list consistent.
             return "pt-BR";
+        } else if (ls.startsWith("pt")) {
+            return "pt-PT";
         } else if (ls.startsWith("ru")) {
             return "ru-RU";
         } else if (ls.startsWith("pl")) {
@@ -186,6 +190,8 @@ const closestSupportedLocale = (
             return "lt-LT";
         } else if (ls.startsWith("uk")) {
             return "uk-UA";
+        } else if (ls.startsWith("vi")) {
+            return "vi-VN";
         }
     }
 
