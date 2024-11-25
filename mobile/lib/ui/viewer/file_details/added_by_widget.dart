@@ -15,9 +15,9 @@ class AddedByWidget extends StatelessWidget {
     if (!file.isUploaded) {
       return const SizedBox.shrink();
     }
-    final bool isPublicFile = CollectionsService.instance
-        .isSharedPublicCollection(file.collectionID!);
-    if (isPublicFile) {
+    final bool fileIsFromSharedPublicLink =
+        CollectionsService.instance.isSharedPublicLink(file.collectionID!);
+    if (fileIsFromSharedPublicLink) {
       return const SizedBox.shrink();
     }
     String? addedBy;

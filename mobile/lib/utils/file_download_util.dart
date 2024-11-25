@@ -98,7 +98,7 @@ Future<File?> downloadAndDecrypt(
   ProgressCallback? progressCallback,
 }) async {
   if (await CollectionsService.instance
-      .isSharedPublicCollection(file.collectionID!)) {
+      .isSharedPublicLink(file.collectionID!)) {
     final authToken = await CollectionsService.instance
         .getSharedPublicAlbumToken(file.collectionID!);
 

@@ -161,8 +161,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   final file = item.file;
   Uint8List encryptedThumbnail;
   try {
-    if (CollectionsService.instance
-        .isSharedPublicCollection(file.collectionID!)) {
+    if (CollectionsService.instance.isSharedPublicLink(file.collectionID!)) {
       final authToken = await CollectionsService.instance
           .getSharedPublicAlbumToken(file.collectionID!);
       final authJWTToken = await CollectionsService.instance

@@ -38,10 +38,10 @@ class GalleryFileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isFileSelected = selectedFiles?.isFileSelected(file) ?? false;
-    bool isPublicFile = false;
+    bool fileIsFromSharedPublicLink = false;
     if (file.collectionID != null) {
-      isPublicFile = CollectionsService.instance
-          .isSharedPublicCollection(file.collectionID!);
+      fileIsFromSharedPublicLink =
+          CollectionsService.instance.isSharedPublicLink(file.collectionID!);
     }
     Color selectionColor = Colors.white;
     if (isFileSelected && file.isUploaded && file.ownerID != currentUserID) {
@@ -59,7 +59,7 @@ class GalleryFileWidget extends StatelessWidget {
       thumbnailSize: photoGridSize < photoGridSizeDefault
           ? thumbnailLargeSize
           : thumbnailSmallSize,
-      shouldShowOwnerAvatar: !(isFileSelected || isPublicFile),
+      shouldShowOwnerAvatar: !(isFileSelected || fileIsFromSharedPublicLink),
       shouldShowVideoDuration: true,
     );
     return GestureDetector(

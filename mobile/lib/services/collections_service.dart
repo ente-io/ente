@@ -1144,7 +1144,7 @@ class CollectionsService {
   }
 
   /// Is a public link opened in the app
-  bool isSharedPublicCollection(int collectionID) {
+  bool isSharedPublicLink(int collectionID) {
     return _cachedPublicCollectionID.contains(collectionID);
   }
 
