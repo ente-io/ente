@@ -19,6 +19,26 @@ enum ThemeOptions {
   blueDark,
   yellowLight,
   yellowDark,
+  purpleLight,
+  purpleDark,
+  orangeLight,
+  orangeDark,
+  tealLight,
+  tealDark,
+  roseLight,
+  roseDark,
+  indigoLight,
+  indigoDark,
+  mochaLight,
+  mochaDark,
+  aquaLight,
+  aquaDark,
+  lilacLight,
+  lilacDark,
+  emeraldLight,
+  emeraldDark,
+  slateLight,
+  slateDark,
 }
 
 class ThemeProvider extends ChangeNotifier {
@@ -165,6 +185,46 @@ class ThemeProvider extends ChangeNotifier {
         return yellowLightScheme;
       case ThemeOptions.yellowDark:
         return yellowDarkScheme;
+      case ThemeOptions.purpleLight:
+        return purpleLightScheme;
+      case ThemeOptions.purpleDark:
+        return purpleDarkScheme;
+      case ThemeOptions.orangeLight:
+        return orangeLightScheme;
+      case ThemeOptions.orangeDark:
+        return orangeDarkScheme;
+      case ThemeOptions.tealLight:
+        return tealLightScheme;
+      case ThemeOptions.tealDark:
+        return tealDarkScheme;
+      case ThemeOptions.roseLight:
+        return roseLightScheme;
+      case ThemeOptions.roseDark:
+        return roseDarkScheme;
+      case ThemeOptions.indigoLight:
+        return indigoLightScheme;
+      case ThemeOptions.indigoDark:
+        return indigoDarkScheme;
+      case ThemeOptions.mochaLight:
+        return mochaLightScheme;
+      case ThemeOptions.mochaDark:
+        return mochaDarkScheme;
+      case ThemeOptions.aquaLight:
+        return aquaLightScheme;
+      case ThemeOptions.aquaDark:
+        return aquaDarkScheme;
+      case ThemeOptions.lilacLight:
+        return lilacLightScheme;
+      case ThemeOptions.lilacDark:
+        return lilacDarkScheme;
+      case ThemeOptions.emeraldLight:
+        return emeraldLightScheme;
+      case ThemeOptions.emeraldDark:
+        return emeraldDarkScheme;
+      case ThemeOptions.slateLight:
+        return slateLightScheme;
+      case ThemeOptions.slateDark:
+        return slateDarkScheme;
       default:
         return lightScheme;
     }

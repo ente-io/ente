@@ -80,7 +80,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
   @override
   Widget build(BuildContext context) {
     final bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
-    final enteColorScheme = getEnteColorScheme(context);
+    // final enteColorScheme = getEnteColorScheme(context);
 
     return SafeArea(
       child: RepaintBoundary(
