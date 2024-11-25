@@ -1,4 +1,4 @@
-import { FilledIconButton } from "@/new/photos/components/mui";
+import { FilledIconButton } from "@/base/components/mui";
 import {
     UPLOAD_RESULT,
     type UploadPhase,

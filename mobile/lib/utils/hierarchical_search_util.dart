@@ -155,7 +155,7 @@ Future<void> curateFilters(
     );
     final contactsFilters = _curateContactsFilter(files);
     final faceFilters = await curateFaceFilters(files);
-    final magicFilters = await curateMagicFilters(files);
+    final magicFilters = await curateMagicFilters(files, context);
     final onlyThemFilter = getOnlyThemFilter(
       searchFilterDataProvider,
       context,
@@ -430,7 +430,10 @@ Future<List<FaceFilter>> curateFaceFilters(
   }
 }
 
-Future<List<MagicFilter>> curateMagicFilters(List<EnteFile> files) async {
+Future<List<MagicFilter>> curateMagicFilters(
+  List<EnteFile> files,
+  BuildContext context,
+) async {
   final magicFilters = <MagicFilter>[];
 
   final magicCaches = await magicCacheService.getMagicCache();
@@ -438,11 +441,12 @@ Future<List<MagicFilter>> curateMagicFilters(List<EnteFile> files) async {
   for (MagicCache magicCache in magicCaches) {
     final uploadedIDs = magicCache.fileUploadedIDs.toSet();
     final intersection = uploadedIDs.intersection(filesUploadedFileIDs);
+    final title = getLocalizedTitle(context, magicCache.title);
 
     if (intersection.length > 3) {
       magicFilters.add(
         MagicFilter(
-          filterName: magicCache.title,
+          filterName: title,
           occurrence: intersection.length,
           matchedUploadedIDs: magicCache.fileUploadedIDs.toSet(),
         ),

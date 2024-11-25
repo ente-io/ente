@@ -413,12 +413,12 @@
   },
   "photoGridSize": "Rozmiar siatki zdjęć",
   "manageDeviceStorage": "Zarządzaj pamięcią urządzenia",
-  "machineLearning": "Uczenie maszynowe",
-  "mlConsent": "Włącz uczenie maszynowe",
-  "mlConsentTitle": "Włączyć uczenie maszynowe?",
-  "mlConsentDescription": "Jeśli włączysz uczenie maszynowe, Ente wyodrębni informacje takie jak geometria twarzy z plików, w tym tych udostępnionych z Tobą.\n\nTo się stanie na Twoim urządzeniu i wygenerowane informacje biometryczne zostaną zaszyfrowane end-to-end.",
+  "machineLearning": "Nauczanie maszynowe",
+  "mlConsent": "Włącz nauczanie maszynowe",
+  "mlConsentTitle": "Włączyć nauczanie maszynowe?",
+  "mlConsentDescription": "Jeśli włączysz nauczanie maszynowe, Ente wyodrębni informacje takie jak geometria twarzy z plików, w tym tych udostępnionych z Tobą.\n\nTo się stanie na Twoim urządzeniu i wygenerowane informacje biometryczne zostaną zaszyfrowane end-to-end.",
   "mlConsentPrivacy": "Kliknij tutaj, aby uzyskać więcej informacji na temat tej funkcji w naszej polityce prywatności",
-  "mlConsentConfirmation": "Rozumiem i chcę włączyć uczenie maszynowe",
+  "mlConsentConfirmation": "Rozumiem i chcę włączyć nauczanie maszynowe",
   "magicSearch": "Magiczne wyszukiwanie",
   "discover": "Odkryj",
   "@discover": {
@@ -439,7 +439,7 @@
   "discover_sunset": "Zachód słońca",
   "discover_hills": "Wzgórza",
   "discover_greenery": "Zieleń",
-  "mlIndexingDescription": "Pamiętaj, że uczenie maszynowe spowoduje większą przepustowość i zużycie baterii do czasu zindeksowania wszystkich elementów. Rozważ użycie aplikacji komputerowej do szybszego indeksowania, wszystkie wyniki zostaną automatycznie zsynchronizowane.",
+  "mlIndexingDescription": "Pamiętaj, że nauczanie maszynowe spowoduje większą przepustowość i zużycie baterii do czasu zindeksowania wszystkich elementów. Rozważ użycie aplikacji komputerowej do szybszego indeksowania, wszystkie wyniki zostaną automatycznie zsynchronizowane.",
   "loadingModel": "Pobieranie modeli...",
   "waitingForWifi": "Czekanie na WiFi...",
   "status": "Stan",
@@ -1246,9 +1246,13 @@
   "locations": "Lokalizacje",
   "descriptions": "Opisy",
   "addAName": "Dodaj nazwę",
+  "findThemQuickly": "Znajdź ich szybko",
+  "@findThemQuickly": {
+    "description": "Subtitle to indicate that the user can find people quickly by name"
+  },
   "findPeopleByName": "Szybko szukaj osób po imieniu",
-  "addViewers": "{count, plural, one {Dodaj widza} few {Dodaj widzów} other {Dodaj widzów}}",
-  "addCollaborators": "{count, plural, one {Dodaj współuczestnika} few {Dodaj współuczestników} other {Dodaj współuczestników}}",
+  "addViewers": "{count, plural, one {Dodaj widza} few {Dodaj widzów} many {Dodaj widzów} other {Dodaj widzów}}",
+  "addCollaborators": "{count, plural, one {Dodaj współuczestnika} few {Dodaj współuczestników} many {Dodaj współuczestników} other {Dodaj współuczestników}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Naciśnij i przytrzymaj e-mail, aby zweryfikować szyfrowanie end-to-end.",
   "developerSettingsWarning": "Czy na pewno chcesz zmodyfikować ustawienia programisty?",
   "developerSettings": "Ustawienia dla programistów",
@@ -1260,6 +1264,10 @@
   "createCollaborativeLink": "Utwórz link współpracy",
   "search": "Szukaj",
   "enterPersonName": "Wprowadź imię osoby",
+  "savePerson": "Zapisz osobę",
+  "editPerson": "Edytuj osobę",
+  "mergedPhotos": "Scalone zdjęcia",
+  "orMergeWithExistingPerson": "Lub złącz z istniejącymi",
   "removePersonLabel": "Usuń etykietę osoby",
   "autoPairDesc": "Automatyczne parowanie działa tylko z urządzeniami obsługującymi Chromecast.",
   "manualPairDesc": "Parowanie PIN-em działa z każdym ekranem, na którym chcesz wyświetlić swój album.",
@@ -1300,7 +1308,7 @@
   "enable": "Włącz",
   "enabled": "Włączone",
   "moreDetails": "Więcej szczegółów",
-  "enableMLIndexingDesc": "Ente obsługuje uczenie maszynowe na urządzeniu dla rozpoznawania twarzy, wyszukiwania magicznego i innych zaawansowanych funkcji wyszukiwania",
+  "enableMLIndexingDesc": "Ente obsługuje nauczanie maszynowe na urządzeniu dla rozpoznawania twarzy, wyszukiwania magicznego i innych zaawansowanych funkcji wyszukiwania",
   "magicSearchHint": "Magiczne wyszukiwanie pozwala na wyszukiwanie zdjęć według ich zawartości, np. \"kwiat\", \"czerwony samochód\", \"dokumenty tożsamości\"",
   "panorama": "Panorama",
   "reenterPassword": "Wprowadź ponownie hasło",
@@ -1351,13 +1359,47 @@
   "newPerson": "Nowa osoba",
   "addName": "Dodaj nazwę",
   "add": "Dodaj",
-  "extraPhotosFoundFor": "Znaleziono dodatkowe zdjęcia dla $text",
+  "extraPhotosFoundFor": "Znaleziono dodatkowe zdjęcia dla {text}",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "extraPhotosFound": "Znaleziono dodatkowe zdjęcia",
   "configuration": "Konfiguracja",
   "localIndexing": "Indeksowanie lokalne",
-  "resetPerson": "Zresetuj osobę",
+  "resetPerson": "Usuń",
   "areYouSureYouWantToResetThisPerson": "Czy na pewno chcesz zresetować tę osobę?",
   "allPersonGroupingWillReset": "Wszystkie grupy dla tej osoby zostaną zresetowane i stracisz wszystkie sugestie dla tej osoby",
   "yesResetPerson": "Tak, zresetuj osobę",
-  "onlyThem": "Tylko te"
+  "onlyThem": "Tylko te",
+  "checkingModels": "Sprawdzanie modeli...",
+  "enableMachineLearningBanner": "Włącz nauczanie maszynowe dla magicznego wyszukiwania i rozpoznawania twarzy",
+  "searchDiscoverEmptySection": "Obrazy będą wyświetlane tutaj po zakończeniu przetwarzania",
+  "searchPersonsEmptySection": "Osoby będą wyświetlane tutaj po zakończeniu przetwarzania",
+  "info": "Informacje",
+  "addFiles": "Dodaj Pliki",
+  "imageNotAnalyzed": "Obraz nie został przeanalizowany",
+  "noFacesFound": "Nie znaleziono twarzy",
+  "fileNotUploadedYet": "Plik nie został jeszcze przesłany",
+  "noSuggestionsForPerson": "Brak sugestii dla {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "miesiąc",
+  "file": "Plik",
+  "selectAllShort": "Wszystko",
+  "@selectAllShort": {
+    "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
+  },
+  "changeLogBackupStatusTitle": "Status Kopii Zapasowej",
+  "changeLogDiscoverTitle": "Odkryj",
+  "newLocation": "Nowa lokalizacja"
 }

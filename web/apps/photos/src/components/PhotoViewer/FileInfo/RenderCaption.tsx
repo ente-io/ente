@@ -1,9 +1,9 @@
 import log from "@/base/log";
-import { EnteFile } from "@/media/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import Close from "@mui/icons-material/Close";
 import Done from "@mui/icons-material/Done";
 import { Box, CircularProgress, IconButton, TextField } from "@mui/material";
+import type { DisplayFile } from "components/PhotoFrame";
 import { Formik } from "formik";
 import { t } from "i18next";
 import { useState } from "react";
@@ -23,7 +23,7 @@ export function RenderCaption({
     shouldDisableEdits,
 }: {
     shouldDisableEdits: boolean;
-    file: EnteFile;
+    file: DisplayFile;
     scheduleUpdate: () => void;
     refreshPhotoswipe: () => void;
 }) {

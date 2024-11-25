@@ -4,6 +4,7 @@ import { CustomErrorMessage } from "@/base/types/ipc";
 import { workerBridge } from "@/base/worker/worker-bridge";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
+import { convertToMP4 } from "../services/ffmpeg";
 import { detectFileTypeInfo } from "./detect-type";
 
 /**
@@ -16,8 +17,8 @@ import { detectFileTypeInfo } from "./detect-type";
 let _isNativeJPEGConversionAvailable = true;
 
 /**
- * Return a new {@link Blob} containing data in a format that the browser
- * (likely) knows how to render (in an img tag, or on the canvas).
+ * Return a new {@link Blob} containing an image's data in a format that the
+ * browser (likely) knows how to render (in an img tag, or on the canvas).
  *
  * The type of the returned blob is set, whenever possible, to the MIME type of
  * the data that we're dealing with.
@@ -55,9 +56,9 @@ export const renderableImageBlob = async (
         const fileTypeInfo = await detectFileTypeInfo(file);
         const { extension, mimeType } = fileTypeInfo;
 
-        log.debug(() => ["Get renderable blob", { fileName, ...fileTypeInfo }]);
-
         if (needsJPEGConversion(extension)) {
+            log.debug(() => [`Converting ${fileName} to JPEG`, fileTypeInfo]);
+
             // If we're running in our desktop app, see if our Node.js layer can
             // convert this into a JPEG using native tools.
 
@@ -95,7 +96,7 @@ export const renderableImageBlob = async (
 
         if (!mimeType) {
             log.info(
-                "Attempting to get renderable blob for a file without a MIME type",
+                "Attempting to convert a file without a MIME type",
                 fileName,
             );
             return imageBlob;
@@ -103,10 +104,7 @@ export const renderableImageBlob = async (
             return new Blob([imageBlob], { type: mimeType });
         }
     } catch (e) {
-        log.error(
-            `Failed to get renderable blob for ${fileName}, will fallback to the original`,
-            e,
-        );
+        log.error(`Failed to convert ${fileName}, will use the original`, e);
         return imageBlob;
     }
 };
@@ -131,3 +129,98 @@ const nativeConvertToJPEG = async (imageBlob: Blob) => {
     log.debug(() => `Native JPEG conversion took ${Date.now() - startTime} ms`);
     return new Blob([jpegData], { type: "image/jpeg" });
 };
+
+/**
+ * Return a new {@link Blob} containing a video's data in a format that the
+ * browser (likely) knows how to play back (using an video tag).
+ *
+ * Unlike {@link renderableImageBlob}, this uses a much simpler flowchart:
+ *
+ * - If the browser thinks it can play the video, then return the original blob
+ *   back.
+ *
+ * - Otherwise try to convert using FFmpeg. This conversion always happens on
+ *   the desktop app, but in the browser the conversion only happens for short
+ *   videos since the WASM FFmpeg implementation is much slower. There is also a
+ *   flag to force this conversion regardless.
+ */
+export const playableVideoBlob = async (
+    fileName: string,
+    videoBlob: Blob,
+    forceConvert: boolean,
+) => {
+    const converted = async () => {
+        try {
+            log.info(`Converting ${fileName} to mp4`);
+            const convertedBlob = await convertToMP4(videoBlob);
+            return new Blob([convertedBlob], { type: "video/mp4" });
+        } catch (e) {
+            log.error(`Video conversion failed for ${fileName}`, e);
+            return null;
+        }
+    };
+
+    // If we've been asked to force convert, do it regardless of anything else.
+    if (forceConvert) return converted();
+
+    const isPlayable = await isPlaybackPossible(URL.createObjectURL(videoBlob));
+    if (isPlayable) return videoBlob;
+
+    // The browser doesn't think it can play this video, try transcoding.
+    if (isDesktop) {
+        return converted();
+    } else {
+        // Don't try to transcode on the web if the file is too big.
+        if (videoBlob.size > 100 * 1024 * 1024 /* 100 MB, arbitrary */) {
+            return null;
+        } else {
+            return converted();
+        }
+    }
+};
+
+/**
+ * Try to see if the browser thinks it can play the video pointed to by the
+ * given {@link url} by creating a <video> element and initiating playback.
+ *
+ * [Note: Forcing conversion of playable videos]
+ *
+ * Note that this can sometimes cause false positives if the browser can play
+ * some of the streams in the video, but not all. For example, the browser may
+ * be able to play back the video stream, but not the audio stream (say due to
+ * some codec issue): in such cases this function will return true, causing us
+ * to skip conversion, but when the user actually plays the video there will be
+ * no sound.
+ *
+ * As an escape hatch, we provide a force convert button in the UI for such
+ * cases, which'll cause the {@link forceConvert} flag in our caller function to
+ * be set. If so, it'll bypasses this preflight check we use to see if the
+ * browser can already play the video, and instead will always be transcoded.
+ */
+const isPlaybackPossible = async (url: string) =>
+    new Promise((resolve) => {
+        const t = setTimeout(() => {
+            video.remove();
+            resolve(false);
+        }, 1000);
+
+        const video = document.createElement("video");
+        video.addEventListener("canplay", () => {
+            clearTimeout(t);
+            // Clean up the video element.
+            video.remove();
+            // Check for duration > 0 to make sure it is not a broken video.
+            if (video.duration > 0) {
+                resolve(true);
+            } else {
+                resolve(false);
+            }
+        });
+        video.addEventListener("error", () => {
+            clearTimeout(t);
+            video.remove();
+            resolve(false);
+        });
+
+        video.src = url;
+    });

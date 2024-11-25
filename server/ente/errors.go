@@ -111,6 +111,12 @@ var ErrSubscriptionAlreadyClaimed = ApiError{
 	Message:        "Subscription is already associted with different account",
 }
 
+var ErrUserAlreadyRegistered = &ApiError{
+	Code:           "USER_ALREADY_REGISTERED",
+	HttpStatusCode: http.StatusConflict,
+	Message:        "User is already registered",
+}
+
 var ErrCollectionNotEmpty = ApiError{
 	Code:           CollectionNotEmpty,
 	HttpStatusCode: http.StatusConflict,

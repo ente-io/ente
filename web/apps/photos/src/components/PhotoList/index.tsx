@@ -631,10 +631,6 @@ export function PhotoList({
 
     /**
      * Checks and merge multiple dates into a single row.
-     *
-     * @param items
-     * @param columns
-     * @returns
      */
     const mergeTimeStampList = (
         items: TimeStampListItem[],

@@ -203,8 +203,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         galleryType != GalleryType.quickLink) {
       showToast(
         context,
-        'Type of galler $galleryType is not supported for '
-        'rename',
+        S.of(context).typeOfGallerGallerytypeIsNotSupportedForRename("$galleryType"),
       );
 
       return;
@@ -388,7 +387,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (galleryType.canAddFiles(widget.collection, userID)) {
       actions.add(
         Tooltip(
-          message: "Add Files",
+          message: S.of(context).addFiles,
           child: IconButton(
             icon: const Icon(Icons.add_photo_alternate_outlined),
             onPressed: () async {
@@ -401,7 +400,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (galleryType.isSharable() && !widget.isFromCollectPhotos) {
       actions.add(
         Tooltip(
-          message: "Share",
+          message: S.of(context).share,
           child: IconButton(
             icon: Icon(
               isQuickLink && (widget.collection!.hasLink)
@@ -419,7 +418,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (widget.collection != null && castService.isSupported) {
       actions.add(
         Tooltip(
-          message: "Cast album",
+          message: S.of(context).castAlbum,
           child: IconButton(
             icon: ValueListenableBuilder<int>(
               valueListenable: castNotifier,

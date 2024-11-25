@@ -158,6 +158,8 @@ const localeName = (locale: SupportedLocale) => {
             return "Lietuvių kalba";
         case "uk-UA":
             return "Українська";
+        case "vi-VN":
+            return "Tiếng Việt";
     }
 };
 

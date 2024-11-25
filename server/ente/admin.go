@@ -36,6 +36,14 @@ type LogoutSessionReq struct {
 	UserID int64  `json:"userID" binding:"required"`
 }
 
+type TokenInfo struct {
+	CreationTime int64  `json:"creationTime"`
+	LastUsedTime int64  `json:"lastUsedTime"`
+	UA           string `json:"ua"`
+	IsDeleted    bool   `json:"isDeleted"`
+	App          App    `json:"app"`
+}
+
 func (a AdminOttReq) Validate() error {
 	if !a.App.IsValid() {
 		return errors.New("invalid app")

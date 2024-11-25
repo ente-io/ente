@@ -2,13 +2,11 @@ import { clientPackageName } from "@/base/app";
 import { assertionFailed } from "@/base/assert";
 import { isHTTP4xxError } from "@/base/http";
 import { getKVN } from "@/base/kv";
-import { ensureAuthToken } from "@/base/local-user";
 import log from "@/base/log";
 import type { ElectronMLWorker } from "@/base/types/ipc";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { wait } from "@/utils/promise";
 import { expose, wrap } from "comlink";
-import downloadManager from "../download";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import type { UploadItem } from "../upload/types";
 import {
@@ -130,12 +128,9 @@ export class MLWorker {
      * @param delegate The {@link MLWorkerDelegate} the worker can use to inform
      * the main thread of interesting events.
      */
-    async init(port: MessagePort, delegate: MLWorkerDelegate) {
+    init(port: MessagePort, delegate: MLWorkerDelegate) {
         this.electron = wrap<ElectronMLWorker>(port);
         this.delegate = delegate;
-        // Initialize the downloadManager running in the web worker with the
-        // user's token. It'll be used to download files to index if needed.
-        await downloadManager.init(await ensureAuthToken());
     }
 
     /**

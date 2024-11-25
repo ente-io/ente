@@ -5,7 +5,6 @@ import (
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/ente/details"
 	bonus "github.com/ente-io/museum/ente/storagebonus"
-	"github.com/ente-io/museum/pkg/utils/recover"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
@@ -27,6 +26,7 @@ func (c *UserController) GetDetailsV2(ctx *gin.Context, userID int64, fetchMemor
 	var familyData *ente.FamilyMemberResponse
 	var subscription *ente.Subscription
 	var canDisableEmailMFA bool
+	var passkeyCount int64
 	var fileCount, sharedCollectionCount, usage int64
 	var bonus *bonus.ActiveStorageBonus
 	g.Go(func() error {
@@ -69,7 +69,12 @@ func (c *UserController) GetDetailsV2(ctx *gin.Context, userID int64, fetchMemor
 		return nil
 	})
 	g.Go(func() error {
-		return recover.Int64ToInt64RecoverWrapper(userID, c.FileRepo.GetUsage, &usage)
+		cnt, err := c.PasskeyRepo.GetPasskeyCount(userID)
+		if err != nil {
+			return stacktrace.Propagate(err, "")
+		}
+		passkeyCount = cnt
+		return nil
 	})
 
 	if fetchMemoryCount {
@@ -111,6 +116,7 @@ func (c *UserController) GetDetailsV2(ctx *gin.Context, userID int64, fetchMemor
 			CanDisableEmailMFA: canDisableEmailMFA,
 			IsEmailMFAEnabled:  *user.IsEmailMFAEnabled,
 			IsTwoFactorEnabled: *user.IsTwoFactorEnabled,
+			PasskeyCount:       passkeyCount,
 		},
 		BonusData: bonus,
 	}

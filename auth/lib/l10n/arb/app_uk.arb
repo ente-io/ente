@@ -45,7 +45,7 @@
   "timeBasedKeyType": "На основі часу (TOTP)",
   "counterBasedKeyType": "На основі лічильника (HOTP)",
   "saveAction": "Зберегти",
-  "nextTotpTitle": "далі",
+  "nextTotpTitle": "наступний",
   "deleteCodeTitle": "Видалити код?",
   "deleteCodeMessage": "Ви впевнені, що хочете видалити цей код? Ця дія є незворотною.",
   "trashCode": "Смітник?",

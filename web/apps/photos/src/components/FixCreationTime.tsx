@@ -1,6 +1,7 @@
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import log from "@/base/log";
+import { downloadManager } from "@/gallery/services/download";
 import { fileLogID, type EnteFile } from "@/media/file";
 import {
     decryptPublicMagicMetadata,
@@ -10,7 +11,6 @@ import {
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
-import downloadManager from "@/new/photos/services/download";
 import { extractExifDates } from "@/new/photos/services/exif";
 import {
     Box,
@@ -324,8 +324,7 @@ const updateEnteFileDate = async (
             timestamp: customDate!.timestamp,
         };
     } else if (enteFile.metadata.fileType == FileType.image) {
-        const stream = await downloadManager.getFile(enteFile);
-        const blob = await new Response(stream).blob();
+        const blob = await downloadManager.fileBlob(enteFile);
         const file = new File([blob], enteFile.metadata.title);
         const { DateTimeOriginal, DateTimeDigitized, MetadataDate, DateTime } =
             await extractExifDates(file);

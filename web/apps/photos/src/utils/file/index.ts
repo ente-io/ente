@@ -2,6 +2,7 @@ import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
+import { downloadManager } from "@/gallery/services/download";
 import { detectFileTypeInfo } from "@/gallery/utils/detect-type";
 import { writeStream } from "@/gallery/utils/native-stream";
 import {
@@ -17,7 +18,6 @@ import {
 import { ItemVisibility } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import DownloadManager from "@/new/photos/services/download";
 import {
     isArchivedFile,
     updateMagicMetadata,
@@ -56,9 +56,7 @@ export enum FILE_OPS_TYPE {
 
 export async function downloadFile(file: EnteFile) {
     try {
-        let fileBlob = await new Response(
-            await DownloadManager.getFile(file),
-        ).blob();
+        let fileBlob = await downloadManager.fileBlob(file);
         if (file.metadata.fileType === FileType.livePhoto) {
             const { imageFileName, imageData, videoFileName, videoData } =
                 await decodeLivePhoto(file.metadata.title, fileBlob);
@@ -392,7 +390,7 @@ async function downloadFileDesktop(
 ) {
     const fs = electron.fs;
 
-    const stream = await DownloadManager.getFile(file);
+    const stream = await downloadManager.fileStream(file);
 
     if (file.metadata.fileType === FileType.livePhoto) {
         const fileBlob = await new Response(stream).blob();

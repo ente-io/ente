@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/errors.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/account/two_factor.dart";
 import 'package:photos/services/user_service.dart';
@@ -91,13 +92,13 @@ class _PasskeyPageState extends State<PasskeyPage> {
       if (mounted && link.toLowerCase().startsWith("ente://passkey")) {
         if (Configuration.instance.isLoggedIn()) {
           _logger.info('ignored deeplink: already configured');
-          showToast(context, 'Account is already configured.');
+          showToast(context, S.of(context).accountIsAlreadyConfigured);
           return;
         }
         final parsedUri = Uri.parse(link);
         final sessionID = parsedUri.queryParameters['passkeySessionID'];
         if (sessionID != widget.sessionID) {
-          showToast(context, "Session ID mismatch");
+          showToast(context, S.of(context).sessionIdMismatch);
           _logger.warning('ignored deeplink: sessionID mismatch');
           return;
         }
