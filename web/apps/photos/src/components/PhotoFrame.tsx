@@ -226,33 +226,6 @@ const PhotoFrame = ({
             return true;
         };
 
-    // Return true if the URL was updated (for the given params), and false
-    // otherwise.
-    const updateSourceURL = (
-        index: number,
-        id: number,
-        srcURLs: SourceURLs,
-        overwrite: boolean,
-    ) => {
-        const file = displayFiles[index];
-        // This is to prevent outdated call from updating the wrong file.
-        if (file.id !== id) {
-            log.info(
-                `Ignoring stale updateSourceURL for display file at index ${index} (file ID ${file.id}, expected ${id})`,
-            );
-            throw Error("Update URL file id mismatch");
-        }
-        if (file.isSourceLoaded && !overwrite) {
-            return false;
-        } else if (file.conversionFailed) {
-            log.info(`[${id}]PhotoSwipe: updateSrcURL: conversion failed`);
-            throw Error("file conversion failed");
-        }
-
-        updateDisplayFileSource(file, srcURLs, enableDownload);
-        return true;
-    };
-
     const handleClose = (needUpdate) => {
         setOpen(false);
         needUpdate && syncWithRemote();
@@ -457,14 +430,21 @@ const PhotoFrame = ({
         srcURL: SourceURLs,
         overwrite: boolean,
     ) => {
-        if (updateSourceURL(index, item.id, srcURL, overwrite)) {
+        const file = displayFiles[index];
+        // This is to prevent outdated call from updating the wrong file.
+        if (file.id !== item.id) {
             log.info(
-                `[${item.id}] calling invalidateCurrItems for src, source loaded: ${item.isSourceLoaded}`,
+                `Ignoring stale updateSourceURL for display file at index ${index} (file ID ${file.id}, expected ${item.id})`,
             );
-            instance.invalidateCurrItems();
-            if ((instance as any).isOpen()) {
-                instance.updateSize(true);
-            }
+            throw new Error("Update URL file id mismatch");
+        }
+        if (file.isSourceLoaded && !overwrite) return;
+        if (file.conversionFailed) throw new Error("File conversion failed");
+
+        updateDisplayFileSource(file, srcURL, enableDownload);
+        instance.invalidateCurrItems();
+        if ((instance as any).isOpen()) {
+            instance.updateSize(true);
         }
     };
 
