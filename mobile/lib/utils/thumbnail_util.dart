@@ -161,12 +161,12 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   final file = item.file;
   Uint8List encryptedThumbnail;
   try {
-    if (await CollectionsService.instance
-        .isPublicCollection(file.collectionID!)) {
+    if (CollectionsService.instance
+        .isSharedPublicCollection(file.collectionID!)) {
       final authToken = await CollectionsService.instance
-          .getPublicAlbumToken(file.collectionID!);
+          .getSharedPublicAlbumToken(file.collectionID!);
       final authJWTToken = await CollectionsService.instance
-          .getPublicAlbumTokenJWT(file.collectionID!);
+          .getSharedPublicAlbumTokenJWT(file.collectionID!);
 
       final headers = {
         "X-Auth-Access-Token": authToken,

@@ -263,8 +263,8 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Future<void> _handlePublicAlbumLink(Uri uri) async {
     try {
-      final Collection collection =
-          await CollectionsService.instance.getPublicCollection(context, uri);
+      final Collection collection = await CollectionsService.instance
+          .getCollectionFromPublicLink(context, uri);
 
       if (collection.owner!.id! == Configuration.instance.getUserID()) {
         await routeToPage(

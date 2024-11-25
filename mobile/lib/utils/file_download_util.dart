@@ -39,7 +39,7 @@ Future<File?> downloadAndDecryptPublicFile(
 
   try {
     final authJWTToken = await CollectionsService.instance
-        .getPublicAlbumTokenJWT(file.collectionID!);
+        .getSharedPublicAlbumTokenJWT(file.collectionID!);
 
     final headers = {
       "X-Auth-Access-Token": authToken,
@@ -98,9 +98,9 @@ Future<File?> downloadAndDecrypt(
   ProgressCallback? progressCallback,
 }) async {
   if (await CollectionsService.instance
-      .isPublicCollection(file.collectionID!)) {
+      .isSharedPublicCollection(file.collectionID!)) {
     final authToken = await CollectionsService.instance
-        .getPublicAlbumToken(file.collectionID!);
+        .getSharedPublicAlbumToken(file.collectionID!);
 
     return await downloadAndDecryptPublicFile(
       file,

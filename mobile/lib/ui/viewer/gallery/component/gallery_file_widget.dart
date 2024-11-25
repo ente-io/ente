@@ -40,8 +40,8 @@ class GalleryFileWidget extends StatelessWidget {
     final isFileSelected = selectedFiles?.isFileSelected(file) ?? false;
     bool isPublicFile = false;
     if (file.collectionID != null) {
-      isPublicFile =
-          CollectionsService.instance.isPublicCollection(file.collectionID!);
+      isPublicFile = CollectionsService.instance
+          .isSharedPublicCollection(file.collectionID!);
     }
     Color selectionColor = Colors.white;
     if (isFileSelected && file.isUploaded && file.ownerID != currentUserID) {

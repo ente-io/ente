@@ -1044,7 +1044,10 @@ class CollectionsService {
     }
   }
 
-  Future<Collection> getPublicCollection(BuildContext context, Uri uri) async {
+  Future<Collection> getCollectionFromPublicLink(
+    BuildContext context,
+    Uri uri,
+  ) async {
     final String? authToken = uri.queryParameters["t"];
     final String albumKey = uri.fragment;
     try {
@@ -1088,9 +1091,9 @@ class CollectionsService {
   Future<bool> verifyPublicCollectionPassword(
     BuildContext context,
     String passwordHash,
-    int collectioID,
+    int collectionID,
   ) async {
-    final authToken = await getPublicAlbumToken(collectioID);
+    final authToken = await getSharedPublicAlbumToken(collectionID);
     try {
       final response = await _enteDio.post(
         "https://api.ente.io/public-collection/verify-password",
@@ -1104,7 +1107,7 @@ class CollectionsService {
       );
       final jwtToken = response.data["jwtToken"];
       if (response.statusCode == 200) {
-        await setPublicAlbumTokenJWT(collectioID, jwtToken);
+        await setPublicAlbumTokenJWT(collectionID, jwtToken);
         return true;
       }
       return false;
@@ -1119,28 +1122,29 @@ class CollectionsService {
     }
   }
 
-  Future<String> getPublicAlbumKey(int collectionID) async {
+  Future<String> getSharedPublicAlbumKey(int collectionID) async {
     if (_cachedPublicAlbumKey.containsKey(collectionID)) {
       return _cachedPublicAlbumKey[collectionID]!;
     }
     return "";
   }
 
-  Future<String?> getPublicAlbumToken(int collectionID) async {
+  Future<String?> getSharedPublicAlbumToken(int collectionID) async {
     if (_cachedPublicAlbumToken.containsKey(collectionID)) {
       return _cachedPublicAlbumToken[collectionID];
     }
     return null;
   }
 
-  Future<String?> getPublicAlbumTokenJWT(int collectionID) async {
+  Future<String?> getSharedPublicAlbumTokenJWT(int collectionID) async {
     if (_cachedPublicAlbumJWT.containsKey(collectionID)) {
       return _cachedPublicAlbumJWT[collectionID];
     }
     return null;
   }
 
-  bool isPublicCollection(int collectionID) {
+  /// Is a public link opened in the app
+  bool isSharedPublicCollection(int collectionID) {
     return _cachedPublicCollectionID.contains(collectionID);
   }
 

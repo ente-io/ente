@@ -23,10 +23,10 @@ class DiffFetcher {
     int collectionID,
   ) async {
     try {
-      final authToken =
-          await CollectionsService.instance.getPublicAlbumToken(collectionID);
+      final authToken = await CollectionsService.instance
+          .getSharedPublicAlbumToken(collectionID);
       final authJWTToken = await CollectionsService.instance
-          .getPublicAlbumTokenJWT(collectionID);
+          .getSharedPublicAlbumTokenJWT(collectionID);
 
       final headers = {
         "X-Auth-Access-Token": authToken,
