@@ -410,28 +410,13 @@ const PhotoFrame = ({
                     url: { video: videoURL, image: imageURL },
                     type: "livePhoto",
                 };
-                try {
-                    const updated = updateSourceURL(
-                        index,
-                        item.id,
-                        loadedLivePhotoSrcURL,
-                        true,
-                    );
-                    if (updated) {
-                        log.info(
-                            `[${item.id}] calling invalidateCurrItems for live photo complete, source loaded: ${item.isSourceLoaded}`,
-                        );
-                        instance.invalidateCurrItems();
-                        if ((instance as any).isOpen()) {
-                            instance.updateSize(true);
-                        }
-                    }
-                } catch (e) {
-                    log.error(
-                        "updating photoswipe for live photo complete update failed",
-                        e,
-                    );
-                }
+                updateSource(
+                    instance,
+                    index,
+                    item,
+                    loadedLivePhotoSrcURL,
+                    true,
+                );
             } else {
                 updateSource(instance, index, item, srcURLs, false);
             }
