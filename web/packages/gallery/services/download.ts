@@ -55,7 +55,15 @@ export interface SourceURLs {
     mimeType?: string;
 }
 
-class DownloadManagerImpl {
+/**
+ * A class that tracks the state of in-progress downloads and conversions,
+ * including caching them for subsequent retrieval if appropriate.
+ *
+ * External code can use it via its singleton instance, {@link downloadManager}.
+ * The class will initialize itself on first use, however {@link logout} should
+ * be called on logout to reset its internal state.
+ */
+class DownloadManager {
     /**
      * Credentials that should be used to download files when we're in the
      * context of the public albums app.
@@ -121,6 +129,9 @@ class DownloadManagerImpl {
         }
     }
 
+    /**
+     * Reset the internal state of the download manager.
+     */
     logout() {
         this.publicAlbumsCredentials = undefined;
         this.thumbnailURLPromises.clear();
@@ -480,9 +491,10 @@ class DownloadManagerImpl {
     }
 }
 
-const DownloadManager = new DownloadManagerImpl();
-
-export default DownloadManager;
+/**
+ * Singleton instance of {@link DownloadManager}.
+ */
+export const downloadManager = new DownloadManager();
 
 async function getRenderableFileURL(
     file: EnteFile,
@@ -540,6 +552,8 @@ async function getRenderableFileURL(
     }
 
     // TODO: Can we remove this non-null assertion and reflect it in the types?
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     return {
         url: url!,
         type,

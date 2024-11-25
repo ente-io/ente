@@ -8,9 +8,9 @@ import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
+import { downloadManager } from "@/gallery/services/download";
 import { EnteFile } from "@/media/file";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
-import downloadManager from "@/new/photos/services/download";
 import { AppContext } from "@/new/photos/types/context";
 import {
     CenteredFlex,

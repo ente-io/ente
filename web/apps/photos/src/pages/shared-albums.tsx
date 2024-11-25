@@ -9,6 +9,7 @@ import {
 } from "@/base/components/utils/hooks";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
+import { downloadManager } from "@/gallery/services/download";
 import { updateShouldDisableCFUploadProxy } from "@/gallery/upload";
 import type { Collection } from "@/media/collection";
 import { type EnteFile, mergeMetadata } from "@/media/file";
@@ -20,7 +21,6 @@ import {
     ALL_SECTION,
     isHiddenCollection,
 } from "@/new/photos/services/collection";
-import downloadManager from "@/new/photos/services/download";
 import { sortFiles } from "@/new/photos/services/files";
 import { useAppContext } from "@/new/photos/types/context";
 import {
