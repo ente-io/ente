@@ -9,7 +9,7 @@ import {
 import {
     authenticatedRequestHeaders,
     clientPackageHeader,
-    ensureOk,
+    retryEnsuringHTTPOk,
 } from "@/base/http";
 import { ensureAuthToken } from "@/base/local-user";
 import log from "@/base/log";
@@ -18,7 +18,6 @@ import {
     playableVideoBlob,
     renderableImageBlob,
 } from "@/gallery/utils/convert";
-import { retryAsyncOperation } from "@/gallery/utils/retry-async";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
@@ -588,16 +587,6 @@ async function getRenderableLivePhotoURL(
         video: getRenderableLivePhotoVideoURL,
     };
 }
-
-/**
- * A helper function to adapt {@link retryAsyncOperation} for HTTP fetches.
- */
-const retryEnsuringHTTPOk = (request: () => Promise<Response>) =>
-    retryAsyncOperation(async () => {
-        const r = await request();
-        ensureOk(r);
-        return r;
-    });
 
 /**
  * The various photos_* functions are used for the actual downloads when
