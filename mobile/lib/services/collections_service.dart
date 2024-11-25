@@ -71,6 +71,7 @@ class CollectionsService {
   final _cachedPublicAlbumToken = <int, String>{};
   final _cachedPublicAlbumJWTToken = <int, String>{};
   final _cachedPublicCollectionID = <int>[];
+  final _cachedPublicAlbumKey = <String, String>{};
 
   CollectionsService._privateConstructor() {
     _db = CollectionsDB.instance;
@@ -183,6 +184,7 @@ class CollectionsService {
     _cachedPublicAlbumJWTToken.clear();
     _cachedPublicCollectionID.clear();
     _cachedKeys.clear();
+    _cachedPublicAlbumKey.clear();
   }
 
   Future<Map<int, int>> getCollectionIDsToBeSynced() async {
@@ -1059,6 +1061,7 @@ class CollectionsService {
       _cachedKeys[collection.id] = collectionKey;
       _cachedPublicAlbumToken[collection.id] = authToken!;
       _cachedPublicCollectionID.add(collection.id);
+      _cachedPublicAlbumKey[authToken] = albumKey;
       collection.setName(_getDecryptedCollectionName(collection));
       return collection;
     } catch (e, s) {
@@ -1112,6 +1115,13 @@ class CollectionsService {
       );
       return false;
     }
+  }
+
+  Future<String> getPublicAlbumKey(String authToken) async {
+    if (_cachedPublicAlbumKey.containsKey(authToken)) {
+      return _cachedPublicAlbumKey[authToken]!;
+    }
+    return "";
   }
 
   Future<String?> getPublicAlbumToken(int collectionID) async {

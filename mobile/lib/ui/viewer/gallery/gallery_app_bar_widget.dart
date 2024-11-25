@@ -33,6 +33,7 @@ import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/cast/auto.dart";
 import "package:photos/ui/cast/choose.dart";
 import "package:photos/ui/common/popup_item.dart";
+import "package:photos/ui/common/web_page.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
@@ -844,7 +845,24 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   Future<void> _showAddPhotoDialog(BuildContext bContext) async {
     final collection = widget.collection;
     try {
-      await showAddPhotosSheet(bContext, collection!);
+      if (galleryType == GalleryType.sharedPublicCollection &&
+          collection!.isEnableCollect()) {
+        final authToken = await CollectionsService.instance
+            .getPublicAlbumToken(collection.id);
+        final albumKey =
+            await CollectionsService.instance.getPublicAlbumKey(authToken!);
+
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => WebPage(
+              widget.title ?? "",
+              "https://albums.ente.sh/?t=$authToken#$albumKey",
+            ),
+          ),
+        );
+      } else {
+        await showAddPhotosSheet(bContext, collection!);
+      }
     } catch (e, s) {
       _logger.severe(e, s);
       await showGenericErrorDialog(context: bContext, error: e);
