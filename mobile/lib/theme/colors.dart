@@ -12,7 +12,6 @@ class EnteColorScheme {
   final Color backdropBase;
   final Color backdropMuted;
   final Color backdropFaint;
-  final Color xdaColor;
 
 
   // Text Colors
@@ -66,7 +65,6 @@ class EnteColorScheme {
       this.backdropBase,
       this.backdropMuted,
       this.backdropFaint,
-      this.xdaColor,
       this.textBase,
       this.textMuted,
       this.textFaint,
@@ -111,7 +109,6 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   backdropBaseLight,
   backdropMutedLight,
   backdropFaintLight,
-  Color(0xFF1224D3),
   textBaseLight,
   textMutedLight,
   textFaintLight,
@@ -135,10 +132,10 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   fixedStrokeMutedWhite,
   strokeSolidMutedLight,
   strokeSolidFaintLight,
-  Color.fromRGBO(13, 71, 161, 1),    // primary700 - Dark Blue
-  Color.fromRGBO(25, 118, 210, 1),   // primary500 - Medium Blue
-  Color.fromRGBO(33, 150, 243, 1),   // primary400 - Light Blue
-  Color.fromRGBO(66, 165, 245, 1),   // primary300 - Very Light Blue
+  _primary700,
+  _primary500,
+  _primary400,
+  _primary300,
   _warning700,
   _warning500,
   _warning400,
@@ -155,7 +152,6 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   backdropBaseDark,
   backdropMutedDark,
   backdropFaintDark,
-  Color(0xFF590000),
   textBaseDark,
   textMutedDark,
   textFaintDark,
@@ -199,7 +195,6 @@ const EnteColorScheme enteDarkScheme = EnteColorScheme(
   backdropBaseDark,
   backdropMutedDark,
   backdropFaintDark,
-  Color(0xFF590000),
   textBaseDark,
   textMutedDark,
   textFaintDark,
@@ -237,180 +232,349 @@ const EnteColorScheme enteDarkScheme = EnteColorScheme(
 );
 
 const EnteColorScheme greenLightScheme = EnteColorScheme(
-  Color(0xFFE8F5E9),
-  Color(0xFFC8E6C9),
-  Color(0xFFA5D6A7),
-  Color(0xFF81C784),
-  Color(0xFF66BB6A),
-  Color(0xFF4CAF50),
-  Color(0xBDD56060),
-  Color(0xFF2E7D32),
-  Color(0xFF388E3C),
-  Color(0xFF43A047),
-  Color(0xFF2E7D32),
-  Color(0xFF4CAF50),
-  Color(0xFF43A047),
-  Color(0xFF388E3C),
-  Color(0xFF66BB6A),
-  Color(0xFFA5D6A7),
-  Color(0xFF81C784),
-  Color(0xFFC8E6C9),
-  Color(0xFF4CAF50),
-  Color(0xFF66BB6A),
-  Color(0xFFA5D6A7),
-  Color(0xFFC8E6C9),
-  Color(0xFF4CAF50),
-  Color(0xFF66BB6A),
-  Color(0xFF43A047),
-  Color(0xFF2E7D32),
-  avatarLight,
-  fixedStrokeMutedWhite,
-  strokeSolidMutedLight,
-  strokeSolidFaintLight,
-  Color(0xFF2E7D32),  // primary700 - Dark Green
-  Color(0xFF388E3C),  // primary500 - Medium Green
-  Color(0xFF43A047),  // primary400 - Light Green
-  Color(0xFF66BB6A),  // primary300 - Very Light Green
-  Color(0xFFD32F2F),  // warning700
-  Color(0xFFE53935),  // warning500
-  Color(0xFFEF5350),  // warning400
-  Color(0xFFC62828),  // warning800
-  Color(0xFFFFB300),  // caution500
-  Color(0xFFFFB300),  // golden700
-  Color(0xFFFFCA28),  // golden500
+  Color.fromRGBO(240, 255, 240, 1),    // backgroundBase
+  Color.fromRGBO(245, 255, 245, 1),    // backgroundElevated
+  Color.fromRGBO(251, 255, 251, 1),    // backgroundElevated2
+  Color.fromRGBO(240, 255, 240, 0.92), // backdropBase
+  Color.fromRGBO(240, 255, 240, 0.75), // backdropMuted
+  Color.fromRGBO(240, 255, 240, 0.30), // backdropFaint
+  Color.fromRGBO(27, 94, 32, 1),       // textBase
+  Color.fromRGBO(46, 125, 50, 0.6),    // textMuted
+  Color.fromRGBO(56, 142, 60, 0.5),    // textFaint
+  Color.fromRGBO(67, 160, 71, 0.65),   // blurTextBase
+  Color.fromRGBO(76, 175, 80, 1),      // fillBase
+  Color.fromRGBO(102, 187, 106, 0.87), // fillBasePressed
+  Color.fromRGBO(129, 199, 132, 0.24), // fillStrong
+  Color.fromRGBO(165, 214, 167, 0.12), // fillMuted
+  Color.fromRGBO(76, 175, 80, 0.3),    // fillFaint
+  Color.fromRGBO(102, 187, 106, 0.08), // fillFaintPressed
+  Color.fromRGBO(242, 255, 242, 1),    // fillBaseGrey
+  Color.fromRGBO(27, 94, 32, 1),       // strokeBase
+  Color.fromRGBO(46, 125, 50, 0.24),   // strokeMuted
+  Color.fromRGBO(56, 142, 60, 0.12),   // strokeFaint
+  Color.fromRGBO(67, 160, 71, 0.06),   // strokeFainter
+  Color.fromRGBO(76, 175, 80, 0.65),   // blurStrokeBase
+  Color.fromRGBO(102, 187, 106, 0.08), // blurStrokeFaint
+  Color.fromRGBO(129, 199, 132, 0.50), // blurStrokePressed
+  Color.fromRGBO(27, 94, 32, 0.85),    // tabIcon
+  avatarLight,                         // avatarColors
+  fixedStrokeMutedWhite,               // fixedStrokeMutedWhite
+  strokeSolidMutedLight,               // strokeSolidMuted
+  strokeSolidFaintLight,               // strokeSolidFaint
+  Color.fromRGBO(27, 94, 32, 1),       // primary700
+  Color.fromRGBO(46, 125, 50, 1),      // primary500
+  Color.fromRGBO(56, 142, 60, 1),      // primary400
+  Color.fromRGBO(67, 160, 71, 1),      // primary300
+  Color.fromRGBO(211, 47, 47, 1),      // warning700
+  Color.fromRGBO(229, 57, 53, 1),      // warning500
+  Color.fromRGBO(239, 83, 80, 1),      // warning400
+  Color.fromRGBO(198, 40, 40, 1),      // warning800
+  Color.fromRGBO(255, 179, 0, 1),      // caution500
+  Color.fromRGBO(255, 179, 0, 1),      // golden700
+  Color.fromRGBO(255, 202, 40, 1),     // golden500
 );
 
 const EnteColorScheme redDarkScheme = EnteColorScheme(
-  Color(0xFF1A0000),
-  Color(0xFF260000),
-  Color(0xFF330000),
-  Color(0xFF400000),
-  Color(0xFF4D0000),
-  Color(0xFF590000),
-  Color(0xC8289F20),
-  Color(0xFFFFCDD2),
-  Color(0xFFEF9A9A),
-  Color(0xFFE57373),
-  Color(0xFFFFCDD2),
-  Color(0xFFE53935),
-  Color(0xFFD32F2F),
-  Color(0xFFC62828),
-  Color(0xFFEF5350),
-  Color(0xFFE57373),
-  Color(0xFFEF9A9A),
-  Color(0xFF4D0000),
-  Color(0xFFE53935),
-  Color(0xFFEF5350),
-  Color(0xFFE57373),
-  Color(0xFFEF9A9A),
-  Color(0xFFE53935),
-  Color(0xFFEF5350),
-  Color(0xFFD32F2F),
-  Color(0xFFEF5350),
-  avatarDark,
-  fixedStrokeMutedWhite,
-  strokeSolidMutedLight,
-  strokeSolidFaintLight,
-  Color(0xFFB71C1C),  // primary700 - Dark Red
-  Color(0xFFC62828),  // primary500 - Medium Red
-  Color(0xFFD32F2F),  // primary400 - Light Red
-  Color(0xFFE53935),  // primary300 - Very Light Red
-  Color(0xFF8B0000),  // warning700
-  Color(0xFFA00000),  // warning500
-  Color(0xFFB71C1C),  // warning400
-  Color(0xFF7B1FA2),  // warning800
-  Color(0xFFFF6F00),  // caution500
-  Color(0xFFFF8F00),  // golden700
-  Color(0xFFFFB300),  // golden500
+  Color.fromRGBO(31, 10, 10, 1),       // backgroundBase
+  Color.fromRGBO(41, 19, 19, 1),       // backgroundElevated
+  Color.fromRGBO(51, 27, 27, 1),       // backgroundElevated2
+  Color.fromRGBO(31, 10, 10, 0.90),    // backdropBase
+  Color.fromRGBO(41, 19, 19, 0.65),    // backdropMuted
+  Color.fromRGBO(51, 27, 27, 0.20),    // backdropFaint
+  Color.fromRGBO(239, 154, 154, 1),    // textBase
+  Color.fromRGBO(229, 115, 115, 0.7),  // textMuted
+  Color.fromRGBO(239, 83, 80, 0.5),    // textFaint
+  Color.fromRGBO(239, 154, 154, 0.95), // blurTextBase
+  Color.fromRGBO(211, 47, 47, 1),      // fillBase
+  Color.fromRGBO(198, 40, 40, 0.9),    // fillBasePressed
+  Color.fromRGBO(229, 57, 53, 0.32),   // fillStrong
+  Color.fromRGBO(239, 83, 80, 0.16),   // fillMuted
+  Color.fromRGBO(244, 67, 54, 0.3),    // fillFaint
+  Color.fromRGBO(229, 115, 115, 0.06), // fillFaintPressed
+  Color.fromRGBO(51, 27, 27, 1),       // fillBaseGrey
+  Color.fromRGBO(211, 47, 47, 1),      // strokeBase
+  Color.fromRGBO(198, 40, 40, 0.24),   // strokeMuted
+  Color.fromRGBO(229, 57, 53, 0.16),   // strokeFaint
+  Color.fromRGBO(239, 83, 80, 0.08),   // strokeFainter
+  Color.fromRGBO(211, 47, 47, 0.90),   // blurStrokeBase
+  Color.fromRGBO(198, 40, 40, 0.06),   // blurStrokeFaint
+  Color.fromRGBO(229, 57, 53, 0.50),   // blurStrokePressed
+  Color.fromRGBO(239, 154, 154, 0.80), // tabIcon
+  avatarDark,                          // avatarColors
+  fixedStrokeMutedWhite,              // fixedStrokeMutedWhite
+  strokeSolidMutedLight,              // strokeSolidMuted
+  strokeSolidFaintLight,              // strokeSolidFaint
+  Color.fromRGBO(183, 28, 28, 1),     // primary700
+  Color.fromRGBO(198, 40, 40, 1),     // primary500
+  Color.fromRGBO(211, 47, 47, 1),     // primary400
+  Color.fromRGBO(229, 57, 53, 1),     // primary300
+  Color.fromRGBO(211, 47, 47, 1),     // warning700
+  Color.fromRGBO(229, 57, 53, 1),     // warning500
+  Color.fromRGBO(239, 83, 80, 1),     // warning400
+  Color.fromRGBO(198, 40, 40, 1),     // warning800
+  Color.fromRGBO(255, 179, 0, 1),     // caution500
+  Color.fromRGBO(255, 179, 0, 1),     // golden700
+  Color.fromRGBO(255, 202, 40, 1),    // golden500
 );
 
 const EnteColorScheme greenDarkScheme = EnteColorScheme(
-  Color(0xFF0A1F0A),  // Very dark green background
-  Color(0xFF132913),
-  Color(0xFF1B331B),
-  Color(0xFF0A1F0A),
-  Color(0xFF132913),
-  Color(0xFF1B331B),
-  Color(0xFF512727),
-  Color(0xFFA5D6A7),  // Light text for dark theme
-  Color(0xFF81C784),
-  Color(0xFF66BB6A),
-  Color(0xFFA5D6A7),
-  Color(0xFF2E7D32),
-  Color(0xFF1B5E20),
-  Color(0xFF388E3C),
-  Color(0xFF43A047),
-  Color(0xFF4CAF50),
-  Color(0xFF66BB6A),
-  Color(0xFF1B331B),
-  Color(0xFF2E7D32),
-  Color(0xFF388E3C),
-  Color(0xFF43A047),
-  Color(0xFF4CAF50),
-  Color(0xFF2E7D32),
-  Color(0xFF388E3C),
-  Color(0xFF1B5E20),
-  Color(0xFF81C784),
-  avatarDark,
-  fixedStrokeMutedWhite,
-  strokeSolidMutedLight,
-  strokeSolidFaintLight,
-  Color(0xFF1B5E20),  // primary700 - Darkest Green
-  Color(0xFF2E7D32),  // primary500 - Dark Green
-  Color(0xFF388E3C),  // primary400 - Medium Green
-  Color(0xFF43A047),  // primary300 - Light Green
-  Color(0xFFD32F2F),  // warning700
-  Color(0xFFE53935),  // warning500
-  Color(0xFFEF5350),  // warning400
-  Color(0xFFC62828),  // warning800
-  Color(0xFFFFB300),  // caution500
-  Color(0xFFFFB300),  // golden700
-  Color(0xFFFFCA28),  // golden500
+  Color.fromRGBO(10, 31, 10, 1),       // backgroundBase
+  Color.fromRGBO(19, 41, 19, 1),       // backgroundElevated
+  Color.fromRGBO(27, 51, 27, 1),       // backgroundElevated2
+  Color.fromRGBO(10, 31, 10, 0.90),    // backdropBase
+  Color.fromRGBO(19, 41, 19, 0.65),    // backdropMuted
+  Color.fromRGBO(27, 51, 27, 0.20),    // backdropFaint
+  Color.fromRGBO(165, 214, 167, 1),    // textBase
+  Color.fromRGBO(129, 199, 132, 0.7),  // textMuted
+  Color.fromRGBO(102, 187, 106, 0.5),  // textFaint
+  Color.fromRGBO(165, 214, 167, 0.95), // blurTextBase
+  Color.fromRGBO(46, 125, 50, 1),      // fillBase
+  Color.fromRGBO(27, 94, 32, 0.9),     // fillBasePressed
+  Color.fromRGBO(56, 142, 60, 0.32),   // fillStrong
+  Color.fromRGBO(67, 160, 71, 0.16),   // fillMuted
+  Color.fromRGBO(76, 175, 80, 0.3),    // fillFaint
+  Color.fromRGBO(102, 187, 106, 0.06), // fillFaintPressed
+  Color.fromRGBO(27, 51, 27, 1),       // fillBaseGrey
+  Color.fromRGBO(46, 125, 50, 1),      // strokeBase
+  Color.fromRGBO(56, 142, 60, 0.24),   // strokeMuted
+  Color.fromRGBO(67, 160, 71, 0.16),   // strokeFaint
+  Color.fromRGBO(76, 175, 80, 0.08),   // strokeFainter
+  Color.fromRGBO(46, 125, 50, 0.90),   // blurStrokeBase
+  Color.fromRGBO(56, 142, 60, 0.06),   // blurStrokeFaint
+  Color.fromRGBO(27, 94, 32, 0.50),    // blurStrokePressed
+  Color.fromRGBO(129, 199, 132, 0.80), // tabIcon
+  avatarDark,                          // avatarColors
+  fixedStrokeMutedWhite,              // fixedStrokeMutedWhite
+  strokeSolidMutedLight,              // strokeSolidMuted
+  strokeSolidFaintLight,              // strokeSolidFaint
+  Color.fromRGBO(27, 94, 32, 1),      // primary700
+  Color.fromRGBO(46, 125, 50, 1),     // primary500
+  Color.fromRGBO(56, 142, 60, 1),     // primary400
+  Color.fromRGBO(67, 160, 71, 1),     // primary300
+  Color.fromRGBO(211, 47, 47, 1),     // warning700
+  Color.fromRGBO(229, 57, 53, 1),     // warning500
+  Color.fromRGBO(239, 83, 80, 1),     // warning400
+  Color.fromRGBO(198, 40, 40, 1),     // warning800
+  Color.fromRGBO(255, 179, 0, 1),     // caution500
+  Color.fromRGBO(255, 179, 0, 1),     // golden700
+  Color.fromRGBO(255, 202, 40, 1),    // golden500
 );
 
 const EnteColorScheme redLightScheme = EnteColorScheme(
-  Color(0xFFFFEBEE),  // Very light red background
-  Color(0xFFFFCDD2),
-  Color(0xFFEF9A9A),
-  Color(0xFFE57373),
-  Color(0xFFEF5350),
-  Color(0xFFF44336),
-  Color(0xFF2752A8),
-  Color(0xFF212121),  // Dark text for light theme
-  Color(0xFF424242),
-  Color(0xFF616161),
-  Color(0xFF212121),
-  Color(0xFFD32F2F),
-  Color(0xFFC62828),
-  Color(0xFFB71C1C),
-  Color(0xFFE53935),
-  Color(0xFFEF5350),
-  Color(0xFFE57373),
-  Color(0xFFFFCDD2),
-  Color(0xFFD32F2F),
-  Color(0xFFE53935),
-  Color(0xFFEF5350),
-  Color(0xFFE57373),
-  Color(0xFFD32F2F),
-  Color(0xFFE53935),
-  Color(0xFFC62828),
-  Color(0xFFD32F2F),
-  avatarLight,
-  fixedStrokeMutedWhite,
-  strokeSolidMutedLight,
-  strokeSolidFaintLight,
-  Color.fromRGBO(13, 71, 161, 1),    // primary700 - Dark Blue
-  Color.fromRGBO(25, 118, 210, 1),   // primary500 - Medium Blue
-  Color.fromRGBO(33, 150, 243, 1),   // primary400 - Light Blue
-  Color.fromRGBO(66, 165, 245, 1),   // primary300 - Very Light Blue
-  _warning700,
-  _warning500,
-  _warning400,
-  _warning800,
-  _caution500,
-  _golden700,
-  _golden500,
+  Color.fromRGBO(255, 240, 240, 1),    // backgroundBase
+  Color.fromRGBO(255, 245, 245, 1),    // backgroundElevated
+  Color.fromRGBO(255, 251, 251, 1),    // backgroundElevated2
+  Color.fromRGBO(255, 240, 240, 0.92), // backdropBase
+  Color.fromRGBO(255, 240, 240, 0.75), // backdropMuted
+  Color.fromRGBO(255, 240, 240, 0.30), // backdropFaint
+  Color.fromRGBO(183, 28, 28, 1),      // textBase
+  Color.fromRGBO(198, 40, 40, 0.6),    // textMuted
+  Color.fromRGBO(211, 47, 47, 0.5),    // textFaint
+  Color.fromRGBO(229, 57, 53, 0.65),   // blurTextBase
+  Color.fromRGBO(239, 83, 80, 1),      // fillBase
+  Color.fromRGBO(229, 115, 115, 0.87), // fillBasePressed
+  Color.fromRGBO(239, 154, 154, 0.24), // fillStrong
+  Color.fromRGBO(244, 67, 54, 0.12),   // fillMuted
+  Color.fromRGBO(239, 83, 80, 0.3),    // fillFaint
+  Color.fromRGBO(229, 115, 115, 0.08), // fillFaintPressed
+  Color.fromRGBO(255, 242, 242, 1),    // fillBaseGrey
+  Color.fromRGBO(183, 28, 28, 1),      // strokeBase
+  Color.fromRGBO(198, 40, 40, 0.24),   // strokeMuted
+  Color.fromRGBO(211, 47, 47, 0.12),   // strokeFaint
+  Color.fromRGBO(229, 57, 53, 0.06),   // strokeFainter
+  Color.fromRGBO(239, 83, 80, 0.65),   // blurStrokeBase
+  Color.fromRGBO(229, 115, 115, 0.08), // blurStrokeFaint
+  Color.fromRGBO(239, 154, 154, 0.50), // blurStrokePressed
+  Color.fromRGBO(183, 28, 28, 0.85),   // tabIcon
+  avatarLight,                         // avatarColors
+  fixedStrokeMutedWhite,              // fixedStrokeMutedWhite
+  strokeSolidMutedLight,              // strokeSolidMuted
+  strokeSolidFaintLight,              // strokeSolidFaint
+  Color.fromRGBO(183, 28, 28, 1),     // primary700
+  Color.fromRGBO(198, 40, 40, 1),     // primary500
+  Color.fromRGBO(211, 47, 47, 1),     // primary400
+  Color.fromRGBO(229, 57, 53, 1),     // primary300
+  Color.fromRGBO(211, 47, 47, 1),     // warning700
+  Color.fromRGBO(229, 57, 53, 1),     // warning500
+  Color.fromRGBO(239, 83, 80, 1),     // warning400
+  Color.fromRGBO(198, 40, 40, 1),     // warning800
+  Color.fromRGBO(255, 179, 0, 1),     // caution500
+  Color.fromRGBO(255, 179, 0, 1),     // golden700
+  Color.fromRGBO(255, 202, 40, 1),    // golden500
 );
+
+const EnteColorScheme blueLightScheme = EnteColorScheme(
+  Color.fromRGBO(240, 240, 255, 1),    // backgroundBase
+  Color.fromRGBO(245, 245, 255, 1),    // backgroundElevated
+  Color.fromRGBO(251, 251, 255, 1),    // backgroundElevated2
+  Color.fromRGBO(240, 240, 255, 0.92), // backdropBase
+  Color.fromRGBO(240, 240, 255, 0.75), // backdropMuted
+  Color.fromRGBO(240, 240, 255, 0.30), // backdropFaint
+  Color.fromRGBO(13, 71, 161, 1),      // textBase
+  Color.fromRGBO(25, 118, 210, 0.6),   // textMuted
+  Color.fromRGBO(33, 150, 243, 0.5),   // textFaint
+  Color.fromRGBO(66, 165, 245, 0.65),  // blurTextBase
+  Color.fromRGBO(100, 181, 246, 1),    // fillBase
+  Color.fromRGBO(144, 202, 249, 0.87), // fillBasePressed
+  Color.fromRGBO(187, 222, 251, 0.24), // fillStrong
+  Color.fromRGBO(227, 242, 253, 0.12), // fillMuted
+  Color.fromRGBO(100, 181, 246, 0.3),  // fillFaint
+  Color.fromRGBO(144, 202, 249, 0.08), // fillFaintPressed
+  Color.fromRGBO(242, 242, 255, 1),    // fillBaseGrey
+  Color.fromRGBO(13, 71, 161, 1),      // strokeBase
+  Color.fromRGBO(25, 118, 210, 0.24),  // strokeMuted
+  Color.fromRGBO(33, 150, 243, 0.12),  // strokeFaint
+  Color.fromRGBO(66, 165, 245, 0.06),  // strokeFainter
+  Color.fromRGBO(100, 181, 246, 0.65), // blurStrokeBase
+  Color.fromRGBO(144, 202, 249, 0.08), // blurStrokeFaint
+  Color.fromRGBO(187, 222, 251, 0.50), // blurStrokePressed
+  Color.fromRGBO(13, 71, 161, 0.85),   // tabIcon
+  avatarLight,                         // avatarColors
+  fixedStrokeMutedWhite,              // fixedStrokeMutedWhite
+  strokeSolidMutedLight,              // strokeSolidMuted
+  strokeSolidFaintLight,              // strokeSolidFaint
+  Color.fromRGBO(13, 71, 161, 1),     // primary700
+  Color.fromRGBO(25, 118, 210, 1),    // primary500
+  Color.fromRGBO(33, 150, 243, 1),    // primary400
+  Color.fromRGBO(66, 165, 245, 1),    // primary300
+  Color.fromRGBO(211, 47, 47, 1),     // warning700
+  Color.fromRGBO(229, 57, 53, 1),     // warning500
+  Color.fromRGBO(239, 83, 80, 1),     // warning400
+  Color.fromRGBO(198, 40, 40, 1),     // warning800
+  Color.fromRGBO(255, 179, 0, 1),     // caution500
+  Color.fromRGBO(255, 179, 0, 1),     // golden700
+  Color.fromRGBO(255, 202, 40, 1),    // golden500
+);
+
+const EnteColorScheme blueDarkScheme = EnteColorScheme(
+  Color.fromRGBO(10, 10, 31, 1),       // backgroundBase
+  Color.fromRGBO(19, 19, 41, 1),       // backgroundElevated
+  Color.fromRGBO(27, 27, 51, 1),       // backgroundElevated2
+  Color.fromRGBO(10, 10, 31, 0.90),    // backdropBase
+  Color.fromRGBO(19, 19, 41, 0.65),    // backdropMuted
+  Color.fromRGBO(27, 27, 51, 0.20),    // backdropFaint
+  Color.fromRGBO(144, 202, 249, 1),    // textBase
+  Color.fromRGBO(100, 181, 246, 0.7),  // textMuted
+  Color.fromRGBO(66, 165, 245, 0.5),   // textFaint
+  Color.fromRGBO(144, 202, 249, 0.95), // blurTextBase
+  Color.fromRGBO(25, 118, 210, 1),     // fillBase
+  Color.fromRGBO(13, 71, 161, 0.9),    // fillBasePressed
+  Color.fromRGBO(33, 150, 243, 0.32),  // fillStrong
+  Color.fromRGBO(66, 165, 245, 0.16),  // fillMuted
+  Color.fromRGBO(100, 181, 246, 0.3),  // fillFaint
+  Color.fromRGBO(144, 202, 249, 0.06), // fillFaintPressed
+  Color.fromRGBO(27, 27, 51, 1),       // fillBaseGrey
+  Color.fromRGBO(25, 118, 210, 1),     // strokeBase
+  Color.fromRGBO(33, 150, 243, 0.24),  // strokeMuted
+  Color.fromRGBO(66, 165, 245, 0.16),  // strokeFaint
+  Color.fromRGBO(100, 181, 246, 0.08), // strokeFainter
+  Color.fromRGBO(25, 118, 210, 0.90),  // blurStrokeBase
+  Color.fromRGBO(33, 150, 243, 0.06),  // blurStrokeFaint
+  Color.fromRGBO(13, 71, 161, 0.50),   // blurStrokePressed
+  Color.fromRGBO(144, 202, 249, 0.80), // tabIcon
+  avatarDark,                          // avatarColors
+  fixedStrokeMutedWhite,              // fixedStrokeMutedWhite
+  strokeSolidMutedLight,              // strokeSolidMuted
+  strokeSolidFaintLight,              // strokeSolidFaint
+  Color.fromRGBO(13, 71, 161, 1),     // primary700
+  Color.fromRGBO(25, 118, 210, 1),    // primary500
+  Color.fromRGBO(33, 150, 243, 1),    // primary400
+  Color.fromRGBO(66, 165, 245, 1),    // primary300
+  Color.fromRGBO(211, 47, 47, 1),     // warning700
+  Color.fromRGBO(229, 57, 53, 1),     // warning500
+  Color.fromRGBO(239, 83, 80, 1),     // warning400
+  Color.fromRGBO(198, 40, 40, 1),     // warning800
+  Color.fromRGBO(255, 179, 0, 1),     // caution500
+  Color.fromRGBO(255, 179, 0, 1),     // golden700
+  Color.fromRGBO(255, 202, 40, 1),    // golden500
+);
+
+const EnteColorScheme yellowLightScheme = EnteColorScheme(
+  Color.fromRGBO(255, 255, 240, 1),    // backgroundBase
+  Color.fromRGBO(255, 255, 245, 1),    // backgroundElevated
+  Color.fromRGBO(255, 255, 251, 1),    // backgroundElevated2
+  Color.fromRGBO(255, 255, 240, 0.92), // backdropBase
+  Color.fromRGBO(255, 255, 240, 0.75), // backdropMuted
+  Color.fromRGBO(255, 255, 240, 0.30), // backdropFaint
+  Color.fromRGBO(245, 127, 23, 1),     // textBase
+  Color.fromRGBO(251, 140, 0, 0.6),    // textMuted
+  Color.fromRGBO(255, 152, 0, 0.5),    // textFaint
+  Color.fromRGBO(255, 167, 38, 0.65),  // blurTextBase
+  Color.fromRGBO(255, 179, 0, 1),      // fillBase
+  Color.fromRGBO(255, 183, 77, 0.87),  // fillBasePressed
+  Color.fromRGBO(255, 204, 128, 0.24), // fillStrong
+  Color.fromRGBO(255, 224, 178, 0.12), // fillMuted
+  Color.fromRGBO(255, 179, 0, 0.3),    // fillFaint
+  Color.fromRGBO(255, 183, 77, 0.08),  // fillFaintPressed
+  Color.fromRGBO(255, 255, 242, 1),    // fillBaseGrey
+  Color.fromRGBO(245, 127, 23, 1),     // strokeBase
+  Color.fromRGBO(251, 140, 0, 0.24),   // strokeMuted
+  Color.fromRGBO(255, 152, 0, 0.12),   // strokeFaint
+  Color.fromRGBO(255, 167, 38, 0.06),  // strokeFainter
+  Color.fromRGBO(255, 179, 0, 0.65),   // blurStrokeBase
+  Color.fromRGBO(255, 183, 77, 0.08),  // blurStrokeFaint
+  Color.fromRGBO(255, 204, 128, 0.50), // blurStrokePressed
+  Color.fromRGBO(245, 127, 23, 0.85),  // tabIcon
+  avatarLight,                         // avatarColors
+  fixedStrokeMutedWhite,              // fixedStrokeMutedWhite
+  strokeSolidMutedLight,              // strokeSolidMuted
+  strokeSolidFaintLight,              // strokeSolidFaint
+  Color.fromRGBO(245, 127, 23, 1),    // primary700
+  Color.fromRGBO(251, 140, 0, 1),     // primary500
+  Color.fromRGBO(255, 152, 0, 1),     // primary400
+  Color.fromRGBO(255, 167, 38, 1),    // primary300
+  Color.fromRGBO(211, 47, 47, 1),     // warning700
+  Color.fromRGBO(229, 57, 53, 1),     // warning500
+  Color.fromRGBO(239, 83, 80, 1),     // warning400
+  Color.fromRGBO(198, 40, 40, 1),     // warning800
+  Color.fromRGBO(255, 179, 0, 1),     // caution500
+  Color.fromRGBO(255, 179, 0, 1),     // golden700
+  Color.fromRGBO(255, 202, 40, 1),    // golden500
+);
+
+const EnteColorScheme yellowDarkScheme = EnteColorScheme(
+  Color.fromRGBO(31, 31, 10, 1),       // backgroundBase
+  Color.fromRGBO(41, 41, 19, 1),       // backgroundElevated
+  Color.fromRGBO(51, 51, 27, 1),       // backgroundElevated2
+  Color.fromRGBO(31, 31, 10, 0.90),    // backdropBase
+  Color.fromRGBO(41, 41, 19, 0.65),    // backdropMuted
+  Color.fromRGBO(51, 51, 27, 0.20),    // backdropFaint
+  Color.fromRGBO(255, 224, 178, 1),    // textBase
+  Color.fromRGBO(255, 204, 128, 0.7),  // textMuted
+  Color.fromRGBO(255, 183, 77, 0.5),   // textFaint
+  Color.fromRGBO(255, 224, 178, 0.95), // blurTextBase
+  Color.fromRGBO(251, 140, 0, 1),      // fillBase
+  Color.fromRGBO(245, 127, 23, 0.9),   // fillBasePressed
+  Color.fromRGBO(255, 152, 0, 0.32),   // fillStrong
+  Color.fromRGBO(255, 167, 38, 0.16),  // fillMuted
+  Color.fromRGBO(255, 179, 0, 0.3),    // fillFaint
+  Color.fromRGBO(255, 183, 77, 0.06),  // fillFaintPressed
+  Color.fromRGBO(51, 51, 27, 1),       // fillBaseGrey
+  Color.fromRGBO(251, 140, 0, 1),      // strokeBase
+  Color.fromRGBO(255, 152, 0, 0.24),   // strokeMuted
+  Color.fromRGBO(255, 167, 38, 0.16),  // strokeFaint
+  Color.fromRGBO(255, 179, 0, 0.08),   // strokeFainter
+  Color.fromRGBO(251, 140, 0, 0.90),   // blurStrokeBase
+  Color.fromRGBO(255, 152, 0, 0.06),   // blurStrokeFaint
+  Color.fromRGBO(245, 127, 23, 0.50),  // blurStrokePressed
+  Color.fromRGBO(255, 224, 178, 0.80), // tabIcon
+  avatarDark,                          // avatarColors
+  fixedStrokeMutedWhite,              // fixedStrokeMutedWhite
+  strokeSolidMutedLight,              // strokeSolidMuted
+  strokeSolidFaintLight,              // strokeSolidFaint
+  Color.fromRGBO(245, 127, 23, 1),    // primary700
+  Color.fromRGBO(251, 140, 0, 1),     // primary500
+  Color.fromRGBO(255, 152, 0, 1),     // primary400
+  Color.fromRGBO(255, 167, 38, 1),    // primary300
+  Color.fromRGBO(211, 47, 47, 1),     // warning700
+  Color.fromRGBO(229, 57, 53, 1),     // warning500
+  Color.fromRGBO(239, 83, 80, 1),     // warning400
+  Color.fromRGBO(198, 40, 40, 1),     // warning800
+  Color.fromRGBO(255, 179, 0, 1),     // caution500
+  Color.fromRGBO(255, 179, 0, 1),     // golden700
+  Color.fromRGBO(255, 202, 40, 1),    // golden500
+);
+
 
 // Background Colors
 const Color backgroundBaseLight = Color.fromRGBO(255, 255, 255, 1);
@@ -485,21 +649,22 @@ const Color fixedStrokeMutedWhite = Color.fromRGBO(255, 255, 255, 0.50);
 const Color strokeSolidMutedLight = Color.fromRGBO(147, 147, 147, 1);
 const Color strokeSolidFaintLight = Color.fromRGBO(221, 221, 221, 1);
 
-const Color _primary700 = Color.fromRGBO(0, 179, 60, 1);
-const Color _primary500 = Color.fromRGBO(29, 185, 84, 1);
-const Color _primary400 = Color.fromRGBO(38, 203, 95, 1);
-const Color _primary300 = Color.fromRGBO(1, 222, 77, 1);
+
+const Color _primary700 = Color.fromRGBO(27, 94, 32, 1);
+const Color _primary500 = Color.fromRGBO(56, 142, 60, 1);
+const Color _primary400 = Color.fromRGBO(67, 160, 71, 1);
+const Color _primary300 = Color.fromRGBO(102, 187, 106, 1);
 
 const Color _warning700 = Color.fromRGBO(234, 63, 63, 1);
 const Color _warning500 = Color.fromRGBO(255, 101, 101, 1);
 const Color warning500 = Color.fromRGBO(255, 101, 101, 1);
 const Color _warning400 = Color.fromRGBO(255, 111, 111, 1);
-const Color _warning800 = Color(0xFFF53434);
+const Color _warning800 = Color.fromRGBO(245, 52, 52, 1);
 
 const Color _caution500 = Color.fromRGBO(255, 194, 71, 1);
 
-const Color _golden700 = Color(0xFFFDB816);
-const Color _golden500 = Color(0xFFFFC336);
+const Color _golden700 = Color.fromRGBO(253, 184, 22, 1);
+const Color _golden500 = Color.fromRGBO(255, 195, 54, 1);
 
 const List<Color> avatarLight = [
   Color.fromRGBO(118, 84, 154, 1),
@@ -552,179 +717,3 @@ const List<Color> avatarDark = [
   Color.fromRGBO(209, 132, 132, 1),
   Color.fromRGBO(120, 181, 167, 1),
 ];
-
-const EnteColorScheme blueLightScheme = EnteColorScheme(
-  Color(0xFFE3F2FD),  // Very light blue background
-  Color(0xFFBBDEFB),
-  Color(0xFF90CAF9),
-  Color(0xFF64B5F6),
-  Color(0xFF42A5F5),
-  Color(0xFF2196F3),
-  Color(0xC81AC69C),
-  Color(0xFF1565C0),  // Dark text for light theme
-  Color(0xFF1976D2),
-  Color(0xFF1E88E5),
-  Color(0xFF1565C0),
-  Color(0xFF2196F3),
-  Color(0xFF1E88E5),
-  Color(0xFF1976D2),
-  Color(0xFF42A5F5),
-  Color(0xFF90CAF9),
-  Color(0xFF64B5F6),
-  Color(0xFFBBDEFB),
-  Color(0xFF2196F3),
-  Color(0xFF42A5F5),
-  Color(0xFF90CAF9),
-  Color(0xFFBBDEFB),
-  Color(0xFF2196F3),
-  Color(0xFF42A5F5),
-  Color(0xFF1E88E5),
-  Color(0xFF1565C0),
-  avatarLight,
-  fixedStrokeMutedWhite,
-  strokeSolidMutedLight,
-  strokeSolidFaintLight,
-  Color(0xFF0D47A1),  // primary700 - Darkest Blue
-  Color(0xFF1565C0),  // primary500 - Dark Blue
-  Color(0xFF1976D2),  // primary400 - Medium Blue
-  Color(0xFF1E88E5),  // primary300 - Light Blue
-  Color(0xFFD32F2F),  // warning700
-  Color(0xFFE53935),  // warning500
-  Color(0xFFEF5350),  // warning400
-  Color(0xFFC62828),  // warning800
-  Color(0xFFFFB300),  // caution500
-  Color(0xFFFFB300),  // golden700
-  Color(0xFFFFCA28),  // golden500
-);
-
-const EnteColorScheme blueDarkScheme = EnteColorScheme(
-  Color(0xFF0D2A4A),  // Very dark blue background
-  Color(0xFF0D3A67),
-  Color(0xFF0D4B84),
-  Color(0xFF0D47A1),
-  Color(0xFF1565C0),
-  Color(0xFF1976D2),
-  Color(0xFFEC9292),
-  Color(0xFFE3F2FD),  // Light text for dark theme
-  Color(0xFFBBDEFB),
-  Color(0xFF90CAF9),
-  Color(0xFFE3F2FD),
-  Color(0xFF2196F3),
-  Color(0xFF1E88E5),
-  Color(0xFF1976D2),
-  Color(0xFF42A5F5),
-  Color(0xFF90CAF9),
-  Color(0xFF64B5F6),
-  Color(0xFF0D4B84),
-  Color(0xFF2196F3),
-  Color(0xFF42A5F5),
-  Color(0xFF90CAF9),
-  Color(0xFFBBDEFB),
-  Color(0xFF2196F3),
-  Color(0xFF42A5F5),
-  Color(0xFF1E88E5),
-  Color(0xFF42A5F5),
-  avatarDark,
-  fixedStrokeMutedWhite,
-  strokeSolidMutedLight,
-  strokeSolidFaintLight,
-  Color(0xFF0D47A1),  // primary700 - Darkest Blue
-  Color(0xFF1565C0),  // primary500 - Dark Blue
-  Color(0xFF1976D2),  // primary400 - Medium Blue
-  Color(0xFF1E88E5),  // primary300 - Light Blue
-  Color(0xFFD32F2F),  // warning700
-  Color(0xFFE53935),  // warning500
-  Color(0xFFEF5350),  // warning400
-  Color(0xFFC62828),  // warning800
-  Color(0xFFFFB300),  // caution500
-  Color(0xFFFFB300),  // golden700
-  Color(0xFFFFCA28),  // golden500
-);
-
-const EnteColorScheme yellowLightScheme = EnteColorScheme(
-  Color(0xFFFFFDE7),  // Very light yellow background
-  Color(0xFFFFF9C4),
-  Color(0xFFFFF59D),
-  Color(0xFFFFEE58),
-  Color(0xFFFFEB3B),
-  Color(0xFFFDD835),
-  Color(0xFFE6D32F),
-  Color(0xFF212121),  // Dark text for light theme
-  Color(0xFF424242),
-  Color(0xFF616161),
-  Color(0xFF212121),
-  Color(0xFFFDD835),
-  Color(0xFFFBC02D),
-  Color(0xFFF9A825),
-  Color(0xFFFFEE58),
-  Color(0xFFFFF59D),
-  Color(0xFFFFEE58),
-  Color(0xFFFFF9C4),
-  Color(0xFFFDD835),
-  Color(0xFFFFEE58),
-  Color(0xFFFFF59D),
-  Color(0xFFFFF9C4),
-  Color(0xFFFDD835),
-  Color(0xFFFFEE58),
-  Color(0xFFFBC02D),
-  Color(0xFFFDD835),
-  avatarLight,
-  fixedStrokeMutedWhite,
-  strokeSolidMutedLight,
-  strokeSolidFaintLight,
-  Color(0xFFF57F17),  // primary700 - Darkest Yellow
-  Color(0xFFF9A825),  // primary500 - Dark Yellow
-  Color(0xFFFBC02D),  // primary400 - Medium Yellow
-  Color(0xFFFDD835),  // primary300 - Light Yellow
-  Color(0xFFD32F2F),  // warning700
-  Color(0xFFE53935),  // warning500
-  Color(0xFFEF5350),  // warning400
-  Color(0xFFC62828),  // warning800
-  Color(0xFFFFB300),  // caution500
-  Color(0xFFFFB300),  // golden700
-  Color(0xFFFFCA28),  // golden500
-);
-
-const EnteColorScheme yellowDarkScheme = EnteColorScheme(
-  Color(0xFF332D00),  // Very dark yellow background
-  Color(0xFF403800),
-  Color(0xFF4D4200),
-  Color(0xFF5A4D00),
-  Color(0xFF665800),
-  Color(0xFF736300),
-  Color(0xBD081839),
-  Color(0xFFFFF9C4),  // Light text for dark theme
-  Color(0xFFFFF59D),
-  Color(0xFFFFEE58),
-  Color(0xFFFFF9C4),
-  Color(0xFFFDD835),
-  Color(0xFFFBC02D),
-  Color(0xFFF9A825),
-  Color(0xFFFFEE58),
-  Color(0xFFFFF59D),
-  Color(0xFFFFEE58),
-  Color(0xFF4D4200),
-  Color(0xFFFDD835),
-  Color(0xFFFFEE58),
-  Color(0xFFFFF59D),
-  Color(0xFFFFF9C4),
-  Color(0xFFFDD835),
-  Color(0xFFFFEE58),
-  Color(0xFFFBC02D),
-  Color(0xFFFFEE58),
-  avatarDark,
-  fixedStrokeMutedWhite,
-  strokeSolidMutedLight,
-  strokeSolidFaintLight,
-  Color(0xFFF57F17),  // primary700 - Darkest Yellow
-  Color(0xFFF9A825),  // primary500 - Dark Yellow
-  Color(0xFFFBC02D),  // primary400 - Medium Yellow
-  Color(0xFFFDD835),  // primary300 - Light Yellow
-  Color(0xFFD32F2F),  // warning700
-  Color(0xFFE53935),  // warning500
-  Color(0xFFEF5350),  // warning400
-  Color(0xFFC62828),  // warning800
-  Color(0xFFFFB300),  // caution500
-  Color(0xFFFFB300),  // golden700
-  Color(0xFFFFCA28),  // golden500
-);
