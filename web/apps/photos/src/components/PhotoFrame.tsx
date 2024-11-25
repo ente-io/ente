@@ -228,7 +228,7 @@ const PhotoFrame = ({
 
     // Return true if the URL was updated (for the given params), and false
     // otherwise.
-    const updateSourceURL = async (
+    const updateSourceURL = (
         index: number,
         id: number,
         srcURLs: SourceURLs,
@@ -400,7 +400,7 @@ const PhotoFrame = ({
                     type: "normal",
                 };
                 try {
-                    if (await updateSourceURL(index, item.id, dummyImgSrcUrl)) {
+                    if (updateSourceURL(index, item.id, dummyImgSrcUrl)) {
                         log.info(
                             `[${item.id}] calling invalidateCurrItems for live photo imgSrc, source loaded: ${item.isSourceLoaded}`,
                         );
@@ -426,7 +426,7 @@ const PhotoFrame = ({
                     type: "livePhoto",
                 };
                 try {
-                    const updated = await updateSourceURL(
+                    const updated = updateSourceURL(
                         index,
                         item.id,
                         loadedLivePhotoSrcURL,
@@ -448,7 +448,7 @@ const PhotoFrame = ({
                     );
                 }
             } else {
-                await updateSource(instance, index, item, srcURLs, false);
+                updateSource(instance, index, item, srcURLs, false);
             }
         } catch (e) {
             log.error("getSlideData failed get src url failed", e);
@@ -480,7 +480,7 @@ const PhotoFrame = ({
         }
     };
 
-    const updateSource = async (
+    const updateSource = (
         instance: PhotoSwipe<PhotoSwipe.Options>,
         index: number,
         item: DisplayFile,
@@ -488,7 +488,7 @@ const PhotoFrame = ({
         forceUpdate?: boolean,
     ) => {
         try {
-            if (await updateSourceURL(index, item.id, srcURL, forceUpdate)) {
+            if (updateSourceURL(index, item.id, srcURL, forceUpdate)) {
                 log.info(
                     `[${item.id}] calling invalidateCurrItems for src, source loaded: ${item.isSourceLoaded}`,
                 );
@@ -520,7 +520,7 @@ const PhotoFrame = ({
                 forceConvert: true,
             });
 
-            await updateSource(instance, index, item, srcURL, true);
+            updateSource(instance, index, item, srcURL, true);
         } catch (e) {
             log.error("getConvertedVideo failed get src url failed", e);
             fetching[item.id] = false;
