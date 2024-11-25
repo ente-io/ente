@@ -43,7 +43,6 @@ class PersonReviewClusterSuggestion extends StatefulWidget {
 
 class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   int currentSuggestionIndex = 0;
-  bool fetch = true;
   Key futureBuilderKeySuggestions = UniqueKey();
   Key futureBuilderKeyFaceThumbnails = UniqueKey();
   bool canGiveFeedback = true;
@@ -59,8 +58,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   void initState() {
     super.initState();
     // Initialize the future in initState
-    if (fetch) _fetchClusterSuggestions();
-    fetch = true;
+    _fetchClusterSuggestions();
   }
 
   @override
@@ -129,7 +127,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                 for (var updatedFile in event.relevantFiles!) {
                   files.remove(updatedFile);
                 }
-                fetch = false;
                 setState(() {});
               }
             });
@@ -275,7 +272,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         });
       } else {
         futureBuilderKeyFaceThumbnails = UniqueKey();
-        fetch = false;
         setState(() {});
       }
     } else {
@@ -304,6 +300,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   // Method to fetch cluster suggestions
   void _fetchClusterSuggestions() {
+    debugPrint("Fetching suggestions for ${widget.person.data.name}");
     futureClusterSuggestions =
         ClusterFeedbackService.instance.getSuggestionForPerson(widget.person);
   }
@@ -514,7 +511,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         );
       }
 
-      fetch = false;
       futureClusterSuggestions = futureClusterSuggestions.then((list) {
         return list.sublist(currentSuggestionIndex)
           ..insert(0, lastFeedback.suggestion);
