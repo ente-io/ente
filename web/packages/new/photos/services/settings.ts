@@ -6,7 +6,7 @@
 
 import { localUser } from "@/base/local-user";
 import log from "@/base/log";
-import { updateShouldDisableCFUploadProxy } from "@/gallery/upload";
+import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";

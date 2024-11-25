@@ -1,11 +1,11 @@
 import { ensureElectron } from "@/base/electron";
 import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
+import { downloadManager } from "@/gallery/services/download";
 import type { Collection } from "@/media/collection";
 import { type EnteFile, mergeMetadata } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import downloadManager from "@/new/photos/services/download";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import { getAllLocalFiles } from "@/new/photos/services/files";
 import {
