@@ -33,7 +33,6 @@ import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/deeplink_service.dart";
 import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/remote_sync_service.dart";
@@ -63,6 +62,7 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/shared_public_collection_page.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
 import 'package:photos/ui/viewer/search_tab/search_tab.dart';
+import "package:photos/utils/collection_util.dart";
 import "package:photos/utils/crypto_util.dart";
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/diff_fetcher.dart";
@@ -244,7 +244,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         .ignore();
 
     if (Platform.isAndroid &&
-        !DeeplinkService.instance.hasConfiguredDeeplinkPermissions() &&
+        localSettings.hasConfiguredInAppLinkPermissions() &&
         RemoteSyncService.instance.isFirstRemoteSyncDone()) {
       PackageInfo.fromPlatform().then((packageInfo) {
         final packageName = packageInfo.packageName;
@@ -252,8 +252,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             packageName == 'io.ente.photos.fdroid') {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              DeeplinkService.instance
-                  .requestDeeplinkPermissions(context, packageName);
+              requestPermissionToOpenLinksInApp(context, packageName);
             }
           });
         }
