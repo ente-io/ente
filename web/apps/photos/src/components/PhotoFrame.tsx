@@ -222,7 +222,7 @@ const PhotoFrame = ({
             if (file.msrc && !forceUpdate) {
                 return false;
             }
-            updateFileMsrcProps(file, url);
+            updateDisplayFileToShowThumbnail(file, url);
             return true;
         };
 
@@ -249,7 +249,7 @@ const PhotoFrame = ({
             throw Error("file conversion failed");
         }
 
-        await updateFileSrcProps(file, srcURLs, enableDownload);
+        await updateDisplayFileToShowFile(file, srcURLs, enableDownload);
         return true;
     };
 
@@ -581,7 +581,7 @@ const PhotoFrame = ({
 
 export default PhotoFrame;
 
-function updateFileMsrcProps(file: DisplayFile, url: string) {
+const updateDisplayFileToShowThumbnail = (file: DisplayFile, url: string) => {
     file.w = window.innerWidth;
     file.h = window.innerHeight;
     file.msrc = url;
@@ -597,13 +597,13 @@ function updateFileMsrcProps(file: DisplayFile, url: string) {
             </div>
             `;
     }
-}
+};
 
-async function updateFileSrcProps(
+const updateDisplayFileToShowFile = (
     file: DisplayFile,
     srcURLs: SourceURLs,
     enableDownload: boolean,
-) {
+) => {
     const { url } = srcURLs;
     const isRenderable = !!url;
     file.w = window.innerWidth;
@@ -656,4 +656,4 @@ async function updateFileSrcProps(
         log.error(`unknown file type - ${file.metadata.fileType}`);
         file.src = url as string;
     }
-}
+};
