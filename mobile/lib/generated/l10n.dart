@@ -10398,6 +10398,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Face not clustered yet, please come back later`
+  String get faceNotClusteredYet {
+    return Intl.message(
+      'Face not clustered yet, please come back later',
+      name: 'faceNotClusteredYet',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -5,6 +5,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/cache/lru_map.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/face/box.dart";
@@ -146,10 +147,12 @@ Future<Uint8List?> precomputeClusterFaceCrop(
   required bool useFullFile,
 }) async {
   try {
+    final w = (kDebugMode ? EnteWatch('precomputeClusterFaceCrop') : null)?..start();
     final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
       recentFileID: file.uploadedFileID!,
       clusterID: clusterID,
     );
+    w?.log('getCoverFaceForPerson');
     if (face == null) {
       debugPrint(
         "No cover face for cluster $clusterID and recentFile ${file.uploadedFileID}",
@@ -159,6 +162,7 @@ Future<Uint8List?> precomputeClusterFaceCrop(
     EnteFile? fileForFaceCrop = file;
     if (face.fileID != file.uploadedFileID!) {
       fileForFaceCrop = await FilesDB.instance.getAnyUploadedFile(face.fileID);
+      w?.log('getAnyUploadedFile');
     }
     if (fileForFaceCrop == null) {
       return null;
@@ -168,6 +172,7 @@ Future<Uint8List?> precomputeClusterFaceCrop(
       [face],
       useFullFile: useFullFile,
     );
+    w?.logAndReset('getCachedFaceCrops');
     return cropMap?[face.faceID];
   } catch (e, s) {
     _logger.severe(

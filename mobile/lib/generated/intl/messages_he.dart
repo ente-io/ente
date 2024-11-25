@@ -449,6 +449,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportLogs": MessageLookupByLibrary.simpleMessage("ייצוא לוגים"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("ייצוא הנתונים שלך"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("נכשל בהחלת הקוד"),
         "failedToCancel": MessageLookupByLibrary.simpleMessage("הביטול נכשל"),
