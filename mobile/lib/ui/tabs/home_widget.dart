@@ -43,6 +43,8 @@ import 'package:photos/theme/colors.dart';
 import "package:photos/theme/effects.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/collections/collection_action_sheet.dart';
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/home/grant_permissions_widget.dart';
 import 'package:photos/ui/home/header_widget.dart';
@@ -56,6 +58,7 @@ import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
 import "package:photos/ui/tabs/user_collections_tab.dart";
+import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/shared_public_collection_page.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
@@ -394,9 +397,52 @@ class _HomeWidgetState extends State<HomeWidget> {
           return;
         }
 
-        setState(() {
-          _shouldRenderCreateCollectionSheet = true;
-          _sharedFiles = value;
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              actions: [
+                const SizedBox(height: 24),
+                ButtonWidget(
+                  labelText: "Open file",
+                  buttonType: ButtonType.primary,
+                  onTap: () async {
+                    Navigator.of(context).pop(true);
+                  },
+                ),
+                const SizedBox(
+                  height: 12,
+                ),
+                ButtonWidget(
+                  buttonType: ButtonType.secondary,
+                  labelText: "Backup file",
+                  onTap: () async {
+                    Navigator.of(context).pop(false);
+                  },
+                ),
+              ],
+            );
+          },
+        ).then((shouldOpenFile) {
+          if (shouldOpenFile) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) {
+                  return FileViewer(
+                    sharedMediaFile: value[0],
+                  );
+                },
+              ),
+            );
+          } else {
+            if (mounted) {
+              setState(() {
+                _shouldRenderCreateCollectionSheet = true;
+                _sharedFiles = value;
+              });
+            }
+          }
         });
       },
       onError: (err) {
@@ -411,6 +457,21 @@ class _HomeWidgetState extends State<HomeWidget> {
         if (value[0].path.contains("albums.ente.sh")) {
           final uri = Uri.parse(value[0].path);
           _handlePublicAlbumLink(uri);
+          return;
+        }
+
+        if (AppLifecycleService.instance.mediaExtensionAction.type ==
+                MediaType.image ||
+            AppLifecycleService.instance.mediaExtensionAction.type ==
+                MediaType.video) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) {
+                return const FileViewer();
+              },
+            ),
+          );
           return;
         }
 
