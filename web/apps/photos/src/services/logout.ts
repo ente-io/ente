@@ -4,7 +4,7 @@ import {
 } from "@/accounts/services/logout";
 import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
-import { resetUploadState } from "@/gallery/upload";
+import { resetUploadState } from "@/gallery/services/upload";
 import { logoutML, terminateMLWorker } from "@/new/photos/services/ml";
 import { logoutSearch } from "@/new/photos/services/search";
 import { logoutSettings } from "@/new/photos/services/settings";

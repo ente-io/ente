@@ -10,7 +10,7 @@ import {
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
-import { updateShouldDisableCFUploadProxy } from "@/gallery/upload";
+import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
 import type { Collection } from "@/media/collection";
 import { type EnteFile, mergeMetadata } from "@/media/file";
 import {
