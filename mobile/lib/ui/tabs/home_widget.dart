@@ -283,6 +283,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           title: S.of(context).enterPassword,
           submitButtonLabel: S.of(context).ok,
           alwaysShowSuccessState: false,
+          popnavAfterSubmission: false,
           onSubmit: (String text) async {
             if (text.trim() == "") {
               return;
@@ -295,31 +296,35 @@ class _HomeWidgetState extends State<HomeWidget> {
                 publicUrl.opsLimit!,
               );
 
-              final result = await CollectionsService.instance
-                  .verifyPublicCollectionPassword(
-                context,
-                CryptoUtil.bin2base64(hashedPassword),
-                collection.id,
-              );
-
-              if (result) {
-                await dialog.show();
-
-                final List<EnteFile> sharedFiles =
-                    await _diffFetcher.getPublicFiles(context, collection.id);
-                await dialog.hide();
-
-                await routeToPage(
+              unawaited(
+                CollectionsService.instance
+                    .verifyPublicCollectionPassword(
                   context,
-                  SharedPublicCollectionPage(
-                    files: sharedFiles,
-                    CollectionWithThumbnail(
-                      collection,
-                      null,
-                    ),
-                  ),
-                );
-              }
+                  CryptoUtil.bin2base64(hashedPassword),
+                  collection.id,
+                )
+                    .then((result) async {
+                  if (result) {
+                    await dialog.show();
+
+                    final List<EnteFile> sharedFiles = await _diffFetcher
+                        .getPublicFiles(context, collection.id);
+                    await dialog.hide();
+                    Navigator.of(context).pop();
+
+                    await routeToPage(
+                      context,
+                      SharedPublicCollectionPage(
+                        files: sharedFiles,
+                        CollectionWithThumbnail(
+                          collection,
+                          null,
+                        ),
+                      ),
+                    );
+                  }
+                }),
+              );
             } catch (e, s) {
               _logger.severe("Failed to decrypt password for album", e, s);
               await showGenericErrorDialog(context: context, error: e);
