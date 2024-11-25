@@ -65,7 +65,6 @@ class SharedPublicCollectionPage extends StatelessWidget {
       initialFiles: initialFiles,
       albumName: c.collection.displayName,
       sortAsyncFn: () => c.collection.pubMagicMetadata.asc ?? false,
-      showSelectAllByDefault: galleryType != GalleryType.sharedPublicCollection,
     );
 
     return GalleryFilesState(

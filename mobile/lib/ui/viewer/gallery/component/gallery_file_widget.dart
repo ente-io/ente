@@ -44,7 +44,10 @@ class GalleryFileWidget extends StatelessWidget {
           CollectionsService.instance.isSharedPublicLink(file.collectionID!);
     }
     Color selectionColor = Colors.white;
-    if (isFileSelected && file.isUploaded && file.ownerID != currentUserID) {
+    if (isFileSelected &&
+        file.isUploaded &&
+        file.ownerID != currentUserID &&
+        !fileIsFromSharedPublicLink) {
       final avatarColors = getEnteColorScheme(context).avatarColors;
       selectionColor =
           avatarColors[(file.ownerID!).remainder(avatarColors.length)];
