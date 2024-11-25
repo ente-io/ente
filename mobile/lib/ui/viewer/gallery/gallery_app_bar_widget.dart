@@ -650,7 +650,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final dialog = createProgressDialog(
       context,
       "Downloading... 0/$totalFiles",
-      isDismissible: true,
+      isDismissible: false,
     );
     await dialog.show();
 
