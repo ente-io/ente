@@ -343,7 +343,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     );
     // Precompute face thumbnails for next suggestions, in case there are
     const precomputeSuggestions = 6;
-    const maxPrecomputations = 6;
+    const maxPrecomputations = 8;
     int compCount = 0;
     if (allSuggestions.length > currentSuggestionIndex + 1) {
       outerLoop:
@@ -356,21 +356,17 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
       )) {
         final files = suggestion.filesInCluster;
         final clusterID = suggestion.clusterIDToMerge;
-        for (final file in files.sublist(0, min(files.length, 6))) {
-          unawaited(
-            precomputeClusterFaceCrop(
-              file,
-              clusterID,
-              useFullFile: true,
-            ),
+        final preComputesLeft = maxPrecomputations - compCount;
+        final computeHere = min(files.length, min(preComputesLeft, 6));
+        unawaited(
+          _generateFaceThumbnails(files.sublist(0, computeHere), clusterID),
+        );
+        compCount += computeHere;
+        if (compCount >= maxPrecomputations) {
+          debugPrint(
+            'Prefetching $compCount face thumbnails for suggestions',
           );
-          compCount++;
-          if (compCount >= maxPrecomputations) {
-            debugPrint(
-              'Prefetching $compCount face thumbnails for suggestions',
-            );
-            break outerLoop;
-          }
+          break outerLoop;
         }
       }
     }
