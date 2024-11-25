@@ -107,7 +107,6 @@ export const withTimeout = async <T>(promise: Promise<T>, ms: number) => {
     return Promise.race([promiseAndCancelTimeout(), rejectOnTimeout]);
 };
 
-
 /**
  * Retry a async operation like a HTTP request 3 (+ 1 original) times with
  * exponential backoff.

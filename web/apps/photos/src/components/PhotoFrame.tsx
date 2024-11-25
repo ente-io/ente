@@ -1,13 +1,13 @@
 import log from "@/base/log";
-import { EnteFile } from "@/media/file";
-import { FileType } from "@/media/file-type";
-import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
-import { TRASH_SECTION } from "@/new/photos/services/collection";
 import {
     downloadManager,
     type LivePhotoSourceURL,
     type SourceURLs,
 } from "@/gallery/services/download";
+import { EnteFile } from "@/media/file";
+import { FileType } from "@/media/file-type";
+import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
+import { TRASH_SECTION } from "@/new/photos/services/collection";
 import { PHOTOS_PAGES } from "@ente/shared/constants/pages";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { styled } from "@mui/material";
