@@ -232,7 +232,7 @@ const PhotoFrame = ({
         index: number,
         id: number,
         srcURLs: SourceURLs,
-        forceUpdate?: boolean,
+        overwrite: boolean,
     ) => {
         const file = displayFiles[index];
         // This is to prevent outdated call from updating the wrong file.
@@ -242,7 +242,7 @@ const PhotoFrame = ({
             );
             throw Error("Update URL file id mismatch");
         }
-        if (file.isSourceLoaded && !forceUpdate) {
+        if (file.isSourceLoaded && !overwrite) {
             return false;
         } else if (file.conversionFailed) {
             log.info(`[${id}]PhotoSwipe: updateSrcURL: conversion failed`);
@@ -455,10 +455,10 @@ const PhotoFrame = ({
         index: number,
         item: DisplayFile,
         srcURL: SourceURLs,
-        forceUpdate?: boolean,
+        overwrite: boolean,
     ) => {
         try {
-            if (updateSourceURL(index, item.id, srcURL, forceUpdate)) {
+            if (updateSourceURL(index, item.id, srcURL, overwrite)) {
                 log.info(
                     `[${item.id}] calling invalidateCurrItems for src, source loaded: ${item.isSourceLoaded}`,
                 );
