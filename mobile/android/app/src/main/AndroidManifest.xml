@@ -53,7 +53,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data 
                     android:scheme="https" 
-                    android:host="albums.ente.sh"/>
+                    android:host="albums.ente.io"/>
             </intent-filter>
             
             <!-- file provider to share files having a file:// URI -->
