@@ -3,6 +3,7 @@ import { clientPackageHeader, ensureOk } from "@/base/http";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { wait } from "@/utils/promise";
+import { nullToUndefined } from "@/utils/transform";
 import castGateway from "@ente/shared/network/cast";
 import { z } from "zod";
 
@@ -111,6 +112,7 @@ export const getCastData = async (registration: Registration) => {
     // The client will send us the encrypted payload using our public key that
     // we registered with museum.
     const encryptedCastData = await getEncryptedCastData(pairingCode);
+    if (!encryptedCastData) return;
 
     // Decrypt it using the private key of the pair and return the plaintext
     // payload, which'll be a JSON object containing the data we need to start a
@@ -127,14 +129,19 @@ export const getCastData = async (registration: Registration) => {
 };
 
 /**
- * Fetch encrypted cast data corresponding to the given {@link code} from
- * remote.
+ * Fetch encrypted cast data corresponding to the given {@link code} from remote
+ * if a client has already paired using it.
  */
 const getEncryptedCastData = async (code: string) => {
     const res = await fetch(await apiURL(`/cast/cast-data/${code}`), {
         headers: clientPackageHeader(),
     });
     ensureOk(res);
-    return z.object({ encCastData: z.string() }).parse(await res.json())
-        .encCastData;
+    return z
+        .object({
+            // encCastData will be null if pairing hasn't happened yet for the
+            // given code.
+            encCastData: z.string().nullish().transform(nullToUndefined),
+        })
+        .parse(await res.json()).encCastData;
 };
