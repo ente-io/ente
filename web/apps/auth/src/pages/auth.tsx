@@ -25,7 +25,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { generateOTPs, type Code } from "services/code";
 import { getAuthCodes } from "services/remote";
 import { useAppContext } from "types/context";
@@ -180,7 +180,7 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
     const [errorMessage, setErrorMessage] = useState("");
     const [hasCopied, setHasCopied] = useState(false);
 
-    const regen = () => {
+    const regen = useCallback(() => {
         try {
             const [m, n] = generateOTPs(code);
             setOTP(m);
@@ -188,7 +188,7 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
         } catch (e) {
             setErrorMessage(e instanceof Error ? e.message : String(e));
         }
-    };
+    }, [code]);
 
     const copyCode = () =>
         void navigator.clipboard.writeText(otp).then(() => {
@@ -214,7 +214,7 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
         }, timeToNextCode);
 
         return () => interval && clearInterval(interval);
-    }, [code]);
+    }, [code, regen]);
 
     return (
         <div style={{ padding: "8px" }}>
