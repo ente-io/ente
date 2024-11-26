@@ -707,14 +707,14 @@ export const boxSeal = async (data: string, publicKey: string) => {
  * underlying data.
  */
 export const boxSealOpen = async (
-    input: string,
+    encryptedData: string,
     publicKey: string,
     secretKey: string,
 ) => {
     await sodium.ready;
     return toB64(
         sodium.crypto_box_seal_open(
-            await fromB64(input),
+            await fromB64(encryptedData),
             await fromB64(publicKey),
             await fromB64(secretKey),
         ),

@@ -1,6 +1,9 @@
 /**
  * @file Higher level functions that use the ontology of Ente's requirements.
  *
+ * For more detailed documentation of specific functions, see the corresponding
+ * function in `libsodium.ts`.
+ *
  * [Note: Crypto code hierarchy]
  *
  * 1.  @/base/crypto            (Crypto API for our code)
@@ -172,8 +175,6 @@ export const encryptThumbnail = (data: BytesOrB64, key: BytesOrB64) =>
 /**
  * Encrypt the given data using chunked streaming encryption, but process all
  * the chunks in one go.
- *
- * For more details, see {@link encryptStreamBytes} in `libsodium.ts`.
  */
 export const encryptStreamBytes = async (data: Uint8Array, key: BytesOrB64) =>
     inWorker()
@@ -182,8 +183,6 @@ export const encryptStreamBytes = async (data: Uint8Array, key: BytesOrB64) =>
 
 /**
  * Prepare for chunked streaming encryption using {@link encryptStreamChunk}.
- *
- * For more details, see {@link initChunkEncryption} in `libsodium.ts`.
  */
 export const initChunkEncryption = async (key: BytesOrB64) =>
     inWorker()
@@ -192,8 +191,6 @@ export const initChunkEncryption = async (key: BytesOrB64) =>
 
 /**
  * Encrypt a chunk as part of a chunked streaming encryption.
- *
- * For more details, see {@link encryptStreamChunk} in `libsodium.ts`.
  */
 export const encryptStreamChunk = async (
     data: Uint8Array,
@@ -346,3 +343,33 @@ export const decryptMetadataJSON = (r: {
     inWorker()
         ? ei._decryptMetadataJSON(r)
         : sharedCryptoWorker().then((w) => w.decryptMetadataJSON(r));
+
+/**
+ * Generate a new public/private keypair for use with the boxSeal* functions.
+ */
+export const generateKeyPair = async () =>
+    inWorker()
+        ? ei._generateKeyPair()
+        : sharedCryptoWorker().then((w) => w.generateKeyPair());
+
+/**
+ * Public key encryption.
+ */
+export const boxSeal = async (data: string, publicKey: string) =>
+    inWorker()
+        ? ei._boxSeal(data, publicKey)
+        : sharedCryptoWorker().then((w) => w.boxSeal(data, publicKey));
+
+/**
+ * Decrypt the result of {@link boxSeal}.
+ */
+export const boxSealOpen = async (
+    encryptedData: string,
+    publicKey: string,
+    secretKey: string,
+) =>
+    inWorker()
+        ? ei._boxSealOpen(encryptedData, publicKey, secretKey)
+        : sharedCryptoWorker().then((w) =>
+              w.boxSealOpen(encryptedData, publicKey, secretKey),
+          );
