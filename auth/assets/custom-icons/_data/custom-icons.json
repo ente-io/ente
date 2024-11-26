@@ -30,6 +30,10 @@
       "title": "Amazon"
     },
     {
+      "title": "Amazon Web Services",
+      "slug": "aws"
+    },
+    {
       "title": "Anycoin Direct",
       "slug": "anycoindirect"
     },
@@ -257,6 +261,9 @@
       ]
     },
     {
+      "title": "DigitalOcean"
+    },
+    {
       "title": "DirectAdmin"
     },
     {
@@ -267,6 +274,9 @@
     },
     {
       "title": "Doppler"
+    },
+    {
+      "title": "Dropbox"
     },
     {
       "title": "dus.net",
@@ -312,6 +322,9 @@
     },
     {
       "title": "ForUsAll"
+    },
+    {
+      "title": "Front"
     },
     {
       "title": "G2A"
@@ -683,6 +696,12 @@
       ]
     },
     {
+      "title": "QNAP",
+      "altNames": [
+        "QNAP QTS"
+      ]
+    },
+    {
       "title": "Raindrop.io",
       "slug": "raindrop_io",
       "altNames": [
@@ -720,6 +739,10 @@
     },
     {
       "title": "RippleMatch"
+    },
+    {
+      "title": "Rocket Money",
+      "slug": "rocket_money"
     },
     {
       "title": "Rockstar Games",
@@ -764,6 +787,9 @@
     },
     {
       "title": "Skinport"
+    },
+    {
+      "title": "Slack"
     },
     {
       "title": "SMSPool",
@@ -945,6 +971,9 @@
     },
     {
       "title": "Wise"
+    },
+    {
+      "title": "WordPress"
     },
     {
       "title": "WorkOS",
