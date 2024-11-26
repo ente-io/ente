@@ -575,9 +575,7 @@
     "IMAGE": "Immagine",
     "VIDEO": "Video",
     "LIVE_PHOTO": "Live Photo",
-    "editor": {
-        "crop": "Ritaglia"
-    },
+    "crop": "Ritaglia",
     "convert": "Converti",
     "confirm_editor_close": "Sei sicuro di voler chiudere l'editor?",
     "confirm_editor_close_message": "Scarica la tua immagine modificata oppure salvane una copia su Ente per preservare le modifiche.",

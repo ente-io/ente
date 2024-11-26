@@ -575,9 +575,7 @@
     "IMAGE": "",
     "VIDEO": "Video",
     "LIVE_PHOTO": "",
-    "editor": {
-        "crop": ""
-    },
+    "crop": "",
     "convert": "",
     "confirm_editor_close": "",
     "confirm_editor_close_message": "",

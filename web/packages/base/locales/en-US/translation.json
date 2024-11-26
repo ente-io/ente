@@ -576,12 +576,10 @@
     "IMAGE": "Image",
     "VIDEO": "Video",
     "LIVE_PHOTO": "Live Photo",
-    "editor": {
-        "crop": "Crop"
-    },
     "photo_editor": "Photo editor",
     "confirm_editor_close": "Are you sure you want to close the editor?",
     "confirm_editor_close_message": "Download your edited image or save a copy to Ente to persist your changes.",
+    "crop": "Crop",
     "BRIGHTNESS": "Brightness",
     "CONTRAST": "Contrast",
     "SATURATION": "Saturation",

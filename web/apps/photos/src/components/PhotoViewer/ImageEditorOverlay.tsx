@@ -645,7 +645,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                 setCurrentTab(value);
                             }}
                         >
-                            <Tab label={t("editor.crop")} value="crop" />
+                            <Tab label={t("crop")} value="crop" />
                             <Tab label={t("TRANSFORM")} value="transform" />
                             <Tab
                                 label={t("COLORS")}

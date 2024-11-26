@@ -575,9 +575,7 @@
     "IMAGE": "Bild",
     "VIDEO": "Video",
     "LIVE_PHOTO": "Live-Foto",
-    "editor": {
-        "crop": "Zuschneiden"
-    },
+    "crop": "Zuschneiden",
     "convert": "Konvertieren",
     "confirm_editor_close": "Editor wirklich schließen?",
     "confirm_editor_close_message": "Lade dein bearbeitetes Bild herunter oder speichere es in Ente, um die Änderungen nicht zu verlieren.",

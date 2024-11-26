@@ -575,9 +575,7 @@
     "IMAGE": "Vaizdas",
     "VIDEO": "Vaizdo įrašas",
     "LIVE_PHOTO": "Gyva nuotrauka",
-    "editor": {
-        "crop": "Apkirpti"
-    },
+    "crop": "Apkirpti",
     "convert": "Konvertuoti",
     "confirm_editor_close": "Ar tikrai norite uždaryti rengyklę?",
     "confirm_editor_close_message": "Atsisiųskite redaguotą vaizdą arba išsaugokite jo kopiją į „Ente“, kad išlaikytumėte pakeitimus.",

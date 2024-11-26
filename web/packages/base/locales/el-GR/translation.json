@@ -575,9 +575,7 @@
     "IMAGE": "Εικόνα",
     "VIDEO": "Βίντεο",
     "LIVE_PHOTO": "Ζωντανή φωτογραφία",
-    "editor": {
-        "crop": "Περικοπή"
-    },
+    "crop": "Περικοπή",
     "convert": "Μετατροπή",
     "confirm_editor_close": "",
     "confirm_editor_close_message": "",

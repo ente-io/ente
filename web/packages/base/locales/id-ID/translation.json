@@ -575,9 +575,7 @@
     "IMAGE": "",
     "VIDEO": "Video",
     "LIVE_PHOTO": "",
-    "editor": {
-        "crop": "Potong"
-    },
+    "crop": "Potong",
     "convert": "",
     "confirm_editor_close": "Apakah kamu yakin ingin menutup editor?",
     "confirm_editor_close_message": "",

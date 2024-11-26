@@ -575,9 +575,7 @@
     "IMAGE": "Imagem",
     "VIDEO": "Vídeo",
     "LIVE_PHOTO": "Fotos em movimento",
-    "editor": {
-        "crop": "Recortar"
-    },
+    "crop": "Recortar",
     "convert": "Converter",
     "confirm_editor_close": "Tem certeza de que deseja fechar o editor?",
     "confirm_editor_close_message": "Baixe sua imagem editada ou salve uma cópia para o ente para persistir nas alterações.",

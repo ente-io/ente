@@ -575,9 +575,7 @@
     "IMAGE": "Hình ảnh",
     "VIDEO": "Video",
     "LIVE_PHOTO": "Ảnh trực tiếp",
-    "editor": {
-        "crop": "Cắt"
-    },
+    "crop": "Cắt",
     "convert": "Chuyển đổi",
     "confirm_editor_close": "Bạn có chắc chắn muốn đóng trình chỉnh sửa không?",
     "confirm_editor_close_message": "Tải xuống hình ảnh đã chỉnh sửa của bạn hoặc lưu bản sao vào Ente để giữ lại các thay đổi của bạn.",

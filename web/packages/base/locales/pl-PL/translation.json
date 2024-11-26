@@ -575,9 +575,7 @@
     "IMAGE": "Zdjęcie",
     "VIDEO": "Wideo",
     "LIVE_PHOTO": "Live Photo",
-    "editor": {
-        "crop": "Przytnij"
-    },
+    "crop": "Przytnij",
     "convert": "Konwertuj",
     "confirm_editor_close": "Czy na pewno chcesz zamknąć edytor?",
     "confirm_editor_close_message": "Pobierz edytowany obraz lub zapisz kopię do Ente, aby utrzymać zmiany.",
