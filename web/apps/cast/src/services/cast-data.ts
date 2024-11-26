@@ -1,3 +1,5 @@
+import type { CastPayload } from "./pair";
+
 export interface CastData {
     /** The ID of the callection we are casting. */
     collectionID: string;
@@ -12,7 +14,7 @@ export interface CastData {
  *
  * We will read in back when we start the slideshow.
  */
-export const storeCastData = (payload: unknown) => {
+export const storeCastData = (payload: CastPayload | undefined) => {
     if (!payload || typeof payload != "object")
         throw new Error("Unexpected cast data");
 

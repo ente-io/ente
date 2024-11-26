@@ -5,7 +5,7 @@ import { PairingCode } from "components/PairingCode";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { readCastData, storeCastData } from "services/cast-data";
-import { getCastData, register } from "services/pair";
+import { getCastPayload, register } from "services/pair";
 import { advertiseOnChromecast } from "../services/chromecast-receiver";
 
 export default function Index() {
@@ -35,9 +35,7 @@ export default function Index() {
 
         const pollTick = async () => {
             try {
-                // TODO:
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                const data = await getCastData({
+                const data = await getCastPayload({
                     publicKey,
                     privateKey,
                     pairingCode,
