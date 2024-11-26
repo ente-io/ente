@@ -12,11 +12,11 @@ class LightThemesScreen extends StatelessWidget {
       builder: (context, themeProvider, _) {
         return Scaffold(
           appBar: AppBar(
-            title: Text('Light Themes'),
+            title: const Text('Light Themes'),
           ),
           body: Stack(
             children: [
-              ThemeSelectionWidget(
+              const ThemeSelectionWidget(
                 isDark: false,
                 themeGroups: [
                   ThemeGroup(

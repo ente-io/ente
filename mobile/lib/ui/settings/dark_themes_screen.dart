@@ -12,11 +12,11 @@ class DarkThemesScreen extends StatelessWidget {
       builder: (context, themeProvider, _) {
         return Scaffold(
           appBar: AppBar(
-            title: Text('Dark Themes'),
+            title: const Text('Dark Themes'),
           ),
           body: Stack(
             children: [
-              ThemeSelectionWidget(
+              const ThemeSelectionWidget(
                 isDark: true,
                 themeGroups: [
                   ThemeGroup(
