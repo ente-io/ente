@@ -1,6 +1,6 @@
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { boxSeal } from "@/base/crypto/libsodium";
+import { boxSeal } from "@/base/crypto";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
@@ -188,21 +188,23 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
             )}
             {view == "pin" && (
                 <>
-                    <Typography>
-                        <Trans
-                            i18nKey="visit_cast_url"
-                            components={{
-                                a: (
-                                    <Link
-                                        target="_blank"
-                                        href="https://cast.ente.io"
-                                    />
-                                ),
-                            }}
-                            values={{ url: "cast.ente.io" }}
-                        />
-                    </Typography>
-                    <Typography>{t("enter_cast_pin_code")}</Typography>
+                    <Stack sx={{ gap: 2, mb: 2 }}>
+                        <Typography>
+                            <Trans
+                                i18nKey="visit_cast_url"
+                                components={{
+                                    a: (
+                                        <Link
+                                            target="_blank"
+                                            href="https://cast.ente.io"
+                                        />
+                                    ),
+                                }}
+                                values={{ url: "cast.ente.io" }}
+                            />
+                        </Typography>
+                        <Typography>{t("enter_cast_pin_code")}</Typography>
+                    </Stack>
                     <SingleInputForm
                         callback={onSubmit}
                         fieldType="text"
@@ -211,7 +213,11 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                         buttonText={t("pair_device_to_tv")}
                         submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
                     />
-                    <Button variant="text" onClick={() => setView("choose")}>
+                    <Button
+                        variant="text"
+                        fullWidth
+                        onClick={() => setView("choose")}
+                    >
                         {t("GO_BACK")}
                     </Button>
                 </>
