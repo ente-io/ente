@@ -15,12 +15,12 @@ import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
-class SharedPublicCollectionPage extends StatelessWidget {
+class SharedPublicCollectionPage extends StatefulWidget {
   final CollectionWithThumbnail c;
   final String tagPrefix;
   final List<EnteFile>? files;
 
-  SharedPublicCollectionPage(
+  const SharedPublicCollectionPage(
     this.c, {
     this.tagPrefix = "shared_public_collection",
     super.key,
@@ -30,32 +30,47 @@ class SharedPublicCollectionPage extends StatelessWidget {
           'sharedLinkFiles cannot be empty',
         );
 
+  @override
+  State<SharedPublicCollectionPage> createState() =>
+      _SharedPublicCollectionPageState();
+}
+
+class _SharedPublicCollectionPageState
+    extends State<SharedPublicCollectionPage> {
   final _selectedFiles = SelectedFiles();
   final galleryType = GalleryType.sharedPublicCollection;
+
+  @override
+  void dispose() {
+    _selectedFiles.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final logger = Logger("SharedPublicCollectionPage");
     logger.info("Building SharedPublicCollectionPage");
-    final bool isPublicDownload = c.collection.isDownloadEnabledForPublicLink();
-    final bool isisEnableCollect = c.collection.isCollectEnabledForPublicLink();
+    final bool isPublicDownload =
+        widget.c.collection.isDownloadEnabledForPublicLink();
+    final bool isisEnableCollect =
+        widget.c.collection.isCollectEnabledForPublicLink();
     final List<EnteFile>? initialFiles =
-        c.thumbnail != null ? [c.thumbnail!] : null;
+        widget.c.thumbnail != null ? [widget.c.thumbnail!] : null;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        files!.sort(
+        widget.files!.sort(
           (a, b) => a.creationTime!.compareTo(b.creationTime!),
         );
 
-        return FileLoadResult(files!, false);
+        return FileLoadResult(widget.files!, false);
       },
       reloadEvent: Bus.instance
           .on<CollectionUpdatedEvent>()
-          .where((event) => event.collectionID == c.collection.id),
+          .where((event) => event.collectionID == widget.c.collection.id),
       forceReloadEvents: [
         Bus.instance.on<CollectionMetaEvent>().where(
               (event) =>
-                  event.id == c.collection.id &&
+                  event.id == widget.c.collection.id &&
                   event.type == CollectionMetaEventType.sortChanged,
             ),
       ],
@@ -64,11 +79,11 @@ class SharedPublicCollectionPage extends StatelessWidget {
         EventType.deletedFromEverywhere,
         EventType.hide,
       },
-      tagPrefix: tagPrefix,
+      tagPrefix: widget.tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: initialFiles,
-      albumName: c.collection.displayName,
-      sortAsyncFn: () => c.collection.pubMagicMetadata.asc ?? false,
+      albumName: widget.c.collection.displayName,
+      sortAsyncFn: () => widget.c.collection.pubMagicMetadata.asc ?? false,
     );
 
     return GalleryFilesState(
@@ -77,10 +92,10 @@ class SharedPublicCollectionPage extends StatelessWidget {
           preferredSize: const Size.fromHeight(50.0),
           child: GalleryAppBarWidget(
             galleryType,
-            c.collection.displayName,
+            widget.c.collection.displayName,
             _selectedFiles,
-            collection: c.collection,
-            files: files,
+            collection: widget.c.collection,
+            files: widget.files,
           ),
         ),
         body: SelectionState(
@@ -94,7 +109,7 @@ class SharedPublicCollectionPage extends StatelessWidget {
                   : FileSelectionOverlayBar(
                       galleryType,
                       _selectedFiles,
-                      collection: c.collection,
+                      collection: widget.c.collection,
                     ),
             ],
           ),
