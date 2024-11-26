@@ -174,7 +174,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                     </div>
                     <Typography>{t("choose_device_from_browser")}</Typography>
                     <Button color="secondary" onClick={() => setView("choose")}>
-                        {t("GO_BACK")}
+                        {t("go_back")}
                     </Button>
                 </Stack>
             )}
@@ -182,7 +182,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                 <Stack sx={{ pt: 1, gap: 3, textAlign: "center" }}>
                     <Typography>{t("cast_auto_pair_failed")}</Typography>
                     <Button color="secondary" onClick={() => setView("choose")}>
-                        {t("GO_BACK")}
+                        {t("go_back")}
                     </Button>
                 </Stack>
             )}
@@ -208,7 +208,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                     <SingleInputForm
                         callback={onSubmit}
                         fieldType="text"
-                        realLabel={"Code"}
+                        realLabel={t("code")}
                         realPlaceholder={"123456"}
                         buttonText={t("pair_device_to_tv")}
                         submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
@@ -218,7 +218,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                         fullWidth
                         onClick={() => setView("choose")}
                     >
-                        {t("GO_BACK")}
+                        {t("go_back")}
                     </Button>
                 </>
             )}

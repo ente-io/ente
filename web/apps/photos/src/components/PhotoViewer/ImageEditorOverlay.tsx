@@ -537,7 +537,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         alignItems={"center"}
                     >
                         <Typography variant="h2" fontWeight="bold">
-                            {t("PHOTO_EDITOR")}
+                            {t("photo_editor")}
                         </Typography>
                         <IconButton
                             onClick={() => {
@@ -613,7 +613,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                         startIcon={<CropIcon />}
                                         onClick={applyCrop}
                                     >
-                                        {t("APPLY_CROP")}
+                                        {t("apply_crop")}
                                     </Button>
                                 </CenteredFlex>
                             )}
@@ -645,10 +645,10 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                 setCurrentTab(value);
                             }}
                         >
-                            <Tab label={t("editor.crop")} value="crop" />
-                            <Tab label={t("TRANSFORM")} value="transform" />
+                            <Tab label={t("crop")} value="crop" />
+                            <Tab label={t("transform")} value="transform" />
                             <Tab
-                                label={t("COLORS")}
+                                label={t("colors")}
                                 value="colors"
                                 disabled={transformationPerformed}
                             />
@@ -666,7 +666,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                             onClick={() => {
                                 loadCanvas();
                             }}
-                            label={t("RESTORE_ORIGINAL")}
+                            label={t("restore_original")}
                         />
                     </MenuItemGroup>
                     {currentTab === "crop" && (
@@ -700,7 +700,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         <EnteMenuItem
                             startIcon={<DownloadIcon />}
                             onClick={downloadEditedPhoto}
-                            label={t("DOWNLOAD_EDITED")}
+                            label={t("download_edited")}
                             disabled={
                                 !transformationPerformed && !coloursAdjusted
                             }
@@ -709,7 +709,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         <EnteMenuItem
                             startIcon={<CloudUploadIcon />}
                             onClick={saveCopyToEnte}
-                            label={t("SAVE_A_COPY_TO_ENTE")}
+                            label={t("save_a_copy_to_ente")}
                             disabled={
                                 !transformationPerformed && !coloursAdjusted
                             }
@@ -717,7 +717,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                     </MenuItemGroup>
                     {!transformationPerformed && !coloursAdjusted && (
                         <MenuSectionTitle
-                            title={t("PHOTO_EDIT_REQUIRED_TO_SAVE")}
+                            title={t("photo_edit_required_to_save")}
                         />
                     )}
                 </SidebarDrawer>
@@ -818,7 +818,7 @@ const CropMenu: React.FC<CropMenuProps> = (props) => {
 
     return (
         <>
-            <MenuSectionTitle title={t("FREEHAND")} />
+            <MenuSectionTitle title={t("freehand")} />
             <MenuItemGroup
                 style={{
                     marginBottom: "0.5rem",
@@ -850,7 +850,7 @@ const CropMenu: React.FC<CropMenuProps> = (props) => {
 
                         setCurrentTab("transform");
                     }}
-                    label={t("APPLY_CROP")}
+                    label={t("apply_crop")}
                 />
             </MenuItemGroup>
         </>
@@ -1231,7 +1231,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
 
     return (
         <>
-            <MenuSectionTitle title={t("ASPECT_RATIO")} />
+            <MenuSectionTitle title={t("aspect_ratio")} />
             <MenuItemGroup
                 style={{
                     marginBottom: "0.5rem",
@@ -1241,7 +1241,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                     disabled={canvasLoading}
                     startIcon={<CropSquareIcon />}
                     onClick={createCropHandler(1, 1)}
-                    label={t("SQUARE") + " (1:1)"}
+                    label={t("square") + " (1:1)"}
                 />
             </MenuItemGroup>
             <MenuItemGroup
@@ -1289,7 +1289,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                     </Fragment>
                 ))}
             </MenuItemGroup>
-            <MenuSectionTitle title={t("ROTATION")} />
+            <MenuSectionTitle title={t("rotation")} />
             <MenuItemGroup
                 style={{
                     marginBottom: "1rem",
@@ -1299,17 +1299,17 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                     disabled={canvasLoading}
                     startIcon={<RotateLeftIcon />}
                     onClick={createRotationHandler("left")}
-                    label={t("ROTATE_LEFT") + " 90˚"}
+                    label={t("rotate_left") + " 90˚"}
                 />
                 <MenuItemDivider />
                 <EnteMenuItem
                     disabled={canvasLoading}
                     startIcon={<RotateRightIcon />}
                     onClick={createRotationHandler("right")}
-                    label={t("ROTATE_RIGHT") + " 90˚"}
+                    label={t("rotate_right") + " 90˚"}
                 />
             </MenuItemGroup>
-            <MenuSectionTitle title={t("FLIP")} />
+            <MenuSectionTitle title={t("flip")} />
             <MenuItemGroup
                 style={{
                     marginBottom: "1rem",
@@ -1321,14 +1321,14 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                         <FlipIcon style={{ transform: "rotateZ(90deg)" }} />
                     }
                     onClick={createFlipCanvasHandler("vertical")}
-                    label={t("FLIP_VERTICALLY")}
+                    label={t("flip_vertically")}
                 />
                 <MenuItemDivider />
                 <EnteMenuItem
                     disabled={canvasLoading}
                     startIcon={<FlipIcon />}
                     onClick={createFlipCanvasHandler("horizontal")}
-                    label={t("FLIP_HORIZONTALLY")}
+                    label={t("flip_horizontally")}
                 />
             </MenuItemGroup>
         </>
@@ -1351,7 +1351,7 @@ interface ColoursMenuProps {
 const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
     <>
         <Box px={"8px"}>
-            <MenuSectionTitle title={t("BRIGHTNESS")} />
+            <MenuSectionTitle title={t("brightness")} />
             <Slider
                 min={0}
                 max={200}
@@ -1369,7 +1369,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                     props.setBrightness(value as number);
                 }}
             />
-            <MenuSectionTitle title={t("CONTRAST")} />
+            <MenuSectionTitle title={t("contrast")} />
             <Slider
                 min={0}
                 max={200}
@@ -1387,7 +1387,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                     },
                 ]}
             />
-            <MenuSectionTitle title={t("BLUR")} />
+            <MenuSectionTitle title={t("blur")} />
             <Slider
                 min={0}
                 max={10}
@@ -1399,7 +1399,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                     props.setBlur(value as number);
                 }}
             />
-            <MenuSectionTitle title={t("SATURATION")} />
+            <MenuSectionTitle title={t("saturation")} />
             <Slider
                 min={0}
                 max={200}
@@ -1426,7 +1426,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
             <EnteMenuItem
                 variant="toggle"
                 checked={props.invert}
-                label={t("INVERT_COLORS")}
+                label={t("invert_colors")}
                 onClick={() => {
                     props.setInvert(!props.invert);
                 }}
