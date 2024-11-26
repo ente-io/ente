@@ -110,7 +110,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                     });
             });
         }
-    }, [view]);
+    }, [view, collection]);
 
     useEffect(() => {
         // Make API call to clear all previous sessions (if any) whenever the
