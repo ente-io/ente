@@ -663,6 +663,64 @@ export async function completeChunkHashing(hashState: sodium.StateAddress) {
     return hashString;
 }
 
+/**
+ * Generate a new public/private keypair for use with the boxSeal* functions,
+ * and return their base64 string representations.
+ *
+ * These keys are suitable for being used with the {@link boxSeal} and
+ * {@link boxSealOpen} functions.
+ */
+export const generateKeyPair = async () => {
+    await sodium.ready;
+    const keyPair = sodium.crypto_box_keypair();
+    return {
+        publicKey: await toB64(keyPair.publicKey),
+        privateKey: await toB64(keyPair.privateKey),
+    };
+};
+
+/**
+ * Public key encryption.
+ *
+ * Encrypt the given {@link data} using the given {@link publicKey}.
+ *
+ * This function performs asymmetric (public-key) encryption. To decrypt the
+ * result, use {@link boxSealOpen}.
+ *
+ * @param data The input data to encrypt, represented as a base64 string.
+ *
+ * @param publicKey The public key to use for encryption (as a base64 string).
+ *
+ * @returns The encrypted data (as a base64 string).
+ */
+export const boxSeal = async (data: string, publicKey: string) => {
+    await sodium.ready;
+    return toB64(
+        sodium.crypto_box_seal(await fromB64(data), await fromB64(publicKey)),
+    );
+};
+
+/**
+ * Decrypt the result of {@link boxSeal}.
+ *
+ * All parameters, and the result, are base64 string representations of the
+ * underlying data.
+ */
+export const boxSealOpen = async (
+    input: string,
+    publicKey: string,
+    secretKey: string,
+) => {
+    await sodium.ready;
+    return toB64(
+        sodium.crypto_box_seal_open(
+            await fromB64(input),
+            await fromB64(publicKey),
+            await fromB64(secretKey),
+        ),
+    );
+};
+
 export async function deriveKey(
     passphrase: string,
     salt: string,
@@ -730,47 +788,6 @@ export async function generateEncryptionKey() {
 export async function generateSaltToDeriveKey() {
     await sodium.ready;
     return await toB64(sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES));
-}
-
-/**
- * Generate a new public/private keypair, and return their base64
- * representations.
- */
-export const generateKeyPair = async () => {
-    await sodium.ready;
-    const keyPair = sodium.crypto_box_keypair();
-    return {
-        publicKey: await toB64(keyPair.publicKey),
-        privateKey: await toB64(keyPair.privateKey),
-    };
-};
-
-export async function boxSealOpen(
-    input: string,
-    publicKey: string,
-    secretKey: string,
-) {
-    await sodium.ready;
-    return await toB64(
-        sodium.crypto_box_seal_open(
-            await fromB64(input),
-            await fromB64(publicKey),
-            await fromB64(secretKey),
-        ),
-    );
-}
-
-/**
- * Encrypt the given {@link input} using the given {@link publicKey}.
- *
- * This function performs asymmetric (public-key) encryption. To decrypt the
- * result, use {@link boxSealOpen}.
- */
-export async function boxSeal(input: string, publicKey: string) {
-    await sodium.ready;
-    return await toB64(
-        sodium.crypto_box_seal(await fromB64(input), await fromB64(publicKey)),
-    );
 }
 
 export async function generateSubKey(
