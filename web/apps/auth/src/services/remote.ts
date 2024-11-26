@@ -1,24 +1,22 @@
-import { decryptMetadataJSON_New, sharedCryptoWorker } from "@/base/crypto";
+import { decryptBoxB64, decryptMetadataJSON_New } from "@/base/crypto";
 import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
+import { masterKeyFromSession } from "@/base/session-store";
 import { ensureString } from "@/utils/ensure";
-import { getActualKey } from "@ente/shared/user";
 import { codeFromURIString, type Code } from "services/code";
 import { z } from "zod";
 
 export const getAuthCodes = async (): Promise<Code[]> => {
-    const masterKey = await getActualKey();
+    const masterKey = await masterKeyFromSession();
     const authenticatorEntityKey = await getAuthenticatorEntityKey();
     if (!authenticatorEntityKey) {
         // The user might not have stored any codes yet from the mobile app.
         return [];
     }
 
-    const cryptoWorker = await sharedCryptoWorker();
-    const authenticatorKey = await cryptoWorker.decryptB64(
-        authenticatorEntityKey.encryptedKey,
-        authenticatorEntityKey.header,
+    const authenticatorKey = await decryptAuthenticatorKey(
+        authenticatorEntityKey,
         masterKey,
     );
     const authEntities = await authenticatorEntityDiff(authenticatorKey);
@@ -150,3 +148,19 @@ export const getAuthenticatorEntityKey = async (): Promise<
         return AuthenticatorEntityKey.parse(await res.json());
     }
 };
+
+/**
+ * Decrypt an encrypted authenticator key using the user's master key.
+ */
+const decryptAuthenticatorKey = async (
+    remote: AuthenticatorEntityKey,
+    masterKey: Uint8Array,
+) =>
+    decryptBoxB64(
+        {
+            encryptedData: remote.encryptedKey,
+            // Remote calls it the header, but it really is the nonce.
+            nonce: remote.header,
+        },
+        masterKey,
+    );
