@@ -4,7 +4,10 @@ import { boxSeal } from "@/base/crypto";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
-import castGateway, { revokeAllCastTokens } from "@/new/photos/services/cast";
+import castGateway, {
+    publicKeyForPairingCode,
+    revokeAllCastTokens,
+} from "@/new/photos/services/cast";
 import { loadCast } from "@/new/photos/utils/chromecast-sender";
 import SingleInputForm, {
     type SingleInputFormProps,
@@ -52,36 +55,34 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
         setFieldError,
     ) => {
         try {
-            await doCast(value.trim());
-            onClose();
-        } catch (e) {
-            if (e instanceof Error && e.message == "tv-not-found") {
-                setFieldError(t("tv_not_found"));
+            if (await doCast(value.trim())) {
+                onClose();
             } else {
-                setFieldError(t("generic_error_retry"));
+                setFieldError(t("tv_not_found"));
             }
+        } catch (e) {
+            log.error("Failed to cast", e);
+            setFieldError(t("generic_error_retry"));
         }
     };
 
     const doCast = async (pin: string) => {
-        // Does the TV exist? have they advertised their existence?
-        const tvPublicKeyB64 = await castGateway.getPublicKey(pin);
-        if (!tvPublicKeyB64) {
-            throw new Error("tv-not-found");
-        }
+        // Find out the public key associated with the given pairing code (if
+        // indeed a device has published one).
+        const publicKey = await publicKeyForPairingCode(pin);
+        if (!publicKey) return false;
 
         // Generate random id.
         const castToken = uuidv4();
 
-        // Ok, they exist. let's give them the good stuff.
+        // Publish the payload so that the other end can use it.
         const payload = JSON.stringify({
             castToken: castToken,
             collectionID: collection.id,
             collectionKey: collection.key,
         });
-        const encryptedPayload = await boxSeal(btoa(payload), tvPublicKeyB64);
+        const encryptedPayload = await boxSeal(btoa(payload), publicKey);
 
-        // Hey TV, we acknowlege you!
         await castGateway.publishCastPayload(
             pin,
             encryptedPayload,

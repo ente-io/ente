@@ -1,9 +1,8 @@
-import { authenticatedRequestHeaders } from "@/base/http";
-import log from "@/base/log";
+import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
-import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { z } from "zod";
 
 /**
  * Revoke all existing outstanding cast tokens for the current user on remote.
@@ -14,28 +13,22 @@ export const revokeAllCastTokens = async () =>
         headers: await authenticatedRequestHeaders(),
     });
 
-class CastGateway {
-    public async getPublicKey(code: string): Promise<string> {
-        let resp;
-        try {
-            const token = getToken();
-            resp = await HTTPService.get(
-                await apiURL(`/cast/device-info/${code}`),
-                undefined,
-                {
-                    "X-Auth-Token": token,
-                },
-            );
-        } catch (e) {
-            if (e instanceof ApiError && e.httpStatusCode === 404) {
-                return "";
-            }
-            log.error("failed to getPublicKey", e);
-            throw e;
-        }
-        return resp.data.publicKey;
-    }
+/**
+ * Fetch the public key (represented as a base64 string) associated with the
+ * given device / pairing {@link code} from remote, or `undefined` if there is
+ * no public key associated with the given code.
+ */
+export const publicKeyForPairingCode = async (code: string) => {
+    const res = await fetch(await apiURL(`/cast/device-info/${code}`), {
+        headers: await authenticatedRequestHeaders(),
+    });
+    if (res.status == 404) return undefined;
+    ensureOk(res);
+    return z.object({ publicKey: z.string() }).parse(await res.json())
+        .publicKey;
+};
 
+class CastGateway {
     public async publishCastPayload(
         code: string,
         castPayload: string,
