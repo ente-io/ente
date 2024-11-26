@@ -208,7 +208,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                     <SingleInputForm
                         callback={onSubmit}
                         fieldType="text"
-                        realLabel={"Code"}
+                        realLabel={t("code")}
                         realPlaceholder={"123456"}
                         buttonText={t("pair_device_to_tv")}
                         submitButtonProps={{ sx: { mt: 1, mb: 2 } }}

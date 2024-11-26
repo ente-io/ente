@@ -605,6 +605,7 @@
     "faster_upload_description": "Route uploads through nearby servers",
     "cast_album_to_tv": "Play album on TV",
     "enter_cast_pin_code": "Enter the code you see on the TV below to pair this device.",
+    "code": "Code",
     "pair_device_to_tv": "Pair devices",
     "tv_not_found": "TV not found. Did you enter the PIN correctly?",
     "cast_auto_pair": "Auto pair",
