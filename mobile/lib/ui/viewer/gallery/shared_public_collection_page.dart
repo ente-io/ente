@@ -104,13 +104,11 @@ class _SharedPublicCollectionPageState
             alignment: Alignment.bottomCenter,
             children: [
               gallery,
-              !isPublicDownload && !isisEnableCollect
-                  ? const SizedBox.shrink()
-                  : FileSelectionOverlayBar(
-                      galleryType,
-                      _selectedFiles,
-                      collection: widget.c.collection,
-                    ),
+              FileSelectionOverlayBar(
+                galleryType,
+                _selectedFiles,
+                collection: widget.c.collection,
+              ),
             ],
           ),
         ),
