@@ -203,9 +203,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         galleryType != GalleryType.quickLink) {
       showToast(
         context,
-        S
-            .of(context)
-            .typeOfGallerGallerytypeIsNotSupportedForRename("$galleryType"),
+        S.of(context).typeOfGallerGallerytypeIsNotSupportedForRename("$galleryType"),
       );
 
       return;
@@ -866,7 +864,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             MaterialPageRoute(
               builder: (context) => WebPage(
                 widget.title ?? "",
-                "https://albums.ente.io/?t=$authToken#$albumKey",
+                "https://albums.ente.sh/?t=$authToken#$albumKey",
               ),
             ),
           );

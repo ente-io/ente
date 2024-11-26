@@ -50,7 +50,7 @@
     	</dict>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>albums.ente.io</string>
+			<string>albums.ente.sh</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>https</string>
