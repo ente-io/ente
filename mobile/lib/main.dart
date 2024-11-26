@@ -44,12 +44,14 @@ import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
 import "package:photos/services/sync_service.dart";
 import "package:photos/services/user_service.dart";
+import 'package:photos/theme/ente_theme_provider.dart';
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _logger = Logger("main");
@@ -96,17 +98,25 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
     final Locale? locale = await getLocale(noFallback: true);
+    final prefs = await SharedPreferences.getInstance();
     runApp(
-      AppLock(
-        builder: (args) =>
-            EnteApp(_runBackgroundTask, _killBGTask, locale, savedThemeMode),
-        lockScreen: const LockScreen(),
-        enabled: await Configuration.instance.shouldShowLockScreen() ||
-            localSettings.isOnGuestView(),
-        locale: locale,
-        lightTheme: lightThemeData,
-        darkTheme: darkThemeData,
-        savedThemeMode: _themeMode(savedThemeMode),
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<ThemeProvider>(
+            create: (_) => ThemeProvider(prefs),
+          ),
+        ],
+        child: AppLock(
+          builder: (args) =>
+              EnteApp(_runBackgroundTask, _killBGTask, locale, savedThemeMode),
+          lockScreen: const LockScreen(),
+          enabled: await Configuration.instance.shouldShowLockScreen() ||
+              localSettings.isOnGuestView(),
+          locale: locale,
+          lightTheme: lightThemeData,
+          darkTheme: darkThemeData,
+          savedThemeMode: _themeMode(savedThemeMode),
+        ),
       ),
     );
     if (Platform.isAndroid) {

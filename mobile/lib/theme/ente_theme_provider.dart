@@ -1,4 +1,3 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -6,6 +5,7 @@ import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/theme/text_style.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum ThemeOptions {
   system,
@@ -42,16 +42,54 @@ enum ThemeOptions {
 }
 
 class ThemeProvider extends ChangeNotifier {
+  static const String _themeKey = 'selected_theme';
   ThemeOptions _currentTheme = ThemeOptions.system;
   bool _isChangingTheme = false;
+  bool _initialized = false;
+  final SharedPreferences _prefs;
+  final Duration _transitionDuration = const Duration(milliseconds: 300);
 
-  // Add theme data caching
+  // Theme data caching
   late final ThemeData _lightThemeData;
   late final ThemeData _darkThemeData;
   final Map<ThemeOptions, ThemeData> _themeCache = {};
 
-  ThemeProvider() {
+  ThemeProvider(this._prefs) {
     _initializeThemeData();
+    _loadSavedTheme();
+    
+    // Better system theme change handling
+    WidgetsBinding.instance.window.onPlatformBrightnessChanged = _handleSystemThemeChange;
+  }
+
+  @override
+  void dispose() {
+    // Clean up system theme listener
+    WidgetsBinding.instance.window.onPlatformBrightnessChanged = null;
+    super.dispose();
+  }
+
+  // Getters
+  ThemeData get currentThemeData {
+    if (_currentTheme == ThemeOptions.system) {
+      final brightness = WidgetsBinding.instance.window.platformBrightness;
+      return brightness == Brightness.light ? _lightThemeData : _darkThemeData;
+    }
+    return _getOrCreateCustomTheme(_currentTheme);
+  }
+
+  bool get initialized => _initialized;
+  ThemeOptions get currentTheme => _currentTheme;
+  bool get isChangingTheme => _isChangingTheme;
+
+  ThemeMode get themeMode {
+    if (_currentTheme == ThemeOptions.system) {
+      final brightness = WidgetsBinding.instance.window.platformBrightness;
+      return brightness == Brightness.light ? ThemeMode.light : ThemeMode.dark;
+    }
+    return _currentTheme.toString().toLowerCase().contains('light') 
+        ? ThemeMode.light 
+        : ThemeMode.dark;
   }
 
   void _initializeThemeData() {
@@ -59,21 +97,73 @@ class ThemeProvider extends ChangeNotifier {
     _darkThemeData = _createCustomThemeFromEnteColorScheme(darkScheme, true);
   }
 
-  ThemeOptions get currentTheme => _currentTheme;
-  bool get isChangingTheme => _isChangingTheme;
+  Future<void> _loadSavedTheme() async {
+    try {
+      final savedTheme = _prefs.getString(_themeKey);
+      if (savedTheme != null) {
+        _currentTheme = ThemeOptions.values.firstWhere(
+          (t) => t.toString() == savedTheme,
+          orElse: () => ThemeOptions.system,
+        );
 
-  // Add theme creation helper methods
-  ThemeData _getOrCreateTheme(ThemeOptions theme, EnteColorScheme scheme, bool isDark) {
-    return _themeCache.putIfAbsent(
-      theme,
-          () => _createCustomThemeFromEnteColorScheme(scheme, isDark),
-    );
+        // Apply theme immediately
+        if (_currentTheme == ThemeOptions.system) {
+          _handleSystemThemeChange();
+        } else {
+          _updateSystemUIOverlay(
+            _getThemeScheme(_currentTheme),
+            !_currentTheme.toString().toLowerCase().contains('light'),
+          );
+        }
+      }
+      _initialized = true;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading theme: $e');
+      _currentTheme = ThemeOptions.system;
+      _initialized = true;
+      notifyListeners();
+    }
+  }
+
+  Future<void> setTheme(ThemeOptions theme, BuildContext context) async {
+    if (_isChangingTheme || theme == _currentTheme) return;
+    
+    try {
+      _isChangingTheme = true;
+      notifyListeners();  // Show loading
+      
+      // Save theme first
+      await _prefs.setString(_themeKey, theme.toString());
+      _currentTheme = theme;
+      
+      // Apply theme
+      if (theme == ThemeOptions.system) {
+        _handleSystemThemeChange();
+      } else {
+        _updateSystemUIOverlay(
+          _getThemeScheme(theme),
+          !theme.toString().toLowerCase().contains('light'),
+        );
+      }
+      
+      // Short delay for smooth transition
+      await Future.delayed(const Duration(milliseconds: 16));  // One frame
+      
+      _isChangingTheme = false;
+      notifyListeners();  // Hide loading and update UI
+    } catch (e) {
+      debugPrint('Error setting theme: $e');
+      _currentTheme = ThemeOptions.system;
+      _isChangingTheme = false;
+      notifyListeners();
+    }
   }
 
   ThemeData _getOrCreateCustomTheme(ThemeOptions theme) {
     return _themeCache.putIfAbsent(
       theme,
-          () {
+      () {
         final scheme = _getThemeScheme(theme);
         final isLightTheme = theme.toString().toLowerCase().contains('light');
         return _createCustomThemeFromEnteColorScheme(scheme, !isLightTheme);
@@ -81,94 +171,14 @@ class ThemeProvider extends ChangeNotifier {
     );
   }
 
-  Future<void> initializeTheme(BuildContext context) async {
-    if (_isChangingTheme) return;
-
-    try {
-      _isChangingTheme = true;
-      final adaptiveTheme = AdaptiveTheme.of(context);
-
-      // For system theme, use lightScheme and darkScheme (not enteDarkScheme)
-      _updateThemeData(
-        adaptiveTheme,
-        _createCustomThemeFromEnteColorScheme(lightScheme, false),
-        _createCustomThemeFromEnteColorScheme(darkScheme, true),
-      );
-
-      adaptiveTheme.setSystem();
-      notifyListeners();
-    } catch (e) {
-      print('Error initializing theme: $e');
-    } finally {
-      _isChangingTheme = false;
-    }
-  }
-
-  Future<void> setTheme(ThemeOptions theme, BuildContext context) async {
-    if (_isChangingTheme || theme == _currentTheme) return;
-
-    try {
-      _isChangingTheme = true;
-      _currentTheme = theme;
-      final adaptiveTheme = AdaptiveTheme.of(context);
-
-      switch (theme) {
-        case ThemeOptions.system:
-          _updateThemeData(
-            adaptiveTheme,
-            _lightThemeData,
-            _darkThemeData,
-          );
-          adaptiveTheme.setSystem();
-          // Update system UI for default dark scheme
-          if (Theme.of(context).brightness == Brightness.dark) {
-            _updateSystemUIOverlay(darkScheme, true);
-          }
-          break;
-
-        case ThemeOptions.light:
-          _updateThemeData(
-            adaptiveTheme,
-            _createCustomThemeFromEnteColorScheme(lightScheme, false),
-            _createCustomThemeFromEnteColorScheme(lightScheme, false),
-          );
-          adaptiveTheme.setLight();
-          break;
-
-        case ThemeOptions.dark:
-          final darkTheme = _getOrCreateTheme(theme, enteDarkScheme, true);
-          _updateThemeData(adaptiveTheme, darkTheme, darkTheme);
-          adaptiveTheme.setDark();
-          _updateSystemUIOverlay(enteDarkScheme, true);
-          break;
-
-        default:
-          final customTheme = _getOrCreateCustomTheme(theme);
-          _updateThemeData(adaptiveTheme, customTheme, customTheme);
-          final isLightTheme = theme.toString().toLowerCase().contains('light');
-          if (isLightTheme) {
-            adaptiveTheme.setLight();
-          } else {
-            adaptiveTheme.setDark();
-          }
-          _updateSystemUIOverlay(_getThemeScheme(theme), !isLightTheme);
-          break;
-      }
-
-      await Future.delayed(const Duration(milliseconds: 50));
-      notifyListeners();
-
-    } catch (e) {
-      debugPrint('Error setting theme: $e');
-      rethrow;
-    } finally {
-      _isChangingTheme = false;
-    }
-  }
-
-  // Helper method to get the correct color scheme
   EnteColorScheme _getThemeScheme(ThemeOptions theme) {
     switch (theme) {
+      case ThemeOptions.system:
+        return lightScheme;
+      case ThemeOptions.light:
+        return lightScheme;
+      case ThemeOptions.dark:
+        return darkScheme;
       case ThemeOptions.greenLight:
         return greenLightScheme;
       case ThemeOptions.greenDark:
@@ -230,74 +240,28 @@ class ThemeProvider extends ChangeNotifier {
     }
   }
 
-  // New method for custom themes
-  ThemeData _createCustomTheme(ThemeOptions theme) {
-    late EnteColorScheme colorScheme;
-    bool isDark = false;
-
-    switch (theme) {
-      case ThemeOptions.greenLight:
-        colorScheme = greenLightScheme;
-        break;
-      case ThemeOptions.greenDark:
-        colorScheme = greenDarkScheme;
-        isDark = true;
-        break;
-      case ThemeOptions.redLight:
-        colorScheme = redLightScheme;
-        break;
-      case ThemeOptions.redDark:
-        colorScheme = redDarkScheme;
-        isDark = true;
-        break;
-      case ThemeOptions.blueLight:
-        colorScheme = blueLightScheme;
-        break;
-      case ThemeOptions.blueDark:
-        colorScheme = blueDarkScheme;
-        isDark = true;
-        break;
-      case ThemeOptions.yellowLight:
-        colorScheme = yellowLightScheme;
-        break;
-      case ThemeOptions.yellowDark:
-        colorScheme = yellowDarkScheme;
-        isDark = true;
-        break;
-      default:
-        colorScheme = lightScheme;
-    }
-
-    return ThemeData(
-      useMaterial3: true,
-      brightness: isDark ? Brightness.dark : Brightness.light,
-      extensions: [
-        EnteTheme(
-          isDark ? darkTextTheme : lightTextTheme,
-          colorScheme,
-          shadowFloat: isDark ? shadowFloatDark : shadowFloatLight,
-          shadowMenu: isDark ? shadowMenuDark : shadowMenuLight,
-          shadowButton: isDark ? shadowButtonDark : shadowButtonLight,
-        ),
-      ],
-      primaryColor: colorScheme.primary500,
-      primaryColorDark: colorScheme.primary700,
-      primaryColorLight: colorScheme.primary300,
-      scaffoldBackgroundColor: colorScheme.backgroundBase,
-      cardColor: colorScheme.backgroundElevated,
-      // ... add other necessary theme properties
+  void _updateSystemUIOverlay(EnteColorScheme colorScheme, bool isDark) {
+    // For system theme and default dark theme, always use transparent
+    final bool isDefaultDarkTheme = isDark && (
+      _currentTheme == ThemeOptions.system || 
+      _currentTheme == ThemeOptions.dark ||
+      identical(colorScheme, darkScheme) ||
+      identical(colorScheme, enteDarkScheme)
     );
-  }
 
-  void _updateThemeData(AdaptiveThemeManager adaptiveTheme, ThemeData light, ThemeData dark) {
-    adaptiveTheme.setTheme(
-      light: light,
-      dark: dark,
-    );
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: colorScheme.backgroundBase,
+      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      systemNavigationBarColor: isDefaultDarkTheme 
+          ? Colors.transparent
+          : colorScheme.backgroundBase,
+      systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      systemNavigationBarDividerColor: Colors.transparent,
+    ),);
   }
 
   ThemeData _createCustomThemeFromEnteColorScheme(EnteColorScheme enteColorScheme, bool isDark) {
-    // Check specifically for default dark schemes only
     final isDefaultDarkScheme = identical(enteColorScheme, darkScheme) ||
         identical(enteColorScheme, enteDarkScheme);
 
@@ -407,20 +371,16 @@ class ThemeProvider extends ChangeNotifier {
     );
   }
 
-  void _updateSystemUIOverlay(EnteColorScheme colorScheme, bool isDark) {
-    final isDefaultDarkScheme = identical(colorScheme, darkScheme) ||
-        identical(colorScheme, enteDarkScheme);
-
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: colorScheme.backgroundBase,
-      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
-      systemNavigationBarColor: isDefaultDarkScheme
-          ? Colors.transparent
-          : colorScheme.backgroundBase,
-      systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-      systemNavigationBarDividerColor: Colors.transparent,
-    ),);
+  // Add a method to handle system theme changes
+  void _handleSystemThemeChange() {
+    if (_currentTheme == ThemeOptions.system) {
+      final isDark = WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
+      _updateSystemUIOverlay(
+        isDark ? darkScheme : lightScheme,
+        isDark,
+      );
+      notifyListeners();
+    }
   }
 }
 

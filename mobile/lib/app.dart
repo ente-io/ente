@@ -22,6 +22,7 @@ import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/utils/intent_util.dart";
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EnteApp extends StatefulWidget {
   final Future<void> Function(String) runBackgroundTask;
@@ -97,50 +98,60 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     // context.saveAsCurrentContext(); //remove if not usefull in future
     if (Platform.isAndroid || kDebugMode) {
-      return MultiProvider(
-        providers: [
-          ChangeNotifierProvider(
-            create: (context) => ThemeProvider(),
-          ),
-        ],
-        child: Builder(
-          builder: (context) {
-            return Consumer<ThemeProvider>(
+      return FutureBuilder<SharedPreferences>(
+        future: SharedPreferences.getInstance(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const MaterialApp(
+              home: Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            );
+          }
+
+          return MultiProvider(
+            providers: [
+              ChangeNotifierProvider<ThemeProvider>(
+                create: (_) => ThemeProvider(snapshot.data!),
+              ),
+            ],
+            child: Consumer<ThemeProvider>(
               builder: (context, themeProvider, child) {
-                if (themeProvider.currentTheme == ThemeOptions.system) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    themeProvider.initializeTheme(context);
-                  });
+                // Wait for theme to initialize
+                if (!themeProvider.initialized) {
+                  return const MaterialApp(
+                    home: Scaffold(
+                      body: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                  );
                 }
-                
-                return AdaptiveTheme(
-                  light: lightThemeData,
-                  dark: darkThemeData,
-                  initial: AdaptiveThemeMode.system,
-                  builder: (ThemeData light, ThemeData dark) => MaterialApp(
-                    title: "ente",
-                    themeMode: ThemeMode.system,
-                    theme: light,
-                    darkTheme: dark,
-                    home: AppLifecycleService.instance.mediaExtensionAction.action ==
-                            IntentAction.view
-                        ? const FileViewer()
-                        : const HomeWidget(),
-                    debugShowCheckedModeBanner: false,
-                    builder: EasyLoading.init(),
-                    locale: locale,
-                    supportedLocales: appSupportedLocales,
-                    localeListResolutionCallback: localResolutionCallBack,
-                    localizationsDelegates: const [
-                      ...AppLocalizations.localizationsDelegates,
-                      S.delegate,
-                    ],
-                  ),
+
+                return MaterialApp(
+                  title: "ente",
+                  theme: themeProvider.currentThemeData,
+                  themeMode: themeProvider.themeMode,
+                  home: AppLifecycleService.instance.mediaExtensionAction.action ==
+                          IntentAction.view
+                      ? const FileViewer()
+                      : const HomeWidget(),
+                  debugShowCheckedModeBanner: false,
+                  builder: EasyLoading.init(),
+                  locale: locale,
+                  supportedLocales: appSupportedLocales,
+                  localeListResolutionCallback: localResolutionCallBack,
+                  localizationsDelegates: const [
+                    ...AppLocalizations.localizationsDelegates,
+                    S.delegate,
+                  ],
                 );
               },
-            );
-          },
-        ),
+            ),
+          );
+        },
       );
     } else {
       return Listener(

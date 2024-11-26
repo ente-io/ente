@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/theme/colors.dart';
+// import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/theme/ente_theme_provider.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -123,28 +123,15 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> with SingleTicker
       isExpandable: false,
       trailingIcon: Icons.chevron_right,
       leadingIcon: icon,
-      onTap: onTap,
+      onTap: () async {
+        if (!context.read<ThemeProvider>().isChangingTheme) {
+          _controller.reverse();
+          await Future.delayed(const Duration(milliseconds: 150));
+          await onTap();
+          _controller.forward();
+        }
+      },
     );
-  }
-
-  Color _getPreviewColor(ThemeOptions theme) {
-    final colorScheme = _getPreviewColorScheme(theme);
-    return colorScheme.primary500;
-  }
-
-  EnteColorScheme _getPreviewColorScheme(ThemeOptions theme) {
-    switch (theme) {
-      case ThemeOptions.system:
-        return Theme.of(context).brightness == Brightness.light 
-            ? getEnteColorScheme(context) 
-            : getEnteColorScheme(context, inverse: true);
-      case ThemeOptions.light:
-        return getEnteColorScheme(context);
-      case ThemeOptions.dark:
-        return getEnteColorScheme(context, inverse: true);
-      default:
-        return getEnteColorScheme(context);
-    }
   }
 
   Future<void> _navigateToThemeScreen(BuildContext context, Widget screen) async {
