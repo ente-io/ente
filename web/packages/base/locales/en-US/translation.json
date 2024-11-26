@@ -98,6 +98,7 @@
     "favorite": "Favorite",
     "favorite_key": "Favorite (L)",
     "unfavorite_key": "Unfavorite (L)",
+    "convert": "Convert",
     "multi_folder_upload": "Multiple folders detected",
     "upload_to_choice": "Would you like to upload them into",
     "upload_to_single_album": "A single album",
@@ -578,7 +579,6 @@
     "editor": {
         "crop": "Crop"
     },
-    "convert": "Convert",
     "photo_editor": "Photo editor",
     "confirm_editor_close": "Are you sure you want to close the editor?",
     "confirm_editor_close_message": "Download your edited image or save a copy to Ente to persist your changes.",
