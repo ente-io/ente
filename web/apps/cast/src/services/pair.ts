@@ -1,5 +1,5 @@
 import { boxSealOpen, generateKeyPair } from "@/base/crypto";
-import { clientPackageHeader, ensureOk } from "@/base/http";
+import { ensureOk, publicRequestHeaders } from "@/base/http";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { wait } from "@/utils/promise";
@@ -109,7 +109,7 @@ export const register = async (): Promise<Registration> => {
 const registerDevice = async (publicKey: string) => {
     const res = await fetch(await apiURL("/cast/device-info/"), {
         method: "POST",
-        headers: clientPackageHeader(),
+        headers: publicRequestHeaders(),
         body: JSON.stringify({
             publicKey,
         }),
@@ -156,7 +156,7 @@ export const getCastData = async (registration: Registration) => {
  */
 const getEncryptedCastData = async (code: string) => {
     const res = await fetch(await apiURL(`/cast/cast-data/${code}`), {
-        headers: clientPackageHeader(),
+        headers: publicRequestHeaders(),
     });
     ensureOk(res);
     return z

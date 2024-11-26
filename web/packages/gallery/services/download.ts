@@ -8,7 +8,7 @@ import {
 } from "@/base/crypto";
 import {
     authenticatedRequestHeaders,
-    clientPackageHeader,
+    publicRequestHeaders,
     retryEnsuringHTTPOk,
 } from "@/base/http";
 import { ensureAuthToken } from "@/base/local-user";
@@ -617,7 +617,7 @@ const photos_downloadThumbnail = async (file: EnteFile) => {
             return fetch(
                 `${customOrigin}/files/preview/${file.id}?${params.toString()}`,
                 {
-                    headers: clientPackageHeader(),
+                    headers: publicRequestHeaders(),
                 },
             );
         } else {
@@ -676,7 +676,7 @@ const photos_downloadFile = async (file: EnteFile): Promise<Response> => {
             return fetch(
                 `${customOrigin}/files/download/${file.id}?${params.toString()}`,
                 {
-                    headers: clientPackageHeader(),
+                    headers: publicRequestHeaders(),
                 },
             );
         } else {
@@ -714,7 +714,7 @@ const publicAlbums_downloadThumbnail = async (
             return fetch(
                 `${customOrigin}/public-collection/files/preview/${file.id}?${params.toString()}`,
                 {
-                    headers: clientPackageHeader(),
+                    headers: publicRequestHeaders(),
                 },
             );
         } else {
@@ -722,7 +722,7 @@ const publicAlbums_downloadThumbnail = async (
                 `https://public-albums.ente.io/preview/?fileID=${file.id}`,
                 {
                     headers: {
-                        ...clientPackageHeader(),
+                        ...publicRequestHeaders(),
                         "X-Auth-Access-Token": accessToken,
                         ...(accessTokenJWT
                             ? { "X-Auth-Access-Token-JWT": accessTokenJWT }
@@ -758,7 +758,7 @@ const publicAlbums_downloadFile = async (
                 `https://public-albums.ente.io/download/?fileID=${file.id}`,
                 {
                     headers: {
-                        ...clientPackageHeader(),
+                        ...publicRequestHeaders(),
                         "X-Auth-Access-Token": accessToken,
                         ...(accessTokenJWT
                             ? { "X-Auth-Access-Token-JWT": accessTokenJWT }
