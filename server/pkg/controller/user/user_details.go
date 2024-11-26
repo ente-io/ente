@@ -5,6 +5,7 @@ import (
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/ente/details"
 	bonus "github.com/ente-io/museum/ente/storagebonus"
+	"github.com/ente-io/museum/pkg/utils/recover"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
@@ -67,6 +68,10 @@ func (c *UserController) GetDetailsV2(ctx *gin.Context, userID int64, fetchMemor
 		}
 		canDisableEmailMFA = isSRPSetupDone
 		return nil
+	})
+
+	g.Go(func() error {
+		return recover.Int64ToInt64RecoverWrapper(userID, c.FileRepo.GetUsage, &usage)
 	})
 	g.Go(func() error {
 		cnt, err := c.PasskeyRepo.GetPasskeyCount(userID)
