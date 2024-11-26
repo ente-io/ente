@@ -6,6 +6,7 @@ import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/theme/text_style.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:flutter/foundation.dart';
 
 enum ThemeOptions {
   system,
@@ -41,6 +42,12 @@ enum ThemeOptions {
   slateDark,
 }
 
+enum ThemeLoadingState {
+  loading,
+  loaded,
+  error,
+}
+
 class ThemeProvider extends ChangeNotifier {
   static const String _themeKey = 'selected_theme';
   ThemeOptions _currentTheme = ThemeOptions.system;
@@ -48,6 +55,13 @@ class ThemeProvider extends ChangeNotifier {
   bool _initialized = false;
   final SharedPreferences _prefs;
   final Duration _transitionDuration = const Duration(milliseconds: 300);
+
+  ThemeLoadingState _themeState = ThemeLoadingState.loading;
+  String? _errorMessage;
+
+  // Add getters
+  ThemeLoadingState get themeState => _themeState;
+  String? get errorMessage => _errorMessage;
 
   // Theme data caching
   late final ThemeData _lightThemeData;
@@ -57,6 +71,7 @@ class ThemeProvider extends ChangeNotifier {
   ThemeProvider(this._prefs) {
     _initializeThemeData();
     _loadSavedTheme();
+    _preCacheThemes();
     
     // Better system theme change handling
     WidgetsBinding.instance.window.onPlatformBrightnessChanged = _handleSystemThemeChange;
@@ -99,6 +114,9 @@ class ThemeProvider extends ChangeNotifier {
 
   Future<void> _loadSavedTheme() async {
     try {
+      _themeState = ThemeLoadingState.loading;
+      notifyListeners();
+
       final savedTheme = _prefs.getString(_themeKey);
       if (savedTheme != null) {
         _currentTheme = ThemeOptions.values.firstWhere(
@@ -106,22 +124,17 @@ class ThemeProvider extends ChangeNotifier {
           orElse: () => ThemeOptions.system,
         );
 
-        // Apply theme immediately
-        if (_currentTheme == ThemeOptions.system) {
-          _handleSystemThemeChange();
-        } else {
-          _updateSystemUIOverlay(
-            _getThemeScheme(_currentTheme),
-            !_currentTheme.toString().toLowerCase().contains('light'),
-          );
-        }
+        // Pre-cache this theme
+        _themeCache[_currentTheme] = _getOrCreateCustomTheme(_currentTheme);
       }
+
+      _themeState = ThemeLoadingState.loaded;
       _initialized = true;
       notifyListeners();
     } catch (e) {
-      debugPrint('Error loading theme: $e');
+      _errorMessage = e.toString();
+      _themeState = ThemeLoadingState.error;
       _currentTheme = ThemeOptions.system;
-      _initialized = true;
       notifyListeners();
     }
   }
@@ -131,29 +144,35 @@ class ThemeProvider extends ChangeNotifier {
     
     try {
       _isChangingTheme = true;
-      notifyListeners();  // Show loading
-      
+      _themeState = ThemeLoadingState.loading;
+      notifyListeners();
+
       // Save theme first
       await _prefs.setString(_themeKey, theme.toString());
       _currentTheme = theme;
-      
+
       // Apply theme
       if (theme == ThemeOptions.system) {
-        _handleSystemThemeChange();
+        final brightness = MediaQuery.platformBrightnessOf(context);
+        final isDark = brightness == Brightness.dark;
+        _updateSystemUIOverlay(
+          isDark ? darkScheme : lightScheme,
+          isDark,
+        );
       } else {
         _updateSystemUIOverlay(
           _getThemeScheme(theme),
           !theme.toString().toLowerCase().contains('light'),
         );
       }
-      
-      // Short delay for smooth transition
-      await Future.delayed(const Duration(milliseconds: 16));  // One frame
-      
+
+      await Future.delayed(const Duration(milliseconds: 16));
       _isChangingTheme = false;
-      notifyListeners();  // Hide loading and update UI
+      _themeState = ThemeLoadingState.loaded;
+      notifyListeners();
     } catch (e) {
-      debugPrint('Error setting theme: $e');
+      _errorMessage = e.toString();
+      _themeState = ThemeLoadingState.error;
       _currentTheme = ThemeOptions.system;
       _isChangingTheme = false;
       notifyListeners();
@@ -381,6 +400,35 @@ class ThemeProvider extends ChangeNotifier {
       );
       notifyListeners();
     }
+  }
+
+  // Add theme reset method
+  Future<void> resetTheme(BuildContext context) async {
+    await setTheme(ThemeOptions.system, context);
+    _themeCache.clear();
+    _preCacheThemes();
+  }
+
+  // Add method to check if theme is dark
+  bool isThemeDark(ThemeOptions theme) {
+    if (theme == ThemeOptions.system) {
+      final brightness = WidgetsBinding.instance.window.platformBrightness;
+      return brightness == Brightness.dark;
+    }
+    return theme.toString().toLowerCase().contains('dark');
+  }
+
+  // Add pre-cache method
+  void _preCacheThemes() {
+    _themeCache[ThemeOptions.system] = _createCustomThemeFromEnteColorScheme(lightScheme, false);
+    _themeCache[ThemeOptions.light] = _createCustomThemeFromEnteColorScheme(lightScheme, false);
+    _themeCache[ThemeOptions.dark] = _createCustomThemeFromEnteColorScheme(darkScheme, true);
+    
+    // Pre-cache commonly used themes
+    _themeCache[ThemeOptions.greenLight] = _createCustomThemeFromEnteColorScheme(greenLightScheme, false);
+    _themeCache[ThemeOptions.greenDark] = _createCustomThemeFromEnteColorScheme(greenDarkScheme, true);
+    _themeCache[ThemeOptions.blueLight] = _createCustomThemeFromEnteColorScheme(blueLightScheme, false);
+    _themeCache[ThemeOptions.blueDark] = _createCustomThemeFromEnteColorScheme(blueDarkScheme, true);
   }
 }
 

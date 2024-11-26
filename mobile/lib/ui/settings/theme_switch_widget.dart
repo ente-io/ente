@@ -114,23 +114,36 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> with SingleTicker
     Future<void> Function() onTap,
     ThemeOptions previewTheme,
   ) {
-    return MenuItemWidget(
-      captionedTextWidget: CaptionedTextWidget(
-        title: title,
-        textStyle: getEnteTextTheme(context).body,
-      ),
-      pressedColor: getEnteColorScheme(context).fillFaint,
-      isExpandable: false,
-      trailingIcon: Icons.chevron_right,
-      leadingIcon: icon,
-      onTap: () async {
-        if (!context.read<ThemeProvider>().isChangingTheme) {
-          _controller.reverse();
-          await Future.delayed(const Duration(milliseconds: 150));
-          await onTap();
-          _controller.forward();
-        }
-      },
+    final themeProvider = context.watch<ThemeProvider>();
+    
+    return Stack(
+      children: [
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: title,
+            textStyle: getEnteTextTheme(context).body,
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          isExpandable: false,
+          trailingIcon: Icons.chevron_right,
+          leadingIcon: icon,
+          onTap: themeProvider.themeState == ThemeLoadingState.loading 
+              ? null 
+              : onTap,
+        ),
+        if (themeProvider.themeState == ThemeLoadingState.loading)
+          const Positioned.fill(
+            child: Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
