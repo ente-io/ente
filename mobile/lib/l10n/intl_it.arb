@@ -816,16 +816,7 @@
   "referFriendsAnd2xYourPlan": "Invita un amico e raddoppia il tuo spazio",
   "shareAlbumHint": "Apri un album e tocca il pulsante di condivisione in alto a destra per condividerlo.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Gli elementi mostrano il numero di giorni rimanenti prima della cancellazione permanente",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1 giorno} other {{count} giorni}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
+  
   "deleteAll": "Elimina tutto",
   "renameAlbum": "Rinomina album",
   "convertToAlbum": "Converti in album",
@@ -980,7 +971,7 @@
   "thisActionCannotBeUndone": "Questa azione non può essere annullata",
   "emptyTrash": "Vuoi svuotare il cestino?",
   "permDeleteWarning": "Tutti gli elementi nel cestino verranno eliminati definitivamente\n\nQuesta azione non può essere annullata",
-  "empty": "Vuoto",
+  "empty": "Svuota",
   "couldNotFreeUpSpace": "Impossibile liberare lo spazio",
   "permanentlyDeleteFromDevice": "Eliminare definitivamente dal dispositivo?",
   "someOfTheFilesYouAreTryingToDeleteAre": "Alcuni dei file che si sta tentando di eliminare sono disponibili solo sul dispositivo e non possono essere recuperati se cancellati",
@@ -1246,6 +1237,10 @@
   "locations": "Luoghi",
   "descriptions": "Descrizioni",
   "addAName": "Aggiungi un nome",
+  "findThemQuickly": "Trovali rapidamente",
+  "@findThemQuickly": {
+    "description": "Subtitle to indicate that the user can find people quickly by name"
+  },
   "findPeopleByName": "Trova rapidamente le persone per nome",
   "addViewers": "{count, plural, zero {Aggiungi visualizzatore} one {Aggiungi visualizzatore} other {Aggiungi visualizzatori}}",
   "addCollaborators": "{count, plural, zero {Aggiungi collaboratore} one {Aggiungi collaboratore} other {Aggiungi collaboratori}}",
@@ -1260,6 +1255,9 @@
   "createCollaborativeLink": "Crea link collaborativo",
   "search": "Cerca",
   "enterPersonName": "Inserisci il nome della persona",
+  "enterName": "Aggiungi nome",
+  "enterDateOfBirth": "Compleanno (Opzionale)",
+  "birthday": "Compleanno",
   "removePersonLabel": "Rimuovi etichetta persona",
   "autoPairDesc": "L'associazione automatica funziona solo con i dispositivi che supportano Chromecast.",
   "manualPairDesc": "L'associazione con PIN funziona con qualsiasi schermo dove desideri visualizzare il tuo album.",
@@ -1352,46 +1350,62 @@
   "addName": "Aggiungi nome",
   "add": "Aggiungi",
   "extraPhotosFoundFor": "Trovate foto aggiuntive per {text}",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "extraPhotosFound": "Trovate foto aggiuntive",
   "configuration": "Configurazione",
   "localIndexing": "Indicizzazione locale",
-  "resetPerson": "Resetta persona",
+  "resetPerson": "Rimuovi",
   "areYouSureYouWantToResetThisPerson": "Sei sicuro di voler resettare questa persona?",
   "allPersonGroupingWillReset": "Tutti i raggruppamenti per questa persona saranno resettati e perderai tutti i suggerimenti fatti per questa persona",
   "yesResetPerson": "Sì, resetta persona",
   "onlyThem": "Solo loro",
   "checkingModels": "Verifica dei modelli...",
-  "accountIsAlreadyConfigured": "Account is already configured.",
-  "sessionIdMismatch": "Session ID mismatch",
-  "failedToFetchActiveSessions": "Failed to fetch active sessions",
-  "failedToRefreshStripeSubscription": "Failed to refresh subscription",
-  "failedToPlayVideo": "Failed to play video",
-  "uploadIsIgnoredDueToIgnorereason": "Upload is ignored due to {ignoreReason}",
-  "typeOfGallerGallerytypeIsNotSupportedForRename": "Type of gallery {galleryType} is not supported for rename",
-  "tapToUploadIsIgnoredDue": "Tap to upload, upload is currently ignored due to {ignoreReason}",
-  "tapToUpload": "Tap to upload",
+  "searchDiscoverEmptySection": "Le immagini saranno mostrate qui una volta che l'elaborazione sarà completata",
+  "accountIsAlreadyConfigured": "L'account è già configurato.",
+  "sessionIdMismatch": "ID sessione non corrispondente",
+  "@sessionIdMismatch": {
+    "description": "In passkey page, deeplink is ignored because of session ID mismatch."
+  },
+  "failedToFetchActiveSessions": "Recupero delle sessioni attive non riuscito",
+  "@failedToFetchActiveSessions": {
+    "description": "In session page, warn user (in toast) that active sessions could not be fetched."
+  },
+  "failedToRefreshStripeSubscription": "Impossibile aggiornare l'abbonamento",
+  "failedToPlayVideo": "Impossibile riprodurre il video",
+  "tapToUpload": "Premi per caricare",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
   "info": "Info",
-  "addFiles": "Add Files",
-  "castAlbum": "Cast album",
-  "imageNotAnalyzed": "Image not analyzed",
-  "noFacesFound": "No faces found",
-  "fileNotUploadedYet": "File not uploaded yet",
-  "noSuggestionsForPerson": "No suggestions for {personName}",
-  "month": "month",
-  "yearShort": "yr",
-  "currentlyRunning": "currently running",
-  "ignored": "ignored",
-  "photosCount": "{count} photos",
+  "addFiles": "Aggiungi File",
+  "imageNotAnalyzed": "Immagine non analizzata",
+  "noFacesFound": "Nessun volto trovato",
+  "fileNotUploadedYet": "File non ancora caricato",
+  "noSuggestionsForPerson": "Nessun suggerimento per {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "mese",
+  "yearShort": "anno",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "attualmente in esecuzione",
+  "ignored": "ignorato",
   "file": "File",
-  "searchSectionsLengthMismatch": "Sections length mismatch: {snapshotLenght} != {searchLenght}",
-  "selectMailApp": "Select mail app",
-  "selectAllShort": "All",
-  "changeLogMagicSearchImprovementTitle": "Magic Search Improvement",
-  "changeLogMagicSearchImprovementContent": "We have improved magic search to become much faster, so you don\\'t have to wait to find what you\\'re looking for.",
-  "changeLogBackupStatusTitle": "Backup Status",
-  "changeLogBackupStatusContent": "We\\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.",
-  "changeLogDiscoverTitle": "Discover",
-  "changeLogDiscoverContent": "Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\\'s a place to find photos that might be important for you.\\n\\nOnly available if you have enabled Machine Learning.",
-  "selectCoverPhoto": "Select cover photo",
-  "newLocation": "New location"
+  "changeLogBackupStatusTitle": "Stato Backup",
+  "changeLogDiscoverTitle": "Esplora",
+  "selectCoverPhoto": "Seleziona foto di copertina",
+  "newLocation": "Nuova posizione"
 }

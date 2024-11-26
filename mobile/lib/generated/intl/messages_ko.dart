@@ -20,118 +20,28 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'ko';
 
-  static String m0(personName) => "No suggestions for ${personName}";
-
-  static String m1(count) => "${count} photos";
-
-  static String m2(snapshotLenght, searchLenght) =>
-      "Sections length mismatch: ${snapshotLenght} != ${searchLenght}";
-
-  static String m3(ignoreReason) =>
-      "Tap to upload, upload is currently ignored due to ${ignoreReason}";
-
-  static String m4(galleryType) =>
-      "Type of gallery ${galleryType} is not supported for rename";
-
-  static String m5(ignoreReason) => "Upload is ignored due to ${ignoreReason}";
-
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "accountIsAlreadyConfigured": MessageLookupByLibrary.simpleMessage(
-            "Account is already configured."),
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("다시 오신 것을 환영합니다!"),
-        "add": MessageLookupByLibrary.simpleMessage("Add"),
-        "addFiles": MessageLookupByLibrary.simpleMessage("Add Files"),
-        "addNew": MessageLookupByLibrary.simpleMessage("Add new"),
         "askDeleteReason":
             MessageLookupByLibrary.simpleMessage("계정을 삭제하는 가장 큰 이유가 무엇인가요?"),
         "cancel": MessageLookupByLibrary.simpleMessage("닫기"),
-        "castAlbum": MessageLookupByLibrary.simpleMessage("Cast album"),
-        "changeLogBackupStatusContent": MessageLookupByLibrary.simpleMessage(
-            "We\\\'ve added a log of all the files that have been uploaded to Ente, including failures and queued."),
-        "changeLogBackupStatusTitle":
-            MessageLookupByLibrary.simpleMessage("Backup Status"),
-        "changeLogDiscoverContent": MessageLookupByLibrary.simpleMessage(
-            "Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\\\'s a place to find photos that might be important for you.\\n\\nOnly available if you have enabled Machine Learning."),
-        "changeLogDiscoverTitle":
-            MessageLookupByLibrary.simpleMessage("Discover"),
-        "changeLogMagicSearchImprovementContent":
-            MessageLookupByLibrary.simpleMessage(
-                "We have improved magic search to become much faster, so you don\\\'t have to wait to find what you\\\'re looking for."),
-        "changeLogMagicSearchImprovementTitle":
-            MessageLookupByLibrary.simpleMessage("Magic Search Improvement"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("계정 삭제 확인"),
-        "currentlyRunning":
-            MessageLookupByLibrary.simpleMessage("currently running"),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("계정 삭제"),
         "deleteAccountPermanentlyButton":
             MessageLookupByLibrary.simpleMessage("계정을 영구적으로 삭제"),
-        "edit": MessageLookupByLibrary.simpleMessage("Edit"),
         "email": MessageLookupByLibrary.simpleMessage("이메일"),
         "enterValidEmail":
             MessageLookupByLibrary.simpleMessage("올바른 이메일 주소를 입력하세요."),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("이메일을 입력하세요"),
-        "error": MessageLookupByLibrary.simpleMessage("Error"),
-        "failedToFetchActiveSessions": MessageLookupByLibrary.simpleMessage(
-            "Failed to fetch active sessions"),
-        "failedToPlayVideo":
-            MessageLookupByLibrary.simpleMessage("Failed to play video"),
-        "failedToRefreshStripeSubscription":
-            MessageLookupByLibrary.simpleMessage(
-                "Failed to refresh subscription"),
         "feedback": MessageLookupByLibrary.simpleMessage("피드백"),
-        "file": MessageLookupByLibrary.simpleMessage("File"),
-        "fileNotUploadedYet":
-            MessageLookupByLibrary.simpleMessage("File not uploaded yet"),
-        "ignored": MessageLookupByLibrary.simpleMessage("ignored"),
-        "imageNotAnalyzed":
-            MessageLookupByLibrary.simpleMessage("Image not analyzed"),
-        "info": MessageLookupByLibrary.simpleMessage("Info"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("잘못된 이메일 주소"),
-        "month": MessageLookupByLibrary.simpleMessage("month"),
-        "monthly": MessageLookupByLibrary.simpleMessage("Monthly"),
-        "newLocation": MessageLookupByLibrary.simpleMessage("New location"),
-        "noFacesFound": MessageLookupByLibrary.simpleMessage("No faces found"),
-        "noInternetConnection":
-            MessageLookupByLibrary.simpleMessage("No internet connection"),
-        "noResultsFound":
-            MessageLookupByLibrary.simpleMessage("No results found"),
-        "noSuggestionsForPerson": m0,
-        "ok": MessageLookupByLibrary.simpleMessage("OK"),
-        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
-        "oops": MessageLookupByLibrary.simpleMessage("Oops"),
-        "photosCount": m1,
-        "pleaseCheckYourInternetConnectionAndTryAgain":
-            MessageLookupByLibrary.simpleMessage(
-                "Please check your internet connection and try again."),
-        "searchSectionsLengthMismatch": m2,
-        "selectAll": MessageLookupByLibrary.simpleMessage("All"),
-        "selectAllShort": MessageLookupByLibrary.simpleMessage("All"),
-        "selectCoverPhoto":
-            MessageLookupByLibrary.simpleMessage("Select cover photo"),
-        "selectMailApp":
-            MessageLookupByLibrary.simpleMessage("Select mail app"),
-        "selectYourPlan":
-            MessageLookupByLibrary.simpleMessage("Select your plan"),
-        "sessionExpired":
-            MessageLookupByLibrary.simpleMessage("Session expired"),
-        "sessionIdMismatch":
-            MessageLookupByLibrary.simpleMessage("Session ID mismatch"),
-        "share": MessageLookupByLibrary.simpleMessage("Share"),
-        "subscription": MessageLookupByLibrary.simpleMessage("Subscription"),
-        "tapToUpload": MessageLookupByLibrary.simpleMessage("Tap to upload"),
-        "tapToUploadIsIgnoredDue": m3,
-        "typeOfGallerGallerytypeIsNotSupportedForRename": m4,
-        "uploadIsIgnoredDueToIgnorereason": m5,
         "verify": MessageLookupByLibrary.simpleMessage("인증"),
-        "yearShort": MessageLookupByLibrary.simpleMessage("yr"),
-        "yearly": MessageLookupByLibrary.simpleMessage("Yearly"),
         "yourAccountHasBeenDeleted":
-            MessageLookupByLibrary.simpleMessage("계정이 삭제되었습니다."),
-        "yourMap": MessageLookupByLibrary.simpleMessage("Your Map")
+            MessageLookupByLibrary.simpleMessage("계정이 삭제되었습니다.")
       };
 }
