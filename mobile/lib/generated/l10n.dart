@@ -10399,6 +10399,16 @@ class S {
     );
   }
 
+  /// `Face not clustered yet, please come back later`
+  String get faceNotClusteredYet {
+    return Intl.message(
+      'Face not clustered yet, please come back later',
+      name: 'faceNotClusteredYet',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `The link you are trying to access has expired.`
   String get theLinkYouAreTryingToAccessHasExpired {
     return Intl.message(
