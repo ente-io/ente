@@ -12,5 +12,13 @@
   "feedback": "피드백",
   "confirmAccountDeletion": "계정 삭제 확인",
   "deleteAccountPermanentlyButton": "계정을 영구적으로 삭제",
-  "yourAccountHasBeenDeleted": "계정이 삭제되었습니다."
+  "yourAccountHasBeenDeleted": "계정이 삭제되었습니다.",
+  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
+  "openFile": "Open file",
+  "backupFile": "Backup file",
+  "openAlbumInBrowser": "Open album in browser",
+  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
+  "allow": "Allow",
+  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
+  "seePublicAlbumLinksInApp": "See public album links in app"
 }

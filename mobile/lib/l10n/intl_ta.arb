@@ -15,5 +15,13 @@
   "confirmDeletePrompt": "ஆம், எல்லா செயலிகளிலும் இந்தக் கணக்கையும் அதன் தரவையும் நிரந்தரமாக நீக்க விரும்புகிறேன்.",
   "confirmAccountDeletion": "கணக்கு நீக்குதலை உறுதிப்படுத்தவும்",
   "deleteAccountPermanentlyButton": "கணக்கை நிரந்தரமாக நீக்கவும்",
-  "deleteReason1": "எனக்கு தேவையான ஒரு முக்கிய அம்சம் இதில் இல்லை"
+  "deleteReason1": "எனக்கு தேவையான ஒரு முக்கிய அம்சம் இதில் இல்லை",
+  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
+  "openFile": "Open file",
+  "backupFile": "Backup file",
+  "openAlbumInBrowser": "Open album in browser",
+  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
+  "allow": "Allow",
+  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
+  "seePublicAlbumLinksInApp": "See public album links in app"
 }

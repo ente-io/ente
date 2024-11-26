@@ -61,9 +61,9 @@ Future<void> requestPermissionToOpenLinksInApp(
     final choice = await showChoiceActionSheet(
       isDismissible: false,
       context,
-      title: "See public album links in app",
-      body: "Allow app to open shared album links",
-      firstButtonLabel: "Allow",
+      title: S.of(context).seePublicAlbumLinksInApp,
+      body: S.of(context).allowAppToOpenSharedAlbumLinks,
+      firstButtonLabel: S.of(context).allow,
     );
     if (choice!.action == ButtonAction.first) {
       final AndroidIntent intent;

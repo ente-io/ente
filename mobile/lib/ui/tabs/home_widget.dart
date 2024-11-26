@@ -425,7 +425,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               actions: [
                 const SizedBox(height: 24),
                 ButtonWidget(
-                  labelText: "Open file",
+                  labelText: S.of(context).openFile,
                   buttonType: ButtonType.primary,
                   onTap: () async {
                     Navigator.of(context).pop(true);
@@ -436,7 +436,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 ),
                 ButtonWidget(
                   buttonType: ButtonType.secondary,
-                  labelText: "Backup file",
+                  labelText: S.of(context).backupFile,
                   onTap: () async {
                     Navigator.of(context).pop(false);
                   },

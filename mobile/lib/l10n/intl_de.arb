@@ -1393,7 +1393,6 @@
     },
     "description": "Number of viewers that were successfully added to an album."
   },
-  
   "accountIsAlreadyConfigured": "Das Konto ist bereits konfiguriert.",
   "sessionIdMismatch": "Sitzungs-ID stimmt nicht überein",
   "@sessionIdMismatch": {
@@ -1459,7 +1458,6 @@
   },
   "currentlyRunning": "läuft gerade",
   "ignored": "ignoriert",
-  
   "file": "Datei",
   "searchSectionsLengthMismatch": "Abschnittslänge stimmt nicht überein: {snapshotLenght} != {searchLenght}",
   "@searchSectionsLengthMismatch": {
@@ -1487,5 +1485,13 @@
   "changeLogDiscoverTitle": "Entdecken",
   "changeLogDiscoverContent": "Suchst du nach Fotos deiner Ausweise, Notizen oder gar Memes? Öffne das Such-Tab und schau dir \"Entdecken\" an. An diesem Ort findest du, basierend auf unserer semantischen Suche, Fotos die wichtig für dich sein könnten.\\n\\nNur verfügbar, wenn du das maschinelle Lernen aktiviert hast.",
   "selectCoverPhoto": "Titelbild auswählen",
-  "newLocation": "Neuer Ort"
+  "newLocation": "Neuer Ort",
+  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
+  "openFile": "Open file",
+  "backupFile": "Backup file",
+  "openAlbumInBrowser": "Open album in browser",
+  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
+  "allow": "Allow",
+  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
+  "seePublicAlbumLinksInApp": "See public album links in app"
 }

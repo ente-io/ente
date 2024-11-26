@@ -327,10 +327,13 @@ class MessageLookup extends MessageLookupByLibrary {
             "Tous les souvenirs conservés"),
         "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
             "Tous les groupements pour cette personne seront réinitialisés, et vous perdrez toutes les suggestions faites pour cette personne"),
+        "allow": MessageLookupByLibrary.simpleMessage("Allow"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Autoriser les personnes avec le lien à ajouter des photos à l\'album partagé."),
         "allowAddingPhotos": MessageLookupByLibrary.simpleMessage(
             "Autoriser l\'ajout de photos"),
+        "allowAppToOpenSharedAlbumLinks": MessageLookupByLibrary.simpleMessage(
+            "Allow app to open shared album links"),
         "allowDownloads": MessageLookupByLibrary.simpleMessage(
             "Autoriser les téléchargements"),
         "allowPeopleToAddPhotos": MessageLookupByLibrary.simpleMessage(
@@ -447,6 +450,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backup": MessageLookupByLibrary.simpleMessage("Sauvegarde"),
         "backupFailed":
             MessageLookupByLibrary.simpleMessage("Échec de la sauvegarde"),
+        "backupFile": MessageLookupByLibrary.simpleMessage("Backup file"),
         "backupOverMobileData": MessageLookupByLibrary.simpleMessage(
             "Sauvegarde sur données mobiles"),
         "backupSettings":
@@ -1272,6 +1276,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Oups, impossible d\'enregistrer les modifications"),
         "oopsSomethingWentWrong": MessageLookupByLibrary.simpleMessage(
             "Oups, une erreur est arrivée"),
+        "openAlbumInBrowser":
+            MessageLookupByLibrary.simpleMessage("Open album in browser"),
+        "openAlbumInBrowserTitle": MessageLookupByLibrary.simpleMessage(
+            "Please use the web app to add photos to this album"),
+        "openFile": MessageLookupByLibrary.simpleMessage("Open file"),
         "openSettings":
             MessageLookupByLibrary.simpleMessage("Ouvrir les paramètres"),
         "openTheItem":
@@ -1568,6 +1577,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchResultCount": m55,
         "searchSectionsLengthMismatch": m56,
         "security": MessageLookupByLibrary.simpleMessage("Sécurité"),
+        "seePublicAlbumLinksInApp": MessageLookupByLibrary.simpleMessage(
+            "See public album links in app"),
         "selectALocation":
             MessageLookupByLibrary.simpleMessage("Sélectionnez un emplacement"),
         "selectALocationFirst": MessageLookupByLibrary.simpleMessage(
@@ -1773,6 +1784,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Merci de vous être abonné !"),
         "theDownloadCouldNotBeCompleted": MessageLookupByLibrary.simpleMessage(
             "Le téléchargement n\'a pas pu être terminé"),
+        "theLinkYouAreTryingToAccessHasExpired":
+            MessageLookupByLibrary.simpleMessage(
+                "The link you are trying to access has expired."),
         "theRecoveryKeyYouEnteredIsIncorrect":
             MessageLookupByLibrary.simpleMessage(
                 "La clé de récupération que vous avez entrée est incorrecte"),

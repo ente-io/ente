@@ -62,10 +62,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "addedAs": MessageLookupByLibrary.simpleMessage("اضافه شده به عنوان"),
         "advanced": MessageLookupByLibrary.simpleMessage("پیشرفته"),
         "albumUpdated": MessageLookupByLibrary.simpleMessage("آلبوم به‌روز شد"),
+        "allow": MessageLookupByLibrary.simpleMessage("Allow"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "به افراد که این پیوند را دارند، اجازه دهید عکس‌ها را به آلبوم اشتراک گذاری شده اضافه کنند."),
         "allowAddingPhotos":
             MessageLookupByLibrary.simpleMessage("اجازه اضافه کردن عکس"),
+        "allowAppToOpenSharedAlbumLinks": MessageLookupByLibrary.simpleMessage(
+            "Allow app to open shared album links"),
         "allowPeopleToAddPhotos": MessageLookupByLibrary.simpleMessage(
             "به افراد اجازه دهید عکس اضافه کنند"),
         "androidBiometricHint":
@@ -90,6 +93,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("پوشه‌های پشتیبان گیری شده"),
         "backup": MessageLookupByLibrary.simpleMessage("پشتیبان گیری"),
+        "backupFile": MessageLookupByLibrary.simpleMessage("Backup file"),
         "blog": MessageLookupByLibrary.simpleMessage("وبلاگ"),
         "cancel": MessageLookupByLibrary.simpleMessage("لغو"),
         "cannotDeleteSharedFiles": MessageLookupByLibrary.simpleMessage(
@@ -269,6 +273,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "notifications": MessageLookupByLibrary.simpleMessage("آگاه‌سازی‌ها"),
         "ok": MessageLookupByLibrary.simpleMessage("تایید"),
         "oops": MessageLookupByLibrary.simpleMessage("اوه"),
+        "openAlbumInBrowser":
+            MessageLookupByLibrary.simpleMessage("Open album in browser"),
+        "openAlbumInBrowserTitle": MessageLookupByLibrary.simpleMessage(
+            "Please use the web app to add photos to this album"),
+        "openFile": MessageLookupByLibrary.simpleMessage("Open file"),
         "password": MessageLookupByLibrary.simpleMessage("رمز عبور"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "رمز عبور با موفقیت تغییر کرد"),
@@ -325,6 +334,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "saveKey": MessageLookupByLibrary.simpleMessage("ذخیره کلید"),
         "search": MessageLookupByLibrary.simpleMessage("جستجو"),
         "security": MessageLookupByLibrary.simpleMessage("امنیت"),
+        "seePublicAlbumLinksInApp": MessageLookupByLibrary.simpleMessage(
+            "See public album links in app"),
         "selectAll": MessageLookupByLibrary.simpleMessage("انتخاب همه"),
         "selectFoldersForBackup": MessageLookupByLibrary.simpleMessage(
             "پوشه‌ها را برای پشتیبان گیری انتخاب کنید"),
@@ -384,6 +395,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("شرایط و مقررات"),
         "theDownloadCouldNotBeCompleted":
             MessageLookupByLibrary.simpleMessage("دانلود کامل نشد"),
+        "theLinkYouAreTryingToAccessHasExpired":
+            MessageLookupByLibrary.simpleMessage(
+                "The link you are trying to access has expired."),
         "theme": MessageLookupByLibrary.simpleMessage("تم"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("این دستگاه"),
         "thisWillLogYouOutOfTheFollowingDevice":

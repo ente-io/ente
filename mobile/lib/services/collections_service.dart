@@ -1075,8 +1075,8 @@ class CollectionsService {
       if (e is DioError && e.response?.statusCode == 410) {
         await showInfoDialog(
           context,
-          title: "Link Expired",
-          body: "The link you are trying to access has expired.",
+          title: S.of(context).linkExpired,
+          body: S.of(context).theLinkYouAreTryingToAccessHasExpired,
         );
         throw UnauthorizedError();
       }

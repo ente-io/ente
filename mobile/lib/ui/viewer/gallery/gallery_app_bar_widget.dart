@@ -563,7 +563,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         if (galleryType == GalleryType.sharedPublicCollection &&
             widget.collection!.isDownloadEnabledForPublicLink())
           EntePopupMenuItem(
-            "Download album",
+            S.of(context).download,
             value: AlbumPopupAction.downloadAlbum,
             icon: Platform.isAndroid
                 ? Icons.download
@@ -855,9 +855,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
         final res = await showChoiceDialog(
           context,
-          title: 'Please use the web app to add photos to this album',
-          firstButtonLabel: "Open album in browser",
-          secondButtonLabel: "Cancel",
+          title: S.of(context).openAlbumInBrowserTitle,
+          firstButtonLabel: S.of(context).openAlbumInBrowser,
+          secondButtonLabel: S.of(context).cancel,
           firstButtonType: ButtonType.primary,
         );
 
