@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 
 const Page: React.FC = () => {
     const router = useRouter();
-    useEffect(() => void router.push(PAGES.LOGIN), []);
+    useEffect(() => void router.push(PAGES.LOGIN), [router]);
     return <></>;
 };
 

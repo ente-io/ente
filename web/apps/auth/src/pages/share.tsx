@@ -24,31 +24,6 @@ const Share: React.FC = () => {
         progress: 0,
     });
 
-    const base64UrlToByteArray = (base64Url: string): Uint8Array => {
-        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-        return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-    };
-
-    const formatCode = (code: string): string =>
-        code.replace(/(.{3})/g, "$1 ").trim();
-
-    const getCodeDisplay = (
-        codes: string[],
-        startTime: number,
-        stepDuration: number,
-    ): CodeDisplay => {
-        const currentTime = Date.now();
-        const elapsedTime = (currentTime - startTime) / 1000;
-        const index = Math.floor(elapsedTime / stepDuration);
-        const progress = ((elapsedTime % stepDuration) / stepDuration) * 100;
-
-        return {
-            currentCode: formatCode(codes[index] || ""),
-            nextCode: formatCode(codes[index + 1] || ""),
-            progress,
-        };
-    };
-
     const getTimeStatus = (
         currentTime: number,
         startTime: number,
@@ -241,3 +216,28 @@ const Share: React.FC = () => {
 };
 
 export default Share;
+
+const base64UrlToByteArray = (base64Url: string): Uint8Array => {
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+};
+
+const formatCode = (code: string): string =>
+    code.replace(/(.{3})/g, "$1 ").trim();
+
+const getCodeDisplay = (
+    codes: string[],
+    startTime: number,
+    stepDuration: number,
+): CodeDisplay => {
+    const currentTime = Date.now();
+    const elapsedTime = (currentTime - startTime) / 1000;
+    const index = Math.floor(elapsedTime / stepDuration);
+    const progress = ((elapsedTime % stepDuration) / stepDuration) * 100;
+
+    return {
+        currentCode: formatCode(codes[index] ?? ""),
+        nextCode: formatCode(codes[index + 1] ?? ""),
+        progress,
+    };
+};
