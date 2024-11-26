@@ -64,6 +64,7 @@ export const generateSRPSetupAttributes = async (
 
     const srpSalt = await cryptoWorker.generateSaltToDeriveKey();
 
+    // Museum schema requires this to be a UUID.
     const srpUserID = uuidv4();
 
     const srpVerifierBuffer = SRP.computeVerifier(
