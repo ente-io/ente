@@ -51,6 +51,7 @@ interface Security {
 interface UserResponse {
     user: User;
     subscription: Subscription;
+    authCodes?: number;
     details?: {
         usage?: number;
         storageBonus?: number;
@@ -182,7 +183,8 @@ const App: React.FC = () => {
                         .isTwoFactorEnabled
                         ? "Enabled"
                         : "Disabled",
-                    Passkeys: (userDataResponse.details?.profileData.passkeyCount ?? 0) > 0 ? "Enabled" : "Disabled",
+                    "Passkeys": (userDataResponse.details?.profileData.passkeyCount ?? 0) > 0 ? "Enabled" : "Disabled",
+                    "AuthCodes" : `${userDataResponse.authCodes ?? 0}`,
                 },
             };
 
