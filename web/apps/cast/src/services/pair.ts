@@ -107,7 +107,7 @@ export const register = async (): Promise<Registration> => {
  * @returns A device code that can be used to pair with us.
  */
 const registerDevice = async (publicKey: string) => {
-    const res = await fetch(await apiURL("/cast/device-info/"), {
+    const res = await fetch(await apiURL("/cast/device-info"), {
         method: "POST",
         headers: publicRequestHeaders(),
         body: JSON.stringify({
