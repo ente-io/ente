@@ -258,7 +258,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 )}
                 <InfoItem
                     icon={<TextSnippetOutlinedIcon />}
-                    title={t("DETAILS")}
+                    title={t("details")}
                     caption={
                         !exif ? (
                             <ActivityIndicator size={12} />
