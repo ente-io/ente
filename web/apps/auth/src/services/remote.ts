@@ -2,7 +2,6 @@ import { decryptBoxB64, decryptMetadataJSON_New } from "@/base/crypto";
 import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
-import { masterKeyFromSession } from "@/base/session-store";
 import { ensureString } from "@/utils/ensure";
 import { codeFromURIString, type Code } from "services/code";
 import { z } from "zod";

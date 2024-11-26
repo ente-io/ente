@@ -3,6 +3,7 @@ import { stashRedirect } from "@/accounts/services/redirect";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { NavbarBase } from "@/base/components/Navbar";
+import { isHTTP401Error } from "@/base/http";
 import log from "@/base/log";
 import { masterKeyFromSessionIfLoggedIn } from "@/base/session-store";
 import {
@@ -12,7 +13,6 @@ import {
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { ApiError } from "@ente/shared/error";
 import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import {
@@ -54,10 +54,7 @@ const Page: React.FC = () => {
                 setCodes(await getAuthCodes(masterKey));
             } catch (e) {
                 log.error("Failed to fetch codes", e);
-                if (e instanceof ApiError && e.httpStatusCode == 401) {
-                    // We get back a 401 Unauthorized if the token is not valid.
-                    showSessionExpiredDialog();
-                }
+                if (isHTTP401Error(e)) showSessionExpiredDialog();
             }
             setHasFetched(true);
         };

@@ -71,6 +71,15 @@ export const isHTTP4xxError = (e: unknown) =>
     e instanceof HTTPError && e.res.status >= 400 && e.res.status <= 499;
 
 /**
+ * Return true if this is a HTTP 401 error.
+ *
+ * For authenticated requests, an HTTP "401 Unauthorized" indicates that the
+ * credentials (auth token) is not valid.
+ */
+export const isHTTP401Error = (e: unknown) =>
+    e instanceof HTTPError && e.res.status == 401;
+
+/**
  * A helper function to adapt {@link retryAsyncOperation} for HTTP fetches.
  *
  * This will ensure that the HTTP operation returning a non-200 OK status (as
