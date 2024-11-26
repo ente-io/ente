@@ -1,4 +1,4 @@
-import { boxSealOpen, generateKeyPair } from "@/base/crypto/libsodium";
+import { boxSealOpen, generateKeyPair } from "@/base/crypto";
 import { clientPackageHeader, ensureOk } from "@/base/http";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";

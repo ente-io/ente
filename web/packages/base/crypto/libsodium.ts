@@ -664,8 +664,8 @@ export async function completeChunkHashing(hashState: sodium.StateAddress) {
 }
 
 /**
- * Generate a new public/private keypair for use with the boxSeal* functions,
- * and return their base64 string representations.
+ * Generate a new public/private keypair for use with public-key encryption
+ * functions, and return their base64 string representations.
  *
  * These keys are suitable for being used with the {@link boxSeal} and
  * {@link boxSealOpen} functions.

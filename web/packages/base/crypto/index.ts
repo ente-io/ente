@@ -345,7 +345,7 @@ export const decryptMetadataJSON = (r: {
         : sharedCryptoWorker().then((w) => w.decryptMetadataJSON(r));
 
 /**
- * Generate a new public/private keypair for use with the boxSeal* functions.
+ * Generate a new public/private keypair.
  */
 export const generateKeyPair = async () =>
     inWorker()
