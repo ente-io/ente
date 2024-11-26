@@ -3,6 +3,7 @@ import { stashRedirect } from "@/accounts/services/redirect";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { NavbarBase } from "@/base/components/Navbar";
+import { masterKeyFromSessionIfLoggedIn } from "@/base/session-store";
 import {
     HorizontalFlex,
     VerticallyCentered,
@@ -10,7 +11,7 @@ import {
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { ApiError, CustomError } from "@ente/shared/error";
+import { ApiError } from "@ente/shared/error";
 import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import {
@@ -41,16 +42,17 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         const fetchCodes = async () => {
+            const masterKey = await masterKeyFromSessionIfLoggedIn();
+            if (!masterKey) {
+                stashRedirect(PAGES.AUTH);
+                void router.push("/");
+                return;
+            }
+
             try {
-                setCodes(await getAuthCodes());
+                setCodes(await getAuthCodes(masterKey));
             } catch (e) {
-                if (
-                    e instanceof Error &&
-                    e.message == CustomError.KEY_MISSING
-                ) {
-                    stashRedirect(PAGES.AUTH);
-                    void router.push("/");
-                } else if (e instanceof ApiError && e.httpStatusCode == 401) {
+                if (e instanceof ApiError && e.httpStatusCode == 401) {
                     // We get back a 401 Unauthorized if the token is not valid.
                     showSessionExpiredDialog();
                 } else {

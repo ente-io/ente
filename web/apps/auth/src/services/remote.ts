@@ -7,8 +7,7 @@ import { ensureString } from "@/utils/ensure";
 import { codeFromURIString, type Code } from "services/code";
 import { z } from "zod";
 
-export const getAuthCodes = async (): Promise<Code[]> => {
-    const masterKey = await masterKeyFromSession();
+export const getAuthCodes = async (masterKey: Uint8Array): Promise<Code[]> => {
     const authenticatorEntityKey = await getAuthenticatorEntityKey();
     if (!authenticatorEntityKey) {
         // The user might not have stored any codes yet from the mobile app.
