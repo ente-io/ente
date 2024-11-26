@@ -259,10 +259,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "allClear": MessageLookupByLibrary.simpleMessage("✨ Sudah bersih"),
         "allMemoriesPreserved":
             MessageLookupByLibrary.simpleMessage("Semua kenangan terpelihara"),
+        "allow": MessageLookupByLibrary.simpleMessage("Allow"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Izinkan orang yang memiliki link untuk menambahkan foto ke album berbagi ini."),
         "allowAddingPhotos":
             MessageLookupByLibrary.simpleMessage("Izinkan menambah foto"),
+        "allowAppToOpenSharedAlbumLinks": MessageLookupByLibrary.simpleMessage(
+            "Allow app to open shared album links"),
         "allowDownloads":
             MessageLookupByLibrary.simpleMessage("Izinkan pengunduhan"),
         "allowPeopleToAddPhotos": MessageLookupByLibrary.simpleMessage(
@@ -354,6 +357,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backup": MessageLookupByLibrary.simpleMessage("Pencadangan"),
         "backupFailed":
             MessageLookupByLibrary.simpleMessage("Pencadangan gagal"),
+        "backupFile": MessageLookupByLibrary.simpleMessage("Backup file"),
         "backupOverMobileData": MessageLookupByLibrary.simpleMessage(
             "Cadangkan dengan data seluler"),
         "backupSettings":
@@ -964,6 +968,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Aduh, tidak dapat menyimpan perubahan"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Aduh, terjadi kesalahan"),
+        "openAlbumInBrowser":
+            MessageLookupByLibrary.simpleMessage("Open album in browser"),
+        "openAlbumInBrowserTitle": MessageLookupByLibrary.simpleMessage(
+            "Please use the web app to add photos to this album"),
+        "openFile": MessageLookupByLibrary.simpleMessage("Open file"),
         "openSettings": MessageLookupByLibrary.simpleMessage("Buka Pengaturan"),
         "openTheItem": MessageLookupByLibrary.simpleMessage("• Buka item-nya"),
         "openstreetmapContributors":
@@ -1187,6 +1196,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Segera tiba: Penelusuran wajah & ajaib ✨"),
         "searchResultCount": m55,
         "security": MessageLookupByLibrary.simpleMessage("Keamanan"),
+        "seePublicAlbumLinksInApp": MessageLookupByLibrary.simpleMessage(
+            "See public album links in app"),
         "selectALocation": MessageLookupByLibrary.simpleMessage("Pilih lokasi"),
         "selectALocationFirst": MessageLookupByLibrary.simpleMessage(
             "Pilih lokasi terlebih dahulu"),
@@ -1354,6 +1365,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Terima kasih telah berlangganan!"),
         "theDownloadCouldNotBeCompleted": MessageLookupByLibrary.simpleMessage(
             "Unduhan tidak dapat diselesaikan"),
+        "theLinkYouAreTryingToAccessHasExpired":
+            MessageLookupByLibrary.simpleMessage(
+                "The link you are trying to access has expired."),
         "theRecoveryKeyYouEnteredIsIncorrect":
             MessageLookupByLibrary.simpleMessage(
                 "Kunci pemulihan yang kamu masukkan salah"),

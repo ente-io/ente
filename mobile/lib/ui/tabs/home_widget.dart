@@ -1,4 +1,5 @@
 import 'dart:async';
+import "dart:convert";
 import "dart:io";
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:logging/logging.dart';
 import "package:media_extension/media_extension_action_types.dart";
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import "package:move_to_background/move_to_background.dart";
+import "package:package_info_plus/package_info_plus.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -24,19 +26,24 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/collection/collection_items.dart';
+import "package:photos/models/file/file.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/notification_service.dart";
+import "package:photos/services/remote_sync_service.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
 import "package:photos/theme/effects.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/collections/collection_action_sheet.dart';
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/home/grant_permissions_widget.dart';
 import 'package:photos/ui/home/header_widget.dart';
@@ -50,10 +57,15 @@ import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
 import "package:photos/ui/tabs/user_collections_tab.dart";
+import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
+import "package:photos/ui/viewer/gallery/shared_public_collection_page.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
 import 'package:photos/ui/viewer/search_tab/search_tab.dart';
+import "package:photos/utils/collection_util.dart";
+import "package:photos/utils/crypto_util.dart";
 import 'package:photos/utils/dialog_util.dart';
+import "package:photos/utils/diff_fetcher.dart";
 import "package:photos/utils/navigation_util.dart";
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
@@ -99,6 +111,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
   late StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
   late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatedEvent;
+  late StreamSubscription _publicAlbumLinkSubscription;
+
+  final DiffFetcher _diffFetcher = DiffFetcher();
 
   @override
   void initState() {
@@ -211,6 +226,8 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
     });
 
+    Platform.isIOS ? _initDeepLinkSubscriptionForPublicAlbums() : null;
+
     // For sharing images coming from outside the app
     _initMediaShareSubscription();
     WidgetsBinding.instance.addPostFrameCallback(
@@ -221,9 +238,121 @@ class _HomeWidgetState extends State<HomeWidget> {
         },
       ),
     );
+
     NotificationService.instance
         .initialize(_onDidReceiveNotificationResponse)
         .ignore();
+
+    if (Platform.isAndroid &&
+        localSettings.hasConfiguredInAppLinkPermissions() &&
+        RemoteSyncService.instance.isFirstRemoteSyncDone()) {
+      PackageInfo.fromPlatform().then((packageInfo) {
+        final packageName = packageInfo.packageName;
+        if (packageName == 'io.ente.photos.independent' ||
+            packageName == 'io.ente.photos.fdroid') {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              requestPermissionToOpenLinksInApp(context, packageName);
+            }
+          });
+        }
+      });
+    }
+  }
+
+  Future<void> _handlePublicAlbumLink(Uri uri) async {
+    try {
+      final Collection collection = await CollectionsService.instance
+          .getCollectionFromPublicLink(context, uri);
+
+      if (collection.owner!.id! == Configuration.instance.getUserID()) {
+        await routeToPage(
+          context,
+          CollectionPage(
+            CollectionWithThumbnail(collection, null),
+          ),
+        );
+        return;
+      }
+      final dialog = createProgressDialog(context, "Loading...");
+      final publicUrl = collection.publicURLs![0];
+      if (publicUrl!.passwordEnabled) {
+        await showTextInputDialog(
+          context,
+          title: S.of(context).enterPassword,
+          submitButtonLabel: S.of(context).ok,
+          alwaysShowSuccessState: false,
+          popnavAfterSubmission: false,
+          onSubmit: (String text) async {
+            if (text.trim() == "") {
+              return;
+            }
+            try {
+              final hashedPassword = await CryptoUtil.deriveKey(
+                utf8.encode(text),
+                CryptoUtil.base642bin(publicUrl.nonce!),
+                publicUrl.memLimit!,
+                publicUrl.opsLimit!,
+              );
+
+              unawaited(
+                CollectionsService.instance
+                    .verifyPublicCollectionPassword(
+                  context,
+                  CryptoUtil.bin2base64(hashedPassword),
+                  collection.id,
+                )
+                    .then((result) async {
+                  if (result) {
+                    await dialog.show();
+
+                    final List<EnteFile> sharedFiles = await _diffFetcher
+                        .getPublicFiles(context, collection.id);
+                    await dialog.hide();
+                    Navigator.of(context).pop();
+
+                    await routeToPage(
+                      context,
+                      SharedPublicCollectionPage(
+                        files: sharedFiles,
+                        CollectionWithThumbnail(
+                          collection,
+                          null,
+                        ),
+                      ),
+                    );
+                  }
+                }),
+              );
+            } catch (e, s) {
+              _logger.severe("Failed to decrypt password for album", e, s);
+              await showGenericErrorDialog(context: context, error: e);
+              return;
+            }
+          },
+        );
+      } else {
+        await dialog.show();
+
+        final List<EnteFile> sharedFiles =
+            await _diffFetcher.getPublicFiles(context, collection.id);
+        await dialog.hide();
+
+        await routeToPage(
+          context,
+          SharedPublicCollectionPage(
+            files: sharedFiles,
+            CollectionWithThumbnail(
+              collection,
+              null,
+            ),
+          ),
+        );
+      }
+    } catch (e, s) {
+      _logger.severe("Failed to handle public album link", e, s);
+      return;
+    }
   }
 
   Future<void> _autoLogoutAlert() async {
@@ -274,34 +403,145 @@ class _HomeWidgetState extends State<HomeWidget> {
     _collectionUpdatedEvent.cancel();
     isOnSearchTabNotifier.dispose();
     _pageController.dispose();
+    _publicAlbumLinkSubscription.cancel();
     super.dispose();
   }
 
   void _initMediaShareSubscription() {
-    // For sharing images coming from outside the app while the app is in the memory
+    // For sharing images/public links coming from outside the app while the app is in the memory
     _intentDataStreamSubscription =
         ReceiveSharingIntent.instance.getMediaStream().listen(
       (List<SharedMediaFile> value) {
-        setState(() {
-          _shouldRenderCreateCollectionSheet = true;
-          _sharedFiles = value;
+        if (value[0].path.contains("albums.ente.io")) {
+          final uri = Uri.parse(value[0].path);
+          _handlePublicAlbumLink(uri);
+          return;
+        }
+
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              actions: [
+                const SizedBox(height: 24),
+                ButtonWidget(
+                  labelText: S.of(context).openFile,
+                  buttonType: ButtonType.primary,
+                  onTap: () async {
+                    Navigator.of(context).pop(true);
+                  },
+                ),
+                const SizedBox(
+                  height: 12,
+                ),
+                ButtonWidget(
+                  buttonType: ButtonType.secondary,
+                  labelText: S.of(context).backupFile,
+                  onTap: () async {
+                    Navigator.of(context).pop(false);
+                  },
+                ),
+              ],
+            );
+          },
+        ).then((shouldOpenFile) {
+          if (shouldOpenFile) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) {
+                  return FileViewer(
+                    sharedMediaFile: value[0],
+                  );
+                },
+              ),
+            );
+          } else {
+            if (mounted) {
+              setState(() {
+                _shouldRenderCreateCollectionSheet = true;
+                _sharedFiles = value;
+              });
+            }
+          }
         });
       },
       onError: (err) {
         _logger.severe("getIntentDataStream error: $err");
       },
     );
-    // For sharing images coming from outside the app while the app is closed
+    // For sharing images/public links coming from outside the app while the app is closed
     ReceiveSharingIntent.instance
         .getInitialMedia()
         .then((List<SharedMediaFile> value) {
       if (mounted) {
+        if (value[0].path.contains("albums.ente.io")) {
+          final uri = Uri.parse(value[0].path);
+          _handlePublicAlbumLink(uri);
+          return;
+        }
+
+        if (AppLifecycleService.instance.mediaExtensionAction.type ==
+                MediaType.image ||
+            AppLifecycleService.instance.mediaExtensionAction.type ==
+                MediaType.video) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) {
+                return const FileViewer();
+              },
+            ),
+          );
+          return;
+        }
+
         setState(() {
           _sharedFiles = value;
           _shouldRenderCreateCollectionSheet = true;
         });
       }
     });
+  }
+
+  Future<void> _initDeepLinkSubscriptionForPublicAlbums() async {
+    try {
+      final initialUri = await getInitialUri();
+      if (initialUri != null) {
+        if (initialUri.toString().contains("albums.ente.io")) {
+          await _handlePublicAlbumLink(initialUri);
+        } else {
+          _logger.info(
+            "uri doesn't contain 'albums.ente.io' in initial public album deep link",
+          );
+        }
+      } else {
+        _logger.info(
+          "No initial link received in public album link subscription.",
+        );
+      }
+    } catch (e) {
+      _logger.severe("Error while getting initial public album deep link: $e");
+    }
+
+    _publicAlbumLinkSubscription = uriLinkStream.listen(
+      (Uri? uri) {
+        if (uri != null) {
+          if (uri.toString().contains("albums.ente.io")) {
+            _handlePublicAlbumLink(uri);
+          } else {
+            _logger.info(
+              "uri doesn't contain 'albums.ente.io' in public album link subscription",
+            );
+          }
+        } else {
+          _logger.info("No link received in public album link subscription.");
+        }
+      },
+      onError: (err) {
+        _logger.severe("Error while getting public album deep link: $err");
+      },
+    );
   }
 
   @override
@@ -382,7 +622,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (!LocalSyncService.instance.hasCompletedFirstImport()) {
       return const LoadingPhotosWidget();
     }
-
     if (_sharedFiles != null &&
         _sharedFiles!.isNotEmpty &&
         _shouldRenderCreateCollectionSheet) {

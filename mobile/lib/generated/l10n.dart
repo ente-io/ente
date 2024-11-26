@@ -10398,6 +10398,86 @@ class S {
       args: [],
     );
   }
+
+  /// `The link you are trying to access has expired.`
+  String get theLinkYouAreTryingToAccessHasExpired {
+    return Intl.message(
+      'The link you are trying to access has expired.',
+      name: 'theLinkYouAreTryingToAccessHasExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open file`
+  String get openFile {
+    return Intl.message(
+      'Open file',
+      name: 'openFile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup file`
+  String get backupFile {
+    return Intl.message(
+      'Backup file',
+      name: 'backupFile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open album in browser`
+  String get openAlbumInBrowser {
+    return Intl.message(
+      'Open album in browser',
+      name: 'openAlbumInBrowser',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please use the web app to add photos to this album`
+  String get openAlbumInBrowserTitle {
+    return Intl.message(
+      'Please use the web app to add photos to this album',
+      name: 'openAlbumInBrowserTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow`
+  String get allow {
+    return Intl.message(
+      'Allow',
+      name: 'allow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow app to open shared album links`
+  String get allowAppToOpenSharedAlbumLinks {
+    return Intl.message(
+      'Allow app to open shared album links',
+      name: 'allowAppToOpenSharedAlbumLinks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `See public album links in app`
+  String get seePublicAlbumLinksInApp {
+    return Intl.message(
+      'See public album links in app',
+      name: 'seePublicAlbumLinksInApp',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

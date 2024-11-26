@@ -1373,5 +1373,13 @@
   },
   "extraPhotosFound": "追加の写真が見つかりました",
   "configuration": "設定",
-  "localIndexing": "このデバイス上での実行"
+  "localIndexing": "このデバイス上での実行",
+  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
+  "openFile": "Open file",
+  "backupFile": "Backup file",
+  "openAlbumInBrowser": "Open album in browser",
+  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
+  "allow": "Allow",
+  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
+  "seePublicAlbumLinksInApp": "See public album links in app"
 }

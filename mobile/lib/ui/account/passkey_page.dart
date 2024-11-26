@@ -1,3 +1,4 @@
+import "dart:async";
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -29,6 +30,7 @@ class PasskeyPage extends StatefulWidget {
 
 class _PasskeyPageState extends State<PasskeyPage> {
   final Logger _logger = Logger("PasskeyPage");
+  late StreamSubscription<String?> linkStreamSubscription;
 
   @override
   void initState() {
@@ -39,6 +41,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
 
   @override
   void dispose() {
+    linkStreamSubscription.cancel();
     super.dispose();
   }
 
@@ -118,7 +121,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
 
   Future<bool> _initDeepLinks() async {
     // Attach a listener to the stream
-    linkStream.listen(
+    linkStreamSubscription = linkStream.listen(
       _handleDeeplink,
       onError: (err) {
         _logger.severe(err);
