@@ -3,6 +3,7 @@ import { stashRedirect } from "@/accounts/services/redirect";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { NavbarBase } from "@/base/components/Navbar";
+import log from "@/base/log";
 import { masterKeyFromSessionIfLoggedIn } from "@/base/session-store";
 import {
     HorizontalFlex,
@@ -52,11 +53,10 @@ const Page: React.FC = () => {
             try {
                 setCodes(await getAuthCodes(masterKey));
             } catch (e) {
+                log.error("Failed to fetch codes", e);
                 if (e instanceof ApiError && e.httpStatusCode == 401) {
                     // We get back a 401 Unauthorized if the token is not valid.
                     showSessionExpiredDialog();
-                } else {
-                    // do not log errors
                 }
             }
             setHasFetched(true);
