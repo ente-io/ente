@@ -55,7 +55,7 @@ class _SharedPublicCollectionPageState
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         widget.files!.sort(
-          (a, b) => a.creationTime!.compareTo(b.creationTime!),
+          (a, b) => b.creationTime!.compareTo(a.creationTime!),
         );
 
         return FileLoadResult(widget.files!, false);
