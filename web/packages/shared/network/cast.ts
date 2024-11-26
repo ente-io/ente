@@ -56,16 +56,6 @@ class CastGateway {
         return resp.data.publicKey;
     }
 
-    public async registerDevice(publicKey: string): Promise<string> {
-        const resp = await HTTPService.post(
-            await apiURL("/cast/device-info/"),
-            {
-                publicKey: publicKey,
-            },
-        );
-        return resp.data.deviceCode;
-    }
-
     public async publishCastPayload(
         code: string,
         castPayload: string,

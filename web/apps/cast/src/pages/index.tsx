@@ -9,8 +9,8 @@ import { getCastData, register } from "services/pair";
 import { advertiseOnChromecast } from "../services/chromecast-receiver";
 
 export default function Index() {
-    const [publicKeyB64, setPublicKeyB64] = useState<string | undefined>();
-    const [privateKeyB64, setPrivateKeyB64] = useState<string | undefined>();
+    const [publicKey, setPublicKey] = useState<string | undefined>();
+    const [privateKey, setPrivateKey] = useState<string | undefined>();
     const [pairingCode, setPairingCode] = useState<string | undefined>();
 
     const router = useRouter();
@@ -18,8 +18,8 @@ export default function Index() {
     useEffect(() => {
         if (!pairingCode) {
             void register().then((r) => {
-                setPublicKeyB64(r.publicKeyB64);
-                setPrivateKeyB64(r.privateKeyB64);
+                setPublicKey(r.publicKey);
+                setPrivateKey(r.privateKey);
                 setPairingCode(r.pairingCode);
             });
         } else {
@@ -31,14 +31,17 @@ export default function Index() {
     }, [pairingCode]);
 
     useEffect(() => {
-        if (!publicKeyB64 || !privateKeyB64 || !pairingCode) return;
+        if (!publicKey || !privateKey || !pairingCode) return;
 
         const pollTick = async () => {
-            const registration = { publicKeyB64, privateKeyB64, pairingCode };
             try {
                 // TODO:
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                const data = await getCastData(registration);
+                const data = await getCastData({
+                    publicKey,
+                    privateKey,
+                    pairingCode,
+                });
                 if (!data) {
                     // No one has connected yet.
                     return;
@@ -58,7 +61,7 @@ export default function Index() {
 
         const interval = setInterval(pollTick, 2000);
         return () => clearInterval(interval);
-    }, [publicKeyB64, privateKeyB64, pairingCode, router]);
+    }, [publicKey, privateKey, pairingCode, router]);
 
     return (
         <Container>
