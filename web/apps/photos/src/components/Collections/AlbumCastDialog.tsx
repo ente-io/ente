@@ -1,13 +1,12 @@
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { boxSeal } from "@/base/crypto";
-import { newID } from "@/base/id";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import {
-    publicKeyForPairingCode,
+    publishCastPayload,
     revokeAllCastTokens,
+    unknownDeviceCodeErrorMessage,
 } from "@/new/photos/services/cast";
 import { loadCast } from "@/new/photos/utils/chromecast-sender";
 import SingleInputForm, {
@@ -55,40 +54,19 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
         setFieldError,
     ) => {
         try {
-            if (await doCast(value.trim())) {
-                onClose();
-            } else {
-                setFieldError(t("tv_not_found"));
-            }
+            await publishCastPayload(value.trim(), collection);
+            onClose();
         } catch (e) {
             log.error("Failed to cast", e);
-            setFieldError(t("generic_error_retry"));
+            if (
+                e instanceof Error &&
+                e.message == unknownDeviceCodeErrorMessage
+            ) {
+                setFieldError(t("tv_not_found"));
+            } else {
+                setFieldError(t("generic_error_retry"));
+            }
         }
-    };
-
-    const doCast = async (code: string) => {
-        // Find out the public key associated with the given pairing code (if
-        // indeed a device has published one).
-        const publicKey = await publicKeyForPairingCode(code);
-        if (!publicKey) return false;
-
-        // Generate random id.
-        const castToken = newID("cast_");
-
-        // Publish the payload so that the other end can use it.
-        const payload = JSON.stringify({
-            castToken: castToken,
-            collectionID: collection.id,
-            collectionKey: collection.key,
-        });
-        const encryptedPayload = await boxSeal(btoa(payload), publicKey);
-
-        await castGateway.publishCastPayload(
-            code,
-            encryptedPayload,
-            collection.id,
-            castToken,
-        );
     };
 
     useEffect(() => {
@@ -111,7 +89,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                         const code = obj.code;
 
                         if (code) {
-                            doCast(code)
+                            publishCastPayload(`${code}`, collection)
                                 .then(() => {
                                     setView("choose");
                                     onClose();
