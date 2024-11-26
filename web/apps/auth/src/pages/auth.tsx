@@ -66,7 +66,7 @@ const Page: React.FC = () => {
     const lcSearch = searchTerm.toLowerCase();
     const filteredCodes = codes.filter(
         (code) =>
-            code.issuer?.toLowerCase().includes(lcSearch) ||
+            code.issuer.toLowerCase().includes(lcSearch) ||
             code.account?.toLowerCase().includes(lcSearch),
     );
 
@@ -275,7 +275,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                             textAlign: "left",
                         }}
                     >
-                        {code.issuer ?? ""}
+                        {code.issuer}
                     </p>
                     <p
                         style={{
