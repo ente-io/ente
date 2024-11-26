@@ -563,7 +563,7 @@
     "oldest_first": "Oldest first",
     "pin_album": "Pin album",
     "unpin_album": "Unpin album",
-    "conversion_failed_notification_message": "This file could not be previewed. Click here to download the original.",
+    "unpreviewable_file_notification": "This file could not be previewed. Click here to download the original.",
     "DOWNLOAD_COMPLETE": "Download complete",
     "DOWNLOADING_COLLECTION": "Downloading {{name}}",
     "DOWNLOAD_FAILED": "Download failed",

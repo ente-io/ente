@@ -1062,7 +1062,7 @@ const ConversionFailedNotification: React.FC<
                         variant="small"
                         sx={{ flex: 1, textAlign: "left" }}
                     >
-                        {t("conversion_failed_notification_message")}
+                        {t("unpreviewable_file_notification")}
                     </Typography>
                     <FilledIconButton onClick={handleClose}>
                         <CloseIcon />

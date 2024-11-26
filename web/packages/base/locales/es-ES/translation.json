@@ -561,7 +561,7 @@
     "sort_by": "Ordenar por",
     "newest_first": "Más recientes primero",
     "oldest_first": "Más antiguos primero",
-    "conversion_failed_notification_message": "",
+    "unpreviewable_file_notification": "",
     "pin_album": "",
     "unpin_album": "",
     "DOWNLOAD_COMPLETE": "",
