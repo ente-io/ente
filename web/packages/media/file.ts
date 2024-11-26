@@ -10,6 +10,15 @@ export interface MetadataFileAttributes {
 export interface S3FileAttributes {
     objectKey: string;
     decryptionHeader: string;
+    /**
+     * The size of the file, in bytes.
+     *
+     * For both file and thumbnails, the client also sends the size of the
+     * encrypted file (as per the client) while creating a new object on remote.
+     * This allows the server to validate that the size of the objects is same
+     * as what client is reporting.
+     */
+    size: number;
 }
 
 export interface FileInfo {

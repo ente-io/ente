@@ -529,7 +529,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 <EnteMenuItem
                     onClick={showWatchFolder}
                     variant="secondary"
-                    label={t("WATCH_FOLDERS")}
+                    label={t("watch_folders")}
                 />
             )}
             <EnteMenuItem

@@ -1,7 +1,7 @@
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
-import { retryAsyncOperation } from "@/gallery/utils/retry-async";
 import { EnteFile } from "@/media/file";
+import { retryAsyncOperation } from "@/utils/promise";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { MultipartUploadURLs, UploadFile, UploadURL } from "./upload-service";

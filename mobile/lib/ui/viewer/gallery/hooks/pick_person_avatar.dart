@@ -2,6 +2,8 @@ import "dart:math";
 
 import "package:flutter/material.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file_load_result.dart";
@@ -156,6 +158,11 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
                                         .updateAvatar(
                                       personEntity,
                                       selectedFile,
+                                    );
+                                    Bus.instance.fire(
+                                      PeopleChangedEvent(
+                                          // person: personEntity,
+                                          ),
                                     );
                                     Navigator.pop(context, result);
                                   },

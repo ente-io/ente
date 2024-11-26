@@ -591,8 +591,8 @@ func (c *ReplicationController3) verifyUploadedFileSize(in *UploadInput, dest *U
 	}
 
 	if *res.ContentLength != in.ExpectedSize {
-		err = fmt.Errorf("size of the uploaded file (%d) does not match the expected size (%d) in bucket %s",
-			*res.ContentLength, in.ExpectedSize, *dest.Bucket)
+		err = fmt.Errorf("size of the uploaded file (%d) does not match the expected size (%d) in bucket %s for object %s",
+			*res.ContentLength, in.ExpectedSize, *dest.Bucket, in.ObjectKey)
 		c.notifyDiscord(fmt.Sprint(err))
 		return stacktrace.Propagate(err, "")
 	}

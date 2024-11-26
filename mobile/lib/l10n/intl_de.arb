@@ -1246,6 +1246,10 @@
   "locations": "Orte",
   "descriptions": "Beschreibungen",
   "addAName": "Füge einen Namen hinzu",
+  "findThemQuickly": "Finde sie schnell",
+  "@findThemQuickly": {
+    "description": "Subtitle to indicate that the user can find people quickly by name"
+  },
   "findPeopleByName": "Finde Personen schnell nach Namen",
   "addViewers": "{count, plural, one {Betrachter} other {Betrachter}} hinzufügen",
   "addCollaborators": "{count, plural, one {Teilnehmer} other {Teilnehmer}} hinzufügen",
@@ -1260,6 +1264,13 @@
   "createCollaborativeLink": "Gemeinschaftlichen Link erstellen",
   "search": "Suche",
   "enterPersonName": "Namen der Person eingeben",
+  "enterName": "Name eingeben",
+  "savePerson": "Person speichern",
+  "editPerson": "Person bearbeiten",
+  "mergedPhotos": "Zusammengeführte Fotos",
+  "orMergeWithExistingPerson": "Oder mit existierenden zusammenführen",
+  "enterDateOfBirth": "Geburtstag (optional)",
+  "birthday": "Geburtstag",
   "removePersonLabel": "Personenetikett entfernen",
   "autoPairDesc": "Automatisches Verbinden funktioniert nur mit Geräten, die Chromecast unterstützen.",
   "manualPairDesc": "\"Mit PIN verbinden\" funktioniert mit jedem Bildschirm, auf dem du dein Album sehen möchtest.",
@@ -1286,6 +1297,7 @@
   "right": "Rechts",
   "whatsNew": "Neue Funktionen",
   "reviewSuggestions": "Vorschläge überprüfen",
+  "review": "Überprüfen",
   "useAsCover": "Als Titelbild festlegen",
   "notPersonLabel": "Nicht {name}?",
   "@notPersonLabel": {
@@ -1351,11 +1363,18 @@
   "newPerson": "Neue Person",
   "addName": "Name hinzufügen",
   "add": "Hinzufügen",
-  "extraPhotosFoundFor": "Zusätzliche Fotos gefunden für {text}",
+  "extraPhotosFoundFor": "Zusätzliche Fotos für {text} gefunden",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "extraPhotosFound": "Zusätzliche Fotos gefunden",
   "configuration": "Konfiguration",
   "localIndexing": "Lokale Indizierung",
-  "resetPerson": "Person zurücksetzen",
+  "resetPerson": "Entfernen",
   "areYouSureYouWantToResetThisPerson": "Bist du sicher, dass du diese Person zurücksetzen möchtest?",
   "allPersonGroupingWillReset": "Alle Gruppierungen für diese Person werden zurückgesetzt und du wirst alle Vorschläge für diese Person verlieren",
   "yesResetPerson": "Ja, Person zurücksetzen",
@@ -1364,37 +1383,109 @@
   "enableMachineLearningBanner": "Aktiviere maschinelles Lernen für die magische Suche und Gesichtserkennung",
   "searchDiscoverEmptySection": "Bilder werden hier angezeigt, sobald die Verarbeitung abgeschlossen ist",
   "searchPersonsEmptySection": "Personen werden hier angezeigt, sobald die Verarbeitung abgeschlossen ist",
-  "accountIsAlreadyConfigured": "Account is already configured.",
-  "sessionIdMismatch": "Session ID mismatch",
-  "failedToFetchActiveSessions": "Failed to fetch active sessions",
-  "failedToRefreshStripeSubscription": "Failed to refresh subscription",
-  "failedToPlayVideo": "Failed to play video",
-  "uploadIsIgnoredDueToIgnorereason": "Upload is ignored due to {ignoreReason}",
-  "typeOfGallerGallerytypeIsNotSupportedForRename": "Type of gallery {galleryType} is not supported for rename",
-  "tapToUploadIsIgnoredDue": "Tap to upload, upload is currently ignored due to {ignoreReason}",
-  "tapToUpload": "Tap to upload",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {0 Betrachter hinzugefügt} one {1 Betrachter hinzugefügt} other {{count} Betrachter hinzugefügt}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  
+  "accountIsAlreadyConfigured": "Das Konto ist bereits konfiguriert.",
+  "sessionIdMismatch": "Sitzungs-ID stimmt nicht überein",
+  "@sessionIdMismatch": {
+    "description": "In passkey page, deeplink is ignored because of session ID mismatch."
+  },
+  "failedToFetchActiveSessions": "Fehler beim Abrufen der aktiven Sitzungen",
+  "@failedToFetchActiveSessions": {
+    "description": "In session page, warn user (in toast) that active sessions could not be fetched."
+  },
+  "failedToRefreshStripeSubscription": "Abonnement konnte nicht erneuert werden",
+  "failedToPlayVideo": "Fehler beim Abspielen des Videos",
+  "uploadIsIgnoredDueToIgnorereason": "Upload wird aufgrund von {ignoreReason} ignoriert",
+  "@uploadIsIgnoredDueToIgnorereason": {
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "typeOfGallerGallerytypeIsNotSupportedForRename": "Der Galerie-Typ {galleryType} unterstützt kein Umbenennen",
+  "@typeOfGallerGallerytypeIsNotSupportedForRename": {
+    "placeholders": {
+      "galleryType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUploadIsIgnoredDue": "Zum Hochladen tippen, Hochladen wird derzeit ignoriert, da {ignoreReason}",
+  "@tapToUploadIsIgnoredDue": {
+    "description": "Shown in upload icon widet, inside a tooltip.",
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUpload": "Zum Hochladen antippen",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
   "info": "Info",
-  "addFiles": "Add Files",
-  "castAlbum": "Cast album",
-  "imageNotAnalyzed": "Image not analyzed",
-  "noFacesFound": "No faces found",
-  "fileNotUploadedYet": "File not uploaded yet",
-  "noSuggestionsForPerson": "No suggestions for {personName}",
-  "month": "month",
-  "yearShort": "yr",
-  "currentlyRunning": "currently running",
-  "ignored": "ignored",
-  "photosCount": "{count} photos",
-  "file": "File",
-  "searchSectionsLengthMismatch": "Sections length mismatch: {snapshotLenght} != {searchLenght}",
-  "selectMailApp": "Select mail app",
-  "selectAllShort": "All",
-  "changeLogMagicSearchImprovementTitle": "Magic Search Improvement",
-  "changeLogMagicSearchImprovementContent": "We have improved magic search to become much faster, so you don\\'t have to wait to find what you\\'re looking for.",
-  "changeLogBackupStatusTitle": "Backup Status",
-  "changeLogBackupStatusContent": "We\\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.",
-  "changeLogDiscoverTitle": "Discover",
-  "changeLogDiscoverContent": "Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\\'s a place to find photos that might be important for you.\\n\\nOnly available if you have enabled Machine Learning.",
-  "selectCoverPhoto": "Select cover photo",
-  "newLocation": "New location"
+  "addFiles": "Dateien hinzufügen",
+  "castAlbum": "Album übertragen",
+  "imageNotAnalyzed": "Bild nicht analysiert",
+  "noFacesFound": "Keine Gesichter gefunden",
+  "fileNotUploadedYet": "Datei wurde noch nicht hochgeladen",
+  "noSuggestionsForPerson": "Keine Vorschläge für {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "Monat",
+  "yearShort": "Jahr",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "läuft gerade",
+  "ignored": "ignoriert",
+  
+  "file": "Datei",
+  "searchSectionsLengthMismatch": "Abschnittslänge stimmt nicht überein: {snapshotLenght} != {searchLenght}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLenght": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLenght": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "selectMailApp": "E-Mail-App auswählen",
+  "selectAllShort": "Alle",
+  "@selectAllShort": {
+    "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
+  },
+  "changeLogMagicSearchImprovementTitle": "Verbesserung der magischen Suche",
+  "changeLogMagicSearchImprovementContent": "Wir haben die magische Suche verbessert, sodass du nicht warten musst, um zu finden, was du suchst.",
+  "changeLogBackupStatusTitle": "Status der Sicherung",
+  "changeLogBackupStatusContent": "Wir haben ein Protokoll aller Dateien hinzugefügt, die in Ente hochgeladen wurden, einschließlich fehlgeschlagenen und solchen in der Warteschlange.",
+  "changeLogDiscoverTitle": "Entdecken",
+  "changeLogDiscoverContent": "Suchst du nach Fotos deiner Ausweise, Notizen oder gar Memes? Öffne das Such-Tab und schau dir \"Entdecken\" an. An diesem Ort findest du, basierend auf unserer semantischen Suche, Fotos die wichtig für dich sein könnten.\\n\\nNur verfügbar, wenn du das maschinelle Lernen aktiviert hast.",
+  "selectCoverPhoto": "Titelbild auswählen",
+  "newLocation": "Neuer Ort"
 }

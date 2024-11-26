@@ -1246,9 +1246,13 @@
   "locations": "Localizações",
   "descriptions": "Descrições",
   "addAName": "Adicione um nome",
+  "findThemQuickly": "Busque-os rapidamente",
+  "@findThemQuickly": {
+    "description": "Subtitle to indicate that the user can find people quickly by name"
+  },
   "findPeopleByName": "Busque pessoas facilmente pelo nome",
-  "addViewers": "{count, plural, one {Adicionar visualizador} other {Adicionar visualizador} other {Adicionar visualizadores}}",
-  "addCollaborators": "{count, plural, one {Adicionar colaborador} other {Adicionar colaboradores} other {Adicionar colaboradores}}",
+  "addViewers": "{count, plural, one {Adicionar visualizador} one {Adicionar visualizador} other {Adicionar visualizadores}}",
+  "addCollaborators": "{count, plural, one {Adicionar colaborador} one {Adicionar colaborador} other {Adicionar colaboradores}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Pressione um e-mail para verificar a criptografia ponta a ponta.",
   "developerSettingsWarning": "Deseja modificar as Opções de Desenvolvedor?",
   "developerSettings": "Opções de desenvolvedor",
@@ -1260,6 +1264,13 @@
   "createCollaborativeLink": "Criar link colaborativo",
   "search": "Buscar",
   "enterPersonName": "Inserir nome da pessoa",
+  "enterName": "Inserir nome",
+  "savePerson": "Salvar pessoa",
+  "editPerson": "Editar pessoa",
+  "mergedPhotos": "Fotos mescladas",
+  "orMergeWithExistingPerson": "Ou mesclar com existente",
+  "enterDateOfBirth": "Aniversário (opcional)",
+  "birthday": "Aniversário",
   "removePersonLabel": "Remover etiqueta da pessoa",
   "autoPairDesc": "O pareamento automático só funciona com dispositivos que suportam o Chromecast.",
   "manualPairDesc": "Parear com PIN funciona com qualquer tela que queira visualizar seu álbum.",
@@ -1286,6 +1297,7 @@
   "right": "Direita",
   "whatsNew": "O que há de novo",
   "reviewSuggestions": "Revisar sugestões",
+  "review": "Revisar",
   "useAsCover": "Usar como capa",
   "notPersonLabel": "Não é {name}?",
   "@notPersonLabel": {
@@ -1352,10 +1364,17 @@
   "addName": "Adicionar pessoa",
   "add": "Adicionar",
   "extraPhotosFoundFor": "Fotos adicionais encontradas para {text}",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "extraPhotosFound": "Fotos adicionais encontradas",
   "configuration": "Configuração",
   "localIndexing": "Indexação local",
-  "resetPerson": "Redefinir pessoa",
+  "resetPerson": "Remover",
   "areYouSureYouWantToResetThisPerson": "Deseja redefinir esta pessoa?",
   "allPersonGroupingWillReset": "Todos os agrupamentos dessa pessoa serão redefinidos, e você perderá todas as sugestões feitas por essa pessoa.",
   "yesResetPerson": "Sim, redefinir pessoa",
@@ -1364,37 +1383,126 @@
   "enableMachineLearningBanner": "Ativar aprendizagem de máquina para busca mágica e reconhecimento facial",
   "searchDiscoverEmptySection": "As imagens serão exibidas aqui quando o processamento for concluído",
   "searchPersonsEmptySection": "As pessoas serão exibidas aqui quando o processamento for concluído",
-  "accountIsAlreadyConfigured": "Account is already configured.",
-  "sessionIdMismatch": "Session ID mismatch",
-  "failedToFetchActiveSessions": "Failed to fetch active sessions",
-  "failedToRefreshStripeSubscription": "Failed to refresh subscription",
-  "failedToPlayVideo": "Failed to play video",
-  "uploadIsIgnoredDueToIgnorereason": "Upload is ignored due to {ignoreReason}",
-  "typeOfGallerGallerytypeIsNotSupportedForRename": "Type of gallery {galleryType} is not supported for rename",
-  "tapToUploadIsIgnoredDue": "Tap to upload, upload is currently ignored due to {ignoreReason}",
-  "tapToUpload": "Tap to upload",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Adicionado 0 visualizadores} =1 {Adicionado 1 visualizador} other {Adicionado {count} visualizadores}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Adicionado 0 colaboradores} =1 {Adicionado 1 colaborador} other {Adicionado {count} colaboradores}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  },
+  "accountIsAlreadyConfigured": "A conta já está configurada.",
+  "sessionIdMismatch": "Incompatibilidade de ID de sessão",
+  "@sessionIdMismatch": {
+    "description": "In passkey page, deeplink is ignored because of session ID mismatch."
+  },
+  "failedToFetchActiveSessions": "Falhou ao obter sessões ativas",
+  "@failedToFetchActiveSessions": {
+    "description": "In session page, warn user (in toast) that active sessions could not be fetched."
+  },
+  "failedToRefreshStripeSubscription": "Falhou ao atualizar assinatura",
+  "failedToPlayVideo": "Falhou ao reproduzir vídeo",
+  "uploadIsIgnoredDueToIgnorereason": "O envio é ignorado devido a {ignoreReason}",
+  "@uploadIsIgnoredDueToIgnorereason": {
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "typeOfGallerGallerytypeIsNotSupportedForRename": "O tipo de galeria {galleryType} não é suportado para renomear",
+  "@typeOfGallerGallerytypeIsNotSupportedForRename": {
+    "placeholders": {
+      "galleryType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUploadIsIgnoredDue": "Toque para enviar, atualmente o envio é ignorado devido a {ignoreReason}",
+  "@tapToUploadIsIgnoredDue": {
+    "description": "Shown in upload icon widet, inside a tooltip.",
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUpload": "Toque para enviar",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
   "info": "Info",
-  "addFiles": "Add Files",
-  "castAlbum": "Cast album",
-  "imageNotAnalyzed": "Image not analyzed",
-  "noFacesFound": "No faces found",
-  "fileNotUploadedYet": "File not uploaded yet",
-  "noSuggestionsForPerson": "No suggestions for {personName}",
-  "month": "month",
-  "yearShort": "yr",
-  "currentlyRunning": "currently running",
-  "ignored": "ignored",
-  "photosCount": "{count} photos",
-  "file": "File",
-  "searchSectionsLengthMismatch": "Sections length mismatch: {snapshotLenght} != {searchLenght}",
-  "selectMailApp": "Select mail app",
-  "selectAllShort": "All",
-  "changeLogMagicSearchImprovementTitle": "Magic Search Improvement",
-  "changeLogMagicSearchImprovementContent": "We have improved magic search to become much faster, so you don\\'t have to wait to find what you\\'re looking for.",
-  "changeLogBackupStatusTitle": "Backup Status",
-  "changeLogBackupStatusContent": "We\\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.",
-  "changeLogDiscoverTitle": "Discover",
-  "changeLogDiscoverContent": "Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\\'s a place to find photos that might be important for you.\\n\\nOnly available if you have enabled Machine Learning.",
-  "selectCoverPhoto": "Select cover photo",
-  "newLocation": "New location"
+  "addFiles": "Adicionar arquivos",
+  "castAlbum": "Transferir álbum",
+  "imageNotAnalyzed": "Imagem não analisada",
+  "noFacesFound": "Nenhum rosto encontrado",
+  "fileNotUploadedYet": "Arquivo ainda não enviado",
+  "noSuggestionsForPerson": "Sem sugestões para {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "mês",
+  "yearShort": "ano",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "Atualmente executando",
+  "ignored": "ignorado",
+  "photosCount": "{count, plural, =0 {0 fotos} =1 {1 foto} other {{count} fotos}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "file": "Arquivo",
+  "searchSectionsLengthMismatch": "Incompatibilidade do comprimento de seções: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLenght": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLenght": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "selectMailApp": "Selecionar aplicativo de e-mail",
+  "selectAllShort": "Tudo",
+  "@selectAllShort": {
+    "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
+  },
+  "changeLogMagicSearchImprovementTitle": "Melhoria na busca mágica",
+  "changeLogMagicSearchImprovementContent": "Nós melhoramos a busca mágica para torná-la mais rápida, para que você não precise esperar pelo que você busca.",
+  "changeLogBackupStatusTitle": "Estado da cópia de segurança",
+  "changeLogBackupStatusContent": "Nós adicionamos um registro de todos os arquivos enviados ao Ente, incluindo falhas e adicionados à fila.",
+  "changeLogDiscoverTitle": "Descobrir",
+  "changeLogDiscoverContent": "Procurando por fotos dos seus cartões de identidade, notas, ou até memes? Vá à aba de busca e confira o Descobrir. Baseado na busca semântica, é um local para encontrar fotos importantes para você.\\nApenas disponível se a Aprendizagem automática estiver ativa.",
+  "selectCoverPhoto": "Selecionar foto da capa",
+  "newLocation": "Nova localização"
 }

@@ -33,6 +33,9 @@ export class CryptoWorker {
     decryptStreamChunk = ei._decryptStreamChunk;
     decryptMetadataJSON_New = ei._decryptMetadataJSON_New;
     decryptMetadataJSON = ei._decryptMetadataJSON;
+    generateKeyPair = ei._generateKeyPair;
+    boxSeal = ei._boxSeal;
+    boxSealOpen = ei._boxSealOpen;
 
     // TODO: -- AUDIT BELOW --
 
@@ -91,18 +94,6 @@ export class CryptoWorker {
 
     async generateSaltToDeriveKey() {
         return libsodium.generateSaltToDeriveKey();
-    }
-
-    async generateKeyPair() {
-        return libsodium.generateKeyPair();
-    }
-
-    async boxSealOpen(input: string, publicKey: string, secretKey: string) {
-        return libsodium.boxSealOpen(input, publicKey, secretKey);
-    }
-
-    async boxSeal(input: string, publicKey: string) {
-        return libsodium.boxSeal(input, publicKey);
     }
 
     async generateSubKey(
