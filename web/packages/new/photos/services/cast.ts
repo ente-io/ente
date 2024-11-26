@@ -1,8 +1,8 @@
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
-import { ApiError } from "../error";
-import { getToken } from "../storage/localStorage/helpers";
-import HTTPService from "./HTTPService";
+import { ApiError } from "@ente/shared/error";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import HTTPService from "@ente/shared/network/HTTPService";
 
 class CastGateway {
     public async revokeAllTokens() {

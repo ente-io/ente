@@ -4,11 +4,11 @@ import { boxSeal } from "@/base/crypto";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
+import castGateway from "@/new/photos/services/cast";
 import { loadCast } from "@/new/photos/utils/chromecast-sender";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
-import castGateway from "@ente/shared/network/cast";
 import { Button, Link, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
