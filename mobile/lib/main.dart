@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import "package:adaptive_theme/adaptive_theme.dart";
+// import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:background_fetch/background_fetch.dart';
 import "package:computer/computer.dart";
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -69,14 +69,13 @@ const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 void main() async {
   debugRepaintRainbowEnabled = false;
   WidgetsFlutterBinding.ensureInitialized();
-  //For audio to work on vidoes in iOS when in silent mode.
   if (Platform.isIOS) {
     unawaited(AudioSessionHandler.setAudioSessionCategory());
   }
   MediaKit.ensureInitialized();
 
-  final savedThemeMode = await AdaptiveTheme.getThemeMode();
-  await _runInForeground(savedThemeMode);
+  final prefs = await SharedPreferences.getInstance();
+  await _runInForeground(ThemeMode.system, prefs);
 
   unawaited(BackgroundFetch.registerHeadlessTask(_headlessTaskHandler));
   if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate().ignore();
@@ -93,12 +92,11 @@ void main() async {
   );
 }
 
-Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
+Future<void> _runInForeground(ThemeMode savedThemeMode, SharedPreferences prefs) async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
     final Locale? locale = await getLocale(noFallback: true);
-    final prefs = await SharedPreferences.getInstance();
     runApp(
       MultiProvider(
         providers: [
@@ -115,7 +113,7 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
           locale: locale,
           lightTheme: lightThemeData,
           darkTheme: darkThemeData,
-          savedThemeMode: _themeMode(savedThemeMode),
+          savedThemeMode: savedThemeMode,
         ),
       ),
     );
@@ -124,24 +122,6 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
     }
     unawaited(_scheduleFGSync('appStart in FG'));
   });
-}
-
-ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
-  if (savedThemeMode == null) return ThemeMode.system;
-  if (savedThemeMode.isLight) return ThemeMode.light;
-  if (savedThemeMode.isDark) return ThemeMode.dark;
-  return ThemeMode.system;
-}
-
-Future<void> _homeWidgetSync() async {
-  if (!Platform.isAndroid) return;
-  try {
-    if (await HomeWidgetService.instance.countHomeWidgets() != 0) {
-      await HomeWidgetService.instance.initHomeWidget();
-    }
-  } catch (e, s) {
-    _logger.severe("Error in initSlideshowWidget", e, s);
-  }
 }
 
 Future<void> _runBackgroundTask(String taskId, {String mode = 'normal'}) async {
@@ -457,4 +437,15 @@ void _scheduleSuicide(Duration duration, [String? taskID]) {
     _logger.warning("TLE, committing seppuku for taskID: $taskIDVal");
     _killBGTask(taskID);
   });
+}
+
+Future<void> _homeWidgetSync() async {
+  if (!Platform.isAndroid) return;
+  try {
+    if (await HomeWidgetService.instance.countHomeWidgets() != 0) {
+      await HomeWidgetService.instance.initHomeWidget();
+    }
+  } catch (e, s) {
+    _logger.severe("Error in initSlideshowWidget", e, s);
+  }
 }

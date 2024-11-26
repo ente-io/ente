@@ -1,7 +1,6 @@
 import "dart:async";
 import 'dart:io';
 
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -22,12 +21,11 @@ import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/utils/intent_util.dart";
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class EnteApp extends StatefulWidget {
   final Future<void> Function(String) runBackgroundTask;
   final Future<void> Function(String) killBackgroundTask;
-  final AdaptiveThemeMode? savedThemeMode;
+  final ThemeMode savedThemeMode;
   final Locale? locale;
 
   const EnteApp(
@@ -96,62 +94,33 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    // context.saveAsCurrentContext(); //remove if not usefull in future
     if (Platform.isAndroid || kDebugMode) {
-      return FutureBuilder<SharedPreferences>(
-        future: SharedPreferences.getInstance(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const MaterialApp(
-              home: Scaffold(
-                body: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-            );
-          }
-
-          return MultiProvider(
-            providers: [
-              ChangeNotifierProvider<ThemeProvider>(
-                create: (_) => ThemeProvider(snapshot.data!),
-              ),
-            ],
-            child: Consumer<ThemeProvider>(
-              builder: (context, themeProvider, child) {
-                // Wait for theme to initialize
-                if (!themeProvider.initialized) {
-                  return const MaterialApp(
-                    home: Scaffold(
-                      body: Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    ),
-                  );
-                }
-
-                return MaterialApp(
-                  title: "ente",
-                  theme: themeProvider.currentThemeData,
-                  themeMode: themeProvider.themeMode,
-                  home: AppLifecycleService.instance.mediaExtensionAction.action ==
-                          IntentAction.view
-                      ? const FileViewer()
-                      : const HomeWidget(),
-                  debugShowCheckedModeBanner: false,
-                  builder: EasyLoading.init(),
-                  locale: locale,
-                  supportedLocales: appSupportedLocales,
-                  localeListResolutionCallback: localResolutionCallBack,
-                  localizationsDelegates: const [
-                    ...AppLocalizations.localizationsDelegates,
-                    S.delegate,
-                  ],
-                );
-              },
-            ),
-          );
+      return Listener(
+        onPointerDown: (event) {
+          machineLearningController.onUserInteraction();
         },
+        child: Consumer<ThemeProvider>(
+          builder: (context, themeProvider, _) {
+            return MaterialApp(
+              title: "ente",
+              theme: themeProvider.currentThemeData,
+              themeMode: themeProvider.themeMode,
+              home: AppLifecycleService.instance.mediaExtensionAction.action ==
+                      IntentAction.view
+                  ? const FileViewer()
+                  : const HomeWidget(),
+              debugShowCheckedModeBanner: false,
+              builder: EasyLoading.init(),
+              locale: locale,
+              supportedLocales: appSupportedLocales,
+              localeListResolutionCallback: localResolutionCallBack,
+              localizationsDelegates: const [
+                ...AppLocalizations.localizationsDelegates,
+                S.delegate,
+              ],
+            );
+          },
+        ),
       );
     } else {
       return Listener(
