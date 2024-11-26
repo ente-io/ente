@@ -566,10 +566,21 @@ func main() {
 		Ctrl:           castCtrl,
 	}
 
+	publicAPI.POST("/cast/device-info", castHandler.RegisterDevice)
+	// Deprecated Nov 2024. Remove in a few months.
+	//
+	// This (and below) are deprecated copy of endpoints with a trailing slash.
+	// Kept around because existing desktop clients will not follow the 307
+	// redirect because of CORS headers missing on the 307. Can be safely
+	// removed in a few months after the desktop apps have updated.
 	publicAPI.POST("/cast/device-info/", castHandler.RegisterDevice)
 	privateAPI.GET("/cast/device-info/:deviceCode", castHandler.GetDeviceInfo)
 	publicAPI.GET("/cast/cast-data/:deviceCode", castHandler.GetCastData)
+	privateAPI.POST("/cast/cast-data", castHandler.InsertCastData)
+	// Deprecated Nov 2024. Remove in a few months.
 	privateAPI.POST("/cast/cast-data/", castHandler.InsertCastData)
+	privateAPI.DELETE("/cast/revoke-all-tokens", castHandler.RevokeAllToken)
+	// Deprecated Nov 2024. Remove in a few months.
 	privateAPI.DELETE("/cast/revoke-all-tokens/", castHandler.RevokeAllToken)
 
 	castAPI.GET("/files/preview/:fileID", castHandler.GetThumbnail)

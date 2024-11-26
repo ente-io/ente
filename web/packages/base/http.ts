@@ -15,10 +15,12 @@ export const authenticatedRequestHeaders = async () => ({
 });
 
 /**
- * Return a headers object with "X-Client-Package" header set to the client
- * package name of the current app.
+ * Return headers that should be passed alongwith (almost) all unauthenticated
+ * `fetch` calls that we make to our API servers.
+ *
+ * -   The client package name.
  */
-export const clientPackageHeader = () => ({
+export const publicRequestHeaders = () => ({
     "X-Client-Package": clientPackageName,
 });
 

@@ -122,7 +122,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
             >
                 <SpaceBetweenFlex sx={{ p: "16px 8px 8px 8px" }}>
                     <DialogTitle variant="h3" fontWeight={"bold"}>
-                        {t("WATCHED_FOLDERS")}
+                        {t("watched_folders")}
                     </DialogTitle>
                     <DialogCloseIconButton {...{ onClose }} />
                 </SpaceBetweenFlex>
@@ -185,21 +185,21 @@ const NoWatches: React.FC = () => {
         <NoWatchesContainer>
             <Stack spacing={1}>
                 <Typography variant="large" fontWeight={"bold"}>
-                    {t("NO_FOLDERS_ADDED")}
+                    {t("no_folders_added")}
                 </Typography>
                 <Typography py={0.5} variant={"small"} color="text.muted">
-                    {t("FOLDERS_AUTOMATICALLY_MONITORED")}
+                    {t("watch_folders_hint_1")}
                 </Typography>
                 <Typography variant={"small"} color="text.muted">
                     <FlexWrapper gap={1}>
                         <CheckmarkIcon />
-                        {t("UPLOAD_NEW_FILES_TO_ENTE")}
+                        {t("watch_folders_hint_2")}
                     </FlexWrapper>
                 </Typography>
                 <Typography variant={"small"} color="text.muted">
                     <FlexWrapper gap={1}>
                         <CheckmarkIcon />
-                        {t("REMOVE_DELETED_FILES_FROM_ENTE")}
+                        {t("watch_folders_hint_3")}
                     </FlexWrapper>
                 </Typography>
             </Stack>

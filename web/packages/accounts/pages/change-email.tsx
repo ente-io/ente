@@ -192,7 +192,7 @@ const ChangeEmailForm: React.FC = () => {
                             </LinkButton>
                         )}
                         <LinkButton onClick={goToApp}>
-                            {t("GO_BACK")}
+                            {t("go_back")}
                         </LinkButton>
                     </FormPaperFooter>
                 </>
