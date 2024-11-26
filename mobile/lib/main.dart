@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-// import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:background_fetch/background_fetch.dart';
 import "package:computer/computer.dart";
 import 'package:firebase_messaging/firebase_messaging.dart';

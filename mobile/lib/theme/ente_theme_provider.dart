@@ -6,7 +6,6 @@ import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/theme/text_style.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:flutter/foundation.dart';
 
 enum ThemeOptions {
   system,
@@ -431,5 +430,3 @@ class ThemeProvider extends ChangeNotifier {
     _themeCache[ThemeOptions.blueDark] = _createCustomThemeFromEnteColorScheme(blueDarkScheme, true);
   }
 }
-
-// ... rest of the code remains the same ... 

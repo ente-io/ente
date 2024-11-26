@@ -451,29 +451,3 @@ SwitchThemeData getSwitchThemeData(Color activeColor) {
     }),
   );
 }
-
-class EnteThemeData {
-  // ... existing code ...
-
-  static ThemeData getOrangeLightTheme() {
-    return ThemeData(
-      colorScheme: const ColorScheme.light(
-        primary: Colors.orange,
-        secondary: Colors.orangeAccent,
-        // ... define other colors for orange theme
-      ),
-      // ... other theme properties
-    );
-  }
-
-  static ThemeData getBlueDarkTheme() {
-    return ThemeData(
-      colorScheme: const ColorScheme.dark(
-        primary: Colors.blue,
-        secondary: Colors.blueAccent,
-        // ... define other colors for blue dark theme
-      ),
-      // ... other theme properties
-    );
-  }
-}

@@ -1,44 +1,49 @@
 <svg width="343" height="200" viewBox="0 0 343 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Base gradient background -->
-  <rect width="343" height="200" rx="12" fill="url(#paint0_linear)"/>
-  
-  <!-- Glass effect elements -->
-  <g opacity="0.15">
-    <!-- Main glass shapes -->
-    <circle cx="50" cy="30" r="100" fill="white" filter="url(#blur1)"/>
-    <circle cx="300" cy="180" r="80" fill="white" filter="url(#blur1)"/>
-    
-    <!-- Light streaks -->
-    <path d="M250 50C300 80 320 150 280 180" 
-          stroke="white" stroke-width="40"
-          filter="url(#blur2)"/>
+  <!-- Base gradient background with improved contrast -->
+<!--  <rect width="34" height="100" rx="5" fill="url(#xda_linear)"/>-->
+
+  <!-- Glass effect elements with better layering -->
+  <g opacity="0.1">  <!-- Further reduced for subtlety -->
+    <!-- Refined glass shapes -->
+    <circle cx="40" cy="20" r="120" fill="white" filter="url(#blur1)"/>
+    <circle cx="310" cy="190" r="90" fill="white" filter="url(#blur1)"/>
+
+    <!-- Enhanced light streaks -->
+    <path d="M240 40C300 70 330 160 280 190"
+        stroke="white" stroke-width="50"
+        filter="url(#blur2)"/>
   </g>
 
-  <!-- Glass shine effect -->
-  <rect width="343" height="125"
-        fill="url(#shine_gradient)" 
-        opacity="0.1"/>
+  <!-- Improved glass shine effect -->
+  <rect width="343" height="140" fill="url(#shine_gradient)" opacity="0.06"/>  <!-- Further reduced for subtlety -->
 
   <defs>
-    <!-- Base color gradient -->
-    <linearGradient id="paint0_linear" x1="0" y1="0" x2="343" y2="200" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="currentColor" stop-opacity="0.3"/>
-      <stop offset="1" stop-color="currentColor" stop-opacity="0.1"/>
+    <!-- Enhanced base color gradient -->
+    <linearGradient id="xda_linear" x1="0" y1="0" x2="090" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="currentColor" stop-opacity="0.02"/>
     </linearGradient>
 
-    <!-- Shine gradient -->
-    <linearGradient id="shine_gradient" x1="171.5" y1="0" x2="171.5" y2="80">
-      <stop offset="0" stop-color="white" stop-opacity="0.4"/>
+    <!-- xda color gradient -->
+    <linearGradient id="paint0_linear" x1="0" y1="0" x2="343" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="currentColor" stop-opacity="0.22"/>
+      <stop offset="0.6" stop-color="currentColor" stop-opacity="0.12"/>  <!-- Added middle stop -->
+      <stop offset="1" stop-color="currentColor" stop-opacity="0.06"/>
+    </linearGradient>
+
+    <!-- Refined shine gradient -->
+    <linearGradient id="shine_gradient" x1="171.5" y1="0" x2="171.5" y2="100">
+      <stop offset="0" stop-color="white" stop-opacity="0.3"/>
+      <stop offset="0.5" stop-color="white" stop-opacity="0.15"/>  <!-- Added middle stop -->
       <stop offset="1" stop-color="white" stop-opacity="0"/>
     </linearGradient>
 
-    <!-- Different blur levels -->
+    <!-- Enhanced blur filters -->
     <filter id="blur1" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="20"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="25"/>
     </filter>
 
     <filter id="blur2" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="10"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="15"/>
     </filter>
   </defs>
 </svg> 

@@ -25,7 +25,7 @@ import 'package:provider/provider.dart';
 class EnteApp extends StatefulWidget {
   final Future<void> Function(String) runBackgroundTask;
   final Future<void> Function(String) killBackgroundTask;
-  final ThemeMode savedThemeMode;
+  final ThemeMode? savedThemeMode;
   final Locale? locale;
 
   const EnteApp(
