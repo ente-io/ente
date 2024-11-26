@@ -5832,11 +5832,11 @@ class S {
     );
   }
 
-  /// `{count, plural, =0 {} =1 {1 day} other {{count} days}}`
+  /// `{count, plural, =0 {Soon} =1 {1 day} other {{count} days}}`
   String trashDaysLeft(int count) {
     return Intl.plural(
       count,
-      zero: '',
+      zero: 'Soon',
       one: '1 day',
       other: '$count days',
       name: 'trashDaysLeft',

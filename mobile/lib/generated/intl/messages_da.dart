@@ -76,8 +76,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Indtast venligst en gyldig email adresse."),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("Indtast din email adresse"),
-        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
-            "Face not clustered yet, please come back later"),
         "familyPlanPortalTitle":
             MessageLookupByLibrary.simpleMessage("Familie"),
         "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),

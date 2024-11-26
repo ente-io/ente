@@ -816,16 +816,7 @@
   "referFriendsAnd2xYourPlan": "Invita un amico e raddoppia il tuo spazio",
   "shareAlbumHint": "Apri un album e tocca il pulsante di condivisione in alto a destra per condividerlo.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Gli elementi mostrano il numero di giorni rimanenti prima della cancellazione permanente",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1 giorno} other {{count} giorni}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
+  
   "deleteAll": "Elimina tutto",
   "renameAlbum": "Rinomina album",
   "convertToAlbum": "Converti in album",

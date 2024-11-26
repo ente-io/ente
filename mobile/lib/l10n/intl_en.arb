@@ -816,7 +816,7 @@
   "referFriendsAnd2xYourPlan": "Refer friends and 2x your plan",
   "shareAlbumHint": "Open an album and tap the share button on the top right to share.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Items show the number of days remaining before permanent deletion",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1 day} other {{count} days}}",
+  "trashDaysLeft": "{count, plural, =0 {Soon} =1 {1 day} other {{count} days}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {

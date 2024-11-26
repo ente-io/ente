@@ -1,5 +1,6 @@
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
+import { downloadManager } from "@/gallery/services/download";
 import { writeStream } from "@/gallery/utils/native-stream";
 import type { Collection } from "@/media/collection";
 import { mergeMetadata, type EnteFile } from "@/media/file";
@@ -14,7 +15,6 @@ import {
     createCollectionNameByID,
     getCollectionUserFacingName,
 } from "@/new/photos/services/collection";
-import downloadManager from "@/new/photos/services/download";
 import {
     exportMetadataDirectoryName,
     exportTrashDirectoryName,

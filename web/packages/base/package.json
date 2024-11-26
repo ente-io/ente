@@ -3,6 +3,7 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
+        "@/utils": "*",
         "@emotion/react": "11.13.3",
         "@emotion/styled": "^11.13.0",
         "@mui/icons-material": "^5.16.6",

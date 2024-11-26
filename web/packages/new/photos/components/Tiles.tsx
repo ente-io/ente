@@ -1,9 +1,9 @@
+import { downloadManager } from "@/gallery/services/download";
 import { type EnteFile } from "@/media/file";
 import {
     LoadingThumbnail,
     StaticThumbnail,
 } from "@/new/photos/components/PlaceholderThumbnails";
-import downloadManager from "@/new/photos/services/download";
 import { styled } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { faceCrop } from "../services/ml";

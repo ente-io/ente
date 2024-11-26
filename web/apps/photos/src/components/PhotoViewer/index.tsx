@@ -5,12 +5,13 @@ import { Overlay } from "@/base/components/mui/Container";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { lowercaseExtension } from "@/base/file-name";
 import log from "@/base/log";
+import {
+    downloadManager,
+    type LoadedLivePhotoSourceURL,
+} from "@/gallery/services/download";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
-import downloadManager, {
-    type LoadedLivePhotoSourceURL,
-} from "@/new/photos/services/download";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import { AppContext } from "@/new/photos/types/context";
 import { FlexWrapper } from "@ente/shared/components/Container";
@@ -782,7 +783,8 @@ function PhotoViewer(props: PhotoViewerProps) {
                                 disabled={livePhotoBtnOptions.loading}
                             >
                                 <FlexWrapper gap={"4px"}>
-                                    {<AlbumOutlined />} {t("LIVE")}
+                                    {<AlbumOutlined />}{" "}
+                                    {t("live_photo_indicator")}
                                 </FlexWrapper>
                             </Button>
                         </LivePhotoBtnContainer>
@@ -903,7 +905,7 @@ function PhotoViewer(props: PhotoViewerProps) {
 
                             <button
                                 className="pswp__button pswp__button--custom"
-                                title={t("INFO_OPTION")}
+                                title={t("info_key")}
                                 onClick={() => handleOpenInfo(photoSwipe)}
                             >
                                 <InfoIcon />
@@ -943,7 +945,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                                 )}
                             {showConvertButton && (
                                 <button
-                                    title={t("CONVERT")}
+                                    title={t("convert")}
                                     className="pswp__button pswp__button--custom"
                                     onClick={handleForceConvert}
                                 >
@@ -1061,7 +1063,7 @@ const ConversionFailedNotification: React.FC<
                         variant="small"
                         sx={{ flex: 1, textAlign: "left" }}
                     >
-                        {t("CONVERSION_FAILED_NOTIFICATION_MESSAGE")}
+                        {t("unpreviewable_file_notification")}
                     </Typography>
                     <FilledIconButton onClick={handleClose}>
                         <CloseIcon />

@@ -1,7 +1,7 @@
 import { clientPackageName, isDesktop } from "@/base/app";
 import { sharedCryptoWorker } from "@/base/crypto";
 import { encryptToB64, generateEncryptionKey } from "@/base/crypto/libsodium";
-import { clientPackageHeader, HTTPError } from "@/base/http";
+import { HTTPError, publicRequestHeaders } from "@/base/http";
 import log from "@/base/log";
 import { accountsAppOrigin, apiURL } from "@/base/origins";
 import { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
@@ -229,7 +229,7 @@ export const checkPasskeyVerificationStatus = async (
     const url = await apiURL("/users/two-factor/passkeys/get-token");
     const params = new URLSearchParams({ sessionID });
     const res = await fetch(`${url}?${params.toString()}`, {
-        headers: clientPackageHeader(),
+        headers: publicRequestHeaders(),
     });
     if (!res.ok) {
         if (res.status == 404 || res.status == 410)

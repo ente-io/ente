@@ -21,8 +21,5 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'km';
 
   final messages = _notInlinedMessages(_notInlinedMessages);
-  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
-            "Face not clustered yet, please come back later")
-      };
+  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{};
 }

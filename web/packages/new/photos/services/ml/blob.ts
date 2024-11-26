@@ -1,11 +1,11 @@
 import { basename } from "@/base/file-name";
 import type { ElectronMLWorker } from "@/base/types/ipc";
+import { downloadManager } from "@/gallery/services/download";
 import { renderableImageBlob } from "@/gallery/utils/convert";
 import { readStream } from "@/gallery/utils/native-stream";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import DownloadManager from "../download";
 import type { UploadItem } from "../upload/types";
 
 /**
@@ -91,7 +91,7 @@ const fetchRenderableUploadItemBlob = async (
 ) => {
     const fileType = file.metadata.fileType;
     if (fileType == FileType.video) {
-        const thumbnailData = await DownloadManager.thumbnailData(file);
+        const thumbnailData = await downloadManager.thumbnailData(file);
         return new Blob([thumbnailData!]);
     } else {
         const blob = await readNonVideoUploadItem(uploadItem, electron);
@@ -146,11 +146,11 @@ export const fetchRenderableEnteFileBlob = async (
 ): Promise<Blob> => {
     const fileType = file.metadata.fileType;
     if (fileType == FileType.video) {
-        const thumbnailData = await DownloadManager.thumbnailData(file);
+        const thumbnailData = await downloadManager.thumbnailData(file);
         return new Blob([thumbnailData!]);
     }
 
-    const originalFileBlob = await DownloadManager.fileBlob(file);
+    const originalFileBlob = await downloadManager.fileBlob(file);
 
     if (fileType == FileType.livePhoto) {
         const { imageFileName, imageData } = await decodeLivePhoto(

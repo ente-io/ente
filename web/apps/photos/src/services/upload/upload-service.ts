@@ -1438,6 +1438,7 @@ const uploadToBucket = async (
         encryptedFilePieces;
     try {
         let fileObjectKey: string = null;
+        let fileSize: number;
 
         const encryptedData = file.encryptedData;
         if (
@@ -1446,18 +1447,20 @@ const uploadToBucket = async (
         ) {
             // We have a stream, and it is more than multipartChunksPerPart
             // chunks long, so use a multipart upload to upload it.
-            fileObjectKey = await uploadStreamUsingMultipart(
-                localID,
-                encryptedData,
-                makeProgessTracker,
-                isCFUploadProxyDisabled,
-                abortIfCancelled,
-            );
+            ({ objectKey: fileObjectKey, fileSize } =
+                await uploadStreamUsingMultipart(
+                    localID,
+                    encryptedData,
+                    makeProgessTracker,
+                    isCFUploadProxyDisabled,
+                    abortIfCancelled,
+                ));
         } else {
             const data =
                 encryptedData instanceof Uint8Array
                     ? encryptedData
                     : await readEntireStream(encryptedData.stream);
+            fileSize = data.length;
 
             const progressTracker = makeProgessTracker(localID);
             const fileUploadURL = await uploadService.getUploadURL();
@@ -1495,10 +1498,12 @@ const uploadToBucket = async (
             file: {
                 decryptionHeader: file.decryptionHeader,
                 objectKey: fileObjectKey,
+                size: fileSize,
             },
             thumbnail: {
                 decryptionHeader: thumbnail.decryptionHeader,
                 objectKey: thumbnailObjectKey,
+                size: thumbnail.encryptedData.length,
             },
             metadata: {
                 encryptedData: metadata.encryptedDataB64,
@@ -1539,6 +1544,7 @@ async function uploadStreamUsingMultipart(
     const percentPerPart =
         RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount;
     const partEtags: PartEtag[] = [];
+    let fileSize = 0;
     for (const [
         index,
         fileUploadURL,
@@ -1546,6 +1552,7 @@ async function uploadStreamUsingMultipart(
         abortIfCancelled();
 
         const uploadChunk = await combineChunksToFormUploadPart(streamReader);
+        fileSize += uploadChunk.length;
         const progressTracker = makeProgessTracker(
             fileLocalID,
             percentPerPart,
@@ -1581,7 +1588,7 @@ async function uploadStreamUsingMultipart(
         await UploadHttpClient.completeMultipartUpload(completeURL, cBody);
     }
 
-    return multipartUploadURLs.objectKey;
+    return { objectKey: multipartUploadURLs.objectKey, fileSize };
 }
 
 async function combineChunksToFormUploadPart(
