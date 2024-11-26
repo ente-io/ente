@@ -108,7 +108,7 @@
     "CHANGE_PASSWORD": "암호 변경하기",
     "password_changed_elsewhere": "",
     "password_changed_elsewhere_message": "",
-    "GO_BACK": "뒤로 가기",
+    "go_back": "뒤로 가기",
     "recovery_key": "키 복구하기",
     "do_this_later": "나중에 저장하기",
     "save_key": "키 저장하기",

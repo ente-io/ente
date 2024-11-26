@@ -108,7 +108,7 @@
     "CHANGE_PASSWORD": "Passwort ändern",
     "password_changed_elsewhere": "Passwort anderswo geändert",
     "password_changed_elsewhere_message": "Bitte melde dich erneut auf diesem Gerät an, um dein neues Passwort zur Authentifizierung zu verwenden.",
-    "GO_BACK": "Zurück",
+    "go_back": "Zurück",
     "recovery_key": "Wiederherstellungsschlüssel",
     "do_this_later": "Auf später verschieben",
     "save_key": "Schlüssel speichern",

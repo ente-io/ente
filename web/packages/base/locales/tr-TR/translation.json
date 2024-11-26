@@ -108,7 +108,7 @@
     "CHANGE_PASSWORD": "Parolayı değiştir",
     "password_changed_elsewhere": "Parola başka bir yerde değiştirildi",
     "password_changed_elsewhere_message": "Lütfen yeni parolanı kullanarak kimlik doğrulaması yapmak için bu cihazda tekrar oturum aç.",
-    "GO_BACK": "Geri dön",
+    "go_back": "Geri dön",
     "recovery_key": "Kurtarma anahtarı",
     "do_this_later": "Sonra yap",
     "save_key": "Anahtarı kaydet",

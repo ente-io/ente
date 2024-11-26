@@ -108,7 +108,7 @@
     "CHANGE_PASSWORD": "Alterar senha",
     "password_changed_elsewhere": "Senha alterada em outro lugar",
     "password_changed_elsewhere_message": "Por favor, inicie sessão novamente neste dispositivo para usar sua nova senha para autenticar.",
-    "GO_BACK": "Voltar",
+    "go_back": "Voltar",
     "recovery_key": "Chave de recuperação",
     "do_this_later": "Fazer isso mais tarde",
     "save_key": "Salvar Chave",

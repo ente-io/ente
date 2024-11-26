@@ -108,7 +108,7 @@
     "CHANGE_PASSWORD": "Змінити пароль",
     "password_changed_elsewhere": "Пароль змінено в іншому місці",
     "password_changed_elsewhere_message": "Увійдіть ще раз на цьому пристрої, щоби використати новий пароль для автентифікації.",
-    "GO_BACK": "Повернутися",
+    "go_back": "Повернутися",
     "recovery_key": "Ключ відновлення",
     "do_this_later": "Зробити це пізніше",
     "save_key": "Зберегти ключ",

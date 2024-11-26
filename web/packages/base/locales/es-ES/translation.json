@@ -108,7 +108,7 @@
     "CHANGE_PASSWORD": "Cambiar contraseña",
     "password_changed_elsewhere": "",
     "password_changed_elsewhere_message": "",
-    "GO_BACK": "Retroceder",
+    "go_back": "Retroceder",
     "recovery_key": "Clave de recuperación",
     "do_this_later": "Hacer más tarde",
     "save_key": "Guardar Clave",

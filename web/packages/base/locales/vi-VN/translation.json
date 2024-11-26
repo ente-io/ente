@@ -108,7 +108,7 @@
     "CHANGE_PASSWORD": "Đổi mật khẩu",
     "password_changed_elsewhere": "Mật khẩu đã được thay đổi ở nơi khác",
     "password_changed_elsewhere_message": "Vui lòng đăng nhập lại trên thiết bị này để sử dụng mật khẩu mới của bạn để xác thực.",
-    "GO_BACK": "Quay lại",
+    "go_back": "Quay lại",
     "recovery_key": "Khóa khôi phục",
     "do_this_later": "Làm điều này sau",
     "save_key": "Lưu khóa",

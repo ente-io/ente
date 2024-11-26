@@ -108,7 +108,7 @@
     "CHANGE_PASSWORD": "تغيير كلمة المرور",
     "password_changed_elsewhere": "تم تغيير كلمة المرور في مكان آخر",
     "password_changed_elsewhere_message": "يرجى تسجيل الدخول مرة أخرى على هذا الجهاز لاستخدام كلمة المرور الجديدة للمصادقة.",
-    "GO_BACK": "رجوع",
+    "go_back": "رجوع",
     "recovery_key": "مفتاح الاستعادة",
     "do_this_later": "قم بهذا لاحقا",
     "save_key": "حفظ المفتاح",

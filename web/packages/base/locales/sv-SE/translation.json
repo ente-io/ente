@@ -108,7 +108,7 @@
     "CHANGE_PASSWORD": "Ändra lösenord",
     "password_changed_elsewhere": "",
     "password_changed_elsewhere_message": "",
-    "GO_BACK": "Gå tillbaka",
+    "go_back": "Gå tillbaka",
     "recovery_key": "Återställningsnyckel",
     "do_this_later": "Gör detta senare",
     "save_key": "Spara nyckel",

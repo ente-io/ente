@@ -108,7 +108,7 @@
     "CHANGE_PASSWORD": "Zmień hasło",
     "password_changed_elsewhere": "Hasło zostało zmienione gdzie indziej",
     "password_changed_elsewhere_message": "Zaloguj się ponownie na tym urządzeniu, aby użyć nowego hasła, aby się uwierzytelnić.",
-    "GO_BACK": "Cofnij się",
+    "go_back": "Cofnij się",
     "recovery_key": "Klucz odzyskiwania",
     "do_this_later": "Zrób to później",
     "save_key": "Zapisz Klucz",

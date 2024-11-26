@@ -108,7 +108,7 @@
     "CHANGE_PASSWORD": "修改密码",
     "password_changed_elsewhere": "密码已在别处更改",
     "password_changed_elsewhere_message": "请在此设备上再次登录以使用您的新密码进行身份验证。",
-    "GO_BACK": "返回",
+    "go_back": "返回",
     "recovery_key": "恢复密钥",
     "do_this_later": "稍后再做",
     "save_key": "保存密钥",

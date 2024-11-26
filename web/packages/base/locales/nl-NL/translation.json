@@ -108,7 +108,7 @@
     "CHANGE_PASSWORD": "Wachtwoord wijzigen",
     "password_changed_elsewhere": "Wachtwoord elders gewijzigd",
     "password_changed_elsewhere_message": "Log opnieuw in op dit apparaat om uw nieuwe wachtwoord te gebruiken om te verifiëren.",
-    "GO_BACK": "Ga terug",
+    "go_back": "Ga terug",
     "recovery_key": "Herstelsleutel",
     "do_this_later": "Doe dit later",
     "save_key": "Sleutel opslaan",

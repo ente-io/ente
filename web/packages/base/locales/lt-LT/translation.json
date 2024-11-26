@@ -108,7 +108,7 @@
     "CHANGE_PASSWORD": "Keisti slaptažodį",
     "password_changed_elsewhere": "Slaptažodis pakeistas kitur",
     "password_changed_elsewhere_message": "Prisijunkite iš naujo šiame įrenginyje, kad naudotumėte naują slaptažodį tapatybės nustatymui.",
-    "GO_BACK": "Eiti atgal",
+    "go_back": "Eiti atgal",
     "recovery_key": "Atkūrimo raktas",
     "do_this_later": "Daryti tai vėliau",
     "save_key": "Išsaugoti raktą",
