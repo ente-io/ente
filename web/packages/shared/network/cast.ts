@@ -22,7 +22,7 @@ class CastGateway {
         try {
             const token = getToken();
             await HTTPService.delete(
-                await apiURL("/cast/revoke-all-tokens/"),
+                await apiURL("/cast/revoke-all-tokens"),
                 undefined,
                 undefined,
                 {
@@ -64,7 +64,7 @@ class CastGateway {
     ) {
         const token = getToken();
         await HTTPService.post(
-            await apiURL("/cast/cast-data/"),
+            await apiURL("/cast/cast-data"),
             {
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-template-expression
                 deviceCode: `${code}`,
