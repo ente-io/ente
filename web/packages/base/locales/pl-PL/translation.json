@@ -561,7 +561,7 @@
     "sort_by": "Sortuj według",
     "newest_first": "Od najnowszych",
     "oldest_first": "Od najstarszych",
-    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "Ten plik nie mógł zostać podglądnięty. Kliknij tutaj, aby pobrać oryginał.",
+    "conversion_failed_notification_message": "Ten plik nie mógł zostać podglądnięty. Kliknij tutaj, aby pobrać oryginał.",
     "pin_album": "Przypnij album",
     "unpin_album": "Odepnij album",
     "DOWNLOAD_COMPLETE": "Pobieranie zakończone",

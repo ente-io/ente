@@ -561,7 +561,7 @@
     "sort_by": "Rikiuoti pagal",
     "newest_first": "Naujausią pirmiausiai",
     "oldest_first": "Seniausią pirmiausiai",
-    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "Šio failo nepavyko peržiūrėti. Spustelėkite čia, jei norite atsisiųsti originalą.",
+    "conversion_failed_notification_message": "Šio failo nepavyko peržiūrėti. Spustelėkite čia, jei norite atsisiųsti originalą.",
     "pin_album": "Prisegti albumą",
     "unpin_album": "Atsegti albumą",
     "DOWNLOAD_COMPLETE": "Atsisiuntimas baigtas",

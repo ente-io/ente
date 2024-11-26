@@ -561,7 +561,7 @@
     "sort_by": "Ordina per",
     "newest_first": "Dal più recente",
     "oldest_first": "Dal più vecchio",
-    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "Impossibile visualizzare l'anteprima di questo file. Clicca qui per scaricare l'originale.",
+    "conversion_failed_notification_message": "Impossibile visualizzare l'anteprima di questo file. Clicca qui per scaricare l'originale.",
     "pin_album": "Fissa l'album",
     "unpin_album": "Sblocca album",
     "DOWNLOAD_COMPLETE": "Download completato",

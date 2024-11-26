@@ -561,7 +561,7 @@
     "sort_by": "Raða eftir",
     "newest_first": "Nýjast fyrst",
     "oldest_first": "Elsta fyrst",
-    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "",
+    "conversion_failed_notification_message": "",
     "pin_album": "",
     "unpin_album": "",
     "DOWNLOAD_COMPLETE": "",

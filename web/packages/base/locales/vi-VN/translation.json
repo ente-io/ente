@@ -561,7 +561,7 @@
     "sort_by": "Sắp xếp theo",
     "newest_first": "Mới nhất trước",
     "oldest_first": "Cũ nhất trước",
-    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "Tệp này không thể được xem trước. Nhấp vào đây để tải xuống bản gốc.",
+    "conversion_failed_notification_message": "Tệp này không thể được xem trước. Nhấp vào đây để tải xuống bản gốc.",
     "pin_album": "Ghim album",
     "unpin_album": "Bỏ ghim album",
     "DOWNLOAD_COMPLETE": "Tải xuống hoàn tất",

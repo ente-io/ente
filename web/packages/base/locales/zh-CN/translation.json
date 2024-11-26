@@ -561,7 +561,7 @@
     "sort_by": "排序方式",
     "newest_first": "最新在前",
     "oldest_first": "最旧在前",
-    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "无法预览此文件。点击这里下载原始文件。",
+    "conversion_failed_notification_message": "无法预览此文件。点击这里下载原始文件。",
     "pin_album": "置顶相册",
     "unpin_album": "取消置顶相册",
     "DOWNLOAD_COMPLETE": "下载完成",

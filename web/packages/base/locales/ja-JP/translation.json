@@ -561,7 +561,7 @@
     "sort_by": "",
     "newest_first": "",
     "oldest_first": "",
-    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "",
+    "conversion_failed_notification_message": "",
     "pin_album": "",
     "unpin_album": "",
     "DOWNLOAD_COMPLETE": "",

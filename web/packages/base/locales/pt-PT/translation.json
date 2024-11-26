@@ -561,7 +561,7 @@
     "sort_by": "Ordenar por",
     "newest_first": "Mais recentes primeiro",
     "oldest_first": "Mais antigo primeiro",
-    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "Este arquivo não pôde ser visualizado. Clique aqui para fazer o download original.",
+    "conversion_failed_notification_message": "Este arquivo não pôde ser visualizado. Clique aqui para fazer o download original.",
     "pin_album": "Fixar álbum",
     "unpin_album": "Desafixar álbum",
     "DOWNLOAD_COMPLETE": "Download concluído",

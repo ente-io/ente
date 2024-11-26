@@ -1062,7 +1062,7 @@ const ConversionFailedNotification: React.FC<
                         variant="small"
                         sx={{ flex: 1, textAlign: "left" }}
                     >
-                        {t("CONVERSION_FAILED_NOTIFICATION_MESSAGE")}
+                        {t("conversion_failed_notification_message")}
                     </Typography>
                     <FilledIconButton onClick={handleClose}>
                         <CloseIcon />

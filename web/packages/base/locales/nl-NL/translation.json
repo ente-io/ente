@@ -561,7 +561,7 @@
     "sort_by": "Sorteren op",
     "newest_first": "Nieuwste eerst",
     "oldest_first": "Oudste eerst",
-    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "Dit bestand kan niet worden bekeken in de app, klik hier om het origineel te downloaden",
+    "conversion_failed_notification_message": "Dit bestand kan niet worden bekeken in de app, klik hier om het origineel te downloaden",
     "pin_album": "Album bovenaan vastzetten",
     "unpin_album": "Album losmaken",
     "DOWNLOAD_COMPLETE": "Download compleet",

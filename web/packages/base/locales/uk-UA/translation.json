@@ -561,7 +561,7 @@
     "sort_by": "Сортувати за",
     "newest_first": "Спочатку найновіші",
     "oldest_first": "Спочатку найстаріші",
-    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "Цей файл не можливо переглянути. Клацніть тут, щоб завантажити оригінал.",
+    "conversion_failed_notification_message": "Цей файл не можливо переглянути. Клацніть тут, щоб завантажити оригінал.",
     "pin_album": "Закріпити альбом",
     "unpin_album": "Відкріпити альбом",
     "DOWNLOAD_COMPLETE": "Завантаження завершено",
