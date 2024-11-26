@@ -236,8 +236,8 @@ const getCodeDisplay = (
     const progress = ((elapsedTime % stepDuration) / stepDuration) * 100;
 
     return {
-        currentCode: formatCode(codes[index] || ""),
-        nextCode: formatCode(codes[index + 1] || ""),
+        currentCode: formatCode(codes[index] ?? ""),
+        nextCode: formatCode(codes[index + 1] ?? ""),
         progress,
     };
 };
