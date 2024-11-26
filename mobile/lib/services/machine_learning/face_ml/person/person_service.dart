@@ -185,7 +185,15 @@ class PersonService {
     final personData = person.data;
     final clusterInfo = personData.assigned!.firstWhere(
       (element) => element.id == clusterID,
+      orElse: () => ClusterInfo(id: "noSuchClusterInRemotePerson", faces: {}),
     );
+    if (clusterInfo.id == "noSuchClusterInRemotePerson") {
+      await MLDataDB.instance.removeClusterToPerson(
+        personID: personID,
+        clusterID: clusterID,
+      );
+      return;
+    }
     personData.rejectedFaceIDs ??= [];
     personData.rejectedFaceIDs!.addAll(clusterInfo.faces);
     personData.assigned!.removeWhere((element) => element.id != clusterID);
