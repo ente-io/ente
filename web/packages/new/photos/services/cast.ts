@@ -1,7 +1,5 @@
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { z } from "zod";
 
 /**
@@ -28,27 +26,23 @@ export const publicKeyForPairingCode = async (code: string) => {
         .publicKey;
 };
 
-class CastGateway {
-    public async publishCastPayload(
-        code: string,
-        castPayload: string,
-        collectionID: number,
-        castToken: string,
-    ) {
-        const token = getToken();
-        await HTTPService.post(
-            await apiURL("/cast/cast-data"),
-            {
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-template-expression
-                deviceCode: `${code}`,
-                encPayload: castPayload,
-                collectionID: collectionID,
-                castToken: castToken,
-            },
-            undefined,
-            { "X-Auth-Token": token },
-        );
-    }
-}
-
-export default new CastGateway();
+/**
+ * Publish encrypted payload for a cast session so that the paired device can
+ * obtain the information it needs to cast a collection.
+ */
+export const publishCastPayload = async (
+    code: string,
+    castPayload: string,
+    collectionID: number,
+    castToken: string,
+) =>
+    fetch(await apiURL("/cast/cast-data"), {
+        method: "POST",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify({
+            deviceCode: code,
+            encPayload: castPayload,
+            collectionID: collectionID,
+            castToken: castToken,
+        }),
+    });

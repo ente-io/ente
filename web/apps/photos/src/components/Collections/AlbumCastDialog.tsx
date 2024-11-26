@@ -1,10 +1,11 @@
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { boxSeal } from "@/base/crypto";
+import { newID } from "@/base/id";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
-import castGateway, {
+import {
     publicKeyForPairingCode,
     revokeAllCastTokens,
 } from "@/new/photos/services/cast";
@@ -16,7 +17,6 @@ import { Button, Link, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { v4 as uuidv4 } from "uuid";
 
 interface AlbumCastDialogProps {
     /** If `true`, the dialog is shown. */
@@ -66,14 +66,14 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
         }
     };
 
-    const doCast = async (pin: string) => {
+    const doCast = async (code: string) => {
         // Find out the public key associated with the given pairing code (if
         // indeed a device has published one).
-        const publicKey = await publicKeyForPairingCode(pin);
+        const publicKey = await publicKeyForPairingCode(code);
         if (!publicKey) return false;
 
         // Generate random id.
-        const castToken = uuidv4();
+        const castToken = newID("cast_");
 
         // Publish the payload so that the other end can use it.
         const payload = JSON.stringify({
@@ -84,7 +84,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
         const encryptedPayload = await boxSeal(btoa(payload), publicKey);
 
         await castGateway.publishCastPayload(
-            pin,
+            code,
             encryptedPayload,
             collection.id,
             castToken,
