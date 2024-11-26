@@ -406,7 +406,7 @@
     "disable_file_download_message": "<p>Sei sicuro di voler disattivare il pulsante di download per i file?</p><p>I visualizzatori possono ancora fare screenshot o salvare una copia delle foto utilizzando strumenti esterni.</p>",
     "SHARED_USING": "Condiviso utilizzando",
     "SHARING_REFERRAL_CODE": "Usa il codice <strong>{{referralCode}}</strong> per ottenere 10 GB gratuiti",
-    "LIVE": "IN DIRETTA",
+    "live_photo_indicator": "IN DIRETTA",
     "disable_password": "Disabilita blocco password",
     "disable_password_message": "Sei sicuro di voler disabilitare il blocco password?",
     "password_lock": "Blocca con password",

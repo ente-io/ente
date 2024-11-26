@@ -406,7 +406,7 @@
     "disable_file_download_message": "<p>Czy na pewno chcesz wyłączyć przycisk pobierania plików?</p><p>Widzowie nadal mogą robić zrzuty ekranu lub zapisać kopię zdjęć za pomocą narzędzi zewnętrznych.</p>",
     "SHARED_USING": "Udostępnione za pomocą ",
     "SHARING_REFERRAL_CODE": "Użyj kodu <strong>{{referralCode}}</strong>, aby otrzymać 10 GB za darmo",
-    "LIVE": "NA ŻYWO",
+    "live_photo_indicator": "NA ŻYWO",
     "disable_password": "Wyłącz blokadę hasłem",
     "disable_password_message": "Czy na pewno chcesz wyłączyć blokadę hasłem?",
     "password_lock": "Blokada hasłem",

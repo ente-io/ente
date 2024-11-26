@@ -406,7 +406,7 @@
     "disable_file_download_message": "<p>Ar tikrai norite išjungti failų atsisiuntimo mygtuką?</p><p>Žiūrėtojai vis tiek gali daryti ekrano kopijas arba išsaugoti nuotraukų kopijas naudojant išorinius įrankius.</p>",
     "SHARED_USING": "Bendrinta naudojant ",
     "SHARING_REFERRAL_CODE": "Naudokite kodą <strong>{{{referralCode}}</strong>, kad gautumėte 10 GB nemokamai",
-    "LIVE": "GYVAI",
+    "live_photo_indicator": "GYVAI",
     "disable_password": "Išjungti slaptažodžio užraktą",
     "disable_password_message": "Ar tikrai norite išjungti slaptažodžio užraktą?",
     "password_lock": "Slaptažodžio užraktas",

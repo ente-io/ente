@@ -406,7 +406,7 @@
     "disable_file_download_message": "<p>Bạn có chắc chắn muốn vô hiệu hóa nút tải xuống cho các tệp không?</p><p>Người xem vẫn có thể chụp ảnh màn hình hoặc lưu bản sao của ảnh của bạn bằng các công cụ bên ngoài.</p>",
     "SHARED_USING": "Chia sẻ bằng ",
     "SHARING_REFERRAL_CODE": "Sử dụng mã <strong>{{referralCode}}</strong> để nhận 10 GB miễn phí",
-    "LIVE": "TRỰC TIẾP",
+    "live_photo_indicator": "TRỰC TIẾP",
     "disable_password": "Vô hiệu hóa khóa mật khẩu",
     "disable_password_message": "Bạn có chắc chắn muốn vô hiệu hóa khóa mật khẩu không?",
     "password_lock": "Khóa mật khẩu",

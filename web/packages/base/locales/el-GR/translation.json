@@ -406,7 +406,7 @@
     "disable_file_download_message": "",
     "SHARED_USING": "Κοινοποίηση μέσω ",
     "SHARING_REFERRAL_CODE": "Χρησιμοποιήστε τον κωδικό <strong>{{referralCode}}</strong> για να αποκτήσετε 10 GB δωρεάν",
-    "LIVE": "ΖΩΝΤΑΝΑ",
+    "live_photo_indicator": "ΖΩΝΤΑΝΑ",
     "disable_password": "Απενεργοποίηση κλειδώματος κωδικού πρόσβασης",
     "disable_password_message": "Είστε σίγουροι ότι θέλετε να απενεργοποιήσετε το κλείδωμα κωδικού πρόσβασης;",
     "password_lock": "Κλείδωμα κωδικού πρόσβασης",

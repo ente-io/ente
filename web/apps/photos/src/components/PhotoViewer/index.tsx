@@ -783,7 +783,8 @@ function PhotoViewer(props: PhotoViewerProps) {
                                 disabled={livePhotoBtnOptions.loading}
                             >
                                 <FlexWrapper gap={"4px"}>
-                                    {<AlbumOutlined />} {t("LIVE")}
+                                    {<AlbumOutlined />}{" "}
+                                    {t("live_photo_indicator")}
                                 </FlexWrapper>
                             </Button>
                         </LivePhotoBtnContainer>

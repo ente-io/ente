@@ -406,7 +406,7 @@
     "disable_file_download_message": "",
     "SHARED_USING": "",
     "SHARING_REFERRAL_CODE": "",
-    "LIVE": "",
+    "live_photo_indicator": "",
     "disable_password": "",
     "disable_password_message": "",
     "password_lock": "",

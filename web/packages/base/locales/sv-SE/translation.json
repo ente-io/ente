@@ -406,7 +406,7 @@
     "disable_file_download_message": "",
     "SHARED_USING": "",
     "SHARING_REFERRAL_CODE": "Använd koden <strong>{{referralCode}}</strong> för att få 10 GB gratis",
-    "LIVE": "",
+    "live_photo_indicator": "",
     "disable_password": "Inaktivera lösenordslås",
     "disable_password_message": "Är du säker på att du vill inaktivera lösenordslåset?",
     "password_lock": "Lösenordslås",
