@@ -7,6 +7,9 @@ If you would like to add your own custom icon, please open a pull-request with
 the relevant SVG placed within `assets/custom-icons/icons` and add the
 corresponding entry within `assets/custom-icons/_data/custom-icons.json`.
 
+The icon should ideally be a color that will display well on both light and dark
+background to work with both the light and dark theme.
+
 Please be careful to upload small and optimized icon files. If your icon file 
 is over 50KB, it is likely not optimized.
 
