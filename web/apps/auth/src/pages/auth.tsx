@@ -38,9 +38,6 @@ const Page: React.FC = () => {
     const [hasFetched, setHasFetched] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
 
-    const showSessionExpiredDialog = () =>
-        showMiniDialog(sessionExpiredDialogAttributes(logout));
-
     useEffect(() => {
         const fetchCodes = async () => {
             const masterKey = await masterKeyFromSessionIfLoggedIn();
@@ -54,13 +51,14 @@ const Page: React.FC = () => {
                 setCodes(await getAuthCodes(masterKey));
             } catch (e) {
                 log.error("Failed to fetch codes", e);
-                if (isHTTP401Error(e)) showSessionExpiredDialog();
+                if (isHTTP401Error(e))
+                    showMiniDialog(sessionExpiredDialogAttributes(logout));
             }
             setHasFetched(true);
         };
         void fetchCodes();
         showNavBar(false);
-    }, []);
+    }, [router, showNavBar, showMiniDialog, logout]);
 
     const lcSearch = searchTerm.toLowerCase();
     const filteredCodes = codes.filter(
