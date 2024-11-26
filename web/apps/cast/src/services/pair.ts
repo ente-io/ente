@@ -1,7 +1,10 @@
 import { boxSealOpen, generateKeyPair } from "@/base/crypto/libsodium";
+import { clientPackageHeader, ensureOk } from "@/base/http";
 import log from "@/base/log";
+import { apiURL } from "@/base/origins";
 import { wait } from "@/utils/promise";
 import castGateway from "@ente/shared/network/cast";
+import { z } from "zod";
 
 export interface Registration {
     /** A pairing code shown on the screen. A client can use this to connect. */
@@ -107,8 +110,7 @@ export const getCastData = async (registration: Registration) => {
 
     // The client will send us the encrypted payload using our public key that
     // we registered with museum.
-    const encryptedCastData = await castGateway.getCastData(pairingCode);
-    if (!encryptedCastData) return;
+    const encryptedCastData = await getEncryptedCastData(pairingCode);
 
     // Decrypt it using the private key of the pair and return the plaintext
     // payload, which'll be a JSON object containing the data we need to start a
@@ -122,4 +124,17 @@ export const getCastData = async (registration: Registration) => {
     // TODO:
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return JSON.parse(atob(decryptedCastData));
+};
+
+/**
+ * Fetch encrypted cast data corresponding to the given {@link code} from
+ * remote.
+ */
+const getEncryptedCastData = async (code: string) => {
+    const res = await fetch(await apiURL(`/cast/cast-data/${code}`), {
+        headers: clientPackageHeader(),
+    });
+    ensureOk(res);
+    return z.object({ encCastData: z.string() }).parse(await res.json())
+        .encCastData;
 };
