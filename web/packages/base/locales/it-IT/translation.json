@@ -578,7 +578,7 @@
     "editor": {
         "crop": "Ritaglia"
     },
-    "CONVERT": "Converti",
+    "convert": "Converti",
     "confirm_editor_close": "Sei sicuro di voler chiudere l'editor?",
     "confirm_editor_close_message": "Scarica la tua immagine modificata oppure salvane una copia su Ente per preservare le modifiche.",
     "BRIGHTNESS": "Luminosità",

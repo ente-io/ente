@@ -578,7 +578,7 @@
     "editor": {
         "crop": "Recortar"
     },
-    "CONVERT": "Converter",
+    "convert": "Converter",
     "confirm_editor_close": "Tem certeza de que deseja fechar o editor?",
     "confirm_editor_close_message": "Baixe sua imagem editada ou salve uma cópia para o ente para persistir nas alterações.",
     "BRIGHTNESS": "Brilho",

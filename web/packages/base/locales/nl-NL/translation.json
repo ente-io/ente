@@ -578,7 +578,7 @@
     "editor": {
         "crop": "Bijsnijden"
     },
-    "CONVERT": "Converteren",
+    "convert": "Converteren",
     "confirm_editor_close": "Weet u zeker dat u de editor wilt afsluiten?",
     "confirm_editor_close_message": "Download uw bewerkte afbeelding of sla een kopie op in Ente om uw wijzigingen te behouden.",
     "BRIGHTNESS": "Helderheid",

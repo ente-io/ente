@@ -578,7 +578,7 @@
     "editor": {
         "crop": ""
     },
-    "CONVERT": "",
+    "convert": "",
     "confirm_editor_close": "",
     "confirm_editor_close_message": "",
     "BRIGHTNESS": "Ljusstyrka",

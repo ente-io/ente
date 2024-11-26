@@ -578,7 +578,7 @@
     "editor": {
         "crop": "Cắt"
     },
-    "CONVERT": "Chuyển đổi",
+    "convert": "Chuyển đổi",
     "confirm_editor_close": "Bạn có chắc chắn muốn đóng trình chỉnh sửa không?",
     "confirm_editor_close_message": "Tải xuống hình ảnh đã chỉnh sửa của bạn hoặc lưu bản sao vào Ente để giữ lại các thay đổi của bạn.",
     "BRIGHTNESS": "Độ sáng",

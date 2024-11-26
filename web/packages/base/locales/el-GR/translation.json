@@ -578,7 +578,7 @@
     "editor": {
         "crop": "Περικοπή"
     },
-    "CONVERT": "Μετατροπή",
+    "convert": "Μετατροπή",
     "confirm_editor_close": "",
     "confirm_editor_close_message": "",
     "BRIGHTNESS": "Φωτεινότητα",

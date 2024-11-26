@@ -578,7 +578,7 @@
     "editor": {
         "crop": "Przytnij"
     },
-    "CONVERT": "Konwertuj",
+    "convert": "Konwertuj",
     "confirm_editor_close": "Czy na pewno chcesz zamknąć edytor?",
     "confirm_editor_close_message": "Pobierz edytowany obraz lub zapisz kopię do Ente, aby utrzymać zmiany.",
     "BRIGHTNESS": "Jasność",

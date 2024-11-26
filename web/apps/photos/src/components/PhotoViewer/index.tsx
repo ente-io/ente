@@ -944,7 +944,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                                 )}
                             {showConvertButton && (
                                 <button
-                                    title={t("CONVERT")}
+                                    title={t("convert")}
                                     className="pswp__button pswp__button--custom"
                                     onClick={handleForceConvert}
                                 >
