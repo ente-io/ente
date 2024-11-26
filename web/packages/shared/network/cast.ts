@@ -5,19 +5,6 @@ import { getToken } from "../storage/localStorage/helpers";
 import HTTPService from "./HTTPService";
 
 class CastGateway {
-    public async getCastData(code: string): Promise<string | null> {
-        let resp;
-        try {
-            resp = await HTTPService.get(
-                await apiURL(`/cast/cast-data/${code}`),
-            );
-        } catch (e) {
-            log.error("failed to getCastData", e);
-            throw e;
-        }
-        return resp.data.encCastData;
-    }
-
     public async revokeAllTokens() {
         try {
             const token = getToken();
