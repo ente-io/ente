@@ -152,8 +152,7 @@ class GalleryFileWidget extends StatelessWidget {
   void _onLongPressNoSelectionLimit(BuildContext context, EnteFile file) {
     if (selectedFiles!.files.isNotEmpty) {
       _routeToDetailPage(file, context);
-    } else if (AppLifecycleService.instance.mediaExtensionAction.action ==
-        IntentAction.main) {
+    } else {
       HapticFeedback.lightImpact();
       _toggleFileSelection(file);
     }
