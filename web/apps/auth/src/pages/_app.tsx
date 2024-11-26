@@ -27,7 +27,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AppContext } from "types/context";
 
 import "../../public/css/global.css";
@@ -81,19 +81,20 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         };
     }, []);
 
-    const showNavBar = (show: boolean) => setShowNavBar(show);
-
     const logout = useCallback(() => {
         void accountLogout().then(() => window.location.replace("/"));
     }, []);
 
-    const appContext = {
-        logout,
-        showNavBar,
-        showMiniDialog,
-        themeColor,
-        setThemeColor,
-    };
+    const appContext = useMemo(
+        () => ({
+            logout,
+            showNavBar: (show: boolean) => setShowNavBar(show),
+            showMiniDialog,
+            themeColor,
+            setThemeColor,
+        }),
+        [logout, showMiniDialog, themeColor, setThemeColor],
+    );
 
     const title = isI18nReady ? t("title_auth") : staticAppTitle;
 
