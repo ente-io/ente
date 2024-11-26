@@ -646,7 +646,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                             }}
                         >
                             <Tab label={t("crop")} value="crop" />
-                            <Tab label={t("TRANSFORM")} value="transform" />
+                            <Tab label={t("transform")} value="transform" />
                             <Tab
                                 label={t("COLORS")}
                                 value="colors"
@@ -1241,7 +1241,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                     disabled={canvasLoading}
                     startIcon={<CropSquareIcon />}
                     onClick={createCropHandler(1, 1)}
-                    label={t("SQUARE") + " (1:1)"}
+                    label={t("square") + " (1:1)"}
                 />
             </MenuItemGroup>
             <MenuItemGroup
@@ -1289,7 +1289,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                     </Fragment>
                 ))}
             </MenuItemGroup>
-            <MenuSectionTitle title={t("ROTATION")} />
+            <MenuSectionTitle title={t("rotation")} />
             <MenuItemGroup
                 style={{
                     marginBottom: "1rem",
@@ -1309,7 +1309,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                     label={t("ROTATE_RIGHT") + " 90˚"}
                 />
             </MenuItemGroup>
-            <MenuSectionTitle title={t("FLIP")} />
+            <MenuSectionTitle title={t("flip")} />
             <MenuItemGroup
                 style={{
                     marginBottom: "1rem",
@@ -1351,7 +1351,7 @@ interface ColoursMenuProps {
 const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
     <>
         <Box px={"8px"}>
-            <MenuSectionTitle title={t("BRIGHTNESS")} />
+            <MenuSectionTitle title={t("brightness")} />
             <Slider
                 min={0}
                 max={200}
@@ -1369,7 +1369,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                     props.setBrightness(value as number);
                 }}
             />
-            <MenuSectionTitle title={t("CONTRAST")} />
+            <MenuSectionTitle title={t("contrast")} />
             <Slider
                 min={0}
                 max={200}
@@ -1387,7 +1387,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                     },
                 ]}
             />
-            <MenuSectionTitle title={t("BLUR")} />
+            <MenuSectionTitle title={t("blur")} />
             <Slider
                 min={0}
                 max={10}
@@ -1399,7 +1399,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                     props.setBlur(value as number);
                 }}
             />
-            <MenuSectionTitle title={t("SATURATION")} />
+            <MenuSectionTitle title={t("saturation")} />
             <Slider
                 min={0}
                 max={200}
