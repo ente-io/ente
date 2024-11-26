@@ -1,129 +1,164 @@
-import { sharedCryptoWorker } from "@/base/crypto";
+import { decryptBoxB64, decryptMetadataJSON_New } from "@/base/crypto";
+import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { ensureString } from "@/utils/ensure";
-import { ApiError, CustomError } from "@ente/shared/error";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { getActualKey } from "@ente/shared/user";
-import { HttpStatusCode } from "axios";
 import { codeFromURIString, type Code } from "services/code";
+import { z } from "zod";
 
-export const getAuthCodes = async (): Promise<Code[]> => {
-    const masterKey = await getActualKey();
-    try {
-        const authKeyData = await getAuthKey();
-        const cryptoWorker = await sharedCryptoWorker();
-        const authenticatorKey = await cryptoWorker.decryptB64(
-            authKeyData.encryptedKey,
-            authKeyData.header,
-            masterKey,
-        );
-        // always fetch all data from server for now
-        const authEntity: AuthEntity[] = await getDiff(0);
-        const authCodes = await Promise.all(
-            authEntity
-                .filter((f) => !f.isDeleted)
-                .map(async (entity) => {
-                    if (!entity.id) return undefined;
-                    if (!entity.encryptedData) return undefined;
-                    if (!entity.header) return undefined;
-                    try {
-                        const decryptedCode =
-                            await cryptoWorker.decryptMetadataJSON({
-                                encryptedDataB64: entity.encryptedData,
-                                decryptionHeaderB64: entity.header,
-                                keyB64: authenticatorKey,
-                            });
-                        return codeFromURIString(
-                            entity.id,
-                            ensureString(decryptedCode),
-                        );
-                    } catch (e) {
-                        log.error(`Failed to parse codeID ${entity.id}`, e);
-                        return undefined;
-                    }
-                }),
-        );
-        const filteredAuthCodes = authCodes.filter((f) => f !== undefined);
-        filteredAuthCodes.sort((a, b) => {
-            if (a.issuer && b.issuer) {
-                return a.issuer.localeCompare(b.issuer);
-            }
-            if (a.issuer) {
-                return -1;
-            }
-            if (b.issuer) {
-                return 1;
-            }
-            return 0;
-        });
-        return filteredAuthCodes;
-    } catch (e) {
-        if (e instanceof Error && e.message != CustomError.AUTH_KEY_NOT_FOUND) {
-            log.error("get authenticator entities failed", e);
-        }
-        throw e;
+export const getAuthCodes = async (masterKey: Uint8Array): Promise<Code[]> => {
+    const authenticatorEntityKey = await getAuthenticatorEntityKey();
+    if (!authenticatorEntityKey) {
+        // The user might not have stored any codes yet from the mobile app.
+        return [];
     }
+
+    const authenticatorKey = await decryptAuthenticatorKey(
+        authenticatorEntityKey,
+        masterKey,
+    );
+    const authEntities = await authenticatorEntityDiff(authenticatorKey);
+    const authCodes = authEntities.map((entity) => {
+        try {
+            return codeFromURIString(entity.id, ensureString(entity.data));
+        } catch (e) {
+            log.error(`Failed to parse codeID ${entity.id}`, e);
+            return undefined;
+        }
+    });
+
+    const filteredAuthCodes = authCodes.filter((f) => f !== undefined);
+    filteredAuthCodes.sort((a, b) => {
+        if (a.issuer && b.issuer) {
+            return a.issuer.localeCompare(b.issuer);
+        }
+        if (a.issuer) {
+            return -1;
+        }
+        if (b.issuer) {
+            return 1;
+        }
+        return 0;
+    });
+    return filteredAuthCodes;
 };
 
-interface AuthEntity {
+/**
+ * Authenticator entities obtained from remote.
+ */
+interface AuthenticatorEntity {
     id: string;
-    encryptedData: string | null;
-    header: string | null;
-    isDeleted: boolean;
-    createdAt: number;
-    updatedAt: number;
+    data: unknown;
 }
 
-interface AuthKey {
-    encryptedKey: string;
-    header: string;
-}
+/**
+ * Zod schema for a item in the user entity diff.
+ */
+const RemoteAuthenticatorEntityChange = z.object({
+    id: z.string(),
+    /**
+     * Base64 string containing the encrypted contents of the entity.
+     *
+     * Will be `null` when isDeleted is true.
+     */
+    encryptedData: z.string().nullable(),
+    /**
+     * Base64 string containing the decryption header.
+     *
+     * Will be `null` when isDeleted is true.
+     */
+    header: z.string().nullable(),
+    isDeleted: z.boolean(),
+});
 
-export const getAuthKey = async (): Promise<AuthKey> => {
-    try {
-        const resp = await HTTPService.get(
-            await apiURL("/authenticator/key"),
-            {},
-            {
-                "X-Auth-Token": getToken(),
-            },
+/**
+ * Fetch all the authenticator entities for the user.
+ *
+ * @param authenticatorKey The (base64 encoded) key that should be used for
+ * decrypting the authenticator entities received from remote.
+ */
+export const authenticatorEntityDiff = async (
+    authenticatorKey: string,
+): Promise<AuthenticatorEntity[]> => {
+    const decrypt = (encryptedData: string, decryptionHeader: string) =>
+        decryptMetadataJSON_New(
+            { encryptedData, decryptionHeader },
+            authenticatorKey,
         );
-        return resp.data;
-    } catch (e) {
-        if (
-            e instanceof ApiError &&
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-            e.httpStatusCode == HttpStatusCode.NotFound
-        ) {
-            throw Error(CustomError.AUTH_KEY_NOT_FOUND);
-        } else {
-            log.error("Get key failed", e);
-            throw e;
-        }
+
+    // Always fetch all data from server for now.
+    const params = new URLSearchParams({
+        sinceTime: "0",
+        limit: "2500",
+    });
+    const url = await apiURL("/authenticator/entity/diff");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    const diff = z
+        .object({ diff: z.array(RemoteAuthenticatorEntityChange) })
+        .parse(await res.json()).diff;
+    return Promise.all(
+        diff
+            .filter((entity) => !entity.isDeleted)
+            .map(async ({ id, encryptedData, header }) => ({
+                id,
+                data: await decrypt(encryptedData!, header!),
+            })),
+    );
+};
+
+export const AuthenticatorEntityKey = z.object({
+    /**
+     * The authenticator entity key (base 64 string), encrypted with the user's
+     * master key.
+     */
+    encryptedKey: z.string(),
+    /**
+     * Base64 encoded nonce used during encryption of the authenticator key.
+     */
+    header: z.string(),
+});
+
+export type AuthenticatorEntityKey = z.infer<typeof AuthenticatorEntityKey>;
+
+/**
+ * Fetch the encryption key for the authenticator entities from remote.
+ *
+ * This is a special case of an entity key for use with "authenticator"
+ * entities. See: [Note: User entity keys].
+ *
+ * @returns the authenticator key, or undefined if there is no authenticator key
+ * yet created on remote for the user.
+ */
+export const getAuthenticatorEntityKey = async (): Promise<
+    AuthenticatorEntityKey | undefined
+> => {
+    const res = await fetch(await apiURL("/authenticator/key"), {
+        headers: await authenticatedRequestHeaders(),
+    });
+    if (!res.ok) {
+        // Remote says HTTP 404 Not Found if there is no key yet for the user.
+        if (res.status == 404) return undefined;
+        throw new HTTPError(res);
+    } else {
+        return AuthenticatorEntityKey.parse(await res.json());
     }
 };
 
-// return a promise which resolves to list of AuthEnitity
-export const getDiff = async (
-    sinceTime: number,
-    limit = 2500,
-): Promise<AuthEntity[]> => {
-    try {
-        const resp = await HTTPService.get(
-            await apiURL("/authenticator/entity/diff"),
-            {
-                sinceTime,
-                limit,
-            },
-            {
-                "X-Auth-Token": getToken(),
-            },
-        );
-        return resp.data.diff;
-    } catch (e) {
-        log.error("Get diff failed", e);
-        throw e;
-    }
-};
+/**
+ * Decrypt an encrypted authenticator key using the user's master key.
+ */
+const decryptAuthenticatorKey = async (
+    remote: AuthenticatorEntityKey,
+    masterKey: Uint8Array,
+) =>
+    decryptBoxB64(
+        {
+            encryptedData: remote.encryptedKey,
+            // Remote calls it the header, but it really is the nonce.
+            nonce: remote.header,
+        },
+        masterKey,
+    );

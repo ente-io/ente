@@ -137,6 +137,20 @@ class Collection {
     return (owner?.id ?? 0) == userID;
   }
 
+  bool isDownloadEnabledForPublicLink() {
+    if (publicURLs == null || publicURLs!.isEmpty) {
+      return false;
+    }
+    return publicURLs?.first?.enableDownload ?? true;
+  }
+
+  bool isCollectEnabledForPublicLink() {
+    if (publicURLs == null || publicURLs!.isEmpty) {
+      return false;
+    }
+    return publicURLs?.first?.enableCollect ?? false;
+  }
+
   CollectionParticipantRole getRole(int userID) {
     if (isOwner(userID)) {
       return CollectionParticipantRole.owner;

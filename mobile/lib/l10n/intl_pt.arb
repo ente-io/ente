@@ -1505,5 +1505,13 @@
   "changeLogDiscoverTitle": "Descobrir",
   "changeLogDiscoverContent": "Procurando por fotos dos seus cartões de identidade, notas, ou até memes? Vá à aba de busca e confira o Descobrir. Baseado na busca semântica, é um local para encontrar fotos importantes para você.\\nApenas disponível se a Aprendizagem automática estiver ativa.",
   "selectCoverPhoto": "Selecionar foto da capa",
-  "newLocation": "Nova localização"
+  "newLocation": "Nova localização",
+  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
+  "openFile": "Open file",
+  "backupFile": "Backup file",
+  "openAlbumInBrowser": "Open album in browser",
+  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
+  "allow": "Allow",
+  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
+  "seePublicAlbumLinksInApp": "See public album links in app"
 }

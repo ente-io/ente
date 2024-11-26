@@ -167,10 +167,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "albums": MessageLookupByLibrary.simpleMessage("Albumai"),
         "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
             "Visi šio asmens grupavimai bus iš naujo nustatyti, o jūs neteksite visų šiam asmeniui pateiktų pasiūlymų"),
+        "allow": MessageLookupByLibrary.simpleMessage("Allow"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Leiskite nuorodą turintiems asmenims taip pat pridėti nuotraukų į bendrinamą albumą."),
         "allowAddingPhotos":
             MessageLookupByLibrary.simpleMessage("Leisti pridėti nuotraukų"),
+        "allowAppToOpenSharedAlbumLinks": MessageLookupByLibrary.simpleMessage(
+            "Allow app to open shared album links"),
         "allowDownloads":
             MessageLookupByLibrary.simpleMessage("Leisti atsisiuntimus"),
         "allowPeopleToAddPhotos": MessageLookupByLibrary.simpleMessage(
@@ -233,6 +236,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "autoPairDesc": MessageLookupByLibrary.simpleMessage(
             "Automatinis susiejimas veikia tik su įrenginiais, kurie palaiko „Chromecast“."),
         "available": MessageLookupByLibrary.simpleMessage("Prieinama"),
+        "backupFile": MessageLookupByLibrary.simpleMessage("Backup file"),
         "birthday": MessageLookupByLibrary.simpleMessage("Gimtadienis"),
         "blog": MessageLookupByLibrary.simpleMessage("Tinklaraštis"),
         "cachedData":
@@ -765,6 +769,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Saugykloje <branding>ente</branding>"),
         "onlyThem": MessageLookupByLibrary.simpleMessage("Tik jiems"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
+        "openAlbumInBrowser":
+            MessageLookupByLibrary.simpleMessage("Open album in browser"),
+        "openAlbumInBrowserTitle": MessageLookupByLibrary.simpleMessage(
+            "Please use the web app to add photos to this album"),
+        "openFile": MessageLookupByLibrary.simpleMessage("Open file"),
         "optionalAsShortAsYouLike": MessageLookupByLibrary.simpleMessage(
             "Nebūtina, trumpai, kaip jums patinka..."),
         "orMergeWithExistingPerson":
@@ -952,6 +961,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
             "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas"),
         "searchResultCount": m55,
+        "seePublicAlbumLinksInApp": MessageLookupByLibrary.simpleMessage(
+            "See public album links in app"),
         "selectALocation":
             MessageLookupByLibrary.simpleMessage("Pasirinkite vietovę"),
         "selectALocationFirst": MessageLookupByLibrary.simpleMessage(
@@ -1075,6 +1086,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "terms": MessageLookupByLibrary.simpleMessage("Sąlygos"),
         "termsOfServicesTitle": MessageLookupByLibrary.simpleMessage("Sąlygos"),
         "thankYou": MessageLookupByLibrary.simpleMessage("Dėkojame"),
+        "theLinkYouAreTryingToAccessHasExpired":
+            MessageLookupByLibrary.simpleMessage(
+                "The link you are trying to access has expired."),
         "theme": MessageLookupByLibrary.simpleMessage("Tema"),
         "thisCanBeUsedToRecoverYourAccountIfYou":
             MessageLookupByLibrary.simpleMessage(

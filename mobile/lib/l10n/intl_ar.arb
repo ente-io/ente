@@ -24,5 +24,13 @@
   "verifyEmail": "التحقق من البريد الإلكتروني",
   "toResetVerifyEmail": "لإعادة تعيين كلمة المرور، يرجى التحقق من بريدك الإلكتروني أولاً.",
   "ackPasswordLostWarning": "أُدركُ أنّني فقدتُ كلمة مروري، فقد أفقد بياناتي لأن بياناتي <underline>مشفرة تشفيرًا تامًّا من النهاية إلى النهاية</underline>.",
-  "faceNotClusteredYet": "Face not clustered yet, please come back later"
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
+  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
+  "openFile": "Open file",
+  "backupFile": "Backup file",
+  "openAlbumInBrowser": "Open album in browser",
+  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
+  "allow": "Allow",
+  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
+  "seePublicAlbumLinksInApp": "See public album links in app"
 }

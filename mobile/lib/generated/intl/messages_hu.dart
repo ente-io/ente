@@ -24,8 +24,12 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Köszöntjük ismét!"),
+        "allow": MessageLookupByLibrary.simpleMessage("Allow"),
+        "allowAppToOpenSharedAlbumLinks": MessageLookupByLibrary.simpleMessage(
+            "Allow app to open shared album links"),
         "askDeleteReason":
             MessageLookupByLibrary.simpleMessage("Miért törli a fiókját?"),
+        "backupFile": MessageLookupByLibrary.simpleMessage("Backup file"),
         "cancel": MessageLookupByLibrary.simpleMessage("Mégse"),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Fiók törlése"),
         "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
@@ -38,6 +42,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("Visszajelzés"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Érvénytelen e-mail cím"),
+        "openAlbumInBrowser":
+            MessageLookupByLibrary.simpleMessage("Open album in browser"),
+        "openAlbumInBrowserTitle": MessageLookupByLibrary.simpleMessage(
+            "Please use the web app to add photos to this album"),
+        "openFile": MessageLookupByLibrary.simpleMessage("Open file"),
+        "seePublicAlbumLinksInApp": MessageLookupByLibrary.simpleMessage(
+            "See public album links in app"),
+        "theLinkYouAreTryingToAccessHasExpired":
+            MessageLookupByLibrary.simpleMessage(
+                "The link you are trying to access has expired."),
         "verify": MessageLookupByLibrary.simpleMessage("Hitelesítés")
       };
 }
