@@ -412,7 +412,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _intentDataStreamSubscription =
         ReceiveSharingIntent.instance.getMediaStream().listen(
       (List<SharedMediaFile> value) {
-        if (value[0].path.contains("albums.ente.sh")) {
+        if (value[0].path.contains("albums.ente.io")) {
           final uri = Uri.parse(value[0].path);
           _handlePublicAlbumLink(uri);
           return;
@@ -475,7 +475,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         .getInitialMedia()
         .then((List<SharedMediaFile> value) {
       if (mounted) {
-        if (value[0].path.contains("albums.ente.sh")) {
+        if (value[0].path.contains("albums.ente.io")) {
           final uri = Uri.parse(value[0].path);
           _handlePublicAlbumLink(uri);
           return;
@@ -508,7 +508,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     try {
       final initialUri = await getInitialUri();
       if (initialUri != null) {
-        if (initialUri.toString().contains("albums.ente.sh")) {
+        if (initialUri.toString().contains("albums.ente.io")) {
           await _handlePublicAlbumLink(initialUri);
         } else {
           _logger.info(
@@ -527,7 +527,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _publicAlbumLinkSubscription = uriLinkStream.listen(
       (Uri? uri) {
         if (uri != null) {
-          if (uri.toString().contains("albums.ente.sh")) {
+          if (uri.toString().contains("albums.ente.io")) {
             _handlePublicAlbumLink(uri);
           } else {
             _logger.info(
