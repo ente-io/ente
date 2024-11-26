@@ -172,7 +172,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
-            <Titlebar onClose={handleCloseInfo} title={t("INFO")} backIsClose />
+            <Titlebar onClose={handleCloseInfo} title={t("info")} backIsClose />
             <Stack pt={1} pb={3} spacing={"20px"}>
                 <RenderCaption
                     {...{
@@ -258,7 +258,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 )}
                 <InfoItem
                     icon={<TextSnippetOutlinedIcon />}
-                    title={t("DETAILS")}
+                    title={t("details")}
                     caption={
                         !exif ? (
                             <ActivityIndicator size={12} />

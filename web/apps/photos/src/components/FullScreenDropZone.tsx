@@ -89,8 +89,8 @@ export default function FullScreenDropZone(props: Props) {
                         <CloseIcon />
                     </CloseButtonWrapper>
                     {appContext.watchFolderView
-                        ? t("WATCH_FOLDER_DROPZONE_MESSAGE")
-                        : t("UPLOAD_DROPZONE_MESSAGE")}
+                        ? t("watch_folder_dropzone_hint")
+                        : t("upload_dropzone_hint")}
                 </Overlay>
             )}
             {props.children}

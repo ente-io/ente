@@ -14,6 +14,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/date_input.dart";
@@ -41,7 +42,9 @@ class SaveOrEditPerson extends StatefulWidget {
     this.person,
     this.isEditing = false,
   }) : assert(
-            !isEditing || person != null, 'Person cannot be null when editing',);
+          !isEditing || person != null,
+          'Person cannot be null when editing',
+        );
 
   @override
   State<SaveOrEditPerson> createState() => _SaveOrEditPersonState();
@@ -55,12 +58,14 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   late final Logger _logger = Logger("_SavePersonState");
   Timer? _debounce;
   List<(PersonEntity, EnteFile)> _cachedPersons = [];
+  PersonEntity? person;
 
   @override
   void initState() {
     super.initState();
     _inputName = widget.person?.data.name ?? "";
     _selectedDate = widget.person?.data.birthDate;
+    person = widget.person;
   }
 
   @override
@@ -96,9 +101,9 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                 child: Column(
                   children: [
                     const SizedBox(height: 48),
-                    if (widget.person != null)
+                    if (person != null)
                       FutureBuilder<(String, EnteFile)>(
-                        future: _getRecentFileWithClusterID(widget.person!),
+                        future: _getRecentFileWithClusterID(person!),
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
                             final String personClusterID = snapshot.data!.$1;
@@ -118,14 +123,14 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                                         ? PersonFaceWidget(
                                             personFile,
                                             clusterID: personClusterID,
-                                            personId: widget.person!.remoteID,
+                                            personId: person!.remoteID,
                                           )
                                         : const NoThumbnailWidget(
                                             addBorder: false,
                                           ),
                                   ),
                                 ),
-                                if (widget.person != null)
+                                if (person != null)
                                   Positioned(
                                     right: 0,
                                     bottom: 0,
@@ -147,12 +152,16 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                                         iconSize:
                                             16, // specify the size of the icon
                                         onPressed: () async {
-                                          await showPersonAvatarPhotoSheet(
+                                          final result =
+                                              await showPersonAvatarPhotoSheet(
                                             context,
-                                            widget.person!,
+                                            person!,
                                           );
-                                          // if (person != null) {
-                                          Navigator.pop(context);
+                                          if (result != null) {
+                                            setState(() {
+                                              person = result;
+                                            });
+                                          }
                                         },
                                       ),
                                     ),
@@ -164,7 +173,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                           }
                         },
                       ),
-                    if (widget.person == null)
+                    if (person == null)
                       SizedBox(
                         height: 110,
                         width: 110,
@@ -263,7 +272,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                     if (widget.isEditing)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12.0, top: 24.0),
-                        child: PersonClustersWidget(widget.person!),
+                        child: PersonClustersWidget(person!),
                       ),
                   ],
                 ),
@@ -411,8 +420,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   }
 
   bool get changed => widget.isEditing
-      ? (_inputName.trim() != widget.person!.data.name ||
-          _selectedDate != widget.person!.data.birthDate)
+      ? (_inputName.trim() != person!.data.name ||
+          _selectedDate != person!.data.birthDate)
       : _inputName.trim().isNotEmpty;
 
   Future<void> updatePerson(BuildContext context) async {
@@ -420,7 +429,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
       final String name = _inputName.trim();
       final String? birthDate = _selectedDate;
       final personEntity = await PersonService.instance.updateAttributes(
-        widget.person!.remoteID,
+        person!.remoteID,
         name: name,
         birthDate: birthDate,
       );
@@ -459,18 +468,36 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   }
 
   Future<(String, EnteFile)> _getRecentFileWithClusterID(
-      PersonEntity person,) async {
+    PersonEntity person,
+  ) async {
     final clustersToFiles =
         await SearchService.instance.getClusterFilesForPersonID(
       person.remoteID,
     );
-    final files = clustersToFiles.values.expand((e) => e).toList();
-    if (files.isEmpty) {
+    int? avatarFileID;
+    if (person.data.hasAvatar()) {
+      avatarFileID = tryGetFileIdFromFaceId(person.data.avatarFaceID!);
+    }
+    EnteFile? resultFile;
+    // iterate over all clusters and get the first file
+    for (final clusterFiles in clustersToFiles.values) {
+      for (final file in clusterFiles) {
+        if (avatarFileID != null && file.uploadedFileID! == avatarFileID) {
+          resultFile = file;
+          break;
+        }
+        resultFile ??= file;
+        if (resultFile.creationTime! < file.creationTime!) {
+          resultFile = file;
+        }
+      }
+    }
+    if (resultFile == null) {
       debugPrint(
         "Person ${kDebugMode ? person.data.name : person.remoteID} has no files",
       );
       return ("", EnteFile());
     }
-    return (person.remoteID, files.first);
+    return (person.remoteID, resultFile);
   }
 }

@@ -20,87 +20,67 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'no';
 
-  static String m18(count) =>
+  static String m12(count) =>
       "${Intl.plural(count, zero: 'Ingen deltakere', one: '1 deltaker', other: '${count} deltakere')}";
 
-  static String m22(user) =>
+  static String m16(user) =>
       "${user} vil ikke kunne legge til flere bilder til dette albumet\n\nDe vil fortsatt kunne fjerne eksisterende bilder lagt til av dem";
 
-  static String m28(count) =>
+  static String m22(count) =>
       "${Intl.plural(count, one: 'Slett ${count} element', other: 'Slett ${count} elementer')}";
 
-  static String m30(albumName) =>
+  static String m24(albumName) =>
       "Dette fjerner den offentlige lenken for tilgang til \"${albumName}\".";
 
-  static String m31(supportEmail) =>
+  static String m25(supportEmail) =>
       "Vennligst send en e-post til ${supportEmail} fra din registrerte e-postadresse";
 
-  static String m33(count, formattedSize) =>
+  static String m27(count, formattedSize) =>
       "${count} filer, ${formattedSize} hver";
 
-  static String m45(count) =>
+  static String m39(count) =>
       "${Intl.plural(count, one: '${count} element', other: '${count} elementer')}";
 
-  static String m46(expiryTime) => "Lenken utløper på ${expiryTime}";
+  static String m40(expiryTime) => "Lenken utløper på ${expiryTime}";
 
-  static String m9(count, formattedCount) =>
+  static String m3(count, formattedCount) =>
       "${Intl.plural(count, zero: 'ingen minner', one: '${formattedCount} minne', other: '${formattedCount} minner')}";
 
-  static String m0(personName) => "No suggestions for ${personName}";
-
-  static String m6(passwordStrengthValue) =>
+  static String m0(passwordStrengthValue) =>
       "Passordstyrke: ${passwordStrengthValue}";
 
-  static String m1(count) => "${count} photos";
+  static String m4(count) => "${count} valgt";
 
-  static String m2(snapshotLenght, searchLenght) =>
-      "Sections length mismatch: ${snapshotLenght} != ${searchLenght}";
+  static String m57(count, yourCount) => "${count} valgt (${yourCount} dine)";
 
-  static String m10(count) => "${count} valgt";
-
-  static String m61(count, yourCount) => "${count} valgt (${yourCount} dine)";
-
-  static String m62(verificationID) =>
+  static String m58(verificationID) =>
       "Her er min verifiserings-ID: ${verificationID} for ente.io.";
 
-  static String m11(verificationID) =>
+  static String m5(verificationID) =>
       "Hei, kan du bekrefte at dette er din ente.io verifiserings-ID: ${verificationID}";
 
-  static String m64(numberOfPeople) =>
+  static String m60(numberOfPeople) =>
       "${Intl.plural(numberOfPeople, zero: 'Del med bestemte personer', one: 'Delt med 1 person', other: 'Delt med ${numberOfPeople} personer')}";
 
-  static String m3(ignoreReason) =>
-      "Tap to upload, upload is currently ignored due to ${ignoreReason}";
+  static String m71(email) => "Dette er ${email} sin verifiserings-ID";
 
-  static String m74(email) => "Dette er ${email} sin verifiserings-ID";
+  static String m77(email) => "Verifiser ${email}";
 
-  static String m4(galleryType) =>
-      "Type of gallery ${galleryType} is not supported for rename";
-
-  static String m5(ignoreReason) => "Upload is ignored due to ${ignoreReason}";
-
-  static String m78(email) => "Verifiser ${email}";
-
-  static String m8(email) =>
+  static String m2(email) =>
       "Vi har sendt en e-post til <green>${email}</green>";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "accountIsAlreadyConfigured": MessageLookupByLibrary.simpleMessage(
-            "Account is already configured."),
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Velkommen tilbake!"),
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
             "Jeg forstår at dersom jeg mister passordet mitt, kan jeg miste dataen min, siden daten er <underline>ende-til-ende-kryptert</underline>."),
         "activeSessions": MessageLookupByLibrary.simpleMessage("Aktive økter"),
-        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addANewEmail":
             MessageLookupByLibrary.simpleMessage("Legg til ny e-post"),
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("Legg til samarbeidspartner"),
-        "addFiles": MessageLookupByLibrary.simpleMessage("Add Files"),
         "addMore": MessageLookupByLibrary.simpleMessage("Legg til flere"),
-        "addNew": MessageLookupByLibrary.simpleMessage("Add new"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Legg til seer"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Lagt til som"),
         "advanced": MessageLookupByLibrary.simpleMessage("Avansert"),
@@ -111,7 +91,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "after1Week": MessageLookupByLibrary.simpleMessage("Etter 1 uke"),
         "after1Year": MessageLookupByLibrary.simpleMessage("Etter 1 år"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("Eier"),
-        "albumParticipantsCount": m18,
+        "albumParticipantsCount": m12,
         "albumUpdated": MessageLookupByLibrary.simpleMessage("Album oppdatert"),
         "albums": MessageLookupByLibrary.simpleMessage("Album"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
@@ -128,23 +108,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "authToViewYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Vennligst autentiser deg for å se gjennopprettingsnøkkelen din"),
         "cancel": MessageLookupByLibrary.simpleMessage("Avbryt"),
-        "cannotAddMorePhotosAfterBecomingViewer": m22,
-        "castAlbum": MessageLookupByLibrary.simpleMessage("Cast album"),
+        "cannotAddMorePhotosAfterBecomingViewer": m16,
         "changeEmail":
             MessageLookupByLibrary.simpleMessage("Endre e-postadresse"),
-        "changeLogBackupStatusContent": MessageLookupByLibrary.simpleMessage(
-            "We\\\'ve added a log of all the files that have been uploaded to Ente, including failures and queued."),
-        "changeLogBackupStatusTitle":
-            MessageLookupByLibrary.simpleMessage("Backup Status"),
-        "changeLogDiscoverContent": MessageLookupByLibrary.simpleMessage(
-            "Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\\\'s a place to find photos that might be important for you.\\n\\nOnly available if you have enabled Machine Learning."),
-        "changeLogDiscoverTitle":
-            MessageLookupByLibrary.simpleMessage("Discover"),
-        "changeLogMagicSearchImprovementContent":
-            MessageLookupByLibrary.simpleMessage(
-                "We have improved magic search to become much faster, so you don\\\'t have to wait to find what you\\\'re looking for."),
-        "changeLogMagicSearchImprovementTitle":
-            MessageLookupByLibrary.simpleMessage("Magic Search Improvement"),
         "changePasswordTitle":
             MessageLookupByLibrary.simpleMessage("Bytt passord"),
         "changePermissions":
@@ -185,8 +151,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Opprett ny konto"),
         "createPublicLink":
             MessageLookupByLibrary.simpleMessage("Opprett offentlig lenke"),
-        "currentlyRunning":
-            MessageLookupByLibrary.simpleMessage("currently running"),
         "custom": MessageLookupByLibrary.simpleMessage("Egendefinert"),
         "decrypting": MessageLookupByLibrary.simpleMessage("Dekrypterer..."),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Slett konto"),
@@ -200,7 +164,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Slett fra begge"),
         "deleteFromDevice":
             MessageLookupByLibrary.simpleMessage("Slett fra enhet"),
-        "deleteItemCount": m28,
+        "deleteItemCount": m22,
         "deletePhotos": MessageLookupByLibrary.simpleMessage("Slett bilder"),
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
             "Det mangler en hovedfunksjon jeg trenger"),
@@ -216,13 +180,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Seere kan fremdeles ta skjermbilder eller lagre en kopi av bildene dine ved bruk av eksterne verktøy"),
         "disableDownloadWarningTitle":
             MessageLookupByLibrary.simpleMessage("Vær oppmerksom på"),
-        "disableLinkMessage": m30,
+        "disableLinkMessage": m24,
         "doThisLater":
             MessageLookupByLibrary.simpleMessage("Gjør dette senere"),
         "done": MessageLookupByLibrary.simpleMessage("Ferdig"),
-        "dropSupportEmail": m31,
-        "duplicateItemsGroup": m33,
-        "edit": MessageLookupByLibrary.simpleMessage("Edit"),
+        "dropSupportEmail": m25,
+        "duplicateItemsGroup": m27,
         "email": MessageLookupByLibrary.simpleMessage("E-post"),
         "encryption": MessageLookupByLibrary.simpleMessage("Kryptering"),
         "encryptionKeys":
@@ -251,24 +214,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Angi passordet ditt"),
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Skriv inn din gjenopprettingsnøkkel"),
-        "error": MessageLookupByLibrary.simpleMessage("Error"),
         "expiredLinkInfo": MessageLookupByLibrary.simpleMessage(
             "Denne lenken er utløpt. Vennligst velg en ny utløpstid eller deaktiver lenkeutløp."),
-        "failedToFetchActiveSessions": MessageLookupByLibrary.simpleMessage(
-            "Failed to fetch active sessions"),
         "failedToLoadAlbums":
             MessageLookupByLibrary.simpleMessage("Kunne ikke laste inn album"),
-        "failedToPlayVideo":
-            MessageLookupByLibrary.simpleMessage("Failed to play video"),
-        "failedToRefreshStripeSubscription":
-            MessageLookupByLibrary.simpleMessage(
-                "Failed to refresh subscription"),
         "familyPlans":
             MessageLookupByLibrary.simpleMessage("Familieabonnementer"),
         "feedback": MessageLookupByLibrary.simpleMessage("Tilbakemelding"),
-        "file": MessageLookupByLibrary.simpleMessage("File"),
-        "fileNotUploadedYet":
-            MessageLookupByLibrary.simpleMessage("File not uploaded yet"),
         "forgotPassword": MessageLookupByLibrary.simpleMessage("Glemt passord"),
         "general": MessageLookupByLibrary.simpleMessage("Generelt"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
@@ -278,9 +230,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Hvordan det fungerer"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
             "Vennligst be dem om å trykke og holde inne på e-postadressen sin på innstillingsskjermen, og bekreft at ID-ene på begge enhetene er like."),
-        "ignored": MessageLookupByLibrary.simpleMessage("ignored"),
-        "imageNotAnalyzed":
-            MessageLookupByLibrary.simpleMessage("Image not analyzed"),
         "importing": MessageLookupByLibrary.simpleMessage("Importerer...."),
         "incorrectPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Feil passord"),
@@ -290,21 +239,20 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Feil gjenopprettingsnøkkel"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Indekserte elementer"),
-        "info": MessageLookupByLibrary.simpleMessage("Info"),
         "insecureDevice": MessageLookupByLibrary.simpleMessage("Usikker enhet"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Ugyldig e-postadresse"),
         "invalidKey": MessageLookupByLibrary.simpleMessage("Ugyldig nøkkel"),
         "invalidRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Gjenopprettingsnøkkelen du har skrevet inn er ikke gyldig. Kontroller at den inneholder 24 ord og kontroller stavemåten av hvert ord.\n\nHvis du har angitt en eldre gjenopprettingskode, må du kontrollere at den er 64 tegn lang, og kontrollere hvert av dem."),
-        "itemCount": m45,
+        "itemCount": m39,
         "keepPhotos": MessageLookupByLibrary.simpleMessage("Behold Bilder"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Vær vennlig og hjelp oss med denne informasjonen"),
         "linkDeviceLimit": MessageLookupByLibrary.simpleMessage("Enhetsgrense"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Aktivert"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Utløpt"),
-        "linkExpiresOn": m46,
+        "linkExpiresOn": m40,
         "linkExpiry": MessageLookupByLibrary.simpleMessage("Lenkeutløp"),
         "linkHasExpired":
             MessageLookupByLibrary.simpleMessage("Lenken har utløpt"),
@@ -322,29 +270,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "manageLink": MessageLookupByLibrary.simpleMessage("Administrer lenke"),
         "manageParticipants":
             MessageLookupByLibrary.simpleMessage("Administrer"),
-        "memoryCount": m9,
+        "memoryCount": m3,
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderat"),
-        "month": MessageLookupByLibrary.simpleMessage("month"),
-        "monthly": MessageLookupByLibrary.simpleMessage("Monthly"),
         "movedToTrash":
             MessageLookupByLibrary.simpleMessage("Flyttet til papirkurven"),
         "never": MessageLookupByLibrary.simpleMessage("Aldri"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nytt album"),
-        "newLocation": MessageLookupByLibrary.simpleMessage("New location"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Ingen"),
-        "noFacesFound": MessageLookupByLibrary.simpleMessage("No faces found"),
-        "noInternetConnection":
-            MessageLookupByLibrary.simpleMessage("No internet connection"),
         "noRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Ingen gjenopprettingsnøkkel?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "Grunnet vår type ente-til-ende-krypteringsprotokoll kan ikke dine data dekrypteres uten passordet ditt eller gjenopprettingsnøkkelen din"),
-        "noResultsFound":
-            MessageLookupByLibrary.simpleMessage("No results found"),
-        "noSuggestionsForPerson": m0,
         "notifications": MessageLookupByLibrary.simpleMessage("Varslinger"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
-        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("Oisann"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Eller velg en eksisterende"),
@@ -352,7 +290,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "passwordChangedSuccessfully":
             MessageLookupByLibrary.simpleMessage("Passordet ble endret"),
         "passwordLock": MessageLookupByLibrary.simpleMessage("Passordlås"),
-        "passwordStrength": m6,
+        "passwordStrength": m0,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Vi lagrer ikke dette passordet, så hvis du glemmer det, <underline>kan vi ikke dekryptere dataene dine</underline>"),
         "pendingItems":
@@ -360,10 +298,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "photoGridSize":
             MessageLookupByLibrary.simpleMessage("Bilderutenettstørrelse"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("bilde"),
-        "photosCount": m1,
-        "pleaseCheckYourInternetConnectionAndTryAgain":
-            MessageLookupByLibrary.simpleMessage(
-                "Please check your internet connection and try again."),
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("Vennligst prøv igjen"),
         "pleaseWait": MessageLookupByLibrary.simpleMessage("Vennligst vent..."),
@@ -414,41 +348,28 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Skann denne strekkoden med\nautentiseringsappen din"),
-        "searchSectionsLengthMismatch": m2,
         "security": MessageLookupByLibrary.simpleMessage("Sikkerhet"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Velg alle"),
-        "selectAllShort": MessageLookupByLibrary.simpleMessage("All"),
-        "selectCoverPhoto":
-            MessageLookupByLibrary.simpleMessage("Select cover photo"),
         "selectFoldersForBackup": MessageLookupByLibrary.simpleMessage(
             "Velg mapper for sikkerhetskopiering"),
-        "selectMailApp":
-            MessageLookupByLibrary.simpleMessage("Select mail app"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Velg grunn"),
-        "selectYourPlan":
-            MessageLookupByLibrary.simpleMessage("Select your plan"),
         "selectedFoldersWillBeEncryptedAndBackedUp":
             MessageLookupByLibrary.simpleMessage(
                 "Valgte mapper vil bli kryptert og sikkerhetskopiert"),
-        "selectedPhotos": m10,
-        "selectedPhotosWithYours": m61,
+        "selectedPhotos": m4,
+        "selectedPhotosWithYours": m57,
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send e-post"),
         "sendInvite": MessageLookupByLibrary.simpleMessage("Send invitasjon"),
         "sendLink": MessageLookupByLibrary.simpleMessage("Send lenke"),
-        "sessionExpired":
-            MessageLookupByLibrary.simpleMessage("Session expired"),
-        "sessionIdMismatch":
-            MessageLookupByLibrary.simpleMessage("Session ID mismatch"),
         "setAPassword": MessageLookupByLibrary.simpleMessage("Lag et passord"),
         "setPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Lag et passord"),
         "setupComplete":
             MessageLookupByLibrary.simpleMessage("Oppsett fullført"),
-        "share": MessageLookupByLibrary.simpleMessage("Share"),
         "shareALink": MessageLookupByLibrary.simpleMessage("Del en lenke"),
-        "shareMyVerificationID": m62,
-        "shareTextConfirmOthersVerificationID": m11,
-        "shareWithPeopleSectionTitle": m64,
+        "shareMyVerificationID": m58,
+        "shareTextConfirmOthersVerificationID": m5,
+        "shareWithPeopleSectionTitle": m60,
         "sharedPhotoNotifications":
             MessageLookupByLibrary.simpleMessage("Nye delte bilder"),
         "sharedPhotoNotificationsExplanation": MessageLookupByLibrary.simpleMessage(
@@ -474,13 +395,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Suksess"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),
         "strongStrength": MessageLookupByLibrary.simpleMessage("Sterkt"),
-        "subscription": MessageLookupByLibrary.simpleMessage("Subscription"),
         "tapToCopy":
             MessageLookupByLibrary.simpleMessage("trykk for å kopiere"),
         "tapToEnterCode":
             MessageLookupByLibrary.simpleMessage("Trykk for å angi kode"),
-        "tapToUpload": MessageLookupByLibrary.simpleMessage("Tap to upload"),
-        "tapToUploadIsIgnoredDue": m3,
         "terminate": MessageLookupByLibrary.simpleMessage("Avslutte"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("Avslutte økten?"),
@@ -489,7 +407,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Dette kan brukes til å gjenopprette kontoen din hvis du mister din andre faktor"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("Denne enheten"),
-        "thisIsPersonVerificationId": m74,
+        "thisIsPersonVerificationId": m71,
         "thisIsYourVerificationId": MessageLookupByLibrary.simpleMessage(
             "Dette er din bekreftelses-ID"),
         "thisWillLogYouOutOfTheFollowingDevice":
@@ -505,12 +423,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Tofaktorautentisering"),
         "twofactorSetup":
             MessageLookupByLibrary.simpleMessage("Oppsett av to-faktor"),
-        "typeOfGallerGallerytypeIsNotSupportedForRename": m4,
         "uncategorized": MessageLookupByLibrary.simpleMessage("Ukategorisert"),
         "unselectAll": MessageLookupByLibrary.simpleMessage("Velg bort alle"),
         "updatingFolderSelection":
             MessageLookupByLibrary.simpleMessage("Oppdaterer mappevalg..."),
-        "uploadIsIgnoredDueToIgnorereason": m5,
         "useRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Bruk gjenopprettingsnøkkel"),
         "verificationId":
@@ -518,7 +434,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verify": MessageLookupByLibrary.simpleMessage("Bekreft"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("Bekreft e-postadresse"),
-        "verifyEmailID": m78,
+        "verifyEmailID": m77,
         "verifyPassword":
             MessageLookupByLibrary.simpleMessage("Bekreft passord"),
         "verifyingRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -527,12 +443,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Vis gjenopprettingsnøkkel"),
         "viewer": MessageLookupByLibrary.simpleMessage("Seer"),
-        "weHaveSendEmailTo": m8,
+        "weHaveSendEmailTo": m2,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Svakt"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("Velkommen tilbake!"),
-        "yearShort": MessageLookupByLibrary.simpleMessage("yr"),
-        "yearly": MessageLookupByLibrary.simpleMessage("Yearly"),
         "yesConvertToViewer":
             MessageLookupByLibrary.simpleMessage("Ja, konverter til seer"),
         "yesDelete": MessageLookupByLibrary.simpleMessage("Ja, slett"),
@@ -540,7 +454,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "youCannotShareWithYourself": MessageLookupByLibrary.simpleMessage(
             "Du kan ikke dele med deg selv"),
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
-            "Brukeren din har blitt slettet"),
-        "yourMap": MessageLookupByLibrary.simpleMessage("Your Map")
+            "Brukeren din har blitt slettet")
       };
 }

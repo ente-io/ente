@@ -5,7 +5,7 @@ import {
     toB64URLSafeNoPaddingString,
 } from "@/base/crypto/libsodium";
 import { isDevBuild } from "@/base/env";
-import { clientPackageHeader, ensureOk, HTTPError } from "@/base/http";
+import { ensureOk, HTTPError, publicRequestHeaders } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
 import { nullToUndefined } from "@/utils/transform";
@@ -412,7 +412,7 @@ export const beginPasskeyAuthentication = async (
     const url = await apiURL("/users/two-factor/passkeys/begin");
     const res = await fetch(url, {
         method: "POST",
-        headers: clientPackageHeader(),
+        headers: publicRequestHeaders(),
         body: JSON.stringify({ sessionID: passkeySessionID }),
     });
     if (!res.ok) {

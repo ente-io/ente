@@ -9,6 +9,7 @@ const (
 
 	ChangeEmailOTTPurpose = "change"
 	SignUpOTTPurpose      = "signup"
+	LoginOTTPurpose       = "login"
 )
 
 // User represents a user in the system
