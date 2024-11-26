@@ -39,13 +39,6 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
     const [browserCanCast, setBrowserCanCast] = useState(false);
 
     useEffect(() => {
-        // Make API call to clear all previous sessions (if any) on component
-        // mount so that the user can start a new session.
-        //
-        // This is usually not going to have any effect, so we don't need to
-        // wait for it to finish (or do anything specific if it fails).
-        void revokeAllCastTokens();
-
         // Determine if Chromecast is supported by the current browser
         // (effectively, only Chrome).
         //
@@ -141,7 +134,12 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
     }, [view]);
 
     useEffect(() => {
-        if (open) castGateway.revokeAllTokens();
+        // Make API call to clear all previous sessions (if any) whenever the
+        // dialog is opened so that the user can start a new session.
+        //
+        // This is not going to have an effect on the current client, so we
+        // don't need to wait for it to finish (and can ignore errors).
+        if (open) void revokeAllCastTokens();
     }, [open]);
 
     return (
