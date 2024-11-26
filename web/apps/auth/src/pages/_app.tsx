@@ -79,7 +79,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             window.removeEventListener("online", setUserOnline);
             window.removeEventListener("offline", setUserOffline);
         };
-    }, []);
+    }, [router]);
 
     const logout = useCallback(() => {
         void accountLogout().then(() => window.location.replace("/"));
