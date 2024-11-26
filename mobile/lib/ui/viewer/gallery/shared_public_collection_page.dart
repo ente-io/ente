@@ -50,10 +50,6 @@ class _SharedPublicCollectionPageState
   Widget build(BuildContext context) {
     final logger = Logger("SharedPublicCollectionPage");
     logger.info("Building SharedPublicCollectionPage");
-    final bool isPublicDownload =
-        widget.c.collection.isDownloadEnabledForPublicLink();
-    final bool isisEnableCollect =
-        widget.c.collection.isCollectEnabledForPublicLink();
     final List<EnteFile>? initialFiles =
         widget.c.thumbnail != null ? [widget.c.thumbnail!] : null;
     final gallery = Gallery(
