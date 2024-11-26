@@ -244,11 +244,12 @@ class _HomeWidgetState extends State<HomeWidget> {
         .ignore();
 
     if (Platform.isAndroid &&
-        localSettings.hasConfiguredInAppLinkPermissions() &&
+        !localSettings.hasConfiguredInAppLinkPermissions() &&
         RemoteSyncService.instance.isFirstRemoteSyncDone()) {
       PackageInfo.fromPlatform().then((packageInfo) {
         final packageName = packageInfo.packageName;
-        if (packageName == 'io.ente.photos.independent' ||
+        if (packageName == 'io.ente.photos.independent.debug' ||
+            packageName == 'io.ente.photos.independent' ||
             packageName == 'io.ente.photos.fdroid') {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
