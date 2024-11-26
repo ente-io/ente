@@ -309,6 +309,7 @@
   "search": "جستجو",
   "whatsNew": "تغییرات جدید",
   "reviewSuggestions": "مرور پیشنهادها",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
   "openFile": "Open file",
   "backupFile": "Backup file",

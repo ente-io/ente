@@ -890,6 +890,7 @@
   "yesResetPerson": "Taip, nustatyti asmenį iš naujo",
   "onlyThem": "Tik jiems",
   "checkingModels": "Tikrinami modeliai...",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "enableMachineLearningBanner": "Įjunkite mašininį mokymąsi magiškai paieškai ir veidų atpažinimui",
   "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas",
   "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas",

@@ -1301,6 +1301,7 @@
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Это удалит публичные ссылки на все выбранные быстрые ссылки.",
   "guestView": "Гостевой вид",
   "guestViewEnablePreSteps": "Чтобы включить гостевой вид, настройте пароль устройства или блокировку экрана в настройках системы.",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
   "openFile": "Open file",
   "backupFile": "Backup file",

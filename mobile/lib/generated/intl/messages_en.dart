@@ -59,7 +59,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m18(albumName) => "Collaborative link created for ${albumName}";
 
-  static String m81(count) =>
+  static String m19(count) =>
       "${Intl.plural(count, zero: 'Added 0 collaborator', one: 'Added 1 collaborator', other: 'Added ${count} collaborators')}";
 
   static String m19(familyAdminEmail) =>
@@ -240,10 +240,10 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m2(email) => "We have sent a mail to <green>${email}</green>";
 
-  static String m79(count) =>
+  static String m81(count) =>
       "${Intl.plural(count, one: '${count} year ago', other: '${count} years ago')}";
 
-  static String m80(storageSaved) =>
+  static String m82(storageSaved) =>
       "You have successfully freed up ${storageSaved}!";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -539,7 +539,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Collaborators can add photos and videos to the shared album."),
-        "collaboratorsSuccessfullyAdded": m81,
+        "collaboratorsSuccessfullyAdded": m19,
         "collageLayout": MessageLookupByLibrary.simpleMessage("Layout"),
         "collageSaved":
             MessageLookupByLibrary.simpleMessage("Collage saved to gallery"),
@@ -1828,7 +1828,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsNew": MessageLookupByLibrary.simpleMessage("What\'s new"),
         "yearShort": MessageLookupByLibrary.simpleMessage("yr"),
         "yearly": MessageLookupByLibrary.simpleMessage("Yearly"),
-        "yearsAgo": m79,
+        "yearsAgo": m81,
         "yes": MessageLookupByLibrary.simpleMessage("Yes"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("Yes, cancel"),
         "yesConvertToViewer":
@@ -1860,7 +1860,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "You cannot share with yourself"),
         "youDontHaveAnyArchivedItems": MessageLookupByLibrary.simpleMessage(
             "You don\'t have any archived items."),
-        "youHaveSuccessfullyFreedUp": m80,
+        "youHaveSuccessfullyFreedUp": m82,
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "Your account has been deleted"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Your map"),

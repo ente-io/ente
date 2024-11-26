@@ -13,6 +13,7 @@
   "confirmAccountDeletion": "계정 삭제 확인",
   "deleteAccountPermanentlyButton": "계정을 영구적으로 삭제",
   "yourAccountHasBeenDeleted": "계정이 삭제되었습니다.",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
   "openFile": "Open file",
   "backupFile": "Backup file",

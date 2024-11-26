@@ -200,10 +200,10 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m2(email) =>
       "Kami telah mengirimkan email ke <green>${email}</green>";
 
-  static String m79(count) =>
+  static String m81(count) =>
       "${Intl.plural(count, other: '${count} tahun lalu')}";
 
-  static String m80(storageSaved) =>
+  static String m82(storageSaved) =>
       "Kamu telah berhasil membersihkan ${storageSaved}!";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -672,6 +672,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportLogs": MessageLookupByLibrary.simpleMessage("Ekspor log"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Ekspor data kamu"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Pengenalan wajah"),
         "faces": MessageLookupByLibrary.simpleMessage("Wajah"),
@@ -1499,7 +1501,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Selamat datang kembali!"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("Hal yang baru"),
         "yearly": MessageLookupByLibrary.simpleMessage("Tahunan"),
-        "yearsAgo": m79,
+        "yearsAgo": m81,
         "yes": MessageLookupByLibrary.simpleMessage("Ya"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("Ya, batalkan"),
         "yesConvertToViewer":
@@ -1526,7 +1528,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Kamu tidak bisa berbagi dengan dirimu sendiri"),
         "youDontHaveAnyArchivedItems": MessageLookupByLibrary.simpleMessage(
             "Kamu tidak memiliki item di arsip."),
-        "youHaveSuccessfullyFreedUp": m80,
+        "youHaveSuccessfullyFreedUp": m82,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("Akunmu telah dihapus"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Peta kamu"),

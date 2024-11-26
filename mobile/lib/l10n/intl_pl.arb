@@ -1375,6 +1375,7 @@
   "allPersonGroupingWillReset": "Wszystkie grupy dla tej osoby zostaną zresetowane i stracisz wszystkie sugestie dla tej osoby",
   "yesResetPerson": "Tak, zresetuj osobę",
   "onlyThem": "Tylko te",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "checkingModels": "Sprawdzanie modeli...",
   "enableMachineLearningBanner": "Włącz nauczanie maszynowe dla magicznego wyszukiwania i rozpoznawania twarzy",
   "searchDiscoverEmptySection": "Obrazy będą wyświetlane tutaj po zakończeniu przetwarzania",

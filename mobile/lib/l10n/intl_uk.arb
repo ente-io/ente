@@ -1383,6 +1383,7 @@
   "enableMachineLearningBanner": "Увімкніть машинне навчання для магічного пошуку та розпізнавання облич",
   "searchDiscoverEmptySection": "Зображення будуть показані тут після завершення обробки",
   "searchPersonsEmptySection": "Люди будуть показані тут після завершення обробки",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "viewersSuccessfullyAdded": "{count, plural, one {} few {Додано {count} глядачі} many {Додано {count} глядачів}=0 {Додано 0 глядачів} =1 {Додано 1 глядач} other {Додано {count} глядачів}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {

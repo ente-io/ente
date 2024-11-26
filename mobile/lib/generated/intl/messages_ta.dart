@@ -88,6 +88,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "failedToRefreshStripeSubscription":
             MessageLookupByLibrary.simpleMessage(
                 "Failed to refresh subscription"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "feedback": MessageLookupByLibrary.simpleMessage("பின்னூட்டம்"),
         "file": MessageLookupByLibrary.simpleMessage("File"),
         "fileNotUploadedYet":

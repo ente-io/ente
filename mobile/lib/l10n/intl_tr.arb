@@ -1170,6 +1170,7 @@
   "invalidEndpointMessage": "Üzgünüz, girdiğiniz uç nokta geçersiz. Lütfen geçerli bir uç nokta girin ve tekrar deneyin.",
   "endpointUpdatedMessage": "Fatura başarıyla güncellendi",
   "customEndpoint": "{endpoint}'e bağlanıldı",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
   "openFile": "Open file",
   "backupFile": "Backup file",

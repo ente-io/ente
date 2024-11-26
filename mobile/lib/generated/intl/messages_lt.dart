@@ -294,6 +294,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Bendradarbiai gali pridėti nuotraukų ir vaizdo įrašų į bendrintą albumą."),
+        "collaboratorsSuccessfullyAdded": m19,
         "collect": MessageLookupByLibrary.simpleMessage("Rinkti"),
         "collectEventPhotos":
             MessageLookupByLibrary.simpleMessage("Rinkti įvykių nuotraukas"),
@@ -1171,6 +1172,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Peržiūrėti atkūrimo raktą"),
         "viewer": MessageLookupByLibrary.simpleMessage("Žiūrėtojas"),
+        "viewersSuccessfullyAdded": m80,
         "visitWebToManage": MessageLookupByLibrary.simpleMessage(
             "Aplankykite web.ente.io, kad tvarkytumėte savo prenumeratą"),
         "waitingForVerification":

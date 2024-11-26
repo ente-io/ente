@@ -123,10 +123,10 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m2(email) => "שלחנו דוא\"ל ל<green>${email}</green>";
 
-  static String m79(count) =>
+  static String m81(count) =>
       "${Intl.plural(count, one: 'לפני ${count} שנה', two: 'לפני ${count} שנים', many: 'לפני ${count} שנים', other: 'לפני ${count} שנים')}";
 
-  static String m80(storageSaved) => "הצלחת לפנות ${storageSaved}!";
+  static String m82(storageSaved) => "הצלחת לפנות ${storageSaved}!";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -453,6 +453,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportLogs": MessageLookupByLibrary.simpleMessage("ייצוא לוגים"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("ייצוא הנתונים שלך"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("נכשל בהחלת הקוד"),
         "failedToCancel": MessageLookupByLibrary.simpleMessage("הביטול נכשל"),
@@ -937,7 +939,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "weakStrength": MessageLookupByLibrary.simpleMessage("חלשה"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("ברוך שובך!"),
         "yearly": MessageLookupByLibrary.simpleMessage("שנתי"),
-        "yearsAgo": m79,
+        "yearsAgo": m81,
         "yes": MessageLookupByLibrary.simpleMessage("כן"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("כן, בטל"),
         "yesConvertToViewer":
@@ -960,7 +962,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "אתה לא יכול לשנמך לתוכנית הזו"),
         "youCannotShareWithYourself":
             MessageLookupByLibrary.simpleMessage("אתה לא יכול לשתף עם עצמך"),
-        "youHaveSuccessfullyFreedUp": m80,
+        "youHaveSuccessfullyFreedUp": m82,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("החשבון שלך נמחק"),
         "yourPlanWasSuccessfullyDowngraded":

@@ -16,6 +16,7 @@
   "confirmAccountDeletion": "கணக்கு நீக்குதலை உறுதிப்படுத்தவும்",
   "deleteAccountPermanentlyButton": "கணக்கை நிரந்தரமாக நீக்கவும்",
   "deleteReason1": "எனக்கு தேவையான ஒரு முக்கிய அம்சம் இதில் இல்லை",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
   "openFile": "Open file",
   "backupFile": "Backup file",

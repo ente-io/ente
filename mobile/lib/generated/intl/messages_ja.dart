@@ -207,10 +207,10 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m2(email) => "<green>${email}</green>にメールを送りました";
 
-  static String m79(count) =>
+  static String m81(count) =>
       "${Intl.plural(count, one: '${count} 年前', other: '${count} 年前')}";
 
-  static String m80(storageSaved) => "${storageSaved} を解放しました";
+  static String m82(storageSaved) => "${storageSaved} を解放しました";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1550,7 +1550,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "welcomeBack": MessageLookupByLibrary.simpleMessage("おかえりなさい！"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("最新情報"),
         "yearly": MessageLookupByLibrary.simpleMessage("年額"),
-        "yearsAgo": m79,
+        "yearsAgo": m81,
         "yes": MessageLookupByLibrary.simpleMessage("はい"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("キャンセル"),
         "yesConvertToViewer":
@@ -1578,7 +1578,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("自分自身と共有することはできません"),
         "youDontHaveAnyArchivedItems":
             MessageLookupByLibrary.simpleMessage("アーカイブした項目はありません"),
-        "youHaveSuccessfullyFreedUp": m80,
+        "youHaveSuccessfullyFreedUp": m82,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("アカウントは削除されました"),
         "yourMap": MessageLookupByLibrary.simpleMessage("あなたの地図"),

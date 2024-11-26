@@ -1380,6 +1380,7 @@
   "yesResetPerson": "Ja, reset persoon",
   "onlyThem": "Alleen hen",
   "checkingModels": "Modellen controleren...",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "enableMachineLearningBanner": "Schakel machine learning in voor magische zoekopdrachten en gezichtsherkenning",
   "searchDiscoverEmptySection": "Afbeeldingen worden hier getoond zodra de verwerking voltooid is",
   "searchPersonsEmptySection": "Mensen worden hier getoond zodra de verwerking voltooid is",

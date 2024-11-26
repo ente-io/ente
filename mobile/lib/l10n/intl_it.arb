@@ -1365,6 +1365,7 @@
   "yesResetPerson": "Sì, resetta persona",
   "onlyThem": "Solo loro",
   "checkingModels": "Verifica dei modelli...",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "searchDiscoverEmptySection": "Le immagini saranno mostrate qui una volta che l'elaborazione sarà completata",
   "accountIsAlreadyConfigured": "L'account è già configurato.",
   "sessionIdMismatch": "ID sessione non corrispondente",

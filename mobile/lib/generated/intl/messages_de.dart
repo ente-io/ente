@@ -237,10 +237,10 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m2(email) =>
       "Wir haben eine E-Mail an <green>${email}</green> gesendet";
 
-  static String m79(count) =>
+  static String m81(count) =>
       "${Intl.plural(count, one: 'vor einem Jahr', other: 'vor ${count} Jahren')}";
 
-  static String m80(storageSaved) =>
+  static String m82(storageSaved) =>
       "Du hast ${storageSaved} erfolgreich freigegeben!";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -554,6 +554,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Bearbeiter können Fotos & Videos zu dem geteilten Album hinzufügen."),
+        "collaboratorsSuccessfullyAdded": m19,
         "collageLayout": MessageLookupByLibrary.simpleMessage("Layout"),
         "collageSaved": MessageLookupByLibrary.simpleMessage(
             "Collage in Galerie gespeichert"),
@@ -1908,7 +1909,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsNew": MessageLookupByLibrary.simpleMessage("Neue Funktionen"),
         "yearShort": MessageLookupByLibrary.simpleMessage("Jahr"),
         "yearly": MessageLookupByLibrary.simpleMessage("Jährlich"),
-        "yearsAgo": m79,
+        "yearsAgo": m81,
         "yes": MessageLookupByLibrary.simpleMessage("Ja"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("Ja, kündigen"),
         "yesConvertToViewer": MessageLookupByLibrary.simpleMessage(
@@ -1940,7 +1941,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Du kannst nicht mit dir selbst teilen"),
         "youDontHaveAnyArchivedItems": MessageLookupByLibrary.simpleMessage(
             "Du hast keine archivierten Elemente."),
-        "youHaveSuccessfullyFreedUp": m80,
+        "youHaveSuccessfullyFreedUp": m82,
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "Dein Benutzerkonto wurde gelöscht"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Deine Karte"),

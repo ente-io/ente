@@ -1452,6 +1452,7 @@
   "imageNotAnalyzed": "Hình ảnh chưa được phân tích",
   "noFacesFound": "Không tìm thấy khuôn mặt",
   "fileNotUploadedYet": "Tệp chưa được tải lên",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
   "openFile": "Open file",
   "backupFile": "Backup file",
