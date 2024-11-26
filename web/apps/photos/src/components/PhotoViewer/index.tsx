@@ -905,7 +905,7 @@ function PhotoViewer(props: PhotoViewerProps) {
 
                             <button
                                 className="pswp__button pswp__button--custom"
-                                title={t("INFO_OPTION")}
+                                title={t("info_key")}
                                 onClick={() => handleOpenInfo(photoSwipe)}
                             >
                                 <InfoIcon />
