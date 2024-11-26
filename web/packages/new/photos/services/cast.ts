@@ -1,27 +1,20 @@
+import { authenticatedRequestHeaders } from "@/base/http";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { ApiError } from "@ente/shared/error";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import HTTPService from "@ente/shared/network/HTTPService";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
+
+/**
+ * Revoke all existing outstanding cast tokens for the current user on remote.
+ */
+export const revokeAllCastTokens = async () =>
+    fetch(await apiURL("/cast/revoke-all-tokens"), {
+        method: "DELETE",
+        headers: await authenticatedRequestHeaders(),
+    });
 
 class CastGateway {
-    public async revokeAllTokens() {
-        try {
-            const token = getToken();
-            await HTTPService.delete(
-                await apiURL("/cast/revoke-all-tokens"),
-                undefined,
-                undefined,
-                {
-                    "X-Auth-Token": token,
-                },
-            );
-        } catch (e) {
-            log.error("removeAllTokens failed", e);
-            // swallow error
-        }
-    }
-
     public async getPublicKey(code: string): Promise<string> {
         let resp;
         try {

@@ -4,7 +4,7 @@ import { boxSeal } from "@/base/crypto";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
-import castGateway from "@/new/photos/services/cast";
+import castGateway, { revokeAllCastTokens } from "@/new/photos/services/cast";
 import { loadCast } from "@/new/photos/utils/chromecast-sender";
 import SingleInputForm, {
     type SingleInputFormProps,
@@ -38,11 +38,18 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
 
     const [browserCanCast, setBrowserCanCast] = useState(false);
 
-    // Make API call to clear all previous sessions on component mount.
     useEffect(() => {
-        castGateway.revokeAllTokens();
+        // Make API call to clear all previous sessions (if any) on component
+        // mount so that the user can start a new session.
+        //
+        // This is usually not going to have any effect, so we don't need to
+        // wait for it to finish (or do anything specific if it fails).
+        void revokeAllCastTokens();
 
-        // Otherwise tsc complains about unknown property chrome.
+        // Determine if Chromecast is supported by the current browser
+        // (effectively, only Chrome).
+        //
+        // Override, otherwise tsc complains about unknown property `chrome`.
         // eslint-disable-next-line @typescript-eslint/dot-notation
         setBrowserCanCast(typeof window["chrome"] !== "undefined");
     }, []);
