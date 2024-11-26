@@ -117,6 +117,12 @@ var ErrUserAlreadyRegistered = &ApiError{
 	Message:        "User is already registered",
 }
 
+var ErrUserNotRegistered = &ApiError{
+	Code:           "USER_NOT_REGISTERED",
+	HttpStatusCode: http.StatusNotFound,
+	Message:        "User is not registered",
+}
+
 var ErrCollectionNotEmpty = ApiError{
 	Code:           CollectionNotEmpty,
 	HttpStatusCode: http.StatusConflict,
