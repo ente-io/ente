@@ -537,7 +537,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         alignItems={"center"}
                     >
                         <Typography variant="h2" fontWeight="bold">
-                            {t("PHOTO_EDITOR")}
+                            {t("photo_editor")}
                         </Typography>
                         <IconButton
                             onClick={() => {

@@ -600,7 +600,7 @@
     "FLIP": "Retourner",
     "ROTATION": "Rotation",
     "reset": "Réinitialiser",
-    "PHOTO_EDITOR": "Éditeur de photos",
+    "photo_editor": "Éditeur de photos",
     "faster_upload": "Chargements plus rapides",
     "faster_upload_description": "Router les chargements vers les serveurs à proximité",
     "cast_album_to_tv": "Jouer l'album sur la TV",

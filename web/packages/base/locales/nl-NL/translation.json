@@ -600,7 +600,7 @@
     "FLIP": "Omdraaien",
     "ROTATION": "Draaiing",
     "reset": "Herstellen",
-    "PHOTO_EDITOR": "Fotobewerker",
+    "photo_editor": "Fotobewerker",
     "faster_upload": "Snellere uploads",
     "faster_upload_description": "Uploaden door nabije servers",
     "cast_album_to_tv": "Album afspelen op TV",

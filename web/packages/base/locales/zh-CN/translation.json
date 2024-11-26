@@ -600,7 +600,7 @@
     "FLIP": "上下翻转",
     "ROTATION": "回转",
     "reset": "重设",
-    "PHOTO_EDITOR": "照片编辑器",
+    "photo_editor": "照片编辑器",
     "faster_upload": "更快上传",
     "faster_upload_description": "通过附近的服务器路由上传",
     "cast_album_to_tv": "在电视上播放相册",

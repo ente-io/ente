@@ -600,7 +600,7 @@
     "FLIP": "Lật",
     "ROTATION": "Xoay",
     "reset": "Đặt lại",
-    "PHOTO_EDITOR": "Trình chỉnh sửa ảnh",
+    "photo_editor": "Trình chỉnh sửa ảnh",
     "faster_upload": "Tải lên nhanh hơn",
     "faster_upload_description": "Định tuyến tải lên qua các máy chủ gần đó",
     "cast_album_to_tv": "Phát album trên TV",
