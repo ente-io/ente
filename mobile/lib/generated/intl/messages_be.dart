@@ -132,6 +132,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Увядзіце свой пароль"),
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Увядзіце свой ключ аднаўлення"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "familyPlans":
             MessageLookupByLibrary.simpleMessage("Сямейныя тарыфныя планы"),
         "faqs": MessageLookupByLibrary.simpleMessage("Частыя пытанні"),

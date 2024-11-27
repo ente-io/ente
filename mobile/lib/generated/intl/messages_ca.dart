@@ -26,6 +26,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "allowAppToOpenSharedAlbumLinks": MessageLookupByLibrary.simpleMessage(
             "Allow app to open shared album links"),
         "backupFile": MessageLookupByLibrary.simpleMessage("Backup file"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "openAlbumInBrowser":
             MessageLookupByLibrary.simpleMessage("Open album in browser"),
         "openAlbumInBrowserTitle": MessageLookupByLibrary.simpleMessage(

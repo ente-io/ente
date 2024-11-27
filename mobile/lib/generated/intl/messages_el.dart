@@ -28,6 +28,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupFile": MessageLookupByLibrary.simpleMessage("Backup file"),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "openAlbumInBrowser":
             MessageLookupByLibrary.simpleMessage("Open album in browser"),
         "openAlbumInBrowserTitle": MessageLookupByLibrary.simpleMessage(
