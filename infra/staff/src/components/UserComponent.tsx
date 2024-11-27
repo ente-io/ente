@@ -17,6 +17,7 @@ import ChangeEmail from "./ChangeEmail";
 import DeleteAccount from "./DeleteAccont";
 import Disable2FA from "./Disable2FA";
 import DisablePasskeys from "./DisablePasskeys";
+import ToggleEmailMFA from "./ToggleEmailMFA";
 import UpdateSubscription from "./UpdateSubscription";
 
 export interface UserData {
@@ -32,8 +33,11 @@ interface UserComponentProps {
 
 const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
     const [deleteAccountOpen, setDeleteAccountOpen] = React.useState(false);
+    const [email2FAEnabled, setEmail2FAEnabled] = React.useState(false);
+    const [email2FAOpen, setEmail2FAToggleOpen] = React.useState(false);
     const [disable2FAOpen, setDisable2FAOpen] = React.useState(false);
     const [twoFactorEnabled, setTwoFactorEnabled] = React.useState(false);
+    const [canDisableEmailMFA, setCanDisableEmailMFA] = React.useState(false);
     const [updateSubscriptionOpen, setUpdateSubscriptionOpen] =
         React.useState(false);
     const [changeEmailOpen, setChangeEmailOpen] = React.useState(false);
@@ -41,6 +45,10 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
 
     React.useEffect(() => {
         setTwoFactorEnabled(userData?.Security["Two factor 2FA"] === "Enabled");
+        setEmail2FAEnabled(userData?.Security["Email MFA"] === "Enabled");
+        setCanDisableEmailMFA(
+            userData?.Security["Can Disable EmailMFA"] === "Yes",
+        );
     }, [userData]);
 
     const handleEditEmail = () => setChangeEmailOpen(true);
@@ -62,9 +70,12 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                         onDeleteAccount={handleDeleteAccountClick}
                         onEditSubscription={handleEditSubscription}
                         onDisablePasskeys={handleDisablePasskeys}
+                        canDisableEmailMFA={canDisableEmailMFA}
                         twoFactorEnabled={twoFactorEnabled}
                         setTwoFactorEnabled={setTwoFactorEnabled}
                         setDisable2FAOpen={setDisable2FAOpen}
+                        email2FAEnabled={email2FAEnabled}
+                        setEmail2FAToggleOpen={setEmail2FAToggleOpen}
                     />
                 </Grid>
             ))}
@@ -77,6 +88,11 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                 open={disable2FAOpen}
                 handleClose={() => setDisable2FAOpen(false)}
                 handleDisable2FA={() => setTwoFactorEnabled(false)}
+            />
+            <ToggleEmailMFA
+                open={email2FAOpen}
+                handleClose={() => setEmail2FAToggleOpen(false)}
+                handleToggleEmailMFA={(status) => setEmail2FAToggleOpen(status)}
             />
             <UpdateSubscription
                 open={updateSubscriptionOpen}
@@ -102,9 +118,12 @@ interface DataTableProps {
     onDeleteAccount: () => void;
     onEditSubscription: () => void;
     onDisablePasskeys: () => void;
+    canDisableEmailMFA: boolean;
     twoFactorEnabled: boolean;
     setTwoFactorEnabled: (enabled: boolean) => void;
     setDisable2FAOpen: (open: boolean) => void;
+    email2FAEnabled: boolean;
+    setEmail2FAToggleOpen: (open: boolean) => void;
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -114,9 +133,12 @@ const DataTable: React.FC<DataTableProps> = ({
     onDeleteAccount,
     onEditSubscription,
     onDisablePasskeys,
+    canDisableEmailMFA,
     twoFactorEnabled,
     setTwoFactorEnabled,
     setDisable2FAOpen,
+    email2FAEnabled,
+    setEmail2FAToggleOpen,
 }) => (
     <TableContainer
         component={Paper}
@@ -186,44 +208,49 @@ const DataTable: React.FC<DataTableProps> = ({
             aria-label={title}
         >
             <TableBody>
-                {Object.entries(data).map(([label, value], index) => (
-                    <TableRow key={label}>
-                        <TableCell
-                            component="th"
-                            scope="row"
-                            style={{
-                                padding: "16px",
-                                borderBottom:
-                                    index === 1 || index === 0
-                                        ? "1px solid rgba(224, 224, 224, 1)"
-                                        : "none",
-                            }}
-                        >
-                            {label}
-                        </TableCell>
-                        <TableCell
-                            align="right"
-                            style={{
-                                padding: "10px",
-                                borderBottom:
-                                    index === 1 || index === 0
-                                        ? "1px solid rgba(224, 224, 224, 1)"
-                                        : "none",
-                            }}
-                        >
-                            {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
-                            {renderTableCellContent(
-                                label,
-                                value,
-                                onEditEmail,
-                                onDisablePasskeys,
-                                twoFactorEnabled,
-                                setTwoFactorEnabled,
-                                setDisable2FAOpen,
-                            )}
-                        </TableCell>
-                    </TableRow>
-                ))}
+                {Object.entries(data)
+                    .filter(([label]) => label !== "Can Disable EmailMFA")
+                    .map(([label, value], index) => (
+                        <TableRow key={label}>
+                            <TableCell
+                                component="th"
+                                scope="row"
+                                style={{
+                                    padding: "16px",
+                                    borderBottom:
+                                        index === 1 || index === 0
+                                            ? "1px solid rgba(224, 224, 224, 1)"
+                                            : "none",
+                                }}
+                            >
+                                {label}
+                            </TableCell>
+                            <TableCell
+                                align="right"
+                                style={{
+                                    padding: "10px",
+                                    borderBottom:
+                                        index === 1 || index === 0
+                                            ? "1px solid rgba(224, 224, 224, 1)"
+                                            : "none",
+                                }}
+                            >
+                                {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
+                                {renderTableCellContent(
+                                    label,
+                                    value,
+                                    onEditEmail,
+                                    onDisablePasskeys,
+                                    canDisableEmailMFA,
+                                    twoFactorEnabled,
+                                    setTwoFactorEnabled,
+                                    setDisable2FAOpen,
+                                    email2FAEnabled,
+                                    setEmail2FAToggleOpen,
+                                )}
+                            </TableCell>
+                        </TableRow>
+                    ))}
             </TableBody>
         </Table>
     </TableContainer>
@@ -234,9 +261,12 @@ const renderTableCellContent = (
     value: string,
     onEditEmail: () => void,
     onDisablePasskeys: () => void,
+    canToggleEmailMFA: boolean,
     twoFactorEnabled: boolean,
     setTwoFactorEnabled: (enabled: boolean) => void,
     setDisable2FAOpen: (open: boolean) => void,
+    email2FAEnabled: boolean,
+    setEmail2FAToggleOpen: (open: boolean) => void,
 ) => {
     switch (label) {
         case "Email":
@@ -289,6 +319,63 @@ const renderTableCellContent = (
                                 if (!isChecked) {
                                     setDisable2FAOpen(true);
                                 }
+                            }}
+                            sx={{
+                                "& .MuiSwitch-switchBase.Mui-checked": {
+                                    color: "#00B33C",
+                                    "&:hover": {
+                                        backgroundColor:
+                                            "rgba(0, 179, 60, 0.08)",
+                                    },
+                                },
+                                "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
+                                    {
+                                        backgroundColor: "#00B33C",
+                                    },
+                            }}
+                        />
+                    )}
+                </Box>
+            );
+        // If Expirty time (in format 30/1/2026, 11:12:53 am) is greatheer than current date, show it in bold green
+        case "Expiry time": {
+            const expiryTime = new Date(
+                Date.parse(
+                    value.replace(
+                        /(\d+)\/(\d+)\/(\d+), (\d+:\d+:\d+ \w+)/,
+                        "$2/$1/$3 $4",
+                    ),
+                ),
+            );
+            const currentTime = new Date();
+            return (
+                <Typography
+                    sx={{
+                        color: expiryTime > currentTime ? "#00B33C" : "red",
+                    }}
+                >
+                    {value}
+                </Typography>
+            );
+        }
+        case "Email MFA":
+            return (
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "right",
+                        width: "100%",
+                        paddingRight: "50px",
+                    }}
+                >
+                    <Typography sx={{ marginRight: "1px" }}>{value}</Typography>
+                    {canToggleEmailMFA && (
+                        <Switch
+                            checked={email2FAEnabled}
+                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                            onChange={(_) => {
+                                setEmail2FAToggleOpen(true);
                             }}
                             sx={{
                                 "& .MuiSwitch-switchBase.Mui-checked": {
