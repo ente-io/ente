@@ -1100,7 +1100,7 @@ class CollectionsService {
         data: {"passHash": passwordHash},
         options: Options(
           headers: {
-            "X-Auth-Access-Token": authToken
+            "X-Auth-Access-Token": authToken,
           },
         ),
       );
