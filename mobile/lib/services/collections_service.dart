@@ -1101,7 +1101,6 @@ class CollectionsService {
         options: Options(
           headers: {
             "X-Auth-Access-Token": authToken,
-            "Cache-Control": "no-cache",
           },
         ),
       );

@@ -30,7 +30,6 @@ class DiffFetcher {
 
       final headers = {
         "X-Auth-Access-Token": authToken,
-        "Cache-Control": "no-cache",
         if (authJWTToken != null) "X-Auth-Access-Token-JWT": authJWTToken,
       };
 
