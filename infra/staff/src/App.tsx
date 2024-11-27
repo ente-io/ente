@@ -47,6 +47,7 @@ interface Security {
     isTwoFactorEnabled: boolean;
     passkeys: string;
     passkeyCount: number;
+    canDisableEmailMFA: boolean;
 }
 
 interface UserResponse {
@@ -189,6 +190,7 @@ const App: React.FC = () => {
                             0) > 0
                             ? "Enabled"
                             : "Disabled",
+                    "Can Disable EmailMFA": userDataResponse.details?.profileData.canDisableEmailMFA ? "Yes":"No",
                     AuthCodes: `${userDataResponse.authCodes ?? 0}`,
                 },
             };
