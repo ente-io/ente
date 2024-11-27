@@ -9,11 +9,11 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import FamilyTableComponent from "./components/FamilyComponentTable";
 import StorageBonusTableComponent from "./components/StorageBonusTableComponent";
+import TokensTableComponent from "./components/TokenTableComponent";
 import type { UserData } from "./components/UserComponent";
 import UserComponent from "./components/UserComponent";
 import duckieimage from "./components/duckie.png";
 import { apiOrigin } from "./services/support";
-import TokensTableComponent from "./components/TokenTableComponent";
 
 export let email = "";
 export let token = "";
@@ -184,8 +184,12 @@ const App: React.FC = () => {
                         .isTwoFactorEnabled
                         ? "Enabled"
                         : "Disabled",
-                    "Passkeys": (userDataResponse.details?.profileData.passkeyCount ?? 0) > 0 ? "Enabled" : "Disabled",
-                    "AuthCodes" : `${userDataResponse.authCodes ?? 0}`,
+                    Passkeys:
+                        (userDataResponse.details?.profileData.passkeyCount ??
+                            0) > 0
+                            ? "Enabled"
+                            : "Disabled",
+                    AuthCodes: `${userDataResponse.authCodes ?? 0}`,
                 },
             };
 

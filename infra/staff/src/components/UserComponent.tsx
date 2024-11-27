@@ -34,7 +34,8 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
     const [deleteAccountOpen, setDeleteAccountOpen] = React.useState(false);
     const [disable2FAOpen, setDisable2FAOpen] = React.useState(false);
     const [twoFactorEnabled, setTwoFactorEnabled] = React.useState(false);
-    const [updateSubscriptionOpen, setUpdateSubscriptionOpen] = React.useState(false);
+    const [updateSubscriptionOpen, setUpdateSubscriptionOpen] =
+        React.useState(false);
     const [changeEmailOpen, setChangeEmailOpen] = React.useState(false);
     const [disablePasskeysOpen, setDisablePasskeysOpen] = React.useState(false);
 
@@ -55,6 +56,7 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                 <Grid item xs={12} sm={10} md={6} key={title}>
                     <DataTable
                         title={title}
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                         data={data}
                         onEditEmail={handleEditEmail}
                         onDeleteAccount={handleDeleteAccountClick}
@@ -67,11 +69,28 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                 </Grid>
             ))}
 
-            <DeleteAccount open={deleteAccountOpen} handleClose={() => setDeleteAccountOpen(false)} />
-            <Disable2FA open={disable2FAOpen} handleClose={() => setDisable2FAOpen(false)} handleDisable2FA={() => setTwoFactorEnabled(false)} />
-            <UpdateSubscription open={updateSubscriptionOpen} onClose={() => setUpdateSubscriptionOpen(false)} />
-            <ChangeEmail open={changeEmailOpen} onClose={() => setChangeEmailOpen(false)} />
-            <DisablePasskeys open={disablePasskeysOpen} handleClose={() => setDisablePasskeysOpen(false)} handleDisablePasskeys={() => setDisablePasskeysOpen(false)} />
+            <DeleteAccount
+                open={deleteAccountOpen}
+                handleClose={() => setDeleteAccountOpen(false)}
+            />
+            <Disable2FA
+                open={disable2FAOpen}
+                handleClose={() => setDisable2FAOpen(false)}
+                handleDisable2FA={() => setTwoFactorEnabled(false)}
+            />
+            <UpdateSubscription
+                open={updateSubscriptionOpen}
+                onClose={() => setUpdateSubscriptionOpen(false)}
+            />
+            <ChangeEmail
+                open={changeEmailOpen}
+                onClose={() => setChangeEmailOpen(false)}
+            />
+            <DisablePasskeys
+                open={disablePasskeysOpen}
+                handleClose={() => setDisablePasskeysOpen(false)}
+                handleDisablePasskeys={() => setDisablePasskeysOpen(false)}
+            />
         </Grid>
     );
 };
@@ -138,12 +157,20 @@ const DataTable: React.FC<DataTableProps> = ({
                 {title}
             </Typography>
             {title === "User" && (
-                <IconButton edge="start" aria-label="delete" onClick={onDeleteAccount}>
+                <IconButton
+                    edge="start"
+                    aria-label="delete"
+                    onClick={onDeleteAccount}
+                >
                     <DeleteIcon style={{ color: "" }} />
                 </IconButton>
             )}
             {title === "Subscription" && (
-                <IconButton edge="end" aria-label="edit" onClick={onEditSubscription}>
+                <IconButton
+                    edge="end"
+                    aria-label="edit"
+                    onClick={onEditSubscription}
+                >
                     <EditIcon style={{ color: "black", marginRight: "15px" }} />
                 </IconButton>
             )}
@@ -166,7 +193,10 @@ const DataTable: React.FC<DataTableProps> = ({
                             scope="row"
                             style={{
                                 padding: "16px",
-                                borderBottom: index === 1 || index === 0 ? "1px solid rgba(224, 224, 224, 1)" : "none",
+                                borderBottom:
+                                    index === 1 || index === 0
+                                        ? "1px solid rgba(224, 224, 224, 1)"
+                                        : "none",
                             }}
                         >
                             {label}
@@ -175,10 +205,22 @@ const DataTable: React.FC<DataTableProps> = ({
                             align="right"
                             style={{
                                 padding: "10px",
-                                borderBottom: index === 1 || index === 0 ? "1px solid rgba(224, 224, 224, 1)" : "none",
+                                borderBottom:
+                                    index === 1 || index === 0
+                                        ? "1px solid rgba(224, 224, 224, 1)"
+                                        : "none",
                             }}
                         >
-                            {renderTableCellContent(label, value, onEditEmail, onDisablePasskeys, twoFactorEnabled, setTwoFactorEnabled, setDisable2FAOpen)}
+                            {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
+                            {renderTableCellContent(
+                                label,
+                                value,
+                                onEditEmail,
+                                onDisablePasskeys,
+                                twoFactorEnabled,
+                                setTwoFactorEnabled,
+                                setDisable2FAOpen,
+                            )}
                         </TableCell>
                     </TableRow>
                 ))}
@@ -199,9 +241,19 @@ const renderTableCellContent = (
     switch (label) {
         case "Email":
             return (
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-end",
+                    }}
+                >
                     <Typography>{value}</Typography>
-                    <IconButton edge="end" aria-label="edit-email" onClick={onEditEmail}>
+                    <IconButton
+                        edge="end"
+                        aria-label="edit-email"
+                        onClick={onEditEmail}
+                    >
                         <EditIcon style={{ color: "black" }} />
                     </IconButton>
                 </Box>
@@ -212,11 +264,21 @@ const renderTableCellContent = (
                     Remove Passkey
                 </Button>
             ) : (
-                <Typography sx={{ width: "100%", paddingLeft: "1px" }}>{value}</Typography>
+                <Typography sx={{ width: "100%", paddingLeft: "1px" }}>
+                    {value}
+                </Typography>
             );
         case "Two factor 2FA":
             return (
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "right", width: "100%", paddingRight: "50px" }}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "right",
+                        width: "100%",
+                        paddingRight: "50px",
+                    }}
+                >
                     <Typography sx={{ marginRight: "1px" }}>{value}</Typography>
                     {value === "Enabled" && (
                         <Switch
@@ -232,12 +294,14 @@ const renderTableCellContent = (
                                 "& .MuiSwitch-switchBase.Mui-checked": {
                                     color: "#00B33C",
                                     "&:hover": {
-                                        backgroundColor: "rgba(0, 179, 60, 0.08)",
+                                        backgroundColor:
+                                            "rgba(0, 179, 60, 0.08)",
                                     },
                                 },
-                                "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                                    backgroundColor: "#00B33C",
-                                },
+                                "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
+                                    {
+                                        backgroundColor: "#00B33C",
+                                    },
                             }}
                         />
                     )}

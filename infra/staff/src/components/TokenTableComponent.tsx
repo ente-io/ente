@@ -106,21 +106,40 @@ const TokensTableComponent: React.FC = () => {
                 <Table aria-label="tokens-table">
                     <TableHead>
                         <TableRow>
-                            
-                            <TableCell sortDirection={orderBy === "creationTime" ? order : false}>
+                            <TableCell
+                                sortDirection={
+                                    orderBy === "creationTime" ? order : false
+                                }
+                            >
                                 <TableSortLabel
                                     active={orderBy === "creationTime"}
-                                    direction={orderBy === "creationTime" ? order : "asc"}
-                                    onClick={() => handleRequestSort("creationTime")}
+                                    direction={
+                                        orderBy === "creationTime"
+                                            ? order
+                                            : "asc"
+                                    }
+                                    onClick={() =>
+                                        handleRequestSort("creationTime")
+                                    }
                                 >
                                     Created At
                                 </TableSortLabel>
                             </TableCell>
-                            <TableCell sortDirection={orderBy === "lastUsedTime" ? order : false}>
+                            <TableCell
+                                sortDirection={
+                                    orderBy === "lastUsedTime" ? order : false
+                                }
+                            >
                                 <TableSortLabel
                                     active={orderBy === "lastUsedTime"}
-                                    direction={orderBy === "lastUsedTime" ? order : "asc"}
-                                    onClick={() => handleRequestSort("lastUsedTime")}
+                                    direction={
+                                        orderBy === "lastUsedTime"
+                                            ? order
+                                            : "asc"
+                                    }
+                                    onClick={() =>
+                                        handleRequestSort("lastUsedTime")
+                                    }
                                 >
                                     Last Used At
                                 </TableSortLabel>
@@ -139,16 +158,23 @@ const TokensTableComponent: React.FC = () => {
                     <TableBody>
                         {sortedTokens.map((token, index) => (
                             <TableRow key={index}>
-
-                                <TableCell>{formatDate(token.creationTime)}</TableCell>
-                                <TableCell>{formatDate(token.lastUsedTime)}</TableCell>
+                                <TableCell>
+                                    {formatDate(token.creationTime)}
+                                </TableCell>
+                                <TableCell>
+                                    {formatDate(token.lastUsedTime)}
+                                </TableCell>
                                 <TableCell>{token.ua}</TableCell>
                                 <TableCell>{token.app}</TableCell>
                                 <TableCell>
                                     <span
                                         style={{
-                                            backgroundColor: token.isDeleted ? "#494949" : "transparent",
-                                            color: token.isDeleted ? "white" : "inherit",
+                                            backgroundColor: token.isDeleted
+                                                ? "#494949"
+                                                : "transparent",
+                                            color: token.isDeleted
+                                                ? "white"
+                                                : "inherit",
                                             padding: "4px 8px",
                                             borderRadius: "10px",
                                         }}
