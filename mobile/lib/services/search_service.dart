@@ -1004,6 +1004,7 @@ class SearchService {
             p.data.name,
             files,
             params: {
+              kPersonWidgetKey: p.data.avatarFaceID ?? p.hashCode.toString(),
               kPersonParamID: personID,
               kFileID: files.first.uploadedFileID,
             },
@@ -1018,6 +1019,8 @@ class SearchService {
                     p.data.name,
                     files,
                     params: {
+                      kPersonWidgetKey:
+                          p.data.avatarFaceID ?? p.hashCode.toString(),
                       kPersonParamID: personID,
                       kFileID: files.first.uploadedFileID,
                     },

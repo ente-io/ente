@@ -334,10 +334,14 @@ class FaceSearchResult extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final params = (searchResult as GenericSearchResult).params;
     return PersonFaceWidget(
       searchResult.previewThumbnail()!,
-      personId: (searchResult as GenericSearchResult).params[kPersonParamID],
-      clusterID: (searchResult as GenericSearchResult).params[kClusterParamId],
+      personId: params[kPersonParamID],
+      clusterID: params[kClusterParamId],
+      key: params.containsKey(kPersonWidgetKey)
+          ? ValueKey(params[kPersonWidgetKey])
+          : null,
     );
   }
 }

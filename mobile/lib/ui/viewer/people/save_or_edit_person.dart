@@ -121,6 +121,9 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                                     ),
                                     child: snapshot.hasData
                                         ? PersonFaceWidget(
+                                            key: ValueKey(
+                                                person?.data.avatarFaceID ??
+                                                    "",),
                                             personFile,
                                             clusterID: personClusterID,
                                             personId: person!.remoteID,
@@ -158,9 +161,18 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                                             person!,
                                           );
                                           if (result != null) {
+                                            _logger
+                                                .info('Person avatar updated');
                                             setState(() {
                                               person = result;
                                             });
+                                            showToast(
+                                              context,
+                                              "Person avatar updated ${person!.data.avatarFaceID ?? 'empty'}",
+                                            );
+                                            Bus.instance.fire(
+                                              PeopleChangedEvent(),
+                                            );
                                           }
                                         },
                                       ),
