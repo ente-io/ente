@@ -774,22 +774,11 @@ export async function deriveSensitiveKey(passphrase: string, salt: string) {
 }
 
 export async function deriveInteractiveKey(passphrase: string, salt: string) {
-    await sodium.ready;
-    const key = await toB64(
-        sodium.crypto_pwhash(
-            sodium.crypto_secretbox_KEYBYTES,
-            sodium.from_string(passphrase),
-            await fromB64(salt),
-            sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
-            sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
-            sodium.crypto_pwhash_ALG_ARGON2ID13,
-        ),
-    );
-    return {
-        key,
-        opsLimit: sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
-        memLimit: sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
-    };
+    const opsLimit = sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE;
+    const memLimit = sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE;
+
+    const key = await deriveKey(passphrase, salt, opsLimit, memLimit);
+    return { key, opsLimit, memLimit };
 }
 
 export async function generateEncryptionKey() {
