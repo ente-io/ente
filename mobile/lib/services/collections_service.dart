@@ -1100,8 +1100,7 @@ class CollectionsService {
         data: {"passHash": passwordHash},
         options: Options(
           headers: {
-            "X-Auth-Access-Token": authToken,
-            "Cache-Control": "no-cache",
+            "X-Auth-Access-Token": authToken
           },
         ),
       );

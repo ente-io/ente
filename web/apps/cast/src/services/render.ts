@@ -167,7 +167,6 @@ const getEncryptedCollectionFiles = async (
             await apiURL("/cast/diff"),
             { sinceTime },
             {
-                "Cache-Control": "no-cache",
                 "X-Cast-Access-Token": castToken,
             },
         );

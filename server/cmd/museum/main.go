@@ -369,7 +369,8 @@ func main() {
 				return base.ServerReqID()
 			},
 		}),
-		middleware.Logger(urlSanitizer), cors(), gzip.Gzip(gzip.DefaultCompression), middleware.PanicRecover())
+		middleware.Logger(urlSanitizer), cors(), cacheHeaders(),
+		gzip.Gzip(gzip.DefaultCompression), middleware.PanicRecover())
 
 	publicAPI := server.Group("/")
 	publicAPI.Use(rateLimiter.GlobalRateLimiter(), rateLimiter.APIRateLimitMiddleware(urlSanitizer))
@@ -978,6 +979,27 @@ func cors() gin.HandlerFunc {
 			c.AbortWithStatus(http.StatusNoContent)
 			return
 		}
+		c.Next()
+	}
+}
+
+func cacheHeaders() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Add "Cache-Control: no-store" to HTTP GET API responses.
+		if c.Request.Method == http.MethodGet {
+			reqPath := urlSanitizer(c)
+			if strings.HasPrefix(reqPath, "/files/preview/") ||
+				strings.HasPrefix(reqPath, "/files/download/") ||
+				strings.HasPrefix(reqPath, "/public-collection/files/preview/") ||
+				strings.HasPrefix(reqPath, "/public-collection/files/download/") ||
+				strings.HasPrefix(reqPath, "/cast/files/preview/") ||
+				strings.HasPrefix(reqPath, "/cast/files/download/") {
+				// Exclude those that redirect to S3 for file downloads.
+			} else {
+				c.Writer.Header().Set("Cache-Control", "no-store")
+			}
+		}
+
 		c.Next()
 	}
 }
