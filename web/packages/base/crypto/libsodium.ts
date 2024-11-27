@@ -752,7 +752,19 @@ export const deriveKey = async (
     );
 };
 
-export async function deriveSensitiveKey(passphrase: string, salt: string) {
+/**
+ * A variant of {@link deriveKey} with (dynamic) parameters for deriving
+ * sensitive keys (like the user's master key kek (key encryption key).
+ *
+ * This function defers to {@link deriveKey} after choosing the most secure ops
+ * and mem limits that the current device can handle. For details about these
+ * limits, see https://libsodium.gitbook.io/doc/password_hashing/default_phf.
+ *
+ * @returns Both the derived key, and the ops and mem limits that were chosen
+ * during the derivation (this information will be needed the user's other
+ * clients to derive the same result).
+ */
+export const deriveSensitiveKey = async (passphrase: string, salt: string) => {
     await sodium.ready;
     const minMemLimit = sodium.crypto_pwhash_MEMLIMIT_MIN;
     let opsLimit = sodium.crypto_pwhash_OPSLIMIT_SENSITIVE;
@@ -773,7 +785,7 @@ export async function deriveSensitiveKey(passphrase: string, salt: string) {
     throw new Error("Failed to derive key: Memory limit exceeded");
 }
 
-export async function deriveInteractiveKey(passphrase: string, salt: string) {
+export const deriveInteractiveKey = async (passphrase: string, salt: string) => {
     const opsLimit = sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE;
     const memLimit = sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE;
 
