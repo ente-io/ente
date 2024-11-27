@@ -715,7 +715,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                             color="text.muted"
                             sx={{ textAlign: "center" }}
                         >
-                            t{"people_suggestions_empty"}
+                            {t("people_suggestions_empty")}
                         </Typography>
                     </CenteredFill>
                 ) : (
