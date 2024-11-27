@@ -98,10 +98,18 @@ class _EnableMachineLearningConsentState
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Text(
-                              S.of(context).mlConsentConfirmation,
-                              style: getEnteTextTheme(context).bodyMuted,
-                              textAlign: TextAlign.left,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _hasAckedPrivacyPolicy.value =
+                                      !_hasAckedPrivacyPolicy.value;
+                                });
+                              },
+                              child: Text(
+                                S.of(context).mlConsentConfirmation,
+                                style: getEnteTextTheme(context).bodyMuted,
+                                textAlign: TextAlign.left,
+                              ),
                             ),
                           ),
                         ),
