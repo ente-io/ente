@@ -48,3 +48,9 @@ allows you to automate backups to ente's cloud.
 
 Some more details about the feature are in our
 [blog post](http://ente.io/blog/watch-folders) announcing it.
+
+## 2-way sync
+
+Note that a two way sync is not currently supported. Attempting to export data
+to the same folder that is also being watched by the Ente app will result in
+undefined behaviour (e.g. duplicate files, export stalling etc).

@@ -8,9 +8,9 @@ description: Frequently asked questions about keeping extra backups of your data
 ## Can I backup my data in a local drive outside Ente?
 
 Yes! You can use our CLI tool or our desktop app to set up exports of your data
-in a local drive or NAS of your choice. This way, you can use Ente in your day
-to day use, but will have an additional guarantee that a copy of your original
-photos and videos are always available in normal directories and files.
+to your local drive. This way, you can use Ente in your day to day use, but will
+have an additional guarantee that a copy of your original photos and videos are
+always available in normal directories and files.
 
 -   You can use
     [Ente's CLI](https://github.com/ente-io/ente/tree/main/cli#export) to export
@@ -29,3 +29,9 @@ photos and videos are always available in normal directories and files.
 When you export your data for local backup, it will maintain the exact structure
 how you have set up within Ente. The exported data will reflect the same photos
 and album structure intact.
+
+## Can I do a 2-way sync?
+
+A two way sync is not currently supported. Attempting to export data to the same
+folder that is also being watched by the Ente app will result in undefined
+behaviour (e.g. duplicate files, export stalling etc).
