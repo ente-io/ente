@@ -221,10 +221,10 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m2(email) =>
       "Hemos enviado un correo a <green>${email}</green>";
 
-  static String m81(count) =>
+  static String m79(count) =>
       "${Intl.plural(count, one: '${count} año atrás', other: '${count} años atrás')}";
 
-  static String m82(storageSaved) => "¡Has liberado ${storageSaved} con éxito!";
+  static String m80(storageSaved) => "¡Has liberado ${storageSaved} con éxito!";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1809,7 +1809,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("¡Bienvenido de nuevo!"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("Qué hay de nuevo"),
         "yearly": MessageLookupByLibrary.simpleMessage("Anualmente"),
-        "yearsAgo": m81,
+        "yearsAgo": m79,
         "yes": MessageLookupByLibrary.simpleMessage("Sí"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("Sí, cancelar"),
         "yesConvertToViewer":
@@ -1839,7 +1839,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "No puedes compartir contigo mismo"),
         "youDontHaveAnyArchivedItems": MessageLookupByLibrary.simpleMessage(
             "No tienes ningún elemento archivado."),
-        "youHaveSuccessfullyFreedUp": m82,
+        "youHaveSuccessfullyFreedUp": m80,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("Tu cuenta ha sido eliminada"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Tu mapa"),

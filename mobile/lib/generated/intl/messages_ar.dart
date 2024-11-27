@@ -37,6 +37,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("أدخل عنوان بريدك الإلكتروني"),
         "enterYourRecoveryKey":
             MessageLookupByLibrary.simpleMessage("أدخل رمز الاسترداد"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("نسيت كلمة المرور"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(

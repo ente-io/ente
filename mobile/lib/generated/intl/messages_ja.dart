@@ -207,10 +207,10 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m2(email) => "<green>${email}</green>にメールを送りました";
 
-  static String m81(count) =>
+  static String m79(count) =>
       "${Intl.plural(count, one: '${count} 年前', other: '${count} 年前')}";
 
-  static String m82(storageSaved) => "${storageSaved} を解放しました";
+  static String m80(storageSaved) => "${storageSaved} を解放しました";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -694,6 +694,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "extraPhotosFound":
             MessageLookupByLibrary.simpleMessage("追加の写真が見つかりました"),
         "extraPhotosFoundFor": m30,
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "faceRecognition": MessageLookupByLibrary.simpleMessage("顔認識"),
         "faces": MessageLookupByLibrary.simpleMessage("顔"),
         "failedToApplyCode":
@@ -1550,7 +1552,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "welcomeBack": MessageLookupByLibrary.simpleMessage("おかえりなさい！"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("最新情報"),
         "yearly": MessageLookupByLibrary.simpleMessage("年額"),
-        "yearsAgo": m81,
+        "yearsAgo": m79,
         "yes": MessageLookupByLibrary.simpleMessage("はい"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("キャンセル"),
         "yesConvertToViewer":
@@ -1578,7 +1580,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("自分自身と共有することはできません"),
         "youDontHaveAnyArchivedItems":
             MessageLookupByLibrary.simpleMessage("アーカイブした項目はありません"),
-        "youHaveSuccessfullyFreedUp": m82,
+        "youHaveSuccessfullyFreedUp": m80,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("アカウントは削除されました"),
         "yourMap": MessageLookupByLibrary.simpleMessage("あなたの地図"),

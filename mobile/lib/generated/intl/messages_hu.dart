@@ -39,6 +39,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Kérjük, adjon meg egy érvényes e-mail címet."),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("Adja meg az e-mail címét"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "feedback": MessageLookupByLibrary.simpleMessage("Visszajelzés"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Érvénytelen e-mail cím"),

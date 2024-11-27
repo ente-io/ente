@@ -114,6 +114,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sisesta oma parool"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Ekspordi oma andmed"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "faq": MessageLookupByLibrary.simpleMessage("KKK"),
         "faqs": MessageLookupByLibrary.simpleMessage("KKK"),
         "feedback": MessageLookupByLibrary.simpleMessage("Tagasiside"),

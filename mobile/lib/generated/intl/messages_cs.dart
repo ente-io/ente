@@ -30,6 +30,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupFile": MessageLookupByLibrary.simpleMessage("Backup file"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Zkontrolujte prosím svou doručenou poštu (a spam) pro dokončení ověření"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(""),
         "openAlbumInBrowser":
             MessageLookupByLibrary.simpleMessage("Open album in browser"),

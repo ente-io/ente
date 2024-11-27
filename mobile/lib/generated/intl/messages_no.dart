@@ -220,6 +220,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Skriv inn din gjenopprettingsnøkkel"),
         "expiredLinkInfo": MessageLookupByLibrary.simpleMessage(
             "Denne lenken er utløpt. Vennligst velg en ny utløpstid eller deaktiver lenkeutløp."),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "failedToLoadAlbums":
             MessageLookupByLibrary.simpleMessage("Kunne ikke laste inn album"),
         "familyPlans":
