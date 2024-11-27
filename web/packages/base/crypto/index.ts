@@ -1,8 +1,10 @@
 /**
- * @file Higher level functions that use the ontology of Ente's requirements.
+ * @file Cryptographic operations. This is the highest layer of the crypto code
+ * hierarchy, and is meant to be used directly by the rest of our code.
  *
- * For more detailed documentation of specific functions, see the corresponding
- * function in `libsodium.ts`.
+ * --|
+ * --> For each function, more detailed documentation is in `libsodium.ts` <-
+ * --|
  *
  * [Note: Crypto code hierarchy]
  *
@@ -21,20 +23,17 @@
  * ensure that sodium.ready has been called before accessing libsodium's APIs,
  * thus all the functions it exposes are async.
  *
- * The highest layer is this file, `crypto/index.ts`. These are usually simple
- * compositions of functionality exposed by `crypto/libsodium.ts`, the primary
- * difference being that these functions try to talk in terms of higher-level
- * Ente specific goal we are trying to accomplish instead of the specific
- * underlying crypto algorithms.
+ * The highest layer is this file, `crypto/index.ts`. These are usually direct
+ * proxies (or simple compositions) of functionality exposed by
+ * `crypto/libsodium.ts`, but they automatically defer to a worker thread.
  *
- * There is an additional actor in play. Cryptographic operations like
- * encryption are CPU intensive and would cause the UI to stutter if used
- * directly on the main thread. To keep the UI smooth, we instead want to run
- * them in a web worker. However, sometimes we already _are_ running in a web
- * worker, and delegating to another worker is wasteful.
+ * Cryptographic operations like encryption are CPU intensive and would cause
+ * the UI to stutter if used directly on the main thread. To keep the UI smooth,
+ * we instead want to run them in a web worker. However, sometimes we already
+ * _are_ running in a web worker, and delegating to another worker is wasteful.
  *
- * To handle both these scenario, the potentially CPU intensive functions in
- * this file are split into the external API, and the underlying implementation
+ * To handle both these scenario, the implementation of the functions in this
+ * file are split into the external API, and the underlying implementation
  * (denoted by an "_" prefix). To avoid a circular dependency during webpack
  * imports, we need to keep the implementation functions in a separate file
  * (`ente-impl.ts`).
@@ -45,8 +44,8 @@
  * implementation function, but this time in the context of a web worker).
  *
  * Also, some code (e.g. the uploader) creates it own crypto worker instances,
- * and thus directly calls the functions in the web worker (it created) instead
- * of going through this file.
+ * and thus directly calls the functions in the web worker that it created
+ * instead of going through this file.
  */
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { type StateAddress } from "libsodium-wrappers-sumo";
@@ -372,4 +371,39 @@ export const boxSealOpen = async (
         ? ei._boxSealOpen(encryptedData, publicKey, secretKey)
         : sharedCryptoWorker().then((w) =>
               w.boxSealOpen(encryptedData, publicKey, secretKey),
+          );
+
+/**
+ * Derive a key by hashing the given {@link passphrase} using Argon 2id.
+ */
+export const deriveKey = async (
+    passphrase: string,
+    salt: string,
+    opsLimit: number,
+    memLimit: number,
+) =>
+    inWorker()
+        ? ei._deriveKey(passphrase, salt, opsLimit, memLimit)
+        : sharedCryptoWorker().then((w) =>
+              w.deriveKey(passphrase, salt, opsLimit, memLimit),
+          );
+
+/**
+ * Derive a sensitive key from the given {@link passphrase}.
+ */
+export const deriveSensitiveKey = async (passphrase: string, salt: string) =>
+    inWorker()
+        ? ei._deriveSensitiveKey(passphrase, salt)
+        : sharedCryptoWorker().then((w) =>
+              w.deriveSensitiveKey(passphrase, salt),
+          );
+
+/**
+ * Derive an interactive key from the given {@link passphrase}.
+ */
+export const deriveInteractiveKey = async (passphrase: string, salt: string) =>
+    inWorker()
+        ? ei._deriveInteractiveKey(passphrase, salt)
+        : sharedCryptoWorker().then((w) =>
+              w.deriveInteractiveKey(passphrase, salt),
           );

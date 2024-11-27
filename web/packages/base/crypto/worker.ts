@@ -36,6 +36,9 @@ export class CryptoWorker {
     generateKeyPair = ei._generateKeyPair;
     boxSeal = ei._boxSeal;
     boxSealOpen = ei._boxSealOpen;
+    deriveKey = ei._deriveKey;
+    deriveSensitiveKey = ei._deriveSensitiveKey;
+    deriveInteractiveKey = ei._deriveInteractiveKey;
 
     // TODO: -- AUDIT BELOW --
 
@@ -51,22 +54,6 @@ export class CryptoWorker {
         return libsodium.completeChunkHashing(hashState);
     }
 
-    async deriveKey(
-        passphrase: string,
-        salt: string,
-        opsLimit: number,
-        memLimit: number,
-    ) {
-        return libsodium.deriveKey(passphrase, salt, opsLimit, memLimit);
-    }
-
-    async deriveSensitiveKey(passphrase: string, salt: string) {
-        return libsodium.deriveSensitiveKey(passphrase, salt);
-    }
-
-    async deriveInteractiveKey(passphrase: string, salt: string) {
-        return libsodium.deriveInteractiveKey(passphrase, salt);
-    }
 
     async decryptB64(data: string, nonce: string, key: string) {
         return libsodium.decryptB64(data, nonce, key);
