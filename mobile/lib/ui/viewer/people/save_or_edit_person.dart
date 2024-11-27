@@ -203,6 +203,9 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                       ),
                     const SizedBox(height: 36),
                     TextFormField(
+                      keyboardType: TextInputType.name,
+                      textCapitalization: TextCapitalization.words,
+                      autocorrect: false,
                       onChanged: (value) {
                         if (_debounce?.isActive ?? false) _debounce?.cancel();
                         _debounce =
