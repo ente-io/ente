@@ -420,62 +420,104 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             };
         }
         case "setNormalCollections": {
-            const archivedCollectionIDs = deriveArchivedCollectionIDs(
-                action.collections,
+            const collections = action.collections;
+            const archivedCollectionIDs =
+                deriveArchivedCollectionIDs(collections);
+            const collectionSummaries = deriveCollectionSummaries(
+                state.user!,
+                collections,
+                state.files,
+                state.trashedFiles,
+                archivedCollectionIDs,
             );
+
+            // Revalidate the active view if needed.
+            let view = state.view;
+            let selectedCollectionSummaryID = state.selectedCollectionSummaryID;
+            if (state.view?.type == "albums") {
+                ({ view, selectedCollectionSummaryID } =
+                    deriveAlbumsViewAndSelectedID(
+                        collections,
+                        collectionSummaries,
+                        selectedCollectionSummaryID,
+                    ));
+            }
+
             return refreshingFilteredFilesIfShowingAlbums({
                 ...state,
-                collections: action.collections,
+                collections,
                 archivedCollectionIDs,
                 favoriteFileIDs: deriveFavoriteFileIDs(
-                    action.collections,
+                    collections,
                     state.files,
                 ),
                 allCollectionNameByID: createCollectionNameByID(
-                    action.collections.concat(state.hiddenCollections),
+                    collections.concat(state.hiddenCollections),
                 ),
-                collectionSummaries: deriveCollectionSummaries(
-                    state.user!,
-                    action.collections,
-                    state.files,
-                    state.trashedFiles,
-                    archivedCollectionIDs,
-                ),
+                collectionSummaries,
+                selectedCollectionSummaryID,
+                view,
             });
         }
+
         case "setAllCollections": {
-            const archivedCollectionIDs = deriveArchivedCollectionIDs(
-                action.collections,
+            const collections = action.collections;
+            const hiddenCollections = action.hiddenCollections;
+            const archivedCollectionIDs =
+                deriveArchivedCollectionIDs(collections);
+            const collectionSummaries = deriveCollectionSummaries(
+                state.user!,
+                collections,
+                state.files,
+                state.trashedFiles,
+                archivedCollectionIDs,
             );
+            const hiddenCollectionSummaries = deriveHiddenCollectionSummaries(
+                state.user!,
+                hiddenCollections,
+                state.hiddenFiles,
+            );
+
+            // Revalidate the active view if needed.
+            let view = state.view;
+            let selectedCollectionSummaryID = state.selectedCollectionSummaryID;
+            if (state.view?.type == "albums") {
+                ({ view, selectedCollectionSummaryID } =
+                    deriveAlbumsViewAndSelectedID(
+                        collections,
+                        collectionSummaries,
+                        selectedCollectionSummaryID,
+                    ));
+            } else if (state.view?.type == "hidden-albums") {
+                ({ view, selectedCollectionSummaryID } =
+                    deriveHiddenAlbumsViewAndSelectedID(
+                        hiddenCollections,
+                        hiddenCollectionSummaries,
+                        selectedCollectionSummaryID,
+                    ));
+            }
+
             return refreshingFilteredFilesIfShowingAlbums({
                 ...state,
-                collections: action.collections,
-                hiddenCollections: action.hiddenCollections,
+                collections,
+                hiddenCollections,
                 archivedCollectionIDs,
-                defaultHiddenCollectionIDs: deriveDefaultHiddenCollectionIDs(
-                    action.hiddenCollections,
-                ),
+                defaultHiddenCollectionIDs:
+                    deriveDefaultHiddenCollectionIDs(hiddenCollections),
                 favoriteFileIDs: deriveFavoriteFileIDs(
-                    action.collections,
+                    collections,
                     state.files,
                 ),
                 allCollectionNameByID: createCollectionNameByID(
-                    action.collections.concat(action.hiddenCollections),
+                    collections.concat(hiddenCollections),
                 ),
-                collectionSummaries: deriveCollectionSummaries(
-                    state.user!,
-                    action.collections,
-                    state.files,
-                    state.trashedFiles,
-                    archivedCollectionIDs,
-                ),
-                hiddenCollectionSummaries: deriveHiddenCollectionSummaries(
-                    state.user!,
-                    action.hiddenCollections,
-                    state.hiddenFiles,
-                ),
+                collectionSummaries,
+                hiddenCollectionSummaries,
+                selectedCollectionSummaryID,
+                view,
             });
         }
+
         case "setFiles": {
             const files = sortFiles(mergeMetadata(action.files));
             return refreshingFilteredFilesIfShowingAlbums({
@@ -495,6 +537,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ),
             });
         }
+
         case "fetchFiles": {
             const files = sortFiles(
                 mergeMetadata(
@@ -518,6 +561,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ),
             });
         }
+
         case "uploadFile": {
             const files = sortFiles([...state.files, action.file]);
             return refreshingFilteredFilesIfShowingAlbums({
@@ -539,6 +583,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ),
             });
         }
+
         case "setHiddenFiles": {
             const hiddenFiles = sortFiles(mergeMetadata(action.hiddenFiles));
             return refreshingFilteredFilesIfShowingHiddenAlbums({
@@ -552,6 +597,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ),
             });
         }
+
         case "fetchHiddenFiles": {
             const hiddenFiles = sortFiles(
                 mergeMetadata(
@@ -572,6 +618,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ),
             });
         }
+
         case "setTrashedFiles":
             return refreshingFilteredFilesIfShowingAlbums({
                 ...state,
@@ -584,6 +631,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.archivedCollectionIDs,
                 ),
             });
+
         case "setPeopleState": {
             const peopleState = action.peopleState;
 
@@ -606,6 +654,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 filteredFiles,
             };
         }
+
         case "markTempDeleted":
             return refreshingFilteredFilesIfShowingAlbumsOrHiddenAlbums({
                 ...state,
@@ -615,11 +664,13 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     ),
                 ),
             });
+
         case "clearTempDeleted":
             return refreshingFilteredFilesIfShowingAlbumsOrHiddenAlbums({
                 ...state,
                 tempDeletedFileIDs: new Set(),
             });
+
         case "markTempHidden":
             return refreshingFilteredFilesIfShowingAlbums({
                 ...state,
@@ -629,11 +680,13 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     ),
                 ),
             });
+
         case "clearTempHidden":
             return refreshingFilteredFilesIfShowingAlbums({
                 ...state,
                 tempHiddenFileIDs: new Set(),
             });
+
         case "showAll":
             return refreshingFilteredFilesIfShowingAlbums({
                 ...state,
@@ -647,6 +700,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 },
                 isInSearchMode: false,
             });
+
         case "showHidden":
             return refreshingFilteredFilesIfShowingHiddenAlbums({
                 ...state,
@@ -660,6 +714,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 },
                 isInSearchMode: false,
             });
+
         case "showAlbums": {
             const { view, selectedCollectionSummaryID } =
                 deriveAlbumsViewAndSelectedID(
@@ -676,6 +731,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 isInSearchMode: false,
             });
         }
+
         case "showNormalOrHiddenCollectionSummary":
             return refreshingFilteredFilesIfShowingAlbumsOrHiddenAlbums({
                 ...state,
@@ -698,6 +754,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 },
                 isInSearchMode: false,
             });
+
         case "showPeople": {
             const { view, extraVisiblePerson } = derivePeopleView(
                 state.peopleState,
@@ -717,6 +774,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 filteredFiles,
             };
         }
+
         case "showPerson": {
             const { view, extraVisiblePerson } = derivePeopleView(
                 state.peopleState,
@@ -736,6 +794,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 filteredFiles,
             };
         }
+
         case "setSearchResults":
             return {
                 ...state,
@@ -744,12 +803,14 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     ? action.searchResults
                     : state.filteredFiles,
             };
+
         case "enterSearchMode":
             return {
                 ...state,
                 isInSearchMode: true,
                 filteredFiles: state.searchResults ?? state.filteredFiles,
             };
+
         case "exitSearch":
             return {
                 ...state,
@@ -1038,7 +1099,8 @@ const findAllSectionVisibleFiles = (
 
 /**
  * Compute the {@link GalleryView} from its dependencies when we are switching
- * to (or back to) the "albums" view.
+ * to (or back to) the "albums" view, or the underlying collections might've
+ * changed.
  */
 const deriveAlbumsViewAndSelectedID = (
     collections: GalleryState["collections"],
@@ -1062,6 +1124,32 @@ const deriveAlbumsViewAndSelectedID = (
     };
 };
 
+/**
+ * Sibling of {@link deriveAlbumsViewAndSelectedID} for when we're in the hidden
+ * albums section.
+ */
+const deriveHiddenAlbumsViewAndSelectedID = (
+    hiddenCollections: GalleryState["hiddenCollections"],
+    hiddenCollectionSummaries: GalleryState["hiddenCollectionSummaries"],
+    selectedCollectionSummaryID: GalleryState["selectedCollectionSummaryID"],
+) => {
+    // Make sure that the last selected ID is still valid by searching for it.
+    const activeCollectionSummaryID = selectedCollectionSummaryID
+        ? hiddenCollectionSummaries.get(selectedCollectionSummaryID)?.id
+        : undefined;
+    const activeCollection = activeCollectionSummaryID
+        ? hiddenCollections.find(({ id }) => id == activeCollectionSummaryID)
+        : undefined;
+    return {
+        selectedCollectionSummaryID: activeCollectionSummaryID,
+        view: {
+            type: "hidden-albums" as const,
+            activeCollectionSummaryID:
+                activeCollectionSummaryID ?? HIDDEN_ITEMS_SECTION,
+            activeCollection,
+        },
+    };
+};
 /**
  * Compute the {@link GalleryView} from its dependencies when we are switching
  * to (or back to) the "people" view.
