@@ -214,53 +214,63 @@ class PersonSearchExample extends StatelessWidget {
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              ClipPath(
-                clipper: ShapeBorderClipper(
-                  shape: ContinuousRectangleBorder(
-                    borderRadius: BorderRadius.circular(82),
+          ClipPath(
+            clipper: ShapeBorderClipper(
+              shape: ContinuousRectangleBorder(
+                borderRadius: BorderRadius.circular(82),
+              ),
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                ClipPath(
+                  clipper: ShapeBorderClipper(
+                    shape: ContinuousRectangleBorder(
+                      borderRadius: BorderRadius.circular(82),
+                    ),
+                  ),
+                  child: Container(
+                    width: size,
+                    height: size,
+                    decoration: BoxDecoration(
+                      color: getEnteColorScheme(context).strokeFaint,
+                    ),
                   ),
                 ),
-                child: Container(
-                  width: size,
-                  height: size,
-                  decoration: BoxDecoration(
-                    color: getEnteColorScheme(context).strokeFaint,
-                  ),
+                SizedBox(
+                  width: size - 2,
+                  height: size - 2,
+                  child: searchResult.previewThumbnail() != null
+                      ? ClipPath(
+                          clipper: ShapeBorderClipper(
+                            shape: ContinuousRectangleBorder(
+                              borderRadius: BorderRadius.circular(81),
+                            ),
+                          ),
+                          child: searchResult.type() != ResultType.faces
+                              ? ThumbnailWidget(
+                                  searchResult.previewThumbnail()!,
+                                  shouldShowSyncStatus: false,
+                                )
+                              : FaceSearchResult(searchResult),
+                        )
+                      : ClipPath(
+                          clipper: ShapeBorderClipper(
+                            shape: ContinuousRectangleBorder(
+                              borderRadius: BorderRadius.circular(81),
+                            ),
+                          ),
+                          child: const NoThumbnailWidget(
+                            addBorder: false,
+                          ),
+                        ),
                 ),
-              ),
-              SizedBox(
-                width: size - 2,
-                height: size - 2,
-                child: searchResult.previewThumbnail() != null
-                    ? ClipPath(
-                        clipper: ShapeBorderClipper(
-                          shape: ContinuousRectangleBorder(
-                            borderRadius: BorderRadius.circular(80),
-                          ),
-                        ),
-                        child: searchResult.type() != ResultType.faces
-                            ? ThumbnailWidget(
-                                searchResult.previewThumbnail()!,
-                                shouldShowSyncStatus: false,
-                              )
-                            : FaceSearchResult(searchResult),
-                      )
-                    : ClipPath(
-                        clipper: ShapeBorderClipper(
-                          shape: ContinuousRectangleBorder(
-                            borderRadius: BorderRadius.circular(80),
-                          ),
-                        ),
-                        child: const NoThumbnailWidget(
-                          addBorder: false,
-                        ),
-                      ),
-              ),
-            ],
+              ],
+            ),
           ),
           isCluster
               ? GestureDetector(
