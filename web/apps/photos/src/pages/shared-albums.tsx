@@ -422,13 +422,7 @@ export default function PublicCollectionGallery() {
             return;
         }
 
-        try {
-            await syncWithRemote();
-            hideLoadingBar();
-        } catch (e) {
-            log.error("Failed to verifyLinkPassword", e);
-            setFieldError(t("generic_error_retry"));
-        }
+        await syncWithRemote();
     };
 
     if (loading) {
