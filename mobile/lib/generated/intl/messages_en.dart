@@ -1070,6 +1070,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Your session has expired. Please login again."),
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>"),
+        "loginWithTOTP":
+            MessageLookupByLibrary.simpleMessage("Login with TOTP"),
         "logout": MessageLookupByLibrary.simpleMessage("Logout"),
         "logsDialogBody": MessageLookupByLibrary.simpleMessage(
             "This will send across logs to help us debug your issue. Please note that file names will be included to help track issues with specific files."),

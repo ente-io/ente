@@ -156,6 +156,7 @@
   "twoFactorAuthTitle": "Two-factor authentication",
   "passkeyAuthTitle": "Passkey verification",
   "verifyPasskey": "Verify passkey",
+  "loginWithTOTP": "Login with TOTP",
   "recoverAccount": "Recover account",
   "enterRecoveryKeyHint": "Enter your recovery key",
   "recover": "Recover",

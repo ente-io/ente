@@ -8719,6 +8719,16 @@ class S {
     );
   }
 
+  /// `Login with TOTP`
+  String get loginWithTOTP {
+    return Intl.message(
+      'Login with TOTP',
+      name: 'loginWithTOTP',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Verification is still pending`
   String get passKeyPendingVerification {
     return Intl.message(
