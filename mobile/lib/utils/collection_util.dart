@@ -81,13 +81,6 @@ Future<void> requestPermissionToOpenLinksInApp(
           data: 'package:io.ente.photos.fdroid',
         );
         await intent.launch();
-      } else if (packageName == 'io.ente.photos.independent.debug') {
-        intent = const AndroidIntent(
-          action: 'android.settings.APP_OPEN_BY_DEFAULT_SETTINGS',
-          package: 'io.ente.photos.independent.debug',
-          data: 'package:io.ente.photos.independent.debug',
-        );
-        await intent.launch();
       }
       await localSettings.setConfiguredLinksInAppPermissions(true);
       logger.info("In-app links permissions granted");
