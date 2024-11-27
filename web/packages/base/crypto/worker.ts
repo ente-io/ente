@@ -105,13 +105,6 @@ export class CryptoWorker {
         return libsodium.generateSubKey(key, subKeyLength, subKeyID, context);
     }
 
-    async fromUTF8(string: string) {
-        return libsodium.fromUTF8(string);
-    }
-    async toUTF8(data: string) {
-        return libsodium.toUTF8(data);
-    }
-
     async toB64(data: Uint8Array) {
         return libsodium.toB64(data);
     }

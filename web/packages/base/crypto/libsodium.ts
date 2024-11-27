@@ -742,12 +742,12 @@ export const boxSealOpen = async (
  * @returns The base64 representation of a 256-bit key suitable for being used
  * with libsodium's secretbox APIs.
  */
-export async function deriveKey(
+export const deriveKey = async (
     passphrase: string,
     salt: string,
     opsLimit: number,
     memLimit: number,
-) {
+) => {
     await sodium.ready;
     return await toB64(
         sodium.crypto_pwhash(
@@ -759,7 +759,7 @@ export async function deriveKey(
             sodium.crypto_pwhash_ALG_ARGON2ID13,
         ),
     );
-}
+};
 
 export async function deriveSensitiveKey(passphrase: string, salt: string) {
     await sodium.ready;
