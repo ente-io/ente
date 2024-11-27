@@ -8,11 +8,13 @@ import {
     useIsTouchscreen,
 } from "@/base/components/utils/hooks";
 import { sharedCryptoWorker } from "@/base/crypto";
+import { isHTTP401Error } from "@/base/http";
 import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
 import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
 import type { Collection } from "@/media/collection";
 import { type EnteFile, mergeMetadata } from "@/media/file";
+import { verifyPublicCollectionPassword } from "@/new/albums/services/publicCollection";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
@@ -72,7 +74,6 @@ import {
     removePublicFiles,
     savePublicCollectionPassword,
     syncPublicFiles,
-    verifyPublicCollectionPassword,
 } from "services/publicCollectionService";
 import uploadManager from "services/upload/uploadManager";
 import {
@@ -400,10 +401,10 @@ export default function PublicCollectionGallery() {
     ) => {
         try {
             const cryptoWorker = await sharedCryptoWorker();
-            let hashedPassword: string = null;
+            let passwordHash: string = null;
             try {
                 const publicUrl = publicCollection.publicURLs[0];
-                hashedPassword = await cryptoWorker.deriveKey(
+                passwordHash = await cryptoWorker.deriveKey(
                     password,
                     publicUrl.nonce,
                     publicUrl.opsLimit,
@@ -417,8 +418,8 @@ export default function PublicCollectionGallery() {
             const collectionUID = getPublicCollectionUID(token.current);
             try {
                 const jwtToken = await verifyPublicCollectionPassword(
+                    passwordHash,
                     token.current,
-                    hashedPassword,
                 );
                 passwordJWTToken.current = jwtToken;
                 downloadManager.setPublicAlbumsCredentials(
@@ -427,8 +428,7 @@ export default function PublicCollectionGallery() {
                 );
                 await savePublicCollectionPassword(collectionUID, jwtToken);
             } catch (e) {
-                const parsedError = parseSharingErrorCodes(e);
-                if (parsedError.message === CustomError.TOKEN_EXPIRED) {
+                if (isHTTP401Error(e)) {
                     setFieldError(t("INCORRECT_PASSPHRASE"));
                     return;
                 }

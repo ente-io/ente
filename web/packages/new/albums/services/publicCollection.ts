@@ -4,11 +4,14 @@ import { z } from "zod";
 
 /**
  * Verify with remote that the password (hash) entered by the user is the same
- * as the password that was set by the person who shared the album. If they
- * match, remote will provide us with another token that can be used to make API
- * calls for this password protected public album.
+ * as the password that was set by the person who shared the album.
  *
- * See: [Note: Password token for public albums requests]
+ * If they match, remote will provide us with another token that can be used to
+ * make API calls for this password protected public album. See: [Note: Password
+ * token for public albums requests].
+ *
+ * If they don't match, or if {@link accessToken} itself has expired, then
+ * remote will return a HTTP 401.
  *
  * @param passwordHash The hash of the password entered by the user.
  *
