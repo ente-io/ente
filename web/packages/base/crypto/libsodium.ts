@@ -721,6 +721,27 @@ export const boxSealOpen = async (
     );
 };
 
+/**
+ * Derive a key by hashing the given {@link passphrase} using Argon 2id.
+ *
+ * While the underlying primitive is a password hash (e.g for its storage), this
+ * function is also meant for key derivation using a low-entropy input by
+ * deriving a longer hash from the user's human chosen passphrase.
+ *
+ * The returned key can be used with the various *Box encryption routines.
+ *
+ * @param passphrase The password / passphrase to hash (normal UTF-8 string).
+ *
+ * @param salt Base64 string representing the salt to use when hashing.
+ *
+ * @param opsLimit Operation limit. The maximum amount of computations to
+ * perform.
+ *
+ * @param memLimit Memory limit. The maximum amount of RAM to use.
+ *
+ * @returns The base64 representation of a 256-bit key suitable for being used
+ * with libsodium's secretbox APIs.
+ */
 export async function deriveKey(
     passphrase: string,
     salt: string,
