@@ -549,7 +549,9 @@ export default function PublicCollectionGallery() {
                     uploadCollection={publicCollection}
                     setLoading={setBlockingLoad}
                     setShouldDisableDropzone={setShouldDisableDropzone}
-                    onUploadFile={(file) => sortFiles([...publicFiles, file])}
+                    onUploadFile={(file) =>
+                        setPublicFiles(sortFiles([...publicFiles, file]))
+                    }
                     uploadTypeSelectorView={uploadTypeSelectorView}
                     closeUploadTypeSelector={closeUploadTypeSelectorView}
                     showSessionExpiredMessage={showPublicLinkExpiredMessage}
