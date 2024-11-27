@@ -120,16 +120,17 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
         _showErrorBanner
             ? HeaderErrorWidget(error: _syncError)
             : const SizedBox.shrink(),
-        _showMlBanner && !_showErrorBanner
+        // _showMlBanner && !_showErrorBanner
+        true
             ? Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 2.0, vertical: 12),
                 child: NotificationWidget(
                   startIcon: Icons.offline_bolt,
                   actionIcon: Icons.arrow_forward,
-                  text:
-                      S.of(context).enableMachineLearningBanner,
+                  text: S.of(context).enableMachineLearningBanner,
                   type: NotificationType.greenBanner,
+                  mainTextStyle: darkTextTheme.smallMuted,
                   onTap: () async => {
                     await routeToPage(
                       context,
