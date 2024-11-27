@@ -122,8 +122,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                                     child: snapshot.hasData
                                         ? PersonFaceWidget(
                                             key: ValueKey(
-                                                person?.data.avatarFaceID ??
-                                                    "",),
+                                              person?.data.avatarFaceID ?? "",
+                                            ),
                                             personFile,
                                             clusterID: personClusterID,
                                             personId: person!.remoteID,
@@ -166,10 +166,6 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                                             setState(() {
                                               person = result;
                                             });
-                                            showToast(
-                                              context,
-                                              "Person avatar updated ${person!.data.avatarFaceID ?? 'empty'}",
-                                            );
                                             Bus.instance.fire(
                                               PeopleChangedEvent(),
                                             );
@@ -207,6 +203,9 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                       ),
                     const SizedBox(height: 36),
                     TextFormField(
+                      keyboardType: TextInputType.name,
+                      textCapitalization: TextCapitalization.words,
+                      autocorrect: false,
                       onChanged: (value) {
                         if (_debounce?.isActive ?? false) _debounce?.cancel();
                         _debounce =
