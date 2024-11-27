@@ -86,7 +86,9 @@ const ToggleEmailMFA: React.FC<ToggleEmailMFAProps> = ({
 
             handleToggleEmailMFA(enable); // Notify parent component of successful action with status
             handleClose(); // Close dialog on successful action
-            console.log(`Email MFA ${enable ? "enabled" : "disabled"} successfully`);
+            console.log(
+                `Email MFA ${enable ? "enabled" : "disabled"} successfully`,
+            );
         } catch (error) {
             if (error instanceof Error) {
                 alert(error.message);
@@ -130,7 +132,8 @@ const ToggleEmailMFA: React.FC<ToggleEmailMFAProps> = ({
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description">
-                        Do you want to enable or disable Email MFA for this account?
+                        Do you want to enable or disable Email MFA for this
+                        account?
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions sx={{ justifyContent: "center" }}>

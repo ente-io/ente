@@ -17,8 +17,8 @@ import ChangeEmail from "./ChangeEmail";
 import DeleteAccount from "./DeleteAccont";
 import Disable2FA from "./Disable2FA";
 import DisablePasskeys from "./DisablePasskeys";
-import UpdateSubscription from "./UpdateSubscription";
 import ToggleEmailMFA from "./ToggleEmailMFA";
+import UpdateSubscription from "./UpdateSubscription";
 
 export interface UserData {
     User: Record<string, string>;
@@ -46,7 +46,9 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
     React.useEffect(() => {
         setTwoFactorEnabled(userData?.Security["Two factor 2FA"] === "Enabled");
         setEmail2FAEnabled(userData?.Security["Email MFA"] === "Enabled");
-        setCanDisableEmailMFA(userData?.Security["Can Disable EmailMFA"] === "Yes");
+        setCanDisableEmailMFA(
+            userData?.Security["Can Disable EmailMFA"] === "Yes",
+        );
     }, [userData]);
 
     const handleEditEmail = () => setChangeEmailOpen(true);
@@ -91,7 +93,7 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                 open={email2FAOpen}
                 handleClose={() => setEmail2FAToggleOpen(false)}
                 handleToggleEmailMFA={(status) => setEmail2FAToggleOpen(status)}
-                /> 
+            />
             <UpdateSubscription
                 open={updateSubscriptionOpen}
                 onClose={() => setUpdateSubscriptionOpen(false)}
@@ -209,46 +211,46 @@ const DataTable: React.FC<DataTableProps> = ({
                 {Object.entries(data)
                     .filter(([label]) => label !== "Can Disable EmailMFA")
                     .map(([label, value], index) => (
-                    <TableRow key={label}>
-                        <TableCell
-                            component="th"
-                            scope="row"
-                            style={{
-                                padding: "16px",
-                                borderBottom:
-                                    index === 1 || index === 0
-                                        ? "1px solid rgba(224, 224, 224, 1)"
-                                        : "none",
-                            }}
-                        >
-                            {label}
-                        </TableCell>
-                        <TableCell
-                            align="right"
-                            style={{
-                                padding: "10px",
-                                borderBottom:
-                                    index === 1 || index === 0
-                                        ? "1px solid rgba(224, 224, 224, 1)"
-                                        : "none",
-                            }}
-                        >
-                            {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
-                            {renderTableCellContent(
-                                label,
-                                value,
-                                onEditEmail,
-                                onDisablePasskeys,
-                                canDisableEmailMFA,
-                                twoFactorEnabled,
-                                setTwoFactorEnabled,
-                                setDisable2FAOpen,
-                                email2FAEnabled,
-                                setEmail2FAToggleOpen,
-                            )}
-                        </TableCell>
-                    </TableRow>
-                ))}
+                        <TableRow key={label}>
+                            <TableCell
+                                component="th"
+                                scope="row"
+                                style={{
+                                    padding: "16px",
+                                    borderBottom:
+                                        index === 1 || index === 0
+                                            ? "1px solid rgba(224, 224, 224, 1)"
+                                            : "none",
+                                }}
+                            >
+                                {label}
+                            </TableCell>
+                            <TableCell
+                                align="right"
+                                style={{
+                                    padding: "10px",
+                                    borderBottom:
+                                        index === 1 || index === 0
+                                            ? "1px solid rgba(224, 224, 224, 1)"
+                                            : "none",
+                                }}
+                            >
+                                {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
+                                {renderTableCellContent(
+                                    label,
+                                    value,
+                                    onEditEmail,
+                                    onDisablePasskeys,
+                                    canDisableEmailMFA,
+                                    twoFactorEnabled,
+                                    setTwoFactorEnabled,
+                                    setDisable2FAOpen,
+                                    email2FAEnabled,
+                                    setEmail2FAToggleOpen,
+                                )}
+                            </TableCell>
+                        </TableRow>
+                    ))}
             </TableBody>
         </Table>
     </TableContainer>
@@ -335,41 +337,63 @@ const renderTableCellContent = (
                     )}
                 </Box>
             );
-            case "Email MFA":
-                return (
-                    <Box
-                        sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "right",
-                            width: "100%",
-                            paddingRight: "50px",
-                        }}
-                    >
-                        <Typography sx={{ marginRight: "1px" }}>{value}</Typography>
-                        {canToggleEmailMFA  && (
-                            <Switch
-                                checked={email2FAEnabled}
-                                onChange={(e) => {
-                                    setEmail2FAToggleOpen(true);
-                                }}
-                                sx={{
-                                    "& .MuiSwitch-switchBase.Mui-checked": {
-                                        color: "#00B33C",
-                                        "&:hover": {
-                                            backgroundColor:
-                                                "rgba(0, 179, 60, 0.08)",
-                                        },
+        // If Expirty time (in format 30/1/2026, 11:12:53 am) is greatheer than current date, show it in bold green
+        case "Expiry time": {
+            const expiryTime = new Date(
+                Date.parse(
+                    value.replace(
+                        /(\d+)\/(\d+)\/(\d+), (\d+:\d+:\d+ \w+)/,
+                        "$2/$1/$3 $4",
+                    ),
+                ),
+            );
+            const currentTime = new Date();
+            return (
+                <Typography
+                    sx={{
+                        color: expiryTime > currentTime ? "#00B33C" : "red",
+                    }}
+                >
+                    {value}
+                </Typography>
+            );
+        }
+        case "Email MFA":
+            return (
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "right",
+                        width: "100%",
+                        paddingRight: "50px",
+                    }}
+                >
+                    <Typography sx={{ marginRight: "1px" }}>{value}</Typography>
+                    {canToggleEmailMFA && (
+                        <Switch
+                            checked={email2FAEnabled}
+                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                            onChange={(_) => {
+                                setEmail2FAToggleOpen(true);
+                            }}
+                            sx={{
+                                "& .MuiSwitch-switchBase.Mui-checked": {
+                                    color: "#00B33C",
+                                    "&:hover": {
+                                        backgroundColor:
+                                            "rgba(0, 179, 60, 0.08)",
                                     },
-                                    "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
-                                        {
-                                            backgroundColor: "#00B33C",
-                                        },
-                                }}
-                            />
-                        )}
-                    </Box>
-                );
+                                },
+                                "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
+                                    {
+                                        backgroundColor: "#00B33C",
+                                    },
+                            }}
+                        />
+                    )}
+                </Box>
+            );
         default:
             return <Typography>{value}</Typography>;
     }

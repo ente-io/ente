@@ -190,7 +190,10 @@ const App: React.FC = () => {
                             0) > 0
                             ? "Enabled"
                             : "Disabled",
-                    "Can Disable EmailMFA": userDataResponse.details?.profileData.canDisableEmailMFA ? "Yes":"No",
+                    "Can Disable EmailMFA": userDataResponse.details
+                        ?.profileData.canDisableEmailMFA
+                        ? "Yes"
+                        : "No",
                     AuthCodes: `${userDataResponse.authCodes ?? 0}`,
                 },
             };
