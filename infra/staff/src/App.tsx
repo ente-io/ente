@@ -13,6 +13,7 @@ import type { UserData } from "./components/UserComponent";
 import UserComponent from "./components/UserComponent";
 import duckieimage from "./components/duckie.png";
 import { apiOrigin } from "./services/support";
+import TokensTableComponent from "./components/TokenTableComponent";
 
 export let email = "";
 export let token = "";
@@ -312,6 +313,7 @@ const App: React.FC = () => {
                                 <Tab label="User" />
                                 <Tab label="Family" />
                                 <Tab label="Bonuses" />
+                                <Tab label="Devices" />
                             </Tabs>
                         </Box>
                         <Box
@@ -337,6 +339,11 @@ const App: React.FC = () => {
                             {tabValue === 2 && userData && (
                                 <div>
                                     <StorageBonusTableComponent />
+                                </div>
+                            )}
+                            {tabValue === 3 && userData && (
+                                <div>
+                                    <TokensTableComponent />
                                 </div>
                             )}
                         </Box>
