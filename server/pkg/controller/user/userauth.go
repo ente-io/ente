@@ -379,10 +379,10 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 	if err != nil {
 		return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 	}
+	var passKeySessionID, twoFactorSessionID string
 
-	// if the user has passkeys, we will prioritize that over secret TOTP
 	if hasPasskeys {
-		passKeySessionID, err := auth.GenerateURLSafeRandomString(PassKeySessionIDLength)
+		passKeySessionID, err = auth.GenerateURLSafeRandomString(PassKeySessionIDLength)
 		if err != nil {
 			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 		}
@@ -390,20 +390,23 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 		if err != nil {
 			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 		}
-		return ente.EmailAuthorizationResponse{ID: userID, PasskeySessionID: passKeySessionID}, nil
-	} else {
-		if isTwoFactorEnabled {
-			twoFactorSessionID, err := auth.GenerateURLSafeRandomString(TwoFactorSessionIDLength)
-			if err != nil {
-				return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
-			}
-			err = c.TwoFactorRepo.AddTwoFactorSession(userID, twoFactorSessionID, time.Microseconds()+TwoFactorValidityDurationInMicroSeconds)
-			if err != nil {
-				return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
-			}
-			return ente.EmailAuthorizationResponse{ID: userID, TwoFactorSessionID: twoFactorSessionID}, nil
+	}
+	if isTwoFactorEnabled {
+		twoFactorSessionID, err = auth.GenerateURLSafeRandomString(TwoFactorSessionIDLength)
+		if err != nil {
+			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 		}
-
+		err = c.TwoFactorRepo.AddTwoFactorSession(userID, twoFactorSessionID, time.Microseconds()+TwoFactorValidityDurationInMicroSeconds)
+		if err != nil {
+			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
+		}
+	}
+	if hasPasskeys && isTwoFactorEnabled {
+		return ente.EmailAuthorizationResponse{ID: userID, PasskeySessionID: passKeySessionID, TwoFactorSessionIDV2: twoFactorSessionID}, nil
+	} else if hasPasskeys {
+		return ente.EmailAuthorizationResponse{ID: userID, PasskeySessionID: passKeySessionID}, nil
+	} else if isTwoFactorEnabled {
+		return ente.EmailAuthorizationResponse{ID: userID, TwoFactorSessionID: twoFactorSessionID}, nil
 	}
 
 	token, err := auth.GenerateURLSafeRandomString(TokenLength)
