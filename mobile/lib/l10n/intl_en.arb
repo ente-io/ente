@@ -1233,6 +1233,7 @@
   "waitingForVerification": "Waiting for verification...",
   "passkey": "Passkey",
   "passkeyAuthTitle": "Passkey verification",
+  "loginWithTOTP": "Login with TOTP",
   "passKeyPendingVerification": "Verification is still pending",
   "loginSessionExpired": "Session expired",
   "loginSessionExpiredDetails": "Your session has expired. Please login again.",
