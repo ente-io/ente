@@ -21,6 +21,7 @@ import {
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
+import { type PublicAlbumsCredentials }from "@/base/http";
 
 export interface LivePhotoSourceURL {
     image: () => Promise<string | undefined>;
@@ -145,14 +146,8 @@ class DownloadManager {
      * Set the credentials that should be used for download files when we're
      * running in the context of the public albums app.
      */
-    setPublicAlbumsCredentials(
-        token: string,
-        passwordToken: string | undefined,
-    ) {
-        this.publicAlbumsCredentials = {
-            accessToken: token,
-            accessTokenJWT: passwordToken,
-        };
+    setPublicAlbumsCredentials(credentials: PublicAlbumsCredentials) {
+        this.publicAlbumsCredentials = credentials;
     }
 
     /**
@@ -688,11 +683,6 @@ const photos_downloadFile = async (file: EnteFile): Promise<Response> => {
 
     return retryEnsuringHTTPOk(getFile);
 };
-
-interface PublicAlbumsCredentials {
-    accessToken: string;
-    accessTokenJWT: string | undefined;
-}
 
 /**
  * The various publicAlbums_* functions are used for the actual downloads when

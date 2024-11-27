@@ -27,7 +27,7 @@ export const publicRequestHeaders = () => ({
 /**
  * A set of credentials needed to make public collections related API requests.
  */
-interface PublicAlbumsCredentials {
+export interface PublicAlbumsCredentials {
     /**
      * An access token that does the same job as the "X-Auth-Token" for usual
      * authenticated API requests, except it will be passed as the

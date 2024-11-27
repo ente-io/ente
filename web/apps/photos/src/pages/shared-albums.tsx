@@ -243,10 +243,9 @@ export default function PublicCollectionGallery() {
                         ? await cryptoWorker.toB64(bs58.decode(ck))
                         : await cryptoWorker.fromHex(ck);
                 token.current = t;
-                downloadManager.setPublicAlbumsCredentials(
-                    token.current,
-                    undefined,
-                );
+                downloadManager.setPublicAlbumsCredentials({
+                    accessToken: token.current,
+                });
                 await updateShouldDisableCFUploadProxy();
                 collectionKey.current = dck;
                 url.current = window.location.href;
@@ -270,10 +269,10 @@ export default function PublicCollectionGallery() {
                     setPublicFiles(localPublicFiles);
                     passwordJWTToken.current =
                         await getLocalPublicCollectionPassword(collectionUID);
-                    downloadManager.setPublicAlbumsCredentials(
-                        token.current,
-                        passwordJWTToken.current,
-                    );
+                    downloadManager.setPublicAlbumsCredentials({
+                        accessToken: token.current,
+                        accessTokenJWT: passwordJWTToken.current,
+                    });
                 }
                 await syncWithRemote();
             } finally {
@@ -406,10 +405,10 @@ export default function PublicCollectionGallery() {
                 token.current,
             );
             passwordJWTToken.current = jwtToken;
-            downloadManager.setPublicAlbumsCredentials(
-                token.current,
-                passwordJWTToken.current,
-            );
+            downloadManager.setPublicAlbumsCredentials({
+                accessToken: token.current,
+                accessTokenJWT: passwordJWTToken.current,
+            });
             const collectionUID = getPublicCollectionUID(token.current);
             await savePublicCollectionPassword(collectionUID, jwtToken);
         } catch (e) {
