@@ -14,7 +14,7 @@ import { downloadManager } from "@/gallery/services/download";
 import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
 import type { Collection } from "@/media/collection";
 import { type EnteFile, mergeMetadata } from "@/media/file";
-import { verifyPublicCollectionPassword } from "@/new/albums/services/publicCollection";
+import { verifyPublicAlbumPassword } from "@/new/albums/services/publicCollection";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
@@ -400,45 +400,34 @@ export default function PublicCollectionGallery() {
         setFieldError,
     ) => {
         try {
-            const cryptoWorker = await sharedCryptoWorker();
-            let passwordHash: string = null;
-            try {
-                const publicUrl = publicCollection.publicURLs[0];
-                passwordHash = await cryptoWorker.deriveKey(
-                    password,
-                    publicUrl.nonce,
-                    publicUrl.opsLimit,
-                    publicUrl.memLimit,
-                );
-            } catch (e) {
-                log.error("failed to derive key for verifyLinkPassword", e);
-                setFieldError(`${t("generic_error_retry")} ${e.message}`);
-                return;
-            }
+            const jwtToken = await verifyPublicAlbumPassword(
+                publicCollection.publicURLs[0]!,
+                password,
+                token.current,
+            );
+            passwordJWTToken.current = jwtToken;
+            downloadManager.setPublicAlbumsCredentials(
+                token.current,
+                passwordJWTToken.current,
+            );
             const collectionUID = getPublicCollectionUID(token.current);
-            try {
-                const jwtToken = await verifyPublicCollectionPassword(
-                    passwordHash,
-                    token.current,
-                );
-                passwordJWTToken.current = jwtToken;
-                downloadManager.setPublicAlbumsCredentials(
-                    token.current,
-                    passwordJWTToken.current,
-                );
-                await savePublicCollectionPassword(collectionUID, jwtToken);
-            } catch (e) {
-                if (isHTTP401Error(e)) {
-                    setFieldError(t("INCORRECT_PASSPHRASE"));
-                    return;
-                }
-                throw e;
+            await savePublicCollectionPassword(collectionUID, jwtToken);
+        } catch (e) {
+            log.error("Failed to verifyLinkPassword", e);
+            if (isHTTP401Error(e)) {
+                setFieldError(t("INCORRECT_PASSPHRASE"));
+            } else {
+                setFieldError(t("generic_error_retry"));
             }
+            return;
+        }
+
+        try {
             await syncWithRemote();
             hideLoadingBar();
         } catch (e) {
-            log.error("failed to verifyLinkPassword", e);
-            setFieldError(`${t("generic_error_retry")} ${e.message}`);
+            log.error("Failed to verifyLinkPassword", e);
+            setFieldError(t("generic_error_retry"));
         }
     };
 

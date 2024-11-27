@@ -1,29 +1,44 @@
+import { deriveKey } from "@/base/crypto";
 import { authenticatedPublicAlbumsRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
+import type { PublicURL } from "@/media/collection";
 import { z } from "zod";
 
 /**
- * Verify with remote that the password (hash) entered by the user is the same
- * as the password that was set by the person who shared the album.
+ * Verify with remote that the password entered by the user is the same as the
+ * password that was set by the person who shared the public album.
  *
- * If they match, remote will provide us with another token that can be used to
- * make API calls for this password protected public album. See: [Note: Password
- * token for public albums requests].
+ * The verification is done on a password hash that we check with remote. If
+ * they match, remote will provide us with another token that can be used to
+ * make API calls for this password protected public album.
  *
  * If they don't match, or if {@link accessToken} itself has expired, then
  * remote will return a HTTP 401.
  *
- * @param passwordHash The hash of the password entered by the user.
+ * @param publicURL Data about the public album.
+ *
+ * @param password The password entered by the user.
  *
  * @param token The access token to make API requests for a particular public
  * album.
  *
- * @returns The password token ("accessTokenJWT").
+ * @returns A accessTokenJWT.
+ *
+ * See [Note: Password token for public albums requests]
  */
-export const verifyPublicCollectionPassword = async (
-    passwordHash: string,
+export const verifyPublicAlbumPassword = async (
+    publicURL: PublicURL,
+    password: string,
     accessToken: string,
 ) => {
+    const passwordHash = await deriveKey(
+        password,
+        // TODO: Fix the types to not require the bang.
+        publicURL.nonce!,
+        publicURL.opsLimit!,
+        publicURL.memLimit!,
+    );
+
     const res = await fetch(
         await apiURL("/public-collection/verify-password"),
         {
