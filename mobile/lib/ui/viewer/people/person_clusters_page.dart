@@ -153,12 +153,10 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
 
 class PersonClustersWidget extends StatefulWidget {
   final PersonEntity person;
-  final double? height;
 
   const PersonClustersWidget(
     this.person, {
     super.key,
-    this.height,
   });
 
   @override
@@ -194,11 +192,10 @@ class _PersonClustersWidgetState extends State<PersonClustersWidget> {
               // Calculate expected height based on number of rows
               final int rowCount = (keys.length / crossAxisCount).ceil();
               // Thumbnail height + text height + spacing
-              final double expectedHeight =
-                  widget.height ?? (rowCount * (110 + 30 + 8));
+              final double expectedHeight = (rowCount * (110 + 30 + 8));
 
               return SizedBox(
-                height: expectedHeight,
+                height: expectedHeight + 500,
                 child: GridView.builder(
                   physics:
                       const NeverScrollableScrollPhysics(), // Disable scrolling
