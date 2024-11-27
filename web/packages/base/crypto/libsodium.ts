@@ -783,19 +783,22 @@ export const deriveSensitiveKey = async (passphrase: string, salt: string) => {
         }
     }
     throw new Error("Failed to derive key: Memory limit exceeded");
-}
+};
 
 /**
  * A variant of {@link deriveSensitiveKey} for deriving an alternative key with
  * parameters suitable for interactive use.
  */
-export const deriveInteractiveKey = async (passphrase: string, salt: string) => {
+export const deriveInteractiveKey = async (
+    passphrase: string,
+    salt: string,
+) => {
     const opsLimit = sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE;
     const memLimit = sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE;
 
     const key = await deriveKey(passphrase, salt, opsLimit, memLimit);
     return { key, opsLimit, memLimit };
-}
+};
 
 export async function generateEncryptionKey() {
     await sodium.ready;

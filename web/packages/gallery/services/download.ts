@@ -7,9 +7,11 @@ import {
     initChunkDecryption,
 } from "@/base/crypto";
 import {
+    authenticatedPublicAlbumsRequestHeaders,
     authenticatedRequestHeaders,
     publicRequestHeaders,
     retryEnsuringHTTPOk,
+    type PublicAlbumsCredentials,
 } from "@/base/http";
 import { ensureAuthToken } from "@/base/local-user";
 import log from "@/base/log";
@@ -21,7 +23,6 @@ import {
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import { type PublicAlbumsCredentials }from "@/base/http";
 
 export interface LivePhotoSourceURL {
     image: () => Promise<string | undefined>;
@@ -690,13 +691,14 @@ const photos_downloadFile = async (file: EnteFile): Promise<Response> => {
  */
 const publicAlbums_downloadThumbnail = async (
     file: EnteFile,
-    { accessToken, accessTokenJWT }: PublicAlbumsCredentials,
+    credentials: PublicAlbumsCredentials,
 ) => {
     const customOrigin = await customAPIOrigin();
 
     const getThumbnail = async () => {
         if (customOrigin) {
             // See: [Note: Passing credentials for self-hosted file fetches]
+            const { accessToken, accessTokenJWT } = credentials;
             const params = new URLSearchParams({
                 accessToken,
                 ...(accessTokenJWT ? { accessTokenJWT } : {}),
@@ -711,13 +713,8 @@ const publicAlbums_downloadThumbnail = async (
             return fetch(
                 `https://public-albums.ente.io/preview/?fileID=${file.id}`,
                 {
-                    headers: {
-                        ...publicRequestHeaders(),
-                        "X-Auth-Access-Token": accessToken,
-                        ...(accessTokenJWT
-                            ? { "X-Auth-Access-Token-JWT": accessTokenJWT }
-                            : {}),
-                    },
+                    headers:
+                        authenticatedPublicAlbumsRequestHeaders(credentials),
                 },
             );
         }
@@ -729,13 +726,14 @@ const publicAlbums_downloadThumbnail = async (
 
 const publicAlbums_downloadFile = async (
     file: EnteFile,
-    { accessToken, accessTokenJWT }: PublicAlbumsCredentials,
+    credentials: PublicAlbumsCredentials,
 ) => {
     const customOrigin = await customAPIOrigin();
 
-    // See: [Note: Passing credentials for self-hosted file fetches]
     const getFile = () => {
         if (customOrigin) {
+            // See: [Note: Passing credentials for self-hosted file fetches]
+            const { accessToken, accessTokenJWT } = credentials;
             const params = new URLSearchParams({
                 accessToken,
                 ...(accessTokenJWT ? { accessTokenJWT } : {}),
@@ -747,13 +745,8 @@ const publicAlbums_downloadFile = async (
             return fetch(
                 `https://public-albums.ente.io/download/?fileID=${file.id}`,
                 {
-                    headers: {
-                        ...publicRequestHeaders(),
-                        "X-Auth-Access-Token": accessToken,
-                        ...(accessTokenJWT
-                            ? { "X-Auth-Access-Token-JWT": accessTokenJWT }
-                            : {}),
-                    },
+                    headers:
+                        authenticatedPublicAlbumsRequestHeaders(credentials),
                 },
             );
         }

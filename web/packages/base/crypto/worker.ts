@@ -54,7 +54,6 @@ export class CryptoWorker {
         return libsodium.completeChunkHashing(hashState);
     }
 
-
     async decryptB64(data: string, nonce: string, key: string) {
         return libsodium.decryptB64(data, nonce, key);
     }
