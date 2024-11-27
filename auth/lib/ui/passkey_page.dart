@@ -5,10 +5,13 @@ import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/errors.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/account/two_factor.dart';
+import 'package:ente_auth/services/passkey_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
+import 'package:ente_auth/ui/two_factor_authentication_page.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -16,9 +19,11 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 class PasskeyPage extends StatefulWidget {
   final String sessionID;
+  final String totp2FASessionID;
 
   const PasskeyPage(
     this.sessionID, {
+    required this.totp2FASessionID,
     super.key,
   });
 
@@ -42,8 +47,9 @@ class _PasskeyPageState extends State<PasskeyPage> {
   }
 
   Future<void> launchPasskey() async {
+    final String accountsUrl = PasskeyService.instance.accountsUrl;
     await launchUrlString(
-      "https://accounts.ente.io/passkeys/verify?"
+      "$accountsUrl/passkeys/verify?"
       "passkeySessionID=${widget.sessionID}"
       "&redirect=enteauth://passkey"
       "&clientPackage=io.ente.auth",
@@ -175,6 +181,30 @@ class _PasskeyPageState extends State<PasskeyPage> {
               shouldSurfaceExecutionStates: true,
             ),
             const Padding(padding: EdgeInsets.all(30)),
+            if (widget.totp2FASessionID.isNotEmpty)
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  routeToPage(
+                    context,
+                    TwoFactorAuthenticationPage(
+                      widget.totp2FASessionID,
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  child: Center(
+                    child: Text(
+                      context.l10n.loginWithTOTP,
+                      style: const TextStyle(
+                        decoration: TextDecoration.underline,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {

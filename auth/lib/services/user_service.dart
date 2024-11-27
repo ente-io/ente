@@ -84,7 +84,7 @@ class UserService {
         "${_config.getHttpEndpoint()}/users/ott",
         data: {
           "email": email,
-          "purpose": isChangeEmail ? "change" : purpose ?? "", 
+          "purpose": isChangeEmail ? "change" : purpose ?? "",
         },
       );
       await dialog.hide();
@@ -379,11 +379,17 @@ class UserService {
       if (response.statusCode == 200) {
         Widget page;
         final String passkeySessionID = response.data["passkeySessionID"];
-        final String twoFASessionID = response.data["twoFactorSessionID"];
-        if (twoFASessionID.isNotEmpty) {
+        String twoFASessionID = response.data["twoFactorSessionID"];
+        if (twoFASessionID.isEmpty) {
+          twoFASessionID = response.data["twoFactorSessionIDV2"];
+        }
+        if (passkeySessionID.isNotEmpty) {
+          page = PasskeyPage(
+            passkeySessionID,
+            totp2FASessionID: twoFASessionID,
+          );
+        } else if (twoFASessionID.isNotEmpty) {
           page = TwoFactorAuthenticationPage(twoFASessionID);
-        } else if (passkeySessionID.isNotEmpty) {
-          page = PasskeyPage(passkeySessionID);
         } else {
           await _saveConfiguration(response);
           if (Configuration.instance.getEncryptedToken() != null) {
@@ -685,13 +691,18 @@ class UserService {
     if (response.statusCode == 200) {
       Widget? page;
       final String passkeySessionID = response.data["passkeySessionID"];
-      final String twoFASessionID = response.data["twoFactorSessionID"];
+      String twoFASessionID = response.data["twoFactorSessionID"];
+      if (twoFASessionID.isEmpty) {
+        twoFASessionID = response.data["twoFactorSessionIDV2"];
+      }
       Configuration.instance.setVolatilePassword(userPassword);
-
-      if (twoFASessionID.isNotEmpty) {
+      if (passkeySessionID.isNotEmpty) {
+        page = PasskeyPage(
+          passkeySessionID,
+          totp2FASessionID: twoFASessionID,
+        );
+      } else if (twoFASessionID.isNotEmpty) {
         page = TwoFactorAuthenticationPage(twoFASessionID);
-      } else if (passkeySessionID.isNotEmpty) {
-        page = PasskeyPage(passkeySessionID);
       } else {
         await _saveConfiguration(response);
         if (Configuration.instance.getEncryptedToken() != null) {
