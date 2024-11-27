@@ -120,8 +120,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
         _showErrorBanner
             ? HeaderErrorWidget(error: _syncError)
             : const SizedBox.shrink(),
-        // _showMlBanner && !_showErrorBanner
-        true
+        _showMlBanner && !_showErrorBanner
             ? Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 2.0, vertical: 12),
