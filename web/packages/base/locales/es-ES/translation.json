@@ -637,6 +637,7 @@
     "check_status": "",
     "passkey_login_instructions": "",
     "passkey_login": "",
+    "totp_login": "",
     "passkey": "",
     "passkey_verify_description": "",
     "waiting_for_verification": "",
