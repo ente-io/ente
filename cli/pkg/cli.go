@@ -41,3 +41,17 @@ func GetCLITempPath() (string) {
 	}
 	return os.TempDir()
 }
+
+// Configure Museum Server Directory to find proper <environment.yaml> file.
+// Made for and used in command `ente account public-albums-url [url]`
+func ConfigureServerDir() (string) {
+  serverEnv := os.Getenv("ENTE_SERVER_DIR")
+  if serverEnv != "" {
+    fmt.Errorf(`ENTE_SERVER_DIR environment is not set, please setup it with\n 
+      export ENTE_SERVER_DIR=/path/to/ente/
+      `)
+  }
+
+  configDir := filepath.Join(serverEnv, "server", "configurations")
+  return configDir
+}
