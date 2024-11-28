@@ -1,5 +1,4 @@
 import { EnteSwitch } from "@/base/components/EnteSwitch";
-import { CaptionedText } from "@ente/shared/components/CaptionedText";
 import {
     SpaceBetweenFlex,
     VerticallyCenteredFlex,
@@ -123,4 +122,46 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
             </SpaceBetweenFlex>
         </MenuItem>
     );
+};
+
+interface CaptionedTextProps {
+    mainText: string;
+    subText?: string;
+    subIcon?: React.ReactNode;
+    color?: ButtonProps["color"];
+}
+
+const CaptionedText = (props: CaptionedTextProps) => {
+    return (
+        <VerticallyCenteredFlex gap={"4px"}>
+            <Typography> {props.mainText}</Typography>
+            <Typography variant="small" color={getSubTextColor(props.color)}>
+                {"•"}
+            </Typography>
+            {props.subText ? (
+                <Typography
+                    variant="small"
+                    color={getSubTextColor(props.color)}
+                >
+                    {props.subText}
+                </Typography>
+            ) : (
+                <Typography
+                    variant="small"
+                    color={getSubTextColor(props.color)}
+                >
+                    {props.subIcon}
+                </Typography>
+            )}
+        </VerticallyCenteredFlex>
+    );
+};
+
+const getSubTextColor = (color: ButtonProps["color"]) => {
+    switch (color) {
+        case "critical":
+            return "critical.main";
+        default:
+            return "text.faint";
+    }
 };
