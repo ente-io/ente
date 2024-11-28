@@ -217,7 +217,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 if (sessionValidityCheck) await sessionValidityCheck;
 
                 const cryptoWorker = await sharedCryptoWorker();
-
                 const {
                     keyAttributes,
                     encryptedToken,
