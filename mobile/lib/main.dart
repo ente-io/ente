@@ -67,9 +67,7 @@ const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 
 void main() async {
   VideoPlayerMediaKit.ensureInitialized(
-    android:
-        true, // default: false    -    dependency: media_kit_libs_android_video
-    iOS: true, // default: false    -    dependency: media_kit_libs_ios_video
+    iOS: true, // media_kit_libs_ios_video
   );
   debugRepaintRainbowEnabled = false;
   WidgetsFlutterBinding.ensureInitialized();
