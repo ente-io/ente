@@ -344,6 +344,11 @@ class UploadManager {
         this.publicUploadProps = publicCollectProps;
     }
 
+    logout() {
+        // TODO: Consolidate state in one place instead of spreading it.
+        UploadService.logout();
+    }
+
     public isUploadRunning() {
         return this.uploadInProgress;
     }
