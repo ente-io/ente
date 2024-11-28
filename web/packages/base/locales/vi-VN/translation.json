@@ -637,6 +637,7 @@
     "check_status": "Kiểm tra trạng thái",
     "passkey_login_instructions": "Thực hiện các bước từ trình duyệt của bạn để tiếp tục đăng nhập.",
     "passkey_login": "Đăng nhập bằng khóa truy cập",
+    "totp_login": "",
     "passkey": "Mã khóa",
     "passkey_verify_description": "Xác minh mã khóa của bạn để đăng nhập vào tài khoản.",
     "waiting_for_verification": "Đang chờ xác minh...",
