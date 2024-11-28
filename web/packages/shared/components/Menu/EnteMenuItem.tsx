@@ -1,6 +1,5 @@
 import { EnteSwitch } from "@/base/components/EnteSwitch";
 import { CaptionedText } from "@ente/shared/components/CaptionedText";
-import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
 import {
     SpaceBetweenFlex,
     VerticallyCenteredFlex,
@@ -17,13 +16,7 @@ import React from "react";
 interface EnteMenuItemProps {
     onClick: () => void;
     color?: ButtonProps["color"];
-    variant?:
-        | "primary"
-        | "captioned"
-        | "toggle"
-        | "secondary"
-        | "mini"
-        | "path";
+    variant?: "primary" | "captioned" | "toggle" | "secondary" | "mini";
     fontWeight?: TypographyProps["fontWeight"];
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
@@ -54,14 +47,14 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
     disabled = false,
 }) => {
     const handleButtonClick = () => {
-        if (variant === "path" || variant === "toggle") {
+        if (variant === "toggle") {
             return;
         }
         onClick();
     };
 
     const handleIconClick = () => {
-        if (variant !== "path" && variant !== "toggle") {
+        if (variant !== "toggle") {
             return;
         }
         onClick();
@@ -125,9 +118,6 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
                             checked={checked}
                             onClick={handleIconClick}
                         />
-                    )}
-                    {variant === "path" && (
-                        <ChangeDirectoryOption onClick={handleIconClick} />
                     )}
                 </VerticallyCenteredFlex>
             </SpaceBetweenFlex>
