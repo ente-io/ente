@@ -6,7 +6,7 @@ import {
 import { ensureElectron } from "@/base/electron";
 import { basename, dirname } from "@/base/file-name";
 import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
-import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
+import { CollectionMappingChoice } from "@/new/photos/components/CollectionMappingChoice";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import {
@@ -141,9 +141,9 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
                     </Stack>
                 </DialogContent>
             </Dialog>
-            <CollectionMappingChoiceDialog
+            <CollectionMappingChoice
                 {...mappingChoiceVisibilityProps}
-                didSelect={handleCollectionMappingSelect}
+                onSelect={handleCollectionMappingSelect}
             />
         </>
     );
