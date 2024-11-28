@@ -136,6 +136,7 @@ class UploadService {
     async getUploadURL() {
         if (this.uploadURLs.length === 0 && this.pendingUploadCount) {
             await this.refillUploadURLs();
+            this.ensureUniqueUploadURLs();
         }
         return this.uploadURLs.pop();
     }
@@ -148,6 +149,7 @@ class UploadService {
             log.error("prefetch uploadURL failed", e);
             handleUploadError(e);
         }
+        this.ensureUniqueUploadURLs();
     }
 
     async uploadFile(uploadFile: UploadFile) {
@@ -171,7 +173,9 @@ class UploadService {
         } finally {
             this.activeUploadURLRefill = undefined;
         }
+    }
 
+    private ensureUniqueUploadURLs() {
         // TODO: Sanity check added on new implementation Nov 2024, remove after
         // a while (tag: Migration).
         if (
