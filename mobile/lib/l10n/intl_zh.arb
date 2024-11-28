@@ -1260,6 +1260,7 @@
   "createCollaborativeLink": "创建协作链接",
   "search": "搜索",
   "enterPersonName": "输入人物名称",
+  "mergedPhotos": "已合并照片",
   "removePersonLabel": "移除人物标签",
   "autoPairDesc": "自动配对仅适用于支持 Chromecast 的设备。",
   "manualPairDesc": "用 PIN 码配对适用于您希望在其上查看相册的任何屏幕。",
@@ -1344,8 +1345,14 @@
   "mostRelevant": "最相关",
   "loadingYourPhotos": "正在加载您的照片...",
   "processingImport": "正在处理 {folderName}...",
-  "resetPerson": "Reset person",
-  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
-  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
-  "yesResetPerson": "Yes, reset person"
+  "extraPhotosFound": "发现额外照片",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
+  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
+  "openFile": "Open file",
+  "backupFile": "Backup file",
+  "openAlbumInBrowser": "Open album in browser",
+  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
+  "allow": "Allow",
+  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
+  "seePublicAlbumLinksInApp": "See public album links in app"
 }

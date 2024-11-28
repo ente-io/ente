@@ -108,7 +108,12 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
             theme: lightTheme,
             darkTheme: dartTheme,
             home: AppLifecycleService.instance.mediaExtensionAction.action ==
-                    IntentAction.view
+                        IntentAction.view &&
+                    (AppLifecycleService.instance.mediaExtensionAction.type ==
+                            MediaType.image ||
+                        AppLifecycleService
+                                .instance.mediaExtensionAction.type ==
+                            MediaType.video)
                 ? const FileViewer()
                 : const HomeWidget(),
             debugShowCheckedModeBanner: false,

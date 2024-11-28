@@ -1,5 +1,7 @@
 import { stashRedirect } from "@/accounts/services/redirect";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { errorDialogAttributes } from "@/base/components/utils/dialog";
+import log from "@/base/log";
 import { ALL_SECTION } from "@/new/photos/services/collection";
 import { createFileCollectionIDs } from "@/new/photos/services/file";
 import { getLocalFiles } from "@/new/photos/services/files";
@@ -24,23 +26,26 @@ import {
 import { Duplicate, getDuplicates } from "services/deduplicationService";
 import { syncFiles, trashFiles } from "services/fileService";
 import { syncTrash } from "services/trashService";
-import {
-    DeduplicateContextType,
-    DefaultDeduplicateContext,
-} from "types/deduplicate";
 import { SelectedState } from "types/gallery";
 import { getSelectedFiles } from "utils/file";
 
-export const DeduplicateContext = createContext<DeduplicateContextType>(
-    DefaultDeduplicateContext,
-);
+export interface DeduplicateContextType {
+    isOnDeduplicatePage: boolean;
+    collectionNameMap: Map<number, string>;
+}
+
+export const DeduplicateContext = createContext<DeduplicateContextType>({
+    isOnDeduplicatePage: false,
+    collectionNameMap: new Map<number, string>(),
+});
+
 export const Info = styled("div")`
     padding: 24px;
     font-size: 18px;
 `;
 
 export default function Deduplicate() {
-    const { showNavBar, showLoadingBar, hideLoadingBar, setDialogMessage } =
+    const { showNavBar, showLoadingBar, hideLoadingBar, showMiniDialog } =
         useAppContext();
     const [duplicates, setDuplicates] = useState<Duplicate[]>(null);
     const [collectionNameMap, setCollectionNameMap] = useState(
@@ -145,27 +150,22 @@ export default function Deduplicate() {
                 () => {},
             );
             await syncTrash(collections, () => {});
-        } catch (e) {
-            if (
-                e instanceof ApiError &&
-                e.httpStatusCode === HttpStatusCode.Forbidden
-            ) {
-                setDialogMessage({
-                    title: t("error"),
-
-                    close: { variant: "critical" },
-                    content: t("NOT_FILE_OWNER"),
-                });
-            } else {
-                setDialogMessage({
-                    title: t("error"),
-
-                    close: { variant: "critical" },
-                    content: t("generic_error_retry"),
-                });
-            }
-        } finally {
             await syncWithRemote();
+        } catch (e) {
+            log.error("Dedup delete failed", e);
+            await syncWithRemote();
+            // See: [Note: Chained MiniDialogs]
+            setTimeout(() => {
+                showMiniDialog(
+                    errorDialogAttributes(
+                        e instanceof ApiError &&
+                            e.httpStatusCode == HttpStatusCode.Forbidden
+                            ? t("not_file_owner_delete_error")
+                            : t("generic_error"),
+                    ),
+                );
+            }, 0);
+        } finally {
             hideLoadingBar();
         }
     };
@@ -190,7 +190,6 @@ export default function Deduplicate() {
     return (
         <DeduplicateContext.Provider
             value={{
-                ...DefaultDeduplicateContext,
                 collectionNameMap,
                 isOnDeduplicatePage: true,
             }}

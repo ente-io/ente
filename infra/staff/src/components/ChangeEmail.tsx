@@ -31,20 +31,18 @@ const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
 
     useEffect(() => {
         const fetchUserID = async () => {
-            const token = getToken();
             const email = getEmail();
             setNewEmail(email); // Set initial email state
 
             const encodedEmail = encodeURIComponent(email);
-            const encodedToken = encodeURIComponent(token);
-            const url = `${apiOrigin}/admin/user?email=${encodedEmail}&token=${encodedToken}`;
 
+            const url = `${apiOrigin}/admin/user?email=${encodedEmail}`;
             try {
                 const response = await fetch(url, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
-                        "X-AUTH-TOKEN": token,
+                        "X-AUTH-TOKEN": getToken(),
                     },
                 });
 
@@ -78,7 +76,7 @@ const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
         event.preventDefault();
 
         const token = getToken();
-        const url = `${apiOrigin}/admin/user/change-email?token=${token}`;
+        const url = `${apiOrigin}/admin/user/change-email`;
 
         const body = {
             userID,

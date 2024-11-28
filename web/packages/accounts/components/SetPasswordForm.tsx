@@ -1,4 +1,4 @@
-import { isWeakPassword } from "@/accounts/utils";
+import { isWeakPassword } from "@/accounts/utils/password";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
 import { Box, Input, TextField, Typography } from "@mui/material";

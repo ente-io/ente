@@ -2,7 +2,6 @@ import { decryptBlob } from "@/base/crypto";
 import type { EncryptedBlobB64 } from "@/base/crypto/types";
 import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
 import { apiURL } from "@/base/origins";
-import { ensure } from "@/utils/ensure";
 import { z } from "zod";
 import type { EntityType } from ".";
 
@@ -40,8 +39,8 @@ const defaultDiffLimit = 500;
  * An entry in the user entity diff.
  *
  * Each change either contains the latest data associated with a particular user
- * entity that has been created or updated, or indicates that the corresponding
- * entity has been deleted.
+ * entity that has been created or updated, or has a flag set to indicate that
+ * the corresponding entity has been deleted.
  */
 export interface UserEntityChange {
     /**
@@ -140,7 +139,7 @@ export const userEntityDiff = async (
             async ({ id, encryptedData, header, isDeleted, updatedAt }) => ({
                 id,
                 data: !isDeleted
-                    ? await decrypt(ensure(encryptedData), ensure(header))
+                    ? await decrypt(encryptedData!, header!)
                     : undefined,
                 updatedAt,
             }),
@@ -203,6 +202,15 @@ export const deleteUserEntity = async (id: string) =>
         }),
     );
 
+export const RemoteUserEntityKey = z.object({
+    /** Base64 encoded entity key, encrypted with the user's master key. */
+    encryptedKey: z.string(),
+    /** Base64 encoded nonce used during encryption of this entity key. */
+    header: z.string(),
+});
+
+export type RemoteUserEntityKey = z.infer<typeof RemoteUserEntityKey>;
+
 /**
  * Fetch the encryption key for the given user entity {@link type} from remote.
  *
@@ -229,15 +237,6 @@ export const getUserEntityKey = async (
         return RemoteUserEntityKey.parse(await res.json());
     }
 };
-
-export const RemoteUserEntityKey = z.object({
-    /** Base64 encoded entity key, encrypted with the user's master key. */
-    encryptedKey: z.string(),
-    /** Base64 encoded nonce used during encryption of this entity key. */
-    header: z.string(),
-});
-
-export type RemoteUserEntityKey = z.infer<typeof RemoteUserEntityKey>;
 
 /**
  * Create a new encryption key for the given user entity {@link type} on remote.

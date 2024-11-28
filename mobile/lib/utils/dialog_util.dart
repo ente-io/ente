@@ -88,10 +88,10 @@ Future<ButtonResult?> showErrorDialogForException({
     icon: Icons.error_outline_outlined,
     body: errorMessage,
     isDismissible: isDismissible,
-    buttons: const [
+    buttons: [
       ButtonWidget(
         buttonType: ButtonType.secondary,
-        labelText: "OK",
+        labelText: S.of(context).ok,
         isInAlert: true,
       ),
     ],

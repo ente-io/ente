@@ -1,13 +1,17 @@
 import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
+import { type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { CenteredBox, SpaceBetweenFlex } from "@/base/components/mui/Container";
+import {
+    CenteredFill,
+    SpaceBetweenFlex,
+} from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
+import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import {
     useModalVisibility,
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
-import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
 import {
     addCGroup,
@@ -26,7 +30,6 @@ import {
     type PersonSuggestionUpdates,
     type PreviewableCluster,
 } from "@/new/photos/services/ml/people";
-import { ensure } from "@/utils/ensure";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import AddIcon from "@mui/icons-material/Add";
@@ -58,7 +61,6 @@ import { t } from "i18next";
 import React, { useEffect, useReducer, useState } from "react";
 import type { FaceCluster } from "../../services/ml/cluster";
 import { useAppContext } from "../../types/context";
-import { type ButtonishProps } from "../mui";
 import { DialogCloseIconButton } from "../mui/Dialog";
 import { SuggestionFaceList } from "../PeopleList";
 import { SingleInputDialog } from "../SingleInputForm";
@@ -329,7 +331,7 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
     const handleAddPersonBySelect = useWrapAsyncOperation(
         async (personID: string) => {
             onClose();
-            const person = ensure(cgroupPeople.find((p) => p.id == personID));
+            const person = cgroupPeople.find((p) => p.id == personID)!;
             await addClusterToCGroup(person.cgroup, cluster);
             onSelectPerson(personID);
         },
@@ -528,7 +530,23 @@ const suggestionsDialogReducer: React.Reducer<
                 // original assigned state.
                 updates.delete(item.id);
             } else {
-                updates.set(item.id, value);
+                const update = (() => {
+                    switch (value) {
+                        case true:
+                            // true corresponds to update "assign".
+                            return "assign";
+                        case false:
+                            // false maps to different updates for suggestions
+                            // vs choices.
+                            return item.assigned === undefined
+                                ? "rejectSuggestion"
+                                : "rejectSavedChoice";
+                        case undefined:
+                            // undefined means reset.
+                            return "reset";
+                    }
+                })();
+                updates.set(item.id, update);
             }
             return { ...state, updates };
         }
@@ -676,15 +694,15 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 sx={{ display: "flex", "&&&": { pt: 0 } }}
             >
                 {state.activity == "fetching" ? (
-                    <CenteredBox>
+                    <CenteredFill>
                         <ActivityIndicator>
                             {t("people_suggestions_finding")}
                         </ActivityIndicator>
-                    </CenteredBox>
+                    </CenteredFill>
                 ) : state.fetchFailed ? (
-                    <CenteredBox>
+                    <CenteredFill>
                         <ActivityErrorIndicator />
-                    </CenteredBox>
+                    </CenteredFill>
                 ) : state.showChoices ? (
                     <SuggestionOrChoiceList
                         items={state.choices}
@@ -692,14 +710,14 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                         onUpdateItem={handleUpdateItem}
                     />
                 ) : state.suggestions.length == 0 ? (
-                    <CenteredBox>
+                    <CenteredFill>
                         <Typography
                             color="text.muted"
                             sx={{ textAlign: "center" }}
                         >
-                            t{"people_suggestions_empty"}
+                            {t("people_suggestions_empty")}
                         </Typography>
-                    </CenteredBox>
+                    </CenteredFill>
                 ) : (
                     <SuggestionOrChoiceList
                         items={state.suggestions}
@@ -764,7 +782,7 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
                 </Stack>
                 {!item.fixed && (
                     <ToggleButtonGroup
-                        value={fromItemValue(item, updates)}
+                        value={itemValueFromUpdate(item, updates)}
                         exclusive
                         onChange={(_, v) => onUpdateItem(item, toItemValue(v))}
                     >
@@ -781,12 +799,25 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
     </List>
 );
 
-const fromItemValue = (item: SCItem, updates: PersonSuggestionUpdates) => {
+const itemValueFromUpdate = (
+    item: SCItem,
+    updates: PersonSuggestionUpdates,
+) => {
     // Use the in-memory state if available. For choices, fallback to their
     // original state.
-    const resolved = updates.has(item.id)
-        ? updates.get(item.id)
-        : item.assigned;
+    const resolveUpdate = () => {
+        switch (updates.get(item.id)) {
+            case "assign":
+                return true;
+            case "rejectSavedChoice":
+                return false;
+            case "rejectSuggestion":
+                return false;
+            default:
+                return undefined;
+        }
+    };
+    const resolved = updates.has(item.id) ? resolveUpdate() : item.assigned;
     return resolved ? "yes" : resolved === false ? "no" : undefined;
 };
 

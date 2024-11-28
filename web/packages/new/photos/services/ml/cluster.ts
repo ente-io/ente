@@ -2,9 +2,12 @@ import { assertionFailed } from "@/base/assert";
 import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
-import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
-import { savedCGroups, updateOrCreateUserEntities } from "../user-entity";
+import {
+    pullUserEntities,
+    savedCGroups,
+    updateOrCreateUserEntities,
+} from "../user-entity";
 import { savedFaceClusters, saveFaceClusters } from "./db";
 import {
     faceDirection,
@@ -97,14 +100,26 @@ export const _clusterFaces = async (
 
     const sortedCGroups = cgroups.sort((a, b) => b.updatedAt - a.updatedAt);
 
-    // Extract the remote clusters.
-    clusters = clusters.concat(
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        sortedCGroups.map((cg) => cg.data.assigned).flat(),
-    );
+    // Fill in clusters from remote cgroups, and also construct rejected lookup.
+    const rejectedClusterIDsForFaceID = new Map<string, Set<string>>();
+    for (const cgroup of sortedCGroups) {
+        if (cgroup.data.rejectedFaceIDs.length == 0) {
+            clusters = clusters.concat(cgroup.data.assigned);
+        } else {
+            const rejectedFaceIDs = new Set(cgroup.data.rejectedFaceIDs);
+            clusters = clusters.concat(
+                cgroup.data.assigned.map((cluster) => ({
+                    ...cluster,
+                    faces: cluster.faces.filter((f) => !rejectedFaceIDs.has(f)),
+                })),
+            );
+            for (const faceID of rejectedFaceIDs) {
+                const s = rejectedClusterIDsForFaceID.get(faceID) ?? new Set();
+                cgroup.data.assigned.forEach(({ id }) => s.add(id));
+                rejectedClusterIDsForFaceID.set(faceID, s);
+            }
+        }
+    }
 
     // Add on the clusters we have available locally.
     clusters = clusters.concat(await savedFaceClusters());
@@ -130,10 +145,15 @@ export const _clusterFaces = async (
         }
     }
 
+    // IDs of the clusters which were modified. We use this information to
+    // determine which cgroups need to be updated on remote.
+    const modifiedClusterIDs = new Set<string>();
+
     const state = {
         faceIDToClusterID,
         faceIDToClusterIndex,
         clusters,
+        modifiedClusterIDs,
     };
 
     // Process the faces in batches, but keep an overlap between batches to
@@ -147,6 +167,7 @@ export const _clusterFaces = async (
         await clusterBatchLinear(
             faces.slice(offset, offset + batchSize),
             state,
+            rejectedClusterIDsForFaceID,
             ({ completed }) =>
                 onProgress({ completed: offset + completed, total }),
         );
@@ -155,7 +176,7 @@ export const _clusterFaces = async (
     const t = `(${Date.now() - startTime} ms)`;
     log.info(`Refreshed ${clusters.length} clusters from ${total} faces ${t}`);
 
-    return clusters;
+    return { clusters, modifiedClusterIDs };
 };
 
 /**
@@ -194,7 +215,7 @@ const sortFacesNewestOnesFirst = (
     const fileForFaceID = new Map(
         faces.map(({ faceID }) => [
             faceID,
-            localFileByID.get(ensure(fileIDFromFaceID(faceID))),
+            localFileByID.get(fileIDFromFaceID(faceID)!),
         ]),
     );
 
@@ -235,11 +256,13 @@ interface ClusteringState {
     faceIDToClusterID: Map<string, string>;
     faceIDToClusterIndex: Map<string, number>;
     clusters: FaceCluster[];
+    modifiedClusterIDs: Set<string>;
 }
 
 const clusterBatchLinear = async (
     batch: ClusterFace[],
     state: ClusteringState,
+    rejectedClusterIDsForFaceID: Map<string, Set<string>>,
     onProgress: (progress: ClusteringProgress) => void,
 ) => {
     const [clusteredFaces, unclusteredFaces] = batch.reduce<
@@ -274,36 +297,51 @@ const clusterBatchLinear = async (
         // If the face is already part of a cluster, then skip it.
         if (state.faceIDToClusterID.has(fi.faceID)) continue;
 
+        const rejectedClusters = rejectedClusterIDsForFaceID.get(fi.faceID);
+
         // Find the nearest neighbour among the previous faces in this batch.
         let nnIndex: number | undefined;
         let nnCosineSimilarity = 0;
         for (let j = i - 1; j >= 0; j--) {
             // ! This is an O(n^2) loop, be careful when adding more code here.
 
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const fj = faces[j]!;
 
             // The vectors are already normalized, so we can directly use their
             // dot product as their cosine similarity.
             const csim = dotProduct(fi.embedding, fj.embedding);
+            if (csim <= nnCosineSimilarity) continue;
+
             const threshold = fj.isBadFace ? 0.84 : 0.76;
-            if (csim > nnCosineSimilarity && csim >= threshold) {
-                nnIndex = j;
-                nnCosineSimilarity = csim;
+            if (csim < threshold) continue;
+
+            // Don't add the face back to a cluster it has been rejected from.
+            if (rejectedClusters) {
+                const cjx = state.faceIDToClusterIndex.get(fj.faceID);
+                if (cjx !== undefined) {
+                    const cj = state.clusters[cjx]!;
+                    if (rejectedClusters.has(cj.id)) {
+                        continue;
+                    }
+                }
             }
+
+            nnIndex = j;
+            nnCosineSimilarity = csim;
         }
 
         if (nnIndex !== undefined) {
             // Found a neighbour close enough, add ourselves to its cluster.
-            const nnFace = ensure(faces[nnIndex]);
-            const nnClusterIndex = ensure(
-                state.faceIDToClusterIndex.get(nnFace.faceID),
-            );
-            const nnCluster = ensure(state.clusters[nnClusterIndex]);
+            const nnFace = faces[nnIndex]!;
+            const nnClusterIndex = state.faceIDToClusterIndex.get(
+                nnFace.faceID,
+            )!;
+            const nnCluster = state.clusters[nnClusterIndex]!;
 
             state.faceIDToClusterID.set(fi.faceID, nnCluster.id);
             state.faceIDToClusterIndex.set(fi.faceID, nnClusterIndex);
             nnCluster.faces.push(fi.faceID);
+            state.modifiedClusterIDs.add(nnCluster.id);
         } else {
             // No neighbour within the threshold. Create a new cluster.
             const clusterID = newClusterID();
@@ -313,6 +351,7 @@ const clusterBatchLinear = async (
             state.faceIDToClusterID.set(fi.faceID, cluster.id);
             state.faceIDToClusterIndex.set(fi.faceID, clusterIndex);
             state.clusters.push(cluster);
+            state.modifiedClusterIDs.add(cluster.id);
         }
     }
 };
@@ -326,6 +365,7 @@ const clusterBatchLinear = async (
  */
 export const reconcileClusters = async (
     clusters: FaceCluster[],
+    modifiedClusterIDs: Set<string>,
     masterKey: Uint8Array,
 ) => {
     // Index clusters by their ID for fast lookup.
@@ -337,18 +377,14 @@ export const reconcileClusters = async (
     // Find the cgroups that have changed since we started.
     const changedCGroups = cgroups
         .map((cgroup) => {
-            for (const oldCluster of cgroup.data.assigned) {
-                // The clustering algorithm does not remove any existing faces, it
-                // can only add new ones to the cluster. So we can use the count as
-                // an indication if something changed.
-                const newCluster = ensure(clusterByID.get(oldCluster.id));
-                if (oldCluster.faces.length != newCluster.faces.length) {
+            for (const cluster of cgroup.data.assigned) {
+                if (modifiedClusterIDs.has(cluster.id)) {
                     return {
                         ...cgroup,
                         data: {
                             ...cgroup.data,
-                            assigned: cgroup.data.assigned.map(({ id }) =>
-                                ensure(clusterByID.get(id)),
+                            assigned: cgroup.data.assigned.map(
+                                ({ id }) => clusterByID.get(id)!,
                             ),
                         },
                     };
@@ -375,4 +411,7 @@ export const reconcileClusters = async (
     await saveFaceClusters(
         clusters.filter(({ id }) => !isRemoteClusterID.has(id)),
     );
+
+    // Refresh our local state if we'd updated remote.
+    if (changedCGroups.length) await pullUserEntities("cgroup", masterKey);
 };

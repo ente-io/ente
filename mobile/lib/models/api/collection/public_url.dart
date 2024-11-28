@@ -5,6 +5,9 @@ class PublicURL {
   bool enableDownload;
   bool enableCollect;
   bool passwordEnabled;
+  String? nonce;
+  int? opsLimit;
+  int? memLimit;
 
   PublicURL({
     required this.url,
@@ -13,6 +16,9 @@ class PublicURL {
     this.enableDownload = true,
     this.passwordEnabled = false,
     this.enableCollect = false,
+    this.nonce,
+    this.opsLimit,
+    this.memLimit,
   });
 
   Map<String, dynamic> toMap() {
@@ -23,6 +29,9 @@ class PublicURL {
       'enableDownload': enableDownload,
       'passwordEnabled': passwordEnabled,
       'enableCollect': enableCollect,
+      'nonce': nonce,
+      'memLimit': memLimit,
+      'opsLimit': opsLimit,
     };
   }
 
@@ -42,6 +51,9 @@ class PublicURL {
       enableDownload: map['enableDownload'] ?? true,
       passwordEnabled: map['passwordEnabled'] ?? false,
       enableCollect: map['enableCollect'] ?? false,
+      nonce: map['nonce'],
+      opsLimit: map['opsLimit'],
+      memLimit: map['memLimit'],
     );
   }
 }

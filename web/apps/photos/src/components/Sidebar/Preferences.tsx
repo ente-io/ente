@@ -16,10 +16,9 @@ import {
     confirmDisableMapsDialogAttributes,
     confirmEnableMapsDialogAttributes,
 } from "@/new/photos/components/utils/dialog";
+import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { isMLSupported } from "@/new/photos/services/ml";
 import {
-    settingsSnapshot,
-    settingsSubscribe,
     syncSettings,
     updateCFProxyDisabledPreference,
     updateMapEnabled,
@@ -27,11 +26,10 @@ import {
 import { useAppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
-import ScienceIcon from "@mui/icons-material/Science";
-import { Box, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import DropdownInput from "components/DropdownInput";
 import { t } from "i18next";
-import React, { useCallback, useEffect, useSyncExternalStore } from "react";
+import React, { useCallback, useEffect } from "react";
 
 export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     open,
@@ -66,6 +64,15 @@ export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 />
                 <Stack sx={{ px: "16px", py: "20px", gap: "24px" }}>
                     <LanguageSelector />
+                    {isMLSupported && (
+                        <MenuItemGroup>
+                            <EnteMenuItem
+                                endIcon={<ChevronRight />}
+                                onClick={showMLSettings}
+                                label={t("ml_search")}
+                            />
+                        </MenuItemGroup>
+                    )}
                     <EnteMenuItem
                         onClick={showMapSettings}
                         endIcon={<ChevronRight />}
@@ -76,21 +83,6 @@ export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         endIcon={<ChevronRight />}
                         label={t("advanced")}
                     />
-                    {isMLSupported && (
-                        <Box>
-                            <MenuSectionTitle
-                                title={t("labs")}
-                                icon={<ScienceIcon />}
-                            />
-                            <MenuItemGroup>
-                                <EnteMenuItem
-                                    endIcon={<ChevronRight />}
-                                    onClick={showMLSettings}
-                                    label={t("ml_search")}
-                                />
-                            </MenuItemGroup>
-                        </Box>
-                    )}
                 </Stack>
             </Stack>
             <MapSettings
@@ -152,6 +144,8 @@ const localeName = (locale: SupportedLocale) => {
             return "Nederlands";
         case "es-ES":
             return "Español";
+        case "pt-PT":
+            return "Português";
         case "pt-BR":
             return "Português Brasileiro";
         case "ru-RU":
@@ -164,6 +158,8 @@ const localeName = (locale: SupportedLocale) => {
             return "Lietuvių kalba";
         case "uk-UA":
             return "Українська";
+        case "vi-VN":
+            return "Tiếng Việt";
     }
 };
 
@@ -174,10 +170,7 @@ export const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
 }) => {
     const { showMiniDialog } = useAppContext();
 
-    const { mapEnabled } = useSyncExternalStore(
-        settingsSubscribe,
-        settingsSnapshot,
-    );
+    const { mapEnabled } = useSettingsSnapshot();
 
     const confirmToggle = useCallback(
         () =>
@@ -230,10 +223,7 @@ export const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
-    const { cfUploadProxyDisabled } = useSyncExternalStore(
-        settingsSubscribe,
-        settingsSnapshot,
-    );
+    const { cfUploadProxyDisabled } = useSettingsSnapshot();
 
     const handleRootClose = () => {
         onClose();

@@ -1,7 +1,7 @@
+import { FormPaper } from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { customAPIHost } from "@/base/origins";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -21,14 +21,14 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         void customAPIHost().then(setHost);
         const user = getData(LS_KEYS.USER);
         if (user?.email) {
-            router.push(PAGES.VERIFY);
+            void router.push(PAGES.VERIFY);
         }
         setLoading(false);
         showNavBar(true);
     }, []);
 
     const signUp = () => {
-        router.push(PAGES.SIGNUP);
+        void router.push(PAGES.SIGNUP);
     };
 
     return loading ? (

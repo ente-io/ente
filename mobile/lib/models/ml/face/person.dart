@@ -51,8 +51,12 @@ class PersonData {
   final bool isHidden;
   String? avatarFaceID;
   List<ClusterInfo>? assigned = List<ClusterInfo>.empty();
-  List<ClusterInfo>? rejected = List<ClusterInfo>.empty();
+  List<String>? rejectedFaceIDs = List<String>.empty();
   final String? birthDate;
+  // email should be always looked via userID as user might have changed
+  // their email ids.
+  final String? email;
+  final int? userID;
 
   bool hasAvatar() => avatarFaceID != null;
 
@@ -62,10 +66,12 @@ class PersonData {
   PersonData({
     required this.name,
     this.assigned,
-    this.rejected,
+    this.rejectedFaceIDs,
     this.avatarFaceID,
     this.isHidden = false,
     this.birthDate,
+    this.email,
+    this.userID,
   });
   // copyWith
   PersonData copyWith({
@@ -75,13 +81,17 @@ class PersonData {
     bool? isHidden,
     int? version,
     String? birthDate,
+    String? email,
+    int? userID,
   }) {
     return PersonData(
       name: name ?? this.name,
       assigned: assigned ?? this.assigned,
-      avatarFaceID: avatarFaceId ?? this.avatarFaceID,
+      avatarFaceID: avatarFaceId ?? avatarFaceID,
       isHidden: isHidden ?? this.isHidden,
       birthDate: birthDate ?? this.birthDate,
+      email: email ?? this.email,
+      userID: userID ?? this.userID,
     );
   }
 
@@ -95,7 +105,7 @@ class PersonData {
       assignedCount += a.faces.length;
     }
     sb.writeln('Assigned: ${assigned?.length} withFaces $assignedCount');
-    sb.writeln('Rejected: ${rejected?.length}');
+    sb.writeln('Rejected faceIDs: ${rejectedFaceIDs?.length}');
     if (assigned != null) {
       for (var cluster in assigned!) {
         sb.writeln('Cluster: ${cluster.id} - ${cluster.faces.length}');
@@ -108,10 +118,12 @@ class PersonData {
   Map<String, dynamic> toJson() => {
         'name': name,
         'assigned': assigned?.map((e) => e.toJson()).toList(),
-        'rejected': rejected?.map((e) => e.toJson()).toList(),
+        'rejectedFaceIDs': rejectedFaceIDs,
         'avatarFaceID': avatarFaceID,
         'isHidden': isHidden,
         'birthDate': birthDate,
+        'email': email,
+        'userID': userID,
       };
 
   // fromJson
@@ -122,18 +134,21 @@ class PersonData {
             json['assigned'].map((x) => ClusterInfo.fromJson(x)),
           );
 
-    final rejected = (json['rejected'] == null || json['rejected'].length == 0)
-        ? <ClusterInfo>[]
-        : List<ClusterInfo>.from(
-            json['rejected'].map((x) => ClusterInfo.fromJson(x)),
-          );
+    final List<String> rejectedFaceIDs =
+        (json['rejectedFaceIDs'] == null || json['rejectedFaceIDs'].length == 0)
+            ? <String>[]
+            : List<String>.from(
+                json['rejectedFaceIDs'],
+              );
     return PersonData(
       name: json['name'] as String,
       assigned: assigned,
-      rejected: rejected,
+      rejectedFaceIDs: rejectedFaceIDs,
       avatarFaceID: json['avatarFaceID'] as String?,
       isHidden: json['isHidden'] as bool? ?? false,
       birthDate: json['birthDate'] as String?,
+      userID: json['userID'] as int?,
+      email: json['email'] as String?,
     );
   }
 }

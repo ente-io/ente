@@ -115,7 +115,8 @@ class MLService {
   }
 
   Future<void> sync() async {
-    await faceRecognitionService.sync();
+    await FileDataService.instance.syncFDStatus();
+    await faceRecognitionService.syncPersonFeedback();
   }
 
   Future<void> runAllML({bool force = false}) async {
@@ -125,7 +126,6 @@ class MLService {
       }
       if (_cannotRunMLFunction() && !force) return;
       _isRunningML = true;
-
       await sync();
 
       final int unclusteredFacesCount =
@@ -250,6 +250,19 @@ class MLService {
 
     _logger.info('Pulling remote feedback before actually clustering');
     await PersonService.instance.fetchRemoteClusterFeedback();
+    final persons = await PersonService.instance.getPersons();
+    final faceIdNotToCluster = <String, List<String>>{};
+    for (final person in persons) {
+      if (person.data.rejectedFaceIDs != null &&
+          person.data.rejectedFaceIDs!.isNotEmpty) {
+        final personClusters = person.data.assigned?.map((e) => e.id).toList();
+        if (personClusters != null) {
+          for (final faceID in person.data.rejectedFaceIDs!) {
+            faceIdNotToCluster[faceID] = personClusters;
+          }
+        }
+      }
+    }
 
     try {
       _showClusteringIsHappening = true;
@@ -271,6 +284,9 @@ class MLService {
         if (!fileIDToCreationTime.containsKey(faceInfo.fileID)) {
           missingFileIDs.add(faceInfo.fileID);
         } else {
+          if (faceIdNotToCluster.containsKey(faceInfo.faceID)) {
+            faceInfo.rejectedClusterIds = faceIdNotToCluster[faceInfo.faceID];
+          }
           allFaceInfoForClustering.add(faceInfo);
         }
       }

@@ -1,4 +1,3 @@
-import { ensure } from "@/utils/ensure";
 import { HOTP, TOTP } from "otpauth";
 import { Steam } from "./steam";
 
@@ -168,8 +167,8 @@ const parseIssuer = (url: URL, path: string): string => {
     let p = decodeURIComponent(path);
     if (p.startsWith("/")) p = p.slice(1);
 
-    if (p.includes(":")) p = ensure(p.split(":")[0]);
-    else if (p.includes("-")) p = ensure(p.split("-")[0]);
+    if (p.includes(":")) p = p.split(":")[0]!;
+    else if (p.includes("-")) p = p.split("-")[0]!;
 
     return p;
 };
@@ -206,7 +205,7 @@ const parseCounter = (url: URL): number | undefined => {
 };
 
 const parseSecret = (url: URL): string =>
-    ensure(url.searchParams.get("secret")).replaceAll(" ", "").toUpperCase();
+    url.searchParams.get("secret")!.replaceAll(" ", "").toUpperCase();
 
 /**
  * Generate a pair of OTPs (one time passwords) from the given {@link code}.
@@ -235,7 +234,7 @@ export const generateOTPs = (code: Code): [otp: string, nextOTP: string] => {
         }
 
         case "hotp": {
-            const counter = code.counter || 0;
+            const counter = code.counter ?? 0;
             const hotp = new HOTP({
                 secret: code.secret,
                 counter: counter,

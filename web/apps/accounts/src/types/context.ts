@@ -1,5 +1,4 @@
 import type { AccountsContextT } from "@/accounts/types/context";
-import { ensure } from "@/utils/ensure";
 import { createContext, useContext } from "react";
 
 /**
@@ -13,7 +12,7 @@ type AppContextT = Omit<AccountsContextT, "logout">;
 export const AppContext = createContext<AppContextT | undefined>(undefined);
 
 /**
- * Utility hook to get the {@link AppContextT}, throwing an exception if it is
- * not defined.
+ * Utility hook to get the {@link AppContextT} expected to be available to all
+ * React components in the Accounts app's React tree.
  */
-export const useAppContext = (): AppContextT => ensure(useContext(AppContext));
+export const useAppContext = (): AppContextT => useContext(AppContext)!;

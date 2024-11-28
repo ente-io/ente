@@ -11,13 +11,14 @@ import { sortFiles } from "@/new/photos/services/files";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
-import { LocalSavedPublicCollectionFiles } from "types/publicCollection";
 import { decryptFile } from "utils/file";
 
 const PUBLIC_COLLECTION_FILES_TABLE = "public-collection-files";
 const PUBLIC_COLLECTIONS_TABLE = "public-collections";
 const PUBLIC_REFERRAL_CODE = "public-referral-code";
 
+// Fix this once we can trust the types.
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-template-expression
 export const getPublicCollectionUID = (token: string) => `${token}`;
 
 const getPublicCollectionLastSyncTimeKey = (collectionUID: string) =>
@@ -42,6 +43,11 @@ export const savePublicCollectionUploaderName = async (
         getPublicCollectionUploaderNameKey(collectionUID),
         uploaderName,
     );
+
+export interface LocalSavedPublicCollectionFiles {
+    collectionUID: string;
+    files: EnteFile[];
+}
 
 export const getLocalPublicFiles = async (collectionUID: string) => {
     const localSavedPublicCollectionFiles =
@@ -262,7 +268,6 @@ const getPublicFiles = async (
                     sinceTime: time,
                 },
                 {
-                    "Cache-Control": "no-cache",
                     "X-Auth-Access-Token": token,
                     ...(passwordToken && {
                         "X-Auth-Access-Token-JWT": passwordToken,
@@ -314,7 +319,7 @@ export const getPublicCollection = async (
         const resp = await HTTPService.get(
             await apiURL("/public-collection/info"),
             null,
-            { "Cache-Control": "no-cache", "X-Auth-Access-Token": token },
+            { "X-Auth-Access-Token": token },
         );
         const fetchedCollection = resp.data.collection;
         const referralCode = resp.data.referralCode ?? "";
@@ -366,7 +371,7 @@ export const verifyPublicCollectionPassword = async (
             await apiURL("/public-collection/verify-password"),
             { passHash: passwordHash },
             null,
-            { "Cache-Control": "no-cache", "X-Auth-Access-Token": token },
+            { "X-Auth-Access-Token": token },
         );
         const jwtToken = resp.data.jwtToken;
         return jwtToken;

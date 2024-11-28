@@ -99,7 +99,7 @@ class UpdateService {
       if (flavor == "playstore") {
         return const Tuple2(
           "Play Store",
-          "market://details??id=io.ente.auth",
+          "market://details?id=io.ente.auth",
         );
       }
       return const Tuple2(

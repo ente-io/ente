@@ -2,6 +2,9 @@ import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
+import { downloadManager } from "@/gallery/services/download";
+import { detectFileTypeInfo } from "@/gallery/utils/detect-type";
+import { writeStream } from "@/gallery/utils/native-stream";
 import {
     EncryptedEnteFile,
     EnteFile,
@@ -15,14 +18,11 @@ import {
 import { ItemVisibility } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import DownloadManager from "@/new/photos/services/download";
 import {
     isArchivedFile,
     updateMagicMetadata,
 } from "@/new/photos/services/magic-metadata";
-import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { safeFileName } from "@/new/photos/utils/native-fs";
-import { writeStream } from "@/new/photos/utils/native-stream";
 import { withTimeout } from "@/utils/promise";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
@@ -56,9 +56,7 @@ export enum FILE_OPS_TYPE {
 
 export async function downloadFile(file: EnteFile) {
     try {
-        let fileBlob = await new Response(
-            await DownloadManager.getFile(file),
-        ).blob();
+        let fileBlob = await downloadManager.fileBlob(file);
         if (file.metadata.fileType === FileType.livePhoto) {
             const { imageFileName, imageData, videoFileName, videoData } =
                 await decodeLivePhoto(file.metadata.title, fileBlob);
@@ -392,7 +390,7 @@ async function downloadFileDesktop(
 ) {
     const fs = electron.fs;
 
-    const stream = await DownloadManager.getFile(file);
+    const stream = await downloadManager.fileStream(file);
 
     if (file.metadata.fileType === FileType.livePhoto) {
         const fileBlob = await new Response(stream).blob();
@@ -534,13 +532,7 @@ export const handleFileOps = async (
     clearTempDeleted: () => void,
     markTempHidden: (tempHiddenFiles: EnteFile[]) => void,
     clearTempHidden: () => void,
-    setFixCreationTimeAttributes: (
-        fixCreationTimeAttributes:
-            | {
-                  files: EnteFile[];
-              }
-            | ((prev: { files: EnteFile[] }) => { files: EnteFile[] }),
-    ) => void,
+    fixCreationTime: (files: EnteFile[]) => void,
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,
 ) => {
     switch (ops) {
@@ -583,7 +575,7 @@ export const handleFileOps = async (
             break;
         }
         case FILE_OPS_TYPE.FIX_TIME:
-            fixTimeHelper(files, setFixCreationTimeAttributes);
+            fixCreationTime(files);
             break;
         case FILE_OPS_TYPE.ARCHIVE:
             await changeFilesVisibility(files, ItemVisibility.archived);
@@ -595,13 +587,4 @@ export const handleFileOps = async (
             await addMultipleToFavorites(files);
             break;
     }
-};
-
-const fixTimeHelper = async (
-    selectedFiles: EnteFile[],
-    setFixCreationTimeAttributes: (fixCreationTimeAttributes: {
-        files: EnteFile[];
-    }) => void,
-) => {
-    setFixCreationTimeAttributes({ files: selectedFiles });
 };

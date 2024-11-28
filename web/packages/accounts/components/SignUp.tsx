@@ -1,14 +1,8 @@
-import { sendOtt } from "@/accounts/api/user";
-import { PasswordStrengthHint } from "@/accounts/components/PasswordStrength";
-import { PAGES } from "@/accounts/constants/pages";
-import { isWeakPassword } from "@/accounts/utils";
-import { generateKeyAndSRPAttributes } from "@/accounts/utils/srp";
+import { FormPaperFooter, FormPaperTitle } from "@/base/components/FormPaper";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import log from "@/base/log";
 import { LS_KEYS, setLSUser } from "@ente/shared//storage/localStorage";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
-import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
 import LinkButton from "@ente/shared/components/LinkButton";
 import {
@@ -41,6 +35,11 @@ import type { NextRouter } from "next/router";
 import React, { useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";
+import { PAGES } from "../constants/pages";
+import { generateKeyAndSRPAttributes } from "../services/srp";
+import { sendOtt } from "../services/user";
+import { isWeakPassword } from "../utils/password";
+import { PasswordStrengthHint } from "./PasswordStrength";
 
 interface FormValues {
     email: string;
@@ -110,7 +109,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                     masterKey,
                 );
                 setJustSignedUp(true);
-                router.push(PAGES.VERIFY);
+                void router.push(PAGES.VERIFY);
             } catch (e) {
                 setFieldError("confirm", t("PASSWORD_GENERATION_FAILED"));
                 throw e;
@@ -147,7 +146,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                     errors,
                     handleChange,
                     handleSubmit,
-                }): JSX.Element => (
+                }): React.JSX.Element => (
                     <form noValidate onSubmit={handleSubmit}>
                         <VerticallyCentered sx={{ mb: 1 }}>
                             <TextField

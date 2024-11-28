@@ -1,10 +1,10 @@
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { EnteFile } from "@/media/file";
+import { retryAsyncOperation } from "@/utils/promise";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { MultipartUploadURLs, UploadFile, UploadURL } from "./upload-service";
-import { retryHTTPCall } from "./uploadHttpClient";
 
 const MAX_URL_REQUESTS = 50;
 
@@ -21,7 +21,7 @@ class PublicUploadHttpClient {
                 throw Error(CustomError.TOKEN_MISSING);
             }
             const url = await apiURL("/public-collection/file");
-            const response = await retryHTTPCall(
+            const response = await retryAsyncOperation(
                 () =>
                     HTTPService.post(url, uploadFile, null, {
                         "X-Auth-Access-Token": token,
@@ -63,7 +63,7 @@ class PublicUploadHttpClient {
                         },
                     );
                     const response = await this.uploadURLFetchInProgress;
-                    for (const url of response.data["urls"]) {
+                    for (const url of response.data.urls) {
                         urlStore.push(url);
                     }
                 } finally {
@@ -99,7 +99,7 @@ class PublicUploadHttpClient {
                 },
             );
 
-            return response.data["urls"];
+            return response.data.urls;
         } catch (e) {
             log.error("fetch public multipart-upload-url failed", e);
             throw e;

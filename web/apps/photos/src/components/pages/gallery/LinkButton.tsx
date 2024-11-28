@@ -16,7 +16,7 @@ const LinkButton: React.FC<
             sx={{
                 color: "text.base",
                 textDecoration: "underline rgba(255, 255, 255, 0.4)",
-                paddingBottom: 0.5,
+                paddingBottom: "2px",
                 "&:hover": {
                     color: `${color}.main`,
                     textDecoration: `underline `,

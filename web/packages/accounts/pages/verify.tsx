@@ -1,10 +1,7 @@
-import type { UserVerificationResponse } from "@/accounts/types/user";
+import { FormPaper, FormPaperTitle } from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
-import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
     type SingleInputFormProps,
@@ -29,8 +26,6 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { getSRPAttributes } from "../api/srp";
-import { putAttributes, sendOtt, verifyOtt } from "../api/user";
 import {
     LoginFlowFormFooter,
     VerifyingPasskey,
@@ -42,8 +37,11 @@ import {
 } from "../services/passkey";
 import { stashedRedirect, unstashRedirect } from "../services/redirect";
 import { configureSRP } from "../services/srp";
+import type { SRPAttributes, SRPSetupAttributes } from "../services/srp-remote";
+import { getSRPAttributes } from "../services/srp-remote";
+import type { UserVerificationResponse } from "../services/user";
+import { putAttributes, sendOtt, verifyOtt } from "../services/user";
 import type { PageProps } from "../types/page";
-import type { SRPAttributes, SRPSetupAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { logout, showNavBar, showMiniDialog } = appContext;
@@ -62,12 +60,12 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
             const redirect = await redirectionIfNeeded(user);
             if (redirect) {
-                router.push(redirect);
+                void router.push(redirect);
             } else {
                 setEmail(user.email);
             }
         };
-        main();
+        void main();
         showNavBar(true);
     }, []);
 
@@ -110,7 +108,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     isTwoFactorEnabled: true,
                 });
                 setIsFirstLogin(true);
-                router.push(PAGES.TWO_FACTOR_VERIFY);
+                void router.push(PAGES.TWO_FACTOR_VERIFY);
             } else {
                 await setLSUser({
                     email,
@@ -125,7 +123,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 } else {
                     if (getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)) {
                         await putAttributes(
-                            ensure(token),
+                            token!,
                             getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES),
                         );
                     }
@@ -136,28 +134,28 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         await configureSRP(srpSetupAttributes);
                     }
                 }
-                localForage.clear();
+                await localForage.clear();
                 setIsFirstLogin(true);
                 const redirectURL = unstashRedirect();
                 if (keyAttributes?.encryptedKey) {
                     clearKeys();
-                    router.push(redirectURL ?? PAGES.CREDENTIALS);
+                    void router.push(redirectURL ?? PAGES.CREDENTIALS);
                 } else {
-                    router.push(redirectURL ?? PAGES.GENERATE);
+                    void router.push(redirectURL ?? PAGES.GENERATE);
                 }
             }
         } catch (e) {
             if (e instanceof ApiError) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                 if (e?.httpStatusCode === HttpStatusCode.Unauthorized) {
                     setFieldError(t("INVALID_CODE"));
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                 } else if (e?.httpStatusCode === HttpStatusCode.Gone) {
                     setFieldError(t("EXPIRED_CODE"));
                 }
             } else {
                 log.error("OTT verification failed", e);
-                setFieldError(
-                    `${t("generic_error_retry")} ${JSON.stringify(e)}`,
-                );
+                setFieldError(t("generic_error_retry"));
             }
         }
     };

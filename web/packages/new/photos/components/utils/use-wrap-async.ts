@@ -2,15 +2,19 @@ import { useCallback } from "react";
 import { useAppContext } from "../../types/context";
 
 /**
- * Wrap an asynchronous operation (e.g. API calls) in an global activity
- * indicator and error handler.
+ * Wrap a function returning a promise in a loading bar and error handler.
  *
- * This function takes a async function, and wraps it in a function that starts
- * the global activity indicator, lets the promise resolve, and then stop the
- * activity indicator. If the promise rejects, then it shows a generic error.
+ * This function wraps asynchronous operations (e.g. API calls) in an global
+ * activity indicator and error handler. The global activity indicator and error
+ * alert triggering mechanism is obtained from the app context.
  *
- * The global activity indicator and error alert triggering mechanism is
- * obtained from the app context.
+ * Specifically, this function takes an async function. It starts the global
+ * activity indicator (using {@link showLoadingBar}), performs the operation,
+ * and stops the activity indicator on completion (using
+ * {@link hideLoadingBar}).
+ *
+ * If the operation throws, it shows a generic error (using
+ * {@link onGenericError}).
  */
 export const useWrapAsyncOperation = <T extends unknown[]>(
     f: (...args: T) => Promise<void>,

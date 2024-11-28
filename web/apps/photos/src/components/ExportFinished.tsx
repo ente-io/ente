@@ -1,3 +1,4 @@
+import { formattedNumber } from "@/base/i18n";
 import { EnteFile } from "@/media/file";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { formatDateTime } from "@ente/shared/time/format";
@@ -10,7 +11,6 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";
-import { formatNumber } from "utils/number/format";
 import ExportPendingList from "./ExportPendingList";
 import LinkButton from "./pages/gallery/LinkButton";
 
@@ -44,22 +44,22 @@ export default function ExportFinished(props: Props) {
                         </Typography>
                         {props.pendingExports.length ? (
                             <LinkButton onClick={openPendingFileList}>
-                                {formatNumber(props.pendingExports.length)}
+                                {formattedNumber(props.pendingExports.length)}
                             </LinkButton>
                         ) : (
                             <Typography>
-                                {formatNumber(props.pendingExports.length)}
+                                {formattedNumber(props.pendingExports.length)}
                             </Typography>
                         )}
                     </SpaceBetweenFlex>
                     <SpaceBetweenFlex minHeight={"48px"}>
                         <Typography color="text.muted">
-                            {t("LAST_EXPORT_TIME")}
+                            {t("last_export_time")}
                         </Typography>
                         <Typography>
                             {props.lastExportTime
                                 ? formatDateTime(props.lastExportTime)
-                                : t("NEVER")}
+                                : t("never")}
                         </Typography>
                     </SpaceBetweenFlex>
                 </Stack>
@@ -69,7 +69,7 @@ export default function ExportFinished(props: Props) {
                     {t("close")}
                 </Button>
                 <Button size="large" color="primary" onClick={props.onResync}>
-                    {t("EXPORT_AGAIN")}
+                    {t("export_again")}
                 </Button>
             </DialogActions>
             <ExportPendingList

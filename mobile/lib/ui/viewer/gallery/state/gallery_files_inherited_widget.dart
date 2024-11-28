@@ -18,6 +18,10 @@ class GalleryFilesState extends InheritedWidget {
     _galleryFiles = galleryFiles;
   }
 
+  void removeFile(EnteFile file) {
+    _galleryFiles!.remove(file);
+  }
+
   List<EnteFile> get galleryFiles {
     if (_galleryFiles == null) {
       throw Exception(

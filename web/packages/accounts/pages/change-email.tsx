@@ -1,10 +1,11 @@
-import { changeEmail, sendOTTForEmailChange } from "@/accounts/api/user";
+import {
+    FormPaper,
+    FormPaperFooter,
+    FormPaperTitle,
+} from "@/base/components/FormPaper";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import { ensure } from "@/utils/ensure";
+import log from "@/base/log";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
-import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Alert, Box, TextField } from "@mui/material";
@@ -15,6 +16,7 @@ import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";
 import { appHomeRoute } from "../services/redirect";
+import { changeEmail, sendOTTForEmailChange } from "../services/user";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = () => {
@@ -23,7 +25,7 @@ const Page: React.FC<PageProps> = () => {
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
         if (!user?.token) {
-            router.push("/");
+            void router.push("/");
         }
     }, []);
 
@@ -68,7 +70,8 @@ const ChangeEmailForm: React.FC = () => {
             //     ottInputRef.current?.focus();
             // }, 250);
         } catch (e) {
-            setFieldError("email", t("EMAIl_ALREADY_OWNED"));
+            log.error(e);
+            setFieldError("email", t("email_already_taken"));
         }
         setLoading(false);
     };
@@ -79,11 +82,12 @@ const ChangeEmailForm: React.FC = () => {
     ) => {
         try {
             setLoading(true);
-            await changeEmail(email, ensure(ott));
+            await changeEmail(email, ott!);
             await setLSUser({ ...getData(LS_KEYS.USER), email });
             setLoading(false);
-            goToApp();
+            void goToApp();
         } catch (e) {
+            log.error(e);
             setLoading(false);
             setFieldError("ott", t("INCORRECT_CODE"));
         }
@@ -188,7 +192,7 @@ const ChangeEmailForm: React.FC = () => {
                             </LinkButton>
                         )}
                         <LinkButton onClick={goToApp}>
-                            {t("GO_BACK")}
+                            {t("go_back")}
                         </LinkButton>
                     </FormPaperFooter>
                 </>

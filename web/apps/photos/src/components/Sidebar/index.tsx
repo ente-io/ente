@@ -3,14 +3,18 @@ import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import { isDesktop } from "@/base/app";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
+import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
 import { downloadString } from "@/base/utils/web";
+import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { TwoFactorSettings } from "@/new/photos/components/sidebar/TwoFactorSettings";
 import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
+import { useUserDetailsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import {
     ARCHIVE_SECTION,
     DUMMY_UNCATEGORIZED_COLLECTION,
@@ -18,41 +22,58 @@ import {
 } from "@/new/photos/services/collection";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { isInternalUser } from "@/new/photos/services/settings";
-import { isFamilyAdmin, isPartOfFamily } from "@/new/photos/services/user";
+import {
+    familyAdminEmail,
+    hasExceededStorageQuota,
+    isFamilyAdmin,
+    isPartOfFamily,
+    isSubscriptionActive,
+    isSubscriptionActivePaid,
+    isSubscriptionCancelled,
+    isSubscriptionFree,
+    isSubscriptionPastDue,
+    isSubscriptionStripe,
+    leaveFamily,
+    redirectToCustomerPortal,
+    syncUserDetails,
+    userDetailsAddOnBonuses,
+    type UserDetails,
+} from "@/new/photos/services/user-details";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
-import { SpaceBetweenFlex } from "@ente/shared/components/Container";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
-import ThemeSwitcher from "@ente/shared/components/ThemeSwitcher";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import {
-    LS_KEYS,
-    getData,
-    setData,
-    setLSUser,
-} from "@ente/shared/storage/localStorage";
+    FlexWrapper,
+    VerticallyCentered,
+} from "@ente/shared/components/Container";
+import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
+import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
 import CloseIcon from "@mui/icons-material/Close";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import LightModeIcon from "@mui/icons-material/LightMode";
 import LockOutlined from "@mui/icons-material/LockOutlined";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import {
     Box,
+    Button,
+    Dialog,
+    DialogContent,
     Divider,
     IconButton,
     Skeleton,
     Stack,
     styled,
+    ToggleButton,
+    ToggleButtonGroup,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
 import { WatchFolder } from "components/WatchFolder";
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import React, {
@@ -63,23 +84,9 @@ import React, {
     useState,
 } from "react";
 import { Trans } from "react-i18next";
-import billingService from "services/billingService";
 import { getUncategorizedCollection } from "services/collectionService";
 import exportService from "services/export";
-import { getUserDetailsV2 } from "services/userService";
-import { UserDetails } from "types/user";
-import {
-    hasAddOnBonus,
-    hasExceededStorageQuota,
-    hasPaidSubscription,
-    hasStripeSubscription,
-    isOnFreePlan,
-    isSubscriptionActive,
-    isSubscriptionCancelled,
-    isSubscriptionPastDue,
-} from "utils/billing";
 import { testUpload } from "../../../tests/upload.test";
-import { MemberSubscriptionManage } from "../MemberSubscriptionManage";
 import { Preferences } from "./Preferences";
 import { SubscriptionCard } from "./SubscriptionCard";
 
@@ -128,10 +135,12 @@ interface HeaderSectionProps {
 
 const HeaderSection: React.FC<HeaderSectionProps> = ({ closeSidebar }) => {
     return (
-        <SpaceBetweenFlex mt={0.5} mb={1} pl={1.5}>
+        <SpaceBetweenFlex
+            sx={{ marginBlock: "4px 4px", paddingInlineStart: "12px" }}
+        >
             <EnteLogo />
             <IconButton
-                aria-label="close"
+                aria-label={t("close")}
                 onClick={closeSidebar}
                 color="secondary"
             >
@@ -149,10 +158,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
     sidebarView,
 }) => {
     const galleryContext = useContext(GalleryContext);
-
-    const [userDetails, setUserDetails] = useLocalState<
-        UserDetails | undefined
-    >(LS_KEYS.USER_DETAILS, undefined);
+    const userDetails = useUserDetailsSnapshot();
     const [memberSubscriptionManageView, setMemberSubscriptionManageView] =
         useState(false);
 
@@ -162,40 +168,27 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
         setMemberSubscriptionManageView(false);
 
     useEffect(() => {
-        if (!sidebarView) {
-            return;
-        }
-        const main = async () => {
-            const userDetails = await getUserDetailsV2();
-            setUserDetails(userDetails);
-            setData(LS_KEYS.SUBSCRIPTION, userDetails.subscription);
-            setData(LS_KEYS.FAMILY_DATA, userDetails.familyData);
-            await setLSUser({
-                ...getData(LS_KEYS.USER),
-                email: userDetails.email,
-            });
-        };
-        main();
+        if (sidebarView) void syncUserDetails();
     }, [sidebarView]);
 
-    const isMemberSubscription = useMemo(
+    const isNonAdminFamilyMember = useMemo(
         () =>
             userDetails &&
-            isPartOfFamily(userDetails.familyData) &&
-            !isFamilyAdmin(userDetails.familyData),
+            isPartOfFamily(userDetails) &&
+            !isFamilyAdmin(userDetails),
         [userDetails],
     );
 
     const handleSubscriptionCardClick = () => {
-        if (isMemberSubscription) {
+        if (isNonAdminFamilyMember) {
             openMemberSubscriptionManage();
         } else {
             if (
                 userDetails &&
-                hasStripeSubscription(userDetails.subscription) &&
+                isSubscriptionStripe(userDetails.subscription) &&
                 isSubscriptionPastDue(userDetails.subscription)
             ) {
-                billingService.redirectToCustomerPortal();
+                redirectToCustomerPortal();
             } else {
                 galleryContext.showPlanSelectorModal();
             }
@@ -217,9 +210,11 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
                     userDetails={userDetails}
                     onClick={handleSubscriptionCardClick}
                 />
-                <SubscriptionStatus userDetails={userDetails} />
+                {userDetails && (
+                    <SubscriptionStatus userDetails={userDetails} />
+                )}
             </Box>
-            {isMemberSubscription && (
+            {isNonAdminFamilyMember && (
                 <MemberSubscriptionManage
                     userDetails={userDetails}
                     open={memberSubscriptionManageView}
@@ -240,17 +235,11 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     const { showPlanSelectorModal } = useContext(GalleryContext);
 
     const hasAMessage = useMemo(() => {
-        if (!userDetails) {
+        if (isPartOfFamily(userDetails) && !isFamilyAdmin(userDetails)) {
             return false;
         }
         if (
-            isPartOfFamily(userDetails.familyData) &&
-            !isFamilyAdmin(userDetails.familyData)
-        ) {
-            return false;
-        }
-        if (
-            hasPaidSubscription(userDetails.subscription) &&
+            isSubscriptionActivePaid(userDetails.subscription) &&
             !isSubscriptionCancelled(userDetails.subscription)
         ) {
             return false;
@@ -261,20 +250,19 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     const handleClick = useMemo(() => {
         const eventHandler: MouseEventHandler<HTMLSpanElement> = (e) => {
             e.stopPropagation();
-            if (userDetails) {
-                if (isSubscriptionActive(userDetails.subscription)) {
-                    if (hasExceededStorageQuota(userDetails)) {
-                        showPlanSelectorModal();
-                    }
+
+            if (isSubscriptionActive(userDetails.subscription)) {
+                if (hasExceededStorageQuota(userDetails)) {
+                    showPlanSelectorModal();
+                }
+            } else {
+                if (
+                    isSubscriptionStripe(userDetails.subscription) &&
+                    isSubscriptionPastDue(userDetails.subscription)
+                ) {
+                    redirectToCustomerPortal();
                 } else {
-                    if (
-                        hasStripeSubscription(userDetails.subscription) &&
-                        isSubscriptionPastDue(userDetails.subscription)
-                    ) {
-                        billingService.redirectToCustomerPortal();
-                    } else {
-                        showPlanSelectorModal();
-                    }
+                    showPlanSelectorModal();
                 }
             }
         };
@@ -285,10 +273,12 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
         return <></>;
     }
 
+    const hasAddOnBonus = userDetailsAddOnBonuses(userDetails).length > 0;
+
     let message: React.ReactNode;
-    if (!hasAddOnBonus(userDetails.bonusData)) {
+    if (!hasAddOnBonus) {
         if (isSubscriptionActive(userDetails.subscription)) {
-            if (isOnFreePlan(userDetails.subscription)) {
+            if (isSubscriptionFree(userDetails.subscription)) {
                 message = t("subscription_info_free");
             } else if (isSubscriptionCancelled(userDetails.subscription)) {
                 message = t("subscription_info_renewal_cancelled", {
@@ -333,6 +323,71 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
         </Box>
     );
 };
+
+function MemberSubscriptionManage({ open, userDetails, onClose }) {
+    const { showMiniDialog } = useAppContext();
+    const fullScreen = useIsSmallWidth();
+
+    const confirmLeaveFamily = () =>
+        showMiniDialog({
+            title: t("leave_family_plan"),
+            message: t("leave_family_plan_confirm"),
+            continue: {
+                text: t("leave"),
+                color: "critical",
+                action: leaveFamily,
+            },
+        });
+
+    if (!userDetails) {
+        return <></>;
+    }
+
+    return (
+        <Dialog {...{ open, onClose, fullScreen }} maxWidth="xs" fullWidth>
+            <SpaceBetweenFlex sx={{ p: "20px 8px 12px 16px" }}>
+                <Stack>
+                    <Typography variant="h3" fontWeight={"bold"}>
+                        {t("subscription")}
+                    </Typography>
+                    <Typography color={"text.muted"}>
+                        {t("family_plan")}
+                    </Typography>
+                </Stack>
+                <DialogCloseIconButton {...{ onClose }} />
+            </SpaceBetweenFlex>
+            <DialogContent>
+                <VerticallyCentered>
+                    <Box mb={4}>
+                        <Typography color="text.muted">
+                            {t("subscription_info_family")}
+                        </Typography>
+                        <Typography>
+                            {familyAdminEmail(userDetails) ?? ""}
+                        </Typography>
+                    </Box>
+
+                    <img
+                        height={256}
+                        src="/images/family-plan/1x.png"
+                        srcSet="/images/family-plan/2x.png 2x,
+                                /images/family-plan/3x.png 3x"
+                    />
+                    <FlexWrapper px={2}>
+                        <Button
+                            size="large"
+                            variant="outlined"
+                            color="critical"
+                            onClick={confirmLeaveFamily}
+                        >
+                            {t("leave_family_plan")}
+                        </Button>
+                    </FlexWrapper>
+                </VerticallyCentered>
+            </DialogContent>
+        </Dialog>
+    );
+}
 
 interface ShortcutSectionProps {
     closeSidebar: () => void;
@@ -470,11 +525,11 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
 
     return (
         <>
-            {isElectron() && (
+            {isDesktop && (
                 <EnteMenuItem
                     onClick={showWatchFolder}
                     variant="secondary"
-                    label={t("WATCH_FOLDERS")}
+                    label={t("watch_folders")}
                 />
             )}
             <EnteMenuItem
@@ -535,7 +590,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 {...twoFactorVisibilityProps}
                 onRootClose={closeSidebar}
             />
-            {isElectron() && (
+            {isDesktop && (
                 <WatchFolder
                     open={watchFolderView}
                     onClose={handleCloseWatchFolder}
@@ -546,6 +601,38 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 onRootClose={closeSidebar}
             />
         </>
+    );
+};
+
+interface ThemeSwitcherProps {
+    themeColor: THEME_COLOR;
+    setThemeColor: (themeColor: THEME_COLOR) => void;
+}
+
+const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
+    themeColor,
+    setThemeColor,
+}) => {
+    const handleChange = (event, themeColor: THEME_COLOR) => {
+        if (themeColor !== null) {
+            setThemeColor(themeColor);
+        }
+    };
+
+    return (
+        <ToggleButtonGroup
+            size="small"
+            value={themeColor}
+            exclusive
+            onChange={handleChange}
+        >
+            <ToggleButton value={THEME_COLOR.LIGHT}>
+                <LightModeIcon />
+            </ToggleButton>
+            <ToggleButton value={THEME_COLOR.DARK}>
+                <DarkModeIcon />
+            </ToggleButton>
+        </ToggleButtonGroup>
     );
 };
 

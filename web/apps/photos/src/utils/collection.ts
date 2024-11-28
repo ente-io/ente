@@ -19,9 +19,7 @@ import {
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
 import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import { safeDirectoryName } from "@/new/photos/utils/native-fs";
-import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { getUnixTimeInMicroSecondsWithDelta } from "@ente/shared/time";
 import type { User } from "@ente/shared/user/types";
 import bs58 from "bs58";
 import { t } from "i18next";
@@ -75,7 +73,7 @@ export async function handleCollectionOps(
             await unhideToCollection(collection, selectedFiles);
             break;
         default:
-            throw Error(CustomError.INVALID_COLLECTION_OPERATION);
+            throw Error("Invalid collection operation");
     }
 }
 
@@ -198,30 +196,6 @@ const _intSelectOption = (i: number) => {
 export function getDeviceLimitOptions() {
     return [0, 2, 5, 10, 25, 50].map((i) => _intSelectOption(i));
 }
-
-export const shareExpiryOptions = () => [
-    { label: t("NEVER"), value: () => 0 },
-    {
-        label: t("AFTER_TIME.HOUR"),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ hours: 1 }),
-    },
-    {
-        label: t("AFTER_TIME.DAY"),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ days: 1 }),
-    },
-    {
-        label: t("AFTER_TIME.WEEK"),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ days: 7 }),
-    },
-    {
-        label: t("AFTER_TIME.MONTH"),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ months: 1 }),
-    },
-    {
-        label: t("AFTER_TIME.YEAR"),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ years: 1 }),
-    },
-];
 
 export const changeCollectionVisibility = async (
     collection: Collection,

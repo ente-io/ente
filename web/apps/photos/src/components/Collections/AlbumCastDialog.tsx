@@ -1,19 +1,21 @@
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { boxSeal } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
+import {
+    publishCastPayload,
+    revokeAllCastTokens,
+    unknownDeviceCodeErrorMessage,
+} from "@/new/photos/services/cast";
 import { loadCast } from "@/new/photos/utils/chromecast-sender";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
-import castGateway from "@ente/shared/network/cast";
 import { Button, Link, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { v4 as uuidv4 } from "uuid";
 
 interface AlbumCastDialogProps {
     /** If `true`, the dialog is shown. */
@@ -38,10 +40,12 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
 
     const [browserCanCast, setBrowserCanCast] = useState(false);
 
-    // Make API call to clear all previous sessions on component mount.
     useEffect(() => {
-        castGateway.revokeAllTokens();
-
+        // Determine if Chromecast is supported by the current browser
+        // (effectively, only Chrome).
+        //
+        // Override, otherwise tsc complains about unknown property `chrome`.
+        // eslint-disable-next-line @typescript-eslint/dot-notation
         setBrowserCanCast(typeof window["chrome"] !== "undefined");
     }, []);
 
@@ -50,42 +54,19 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
         setFieldError,
     ) => {
         try {
-            await doCast(value.trim());
+            await publishCastPayload(value.trim(), collection);
             onClose();
         } catch (e) {
-            if (e instanceof Error && e.message == "tv-not-found") {
+            log.error("Failed to cast", e);
+            if (
+                e instanceof Error &&
+                e.message == unknownDeviceCodeErrorMessage
+            ) {
                 setFieldError(t("tv_not_found"));
             } else {
                 setFieldError(t("generic_error_retry"));
             }
         }
-    };
-
-    const doCast = async (pin: string) => {
-        // Does the TV exist? have they advertised their existence?
-        const tvPublicKeyB64 = await castGateway.getPublicKey(pin);
-        if (!tvPublicKeyB64) {
-            throw new Error("tv-not-found");
-        }
-
-        // Generate random id.
-        const castToken = uuidv4();
-
-        // Ok, they exist. let's give them the good stuff.
-        const payload = JSON.stringify({
-            castToken: castToken,
-            collectionID: collection.id,
-            collectionKey: collection.key,
-        });
-        const encryptedPayload = await boxSeal(btoa(payload), tvPublicKeyB64);
-
-        // Hey TV, we acknowlege you!
-        await castGateway.publishCastPayload(
-            pin,
-            encryptedPayload,
-            collection.id,
-            castToken,
-        );
     };
 
     useEffect(() => {
@@ -108,12 +89,12 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                         const code = obj.code;
 
                         if (code) {
-                            doCast(code)
+                            publishCastPayload(`${code}`, collection)
                                 .then(() => {
                                     setView("choose");
                                     onClose();
                                 })
-                                .catch((e) => {
+                                .catch((e: unknown) => {
                                     log.error("Error casting to TV", e);
                                     setView("auto-cast-error");
                                 });
@@ -129,10 +110,15 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                     });
             });
         }
-    }, [view]);
+    }, [view, collection]);
 
     useEffect(() => {
-        if (open) castGateway.revokeAllTokens();
+        // Make API call to clear all previous sessions (if any) whenever the
+        // dialog is opened so that the user can start a new session.
+        //
+        // This is not going to have an effect on the current client, so we
+        // don't need to wait for it to finish (and can ignore errors).
+        if (open) void revokeAllCastTokens();
     }, [open]);
 
     return (
@@ -172,7 +158,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                     </div>
                     <Typography>{t("choose_device_from_browser")}</Typography>
                     <Button color="secondary" onClick={() => setView("choose")}>
-                        {t("GO_BACK")}
+                        {t("go_back")}
                     </Button>
                 </Stack>
             )}
@@ -180,37 +166,43 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                 <Stack sx={{ pt: 1, gap: 3, textAlign: "center" }}>
                     <Typography>{t("cast_auto_pair_failed")}</Typography>
                     <Button color="secondary" onClick={() => setView("choose")}>
-                        {t("GO_BACK")}
+                        {t("go_back")}
                     </Button>
                 </Stack>
             )}
             {view == "pin" && (
                 <>
-                    <Typography>
-                        <Trans
-                            i18nKey="visit_cast_url"
-                            components={{
-                                a: (
-                                    <Link
-                                        target="_blank"
-                                        href="https://cast.ente.io"
-                                    />
-                                ),
-                            }}
-                            values={{ url: "cast.ente.io" }}
-                        />
-                    </Typography>
-                    <Typography>{t("enter_cast_pin_code")}</Typography>
+                    <Stack sx={{ gap: 2, mb: 2 }}>
+                        <Typography>
+                            <Trans
+                                i18nKey="visit_cast_url"
+                                components={{
+                                    a: (
+                                        <Link
+                                            target="_blank"
+                                            href="https://cast.ente.io"
+                                        />
+                                    ),
+                                }}
+                                values={{ url: "cast.ente.io" }}
+                            />
+                        </Typography>
+                        <Typography>{t("enter_cast_pin_code")}</Typography>
+                    </Stack>
                     <SingleInputForm
                         callback={onSubmit}
                         fieldType="text"
-                        realLabel={"Code"}
+                        realLabel={t("code")}
                         realPlaceholder={"123456"}
                         buttonText={t("pair_device_to_tv")}
                         submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
                     />
-                    <Button variant="text" onClick={() => setView("choose")}>
-                        {t("GO_BACK")}
+                    <Button
+                        variant="text"
+                        fullWidth
+                        onClick={() => setView("choose")}
+                    >
+                        {t("go_back")}
                     </Button>
                 </>
             )}

@@ -1,21 +1,16 @@
 import { accountLogout } from "@/accounts/services/logout";
-import type { AccountsContextT } from "@/accounts/types/context";
 import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Overlay } from "@/base/components/mui/Container";
 import { AppNavbar } from "@/base/components/Navbar";
-import {
-    genericErrorDialogAttributes,
-    useAttributedMiniDialog,
-} from "@/base/components/utils/dialog";
+import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
 import { setupI18n } from "@/base/i18n";
 import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/base/log-web";
-import { ensure } from "@/utils/ensure";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -32,24 +27,10 @@ import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { AppContext } from "types/context";
 
 import "../../public/css/global.css";
-
-/**
- * Properties available via {@link AppContext} to the Auth app's React tree.
- */
-type AppContextT = AccountsContextT & {
-    themeColor: THEME_COLOR;
-    setThemeColor: (themeColor: THEME_COLOR) => void;
-    somethingWentWrong: () => void;
-};
-
-/** The React {@link Context} available to all pages. */
-export const AppContext = createContext<AppContextT | undefined>(undefined);
-
-/** Utility hook to reduce amount of boilerplate in account related pages. */
-export const useAppContext = () => ensure(useContext(AppContext));
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const router = useRouter();
@@ -69,7 +50,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useEffect(() => {
         void setupI18n().finally(() => setIsI18nReady(true));
         const user = getData(LS_KEYS.USER) as User | undefined | null;
-        migrateKVToken(user);
+        void migrateKVToken(user);
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
         logUnhandledErrorsAndRejections(true);
@@ -98,25 +79,22 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             window.removeEventListener("online", setUserOnline);
             window.removeEventListener("offline", setUserOffline);
         };
+    }, [router]);
+
+    const logout = useCallback(() => {
+        void accountLogout().then(() => window.location.replace("/"));
     }, []);
 
-    const showNavBar = (show: boolean) => setShowNavBar(show);
-
-    const somethingWentWrong = () =>
-        showMiniDialog(genericErrorDialogAttributes());
-
-    const logout = () => {
-        void accountLogout().then(() => router.push("/"));
-    };
-
-    const appContext = {
-        logout,
-        showNavBar,
-        showMiniDialog,
-        themeColor,
-        setThemeColor,
-        somethingWentWrong,
-    };
+    const appContext = useMemo(
+        () => ({
+            logout,
+            showNavBar: (show: boolean) => setShowNavBar(show),
+            showMiniDialog,
+            themeColor,
+            setThemeColor,
+        }),
+        [logout, showMiniDialog, themeColor, setThemeColor],
+    );
 
     const title = isI18nReady ? t("title_auth") : staticAppTitle;
 

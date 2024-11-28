@@ -151,7 +151,7 @@ const parseMetadataDateFromDayjs = (d: Dayjs): ParsedMetadataDate => {
 
     // Check to see if there is a time-zone descriptor of the form "Z" or
     // "±05:30" or "±0530" at the end of s.
-    const m = s.match(/Z|[+-]\d\d:?\d\d$/);
+    const m = /Z|[+-]\d\d:?\d\d$/.exec(s);
     if (m?.index) {
         dateTime = s.substring(0, m.index);
         offset = s.substring(m.index);

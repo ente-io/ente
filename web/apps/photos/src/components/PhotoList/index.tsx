@@ -197,7 +197,7 @@ type Props = Pick<PhotoFrameProps, "mode" | "modePlus"> & {
         file: EnteFile,
         index: number,
         isScrolling?: boolean,
-    ) => JSX.Element;
+    ) => React.JSX.Element;
     activeCollectionID: number;
     activePersonID?: string;
 };
@@ -209,7 +209,7 @@ interface ItemData {
     renderListItem: (
         timeStampListItem: TimeStampListItem,
         isScrolling?: boolean,
-    ) => JSX.Element;
+    ) => React.JSX.Element;
 }
 
 const createItemData = memoize(
@@ -220,7 +220,7 @@ const createItemData = memoize(
         renderListItem: (
             timeStampListItem: TimeStampListItem,
             isScrolling?: boolean,
-        ) => JSX.Element,
+        ) => React.JSX.Element,
     ): ItemData => ({
         timeStampList,
         columns,
@@ -631,10 +631,6 @@ export function PhotoList({
 
     /**
      * Checks and merge multiple dates into a single row.
-     *
-     * @param items
-     * @param columns
-     * @returns
      */
     const mergeTimeStampList = (
         items: TimeStampListItem[],

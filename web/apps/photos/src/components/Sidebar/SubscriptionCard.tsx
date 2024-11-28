@@ -1,9 +1,10 @@
+import type { ButtonishProps } from "@/base/components/mui";
 import { Overlay } from "@/base/components/mui/Container";
-import type { ButtonishProps } from "@/new/photos/components/mui";
+import type { UserDetails } from "@/new/photos/services/user-details";
 import {
-    hasNonAdminFamilyMembers,
-    isPartOfFamily,
-} from "@/new/photos/services/user";
+    familyUsage,
+    isPartOfFamilyWithOtherMembers,
+} from "@/new/photos/services/user-details";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -19,8 +20,6 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import type React from "react";
-import { useMemo } from "react";
-import type { UserDetails } from "types/user";
 
 interface SubscriptionCardProps {
     userDetails: UserDetails;
@@ -91,7 +90,7 @@ export const SubscriptionCardContentOverlay: React.FC<
                 flexDirection={"column"}
                 padding={"20px 16px"}
             >
-                {hasNonAdminFamilyMembers(userDetails.familyData) ? (
+                {userDetails && isPartOfFamilyWithOtherMembers(userDetails) ? (
                     <FamilySubscriptionCardContent userDetails={userDetails} />
                 ) : (
                     <IndividualSubscriptionCardContent
@@ -111,7 +110,7 @@ const IndividualSubscriptionCardContent: React.FC<
     IndividualSubscriptionCardContentProps
 > = ({ userDetails }) => {
     const totalStorage =
-        userDetails.subscription.storage + (userDetails.storageBonus ?? 0);
+        userDetails.subscription.storage + userDetails.storageBonus;
     return (
         <>
             <StorageSection storage={totalStorage} usage={userDetails.usage} />
@@ -147,7 +146,7 @@ const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
     return (
         <Box width="100%">
             <Typography variant="small" color={"text.muted"}>
-                {t("STORAGE")}
+                {t("storage")}
             </Typography>
             <DefaultBox>
                 <Typography
@@ -155,8 +154,8 @@ const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
                     sx={{ fontSize: "24px", lineHeight: "30px" }}
                 >
                     {`${formattedStorageByteSize(usage, { round: true })} ${t(
-                        "OF",
-                    )} ${formattedStorageByteSize(storage)} ${t("USED")}`}
+                        "of",
+                    )} ${formattedStorageByteSize(storage)} ${t("used")}`}
                 </Typography>
             </DefaultBox>
             <MobileSmallBox>
@@ -164,7 +163,7 @@ const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
                     fontWeight={"bold"}
                     sx={{ fontSize: "24px", lineHeight: "30px" }}
                 >
-                    {`${bytesInGB(usage)} /  ${bytesInGB(storage)} ${t("storage_unit.gb")} ${t("USED")}`}
+                    {`${bytesInGB(usage)} /  ${bytesInGB(storage)} ${t("storage_unit.gb")} ${t("used")}`}
                 </Typography>
             </MobileSmallBox>
         </Box>
@@ -203,7 +202,7 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
             >
                 <Typography variant="mini">{`${formattedStorageByteSize(
                     storage - usage,
-                )} ${t("FREE")}`}</Typography>
+                )} ${t("free")}`}</Typography>
                 <Typography variant="mini" fontWeight={"bold"}>
                     {t("photos_count", { count: fileCount ?? 0 })}
                 </Typography>
@@ -219,18 +218,9 @@ interface FamilySubscriptionCardContentProps {
 const FamilySubscriptionCardContent: React.FC<
     FamilySubscriptionCardContentProps
 > = ({ userDetails }) => {
-    const totalUsage = useMemo(() => {
-        if (isPartOfFamily(userDetails.familyData)) {
-            return userDetails.familyData.members.reduce(
-                (sum, currentMember) => sum + currentMember.usage,
-                0,
-            );
-        } else {
-            return userDetails.usage;
-        }
-    }, [userDetails]);
+    const totalUsage = familyUsage(userDetails);
     const totalStorage =
-        userDetails.familyData.storage + (userDetails.storageBonus ?? 0);
+        (userDetails.familyData?.storage ?? 0) + userDetails.storageBonus;
 
     return (
         <>
@@ -271,8 +261,8 @@ const FamilyUsageSection: React.FC<FamilyUsageSectionProps> = ({
                 }}
             >
                 <Stack direction={"row"} spacing={1.5}>
-                    <Legend label={t("YOU")} color="text.base" />
-                    <Legend label={t("FAMILY")} color="text.muted" />
+                    <Legend label={t("you")} color="text.base" />
+                    <Legend label={t("family")} color="text.muted" />
                 </Stack>
                 <Typography variant="mini" fontWeight={"bold"}>
                     {t("photos_count", { count: fileCount ?? 0 })}

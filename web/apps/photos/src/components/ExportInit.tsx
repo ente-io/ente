@@ -9,7 +9,7 @@ export default function ExportInit({ startExport }: Props) {
         <DialogContent>
             <DialogActions>
                 <Button size="large" color="accent" onClick={startExport}>
-                    {t("START")}
+                    {t("start")}
                 </Button>
             </DialogActions>
         </DialogContent>

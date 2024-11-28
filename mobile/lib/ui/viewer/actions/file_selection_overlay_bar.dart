@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/models/search/hierarchical/face_filter.dart";
+import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
+import "package:photos/models/search/hierarchical/only_them_filter.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
+import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
+import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class FileSelectionOverlayBar extends StatefulWidget {
@@ -34,10 +40,14 @@ class FileSelectionOverlayBar extends StatefulWidget {
 
 class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   final ValueNotifier<bool> _hasSelectedFilesNotifier = ValueNotifier(false);
+  late GalleryType _galleryType;
+  SearchFilterDataProvider? _searchFilterDataProvider;
+  bool? _galleryInitialFilterStillApplied;
 
   @override
   void initState() {
     super.initState();
+    _galleryType = widget.galleryType;
     widget.selectedFiles.addListener(_selectedFilesListener);
   }
 
@@ -45,7 +55,37 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   void dispose() {
     _hasSelectedFilesNotifier.dispose();
     widget.selectedFiles.removeListener(_selectedFilesListener);
+    _searchFilterDataProvider?.removeListener(
+      listener: _filterAppliedListener,
+      fromApplied: true,
+    );
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant FileSelectionOverlayBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _galleryType = widget.galleryType;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final inheritedSearchFilterData =
+        InheritedSearchFilterData.maybeOf(context);
+    if (inheritedSearchFilterData?.isHierarchicalSearchable ?? false) {
+      _searchFilterDataProvider =
+          inheritedSearchFilterData!.searchFilterDataProvider;
+
+      _searchFilterDataProvider!.removeListener(
+        listener: _filterAppliedListener,
+        fromApplied: true,
+      );
+      _searchFilterDataProvider!.addListener(
+        listener: _filterAppliedListener,
+        toApplied: true,
+      );
+    }
   }
 
   @override
@@ -54,7 +94,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       '$runtimeType building with ${widget.selectedFiles.files.length}',
     );
 
-    return widget.galleryType == GalleryType.homepage
+    return _galleryType == GalleryType.homepage
         ? _body()
         : PopScope(
             canPop: false,
@@ -99,7 +139,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                 ),
                 child: BottomActionBarWidget(
                   selectedFiles: widget.selectedFiles,
-                  galleryType: widget.galleryType,
+                  galleryType: _galleryType,
                   collection: widget.collection,
                   person: widget.person,
                   clusterID: widget.clusterID,
@@ -121,6 +161,54 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
   _selectedFilesListener() {
     _hasSelectedFilesNotifier.value = widget.selectedFiles.files.isNotEmpty;
+  }
+
+  void _filterAppliedListener() {
+    widget.selectedFiles.clearAll();
+    _updateGalleryTypeIfRequired();
+  }
+
+  /// This method is used to update the GalleryType if the initial filter is
+  /// removed from the applied filters. As long as the inital filter is present
+  /// in the applied filters, the gallery type will remain the same as the type
+  /// initally passed in the widget constructor. Once the inital filter is
+  /// removed, the gallery type will be updated to GalleryType.searchResults
+  /// and never be updated again.
+  void _updateGalleryTypeIfRequired() {
+    if (_galleryInitialFilterStillApplied != null &&
+        !_galleryInitialFilterStillApplied!) {
+      return;
+    }
+
+    final appliedFilters = _searchFilterDataProvider!.appliedFilters;
+    final initialFilter = _searchFilterDataProvider!.initialGalleryFilter;
+    bool initalFilterIsInAppliedFiters = false;
+    for (HierarchicalSearchFilter filter in appliedFilters) {
+      if (filter.isSameFilter(initialFilter)) {
+        initalFilterIsInAppliedFiters = true;
+        break;
+      }
+      if (initialFilter is FaceFilter) {
+        for (HierarchicalSearchFilter filter in appliedFilters) {
+          if (filter is OnlyThemFilter) {
+            if (filter.faceFilters
+                .any((faceFilter) => faceFilter.isSameFilter(initialFilter))) {
+              initalFilterIsInAppliedFiters = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    if (!initalFilterIsInAppliedFiters) {
+      setState(() {
+        _galleryInitialFilterStillApplied = false;
+        _galleryType = GalleryType.searchResults;
+      });
+    } else {
+      _galleryInitialFilterStillApplied = true;
+    }
   }
 }
 
@@ -176,7 +264,7 @@ class _SelectAllButtonState extends State<SelectAllButton> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                "All",
+                S.of(context).selectAllShort,
                 style: getEnteTextTheme(context).miniMuted,
               ),
               const SizedBox(width: 4),

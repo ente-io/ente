@@ -48,6 +48,7 @@ const messageWithError = (message: string, e?: unknown) => {
         es = [`${e.name}: ${e.message}`, e.stack].filter((x) => x).join("\n");
     } else {
         // For the rest rare cases, use the default string serialization of e.
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
         es = String(e);
     }
 

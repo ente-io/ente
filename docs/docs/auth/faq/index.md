@@ -25,6 +25,11 @@ at [ente.io](https://ente.io).
 
 You can enable FaceID lock under Settings → Security → Lockscreen.
 
+### How secure is the lock screen provided by Ente Auth?
+
+Auth's lock screen acts as a barrier to prevent an attacker from accessing the
+contents of the app. It does not introduce a layer of cryptographic security.
+
 ### Why do the desktop and mobile apps display different codes?
 
 Please verify that the time on both your mobile and desktop is the same.

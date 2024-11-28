@@ -7,6 +7,7 @@ import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_types.dart";
@@ -383,7 +384,7 @@ class GoToMapWithBG extends StatelessWidget {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => MapScreen(
-                  filesFutureFn: SearchService.instance.getAllFiles,
+                  filesFutureFn: SearchService.instance.getAllFilesForSearch,
                 ),
               ),
             );
@@ -459,7 +460,7 @@ class GoToMapWithBG extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      "Your Map",
+                                      S.of(context).yourMap,
                                       style: enteTextTheme.mini.copyWith(
                                         color: Colors.white,
                                       ),
@@ -579,7 +580,7 @@ class LocationCTA extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  "Add new",
+                                  S.of(context).addNew,
                                   style: enteTextTheme.miniFaint,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,

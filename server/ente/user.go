@@ -8,6 +8,8 @@ const (
 	EmailChangedSubject    = "Email address updated"
 
 	ChangeEmailOTTPurpose = "change"
+	SignUpOTTPurpose      = "signup"
+	LoginOTTPurpose       = "login"
 )
 
 // User represents a user in the system
@@ -53,6 +55,10 @@ type EmailAuthorizationResponse struct {
 	Token              string         `json:"token,omitempty"`
 	PasskeySessionID   string         `json:"passkeySessionID"`
 	TwoFactorSessionID string         `json:"twoFactorSessionID"`
+	// TwoFactorSessionIDV2 is set only if user has both passkey and two factor enabled.
+	// This is to ensure older clients keep using passkey flow when both are set. We can remove
+	// This field once the clients starts surface both options for performing 2fa
+	TwoFactorSessionIDV2 string `json:"twoFactorSessionIDV2"`
 	// SrpM2 is sent only if the user is logging via SRP
 	// SrpM2 is the SRP M2 value aka the proof that the server has the verifier
 	SrpM2 *string `json:"srpM2,omitempty"`
@@ -114,6 +120,7 @@ type DeleteChallengeResponse struct {
 	// AllowDelete indicates whether the user is allowed to delete their account via app
 	AllowDelete        bool    `json:"allowDelete"`
 	EncryptedChallenge *string `json:"encryptedChallenge,omitempty"`
+	Apps               []App   `json:"apps"`
 }
 
 type DeleteAccountRequest struct {
@@ -194,9 +201,10 @@ type TwoFactorRemovalRequest struct {
 
 type ProfileData struct {
 	// CanDisableEmailMFA is used to decide if client should show disable email MFA option
-	CanDisableEmailMFA bool `json:"canDisableEmailMFA"`
-	IsEmailMFAEnabled  bool `json:"isEmailMFAEnabled"`
-	IsTwoFactorEnabled bool `json:"isTwoFactorEnabled"`
+	CanDisableEmailMFA bool  `json:"canDisableEmailMFA"`
+	IsEmailMFAEnabled  bool  `json:"isEmailMFAEnabled"`
+	IsTwoFactorEnabled bool  `json:"isTwoFactorEnabled"`
+	PasskeyCount       int64 `json:"passkeyCount"`
 }
 
 type Session struct {

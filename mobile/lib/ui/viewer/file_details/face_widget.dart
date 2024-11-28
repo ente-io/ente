@@ -6,7 +6,7 @@ import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/extensions/stop_watch.dart";
-import "package:photos/models/base/id.dart";
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
@@ -18,7 +18,7 @@ import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/face/face_box_crop.dart";
-import "package:photos/utils/thumbnail_util.dart";
+import "package:photos/utils/toast_util.dart";
 
 class FaceWidget extends StatefulWidget {
   final EnteFile file;
@@ -37,8 +37,8 @@ class FaceWidget extends StatefulWidget {
     this.clusterID,
     this.highlight = false,
     this.editMode = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<FaceWidget> createState() => _FaceWidgetState();
@@ -55,7 +55,9 @@ class _FaceWidgetState extends State<FaceWidget> {
 
   Widget _buildFaceImageGenerated(bool givenFaces) {
     return FutureBuilder<Map<String, Uint8List>?>(
-      future: givenFaces ? widget.faceCrops : getFaceCrop(),
+      future: givenFaces
+          ? widget.faceCrops
+          : getCachedFaceCrops(widget.file, [widget.face]),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final ImageProvider imageProvider =
@@ -79,7 +81,8 @@ class _FaceWidgetState extends State<FaceWidget> {
                 if (existingClusterID != null) {
                   final fileIdsToClusterIds =
                       await MLDataDB.instance.getFileIdToClusterIds();
-                  final files = await SearchService.instance.getAllFiles();
+                  final files =
+                      await SearchService.instance.getAllFilesForSearch();
                   final clusterFiles = files
                       .where(
                         (file) =>
@@ -98,34 +101,26 @@ class _FaceWidgetState extends State<FaceWidget> {
                   );
                 }
 
-                // Create new clusterID for the faceID and update DB to assign the faceID to the new clusterID
-                final String clusterID = newClusterID();
-                await MLDataDB.instance.updateFaceIdToClusterId(
-                  {widget.face.faceID: clusterID},
+                showShortToast(
+                  context,
+                  S.of(context).faceNotClusteredYet,
                 );
-
-                // Push page for the new cluster
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => ClusterPage(
-                      [widget.file],
-                      clusterID: clusterID,
-                    ),
-                  ),
-                );
+                return;
               }
               if (widget.person != null) {
                 await Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => PeoplePage(
                       person: widget.person!,
+                      searchResult: null,
                     ),
                   ),
                 );
               } else if (widget.clusterID != null) {
                 final fileIdsToClusterIds =
                     await MLDataDB.instance.getFileIdToClusterIds();
-                final files = await SearchService.instance.getAllFiles();
+                final files =
+                    await SearchService.instance.getAllFilesForSearch();
                 final clusterFiles = files
                     .where(
                       (file) =>
@@ -201,7 +196,7 @@ class _FaceWidgetState extends State<FaceWidget> {
                 if (widget.person != null)
                   Text(
                     widget.person!.data.isIgnored
-                        ? '(ignored)'
+                        ? '(' + S.of(context).ignored + ')'
                         : widget.person!.data.name.trim(),
                     style: Theme.of(context).textTheme.bodySmall,
                     overflow: TextOverflow.ellipsis,
@@ -283,47 +278,6 @@ class _FaceWidgetState extends State<FaceWidget> {
       });
     } catch (e, s) {
       log("removing face/file from cluster from file info widget failed: $e, \n $s");
-    }
-  }
-
-  Future<Map<String, Uint8List>?> getFaceCrop({int fetchAttempt = 1}) async {
-    try {
-      final Uint8List? cachedFace = faceCropCache.get(widget.face.faceID);
-      if (cachedFace != null) {
-        return {widget.face.faceID: cachedFace};
-      }
-      final faceCropCacheFile = cachedFaceCropPath(widget.face.faceID);
-      if ((await faceCropCacheFile.exists())) {
-        final data = await faceCropCacheFile.readAsBytes();
-        faceCropCache.put(widget.face.faceID, data);
-        return {widget.face.faceID: data};
-      }
-
-      final result = await poolFullFileFaceGenerations.withResource(
-        () async => await getFaceCrops(
-          widget.file,
-          {
-            widget.face.faceID: widget.face.detection.box,
-          },
-        ),
-      );
-      final Uint8List? computedCrop = result?[widget.face.faceID];
-      if (computedCrop != null) {
-        faceCropCache.put(widget.face.faceID, computedCrop);
-        faceCropCacheFile.writeAsBytes(computedCrop).ignore();
-      }
-      return {widget.face.faceID: computedCrop!};
-    } catch (e, s) {
-      log(
-        "Error getting face for faceID: ${widget.face.faceID}",
-        error: e,
-        stackTrace: s,
-      );
-      resetPool(fullFile: true);
-      if (fetchAttempt <= retryLimit) {
-        return getFaceCrop(fetchAttempt: fetchAttempt + 1);
-      }
-      return null;
     }
   }
 }
