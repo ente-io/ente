@@ -1,13 +1,17 @@
 import { isDesktop } from "@/base/app";
+import { FilledIconButton, type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Overlay } from "@/base/components/mui/Container";
-import { lowercaseExtension } from "@/base/file";
+import { type ModalVisibilityProps } from "@/base/components/utils/modal";
+import { lowercaseExtension } from "@/base/file-name";
 import log from "@/base/log";
-import type { LoadedLivePhotoSourceURL } from "@/media/file";
+import {
+    downloadManager,
+    type LoadedLivePhotoSourceURL,
+} from "@/gallery/services/download";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
-import downloadManager from "@/new/photos/services/download";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import { AppContext } from "@/new/photos/types/context";
 import { FlexWrapper } from "@ente/shared/components/Container";
@@ -31,17 +35,25 @@ import {
     Button,
     CircularProgress,
     Paper,
+    Snackbar,
     styled,
     Typography,
+    type ButtonProps,
     type CircularProgressProps,
 } from "@mui/material";
-import Notification from "components/Notification";
+import type { DisplayFile } from "components/PhotoFrame";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import { GalleryContext } from "pages/gallery";
 import Photoswipe from "photoswipe";
 import PhotoswipeUIDefault from "photoswipe/dist/photoswipe-ui-default";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    useSyncExternalStore,
+} from "react";
 import {
     addToFavorites,
     removeFromFavorites,
@@ -53,11 +65,9 @@ import {
     downloadSingleFile,
     getFileFromURL,
 } from "utils/file";
-import { pauseVideo, playVideo } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import { getTrashFileMessage } from "utils/ui";
 import { FileInfo, type FileInfoExif, type FileInfoProps } from "./FileInfo";
-import ImageEditorOverlay from "./ImageEditorOverlay";
+import { ImageEditorOverlay } from "./ImageEditorOverlay";
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -110,7 +120,7 @@ export interface PhotoViewerProps {
     currentIndex?: number;
     onClose?: (needUpdate: boolean) => void;
     gettingData: (instance: any, index: number, item: EnteFile) => void;
-    getConvertedItem: (instance: any, index: number, item: EnteFile) => void;
+    forceConvertItem: (instance: any, index: number, item: EnteFile) => void;
     id?: string;
     favItemIds: Set<number>;
     markTempDeleted?: (tempDeletedFiles: EnteFile[]) => void;
@@ -124,8 +134,10 @@ export interface PhotoViewerProps {
 }
 
 function PhotoViewer(props: PhotoViewerProps) {
+    const { id, forceConvertItem } = props;
+
     const galleryContext = useContext(GalleryContext);
-    const { showLoadingBar, hideLoadingBar, setDialogMessage } =
+    const { showLoadingBar, hideLoadingBar, showMiniDialog } =
         useContext(AppContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
@@ -150,7 +162,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         defaultLivePhotoDefaultOptions,
     );
     const [isOwnFile, setIsOwnFile] = useState(false);
-    const [showConvertBtn, setShowConvertBtn] = useState(false);
+    const [showConvertButton, setShowConvertButton] = useState(false);
     const [isSourceLoaded, setIsSourceLoaded] = useState(false);
     const [isInFullScreenMode, setIsInFullScreenMode] = useState(false);
 
@@ -168,17 +180,14 @@ function PhotoViewer(props: PhotoViewerProps) {
         setConversionFailedNotificationOpen,
     ] = useState(false);
 
-    const [fileDownloadProgress, setFileDownloadProgress] = useState<
-        Map<number, number>
-    >(new Map());
-
     const [showEditButton, setShowEditButton] = useState(false);
 
     const [showZoomButton, setShowZoomButton] = useState(false);
 
-    useEffect(() => {
-        downloadManager.setProgressUpdater(setFileDownloadProgress);
-    }, []);
+    const fileDownloadProgress = useSyncExternalStore(
+        (onChange) => downloadManager.fileDownloadProgressSubscribe(onChange),
+        () => downloadManager.fileDownloadProgressSnapshot(),
+    );
 
     useEffect(() => {
         if (!pswpElement) return;
@@ -341,7 +350,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         setIsOwnFile(isOwnFile);
     }
 
-    function updateExif(file: EnteFile) {
+    function updateExif(file: DisplayFile) {
         if (file.metadata.fileType === FileType.video) {
             setExif({
                 key: file.src,
@@ -364,22 +373,15 @@ function PhotoViewer(props: PhotoViewerProps) {
         checkExifAvailable(file);
     }
 
-    function updateShowConvertBtn(file: EnteFile) {
-        const shouldShowConvertBtn =
-            isElectron() &&
-            (file.metadata.fileType === FileType.video ||
-                file.metadata.fileType === FileType.livePhoto) &&
-            !file.isConverted &&
-            file.isSourceLoaded &&
-            !file.conversionFailed;
-        setShowConvertBtn(shouldShowConvertBtn);
+    function updateShowConvertBtn(file: DisplayFile) {
+        setShowConvertButton(!!file.canForceConvert);
     }
 
-    function updateConversionFailedNotification(file: EnteFile) {
+    function updateConversionFailedNotification(file: DisplayFile) {
         setConversionFailedNotificationOpen(file.conversionFailed);
     }
 
-    function updateIsSourceLoaded(file: EnteFile) {
+    function updateIsSourceLoaded(file: DisplayFile) {
         setIsSourceLoaded(file.isSourceLoaded);
     }
 
@@ -427,6 +429,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                     if (ele) {
                         const rect = ele.getBoundingClientRect();
                         const pageYScroll =
+                            // eslint-disable-next-line @typescript-eslint/no-deprecated
                             window.pageYOffset ||
                             document.documentElement.scrollTop;
                         return {
@@ -436,7 +439,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                         };
                     }
                     return null;
-                } catch (e) {
+                } catch {
                     return null;
                 }
             },
@@ -509,7 +512,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         }
         handleCloseInfo();
     };
-    const isInFav = (file: EnteFile) => {
+    const isInFav = (file: DisplayFile) => {
         const { favItemIds } = props;
         if (favItemIds && file) {
             return favItemIds.has(file.id);
@@ -517,7 +520,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         return false;
     };
 
-    const onFavClick = async (file: EnteFile) => {
+    const onFavClick = async (file: DisplayFile) => {
         try {
             if (
                 !file ||
@@ -543,7 +546,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         }
     };
 
-    const trashFile = async (file: EnteFile) => {
+    const trashFile = async (file: DisplayFile) => {
         try {
             showLoadingBar();
             try {
@@ -563,7 +566,16 @@ function PhotoViewer(props: PhotoViewerProps) {
         if (!file || !isOwnFile || props.isTrashCollection) {
             return;
         }
-        setDialogMessage(getTrashFileMessage(() => trashFile(file)));
+        showMiniDialog({
+            title: t("trash_file_title"),
+            message: t("trash_file_message"),
+            continue: {
+                text: t("move_to_trash"),
+                color: "critical",
+                action: () => trashFile(file),
+                autoFocus: true,
+            },
+        });
     };
 
     const handleArrowClick = (
@@ -584,7 +596,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         }
     };
 
-    const updateItems = (items: EnteFile[]) => {
+    const updateItems = (items: DisplayFile[]) => {
         try {
             if (photoSwipe) {
                 if (items.length === 0) {
@@ -621,7 +633,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         }
     };
 
-    const checkExifAvailable = async (enteFile: EnteFile) => {
+    const checkExifAvailable = async (enteFile: DisplayFile) => {
         if (exifExtractionInProgress.current === enteFile.src) return;
 
         try {
@@ -657,7 +669,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         if (isInFullScreenMode) {
             const fullScreenApi: PhotoswipeFullscreenAPI =
                 photoSwipe?.ui?.getFullscreenAPI();
-            if (fullScreenApi && fullScreenApi.isFullscreen()) {
+            if (fullScreenApi?.isFullscreen()) {
                 fullScreenApi.exit();
                 setIsInFullScreenMode(false);
             }
@@ -686,13 +698,13 @@ function PhotoViewer(props: PhotoViewerProps) {
                         file.metadata.title,
                     );
                 await downloadSingleFile(file, setSingleFileDownloadProgress);
-            } catch (e) {
+            } catch {
                 // do nothing
             }
         }
     };
 
-    const copyToClipboardHelper = async (file: EnteFile) => {
+    const copyToClipboardHelper = async (file: DisplayFile) => {
         if (file && props.enableDownload && shouldShowCopyOption) {
             showLoadingBar();
             await copyFileToClipboard(file.src);
@@ -741,16 +753,14 @@ function PhotoViewer(props: PhotoViewerProps) {
         }
     };
 
-    const triggerManualConvert = () => {
-        props.getConvertedItem(
+    const handleForceConvert = () =>
+        forceConvertItem(
             photoSwipe,
             photoSwipe.getCurrentIndex(),
             photoSwipe.currItem as EnteFile,
         );
-    };
 
     const scheduleUpdate = () => (needUpdate.current = true);
-    const { id } = props;
     return (
         <>
             <div
@@ -773,7 +783,8 @@ function PhotoViewer(props: PhotoViewerProps) {
                                 disabled={livePhotoBtnOptions.loading}
                             >
                                 <FlexWrapper gap={"4px"}>
-                                    {<AlbumOutlined />} {t("LIVE")}
+                                    {<AlbumOutlined />}{" "}
+                                    {t("live_photo_indicator")}
                                 </FlexWrapper>
                             </Button>
                         </LivePhotoBtnContainer>
@@ -894,7 +905,7 @@ function PhotoViewer(props: PhotoViewerProps) {
 
                             <button
                                 className="pswp__button pswp__button--custom"
-                                title={t("INFO_OPTION")}
+                                title={t("info_key")}
                                 onClick={() => handleOpenInfo(photoSwipe)}
                             >
                                 <InfoIcon />
@@ -932,11 +943,11 @@ function PhotoViewer(props: PhotoViewerProps) {
                                         </button>
                                     </>
                                 )}
-                            {showConvertBtn && (
+                            {showConvertButton && (
                                 <button
-                                    title={t("CONVERT")}
+                                    title={t("convert")}
                                     className="pswp__button pswp__button--custom"
-                                    onClick={triggerManualConvert}
+                                    onClick={handleForceConvert}
                                 >
                                     <ReplayIcon fontSize="small" />
                                 </button>
@@ -1015,28 +1026,51 @@ function CircularProgressWithLabel(
     );
 }
 
-interface ConversionFailedNotificationProps {
-    open: boolean;
-    onClose: () => void;
-    onClick: () => void;
-}
+type ConversionFailedNotificationProps = ModalVisibilityProps & ButtonishProps;
 
 const ConversionFailedNotification: React.FC<
     ConversionFailedNotificationProps
 > = ({ open, onClose, onClick }) => {
+    const handleClick = () => {
+        onClick();
+        onClose();
+    };
+
+    const handleClose: ButtonProps["onClick"] = (event) => {
+        onClose();
+        event.stopPropagation();
+    };
+
     return (
-        <Notification
+        <Snackbar
             open={open}
-            onClose={onClose}
-            attributes={{
-                variant: "secondary",
-                subtext: t("CONVERSION_FAILED_NOTIFICATION_MESSAGE"),
-                onClick: onClick,
-            }}
-            horizontal="right"
-            vertical="bottom"
-            sx={{ zIndex: 4000 }}
-        />
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        >
+            <Paper sx={{ width: "320px" }}>
+                <Button
+                    color={"secondary"}
+                    onClick={handleClick}
+                    sx={{
+                        borderRadius: "8px",
+                        flex: 1,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "16px",
+                    }}
+                >
+                    <InfoIcon />
+                    <Typography
+                        variant="small"
+                        sx={{ flex: 1, textAlign: "left" }}
+                    >
+                        {t("unpreviewable_file_notification")}
+                    </Typography>
+                    <FilledIconButton onClick={handleClose}>
+                        <CloseIcon />
+                    </FilledIconButton>
+                </Button>
+            </Paper>
+        </Snackbar>
     );
 };
 
@@ -1047,3 +1081,22 @@ const LivePhotoBtnContainer = styled(Paper)`
     right: 6vh;
     z-index: 10;
 `;
+
+export async function playVideo(livePhotoVideo, livePhotoImage) {
+    const videoPlaying = !livePhotoVideo.paused;
+    if (videoPlaying) return;
+    livePhotoVideo.style.opacity = 1;
+    livePhotoImage.style.opacity = 0;
+    livePhotoVideo.load();
+    livePhotoVideo.play().catch(() => {
+        pauseVideo(livePhotoVideo, livePhotoImage);
+    });
+}
+
+export async function pauseVideo(livePhotoVideo, livePhotoImage) {
+    const videoPlaying = !livePhotoVideo.paused;
+    if (!videoPlaying) return;
+    livePhotoVideo.pause();
+    livePhotoVideo.style.opacity = 0;
+    livePhotoImage.style.opacity = 1;
+}

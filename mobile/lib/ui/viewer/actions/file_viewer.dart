@@ -1,4 +1,5 @@
 import 'dart:convert';
+import "dart:io";
 
 import "package:chewie/chewie.dart";
 import "package:flutter/material.dart";
@@ -7,10 +8,12 @@ import "package:logging/logging.dart";
 import "package:media_extension/media_extension_action_types.dart";
 import "package:photo_view/photo_view.dart";
 import "package:photos/services/app_lifecycle_service.dart";
+import "package:receive_sharing_intent/receive_sharing_intent.dart";
 import "package:video_player/video_player.dart";
 
 class FileViewer extends StatefulWidget {
-  const FileViewer({super.key});
+  final SharedMediaFile? sharedMediaFile;
+  const FileViewer({super.key, this.sharedMediaFile});
 
   @override
   State<StatefulWidget> createState() {
@@ -26,8 +29,10 @@ class FileViewerState extends State<FileViewer> {
 
   @override
   void initState() {
+    _logger.info("Initializing FileViewer");
     super.initState();
-    if (action.type == MediaType.video) {
+    if (action.type == MediaType.video ||
+        widget.sharedMediaFile?.type == SharedMediaType.video) {
       initController();
     }
   }
@@ -41,7 +46,9 @@ class FileViewerState extends State<FileViewer> {
 
   void initController() async {
     videoController = VideoPlayerController.contentUri(
-      Uri.parse(action.data!),
+      widget.sharedMediaFile?.path != null
+          ? Uri.parse(widget.sharedMediaFile!.path)
+          : Uri.parse(action.data!),
     );
     controller = ChewieController(
       videoPlayerController: videoController!,
@@ -67,6 +74,7 @@ class FileViewerState extends State<FileViewer> {
 
   @override
   Widget build(BuildContext context) {
+    _logger.info("Building FileViewer");
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -81,16 +89,22 @@ class FileViewerState extends State<FileViewer> {
           Expanded(
             child: Center(
               child: (() {
-                if (action.type == MediaType.image) {
+                if (action.type == MediaType.image ||
+                    widget.sharedMediaFile?.type == SharedMediaType.image) {
                   return PhotoView(
-                    imageProvider: MemoryImage(base64Decode(action.data!)),
+                    imageProvider: widget.sharedMediaFile?.path != null
+                        ? Image.file(File(widget.sharedMediaFile!.path)).image
+                        : MemoryImage(base64Decode(action.data!)),
                   );
-                } else if (action.type == MediaType.video) {
+                } else if (action.type == MediaType.video ||
+                    widget.sharedMediaFile?.type == SharedMediaType.video) {
                   return controller != null
                       ? Chewie(controller: controller!)
                       : const CircularProgressIndicator();
                 } else {
-                  _logger.severe('unsupported file type ${action.type}');
+                  _logger.severe(
+                    'unsupported file type ${action.type} or ${widget.sharedMediaFile?.type}',
+                  );
                   return const Icon(Icons.error);
                 }
               })(),

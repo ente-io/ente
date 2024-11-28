@@ -1,4 +1,3 @@
-import { ensure } from "@/utils/ensure";
 import type { PaletteOptions, ThemeColorsOptions } from "@mui/material";
 import { THEME_COLOR } from "./constants";
 
@@ -21,24 +20,33 @@ export const getPalletteOptions = (
 ): PaletteOptions => {
     return {
         primary: {
-            // TODO: Refactor this code to not require this ensure
-            main: ensure(colors.fill?.base),
+            // See: [Note: strict mode migration]
+            //
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            main: colors.fill.base,
             dark: colors.fill?.basePressed,
             contrastText:
                 themeColor === "dark" ? colors.black?.base : colors.white?.base,
         },
         secondary: {
-            main: ensure(colors.fill?.faint),
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            main: colors.fill.faint,
             dark: colors.fill?.faintPressed,
             contrastText: colors.text?.base,
         },
         accent: {
-            main: ensure(colors.accent?.A500),
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            main: colors.accent.A500,
             dark: colors.accent?.A700,
             contrastText: colors.white?.base,
         },
         critical: {
-            main: ensure(colors.danger?.A700),
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            main: colors.danger.A700,
             dark: colors.danger?.A800,
             contrastText: colors.white?.base,
         },

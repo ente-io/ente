@@ -1,4 +1,4 @@
-import type { SRPAttributes } from "@/accounts/types/srp";
+import type { SRPAttributes } from "@/accounts/services/srp-remote";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { Input, type ButtonProps } from "@mui/material";

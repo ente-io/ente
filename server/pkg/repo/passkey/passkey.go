@@ -101,6 +101,11 @@ func NewRepository(
 	return
 }
 
+func (r *Repository) GetPasskeyCount(userID int64) (count int64, err error) {
+	err = r.DB.QueryRow(`SELECT COUNT(*) FROM passkeys WHERE user_id = $1 AND deleted_at IS NULL`, userID).Scan(&count)
+	return
+}
+
 func (r *Repository) GetUserPasskeys(userID int64) (passkeys []ente.Passkey, err error) {
 	rows, err := r.DB.Query(`
 		SELECT id, user_id, friendly_name, created_at

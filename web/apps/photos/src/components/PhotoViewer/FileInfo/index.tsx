@@ -1,9 +1,10 @@
+import { type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { useModalVisibility } from "@/base/components/utils/modal";
-import { nameAndExtension } from "@/base/file";
+import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import type { Location } from "@/base/types";
 import { EnteFile } from "@/media/file";
@@ -15,7 +16,6 @@ import {
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
-import { type ButtonishProps } from "@/new/photos/components/mui";
 import { ChipButton } from "@/new/photos/components/mui/ChipButton";
 import { FilePeopleList } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
@@ -23,6 +23,7 @@ import {
     confirmDisableMapsDialogAttributes,
     confirmEnableMapsDialogAttributes,
 } from "@/new/photos/components/utils/dialog";
+import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { fileInfoDrawerZIndex } from "@/new/photos/components/utils/z-index";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import {
@@ -30,15 +31,11 @@ import {
     isMLEnabled,
     type AnnotatedFaceID,
 } from "@/new/photos/services/ml";
-import {
-    settingsSnapshot,
-    settingsSubscribe,
-    updateMapEnabled,
-} from "@/new/photos/services/settings";
+import { updateMapEnabled } from "@/new/photos/services/settings";
 import { AppContext } from "@/new/photos/types/context";
 import { formattedByteSize } from "@/new/photos/utils/units";
-import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
+import CopyButton from "@ente/shared/components/CopyButton";
 import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -63,13 +60,7 @@ import {
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import React, {
-    useContext,
-    useEffect,
-    useMemo,
-    useState,
-    useSyncExternalStore,
-} from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { changeFileName, updateExistingFilePubMetadata } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { FileNameEditDialog } from "./FileNameEditDialog";
@@ -113,10 +104,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     closePhotoViewer,
     onSelectPerson,
 }) => {
-    const { mapEnabled } = useSyncExternalStore(
-        settingsSubscribe,
-        settingsSnapshot,
-    );
+    const { mapEnabled } = useSettingsSnapshot();
 
     const { showMiniDialog } = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
@@ -184,7 +172,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
-            <Titlebar onClose={handleCloseInfo} title={t("INFO")} backIsClose />
+            <Titlebar onClose={handleCloseInfo} title={t("info")} backIsClose />
             <Stack pt={1} pb={3} spacing={"20px"}>
                 <RenderCaption
                     {...{
@@ -270,7 +258,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 )}
                 <InfoItem
                     icon={<TextSnippetOutlinedIcon />}
-                    title={t("DETAILS")}
+                    title={t("details")}
                     caption={
                         !exif ? (
                             <ActivityIndicator size={12} />
@@ -371,14 +359,13 @@ const parseExifInfo = (
 
     if (exif) {
         if (exif.Make && exif.Model)
-            info["takenOnDevice"] =
-                `${exif.Make.description} ${exif.Model.description}`;
+            info.takenOnDevice = `${exif.Make.description} ${exif.Model.description}`;
 
         if (exif.FNumber)
             info.fNumber = exif.FNumber.description; /* e.g. "f/16" */
 
         if (exif.ExposureTime)
-            info["exposureTime"] = exif.ExposureTime.description; /* "1/10" */
+            info.exposureTime = exif.ExposureTime.description; /* "1/10" */
 
         if (exif.ISOSpeedRatings)
             info.iso = `ISO${tagNumericValue(exif.ISOSpeedRatings)}`;

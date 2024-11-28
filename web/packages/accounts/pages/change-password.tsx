@@ -1,24 +1,21 @@
 import {
-    getSRPAttributes,
-    startSRPSetup,
-    updateSRPAndKeys,
-} from "@/accounts/api/srp";
-import SetPasswordForm, {
-    type SetPasswordFormProps,
-} from "@/accounts/components/SetPasswordForm";
-import { PAGES } from "@/accounts/constants/pages";
-import {
+    convertBase64ToBuffer,
+    convertBufferToBase64,
     generateSRPClient,
     generateSRPSetupAttributes,
 } from "@/accounts/services/srp";
-import type { UpdatedKey } from "@/accounts/types/user";
-import { convertBase64ToBuffer, convertBufferToBase64 } from "@/accounts/utils";
+import {
+    getSRPAttributes,
+    startSRPSetup,
+    updateSRPAndKeys,
+} from "@/accounts/services/srp-remote";
+import {
+    FormPaper,
+    FormPaperFooter,
+    FormPaperTitle,
+} from "@/base/components/FormPaper";
 import { sharedCryptoWorker } from "@/base/crypto";
-import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
-import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import {
     generateAndSaveIntermediateKeyAttributes,
@@ -32,7 +29,12 @@ import type { KEK, KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import SetPasswordForm, {
+    type SetPasswordFormProps,
+} from "../components/SetPasswordForm";
+import { PAGES } from "../constants/pages";
 import { appHomeRoute, stashRedirect } from "../services/redirect";
+import type { UpdatedKey } from "../services/user";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = () => {
@@ -46,7 +48,7 @@ const Page: React.FC<PageProps> = () => {
         setUser(user);
         if (!user?.token) {
             stashRedirect(PAGES.CHANGE_PASSWORD);
-            router.push("/");
+            void router.push("/");
         } else {
             setToken(user.token);
         }
@@ -63,7 +65,7 @@ const Page: React.FC<PageProps> = () => {
         let kek: KEK;
         try {
             kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
-        } catch (e) {
+        } catch {
             setFieldError("confirm", t("PASSWORD_GENERATION_FAILED"));
             return;
         }
@@ -92,7 +94,7 @@ const Page: React.FC<PageProps> = () => {
 
         const srpA = convertBufferToBase64(srpClient.computeA());
 
-        const { setupID, srpB } = await startSRPSetup(ensure(token), {
+        const { setupID, srpB } = await startSRPSetup(token!, {
             srpUserID,
             srpSalt,
             srpVerifier,
@@ -103,7 +105,7 @@ const Page: React.FC<PageProps> = () => {
 
         const srpM1 = convertBufferToBase64(srpClient.computeM1());
 
-        await updateSRPAndKeys(ensure(token), {
+        await updateSRPAndKeys(token!, {
             setupID,
             srpM1,
             updatedKeyAttr: updatedKey,
@@ -131,7 +133,7 @@ const Page: React.FC<PageProps> = () => {
 
     const redirectToAppHome = () => {
         setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
-        router.push(appHomeRoute);
+        void router.push(appHomeRoute);
     };
 
     // TODO: Handle the case where user is not loaded yet.
@@ -147,7 +149,7 @@ const Page: React.FC<PageProps> = () => {
                 {(getData(LS_KEYS.SHOW_BACK_BUTTON)?.value ?? true) && (
                     <FormPaperFooter>
                         <LinkButton onClick={router.back}>
-                            {t("GO_BACK")}
+                            {t("go_back")}
                         </LinkButton>
                     </FormPaperFooter>
                 )}

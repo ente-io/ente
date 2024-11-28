@@ -12,19 +12,19 @@ export interface ItemListProps<T> {
     items: T[];
     generateItemKey: (item: T) => string | number;
     getItemTitle: (item: T) => string;
-    renderListItem: (item: T) => JSX.Element;
+    renderListItem: (item: T) => React.JSX.Element;
     maxHeight?: number;
     itemSize?: number;
 }
 
 interface ItemData<T> {
-    renderListItem: (item: T) => JSX.Element;
+    renderListItem: (item: T) => React.JSX.Element;
     getItemTitle: (item: T) => string;
     items: T[];
 }
 
 const createItemData: <T>(
-    renderListItem: (item: T) => JSX.Element,
+    renderListItem: (item: T) => React.JSX.Element,
     getItemTitle: (item: T) => string,
     items: T[],
 ) => ItemData<T> = memoize((renderListItem, getItemTitle, items) => ({

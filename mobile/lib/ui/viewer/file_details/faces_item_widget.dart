@@ -1,11 +1,9 @@
-import "dart:developer" as dev show log;
-
-import "package:flutter/foundation.dart" show Uint8List, kDebugMode;
+import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
@@ -14,7 +12,6 @@ import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/ui/viewer/file_details/face_widget.dart";
 import "package:photos/utils/face/face_box_crop.dart";
-import "package:photos/utils/thumbnail_util.dart";
 
 class FacesItemWidget extends StatefulWidget {
   final EnteFile file;
@@ -59,8 +56,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     try {
       if (file.uploadedFileID == null) {
         return [
-          const ChipButtonWidget(
-            "File not uploaded yet",
+          ChipButtonWidget(
+            S.of(context).fileNotUploadedYet,
             noChips: true,
           ),
         ];
@@ -70,8 +67,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
           await MLDataDB.instance.getFacesForGivenFileID(file.uploadedFileID!);
       if (faces == null) {
         return [
-          const ChipButtonWidget(
-            "Image not analyzed",
+          ChipButtonWidget(
+            S.of(context).imageNotAnalyzed,
             noChips: true,
           ),
         ];
@@ -86,8 +83,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
       if (faces.isEmpty) {
         return [
-          const ChipButtonWidget(
-            "No faces found",
+          ChipButtonWidget(
+            S.of(context).noFacesFound,
             noChips: true,
           ),
         ];
@@ -142,9 +139,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       final faceWidgets = <FaceWidget>[];
 
       // await generation of the face crops here, so that the file info shows one central loading spinner
-      final _ = await getRelevantFaceCrops(faces);
+      final _ = await getCachedFaceCrops(file, faces);
 
-      final faceCrops = getRelevantFaceCrops(faces);
+      final faceCrops = getCachedFaceCrops(file, faces);
       for (final Face face in faces) {
         final String? clusterID = faceIdsToClusterIds[face.faceID];
         final PersonEntity? person = clusterIDToPerson[clusterID] != null
@@ -169,66 +166,6 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     } catch (e, s) {
       Logger("FacesItemWidget").info(e, s);
       return <FaceWidget>[];
-    }
-  }
-
-  Future<Map<String, Uint8List>?> getRelevantFaceCrops(
-    Iterable<Face> faces, {
-    int fetchAttempt = 1,
-  }) async {
-    try {
-      final faceIdToCrop = <String, Uint8List>{};
-      final facesWithoutCrops = <String, FaceBox>{};
-      for (final face in faces) {
-        final Uint8List? cachedFace = faceCropCache.get(face.faceID);
-        if (cachedFace != null) {
-          faceIdToCrop[face.faceID] = cachedFace;
-        } else {
-          final faceCropCacheFile = cachedFaceCropPath(face.faceID);
-          if ((await faceCropCacheFile.exists())) {
-            final data = await faceCropCacheFile.readAsBytes();
-            faceCropCache.put(face.faceID, data);
-            faceIdToCrop[face.faceID] = data;
-          } else {
-            facesWithoutCrops[face.faceID] = face.detection.box;
-          }
-        }
-      }
-
-      if (facesWithoutCrops.isEmpty) {
-        return faceIdToCrop;
-      }
-
-      final result = await poolFullFileFaceGenerations.withResource(
-        () async => await getFaceCrops(
-          widget.file,
-          facesWithoutCrops,
-        ),
-      );
-      if (result == null) {
-        return (faceIdToCrop.isEmpty) ? null : faceIdToCrop;
-      }
-      for (final entry in result.entries) {
-        final Uint8List? computedCrop = result[entry.key];
-        if (computedCrop != null) {
-          faceCropCache.put(entry.key, computedCrop);
-          final faceCropCacheFile = cachedFaceCropPath(entry.key);
-          faceCropCacheFile.writeAsBytes(computedCrop).ignore();
-          faceIdToCrop[entry.key] = computedCrop;
-        }
-      }
-      return (faceIdToCrop.isEmpty) ? null : faceIdToCrop;
-    } catch (e, s) {
-      dev.log(
-        "Error getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()}",
-        error: e,
-        stackTrace: s,
-      );
-      resetPool(fullFile: true);
-      if (fetchAttempt <= retryLimit) {
-        return getRelevantFaceCrops(faces, fetchAttempt: fetchAttempt + 1);
-      }
-      return null;
     }
   }
 }

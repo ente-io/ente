@@ -1,11 +1,11 @@
 import { ensureElectron } from "@/base/electron";
-import { nameAndExtension } from "@/base/file";
+import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
+import { downloadManager } from "@/gallery/services/download";
 import type { Collection } from "@/media/collection";
 import { type EnteFile, mergeMetadata } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import downloadManager from "@/new/photos/services/download";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import { getAllLocalFiles } from "@/new/photos/services/files";
 import {
@@ -309,8 +309,7 @@ async function getFileExportNamesFromExportedFiles(
             For Live Photos we need to download the file to get the image and video name
         */
         if (file.metadata.fileType === FileType.livePhoto) {
-            const fileStream = await downloadManager.getFile(file);
-            const fileBlob = await new Response(fileStream).blob();
+            const fileBlob = await downloadManager.fileBlob(file);
             const { imageFileName, videoFileName } = await decodeLivePhoto(
                 file.metadata.title,
                 fileBlob,

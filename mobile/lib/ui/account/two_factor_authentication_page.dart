@@ -9,8 +9,7 @@ import "package:pinput/pinput.dart";
 class TwoFactorAuthenticationPage extends StatefulWidget {
   final String sessionID;
 
-  const TwoFactorAuthenticationPage(this.sessionID, {Key? key})
-      : super(key: key);
+  const TwoFactorAuthenticationPage(this.sessionID, {super.key});
 
   @override
   State<TwoFactorAuthenticationPage> createState() =>

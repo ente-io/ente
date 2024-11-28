@@ -1,13 +1,11 @@
-import { verifyTwoFactor } from "@/accounts/api/user";
-import VerifyTwoFactor, {
-    type VerifyTwoFactorCallback,
-} from "@/accounts/components/two-factor/VerifyForm";
 import { PAGES } from "@/accounts/constants/pages";
-import { ensure } from "@/utils/ensure";
+import { verifyTwoFactor } from "@/accounts/services/user";
+import {
+    FormPaper,
+    FormPaperFooter,
+    FormPaperTitle,
+} from "@/base/components/FormPaper";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
-import FormTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { ApiError } from "@ente/shared/error";
 import {
@@ -21,6 +19,10 @@ import { HttpStatusCode } from "axios";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import {
+    VerifyTwoFactor,
+    type VerifyTwoFactorCallback,
+} from "../../components/two-factor/VerifyTwoFactor";
 import { unstashRedirect } from "../../services/redirect";
 import type { PageProps } from "../../types/page";
 
@@ -32,20 +34,17 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const router = useRouter();
 
     useEffect(() => {
-        const main = async () => {
-            const user: User = getData(LS_KEYS.USER);
-            if (!user?.email || !user.twoFactorSessionID) {
-                router.push("/");
-            } else if (
-                !user.isTwoFactorEnabled &&
-                (user.encryptedToken || user.token)
-            ) {
-                router.push(PAGES.CREDENTIALS);
-            } else {
-                setSessionID(user.twoFactorSessionID);
-            }
-        };
-        main();
+        const user: User = getData(LS_KEYS.USER);
+        if (!user?.email || !user.twoFactorSessionID) {
+            void router.push("/");
+        } else if (
+            !user.isTwoFactorEnabled &&
+            (user.encryptedToken || user.token)
+        ) {
+            void router.push(PAGES.CREDENTIALS);
+        } else {
+            setSessionID(user.twoFactorSessionID);
+        }
     }, []);
 
     const onSubmit: VerifyTwoFactorCallback = async (otp) => {
@@ -58,11 +57,12 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 encryptedToken,
                 id,
             });
-            setData(LS_KEYS.KEY_ATTRIBUTES, ensure(keyAttributes));
-            router.push(unstashRedirect() ?? PAGES.CREDENTIALS);
+            setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes!);
+            void router.push(unstashRedirect() ?? PAGES.CREDENTIALS);
         } catch (e) {
             if (
                 e instanceof ApiError &&
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                 e.httpStatusCode === HttpStatusCode.NotFound
             ) {
                 logout();
@@ -75,7 +75,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     return (
         <VerticallyCentered>
             <FormPaper sx={{ maxWidth: "410px" }}>
-                <FormTitle>{t("two_factor")}</FormTitle>
+                <FormPaperTitle>{t("two_factor")}</FormPaperTitle>
                 <VerifyTwoFactor onSubmit={onSubmit} buttonText={t("VERIFY")} />
 
                 <FormPaperFooter style={{ justifyContent: "space-between" }}>

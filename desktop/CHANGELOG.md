@@ -3,6 +3,7 @@
 ## v1.7.7 (Unreleased)
 
 -   Retain JPEG originals even on date modifications.
+-   Support Portuguese and Vietnamese translations.
 -   .
 
 ## v1.7.6

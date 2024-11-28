@@ -1,9 +1,9 @@
 import { PAGES } from "@/accounts/constants/pages";
+import { FormPaper } from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { customAPIHost } from "@/base/origins";
 import { LS_KEYS, getData } from "@ente/shared//storage/localStorage";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { SignUp } from "../components/SignUp";
@@ -21,14 +21,14 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         void customAPIHost().then(setHost);
         const user = getData(LS_KEYS.USER);
         if (user?.email) {
-            router.push(PAGES.VERIFY);
+            void router.push(PAGES.VERIFY);
         }
         setLoading(false);
         showNavBar(true);
     }, []);
 
     const login = () => {
-        router.push(PAGES.LOGIN);
+        void router.push(PAGES.LOGIN);
     };
 
     return (

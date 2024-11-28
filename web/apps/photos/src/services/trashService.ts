@@ -17,7 +17,7 @@ const TRASH_TIME = "trash-time";
 const DELETED_COLLECTION = "deleted-collection";
 
 export async function getLocalDeletedCollections() {
-    const trashedCollections: Array<Collection> =
+    const trashedCollections: Collection[] =
         (await localForage.getItem<Collection[]>(DELETED_COLLECTION)) || [];
     const nonUndefinedCollections = trashedCollections.filter(
         (collection) => !!collection,

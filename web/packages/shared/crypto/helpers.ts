@@ -1,4 +1,4 @@
-import { setRecoveryKey } from "@/accounts/api/user";
+import { setRecoveryKey } from "@/accounts/services/user";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import {
@@ -143,7 +143,6 @@ export const getRecoveryKey = async () => {
         recoveryKey = await cryptoWorker.toHex(recoveryKey);
         return recoveryKey;
     } catch (e) {
-        console.log(e);
         log.error("getRecoveryKey failed", e);
         throw e;
     }

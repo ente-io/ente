@@ -11,6 +11,7 @@ class CodeDisplay {
   final int tapCount;
   String note;
   final List<String> tags;
+  int position;
 
   CodeDisplay({
     this.pinned = false,
@@ -19,6 +20,7 @@ class CodeDisplay {
     this.tapCount = 0,
     this.tags = const [],
     this.note = '',
+    this.position = 0,
   });
 
   // copyWith
@@ -29,6 +31,7 @@ class CodeDisplay {
     int? tapCount,
     List<String>? tags,
     String? note,
+    int? position,
   }) {
     final bool updatedPinned = pinned ?? this.pinned;
     final bool updatedTrashed = trashed ?? this.trashed;
@@ -36,6 +39,7 @@ class CodeDisplay {
     final int updatedTapCount = tapCount ?? this.tapCount;
     final List<String> updatedTags = tags ?? this.tags;
     final String updatedNote = note ?? this.note;
+    final int updatedPosition = position ?? this.position;
 
     return CodeDisplay(
       pinned: updatedPinned,
@@ -44,6 +48,7 @@ class CodeDisplay {
       tapCount: updatedTapCount,
       tags: updatedTags,
       note: updatedNote,
+      position: updatedPosition,
     );
   }
 
@@ -58,6 +63,7 @@ class CodeDisplay {
       tapCount: json['tapCount'] ?? 0,
       tags: List<String>.from(json['tags'] ?? []),
       note: json['note'] ?? '',
+      position: json['position'] ?? 0,
     );
   }
 
@@ -99,6 +105,7 @@ class CodeDisplay {
       'tapCount': tapCount,
       'tags': tags,
       'note': note,
+      'position': position,
     };
   }
 

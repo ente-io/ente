@@ -38,7 +38,11 @@ export const setLocalFiles = async (
 };
 
 /**
- * Sort the given list of {@link EnteFile}s.
+ * Sort the given list of {@link EnteFile}s in place.
+ *
+ * Like the JavaScript Array#sort, this method modifies the {@link files}
+ * argument. It sorts {@link files} in place, and then returns a reference to
+ * the same mutated array.
  *
  * By default, files are sorted so that the newest one is first. The optional
  * {@link sortAsc} flag can be set to `true` to sort them so that the oldest one
@@ -58,6 +62,29 @@ export const sortFiles = (files: EnteFile[], sortAsc = false) => {
             );
         }
         return factor * (b.metadata.creationTime - a.metadata.creationTime);
+    });
+};
+
+/**
+ * File IDs themselves are unique across all the files for the user (in fact,
+ * they're unique across all the files in an Ente instance). However, we still
+ * can have multiple entries for the same file ID in our local database because
+ * the unit of account is not actually a file, but a "Collection File": a
+ * collection and file pair.
+ *
+ * For example, if the same file is symlinked into two collections, then we will
+ * have two "Collection File" entries for it, both with the same file ID, but
+ * with different collection IDs.
+ *
+ * This function returns files such that only one of these entries (the newer
+ * one in case of dupes) is returned.
+ */
+export const uniqueFilesByID = (files: EnteFile[]) => {
+    const seen = new Set<number>();
+    return files.filter(({ id }) => {
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
     });
 };
 

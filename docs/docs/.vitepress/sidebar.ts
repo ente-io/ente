@@ -265,6 +265,10 @@ export const sidebar = [
                         text: "Hosting Ente without Docker",
                         link: "/self-hosting/guides/standalone-ente",
                     },
+                    {
+                        text: "Configure CLI for Self Hosted Instance",
+                        link: "/self-hosting/guides/selfhost-cli"
+                    }
                 ],
             },
             {

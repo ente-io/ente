@@ -3,7 +3,6 @@ import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import { type Location } from "@/base/types";
 import { type EnteFile, type FilePublicMagicMetadata } from "@/media/file";
-import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { mergeMetadata1 } from "./file";
@@ -374,7 +373,7 @@ export const updateRemotePublicMagicMetadata = async (
         metadataVersion,
     );
 
-    const updatedEnvelope = ensure(updateRequest.metadataList[0]).magicMetadata;
+    const updatedEnvelope = updateRequest.metadataList[0]!.magicMetadata;
 
     await putFilesPublicMagicMetadata(updateRequest);
 
@@ -675,7 +674,7 @@ export const parseMetadataDate = (
 
     // Check to see if there is a time-zone descriptor of the form "Z" or
     // "±05:30" or "±0530" at the end of s.
-    const m = s.match(/Z|[+-]\d\d:?\d\d$/);
+    const m = /Z|[+-]\d\d:?\d\d$/.exec(s);
     if (m?.index) {
         sWithoutOffset = s.substring(0, m.index);
         offset = s.substring(m.index);

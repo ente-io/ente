@@ -89,13 +89,17 @@ class UserService {
     bool isChangeEmail = false,
     bool isCreateAccountScreen = false,
     bool isResetPasswordScreen = false,
+    String? purpose,
   }) async {
     final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     try {
       final response = await _dio.post(
         _config.getHttpEndpoint() + "/users/ott",
-        data: {"email": email, "purpose": isChangeEmail ? "change" : ""},
+        data: {
+          "email": email,
+          "purpose": isChangeEmail ? "change" : purpose ?? "",
+        },
       );
       await dialog.hide();
       if (response.statusCode == 200) {
@@ -395,13 +399,19 @@ class UserService {
       if (response.statusCode == 200) {
         Widget page;
         final String passkeySessionID = response.data["passkeySessionID"];
-        final String twoFASessionID = response.data["twoFactorSessionID"];
-
-        if (twoFASessionID.isNotEmpty) {
+        String twoFASessionID = response.data["twoFactorSessionID"];
+        if (twoFASessionID.isEmpty &&
+            response.data["twoFactorSessionIDV2"] != null) {
+          twoFASessionID = response.data["twoFactorSessionIDV2"];
+        }
+        if (passkeySessionID.isNotEmpty) {
+          page = PasskeyPage(
+            passkeySessionID,
+            totp2FASessionID: twoFASessionID,
+          );
+        } else if (twoFASessionID.isNotEmpty) {
           await setTwoFactor(value: true);
           page = TwoFactorAuthenticationPage(twoFASessionID);
-        } else if (passkeySessionID.isNotEmpty) {
-          page = PasskeyPage(passkeySessionID);
         } else {
           await _saveConfiguration(response);
           if (Configuration.instance.getEncryptedToken() != null) {
@@ -610,7 +620,7 @@ class UserService {
             SetupSRPResponse.fromJson(response.data);
         final serverB =
             SRP6Util.decodeBigInt(base64Decode(setupSRPResponse.srpB));
-        // ignore: unused_local_variable, need to calculate secret to get M1 
+        // ignore: unused_local_variable, need to calculate secret to get M1
         final clientS = client.calculateSecret(serverB);
         final clientM = client.calculateClientEvidenceMessage();
         // ignore: unused_local_variable
@@ -709,15 +719,19 @@ class UserService {
     );
     if (response.statusCode == 200) {
       Widget page;
-      final String twoFASessionID = response.data["twoFactorSessionID"];
+      String twoFASessionID = response.data["twoFactorSessionID"];
+      if (twoFASessionID.isEmpty &&
+          response.data["twoFactorSessionIDV2"] != null) {
+        twoFASessionID = response.data["twoFactorSessionIDV2"];
+      }
       final String passkeySessionID = response.data["passkeySessionID"];
 
       Configuration.instance.setVolatilePassword(userPassword);
-      if (twoFASessionID.isNotEmpty) {
+      if (passkeySessionID.isNotEmpty) {
+        page = PasskeyPage(passkeySessionID, totp2FASessionID: twoFASessionID);
+      } else if (twoFASessionID.isNotEmpty) {
         await setTwoFactor(value: true);
         page = TwoFactorAuthenticationPage(twoFASessionID);
-      } else if (passkeySessionID.isNotEmpty) {
-        page = PasskeyPage(passkeySessionID);
       } else {
         await _saveConfiguration(response);
         if (Configuration.instance.getEncryptedToken() != null) {
@@ -828,7 +842,7 @@ class UserService {
       await dialog.hide();
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
-        showToast(context, "Session expired");
+        showToast(context, S.of(context).sessionExpired);
         await Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -989,7 +1003,7 @@ class UserService {
       await dialog.hide();
       _logger.severe("error during recovery", e);
       if (e.response != null && e.response!.statusCode == 404) {
-        showToast(context, "Session expired");
+        showToast(context, S.of(context).sessionExpired);
         // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(

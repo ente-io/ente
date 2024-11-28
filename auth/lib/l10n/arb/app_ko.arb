@@ -1,6 +1,6 @@
 {
   "account": "계정",
-  "unlock": "잠금해제",
+  "unlock": "잠금 해제",
   "recoveryKey": "복구 키",
   "counterAppBarTitle": "카운터",
   "@counterAppBarTitle": {
@@ -19,6 +19,7 @@
   "pleaseVerifyDetails": "입력된 정보를 확인하고 다시 시도하세요",
   "codeIssuerHint": "발행인",
   "codeSecretKeyHint": "비밀 키",
+  "all": "모든 항목",
   "codeAccountHint": "계정 (you@domain.com)",
   "codeTagHint": "태그",
   "accountKeyType": "키 종류",
@@ -34,8 +35,11 @@
   "nextTotpTitle": "다음",
   "deleteCodeTitle": "코드를 삭제할까요?",
   "deleteCodeMessage": "정말 이 코드를 삭제하시겠습니까? 이 동작은 되돌릴 수 없습니다.",
+  "trashCode": "코드를 삭제할까요?",
+  "trashCodeMessage": "정말로 {account} 의 코드를 삭제할까요?",
+  "trash": "휴지통",
   "viewLogsAction": "로그 확인",
-  "sendLogsDescription": "이렇게 하면 문제를 디버깅하는 데 도움이 되는 로그가 전송됩니다. 민감한 정보가 기록되지 않도록 예방 조치를 취하고 있지만, 로그를 공유하기 전에 해당 로그를 확인하는 것이 좋습니다.",
+  "sendLogsDescription": "이 로그를 전송하면 문제 해결을 위한 디버그에 도움이 됩니다. 민감한 정보가 로그에 기록되지 않도록 주의를 기울이고 있지만, 공유하기 전에 해당 로그를 직접 확인하시기를 권장합니다.",
   "preparingLogsTitle": "로그를 준비하는 중...",
   "emailLogsTitle": "이메일 로그",
   "emailLogsMessage": "{email} 로 로그를 보내주세요",
@@ -51,7 +55,7 @@
   "reportABug": "버그 제보",
   "crashAndErrorReporting": "충돌 & 에러 보고",
   "reportBug": "버그 제보",
-  "emailUsMessage": "{email} 로 이메일을 보내주세요",
+  "emailUsMessage": "{email} 로 이메일을 보내주세요.",
   "@emailUsMessage": {
     "placeholders": {
       "email": {
@@ -59,7 +63,7 @@
       }
     }
   },
-  "contactSupport": "지원 연락",
+  "contactSupport": "지원 문의",
   "rateUsOnStore": "{storeName} 에서 평가해주세요",
   "blog": "블로그",
   "merchandise": "제품",
@@ -82,5 +86,22 @@
   "importTypeEnteEncrypted": "Ente로 암호화된 내보내기",
   "passwordForDecryptingExport": "복호화용 비밀번호",
   "passwordEmptyError": "비밀번호는 비어있을 수 없습니다",
-  "importSelectJsonFile": "JSON 파일 선택"
+  "importFromApp": "{appName} 로부터 코드 불러오기",
+  "importSelectJsonFile": "JSON 파일 선택",
+  "exportCodes": "코드 내보내기",
+  "selectFile": "파일 선택",
+  "emailVerificationToggle": "이메일 검증",
+  "email": "이메일",
+  "support": "지원",
+  "general": "일반 설정",
+  "settings": "설정",
+  "copied": "복사 됨",
+  "pleaseTryAgain": "다시 시도해주세요.",
+  "existingUser": "기존 유저",
+  "newUser": "Ente에 새로 가입",
+  "delete": "삭제",
+  "enterYourPasswordHint": "패스워드 입력",
+  "forgotPassword": "패스워드 분실",
+  "suggestFeatures": "기능 제안",
+  "faq": "FAQ"
 }

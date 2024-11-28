@@ -816,16 +816,6 @@
   "referFriendsAnd2xYourPlan": "Invita un amico e raddoppia il tuo spazio",
   "shareAlbumHint": "Apri un album e tocca il pulsante di condivisione in alto a destra per condividerlo.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Gli elementi mostrano il numero di giorni rimanenti prima della cancellazione permanente",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1 giorno} other {{count} giorni}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "Elimina tutto",
   "renameAlbum": "Rinomina album",
   "convertToAlbum": "Converti in album",
@@ -980,7 +970,7 @@
   "thisActionCannotBeUndone": "Questa azione non può essere annullata",
   "emptyTrash": "Vuoi svuotare il cestino?",
   "permDeleteWarning": "Tutti gli elementi nel cestino verranno eliminati definitivamente\n\nQuesta azione non può essere annullata",
-  "empty": "Vuoto",
+  "empty": "Svuota",
   "couldNotFreeUpSpace": "Impossibile liberare lo spazio",
   "permanentlyDeleteFromDevice": "Eliminare definitivamente dal dispositivo?",
   "someOfTheFilesYouAreTryingToDeleteAre": "Alcuni dei file che si sta tentando di eliminare sono disponibili solo sul dispositivo e non possono essere recuperati se cancellati",
@@ -1187,7 +1177,7 @@
   "addOns": "Componenti aggiuntivi",
   "addOnPageSubtitle": "Dettagli dei componenti aggiuntivi",
   "yourMap": "La tua mappa",
-  "modifyYourQueryOrTrySearchingFor": "Modifica la tua interrogazione o prova a cercare",
+  "modifyYourQueryOrTrySearchingFor": "Modifica la tua ricerca o prova con",
   "blackFridaySale": "Offerta del Black Friday",
   "upto50OffUntil4thDec": "Sconto del 50%, fino al 4 dicembre.",
   "photos": "Foto",
@@ -1246,6 +1236,10 @@
   "locations": "Luoghi",
   "descriptions": "Descrizioni",
   "addAName": "Aggiungi un nome",
+  "findThemQuickly": "Trovali rapidamente",
+  "@findThemQuickly": {
+    "description": "Subtitle to indicate that the user can find people quickly by name"
+  },
   "findPeopleByName": "Trova rapidamente le persone per nome",
   "addViewers": "{count, plural, zero {Aggiungi visualizzatore} one {Aggiungi visualizzatore} other {Aggiungi visualizzatori}}",
   "addCollaborators": "{count, plural, zero {Aggiungi collaboratore} one {Aggiungi collaboratore} other {Aggiungi collaboratori}}",
@@ -1260,6 +1254,9 @@
   "createCollaborativeLink": "Crea link collaborativo",
   "search": "Cerca",
   "enterPersonName": "Inserisci il nome della persona",
+  "enterName": "Aggiungi nome",
+  "enterDateOfBirth": "Compleanno (Opzionale)",
+  "birthday": "Compleanno",
   "removePersonLabel": "Rimuovi etichetta persona",
   "autoPairDesc": "L'associazione automatica funziona solo con i dispositivi che supportano Chromecast.",
   "manualPairDesc": "L'associazione con PIN funziona con qualsiasi schermo dove desideri visualizzare il tuo album.",
@@ -1344,9 +1341,79 @@
   "mostRelevant": "Più rilevanti",
   "loadingYourPhotos": "Caricando le tue foto...",
   "processingImport": "Elaborando {folderName}...",
-  "resetPerson": "Reset person",
-  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
-  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
-  "yesResetPerson": "Yes, reset person",
-  "onlyThem": "Only them"
+  "personName": "Nome della persona",
+  "addNewPerson": "Aggiungi nuova persona",
+  "addNameOrMerge": "Aggiungi nome o unisci",
+  "mergeWithExisting": "Unisci con esistente",
+  "newPerson": "Nuova persona",
+  "addName": "Aggiungi nome",
+  "add": "Aggiungi",
+  "extraPhotosFoundFor": "Trovate foto aggiuntive per {text}",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "extraPhotosFound": "Trovate foto aggiuntive",
+  "configuration": "Configurazione",
+  "localIndexing": "Indicizzazione locale",
+  "resetPerson": "Rimuovi",
+  "areYouSureYouWantToResetThisPerson": "Sei sicuro di voler resettare questa persona?",
+  "allPersonGroupingWillReset": "Tutti i raggruppamenti per questa persona saranno resettati e perderai tutti i suggerimenti fatti per questa persona",
+  "yesResetPerson": "Sì, resetta persona",
+  "onlyThem": "Solo loro",
+  "checkingModels": "Verifica dei modelli...",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
+  "searchDiscoverEmptySection": "Le immagini saranno mostrate qui una volta che l'elaborazione sarà completata",
+  "accountIsAlreadyConfigured": "L'account è già configurato.",
+  "sessionIdMismatch": "ID sessione non corrispondente",
+  "@sessionIdMismatch": {
+    "description": "In passkey page, deeplink is ignored because of session ID mismatch."
+  },
+  "failedToFetchActiveSessions": "Recupero delle sessioni attive non riuscito",
+  "@failedToFetchActiveSessions": {
+    "description": "In session page, warn user (in toast) that active sessions could not be fetched."
+  },
+  "failedToRefreshStripeSubscription": "Impossibile aggiornare l'abbonamento",
+  "failedToPlayVideo": "Impossibile riprodurre il video",
+  "tapToUpload": "Premi per caricare",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
+  "info": "Info",
+  "addFiles": "Aggiungi File",
+  "imageNotAnalyzed": "Immagine non analizzata",
+  "noFacesFound": "Nessun volto trovato",
+  "fileNotUploadedYet": "File non ancora caricato",
+  "noSuggestionsForPerson": "Nessun suggerimento per {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "mese",
+  "yearShort": "anno",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "attualmente in esecuzione",
+  "ignored": "ignorato",
+  "file": "File",
+  "changeLogBackupStatusTitle": "Stato Backup",
+  "changeLogDiscoverTitle": "Esplora",
+  "selectCoverPhoto": "Seleziona foto di copertina",
+  "newLocation": "Nuova posizione",
+  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
+  "openFile": "Open file",
+  "backupFile": "Backup file",
+  "openAlbumInBrowser": "Open album in browser",
+  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
+  "allow": "Allow",
+  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
+  "seePublicAlbumLinksInApp": "See public album links in app"
 }

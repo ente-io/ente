@@ -1,3 +1,4 @@
+import { retryAsyncOperation } from "@/utils/promise";
 import { clientPackageName } from "./app";
 import { ensureAuthToken } from "./local-user";
 
@@ -14,10 +15,12 @@ export const authenticatedRequestHeaders = async () => ({
 });
 
 /**
- * Return a headers object with "X-Client-Package" header set to the client
- * package name of the current app.
+ * Return headers that should be passed alongwith (almost) all unauthenticated
+ * `fetch` calls that we make to our API servers.
+ *
+ * -   The client package name.
  */
-export const clientPackageHeader = () => ({
+export const publicRequestHeaders = () => ({
     "X-Client-Package": clientPackageName,
 });
 
@@ -66,3 +69,26 @@ export const ensureOk = (res: Response) => {
  */
 export const isHTTP4xxError = (e: unknown) =>
     e instanceof HTTPError && e.res.status >= 400 && e.res.status <= 499;
+
+/**
+ * Return true if this is a HTTP 401 error.
+ *
+ * For authenticated requests, an HTTP "401 Unauthorized" indicates that the
+ * credentials (auth token) is not valid.
+ */
+export const isHTTP401Error = (e: unknown) =>
+    e instanceof HTTPError && e.res.status == 401;
+
+/**
+ * A helper function to adapt {@link retryAsyncOperation} for HTTP fetches.
+ *
+ * This will ensure that the HTTP operation returning a non-200 OK status (as
+ * matched by {@link ensureOk}) is also counted as an error when considering if
+ * a request should be retried.
+ */
+export const retryEnsuringHTTPOk = (request: () => Promise<Response>) =>
+    retryAsyncOperation(async () => {
+        const r = await request();
+        ensureOk(r);
+        return r;
+    });

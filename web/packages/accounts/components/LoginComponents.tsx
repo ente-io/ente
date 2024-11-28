@@ -1,16 +1,16 @@
+import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import {
     checkPasskeyVerificationStatus,
     passkeySessionExpiredErrorMessage,
     saveCredentialsAndNavigateTo,
 } from "@/accounts/services/passkey";
+import { FormPaper, FormPaperFooter } from "@/base/components/FormPaper";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { genericErrorDialogAttributes } from "@/base/components/utils/dialog";
 import log from "@/base/log";
 import { customAPIHost } from "@/base/origins";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { CircularProgress, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
@@ -102,7 +102,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
             const response =
                 await checkPasskeyVerificationStatus(passkeySessionID);
             if (!response) setVerificationStatus("pending");
-            else router.push(await saveCredentialsAndNavigateTo(response));
+            else void router.push(await saveCredentialsAndNavigateTo(response));
         } catch (e) {
             log.error("Passkey verification status check failed", e);
             showMiniDialog(
@@ -116,7 +116,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
     };
 
     const handleRecover = () => {
-        router.push("/passkeys/recover");
+        void router.push("/passkeys/recover");
     };
 
     return (
@@ -193,25 +193,3 @@ const ButtonStack = styled("div")`
     flex-direction: column;
     gap: 1rem;
 `;
-
-/**
- * {@link MiniDialogAttributes} for showing asking the user to login again when
- * their session has expired.
- *
- * There is one button, which allows them to logout.
- *
- * @param onLogin Called when the user presses the "Login" button on the error
- * dialog.
- */
-export const sessionExpiredDialogAttributes = (
-    onLogin: () => void,
-): MiniDialogAttributes => ({
-    title: t("session_expired"),
-    message: t("session_expired_message"),
-    nonClosable: true,
-    continue: {
-        text: t("login"),
-        action: onLogin,
-    },
-    cancel: false,
-});

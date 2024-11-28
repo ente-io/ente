@@ -1,9 +1,11 @@
-import { sessionExpiredDialogAttributes } from "@/accounts/components/LoginComponents";
+import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { stashRedirect } from "@/accounts/services/redirect";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { NavbarBase } from "@/base/components/Navbar";
-import { ensure } from "@/utils/ensure";
+import { isHTTP401Error } from "@/base/http";
+import log from "@/base/log";
+import { masterKeyFromSessionIfLoggedIn } from "@/base/session-store";
 import {
     HorizontalFlex,
     VerticallyCentered,
@@ -11,57 +13,57 @@ import {
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { ApiError, CustomError } from "@ente/shared/error";
 import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import { Button, ButtonBase, Snackbar, TextField, styled } from "@mui/material";
+import {
+    Button,
+    ButtonBase,
+    Snackbar,
+    TextField,
+    Typography,
+    styled,
+} from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { generateOTPs, type Code } from "services/code";
 import { getAuthCodes } from "services/remote";
-import { AppContext } from "./_app";
+import { useAppContext } from "types/context";
 
 const Page: React.FC = () => {
-    const { logout, showNavBar, showMiniDialog } = ensure(
-        useContext(AppContext),
-    );
+    const { logout, showNavBar, showMiniDialog } = useAppContext();
+
     const router = useRouter();
     const [codes, setCodes] = useState<Code[]>([]);
     const [hasFetched, setHasFetched] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
 
-    const showSessionExpiredDialog = () =>
-        showMiniDialog(sessionExpiredDialogAttributes(logout));
-
     useEffect(() => {
         const fetchCodes = async () => {
+            const masterKey = await masterKeyFromSessionIfLoggedIn();
+            if (!masterKey) {
+                stashRedirect(PAGES.AUTH);
+                void router.push("/");
+                return;
+            }
+
             try {
-                setCodes(await getAuthCodes());
+                setCodes(await getAuthCodes(masterKey));
             } catch (e) {
-                if (
-                    e instanceof Error &&
-                    e.message == CustomError.KEY_MISSING
-                ) {
-                    stashRedirect(PAGES.AUTH);
-                    router.push("/");
-                } else if (e instanceof ApiError && e.httpStatusCode == 401) {
-                    // We get back a 401 Unauthorized if the token is not valid.
-                    showSessionExpiredDialog();
-                } else {
-                    // do not log errors
-                }
+                log.error("Failed to fetch codes", e);
+                if (isHTTP401Error(e))
+                    showMiniDialog(sessionExpiredDialogAttributes(logout));
             }
             setHasFetched(true);
         };
         void fetchCodes();
         showNavBar(false);
-    }, []);
+    }, [router, showNavBar, showMiniDialog, logout]);
 
     const lcSearch = searchTerm.toLowerCase();
     const filteredCodes = codes.filter(
         (code) =>
-            code.issuer?.toLowerCase().includes(lcSearch) ||
+            code.issuer.toLowerCase().includes(lcSearch) ||
             code.account?.toLowerCase().includes(lcSearch),
     );
 
@@ -121,9 +123,11 @@ const Page: React.FC = () => {
                             }}
                         >
                             {searchTerm.length > 0 ? (
-                                <p>{t("no_results")}</p>
+                                <Typography>{t("no_results")}</Typography>
                             ) : (
-                                <></>
+                                <Typography color="text.muted">
+                                    {t("no_codes_added_yet")}
+                                </Typography>
                             )}
                         </div>
                     ) : (
@@ -141,7 +145,7 @@ const Page: React.FC = () => {
 export default Page;
 
 const AuthNavbar: React.FC = () => {
-    const { logout } = ensure(useContext(AppContext));
+    const { logout } = useAppContext();
 
     return (
         <NavbarBase>
@@ -176,7 +180,7 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
     const [errorMessage, setErrorMessage] = useState("");
     const [hasCopied, setHasCopied] = useState(false);
 
-    const regen = () => {
+    const regen = useCallback(() => {
         try {
             const [m, n] = generateOTPs(code);
             setOTP(m);
@@ -184,13 +188,13 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
         } catch (e) {
             setErrorMessage(e instanceof Error ? e.message : String(e));
         }
-    };
+    }, [code]);
 
-    const copyCode = () => {
-        navigator.clipboard.writeText(otp);
-        setHasCopied(true);
-        setTimeout(() => setHasCopied(false), 2000);
-    };
+    const copyCode = () =>
+        void navigator.clipboard.writeText(otp).then(() => {
+            setHasCopied(true);
+            setTimeout(() => setHasCopied(false), 2000);
+        });
 
     useEffect(() => {
         // Generate to set the initial otp and nextOTP on component mount.
@@ -210,7 +214,7 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
         }, timeToNextCode);
 
         return () => interval && clearInterval(interval);
-    }, [code]);
+    }, [code, regen]);
 
     return (
         <div style={{ padding: "8px" }}>
@@ -268,7 +272,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                             textAlign: "left",
                         }}
                     >
-                        {code.issuer ?? ""}
+                        {code.issuer}
                     </p>
                     <p
                         style={{
@@ -317,7 +321,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                             color: "grey",
                         }}
                     >
-                        {t("AUTH_NEXT")}
+                        {t("auth_next")}
                     </p>
                     <p
                         style={{
@@ -402,7 +406,7 @@ const UnparseableCode: React.FC<UnparseableCodeProps> = ({
 const Footer: React.FC = () => {
     return (
         <Footer_>
-            <p>{t("AUTH_DOWNLOAD_MOBILE_APP")}</p>
+            <Typography>{t("auth_download_mobile_app")}</Typography>
             <a
                 href="https://github.com/ente-io/ente/tree/main/auth#-download"
                 download
@@ -414,9 +418,9 @@ const Footer: React.FC = () => {
 };
 
 const Footer_ = styled("div")`
-    margin-block-start: 2rem;
-    margin-block-end: 4rem;
+    margin-block: 4rem;
     display: flex;
+    gap: 1rem;
     flex-direction: column;
     align-items: center;
     justify-content: center;

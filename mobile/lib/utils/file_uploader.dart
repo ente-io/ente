@@ -820,6 +820,9 @@ class FileUploader {
         // file upload can be be retried in such cases without user intervention
         uploadHardFailure = false;
       }
+      if (isMultipartUpload && isPutOrUpdateFileError(e)) {
+        await UploadLocksDB.instance.deleteMultipartTrack(lockKey);
+      }
       rethrow;
     } finally {
       await _onUploadDone(
@@ -833,6 +836,14 @@ class FileUploader {
         isMultiPartUpload: isMultipartUpload,
       );
     }
+  }
+
+  bool isPutOrUpdateFileError(Object e) {
+    if (e is DioError) {
+      return e.requestOptions.path.contains("/files") ||
+          e.requestOptions.path.contains("/files/update");
+    }
+    return false;
   }
 
   /*

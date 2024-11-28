@@ -6,8 +6,6 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/models/api/entity/type.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart";
@@ -37,7 +35,7 @@ class FaceRecognitionService {
 
     // Listen on DiffSync
     Bus.instance.on<DiffSyncCompleteEvent>().listen((event) async {
-      unawaited(_syncPersonFeedback());
+      unawaited(syncPersonFeedback());
     });
 
     // Listen on PeopleChanged
@@ -50,23 +48,27 @@ class FaceRecognitionService {
     _logger.info('init done');
   }
 
-  Future<void> sync() async {
-    await _syncPersonFeedback();
-  }
-
-  Future<void> _syncPersonFeedback() async {
+  Future<void> syncPersonFeedback() async {
     if (_isSyncing) {
       return;
     }
     _isSyncing = true;
-    if (_shouldReconcilePeople) {
-      await PersonService.instance.reconcileClusters();
-      Bus.instance.fire(PeopleChangedEvent(type: PeopleEventType.syncDone));
-      _shouldReconcilePeople = false;
-    } else {
-      await entityService.syncEntity(EntityType.cgroup);
+    try {
+      if (_shouldReconcilePeople) {
+        await PersonService.instance.reconcileClusters();
+        Bus.instance.fire(PeopleChangedEvent(type: PeopleEventType.syncDone));
+        _shouldReconcilePeople = false;
+      } else {
+        final bool didChange =
+            await PersonService.instance.fetchRemoteClusterFeedback();
+        if (didChange) {
+          _logger.info("people: got remote data update ");
+          Bus.instance.fire(PeopleChangedEvent(type: PeopleEventType.syncDone));
+        }
+      }
+    } finally {
+      _isSyncing = false;
     }
-    _isSyncing = false;
   }
 
   static Future<List<FaceResult>> runFacesPipeline(

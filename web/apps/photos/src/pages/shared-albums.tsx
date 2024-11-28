@@ -1,11 +1,16 @@
 import { EnteLogoSVG } from "@/base/components/EnteLogo";
+import { FormPaper, FormPaperTitle } from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
+import {
+    useIsSmallWidth,
+    useIsTouchscreen,
+} from "@/base/components/utils/hooks";
 import { sharedCryptoWorker } from "@/base/crypto";
-import { useIsSmallWidth, useIsTouchscreen } from "@/base/hooks";
 import log from "@/base/log";
-import { updateShouldDisableCFUploadProxy } from "@/gallery/upload";
+import { downloadManager } from "@/gallery/services/download";
+import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
 import type { Collection } from "@/media/collection";
 import { type EnteFile, mergeMetadata } from "@/media/file";
 import {
@@ -16,7 +21,6 @@ import {
     ALL_SECTION,
     isHiddenCollection,
 } from "@/new/photos/services/collection";
-import downloadManager from "@/new/photos/services/download";
 import { sortFiles } from "@/new/photos/services/files";
 import { useAppContext } from "@/new/photos/types/context";
 import {
@@ -24,8 +28,6 @@ import {
     FluidContainer,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import SingleInputForm, {
@@ -78,7 +80,6 @@ import {
 } from "types/gallery";
 import { downloadCollectionFiles } from "utils/collection";
 import { downloadSelectedFiles, getSelectedFiles } from "utils/file";
-import { formatNumber } from "utils/number/format";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export default function PublicCollectionGallery() {
@@ -91,8 +92,7 @@ export default function PublicCollectionGallery() {
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const [errorMessage, setErrorMessage] = useState<string>(null);
-    const { showLoadingBar, hideLoadingBar, setDialogMessage } =
-        useAppContext();
+    const { showLoadingBar, hideLoadingBar, showMiniDialog } = useAppContext();
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const [isPasswordProtected, setIsPasswordProtected] =
@@ -187,16 +187,17 @@ export default function PublicCollectionGallery() {
     };
 
     const showPublicLinkExpiredMessage = () =>
-        setDialogMessage({
-            title: t("LINK_EXPIRED"),
-            content: t("LINK_EXPIRED_MESSAGE"),
-
+        showMiniDialog({
+            title: t("link_expired"),
+            message: t("link_expired_message"),
             nonClosable: true,
-            proceed: {
+            continue: {
                 text: t("login"),
-                action: () => router.push("/"),
-                variant: "accent",
+                action: async () => {
+                    await router.push("/");
+                },
             },
+            cancel: false,
         });
 
     useEffect(() => {
@@ -222,7 +223,6 @@ export default function PublicCollectionGallery() {
             let redirectingToWebsite = false;
             try {
                 const cryptoWorker = await sharedCryptoWorker();
-                await downloadManager.init();
 
                 url.current = window.location.href;
                 const currentURL = new URL(url.current);
@@ -240,7 +240,10 @@ export default function PublicCollectionGallery() {
                         ? await cryptoWorker.toB64(bs58.decode(ck))
                         : await cryptoWorker.fromHex(ck);
                 token.current = t;
-                downloadManager.updateToken(token.current);
+                downloadManager.setPublicAlbumsCredentials(
+                    token.current,
+                    undefined,
+                );
                 await updateShouldDisableCFUploadProxy();
                 collectionKey.current = dck;
                 url.current = window.location.href;
@@ -264,7 +267,7 @@ export default function PublicCollectionGallery() {
                     setPublicFiles(localPublicFiles);
                     passwordJWTToken.current =
                         await getLocalPublicCollectionPassword(collectionUID);
-                    downloadManager.updateToken(
+                    downloadManager.setPublicAlbumsCredentials(
                         token.current,
                         passwordJWTToken.current,
                     );
@@ -370,7 +373,7 @@ export default function PublicCollectionGallery() {
                 setErrorMessage(
                     parsedError.message === CustomError.TOO_MANY_REQUESTS
                         ? t("LINK_TOO_MANY_REQUESTS")
-                        : t("LINK_EXPIRED_MESSAGE"),
+                        : t("link_expired_message"),
                 );
                 // share has been disabled
                 // local cache should be cleared
@@ -416,7 +419,7 @@ export default function PublicCollectionGallery() {
                     hashedPassword,
                 );
                 passwordJWTToken.current = jwtToken;
-                downloadManager.updateToken(
+                downloadManager.setPublicAlbumsCredentials(
                     token.current,
                     passwordJWTToken.current,
                 );
@@ -546,7 +549,9 @@ export default function PublicCollectionGallery() {
                     uploadCollection={publicCollection}
                     setLoading={setBlockingLoad}
                     setShouldDisableDropzone={setShouldDisableDropzone}
-                    onUploadFile={(file) => sortFiles([...publicFiles, file])}
+                    onUploadFile={(file) =>
+                        setPublicFiles(sortFiles([...publicFiles, file]))
+                    }
                     uploadTypeSelectorView={uploadTypeSelectorView}
                     closeUploadTypeSelector={closeUploadTypeSelectorView}
                     showSessionExpiredMessage={showPublicLinkExpiredMessage}
@@ -677,9 +682,7 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />
                 </IconButton>
-                <Box ml={1.5}>
-                    {formatNumber(count)} {t("SELECTED")}{" "}
-                </Box>
+                <Box ml={1.5}>{t("selected_count", { selected: count })}</Box>
             </FluidContainer>
             <Stack spacing={2} direction="row" mr={2}>
                 <Tooltip title={t("download")}>

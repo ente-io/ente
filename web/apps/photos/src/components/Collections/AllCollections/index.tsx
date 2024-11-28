@@ -1,5 +1,5 @@
+import { FilledIconButton } from "@/base/components/mui";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
-import { FilledIconButton } from "@/new/photos/components/mui";
 import { SlideUpTransition } from "@/new/photos/components/mui/SlideUpTransition";
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
 import { CollectionsSortBy } from "@/new/photos/services/collection/ui";

@@ -9,7 +9,6 @@
  * To see where this code fits, see [Note: Crypto code hierarchy].
  */
 import { mergeUint8Arrays } from "@/utils/array";
-import { CustomError } from "@ente/shared/error";
 import sodium, { type StateAddress } from "libsodium-wrappers-sumo";
 import type {
     BytesOrB64,
@@ -18,6 +17,7 @@ import type {
     EncryptedBlobBytes,
     EncryptedBox,
     EncryptedBoxB64,
+    EncryptedFile,
 } from "./types";
 
 /**
@@ -129,23 +129,25 @@ const bytes = async (bob: BytesOrB64) =>
     typeof bob == "string" ? fromB64(bob) : bob;
 
 /**
- * Generate a key for use with the *Box encryption functions.
+ * Generate a new key for use with the *Box encryption functions, and return its
+ * base64 string representation.
  *
  * This returns a new randomly generated 256-bit key suitable for being used
  * with libsodium's secretbox APIs.
  */
-export const generateNewBoxKey = async () => {
+export const generateBoxKey = async () => {
     await sodium.ready;
     return toB64(sodium.crypto_secretbox_keygen());
 };
 
 /**
- * Generate a key for use with the *Blob or *Stream encryption functions.
+ * Generate a new key for use with the *Blob or *Stream encryption functions,
+ * and return its base64 string representation.
  *
  * This returns a new randomly generated 256-bit key suitable for being used
  * with libsodium's secretstream APIs.
  */
-export const generateNewBlobOrStreamKey = async () => {
+export const generateBlobOrStreamKey = async () => {
     await sodium.ready;
     return toB64(sodium.crypto_secretstream_xchacha20poly1305_keygen());
 };
@@ -194,35 +196,32 @@ export const generateNewBlobOrStreamKey = async () => {
  *     secretstream APIs are more appropriate.
  *
  * However, in our code we have evolved two different use cases for the 2nd
- * option.
- *
- * Say we have an Ente object, specifically an {@link EnteFile}. This holds the
- * encryption keys for encrypting the contents of the file that a user wishes to
- * upload. The secretstream APIs are the obvious fit, and indeed that's what we
- * use, chunking the file if the contents are bigger than some threshold. But if
- * the file is small enough, there is no need to chunk, so we also expose a
- * function that does streaming encryption, but in "one-shot" mode.
- *
- * Later on, say we have to encrypt the public magic metadata associated with
- * the {@link EnteFile}. Instead of using the secretbox APIs, we just us the
- * same streaming encryption that the rest of the file uses, but since such
- * metadata is well below the threshold for chunking, it invariably uses the
- * "one-shot" mode.
+ * option. The data to encrypt might be smaller than our streaming encryption
+ * chunk size (e.g. the public magic metadata associated with the
+ * {@link EnteFile}), so we do not chunk it and instead encrypt / decrypt it in
+ * a single go. In contrast, the actual file that the user wishes to upload may
+ * be arbitrarily big, and there we first break in into chunks before using the
+ * streaming encryption.
  *
  * Thus, we have three scenarios:
  *
  * 1.  Box: Using secretbox APIs to encrypt some independent blob of data.
  *
- * 2.  Blob: Using secretstream APIs in one-shot mode. This is used to encrypt
+ * 2.  Blob: Using secretstream APIs without chunking. This is used to encrypt
  *     data associated to an Ente object (file, collection, entity, etc), when
  *     the data is small-ish (less than a few MBs).
  *
  * 3.  Stream/Chunks: Using secretstream APIs for encrypting chunks. This is
  *     used to encrypt the actual content of the files associated with an
- *     EnteFile object.
+ *     EnteFile object. This itself happens in two ways:
+ *
+ *     3a. One shot mode - where we do break the data into chunks, but a single
+ *         function processes all the chunks in one go.
+ *
+ *     3b. Streaming - where all the chunks are processed one by one.
  *
  * "Blob" is not a prior term of art in this context, it is just something we
- * use to abbreviate "data encrypted using secretstream APIs in one-shot mode".
+ * use to abbreviate "data encrypted using secretstream APIs without chunking".
  *
  * The distinction between Box and Blob is also handy since not only does the
  * underlying algorithm differ, but also the terminology that libsodium use for
@@ -240,10 +239,15 @@ export const generateNewBlobOrStreamKey = async () => {
  *
  * 1.  Box uses secretbox APIs (Salsa), Blob uses secretstream APIs (ChaCha).
  *
- * 2.  While both are one-shot, Blob should generally be used for data
- *     associated with an Ente object, and Box for the other cases.
+ * 2.  Blob should generally be used for data associated with an Ente object,
+ *     and Box for the other cases.
  *
  * 3.  Box returns a "nonce", while Blob returns a "header".
+ *
+ * The difference between case 2 and 3 (Blob vs Stream) is that while both use
+ * the same algorithms, in case of Blob the entire data is encrypted / decrypted
+ * without chunking, whilst the *Stream routines first break it into
+ * {@link streamEncryptionChunkSize} chunks.
  */
 export const encryptBoxB64 = async (
     data: BytesOrB64,
@@ -263,7 +267,7 @@ export const encryptBoxB64 = async (
 };
 
 /**
- * Encrypt the given data using libsodium's secretstream APIs in one-shot mode.
+ * Encrypt the given data using libsodium's secretstream APIs without chunking.
  *
  * Use {@link decryptBlob} to decrypt the result.
  *
@@ -283,9 +287,9 @@ export const encryptBlob = async (
 ): Promise<EncryptedBlobBytes> => {
     await sodium.ready;
 
-    const uintkey = await bytes(key);
+    const keyBytes = await bytes(key);
     const initPushResult =
-        sodium.crypto_secretstream_xchacha20poly1305_init_push(uintkey);
+        sodium.crypto_secretstream_xchacha20poly1305_init_push(keyBytes);
     const [pushState, header] = [initPushResult.state, initPushResult.header];
 
     const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(
@@ -315,16 +319,46 @@ export const encryptBlobB64 = async (
     };
 };
 
-export const ENCRYPTION_CHUNK_SIZE = 4 * 1024 * 1024;
+/**
+ * The various *Stream encryption functions break up the input into chunks of
+ * {@link streamEncryptionChunkSize} bytes during encryption (except the last
+ * chunk which can be smaller since a file would rarely align exactly to a
+ * {@link streamEncryptionChunkSize} multiple).
+ *
+ * The various *Stream decryption functions also assume that each potential
+ * chunk is {@link streamEncryptionChunkSize} long.
+ *
+ * This value of this constant is 4 MB (and is unlikely to change).
+ */
+export const streamEncryptionChunkSize = 4 * 1024 * 1024;
 
-export const encryptChaCha = async (data: Uint8Array) => {
+/**
+ * Encrypt the given data using libsodium's secretstream APIs after breaking it
+ * into {@link streamEncryptionChunkSize} chunks.
+ *
+ * Use {@link decryptStreamBytes} to decrypt the result.
+ *
+ * Unlike {@link initChunkDecryption} / {@link encryptFileChunk}, this function
+ * processes all the chunks at once in a single call to this function.
+ *
+ * @param data The data to encrypt.
+ *
+ * @returns The encrypted bytes ({@link Uint8Array}) and the decryption header
+ * (as a base64 string).
+ *
+ * -   See: [Note: 3 forms of encryption (Box | Blob | Stream)].
+ *
+ * -   See: https://doc.libsodium.org/secret-key_cryptography/secretstream
+ */
+export const encryptStreamBytes = async (
+    data: Uint8Array,
+    key: BytesOrB64,
+): Promise<EncryptedFile> => {
     await sodium.ready;
 
-    const uintkey: Uint8Array =
-        sodium.crypto_secretstream_xchacha20poly1305_keygen();
-
+    const keyBytes = await bytes(key);
     const initPushResult =
-        sodium.crypto_secretstream_xchacha20poly1305_init_push(uintkey);
+        sodium.crypto_secretstream_xchacha20poly1305_init_push(keyBytes);
     const [pushState, header] = [initPushResult.state, initPushResult.header];
     let bytesRead = 0;
     let tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
@@ -332,7 +366,7 @@ export const encryptChaCha = async (data: Uint8Array) => {
     const encryptedChunks = [];
 
     while (tag !== sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL) {
-        let chunkSize = ENCRYPTION_CHUNK_SIZE;
+        let chunkSize = streamEncryptionChunkSize;
         if (bytesRead + chunkSize >= data.length) {
             chunkSize = data.length - bytesRead;
             tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL;
@@ -349,45 +383,74 @@ export const encryptChaCha = async (data: Uint8Array) => {
         encryptedChunks.push(pushResult);
     }
     return {
-        key: await toB64(uintkey),
-        file: {
-            encryptedData: mergeUint8Arrays(encryptedChunks),
-            decryptionHeader: await toB64(header),
-        },
+        encryptedData: mergeUint8Arrays(encryptedChunks),
+        decryptionHeader: await toB64(header),
     };
 };
 
-export async function initChunkEncryption() {
+/**
+ * Initialize libsodium's secretstream APIs for encrypting
+ * {@link streamEncryptionChunkSize} chunks. Subsequently, each chunk can be
+ * encrypted using {@link encryptStreamChunk}.
+ *
+ * Use {@link initChunkDecryption} to initialize the decryption routine, and
+ * {@link decryptStreamChunk} to decrypt the individual chunks.
+ *
+ * See also: {@link encryptStreamBytes} which also does chunked encryption but
+ * encrypts all the chunks in a single call.
+ *
+ * @param key The key to use for encryption.
+ *
+ * @returns The decryption header (as a base64 string) which should be preserved
+ * and used during decryption, and an opaque "push state" that should be passed
+ * to subsequent calls to {@link encryptStreamChunk} along with the chunks's
+ * contents.
+ */
+export const initChunkEncryption = async (key: BytesOrB64) => {
     await sodium.ready;
-    const key = sodium.crypto_secretstream_xchacha20poly1305_keygen();
-    const initPushResult =
-        sodium.crypto_secretstream_xchacha20poly1305_init_push(key);
-    const [pushState, header] = [initPushResult.state, initPushResult.header];
+    const keyBytes = await bytes(key);
+    const { state, header } =
+        sodium.crypto_secretstream_xchacha20poly1305_init_push(keyBytes);
     return {
-        key: await toB64(key),
         decryptionHeader: await toB64(header),
-        pushState,
+        pushState: state,
     };
-}
+};
 
-export async function encryptFileChunk(
+/**
+ * Encrypt an individual chunk using libsodium's secretstream APIs.
+ *
+ * This function is not meant to be standalone, but is instead called in tandem
+ * with {@link initChunkEncryption} for encrypting data after breaking it into
+ * chunks.
+ *
+ * @param data The chunk's data as bytes ({@link Uint8Array}).
+ *
+ * @param pushState The state for this instantiation of chunked encryption. This
+ * should be treated as opaque libsodium state that should be passed to all
+ * calls to {@link encryptStreamChunk} that are paired with a particular
+ * {@link initChunkEncryption}.
+ *
+ * @param isFinalChunk `true` if this is the last chunk in the sequence.
+ *
+ * @returns The encrypted chunk.
+ */
+export const encryptStreamChunk = async (
     data: Uint8Array,
     pushState: sodium.StateAddress,
     isFinalChunk: boolean,
-) {
+) => {
     await sodium.ready;
     const tag = isFinalChunk
         ? sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL
         : sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
-    const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(
+    return sodium.crypto_secretstream_xchacha20poly1305_push(
         pushState,
         data,
         null,
         tag,
     );
-
-    return pushResult;
-}
+};
 
 /**
  * Decrypt the result of {@link encryptBoxB64} and return the decrypted bytes.
@@ -440,38 +503,34 @@ export const decryptBlobB64 = (
     key: BytesOrB64,
 ): Promise<string> => decryptBlob(blob, key).then(toB64);
 
-/** Decrypt Stream, but merge the results. */
-export const decryptChaCha = async (
-    data: Uint8Array,
-    header: Uint8Array,
-    key: string,
+/**
+ * Decrypt the result of {@link encryptStreamBytes}.
+ */
+export const decryptStreamBytes = async (
+    { encryptedData, decryptionHeader }: EncryptedFile,
+    key: BytesOrB64,
 ) => {
     await sodium.ready;
     const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
-        header,
-        await fromB64(key),
+        await fromB64(decryptionHeader),
+        await bytes(key),
     );
     const decryptionChunkSize =
-        ENCRYPTION_CHUNK_SIZE +
+        streamEncryptionChunkSize +
         sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
     let bytesRead = 0;
     const decryptedChunks = [];
     let tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
     while (tag !== sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL) {
         let chunkSize = decryptionChunkSize;
-        if (bytesRead + chunkSize > data.length) {
-            chunkSize = data.length - bytesRead;
+        if (bytesRead + chunkSize > encryptedData.length) {
+            chunkSize = encryptedData.length - bytesRead;
         }
-        const buffer = data.slice(bytesRead, bytesRead + chunkSize);
+        const buffer = encryptedData.slice(bytesRead, bytesRead + chunkSize);
         const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
             pullState,
             buffer,
         );
-        // TODO:
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (!pullResult.message) {
-            throw new Error(CustomError.PROCESSING_FAILED);
-        }
         decryptedChunks.push(pullResult.message);
         tag = pullResult.tag;
         bytesRead += chunkSize;
@@ -479,36 +538,55 @@ export const decryptChaCha = async (
     return mergeUint8Arrays(decryptedChunks);
 };
 
-export async function initChunkDecryption(header: Uint8Array, key: Uint8Array) {
+/**
+ * Prepare to decrypt the result of {@link initChunkEncryption} and
+ * {@link encryptStreamChunk}.
+ *
+ * @param decryptionHeader The header (as a base64 string) that was produced
+ * during encryption by {@link initChunkEncryption}.
+ *
+ * @param key The encryption key.
+ *
+ * @returns The pull state, which should be treated as opaque libsodium specific
+ * state that should be passed along to each subsequent call to
+ * {@link decryptStreamChunk}, and the size of each (decrypted) chunk that will
+ * be produced by subsequent calls to {@link decryptStreamChunk}.
+ */
+export const initChunkDecryption = async (
+    decryptionHeader: string,
+    key: BytesOrB64,
+) => {
     await sodium.ready;
     const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
-        header,
-        key,
+        await fromB64(decryptionHeader),
+        await bytes(key),
     );
     const decryptionChunkSize =
-        ENCRYPTION_CHUNK_SIZE +
+        streamEncryptionChunkSize +
         sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
-    const tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
-    return { pullState, decryptionChunkSize, tag };
-}
+    return { pullState, decryptionChunkSize };
+};
 
-export async function decryptFileChunk(
+/**
+ * Decrypt an individual chunk of the data encrypted using
+ * {@link initChunkEncryption} and {@link encryptStreamChunk}.
+ *
+ * This is meant to be used in tandem with {@link initChunkDecryption}. During
+ * each invocation, it should be passed the encrypted chunk, and the
+ * {@link pullState} returned by {@link initChunkDecryption}. It will then
+ * return the corresponding decrypted chunk's bytes.
+ */
+export const decryptStreamChunk = async (
     data: Uint8Array,
     pullState: StateAddress,
-) {
+) => {
     await sodium.ready;
     const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
         pullState,
         data,
     );
-    // TODO:
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!pullResult.message) {
-        throw new Error(CustomError.PROCESSING_FAILED);
-    }
-    const newTag = pullResult.tag;
-    return { decryptedData: pullResult.message, newTag };
-}
+    return pullResult.message;
+};
 
 export interface B64EncryptionResult {
     encryptedData: string;
@@ -585,6 +663,64 @@ export async function completeChunkHashing(hashState: sodium.StateAddress) {
     return hashString;
 }
 
+/**
+ * Generate a new public/private keypair for use with public-key encryption
+ * functions, and return their base64 string representations.
+ *
+ * These keys are suitable for being used with the {@link boxSeal} and
+ * {@link boxSealOpen} functions.
+ */
+export const generateKeyPair = async () => {
+    await sodium.ready;
+    const keyPair = sodium.crypto_box_keypair();
+    return {
+        publicKey: await toB64(keyPair.publicKey),
+        privateKey: await toB64(keyPair.privateKey),
+    };
+};
+
+/**
+ * Public key encryption.
+ *
+ * Encrypt the given {@link data} using the given {@link publicKey}.
+ *
+ * This function performs asymmetric (public-key) encryption. To decrypt the
+ * result, use {@link boxSealOpen}.
+ *
+ * @param data The input data to encrypt, represented as a base64 string.
+ *
+ * @param publicKey The public key to use for encryption (as a base64 string).
+ *
+ * @returns The encrypted data (as a base64 string).
+ */
+export const boxSeal = async (data: string, publicKey: string) => {
+    await sodium.ready;
+    return toB64(
+        sodium.crypto_box_seal(await fromB64(data), await fromB64(publicKey)),
+    );
+};
+
+/**
+ * Decrypt the result of {@link boxSeal}.
+ *
+ * All parameters, and the result, are base64 string representations of the
+ * underlying data.
+ */
+export const boxSealOpen = async (
+    encryptedData: string,
+    publicKey: string,
+    secretKey: string,
+) => {
+    await sodium.ready;
+    return toB64(
+        sodium.crypto_box_seal_open(
+            await fromB64(encryptedData),
+            await fromB64(publicKey),
+            await fromB64(secretKey),
+        ),
+    );
+};
+
 export async function deriveKey(
     passphrase: string,
     salt: string,
@@ -617,7 +753,7 @@ export async function deriveSensitiveKey(passphrase: string, salt: string) {
                 opsLimit,
                 memLimit,
             };
-        } catch (e) {
+        } catch {
             opsLimit *= 2;
             memLimit /= 2;
         }
@@ -652,47 +788,6 @@ export async function generateEncryptionKey() {
 export async function generateSaltToDeriveKey() {
     await sodium.ready;
     return await toB64(sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES));
-}
-
-/**
- * Generate a new public/private keypair, and return their base64
- * representations.
- */
-export const generateKeyPair = async () => {
-    await sodium.ready;
-    const keyPair = sodium.crypto_box_keypair();
-    return {
-        publicKey: await toB64(keyPair.publicKey),
-        privateKey: await toB64(keyPair.privateKey),
-    };
-};
-
-export async function boxSealOpen(
-    input: string,
-    publicKey: string,
-    secretKey: string,
-) {
-    await sodium.ready;
-    return await toB64(
-        sodium.crypto_box_seal_open(
-            await fromB64(input),
-            await fromB64(publicKey),
-            await fromB64(secretKey),
-        ),
-    );
-}
-
-/**
- * Encrypt the given {@link input} using the given {@link publicKey}.
- *
- * This function performs asymmetric (public-key) encryption. To decrypt the
- * result, use {@link boxSealOpen}.
- */
-export async function boxSeal(input: string, publicKey: string) {
-    await sodium.ready;
-    return await toB64(
-        sodium.crypto_box_seal(await fromB64(input), await fromB64(publicKey)),
-    );
 }
 
 export async function generateSubKey(

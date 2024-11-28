@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
@@ -52,7 +53,7 @@ class OnlyThemFilterChip extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Text(
-                  "Only them",
+                  S.of(context).onlyThem,
                   style: getEnteTextTheme(context).miniBold,
                 ),
               ),
@@ -92,6 +93,7 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
             clusterID: faceFilters.first.clusterId,
             thumbnailFallback: false,
             useFullFile: false,
+            cannotTrustFile: true,
           ),
         ),
       );
@@ -108,6 +110,7 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
                 clusterID: faceFilters.first.clusterId,
                 thumbnailFallback: false,
                 useFullFile: false,
+                cannotTrustFile: true,
               ),
             ),
             const SizedBox(width: 1),
@@ -120,6 +123,7 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
                 clusterID: faceFilters.last.clusterId,
                 thumbnailFallback: false,
                 useFullFile: false,
+                cannotTrustFile: true,
               ),
             ),
           ],
@@ -139,6 +143,7 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
                 clusterID: faceFilters[0].clusterId,
                 thumbnailFallback: false,
                 useFullFile: false,
+                cannotTrustFile: true,
               ),
             ),
             const SizedBox(width: 1),
@@ -158,6 +163,7 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
                       clusterID: faceFilters[1].clusterId,
                       thumbnailFallback: false,
                       useFullFile: false,
+                      cannotTrustFile: true,
                     ),
                   ),
                 ),
@@ -175,6 +181,7 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
                       clusterID: faceFilters[2].clusterId,
                       thumbnailFallback: false,
                       useFullFile: false,
+                      cannotTrustFile: true,
                     ),
                   ),
                 ),
@@ -204,6 +211,7 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
                       clusterID: faceFilters[0].clusterId,
                       thumbnailFallback: false,
                       useFullFile: false,
+                      cannotTrustFile: true,
                     ),
                   ),
                 ),
@@ -221,6 +229,7 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
                       clusterID: faceFilters[1].clusterId,
                       thumbnailFallback: false,
                       useFullFile: false,
+                      cannotTrustFile: true,
                     ),
                   ),
                 ),
@@ -243,6 +252,7 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
                       clusterID: faceFilters[2].clusterId,
                       thumbnailFallback: false,
                       useFullFile: false,
+                      cannotTrustFile: true,
                     ),
                   ),
                 ),
@@ -260,6 +270,7 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
                       clusterID: faceFilters[3].clusterId,
                       thumbnailFallback: false,
                       useFullFile: false,
+                      cannotTrustFile: true,
                     ),
                   ),
                 ),

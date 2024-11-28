@@ -1,4 +1,6 @@
 import "package:flutter/material.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/notification_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/user_remote_flag_service.dart";
@@ -96,10 +98,18 @@ class _EnableMachineLearningConsentState
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Text(
-                              S.of(context).mlConsentConfirmation,
-                              style: getEnteTextTheme(context).bodyMuted,
-                              textAlign: TextAlign.left,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _hasAckedPrivacyPolicy.value =
+                                      !_hasAckedPrivacyPolicy.value;
+                                });
+                              },
+                              child: Text(
+                                S.of(context).mlConsentConfirmation,
+                                style: getEnteTextTheme(context).bodyMuted,
+                                textAlign: TextAlign.left,
+                              ),
                             ),
                           ),
                         ),
@@ -120,6 +130,8 @@ class _EnableMachineLearningConsentState
                       buttonType: ButtonType.secondary,
                       labelText: S.of(context).cancel,
                       onTap: () async {
+                        await localSettings.setHasSeenMLEnablingBanner();
+                        Bus.instance.fire(NotificationEvent());
                         Navigator.of(context).pop();
                       },
                     ),
@@ -145,6 +157,7 @@ class _EnableMachineLearningConsentState
         UserRemoteFlagService.mlEnabled,
         true,
       );
+      Bus.instance.fire(NotificationEvent());
       Navigator.of(context).pop(true);
     } catch (e) {
       // ignore: unawaited_futures

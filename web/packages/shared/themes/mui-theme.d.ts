@@ -108,7 +108,7 @@ declare module "@mui/material/styles" {
         backdrop: Strength;
         text: Strength;
         fill: FillStrength;
-        stroke: StrokeStrength;
+        stroke: Strength;
         shadows: Shadows;
         accent: ColorStrength;
         warning: ColorStrength;
@@ -164,22 +164,10 @@ declare module "@mui/material/styles" {
         faint: string;
     }
 
-    type FillStrength = Strength & StrengthFillPressed & StrengthFillStrong;
-
-    interface StrengthFillPressed {
+    type FillStrength = Strength & {
         basePressed: string;
         faintPressed: string;
-    }
-
-    interface StrengthFillStrong {
-        strong: string;
-    }
-
-    type StrokeStrength = Strength & StrengthExtras;
-
-    interface StrengthExtras {
-        fainter: string;
-    }
+    };
 
     interface Shadows {
         float: Shadow[];
@@ -200,6 +188,6 @@ declare module "@mui/material/styles" {
         faint: number;
     }
 
-    type AvatarColors = Array<string>;
+    type AvatarColors = string[];
 }
 export {};

@@ -12,11 +12,14 @@ class LocalSettings {
   static const kCollectionSortPref = "collection_sort_pref";
   static const kPhotoGridSize = "photo_grid_size";
   static const _kisMLLocalIndexingEnabled = "ls.ml_local_indexing";
+  static const _kHasSeenMLEnablingBanner = "ls.has_seen_ml_enabling_banner";
   static const kRateUsShownCount = "rate_us_shown_count";
   static const kEnableMultiplePart = "ls.enable_multiple_part";
   static const kRateUsPromptThreshold = 2;
   static const shouldLoopVideoKey = "video.should_loop";
   static const onGuestViewKey = "on_guest_view";
+  static const _hasConfiguredLinksInAppPermissionKey =
+      "has_configured_links_in_app_permission";
 
   final SharedPreferences _prefs;
 
@@ -75,6 +78,12 @@ class LocalSettings {
     return isMLLocalIndexingEnabled;
   }
 
+  bool get hasSeenMLEnablingBanner =>
+      _prefs.getBool(_kHasSeenMLEnablingBanner) ?? false;
+  Future<void> setHasSeenMLEnablingBanner() async {
+    await _prefs.setBool(_kHasSeenMLEnablingBanner, true);
+  }
+
   //#region todo:(NG) remove this section, only needed for internal testing to see
   // if the OS stops the app during indexing
   bool get remoteFetchEnabled => _prefs.getBool("remoteFetchEnabled") ?? true;
@@ -97,5 +106,16 @@ class LocalSettings {
 
   bool isOnGuestView() {
     return _prefs.getBool(onGuestViewKey) ?? false;
+  }
+
+  Future<void> setConfiguredLinksInAppPermissions(bool value) async {
+    await _prefs.setBool(_hasConfiguredLinksInAppPermissionKey, value);
+  }
+
+  /// This is only relevant for fdorid and independent builds since in them,
+  /// user has to manually allow the app to open public links in-app
+  bool hasConfiguredInAppLinkPermissions() {
+    final result = _prefs.getBool(_hasConfiguredLinksInAppPermissionKey);
+    return result ?? false;
   }
 }

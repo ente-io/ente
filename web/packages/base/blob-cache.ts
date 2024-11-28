@@ -1,4 +1,4 @@
-import isElectron from "is-electron";
+import { isDesktop } from "./app";
 
 const blobCacheNames = [
     "thumbs",
@@ -100,7 +100,7 @@ export const blobCache = async (
 export const openBlobCache = async (
     name: BlobCacheNamespace,
 ): Promise<BlobCache> =>
-    isElectron() ? openOPFSCacheWeb(name) : openWebCache(name);
+    isDesktop ? openOPFSCacheWeb(name) : openWebCache(name);
 
 /**
  * [Note: ArrayBuffer vs Blob vs Uint8Array]
@@ -234,7 +234,7 @@ const openOPFSCacheWeb = async (name: BlobCacheNamespace) => {
  */
 export const clearBlobCaches = async () => {
     cachedCaches.clear();
-    return isElectron() ? clearOPFSCaches() : clearWebCaches();
+    return isDesktop ? clearOPFSCaches() : clearWebCaches();
 };
 
 const clearWebCaches = () =>

@@ -377,8 +377,8 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
                 if (snapshot.data!) {
                   MLIndexingIsolate.instance.triggerModelsDownload();
                   return CaptionedTextWidget(
-                    title: S.of(context).loadingModel,
-                    key: const ValueKey("loading_model"),
+                    title: S.of(context).checkingModels,
+                    key: const ValueKey("checking_model"),
                   );
                 } else {
                   return CaptionedTextWidget(
@@ -510,7 +510,7 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
                             title: S.of(context).clusteringProgress,
                           ),
                           trailingWidget: Text(
-                            "currently running",
+                            S.of(context).currentlyRunning,
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           singleBorderRadius: 8,

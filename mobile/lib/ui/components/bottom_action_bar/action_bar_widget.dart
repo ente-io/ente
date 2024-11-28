@@ -21,7 +21,9 @@ class ActionBarWidget extends StatefulWidget {
 class _ActionBarWidgetState extends State<ActionBarWidget> {
   final ValueNotifier<int> _selectedFilesNotifier = ValueNotifier(0);
   final ValueNotifier<int> _selectedOwnedFilesNotifier = ValueNotifier(0);
-  final int currentUserID = Configuration.instance.getUserID()!;
+
+  //User ID will be null if the user is not logged in (links-in-app)
+  final int currentUserID = Configuration.instance.getUserID() ?? -1;
 
   @override
   void initState() {

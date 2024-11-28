@@ -14,6 +14,7 @@ const DropDiv = styled("div")`
     flex: 1;
     display: flex;
     flex-direction: column;
+    height: 100%;
 `;
 const Overlay = styled("div")`
     border-width: 8px;
@@ -88,8 +89,8 @@ export default function FullScreenDropZone(props: Props) {
                         <CloseIcon />
                     </CloseButtonWrapper>
                     {appContext.watchFolderView
-                        ? t("WATCH_FOLDER_DROPZONE_MESSAGE")
-                        : t("UPLOAD_DROPZONE_MESSAGE")}
+                        ? t("watch_folder_dropzone_hint")
+                        : t("upload_dropzone_hint")}
                 </Overlay>
             )}
             {props.children}

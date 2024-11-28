@@ -369,7 +369,8 @@ func main() {
 				return base.ServerReqID()
 			},
 		}),
-		middleware.Logger(urlSanitizer), cors(), gzip.Gzip(gzip.DefaultCompression), middleware.PanicRecover())
+		middleware.Logger(urlSanitizer), cors(), cacheHeaders(),
+		gzip.Gzip(gzip.DefaultCompression), middleware.PanicRecover())
 
 	publicAPI := server.Group("/")
 	publicAPI.Use(rateLimiter.GlobalRateLimiter(), rateLimiter.APIRateLimitMiddleware(urlSanitizer))
@@ -566,10 +567,21 @@ func main() {
 		Ctrl:           castCtrl,
 	}
 
+	publicAPI.POST("/cast/device-info", castHandler.RegisterDevice)
+	// Deprecated Nov 2024. Remove in a few months.
+	//
+	// This (and below) are deprecated copy of endpoints with a trailing slash.
+	// Kept around because existing desktop clients will not follow the 307
+	// redirect because of CORS headers missing on the 307. Can be safely
+	// removed in a few months after the desktop apps have updated.
 	publicAPI.POST("/cast/device-info/", castHandler.RegisterDevice)
 	privateAPI.GET("/cast/device-info/:deviceCode", castHandler.GetDeviceInfo)
 	publicAPI.GET("/cast/cast-data/:deviceCode", castHandler.GetCastData)
+	privateAPI.POST("/cast/cast-data", castHandler.InsertCastData)
+	// Deprecated Nov 2024. Remove in a few months.
 	privateAPI.POST("/cast/cast-data/", castHandler.InsertCastData)
+	privateAPI.DELETE("/cast/revoke-all-tokens", castHandler.RevokeAllToken)
+	// Deprecated Nov 2024. Remove in a few months.
 	privateAPI.DELETE("/cast/revoke-all-tokens/", castHandler.RevokeAllToken)
 
 	castAPI.GET("/files/preview/:fileID", castHandler.GetThumbnail)
@@ -627,6 +639,7 @@ func main() {
 		QueueRepo:               queueRepo,
 		UserRepo:                userRepo,
 		CollectionRepo:          collectionRepo,
+		AuthenticatorRepo:       authRepo,
 		UserAuthRepo:            userAuthRepo,
 		UserController:          userController,
 		FamilyController:        familyController,
@@ -966,6 +979,27 @@ func cors() gin.HandlerFunc {
 			c.AbortWithStatus(http.StatusNoContent)
 			return
 		}
+		c.Next()
+	}
+}
+
+func cacheHeaders() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Add "Cache-Control: no-store" to HTTP GET API responses.
+		if c.Request.Method == http.MethodGet {
+			reqPath := urlSanitizer(c)
+			if strings.HasPrefix(reqPath, "/files/preview/") ||
+				strings.HasPrefix(reqPath, "/files/download/") ||
+				strings.HasPrefix(reqPath, "/public-collection/files/preview/") ||
+				strings.HasPrefix(reqPath, "/public-collection/files/download/") ||
+				strings.HasPrefix(reqPath, "/cast/files/preview/") ||
+				strings.HasPrefix(reqPath, "/cast/files/download/") {
+				// Exclude those that redirect to S3 for file downloads.
+			} else {
+				c.Writer.Header().Set("Cache-Control", "no-store")
+			}
+		}
+
 		c.Next()
 	}
 }

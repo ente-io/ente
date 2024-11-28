@@ -157,14 +157,23 @@ For more details, see [translations.md](translations.md).
     (e.g. verifying that API responses match the expected TypeScript shape).
 
 -   [nanoid](https://github.com/ai/nanoid) is used for generating unique
-    identifiers.
+    identifiers. For one particular use case, we also need
+    [uuid](https://github.com/uuidjs/uuid) for UUID v4 generation.
 
 -   [debounce](https://github.com/sindresorhus/debounce) and its
     promise-supporting sibling
     [pDebounce](https://github.com/sindresorhus/p-debounce) are used for
     debouncing operations (See also: `[Note: Throttle and debounce]`).
 
+-   [zxcvbn](https://github.com/dropbox/zxcvbn) is used for password strength
+    estimation.
+
 ## Media
+
+-   [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm) is used to run
+    FFmpeg in the browser using WASM. Note that this is substantially slower
+    than native ffmpeg (the desktop app can, and does, bundle the faster native
+    ffmpeg implementation too).
 
 -   [ExifReader](https://github.com/mattiasw/ExifReader) is used for Exif
     parsing.

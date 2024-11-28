@@ -64,6 +64,9 @@ func (c *FileController) validateFileCreateOrUpdateReq(userID int64, file ente.F
 	if !strings.HasPrefix(file.File.ObjectKey, objectPathPrefix) || !strings.HasPrefix(file.Thumbnail.ObjectKey, objectPathPrefix) {
 		return stacktrace.Propagate(ente.ErrBadRequest, "Incorrect object key reported")
 	}
+	if file.File.ObjectKey == file.Thumbnail.ObjectKey {
+		return stacktrace.Propagate(ente.ErrBadRequest, "file and thumbnail object keys are same")
+	}
 	isCreateFileReq := file.ID == 0
 	// Check for attributes for fileCreation. We don't send key details on update
 	if isCreateFileReq {

@@ -17,14 +17,17 @@ import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/utils/ml_util.dart";
 import 'package:sqlite_async/sqlite_async.dart';
 
-/// Stores all data for the FacesML-related features. The database can be accessed by `MLDataDB.instance.database`.
+/// Stores all data for the ML related features. The database can be accessed by `MLDataDB.instance.database`.
 ///
 /// This includes:
 /// [facesTable] - Stores all the detected faces and its embeddings in the images.
-/// [createFaceClustersTable] - Stores all the mappings from the faces (faceID) to the clusters (clusterID).
+/// [faceClustersTable] - Stores all the mappings from the faces (faceID) to the clusters (clusterID).
 /// [clusterPersonTable] - Stores all the clusters that are mapped to a certain person.
 /// [clusterSummaryTable] - Stores a summary of each cluster, containg the mean embedding and the number of faces in the cluster.
 /// [notPersonFeedback] - Stores the clusters that are confirmed not to belong to a certain person by the user
+///
+/// [clipTable] - Stores the embeddings of the CLIP model
+/// [fileDataTable] - Stores data about the files that are already processed by the ML models
 class MLDataDB {
   static final Logger _logger = Logger("MLDataDB");
 
@@ -330,16 +333,16 @@ class MLDataDB {
 
       final List<Map<String, dynamic>> faceMaps = await db.getAll(
         '''
-  SELECT * FROM $facesTable 
-  WHERE $faceIDColumn IN (
-    SELECT $faceIDColumn 
-    FROM $faceClustersTable 
-    WHERE $clusterIDColumn IN (${List.filled(clusterIDs.length, '?').join(',')})
-  )
-  AND $fileIDColumn IN (${List.filled(fileId.length, '?').join(',')})
-  AND $faceScore > ?
-  ORDER BY $faceScore DESC
-  ''',
+        SELECT * FROM $facesTable 
+        WHERE $faceIDColumn IN (
+        SELECT $faceIDColumn 
+        FROM $faceClustersTable 
+        WHERE $clusterIDColumn IN (${List.filled(clusterIDs.length, '?').join(',')})
+        )
+        AND $fileIDColumn IN (${List.filled(fileId.length, '?').join(',')})
+        AND $faceScore > ?
+        ORDER BY $faceScore DESC
+        ''',
         [...clusterIDs, ...fileId, kMinimumQualityFaceScore],
       );
       if (faceMaps.isNotEmpty) {
@@ -477,6 +480,25 @@ class MLDataDB {
     return result;
   }
 
+  Future<Map<String, Set<String>>> getClusterIdToFaceIdsForPerson(
+    String personID,
+  ) async {
+    final db = await instance.asyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT $faceClustersTable.$clusterIDColumn, $faceIDColumn FROM $clusterPersonTable '
+      'INNER JOIN $faceClustersTable ON $clusterPersonTable.$clusterIDColumn = $faceClustersTable.$clusterIDColumn '
+      'WHERE $personIdColumn = ?',
+      [personID],
+    );
+    final Map<String, Set<String>> result = {};
+    for (final map in maps) {
+      final clusterID = map[clusterIDColumn] as String;
+      final faceID = map[faceIDColumn] as String;
+      result.putIfAbsent(clusterID, () => {}).add(faceID);
+    }
+    return result;
+  }
+
   Future<Set<String>> getFaceIDsForPerson(String personID) async {
     final db = await instance.asyncDB;
     final faceIdsResult = await db.getAll(
@@ -547,6 +569,19 @@ class MLDataDB {
       INSERT INTO $faceClustersTable ($faceIDColumn, $clusterIDColumn)
       VALUES (?, ?)
       ON CONFLICT($faceIDColumn) DO UPDATE SET $clusterIDColumn = excluded.$clusterIDColumn
+    ''';
+    final parameterSets =
+        faceIDToClusterID.entries.map((e) => [e.key, e.value]).toList();
+    await db.executeBatch(sql, parameterSets);
+  }
+
+  Future<void> removeFaceIdToClusterId(
+    Map<String, String> faceIDToClusterID,
+  ) async {
+    final db = await instance.asyncDB;
+    const String sql = '''
+      DELETE FROM $faceClustersTable
+      WHERE $faceIDColumn = ? AND $clusterIDColumn = ?
     ''';
     final parameterSets =
         faceIDToClusterID.entries.map((e) => [e.key, e.value]).toList();
