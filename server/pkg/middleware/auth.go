@@ -95,10 +95,10 @@ func (m *AuthMiddleware) AdminAuthMiddleware() gin.HandlerFunc {
 		// workaround Viper issues in passing env vars for an int slice.
 		admin := viper.GetInt("internal.admin")
 		if len(admins) == 0 && admin != 0 {
-				if int64(admin) == userID {
-					c.Next()
-					return
-				}
+			if int64(admin) == userID {
+				c.Next()
+				return
+			}
 		}
 		// if no admins are set, then check if the user is first user in the system
 		if len(admins) == 0 && admin == 0 {
