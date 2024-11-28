@@ -22,6 +22,7 @@ Future<void> onTapCollectEventPhotos(BuildContext context) async {
     alwaysShowSuccessState: false,
     initialValue: currentDate,
     textCapitalization: TextCapitalization.words,
+    popnavAfterSubmission: false,
     onSubmit: (String text) async {
       // indicates user cancelled the rename request
       if (text.trim() == "") {
@@ -31,14 +32,14 @@ Future<void> onTapCollectEventPhotos(BuildContext context) async {
       try {
         final Collection c =
             await CollectionsService.instance.createAlbum(text);
-        // ignore: unawaited_futures
-        routeToPage(
+        await routeToPage(
           context,
           CollectionPage(
             isFromCollectPhotos: true,
             CollectionWithThumbnail(c, null),
           ),
         );
+        Navigator.of(context).pop();
       } catch (e, s) {
         Logger("Collect event photos from CollectPhotosCardWidget")
             .severe("Failed to rename album", e, s);
