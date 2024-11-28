@@ -51,6 +51,7 @@ import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
+import "package:video_player_media_kit/video_player_media_kit.dart";
 
 final _logger = Logger("main");
 
@@ -65,6 +66,11 @@ const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 
 void main() async {
+  VideoPlayerMediaKit.ensureInitialized(
+    android:
+        true, // default: false    -    dependency: media_kit_libs_android_video
+    iOS: true, // default: false    -    dependency: media_kit_libs_ios_video
+  );
   debugRepaintRainbowEnabled = false;
   WidgetsFlutterBinding.ensureInitialized();
   //For audio to work on vidoes in iOS when in silent mode.

@@ -28,9 +28,6 @@ dependencies:
   bip39: ^1.0.6
   cached_network_image: ^3.0.0
   chewie:
-    git:
-      url: https://github.com/ente-io/chewie.git
-      ref: forked_video_player_plus
   collection: # dart
   computer:
     git: "https://github.com/ente-io/computer.git"
@@ -114,6 +111,8 @@ dependencies:
   maps_launcher: ^2.2.1
   media_extension: ^1.0.1
   media_kit: ^1.1.10+1
+  media_kit_libs_android_video: ^1.3.6
+  media_kit_libs_ios_video: ^1.1.4
   media_kit_libs_video: ^1.0.4
   media_kit_video: ^1.2.4
   ml_linalg: ^13.11.31
@@ -178,15 +177,11 @@ dependencies:
   video_compress:
     git:
       url: https://github.com/RmanAkbarzadeh/VideoCompress.git
-
   video_editor:
     git:
       url: https://github.com/prateekmedia/video_editor.git
   video_player:
-    git:
-      url: https://github.com/ente-io/packages.git
-      ref: android_video_roation_fix
-      path: packages/video_player/video_player/
+  video_player_media_kit: ^1.0.5
   video_thumbnail: ^0.5.3
   visibility_detector: ^0.3.3
   wakelock_plus: ^1.1.1

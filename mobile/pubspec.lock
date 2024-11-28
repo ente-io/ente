@@ -250,12 +250,11 @@ packages:
   chewie:
     dependency: "direct main"
     description:
-      path: "."
-      ref: forked_video_player_plus
-      resolved-ref: "2d8908efe9d7533ec76abe2e59444547c4031f28"
-      url: "https://github.com/ente-io/chewie.git"
-    source: git
-    version: "1.7.1"
+      name: chewie
+      sha256: "8bc4ac4cf3f316e50a25958c0f5eb9bb12cf7e8308bb1d74a43b230da2cfc144"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.7.5"
   cli_util:
     dependency: transitive
     description:
@@ -1531,7 +1530,7 @@ packages:
     source: hosted
     version: "1.1.11"
   media_kit_libs_android_video:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: media_kit_libs_android_video
       sha256: "9dd8012572e4aff47516e55f2597998f0a378e3d588d0fad0ca1f11a53ae090c"
@@ -1539,7 +1538,7 @@ packages:
     source: hosted
     version: "1.3.6"
   media_kit_libs_ios_video:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: media_kit_libs_ios_video
       sha256: b5382994eb37a4564c368386c154ad70ba0cc78dacdd3fb0cd9f30db6d837991
@@ -2790,6 +2789,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.6.2"
+  video_player_media_kit:
+    dependency: "direct main"
+    description:
+      name: video_player_media_kit
+      sha256: eadf78b85d0ecc6f65bb5ca84c5ad9546a8609c6c0ee207e81673f7969461f3b
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.5"
   video_player_platform_interface:
     dependency: transitive
     description:
