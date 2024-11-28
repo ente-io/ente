@@ -111,9 +111,17 @@ class UploadService {
     private uploadURLs: UploadURL[] = [];
     private pendingUploadCount: number = 0;
     private publicUploadProps: PublicUploadProps = undefined;
+    private activeUploadURLRefill: Promise<void> | undefined;
 
     init(publicUploadProps: PublicUploadProps) {
         this.publicUploadProps = publicUploadProps;
+    }
+
+    logout() {
+        this.uploadURLs = [];
+        this.pendingUploadCount = 0;
+        this.publicUploadProps = undefined;
+        this.activeUploadURLRefill = undefined;
     }
 
     async setFileCount(fileCount: number) {
@@ -127,14 +135,14 @@ class UploadService {
 
     async getUploadURL() {
         if (this.uploadURLs.length === 0 && this.pendingUploadCount) {
-            await this.fetchUploadURLs();
+            await this.refillUploadURLs();
         }
         return this.uploadURLs.pop();
     }
 
     private async preFetchUploadURLs() {
         try {
-            await this.fetchUploadURLs();
+            await this.refillUploadURLs();
             // checking for any subscription related errors
         } catch (e) {
             log.error("prefetch uploadURL failed", e);
@@ -154,20 +162,43 @@ class UploadService {
         }
     }
 
-    private async fetchUploadURLs() {
+    private async refillUploadURLs() {
+        try {
+            if (!this.activeUploadURLRefill) {
+                this.activeUploadURLRefill = this._refillUploadURLs();
+            }
+            await this.activeUploadURLRefill;
+        } finally {
+            this.activeUploadURLRefill = undefined;
+        }
+
+        // TODO: Sanity check added on new implementation Nov 2024, remove after
+        // a while (tag: Migration).
+        if (
+            this.uploadURLs.length !=
+            new Set(this.uploadURLs.map((u) => u.url)).size
+        ) {
+            throw new Error("Duplicate upload URLs detected");
+        }
+    }
+
+    private async _refillUploadURLs() {
+        let urls: UploadURL[];
         if (this.publicUploadProps.accessedThroughSharedURL) {
-            await publicUploadHttpClient.fetchUploadURLs(
+            if (!this.publicUploadProps.token) {
+                throw Error(CustomError.TOKEN_MISSING);
+            }
+            urls = await publicUploadHttpClient.fetchUploadURLs(
                 this.pendingUploadCount,
-                this.uploadURLs,
                 this.publicUploadProps.token,
                 this.publicUploadProps.passwordToken,
             );
         } else {
-            await UploadHttpClient.fetchUploadURLs(
+            urls = await UploadHttpClient.fetchUploadURLs(
                 this.pendingUploadCount,
-                this.uploadURLs,
             );
         }
+        urls.forEach((u) => this.uploadURLs.push(u));
     }
 
     async fetchMultipartUploadURLs(count: number) {
@@ -291,8 +322,13 @@ export interface MultipartUploadURLs {
     completeURL: string;
 }
 
+/**
+ * A pre-signed URL alongwith the associated object key.
+ */
 export interface UploadURL {
+    /** A pre-signed URL that can be used to upload data to S3. */
     url: string;
+    /** The objectKey with which remote will refer to this object. */
     objectKey: string;
 }
 

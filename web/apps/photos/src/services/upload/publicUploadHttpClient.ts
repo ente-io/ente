@@ -1,16 +1,29 @@
+import { ensureOk } from "@/base/http";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { EnteFile } from "@/media/file";
 import { retryAsyncOperation } from "@/utils/promise";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { MultipartUploadURLs, UploadFile, UploadURL } from "./upload-service";
+import { z } from "zod";
+import {
+    MultipartUploadURLs,
+    UploadFile,
+    type UploadURL,
+} from "./upload-service";
 
-const MAX_URL_REQUESTS = 50;
+/**
+ * Zod schema for {@link UploadURL}.
+ *
+ * TODO: Duplicated with uploadHttpClient, can be removed after we refactor this
+ * code.
+ */
+const UploadURL = z.object({
+    objectKey: z.string(),
+    url: z.string(),
+});
 
 class PublicUploadHttpClient {
-    private uploadURLFetchInProgress = null;
-
     async uploadFile(
         uploadFile: UploadFile,
         token: string,
@@ -38,43 +51,35 @@ class PublicUploadHttpClient {
         }
     }
 
+    /**
+     * Sibling of {@link fetchUploadURLs} for public albums.
+     */
     async fetchUploadURLs(
-        count: number,
-        urlStore: UploadURL[],
+        countHint: number,
         token: string,
         passwordToken: string,
-    ): Promise<void> {
-        try {
-            if (!this.uploadURLFetchInProgress) {
-                try {
-                    if (!token) {
-                        throw Error(CustomError.TOKEN_MISSING);
-                    }
-                    this.uploadURLFetchInProgress = HTTPService.get(
-                        await apiURL("/public-collection/upload-urls"),
-                        {
-                            count: Math.min(MAX_URL_REQUESTS, count * 2),
-                        },
-                        {
-                            "X-Auth-Access-Token": token,
-                            ...(passwordToken && {
-                                "X-Auth-Access-Token-JWT": passwordToken,
-                            }),
-                        },
-                    );
-                    const response = await this.uploadURLFetchInProgress;
-                    for (const url of response.data.urls) {
-                        urlStore.push(url);
-                    }
-                } finally {
-                    this.uploadURLFetchInProgress = null;
-                }
-            }
-            return this.uploadURLFetchInProgress;
-        } catch (e) {
-            log.error("fetch public upload-url failed ", e);
-            throw e;
-        }
+    ) {
+        const count = Math.min(50, countHint * 2).toString();
+        const params = new URLSearchParams({ count });
+        const url = await apiURL("/public-collection/upload-urls");
+        const res = await fetch(`${url}?${params.toString()}`, {
+            // TODO: Use authenticatedPublicAlbumsRequestHeaders after the public
+            // albums refactor branch is merged.
+            // headers: await authenticatedRequestHeaders(),
+            headers: {
+                "X-Auth-Access-Token": token,
+                ...(passwordToken && {
+                    "X-Auth-Access-Token-JWT": passwordToken,
+                }),
+            },
+        });
+        ensureOk(res);
+        return (
+            // TODO: The as cast will not be needed when tsc strict mode is
+            // enabled for this code.
+            z.object({ urls: UploadURL.array() }).parse(await res.json())
+                .urls as UploadURL[]
+        );
     }
 
     async fetchMultipartUploadURLs(
