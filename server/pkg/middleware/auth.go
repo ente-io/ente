@@ -94,9 +94,12 @@ func (m *AuthMiddleware) AdminAuthMiddleware() gin.HandlerFunc {
 		// The config allows alternatively specifying a singular admin ID to
 		// workaround Viper issues in passing env vars for an int slice.
 		if len(admins) == 0 {
-			if viper.GetInt("internal.admin") == userId {
-				c.Next()
-				return
+			admin := viper.GetInt("internal.admin")
+			if admin != 0 {
+				if int64(admin) == userID {
+					c.Next()
+					return
+				}
 			}
 		}
 		// if no admins are set, then check if the user is first user in the system
