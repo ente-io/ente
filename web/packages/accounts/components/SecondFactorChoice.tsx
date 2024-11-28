@@ -12,7 +12,7 @@ type SecondFactorChoiceProps = ModalVisibilityProps & {
      *
      * The dialog will automatically be closed before this callback is invoked.
      */
-    didSelect: (factor: SecondFactorType) => void;
+    onSelect: (factor: SecondFactorType) => void;
 };
 
 /**
@@ -22,7 +22,7 @@ type SecondFactorChoiceProps = ModalVisibilityProps & {
 export const SecondFactorChoice: React.FC<SecondFactorChoiceProps> = ({
     open,
     onClose,
-    didSelect,
+    onSelect,
 }) => (
     <Dialog
         open={open}
@@ -39,7 +39,7 @@ export const SecondFactorChoice: React.FC<SecondFactorChoiceProps> = ({
                     color="accent"
                     onClick={() => {
                         onClose();
-                        didSelect("totp");
+                        onSelect("totp");
                     }}
                 >
                     {t("totp_login")}
@@ -49,7 +49,7 @@ export const SecondFactorChoice: React.FC<SecondFactorChoiceProps> = ({
                     color="accent"
                     onClick={() => {
                         onClose();
-                        didSelect("passkey");
+                        onSelect("passkey");
                     }}
                 >
                     {t("passkey_login")}

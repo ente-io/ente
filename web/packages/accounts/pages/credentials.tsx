@@ -1,7 +1,6 @@
 import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { FormPaper } from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { useModalVisibility } from "@/base/components/utils/modal";
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import { clearLocalStorage } from "@/base/local-storage";
@@ -39,16 +38,14 @@ import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { Stack } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
     LoginFlowFormFooter,
     PasswordHeader,
     VerifyingPasskey,
 } from "../components/LoginComponents";
-import {
-    SecondFactorChoice,
-    type SecondFactorType,
-} from "../components/SecondFactorChoice";
+import { SecondFactorChoice } from "../components/SecondFactorChoice";
+import { useSecondFactorChoiceIfNeeded } from "../components/utils/second-factor-choice";
 import { PAGES } from "../constants/pages";
 import {
     openPasskeyVerificationURL,
@@ -81,14 +78,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const [sessionValidityCheck, setSessionValidityCheck] = useState<
         Promise<void> | undefined
     >();
-    const resolveSecondFactorChoice = useRef<
-        | ((value: SecondFactorType | PromiseLike<SecondFactorType>) => void)
-        | undefined
-    >();
     const {
-        show: showSecondFactorChoice,
-        props: secondFactorChoiceVisibilityProps,
-    } = useModalVisibility();
+        secondFactorChoiceProps,
+        userVerificationResultAfterResolvingSecondFactorChoice,
+    } = useSecondFactorChoiceIfNeeded();
 
     const router = useRouter();
 
@@ -224,51 +217,19 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 if (sessionValidityCheck) await sessionValidityCheck;
 
                 const cryptoWorker = await sharedCryptoWorker();
+
                 const {
                     keyAttributes,
                     encryptedToken,
                     token,
                     id,
-                    twoFactorSessionID: _twoFactorSessionIDV1,
-                    twoFactorSessionIDV2: _twoFactorSessionIDV2,
-                    passkeySessionID: _passkeySessionID,
-                } = await loginViaSRP(srpAttributes!, kek);
-                setIsFirstLogin(true);
-
-                // When the user has both TOTP and pk set as the second factor,
-                // we'll get two session IDs. For backward compat, the TOTP
-                // session ID will be in a V2 attribute during a transient
-                // migration period.
-                //
-                // Note the use of || instead of ?? since _twoFactorSessionIDV1
-                // will be an empty string, not undefined, if it is unset. We
-                // might need to add a `xxx-eslint-disable
-                // @typescript-eslint/prefer-nullish-coalescing` here too later.
-                const _twoFactorSessionID =
-                    _twoFactorSessionIDV1 || _twoFactorSessionIDV2;
-                let passkeySessionID: string | undefined;
-                let twoFactorSessionID: string | undefined;
-                if (_twoFactorSessionID && _passkeySessionID) {
-                    // If both factors are set, ask the user which one they wish
-                    // to use.
-                    const choice = await new Promise<SecondFactorType>(
-                        (resolve) => {
-                            resolveSecondFactorChoice.current = resolve;
-                            showSecondFactorChoice();
-                        },
+                    twoFactorSessionID,
+                    passkeySessionID,
+                } =
+                    await userVerificationResultAfterResolvingSecondFactorChoice(
+                        await loginViaSRP(srpAttributes!, kek),
                     );
-                    switch (choice) {
-                        case "passkey":
-                            passkeySessionID = _passkeySessionID;
-                            break;
-                        case "totp":
-                            twoFactorSessionID = _twoFactorSessionID;
-                            break;
-                    }
-                } else {
-                    passkeySessionID = _passkeySessionID;
-                    twoFactorSessionID = _twoFactorSessionID;
-                }
+                setIsFirstLogin(true);
 
                 if (passkeySessionID) {
                     const sessionKeyAttributes =
@@ -372,12 +333,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         }
     };
 
-    const handleSecondFactorChoice = (factor: SecondFactorType) => {
-        const resolve = resolveSecondFactorChoice.current!;
-        resolveSecondFactorChoice.current = undefined;
-        resolve(factor);
-    };
-
     if (!keyAttributes && !srpAttributes) {
         return (
             <VerticallyCentered>
@@ -444,10 +399,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 </LoginFlowFormFooter>
             </FormPaper>
 
-            <SecondFactorChoice
-                {...secondFactorChoiceVisibilityProps}
-                didSelect={handleSecondFactorChoice}
-            />
+            <SecondFactorChoice {...secondFactorChoiceProps} />
         </VerticallyCentered>
     );
 };
