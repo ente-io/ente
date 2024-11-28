@@ -7,6 +7,7 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/cupertino.dart';
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
+import "package:fluttertoast/fluttertoast.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/core/event_bus.dart";
@@ -93,6 +94,7 @@ class _VideoViewWidgetState extends State<VideoViewWidget> {
       }
 
       if (previewFile != null) {
+        Fluttertoast.showToast(msg: "Playing preview video");
         return PreviewVideoWidget(
           widget.file,
           preview: previewFile!,

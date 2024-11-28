@@ -4,15 +4,11 @@ import 'dart:io';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
-import "package:photos/generated/l10n.dart";
-import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/service_locator.dart";
-import 'package:photos/services/files_service.dart';
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/video_controls.dart';
@@ -44,7 +40,6 @@ class PreviewVideoWidget extends StatefulWidget {
 }
 
 class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
-  final _logger = Logger("VideoWidget");
   VideoPlayerController? _videoPlayerController;
   ChewieController? _chewieController;
   final _progressNotifier = ValueNotifier<double?>(null);
@@ -66,48 +61,6 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
     });
   }
 
-  void _setFileSizeIfNull() {
-    if (widget.file.fileSize == null && widget.file.canEditMetaInfo) {
-      FilesService.instance
-          .getFileSize(widget.file.uploadedFileID!)
-          .then((value) {
-        widget.file.fileSize = value;
-        if (mounted) {
-          setState(() {});
-        }
-      });
-    }
-  }
-
-  void _loadNetworkVideo() {
-    getFileFromServer(
-      widget.file,
-      progressCallback: (count, total) {
-        if (!mounted) {
-          return;
-        }
-        _progressNotifier.value = count / (widget.file.fileSize ?? total);
-        if (_progressNotifier.value == 1) {
-          if (mounted) {
-            showShortToast(context, S.of(context).decryptingVideo);
-          }
-        }
-      },
-    ).then((file) {
-      if (file != null && mounted) {
-        _setVideoPlayerController(file: file);
-      }
-    }).onError((error, stackTrace) {
-      if (mounted) {
-        showErrorDialog(
-          context,
-          "Error",
-          S.of(context).failedToDownloadVideo,
-        );
-      }
-    });
-  }
-
   @override
   void dispose() {
     _fileSwipeLockEventSubscription.cancel();
@@ -119,9 +72,7 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
     super.dispose();
   }
 
-  void _setVideoPlayerController({
-    File? file,
-  }) {
+  void _setVideoPlayerController() {
     if (!mounted) {
       // Note: Do not initiale video player if widget is not mounted.
       // On Android, if multiple instance of ExoPlayer is created, it will start
@@ -129,7 +80,7 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
       return;
     }
     VideoPlayerController videoPlayerController;
-    videoPlayerController = VideoPlayerController.file(file ?? widget.preview);
+    videoPlayerController = VideoPlayerController.file(widget.preview);
 
     debugPrint("videoPlayerController: $videoPlayerController");
     _videoPlayerController = videoPlayerController
