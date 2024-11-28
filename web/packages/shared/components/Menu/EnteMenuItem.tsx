@@ -131,37 +131,28 @@ interface CaptionedTextProps {
     color?: ButtonProps["color"];
 }
 
-const CaptionedText = (props: CaptionedTextProps) => {
+const CaptionedText: React.FC<CaptionedTextProps> = ({
+    mainText,
+    subText,
+    subIcon,
+    color,
+}) => {
+    const subTextColor = color == "critical" ? "critical.main" : "text.faint";
     return (
         <VerticallyCenteredFlex gap={"4px"}>
-            <Typography> {props.mainText}</Typography>
-            <Typography variant="small" color={getSubTextColor(props.color)}>
+            <Typography>{mainText}</Typography>
+            <Typography variant="small" color={subTextColor}>
                 {"•"}
             </Typography>
-            {props.subText ? (
-                <Typography
-                    variant="small"
-                    color={getSubTextColor(props.color)}
-                >
-                    {props.subText}
+            {subText ? (
+                <Typography variant="small" color={subTextColor}>
+                    {subText}
                 </Typography>
             ) : (
-                <Typography
-                    variant="small"
-                    color={getSubTextColor(props.color)}
-                >
-                    {props.subIcon}
+                <Typography variant="small" color={subTextColor}>
+                    {subIcon}
                 </Typography>
             )}
         </VerticallyCenteredFlex>
     );
-};
-
-const getSubTextColor = (color: ButtonProps["color"]) => {
-    switch (color) {
-        case "critical":
-            return "critical.main";
-        default:
-            return "text.faint";
-    }
 };
