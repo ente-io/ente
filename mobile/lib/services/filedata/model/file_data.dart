@@ -154,3 +154,38 @@ class RemoteClipEmbedding {
     );
   }
 }
+
+// FDStatus represents the status of a file data entry.
+class FDStatus {
+  final int fileID;
+  final int userID;
+  final String type;
+  final bool isDeleted;
+  final int size;
+  final int updatedAt;
+  final String? objectID;
+  final String? objectNonce;
+  FDStatus({
+    required this.fileID,
+    required this.userID,
+    required this.type,
+    required this.size,
+    required this.updatedAt,
+    this.isDeleted = false,
+    this.objectID,
+    this.objectNonce,
+  });
+
+  factory FDStatus.fromJson(Map<String, dynamic> json) {
+    return FDStatus(
+      fileID: json['fileID'] as int,
+      userID: json['userID'] as int,
+      type: json['type'] as String,
+      isDeleted: json['isDeleted'] as bool? ?? false,
+      size: json['size'] as int,
+      objectID: json['objectID'] as String?,
+      objectNonce: json['objectNonce'] as String?,
+      updatedAt: json['updatedAt'] as int,
+    );
+  }
+}

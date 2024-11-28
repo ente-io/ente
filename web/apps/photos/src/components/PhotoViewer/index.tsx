@@ -1,9 +1,10 @@
 import { isDesktop } from "@/base/app";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { Overlay } from "@/base/components/mui/Container";
 import { lowercaseExtension } from "@/base/file";
 import log from "@/base/log";
 import type { LoadedLivePhotoSourceURL } from "@/media/file";
-import { type EnteFile, fileLogID } from "@/media/file";
+import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import downloadManager from "@/new/photos/services/download";
@@ -25,7 +26,16 @@ import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
 import InfoIcon from "@mui/icons-material/InfoOutlined";
 import ReplayIcon from "@mui/icons-material/Replay";
 import ZoomInOutlinedIcon from "@mui/icons-material/ZoomInOutlined";
-import { Box, Button, styled } from "@mui/material";
+import {
+    Box,
+    Button,
+    CircularProgress,
+    Paper,
+    styled,
+    Typography,
+    type CircularProgressProps,
+} from "@mui/material";
+import Notification from "components/Notification";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { GalleryContext } from "pages/gallery";
@@ -48,9 +58,6 @@ import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { getTrashFileMessage } from "utils/ui";
 import { FileInfo, type FileInfoExif, type FileInfoProps } from "./FileInfo";
 import ImageEditorOverlay from "./ImageEditorOverlay";
-import CircularProgressWithLabel from "./styledComponents/CircularProgressWithLabel";
-import { ConversionFailedNotification } from "./styledComponents/ConversionFailedNotification";
-import { LivePhotoBtnContainer } from "./styledComponents/LivePhotoBtn";
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -118,7 +125,8 @@ export interface PhotoViewerProps {
 
 function PhotoViewer(props: PhotoViewerProps) {
     const galleryContext = useContext(GalleryContext);
-    const appContext = useContext(AppContext);
+    const { showLoadingBar, hideLoadingBar, setDialogMessage } =
+        useContext(AppContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
     );
@@ -537,9 +545,12 @@ function PhotoViewer(props: PhotoViewerProps) {
 
     const trashFile = async (file: EnteFile) => {
         try {
-            appContext.startLoading();
-            await trashFiles([file]);
-            appContext.finishLoading();
+            showLoadingBar();
+            try {
+                await trashFiles([file]);
+            } finally {
+                hideLoadingBar();
+            }
             markTempDeleted?.([file]);
             updateItems(props.items.filter((item) => item.id !== file.id));
             needUpdate.current = true;
@@ -552,7 +563,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         if (!file || !isOwnFile || props.isTrashCollection) {
             return;
         }
-        appContext.setDialogMessage(getTrashFileMessage(() => trashFile(file)));
+        setDialogMessage(getTrashFileMessage(() => trashFile(file)));
     };
 
     const handleArrowClick = (
@@ -683,9 +694,9 @@ function PhotoViewer(props: PhotoViewerProps) {
 
     const copyToClipboardHelper = async (file: EnteFile) => {
         if (file && props.enableDownload && shouldShowCopyOption) {
-            appContext.startLoading();
+            showLoadingBar();
             await copyFileToClipboard(file.src);
-            appContext.finishLoading();
+            hideLoadingBar();
         }
     };
 
@@ -979,3 +990,60 @@ function PhotoViewer(props: PhotoViewerProps) {
 }
 
 export default PhotoViewer;
+
+function CircularProgressWithLabel(
+    props: CircularProgressProps & { value: number },
+) {
+    return (
+        <>
+            <CircularProgress variant="determinate" {...props} color="accent" />
+            <Overlay
+                sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "40px",
+                }}
+            >
+                <Typography
+                    variant="mini"
+                    component="div"
+                    color="text.secondary"
+                >{`${Math.round(props.value)}%`}</Typography>
+            </Overlay>
+        </>
+    );
+}
+
+interface ConversionFailedNotificationProps {
+    open: boolean;
+    onClose: () => void;
+    onClick: () => void;
+}
+
+const ConversionFailedNotification: React.FC<
+    ConversionFailedNotificationProps
+> = ({ open, onClose, onClick }) => {
+    return (
+        <Notification
+            open={open}
+            onClose={onClose}
+            attributes={{
+                variant: "secondary",
+                subtext: t("CONVERSION_FAILED_NOTIFICATION_MESSAGE"),
+                onClick: onClick,
+            }}
+            horizontal="right"
+            vertical="bottom"
+            sx={{ zIndex: 4000 }}
+        />
+    );
+};
+
+const LivePhotoBtnContainer = styled(Paper)`
+    border-radius: 4px;
+    position: absolute;
+    bottom: 10vh;
+    right: 6vh;
+    z-index: 10;
+`;

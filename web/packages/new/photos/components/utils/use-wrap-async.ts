@@ -15,18 +15,18 @@ import { useAppContext } from "../../types/context";
 export const useWrapAsyncOperation = <T extends unknown[]>(
     f: (...args: T) => Promise<void>,
 ) => {
-    const { startLoading, finishLoading, onGenericError } = useAppContext();
+    const { showLoadingBar, hideLoadingBar, onGenericError } = useAppContext();
     return useCallback(
         async (...args: T) => {
-            startLoading();
+            showLoadingBar();
             try {
                 await f(...args);
             } catch (e) {
                 onGenericError(e);
             } finally {
-                finishLoading();
+                hideLoadingBar();
             }
         },
-        [f, startLoading, finishLoading, onGenericError],
+        [f, showLoadingBar, hideLoadingBar, onGenericError],
     );
 };

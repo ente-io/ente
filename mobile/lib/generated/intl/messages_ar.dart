@@ -26,6 +26,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("مرحبًا مجددًا!"),
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
             "أُدركُ أنّني فقدتُ كلمة مروري، فقد أفقد بياناتي لأن بياناتي <underline>مشفرة تشفيرًا تامًّا من النهاية إلى النهاية</underline>."),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to reset this person?"),
         "cancel": MessageLookupByLibrary.simpleMessage("إلغاء"),
         "decrypting": MessageLookupByLibrary.simpleMessage("فك التشفير..."),
         "email": MessageLookupByLibrary.simpleMessage("البريد الإلكتروني"),
@@ -45,9 +50,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ما من مفتاح استرداد؟"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "لا يمكن فك تشفير بياناتك دون كلمة المرور أو مفتاح الاسترداد بسبب طبيعة بروتوكول التشفير الخاص بنا من النهاية إلى النهاية"),
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("استرداد"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("نجح الاسترداد!"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "sorry": MessageLookupByLibrary.simpleMessage("المعذرة"),
         "terminate": MessageLookupByLibrary.simpleMessage("إنهاء"),
         "terminateSession":
@@ -62,6 +69,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "لإعادة تعيين كلمة المرور، يرجى التحقق من بريدك الإلكتروني أولاً."),
         "verify": MessageLookupByLibrary.simpleMessage("التحقّق"),
         "verifyEmail":
-            MessageLookupByLibrary.simpleMessage("التحقق من البريد الإلكتروني")
+            MessageLookupByLibrary.simpleMessage("التحقق من البريد الإلكتروني"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Yes, reset person")
       };
 }

@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.9.53+953
+version: 0.9.58+958
 publish_to: none
 
 environment:
@@ -166,6 +166,7 @@ dependencies:
   syncfusion_flutter_core: ^25.2.5
   syncfusion_flutter_sliders: ^25.2.5
   synchronized: ^3.1.0
+  system_info_plus: ^0.0.5
   tuple: ^2.0.0
   ua_client_hints: ^1.4.0
   uni_links: ^0.5.1

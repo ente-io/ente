@@ -83,7 +83,3 @@ export interface CreateSRPSessionResponse {
     sessionID: string;
     srpB: string;
 }
-
-export interface GetFeatureFlagResponse {
-    disableCFUploadProxy?: boolean;
-}

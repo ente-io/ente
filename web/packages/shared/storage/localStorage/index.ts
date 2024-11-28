@@ -18,10 +18,8 @@ export enum LS_KEYS {
     THEME = "theme",
     // Moved to the new wrapper @/base/local-storage
     // LOCALE = 'locale',
-    MAP_ENABLED = "mapEnabled",
     SRP_SETUP_ATTRIBUTES = "srpSetupAttributes",
     SRP_ATTRIBUTES = "srpAttributes",
-    CF_PROXY_DISABLED = "cfProxyDisabled",
     REFERRAL_SOURCE = "referralSource",
 }
 

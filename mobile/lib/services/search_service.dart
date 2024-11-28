@@ -1,6 +1,7 @@
 import "dart:math";
 
 import "package:flutter/cupertino.dart";
+import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
 import "package:photos/core/constants.dart";
@@ -24,14 +25,23 @@ import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
+import "package:photos/models/search/hierarchical/contacts_filter.dart";
+import "package:photos/models/search/hierarchical/face_filter.dart";
+import "package:photos/models/search/hierarchical/file_type_filter.dart";
+import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
+import "package:photos/models/search/hierarchical/location_filter.dart";
+import "package:photos/models/search/hierarchical/magic_filter.dart";
+import "package:photos/models/search/hierarchical/top_level_generic_filter.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/filter/db_filters.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
+import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";
@@ -39,11 +49,14 @@ import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
 import 'package:photos/utils/date_time_util.dart';
+import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import 'package:tuple/tuple.dart';
 
 class SearchService {
   Future<List<EnteFile>>? _cachedFilesFuture;
+  Future<List<EnteFile>>? _cachedFilesForSearch;
+  Future<List<EnteFile>>? _cachedFilesForHierarchicalSearch;
   Future<List<EnteFile>>? _cachedHiddenFilesFuture;
   final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
@@ -57,6 +70,8 @@ class SearchService {
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       // only invalidate, let the load happen on demand
       _cachedFilesFuture = null;
+      _cachedFilesForSearch = null;
+      _cachedFilesForHierarchicalSearch = null;
       _cachedHiddenFilesFuture = null;
     });
   }
@@ -65,16 +80,56 @@ class SearchService {
     return CollectionsService.instance.getHiddenCollectionIds();
   }
 
-  Future<List<EnteFile>> getAllFiles() async {
-    if (_cachedFilesFuture != null) {
-      return _cachedFilesFuture!;
+  Future<List<EnteFile>> getAllFilesForSearch() async {
+    if (_cachedFilesFuture != null && _cachedFilesForSearch != null) {
+      return _cachedFilesForSearch!;
     }
-    _logger.fine("Reading all files from db");
-    _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB(
-      ignoreCollections(),
-      dedupeByUploadId: true,
-    );
-    return _cachedFilesFuture!;
+
+    if (_cachedFilesFuture == null) {
+      _logger.fine("Reading all files from db");
+      _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB(
+        ignoreCollections(),
+        dedupeByUploadId: false,
+      );
+    }
+
+    _cachedFilesForSearch = _cachedFilesFuture!.then((files) {
+      return applyDBFilters(
+        files,
+        DBFilterOptions(
+          dedupeUploadID: true,
+        ),
+      );
+    });
+
+    return _cachedFilesForSearch!;
+  }
+
+  Future<List<EnteFile>> getAllFilesForHierarchicalSearch() async {
+    if (_cachedFilesFuture != null &&
+        _cachedFilesForHierarchicalSearch != null) {
+      return _cachedFilesForHierarchicalSearch!;
+    }
+
+    if (_cachedFilesFuture == null) {
+      _logger.fine("Reading all files from db");
+      _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB(
+        ignoreCollections(),
+        dedupeByUploadId: false,
+      );
+    }
+
+    _cachedFilesForHierarchicalSearch = _cachedFilesFuture!.then((files) {
+      return applyDBFilters(
+        files,
+        DBFilterOptions(
+          dedupeUploadID: false,
+          onlyUploadedFiles: true,
+        ),
+      );
+    });
+
+    return _cachedFilesForHierarchicalSearch!;
   }
 
   Future<List<EnteFile>> getHiddenFiles() async {
@@ -91,6 +146,8 @@ class SearchService {
 
   void clearCache() {
     _cachedFilesFuture = null;
+    _cachedFilesForSearch = null;
+    _cachedFilesForHierarchicalSearch = null;
     _cachedHiddenFilesFuture = null;
   }
 
@@ -168,6 +225,13 @@ class SearchService {
               ResultType.year,
               yearData.year,
               filesInYear,
+              hierarchicalSearchFilter: TopLevelGenericFilter(
+                filterName: yearData.year,
+                occurrence: kMostRelevantFilter,
+                filterResultType: ResultType.year,
+                matchedUploadedIDs: filesToUploadedFileIDs(filesInYear),
+                filterIcon: Icons.calendar_month_outlined,
+              ),
             ),
           );
         }
@@ -179,7 +243,8 @@ class SearchService {
   Future<List<GenericSearchResult>> getMagicSectionResults(
     BuildContext context,
   ) async {
-    if (localSettings.isMLIndexingEnabled) {
+    if (userRemoteFlagService
+        .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) {
       return magicCacheService.getMagicGenericSearchResult(context);
     } else {
       return <GenericSearchResult>[];
@@ -222,6 +287,13 @@ class SearchService {
           ResultType.year,
           yearData.year,
           filesInYear,
+          hierarchicalSearchFilter: TopLevelGenericFilter(
+            filterName: yearData.year,
+            occurrence: kMostRelevantFilter,
+            filterResultType: ResultType.year,
+            matchedUploadedIDs: filesToUploadedFileIDs(filesInYear),
+            filterIcon: Icons.calendar_month_outlined,
+          ),
         );
       }
     }
@@ -247,6 +319,13 @@ class SearchService {
             ResultType.month,
             month.name,
             matchedFiles,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: month.name,
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.month,
+              matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+              filterIcon: Icons.calendar_month_outlined,
+            ),
           ),
         );
       }
@@ -270,6 +349,13 @@ class SearchService {
           ResultType.month,
           month.name,
           matchedFiles,
+          hierarchicalSearchFilter: TopLevelGenericFilter(
+            filterName: month.name,
+            occurrence: kMostRelevantFilter,
+            filterResultType: ResultType.month,
+            matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+            filterIcon: Icons.calendar_month_outlined,
+          ),
         );
       }
     }
@@ -296,7 +382,18 @@ class SearchService {
         );
         if (matchedFiles.isNotEmpty) {
           searchResults.add(
-            GenericSearchResult(ResultType.event, holiday.name, matchedFiles),
+            GenericSearchResult(
+              ResultType.event,
+              holiday.name,
+              matchedFiles,
+              hierarchicalSearchFilter: TopLevelGenericFilter(
+                filterName: holiday.name,
+                occurrence: kMostRelevantFilter,
+                filterResultType: ResultType.event,
+                matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+                filterIcon: Icons.event_outlined,
+              ),
+            ),
           );
         }
       }
@@ -320,6 +417,13 @@ class SearchService {
           ResultType.event,
           holiday.name,
           matchedFiles,
+          hierarchicalSearchFilter: TopLevelGenericFilter(
+            filterName: holiday.name,
+            occurrence: kMostRelevantFilter,
+            filterResultType: ResultType.event,
+            matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+            filterIcon: Icons.event_outlined,
+          ),
         );
       }
     }
@@ -331,7 +435,7 @@ class SearchService {
     String query,
   ) async {
     final List<GenericSearchResult> searchResults = [];
-    final List<EnteFile> allFiles = await getAllFiles();
+    final List<EnteFile> allFiles = await getAllFilesForSearch();
     for (var fileType in FileType.values) {
       final String fileTypeString = getHumanReadableString(context, fileType);
       if (fileTypeString.toLowerCase().startsWith(query.toLowerCase())) {
@@ -343,6 +447,12 @@ class SearchService {
               ResultType.fileType,
               fileTypeString,
               matchedFiles,
+              hierarchicalSearchFilter: FileTypeFilter(
+                fileType: fileType,
+                typeName: fileTypeString,
+                occurrence: kMostRelevantFilter,
+                matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+              ),
             ),
           );
         }
@@ -356,7 +466,7 @@ class SearchService {
     int? limit,
   ) async {
     final List<GenericSearchResult> searchResults = [];
-    final List<EnteFile> allFiles = await getAllFiles();
+    final List<EnteFile> allFiles = await getAllFilesForSearch();
     final fileTypesAndMatchingFiles = <FileType, List<EnteFile>>{};
     final extensionsAndMatchingFiles = <String, List<EnteFile>>{};
     try {
@@ -382,11 +492,18 @@ class SearchService {
       }
 
       fileTypesAndMatchingFiles.forEach((key, value) {
+        final name = getHumanReadableString(context, key);
         searchResults.add(
           GenericSearchResult(
             ResultType.fileType,
-            getHumanReadableString(context, key),
+            name,
             value,
+            hierarchicalSearchFilter: FileTypeFilter(
+              fileType: key,
+              typeName: name,
+              occurrence: kMostRelevantFilter,
+              matchedUploadedIDs: filesToUploadedFileIDs(value),
+            ),
           ),
         );
       });
@@ -397,6 +514,13 @@ class SearchService {
             ResultType.fileExtension,
             key + "s",
             value,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: key + "s",
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.fileExtension,
+              matchedUploadedIDs: filesToUploadedFileIDs(value),
+              filterIcon: CupertinoIcons.doc_text,
+            ),
           ),
         );
       });
@@ -422,7 +546,7 @@ class SearchService {
   ) async {
     try {
       final List<GenericSearchResult> searchResults = [];
-      final List<EnteFile> allFiles = await getAllFiles();
+      final List<EnteFile> allFiles = await getAllFilesForSearch();
 
       //each list element will be substrings from a description mapped by
       //word count = 1 and word count > 1
@@ -544,8 +668,20 @@ class SearchService {
       }
 
       relevantDescAndFiles.forEach((key, value) {
+        final listOfFiles = value.toList();
         searchResults.add(
-          GenericSearchResult(ResultType.fileCaption, key, value.toList()),
+          GenericSearchResult(
+            ResultType.fileCaption,
+            key,
+            listOfFiles,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: key,
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.fileCaption,
+              matchedUploadedIDs: filesToUploadedFileIDs(listOfFiles),
+              filterIcon: Icons.description_outlined,
+            ),
+          ),
         );
       });
       if (limit != null) {
@@ -567,7 +703,7 @@ class SearchService {
       return searchResults;
     }
     final RegExp pattern = RegExp(query, caseSensitive: false);
-    final List<EnteFile> allFiles = await getAllFiles();
+    final List<EnteFile> allFiles = await getAllFilesForSearch();
     final List<EnteFile> captionMatch = <EnteFile>[];
     final List<EnteFile> displayNameMatch = <EnteFile>[];
     for (EnteFile eachFile in allFiles) {
@@ -584,6 +720,13 @@ class SearchService {
           ResultType.fileCaption,
           query,
           captionMatch,
+          hierarchicalSearchFilter: TopLevelGenericFilter(
+            filterName: query,
+            occurrence: kMostRelevantFilter,
+            filterResultType: ResultType.fileCaption,
+            matchedUploadedIDs: filesToUploadedFileIDs(captionMatch),
+            filterIcon: Icons.description_outlined,
+          ),
         ),
       );
     }
@@ -593,6 +736,12 @@ class SearchService {
           ResultType.file,
           query,
           displayNameMatch,
+          hierarchicalSearchFilter: TopLevelGenericFilter(
+            filterName: query,
+            occurrence: kMostRelevantFilter,
+            filterResultType: ResultType.file,
+            matchedUploadedIDs: filesToUploadedFileIDs(displayNameMatch),
+          ),
         ),
       );
     }
@@ -607,7 +756,7 @@ class SearchService {
       return searchResults;
     }
 
-    final List<EnteFile> allFiles = await getAllFiles();
+    final List<EnteFile> allFiles = await getAllFilesForSearch();
     final Map<String, List<EnteFile>> resultMap = <String, List<EnteFile>>{};
 
     for (EnteFile eachFile in allFiles) {
@@ -626,6 +775,13 @@ class SearchService {
           ResultType.fileExtension,
           entry.key.toUpperCase(),
           entry.value,
+          hierarchicalSearchFilter: TopLevelGenericFilter(
+            filterName: entry.key.toUpperCase(),
+            occurrence: kMostRelevantFilter,
+            filterResultType: ResultType.fileExtension,
+            matchedUploadedIDs: filesToUploadedFileIDs(entry.value),
+            filterIcon: CupertinoIcons.doc_text,
+          ),
         ),
       );
     }
@@ -645,7 +801,7 @@ class SearchService {
         result[tag] = [];
       }
     }
-    final allFiles = await getAllFiles();
+    final allFiles = await getAllFilesForSearch();
     for (EnteFile file in allFiles) {
       if (file.hasLocation) {
         for (LocalEntity<LocationTag> tag in result.keys) {
@@ -684,6 +840,13 @@ class SearchService {
             ResultType.fileType,
             "No Location Tag",
             noLocationTagFiles,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: "No Location Tag",
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.fileType,
+              matchedUploadedIDs: filesToUploadedFileIDs(noLocationTagFiles),
+              filterIcon: Icons.not_listed_location_outlined,
+            ),
           ),
         );
       }
@@ -708,6 +871,11 @@ class SearchService {
                 ),
               );
             },
+            hierarchicalSearchFilter: LocationFilter(
+              locationTag: entry.key.item,
+              occurrence: kMostRelevantFilter,
+              matchedUploadedIDs: filesToUploadedFileIDs(entry.value),
+            ),
           ),
         );
       }
@@ -724,11 +892,25 @@ class SearchService {
     for (final city in sortedByResultCount) {
       // If the location tag already exists for a city, don't add it again
       if (!locationTagNames.contains(city.city)) {
+        final a =
+            (defaultCityRadius * scaleFactor(city.lat)) / kilometersPerDegree;
+        const b = defaultCityRadius / kilometersPerDegree;
         searchResults.add(
           GenericSearchResult(
             ResultType.location,
             city.city,
             results[city]!,
+            hierarchicalSearchFilter: LocationFilter(
+              locationTag: LocationTag(
+                name: city.city,
+                radius: defaultCityRadius,
+                centerPoint: Location(latitude: city.lat, longitude: city.lng),
+                aSquare: a * a,
+                bSquare: b * b,
+              ),
+              occurrence: kMostRelevantFilter,
+              matchedUploadedIDs: filesToUploadedFileIDs(results[city]!),
+            ),
           ),
         );
       }
@@ -744,7 +926,7 @@ class SearchService {
         await MLDataDB.instance.getFileIdToClusterIDSet(personID);
     _logger.info('faceDbDone getClusterFilesForPersonID $personID');
     final Map<String, List<EnteFile>> clusterIDToFiles = {};
-    final allFiles = await getAllFiles();
+    final allFiles = await getAllFilesForSearch();
     for (final f in allFiles) {
       if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
         continue;
@@ -778,13 +960,13 @@ class SearchService {
       final List<GenericSearchResult> facesResult = [];
       final Map<String, List<EnteFile>> clusterIdToFiles = {};
       final Map<String, List<EnteFile>> personIdToFiles = {};
-      final allFiles = await getAllFiles();
+      final allFiles = await getAllFilesForSearch();
       for (final f in allFiles) {
         if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
           continue;
         }
-        final cluserIds = fileIdToClusterID[f.uploadedFileID ?? -1]!;
-        for (final cluster in cluserIds) {
+        final clusterIds = fileIdToClusterID[f.uploadedFileID ?? -1]!;
+        for (final cluster in clusterIds) {
           final PersonEntity? p =
               personIdToPerson[clusterIDToPersonID[cluster] ?? ""];
           if (p != null) {
@@ -831,9 +1013,34 @@ class SearchService {
                 PeoplePage(
                   tagPrefix: "${ResultType.faces.toString()}_${p.data.name}",
                   person: p,
+                  searchResult: GenericSearchResult(
+                    ResultType.faces,
+                    p.data.name,
+                    files,
+                    params: {
+                      kPersonParamID: personID,
+                      kFileID: files.first.uploadedFileID,
+                    },
+                    hierarchicalSearchFilter: FaceFilter(
+                      personId: p.remoteID,
+                      clusterId: null,
+                      faceName: p.data.name,
+                      faceFile: files.first,
+                      occurrence: kMostRelevantFilter,
+                      matchedUploadedIDs: filesToUploadedFileIDs(files),
+                    ),
+                  ),
                 ),
               );
             },
+            hierarchicalSearchFilter: FaceFilter(
+              personId: p.remoteID,
+              clusterId: null,
+              faceName: p.data.name,
+              faceFile: files.first,
+              occurrence: kMostRelevantFilter,
+              matchedUploadedIDs: filesToUploadedFileIDs(files),
+            ),
           ),
         );
       }
@@ -877,6 +1084,14 @@ class SearchService {
                 ),
               );
             },
+            hierarchicalSearchFilter: FaceFilter(
+              personId: null,
+              clusterId: clusterId,
+              faceName: null,
+              faceFile: files.first,
+              occurrence: kMostRelevantFilter,
+              matchedUploadedIDs: filesToUploadedFileIDs(files),
+            ),
           ),
         );
       }
@@ -910,7 +1125,7 @@ class SearchService {
       final Map<LocalEntity<LocationTag>, List<EnteFile>> tagToItemsMap = {};
       final List<GenericSearchResult> tagSearchResults = [];
       final locationTagEntities = (await locationService.getLocationTags());
-      final allFiles = await getAllFiles();
+      final allFiles = await getAllFilesForSearch();
       final List<EnteFile> filesWithNoLocTag = [];
 
       for (int i = 0; i < locationTagEntities.length; i++) {
@@ -960,6 +1175,11 @@ class SearchService {
                   ),
                 );
               },
+              hierarchicalSearchFilter: LocationFilter(
+                locationTag: entry.key.item,
+                occurrence: kMostRelevantFilter,
+                matchedUploadedIDs: filesToUploadedFileIDs(entry.value),
+              ),
             ),
           );
         }
@@ -971,6 +1191,9 @@ class SearchService {
           ..sort((a, b) => results[b]!.length.compareTo(results[a]!.length));
         for (final city in sortedByResultCount) {
           if (results[city]!.length <= 1) continue;
+          final a =
+              (defaultCityRadius * scaleFactor(city.lat)) / kilometersPerDegree;
+          const b = defaultCityRadius / kilometersPerDegree;
           tagSearchResults.add(
             GenericSearchResult(
               ResultType.locationSuggestion,
@@ -984,6 +1207,18 @@ class SearchService {
                   radius: defaultCityRadius,
                 );
               },
+              hierarchicalSearchFilter: LocationFilter(
+                locationTag: LocationTag(
+                  name: city.city,
+                  radius: defaultCityRadius,
+                  centerPoint:
+                      Location(latitude: city.lat, longitude: city.lng),
+                  aSquare: a * a,
+                  bSquare: b * b,
+                ),
+                occurrence: kMostRelevantFilter,
+                matchedUploadedIDs: filesToUploadedFileIDs(results[city]!),
+              ),
             ),
           );
         }
@@ -1013,11 +1248,19 @@ class SearchService {
         order: 'DESC',
       );
       if (matchedFiles.isNotEmpty) {
+        final name = '$day ${potentialDate.item2.name} ${year ?? ''}';
         searchResults.add(
           GenericSearchResult(
             ResultType.event,
-            '$day ${potentialDate.item2.name} ${year ?? ''}',
+            name,
             matchedFiles,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: name,
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.event,
+              matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+              filterIcon: Icons.event_outlined,
+            ),
           ),
         );
       }
@@ -1052,11 +1295,29 @@ class SearchService {
                 files,
                 name: query,
                 enableGrouping: false,
-                heroTag: GenericSearchResult(ResultType.magic, query, files)
-                    .heroTag(),
+                heroTag: GenericSearchResult(
+                  ResultType.magic,
+                  query,
+                  files,
+                  hierarchicalSearchFilter: MagicFilter(
+                    filterName: query,
+                    occurrence: kMostRelevantFilter,
+                    matchedUploadedIDs: filesToUploadedFileIDs(files),
+                  ),
+                ).heroTag(),
+                magicFilter: MagicFilter(
+                  filterName: query,
+                  occurrence: kMostRelevantFilter,
+                  matchedUploadedIDs: filesToUploadedFileIDs(files),
+                ),
               ),
             );
           },
+          hierarchicalSearchFilter: MagicFilter(
+            filterName: query,
+            occurrence: kMostRelevantFilter,
+            matchedUploadedIDs: filesToUploadedFileIDs(files),
+          ),
         ),
       );
     }
@@ -1066,7 +1327,7 @@ class SearchService {
   Future<GenericSearchResult?> getRandomDateResults(
     BuildContext context,
   ) async {
-    final allFiles = await getAllFiles();
+    final allFiles = await getAllFilesForSearch();
     if (allFiles.isEmpty) return null;
 
     final length = allFiles.length;
@@ -1097,12 +1358,19 @@ class SearchService {
       order: 'DESC',
     );
 
+    final name = DateFormat.yMMMd(Localizations.localeOf(context).languageCode)
+        .format(originalDateTime.toLocal());
     return GenericSearchResult(
       ResultType.event,
-      DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(
-        DateTime.fromMicrosecondsSinceEpoch(creationTime).toLocal(),
-      ),
+      name,
       matchedFiles,
+      hierarchicalSearchFilter: TopLevelGenericFilter(
+        filterName: name,
+        occurrence: kMostRelevantFilter,
+        filterResultType: ResultType.event,
+        matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+        filterIcon: Icons.event_outlined,
+      ),
     );
   }
 
@@ -1111,7 +1379,7 @@ class SearchService {
   ) async {
     final lowerCaseQuery = query.toLowerCase();
     final searchResults = <GenericSearchResult>[];
-    final allFiles = await getAllFiles();
+    final allFiles = await getAllFilesForSearch();
     final peopleToSharedFiles = <User, List<EnteFile>>{};
     for (EnteFile file in allFiles) {
       if (file.isOwner) continue;
@@ -1135,6 +1403,11 @@ class SearchService {
           ResultType.shared,
           key.name != null && key.name!.isNotEmpty ? key.name! : key.email,
           value,
+          hierarchicalSearchFilter: ContactsFilter(
+            user: key,
+            occurrence: kMostRelevantFilter,
+            matchedUploadedIDs: filesToUploadedFileIDs(value),
+          ),
         ),
       );
     });
@@ -1147,7 +1420,7 @@ class SearchService {
   ) async {
     try {
       final searchResults = <GenericSearchResult>[];
-      final allFiles = await getAllFiles();
+      final allFiles = await getAllFilesForSearch();
       final peopleToSharedFiles = <User, List<EnteFile>>{};
       int peopleCount = 0;
       for (EnteFile file in allFiles) {
@@ -1165,13 +1438,19 @@ class SearchService {
       }
 
       peopleToSharedFiles.forEach((key, value) {
+        final name = key.name != null && key.name!.isNotEmpty
+            ? key.name!
+            : key.email.split("@")[0];
         searchResults.add(
           GenericSearchResult(
             ResultType.shared,
-            key.name != null && key.name!.isNotEmpty
-                ? key.name!
-                : key.email.split("@")[0],
+            name,
             value,
+            hierarchicalSearchFilter: ContactsFilter(
+              user: key,
+              occurrence: kMostRelevantFilter,
+              matchedUploadedIDs: filesToUploadedFileIDs(value),
+            ),
           ),
         );
       });

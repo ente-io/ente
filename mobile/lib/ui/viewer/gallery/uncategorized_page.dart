@@ -8,12 +8,17 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
+import "package:photos/models/search/hierarchical/album_filter.dart";
+import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
+import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
+import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class UnCategorizedPage extends StatelessWidget {
@@ -75,27 +80,52 @@ class UnCategorizedPage extends StatelessWidget {
       albumName: S.of(context).uncategorized,
     );
     return GalleryFilesState(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0),
-          child: GalleryAppBarWidget(
-            appBarType,
-            S.of(context).uncategorized,
-            _selectedFiles,
-            collection: collection,
+      child: InheritedSearchFilterDataWrapper(
+        searchFilterDataProvider: SearchFilterDataProvider(
+          initialGalleryFilter: AlbumFilter(
+            collectionID: collection.id,
+            albumName: collection.displayName,
+            occurrence: kMostRelevantFilter,
           ),
         ),
-        body: SelectionState(
-          selectedFiles: _selectedFiles,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              gallery,
-              FileSelectionOverlayBar(
-                overlayType,
-                _selectedFiles,
-              ),
-            ],
+        child: Scaffold(
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(90.0),
+            child: GalleryAppBarWidget(
+              appBarType,
+              S.of(context).uncategorized,
+              _selectedFiles,
+              collection: collection,
+            ),
+          ),
+          body: SelectionState(
+            selectedFiles: _selectedFiles,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                Builder(
+                  builder: (context) {
+                    return ValueListenableBuilder(
+                      valueListenable: InheritedSearchFilterData.of(context)
+                          .searchFilterDataProvider!
+                          .isSearchingNotifier,
+                      builder: (context, isSearching, _) {
+                        return isSearching
+                            ? HierarchicalSearchGallery(
+                                tagPrefix: tagPrefix,
+                                selectedFiles: _selectedFiles,
+                              )
+                            : gallery;
+                      },
+                    );
+                  },
+                ),
+                FileSelectionOverlayBar(
+                  overlayType,
+                  _selectedFiles,
+                ),
+              ],
+            ),
           ),
         ),
       ),

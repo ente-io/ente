@@ -11,7 +11,7 @@ import (
 	"github.com/lib/pq"
 )
 
-const BaseShareURL = "https://albums.ente.io?t=%s"
+const BaseShareURL = "https://albums.ente.io/?t=%s"
 
 // PublicCollectionRepository defines the methods for inserting, updating and
 // retrieving entities related to public collections
@@ -32,7 +32,7 @@ func NewPublicCollectionRepository(db *sql.DB, albumHost string) *PublicCollecti
 }
 
 func (pcr *PublicCollectionRepository) GetAlbumUrl(token string) string {
-	return fmt.Sprintf("%s?t=%s", pcr.albumHost, token)
+	return fmt.Sprintf("%s/?t=%s", pcr.albumHost, token)
 }
 
 func (pcr *PublicCollectionRepository) Insert(ctx context.Context,
