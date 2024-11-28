@@ -17,7 +17,7 @@ import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/debouncer.dart";
 
 class SearchWidget extends StatefulWidget {
-  const SearchWidget({Key? key}) : super(key: key);
+  const SearchWidget({super.key});
 
   @override
   State<SearchWidget> createState() => SearchWidgetState();
