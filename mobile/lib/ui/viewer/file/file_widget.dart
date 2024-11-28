@@ -54,6 +54,7 @@ class FileWidget extends StatelessWidget {
         file,
         tagPrefix: tagPrefix,
         playbackCallback: playbackCallback,
+        key: key ?? ValueKey(fileKey),
       );
     } else {
       Logger('FileWidget').severe('unsupported file type ${file.fileType}');
