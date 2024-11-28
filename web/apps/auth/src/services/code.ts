@@ -234,7 +234,7 @@ export const generateOTPs = (code: Code): [otp: string, nextOTP: string] => {
         }
 
         case "hotp": {
-            const counter = code.counter || 0;
+            const counter = code.counter ?? 0;
             const hotp = new HOTP({
                 secret: code.secret,
                 counter: counter,

@@ -85,13 +85,16 @@ func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpos
 			return err
 		}
 	}
-	if purpose == ente.SignUpOTTPurpose {
-		isComplete, err := c.isSignedUpComplete(email)
+	if purpose == ente.SignUpOTTPurpose || purpose == ente.LoginOTTPurpose {
+		isComplete, err := c.isSignUpComplete(email)
 		if err != nil {
 			return stacktrace.Propagate(err, "")
 		}
-		if isComplete {
+		if isComplete && purpose == ente.SignUpOTTPurpose {
 			return stacktrace.Propagate(ente.ErrUserAlreadyRegistered, "user has already completed sign up process")
+		}
+		if !isComplete && purpose == ente.LoginOTTPurpose {
+			return stacktrace.Propagate(ente.ErrUserNotRegistered, "user has not completed sign up process")
 		}
 	}
 	ott, err := random.GenerateSixDigitOtp()
@@ -150,9 +153,9 @@ func (c *UserController) isEmailAlreadyUsed(email string) error {
 	return nil
 }
 
-// isSignedUpComplete checks if the user has completed the entire sign up process.
+// isSignUpComplete checks if the user has completed the entire signup process.
 // Sign up is considered complete if the user has verified their email address and their key attributes are set.
-func (c *UserController) isSignedUpComplete(email string) (bool, error) {
+func (c *UserController) isSignUpComplete(email string) (bool, error) {
 	userID, err := c.UserRepo.GetUserIDWithEmail(email)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return false, nil
@@ -376,10 +379,10 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 	if err != nil {
 		return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 	}
+	var passKeySessionID, twoFactorSessionID string
 
-	// if the user has passkeys, we will prioritize that over secret TOTP
 	if hasPasskeys {
-		passKeySessionID, err := auth.GenerateURLSafeRandomString(PassKeySessionIDLength)
+		passKeySessionID, err = auth.GenerateURLSafeRandomString(PassKeySessionIDLength)
 		if err != nil {
 			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 		}
@@ -387,20 +390,23 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 		if err != nil {
 			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 		}
-		return ente.EmailAuthorizationResponse{ID: userID, PasskeySessionID: passKeySessionID}, nil
-	} else {
-		if isTwoFactorEnabled {
-			twoFactorSessionID, err := auth.GenerateURLSafeRandomString(TwoFactorSessionIDLength)
-			if err != nil {
-				return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
-			}
-			err = c.TwoFactorRepo.AddTwoFactorSession(userID, twoFactorSessionID, time.Microseconds()+TwoFactorValidityDurationInMicroSeconds)
-			if err != nil {
-				return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
-			}
-			return ente.EmailAuthorizationResponse{ID: userID, TwoFactorSessionID: twoFactorSessionID}, nil
+	}
+	if isTwoFactorEnabled {
+		twoFactorSessionID, err = auth.GenerateURLSafeRandomString(TwoFactorSessionIDLength)
+		if err != nil {
+			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 		}
-
+		err = c.TwoFactorRepo.AddTwoFactorSession(userID, twoFactorSessionID, time.Microseconds()+TwoFactorValidityDurationInMicroSeconds)
+		if err != nil {
+			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
+		}
+	}
+	if hasPasskeys && isTwoFactorEnabled {
+		return ente.EmailAuthorizationResponse{ID: userID, PasskeySessionID: passKeySessionID, TwoFactorSessionIDV2: twoFactorSessionID}, nil
+	} else if hasPasskeys {
+		return ente.EmailAuthorizationResponse{ID: userID, PasskeySessionID: passKeySessionID}, nil
+	} else if isTwoFactorEnabled {
+		return ente.EmailAuthorizationResponse{ID: userID, TwoFactorSessionID: twoFactorSessionID}, nil
 	}
 
 	token, err := auth.GenerateURLSafeRandomString(TokenLength)

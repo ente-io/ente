@@ -181,7 +181,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                         {t("NO_RECOVERY_KEY")}
                     </LinkButton>
                     <LinkButton onClick={router.back}>
-                        {t("GO_BACK")}
+                        {t("go_back")}
                     </LinkButton>
                 </FormPaperFooter>
             </FormPaper>

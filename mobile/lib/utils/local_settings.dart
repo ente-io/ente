@@ -18,6 +18,8 @@ class LocalSettings {
   static const kRateUsPromptThreshold = 2;
   static const shouldLoopVideoKey = "video.should_loop";
   static const onGuestViewKey = "on_guest_view";
+  static const _hasConfiguredLinksInAppPermissionKey =
+      "has_configured_links_in_app_permission";
 
   final SharedPreferences _prefs;
 
@@ -104,5 +106,16 @@ class LocalSettings {
 
   bool isOnGuestView() {
     return _prefs.getBool(onGuestViewKey) ?? false;
+  }
+
+  Future<void> setConfiguredLinksInAppPermissions(bool value) async {
+    await _prefs.setBool(_hasConfiguredLinksInAppPermissionKey, value);
+  }
+
+  /// This is only relevant for fdorid and independent builds since in them,
+  /// user has to manually allow the app to open public links in-app
+  bool hasConfiguredInAppLinkPermissions() {
+    final result = _prefs.getBool(_hasConfiguredLinksInAppPermissionKey);
+    return result ?? false;
   }
 }

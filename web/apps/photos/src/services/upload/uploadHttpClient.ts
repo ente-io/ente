@@ -1,15 +1,27 @@
+import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import log from "@/base/log";
 import { apiURL, uploaderOrigin } from "@/base/origins";
-import { retryAsyncOperation } from "@/gallery/utils/retry-async";
 import { EnteFile } from "@/media/file";
+import { retryAsyncOperation } from "@/utils/promise";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { MultipartUploadURLs, UploadFile, UploadURL } from "./upload-service";
+import { z } from "zod";
+import {
+    MultipartUploadURLs,
+    UploadFile,
+    type UploadURL,
+} from "./upload-service";
+
+/**
+ * Zod schema for {@link UploadURL}.
+ */
+const UploadURL = z.object({
+    objectKey: z.string(),
+    url: z.string(),
+});
 
 class UploadHttpClient {
-    private uploadURLFetchInProgress = null;
-
     async uploadFile(uploadFile: UploadFile): Promise<EnteFile> {
         try {
             const token = getToken();
@@ -31,34 +43,30 @@ class UploadHttpClient {
         }
     }
 
-    async fetchUploadURLs(count: number, urlStore: UploadURL[]): Promise<void> {
-        try {
-            if (!this.uploadURLFetchInProgress) {
-                try {
-                    const token = getToken();
-                    if (!token) {
-                        return;
-                    }
-                    this.uploadURLFetchInProgress = HTTPService.get(
-                        await apiURL("/files/upload-urls"),
-                        {
-                            count: Math.min(50, count * 2),
-                        },
-                        { "X-Auth-Token": token },
-                    );
-                    const response = await this.uploadURLFetchInProgress;
-                    for (const url of response.data.urls) {
-                        urlStore.push(url);
-                    }
-                } finally {
-                    this.uploadURLFetchInProgress = null;
-                }
-            }
-            return this.uploadURLFetchInProgress;
-        } catch (e) {
-            log.error("fetch upload-url failed ", e);
-            throw e;
-        }
+    /**
+     * Fetch a fresh list of URLs from remote that can be used to upload files
+     * and thumbnails to.
+     *
+     * @param countHint An approximate number of files that we're expecting to
+     * upload.
+     *
+     * @returns A list of pre-signed object URLs that can be used to upload data
+     * to the S3 bucket.
+     */
+    async fetchUploadURLs(countHint: number) {
+        const count = Math.min(50, countHint * 2).toString();
+        const params = new URLSearchParams({ count });
+        const url = await apiURL("/files/upload-urls");
+        const res = await fetch(`${url}?${params.toString()}`, {
+            headers: await authenticatedRequestHeaders(),
+        });
+        ensureOk(res);
+        return (
+            // TODO: The as cast will not be needed when tsc strict mode is
+            // enabled for this code.
+            z.object({ urls: UploadURL.array() }).parse(await res.json())
+                .urls as UploadURL[]
+        );
     }
 
     async fetchMultipartUploadURLs(

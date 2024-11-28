@@ -312,6 +312,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Denna länk har upphört att gälla. Välj ett nytt datum eller inaktivera tidsbegränsningen."),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Exportera din data"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage(
             "Det gick inte att använda koden"),
         "failedToFetchActiveSessions": MessageLookupByLibrary.simpleMessage(

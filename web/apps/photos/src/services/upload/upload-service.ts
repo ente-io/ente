@@ -111,9 +111,17 @@ class UploadService {
     private uploadURLs: UploadURL[] = [];
     private pendingUploadCount: number = 0;
     private publicUploadProps: PublicUploadProps = undefined;
+    private activeUploadURLRefill: Promise<void> | undefined;
 
     init(publicUploadProps: PublicUploadProps) {
         this.publicUploadProps = publicUploadProps;
+    }
+
+    logout() {
+        this.uploadURLs = [];
+        this.pendingUploadCount = 0;
+        this.publicUploadProps = undefined;
+        this.activeUploadURLRefill = undefined;
     }
 
     async setFileCount(fileCount: number) {
@@ -127,19 +135,21 @@ class UploadService {
 
     async getUploadURL() {
         if (this.uploadURLs.length === 0 && this.pendingUploadCount) {
-            await this.fetchUploadURLs();
+            await this.refillUploadURLs();
+            this.ensureUniqueUploadURLs();
         }
         return this.uploadURLs.pop();
     }
 
     private async preFetchUploadURLs() {
         try {
-            await this.fetchUploadURLs();
+            await this.refillUploadURLs();
             // checking for any subscription related errors
         } catch (e) {
             log.error("prefetch uploadURL failed", e);
             handleUploadError(e);
         }
+        this.ensureUniqueUploadURLs();
     }
 
     async uploadFile(uploadFile: UploadFile) {
@@ -154,20 +164,45 @@ class UploadService {
         }
     }
 
-    private async fetchUploadURLs() {
+    private async refillUploadURLs() {
+        try {
+            if (!this.activeUploadURLRefill) {
+                this.activeUploadURLRefill = this._refillUploadURLs();
+            }
+            await this.activeUploadURLRefill;
+        } finally {
+            this.activeUploadURLRefill = undefined;
+        }
+    }
+
+    private ensureUniqueUploadURLs() {
+        // TODO: Sanity check added on new implementation Nov 2024, remove after
+        // a while (tag: Migration).
+        if (
+            this.uploadURLs.length !=
+            new Set(this.uploadURLs.map((u) => u.url)).size
+        ) {
+            throw new Error("Duplicate upload URLs detected");
+        }
+    }
+
+    private async _refillUploadURLs() {
+        let urls: UploadURL[];
         if (this.publicUploadProps.accessedThroughSharedURL) {
-            await publicUploadHttpClient.fetchUploadURLs(
+            if (!this.publicUploadProps.token) {
+                throw Error(CustomError.TOKEN_MISSING);
+            }
+            urls = await publicUploadHttpClient.fetchUploadURLs(
                 this.pendingUploadCount,
-                this.uploadURLs,
                 this.publicUploadProps.token,
                 this.publicUploadProps.passwordToken,
             );
         } else {
-            await UploadHttpClient.fetchUploadURLs(
+            urls = await UploadHttpClient.fetchUploadURLs(
                 this.pendingUploadCount,
-                this.uploadURLs,
             );
         }
+        urls.forEach((u) => this.uploadURLs.push(u));
     }
 
     async fetchMultipartUploadURLs(count: number) {
@@ -291,8 +326,13 @@ export interface MultipartUploadURLs {
     completeURL: string;
 }
 
+/**
+ * A pre-signed URL alongwith the associated object key.
+ */
 export interface UploadURL {
+    /** A pre-signed URL that can be used to upload data to S3. */
     url: string;
+    /** The objectKey with which remote will refer to this object. */
     objectKey: string;
 }
 
@@ -1438,6 +1478,7 @@ const uploadToBucket = async (
         encryptedFilePieces;
     try {
         let fileObjectKey: string = null;
+        let fileSize: number;
 
         const encryptedData = file.encryptedData;
         if (
@@ -1446,18 +1487,20 @@ const uploadToBucket = async (
         ) {
             // We have a stream, and it is more than multipartChunksPerPart
             // chunks long, so use a multipart upload to upload it.
-            fileObjectKey = await uploadStreamUsingMultipart(
-                localID,
-                encryptedData,
-                makeProgessTracker,
-                isCFUploadProxyDisabled,
-                abortIfCancelled,
-            );
+            ({ objectKey: fileObjectKey, fileSize } =
+                await uploadStreamUsingMultipart(
+                    localID,
+                    encryptedData,
+                    makeProgessTracker,
+                    isCFUploadProxyDisabled,
+                    abortIfCancelled,
+                ));
         } else {
             const data =
                 encryptedData instanceof Uint8Array
                     ? encryptedData
                     : await readEntireStream(encryptedData.stream);
+            fileSize = data.length;
 
             const progressTracker = makeProgessTracker(localID);
             const fileUploadURL = await uploadService.getUploadURL();
@@ -1495,10 +1538,12 @@ const uploadToBucket = async (
             file: {
                 decryptionHeader: file.decryptionHeader,
                 objectKey: fileObjectKey,
+                size: fileSize,
             },
             thumbnail: {
                 decryptionHeader: thumbnail.decryptionHeader,
                 objectKey: thumbnailObjectKey,
+                size: thumbnail.encryptedData.length,
             },
             metadata: {
                 encryptedData: metadata.encryptedDataB64,
@@ -1539,6 +1584,7 @@ async function uploadStreamUsingMultipart(
     const percentPerPart =
         RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount;
     const partEtags: PartEtag[] = [];
+    let fileSize = 0;
     for (const [
         index,
         fileUploadURL,
@@ -1546,6 +1592,7 @@ async function uploadStreamUsingMultipart(
         abortIfCancelled();
 
         const uploadChunk = await combineChunksToFormUploadPart(streamReader);
+        fileSize += uploadChunk.length;
         const progressTracker = makeProgessTracker(
             fileLocalID,
             percentPerPart,
@@ -1581,7 +1628,7 @@ async function uploadStreamUsingMultipart(
         await UploadHttpClient.completeMultipartUpload(completeURL, cBody);
     }
 
-    return multipartUploadURLs.objectKey;
+    return { objectKey: multipartUploadURLs.objectKey, fileSize };
 }
 
 async function combineChunksToFormUploadPart(

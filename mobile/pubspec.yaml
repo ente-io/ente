@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.9.59+959
+version: 0.9.65+965
 publish_to: none
 
 environment:
@@ -20,6 +20,7 @@ environment:
 
 dependencies:
   adaptive_theme: ^3.1.0
+  android_intent_plus: ^5.2.0
   animate_do: ^2.0.0
   animated_list_plus: ^0.5.2
   archive: ^3.6.1
@@ -109,7 +110,10 @@ dependencies:
   logging: ^1.0.1
   lottie: ^1.2.2
   maps_launcher: ^2.2.1
-  media_extension: ^1.0.1
+  media_extension:
+    git:
+      url: "https://github.com/ente-io/media_extension.git"
+      ref: deeplink_fixes
   media_kit: ^1.1.10+1
   media_kit_libs_android_video: ^1.3.6
   media_kit_libs_ios_video: ^1.1.4

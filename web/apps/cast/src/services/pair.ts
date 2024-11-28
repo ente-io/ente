@@ -1,15 +1,24 @@
-import { boxSealOpen, generateKeyPair } from "@/base/crypto/libsodium";
+import { boxSealOpen, generateKeyPair } from "@/base/crypto";
+import { ensureOk, publicRequestHeaders } from "@/base/http";
 import log from "@/base/log";
+import { apiURL } from "@/base/origins";
 import { wait } from "@/utils/promise";
-import castGateway from "@ente/shared/network/cast";
+import { nullToUndefined } from "@/utils/transform";
+import { z } from "zod";
 
 export interface Registration {
     /** A pairing code shown on the screen. A client can use this to connect. */
     pairingCode: string;
-    /** The public part of the keypair we registered with the server. */
-    publicKeyB64: string;
-    /** The private part of the keypair we registered with the server. */
-    privateKeyB64: string;
+    /**
+     * A base64 string representation of the public part of the keypair we
+     * registered with the server.
+     */
+    publicKey: string;
+    /**
+     * A base64 string representation of the private part of the keypair we
+     * registered with the server.
+     */
+    privateKey: string;
 }
 
 /**
@@ -54,7 +63,7 @@ export interface Registration {
  * Once the client gets the pairing code (via Chromecast or manual entry),
  * they'll let museum know. So in parallel with Phase 2, we perform Phase 3.
  *
- * Phase 3 - {@link getCastData} in a setInterval.
+ * Phase 3 - {@link getCastPayload} in a setInterval.
  *
  * 7. Keep polling museum to ask it if anyone has claimed that code we vended
  *    out and used that to send us an payload encrypted using our public key.
@@ -69,19 +78,18 @@ export interface Registration {
  * At this time we start showing the pairing code on the UI, and start phase 2,
  * {@link advertiseCode} to vend out the pairing code to Chromecast connections.
  *
- * In parallel, we start Phase 3, calling {@link getCastData} in a loop. Once we
+ * In parallel, we start Phase 3, calling {@link getCastPayload} in a loop. Once we
  * get a response, we decrypt it to get the data we need to start the slideshow.
  */
 export const register = async (): Promise<Registration> => {
     // Generate keypair.
-    const { publicKey: publicKeyB64, privateKey: privateKeyB64 } =
-        await generateKeyPair();
+    const { publicKey, privateKey } = await generateKeyPair();
 
     // Register keypair with museum to get a pairing code.
     let pairingCode: string | undefined;
     while (true) {
         try {
-            pairingCode = await castGateway.registerDevice(publicKeyB64);
+            pairingCode = await registerDevice(publicKey);
         } catch (e) {
             log.error("Failed to register public key with server", e);
         }
@@ -90,8 +98,38 @@ export const register = async (): Promise<Registration> => {
         await wait(10000);
     }
 
-    return { pairingCode, publicKeyB64, privateKeyB64 };
+    return { pairingCode, publicKey, privateKey };
 };
+
+/**
+ * Register the given {@link publicKey} with remote.
+ *
+ * @returns A device code that can be used to pair with us.
+ */
+const registerDevice = async (publicKey: string) => {
+    const res = await fetch(await apiURL("/cast/device-info"), {
+        method: "POST",
+        headers: publicRequestHeaders(),
+        body: JSON.stringify({
+            publicKey,
+        }),
+    });
+    ensureOk(res);
+    return z.object({ deviceCode: z.string() }).parse(await res.json())
+        .deviceCode;
+};
+
+/**
+ * The structure of the (decrypted) payload that is published (e.g.) by
+ * `publishCastPayload` on the photos web/desktop app.
+ */
+const CastPayload = z.object({
+    castToken: z.string(),
+    collectionID: z.number(),
+    collectionKey: z.string(),
+});
+
+export type CastPayload = z.infer<typeof CastPayload>;
 
 /**
  * Ask museum if anyone has sent a (encrypted) payload corresponding to the
@@ -102,24 +140,42 @@ export const register = async (): Promise<Registration> => {
  *
  * See: [Note: Pairing protocol].
  */
-export const getCastData = async (registration: Registration) => {
-    const { pairingCode, publicKeyB64, privateKeyB64 } = registration;
+export const getCastPayload = async (
+    registration: Registration,
+): Promise<CastPayload | undefined> => {
+    const { pairingCode, publicKey, privateKey } = registration;
 
     // The client will send us the encrypted payload using our public key that
     // we registered with museum.
-    const encryptedCastData = await castGateway.getCastData(pairingCode);
-    if (!encryptedCastData) return;
+    const encryptedCastData = await getEncryptedCastData(pairingCode);
+    if (!encryptedCastData) return undefined;
 
     // Decrypt it using the private key of the pair and return the plaintext
     // payload, which'll be a JSON object containing the data we need to start a
     // slideshow for some collection.
     const decryptedCastData = await boxSealOpen(
         encryptedCastData,
-        publicKeyB64,
-        privateKeyB64,
+        publicKey,
+        privateKey,
     );
 
-    // TODO:
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return JSON.parse(atob(decryptedCastData));
+    return CastPayload.parse(JSON.parse(atob(decryptedCastData)));
+};
+
+/**
+ * Fetch encrypted cast data corresponding to the given {@link code} from remote
+ * if a client has already paired using it.
+ */
+const getEncryptedCastData = async (code: string) => {
+    const res = await fetch(await apiURL(`/cast/cast-data/${code}`), {
+        headers: publicRequestHeaders(),
+    });
+    ensureOk(res);
+    return z
+        .object({
+            // encCastData will be null if pairing hasn't happened yet for the
+            // given code.
+            encCastData: z.string().nullish().transform(nullToUndefined),
+        })
+        .parse(await res.json()).encCastData;
 };

@@ -100,17 +100,16 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        S.of(context).changeLogDiscoverTitle,
-        S.of(context).changeLogDiscoverContent,
+        "Advanced Search ✨",
+        "Filter down memories by adding suggested filters on search results, albums etc.",
       ),
       ChangeLogEntry(
-        S.of(context).changeLogBackupStatusTitle,
-        S.of(context).changeLogBackupStatusContent,
+        "Links in App ✨",
+        "Public links tapped from outside the app now opens in-app.",
       ),
       ChangeLogEntry(
-        S.of(context).changeLogMagicSearchImprovementTitle,
-        S.of(context).changeLogMagicSearchImprovementContent,
-        isFeature: false,
+        "ML out of Beta ✨",
+        "ML feaures are now out of beta.",
       ),
     ]);
 

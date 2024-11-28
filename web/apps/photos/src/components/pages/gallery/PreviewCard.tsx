@@ -1,5 +1,6 @@
 import { Overlay } from "@/base/components/mui/Container";
 import log from "@/base/log";
+import { downloadManager } from "@/gallery/services/download";
 import { FileType } from "@/media/file-type";
 import {
     GAP_BTW_TILES,
@@ -10,7 +11,6 @@ import {
     StaticThumbnail,
 } from "@/new/photos/components/PlaceholderThumbnails";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
-import DownloadManager from "@/new/photos/services/download";
 import useLongPress from "@ente/shared/hooks/useLongPress";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
 import Favorite from "@mui/icons-material/FavoriteRounded";
@@ -274,7 +274,7 @@ export default function PreviewCard(props: IProps) {
                     return;
                 }
                 const url: string =
-                    await DownloadManager.renderableThumbnailURL(
+                    await downloadManager.renderableThumbnailURL(
                         file,
                         props.showPlaceholder,
                     );

@@ -74,7 +74,7 @@ const Page: React.FC<PageProps> = () => {
                             buttonText={t("enable")}
                         />
                         <LinkButton sx={{ mt: 2 }} onClick={router.back}>
-                            {t("GO_BACK")}
+                            {t("go_back")}
                         </LinkButton>
                     </VerticallyCentered>
                 </CardContent>

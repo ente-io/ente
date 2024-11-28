@@ -1,12 +1,13 @@
 import log from "@/base/log";
+import {
+    downloadManager,
+    type LivePhotoSourceURL,
+    type SourceURLs,
+} from "@/gallery/services/download";
 import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
-import DownloadManager, {
-    type LivePhotoSourceURL,
-    type SourceURLs,
-} from "@/new/photos/services/download";
 import { PHOTOS_PAGES } from "@ente/shared/constants/pages";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { styled } from "@mui/material";
@@ -364,7 +365,7 @@ const PhotoFrame = ({
                 thumbFetching[item.id] = true;
                 // URL will always be defined (unless an error is thrown) since
                 // we are not passing the `cachedOnly` option.
-                const url = await DownloadManager.renderableThumbnailURL(item)!;
+                const url = await downloadManager.renderableThumbnailURL(item)!;
                 updateThumb(instance, index, item, url, false);
             } catch (e) {
                 log.error("getSlideData failed get msrc url failed", e);
@@ -389,7 +390,7 @@ const PhotoFrame = ({
         try {
             log.info(`[${item.id}] new file src request`);
             fetching[item.id] = true;
-            const srcURLs = await DownloadManager.getFileForPreview(item);
+            const srcURLs = await downloadManager.getFileForPreview(item);
             if (item.metadata.fileType === FileType.livePhoto) {
                 const srcImgURL = srcURLs.url as LivePhotoSourceURL;
                 const imageURL = await srcImgURL.image();
@@ -515,7 +516,7 @@ const PhotoFrame = ({
             );
             fetching[item.id] = true;
 
-            const srcURL = await DownloadManager.getFileForPreview(item, {
+            const srcURL = await downloadManager.getFileForPreview(item, {
                 forceConvert: true,
             });
 

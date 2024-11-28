@@ -5,7 +5,7 @@ import { lowercaseExtension, nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
-import { shouldDisableCFUploadProxy } from "@/gallery/upload";
+import { shouldDisableCFUploadProxy } from "@/gallery/services/upload";
 import type { Collection } from "@/media/collection";
 import { EncryptedEnteFile, EnteFile } from "@/media/file";
 import type { ParsedMetadata } from "@/media/file-metadata";
@@ -342,6 +342,11 @@ class UploadManager {
         UploadService.init(publicCollectProps);
         this.onUploadFile = onUploadFile;
         this.publicUploadProps = publicCollectProps;
+    }
+
+    logout() {
+        // TODO: Consolidate state in one place instead of spreading it.
+        UploadService.logout();
     }
 
     public isUploadRunning() {

@@ -70,7 +70,7 @@ export function RenderCaption({
                 validationSchema={Yup.object().shape({
                     caption: Yup.string().max(
                         MAX_CAPTION_SIZE,
-                        t("CAPTION_CHARACTER_LIMIT"),
+                        t("caption_character_limit"),
                     ),
                 })}
                 validateOnBlur={false}
@@ -91,7 +91,7 @@ export function RenderCaption({
                             name="caption"
                             type="text"
                             multiline
-                            placeholder={t("CAPTION_PLACEHOLDER")}
+                            placeholder={t("caption_placeholder")}
                             value={values.caption}
                             onChange={handleChange("caption")}
                             error={Boolean(errors.caption)}

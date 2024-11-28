@@ -38,6 +38,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.7.0"
+  android_intent_plus:
+    dependency: "direct main"
+    description:
+      name: android_intent_plus
+      sha256: "38921ec22ebb3b9a7eb678792cf6fab0b6f458b61b9d327688573449c9b47db3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.2.0"
   animate_do:
     dependency: "direct main"
     description:
@@ -1516,10 +1524,11 @@ packages:
   media_extension:
     dependency: "direct main"
     description:
-      name: media_extension
-      sha256: "5c4347d7035a48220c210149df776c764b920daf312b2ae7e3077506273db8d3"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: deeplink_fixes
+      resolved-ref: "520a200a6f76dece843f3e0eedb9b1f89c805cdf"
+      url: "https://github.com/ente-io/media_extension.git"
+    source: git
     version: "1.0.2"
   media_kit:
     dependency: "direct main"

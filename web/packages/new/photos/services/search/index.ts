@@ -186,7 +186,7 @@ const holidays = (): LabelledSearchDateComponents[] => [
  * A list of file types with their localized names.
  */
 const labelledFileTypes = (): LabelledFileType[] => [
-    { fileType: FileType.image, label: t("IMAGE") },
-    { fileType: FileType.video, label: t("VIDEO") },
-    { fileType: FileType.livePhoto, label: t("LIVE_PHOTO") },
+    { fileType: FileType.image, label: t("image") },
+    { fileType: FileType.video, label: t("video") },
+    { fileType: FileType.livePhoto, label: t("live_photo") },
 ];

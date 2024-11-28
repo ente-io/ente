@@ -13,6 +13,12 @@ export interface UserVerificationResponse {
     token?: string;
     twoFactorSessionID: string;
     passkeySessionID: string;
+    /**
+     * If both passkeys and TOTP based two factors are enabled, then {@link
+     * twoFactorSessionIDV2} will be set to the TOTP session ID instead of
+     * {@link twoFactorSessionID}.
+     */
+    twoFactorSessionIDV2?: string | undefined;
     srpM2?: string;
 }
 

@@ -127,9 +127,9 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                 child: NotificationWidget(
                   startIcon: Icons.offline_bolt,
                   actionIcon: Icons.arrow_forward,
-                  text:
-                      S.of(context).enableMachineLearningBanner,
+                  text: S.of(context).enableMachineLearningBanner,
                   type: NotificationType.greenBanner,
+                  mainTextStyle: darkTextTheme.smallMuted,
                   onTap: () async => {
                     await routeToPage(
                       context,

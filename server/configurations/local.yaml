@@ -317,6 +317,10 @@ internal:
     # List of user IDs that can use the admin API endpoints.
     # If this is not set, as a fallback, the first user is considered an admin.
     admins: []
+    # In case there is a single admin, it can be alternatively specified by as
+    # the "admin" instead of "admins". This can be useful e.g. when wishing to
+    # pass the admin as an environment variable.
+    admin:
 
 # Replication config
 #
