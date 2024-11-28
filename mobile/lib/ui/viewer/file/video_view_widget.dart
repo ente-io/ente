@@ -71,11 +71,6 @@ class _VideoViewWidgetState extends State<VideoViewWidget> {
     }).onError((error, stackTrace) {
       if (!mounted) return;
       _logger.warning("Failed to download preview video", error, stackTrace);
-      showErrorDialog(
-        context,
-        "Error",
-        S.of(context).failedToDownloadVideo,
-      );
       isCheckingForPreview = false;
       setState(() {});
     });
