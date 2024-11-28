@@ -19,6 +19,7 @@ import {
     updateAvailableForDownloadDialogAttributes,
     updateReadyToInstallDialogAttributes,
 } from "@/new/photos/components/utils/download";
+import { useIsOffline } from "@/new/photos/components/utils/use-is-offline";
 import { useLoadingBar } from "@/new/photos/components/utils/use-loading-bar";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import { runMigrations } from "@/new/photos/services/migrations";
@@ -54,9 +55,6 @@ export default function App({ Component, pageProps }: AppProps) {
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
-    const [offline, setOffline] = useState(
-        typeof window !== "undefined" && !window.navigator.onLine,
-    );
     const [showNavbar, setShowNavBar] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
@@ -65,6 +63,7 @@ export default function App({ Component, pageProps }: AppProps) {
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
 
+    const isOffline = useIsOffline();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
     const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
     const [themeColor, setThemeColor] = useLocalState(
@@ -127,9 +126,6 @@ export default function App({ Component, pageProps }: AppProps) {
         if (isDesktop) void resumeExportsIfNeeded();
     }, []);
 
-    const setUserOnline = () => setOffline(false);
-    const setUserOffline = () => setOffline(true);
-
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
         const needsFamilyRedirect = query.get("redirect") == "families";
@@ -154,14 +150,6 @@ export default function App({ Component, pageProps }: AppProps) {
         router.events.on("routeChangeComplete", () => {
             setLoading(false);
         });
-
-        window.addEventListener("online", setUserOnline);
-        window.addEventListener("offline", setUserOffline);
-
-        return () => {
-            window.removeEventListener("online", setUserOnline);
-            window.removeEventListener("offline", setUserOffline);
-        };
     }, []);
 
     useEffect(() => {
@@ -210,7 +198,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar />}
                 <OfflineMessageContainer>
-                    {isI18nReady && offline && t("OFFLINE_MSG")}
+                    {isI18nReady && isOffline && t("OFFLINE_MSG")}
                 </OfflineMessageContainer>
                 <LoadingBar color="#51cd7c" ref={loadingBarRef} />
 
