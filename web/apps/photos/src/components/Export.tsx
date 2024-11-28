@@ -12,8 +12,10 @@ import {
     VerticallyCenteredFlex,
 } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
-import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
-import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@ente/shared/components/OverflowMenu";
 import { CustomError } from "@ente/shared/error";
 import FolderIcon from "@mui/icons-material/Folder";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
