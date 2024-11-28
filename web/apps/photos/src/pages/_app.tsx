@@ -25,7 +25,6 @@ import { runMigrations } from "@/new/photos/services/migrations";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
 import { AppContext } from "@/new/photos/types/context";
-import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
@@ -37,7 +36,7 @@ import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import type { User } from "@ente/shared/user/types";
 import ArrowForward from "@mui/icons-material/ArrowForward";
-import { CssBaseline } from "@mui/material";
+import { CssBaseline, styled } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import Notification from "components/Notification";
 import { t } from "i18next";
@@ -210,9 +209,9 @@ export default function App({ Component, pageProps }: AppProps) {
             <ThemeProvider theme={getTheme(themeColor, "photos")}>
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar />}
-                <MessageContainer>
+                <OfflineMessageContainer>
                     {isI18nReady && offline && t("OFFLINE_MSG")}
-                </MessageContainer>
+                </OfflineMessageContainer>
                 <LoadingBar color="#51cd7c" ref={loadingBarRef} />
 
                 <AttributedMiniDialog
@@ -248,6 +247,14 @@ export default function App({ Component, pageProps }: AppProps) {
         </>
     );
 }
+
+const OfflineMessageContainer = styled("div")`
+    background-color: #111;
+    padding: 0;
+    font-size: 14px;
+    text-align: center;
+    line-height: 32px;
+`;
 
 const redirectToFamilyPortal = () =>
     void getFamilyPortalRedirectURL().then((url) => {
