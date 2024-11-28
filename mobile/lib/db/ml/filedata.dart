@@ -26,6 +26,7 @@ extension FileDataTable on MLDataDB {
     );
   }
 
+  // optimize this
   Future<Set<int>> getFileIDsWithFDData() async {
     final db = await MLDataDB.instance.asyncDB;
     final res = await db.execute('SELECT $fileIDColumn FROM $fileDataTable');

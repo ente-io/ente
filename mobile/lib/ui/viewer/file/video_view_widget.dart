@@ -11,6 +11,8 @@ import "package:fluttertoast/fluttertoast.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/ml/db.dart";
+import "package:photos/db/ml/filedata.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/service_locator.dart";
@@ -56,9 +58,18 @@ class _VideoViewWidgetState extends State<VideoViewWidget> {
     _checkForPreview();
   }
 
-  void _checkForPreview() {
+  Future<void> _checkForPreview() async {
     if (!flagService.internalUser) return;
-    PreviewVideoStore.instance.getPlaylist(widget.file).then((file) {
+
+    final Set<int> filesWithFDStatus =
+        await MLDataDB.instance.getFileIDsWithFDData();
+
+    if (!filesWithFDStatus.contains(widget.file.uploadedFileID)) {
+      isCheckingForPreview = false;
+      setState(() {});
+    }
+
+    await PreviewVideoStore.instance.getPlaylist(widget.file).then((file) {
       if (!mounted) return;
       if (file != null) {
         isCheckingForPreview = false;
