@@ -85,7 +85,7 @@ func (r *Repository) InsertOrUpdatePreviewData(ctx context.Context, data filedat
             updated_at = now_utc_micro_seconds()
         WHERE file_data.is_deleted = false`
 	_, err = tx.ExecContext(ctx, query,
-		data.FileID, data.UserID, string(data.Type), data.Size, data.LatestBucket, *data.ObjectID, *data.ObjectNonce)
+		data.FileID, data.UserID, string(data.Type), data.Size, data.LatestBucket, *data.ObjectID, data.ObjectNonce)
 	if err != nil {
 		tx.Rollback()
 		return stacktrace.Propagate(err, "failed to insert file data")

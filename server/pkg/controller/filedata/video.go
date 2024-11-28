@@ -46,7 +46,6 @@ func (c *Controller) InsertVideoPreview(ctx *gin.Context, req *filedata.VidPrevi
 		logger.WithError(uploadErr).Error("upload failed")
 		return nil
 	}
-	nonce := "na"
 	row := filedata.Row{
 		FileID:       req.FileID,
 		Type:         ente.PreviewVideo,
@@ -54,7 +53,7 @@ func (c *Controller) InsertVideoPreview(ctx *gin.Context, req *filedata.VidPrevi
 		Size:         size + req.ObjectSize,
 		LatestBucket: bucketID,
 		ObjectID:     &req.ObjectID,
-		ObjectNonce:  &nonce,
+		ObjectNonce:  nil,
 	}
 	dbInsertErr := c.Repo.InsertOrUpdatePreviewData(context.Background(), row, fileObjectKey)
 	if dbInsertErr != nil {
