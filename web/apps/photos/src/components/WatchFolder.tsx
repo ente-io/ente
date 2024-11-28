@@ -6,7 +6,7 @@ import {
 import { ensureElectron } from "@/base/electron";
 import { basename, dirname } from "@/base/file-name";
 import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
-import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
+import { CollectionMappingChoice } from "@/new/photos/components/CollectionMappingChoice";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import {
@@ -15,8 +15,10 @@ import {
     SpaceBetweenFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
-import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@ente/shared/components/OverflowMenu";
 import CheckIcon from "@mui/icons-material/Check";
 import DoNotDisturbOutlinedIcon from "@mui/icons-material/DoNotDisturbOutlined";
 import FolderCopyOutlinedIcon from "@mui/icons-material/FolderCopyOutlined";
@@ -141,9 +143,9 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
                     </Stack>
                 </DialogContent>
             </Dialog>
-            <CollectionMappingChoiceDialog
+            <CollectionMappingChoice
                 {...mappingChoiceVisibilityProps}
-                didSelect={handleCollectionMappingSelect}
+                onSelect={handleCollectionMappingSelect}
             />
         </>
     );
