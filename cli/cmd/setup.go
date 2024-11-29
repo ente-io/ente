@@ -2,12 +2,14 @@ package cmd
 
 import (
   "fmt"
-  "github.com/ente-io/cli/pkg"
-  "github.com/spf13/viper"
-  "github.com/spf13/cobra"
   "os"
   "net/url"
   "strings"
+  
+  "github.com/spf13/viper"
+  "github.com/spf13/cobra"
+
+  "github.com/ente-io/cli/pkg"
 )
 
 var setupCmd = &cobra.Command {
