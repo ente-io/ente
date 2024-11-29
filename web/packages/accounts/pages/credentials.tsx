@@ -44,6 +44,8 @@ import {
     PasswordHeader,
     VerifyingPasskey,
 } from "../components/LoginComponents";
+import { SecondFactorChoice } from "../components/SecondFactorChoice";
+import { useSecondFactorChoiceIfNeeded } from "../components/utils/second-factor-choice";
 import { PAGES } from "../constants/pages";
 import {
     openPasskeyVerificationURL,
@@ -76,6 +78,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const [sessionValidityCheck, setSessionValidityCheck] = useState<
         Promise<void> | undefined
     >();
+    const {
+        secondFactorChoiceProps,
+        userVerificationResultAfterResolvingSecondFactorChoice,
+    } = useSecondFactorChoiceIfNeeded();
 
     const router = useRouter();
 
@@ -218,8 +224,12 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     id,
                     twoFactorSessionID,
                     passkeySessionID,
-                } = await loginViaSRP(srpAttributes!, kek);
+                } =
+                    await userVerificationResultAfterResolvingSecondFactorChoice(
+                        await loginViaSRP(srpAttributes!, kek),
+                    );
                 setIsFirstLogin(true);
+
                 if (passkeySessionID) {
                     const sessionKeyAttributes =
                         await cryptoWorker.generateKeyAndEncryptToB64(kek);
@@ -387,6 +397,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     </Stack>
                 </LoginFlowFormFooter>
             </FormPaper>
+
+            <SecondFactorChoice {...secondFactorChoiceProps} />
         </VerticallyCentered>
     );
 };

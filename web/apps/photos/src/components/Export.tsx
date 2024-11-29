@@ -1,18 +1,23 @@
 import { isDesktop } from "@/base/app";
 import { EnteSwitch } from "@/base/components/EnteSwitch";
+import type { ButtonishProps } from "@/base/components/mui";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import { EnteFile } from "@/media/file";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { useAppContext } from "@/new/photos/types/context";
-import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
 import {
     SpaceBetweenFlex,
     VerticallyCenteredFlex,
 } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@ente/shared/components/OverflowMenu";
 import { CustomError } from "@ente/shared/error";
+import FolderIcon from "@mui/icons-material/Folder";
 import {
     Box,
     Button,
@@ -260,6 +265,14 @@ const DirectoryPathContainer = styled(LinkButton)(
     direction: rtl;
     text-align: left;
 `,
+);
+
+const ChangeDirectoryOption: React.FC<ButtonishProps> = ({ onClick }) => (
+    <OverflowMenu ariaID="export-option" triggerButtonProps={{ sx: { ml: 1 } }}>
+        <OverflowMenuOption onClick={onClick} startIcon={<FolderIcon />}>
+            {t("CHANGE_FOLDER")}
+        </OverflowMenuOption>
+    </OverflowMenu>
 );
 
 function ContinuousExport({ continuousExport, toggleContinuousExport }) {

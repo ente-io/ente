@@ -30,6 +30,8 @@ import {
     LoginFlowFormFooter,
     VerifyingPasskey,
 } from "../components/LoginComponents";
+import { SecondFactorChoice } from "../components/SecondFactorChoice";
+import { useSecondFactorChoiceIfNeeded } from "../components/utils/second-factor-choice";
 import { PAGES } from "../constants/pages";
 import {
     openPasskeyVerificationURL,
@@ -51,6 +53,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const [passkeyVerificationData, setPasskeyVerificationData] = useState<
         { passkeySessionID: string; url: string } | undefined
     >();
+    const {
+        secondFactorChoiceProps,
+        userVerificationResultAfterResolvingSecondFactorChoice,
+    } = useSecondFactorChoiceIfNeeded();
 
     const router = useRouter();
 
@@ -83,7 +89,9 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 id,
                 twoFactorSessionID,
                 passkeySessionID,
-            } = resp.data as UserVerificationResponse;
+            } = await userVerificationResultAfterResolvingSecondFactorChoice(
+                resp.data as UserVerificationResponse,
+            );
             if (passkeySessionID) {
                 const user = getData(LS_KEYS.USER);
                 await setLSUser({
@@ -243,6 +251,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     </Stack>
                 </LoginFlowFormFooter>
             </FormPaper>
+
+            <SecondFactorChoice {...secondFactorChoiceProps} />
         </VerticallyCentered>
     );
 };

@@ -3,6 +3,7 @@ import type { BytesOrB64 } from "@/base/crypto/types";
 import { type CryptoWorker } from "@/base/crypto/worker";
 import { ensureElectron } from "@/base/electron";
 import { basename, nameAndExtension } from "@/base/file-name";
+import type { PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
 import { extractVideoMetadata } from "@/gallery/services/ffmpeg";
@@ -42,10 +43,7 @@ import { mergeUint8Arrays } from "@/utils/array";
 import { ensureInteger, ensureNumber } from "@/utils/ensure";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import { addToCollection } from "services/collectionService";
-import {
-    PublicUploadProps,
-    type LivePhotoAssets,
-} from "services/upload/uploadManager";
+import { type LivePhotoAssets } from "services/upload/uploadManager";
 import * as convert from "xml-js";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import publicUploadHttpClient from "./publicUploadHttpClient";
@@ -110,10 +108,18 @@ const multipartChunksPerPart = 5;
 class UploadService {
     private uploadURLs: UploadURL[] = [];
     private pendingUploadCount: number = 0;
-    private publicUploadProps: PublicUploadProps = undefined;
+    private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
+    private activeUploadURLRefill: Promise<void> | undefined;
 
-    init(publicUploadProps: PublicUploadProps) {
-        this.publicUploadProps = publicUploadProps;
+    init(publicAlbumsCredentials: PublicAlbumsCredentials | undefined) {
+        this.publicAlbumsCredentials = publicAlbumsCredentials;
+    }
+
+    logout() {
+        this.uploadURLs = [];
+        this.pendingUploadCount = 0;
+        this.publicAlbumsCredentials = undefined;
+        this.activeUploadURLRefill = undefined;
     }
 
     async setFileCount(fileCount: number) {
@@ -127,55 +133,80 @@ class UploadService {
 
     async getUploadURL() {
         if (this.uploadURLs.length === 0 && this.pendingUploadCount) {
-            await this.fetchUploadURLs();
+            await this.refillUploadURLs();
+            this.ensureUniqueUploadURLs();
         }
         return this.uploadURLs.pop();
     }
 
     private async preFetchUploadURLs() {
         try {
-            await this.fetchUploadURLs();
+            await this.refillUploadURLs();
             // checking for any subscription related errors
         } catch (e) {
             log.error("prefetch uploadURL failed", e);
             handleUploadError(e);
         }
+        this.ensureUniqueUploadURLs();
     }
 
     async uploadFile(uploadFile: UploadFile) {
-        if (this.publicUploadProps.accessedThroughSharedURL) {
+        if (this.publicAlbumsCredentials) {
             return publicUploadHttpClient.uploadFile(
                 uploadFile,
-                this.publicUploadProps.token,
-                this.publicUploadProps.passwordToken,
+                // TODO: publicAlbumsCredentials
+                this.publicAlbumsCredentials.accessToken,
+                this.publicAlbumsCredentials.accessTokenJWT,
             );
         } else {
             return UploadHttpClient.uploadFile(uploadFile);
         }
     }
 
-    private async fetchUploadURLs() {
-        if (this.publicUploadProps.accessedThroughSharedURL) {
-            await publicUploadHttpClient.fetchUploadURLs(
-                this.pendingUploadCount,
-                this.uploadURLs,
-                this.publicUploadProps.token,
-                this.publicUploadProps.passwordToken,
-            );
-        } else {
-            await UploadHttpClient.fetchUploadURLs(
-                this.pendingUploadCount,
-                this.uploadURLs,
-            );
+    private async refillUploadURLs() {
+        try {
+            if (!this.activeUploadURLRefill) {
+                this.activeUploadURLRefill = this._refillUploadURLs();
+            }
+            await this.activeUploadURLRefill;
+        } finally {
+            this.activeUploadURLRefill = undefined;
         }
     }
 
+    private ensureUniqueUploadURLs() {
+        // TODO: Sanity check added on new implementation Nov 2024, remove after
+        // a while (tag: Migration).
+        if (
+            this.uploadURLs.length !=
+            new Set(this.uploadURLs.map((u) => u.url)).size
+        ) {
+            throw new Error("Duplicate upload URLs detected");
+        }
+    }
+
+    private async _refillUploadURLs() {
+        let urls: UploadURL[];
+        if (this.publicAlbumsCredentials) {
+            urls = await publicUploadHttpClient.fetchUploadURLs(
+                this.pendingUploadCount,
+                this.publicAlbumsCredentials,
+            );
+        } else {
+            urls = await UploadHttpClient.fetchUploadURLs(
+                this.pendingUploadCount,
+            );
+        }
+        urls.forEach((u) => this.uploadURLs.push(u));
+    }
+
     async fetchMultipartUploadURLs(count: number) {
-        if (this.publicUploadProps.accessedThroughSharedURL) {
+        if (this.publicAlbumsCredentials) {
+            // TODO: publicAlbumsCredentials
             return await publicUploadHttpClient.fetchMultipartUploadURLs(
                 count,
-                this.publicUploadProps.token,
-                this.publicUploadProps.passwordToken,
+                this.publicAlbumsCredentials.accessToken,
+                this.publicAlbumsCredentials.accessTokenJWT,
             );
         } else {
             return await UploadHttpClient.fetchMultipartUploadURLs(count);
@@ -291,8 +322,13 @@ export interface MultipartUploadURLs {
     completeURL: string;
 }
 
+/**
+ * A pre-signed URL alongwith the associated object key.
+ */
 export interface UploadURL {
+    /** A pre-signed URL that can be used to upload data to S3. */
     url: string;
+    /** The objectKey with which remote will refer to this object. */
     objectKey: string;
 }
 

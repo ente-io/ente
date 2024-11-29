@@ -19,6 +19,12 @@ func (repo *UserAuthRepository) AddSRPSession(srpUserID uuid.UUID, serverKey str
 	return id, stacktrace.Propagate(err, "")
 }
 
+func (repo *UserAuthRepository) GetUnverifiedSessionsInLastHour(srpUserID uuid.UUID) (int64, error) {
+	var count int64
+	err := repo.DB.QueryRow(`SELECT COUNT(*) FROM srp_sessions WHERE srp_user_id = $1 AND has_verified = false AND created_at > (now_utc_micro_seconds() - (60::BIGINT * 60 * 1000 * 1000))`, srpUserID).Scan(&count)
+	return count, stacktrace.Propagate(err, "")
+}
+
 func (repo *UserAuthRepository) GetSRPAuthEntity(ctx context.Context, userID int64) (*ente.SRPAuthEntity, error) {
 	result := ente.SRPAuthEntity{}
 	row := repo.DB.QueryRowContext(ctx, `SELECT user_id, srp_user_id, salt, verifier FROM srp_auth WHERE user_id = $1`, userID)

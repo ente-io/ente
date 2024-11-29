@@ -374,7 +374,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 activeCollectionSummaryID: ALL_SECTION,
                 activeCollection: undefined,
             };
-            return {
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 user: action.user,
                 familyData: action.familyData,
@@ -408,16 +408,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     action.hiddenFiles,
                 ),
                 view,
-                filteredFiles: deriveAlbumsFilteredFiles(
-                    action.files,
-                    action.trashedFiles,
-                    archivedCollectionIDs,
-                    hiddenFileIDs,
-                    state.tempDeletedFileIDs,
-                    state.tempHiddenFileIDs,
-                    view,
-                ),
-            };
+            });
         }
         case "setNormalCollections": {
             const collections = action.collections;
@@ -443,7 +434,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     ));
             }
 
-            return refreshingFilteredFilesIfShowingAlbums({
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 collections,
                 archivedCollectionIDs,
@@ -497,7 +488,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     ));
             }
 
-            return refreshingFilteredFilesIfShowingAlbums({
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 collections,
                 hiddenCollections,
@@ -520,7 +511,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
 
         case "setFiles": {
             const files = sortFiles(mergeMetadata(action.files));
-            return refreshingFilteredFilesIfShowingAlbums({
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 files,
                 favoriteFileIDs: deriveFavoriteFileIDs(
@@ -544,7 +535,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     getLatestVersionFiles([...state.files, ...action.files]),
                 ),
             );
-            return refreshingFilteredFilesIfShowingAlbums({
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 files,
                 favoriteFileIDs: deriveFavoriteFileIDs(
@@ -564,7 +555,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
 
         case "uploadFile": {
             const files = sortFiles([...state.files, action.file]);
-            return refreshingFilteredFilesIfShowingAlbums({
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 files,
                 favoriteFileIDs: deriveFavoriteFileIDs(
@@ -586,7 +577,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
 
         case "setHiddenFiles": {
             const hiddenFiles = sortFiles(mergeMetadata(action.hiddenFiles));
-            return refreshingFilteredFilesIfShowingHiddenAlbums({
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 hiddenFiles,
                 hiddenFileIDs: deriveHiddenFileIDs(hiddenFiles),
@@ -607,7 +598,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     ]),
                 ),
             );
-            return refreshingFilteredFilesIfShowingHiddenAlbums({
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 hiddenFiles,
                 hiddenFileIDs: deriveHiddenFileIDs(hiddenFiles),
@@ -620,7 +611,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
         }
 
         case "setTrashedFiles":
-            return refreshingFilteredFilesIfShowingAlbums({
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 trashedFiles: action.trashedFiles,
                 collectionSummaries: deriveCollectionSummaries(
@@ -644,19 +635,17 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 state.selectedPersonID,
                 state.extraVisiblePerson,
             );
-            const filteredFiles = derivePeopleFilteredFiles(state.files, view);
-            return {
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 peopleState,
                 selectedPersonID: view.activePerson?.id,
                 extraVisiblePerson,
                 view,
-                filteredFiles,
-            };
+            });
         }
 
         case "markTempDeleted":
-            return refreshingFilteredFilesIfShowingAlbumsOrHiddenAlbums({
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 tempDeletedFileIDs: new Set(
                     [...state.tempDeletedFileIDs].concat(
@@ -666,13 +655,13 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             });
 
         case "clearTempDeleted":
-            return refreshingFilteredFilesIfShowingAlbumsOrHiddenAlbums({
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 tempDeletedFileIDs: new Set(),
             });
 
         case "markTempHidden":
-            return refreshingFilteredFilesIfShowingAlbums({
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 tempHiddenFileIDs: new Set(
                     [...state.tempHiddenFileIDs].concat(
@@ -682,13 +671,13 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             });
 
         case "clearTempHidden":
-            return refreshingFilteredFilesIfShowingAlbums({
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 tempHiddenFileIDs: new Set(),
             });
 
         case "showAll":
-            return refreshingFilteredFilesIfShowingAlbums({
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 selectedCollectionSummaryID: undefined,
                 extraVisiblePerson: undefined,
@@ -702,7 +691,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             });
 
         case "showHidden":
-            return refreshingFilteredFilesIfShowingHiddenAlbums({
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 selectedCollectionSummaryID: undefined,
                 extraVisiblePerson: undefined,
@@ -722,7 +711,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.collectionSummaries,
                     state.selectedCollectionSummaryID,
                 );
-            return refreshingFilteredFilesIfShowingAlbums({
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 selectedCollectionSummaryID,
                 extraVisiblePerson: undefined,
@@ -733,7 +722,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
         }
 
         case "showNormalOrHiddenCollectionSummary":
-            return refreshingFilteredFilesIfShowingAlbumsOrHiddenAlbums({
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 selectedCollectionSummaryID: action.collectionSummaryID,
                 extraVisiblePerson: undefined,
@@ -763,16 +752,14 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 state.selectedPersonID,
                 state.extraVisiblePerson,
             );
-            const filteredFiles = derivePeopleFilteredFiles(state.files, view);
-            return {
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 selectedPersonID: view.activePerson?.id,
                 extraVisiblePerson,
                 searchResults: undefined,
                 view,
                 isInSearchMode: false,
-                filteredFiles,
-            };
+            });
         }
 
         case "showPerson": {
@@ -783,40 +770,33 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 action.personID,
                 state.extraVisiblePerson,
             );
-            const filteredFiles = derivePeopleFilteredFiles(state.files, view);
-            return {
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 searchResults: undefined,
                 selectedPersonID: view.activePerson?.id,
                 extraVisiblePerson,
                 view,
                 isInSearchMode: false,
-                filteredFiles,
-            };
+            });
         }
 
         case "setSearchResults":
-            return {
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 searchResults: action.searchResults,
-                filteredFiles: state.isInSearchMode
-                    ? action.searchResults
-                    : state.filteredFiles,
-            };
+            });
 
         case "enterSearchMode":
-            return {
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 isInSearchMode: true,
-                filteredFiles: state.searchResults ?? state.filteredFiles,
-            };
+            });
 
         case "exitSearch":
-            return {
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 isInSearchMode: false,
-                searchResults: undefined,
-            };
+            });
     }
 };
 
@@ -1223,17 +1203,20 @@ const derivePeopleView = (
 };
 
 /**
- * Return a new state by recomputing the {@link filteredFiles} property if we're
- * showing the "albums" view.
+ * Return a new state by recomputing the {@link filteredFiles} property
+ * depending on which view we are showing
  *
  * Usually, we update state by manually dependency tracking on a fine grained
  * basis, but it is cumbersome (and mistake prone) to do that for the list of
  * filtered files which depend on a many things. So this is a convenience
  * function for recomputing filtered files whenever any bit of the underlying
- * state that could affect the "albums" view changes (and we're showing it).
+ * state that could affect the list of files changes.
  */
-const refreshingFilteredFilesIfShowingAlbums = (state: GalleryState) => {
-    if (state.view?.type == "albums") {
+const stateByUpdatingFilteredFiles = (state: GalleryState) => {
+    if (state.isInSearchMode) {
+        const filteredFiles = state.searchResults ?? state.filteredFiles;
+        return { ...state, filteredFiles };
+    } else if (state.view?.type == "albums") {
         const filteredFiles = deriveAlbumsFilteredFiles(
             state.files,
             state.trashedFiles,
@@ -1241,6 +1224,20 @@ const refreshingFilteredFilesIfShowingAlbums = (state: GalleryState) => {
             state.hiddenFileIDs,
             state.tempDeletedFileIDs,
             state.tempHiddenFileIDs,
+            state.view,
+        );
+        return { ...state, filteredFiles };
+    } else if (state.view?.type == "hidden-albums") {
+        const filteredFiles = deriveHiddenAlbumsFilteredFiles(
+            state.hiddenFiles,
+            state.defaultHiddenCollectionIDs,
+            state.tempDeletedFileIDs,
+            state.view,
+        );
+        return { ...state, filteredFiles };
+    } else if (state.view?.type == "people") {
+        const filteredFiles = derivePeopleFilteredFiles(
+            state.files,
             state.view,
         );
         return { ...state, filteredFiles };
@@ -1308,38 +1305,6 @@ const deriveAlbumsFilteredFiles = (
 
     return sortAndUniqueFilteredFiles(filteredFiles, view.activeCollection);
 };
-
-/**
- * Return a new state by recomputing the {@link filteredFiles} property if we're
- * showing the "hidden-albums" view.
- *
- * See {@link refreshingFilteredFilesIfShowingAlbums} for more details.
- */
-const refreshingFilteredFilesIfShowingHiddenAlbums = (state: GalleryState) => {
-    if (state.view?.type == "hidden-albums") {
-        const filteredFiles = deriveHiddenAlbumsFilteredFiles(
-            state.hiddenFiles,
-            state.defaultHiddenCollectionIDs,
-            state.tempDeletedFileIDs,
-            state.view,
-        );
-        return { ...state, filteredFiles };
-    } else {
-        return state;
-    }
-};
-
-/**
- * Convenience method for chaining the refresh functions for "albums" and
- * "hidden-albums". This is useful if something that potentially affects both
- * scenarios changes.
- */
-const refreshingFilteredFilesIfShowingAlbumsOrHiddenAlbums = (
-    state: GalleryState,
-) =>
-    refreshingFilteredFilesIfShowingHiddenAlbums(
-        refreshingFilteredFilesIfShowingAlbums(state),
-    );
 
 /**
  * Compute the sorted list of files to show when we're in the "hidden-albums"

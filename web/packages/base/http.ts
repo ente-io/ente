@@ -25,6 +25,47 @@ export const publicRequestHeaders = () => ({
 });
 
 /**
+ * A set of credentials needed to make public collections related API requests.
+ */
+export interface PublicAlbumsCredentials {
+    /**
+     * An access token that does the same job as the "X-Auth-Token" for usual
+     * authenticated API requests, except it will be passed as the
+     * ""X-Auth-Access-Token" header.
+     */
+    accessToken: string;
+    /**
+     * [Note: Password token for public albums requests].
+     *
+     * A password protected access token. This is only needed for albums that
+     * are behind a password. In such cases, the client needs to fetch this
+     * extra token from remote (in exchange for the public album's password),
+     * and then pass it as the "X-Auth-Access-Token-JWT" header in authenticated
+     * public collections related API requests.
+     */
+    accessTokenJWT?: string | undefined;
+}
+
+/**
+ * Return headers that should be passed alongwith public collection related
+ * authenticated `fetch` calls that we make to our API servers.
+ *
+ * -   The auth token.
+ * -   The password protected auth token (if provided).
+ * -   The client package name.
+ */
+export const authenticatedPublicAlbumsRequestHeaders = ({
+    accessToken,
+    accessTokenJWT,
+}: PublicAlbumsCredentials) => ({
+    "X-Auth-Access-Token": accessToken,
+    ...(accessTokenJWT && {
+        "X-Auth-Access-Token-JWT": accessTokenJWT,
+    }),
+    "X-Client-Package": clientPackageName,
+});
+
+/**
  * A custom Error that is thrown if a fetch fails with a non-2xx HTTP status.
  */
 export class HTTPError extends Error {

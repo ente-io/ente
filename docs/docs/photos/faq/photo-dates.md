@@ -64,15 +64,6 @@ videos that you imported. The modifications (e.g. date changes) you make within
 Ente will be written into a separate metadata JSON file during export so as to
 not modify the original.
 
-> [!WARNING]
->
-> There used to be one exception to this - for JPEG files, the Exif
-> DateTimeOriginal was changed during export from web or desktop apps. This was
-> done on a customer request, but in hindsight this was an incorrect change.
->
-> We have deprecated this behaviour, and the desktop version 1.7.6 is going to
-> be the last version with this exception.
-
 As an example: suppose you have `flower.png`. When you export your library, you
 will end up with:
 

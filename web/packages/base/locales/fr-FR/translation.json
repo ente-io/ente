@@ -637,6 +637,7 @@
     "check_status": "Vérifier le statut",
     "passkey_login_instructions": "Suivez les étapes de votre navigateur pour poursuivre la connexion.",
     "passkey_login": "Se connecter avec le code d'accès",
+    "totp_login": "",
     "passkey": "Clé d'accès",
     "passkey_verify_description": "Vérifiez votre clé d'accès pour vous connecter à votre compte.",
     "waiting_for_verification": "En attente de vérification...",

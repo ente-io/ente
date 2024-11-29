@@ -637,6 +637,7 @@
     "check_status": "检查状态",
     "passkey_login_instructions": "按照浏览器中提示的步骤继续登录。",
     "passkey_login": "使用通行密钥来登录",
+    "totp_login": "",
     "passkey": "通行密钥",
     "passkey_verify_description": "验证您的通行密钥以登录你的账户。",
     "waiting_for_verification": "正在等待验证...",

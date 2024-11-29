@@ -62,7 +62,7 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
         if (
             open &&
             directlyShowUploadFiles &&
-            publicCollectionGalleryContext.accessedThroughSharedURL
+            publicCollectionGalleryContext.credentials
         ) {
             uploadFiles();
             onClose();
