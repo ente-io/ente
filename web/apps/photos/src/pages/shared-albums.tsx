@@ -452,14 +452,14 @@ export default function PublicCollectionGallery() {
         }
     };
 
-    if (loading) {
-        if (!publicFiles) {
-            return (
-                <VerticallyCentered>
-                    <ActivityIndicator />
-                </VerticallyCentered>
-            );
-        }
+    if (loading && !publicFiles) {
+        return (
+            <VerticallyCentered>
+                <ActivityIndicator />
+            </VerticallyCentered>
+        );
+    } else if (!publicFiles) {
+        return <VerticallyCentered>{t("NOT_FOUND")}</VerticallyCentered>;
     } else if (errorMessage) {
         return <VerticallyCentered>{errorMessage}</VerticallyCentered>;
     } else if (isPasswordProtected && !passwordJWTToken.current) {
@@ -479,8 +479,6 @@ export default function PublicCollectionGallery() {
                 </FormPaper>
             </VerticallyCentered>
         );
-    } else if (!publicFiles) {
-        return <VerticallyCentered>{t("NOT_FOUND")}</VerticallyCentered>;
     }
 
     return (
