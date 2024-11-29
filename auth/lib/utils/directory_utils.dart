@@ -66,13 +66,12 @@ class DirectoryUtils {
       Directory oldDataDir;
       Directory newDataDir = await getApplicationSupportDirectory();
       await newDataDir.create(recursive: true);
-
-      Directory? tempDir;
+      
       if (Platform.isLinux) {
         oldDataDir = Directory(
           p.join(dataHome.path, "ente_auth"),
         );
-        tempDir = Directory(
+        Directory tempDir = Directory(
           p.join(dataHome.path, "enteauth"),
         );
         if (tempDir.existsSync()) {
@@ -88,24 +87,23 @@ class DirectoryUtils {
             "ente",
           ),
         );
-        tempDir = Directory(
+        Directory tempDir = Directory(
           p.join(
             (await getApplicationDocumentsDirectory()).path,
             "enteauth",
           ),
         );
         if (tempDir.existsSync()) {
+          oldDataDir = tempDir;
           databaseFile = File(
             p.join(
-              (await getApplicationDocumentsDirectory()).path,
-              "enteauth",
+              tempDir.path,
               ".ente.authenticator.db",
             ),
           );
           offlineDatabaseFile = File(
             p.join(
-              (await getApplicationDocumentsDirectory()).path,
-              "enteauth",
+              tempDir.path,
               ".ente.offline_authenticator.db",
             ),
           );
