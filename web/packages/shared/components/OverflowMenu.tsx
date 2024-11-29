@@ -90,7 +90,6 @@ interface OverflowMenuOptionProps {
     color?: ButtonProps["color"];
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
-    keepOpenAfterClick?: boolean;
     children?: any;
     // To avoid changing old places without an audit, new code should use this
     // option explicitly to fix/tweak the alignment of the button label and
@@ -103,7 +102,6 @@ export const OverflowMenuOption: React.FC<OverflowMenuOptionProps> = ({
     color = "primary",
     startIcon,
     endIcon,
-    keepOpenAfterClick,
     centerAlign,
     children,
 }) => {
@@ -111,9 +109,7 @@ export const OverflowMenuOption: React.FC<OverflowMenuOptionProps> = ({
 
     const handleClick = () => {
         onClick();
-        if (!keepOpenAfterClick) {
-            menuContext.close();
-        }
+        menuContext.close();
     };
     return (
         <MenuItem
