@@ -258,11 +258,12 @@ packages:
   chewie:
     dependency: "direct main"
     description:
-      name: chewie
-      sha256: "8bc4ac4cf3f316e50a25958c0f5eb9bb12cf7e8308bb1d74a43b230da2cfc144"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.7.5"
+      path: "."
+      ref: forked_video_player_plus
+      resolved-ref: "2d8908efe9d7533ec76abe2e59444547c4031f28"
+      url: "https://github.com/ente-io/chewie.git"
+    source: git
+    version: "1.7.1"
   cli_util:
     dependency: transitive
     description:
