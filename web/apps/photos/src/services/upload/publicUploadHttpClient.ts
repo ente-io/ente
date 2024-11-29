@@ -1,4 +1,8 @@
-import { ensureOk } from "@/base/http";
+import {
+    authenticatedPublicAlbumsRequestHeaders,
+    ensureOk,
+    type PublicAlbumsCredentials,
+} from "@/base/http";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { EnteFile } from "@/media/file";
@@ -56,8 +60,7 @@ class PublicUploadHttpClient {
      */
     async fetchUploadURLs(
         countHint: number,
-        token: string,
-        passwordToken: string,
+        credentials: PublicAlbumsCredentials,
     ) {
         const count = Math.min(50, countHint * 2).toString();
         const params = new URLSearchParams({ count });
@@ -66,12 +69,7 @@ class PublicUploadHttpClient {
             // TODO: Use authenticatedPublicAlbumsRequestHeaders after the public
             // albums refactor branch is merged.
             // headers: await authenticatedRequestHeaders(),
-            headers: {
-                "X-Auth-Access-Token": token,
-                ...(passwordToken && {
-                    "X-Auth-Access-Token-JWT": passwordToken,
-                }),
-            },
+            headers: authenticatedPublicAlbumsRequestHeaders(credentials),
         });
         ensureOk(res);
         return (

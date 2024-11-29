@@ -194,8 +194,10 @@ class UploadService {
             }
             urls = await publicUploadHttpClient.fetchUploadURLs(
                 this.pendingUploadCount,
-                this.publicUploadProps.token,
-                this.publicUploadProps.passwordToken,
+                {
+                    accessToken: this.publicUploadProps.token,
+                    accessTokenJWT: this.publicUploadProps.passwordToken,
+                },
             );
         } else {
             urls = await UploadHttpClient.fetchUploadURLs(
