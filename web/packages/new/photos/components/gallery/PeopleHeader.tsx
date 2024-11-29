@@ -147,7 +147,7 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
                 fileCount={person.fileIDs.length}
             />
             <OverflowMenu
-                ariaControls={"person-options"}
+                ariaID={"person-options"}
                 triggerButtonIcon={<MoreHorizIcon />}
             >
                 <OverflowMenuOption
@@ -211,7 +211,7 @@ const IgnoredPersonHeader: React.FC<IgnoredPersonHeaderProps> = ({
                 fileCount={person.fileIDs.length}
             />
             <OverflowMenu
-                ariaControls={"person-options"}
+                ariaID={"person-options"}
                 triggerButtonIcon={<MoreHorizIcon />}
             >
                 <OverflowMenuOption
@@ -272,7 +272,7 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
                 </Tooltip>
 
                 <OverflowMenu
-                    ariaControls={"person-options"}
+                    ariaID={"person-options"}
                     triggerButtonIcon={<MoreHorizIcon />}
                 >
                     <OverflowMenuOption

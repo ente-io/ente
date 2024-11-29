@@ -716,7 +716,7 @@ const ListHeader: React.FC<ListHeaderProps> = ({
                 />
                 {downloadEnabled && (
                     <OverflowMenu
-                        ariaControls={"collection-options"}
+                        ariaID={"collection-options"}
                         triggerButtonIcon={<MoreHoriz />}
                     >
                         <OverflowMenuOption

@@ -311,14 +311,14 @@ interface EntryOptionsProps {
 const EntryOptions: React.FC<EntryOptionsProps> = ({ confirmStopWatching }) => {
     return (
         <OverflowMenu
+            ariaID={"watch-mapping-option"}
+            triggerButtonIcon={<MoreHorizIcon />}
             menuPaperProps={{
                 sx: {
                     backgroundColor: (theme) =>
                         theme.colors.background.elevated2,
                 },
             }}
-            ariaControls={"watch-mapping-option"}
-            triggerButtonIcon={<MoreHorizIcon />}
         >
             <OverflowMenuOption
                 color="critical"

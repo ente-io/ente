@@ -41,7 +41,7 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
     ...optProps
 }) => (
     <OverflowMenu
-        ariaControls="collection-sort"
+        ariaID="collection-sort"
         triggerButtonIcon={<SortIcon />}
         menuPaperProps={{
             sx: {

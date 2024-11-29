@@ -18,13 +18,25 @@ const OverflowMenuContext = createContext({
 });
 
 interface OverflowMenuProps {
+    /**
+     * An ARIA identifier for the overflow menu when it is displayed.
+     */
+    ariaID: string;
+    /**
+     * The icon for the trigger button.
+     */
     triggerButtonIcon: React.ReactNode;
+    /**
+     * Optional additional properties for the trigger icon button.
+     */
     triggerButtonProps?: Partial<IconButtonProps>;
-    children?: React.ReactNode;
-    ariaControls: string;
+    // backgroundColor;
     menuPaperProps?: Partial<PaperProps>;
 }
 
+/**
+ * A custom MUI {@link Menu} with some Ente specific styling applied to it.
+ */
 export const StyledMenu = styled(Menu)`
     & .MuiPaper-root {
         margin: 16px auto;
@@ -38,12 +50,18 @@ export const StyledMenu = styled(Menu)`
     }
 `;
 
-export const OverflowMenu: React.FC<OverflowMenuProps> = ({
-    children,
-    ariaControls,
+/**
+ * An overflow menu showing {@link OverflowMenuOptions}, alongwith a button to
+ * trigger the visibility of the menu.
+ */
+export const OverflowMenu: React.FC<
+    React.PropsWithChildren<OverflowMenuProps>
+> = ({
+    ariaID,
     triggerButtonIcon,
     triggerButtonProps,
     menuPaperProps,
+    children,
 }) => {
     const [anchorEl, setAnchorEl] = useState<MenuProps["anchorEl"]>();
     const context = useMemo(
@@ -54,7 +72,7 @@ export const OverflowMenu: React.FC<OverflowMenuProps> = ({
         <OverflowMenuContext.Provider value={context}>
             <IconButton
                 onClick={(event) => setAnchorEl(event.currentTarget)}
-                aria-controls={anchorEl ? ariaControls : undefined}
+                aria-controls={anchorEl ? ariaID : undefined}
                 aria-haspopup="true"
                 aria-expanded={anchorEl ? "true" : undefined}
                 {...triggerButtonProps}
@@ -62,13 +80,13 @@ export const OverflowMenu: React.FC<OverflowMenuProps> = ({
                 {triggerButtonIcon}
             </IconButton>
             <StyledMenu
-                id={ariaControls}
+                id={ariaID}
                 anchorEl={anchorEl}
                 open={!!anchorEl}
                 onClose={() => setAnchorEl(undefined)}
                 MenuListProps={{
                     disablePadding: true,
-                    "aria-labelledby": ariaControls,
+                    "aria-labelledby": ariaID,
                 }}
                 PaperProps={menuPaperProps}
                 anchorOrigin={{

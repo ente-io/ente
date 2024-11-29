@@ -156,7 +156,7 @@ const AuthNavbar: React.FC = () => {
             </HorizontalFlex>
             <HorizontalFlex position={"absolute"} right="24px">
                 <OverflowMenu
-                    ariaControls={"auth-options"}
+                    ariaID={"auth-options"}
                     triggerButtonIcon={<MoreHoriz />}
                 >
                     <OverflowMenuOption
