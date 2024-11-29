@@ -18,7 +18,6 @@ import {
 } from "@ente/shared/components/OverflowMenu";
 import { CustomError } from "@ente/shared/error";
 import FolderIcon from "@mui/icons-material/Folder";
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import {
     Box,
     Button,
@@ -269,11 +268,7 @@ const DirectoryPathContainer = styled(LinkButton)(
 );
 
 const ChangeDirectoryOption: React.FC<ButtonishProps> = ({ onClick }) => (
-    <OverflowMenu
-        triggerButtonProps={{ sx: { ml: 1 } }}
-        ariaControls={"export-option"}
-        triggerButtonIcon={<MoreHoriz />}
-    >
+    <OverflowMenu ariaID="export-option" triggerButtonProps={{ sx: { ml: 1 } }}>
         <OverflowMenuOption onClick={onClick} startIcon={<FolderIcon />}>
             {t("CHANGE_FOLDER")}
         </OverflowMenuOption>

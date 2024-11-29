@@ -1,21 +1,23 @@
+import type { PublicAlbumsCredentials } from "@/base/http";
 import { TimeStampListItem } from "components/PhotoList";
 import { createContext } from "react";
 
 export interface PublicCollectionGalleryContextType {
-    token: string;
-    passwordToken: string;
+    /**
+     * The {@link PublicAlbumsCredentials} to use. These are guaranteed to be
+     * set if we are in the context of the public albums app, and will be
+     * undefined when we're in the default photos app context.
+     */
+    credentials: PublicAlbumsCredentials | undefined;
     referralCode: string | null;
-    accessedThroughSharedURL: boolean;
     photoListHeader: TimeStampListItem;
     photoListFooter: TimeStampListItem;
 }
 
 export const PublicCollectionGalleryContext =
     createContext<PublicCollectionGalleryContextType>({
-        token: null,
-        passwordToken: null,
+        credentials: undefined,
         referralCode: null,
-        accessedThroughSharedURL: false,
         photoListHeader: null,
         photoListFooter: null,
     });

@@ -249,7 +249,7 @@ export default function Uploader({
                 setUploadProgressView,
             },
             onUploadFile,
-            publicCollectionGalleryContext,
+            publicCollectionGalleryContext.credentials,
         );
 
         if (uploadManager.isUploadRunning()) {
@@ -288,11 +288,7 @@ export default function Uploader({
                 setDesktopZipItems(zipItems);
             });
         }
-    }, [
-        publicCollectionGalleryContext.accessedThroughSharedURL,
-        publicCollectionGalleryContext.token,
-        publicCollectionGalleryContext.passwordToken,
-    ]);
+    }, [publicCollectionGalleryContext.credentials]);
 
     // Handle selected files when user selects files for upload through the open
     // file / open folder selection dialog, or drag-and-drops them.
@@ -417,10 +413,10 @@ export default function Uploader({
         props.setLoading(false);
 
         (async () => {
-            if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+            if (publicCollectionGalleryContext.credentials) {
                 const uploaderName = await getPublicCollectionUploaderName(
                     getPublicCollectionUID(
-                        publicCollectionGalleryContext.token,
+                        publicCollectionGalleryContext.credentials.accessToken,
                     ),
                 );
                 uploaderNameRef.current = uploaderName;
@@ -727,7 +723,7 @@ export default function Uploader({
             if (!skipSave) {
                 savePublicCollectionUploaderName(
                     getPublicCollectionUID(
-                        publicCollectionGalleryContext.token,
+                        publicCollectionGalleryContext.credentials.accessToken,
                     ),
                     uploaderName,
                 );

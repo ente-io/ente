@@ -24,10 +24,10 @@ interface CollectionsSortOptionsProps {
      */
     nestedInDialog?: boolean;
     /**
-     * Set this to true to disable the background in the button that triggers
-     * the menu.
+     * Set this to true to disable the background for the icon button that
+     * triggers the menu.
      */
-    disableTriggerButtonBackground?: boolean;
+    transparentTriggerButtonBackground?: boolean;
 }
 
 /**
@@ -37,11 +37,11 @@ interface CollectionsSortOptionsProps {
  */
 export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
     nestedInDialog,
-    disableTriggerButtonBackground,
+    transparentTriggerButtonBackground,
     ...optProps
 }) => (
     <OverflowMenu
-        ariaControls="collection-sort"
+        ariaID="collection-sort"
         triggerButtonIcon={<SortIcon />}
         menuPaperProps={{
             sx: {
@@ -54,7 +54,7 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
         triggerButtonProps={{
             sx: {
                 backgroundColor: (theme) =>
-                    disableTriggerButtonBackground
+                    transparentTriggerButtonBackground
                         ? undefined
                         : theme.colors.fill.faint,
             },

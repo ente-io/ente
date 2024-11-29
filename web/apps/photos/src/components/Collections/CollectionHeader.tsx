@@ -330,7 +330,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
             />
 
             <OverflowMenu
-                ariaControls={"collection-options"}
+                ariaID={"collection-options"}
                 triggerButtonIcon={<MoreHoriz ref={overFlowMenuIconRef} />}
             >
                 {collectionSummaryType == "trash" ? (
