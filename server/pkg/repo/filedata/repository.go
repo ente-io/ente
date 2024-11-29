@@ -65,7 +65,7 @@ func (r *Repository) InsertOrUpdatePreviewData(ctx context.Context, data filedat
 	}
 	query := `
         INSERT INTO file_data 
-            (file_id, user_id, data_type, size, latest_bucket, obj_id, obj_nonce ) 
+            (file_id, user_id, data_type, size, latest_bucket, obj_id, obj_nonce, obj_size ) 
         VALUES 
             ($1, $2, $3, $4, $5, $6, $7)
         ON CONFLICT (file_id, data_type)
@@ -85,10 +85,11 @@ func (r *Repository) InsertOrUpdatePreviewData(ctx context.Context, data filedat
             latest_bucket = EXCLUDED.latest_bucket,
             obj_id = EXCLUDED.obj_id,
             obj_nonce = excluded.obj_nonce,
+            obj_size = excluded.obj_size,
             updated_at = now_utc_micro_seconds()
         WHERE file_data.is_deleted = false`
 	_, err = tx.ExecContext(ctx, query,
-		data.FileID, data.UserID, string(data.Type), data.Size, data.LatestBucket, *data.ObjectID, data.ObjectNonce)
+		data.FileID, data.UserID, string(data.Type), data.Size, data.LatestBucket, *data.ObjectID, data.ObjectNonce, data.ObjectSize)
 	if err != nil {
 		tx.Rollback()
 		return stacktrace.Propagate(err, "failed to insert file data")
@@ -102,7 +103,7 @@ func (r *Repository) InsertOrUpdatePreviewData(ctx context.Context, data filedat
 }
 
 func (r *Repository) GetFilesData(ctx context.Context, oType ente.ObjectType, fileIDs []int64) ([]filedata.Row, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, user_id, data_type, size, latest_bucket, replicated_buckets, delete_from_buckets, inflight_rep_buckets, pending_sync, is_deleted, sync_locked_till, created_at, updated_at, obj_id, obj_nonce
+	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, user_id, data_type, size, latest_bucket, replicated_buckets, delete_from_buckets, inflight_rep_buckets, pending_sync, is_deleted, sync_locked_till, created_at, updated_at, obj_id, obj_nonce, obj_size
 										FROM file_data
 										WHERE data_type = $1 AND file_id = ANY($2)`, string(oType), pq.Array(fileIDs))
 	if err != nil {
@@ -112,7 +113,7 @@ func (r *Repository) GetFilesData(ctx context.Context, oType ente.ObjectType, fi
 }
 
 func (r *Repository) GetFileData(ctx context.Context, fileIDs int64) ([]filedata.Row, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, user_id, data_type, size, latest_bucket, replicated_buckets, delete_from_buckets,inflight_rep_buckets, pending_sync, is_deleted, sync_locked_till, created_at, updated_at, obj_id, obj_nonce
+	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, user_id, data_type, size, latest_bucket, replicated_buckets, delete_from_buckets,inflight_rep_buckets, pending_sync, is_deleted, sync_locked_till, created_at, updated_at, obj_id, obj_nonce, obj_size
 										FROM file_data
 										WHERE file_id = $1`, fileIDs)
 	if err != nil {
@@ -318,7 +319,7 @@ func convertRowsToFilesData(rows *sql.Rows) ([]filedata.Row, error) {
 	var filesData []filedata.Row
 	for rows.Next() {
 		var fileData filedata.Row
-		err := rows.Scan(&fileData.FileID, &fileData.UserID, &fileData.Type, &fileData.Size, &fileData.LatestBucket, pq.Array(&fileData.ReplicatedBuckets), pq.Array(&fileData.DeleteFromBuckets), pq.Array(&fileData.InflightReplicas), &fileData.PendingSync, &fileData.IsDeleted, &fileData.SyncLockedTill, &fileData.CreatedAt, &fileData.UpdatedAt, &fileData.ObjectID, &fileData.ObjectNonce)
+		err := rows.Scan(&fileData.FileID, &fileData.UserID, &fileData.Type, &fileData.Size, &fileData.LatestBucket, pq.Array(&fileData.ReplicatedBuckets), pq.Array(&fileData.DeleteFromBuckets), pq.Array(&fileData.InflightReplicas), &fileData.PendingSync, &fileData.IsDeleted, &fileData.SyncLockedTill, &fileData.CreatedAt, &fileData.UpdatedAt, &fileData.ObjectID, &fileData.ObjectNonce, &fileData.ObjectSize)
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}

@@ -115,7 +115,11 @@ type Row struct {
 	ObjectID     *string
 	// For HLS video object, there's no object nonce, all relevant data
 	// is stored in the metadata object that primarily contains the playlist.
-	ObjectNonce       *string
+	ObjectNonce *string
+	// Size of the object that is stored in the S3 bucket.
+	// In case of HLS video, this points to the size of the encrypted video.
+	// The playlist size can be calculated by the size - objectSize.
+	ObjectSize        *int64
 	ReplicatedBuckets []string
 	DeleteFromBuckets []string
 	InflightReplicas  []string
