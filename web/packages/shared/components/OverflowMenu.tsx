@@ -1,4 +1,5 @@
 import { FluidContainer } from "@ente/shared/components/Container";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import {
     Box,
     IconButton,
@@ -10,7 +11,6 @@ import {
     type PaperProps,
 } from "@mui/material";
 import Menu, { type MenuProps } from "@mui/material/Menu";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import React, { createContext, useContext, useMemo, useState } from "react";
 
 const OverflowMenuContext = createContext({
@@ -91,7 +91,9 @@ export const OverflowMenu: React.FC<
                     disablePadding: true,
                     "aria-labelledby": ariaID,
                 }}
-                PaperProps={menuPaperProps}
+                slotProps={{
+                    paper: menuPaperProps,
+                }}
                 anchorOrigin={{
                     vertical: "bottom",
                     horizontal: "right",
