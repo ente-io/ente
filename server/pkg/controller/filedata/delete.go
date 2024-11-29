@@ -63,7 +63,7 @@ func (c *Controller) tryDelete() error {
 	} else if row.Type == ente.PreviewVideo {
 		err = c.deleteFileRowV2(*row)
 	} else {
-		log.Warning("Unsupported object type for deletion: %s", row.Type)
+		log.Warningf("Unsupported object type for deletion: %s", row.Type)
 		return nil
 	}
 	if err != nil {
