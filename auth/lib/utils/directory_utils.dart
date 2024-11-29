@@ -42,7 +42,7 @@ class DirectoryUtils {
     return await getTemporaryDirectory();
   }
 
-  static String migratedNamingChanges = "migrated_naming_changes.b6";
+  static String migratedNamingChanges = "migrated_naming_changes.b5";
   static migrateNamingChanges() async {
     try {
       final sharedPrefs = await SharedPreferences.getInstance();
@@ -85,10 +85,15 @@ class DirectoryUtils {
         oldDataDir = Directory(
           p.join(
             (await getApplicationDocumentsDirectory()).path,
+            "ente",
+          ),
+        );
+        tempDir = Directory(
+          p.join(
+            (await getApplicationDocumentsDirectory()).path,
             "enteauth",
           ),
         );
-        tempDir = oldDataDir;
         if (tempDir.existsSync()) {
           databaseFile = File(
             p.join(
@@ -124,14 +129,15 @@ class DirectoryUtils {
       final prefix = Platform.isMacOS ? "" : ".";
       File newDatabaseFile =
           File(p.join(newDataDir.path, "${prefix}ente.authenticator.db"));
-      if (await databaseFile.exists()) {
+      if (await databaseFile.exists() && !await newDatabaseFile.exists()) {
         await databaseFile.copy(newDatabaseFile.path);
       }
 
       File newOfflineDatabaseFile = File(
         p.join(newDataDir.path, "${prefix}ente.offline_authenticator.db"),
       );
-      if (await offlineDatabaseFile.exists()) {
+      if (await offlineDatabaseFile.exists() &&
+          !await newOfflineDatabaseFile.exists()) {
         await offlineDatabaseFile.copy(newOfflineDatabaseFile.path);
       }
 
