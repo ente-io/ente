@@ -195,18 +195,17 @@ Future<String> generateOTPEntryHtml(
     code.rawData,
   );
   return '''
-      <div class="otp-entry">
-        <p class="details">
-          <p><span class="label">Account:</span> ${code.account}</p>
-          <p><span class="label">Issuer:</span> ${code.issuer}</p>
-          <p><span class="label">Type:</span> ${code.type.toString()}</p>
-          <p><span class="label">Algorithm:</span> ${code.algorithm.toString()}</p>
-          <p><span class="label">Digits:</span> ${code.digits}</p>
-        </p>
-        <p><span class="qr-code">
-          <img src="data:image/png;base64,$qrBase64" alt="QR Code">
-        </span></p>
+    <div class="otp-entry">
+      <div>
+        <p><b>Account:</b> A@gmail.com</p>
+        <p><b>Issuer:</b> A</p>
+        <p><b>Type:</b> Type.totp</p>
+        <p><b>Algorithm:</b> Algorithm.sha1</p>
+        <p><b>Digits:</b> 6</p>
+        <img src="data:image/png;base64,$qrBase64" alt="QR Code">
       </div>
+    </div>
+  <hr style="width: 1000px;">
     ''';
 }
 
@@ -249,128 +248,44 @@ Future<String> generateHtml(BuildContext context) async {
   }
 
   return '''
-    <!DOCTYPE html>
-    <html>
+  <!DOCTYPE html>
+  <html>
     <head>
-      <title>OTP Data Export</title>
+      <title>Ente OTP Data Export</title>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
-        html {
-          font-size: 62.5%;
-          box-sizing: border-box;
+        * {
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+          font-size: large;
+          text-align: center;
+          width: 100%;
+          flex-direction: column;
+          justify-items: center;
         }
-
-        *, *:before, *:after {
-          box-sizing: inherit;
-        }
-
-        body {
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-          font-size: 1.6rem;
-          line-height: 1.5;
-          max-width: 80rem;
-          margin: 0 auto;
-          padding: 2rem;
-          background-color: #f8f9fa;
-          color: #212529;
-        }
-
-        .otp-entry {
-          background: white;
-          border-radius: 1.2rem;
-          margin: 2.4rem 0;
-          padding: 2.4rem;
-          box-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.08);
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .otp-entry:hover {
-          transform: translateY(-0.2rem);
-          box-shadow: 0 0.4rem 1.5rem rgba(0, 0, 0, 0.12);
-        }
-
         h1 {
-          font-size: 3.2rem;
-          font-weight: 700;
-          color: #1a1a1a;
-          text-align: center;
-          margin: 3.2rem 0;
-          letter-spacing: -0.02em;
+          font-size: 35px;
         }
-
-        h2 {
-          font-size: 2.4rem;
-          font-weight: 600;
-          color: #2d2d2d;
-          margin: 0 0 1.6rem 0;
-          letter-spacing: -0.01em;
-        }
-
-        .details {
-          margin: 1.6rem 0;
-          font-size: 1.4rem;
-        }
-
-        .label {
-          color: #6c757d;
-          font-weight: 500;
-          margin-right: 1.2rem;
-          display: inline-block;
-          min-width: 12rem;
-        }
-
-        .qr-code {
-          margin-top: 2.4rem;
-          text-align: center;
-        }
-
-        .qr-code img {
-          max-width: 30rem;
-          height: auto;
-          border-radius: 0.8rem;
-          box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.06);
-        }
-
         p {
-          margin: 0.8rem 0;
-          line-height: 1.5;
+          text-align: left
         }
-
         .timestamp {
+          font-size: 30px;
           text-align: center;
-          color: #6c757d;
-          margin: 2.4rem 0 4rem;
-          font-size: 1.4rem;
-          font-weight: 500;
         }
-
-        @media (max-width: 600px) {
-          html {
-            font-size: 56.25%;
-          }
-
-          body {
-            padding: 1.6rem;
-          }
-
-          .otp-entry {
-            padding: 1.6rem;
-            margin: 1.6rem 0;
-          }
-
-          .label {
-            min-width: 9rem;
-          }
+        div.otp-entry {
+          width: 700px;
+          padding: 10px;
         }
       </style>
     </head>
     <body>
       <h1>Ente OTP Codes Export</h1>
       <p class="timestamp">Export Date: $formattedDate</p>
+      <hr style="width: 1000px;">
       ${enteries.join('\n')}
     </body>
-    </html>
+  </html>
   ''';
 }
 
