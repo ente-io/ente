@@ -8,7 +8,7 @@ import {
     useIsTouchscreen,
 } from "@/base/components/utils/hooks";
 import { sharedCryptoWorker } from "@/base/crypto";
-import { isHTTP401Error } from "@/base/http";
+import { isHTTP401Error, PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
 import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
@@ -85,9 +85,7 @@ import { downloadSelectedFiles, getSelectedFiles } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export default function PublicCollectionGallery() {
-    const token = useRef<string>(null);
-    // passwordJWTToken refers to the jwt token which is used for album protected by password.
-    const passwordJWTToken = useRef<string>(null);
+    const credentials = useRef<PublicAlbumsCredentials | undefined>();
     const collectionKey = useRef<string>(null);
     const url = useRef<string>(null);
     const referralCode = useRef<string>("");
@@ -241,16 +239,13 @@ export default function PublicCollectionGallery() {
                     ck.length < 50
                         ? await cryptoWorker.toB64(bs58.decode(ck))
                         : await cryptoWorker.fromHex(ck);
-                token.current = t;
-                downloadManager.setPublicAlbumsCredentials({
-                    accessToken: token.current,
-                });
-                await updateShouldDisableCFUploadProxy();
                 collectionKey.current = dck;
                 url.current = window.location.href;
                 const localCollection = await getLocalPublicCollection(
                     collectionKey.current,
                 );
+                const accessToken = t;
+                let accessTokenJWT: string | undefined;
                 if (localCollection) {
                     referralCode.current = await getReferralCode();
                     const sortAsc: boolean =
@@ -259,20 +254,20 @@ export default function PublicCollectionGallery() {
                     const isPasswordProtected =
                         localCollection?.publicURLs?.[0]?.passwordEnabled;
                     setIsPasswordProtected(isPasswordProtected);
-                    const collectionUID = getPublicCollectionUID(token.current);
+                    const collectionUID = getPublicCollectionUID(accessToken);
                     const localFiles = await getLocalPublicFiles(collectionUID);
                     const localPublicFiles = sortFiles(
                         mergeMetadata(localFiles),
                         sortAsc,
                     );
                     setPublicFiles(localPublicFiles);
-                    passwordJWTToken.current =
+                    accessTokenJWT =
                         await getLocalPublicCollectionPassword(collectionUID);
-                    downloadManager.setPublicAlbumsCredentials({
-                        accessToken: token.current,
-                        accessTokenJWT: passwordJWTToken.current,
-                    });
                 }
+                credentials.current = { accessToken, accessTokenJWT };
+                downloadManager.setPublicAlbumsCredentials(credentials.current);
+                // Update the CF proxy flag, but we don't need to block on it.
+                void updateShouldDisableCFUploadProxy();
                 await syncWithRemote();
             } finally {
                 if (!redirectingToWebsite) {
@@ -321,12 +316,14 @@ export default function PublicCollectionGallery() {
     }, [onAddPhotos]);
 
     const syncWithRemote = async () => {
-        const collectionUID = getPublicCollectionUID(token.current);
+        const collectionUID = getPublicCollectionUID(
+            credentials.current.accessToken,
+        );
         try {
             showLoadingBar();
             setLoading(true);
             const [collection, userReferralCode] = await getPublicCollection(
-                token.current,
+                credentials.current.accessToken,
                 collectionKey.current,
             );
             referralCode.current = userReferralCode;
@@ -337,19 +334,26 @@ export default function PublicCollectionGallery() {
             setIsPasswordProtected(isPasswordProtected);
             setErrorMessage(null);
 
-            // remove outdated password, sharer has disabled the password
-            if (!isPasswordProtected && passwordJWTToken.current) {
-                passwordJWTToken.current = null;
+            // Remove the locally saved outdated password token if the sharer
+            // has disabled password protection on the link.
+            if (!isPasswordProtected && credentials.current.accessTokenJWT) {
+                credentials.current.accessTokenJWT = undefined;
+                downloadManager.setPublicAlbumsCredentials(credentials.current);
                 savePublicCollectionPassword(collectionUID, null);
             }
+
+            if (isPasswordProtected && !credentials.current.accessTokenJWT) {
+                await removePublicFiles(collectionUID);
+            }
+
             if (
                 !isPasswordProtected ||
-                (isPasswordProtected && passwordJWTToken.current)
+                (isPasswordProtected && credentials.current.accessTokenJWT)
             ) {
                 try {
                     await syncPublicFiles(
-                        token.current,
-                        passwordJWTToken.current,
+                        credentials.current.accessToken,
+                        credentials.current.accessTokenJWT,
                         collection,
                         setPublicFiles,
                     );
@@ -358,12 +362,12 @@ export default function PublicCollectionGallery() {
                     if (parsedError.message === CustomError.TOKEN_EXPIRED) {
                         // passwordToken has expired, sharer has changed the password,
                         // so,clearing local cache token value to prompt user to re-enter password
-                        passwordJWTToken.current = null;
+                        credentials.current.accessTokenJWT = undefined;
+                        downloadManager.setPublicAlbumsCredentials(
+                            credentials.current,
+                        );
                     }
                 }
-            }
-            if (isPasswordProtected && !passwordJWTToken.current) {
-                await removePublicFiles(collectionUID);
             }
         } catch (e) {
             const parsedError = parseSharingErrorCodes(e);
@@ -398,18 +402,17 @@ export default function PublicCollectionGallery() {
         setFieldError,
     ) => {
         try {
-            const jwtToken = await verifyPublicAlbumPassword(
+            const accessTokenJWT = await verifyPublicAlbumPassword(
                 publicCollection.publicURLs[0]!,
                 password,
-                token.current,
+                credentials.current.accessToken,
             );
-            passwordJWTToken.current = jwtToken;
-            downloadManager.setPublicAlbumsCredentials({
-                accessToken: token.current,
-                accessTokenJWT: passwordJWTToken.current,
-            });
-            const collectionUID = getPublicCollectionUID(token.current);
-            await savePublicCollectionPassword(collectionUID, jwtToken);
+            credentials.current.accessTokenJWT = accessTokenJWT;
+            downloadManager.setPublicAlbumsCredentials(credentials.current);
+            const collectionUID = getPublicCollectionUID(
+                credentials.current.accessToken,
+            );
+            await savePublicCollectionPassword(collectionUID, accessTokenJWT);
         } catch (e) {
             log.error("Failed to verifyLinkPassword", e);
             if (isHTTP401Error(e)) {
@@ -452,7 +455,7 @@ export default function PublicCollectionGallery() {
         }
     };
 
-    if (loading && !publicFiles) {
+    if (loading && (!publicFiles || !credentials.current)) {
         return (
             <VerticallyCentered>
                 <ActivityIndicator />
@@ -462,7 +465,7 @@ export default function PublicCollectionGallery() {
         return <VerticallyCentered>{t("NOT_FOUND")}</VerticallyCentered>;
     } else if (errorMessage) {
         return <VerticallyCentered>{errorMessage}</VerticallyCentered>;
-    } else if (isPasswordProtected && !passwordJWTToken.current) {
+    } else if (isPasswordProtected && !credentials.current.accessTokenJWT) {
         return (
             <VerticallyCentered>
                 <FormPaper>
@@ -484,9 +487,9 @@ export default function PublicCollectionGallery() {
     return (
         <PublicCollectionGalleryContext.Provider
             value={{
-                token: token.current,
+                token: credentials.current.accessToken,
                 referralCode: referralCode.current,
-                passwordToken: passwordJWTToken.current,
+                passwordToken: credentials.current.accessTokenJWT,
                 accessedThroughSharedURL: true,
                 photoListHeader,
                 photoListFooter,
