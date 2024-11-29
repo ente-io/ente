@@ -362,13 +362,13 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 	userID, err := c.UserRepo.GetUserIDWithEmail(email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			if !viper.GetBool("internal.disable-registration") {
+			if viper.GetBool("internal.disable-registration") {
+				return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(ente.ErrPermissionDenied, "")
+			} else {
 				userID, _, err = c.createUser(email, source)
 				if err != nil {
 					return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 				}
-			} else {
-				return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(ente.ErrPermissionDenied, "")
 			}
 		} else {
 			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
