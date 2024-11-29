@@ -44,7 +44,7 @@ import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
@@ -156,8 +156,6 @@ export default function App({ Component, pageProps }: AppProps) {
         setNotificationView(true);
     }, [notificationAttributes]);
 
-    const showNavBar = (show: boolean) => setShowNavBar(show);
-
     const onGenericError = useCallback((e: unknown) => {
         log.error(e);
         // The generic error handler is sometimes called in the context of
@@ -172,21 +170,24 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const logout = useCallback(() => void photosLogout(), []);
 
-    const appContext = {
-        showNavBar,
-        showLoadingBar,
-        hideLoadingBar,
-        watchFolderView,
-        setWatchFolderView,
-        watchFolderFiles,
-        setWatchFolderFiles,
-        setNotificationAttributes,
-        themeColor,
-        setThemeColor,
-        showMiniDialog,
-        onGenericError,
-        logout,
-    };
+    const appContext = useMemo(
+        () => ({
+            showNavBar: (show: boolean) => setShowNavBar(show),
+            showLoadingBar,
+            hideLoadingBar,
+            watchFolderView,
+            setWatchFolderView,
+            watchFolderFiles,
+            setWatchFolderFiles,
+            setNotificationAttributes,
+            themeColor,
+            setThemeColor,
+            showMiniDialog,
+            onGenericError,
+            logout,
+        }),
+        [showLoadingBar, hideLoadingBar, onGenericError, logout],
+    );
 
     const title = isI18nReady ? t("title_photos") : staticAppTitle;
 
