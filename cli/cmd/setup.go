@@ -7,6 +7,7 @@ import (
   "github.com/spf13/cobra"
   "os"
   "net/url"
+  "strings"
 )
 
 var setupCmd = &cobra.Command {
@@ -30,6 +31,7 @@ var addPublicAlbumsUrl = &cobra.Command {
 
     dir := pkg.ConfigureServerDir()
 
+    // Adding path to the museum config file
     viper.AddConfigPath(dir)
     viper.SetConfigName(environment)
     viper.SetConfigType("yaml")
@@ -39,7 +41,7 @@ var addPublicAlbumsUrl = &cobra.Command {
       fmt.Errorf("%v", err)
       return
     }
-    albumsUrl := args[0]
+    albumsUrl := strings.TrimSuffix(args[0], "/")
     _, err = url.ParseRequestURI(albumsUrl)
     if err != nil {
       // Report Error and exit
@@ -60,6 +62,7 @@ var addPublicAlbumsUrl = &cobra.Command {
 }
 
 func init() {
+  // `ente setup` will be the initial root command
   rootCmd.AddCommand(setupCmd)
   rootCmd.Flags().String("public-albums-url", "", "Sets the public-albums url in your environments configuration file")
 
