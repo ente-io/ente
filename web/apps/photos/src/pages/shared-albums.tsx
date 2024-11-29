@@ -461,8 +461,6 @@ export default function PublicCollectionGallery() {
                 <ActivityIndicator />
             </VerticallyCentered>
         );
-    } else if (!publicFiles || !credentials.current) {
-        return <VerticallyCentered>{t("NOT_FOUND")}</VerticallyCentered>;
     } else if (errorMessage) {
         return <VerticallyCentered>{errorMessage}</VerticallyCentered>;
     } else if (isPasswordProtected && !credentials.current.accessTokenJWT) {
@@ -482,6 +480,8 @@ export default function PublicCollectionGallery() {
                 </FormPaper>
             </VerticallyCentered>
         );
+    } else if (!publicFiles || !credentials.current) {
+        return <VerticallyCentered>{t("NOT_FOUND")}</VerticallyCentered>;
     }
 
     // TODO: memo this (after the dependencies are traceable).
