@@ -35,7 +35,6 @@ func (repo *ObjectCopiesRepository) GetAndLockUnreplicatedObject(ctx context.Con
 		}
 	}
 
-	// todo:(neeraj) reduce the gap between last_attempt and now_utc_micro_seconds from 7 days to 1 day
 	row := tx.QueryRowContext(ctx, `
 	SELECT object_key, want_b2, b2, want_wasabi, wasabi, want_scw, scw
 	FROM object_copies
@@ -43,7 +42,7 @@ func (repo *ObjectCopiesRepository) GetAndLockUnreplicatedObject(ctx context.Con
 		(
 			(wasabi IS NULL AND want_wasabi = true) OR
 			(scw IS NULL AND want_scw = true)
-		) AND last_attempt < (now_utc_micro_seconds() - (7* 24::BIGINT * 60 * 60 * 1000 * 1000))
+		) AND last_attempt < (now_utc_micro_seconds() - (24::BIGINT * 60 * 60 * 1000 * 1000))
 	)
 	LIMIT 1
 	FOR UPDATE SKIP LOCKED
@@ -109,6 +108,15 @@ func (repo *ObjectCopiesRepository) RegisterReplicationAttempt(tx *sql.Tx, ctx c
 	SET last_attempt = now_utc_micro_seconds()
 	WHERE object_key = $1
 	`, objectKey)
+	return stacktrace.Propagate(err, "")
+}
+
+func (repo *ObjectCopiesRepository) DelayNextAttemptByDays(ctx context.Context, objectKey string, days int) error {
+	_, err := repo.DB.ExecContext(ctx, `
+	UPDATE object_copies
+	SET last_attempt = last_attempt + ($2 * 24::BIGINT * 60 * 60 * 1000 * 1000)
+	WHERE object_key = $1
+	`, objectKey, days)
 	return stacktrace.Propagate(err, "")
 }
 

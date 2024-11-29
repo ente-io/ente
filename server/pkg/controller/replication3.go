@@ -250,6 +250,16 @@ func (c *ReplicationController3) tryReplicate() error {
 			logger.Error(err)
 		}
 
+		if strings.Contains(err.Error(), "size of the uploaded file") {
+			delayErr := c.ObjectCopiesRepo.DelayNextAttemptByDays(context.Background(), objectKey, 7)
+			if delayErr != nil {
+				logger.WithError(delayErr).Error("Failed to delay next attempt by 7 days")
+			} else {
+				discordAlert := fmt.Sprintf("🔥 Size mismatch for object %s, failed to delay next attempt by 7 days", objectKey)
+				c.notifyDiscord(discordAlert)
+			}
+		}
+
 		if err == nil {
 			logger.Info("Replication attempt succeeded")
 		} else {
