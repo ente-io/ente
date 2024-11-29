@@ -342,10 +342,6 @@ export default function PublicCollectionGallery() {
                 savePublicCollectionPassword(collectionUID, null);
             }
 
-            if (isPasswordProtected && !credentials.current.accessTokenJWT) {
-                await removePublicFiles(collectionUID);
-            }
-
             if (
                 !isPasswordProtected ||
                 (isPasswordProtected && credentials.current.accessTokenJWT)
@@ -368,6 +364,10 @@ export default function PublicCollectionGallery() {
                         );
                     }
                 }
+            }
+
+            if (isPasswordProtected && !credentials.current.accessTokenJWT) {
+                await removePublicFiles(collectionUID);
             }
         } catch (e) {
             const parsedError = parseSharingErrorCodes(e);
