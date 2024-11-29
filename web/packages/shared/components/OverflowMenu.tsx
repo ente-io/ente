@@ -81,7 +81,7 @@ export const OverflowMenu: React.FC<
             </IconButton>
             <StyledMenu
                 id={ariaID}
-                anchorEl={anchorEl}
+                {...(anchorEl ? { anchorEl } : {})}
                 open={!!anchorEl}
                 onClose={() => setAnchorEl(undefined)}
                 MenuListProps={{
