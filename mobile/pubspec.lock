@@ -1539,7 +1539,7 @@ packages:
     source: hosted
     version: "1.1.11"
   media_kit_libs_android_video:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: media_kit_libs_android_video
       sha256: "9dd8012572e4aff47516e55f2597998f0a378e3d588d0fad0ca1f11a53ae090c"
