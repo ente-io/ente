@@ -10,6 +10,7 @@ import {
     type PaperProps,
 } from "@mui/material";
 import Menu, { type MenuProps } from "@mui/material/Menu";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import React, { createContext, useContext, useMemo, useState } from "react";
 
 const OverflowMenuContext = createContext({
@@ -24,8 +25,10 @@ interface OverflowMenuProps {
     ariaID: string;
     /**
      * The icon for the trigger button.
+     *
+     * If not provided, then by default the MoreHoriz icon from MUI is used.
      */
-    triggerButtonIcon: React.ReactNode;
+    triggerButtonIcon?: React.ReactNode;
     /**
      * Optional additional properties for the trigger icon button.
      */
@@ -77,7 +80,7 @@ export const OverflowMenu: React.FC<
                 aria-expanded={anchorEl ? "true" : undefined}
                 {...triggerButtonProps}
             >
-                {triggerButtonIcon}
+                {triggerButtonIcon ?? <MoreHorizIcon />}
             </IconButton>
             <StyledMenu
                 id={ariaID}

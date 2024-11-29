@@ -44,7 +44,6 @@ import AddPhotoAlternateOutlined from "@mui/icons-material/AddPhotoAlternateOutl
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
@@ -715,10 +714,7 @@ const ListHeader: React.FC<ListHeaderProps> = ({
                     fileCount={publicFiles.length}
                 />
                 {downloadEnabled && (
-                    <OverflowMenu
-                        ariaID={"collection-options"}
-                        triggerButtonIcon={<MoreHoriz />}
-                    >
+                    <OverflowMenu ariaID={"collection-options"}>
                         <OverflowMenuOption
                             startIcon={<FileDownloadOutlinedIcon />}
                             onClick={downloadAllFiles}

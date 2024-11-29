@@ -23,7 +23,6 @@ import CheckIcon from "@mui/icons-material/Check";
 import DoNotDisturbOutlinedIcon from "@mui/icons-material/DoNotDisturbOutlined";
 import FolderCopyOutlinedIcon from "@mui/icons-material/FolderCopyOutlined";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import {
     Box,
     Button,
@@ -312,7 +311,6 @@ const EntryOptions: React.FC<EntryOptionsProps> = ({ confirmStopWatching }) => {
     return (
         <OverflowMenu
             ariaID={"watch-mapping-option"}
-            triggerButtonIcon={<MoreHorizIcon />}
             menuPaperProps={{
                 sx: {
                     backgroundColor: (theme) =>
