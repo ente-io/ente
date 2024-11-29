@@ -461,7 +461,7 @@ export default function PublicCollectionGallery() {
                 <ActivityIndicator />
             </VerticallyCentered>
         );
-    } else if (!publicFiles) {
+    } else if (!publicFiles || !credentials.current) {
         return <VerticallyCentered>{t("NOT_FOUND")}</VerticallyCentered>;
     } else if (errorMessage) {
         return <VerticallyCentered>{errorMessage}</VerticallyCentered>;
@@ -484,17 +484,16 @@ export default function PublicCollectionGallery() {
         );
     }
 
+    // TODO: memo this (after the dependencies are traceable).
+    const context = {
+        credentials: credentials.current,
+        referralCode: referralCode.current,
+        photoListHeader,
+        photoListFooter,
+    };
+
     return (
-        <PublicCollectionGalleryContext.Provider
-            value={{
-                token: credentials.current.accessToken,
-                referralCode: referralCode.current,
-                passwordToken: credentials.current.accessTokenJWT,
-                accessedThroughSharedURL: true,
-                photoListHeader,
-                photoListFooter,
-            }}
-        >
+        <PublicCollectionGalleryContext.Provider value={context}>
             <FullScreenDropZone {...{ getDragAndDropRootProps }}>
                 <UploadSelectorInputs
                     {...{
