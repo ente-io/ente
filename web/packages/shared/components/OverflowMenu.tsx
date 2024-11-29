@@ -33,7 +33,10 @@ interface OverflowMenuProps {
      * Optional additional properties for the trigger icon button.
      */
     triggerButtonProps?: Partial<IconButtonProps>;
-    // backgroundColor;
+    /**
+     * Optional additional properties for the MUI {@link Paper} that underlies
+     * the {@link Menu}.
+     */
     menuPaperProps?: Partial<PaperProps>;
 }
 
