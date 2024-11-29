@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v1.7.8 (Unreleased)
+
+-   .
+
 ## v1.7.7
 
 -   Retain JPEG originals even on date modifications.
