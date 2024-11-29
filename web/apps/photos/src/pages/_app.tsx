@@ -186,7 +186,13 @@ export default function App({ Component, pageProps }: AppProps) {
             onGenericError,
             logout,
         }),
-        [showLoadingBar, hideLoadingBar, onGenericError, logout],
+        [
+            showLoadingBar,
+            hideLoadingBar,
+            showMiniDialog,
+            onGenericError,
+            logout,
+        ],
     );
 
     const title = isI18nReady ? t("title_photos") : staticAppTitle;
