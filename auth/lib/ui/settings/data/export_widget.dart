@@ -197,11 +197,11 @@ Future<String> generateOTPEntryHtml(
   return '''
     <div class="otp-entry">
       <div>
-        <p><b>Account:</b> A@gmail.com</p>
-        <p><b>Issuer:</b> A</p>
-        <p><b>Type:</b> Type.totp</p>
-        <p><b>Algorithm:</b> Algorithm.sha1</p>
-        <p><b>Digits:</b> 6</p>
+        <p><b>Account:</b> ${code.account}</p>
+        <p><b>Issuer:</b> ${code.issuer}</p>
+        <p><b>Type:</b> ${code.type.name}</p>
+        <p><b>Algorithm:</b> ${code.algorithm.name}</p>
+        <p><b>Digits:</b> ${code.digits}</p>
         <img src="data:image/png;base64,$qrBase64" alt="QR Code">
       </div>
     </div>
