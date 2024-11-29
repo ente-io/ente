@@ -685,6 +685,10 @@
       "title": "Proxmox"
     },
     {
+      "title": "Pushover",
+      "slug": "pushover"
+    },
+    {
       "title": "qiniuyun",
       "altNames": [
         "七牛云",
