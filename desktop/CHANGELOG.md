@@ -1,10 +1,13 @@
 # CHANGELOG
 
-## v1.7.7 (Unreleased)
+## v1.7.8 (Unreleased)
+
+-   .
+
+## v1.7.7
 
 -   Retain JPEG originals even on date modifications.
 -   Support Portuguese and Vietnamese translations.
--   .
 
 ## v1.7.6
 

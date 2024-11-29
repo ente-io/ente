@@ -27,8 +27,9 @@ import (
 )
 
 const (
-	slowUploadThreshold = 2 * time.Second
-	slowSpeedThreshold  = 0.5 // MB/s
+	slowUploadThreshold             = 2 * time.Second
+	slowSpeedThreshold              = 0.5 // MB/s
+	replicationDelayForStaleObjects = 30
 )
 
 // ReplicationController3 oversees version 3 of our object replication.
@@ -248,6 +249,16 @@ func (c *ReplicationController3) tryReplicate() error {
 	done := func(err error) error {
 		if err != nil {
 			logger.Error(err)
+		}
+
+		if strings.Contains(err.Error(), "size of the uploaded file") {
+			delayErr := c.ObjectCopiesRepo.DelayNextAttemptByDays(context.Background(), objectKey, replicationDelayForStaleObjects)
+			if delayErr != nil {
+				logger.WithError(delayErr).Error("Failed to delay next attempt")
+			} else {
+				discordAlert := fmt.Sprintf("🔥 Size mismatch for object %s, deferred next attemp for %d days", objectKey, replicationDelayForStaleObjects)
+				c.notifyDiscord(discordAlert)
+			}
 		}
 
 		if err == nil {

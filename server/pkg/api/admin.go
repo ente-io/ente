@@ -296,7 +296,7 @@ func (h *AdminHandler) UpdateEmailMFA(c *gin.Context) {
 	}
 
 	go h.DiscordController.NotifyAdminAction(
-		fmt.Sprintf("Admin (%d) updating email mfa (%v) for account %d", auth.GetUserID(c.Request.Header), request.EmailMFA, request.UserID))
+		fmt.Sprintf("Admin (%d) updating email mfa (%v) for account %d", auth.GetUserID(c.Request.Header), *request.EmailMFA, request.UserID))
 	logger := logrus.WithFields(logrus.Fields{
 		"user_id":  request.UserID,
 		"admin_id": auth.GetUserID(c.Request.Header),

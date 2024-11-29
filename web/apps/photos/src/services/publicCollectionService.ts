@@ -362,25 +362,6 @@ export const getPublicCollection = async (
     }
 };
 
-export const verifyPublicCollectionPassword = async (
-    token: string,
-    passwordHash: string,
-): Promise<string> => {
-    try {
-        const resp = await HTTPService.post(
-            await apiURL("/public-collection/verify-password"),
-            { passHash: passwordHash },
-            null,
-            { "X-Auth-Access-Token": token },
-        );
-        const jwtToken = resp.data.jwtToken;
-        return jwtToken;
-    } catch (e) {
-        log.error("failed to verify public collection password", e);
-        throw e;
-    }
-};
-
 export const removePublicCollectionWithFiles = async (
     collectionUID: string,
     collectionKey: string,

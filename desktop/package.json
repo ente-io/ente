@@ -1,6 +1,6 @@
 {
     "name": "ente",
-    "version": "1.7.7-beta",
+    "version": "1.7.8-beta",
     "private": true,
     "description": "Desktop client for Ente Photos",
     "repository": "github:ente-io/photos-desktop",
@@ -30,14 +30,14 @@
         "clip-bpe-js": "^0.0.6",
         "comlink": "^4.4.2",
         "compare-versions": "^6.1.1",
-        "electron-log": "^5.2.2",
+        "electron-log": "^5.2.3",
         "electron-store": "^8.2.0",
         "electron-updater": "^6.3.9",
         "ffmpeg-static": "^5.2.0",
         "lru-cache": "^11.0.2",
         "next-electron-server": "^1.0.0",
         "node-stream-zip": "^1.15.0",
-        "onnxruntime-node": "^1.20.0"
+        "onnxruntime-node": "^1.20.1"
     },
     "devDependencies": {
         "@eslint/js": "^9.15.0",
@@ -48,15 +48,15 @@
         "ajv": "^8.17.1",
         "concurrently": "^9.1.0",
         "cross-env": "^7.0.3",
-        "electron": "^33.2.0",
+        "electron": "^33.2.1",
         "electron-builder": "^25.1.8",
         "eslint": "^9",
-        "prettier": "^3.3.3",
+        "prettier": "3.3.3",
         "prettier-plugin-organize-imports": "^4.1.0",
-        "prettier-plugin-packagejson": "^2.5.3",
+        "prettier-plugin-packagejson": "^2.5.6",
         "shx": "^0.3.4",
-        "typescript": "^5.6.3",
-        "typescript-eslint": "^8.14.0"
+        "typescript": "^5.7.2",
+        "typescript-eslint": "^8.16.0"
     },
     "packageManager": "yarn@1.22.22",
     "productName": "ente"

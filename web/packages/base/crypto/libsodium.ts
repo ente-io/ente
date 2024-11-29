@@ -100,16 +100,6 @@ export const fromB64URLSafeNoPaddingString = async (input: string) => {
     return sodium.to_string(await fromB64URLSafeNoPadding(input));
 };
 
-export async function fromUTF8(input: string) {
-    await sodium.ready;
-    return sodium.from_string(input);
-}
-
-export async function toUTF8(input: string) {
-    await sodium.ready;
-    return sodium.to_string(await fromB64(input));
-}
-
 export async function toHex(input: string) {
     await sodium.ready;
     return sodium.to_hex(await fromB64(input));
@@ -612,7 +602,8 @@ export async function generateKeyAndEncryptToB64(data: string) {
 }
 
 export async function encryptUTF8(data: string, key: string) {
-    const b64Data = await toB64(await fromUTF8(data));
+    await sodium.ready;
+    const b64Data = await toB64(sodium.from_string(data));
     return await encryptToB64(b64Data, key);
 }
 
@@ -721,26 +712,59 @@ export const boxSealOpen = async (
     );
 };
 
-export async function deriveKey(
+/**
+ * Derive a key by hashing the given {@link passphrase} using Argon 2id.
+ *
+ * While the underlying primitive is a password hash (e.g for its storage), this
+ * function is also meant for key derivation using a low-entropy input by
+ * deriving a longer hash from the user's human chosen passphrase.
+ *
+ * The returned key can be used with the various *Box encryption routines.
+ *
+ * @param passphrase The password / passphrase to hash (normal UTF-8 string).
+ *
+ * @param salt Base64 string representing the salt to use when hashing.
+ *
+ * @param opsLimit Operation limit. The maximum amount of computations to
+ * perform.
+ *
+ * @param memLimit Memory limit. The maximum amount of RAM to use.
+ *
+ * @returns The base64 representation of a 256-bit key suitable for being used
+ * with libsodium's secretbox APIs.
+ */
+export const deriveKey = async (
     passphrase: string,
     salt: string,
     opsLimit: number,
     memLimit: number,
-) {
+) => {
     await sodium.ready;
     return await toB64(
         sodium.crypto_pwhash(
             sodium.crypto_secretbox_KEYBYTES,
-            await fromUTF8(passphrase),
+            sodium.from_string(passphrase),
             await fromB64(salt),
             opsLimit,
             memLimit,
             sodium.crypto_pwhash_ALG_ARGON2ID13,
         ),
     );
-}
+};
 
-export async function deriveSensitiveKey(passphrase: string, salt: string) {
+/**
+ * A variant of {@link deriveKey} with (dynamic) parameters for deriving
+ * sensitive keys (like the user's master key kek (key encryption key).
+ *
+ * This function defers to {@link deriveKey} after choosing the most secure ops
+ * and mem limits that the current device can handle. For details about these
+ * limits, see https://libsodium.gitbook.io/doc/password_hashing/default_phf.
+ *
+ * @returns Both the derived key, and the ops and mem limits that were chosen
+ * during the derivation (this information will be needed the user's other
+ * clients to derive the same result).
+ */
+export const deriveSensitiveKey = async (passphrase: string, salt: string) => {
     await sodium.ready;
     const minMemLimit = sodium.crypto_pwhash_MEMLIMIT_MIN;
     let opsLimit = sodium.crypto_pwhash_OPSLIMIT_SENSITIVE;
@@ -759,26 +783,22 @@ export async function deriveSensitiveKey(passphrase: string, salt: string) {
         }
     }
     throw new Error("Failed to derive key: Memory limit exceeded");
-}
+};
 
-export async function deriveInteractiveKey(passphrase: string, salt: string) {
-    await sodium.ready;
-    const key = await toB64(
-        sodium.crypto_pwhash(
-            sodium.crypto_secretbox_KEYBYTES,
-            await fromUTF8(passphrase),
-            await fromB64(salt),
-            sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
-            sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
-            sodium.crypto_pwhash_ALG_ARGON2ID13,
-        ),
-    );
-    return {
-        key,
-        opsLimit: sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
-        memLimit: sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
-    };
-}
+/**
+ * A variant of {@link deriveSensitiveKey} for deriving an alternative key with
+ * parameters suitable for interactive use.
+ */
+export const deriveInteractiveKey = async (
+    passphrase: string,
+    salt: string,
+) => {
+    const opsLimit = sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE;
+    const memLimit = sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE;
+
+    const key = await deriveKey(passphrase, salt, opsLimit, memLimit);
+    return { key, opsLimit, memLimit };
+};
 
 export async function generateEncryptionKey() {
     await sodium.ready;

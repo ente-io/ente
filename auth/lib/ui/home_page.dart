@@ -362,10 +362,7 @@ class _HomePageState extends State<HomePage> {
                       _searchText = _textController.text;
 
                       // Request focus on the search box
-                      // For Windows and macOS only for now. This if statement can be removed if other platforms has been tested.
-                      if (Platform.isWindows || Platform.isMacOS) {
-                        searchBoxFocusNode.requestFocus();
-                      }
+                      searchBoxFocusNode.requestFocus();
                     }
                     _applyFilteringAndRefresh();
                   },
