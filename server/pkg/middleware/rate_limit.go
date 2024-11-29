@@ -152,6 +152,7 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 		reqPath == "/users/srp/attributes" ||
 		(reqPath == "/cast/device-info" && reqMethod == "POST") ||
 		(reqPath == "/cast/device-info/" && reqMethod == "POST") ||
+		reqPath == "/users/srp/create-session" ||
 		reqPath == "/users/srp/verify-session" ||
 		reqPath == "/family/invite-info/:token" ||
 		reqPath == "/family/add-member" ||
