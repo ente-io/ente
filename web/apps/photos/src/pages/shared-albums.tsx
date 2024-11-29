@@ -423,41 +423,6 @@ export default function PublicCollectionGallery() {
         await syncWithRemote();
     };
 
-    if (loading) {
-        if (!publicFiles) {
-            return (
-                <VerticallyCentered>
-                    <ActivityIndicator />
-                </VerticallyCentered>
-            );
-        }
-    } else {
-        if (errorMessage) {
-            return <VerticallyCentered>{errorMessage}</VerticallyCentered>;
-        }
-        if (isPasswordProtected && !passwordJWTToken.current) {
-            return (
-                <VerticallyCentered>
-                    <FormPaper>
-                        <FormPaperTitle>{t("password")}</FormPaperTitle>
-                        <Typography color={"text.muted"} mb={2} variant="small">
-                            {t("link_password_description")}
-                        </Typography>
-                        <SingleInputForm
-                            callback={verifyLinkPassword}
-                            placeholder={t("password")}
-                            buttonText={t("unlock")}
-                            fieldType="password"
-                        />
-                    </FormPaper>
-                </VerticallyCentered>
-            );
-        }
-        if (!publicFiles) {
-            return <VerticallyCentered>{t("NOT_FOUND")}</VerticallyCentered>;
-        }
-    }
-
     const clearSelection = () => {
         if (!selected?.count) {
             return;
@@ -486,6 +451,37 @@ export default function PublicCollectionGallery() {
             log.error("failed to download selected files", e);
         }
     };
+
+    if (loading) {
+        if (!publicFiles) {
+            return (
+                <VerticallyCentered>
+                    <ActivityIndicator />
+                </VerticallyCentered>
+            );
+        }
+    } else if (errorMessage) {
+        return <VerticallyCentered>{errorMessage}</VerticallyCentered>;
+    } else if (isPasswordProtected && !passwordJWTToken.current) {
+        return (
+            <VerticallyCentered>
+                <FormPaper>
+                    <FormPaperTitle>{t("password")}</FormPaperTitle>
+                    <Typography color={"text.muted"} mb={2} variant="small">
+                        {t("link_password_description")}
+                    </Typography>
+                    <SingleInputForm
+                        callback={verifyLinkPassword}
+                        placeholder={t("password")}
+                        buttonText={t("unlock")}
+                        fieldType="password"
+                    />
+                </FormPaper>
+            </VerticallyCentered>
+        );
+    } else if (!publicFiles) {
+        return <VerticallyCentered>{t("NOT_FOUND")}</VerticallyCentered>;
+    }
 
     return (
         <PublicCollectionGalleryContext.Provider
