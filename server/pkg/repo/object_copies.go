@@ -111,6 +111,15 @@ func (repo *ObjectCopiesRepository) RegisterReplicationAttempt(tx *sql.Tx, ctx c
 	return stacktrace.Propagate(err, "")
 }
 
+func (repo *ObjectCopiesRepository) DelayNextAttemptByDays(ctx context.Context, objectKey string, days int) error {
+	_, err := repo.DB.ExecContext(ctx, `
+	UPDATE object_copies
+	SET last_attempt = last_attempt + ($2 * 24::BIGINT * 60 * 60 * 1000 * 1000)
+	WHERE object_key = $1
+	`, objectKey, days)
+	return stacktrace.Propagate(err, "")
+}
+
 // ResetNeedsB2Replication modifies the db to indicate that objectKey should be
 // re-replicated to Backblaze even if it has already been replicated there.
 func (repo *ObjectCopiesRepository) ResetNeedsB2Replication(objectKey string) error {
