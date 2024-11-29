@@ -8,6 +8,7 @@ import (
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/ente/filedata"
 	fileDataRepo "github.com/ente-io/museum/pkg/repo/filedata"
+	"github.com/ente-io/museum/pkg/utils/file"
 	enteTime "github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	log "github.com/sirupsen/logrus"
@@ -30,9 +31,37 @@ func (c *Controller) StartReplication() error {
 	if workerCount == 0 {
 		workerCount = 6
 	}
+	err := c.createTemporaryStorage()
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to create temporary storage")
+	}
 	go c.startWorkers(workerCount)
 	return nil
 }
+
+func (c *Controller) createTemporaryStorage() error {
+	tempStorage := viper.GetString("replication.file-data.tmp-storage")
+	if tempStorage == "" {
+		tempStorage = "tmp/replication-file-data"
+	}
+
+	log.Infof("Temporary storage for replication v3 is: %s", tempStorage)
+
+	err := file.DeleteAllFilesInDirectory(tempStorage)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to deleting old files from %s", tempStorage)
+	}
+
+	err = file.MakeDirectoryIfNotExists(tempStorage)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to create temporary storage %s", tempStorage)
+	}
+
+	c.tempStorage = tempStorage
+
+	return nil
+}
+
 func (c *Controller) startWorkers(n int) {
 	log.Infof("Starting %d workers for replication v3", n)
 

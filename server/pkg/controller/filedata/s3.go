@@ -10,8 +10,11 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/ente-io/museum/ente"
 	fileData "github.com/ente-io/museum/ente/filedata"
+	"github.com/ente-io/museum/pkg/utils/file"
 	"github.com/ente-io/stacktrace"
 	log "github.com/sirupsen/logrus"
+	"io"
+	"os"
 	stime "time"
 )
 
@@ -112,21 +115,53 @@ func (c *Controller) verifySize(bucketID string, objectKey string, expectedSize 
 	return nil
 }
 
-// copyObject copies the object from srcObjectKey to destObjectKey in the same bucket and returns the object size
-func (c *Controller) copyObject(srcObjectKey string, destObjectKey string, bucketID string) error {
-	bucket := c.S3Config.GetBucket(bucketID)
-	s3Client := c.S3Config.GetS3Client(bucketID)
-	copySource := fmt.Sprintf("%s/%s", *bucket, srcObjectKey)
-	copyInput := &s3.CopyObjectInput{
-		Bucket:     bucket,
-		CopySource: &copySource,
-		Key:        aws.String(destObjectKey),
-	}
+type ReplicateObjectReq struct {
+	ObjectKey    string
+	SrcBucketID  string
+	DestBucketID string
+	ObjectSize   int64
+}
 
-	_, err := s3Client.CopyObject(copyInput)
-	if err != nil {
-		return fmt.Errorf("failed to copy (%s) from %s to %s: %v", bucketID, srcObjectKey, destObjectKey, err)
+// copyObject copies the object from srcObjectKey to destObjectKey in the same bucket and returns the object size
+func (c *Controller) replicateObject(ctx context.Context, req *ReplicateObjectReq) error {
+	if err := file.EnsureSufficientSpace(req.ObjectSize); err != nil {
+		return stacktrace.Propagate(err, "")
 	}
-	log.Infof("Copied (%s) from %s to %s", bucketID, srcObjectKey, destObjectKey)
+	filePath, file, err := file.CreateTemporaryFile(c.tempStorage, req.ObjectKey)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to create temporary file")
+	}
+	defer os.Remove(filePath)
+	defer file.Close()
+	//s3Client := c.S3Config.GetS3Client(req.SrcBucketID)
+	bucket := c.S3Config.GetBucket(req.SrcBucketID)
+	downloader := c.downloadManagerCache[req.SrcBucketID]
+	_, err = downloader.DownloadWithContext(ctx, file, &s3.GetObjectInput{
+		Bucket: bucket,
+		Key:    &req.ObjectKey,
+	})
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to download object from bucket %s", req.SrcBucketID)
+	}
+	if err := c.verifySize(req.SrcBucketID, req.ObjectKey, req.ObjectSize); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	dstClient := c.S3Config.GetS3Client(req.DestBucketID)
+	uploader := s3manager.NewUploaderWithClient(&dstClient)
+	file.Seek(0, io.SeekStart)
+	up := s3manager.UploadInput{
+		Bucket: c.S3Config.GetBucket(req.DestBucketID),
+		Key:    aws.String(req.ObjectKey),
+		Body:   file,
+	}
+	result, err := uploader.Upload(&up)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to upload object to bucket %s", req.DestBucketID)
+	}
+	log.Infof("Uploaded to bucket %s", result.Location)
+	// verify the size of the uploaded object
+	if err := c.verifySize(req.DestBucketID, req.ObjectKey, req.ObjectSize); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
 	return nil
 }

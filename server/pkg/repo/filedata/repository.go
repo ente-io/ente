@@ -60,6 +60,9 @@ func (r *Repository) InsertOrUpdate(ctx context.Context, data filedata.Row) erro
 
 func (r *Repository) InsertOrUpdatePreviewData(ctx context.Context, data filedata.Row, previewObject string) error {
 	tx, err := r.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
 	query := `
         INSERT INTO file_data 
             (file_id, user_id, data_type, size, latest_bucket, obj_id, obj_nonce ) 

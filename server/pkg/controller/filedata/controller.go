@@ -48,7 +48,8 @@ type Controller struct {
 	CollectionRepo          *repo.CollectionRepository
 	downloadManagerCache    map[string]*s3manager.Downloader
 	// for downloading objects from s3 for replication
-	workerURL string
+	workerURL   string
+	tempStorage string
 }
 
 func New(repo *fileDataRepo.Repository,
@@ -56,7 +57,8 @@ func New(repo *fileDataRepo.Repository,
 	objectCleanupController *controller.ObjectCleanupController,
 	s3Config *s3config.S3Config,
 	fileRepo *repo.FileRepository,
-	collectionRepo *repo.CollectionRepository) *Controller {
+	collectionRepo *repo.CollectionRepository,
+) *Controller {
 	embeddingDcs := []string{s3Config.GetHotBackblazeDC(), s3Config.GetHotWasabiDC(), s3Config.GetWasabiDerivedDC(), s3Config.GetDerivedStorageDataCenter(), "b5"}
 	cache := make(map[string]*s3manager.Downloader, len(embeddingDcs))
 	for i := range embeddingDcs {
