@@ -66,16 +66,19 @@ best to start small. Consider some well-scoped changes, say like adding more
 [custom icons to auth](auth/docs/adding-icons.md).
 
 Each of the individual product/platform specific directories in this repository
-have instructions on setting up a dev environment and making changes. The issues
-and discussions (feature requests) labelled "good first issues" should be good
-starting points. Once you have a bearing, you can head on to issues or
-discussions labelled "help wanted".
+have instructions on setting up a dev environment.
 
-If you're planning on adding a new feature or making any other substantial
-change, please [discuss it with
-us](https://github.com/ente-io/ente/discussions). Discussing your idea with us
-first ensures that everyone is on the same page before you start working on your
-change.
+For anything beyond trivial bug fixes, please use [features requests and
+discussions](https://github.com/ente-io/ente/discussions) instead of performing
+code changes directly.
+
+> [!TIP]
+>
+> Please remember that code is a important, but small, part of the overall big
+> picture that makes a product a joy to use. Something that's easy in code is
+> not necessarily the right choice for the product as a whole. So we'll repeat -
+> there are other ways to contribute than code that we'd request you to
+> consider.
 
 ## Leave a review or star
 
