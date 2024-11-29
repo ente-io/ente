@@ -10,7 +10,7 @@ import {
     type PaperProps,
 } from "@mui/material";
 import Menu, { type MenuProps } from "@mui/material/Menu";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 
 const OverflowMenuContext = createContext({
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -45,26 +45,27 @@ export const OverflowMenu: React.FC<OverflowMenuProps> = ({
     triggerButtonProps,
     menuPaperProps,
 }) => {
-    const [sortByEl, setSortByEl] = useState<MenuProps["anchorEl"] | null>(
-        null,
+    const [anchorEl, setAnchorEl] = useState<MenuProps["anchorEl"]>();
+    const context = useMemo(
+        () => ({ close: () => setAnchorEl(undefined) }),
+        [],
     );
-    const handleClose = () => setSortByEl(null);
     return (
-        <OverflowMenuContext.Provider value={{ close: handleClose }}>
+        <OverflowMenuContext.Provider value={context}>
             <IconButton
-                onClick={(event) => setSortByEl(event.currentTarget)}
-                aria-controls={sortByEl ? ariaControls : undefined}
+                onClick={(event) => setAnchorEl(event.currentTarget)}
+                aria-controls={anchorEl ? ariaControls : undefined}
                 aria-haspopup="true"
-                aria-expanded={sortByEl ? "true" : undefined}
+                aria-expanded={anchorEl ? "true" : undefined}
                 {...triggerButtonProps}
             >
                 {triggerButtonIcon}
             </IconButton>
             <StyledMenu
                 id={ariaControls}
-                anchorEl={sortByEl}
-                open={Boolean(sortByEl)}
-                onClose={handleClose}
+                anchorEl={anchorEl}
+                open={!!anchorEl}
+                onClose={() => setAnchorEl(undefined)}
                 MenuListProps={{
                     disablePadding: true,
                     "aria-labelledby": ariaControls,
@@ -111,6 +112,7 @@ export const OverflowMenuOption: React.FC<OverflowMenuOptionProps> = ({
         onClick();
         menuContext.close();
     };
+
     return (
         <MenuItem
             onClick={handleClick}
