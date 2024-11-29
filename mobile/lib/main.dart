@@ -66,9 +66,6 @@ const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 
 void main() async {
-  VideoPlayerMediaKit.ensureInitialized(
-    iOS: true, // media_kit_libs_ios_video
-  );
   debugRepaintRainbowEnabled = false;
   WidgetsFlutterBinding.ensureInitialized();
   //For audio to work on vidoes in iOS when in silent mode.
@@ -239,6 +236,10 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
 
     ServiceLocator.instance
         .init(preferences, NetworkClient.instance.enteDio, packageInfo);
+
+    if (!isBackground && flagService.internalUser) {
+      VideoPlayerMediaKit.ensureInitialized(iOS: true);
+    }
 
     _logger.info("UserService init $tlog");
     await UserService.instance.init();
