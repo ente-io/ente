@@ -2896,11 +2896,21 @@ class S {
     );
   }
 
-  /// `Manage device storage`
+  /// `Manage device Cache`
   String get manageDeviceStorage {
     return Intl.message(
-      'Manage device storage',
+      'Manage device Cache',
       name: 'manageDeviceStorage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review and clear local cache storage.`
+  String get manageDeviceStorageDesc {
+    return Intl.message(
+      'Review and clear local cache storage.',
+      name: 'manageDeviceStorageDesc',
       desc: '',
       args: [],
     );
