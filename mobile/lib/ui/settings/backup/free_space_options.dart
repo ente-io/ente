@@ -72,6 +72,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 20),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Column(
                           children: [
@@ -230,6 +231,13 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                       const AppStorageViewer(),
                                     );
                                   },
+                                ),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: MenuSectionDescriptionWidget(
+                                    content:
+                                        S.of(context).manageDeviceStorageDesc,
+                                  ),
                                 ),
                               ],
                             ),

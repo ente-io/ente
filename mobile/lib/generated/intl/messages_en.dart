@@ -1091,7 +1091,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Magic search allows to search photos by their contents, e.g. \'flower\', \'red car\', \'identity documents\'"),
         "manage": MessageLookupByLibrary.simpleMessage("Manage"),
         "manageDeviceStorage":
-            MessageLookupByLibrary.simpleMessage("Manage device storage"),
+            MessageLookupByLibrary.simpleMessage("Manage device Cache"),
+        "manageDeviceStorageDesc": MessageLookupByLibrary.simpleMessage(
+            "Review and clear local cache storage."),
         "manageFamily": MessageLookupByLibrary.simpleMessage("Manage Family"),
         "manageLink": MessageLookupByLibrary.simpleMessage("Manage link"),
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Manage"),
