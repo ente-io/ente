@@ -79,6 +79,9 @@ class _HomePageState extends State<HomePage> {
   bool hasTrashedCodes = false;
   bool hasNonTrashedCodes = false;
   bool isCompactMode = false;
+  bool _isFavouriteOpen = false;
+  bool hasFavouriteCodes = false;
+  bool hasNonFavouriteCodes = false;
 
   @override
   void initState() {
@@ -110,13 +113,24 @@ class _HomePageState extends State<HomePage> {
       _allCodes = codes;
       hasTrashedCodes = false;
       hasNonTrashedCodes = false;
+      hasNonFavouriteCodes = false;
+      hasFavouriteCodes = false;
+
       for (final c in _allCodes ?? []) {
         if (c.isTrashed) {
           hasTrashedCodes = true;
         } else {
           hasNonTrashedCodes = true;
         }
-        if (hasNonTrashedCodes && hasTrashedCodes) {
+        if (c.isPinned) {
+          hasFavouriteCodes = true;
+        } else {
+          hasNonFavouriteCodes = true;
+        }
+        if (hasTrashedCodes && hasNonTrashedCodes) {
+          break;
+        }
+        if (hasFavouriteCodes && hasNonFavouriteCodes) {
           break;
         }
       }
@@ -125,6 +139,12 @@ class _HomePageState extends State<HomePage> {
       }
       if (!hasNonTrashedCodes && hasTrashedCodes) {
         _isTrashOpen = true;
+      }
+      if (!hasFavouriteCodes) {
+        _isFavouriteOpen = false;
+      }
+      if (!hasNonFavouriteCodes && hasFavouriteCodes) {
+        _isFavouriteOpen = true;
       }
 
       CodeDisplayStore.instance.getAllTags(allCodes: _allCodes).then((value) {
@@ -156,7 +176,8 @@ class _HomePageState extends State<HomePage> {
         if (codeState.hasError ||
             selectedTag != "" &&
                 !codeState.display.tags.contains(selectedTag) ||
-            (codeState.isTrashed != _isTrashOpen)) {
+            (codeState.isTrashed != _isTrashOpen) ||
+            (codeState.isPinned != _isFavouriteOpen)) {
           continue;
         }
 
@@ -172,6 +193,14 @@ class _HomePageState extends State<HomePage> {
       _filteredCodes = _allCodes
               ?.where(
                 (element) => !element.hasError && element.isTrashed,
+              )
+              .toList() ??
+          [];
+    } else if (_isFavouriteOpen) {
+      _filteredCodes = _allCodes
+              ?.where(
+                (element) =>
+                    !element.hasError && !element.isTrashed && element.isPinned,
               )
               .toList() ??
           [];
@@ -393,7 +422,8 @@ class _HomePageState extends State<HomePage> {
             _allCodes?.firstWhereOrNull((element) => element.hasError) != null;
         final indexOffset = anyCodeHasError ? 1 : 0;
         final itemCount = (hasNonTrashedCodes ? tags.length + 1 : 0) +
-            (hasTrashedCodes ? 1 : 0);
+            (hasTrashedCodes ? 1 : 0) +
+            (hasFavouriteCodes ? 1 : 0);
 
         final list = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -412,15 +442,34 @@ class _HomePageState extends State<HomePage> {
                     if (index == 0 && hasNonTrashedCodes) {
                       return TagChip(
                         label: l10n.all,
-                        state: selectedTag == "" && _isTrashOpen == false
+                        state: selectedTag == "" &&
+                                _isTrashOpen == false &&
+                                _isFavouriteOpen == false
                             ? TagChipState.selected
                             : TagChipState.unselected,
                         onTap: () {
                           selectedTag = "";
                           _isTrashOpen = false;
+                          _isFavouriteOpen = false;
                           setState(() {});
                           _applyFilteringAndRefresh();
                         },
+                      );
+                    }
+                    if (index == 1 && hasFavouriteCodes) {
+                      return TagChip(
+                        label: "Favourite",
+                        state: _isFavouriteOpen
+                            ? TagChipState.selected
+                            : TagChipState.unselected,
+                        onTap: () {
+                          selectedTag = "";
+                          _isTrashOpen = false;
+                          _isFavouriteOpen = !_isFavouriteOpen;
+                          setState(() {});
+                          _applyFilteringAndRefresh();
+                        },
+                        iconData: Icons.star,
                       );
                     }
                     if (index == itemCount - 1 && hasTrashedCodes) {
@@ -432,31 +481,38 @@ class _HomePageState extends State<HomePage> {
                         onTap: () {
                           selectedTag = "";
                           _isTrashOpen = !_isTrashOpen;
+                          _isFavouriteOpen = false;
                           setState(() {});
                           _applyFilteringAndRefresh();
                         },
                         iconData: Icons.delete,
                       );
                     }
-                    return TagChip(
-                      label: tags[index - 1],
-                      action: TagChipAction.menu,
-                      state: selectedTag == tags[index - 1]
-                          ? TagChipState.selected
-                          : TagChipState.unselected,
-                      onTap: () {
-                        _isTrashOpen = false;
-                        if (selectedTag == tags[index - 1]) {
-                          selectedTag = "";
+                    final customTagIndex =
+                        hasFavouriteCodes ? index - 2 : index - 1;
+                    if (customTagIndex >= 0 && customTagIndex < tags.length) {
+                      return TagChip(
+                        label: tags[customTagIndex],
+                        action: TagChipAction.menu,
+                        state: selectedTag == tags[customTagIndex]
+                            ? TagChipState.selected
+                            : TagChipState.unselected,
+                        onTap: () {
+                          _isTrashOpen = false;
+                          _isFavouriteOpen = false;
+                          if (selectedTag == tags[customTagIndex]) {
+                            selectedTag = "";
+                            setState(() {});
+                            _applyFilteringAndRefresh();
+                            return;
+                          }
+                          selectedTag = tags[customTagIndex];
                           setState(() {});
                           _applyFilteringAndRefresh();
-                          return;
-                        }
-                        selectedTag = tags[index - 1];
-                        setState(() {});
-                        _applyFilteringAndRefresh();
-                      },
-                    );
+                        },
+                      );
+                    }
+                    return const SizedBox.shrink();
                   },
                 ),
               ),
