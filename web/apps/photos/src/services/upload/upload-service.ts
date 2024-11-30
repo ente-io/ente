@@ -46,7 +46,11 @@ import { addToCollection } from "services/collectionService";
 import { type LivePhotoAssets } from "services/upload/uploadManager";
 import * as convert from "xml-js";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
-import { PhotosUploadHttpClient, PublicUploadHttpClient } from "./remote";
+import {
+    PhotosUploadHttpClient,
+    PublicUploadHttpClient,
+    type ObjectUploadURL,
+} from "./remote";
 import type { ParsedMetadataJSON } from "./takeout";
 import { matchTakeoutMetadata } from "./takeout";
 import {
@@ -108,7 +112,7 @@ const multipartChunksPerPart = 5;
 
 /** Upload files to cloud storage */
 class UploadService {
-    private uploadURLs: UploadURL[] = [];
+    private uploadURLs: ObjectUploadURL[] = [];
     private pendingUploadCount: number = 0;
     private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
     private activeUploadURLRefill: Promise<void> | undefined;
@@ -188,7 +192,7 @@ class UploadService {
     }
 
     private async _refillUploadURLs() {
-        let urls: UploadURL[];
+        let urls: ObjectUploadURL[];
         if (this.publicAlbumsCredentials) {
             urls = await publicUploadHttpClient.fetchUploadURLs(
                 this.pendingUploadCount,
@@ -322,16 +326,6 @@ export interface MultipartUploadURLs {
     objectKey: string;
     partURLs: string[];
     completeURL: string;
-}
-
-/**
- * A pre-signed URL alongwith the associated object key.
- */
-export interface UploadURL {
-    /** A pre-signed URL that can be used to upload data to S3. */
-    url: string;
-    /** The objectKey with which remote will refer to this object. */
-    objectKey: string;
 }
 
 export interface PotentialLivePhotoAsset {

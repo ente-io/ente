@@ -12,18 +12,22 @@ import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { z } from "zod";
-import {
-    MultipartUploadURLs,
-    UploadFile,
-    type UploadURL,
-} from "./upload-service";
+import { MultipartUploadURLs, UploadFile } from "./upload-service";
 
 /**
- * Zod schema for {@link UploadURL}.
+ * A pre-signed URL alongwith the associated object key.
  */
-const UploadURL = z.object({
+const ObjectUploadURL = z.object({
+    /** A pre-signed URL that can be used to upload data to S3. */
     objectKey: z.string(),
+    /** The objectKey with which remote will refer to this object. */
     url: z.string(),
+});
+
+export type ObjectUploadURL = z.infer<typeof ObjectUploadURL>;
+
+const ObjectUploadURLResponse = z.object({
+    urls: ObjectUploadURL.array(),
 });
 
 export class PhotosUploadHttpClient {
@@ -69,8 +73,8 @@ export class PhotosUploadHttpClient {
         return (
             // TODO: The as cast will not be needed when tsc strict mode is
             // enabled for this code.
-            z.object({ urls: UploadURL.array() }).parse(await res.json())
-                .urls as UploadURL[]
+            ObjectUploadURLResponse.parse(await res.json())
+                .urls as ObjectUploadURL[]
         );
     }
 
@@ -98,7 +102,7 @@ export class PhotosUploadHttpClient {
     }
 
     async putFile(
-        fileUploadURL: UploadURL,
+        fileUploadURL: ObjectUploadURL,
         file: Uint8Array,
         progressTracker,
     ): Promise<string> {
@@ -124,7 +128,7 @@ export class PhotosUploadHttpClient {
     }
 
     async putFileV2(
-        fileUploadURL: UploadURL,
+        fileUploadURL: ObjectUploadURL,
         file: Uint8Array,
         progressTracker,
     ): Promise<string> {
@@ -295,8 +299,8 @@ export class PublicUploadHttpClient {
         return (
             // TODO: The as cast will not be needed when tsc strict mode is
             // enabled for this code.
-            z.object({ urls: UploadURL.array() }).parse(await res.json())
-                .urls as UploadURL[]
+            ObjectUploadURLResponse.parse(await res.json())
+                .urls as ObjectUploadURL[]
         );
     }
 
