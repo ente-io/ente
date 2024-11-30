@@ -209,7 +209,7 @@ ENDPOINT=http://localhost:8080
 ALBUMS_ENDPOINT=http://localhost:8082
 ```
 
-Create the `museum.yml` with additional configuration, this will be mounted
+Create the `museum.yaml` with additional configuration, this will be mounted
 (read-only) into the container:
 
 ```yaml
