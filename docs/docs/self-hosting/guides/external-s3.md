@@ -72,6 +72,7 @@ services:
             - ./.credentials.env
         volumes:
             - custom-logs:/var/logs
+            - museum.yaml:/museum.yaml:ro
         networks:
             - internal
 
@@ -199,22 +200,33 @@ ENTE_KEY_ENCRYPTION=
 ENTE_KEY_HASH=
 ENTE_JWT_SECRET=
 
-ENTE_S3_B2-EU-CEN_KEY=YOUR_S3_KEY
-ENTE_S3_B2-EU-CEN_SECRET=YOUR_S3_SECRET
-ENTE_S3_B2-EU-CEN_ENDPOINT=YOUR_S3_ENDPOINT
-ENTE_S3_B2-EU-CEN_REGION=YOUR_S3_REGION
-ENTE_S3_B2-EU-CEN_BUCKET=YOUR_S3_BUCKET
-ENTE_S3_ARE_LOCAL_BUCKETS=false
-
-ENTE_INTERNAL_HARDCODED-OTT_LOCAL-DOMAIN-SUFFIX="@example.com"
-ENTE_INTERNAL_HARDCODED-OTT_LOCAL-DOMAIN-VALUE=123456
-
 # if you deploy it on a server under a domain, you need to set the correct value of the following variables
 # it can be changed later
+
+# The backend server URL (Museum) to be used by the webapp
 ENDPOINT=http://localhost:8080
+# The URL of the public albums webapp (also need to be updated in museum.yml so the correct links are generated)
 ALBUMS_ENDPOINT=http://localhost:8082
-# This is used to generate sharable URLs
-ENTE_APPS_PUBLIC-ALBUMS=http://localhost:8082
+```
+
+Create the `museum.yml` with additional configuration, this will be mounted
+(read-only) into the container:
+
+```yaml
+s3:
+    are_local_buckets: false
+    # For some self-hosted S3 deployments you (e.g. Minio) you might need to disable bucket subdomains
+    use_path_style_urls: true
+    # The key must be named like so
+    b2-eu-cen:
+        key:      $YOUR_S3_KEY
+        secret:   $YOUR_S3_SECRET
+        endpoint: $YOUR_S3_ENDPOINT
+        region:   $YOUR_S3_REGION
+        bucket:   $YOUR_S3_BUCKET_NAME
+# The same value as the one specified in ALBUMS_ENDPOINT
+apps:
+    public-albums: http://localhost:8082
 ```
 
 ## 3. Run `docker-compose up`
