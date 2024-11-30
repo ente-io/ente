@@ -1,4 +1,9 @@
-import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
+import {
+    authenticatedPublicAlbumsRequestHeaders,
+    authenticatedRequestHeaders,
+    ensureOk,
+    type PublicAlbumsCredentials,
+} from "@/base/http";
 import log from "@/base/log";
 import { apiURL, uploaderOrigin } from "@/base/origins";
 import { EnteFile } from "@/media/file";
@@ -7,21 +12,25 @@ import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { z } from "zod";
-import {
-    MultipartUploadURLs,
-    UploadFile,
-    type UploadURL,
-} from "./upload-service";
+import { MultipartUploadURLs, UploadFile } from "./upload-service";
 
 /**
- * Zod schema for {@link UploadURL}.
+ * A pre-signed URL alongwith the associated object key.
  */
-const UploadURL = z.object({
+const ObjectUploadURL = z.object({
+    /** A pre-signed URL that can be used to upload data to S3. */
     objectKey: z.string(),
+    /** The objectKey with which remote will refer to this object. */
     url: z.string(),
 });
 
-class UploadHttpClient {
+export type ObjectUploadURL = z.infer<typeof ObjectUploadURL>;
+
+const ObjectUploadURLResponse = z.object({
+    urls: ObjectUploadURL.array(),
+});
+
+export class PhotosUploadHttpClient {
     async uploadFile(uploadFile: UploadFile): Promise<EnteFile> {
         try {
             const token = getToken();
@@ -64,8 +73,8 @@ class UploadHttpClient {
         return (
             // TODO: The as cast will not be needed when tsc strict mode is
             // enabled for this code.
-            z.object({ urls: UploadURL.array() }).parse(await res.json())
-                .urls as UploadURL[]
+            ObjectUploadURLResponse.parse(await res.json())
+                .urls as ObjectUploadURL[]
         );
     }
 
@@ -93,7 +102,7 @@ class UploadHttpClient {
     }
 
     async putFile(
-        fileUploadURL: UploadURL,
+        fileUploadURL: ObjectUploadURL,
         file: Uint8Array,
         progressTracker,
     ): Promise<string> {
@@ -119,7 +128,7 @@ class UploadHttpClient {
     }
 
     async putFileV2(
-        fileUploadURL: UploadURL,
+        fileUploadURL: ObjectUploadURL,
         file: Uint8Array,
         progressTracker,
     ): Promise<string> {
@@ -242,4 +251,85 @@ class UploadHttpClient {
     }
 }
 
-export default new UploadHttpClient();
+export class PublicUploadHttpClient {
+    async uploadFile(
+        uploadFile: UploadFile,
+        token: string,
+        passwordToken: string,
+    ): Promise<EnteFile> {
+        try {
+            if (!token) {
+                throw Error(CustomError.TOKEN_MISSING);
+            }
+            const url = await apiURL("/public-collection/file");
+            const response = await retryAsyncOperation(
+                () =>
+                    HTTPService.post(url, uploadFile, null, {
+                        "X-Auth-Access-Token": token,
+                        ...(passwordToken && {
+                            "X-Auth-Access-Token-JWT": passwordToken,
+                        }),
+                    }),
+                handleUploadError,
+            );
+            return response.data;
+        } catch (e) {
+            log.error("upload public File Failed", e);
+            throw e;
+        }
+    }
+
+    /**
+     * Sibling of {@link fetchUploadURLs} for public albums.
+     */
+    async fetchUploadURLs(
+        countHint: number,
+        credentials: PublicAlbumsCredentials,
+    ) {
+        const count = Math.min(50, countHint * 2).toString();
+        const params = new URLSearchParams({ count });
+        const url = await apiURL("/public-collection/upload-urls");
+        const res = await fetch(`${url}?${params.toString()}`, {
+            // TODO: Use authenticatedPublicAlbumsRequestHeaders after the public
+            // albums refactor branch is merged.
+            // headers: await authenticatedRequestHeaders(),
+            headers: authenticatedPublicAlbumsRequestHeaders(credentials),
+        });
+        ensureOk(res);
+        return (
+            // TODO: The as cast will not be needed when tsc strict mode is
+            // enabled for this code.
+            ObjectUploadURLResponse.parse(await res.json())
+                .urls as ObjectUploadURL[]
+        );
+    }
+
+    async fetchMultipartUploadURLs(
+        count: number,
+        token: string,
+        passwordToken: string,
+    ): Promise<MultipartUploadURLs> {
+        try {
+            if (!token) {
+                throw Error(CustomError.TOKEN_MISSING);
+            }
+            const response = await HTTPService.get(
+                await apiURL("/public-collection/multipart-upload-urls"),
+                {
+                    count,
+                },
+                {
+                    "X-Auth-Access-Token": token,
+                    ...(passwordToken && {
+                        "X-Auth-Access-Token-JWT": passwordToken,
+                    }),
+                },
+            );
+
+            return response.data.urls;
+        } catch (e) {
+            log.error("fetch public multipart-upload-url failed", e);
+            throw e;
+        }
+    }
+}
