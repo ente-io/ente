@@ -122,15 +122,17 @@ class _HomePageState extends State<HomePage> {
         } else {
           hasNonTrashedCodes = true;
         }
-        if (c.isPinned) {
-          hasFavouriteCodes = true;
-        } else {
-          hasNonFavouriteCodes = true;
+        if (!c.isTrashed) {
+          if (c.isPinned) {
+            hasFavouriteCodes = true;
+          } else {
+            hasNonFavouriteCodes = true;
+          }
         }
-        if (hasTrashedCodes && hasNonTrashedCodes) {
-          break;
-        }
-        if (hasFavouriteCodes && hasNonFavouriteCodes) {
+        if (hasTrashedCodes &&
+            hasNonTrashedCodes &&
+            hasFavouriteCodes &&
+            hasNonFavouriteCodes) {
           break;
         }
       }
