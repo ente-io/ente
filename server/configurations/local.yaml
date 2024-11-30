@@ -321,6 +321,9 @@ internal:
     # the "admin" instead of "admins". This can be useful e.g. when wishing to
     # pass the admin as an environment variable.
     admin:
+    # If set to true, users will not be able to register a new account.
+    # Account creation will fail when entering the email ott
+    disable-registration: false
 
 # Replication config
 #
