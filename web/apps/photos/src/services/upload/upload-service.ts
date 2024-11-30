@@ -46,7 +46,7 @@ import { addToCollection } from "services/collectionService";
 import { type LivePhotoAssets } from "services/upload/uploadManager";
 import * as convert from "xml-js";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
-import publicUploadHttpClient from "./publicUploadHttpClient";
+import { PhotosUploadHttpClient, PublicUploadHttpClient } from "./remote";
 import type { ParsedMetadataJSON } from "./takeout";
 import { matchTakeoutMetadata } from "./takeout";
 import {
@@ -54,8 +54,10 @@ import {
     generateThumbnailNative,
     generateThumbnailWeb,
 } from "./thumbnail";
-import UploadHttpClient from "./uploadHttpClient";
 import type { UploadableUploadItem } from "./uploadManager";
+
+const publicUploadHttpClient = new PublicUploadHttpClient();
+const UploadHttpClient = new PhotosUploadHttpClient();
 
 /**
  * A readable stream for a file, and its associated size and last modified time.

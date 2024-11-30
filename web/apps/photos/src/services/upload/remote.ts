@@ -1,4 +1,9 @@
-import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
+import {
+    authenticatedPublicAlbumsRequestHeaders,
+    authenticatedRequestHeaders,
+    ensureOk,
+    type PublicAlbumsCredentials,
+} from "@/base/http";
 import log from "@/base/log";
 import { apiURL, uploaderOrigin } from "@/base/origins";
 import { EnteFile } from "@/media/file";
@@ -21,7 +26,7 @@ const UploadURL = z.object({
     url: z.string(),
 });
 
-class UploadHttpClient {
+export class PhotosUploadHttpClient {
     async uploadFile(uploadFile: UploadFile): Promise<EnteFile> {
         try {
             const token = getToken();
@@ -242,4 +247,85 @@ class UploadHttpClient {
     }
 }
 
-export default new UploadHttpClient();
+export class PublicUploadHttpClient {
+    async uploadFile(
+        uploadFile: UploadFile,
+        token: string,
+        passwordToken: string,
+    ): Promise<EnteFile> {
+        try {
+            if (!token) {
+                throw Error(CustomError.TOKEN_MISSING);
+            }
+            const url = await apiURL("/public-collection/file");
+            const response = await retryAsyncOperation(
+                () =>
+                    HTTPService.post(url, uploadFile, null, {
+                        "X-Auth-Access-Token": token,
+                        ...(passwordToken && {
+                            "X-Auth-Access-Token-JWT": passwordToken,
+                        }),
+                    }),
+                handleUploadError,
+            );
+            return response.data;
+        } catch (e) {
+            log.error("upload public File Failed", e);
+            throw e;
+        }
+    }
+
+    /**
+     * Sibling of {@link fetchUploadURLs} for public albums.
+     */
+    async fetchUploadURLs(
+        countHint: number,
+        credentials: PublicAlbumsCredentials,
+    ) {
+        const count = Math.min(50, countHint * 2).toString();
+        const params = new URLSearchParams({ count });
+        const url = await apiURL("/public-collection/upload-urls");
+        const res = await fetch(`${url}?${params.toString()}`, {
+            // TODO: Use authenticatedPublicAlbumsRequestHeaders after the public
+            // albums refactor branch is merged.
+            // headers: await authenticatedRequestHeaders(),
+            headers: authenticatedPublicAlbumsRequestHeaders(credentials),
+        });
+        ensureOk(res);
+        return (
+            // TODO: The as cast will not be needed when tsc strict mode is
+            // enabled for this code.
+            z.object({ urls: UploadURL.array() }).parse(await res.json())
+                .urls as UploadURL[]
+        );
+    }
+
+    async fetchMultipartUploadURLs(
+        count: number,
+        token: string,
+        passwordToken: string,
+    ): Promise<MultipartUploadURLs> {
+        try {
+            if (!token) {
+                throw Error(CustomError.TOKEN_MISSING);
+            }
+            const response = await HTTPService.get(
+                await apiURL("/public-collection/multipart-upload-urls"),
+                {
+                    count,
+                },
+                {
+                    "X-Auth-Access-Token": token,
+                    ...(passwordToken && {
+                        "X-Auth-Access-Token-JWT": passwordToken,
+                    }),
+                },
+            );
+
+            return response.data.urls;
+        } catch (e) {
+            log.error("fetch public multipart-upload-url failed", e);
+            throw e;
+        }
+    }
+}
