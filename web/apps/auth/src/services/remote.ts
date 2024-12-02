@@ -68,7 +68,17 @@ const RemoteAuthenticatorEntityChange = z.object({
      * Will be `null` when isDeleted is true.
      */
     header: z.string().nullable(),
+    /**
+     * `true` if the corresponding entity was deleted.
+     */
     isDeleted: z.boolean(),
+    /**
+     * Epoch milliseconds when this entity was last updated.
+     *
+     * This value is suitable for being passed as the `sinceTime` in the diff
+     * requests to implement pagination.
+     */
+    updatedAt: z.number(),
 });
 
 /**
@@ -86,26 +96,48 @@ export const authenticatorEntityDiff = async (
             authenticatorKey,
         );
 
-    // Always fetch all data from server for now.
-    const params = new URLSearchParams({
-        sinceTime: "0",
-        limit: "2500",
-    });
-    const url = await apiURL("/authenticator/entity/diff");
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: await authenticatedRequestHeaders(),
-    });
-    ensureOk(res);
-    const diff = z
-        .object({ diff: z.array(RemoteAuthenticatorEntityChange) })
-        .parse(await res.json()).diff;
+    // Fetch all the entities, paginating the requests.
+    const entities = new Map<
+        string,
+        { id: string; encryptedData: string; header: string }
+    >();
+    let sinceTime = 0;
+    const batchSize = 2500;
+
+    while (true) {
+        const params = new URLSearchParams({
+            sinceTime: `${sinceTime}`,
+            limit: `${batchSize}`,
+        });
+        const url = await apiURL("/authenticator/entity/diff");
+        const res = await fetch(`${url}?${params.toString()}`, {
+            headers: await authenticatedRequestHeaders(),
+        });
+        ensureOk(res);
+        const diff = z
+            .object({ diff: z.array(RemoteAuthenticatorEntityChange) })
+            .parse(await res.json()).diff;
+        if (diff.length == 0) break;
+
+        for (const change of diff) {
+            sinceTime = Math.max(sinceTime, change.updatedAt);
+            if (change.isDeleted) {
+                entities.delete(change.id);
+            } else {
+                entities.set(change.id, {
+                    id: change.id,
+                    encryptedData: change.encryptedData!,
+                    header: change.header!,
+                });
+            }
+        }
+    }
+
     return Promise.all(
-        diff
-            .filter((entity) => !entity.isDeleted)
-            .map(async ({ id, encryptedData, header }) => ({
-                id,
-                data: await decrypt(encryptedData!, header!),
-            })),
+        entities.values().map(async ({ id, encryptedData, header }) => ({
+            id,
+            data: await decrypt(encryptedData, header),
+        })),
     );
 };
 
