@@ -17,30 +17,28 @@ export const getAuthCodes = async (masterKey: Uint8Array): Promise<Code[]> => {
         authenticatorEntityKey,
         masterKey,
     );
-    const authEntities = await authenticatorEntityDiff(authenticatorKey);
-    const authCodes = authEntities.map((entity) => {
-        try {
-            return codeFromURIString(entity.id, ensureString(entity.data));
-        } catch (e) {
-            log.error(`Failed to parse codeID ${entity.id}`, e);
-            return undefined;
-        }
-    });
-
-    const filteredAuthCodes = authCodes.filter((f) => f !== undefined);
-    filteredAuthCodes.sort((a, b) => {
-        if (a.issuer && b.issuer) {
-            return a.issuer.localeCompare(b.issuer);
-        }
-        if (a.issuer) {
-            return -1;
-        }
-        if (b.issuer) {
-            return 1;
-        }
-        return 0;
-    });
-    return filteredAuthCodes;
+    return (await authenticatorEntityDiff(authenticatorKey))
+        .map((entity) => {
+            try {
+                return codeFromURIString(entity.id, ensureString(entity.data));
+            } catch (e) {
+                log.error(`Failed to parse codeID ${entity.id}`, e);
+                return undefined;
+            }
+        })
+        .filter((f) => f !== undefined)
+        .sort((a, b) => {
+            if (a.issuer && b.issuer) {
+                return a.issuer.localeCompare(b.issuer);
+            }
+            if (a.issuer) {
+                return -1;
+            }
+            if (b.issuer) {
+                return 1;
+            }
+            return 0;
+        });
 };
 
 /**
