@@ -27,6 +27,10 @@ export const getAuthCodes = async (masterKey: Uint8Array): Promise<Code[]> => {
             }
         })
         .filter((f) => f !== undefined)
+        .filter((f) => {
+            // Do not show trashed entries in the web inteface.
+            return !f.codeDisplay?.trashed;
+        })
         .sort((a, b) => {
             if (a.issuer && b.issuer) {
                 return a.issuer.localeCompare(b.issuer);
