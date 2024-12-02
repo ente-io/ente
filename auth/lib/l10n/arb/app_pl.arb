@@ -156,6 +156,7 @@
   "twoFactorAuthTitle": "Uwierzytelnianie dwustopniowe",
   "passkeyAuthTitle": "Weryfikacja kluczem dostępu",
   "verifyPasskey": "Zweryfikuj klucz dostępu",
+  "loginWithTOTP": "Zaloguj się za pomocą TOTP",
   "recoverAccount": "Odzyskaj konto",
   "enterRecoveryKeyHint": "Wprowadź swój klucz odzyskiwania",
   "recover": "Odzyskaj",
