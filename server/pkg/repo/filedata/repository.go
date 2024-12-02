@@ -67,7 +67,7 @@ func (r *Repository) InsertOrUpdatePreviewData(ctx context.Context, data filedat
         INSERT INTO file_data 
             (file_id, user_id, data_type, size, latest_bucket, obj_id, obj_nonce, obj_size ) 
         VALUES 
-            ($1, $2, $3, $4, $5, $6, $7)
+            ($1, $2, $3, $4, $5, $6, $7, $8)
         ON CONFLICT (file_id, data_type)
         DO UPDATE SET 
             size = EXCLUDED.size,
@@ -240,13 +240,13 @@ func (r *Repository) GetPendingSyncDataAndExtendLock(ctx context.Context, newSyn
 		return nil, stacktrace.Propagate(err, "")
 	}
 	defer tx.Rollback()
-	row := tx.QueryRow(`SELECT file_id, user_id, data_type, size, latest_bucket, replicated_buckets, delete_from_buckets, inflight_rep_buckets, pending_sync, is_deleted, sync_locked_till, created_at, updated_at
+	row := tx.QueryRow(`SELECT file_id, user_id, data_type, size, latest_bucket, replicated_buckets, delete_from_buckets, inflight_rep_buckets, pending_sync, is_deleted, sync_locked_till, created_at, updated_at, obj_id, obj_nonce, obj_size
 		FROM file_data
 		where pending_sync = true and is_deleted = $1 and sync_locked_till < now_utc_micro_seconds()
 		LIMIT 1
 		FOR UPDATE SKIP LOCKED`, forDeletion)
 	var fileData filedata.Row
-	err = row.Scan(&fileData.FileID, &fileData.UserID, &fileData.Type, &fileData.Size, &fileData.LatestBucket, pq.Array(&fileData.ReplicatedBuckets), pq.Array(&fileData.DeleteFromBuckets), pq.Array(&fileData.InflightReplicas), &fileData.PendingSync, &fileData.IsDeleted, &fileData.SyncLockedTill, &fileData.CreatedAt, &fileData.UpdatedAt)
+	err = row.Scan(&fileData.FileID, &fileData.UserID, &fileData.Type, &fileData.Size, &fileData.LatestBucket, pq.Array(&fileData.ReplicatedBuckets), pq.Array(&fileData.DeleteFromBuckets), pq.Array(&fileData.InflightReplicas), &fileData.PendingSync, &fileData.IsDeleted, &fileData.SyncLockedTill, &fileData.CreatedAt, &fileData.UpdatedAt, &fileData.ObjectID, &fileData.ObjectNonce, &fileData.ObjectSize)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}

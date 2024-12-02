@@ -97,10 +97,7 @@ func (c *Controller) tryReplicate() error {
 		}
 		return err
 	}
-	if row.Type == ente.PreviewVideo {
-		log.Infof("Skipping replication for preview video %d", row.FileID)
-		return nil
-	}
+
 	err = c.replicateRowData(ctx, *row)
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -140,6 +137,17 @@ func (c *Controller) replicateRowData(ctx context.Context, row filedata.Row) err
 			if err := c.uploadAndVerify(ctx, row, s3FileMetadata, bucketID); err != nil {
 				return stacktrace.Propagate(err, "error uploading and verifying metadata object")
 			}
+			if row.Type == ente.PreviewVideo {
+				req := ReplicateObjectReq{
+					ObjectKey:    row.GetS3FileObjectKey(),
+					SrcBucketID:  row.LatestBucket,
+					DestBucketID: bucketID,
+					ObjectSize:   *row.ObjectSize,
+				}
+				if err := c.replicateObject(ctx, &req); err != nil {
+					return stacktrace.Propagate(err, "error replicating video objects")
+				}
+			}
 			return c.Repo.MoveBetweenBuckets(row, bucketID, fileDataRepo.InflightRepColumn, fileDataRepo.ReplicationColumn)
 		}
 	} else {
@@ -150,10 +158,15 @@ func (c *Controller) replicateRowData(ctx context.Context, row filedata.Row) err
 
 func (c *Controller) uploadAndVerify(ctx context.Context, row filedata.Row, s3FileMetadata filedata.S3FileMetadata, dstBucketID string) error {
 	metadataSize, err := c.uploadObject(s3FileMetadata, row.S3FileMetadataObjectKey(), dstBucketID)
+
 	if err != nil {
 		return err
 	}
-	if metadataSize != row.Size {
+	expectedSize := row.Size
+	if row.ObjectSize != nil {
+		expectedSize = expectedSize - *row.ObjectSize
+	}
+	if metadataSize != expectedSize {
 		return fmt.Errorf("uploaded metadata size %d does not match expected size %d", metadataSize, row.Size)
 	}
 	return nil
