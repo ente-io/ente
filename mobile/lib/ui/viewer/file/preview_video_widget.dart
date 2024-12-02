@@ -1,14 +1,17 @@
 import 'dart:async';
-import 'dart:io';
+import "dart:io";
 
 import 'package:chewie/chewie.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import "package:fluttertoast/fluttertoast.dart";
+import "package:logging/logging.dart";
 import 'package:photos/core/constants.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/service_locator.dart";
+import "package:photos/services/preview_video_store.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/video_controls.dart';
@@ -24,11 +27,9 @@ class PreviewVideoWidget extends StatefulWidget {
   final bool? autoPlay;
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
-  final File preview;
 
   const PreviewVideoWidget(
     this.file, {
-    required this.preview,
     this.autoPlay = false,
     this.tagPrefix,
     this.playbackCallback,
@@ -40,6 +41,7 @@ class PreviewVideoWidget extends StatefulWidget {
 }
 
 class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
+  final _logger = Logger("PreviewVideoWidget");
   VideoPlayerController? _videoPlayerController;
   ChewieController? _chewieController;
   final _progressNotifier = ValueNotifier<double?>(null);
@@ -47,12 +49,13 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
   final EnteWakeLock _wakeLock = EnteWakeLock();
   bool _isFileSwipeLocked = false;
   late final StreamSubscription<GuestViewEvent> _fileSwipeLockEventSubscription;
+  File? previewFile;
 
   @override
   void initState() {
     super.initState();
 
-    _setVideoPlayerController();
+    _checkForPreview();
     _fileSwipeLockEventSubscription =
         Bus.instance.on<GuestViewEvent>().listen((event) {
       setState(() {
@@ -72,6 +75,23 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
     super.dispose();
   }
 
+  Future<void> _checkForPreview() async {
+    final file = await PreviewVideoStore.instance
+        .getPlaylist(widget.file)
+        .onError((error, stackTrace) {
+      if (!mounted) return;
+      _logger.warning("Failed to download preview video", error, stackTrace);
+      Fluttertoast.showToast(msg: "Failed to download preview!");
+      return null;
+    });
+    if (!mounted) return;
+    if (file != null) {
+      Fluttertoast.showToast(msg: "Playing Preview!").ignore();
+      previewFile = file;
+      _setVideoPlayerController();
+    }
+  }
+
   void _setVideoPlayerController() {
     if (!mounted) {
       // Note: Do not initiale video player if widget is not mounted.
@@ -80,7 +100,7 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
       return;
     }
     VideoPlayerController videoPlayerController;
-    videoPlayerController = VideoPlayerController.file(widget.preview);
+    videoPlayerController = VideoPlayerController.file(previewFile!);
 
     debugPrint("videoPlayerController: $videoPlayerController");
     _videoPlayerController = videoPlayerController

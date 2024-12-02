@@ -379,7 +379,11 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         _setFilePathForNativePlayer(file.path);
       }
     }).onError((error, stackTrace) {
-      showErrorDialog(context, S.of(context).error, S.of(context).failedToDownloadVideo);
+      showErrorDialog(
+        context,
+        S.of(context).error,
+        S.of(context).failedToDownloadVideo,
+      );
     });
   }
 

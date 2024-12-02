@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
-import "package:photos/ui/viewer/file/video_view_widget.dart";
+import "package:photos/service_locator.dart";
+import "package:photos/services/filedata/filedata_service.dart";
+import "package:photos/ui/viewer/file/preview_video_widget.dart";
+import "package:photos/ui/viewer/file/video_widget_native.dart";
 import "package:photos/ui/viewer/file/zoomable_live_image_new.dart";
 
 class FileWidget extends StatelessWidget {
@@ -40,8 +43,19 @@ class FileWidget extends StatelessWidget {
         key: key ?? ValueKey(fileKey),
       );
     } else if (file.fileType == FileType.video) {
-      return VideoViewWidget(
-        // return VideoWidgetNative(
+      if (file.isRemoteFile &&
+          flagService.internalUser &&
+          (FileDataService.instance.previewIds
+                  ?.contains(file.uploadedFileID!) ??
+              false)) {
+        return PreviewVideoWidget(
+          file,
+          tagPrefix: tagPrefix,
+          playbackCallback: playbackCallback,
+          key: key ?? ValueKey(fileKey),
+        );
+      }
+      return VideoWidgetNative(
         file,
         tagPrefix: tagPrefix,
         playbackCallback: playbackCallback,

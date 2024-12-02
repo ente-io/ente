@@ -250,6 +250,10 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("CollectionsService init done $tlog");
 
     FavoritesService.instance.initFav().ignore();
+    MemoriesService.instance.init(preferences);
+    LocalFileUpdateService.instance.init(preferences);
+    SearchService.instance.init();
+    FileDataService.instance.init(preferences);
 
     _logger.info("FileUploader init $tlog");
     await FileUploader.instance.init(preferences, isBackground);
@@ -265,10 +269,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done $tlog");
 
-    MemoriesService.instance.init(preferences);
-    LocalFileUpdateService.instance.init(preferences);
-    SearchService.instance.init();
-    FileDataService.instance.init(preferences);
     _logger.info("RemoteFileMLService done $tlog");
     if (!isBackground &&
         Platform.isAndroid &&
