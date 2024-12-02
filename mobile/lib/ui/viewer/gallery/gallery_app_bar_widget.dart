@@ -20,6 +20,7 @@ import 'package:photos/models/backup_status.dart';
 import "package:photos/models/button_result.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/device_collection.dart';
+import "package:photos/models/file/file.dart";
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
@@ -32,6 +33,7 @@ import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/cast/auto.dart";
 import "package:photos/ui/cast/choose.dart";
 import "package:photos/ui/common/popup_item.dart";
+import "package:photos/ui/common/web_page.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
@@ -49,6 +51,7 @@ import "package:photos/ui/viewer/hierarchicial_search/recommended_filters_for_ap
 import "package:photos/ui/viewer/location/edit_location_sheet.dart";
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
+import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -61,6 +64,7 @@ class GalleryAppBarWidget extends StatefulWidget {
   final DeviceCollection? deviceCollection;
   final Collection? collection;
   final bool isFromCollectPhotos;
+  final List<EnteFile>? files;
 
   const GalleryAppBarWidget(
     this.type,
@@ -70,6 +74,7 @@ class GalleryAppBarWidget extends StatefulWidget {
     this.deviceCollection,
     this.collection,
     this.isFromCollectPhotos = false,
+    this.files,
   });
 
   @override
@@ -92,6 +97,7 @@ enum AlbumPopupAction {
   pinAlbum,
   removeLink,
   cleanUncategorized,
+  downloadAlbum,
   sortByMostRecent,
   sortByMostRelevant,
   editLocation,
@@ -197,7 +203,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         galleryType != GalleryType.quickLink) {
       showToast(
         context,
-        S.of(context).typeOfGallerGallerytypeIsNotSupportedForRename("$galleryType"),
+        S
+            .of(context)
+            .typeOfGallerGallerytypeIsNotSupportedForRename("$galleryType"),
       );
 
       return;
@@ -552,8 +560,18 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             value: AlbumPopupAction.freeUpSpace,
             icon: Icons.delete_sweep_outlined,
           ),
+        if (galleryType == GalleryType.sharedPublicCollection &&
+            widget.collection!.isDownloadEnabledForPublicLink())
+          EntePopupMenuItem(
+            S.of(context).download,
+            value: AlbumPopupAction.downloadAlbum,
+            icon: Platform.isAndroid
+                ? Icons.download
+                : Icons.cloud_download_outlined,
+          ),
       ],
     );
+
     if (items.isNotEmpty) {
       actions.add(
         PopupMenuButton(
@@ -609,6 +627,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               await showOnMap();
             } else if (value == AlbumPopupAction.cleanUncategorized) {
               await onCleanUncategorizedClick(context);
+            } else if (value == AlbumPopupAction.downloadAlbum) {
+              await _downloadPublicAlbumToGallery(widget.files!);
             } else if (value == AlbumPopupAction.editLocation) {
               editLocation();
             } else if (value == AlbumPopupAction.deleteLocation) {
@@ -622,6 +642,30 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
 
     return actions;
+  }
+
+  Future<void> _downloadPublicAlbumToGallery(List<EnteFile>? files) async {
+    if (files == null || files.isEmpty) {
+      return;
+    }
+    final totalFiles = files.length;
+    final dialog = createProgressDialog(
+      context,
+      "Downloading... 0/$totalFiles",
+      isDismissible: false,
+    );
+    await dialog.show();
+
+    try {
+      for (var i = 0; i < files.length; i++) {
+        await downloadToGallery(files[i]);
+        dialog.update(message: "Downloading... ${i + 1}/$totalFiles");
+      }
+    } catch (e, s) {
+      _logger.severe("Failed to download album", e, s);
+      await showGenericErrorDialog(context: context, error: e);
+    }
+    await dialog.hide();
   }
 
   void editLocation() {
@@ -802,7 +846,34 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   Future<void> _showAddPhotoDialog(BuildContext bContext) async {
     final collection = widget.collection;
     try {
-      await showAddPhotosSheet(bContext, collection!);
+      if (galleryType == GalleryType.sharedPublicCollection &&
+          collection!.isCollectEnabledForPublicLink()) {
+        final authToken = await CollectionsService.instance
+            .getSharedPublicAlbumToken(collection.id);
+        final albumKey = await CollectionsService.instance
+            .getSharedPublicAlbumKey(collection.id);
+
+        final res = await showChoiceDialog(
+          context,
+          title: S.of(context).openAlbumInBrowserTitle,
+          firstButtonLabel: S.of(context).openAlbumInBrowser,
+          secondButtonLabel: S.of(context).cancel,
+          firstButtonType: ButtonType.primary,
+        );
+
+        if (res != null && res.action == ButtonAction.first) {
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => WebPage(
+                widget.title ?? "",
+                "https://albums.ente.io/?t=$authToken#$albumKey",
+              ),
+            ),
+          );
+        }
+      } else {
+        await showAddPhotosSheet(bContext, collection!);
+      }
     } catch (e, s) {
       _logger.severe(e, s);
       await showGenericErrorDialog(context: bContext, error: e);

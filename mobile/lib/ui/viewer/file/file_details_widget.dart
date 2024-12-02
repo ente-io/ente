@@ -41,8 +41,8 @@ class FileDetailsWidget extends StatefulWidget {
 
   const FileDetailsWidget(
     this.file, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<FileDetailsWidget> createState() => _FileDetailsWidgetState();

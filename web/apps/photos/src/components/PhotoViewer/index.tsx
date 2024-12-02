@@ -345,7 +345,7 @@ function PhotoViewer(props: PhotoViewerProps) {
 
     function updateIsOwnFile(file: EnteFile) {
         const isOwnFile =
-            !publicCollectionGalleryContext.accessedThroughSharedURL &&
+            !publicCollectionGalleryContext.credentials &&
             galleryContext.user?.id === file.ownerID;
         setIsOwnFile(isOwnFile);
     }
@@ -783,7 +783,8 @@ function PhotoViewer(props: PhotoViewerProps) {
                                 disabled={livePhotoBtnOptions.loading}
                             >
                                 <FlexWrapper gap={"4px"}>
-                                    {<AlbumOutlined />} {t("LIVE")}
+                                    {<AlbumOutlined />}{" "}
+                                    {t("live_photo_indicator")}
                                 </FlexWrapper>
                             </Button>
                         </LivePhotoBtnContainer>
@@ -904,7 +905,7 @@ function PhotoViewer(props: PhotoViewerProps) {
 
                             <button
                                 className="pswp__button pswp__button--custom"
-                                title={t("INFO_OPTION")}
+                                title={t("info_key")}
                                 onClick={() => handleOpenInfo(photoSwipe)}
                             >
                                 <InfoIcon />
@@ -944,7 +945,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                                 )}
                             {showConvertButton && (
                                 <button
-                                    title={t("CONVERT")}
+                                    title={t("convert")}
                                     className="pswp__button pswp__button--custom"
                                     onClick={handleForceConvert}
                                 >
@@ -1062,7 +1063,7 @@ const ConversionFailedNotification: React.FC<
                         variant="small"
                         sx={{ flex: 1, textAlign: "left" }}
                     >
-                        {t("CONVERSION_FAILED_NOTIFICATION_MESSAGE")}
+                        {t("unpreviewable_file_notification")}
                     </Typography>
                     <FilledIconButton onClick={handleClose}>
                         <CloseIcon />

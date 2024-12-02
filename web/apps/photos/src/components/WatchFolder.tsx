@@ -6,7 +6,7 @@ import {
 import { ensureElectron } from "@/base/electron";
 import { basename, dirname } from "@/base/file-name";
 import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
-import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
+import { CollectionMappingChoice } from "@/new/photos/components/CollectionMappingChoice";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import {
@@ -15,13 +15,14 @@ import {
     SpaceBetweenFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
-import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@ente/shared/components/OverflowMenu";
 import CheckIcon from "@mui/icons-material/Check";
 import DoNotDisturbOutlinedIcon from "@mui/icons-material/DoNotDisturbOutlined";
 import FolderCopyOutlinedIcon from "@mui/icons-material/FolderCopyOutlined";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import {
     Box,
     Button,
@@ -122,7 +123,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
             >
                 <SpaceBetweenFlex sx={{ p: "16px 8px 8px 8px" }}>
                     <DialogTitle variant="h3" fontWeight={"bold"}>
-                        {t("WATCHED_FOLDERS")}
+                        {t("watched_folders")}
                     </DialogTitle>
                     <DialogCloseIconButton {...{ onClose }} />
                 </SpaceBetweenFlex>
@@ -141,9 +142,9 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
                     </Stack>
                 </DialogContent>
             </Dialog>
-            <CollectionMappingChoiceDialog
+            <CollectionMappingChoice
                 {...mappingChoiceVisibilityProps}
-                didSelect={handleCollectionMappingSelect}
+                onSelect={handleCollectionMappingSelect}
             />
         </>
     );
@@ -185,21 +186,21 @@ const NoWatches: React.FC = () => {
         <NoWatchesContainer>
             <Stack spacing={1}>
                 <Typography variant="large" fontWeight={"bold"}>
-                    {t("NO_FOLDERS_ADDED")}
+                    {t("no_folders_added")}
                 </Typography>
                 <Typography py={0.5} variant={"small"} color="text.muted">
-                    {t("FOLDERS_AUTOMATICALLY_MONITORED")}
+                    {t("watch_folders_hint_1")}
                 </Typography>
                 <Typography variant={"small"} color="text.muted">
                     <FlexWrapper gap={1}>
                         <CheckmarkIcon />
-                        {t("UPLOAD_NEW_FILES_TO_ENTE")}
+                        {t("watch_folders_hint_2")}
                     </FlexWrapper>
                 </Typography>
                 <Typography variant={"small"} color="text.muted">
                     <FlexWrapper gap={1}>
                         <CheckmarkIcon />
-                        {t("REMOVE_DELETED_FILES_FROM_ENTE")}
+                        {t("watch_folders_hint_3")}
                     </FlexWrapper>
                 </Typography>
             </Stack>
@@ -309,14 +310,13 @@ interface EntryOptionsProps {
 const EntryOptions: React.FC<EntryOptionsProps> = ({ confirmStopWatching }) => {
     return (
         <OverflowMenu
+            ariaID={"watch-mapping-option"}
             menuPaperProps={{
                 sx: {
                     backgroundColor: (theme) =>
                         theme.colors.background.elevated2,
                 },
             }}
-            ariaControls={"watch-mapping-option"}
-            triggerButtonIcon={<MoreHorizIcon />}
         >
             <OverflowMenuOption
                 color="critical"

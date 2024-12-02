@@ -299,10 +299,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Tutti i ricordi conservati"),
         "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
             "Tutti i raggruppamenti per questa persona saranno resettati e perderai tutti i suggerimenti fatti per questa persona"),
+        "allow": MessageLookupByLibrary.simpleMessage("Allow"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Permetti anche alle persone con il link di aggiungere foto all\'album condiviso."),
         "allowAddingPhotos": MessageLookupByLibrary.simpleMessage(
             "Consenti l\'aggiunta di foto"),
+        "allowAppToOpenSharedAlbumLinks": MessageLookupByLibrary.simpleMessage(
+            "Allow app to open shared album links"),
         "allowDownloads":
             MessageLookupByLibrary.simpleMessage("Consenti download"),
         "allowPeopleToAddPhotos": MessageLookupByLibrary.simpleMessage(
@@ -416,6 +419,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Cartelle salvate"),
         "backup": MessageLookupByLibrary.simpleMessage("Backup"),
         "backupFailed": MessageLookupByLibrary.simpleMessage("Backup fallito"),
+        "backupFile": MessageLookupByLibrary.simpleMessage("Backup file"),
         "backupOverMobileData":
             MessageLookupByLibrary.simpleMessage("Backup su dati mobili"),
         "backupSettings":
@@ -811,6 +815,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "extraPhotosFound":
             MessageLookupByLibrary.simpleMessage("Trovate foto aggiuntive"),
         "extraPhotosFoundFor": m30,
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Riconoscimento facciale"),
         "faces": MessageLookupByLibrary.simpleMessage("Volti"),
@@ -1204,6 +1210,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ops, impossibile salvare le modifiche"),
         "oopsSomethingWentWrong": MessageLookupByLibrary.simpleMessage(
             "Oops! Qualcosa è andato storto"),
+        "openAlbumInBrowser":
+            MessageLookupByLibrary.simpleMessage("Open album in browser"),
+        "openAlbumInBrowserTitle": MessageLookupByLibrary.simpleMessage(
+            "Please use the web app to add photos to this album"),
+        "openFile": MessageLookupByLibrary.simpleMessage("Open file"),
         "openSettings":
             MessageLookupByLibrary.simpleMessage("Apri Impostazioni"),
         "openTheItem":
@@ -1480,6 +1491,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Invita persone e vedrai qui tutte le foto condivise da loro"),
         "searchResultCount": m55,
         "security": MessageLookupByLibrary.simpleMessage("Sicurezza"),
+        "seePublicAlbumLinksInApp": MessageLookupByLibrary.simpleMessage(
+            "See public album links in app"),
         "selectALocation":
             MessageLookupByLibrary.simpleMessage("Seleziona un luogo"),
         "selectALocationFirst":
@@ -1678,6 +1691,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Grazie per esserti iscritto!"),
         "theDownloadCouldNotBeCompleted": MessageLookupByLibrary.simpleMessage(
             "Il download non può essere completato"),
+        "theLinkYouAreTryingToAccessHasExpired":
+            MessageLookupByLibrary.simpleMessage(
+                "The link you are trying to access has expired."),
         "theRecoveryKeyYouEnteredIsIncorrect":
             MessageLookupByLibrary.simpleMessage(
                 "La chiave di recupero inserita non è corretta"),

@@ -83,3 +83,15 @@ export const _decryptMetadataJSON = async (r: {
         },
         r.keyB64,
     );
+
+export const _generateKeyPair = libsodium.generateKeyPair;
+
+export const _boxSeal = libsodium.boxSeal;
+
+export const _boxSealOpen = libsodium.boxSealOpen;
+
+export const _deriveKey = libsodium.deriveKey;
+
+export const _deriveSensitiveKey = libsodium.deriveSensitiveKey;
+
+export const _deriveInteractiveKey = libsodium.deriveInteractiveKey;

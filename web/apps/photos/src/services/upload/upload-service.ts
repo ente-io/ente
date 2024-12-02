@@ -3,6 +3,7 @@ import type { BytesOrB64 } from "@/base/crypto/types";
 import { type CryptoWorker } from "@/base/crypto/worker";
 import { ensureElectron } from "@/base/electron";
 import { basename, nameAndExtension } from "@/base/file-name";
+import type { PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
 import { extractVideoMetadata } from "@/gallery/services/ffmpeg";
@@ -42,13 +43,14 @@ import { mergeUint8Arrays } from "@/utils/array";
 import { ensureInteger, ensureNumber } from "@/utils/ensure";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import { addToCollection } from "services/collectionService";
-import {
-    PublicUploadProps,
-    type LivePhotoAssets,
-} from "services/upload/uploadManager";
+import { type LivePhotoAssets } from "services/upload/uploadManager";
 import * as convert from "xml-js";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
-import publicUploadHttpClient from "./publicUploadHttpClient";
+import {
+    PhotosUploadHttpClient,
+    PublicUploadHttpClient,
+    type ObjectUploadURL,
+} from "./remote";
 import type { ParsedMetadataJSON } from "./takeout";
 import { matchTakeoutMetadata } from "./takeout";
 import {
@@ -56,8 +58,10 @@ import {
     generateThumbnailNative,
     generateThumbnailWeb,
 } from "./thumbnail";
-import UploadHttpClient from "./uploadHttpClient";
 import type { UploadableUploadItem } from "./uploadManager";
+
+const publicUploadHttpClient = new PublicUploadHttpClient();
+const UploadHttpClient = new PhotosUploadHttpClient();
 
 /**
  * A readable stream for a file, and its associated size and last modified time.
@@ -108,12 +112,20 @@ const multipartChunksPerPart = 5;
 
 /** Upload files to cloud storage */
 class UploadService {
-    private uploadURLs: UploadURL[] = [];
+    private uploadURLs: ObjectUploadURL[] = [];
     private pendingUploadCount: number = 0;
-    private publicUploadProps: PublicUploadProps = undefined;
+    private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
+    private activeUploadURLRefill: Promise<void> | undefined;
 
-    init(publicUploadProps: PublicUploadProps) {
-        this.publicUploadProps = publicUploadProps;
+    init(publicAlbumsCredentials: PublicAlbumsCredentials | undefined) {
+        this.publicAlbumsCredentials = publicAlbumsCredentials;
+    }
+
+    logout() {
+        this.uploadURLs = [];
+        this.pendingUploadCount = 0;
+        this.publicAlbumsCredentials = undefined;
+        this.activeUploadURLRefill = undefined;
     }
 
     async setFileCount(fileCount: number) {
@@ -127,55 +139,80 @@ class UploadService {
 
     async getUploadURL() {
         if (this.uploadURLs.length === 0 && this.pendingUploadCount) {
-            await this.fetchUploadURLs();
+            await this.refillUploadURLs();
+            this.ensureUniqueUploadURLs();
         }
         return this.uploadURLs.pop();
     }
 
     private async preFetchUploadURLs() {
         try {
-            await this.fetchUploadURLs();
+            await this.refillUploadURLs();
             // checking for any subscription related errors
         } catch (e) {
             log.error("prefetch uploadURL failed", e);
             handleUploadError(e);
         }
+        this.ensureUniqueUploadURLs();
     }
 
     async uploadFile(uploadFile: UploadFile) {
-        if (this.publicUploadProps.accessedThroughSharedURL) {
+        if (this.publicAlbumsCredentials) {
             return publicUploadHttpClient.uploadFile(
                 uploadFile,
-                this.publicUploadProps.token,
-                this.publicUploadProps.passwordToken,
+                // TODO: publicAlbumsCredentials
+                this.publicAlbumsCredentials.accessToken,
+                this.publicAlbumsCredentials.accessTokenJWT,
             );
         } else {
             return UploadHttpClient.uploadFile(uploadFile);
         }
     }
 
-    private async fetchUploadURLs() {
-        if (this.publicUploadProps.accessedThroughSharedURL) {
-            await publicUploadHttpClient.fetchUploadURLs(
-                this.pendingUploadCount,
-                this.uploadURLs,
-                this.publicUploadProps.token,
-                this.publicUploadProps.passwordToken,
-            );
-        } else {
-            await UploadHttpClient.fetchUploadURLs(
-                this.pendingUploadCount,
-                this.uploadURLs,
-            );
+    private async refillUploadURLs() {
+        try {
+            if (!this.activeUploadURLRefill) {
+                this.activeUploadURLRefill = this._refillUploadURLs();
+            }
+            await this.activeUploadURLRefill;
+        } finally {
+            this.activeUploadURLRefill = undefined;
         }
     }
 
+    private ensureUniqueUploadURLs() {
+        // TODO: Sanity check added on new implementation Nov 2024, remove after
+        // a while (tag: Migration).
+        if (
+            this.uploadURLs.length !=
+            new Set(this.uploadURLs.map((u) => u.url)).size
+        ) {
+            throw new Error("Duplicate upload URLs detected");
+        }
+    }
+
+    private async _refillUploadURLs() {
+        let urls: ObjectUploadURL[];
+        if (this.publicAlbumsCredentials) {
+            urls = await publicUploadHttpClient.fetchUploadURLs(
+                this.pendingUploadCount,
+                this.publicAlbumsCredentials,
+            );
+        } else {
+            urls = await UploadHttpClient.fetchUploadURLs(
+                this.pendingUploadCount,
+            );
+        }
+        urls.forEach((u) => this.uploadURLs.push(u));
+    }
+
     async fetchMultipartUploadURLs(count: number) {
-        if (this.publicUploadProps.accessedThroughSharedURL) {
+        if (this.publicAlbumsCredentials) {
+            // TODO: publicAlbumsCredentials
             return await publicUploadHttpClient.fetchMultipartUploadURLs(
                 count,
-                this.publicUploadProps.token,
-                this.publicUploadProps.passwordToken,
+                this.publicAlbumsCredentials.accessToken,
+                this.publicAlbumsCredentials.accessTokenJWT,
             );
         } else {
             return await UploadHttpClient.fetchMultipartUploadURLs(count);
@@ -289,11 +326,6 @@ export interface MultipartUploadURLs {
     objectKey: string;
     partURLs: string[];
     completeURL: string;
-}
-
-export interface UploadURL {
-    url: string;
-    objectKey: string;
 }
 
 export interface PotentialLivePhotoAsset {
@@ -1438,6 +1470,7 @@ const uploadToBucket = async (
         encryptedFilePieces;
     try {
         let fileObjectKey: string = null;
+        let fileSize: number;
 
         const encryptedData = file.encryptedData;
         if (
@@ -1446,18 +1479,20 @@ const uploadToBucket = async (
         ) {
             // We have a stream, and it is more than multipartChunksPerPart
             // chunks long, so use a multipart upload to upload it.
-            fileObjectKey = await uploadStreamUsingMultipart(
-                localID,
-                encryptedData,
-                makeProgessTracker,
-                isCFUploadProxyDisabled,
-                abortIfCancelled,
-            );
+            ({ objectKey: fileObjectKey, fileSize } =
+                await uploadStreamUsingMultipart(
+                    localID,
+                    encryptedData,
+                    makeProgessTracker,
+                    isCFUploadProxyDisabled,
+                    abortIfCancelled,
+                ));
         } else {
             const data =
                 encryptedData instanceof Uint8Array
                     ? encryptedData
                     : await readEntireStream(encryptedData.stream);
+            fileSize = data.length;
 
             const progressTracker = makeProgessTracker(localID);
             const fileUploadURL = await uploadService.getUploadURL();
@@ -1495,10 +1530,12 @@ const uploadToBucket = async (
             file: {
                 decryptionHeader: file.decryptionHeader,
                 objectKey: fileObjectKey,
+                size: fileSize,
             },
             thumbnail: {
                 decryptionHeader: thumbnail.decryptionHeader,
                 objectKey: thumbnailObjectKey,
+                size: thumbnail.encryptedData.length,
             },
             metadata: {
                 encryptedData: metadata.encryptedDataB64,
@@ -1539,6 +1576,7 @@ async function uploadStreamUsingMultipart(
     const percentPerPart =
         RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount;
     const partEtags: PartEtag[] = [];
+    let fileSize = 0;
     for (const [
         index,
         fileUploadURL,
@@ -1546,6 +1584,7 @@ async function uploadStreamUsingMultipart(
         abortIfCancelled();
 
         const uploadChunk = await combineChunksToFormUploadPart(streamReader);
+        fileSize += uploadChunk.length;
         const progressTracker = makeProgessTracker(
             fileLocalID,
             percentPerPart,
@@ -1581,7 +1620,7 @@ async function uploadStreamUsingMultipart(
         await UploadHttpClient.completeMultipartUpload(completeURL, cBody);
     }
 
-    return multipartUploadURLs.objectKey;
+    return { objectKey: multipartUploadURLs.objectKey, fileSize };
 }
 
 async function combineChunksToFormUploadPart(

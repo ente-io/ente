@@ -120,7 +120,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         />
                         <FormPaperFooter>
                             <LinkButton onClick={logout}>
-                                {t("GO_BACK")}
+                                {t("go_back")}
                             </LinkButton>
                         </FormPaperFooter>
                     </FormPaper>

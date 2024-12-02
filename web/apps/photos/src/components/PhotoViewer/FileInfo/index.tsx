@@ -172,7 +172,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
-            <Titlebar onClose={handleCloseInfo} title={t("INFO")} backIsClose />
+            <Titlebar onClose={handleCloseInfo} title={t("info")} backIsClose />
             <Stack pt={1} pb={3} spacing={"20px"}>
                 <RenderCaption
                     {...{
@@ -213,7 +213,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             title={t("location")}
                             caption={
                                 !mapEnabled ||
-                                publicCollectionGalleryContext.accessedThroughSharedURL ? (
+                                publicCollectionGalleryContext.credentials ? (
                                     <Link
                                         href={openStreetMapLink(location)}
                                         target="_blank"
@@ -245,7 +245,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                 />
                             }
                         />
-                        {!publicCollectionGalleryContext.accessedThroughSharedURL && (
+                        {!publicCollectionGalleryContext.credentials && (
                             <MapBox
                                 location={location}
                                 mapEnabled={mapEnabled}
@@ -258,7 +258,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 )}
                 <InfoItem
                     icon={<TextSnippetOutlinedIcon />}
-                    title={t("DETAILS")}
+                    title={t("details")}
                     caption={
                         !exif ? (
                             <ActivityIndicator size={12} />

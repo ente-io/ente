@@ -10,6 +10,7 @@ import { logoutSearch } from "@/new/photos/services/search";
 import { logoutSettings } from "@/new/photos/services/settings";
 import { logoutUserDetails } from "@/new/photos/services/user-details";
 import exportService from "./export";
+import uploadManager from "./upload/uploadManager";
 
 /**
  * Logout sequence for the photos app.
@@ -55,6 +56,12 @@ export const photosLogout = async () => {
 
     try {
         resetUploadState();
+    } catch (e) {
+        ignoreError("Upload", e);
+    }
+
+    try {
+        uploadManager.logout();
     } catch (e) {
         ignoreError("Upload", e);
     }

@@ -325,10 +325,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Alle herinneringen bewaard"),
         "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
             "Alle groepen voor deze persoon worden gereset, en je verliest alle suggesties die voor deze persoon zijn gedaan"),
+        "allow": MessageLookupByLibrary.simpleMessage("Allow"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Sta toe dat mensen met de link ook foto\'s kunnen toevoegen aan het gedeelde album."),
         "allowAddingPhotos":
             MessageLookupByLibrary.simpleMessage("Foto\'s toevoegen toestaan"),
+        "allowAppToOpenSharedAlbumLinks": MessageLookupByLibrary.simpleMessage(
+            "Allow app to open shared album links"),
         "allowDownloads":
             MessageLookupByLibrary.simpleMessage("Downloads toestaan"),
         "allowPeopleToAddPhotos": MessageLookupByLibrary.simpleMessage(
@@ -442,6 +445,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Back-up mappen"),
         "backup": MessageLookupByLibrary.simpleMessage("Back-up"),
         "backupFailed": MessageLookupByLibrary.simpleMessage("Back-up mislukt"),
+        "backupFile": MessageLookupByLibrary.simpleMessage("Backup file"),
         "backupOverMobileData": MessageLookupByLibrary.simpleMessage(
             "Back-up maken via mobiele data"),
         "backupSettings":
@@ -858,6 +862,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "extraPhotosFound":
             MessageLookupByLibrary.simpleMessage("Extra foto\'s gevonden"),
         "extraPhotosFoundFor": m30,
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Gezichtsherkenning"),
         "faces": MessageLookupByLibrary.simpleMessage("Gezichten"),
@@ -1248,6 +1254,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Oeps, kon bewerkingen niet opslaan"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Oeps, er is iets misgegaan"),
+        "openAlbumInBrowser":
+            MessageLookupByLibrary.simpleMessage("Open album in browser"),
+        "openAlbumInBrowserTitle": MessageLookupByLibrary.simpleMessage(
+            "Please use the web app to add photos to this album"),
+        "openFile": MessageLookupByLibrary.simpleMessage("Open file"),
         "openSettings":
             MessageLookupByLibrary.simpleMessage("Instellingen openen"),
         "openTheItem": MessageLookupByLibrary.simpleMessage("• Open het item"),
@@ -1535,6 +1546,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchResultCount": m55,
         "searchSectionsLengthMismatch": m56,
         "security": MessageLookupByLibrary.simpleMessage("Beveiliging"),
+        "seePublicAlbumLinksInApp": MessageLookupByLibrary.simpleMessage(
+            "See public album links in app"),
         "selectALocation":
             MessageLookupByLibrary.simpleMessage("Selecteer een locatie"),
         "selectALocationFirst":
@@ -1730,6 +1743,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Dank je wel voor het abonneren!"),
         "theDownloadCouldNotBeCompleted": MessageLookupByLibrary.simpleMessage(
             "De download kon niet worden voltooid"),
+        "theLinkYouAreTryingToAccessHasExpired":
+            MessageLookupByLibrary.simpleMessage(
+                "The link you are trying to access has expired."),
         "theRecoveryKeyYouEnteredIsIncorrect":
             MessageLookupByLibrary.simpleMessage(
                 "De ingevoerde herstelsleutel is onjuist"),

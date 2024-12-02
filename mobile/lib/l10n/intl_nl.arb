@@ -1380,6 +1380,7 @@
   "yesResetPerson": "Ja, reset persoon",
   "onlyThem": "Alleen hen",
   "checkingModels": "Modellen controleren...",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "enableMachineLearningBanner": "Schakel machine learning in voor magische zoekopdrachten en gezichtsherkenning",
   "searchDiscoverEmptySection": "Afbeeldingen worden hier getoond zodra de verwerking voltooid is",
   "searchPersonsEmptySection": "Mensen worden hier getoond zodra de verwerking voltooid is",
@@ -1504,5 +1505,13 @@
   "changeLogDiscoverTitle": "Ontdek",
   "changeLogDiscoverContent": "Op zoek naar foto's van je identiteitskaarten, notities of zelfs herinneringen? Ga naar het tabblad Zoeken en bekijk ontdekking. Op basis van onze semantische zoekopdracht is het een plek om foto's te vinden die belangrijk voor jou kunnen zijn.\\n\\nAlleen beschikbaar als je Machine Learning hebt ingeschakeld.",
   "selectCoverPhoto": "Selecteer omslagfoto",
-  "newLocation": "Nieuwe locatie"
+  "newLocation": "Nieuwe locatie",
+  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
+  "openFile": "Open file",
+  "backupFile": "Backup file",
+  "openAlbumInBrowser": "Open album in browser",
+  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
+  "allow": "Allow",
+  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
+  "seePublicAlbumLinksInApp": "See public album links in app"
 }

@@ -85,17 +85,6 @@
       ]
     },
     {
-      "title": "Binance TR",
-      "slug": "binance_tr"
-    },
-    {
-      "title": "BinanceUS",
-      "slug": "binance_us",
-      "altNames": [
-        "Binance US"
-      ]
-    },
-    {
       "title": "Bitfinex"
     },
     {
@@ -128,13 +117,6 @@
       "title": "Bitwarden"
     },
     {
-      "title": "Bloom Host",
-      "slug": "bloom_host",
-      "altNames": [
-        "Bloom Host Billing"
-      ]
-    },
-    {
       "title": "Blockchain",
       "altNames": [
         "blockchain.com",
@@ -165,12 +147,6 @@
       ]
     },
     {
-      "title": "Booking",
-      "altNames": [
-        "Booking.com"
-      ]
-    },
-    {
       "title": "Brave Creators",
       "slug": "brave_creators",
       "altNames": [
@@ -178,6 +154,9 @@
         "Brave Rewards",
         "Brave Browser"
       ]
+    },
+    {
+      "title": "Bugzilla"
     },
     {
       "title": "Bybit"
@@ -314,6 +293,13 @@
       "title": "Estateguru"
     },
     {
+      "title": "Fidelity",
+      "slug": "fidelity",
+      "altNames": [
+        "Fidelity Investments"
+      ]
+    },
+    {
       "title": "Filen"
     },
     {
@@ -353,6 +339,15 @@
       "slug": "gov_uk",
       "altNames": [
         "Government Gateway"
+      ]
+    },
+    {
+      "title": "Government of Canada",
+      "slug": "canada_flag",
+      "altNames": [
+        "CRA",
+        "CRA/ARC",
+        "Canada Revenue Agency"
       ]
     },
     {
@@ -687,6 +682,10 @@
     },
     {
       "title": "Proxmox"
+    },
+    {
+      "title": "Pushover",
+      "slug": "pushover"
     },
     {
       "title": "qiniuyun",

@@ -88,197 +88,213 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
           ),
         ),
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(
-                  bottom: 32.0,
-                  left: 16.0,
-                  right: 16.0,
-                ),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 48),
-                    if (person != null)
-                      FutureBuilder<(String, EnteFile)>(
-                        future: _getRecentFileWithClusterID(person!),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            final String personClusterID = snapshot.data!.$1;
-                            final personFile = snapshot.data!.$2;
-                            return Stack(
-                              children: [
-                                SizedBox(
-                                  height: 110,
-                                  width: 110,
-                                  child: ClipPath(
-                                    clipper: ShapeBorderClipper(
-                                      shape: ContinuousRectangleBorder(
-                                        borderRadius: BorderRadius.circular(80),
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(
+                    bottom: 32.0,
+                    left: 16.0,
+                    right: 16.0,
+                  ),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 48),
+                      if (person != null)
+                        FutureBuilder<(String, EnteFile)>(
+                          future: _getRecentFileWithClusterID(person!),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              final String personClusterID = snapshot.data!.$1;
+                              final personFile = snapshot.data!.$2;
+                              return Stack(
+                                children: [
+                                  SizedBox(
+                                    height: 110,
+                                    width: 110,
+                                    child: ClipPath(
+                                      clipper: ShapeBorderClipper(
+                                        shape: ContinuousRectangleBorder(
+                                          borderRadius: BorderRadius.circular(80),
+                                        ),
                                       ),
-                                    ),
-                                    child: snapshot.hasData
-                                        ? PersonFaceWidget(
-                                            personFile,
-                                            clusterID: personClusterID,
-                                            personId: person!.remoteID,
-                                          )
-                                        : const NoThumbnailWidget(
-                                            addBorder: false,
-                                          ),
-                                  ),
-                                ),
-                                if (person != null)
-                                  Positioned(
-                                    right: 0,
-                                    bottom: 0,
-                                    child: Container(
-                                      width: 28,
-                                      height: 28,
-                                      decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        boxShadow: Theme.of(context)
-                                            .colorScheme
-                                            .enteTheme
-                                            .shadowMenu,
-                                        color: getEnteColorScheme(context)
-                                            .backgroundElevated2,
-                                      ),
-                                      child: IconButton(
-                                        icon: const Icon(Icons.edit),
-                                        iconSize:
-                                            16, // specify the size of the icon
-                                        onPressed: () async {
-                                          final result =
-                                              await showPersonAvatarPhotoSheet(
-                                            context,
-                                            person!,
-                                          );
-                                          if (result != null) {
-                                            setState(() {
-                                              person = result;
-                                            });
-                                          }
-                                        },
-                                      ),
+                                      child: snapshot.hasData
+                                          ? PersonFaceWidget(
+                                              key: ValueKey(
+                                                person?.data.avatarFaceID ?? "",
+                                              ),
+                                              personFile,
+                                              clusterID: personClusterID,
+                                              personId: person!.remoteID,
+                                            )
+                                          : const NoThumbnailWidget(
+                                              addBorder: false,
+                                            ),
                                     ),
                                   ),
-                              ],
-                            );
+                                  if (person != null)
+                                    Positioned(
+                                      right: 0,
+                                      bottom: 0,
+                                      child: Container(
+                                        width: 28,
+                                        height: 28,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          boxShadow: Theme.of(context)
+                                              .colorScheme
+                                              .enteTheme
+                                              .shadowMenu,
+                                          color: getEnteColorScheme(context)
+                                              .backgroundElevated2,
+                                        ),
+                                        child: IconButton(
+                                          icon: const Icon(Icons.edit),
+                                          iconSize:
+                                              16, // specify the size of the icon
+                                          onPressed: () async {
+                                            final result =
+                                                await showPersonAvatarPhotoSheet(
+                                              context,
+                                              person!,
+                                            );
+                                            if (result != null) {
+                                              _logger
+                                                  .info('Person avatar updated');
+                                              setState(() {
+                                                person = result;
+                                              });
+                                              Bus.instance.fire(
+                                                PeopleChangedEvent(),
+                                              );
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              );
+                            } else {
+                              return const SizedBox.shrink();
+                            }
+                          },
+                        ),
+                      if (person == null)
+                        SizedBox(
+                          height: 110,
+                          width: 110,
+                          child: ClipPath(
+                            clipper: ShapeBorderClipper(
+                              shape: ContinuousRectangleBorder(
+                                borderRadius: BorderRadius.circular(80),
+                              ),
+                            ),
+                            child: widget.file != null
+                                ? PersonFaceWidget(
+                                    widget.file!,
+                                    clusterID: widget.clusterID,
+                                  )
+                                : const NoThumbnailWidget(
+                                    addBorder: false,
+                                  ),
+                          ),
+                        ),
+                      const SizedBox(height: 36),
+                      TextFormField(
+                        keyboardType: TextInputType.name,
+                        textCapitalization: TextCapitalization.words,
+                        autocorrect: false,
+                        onChanged: (value) {
+                          if (_debounce?.isActive ?? false) _debounce?.cancel();
+                          _debounce =
+                              Timer(const Duration(milliseconds: 300), () {
+                            setState(() {
+                              _inputName = value;
+                            });
+                          });
+                        },
+                        initialValue: _inputName,
+                        decoration: InputDecoration(
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(8.0)),
+                            borderSide: BorderSide(
+                              color: getEnteColorScheme(context).strokeMuted,
+                            ),
+                          ),
+                          fillColor: getEnteColorScheme(context).fillFaint,
+                          filled: true,
+                          hintText: context.l10n.enterName,
+                          hintStyle: getEnteTextTheme(context).bodyFaint,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          border: UnderlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      DatePickerField(
+                        hintText: context.l10n.enterDateOfBirth,
+                        firstDate: DateTime(100),
+                        lastDate: DateTime.now(),
+                        initialValue: _selectedDate,
+                        isRequired: false,
+                        onChanged: (date) {
+                          setState(() {
+                            // format date to yyyy-MM-dd
+                            _selectedDate =
+                                date?.toIso8601String().split("T").first;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 32),
+                      ButtonWidget(
+                        buttonType: ButtonType.primary,
+                        labelText: context.l10n.save,
+                        isDisabled: !changed,
+                        onTap: () async {
+                          if (widget.isEditing) {
+                            await updatePerson(context);
                           } else {
-                            return const SizedBox.shrink();
+                            await addNewPerson(
+                              context,
+                              text: _inputName,
+                              clusterID: widget.clusterID!,
+                            );
                           }
                         },
                       ),
-                    if (person == null)
-                      SizedBox(
-                        height: 110,
-                        width: 110,
-                        child: ClipPath(
-                          clipper: ShapeBorderClipper(
-                            shape: ContinuousRectangleBorder(
-                              borderRadius: BorderRadius.circular(80),
-                            ),
-                          ),
-                          child: widget.file != null
-                              ? PersonFaceWidget(
-                                  widget.file!,
-                                  clusterID: widget.clusterID,
-                                )
-                              : const NoThumbnailWidget(
-                                  addBorder: false,
-                                ),
-                        ),
-                      ),
-                    const SizedBox(height: 36),
-                    TextFormField(
-                      onChanged: (value) {
-                        if (_debounce?.isActive ?? false) _debounce?.cancel();
-                        _debounce =
-                            Timer(const Duration(milliseconds: 300), () {
-                          setState(() {
-                            _inputName = value;
-                          });
-                        });
-                      },
-                      initialValue: _inputName,
-                      decoration: InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(8.0)),
-                          borderSide: BorderSide(
-                            color: getEnteColorScheme(context).strokeMuted,
+                      const SizedBox(height: 32),
+                      if (!widget.isEditing) _getPersonItems(),
+                      if (widget.isEditing)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            context.l10n.mergedPhotos,
+                            style: getEnteTextTheme(context).body,
                           ),
                         ),
-                        fillColor: getEnteColorScheme(context).fillFaint,
-                        filled: true,
-                        hintText: context.l10n.enterName,
-                        hintStyle: getEnteTextTheme(context).bodyFaint,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
+                      if (widget.isEditing)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0, top: 24.0),
+                          child: PersonClustersWidget(person!),
                         ),
-                        border: UnderlineInputBorder(
-                          borderSide: BorderSide.none,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    DatePickerField(
-                      hintText: context.l10n.enterDateOfBirth,
-                      firstDate: DateTime(100),
-                      lastDate: DateTime.now(),
-                      initialValue: _selectedDate,
-                      isRequired: false,
-                      onChanged: (date) {
-                        setState(() {
-                          // format date to yyyy-MM-dd
-                          _selectedDate =
-                              date?.toIso8601String().split("T").first;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 32),
-                    ButtonWidget(
-                      buttonType: ButtonType.primary,
-                      labelText: context.l10n.save,
-                      isDisabled: !changed,
-                      onTap: () async {
-                        if (widget.isEditing) {
-                          await updatePerson(context);
-                        } else {
-                          await addNewPerson(
-                            context,
-                            text: _inputName,
-                            clusterID: widget.clusterID!,
-                          );
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 32),
-                    if (!widget.isEditing) _getPersonItems(),
-                    if (widget.isEditing)
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          context.l10n.mergedPhotos,
-                          style: getEnteTextTheme(context).body,
-                        ),
-                      ),
-                    if (widget.isEditing)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0, top: 24.0),
-                        child: PersonClustersWidget(person!),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

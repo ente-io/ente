@@ -1,5 +1,10 @@
 /**
- * @file Higher level functions that use the ontology of Ente's requirements.
+ * @file Cryptographic operations. This is the highest layer of the crypto code
+ * hierarchy, and is meant to be used directly by the rest of our code.
+ *
+ * --|
+ * --> For each function, more detailed documentation is in `libsodium.ts` <-
+ * --|
  *
  * [Note: Crypto code hierarchy]
  *
@@ -18,20 +23,17 @@
  * ensure that sodium.ready has been called before accessing libsodium's APIs,
  * thus all the functions it exposes are async.
  *
- * The highest layer is this file, `crypto/index.ts`. These are usually simple
- * compositions of functionality exposed by `crypto/libsodium.ts`, the primary
- * difference being that these functions try to talk in terms of higher-level
- * Ente specific goal we are trying to accomplish instead of the specific
- * underlying crypto algorithms.
+ * The highest layer is this file, `crypto/index.ts`. These are usually direct
+ * proxies (or simple compositions) of functionality exposed by
+ * `crypto/libsodium.ts`, but they automatically defer to a worker thread.
  *
- * There is an additional actor in play. Cryptographic operations like
- * encryption are CPU intensive and would cause the UI to stutter if used
- * directly on the main thread. To keep the UI smooth, we instead want to run
- * them in a web worker. However, sometimes we already _are_ running in a web
- * worker, and delegating to another worker is wasteful.
+ * Cryptographic operations like encryption are CPU intensive and would cause
+ * the UI to stutter if used directly on the main thread. To keep the UI smooth,
+ * we instead want to run them in a web worker. However, sometimes we already
+ * _are_ running in a web worker, and delegating to another worker is wasteful.
  *
- * To handle both these scenario, the potentially CPU intensive functions in
- * this file are split into the external API, and the underlying implementation
+ * To handle both these scenario, the implementation of the functions in this
+ * file are split into the external API, and the underlying implementation
  * (denoted by an "_" prefix). To avoid a circular dependency during webpack
  * imports, we need to keep the implementation functions in a separate file
  * (`ente-impl.ts`).
@@ -42,8 +44,8 @@
  * implementation function, but this time in the context of a web worker).
  *
  * Also, some code (e.g. the uploader) creates it own crypto worker instances,
- * and thus directly calls the functions in the web worker (it created) instead
- * of going through this file.
+ * and thus directly calls the functions in the web worker that it created
+ * instead of going through this file.
  */
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { type StateAddress } from "libsodium-wrappers-sumo";
@@ -68,6 +70,9 @@ let _comlinkWorker: ComlinkWorker<typeof CryptoWorker> | undefined;
  */
 export const sharedCryptoWorker = async () =>
     (_comlinkWorker ??= createComlinkCryptoWorker()).remote;
+
+/** A shorter alias of {@link sharedCryptoWorker} for use within this file. */
+const sharedWorker = sharedCryptoWorker;
 
 /**
  * Create a new instance of a comlink worker that wraps a {@link CryptoWorker}
@@ -100,7 +105,7 @@ const assertInWorker = <T>(x: T): T => {
 export const generateBoxKey = () =>
     inWorker()
         ? ei._generateBoxKey()
-        : sharedCryptoWorker().then((w) => w.generateBoxKey());
+        : sharedWorker().then((w) => w.generateBoxKey());
 
 /**
  * Return a new randomly generated 256-bit key (as a base64 string) suitable for
@@ -109,7 +114,7 @@ export const generateBoxKey = () =>
 export const generateBlobOrStreamKey = () =>
     inWorker()
         ? ei._generateBlobOrStreamKey()
-        : sharedCryptoWorker().then((w) => w.generateBlobOrStreamKey());
+        : sharedWorker().then((w) => w.generateBlobOrStreamKey());
 
 /**
  * Encrypt the given data, returning a box containing the encrypted data and a
@@ -127,7 +132,7 @@ export const generateBlobOrStreamKey = () =>
 export const encryptBoxB64 = (data: BytesOrB64, key: BytesOrB64) =>
     inWorker()
         ? ei._encryptBoxB64(data, key)
-        : sharedCryptoWorker().then((w) => w.encryptBoxB64(data, key));
+        : sharedWorker().then((w) => w.encryptBoxB64(data, key));
 
 /**
  * Encrypt the given data, returning a blob containing the encrypted data and a
@@ -153,7 +158,7 @@ export const encryptBlob = (data: BytesOrB64, key: BytesOrB64) =>
 export const encryptBlobB64 = (data: BytesOrB64, key: BytesOrB64) =>
     inWorker()
         ? ei._encryptBlobB64(data, key)
-        : sharedCryptoWorker().then((w) => w.encryptBlobB64(data, key));
+        : sharedWorker().then((w) => w.encryptBlobB64(data, key));
 
 /**
  * Encrypt the thumbnail for a file.
@@ -167,33 +172,27 @@ export const encryptBlobB64 = (data: BytesOrB64, key: BytesOrB64) =>
 export const encryptThumbnail = (data: BytesOrB64, key: BytesOrB64) =>
     inWorker()
         ? ei._encryptThumbnail(data, key)
-        : sharedCryptoWorker().then((w) => w.encryptThumbnail(data, key));
+        : sharedWorker().then((w) => w.encryptThumbnail(data, key));
 
 /**
  * Encrypt the given data using chunked streaming encryption, but process all
  * the chunks in one go.
- *
- * For more details, see {@link encryptStreamBytes} in `libsodium.ts`.
  */
 export const encryptStreamBytes = async (data: Uint8Array, key: BytesOrB64) =>
     inWorker()
         ? ei._encryptStreamBytes(data, key)
-        : sharedCryptoWorker().then((w) => w.encryptStreamBytes(data, key));
+        : sharedWorker().then((w) => w.encryptStreamBytes(data, key));
 
 /**
  * Prepare for chunked streaming encryption using {@link encryptStreamChunk}.
- *
- * For more details, see {@link initChunkEncryption} in `libsodium.ts`.
  */
 export const initChunkEncryption = async (key: BytesOrB64) =>
     inWorker()
         ? ei._initChunkEncryption(key)
-        : sharedCryptoWorker().then((w) => w.initChunkEncryption(key));
+        : sharedWorker().then((w) => w.initChunkEncryption(key));
 
 /**
  * Encrypt a chunk as part of a chunked streaming encryption.
- *
- * For more details, see {@link encryptStreamChunk} in `libsodium.ts`.
  */
 export const encryptStreamChunk = async (
     data: Uint8Array,
@@ -202,7 +201,7 @@ export const encryptStreamChunk = async (
 ) =>
     inWorker()
         ? ei._encryptStreamChunk(data, state, isFinalChunk)
-        : sharedCryptoWorker().then((w) =>
+        : sharedWorker().then((w) =>
               w.encryptStreamChunk(data, state, isFinalChunk),
           );
 
@@ -229,9 +228,7 @@ export const encryptStreamChunk = async (
 export const encryptMetadataJSON_New = (jsonValue: unknown, key: BytesOrB64) =>
     inWorker()
         ? ei._encryptMetadataJSON_New(jsonValue, key)
-        : sharedCryptoWorker().then((w) =>
-              w.encryptMetadataJSON_New(jsonValue, key),
-          );
+        : sharedWorker().then((w) => w.encryptMetadataJSON_New(jsonValue, key));
 
 /**
  * Deprecated, use {@link encryptMetadataJSON_New} instead.
@@ -242,7 +239,7 @@ export const encryptMetadataJSON = async (r: {
 }) =>
     inWorker()
         ? ei._encryptMetadataJSON(r)
-        : sharedCryptoWorker().then((w) => w.encryptMetadataJSON(r));
+        : sharedWorker().then((w) => w.encryptMetadataJSON(r));
 
 /**
  * Decrypt a box encrypted using {@link encryptBoxB64} and returns the decrypted
@@ -251,7 +248,7 @@ export const encryptMetadataJSON = async (r: {
 export const decryptBox = (box: EncryptedBox, key: BytesOrB64) =>
     inWorker()
         ? ei._decryptBox(box, key)
-        : sharedCryptoWorker().then((w) => w.decryptBox(box, key));
+        : sharedWorker().then((w) => w.decryptBox(box, key));
 
 /**
  * Variant of {@link decryptBox} that returns the result as a base64 string.
@@ -259,7 +256,7 @@ export const decryptBox = (box: EncryptedBox, key: BytesOrB64) =>
 export const decryptBoxB64 = (box: EncryptedBox, key: BytesOrB64) =>
     inWorker()
         ? ei._decryptBoxB64(box, key)
-        : sharedCryptoWorker().then((w) => w.decryptBoxB64(box, key));
+        : sharedWorker().then((w) => w.decryptBoxB64(box, key));
 
 /**
  * Decrypt a blob encrypted using either {@link encryptBlob} or
@@ -268,7 +265,7 @@ export const decryptBoxB64 = (box: EncryptedBox, key: BytesOrB64) =>
 export const decryptBlob = (blob: EncryptedBlob, key: BytesOrB64) =>
     inWorker()
         ? ei._decryptBlob(blob, key)
-        : sharedCryptoWorker().then((w) => w.decryptBlob(blob, key));
+        : sharedWorker().then((w) => w.decryptBlob(blob, key));
 
 /**
  * A variant of {@link decryptBlob} that returns the result as a base64 string.
@@ -276,7 +273,7 @@ export const decryptBlob = (blob: EncryptedBlob, key: BytesOrB64) =>
 export const decryptBlobB64 = (blob: EncryptedBlob, key: BytesOrB64) =>
     inWorker()
         ? ei._decryptBlobB64(blob, key)
-        : sharedCryptoWorker().then((w) => w.decryptBlobB64(blob, key));
+        : sharedWorker().then((w) => w.decryptBlobB64(blob, key));
 
 /**
  * Decrypt the thumbnail encrypted using {@link encryptThumbnail}.
@@ -284,7 +281,7 @@ export const decryptBlobB64 = (blob: EncryptedBlob, key: BytesOrB64) =>
 export const decryptThumbnail = (blob: EncryptedBlob, key: BytesOrB64) =>
     inWorker()
         ? ei._decryptThumbnail(blob, key)
-        : sharedCryptoWorker().then((w) => w.decryptThumbnail(blob, key));
+        : sharedWorker().then((w) => w.decryptThumbnail(blob, key));
 
 /**
  * Decrypt the result of {@link encryptStreamBytes}.
@@ -295,7 +292,7 @@ export const decryptStreamBytes = async (
 ) =>
     inWorker()
         ? ei._decryptStreamBytes(file, key)
-        : sharedCryptoWorker().then((w) => w.decryptStreamBytes(file, key));
+        : sharedWorker().then((w) => w.decryptStreamBytes(file, key));
 
 /**
  * Prepare to decrypt the encrypted result produced using {@link initChunkEncryption} and
@@ -304,7 +301,7 @@ export const decryptStreamBytes = async (
 export const initChunkDecryption = async (header: string, key: BytesOrB64) =>
     inWorker()
         ? ei._initChunkDecryption(header, key)
-        : sharedCryptoWorker().then((w) => w.initChunkDecryption(header, key));
+        : sharedWorker().then((w) => w.initChunkDecryption(header, key));
 
 /**
  * Decrypt an individual chunk produced by {@link encryptStreamChunk}.
@@ -317,7 +314,7 @@ export const decryptStreamChunk = async (
 ) =>
     inWorker()
         ? ei._decryptStreamChunk(data, state)
-        : sharedCryptoWorker().then((w) => w.decryptStreamChunk(data, state));
+        : sharedWorker().then((w) => w.decryptStreamChunk(data, state));
 
 /**
  * Decrypt the metadata JSON encrypted using {@link encryptMetadataJSON}.
@@ -331,9 +328,7 @@ export const decryptMetadataJSON_New = (
 ) =>
     inWorker()
         ? ei._decryptMetadataJSON_New(blob, key)
-        : sharedCryptoWorker().then((w) =>
-              w.decryptMetadataJSON_New(blob, key),
-          );
+        : sharedWorker().then((w) => w.decryptMetadataJSON_New(blob, key));
 
 /**
  * Deprecated, retains the old API.
@@ -345,4 +340,65 @@ export const decryptMetadataJSON = (r: {
 }) =>
     inWorker()
         ? ei._decryptMetadataJSON(r)
-        : sharedCryptoWorker().then((w) => w.decryptMetadataJSON(r));
+        : sharedWorker().then((w) => w.decryptMetadataJSON(r));
+
+/**
+ * Generate a new public/private keypair.
+ */
+export const generateKeyPair = async () =>
+    inWorker()
+        ? ei._generateKeyPair()
+        : sharedWorker().then((w) => w.generateKeyPair());
+
+/**
+ * Public key encryption.
+ */
+export const boxSeal = async (data: string, publicKey: string) =>
+    inWorker()
+        ? ei._boxSeal(data, publicKey)
+        : sharedWorker().then((w) => w.boxSeal(data, publicKey));
+
+/**
+ * Decrypt the result of {@link boxSeal}.
+ */
+export const boxSealOpen = async (
+    encryptedData: string,
+    publicKey: string,
+    secretKey: string,
+) =>
+    inWorker()
+        ? ei._boxSealOpen(encryptedData, publicKey, secretKey)
+        : sharedWorker().then((w) =>
+              w.boxSealOpen(encryptedData, publicKey, secretKey),
+          );
+
+/**
+ * Derive a key by hashing the given {@link passphrase} using Argon 2id.
+ */
+export const deriveKey = async (
+    passphrase: string,
+    salt: string,
+    opsLimit: number,
+    memLimit: number,
+) =>
+    inWorker()
+        ? ei._deriveKey(passphrase, salt, opsLimit, memLimit)
+        : sharedWorker().then((w) =>
+              w.deriveKey(passphrase, salt, opsLimit, memLimit),
+          );
+
+/**
+ * Derive a sensitive key from the given {@link passphrase}.
+ */
+export const deriveSensitiveKey = async (passphrase: string, salt: string) =>
+    inWorker()
+        ? ei._deriveSensitiveKey(passphrase, salt)
+        : sharedWorker().then((w) => w.deriveSensitiveKey(passphrase, salt));
+
+/**
+ * Derive an interactive key from the given {@link passphrase}.
+ */
+export const deriveInteractiveKey = async (passphrase: string, salt: string) =>
+    inWorker()
+        ? ei._deriveInteractiveKey(passphrase, salt)
+        : sharedWorker().then((w) => w.deriveInteractiveKey(passphrase, salt));

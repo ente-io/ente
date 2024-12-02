@@ -333,16 +333,16 @@ class MLDataDB {
 
       final List<Map<String, dynamic>> faceMaps = await db.getAll(
         '''
-  SELECT * FROM $facesTable 
-  WHERE $faceIDColumn IN (
-    SELECT $faceIDColumn 
-    FROM $faceClustersTable 
-    WHERE $clusterIDColumn IN (${List.filled(clusterIDs.length, '?').join(',')})
-  )
-  AND $fileIDColumn IN (${List.filled(fileId.length, '?').join(',')})
-  AND $faceScore > ?
-  ORDER BY $faceScore DESC
-  ''',
+        SELECT * FROM $facesTable 
+        WHERE $faceIDColumn IN (
+        SELECT $faceIDColumn 
+        FROM $faceClustersTable 
+        WHERE $clusterIDColumn IN (${List.filled(clusterIDs.length, '?').join(',')})
+        )
+        AND $fileIDColumn IN (${List.filled(fileId.length, '?').join(',')})
+        AND $faceScore > ?
+        ORDER BY $faceScore DESC
+        ''',
         [...clusterIDs, ...fileId, kMinimumQualityFaceScore],
       );
       if (faceMaps.isNotEmpty) {

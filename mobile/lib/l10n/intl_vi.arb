@@ -1451,5 +1451,14 @@
   "castAlbum": "Phát album",
   "imageNotAnalyzed": "Hình ảnh chưa được phân tích",
   "noFacesFound": "Không tìm thấy khuôn mặt",
-  "fileNotUploadedYet": "Tệp chưa được tải lên"
+  "fileNotUploadedYet": "Tệp chưa được tải lên",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
+  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
+  "openFile": "Open file",
+  "backupFile": "Backup file",
+  "openAlbumInBrowser": "Open album in browser",
+  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
+  "allow": "Allow",
+  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
+  "seePublicAlbumLinksInApp": "See public album links in app"
 }

@@ -23,10 +23,11 @@ import {
 } from "@/new/photos/services/magic-metadata";
 import { useAppContext } from "@/new/photos/types/context";
 import { HorizontalFlex } from "@ente/shared/components/Container";
-import OverflowMenu, {
+import {
+    OverflowMenu,
+    OverflowMenuOption,
     StyledMenu,
-} from "@ente/shared/components/OverflowMenu/menu";
-import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
+} from "@ente/shared/components/OverflowMenu";
 import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
@@ -329,7 +330,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
             />
 
             <OverflowMenu
-                ariaControls={"collection-options"}
+                ariaID={"collection-options"}
                 triggerButtonIcon={<MoreHoriz ref={overFlowMenuIconRef} />}
             >
                 {collectionSummaryType == "trash" ? (

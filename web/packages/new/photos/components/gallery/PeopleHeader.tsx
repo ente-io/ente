@@ -30,15 +30,16 @@ import {
     type PersonSuggestionUpdates,
     type PreviewableCluster,
 } from "@/new/photos/services/ml/people";
-import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
-import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@ente/shared/components/OverflowMenu";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import EditIcon from "@mui/icons-material/Edit";
 import HideImageOutlinedIcon from "@mui/icons-material/HideImageOutlined";
 import ListAltOutlinedIcon from "@mui/icons-material/ListAltOutlined";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import RestoreIcon from "@mui/icons-material/Restore";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import {
@@ -144,10 +145,7 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
                 name={name}
                 fileCount={person.fileIDs.length}
             />
-            <OverflowMenu
-                ariaControls={"person-options"}
-                triggerButtonIcon={<MoreHorizIcon />}
-            >
+            <OverflowMenu ariaID={"person-options"}>
                 <OverflowMenuOption
                     startIcon={<ListAltOutlinedIcon />}
                     centerAlign
@@ -208,10 +206,7 @@ const IgnoredPersonHeader: React.FC<IgnoredPersonHeaderProps> = ({
                 nameProps={{ color: "text.muted" }}
                 fileCount={person.fileIDs.length}
             />
-            <OverflowMenu
-                ariaControls={"person-options"}
-                triggerButtonIcon={<MoreHorizIcon />}
-            >
+            <OverflowMenu ariaID={"person-options"}>
                 <OverflowMenuOption
                     startIcon={<VisibilityOutlinedIcon />}
                     centerAlign
@@ -269,10 +264,7 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
                     </IconButton>
                 </Tooltip>
 
-                <OverflowMenu
-                    ariaControls={"person-options"}
-                    triggerButtonIcon={<MoreHorizIcon />}
-                >
+                <OverflowMenu ariaID={"person-options"}>
                     <OverflowMenuOption
                         startIcon={<AddIcon />}
                         centerAlign
@@ -715,7 +707,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                             color="text.muted"
                             sx={{ textAlign: "center" }}
                         >
-                            t{"people_suggestions_empty"}
+                            {t("people_suggestions_empty")}
                         </Typography>
                     </CenteredFill>
                 ) : (

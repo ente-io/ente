@@ -1375,6 +1375,7 @@
   "allPersonGroupingWillReset": "Wszystkie grupy dla tej osoby zostaną zresetowane i stracisz wszystkie sugestie dla tej osoby",
   "yesResetPerson": "Tak, zresetuj osobę",
   "onlyThem": "Tylko te",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "checkingModels": "Sprawdzanie modeli...",
   "enableMachineLearningBanner": "Włącz nauczanie maszynowe dla magicznego wyszukiwania i rozpoznawania twarzy",
   "searchDiscoverEmptySection": "Obrazy będą wyświetlane tutaj po zakończeniu przetwarzania",
@@ -1401,5 +1402,13 @@
   },
   "changeLogBackupStatusTitle": "Status Kopii Zapasowej",
   "changeLogDiscoverTitle": "Odkryj",
-  "newLocation": "Nowa lokalizacja"
+  "newLocation": "Nowa lokalizacja",
+  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
+  "openFile": "Open file",
+  "backupFile": "Backup file",
+  "openAlbumInBrowser": "Open album in browser",
+  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
+  "allow": "Allow",
+  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
+  "seePublicAlbumLinksInApp": "See public album links in app"
 }

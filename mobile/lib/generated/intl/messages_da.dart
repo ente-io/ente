@@ -36,10 +36,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Aktive sessioner"),
         "addOnPageSubtitle":
             MessageLookupByLibrary.simpleMessage("Oplysninger om tilføjelser"),
+        "allow": MessageLookupByLibrary.simpleMessage("Allow"),
+        "allowAppToOpenSharedAlbumLinks": MessageLookupByLibrary.simpleMessage(
+            "Allow app to open shared album links"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Hvad er hovedårsagen til, at du sletter din konto?"),
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Sikkerhedskopierede mapper"),
+        "backupFile": MessageLookupByLibrary.simpleMessage("Backup file"),
         "cancel": MessageLookupByLibrary.simpleMessage("Annuller"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekræft Sletning Af Konto"),
@@ -76,6 +80,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Indtast venligst en gyldig email adresse."),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("Indtast din email adresse"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "familyPlanPortalTitle":
             MessageLookupByLibrary.simpleMessage("Familie"),
         "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),
@@ -106,6 +112,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "next": MessageLookupByLibrary.simpleMessage("Næste"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
+        "openAlbumInBrowser":
+            MessageLookupByLibrary.simpleMessage("Open album in browser"),
+        "openAlbumInBrowserTitle": MessageLookupByLibrary.simpleMessage(
+            "Please use the web app to add photos to this album"),
+        "openFile": MessageLookupByLibrary.simpleMessage("Open file"),
         "password": MessageLookupByLibrary.simpleMessage("Adgangskode"),
         "pleaseContactSupportAndWeWillBeHappyToHelp":
             MessageLookupByLibrary.simpleMessage(
@@ -116,6 +127,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Skan denne QR-kode med godkendelses-appen"),
         "searchHint1":
             MessageLookupByLibrary.simpleMessage("Hurtig, søgning på enheden"),
+        "seePublicAlbumLinksInApp": MessageLookupByLibrary.simpleMessage(
+            "See public album links in app"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Vælg årsag"),
         "selectedPhotos": m4,
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),
@@ -126,6 +139,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "subscribe": MessageLookupByLibrary.simpleMessage("Abonner"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("Afslut session?"),
+        "theLinkYouAreTryingToAccessHasExpired":
+            MessageLookupByLibrary.simpleMessage(
+                "The link you are trying to access has expired."),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Dette vil logge dig ud af følgende enhed:"),

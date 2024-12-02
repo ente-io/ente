@@ -314,10 +314,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("All memories preserved"),
         "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
             "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
+        "allow": MessageLookupByLibrary.simpleMessage("Allow"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Allow people with the link to also add photos to the shared album."),
         "allowAddingPhotos":
             MessageLookupByLibrary.simpleMessage("Allow adding photos"),
+        "allowAppToOpenSharedAlbumLinks": MessageLookupByLibrary.simpleMessage(
+            "Allow app to open shared album links"),
         "allowDownloads":
             MessageLookupByLibrary.simpleMessage("Allow downloads"),
         "allowPeopleToAddPhotos":
@@ -427,6 +430,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Backed up folders"),
         "backup": MessageLookupByLibrary.simpleMessage("Backup"),
         "backupFailed": MessageLookupByLibrary.simpleMessage("Backup failed"),
+        "backupFile": MessageLookupByLibrary.simpleMessage("Backup file"),
         "backupOverMobileData":
             MessageLookupByLibrary.simpleMessage("Backup over mobile data"),
         "backupSettings":
@@ -826,6 +830,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "extraPhotosFound":
             MessageLookupByLibrary.simpleMessage("Extra photos found"),
         "extraPhotosFoundFor": m30,
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Face recognition"),
         "faces": MessageLookupByLibrary.simpleMessage("Faces"),
@@ -1064,6 +1070,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Your session has expired. Please login again."),
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>"),
+        "loginWithTOTP":
+            MessageLookupByLibrary.simpleMessage("Login with TOTP"),
         "logout": MessageLookupByLibrary.simpleMessage("Logout"),
         "logsDialogBody": MessageLookupByLibrary.simpleMessage(
             "This will send across logs to help us debug your issue. Please note that file names will be included to help track issues with specific files."),
@@ -1083,7 +1091,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Magic search allows to search photos by their contents, e.g. \'flower\', \'red car\', \'identity documents\'"),
         "manage": MessageLookupByLibrary.simpleMessage("Manage"),
         "manageDeviceStorage":
-            MessageLookupByLibrary.simpleMessage("Manage device storage"),
+            MessageLookupByLibrary.simpleMessage("Manage device Cache"),
+        "manageDeviceStorageDesc": MessageLookupByLibrary.simpleMessage(
+            "Review and clear local cache storage."),
         "manageFamily": MessageLookupByLibrary.simpleMessage("Manage Family"),
         "manageLink": MessageLookupByLibrary.simpleMessage("Manage link"),
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Manage"),
@@ -1196,6 +1206,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Oops, could not save edits"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Oops, something went wrong"),
+        "openAlbumInBrowser":
+            MessageLookupByLibrary.simpleMessage("Open album in browser"),
+        "openAlbumInBrowserTitle": MessageLookupByLibrary.simpleMessage(
+            "Please use the web app to add photos to this album"),
+        "openFile": MessageLookupByLibrary.simpleMessage("Open file"),
         "openSettings": MessageLookupByLibrary.simpleMessage("Open Settings"),
         "openTheItem": MessageLookupByLibrary.simpleMessage("• Open the item"),
         "openstreetmapContributors":
@@ -1469,6 +1484,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchResultCount": m55,
         "searchSectionsLengthMismatch": m56,
         "security": MessageLookupByLibrary.simpleMessage("Security"),
+        "seePublicAlbumLinksInApp": MessageLookupByLibrary.simpleMessage(
+            "See public album links in app"),
         "selectALocation":
             MessageLookupByLibrary.simpleMessage("Select a location"),
         "selectALocationFirst":
@@ -1656,6 +1673,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Thank you for subscribing!"),
         "theDownloadCouldNotBeCompleted": MessageLookupByLibrary.simpleMessage(
             "The download could not be completed"),
+        "theLinkYouAreTryingToAccessHasExpired":
+            MessageLookupByLibrary.simpleMessage(
+                "The link you are trying to access has expired."),
         "theRecoveryKeyYouEnteredIsIncorrect":
             MessageLookupByLibrary.simpleMessage(
                 "The recovery key you entered is incorrect"),

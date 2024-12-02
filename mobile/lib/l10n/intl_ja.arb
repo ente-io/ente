@@ -1356,6 +1356,7 @@
   "mostRelevant": "関連度順",
   "loadingYourPhotos": "写真を読み込んでいます...",
   "processingImport": "{folderName} を処理中...",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "personName": "人名名",
   "addNewPerson": "新しい人物を追加",
   "addNameOrMerge": "名前をつける、あるいは既存の人物にまとめる",
@@ -1373,5 +1374,13 @@
   },
   "extraPhotosFound": "追加の写真が見つかりました",
   "configuration": "設定",
-  "localIndexing": "このデバイス上での実行"
+  "localIndexing": "このデバイス上での実行",
+  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
+  "openFile": "Open file",
+  "backupFile": "Backup file",
+  "openAlbumInBrowser": "Open album in browser",
+  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
+  "allow": "Allow",
+  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
+  "seePublicAlbumLinksInApp": "See public album links in app"
 }

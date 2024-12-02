@@ -38,7 +38,11 @@ export const setLocalFiles = async (
 };
 
 /**
- * Sort the given list of {@link EnteFile}s.
+ * Sort the given list of {@link EnteFile}s in place.
+ *
+ * Like the JavaScript Array#sort, this method modifies the {@link files}
+ * argument. It sorts {@link files} in place, and then returns a reference to
+ * the same mutated array.
  *
  * By default, files are sorted so that the newest one is first. The optional
  * {@link sortAsc} flag can be set to `true` to sort them so that the oldest one

@@ -268,7 +268,6 @@ const getPublicFiles = async (
                     sinceTime: time,
                 },
                 {
-                    "Cache-Control": "no-cache",
                     "X-Auth-Access-Token": token,
                     ...(passwordToken && {
                         "X-Auth-Access-Token-JWT": passwordToken,
@@ -320,7 +319,7 @@ export const getPublicCollection = async (
         const resp = await HTTPService.get(
             await apiURL("/public-collection/info"),
             null,
-            { "Cache-Control": "no-cache", "X-Auth-Access-Token": token },
+            { "X-Auth-Access-Token": token },
         );
         const fetchedCollection = resp.data.collection;
         const referralCode = resp.data.referralCode ?? "";
@@ -359,25 +358,6 @@ export const getPublicCollection = async (
         return [collection, referralCode];
     } catch (e) {
         log.error("failed to get public collection", e);
-        throw e;
-    }
-};
-
-export const verifyPublicCollectionPassword = async (
-    token: string,
-    passwordHash: string,
-): Promise<string> => {
-    try {
-        const resp = await HTTPService.post(
-            await apiURL("/public-collection/verify-password"),
-            { passHash: passwordHash },
-            null,
-            { "Cache-Control": "no-cache", "X-Auth-Access-Token": token },
-        );
-        const jwtToken = resp.data.jwtToken;
-        return jwtToken;
-    } catch (e) {
-        log.error("failed to verify public collection password", e);
         throw e;
     }
 };

@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import FamilyTableComponent from "./components/FamilyComponentTable";
 import StorageBonusTableComponent from "./components/StorageBonusTableComponent";
+import TokensTableComponent from "./components/TokenTableComponent";
 import type { UserData } from "./components/UserComponent";
 import UserComponent from "./components/UserComponent";
 import duckieimage from "./components/duckie.png";
@@ -45,11 +46,14 @@ interface Security {
     isEmailMFAEnabled: boolean;
     isTwoFactorEnabled: boolean;
     passkeys: string;
+    passkeyCount: number;
+    canDisableEmailMFA: boolean;
 }
 
 interface UserResponse {
     user: User;
     subscription: Subscription;
+    authCodes?: number;
     details?: {
         usage?: number;
         storageBonus?: number;
@@ -181,7 +185,16 @@ const App: React.FC = () => {
                         .isTwoFactorEnabled
                         ? "Enabled"
                         : "Disabled",
-                    Passkeys: "None",
+                    Passkeys:
+                        (userDataResponse.details?.profileData.passkeyCount ??
+                            0) > 0
+                            ? "Enabled"
+                            : "Disabled",
+                    "Can Disable EmailMFA": userDataResponse.details
+                        ?.profileData.canDisableEmailMFA
+                        ? "Yes"
+                        : "No",
+                    AuthCodes: `${userDataResponse.authCodes ?? 0}`,
                 },
             };
 
@@ -309,6 +322,7 @@ const App: React.FC = () => {
                                 <Tab label="User" />
                                 <Tab label="Family" />
                                 <Tab label="Bonuses" />
+                                <Tab label="Devices" />
                             </Tabs>
                         </Box>
                         <Box
@@ -334,6 +348,11 @@ const App: React.FC = () => {
                             {tabValue === 2 && userData && (
                                 <div>
                                     <StorageBonusTableComponent />
+                                </div>
+                            )}
+                            {tabValue === 3 && userData && (
+                                <div>
+                                    <TokensTableComponent />
                                 </div>
                             )}
                         </Box>

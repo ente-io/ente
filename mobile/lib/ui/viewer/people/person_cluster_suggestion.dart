@@ -20,6 +20,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/person_clusters_page.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
+import "package:photos/utils/face/face_box_crop.dart";
 
 class SuggestionUserFeedback {
   final bool accepted;
@@ -42,7 +43,6 @@ class PersonReviewClusterSuggestion extends StatefulWidget {
 
 class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   int currentSuggestionIndex = 0;
-  bool fetch = true;
   Key futureBuilderKeySuggestions = UniqueKey();
   Key futureBuilderKeyFaceThumbnails = UniqueKey();
   bool canGiveFeedback = true;
@@ -58,8 +58,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   void initState() {
     super.initState();
     // Initialize the future in initState
-    if (fetch) _fetchClusterSuggestions();
-    fetch = true;
+    _fetchClusterSuggestions();
   }
 
   @override
@@ -117,7 +116,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
             final Future<Map<int, Uint8List?>> generateFacedThumbnails =
                 _generateFaceThumbnails(
-              files.sublist(0, min(files.length, 8)),
+              files.sublist(0, min(files.length, 6)),
               clusterID,
             );
 
@@ -128,7 +127,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                 for (var updatedFile in event.relevantFiles!) {
                   files.remove(updatedFile);
                 }
-                fetch = false;
                 setState(() {});
               }
             });
@@ -169,7 +167,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                           usingMean,
                           files,
                           numberOfDifferentSuggestions,
-                          allSuggestions,
                           generateFacedThumbnails,
                         ),
                       ),
@@ -275,7 +272,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         });
       } else {
         futureBuilderKeyFaceThumbnails = UniqueKey();
-        fetch = false;
         setState(() {});
       }
     } else {
@@ -304,6 +300,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   // Method to fetch cluster suggestions
   void _fetchClusterSuggestions() {
+    debugPrint("Fetching suggestions for ${widget.person.data.name}");
     futureClusterSuggestions =
         ClusterFeedbackService.instance.getSuggestionForPerson(widget.person);
   }
@@ -314,7 +311,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     bool usingMean,
     List<EnteFile> files,
     int numberOfSuggestions,
-    List<ClusterSuggestion> allSuggestions,
     Future<Map<int, Uint8List?>> generateFaceThumbnails,
   ) {
     final widgetToReturn = Column(
@@ -341,38 +337,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
       ],
     );
     // Precompute face thumbnails for next suggestions, in case there are
-    const precomputeSuggestions = 8;
-    const maxPrecomputations = 8;
-    int compCount = 0;
-    if (allSuggestions.length > currentSuggestionIndex + 1) {
-      outerLoop:
-      for (final suggestion in allSuggestions.sublist(
-        currentSuggestionIndex + 1,
-        min(
-          allSuggestions.length,
-          currentSuggestionIndex + precomputeSuggestions,
-        ),
-      )) {
-        final files = suggestion.filesInCluster;
-        final clusterID = suggestion.clusterIDToMerge;
-        for (final file in files.sublist(0, min(files.length, 9))) {
-          unawaited(
-            PersonFaceWidget.precomputeNextFaceCrops(
-              file,
-              clusterID,
-              useFullFile: false,
-            ),
-          );
-          compCount++;
-          if (compCount >= maxPrecomputations) {
-            debugPrint(
-              'Prefetching $compCount face thumbnails for suggestions',
-            );
-            break outerLoop;
-          }
-        }
-      }
-    }
+    precomputeFaceCrops();
     return widgetToReturn;
   }
 
@@ -407,16 +372,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                     clusterID,
                     faceThumbnails,
                     start: 3,
-                  ),
-                ),
-              if (files.length > 6)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: _buildThumbnailWidgetsRow(
-                    files,
-                    clusterID,
-                    faceThumbnails,
-                    start: 6,
                   ),
                 ),
             ],
@@ -456,13 +411,13 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                 child: PersonFaceWidget(
                   files[start + index],
                   clusterID: cluserId,
-                  useFullFile: false,
+                  useFullFile: true,
                   thumbnailFallback: false,
                   faceCrop:
                       faceThumbnails[files[start + index].uploadedFileID!],
                 ),
               ),
-              if (start + index == 8 && files.length > 9)
+              if (start + index == 5 && files.length > 6)
                 ClipPath(
                   clipper: ShapeBorderClipper(
                     shape: ContinuousRectangleBorder(
@@ -475,7 +430,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                     ),
                     child: Center(
                       child: Text(
-                        '+${files.length - 8}',
+                        '+${files.length - 5}',
                         style: darkTheme.textTheme.h3Bold,
                       ),
                     ),
@@ -495,10 +450,10 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     final futures = <Future<Uint8List?>>[];
     for (final file in files) {
       futures.add(
-        PersonFaceWidget.precomputeNextFaceCrops(
+        precomputeClusterFaceCrop(
           file,
           clusterID,
-          useFullFile: false,
+          useFullFile: true,
         ),
       );
     }
@@ -508,6 +463,37 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
       faceCrops[files[i].uploadedFileID!] = faceCropsList[i];
     }
     return faceCrops;
+  }
+
+  void precomputeFaceCrops() {
+    const precomputeSuggestions = 6;
+    const maxPrecomputations = 8;
+    int compCount = 0;
+    if (allSuggestions.length > currentSuggestionIndex + 1) {
+      outerLoop:
+      for (final suggestion in allSuggestions.sublist(
+        currentSuggestionIndex + 1,
+        min(
+          allSuggestions.length,
+          currentSuggestionIndex + precomputeSuggestions,
+        ),
+      )) {
+        final files = suggestion.filesInCluster;
+        final clusterID = suggestion.clusterIDToMerge;
+        final preComputesLeft = maxPrecomputations - compCount;
+        final computeHere = min(files.length, min(preComputesLeft, 6));
+        unawaited(
+          _generateFaceThumbnails(files.sublist(0, computeHere), clusterID),
+        );
+        compCount += computeHere;
+        if (compCount >= maxPrecomputations) {
+          debugPrint(
+            'Prefetching $compCount face thumbnails for suggestions',
+          );
+          break outerLoop;
+        }
+      }
+    }
   }
 
   Future<void> _undoLastFeedback() async {
@@ -525,7 +511,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         );
       }
 
-      fetch = false;
       futureClusterSuggestions = futureClusterSuggestions.then((list) {
         return list.sublist(currentSuggestionIndex)
           ..insert(0, lastFeedback.suggestion);

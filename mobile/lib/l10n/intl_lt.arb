@@ -560,7 +560,6 @@
   "enterAlbumName": "Įveskite albumo pavadinimą",
   "shareAlbumHint": "Atidarykite albumą ir palieskite bendrinimo mygtuką viršuje dešinėje, kad bendrintumėte.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Elementai rodo likusių dienų skaičių iki visiško ištrynimo.",
-  
   "setCover": "Nustatyti viršelį",
   "@setCover": {
     "description": "Text to set cover photo for an album"
@@ -891,10 +890,10 @@
   "yesResetPerson": "Taip, nustatyti asmenį iš naujo",
   "onlyThem": "Tik jiems",
   "checkingModels": "Tikrinami modeliai...",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "enableMachineLearningBanner": "Įjunkite mašininį mokymąsi magiškai paieškai ir veidų atpažinimui",
   "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas",
   "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas",
-
   "accountIsAlreadyConfigured": "Paskyra jau sukonfigūruota.",
   "sessionIdMismatch": "Seanso ID nesutampa.",
   "@sessionIdMismatch": {
@@ -943,5 +942,13 @@
   "castAlbum": "Perduoti albumą",
   "imageNotAnalyzed": "Vaizdas neanalizuotas.",
   "noFacesFound": "Nerasta veidų.",
-  "fileNotUploadedYet": "Failas dar neįkeltas."
+  "fileNotUploadedYet": "Failas dar neįkeltas.",
+  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
+  "openFile": "Open file",
+  "backupFile": "Backup file",
+  "openAlbumInBrowser": "Open album in browser",
+  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
+  "allow": "Allow",
+  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
+  "seePublicAlbumLinksInApp": "See public album links in app"
 }

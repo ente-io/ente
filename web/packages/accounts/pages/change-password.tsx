@@ -149,7 +149,7 @@ const Page: React.FC<PageProps> = () => {
                 {(getData(LS_KEYS.SHOW_BACK_BUTTON)?.value ?? true) && (
                     <FormPaperFooter>
                         <LinkButton onClick={router.back}>
-                            {t("GO_BACK")}
+                            {t("go_back")}
                         </LinkButton>
                     </FormPaperFooter>
                 )}

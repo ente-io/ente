@@ -44,10 +44,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "after1Week": MessageLookupByLibrary.simpleMessage("Праз 1 тыдзень"),
         "after1Year": MessageLookupByLibrary.simpleMessage("Праз 1 год"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("Уладальнік"),
+        "allow": MessageLookupByLibrary.simpleMessage("Allow"),
+        "allowAppToOpenSharedAlbumLinks": MessageLookupByLibrary.simpleMessage(
+            "Allow app to open shared album links"),
         "apply": MessageLookupByLibrary.simpleMessage("Ужыць"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Якая асноўная прычына выдалення вашага ўліковага запісу?"),
         "backup": MessageLookupByLibrary.simpleMessage("Рэзервовая копія"),
+        "backupFile": MessageLookupByLibrary.simpleMessage("Backup file"),
         "cancel": MessageLookupByLibrary.simpleMessage("Скасаваць"),
         "change": MessageLookupByLibrary.simpleMessage("Змяніць"),
         "changeEmail": MessageLookupByLibrary.simpleMessage(
@@ -128,6 +132,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Увядзіце свой пароль"),
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Увядзіце свой ключ аднаўлення"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "familyPlans":
             MessageLookupByLibrary.simpleMessage("Сямейныя тарыфныя планы"),
         "faqs": MessageLookupByLibrary.simpleMessage("Частыя пытанні"),
@@ -175,6 +181,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "notifications": MessageLookupByLibrary.simpleMessage("Апавяшчэнні"),
         "ok": MessageLookupByLibrary.simpleMessage("Добра"),
         "oops": MessageLookupByLibrary.simpleMessage("Вой"),
+        "openAlbumInBrowser":
+            MessageLookupByLibrary.simpleMessage("Open album in browser"),
+        "openAlbumInBrowserTitle": MessageLookupByLibrary.simpleMessage(
+            "Please use the web app to add photos to this album"),
+        "openFile": MessageLookupByLibrary.simpleMessage("Open file"),
         "password": MessageLookupByLibrary.simpleMessage("Пароль"),
         "passwordChangedSuccessfully":
             MessageLookupByLibrary.simpleMessage("Пароль паспяхова зменены"),
@@ -220,6 +231,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "saveKey": MessageLookupByLibrary.simpleMessage("Захаваць ключ"),
         "scanCode": MessageLookupByLibrary.simpleMessage("Сканіраваць код"),
         "security": MessageLookupByLibrary.simpleMessage("Бяспека"),
+        "seePublicAlbumLinksInApp": MessageLookupByLibrary.simpleMessage(
+            "See public album links in app"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Абраць усё"),
         "selectReason":
             MessageLookupByLibrary.simpleMessage("Выберыце прычыну"),
@@ -250,6 +263,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("Перарваць сеанс?"),
         "termsOfServicesTitle": MessageLookupByLibrary.simpleMessage("Умовы"),
+        "theLinkYouAreTryingToAccessHasExpired":
+            MessageLookupByLibrary.simpleMessage(
+                "The link you are trying to access has expired."),
         "theme": MessageLookupByLibrary.simpleMessage("Тема"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("Гэта прылада"),
         "thisWillLogYouOutOfTheFollowingDevice":

@@ -15,10 +15,53 @@ export const authenticatedRequestHeaders = async () => ({
 });
 
 /**
- * Return a headers object with "X-Client-Package" header set to the client
- * package name of the current app.
+ * Return headers that should be passed alongwith (almost) all unauthenticated
+ * `fetch` calls that we make to our API servers.
+ *
+ * -   The client package name.
  */
-export const clientPackageHeader = () => ({
+export const publicRequestHeaders = () => ({
+    "X-Client-Package": clientPackageName,
+});
+
+/**
+ * A set of credentials needed to make public collections related API requests.
+ */
+export interface PublicAlbumsCredentials {
+    /**
+     * An access token that does the same job as the "X-Auth-Token" for usual
+     * authenticated API requests, except it will be passed as the
+     * ""X-Auth-Access-Token" header.
+     */
+    accessToken: string;
+    /**
+     * [Note: Password token for public albums requests].
+     *
+     * A password protected access token. This is only needed for albums that
+     * are behind a password. In such cases, the client needs to fetch this
+     * extra token from remote (in exchange for the public album's password),
+     * and then pass it as the "X-Auth-Access-Token-JWT" header in authenticated
+     * public collections related API requests.
+     */
+    accessTokenJWT?: string | undefined;
+}
+
+/**
+ * Return headers that should be passed alongwith public collection related
+ * authenticated `fetch` calls that we make to our API servers.
+ *
+ * -   The auth token.
+ * -   The password protected auth token (if provided).
+ * -   The client package name.
+ */
+export const authenticatedPublicAlbumsRequestHeaders = ({
+    accessToken,
+    accessTokenJWT,
+}: PublicAlbumsCredentials) => ({
+    "X-Auth-Access-Token": accessToken,
+    ...(accessTokenJWT && {
+        "X-Auth-Access-Token-JWT": accessTokenJWT,
+    }),
     "X-Client-Package": clientPackageName,
 });
 
@@ -67,6 +110,15 @@ export const ensureOk = (res: Response) => {
  */
 export const isHTTP4xxError = (e: unknown) =>
     e instanceof HTTPError && e.res.status >= 400 && e.res.status <= 499;
+
+/**
+ * Return true if this is a HTTP 401 error.
+ *
+ * For authenticated requests, an HTTP "401 Unauthorized" indicates that the
+ * credentials (auth token) is not valid.
+ */
+export const isHTTP401Error = (e: unknown) =>
+    e instanceof HTTPError && e.res.status == 401;
 
 /**
  * A helper function to adapt {@link retryAsyncOperation} for HTTP fetches.

@@ -89,7 +89,8 @@ class _FileSelectionActionsWidgetState
 
   @override
   void initState() {
-    currentUserID = Configuration.instance.getUserID()!;
+    //User ID will be null if the user is not logged in (links-in-app)
+    currentUserID = Configuration.instance.getUserID() ?? -1;
 
     split = FilesSplit.split(<EnteFile>[], currentUserID);
     widget.selectedFiles.addListener(_selectFileChangeListener);
@@ -294,14 +295,16 @@ class _FileSelectionActionsWidgetState
         onTap: _onGuestViewClick,
       ),
     );
-    items.add(
-      SelectionActionButton(
-        icon: Icons.grid_view_outlined,
-        labelText: S.of(context).createCollage,
-        onTap: _onCreateCollageClicked,
-        shouldShow: showCollageOption,
-      ),
-    );
+    if (widget.type != GalleryType.sharedPublicCollection) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.grid_view_outlined,
+          labelText: S.of(context).createCollage,
+          onTap: _onCreateCollageClicked,
+          shouldShow: showCollageOption,
+        ),
+      );
+    }
 
     if (widget.type.showDeleteOption()) {
       items.add(
@@ -432,19 +435,20 @@ class _FileSelectionActionsWidgetState
         ),
       );
     }
-
-    items.add(
-      SelectionActionButton(
-        labelText: S.of(context).share,
-        icon: Icons.adaptive.share_outlined,
-        key: shareButtonKey,
-        onTap: () => shareSelected(
-          context,
-          shareButtonKey,
-          widget.selectedFiles.files.toList(),
+    if (widget.type != GalleryType.sharedPublicCollection) {
+      items.add(
+        SelectionActionButton(
+          labelText: S.of(context).share,
+          icon: Icons.adaptive.share_outlined,
+          key: shareButtonKey,
+          onTap: () => shareSelected(
+            context,
+            shareButtonKey,
+            widget.selectedFiles.files.toList(),
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     if (items.isNotEmpty) {
       final scrollController = ScrollController();

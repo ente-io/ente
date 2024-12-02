@@ -2896,11 +2896,21 @@ class S {
     );
   }
 
-  /// `Manage device storage`
+  /// `Manage device Cache`
   String get manageDeviceStorage {
     return Intl.message(
-      'Manage device storage',
+      'Manage device Cache',
       name: 'manageDeviceStorage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review and clear local cache storage.`
+  String get manageDeviceStorageDesc {
+    return Intl.message(
+      'Review and clear local cache storage.',
+      name: 'manageDeviceStorageDesc',
       desc: '',
       args: [],
     );
@@ -8719,6 +8729,16 @@ class S {
     );
   }
 
+  /// `Login with TOTP`
+  String get loginWithTOTP {
+    return Intl.message(
+      'Login with TOTP',
+      name: 'loginWithTOTP',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Verification is still pending`
   String get passKeyPendingVerification {
     return Intl.message(
@@ -10394,6 +10414,96 @@ class S {
     return Intl.message(
       'New location',
       name: 'newLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Face not clustered yet, please come back later`
+  String get faceNotClusteredYet {
+    return Intl.message(
+      'Face not clustered yet, please come back later',
+      name: 'faceNotClusteredYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The link you are trying to access has expired.`
+  String get theLinkYouAreTryingToAccessHasExpired {
+    return Intl.message(
+      'The link you are trying to access has expired.',
+      name: 'theLinkYouAreTryingToAccessHasExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open file`
+  String get openFile {
+    return Intl.message(
+      'Open file',
+      name: 'openFile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup file`
+  String get backupFile {
+    return Intl.message(
+      'Backup file',
+      name: 'backupFile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open album in browser`
+  String get openAlbumInBrowser {
+    return Intl.message(
+      'Open album in browser',
+      name: 'openAlbumInBrowser',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please use the web app to add photos to this album`
+  String get openAlbumInBrowserTitle {
+    return Intl.message(
+      'Please use the web app to add photos to this album',
+      name: 'openAlbumInBrowserTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow`
+  String get allow {
+    return Intl.message(
+      'Allow',
+      name: 'allow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow app to open shared album links`
+  String get allowAppToOpenSharedAlbumLinks {
+    return Intl.message(
+      'Allow app to open shared album links',
+      name: 'allowAppToOpenSharedAlbumLinks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `See public album links in app`
+  String get seePublicAlbumLinksInApp {
+    return Intl.message(
+      'See public album links in app',
+      name: 'seePublicAlbumLinksInApp',
       desc: '',
       args: [],
     );

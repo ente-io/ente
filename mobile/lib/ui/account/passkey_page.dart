@@ -1,5 +1,7 @@
+import "dart:async";
 import 'dart:convert';
 
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -7,19 +9,24 @@ import "package:photos/core/errors.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/account/two_factor.dart";
+import "package:photos/services/passkey_service.dart";
 import 'package:photos/services/user_service.dart';
+import "package:photos/ui/account/two_factor_authentication_page.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/toast_util.dart";
 import "package:uni_links/uni_links.dart";
 import 'package:url_launcher/url_launcher_string.dart';
 
 class PasskeyPage extends StatefulWidget {
   final String sessionID;
+  final String totp2FASessionID;
 
   const PasskeyPage(
     this.sessionID, {
+    required this.totp2FASessionID,
     super.key,
   });
 
@@ -29,6 +36,7 @@ class PasskeyPage extends StatefulWidget {
 
 class _PasskeyPageState extends State<PasskeyPage> {
   final Logger _logger = Logger("PasskeyPage");
+  late StreamSubscription<String?> linkStreamSubscription;
 
   @override
   void initState() {
@@ -39,12 +47,14 @@ class _PasskeyPageState extends State<PasskeyPage> {
 
   @override
   void dispose() {
+    linkStreamSubscription.cancel();
     super.dispose();
   }
 
   Future<void> launchPasskey() async {
+    final String accountsUrl = PasskeyService.instance.accountsUrl;
     await launchUrlString(
-      "https://accounts.ente.io/passkeys/verify?"
+      "$accountsUrl/passkeys/verify?"
       "passkeySessionID=${widget.sessionID}"
       "&redirect=ente://passkey"
       "&clientPackage=io.ente.photos",
@@ -118,7 +128,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
 
   Future<bool> _initDeepLinks() async {
     // Attach a listener to the stream
-    linkStream.listen(
+    linkStreamSubscription = linkStream.listen(
       _handleDeeplink,
       onError: (err) {
         _logger.severe(err);
@@ -175,6 +185,30 @@ class _PasskeyPageState extends State<PasskeyPage> {
               shouldSurfaceExecutionStates: true,
             ),
             const Padding(padding: EdgeInsets.all(30)),
+            if (widget.totp2FASessionID.isNotEmpty)
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  routeToPage(
+                    context,
+                    TwoFactorAuthenticationPage(
+                      widget.totp2FASessionID,
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  child: Center(
+                    child: Text(
+                      context.l10n.loginWithTOTP,
+                      style: const TextStyle(
+                        decoration: TextDecoration.underline,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {

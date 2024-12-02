@@ -11,7 +11,6 @@ import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/base/log-web";
-import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
@@ -27,7 +26,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AppContext } from "types/context";
 
 import "../../public/css/global.css";
@@ -36,9 +35,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
-    const [offline, setOffline] = useState(
-        typeof window !== "undefined" && !window.navigator.onLine,
-    );
     const [showNavbar, setShowNavBar] = useState(false);
 
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
@@ -57,9 +53,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
-    const setUserOnline = () => setOffline(false);
-    const setUserOffline = () => setOffline(true);
-
     useEffect(() => {
         router.events.on("routeChangeStart", (url: string) => {
             const newPathname = url.split("?")[0];
@@ -71,29 +64,22 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         router.events.on("routeChangeComplete", () => {
             setLoading(false);
         });
-
-        window.addEventListener("online", setUserOnline);
-        window.addEventListener("offline", setUserOffline);
-
-        return () => {
-            window.removeEventListener("online", setUserOnline);
-            window.removeEventListener("offline", setUserOffline);
-        };
-    }, []);
-
-    const showNavBar = (show: boolean) => setShowNavBar(show);
+    }, [router]);
 
     const logout = useCallback(() => {
         void accountLogout().then(() => window.location.replace("/"));
     }, []);
 
-    const appContext = {
-        logout,
-        showNavBar,
-        showMiniDialog,
-        themeColor,
-        setThemeColor,
-    };
+    const appContext = useMemo(
+        () => ({
+            logout,
+            showNavBar: (show: boolean) => setShowNavBar(show),
+            showMiniDialog,
+            themeColor,
+            setThemeColor,
+        }),
+        [logout, showMiniDialog, themeColor, setThemeColor],
+    );
 
     const title = isI18nReady ? t("title_auth") : staticAppTitle;
 
@@ -104,9 +90,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             <ThemeProvider theme={getTheme(themeColor, "auth")}>
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar />}
-                <MessageContainer>
-                    {isI18nReady && offline && t("OFFLINE_MSG")}
-                </MessageContainer>
 
                 <AttributedMiniDialog {...miniDialogProps} />
 

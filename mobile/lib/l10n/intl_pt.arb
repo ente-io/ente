@@ -1383,6 +1383,7 @@
   "enableMachineLearningBanner": "Ativar aprendizagem de máquina para busca mágica e reconhecimento facial",
   "searchDiscoverEmptySection": "As imagens serão exibidas aqui quando o processamento for concluído",
   "searchPersonsEmptySection": "As pessoas serão exibidas aqui quando o processamento for concluído",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "viewersSuccessfullyAdded": "{count, plural, =0 {Adicionado 0 visualizadores} =1 {Adicionado 1 visualizador} other {Adicionado {count} visualizadores}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1504,5 +1505,13 @@
   "changeLogDiscoverTitle": "Descobrir",
   "changeLogDiscoverContent": "Procurando por fotos dos seus cartões de identidade, notas, ou até memes? Vá à aba de busca e confira o Descobrir. Baseado na busca semântica, é um local para encontrar fotos importantes para você.\\nApenas disponível se a Aprendizagem automática estiver ativa.",
   "selectCoverPhoto": "Selecionar foto da capa",
-  "newLocation": "Nova localização"
+  "newLocation": "Nova localização",
+  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
+  "openFile": "Open file",
+  "backupFile": "Backup file",
+  "openAlbumInBrowser": "Open album in browser",
+  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
+  "allow": "Allow",
+  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
+  "seePublicAlbumLinksInApp": "See public album links in app"
 }

@@ -3,16 +3,19 @@ import { stashRedirect } from "@/accounts/services/redirect";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { NavbarBase } from "@/base/components/Navbar";
+import { isHTTP401Error } from "@/base/http";
+import log from "@/base/log";
+import { masterKeyFromSessionIfLoggedIn } from "@/base/session-store";
 import {
     HorizontalFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
-import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@ente/shared/components/OverflowMenu";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { ApiError, CustomError } from "@ente/shared/error";
 import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import {
     Button,
     ButtonBase,
@@ -23,7 +26,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { generateOTPs, type Code } from "services/code";
 import { getAuthCodes } from "services/remote";
 import { useAppContext } from "types/context";
@@ -36,37 +39,32 @@ const Page: React.FC = () => {
     const [hasFetched, setHasFetched] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
 
-    const showSessionExpiredDialog = () =>
-        showMiniDialog(sessionExpiredDialogAttributes(logout));
-
     useEffect(() => {
         const fetchCodes = async () => {
+            const masterKey = await masterKeyFromSessionIfLoggedIn();
+            if (!masterKey) {
+                stashRedirect(PAGES.AUTH);
+                void router.push("/");
+                return;
+            }
+
             try {
-                setCodes(await getAuthCodes());
+                setCodes(await getAuthCodes(masterKey));
             } catch (e) {
-                if (
-                    e instanceof Error &&
-                    e.message == CustomError.KEY_MISSING
-                ) {
-                    stashRedirect(PAGES.AUTH);
-                    void router.push("/");
-                } else if (e instanceof ApiError && e.httpStatusCode == 401) {
-                    // We get back a 401 Unauthorized if the token is not valid.
-                    showSessionExpiredDialog();
-                } else {
-                    // do not log errors
-                }
+                log.error("Failed to fetch codes", e);
+                if (isHTTP401Error(e))
+                    showMiniDialog(sessionExpiredDialogAttributes(logout));
             }
             setHasFetched(true);
         };
         void fetchCodes();
         showNavBar(false);
-    }, []);
+    }, [router, showNavBar, showMiniDialog, logout]);
 
     const lcSearch = searchTerm.toLowerCase();
     const filteredCodes = codes.filter(
         (code) =>
-            code.issuer?.toLowerCase().includes(lcSearch) ||
+            code.issuer.toLowerCase().includes(lcSearch) ||
             code.account?.toLowerCase().includes(lcSearch),
     );
 
@@ -156,10 +154,7 @@ const AuthNavbar: React.FC = () => {
                 <EnteLogo />
             </HorizontalFlex>
             <HorizontalFlex position={"absolute"} right="24px">
-                <OverflowMenu
-                    ariaControls={"auth-options"}
-                    triggerButtonIcon={<MoreHoriz />}
-                >
+                <OverflowMenu ariaID={"auth-options"}>
                     <OverflowMenuOption
                         color="critical"
                         startIcon={<LogoutOutlined />}
@@ -183,7 +178,7 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
     const [errorMessage, setErrorMessage] = useState("");
     const [hasCopied, setHasCopied] = useState(false);
 
-    const regen = () => {
+    const regen = useCallback(() => {
         try {
             const [m, n] = generateOTPs(code);
             setOTP(m);
@@ -191,7 +186,7 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
         } catch (e) {
             setErrorMessage(e instanceof Error ? e.message : String(e));
         }
-    };
+    }, [code]);
 
     const copyCode = () =>
         void navigator.clipboard.writeText(otp).then(() => {
@@ -217,7 +212,7 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
         }, timeToNextCode);
 
         return () => interval && clearInterval(interval);
-    }, [code]);
+    }, [code, regen]);
 
     return (
         <div style={{ padding: "8px" }}>
@@ -275,7 +270,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                             textAlign: "left",
                         }}
                     >
-                        {code.issuer ?? ""}
+                        {code.issuer}
                     </p>
                     <p
                         style={{

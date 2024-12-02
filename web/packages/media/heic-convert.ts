@@ -1,5 +1,4 @@
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
-import { wait } from "@/utils/promise";
 import type { HEICConvertWorker } from "./heic-convert.worker";
 
 /**
@@ -13,11 +12,7 @@ import type { HEICConvertWorker } from "./heic-convert.worker";
  * @returns The JPEG blob.
  */
 export const heicToJPEG = async (heicBlob: Blob) =>
-    worker()
-        .then((w) => w.heicToJPEG(heicBlob))
-        // I'm told this library used to have big memory spikes, and adding pauses
-        // to get GC to run helped.
-        .then((res) => wait(10 /* ms */).then(() => res));
+    worker().then((w) => w.heicToJPEG(heicBlob));
 
 /** Cached instance of the {@link ComlinkWorker} that wraps our web worker. */
 let _comlinkWorker: ComlinkWorker<typeof HEICConvertWorker> | undefined;
