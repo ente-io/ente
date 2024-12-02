@@ -1,6 +1,8 @@
+import log from "@/base/log";
+import { nullToUndefined } from "@/utils/transform";
 import { HOTP, TOTP } from "otpauth";
+import { z } from "zod";
 import { Steam } from "./steam";
-
 /**
  * A parsed representation of an *OTP code URI.
  *
@@ -44,9 +46,28 @@ export interface Code {
      * {@link type}-specific manner).
      */
     secret: string;
+    /**
+     * Optional metadata.
+     *
+     * This is metadata of the shape {@link CodeDisplay} containing Ente
+     * specific metadata (e.g. if it is pinned) for this code.
+     */
+    codeDisplay: CodeDisplay | undefined;
     /** The original string from which this code was generated. */
     uriString: string;
 }
+
+export interface CodeDisplay {
+    /**
+     * `true` if this code is in the Trash (i.e. it has been deleted by the
+     * user and will be automatically permanenently deleted after some time).
+     */
+    trashed?: boolean;
+}
+
+const CodeDisplay = z.object({
+    trashed: z.boolean().nullish().transform(nullToUndefined),
+});
 
 /**
  * Convert a OTP code URI into its parse representation, a {@link Code}.
@@ -95,6 +116,7 @@ const _codeFromURIString = (id: string, uriString: string): Code => {
         algorithm: parseAlgorithm(url),
         counter: parseCounter(url),
         secret: parseSecret(url),
+        codeDisplay: parseCodeDisplay(url),
         uriString,
     };
 };
@@ -206,6 +228,21 @@ const parseCounter = (url: URL): number | undefined => {
 
 const parseSecret = (url: URL): string =>
     url.searchParams.get("secret")!.replaceAll(" ", "").toUpperCase();
+
+/**
+ * Parse a JSON string containing Ente specific metadata attached to the code.
+ */
+const parseCodeDisplay = (url: URL): CodeDisplay | undefined => {
+    const s = url.searchParams.get("codeDisplay");
+    if (!s) return undefined;
+
+    try {
+        return CodeDisplay.parse(JSON.parse(s));
+    } catch (e) {
+        log.error(`Ignoring unparseable code display ${s}`, e);
+        return undefined;
+    }
+};
 
 /**
  * Generate a pair of OTPs (one time passwords) from the given {@link code}.
