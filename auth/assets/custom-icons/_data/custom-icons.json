@@ -81,17 +81,6 @@
       ]
     },
     {
-      "title": "Binance TR",
-      "slug": "binance_tr"
-    },
-    {
-      "title": "BinanceUS",
-      "slug": "binance_us",
-      "altNames": [
-        "Binance US"
-      ]
-    },
-    {
       "title": "Bitfinex"
     },
     {
@@ -124,13 +113,6 @@
       "title": "Bitwarden"
     },
     {
-      "title": "Bloom Host",
-      "slug": "bloom_host",
-      "altNames": [
-        "Bloom Host Billing"
-      ]
-    },
-    {
       "title": "Blockchain",
       "altNames": [
         "blockchain.com",
@@ -158,12 +140,6 @@
       "title": "BorgBase",
       "altNames": [
         "borg"
-      ]
-    },
-    {
-      "title": "Booking",
-      "altNames": [
-        "Booking.com"
       ]
     },
     {
@@ -267,6 +243,9 @@
     },
     {
       "title": "Doppler"
+    },
+    {
+      "title": "Dropbox"
     },
     {
       "title": "dus.net",
