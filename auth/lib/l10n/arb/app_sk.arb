@@ -19,6 +19,20 @@
   "pleaseVerifyDetails": "Prosím, skontrolujte svoje údaje a skúste to znova",
   "codeIssuerHint": "Vydavateľ",
   "codeSecretKeyHint": "Tajný kľúč",
+  "secret": "Tajný kľúč",
+  "all": "Všetko",
+  "notes": "Poznámky",
+  "notesLengthLimit": "Maximálna dĺžka poznámky je {count} znakov",
+  "@notesLengthLimit": {
+    "description": "Text to indicate the maximum number of characters allowed for notes",
+    "placeholders": {
+      "count": {
+        "description": "The maximum number of characters allowed for notes",
+        "type": "int",
+        "example": "100"
+      }
+    }
+  },
   "codeAccountHint": "Účet (ty@domena.sk)",
   "codeTagHint": "Tag",
   "accountKeyType": "Typ kľúča",
@@ -34,6 +48,9 @@
   "nextTotpTitle": "ďalej",
   "deleteCodeTitle": "Odstrániť položku?",
   "deleteCodeMessage": "Naozaj chcete odstrániť položku? Táto akcia je nezvratná.",
+  "trashCode": "Odstrániť kód?",
+  "trashCodeMessage": "Ste si istý, že chcete odstrániť kód pre účet {account}?",
+  "trash": "Odstrániť",
   "viewLogsAction": "Zobraziť logy",
   "sendLogsDescription": "Toto odošle logy, ktoré nám pomôžu vyriešiť váš problém. Aj keď prijímame preventívne opatrenia, aby sme zabezpečili, že sa citlivé informácie neukladajú do logov, odporúčame vám, aby ste si ich pred zdieľaním pozreli.",
   "preparingLogsTitle": "Príprava logov...",
@@ -100,6 +117,7 @@
   "emailVerificationToggle": "Overenie pomocou e-mailovej adresy",
   "emailVerificationEnableWarning": "Aby ste predišli vymknutiu sa z vášho účtu, nezabudnite pred povolením overenia emailom uložiť kópiu svojho 2FA emailu mimo Ente Auth.",
   "authToChangeEmailVerificationSetting": "Pre zmenu overenia pomocou emailu sa musíte overiť",
+  "authenticateGeneric": "Prosím, overte svoju identitu",
   "authToViewYourRecoveryKey": "Pre zobrazenie vášho kľúča na obnovenie sa musíte overiť",
   "authToChangeYourEmail": "Pre zmenu vášho emailu sa musíte overiť",
   "authToChangeYourPassword": "Pre zmenu vášho hesla sa musíte overiť",
@@ -127,6 +145,8 @@
   "leaveFamily": "Opustiť rodinku",
   "leaveFamilyMessage": "Ste si istý, že chcete opustiť rodinku?",
   "inFamilyPlanMessage": "Ste prihlásený k rodinke!",
+  "hintForMobile": "Pre úpravu alebo odstránenie kódu podržte.",
+  "hintForDesktop": "Pre úpravu alebo odstránenie kódu kliknite pravým tlačidlom myši.",
   "scan": "Skenovať",
   "scanACode": "Skenovať kód",
   "verify": "Overiť",
@@ -171,6 +191,7 @@
   "security": "Zabezpečenie",
   "lockscreen": "Uzamknutie obrazovky",
   "authToChangeLockscreenSetting": "Pre zmenu nastavenia uzamknutia obrazovky sa musíte overiť",
+  "deviceLockEnablePreSteps": "Pre povolenie zámku zariadenia, nastavte prístupový kód zariadenia alebo zámok obrazovky v nastaveniach systému.",
   "viewActiveSessions": "Zobraziť aktívne relácie",
   "authToViewYourActiveSessions": "Pre zobrazenie vašich aktívnych relácii sa musíte overiť",
   "searchHint": "Hľadať...",
@@ -181,6 +202,10 @@
   "scanAQrCode": "Naskenovať QR kód",
   "enterDetailsManually": "Zadajte údaje manuálne",
   "edit": "Upraviť",
+  "share": "Zdielať",
+  "shareCodes": "Zdieľať kódy",
+  "shareCodesDuration": "Zvoľte dobu, počas ktorej chcete zdieľať kódy.",
+  "restore": "Obnoviť",
   "copiedToClipboard": "Skopírované do schránky",
   "copiedNextToClipboard": "Skopírovaný následujúci kód do schránky",
   "error": "Chyba",
@@ -334,6 +359,7 @@
   "sigInBackupReminder": "Exportujte svoje kódy, aby ste sa uistili, že máte zálohu, ktorú môžete neskôr obnoviť.",
   "offlineModeWarning": "Rozhodli ste sa pokračovať bez zálohovania. Prosím, vykonávajte pravidelné manuálne zálohy aby ste mali istotu, že kódy nestratíte.",
   "showLargeIcons": "Zobraziť veľké ikony",
+  "compactMode": "Kompaktný mód",
   "shouldHideCode": "Skryť kódy",
   "doubleTapToViewHiddenCode": "Dvakrát klepnite na položku aby ste zobrazili kód",
   "focusOnSearchBar": "Využívať pole vyhľadávania pri spustení aplikácie",
@@ -454,5 +480,9 @@
   "pinLock": "Zámok PIN",
   "enterPin": "Zadajte PIN",
   "setNewPin": "Nastaviť nový PIN",
-  "importFailureDescNew": "Vybraný súbor nie je možné spracovať."
+  "importFailureDescNew": "Vybraný súbor nie je možné spracovať.",
+  "appLockNotEnabled": "Zámok aplikácie nie je povolený",
+  "appLockNotEnabledDescription": "Prosím, povoľte zámok aplikácie v časti Zabezpečenie > Zámok aplikácie",
+  "authToViewPasskey": "Pre zobrazenie vášho passkey sa musíte overiť",
+  "appLockOfflineModeWarning": "Rozhodli ste sa pokračovať bez záloh. Ak zabudnete svoj zámok aplikácie, prístup k údajom bude nemožný."
 }
