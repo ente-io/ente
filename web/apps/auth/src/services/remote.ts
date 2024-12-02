@@ -32,6 +32,12 @@ export const getAuthCodes = async (masterKey: Uint8Array): Promise<Code[]> => {
             return !f.codeDisplay?.trashed;
         })
         .sort((a, b) => {
+            // If only one of them is pinned, prefer it.
+            if (a.codeDisplay?.pinned && !b.codeDisplay?.pinned) return -1;
+            if (!a.codeDisplay?.pinned && b.codeDisplay?.pinned) return 1;
+            // If we get here, either both are pinned, or none are...
+
+            // Sort by issuer, alphabetically.
             if (a.issuer && b.issuer) {
                 return a.issuer.localeCompare(b.issuer);
             }

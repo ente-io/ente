@@ -63,10 +63,17 @@ export interface CodeDisplay {
      * user and will be automatically permanenently deleted after some time).
      */
     trashed?: boolean;
+    /**
+     * `true` if this code has been pinned by the user.
+     *
+     * Pinned codes show at the top of the list of codes.
+     */
+    pinned?: boolean;
 }
 
 const CodeDisplay = z.object({
     trashed: z.boolean().nullish().transform(nullToUndefined),
+    pinned: z.boolean().nullish().transform(nullToUndefined),
 });
 
 /**
