@@ -17,7 +17,6 @@ import { wait } from "@/utils/promise";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { getLocalCollections } from "services/collectionService";
-import { ExportProgress } from "types/export";
 import { getIDBasedSortedFiles, getPersonalFiles } from "utils/file";
 import {
     getCollectionIDFromFileUID,
@@ -25,6 +24,7 @@ import {
     getLivePhotoExportName,
     getMetadataFolderExportPath,
     type CollectionExportNames,
+    type ExportProgress,
     type ExportStage,
     type FileExportNames,
 } from ".";

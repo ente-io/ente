@@ -25,7 +25,6 @@ import { PromiseQueue } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import i18n from "i18next";
-import { ExportProgress, ExportSettings, ExportUIUpdaters } from "types/export";
 import { getAllLocalCollections } from "../collectionService";
 import { migrateExport, type ExportRecord } from "./migration";
 
@@ -47,6 +46,17 @@ export enum ExportStage {
     RENAMING_COLLECTION_FOLDERS = 5,
     TRASHING_DELETED_COLLECTIONS = 6,
     FINISHED = 7,
+}
+
+export interface ExportProgress {
+    success: number;
+    failed: number;
+    total: number;
+}
+
+export interface ExportSettings {
+    folder: string;
+    continuousExport: boolean;
 }
 
 export type CollectionExportNames = Record<number, string>;
