@@ -200,12 +200,12 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                       ),
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: widget.playbackCallback != null
-                            ? () {
-                                _showControls.value = !_showControls.value;
-                                widget.playbackCallback!(!_showControls.value);
-                              }
-                            : null,
+                        onTap: () {
+                          _showControls.value = !_showControls.value;
+                          if (widget.playbackCallback != null) {
+                            widget.playbackCallback!(!_showControls.value);
+                          }
+                        },
                         child: Container(
                           constraints: const BoxConstraints.expand(),
                         ),
@@ -310,7 +310,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
             return;
           }
           _showControls.value = false;
-          widget.playbackCallback!(true);
+          if (widget.playbackCallback != null) {
+            widget.playbackCallback!(true);
+          }
         }
       });
     }
@@ -321,7 +323,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       return;
     }
     if (_controller!.playbackInfo?.status == PlaybackStatus.playing) {
-      if (widget.playbackCallback != null && mounted) {
+      if (mounted) {
         _debouncer.run(() async {
           if (mounted) {
             if (_isSeeking.value ||
@@ -329,7 +331,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
               return;
             }
             _showControls.value = false;
-            widget.playbackCallback!(true);
+            if (widget.playbackCallback != null) {
+              widget.playbackCallback!(true);
+            }
           }
         });
       }
@@ -379,7 +383,11 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         _setFilePathForNativePlayer(file.path);
       }
     }).onError((error, stackTrace) {
-      showErrorDialog(context, S.of(context).error, S.of(context).failedToDownloadVideo);
+      showErrorDialog(
+        context,
+        S.of(context).error,
+        S.of(context).failedToDownloadVideo,
+      );
     });
   }
 

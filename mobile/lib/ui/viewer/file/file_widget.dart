@@ -12,7 +12,6 @@ class FileWidget extends StatelessWidget {
   final Function(bool)? playbackCallback;
   final BoxDecoration? backgroundDecoration;
   final bool? autoPlay;
-  final bool isFromMemories;
 
   const FileWidget(
     this.file, {
@@ -21,7 +20,6 @@ class FileWidget extends StatelessWidget {
     this.playbackCallback,
     this.tagPrefix,
     this.backgroundDecoration,
-    required this.isFromMemories,
     super.key,
   });
 
