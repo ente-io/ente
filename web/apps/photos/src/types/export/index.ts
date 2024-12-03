@@ -11,10 +11,3 @@ export interface ExportSettings {
     folder: string;
     continuousExport: boolean;
 }
-
-export interface ExportUIUpdaters {
-    setExportStage: (stage: ExportStage) => void;
-    setExportProgress: (progress: ExportProgress) => void;
-    setLastExportTime: (exportTime: number) => void;
-    setPendingExports: (pendingExports: EnteFile[]) => void;
-}

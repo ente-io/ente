@@ -73,6 +73,13 @@ export interface ExportOpts {
     resync?: boolean;
 }
 
+interface ExportUIUpdaters {
+    setExportStage: (stage: ExportStage) => void;
+    setExportProgress: (progress: ExportProgress) => void;
+    setLastExportTime: (exportTime: number) => void;
+    setPendingExports: (pendingExports: EnteFile[]) => void;
+}
+
 interface RequestCanceller {
     exec: () => void;
 }
