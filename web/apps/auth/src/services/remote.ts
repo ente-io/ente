@@ -142,7 +142,7 @@ export const authenticatorEntityDiff = async (
     }
 
     return Promise.all(
-        entities.values().map(async ({ id, encryptedData, header }) => ({
+        [...entities.values()].map(async ({ id, encryptedData, header }) => ({
             id,
             data: await decrypt(encryptedData, header),
         })),
