@@ -25,16 +25,8 @@ import { PromiseQueue } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import i18n from "i18next";
-import {
-    CollectionExportNames,
-    ExportProgress,
-    ExportRecord,
-    ExportSettings,
-    ExportUIUpdaters,
-    FileExportNames,
-} from "types/export";
 import { getAllLocalCollections } from "../collectionService";
-import { migrateExport } from "./migration";
+import { migrateExport, type ExportRecord } from "./migration";
 
 /** Name of the JSON file in which we keep the state of the export. */
 const exportRecordFileName = "export_status.json";
@@ -56,6 +48,21 @@ export enum ExportStage {
     FINISHED = 7,
 }
 
+export interface ExportProgress {
+    success: number;
+    failed: number;
+    total: number;
+}
+
+export interface ExportSettings {
+    folder: string;
+    continuousExport: boolean;
+}
+
+export type CollectionExportNames = Record<number, string>;
+
+export type FileExportNames = Record<string, string>;
+
 export const NULL_EXPORT_RECORD: ExportRecord = {
     version: 3,
     lastAttemptTimestamp: null,
@@ -74,6 +81,13 @@ export interface ExportOpts {
      * - If the user explicitly presses the "Resync" button.
      */
     resync?: boolean;
+}
+
+interface ExportUIUpdaters {
+    setExportStage: (stage: ExportStage) => void;
+    setExportProgress: (progress: ExportProgress) => void;
+    setLastExportTime: (exportTime: number) => void;
+    setPendingExports: (pendingExports: EnteFile[]) => void;
 }
 
 interface RequestCanceller {
