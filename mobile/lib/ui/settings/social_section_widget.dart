@@ -54,6 +54,11 @@ class SocialSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         SocialsMenuItemWidget(
+          S.of(context).bluesky,
+          "https://bsky.app/profile/ente.io",
+        ),
+        sectionOptionSpacing,
+        SocialsMenuItemWidget(
           S.of(context).mastodon,
           "https://fosstodon.org/@ente",
         ),
