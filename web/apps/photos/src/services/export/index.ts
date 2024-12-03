@@ -25,16 +25,9 @@ import { PromiseQueue } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import i18n from "i18next";
-import {
-    CollectionExportNames,
-    ExportProgress,
-    ExportRecord,
-    ExportSettings,
-    ExportUIUpdaters,
-    FileExportNames,
-} from "types/export";
+import { ExportProgress, ExportSettings, ExportUIUpdaters } from "types/export";
 import { getAllLocalCollections } from "../collectionService";
-import { migrateExport } from "./migration";
+import { migrateExport, type ExportRecord } from "./migration";
 
 /** Name of the JSON file in which we keep the state of the export. */
 const exportRecordFileName = "export_status.json";
@@ -55,6 +48,10 @@ export enum ExportStage {
     TRASHING_DELETED_COLLECTIONS = 6,
     FINISHED = 7,
 }
+
+export type CollectionExportNames = Record<number, string>;
+
+export type FileExportNames = Record<string, string>;
 
 export const NULL_EXPORT_RECORD: ExportRecord = {
     version: 3,
