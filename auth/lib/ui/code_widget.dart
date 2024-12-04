@@ -25,7 +25,6 @@ import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
 
