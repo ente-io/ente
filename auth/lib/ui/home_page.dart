@@ -318,10 +318,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> navigateToReorderPage(List<Code> allCodes) async {
+    List<Code> sortCandidate = allCodes
+        .where((element) => !element.hasError && !element.isTrashed)
+        .toList();
+    sortCandidate
+        .sort((a, b) => a.display.position.compareTo(b.display.position));
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return ReorderCodesPage(codes: _filteredCodes);
+          return ReorderCodesPage(codes: sortCandidate);
         },
       ),
     ).then((value) {
