@@ -328,6 +328,9 @@
       }
     }
   },
+  "manualSort": "Custom",
+  "mostFrequentlyUsed": "Frequently used",
+  "mostRecentlyUsed": "Recently used",
   "activeSessions": "Active sessions",
   "somethingWentWrongPleaseTryAgain": "Something went wrong, please try again",
   "thisWillLogYouOutOfThisDevice": "This will log you out of this device!",

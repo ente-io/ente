@@ -31,6 +31,7 @@ import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
 import 'package:ente_auth/ui/reorder_codes_page.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
+import 'package:ente_auth/ui/sort_option_menu.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
@@ -358,13 +359,17 @@ class _HomePageState extends State<HomePage> {
                 ),
           centerTitle: PlatformUtil.isDesktop() ? false : true,
           actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.edit),
-              tooltip: l10n.edit,
-              onPressed: () {
-                navigateToReorderPage(_allCodes!);
-              },
+            SortCodeMenuWidget(
+              currentKey: CodeSortKey.accountName,
+              onSelected: (p0) => {},
             ),
+            // IconButton(
+            //   icon: const Icon(Icons.edit),
+            //   tooltip: l10n.edit,
+            //   onPressed: () {
+            //     navigateToReorderPage(_allCodes!);
+            //   },
+            // ),
             PlatformUtil.isDesktop()
                 ? IconButton(
                     icon: const Icon(Icons.lock),
