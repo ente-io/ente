@@ -460,7 +460,7 @@ class _HomePageState extends State<HomePage> {
                     }
                     if (index == 1 && hasFavouriteCodes) {
                       return TagChip(
-                        label: "Favourite",
+                        label: "",
                         state: _isFavouriteOpen
                             ? TagChipState.selected
                             : TagChipState.unselected,

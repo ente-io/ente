@@ -59,21 +59,22 @@ class TagChip extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  if (iconData != null) ...[
+                  if (iconData != null)
                     Icon(
                       iconData,
-                      size: 16,
+                      size: label.isNotEmpty ? 16 : 20,
                       color: color,
                     ),
+                  if (iconData != null && label.isNotEmpty)
                     const SizedBox(width: 8),
-                  ],
-                  Text(
-                    label,
-                    style: TextStyle(
-                      color: color,
-                      fontSize: 14,
+                  if (label.isNotEmpty)
+                    Text(
+                      label,
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 14,
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
