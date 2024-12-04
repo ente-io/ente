@@ -255,7 +255,8 @@ class _HomePageState extends State<HomePage> {
         break;
       case CodeSortKey.recentlyUsed:
         codes.sort(
-            (a, b) => b.display.lastUsedAt.compareTo(a.display.lastUsedAt));
+          (a, b) => b.display.lastUsedAt.compareTo(a.display.lastUsedAt),
+        );
         break;
       case CodeSortKey.manual:
       default:
