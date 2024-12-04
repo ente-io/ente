@@ -16,7 +16,7 @@ class IconButtonWidget extends StatefulWidget {
   final Color? defaultColor;
   final Color? pressedColor;
   final Color? iconColor;
-  const IconButtonWidget({
+const IconButtonWidget({
     super.key,
     required this.icon,
     required this.iconButtonType,

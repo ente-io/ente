@@ -31,6 +31,7 @@ import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
 import 'package:ente_auth/ui/reorder_codes_page.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
+import 'package:ente_auth/ui/sort_option_menu.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
@@ -82,11 +83,13 @@ class _HomePageState extends State<HomePage> {
   bool _isFavouriteOpen = false;
   bool hasFavouriteCodes = false;
   bool hasNonFavouriteCodes = false;
+  late CodeSortKey _codeSortKey;
 
   @override
   void initState() {
     super.initState();
     _textController.addListener(_applyFilteringAndRefresh);
+    _codeSortKey = PreferenceService.instance.codeSortKey();
     _loadCodes();
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
       _loadCodes();
@@ -95,6 +98,7 @@ class _HomePageState extends State<HomePage> {
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
       await autoLogoutAlert(context);
     });
+
     _initDeepLinks();
     Future.delayed(
       const Duration(seconds: 1),
@@ -219,8 +223,7 @@ class _HomePageState extends State<HomePage> {
           [];
     }
 
-    _filteredCodes
-        .sort((a, b) => a.display.position.compareTo(b.display.position));
+    sortFilteredCodes(_filteredCodes, _codeSortKey);
 
     if (mounted) {
       setState(() {});
@@ -237,6 +240,29 @@ class _HomePageState extends State<HomePage> {
     searchBoxFocusNode.dispose();
 
     super.dispose();
+  }
+
+  void sortFilteredCodes(List<Code> codes, CodeSortKey sortKey) {
+    switch (sortKey) {
+      case CodeSortKey.issuerName:
+        codes.sort((a, b) => a.issuer.compareTo(b.issuer));
+        break;
+      case CodeSortKey.accountName:
+        codes.sort((a, b) => a.account.compareTo(b.account));
+        break;
+      case CodeSortKey.mostFrequentlyUsed:
+        codes.sort((a, b) => b.display.tapCount.compareTo(a.display.tapCount));
+        break;
+      case CodeSortKey.recentlyUsed:
+        codes.sort(
+          (a, b) => b.display.lastUsedAt.compareTo(a.display.lastUsedAt),
+        );
+        break;
+      case CodeSortKey.manual:
+      default:
+        codes.sort((a, b) => a.display.position.compareTo(b.display.position));
+        break;
+    }
   }
 
   Future<void> _redirectToScannerPage() async {
@@ -358,11 +384,20 @@ class _HomePageState extends State<HomePage> {
                 ),
           centerTitle: PlatformUtil.isDesktop() ? false : true,
           actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.edit),
-              tooltip: l10n.edit,
-              onPressed: () {
-                navigateToReorderPage(_allCodes!);
+            SortCodeMenuWidget(
+              currentKey: PreferenceService.instance.codeSortKey(),
+              onSelected: (p0) async {
+                await PreferenceService.instance.setCodeSortKey(p0);
+
+                if (p0 == CodeSortKey.manual) {
+                  await navigateToReorderPage(_allCodes!);
+                }
+                setState(() {
+                  _codeSortKey = p0;
+                });
+                if (mounted) {
+                  _applyFilteringAndRefresh();
+                }
               },
             ),
             PlatformUtil.isDesktop()
@@ -543,6 +578,7 @@ class _HomePageState extends State<HomePage> {
                       key: ValueKey('${code.hashCode}_$newIndex'),
                       code,
                       isCompactMode: isCompactMode,
+                      sortKey: _codeSortKey,
                     ),
                   );
                 }),

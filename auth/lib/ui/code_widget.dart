@@ -31,11 +31,13 @@ import 'package:move_to_background/move_to_background.dart';
 class CodeWidget extends StatefulWidget {
   final Code code;
   final bool isCompactMode;
+  final CodeSortKey? sortKey;
 
   const CodeWidget(
     this.code, {
     super.key,
     required this.isCompactMode,
+    this.sortKey,
   });
 
   @override
@@ -454,11 +456,12 @@ class _CodeWidgetState extends State<CodeWidget> {
     );
   }
 
-  void _copyCurrentOTPToClipboard() async {
+  void _copyCurrentOTPToClipboard() {
     _copyToClipboard(
       _getCurrentOTP(),
       confirmationMessage: context.l10n.copiedToClipboard,
     );
+    _udateCodeMetadata().ignore();
   }
 
   void _copyNextToClipboard() {
@@ -466,6 +469,26 @@ class _CodeWidgetState extends State<CodeWidget> {
       _getNextTotp(),
       confirmationMessage: context.l10n.copiedNextToClipboard,
     );
+    _udateCodeMetadata().ignore();
+  }
+
+  Future<void> _udateCodeMetadata() async {
+    if (widget.sortKey == null) return;
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        if (widget.sortKey == CodeSortKey.mostFrequentlyUsed ||
+            widget.sortKey == CodeSortKey.recentlyUsed) {
+          final display = widget.code.display;
+          final Code code = widget.code.copyWith(
+            display: display.copyWith(
+              tapCount: display.tapCount + 1,
+              lastUsedAt: DateTime.now().microsecondsSinceEpoch,
+            ),
+          );
+          unawaited(CodeStore.instance.addCode(code));
+        }
+      }
+    });
   }
 
   void _copyToClipboard(
