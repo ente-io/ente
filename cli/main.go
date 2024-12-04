@@ -119,16 +119,25 @@ func initConfig(cliConfigDir string) {
 // GetCLIConfigDir returns the path to the .ente-cli folder and creates it if it doesn't exist.
 func GetCLIConfigDir() (string, error) {
 	var configDir = os.Getenv("ENTE_CLI_CONFIG_DIR")
-	if configDir == "" {
-		// for backward compatibility, check for ENTE_CLI_CONFIG_PATH
-		configDir = os.Getenv("ENTE_CLI_CONFIG_PATH")
-	}
+  // For backward compatibility 
+  var oldConfigPath = os.Getenv("ENTE_CLI_CONFIG_PATH")
+
+  if configDir == "" {
+    // for backward compatibility, check for ENTE_CLI_CONFIG_PATH
+    configDir = os.Getenv("ENTE_CLI_CONFIG_PATH")
+  }
+
+  // Throw instructoin if none of the environment variables has been set.
+  if configDir == "" && oldConfigPath == "" {
+    fmt.Println(`Environment variable for the config dir is not set. Please setup 
+the environment variable with export ENTE_CLI_CONFIG_DIR="/path/to/config"
+      `)
+  }
 	if configDir != "" {
 		// remove trailing slash (for all OS)
 		configDir = strings.TrimSuffix(configDir, string(filepath.Separator))
 		return configDir, nil
 	}
-
 	// Get the user's home directory
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
