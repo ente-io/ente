@@ -577,6 +577,7 @@ class _HomePageState extends State<HomePage> {
                       key: ValueKey('${code.hashCode}_$newIndex'),
                       code,
                       isCompactMode: isCompactMode,
+                      sortKey: _codeSortKey,
                     ),
                   );
                 }),
