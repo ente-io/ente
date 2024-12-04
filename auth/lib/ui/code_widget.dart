@@ -113,20 +113,27 @@ class _CodeWidgetState extends State<CodeWidget> {
     final l10n = context.l10n;
 
     Widget getCardContents(AppLocalizations l10n) {
+      // final bool isFavorite = widget.code.isPinned;
       return Stack(
         children: [
-          if (widget.code.isPinned)
-            Align(
-              alignment: Alignment.topRight,
-              child: CustomPaint(
-                painter: PinBgPainter(
-                  color: colorScheme.pinnedBgColor,
-                ),
-                size: widget.isCompactMode
-                    ? const Size(24, 24)
-                    : const Size(39, 39),
-              ),
-            ),
+          // if (isFavorite)
+          // Align(
+          //   alignment: Alignment.topRight,
+          //   child: Icon(
+          //     Icons.star,
+          //     color: colorScheme.pinnedBgColor,
+          //     size: widget.isCompactMode ? 16 : 24,
+          //   ),
+          //   //
+          //   // child: CustomPaint(
+          //   //   painter: PinBgPainter(
+          //   //     color: colorScheme.pinnedBgColor,
+          //   //   ),
+          //   //   size: widget.isCompactMode
+          //   //       ? const Size(24, 24)
+          //   //       : const Size(39, 39),
+          //   // ),
+          // ),
           if (widget.code.isTrashed && kDebugMode)
             Align(
               alignment: Alignment.topLeft,
@@ -172,15 +179,10 @@ class _CodeWidgetState extends State<CodeWidget> {
           if (widget.code.isPinned) ...[
             Align(
               alignment: Alignment.topRight,
-              child: Padding(
-                padding: widget.isCompactMode
-                    ? const EdgeInsets.only(right: 4, top: 4)
-                    : const EdgeInsets.only(right: 6, top: 6),
-                child: SvgPicture.asset(
-                  "assets/svg/pin-card.svg",
-                  width: widget.isCompactMode ? 8 : null,
-                  height: widget.isCompactMode ? 8 : null,
-                ),
+              child: Icon(
+                Icons.star,
+                color: colorScheme.primary700.withOpacity(0.4),
+                size: widget.isCompactMode ? 16 : 24,
               ),
             ),
           ],
@@ -272,11 +274,10 @@ class _CodeWidgetState extends State<CodeWidget> {
                     ),
                   if (!widget.code.isTrashed)
                     MenuItem(
-                      label:
-                          widget.code.isPinned ? l10n.unpinText : l10n.pinText,
+                      label: widget.code.isPinned ? l10n.unfav : l10n.fav,
                       icon: widget.code.isPinned
-                          ? Icons.push_pin
-                          : Icons.push_pin_outlined,
+                          ? Icons.star_border
+                          : Icons.star_border_outlined,
                       onSelected: () => _onPinPressed(null),
                     ),
                   if (!widget.code.isTrashed)
@@ -579,8 +580,8 @@ class _CodeWidgetState extends State<CodeWidget> {
             (value) => showToast(
               context,
               !currentlyPinned
-                  ? context.l10n.pinnedCodeMessage(widget.code.issuer)
-                  : context.l10n.unpinnedCodeMessage(widget.code.issuer),
+                  ? context.l10n.favoritedCodeMessage(widget.code.issuer)
+                  : context.l10n.unfavoritedCodeMessage(widget.code.issuer),
             ),
           ),
     );
