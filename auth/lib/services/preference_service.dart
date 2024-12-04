@@ -6,7 +6,7 @@ enum CodeSortKey {
   issuerName,
   accountName,
   mostFrequentlyUsed,
-  leastRecentlyUsed,
+  recentlyUsed,
   manual,
 }
 
@@ -34,6 +34,15 @@ class PreferenceService {
     } else {
       return false;
     }
+  }
+
+  CodeSortKey codeSortKey() {
+    return CodeSortKey
+        .values[_prefs.getInt("codeSortKey") ?? CodeSortKey.manual.index];
+  }
+
+  Future<void> setCodeSortKey(CodeSortKey key) async {
+    await _prefs.setInt("codeSortKey", key.index);
   }
 
   Future<void> setHasShownCoachMark(bool value) {

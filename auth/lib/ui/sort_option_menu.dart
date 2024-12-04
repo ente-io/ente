@@ -1,7 +1,5 @@
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/preference_service.dart';
-import 'package:ente_auth/theme/ente_theme.dart';
-import 'package:ente_auth/ui/components/buttons/icon_button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -28,7 +26,7 @@ class SortCodeMenuWidget extends StatelessWidget {
         case CodeSortKey.mostFrequentlyUsed:
           text = context.l10n.mostFrequentlyUsed;
           break;
-        case CodeSortKey.leastRecentlyUsed:
+        case CodeSortKey.recentlyUsed:
           text = context.l10n.mostRecentlyUsed;
           break;
         case CodeSortKey.manual:
