@@ -540,7 +540,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Hapus album bersama?"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "Album ini akan di hapus untuk semua\n\nKamu akan kehilangan akses ke foto yang di bagikan dalam album ini yang di miliki oleh pengguna lain"),
-        "descriptions": MessageLookupByLibrary.simpleMessage("Keterangan"),
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Dibuat untuk melestarikan"),
         "details": MessageLookupByLibrary.simpleMessage("Rincian"),
