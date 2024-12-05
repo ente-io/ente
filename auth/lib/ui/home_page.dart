@@ -402,14 +402,13 @@ class _HomePageState extends State<HomePage> {
           actions: <Widget>[
             SortCodeMenuWidget(
               currentKey: PreferenceService.instance.codeSortKey(),
-              onSelected: (p0) async {
-                await PreferenceService.instance.setCodeSortKey(p0);
-
-                if (p0 == CodeSortKey.manual) {
+              onSelected: (newOrder) async {
+                await PreferenceService.instance.setCodeSortKey(newOrder);
+                if (newOrder == CodeSortKey.manual && newOrder == _codeSortKey) {
                   await navigateToReorderPage(_allCodes!);
                 }
                 setState(() {
-                  _codeSortKey = p0;
+                  _codeSortKey = newOrder;
                 });
                 if (mounted) {
                   _applyFilteringAndRefresh();
