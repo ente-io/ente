@@ -500,7 +500,7 @@ class _HomePageState extends State<HomePage> {
                     }
                     if (index == 1 && hasFavouriteCodes) {
                       return TagChip(
-                        label: "",
+                        label: "Favorite",
                         state: _isFavouriteOpen
                             ? TagChipState.selected
                             : TagChipState.unselected,
@@ -511,7 +511,7 @@ class _HomePageState extends State<HomePage> {
                           setState(() {});
                           _applyFilteringAndRefresh();
                         },
-                        iconData: Icons.star,
+                        // iconData: Icons.star,
                       );
                     }
                     if (index == itemCount - 1 && hasTrashedCodes) {
