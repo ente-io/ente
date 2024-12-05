@@ -118,23 +118,23 @@ class _CodeWidgetState extends State<CodeWidget> {
       return Stack(
         children: [
           // if (isFavorite)
-          // Align(
-          //   alignment: Alignment.topRight,
-          //   child: Icon(
-          //     Icons.star,
-          //     color: colorScheme.pinnedBgColor,
-          //     size: widget.isCompactMode ? 16 : 24,
+          //   Align(
+          //     alignment: Alignment.topRight,
+          //     child: Icon(
+          //       Icons.star,
+          //       color: colorScheme.pinnedBgColor,
+          //       size: widget.isCompactMode ? 16 : 24,
+          //     ),
+          //     //
+          //     // child: CustomPaint(
+          //     //   painter: PinBgPainter(
+          //     //     color: colorScheme.pinnedBgColor,
+          //     //   ),
+          //     //   size: widget.isCompactMode
+          //     //       ? const Size(24, 24)
+          //     //       : const Size(39, 39),
+          //     // ),
           //   ),
-          //   //
-          //   // child: CustomPaint(
-          //   //   painter: PinBgPainter(
-          //   //     color: colorScheme.pinnedBgColor,
-          //   //   ),
-          //   //   size: widget.isCompactMode
-          //   //       ? const Size(24, 24)
-          //   //       : const Size(39, 39),
-          //   // ),
-          // ),
           if (widget.code.isTrashed && kDebugMode)
             Align(
               alignment: Alignment.topLeft,
@@ -180,10 +180,13 @@ class _CodeWidgetState extends State<CodeWidget> {
           if (widget.code.isPinned) ...[
             Align(
               alignment: Alignment.topRight,
-              child: Icon(
-                Icons.star,
-                color: colorScheme.primary700.withOpacity(0.4),
-                size: widget.isCompactMode ? 16 : 24,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 2, right: 2),
+                child: Icon(
+                  Icons.star,
+                  color: colorScheme.primary700.withOpacity(0.4),
+                  size: widget.isCompactMode ? 12 : 20,
+                ),
               ),
             ),
           ],
