@@ -276,6 +276,9 @@
       ]
     },
     {
+      "title": "eneba"
+    },
+    {
       "title": "ente",
       "hex": "1DB954"
     },
@@ -511,6 +514,10 @@
       "hex": "6364FF"
     },
     {
+      "title": "matlab",
+      "altNames": "mathworks"
+    },
+    {
       "title": "Mercado Livre",
       "slug": "mercado_livre",
       "altNames": [
@@ -596,7 +603,7 @@
       "hex": "858585"
     },
     {
-      "title": "Nintendo",
+      "title": "nintendo",
       "altNames": [
         "任天堂"
       ]
@@ -706,6 +713,9 @@
       "altNames": [
         "Raindrop"
       ]
+    },
+    {
+      "title": "randstad"
     },
     {
       "title": "Real-Debrid",
