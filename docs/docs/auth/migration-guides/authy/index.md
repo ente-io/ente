@@ -155,6 +155,9 @@ who have a rooted android phone running android 6 or newer that passes Play
 Integrity.
 
 This way of exporting your data will require a rooted phone.
+
+### Exporting codes using Android OTP Extractor
+
 This uses the tool [Android OTP Extractor](https://github.com/puddly/android-otp-extractor) from [puddly](https://github.com/puddly) on GitHub
 
 1. Install python 3 and adb to your computer you can download binaries for 
@@ -184,6 +187,18 @@ it from [Google](https://developer.android.com/tools/releases/platform-tools)
 	```
 	python -m android_otp_extractor --prepend-issuer --include authy
 	```
+
+### Exporting codes using Aegis Authenticator
+
+This uses the tool [Aegis Authenticator](https://getaegis.app/) from [beemdevelopment](
+https://github.com/beemdevelopment).
+
+1. Install Authy and login on your rooted phone.
+2. Install Aegis Authenticator from the [Google Play Store](https://play.google.com/store/apps/details?id=com.beemdevelopment.aegis).
+3. In the app, click the three dots in the top right corner and click "Import & Export".
+4. Click "Import from another app" and choose Authy.
+5. The app will ask for root permissions, then automatically import your codes from Authy.
+6. Then export the codes from Aegis Authenticator to `json` or `txt` using the "Export to file" option in the "Import & Export" menu.
 
 ## Importing to Ente Authenticator (Method 1, method 2.1)
 
