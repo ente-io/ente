@@ -329,6 +329,7 @@
     }
   },
   "manualSort": "Custom",
+  "editOrder": "Edit order",
   "mostFrequentlyUsed": "Frequently used",
   "mostRecentlyUsed": "Recently used",
   "activeSessions": "Active sessions",
