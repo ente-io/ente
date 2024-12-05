@@ -263,6 +263,17 @@ class _HomePageState extends State<HomePage> {
         codes.sort((a, b) => a.display.position.compareTo(b.display.position));
         break;
     }
+    if (sortKey != CodeSortKey.manual) {
+      // move pinned codes to the using
+      int insertIndex = 0;
+      for (int i = 0; i < codes.length; i++) {
+        if (codes[i].isPinned) {
+          final code = codes.removeAt(i);
+          codes.insert(insertIndex, code);
+          insertIndex++;
+        }
+      }
+    }
   }
 
   Future<void> _redirectToScannerPage() async {
