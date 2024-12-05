@@ -405,7 +405,9 @@ class FileAppBarState extends State<FileAppBar> {
                   widget.file,
                 );
               } catch (e) {
-                await showGenericErrorDialog(context: context, error: e);
+                if (mounted) {
+                  await showGenericErrorDialog(context: context, error: e);
+                }
               }
             } else if (value == 7) {
               _onToggleLoopVideo();

@@ -24,6 +24,13 @@ class PreviewVideoStore {
 
   final _logger = Logger("PreviewVideoStore");
   final _dio = NetworkClient.instance.enteDio;
+  void init() {
+    VideoCompress.compressProgress$.subscribe((progress) {
+      if (kDebugMode) {
+        _logger.info("Compression progress: $progress");
+      }
+    });
+  }
 
   Future<void> chunkAndUploadVideo(EnteFile enteFile) async {
     if (!enteFile.isUploaded) return;
@@ -36,16 +43,22 @@ class PreviewVideoStore {
       debugPrint("previewUrl $resultUrl");
       return;
     } catch (e) {
-      _logger.warning("Failed to get playlist for $enteFile", e);
+      if (e is DioError && e.response?.statusCode == 404) {
+        _logger.info("No preview found for $enteFile");
+      } else {
+        _logger.warning("Failed to get playlist for $enteFile", e);
+      }
     }
     final tmpDirectory = await getApplicationDocumentsDirectory();
     final prefix = "${tmpDirectory.path}/${enteFile.generatedID}";
     Directory(prefix).createSync();
+    _logger.info('Compressing video ${enteFile.displayName}');
     final mediaInfo = await VideoCompress.compressVideo(
       file.path,
       quality: VideoQuality.Res1280x720Quality,
     );
     if (mediaInfo?.path == null) return;
+    _logger.info('CompressionDone ${enteFile.displayName}');
 
     final key = Key.fromLength(16);
 
@@ -55,7 +68,7 @@ class PreviewVideoStore {
     final keyinfo = File('$prefix/mykey.keyinfo');
     keyinfo.writeAsStringSync("data:text/plain;base64,${key.base64}\n"
         "${keyfile.path}\n");
-
+    _logger.info('Generating HLS Playlist ${enteFile.displayName}');
     final session = await FFmpegKit.execute(
       '-i "${mediaInfo!.path}" '
       '-c copy -f hls -hls_time 10 -hls_flags single_file '
@@ -66,6 +79,7 @@ class PreviewVideoStore {
     final returnCode = await session.getReturnCode();
 
     if (ReturnCode.isSuccess(returnCode)) {
+      _logger.info('Playlist Generated ${enteFile.displayName}');
       final playlistFile = File("$prefix/output.m3u8");
       final previewFile = File("$prefix/output.ts");
       final result = await _uploadPreviewVideo(enteFile, previewFile);
@@ -77,7 +91,7 @@ class PreviewVideoStore {
         objectID: objectID,
         objectSize: objectSize,
       );
-      _logger.info("Video preview uploaded for $enteFile");
+      _logger.info("XXXHLS Video preview uploaded for $enteFile");
     } else if (ReturnCode.isCancel(returnCode)) {
       _logger.warning("FFmpeg command cancelled");
     } else {
