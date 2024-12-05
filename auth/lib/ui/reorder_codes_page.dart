@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_store.dart';
@@ -34,7 +35,7 @@ class _ReorderCodesPageState extends State<ReorderCodesPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Custom order"),
+          title: Text(context.l10n.editOrder),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {

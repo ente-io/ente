@@ -329,6 +329,7 @@
     }
   },
   "manualSort": "Custom",
+  "editOrder": "Edit order",
   "mostFrequentlyUsed": "Frequently used",
   "mostRecentlyUsed": "Recently used",
   "activeSessions": "Active sessions",
@@ -451,6 +452,7 @@
   "pinText": "Pin",
   "unpinText": "Unpin",
   "fav": "Favorite",
+  "favorites": "Favorites",
   "unfav": "Unfavorite",
   "favoritedCodeMessage": "{code} has been added to favorites",
   "unfavoritedCodeMessage": "{code} has been removed from favorites",
