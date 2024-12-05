@@ -77,6 +77,16 @@ func GetOrCreateClISecret() []byte {
 	return legacySecret
 }
 
+// Simple function to check if keyring is available or not 
+func IsKeyringAvailable() bool {
+  _, err := keyring.Get(secretService, secretUser)
+
+  if err != nil && !errors.Is(err, keyring.ErrNotFound) {
+    return false
+  }
+  return true
+}
+
 // GetSecretFromSecretText reads the scecret from the secret text file.
 // If the file does not exist, it will be created and write random keyLength bytes secret to it.
 func GetSecretFromSecretText(secretFilePath string) []byte {
