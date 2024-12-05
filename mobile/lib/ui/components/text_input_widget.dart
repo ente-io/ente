@@ -480,19 +480,17 @@ class SuffixIconWidget extends StatelessWidget {
     } else {
       trailingWidget = null;
     }
-    if (trailingWidget != null) {
-      return AnimatedSwitcher(
-        duration: const Duration(milliseconds: 175),
-        switchInCurve: Curves.easeInExpo,
-        switchOutCurve: Curves.easeOutExpo,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: trailingWidget,
-        ),
-      );
-    } else {
-      // return trailingWidget;
-      return const SizedBox.shrink();
-    }
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 175),
+      switchInCurve: Curves.easeInExpo,
+      switchOutCurve: Curves.easeOutExpo,
+      child: trailingWidget != null
+          ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: trailingWidget,
+            )
+          : const SizedBox.shrink(),
+    );
   }
 }
