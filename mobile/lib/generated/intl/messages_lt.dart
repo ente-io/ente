@@ -387,7 +387,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Mano priežastis nenurodyta"),
         "deleteRequestSLAText": MessageLookupByLibrary.simpleMessage(
             "Jūsų prašymas bus apdorotas per 72 valandas."),
-        "descriptions": MessageLookupByLibrary.simpleMessage("Aprašymai"),
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Sukurta išgyventi"),
         "developerSettings":

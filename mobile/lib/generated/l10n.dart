@@ -8849,16 +8849,6 @@ class S {
     );
   }
 
-  /// `Descriptions`
-  String get descriptions {
-    return Intl.message(
-      'Descriptions',
-      name: 'descriptions',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Add a name`
   String get addAName {
     return Intl.message(

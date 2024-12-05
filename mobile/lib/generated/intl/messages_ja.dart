@@ -557,7 +557,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("共有アルバムを削除しますか？"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "このアルバムは他の人からも削除されます\n\n他の人が共有してくれた写真も、あなたからは見れなくなります"),
-        "descriptions": MessageLookupByLibrary.simpleMessage("説明文"),
         "deselectAll": MessageLookupByLibrary.simpleMessage("選択解除"),
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("生き延びるためのデザイン"),
