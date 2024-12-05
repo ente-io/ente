@@ -500,7 +500,7 @@ class _HomePageState extends State<HomePage> {
                     }
                     if (index == 1 && hasFavouriteCodes) {
                       return TagChip(
-                        label: "Favorite",
+                        label: context.l10n.fav,
                         state: _isFavouriteOpen
                             ? TagChipState.selected
                             : TagChipState.unselected,
