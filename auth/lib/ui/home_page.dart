@@ -183,7 +183,7 @@ class _HomePageState extends State<HomePage> {
             selectedTag != "" &&
                 !codeState.display.tags.contains(selectedTag) ||
             (codeState.isTrashed != _isTrashOpen) ||
-            (codeState.isPinned != _isFavouriteOpen)) {
+            (codeState.isPinned != _isFavouriteOpen && val.isEmpty)) {
           continue;
         }
 
