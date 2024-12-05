@@ -2,6 +2,7 @@ import { isDesktop } from "@/base/app";
 import { createComlinkCryptoWorker } from "@/base/crypto";
 import { type CryptoWorker } from "@/base/crypto/worker";
 import { lowercaseExtension, nameAndExtension } from "@/base/file-name";
+import type { PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
@@ -94,12 +95,6 @@ export type UploadItemWithCollection = UploadAsset & {
 export interface LivePhotoAssets {
     image: UploadItem;
     video: UploadItem;
-}
-
-export interface PublicUploadProps {
-    token: string;
-    passwordToken: string;
-    accessedThroughSharedURL: boolean;
 }
 
 interface UploadCancelStatus {
@@ -325,7 +320,7 @@ class UploadManager {
     private onUploadFile: (file: EnteFile) => void;
     private collections: Map<number, Collection>;
     private uploadInProgress: boolean;
-    private publicUploadProps: PublicUploadProps;
+    private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
     private uploaderName: string;
     private uiService: UIService;
 
@@ -336,12 +331,12 @@ class UploadManager {
     public async init(
         progressUpdater: ProgressUpdater,
         onUploadFile: (file: EnteFile) => void,
-        publicCollectProps: PublicUploadProps,
+        publicAlbumsCredentials: PublicAlbumsCredentials | undefined,
     ) {
         this.uiService.init(progressUpdater);
-        UploadService.init(publicCollectProps);
+        UploadService.init(publicAlbumsCredentials);
         this.onUploadFile = onUploadFile;
-        this.publicUploadProps = publicCollectProps;
+        this.publicAlbumsCredentials = publicAlbumsCredentials;
     }
 
     logout() {
@@ -497,9 +492,11 @@ class UploadManager {
     };
 
     private async updateExistingFilesAndCollections(collections: Collection[]) {
-        if (this.publicUploadProps.accessedThroughSharedURL) {
+        if (this.publicAlbumsCredentials) {
             this.existingFiles = await getLocalPublicFiles(
-                getPublicCollectionUID(this.publicUploadProps.token),
+                getPublicCollectionUID(
+                    this.publicAlbumsCredentials.accessToken,
+                ),
             );
         } else {
             this.existingFiles = getUserOwnedFiles(await getLocalFiles());

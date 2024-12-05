@@ -3,6 +3,7 @@ import type { BytesOrB64 } from "@/base/crypto/types";
 import { type CryptoWorker } from "@/base/crypto/worker";
 import { ensureElectron } from "@/base/electron";
 import { basename, nameAndExtension } from "@/base/file-name";
+import type { PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
 import { extractVideoMetadata } from "@/gallery/services/ffmpeg";
@@ -42,10 +43,7 @@ import { mergeUint8Arrays } from "@/utils/array";
 import { ensureInteger, ensureNumber } from "@/utils/ensure";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import { addToCollection } from "services/collectionService";
-import {
-    PublicUploadProps,
-    type LivePhotoAssets,
-} from "services/upload/uploadManager";
+import { type LivePhotoAssets } from "services/upload/uploadManager";
 import * as convert from "xml-js";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import publicUploadHttpClient from "./publicUploadHttpClient";
@@ -110,17 +108,17 @@ const multipartChunksPerPart = 5;
 class UploadService {
     private uploadURLs: UploadURL[] = [];
     private pendingUploadCount: number = 0;
-    private publicUploadProps: PublicUploadProps = undefined;
+    private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
     private activeUploadURLRefill: Promise<void> | undefined;
 
-    init(publicUploadProps: PublicUploadProps) {
-        this.publicUploadProps = publicUploadProps;
+    init(publicAlbumsCredentials: PublicAlbumsCredentials | undefined) {
+        this.publicAlbumsCredentials = publicAlbumsCredentials;
     }
 
     logout() {
         this.uploadURLs = [];
         this.pendingUploadCount = 0;
-        this.publicUploadProps = undefined;
+        this.publicAlbumsCredentials = undefined;
         this.activeUploadURLRefill = undefined;
     }
 
@@ -153,11 +151,12 @@ class UploadService {
     }
 
     async uploadFile(uploadFile: UploadFile) {
-        if (this.publicUploadProps.accessedThroughSharedURL) {
+        if (this.publicAlbumsCredentials) {
             return publicUploadHttpClient.uploadFile(
                 uploadFile,
-                this.publicUploadProps.token,
-                this.publicUploadProps.passwordToken,
+                // TODO: publicAlbumsCredentials
+                this.publicAlbumsCredentials.accessToken,
+                this.publicAlbumsCredentials.accessTokenJWT,
             );
         } else {
             return UploadHttpClient.uploadFile(uploadFile);
@@ -188,16 +187,10 @@ class UploadService {
 
     private async _refillUploadURLs() {
         let urls: UploadURL[];
-        if (this.publicUploadProps.accessedThroughSharedURL) {
-            if (!this.publicUploadProps.token) {
-                throw Error(CustomError.TOKEN_MISSING);
-            }
+        if (this.publicAlbumsCredentials) {
             urls = await publicUploadHttpClient.fetchUploadURLs(
                 this.pendingUploadCount,
-                {
-                    accessToken: this.publicUploadProps.token,
-                    accessTokenJWT: this.publicUploadProps.passwordToken,
-                },
+                this.publicAlbumsCredentials,
             );
         } else {
             urls = await UploadHttpClient.fetchUploadURLs(
@@ -208,11 +201,12 @@ class UploadService {
     }
 
     async fetchMultipartUploadURLs(count: number) {
-        if (this.publicUploadProps.accessedThroughSharedURL) {
+        if (this.publicAlbumsCredentials) {
+            // TODO: publicAlbumsCredentials
             return await publicUploadHttpClient.fetchMultipartUploadURLs(
                 count,
-                this.publicUploadProps.token,
-                this.publicUploadProps.passwordToken,
+                this.publicAlbumsCredentials.accessToken,
+                this.publicAlbumsCredentials.accessTokenJWT,
             );
         } else {
             return await UploadHttpClient.fetchMultipartUploadURLs(count);

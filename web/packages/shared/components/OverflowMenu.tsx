@@ -1,4 +1,5 @@
 import { FluidContainer } from "@ente/shared/components/Container";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import {
     Box,
     IconButton,
@@ -10,7 +11,7 @@ import {
     type PaperProps,
 } from "@mui/material";
 import Menu, { type MenuProps } from "@mui/material/Menu";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 
 const OverflowMenuContext = createContext({
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -18,13 +19,30 @@ const OverflowMenuContext = createContext({
 });
 
 interface OverflowMenuProps {
-    triggerButtonIcon: React.ReactNode;
+    /**
+     * An ARIA identifier for the overflow menu when it is displayed.
+     */
+    ariaID: string;
+    /**
+     * The icon for the trigger button.
+     *
+     * If not provided, then by default the MoreHoriz icon from MUI is used.
+     */
+    triggerButtonIcon?: React.ReactNode;
+    /**
+     * Optional additional properties for the trigger icon button.
+     */
     triggerButtonProps?: Partial<IconButtonProps>;
-    children?: React.ReactNode;
-    ariaControls: string;
+    /**
+     * Optional additional properties for the MUI {@link Paper} that underlies
+     * the {@link Menu}.
+     */
     menuPaperProps?: Partial<PaperProps>;
 }
 
+/**
+ * A custom MUI {@link Menu} with some Ente specific styling applied to it.
+ */
 export const StyledMenu = styled(Menu)`
     & .MuiPaper-root {
         margin: 16px auto;
@@ -38,38 +56,47 @@ export const StyledMenu = styled(Menu)`
     }
 `;
 
-export const OverflowMenu: React.FC<OverflowMenuProps> = ({
-    children,
-    ariaControls,
+/**
+ * An overflow menu showing {@link OverflowMenuOptions}, alongwith a button to
+ * trigger the visibility of the menu.
+ */
+export const OverflowMenu: React.FC<
+    React.PropsWithChildren<OverflowMenuProps>
+> = ({
+    ariaID,
     triggerButtonIcon,
     triggerButtonProps,
     menuPaperProps,
+    children,
 }) => {
-    const [sortByEl, setSortByEl] = useState<MenuProps["anchorEl"] | null>(
-        null,
+    const [anchorEl, setAnchorEl] = useState<MenuProps["anchorEl"]>();
+    const context = useMemo(
+        () => ({ close: () => setAnchorEl(undefined) }),
+        [],
     );
-    const handleClose = () => setSortByEl(null);
     return (
-        <OverflowMenuContext.Provider value={{ close: handleClose }}>
+        <OverflowMenuContext.Provider value={context}>
             <IconButton
-                onClick={(event) => setSortByEl(event.currentTarget)}
-                aria-controls={sortByEl ? ariaControls : undefined}
+                onClick={(event) => setAnchorEl(event.currentTarget)}
+                aria-controls={anchorEl ? ariaID : undefined}
                 aria-haspopup="true"
-                aria-expanded={sortByEl ? "true" : undefined}
+                aria-expanded={anchorEl ? "true" : undefined}
                 {...triggerButtonProps}
             >
-                {triggerButtonIcon}
+                {triggerButtonIcon ?? <MoreHorizIcon />}
             </IconButton>
             <StyledMenu
-                id={ariaControls}
-                anchorEl={sortByEl}
-                open={Boolean(sortByEl)}
-                onClose={handleClose}
+                id={ariaID}
+                {...(anchorEl ? { anchorEl } : {})}
+                open={!!anchorEl}
+                onClose={() => setAnchorEl(undefined)}
                 MenuListProps={{
                     disablePadding: true,
-                    "aria-labelledby": ariaControls,
+                    "aria-labelledby": ariaID,
                 }}
-                PaperProps={menuPaperProps}
+                slotProps={{
+                    paper: menuPaperProps,
+                }}
                 anchorOrigin={{
                     vertical: "bottom",
                     horizontal: "right",
@@ -90,7 +117,6 @@ interface OverflowMenuOptionProps {
     color?: ButtonProps["color"];
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
-    keepOpenAfterClick?: boolean;
     children?: any;
     // To avoid changing old places without an audit, new code should use this
     // option explicitly to fix/tweak the alignment of the button label and
@@ -103,7 +129,6 @@ export const OverflowMenuOption: React.FC<OverflowMenuOptionProps> = ({
     color = "primary",
     startIcon,
     endIcon,
-    keepOpenAfterClick,
     centerAlign,
     children,
 }) => {
@@ -111,10 +136,9 @@ export const OverflowMenuOption: React.FC<OverflowMenuOptionProps> = ({
 
     const handleClick = () => {
         onClick();
-        if (!keepOpenAfterClick) {
-            menuContext.close();
-        }
+        menuContext.close();
     };
+
     return (
         <MenuItem
             onClick={handleClick}

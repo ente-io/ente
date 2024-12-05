@@ -16,7 +16,6 @@ import {
 } from "@ente/shared/components/OverflowMenu";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
 import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import {
     Button,
     ButtonBase,
@@ -155,10 +154,7 @@ const AuthNavbar: React.FC = () => {
                 <EnteLogo />
             </HorizontalFlex>
             <HorizontalFlex position={"absolute"} right="24px">
-                <OverflowMenu
-                    ariaControls={"auth-options"}
-                    triggerButtonIcon={<MoreHoriz />}
-                >
+                <OverflowMenu ariaID={"auth-options"}>
                     <OverflowMenuOption
                         color="critical"
                         startIcon={<LogoutOutlined />}

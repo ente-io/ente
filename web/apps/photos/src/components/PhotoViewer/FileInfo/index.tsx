@@ -213,7 +213,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             title={t("location")}
                             caption={
                                 !mapEnabled ||
-                                publicCollectionGalleryContext.accessedThroughSharedURL ? (
+                                publicCollectionGalleryContext.credentials ? (
                                     <Link
                                         href={openStreetMapLink(location)}
                                         target="_blank"
@@ -245,7 +245,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                 />
                             }
                         />
-                        {!publicCollectionGalleryContext.accessedThroughSharedURL && (
+                        {!publicCollectionGalleryContext.credentials && (
                             <MapBox
                                 location={location}
                                 mapEnabled={mapEnabled}

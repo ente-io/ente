@@ -345,7 +345,7 @@ function PhotoViewer(props: PhotoViewerProps) {
 
     function updateIsOwnFile(file: EnteFile) {
         const isOwnFile =
-            !publicCollectionGalleryContext.accessedThroughSharedURL &&
+            !publicCollectionGalleryContext.credentials &&
             galleryContext.user?.id === file.ownerID;
         setIsOwnFile(isOwnFile);
     }
