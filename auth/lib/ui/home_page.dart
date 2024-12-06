@@ -80,9 +80,7 @@ class _HomePageState extends State<HomePage> {
   bool hasTrashedCodes = false;
   bool hasNonTrashedCodes = false;
   bool isCompactMode = false;
-  bool _isFavouriteOpen = false;
-  bool hasFavouriteCodes = false;
-  bool hasNonFavouriteCodes = false;
+
   late CodeSortKey _codeSortKey;
 
   @override
@@ -117,8 +115,6 @@ class _HomePageState extends State<HomePage> {
       _allCodes = codes;
       hasTrashedCodes = false;
       hasNonTrashedCodes = false;
-      hasNonFavouriteCodes = false;
-      hasFavouriteCodes = false;
 
       for (final c in _allCodes ?? []) {
         if (c.isTrashed) {
@@ -126,17 +122,8 @@ class _HomePageState extends State<HomePage> {
         } else {
           hasNonTrashedCodes = true;
         }
-        if (!c.isTrashed) {
-          if (c.isPinned) {
-            hasFavouriteCodes = true;
-          } else {
-            hasNonFavouriteCodes = true;
-          }
-        }
-        if (hasTrashedCodes &&
-            hasNonTrashedCodes &&
-            hasFavouriteCodes &&
-            hasNonFavouriteCodes) {
+
+        if (hasTrashedCodes && hasNonTrashedCodes) {
           break;
         }
       }
@@ -145,12 +132,6 @@ class _HomePageState extends State<HomePage> {
       }
       if (!hasNonTrashedCodes && hasTrashedCodes) {
         _isTrashOpen = true;
-      }
-      if (!hasFavouriteCodes) {
-        _isFavouriteOpen = false;
-      }
-      if (!hasNonFavouriteCodes && hasFavouriteCodes) {
-        _isFavouriteOpen = true;
       }
 
       CodeDisplayStore.instance.getAllTags(allCodes: _allCodes).then((value) {
@@ -182,8 +163,7 @@ class _HomePageState extends State<HomePage> {
         if (codeState.hasError ||
             selectedTag != "" &&
                 !codeState.display.tags.contains(selectedTag) ||
-            (codeState.isTrashed != _isTrashOpen) ||
-            (codeState.isPinned != _isFavouriteOpen && val.isEmpty)) {
+            (codeState.isTrashed != _isTrashOpen)) {
           continue;
         }
 
@@ -199,14 +179,6 @@ class _HomePageState extends State<HomePage> {
       _filteredCodes = _allCodes
               ?.where(
                 (element) => !element.hasError && element.isTrashed,
-              )
-              .toList() ??
-          [];
-    } else if (_isFavouriteOpen) {
-      _filteredCodes = _allCodes
-              ?.where(
-                (element) =>
-                    !element.hasError && !element.isTrashed && element.isPinned,
               )
               .toList() ??
           [];
@@ -404,7 +376,8 @@ class _HomePageState extends State<HomePage> {
               currentKey: PreferenceService.instance.codeSortKey(),
               onSelected: (newOrder) async {
                 await PreferenceService.instance.setCodeSortKey(newOrder);
-                if (newOrder == CodeSortKey.manual && newOrder == _codeSortKey) {
+                if (newOrder == CodeSortKey.manual &&
+                    newOrder == _codeSortKey) {
                   await navigateToReorderPage(_allCodes!);
                 }
                 setState(() {
@@ -474,8 +447,7 @@ class _HomePageState extends State<HomePage> {
             _allCodes?.firstWhereOrNull((element) => element.hasError) != null;
         final indexOffset = anyCodeHasError ? 1 : 0;
         final itemCount = (hasNonTrashedCodes ? tags.length + 1 : 0) +
-            (hasTrashedCodes ? 1 : 0) +
-            (hasFavouriteCodes ? 1 : 0);
+            (hasTrashedCodes ? 1 : 0);
 
         final list = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -494,36 +466,19 @@ class _HomePageState extends State<HomePage> {
                     if (index == 0 && hasNonTrashedCodes) {
                       return TagChip(
                         label: l10n.all,
-                        state: selectedTag == "" &&
-                                _isTrashOpen == false &&
-                                _isFavouriteOpen == false
+                        state: selectedTag == "" && _isTrashOpen == false
                             ? TagChipState.selected
                             : TagChipState.unselected,
                         onTap: () {
                           selectedTag = "";
                           _isTrashOpen = false;
-                          _isFavouriteOpen = false;
+
                           setState(() {});
                           _applyFilteringAndRefresh();
                         },
                       );
                     }
-                    if (index == 1 && hasFavouriteCodes) {
-                      return TagChip(
-                        label: context.l10n.favorites,
-                        state: _isFavouriteOpen
-                            ? TagChipState.selected
-                            : TagChipState.unselected,
-                        onTap: () {
-                          selectedTag = "";
-                          _isTrashOpen = false;
-                          _isFavouriteOpen = !_isFavouriteOpen;
-                          setState(() {});
-                          _applyFilteringAndRefresh();
-                        },
-                        // iconData: Icons.star,
-                      );
-                    }
+
                     if (index == itemCount - 1 && hasTrashedCodes) {
                       return TagChip(
                         label: l10n.trash,
@@ -533,15 +488,13 @@ class _HomePageState extends State<HomePage> {
                         onTap: () {
                           selectedTag = "";
                           _isTrashOpen = !_isTrashOpen;
-                          _isFavouriteOpen = false;
                           setState(() {});
                           _applyFilteringAndRefresh();
                         },
                         iconData: Icons.delete,
                       );
                     }
-                    final customTagIndex =
-                        hasFavouriteCodes ? index - 2 : index - 1;
+                    final customTagIndex = index - 1;
                     if (customTagIndex >= 0 && customTagIndex < tags.length) {
                       return TagChip(
                         label: tags[customTagIndex],
@@ -551,7 +504,6 @@ class _HomePageState extends State<HomePage> {
                             : TagChipState.unselected,
                         onTap: () {
                           _isTrashOpen = false;
-                          _isFavouriteOpen = false;
                           if (selectedTag == tags[customTagIndex]) {
                             selectedTag = "";
                             setState(() {});
