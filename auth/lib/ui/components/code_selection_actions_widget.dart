@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 class CodeSelectionActionsWidget extends StatefulWidget {
   final Code code;
+  final bool showPin;
   final VoidCallback? onShare;
   final VoidCallback? onPin;
   final VoidCallback? onShowQR;
@@ -16,6 +17,7 @@ class CodeSelectionActionsWidget extends StatefulWidget {
   const CodeSelectionActionsWidget({
     super.key,
     required this.code,
+    this.showPin = true,
     this.onShare,
     this.onPin,
     this.onShowQR,
@@ -54,16 +56,18 @@ class _CodeSelectionActionsWidgetState
           onTap: widget.onShare,
         ),
       );
-
-      items.add(
-        SelectionActionButton(
-          labelText: widget.code.isPinned
-              ? context.l10n.unpinText
-              : context.l10n.pinText,
-          icon: widget.code.isPinned ? Icons.push_pin_outlined : Icons.pin,
-          onTap: widget.onPin,
-        ),
-      );
+      if (widget.showPin) {
+        items.add(
+          SelectionActionButton(
+            labelText: widget.code.isPinned
+                ? context.l10n.unpinText
+                : context.l10n.pinText,
+            icon:
+                widget.code.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+            onTap: widget.onPin,
+          ),
+        );
+      }
 
       items.add(
         SelectionActionButton(

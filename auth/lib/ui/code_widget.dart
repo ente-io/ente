@@ -57,6 +57,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   bool isMaskingEnabled = false;
   int _codeTimeStep = -1;
   int lastRefreshTime = 0;
+  bool ignorePin = false;
 
   @override
   void initState() {
@@ -99,6 +100,7 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    ignorePin = widget.sortKey == null || widget.sortKey == CodeSortKey.manual;
     final colorScheme = getEnteColorScheme(context);
     if (isMaskingEnabled != PreferenceService.instance.shouldHideCodes()) {
       isMaskingEnabled = PreferenceService.instance.shouldHideCodes();
@@ -117,7 +119,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     Widget getCardContents(AppLocalizations l10n) {
       return Stack(
         children: [
-          if (widget.code.isPinned)
+          if (!ignorePin && widget.code.isPinned)
             Align(
               alignment: Alignment.topRight,
               child: CustomPaint(
@@ -171,7 +173,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                   : const SizedBox(height: 32),
             ],
           ),
-          if (widget.code.isPinned) ...[
+          if (!ignorePin && widget.code.isPinned) ...[
             Align(
               alignment: Alignment.topRight,
               child: Padding(
@@ -224,6 +226,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                   builder: (_) {
                     return BottomActionBarWidget(
                       code: widget.code,
+                      showPin: !ignorePin,
                       onEdit: () => _onEditPressed(true),
                       onShare: () => _onSharePressed(true),
                       onPin: () => _onPinPressed(true),
@@ -272,7 +275,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                       icon: Icons.notes_outlined,
                       onSelected: () => _onShowNotesPressed(null),
                     ),
-                  if (!widget.code.isTrashed)
+                  if (!widget.code.isTrashed && !ignorePin)
                     MenuItem(
                       label:
                           widget.code.isPinned ? l10n.unpinText : l10n.pinText,
@@ -602,8 +605,8 @@ class _CodeWidgetState extends State<CodeWidget> {
             (value) => showToast(
               context,
               !currentlyPinned
-                  ? context.l10n.favoritedCodeMessage(widget.code.issuer)
-                  : context.l10n.unfavoritedCodeMessage(widget.code.issuer),
+                  ? context.l10n.pinnedCodeMessage(widget.code.issuer)
+                  : context.l10n.unpinnedCodeMessage(widget.code.issuer),
             ),
           ),
     );

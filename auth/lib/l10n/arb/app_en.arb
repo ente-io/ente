@@ -451,10 +451,10 @@
   "customEndpoint": "Connected to {endpoint}",
   "pinText": "Pin",
   "unpinText": "Unpin",
+  "pinnedCodeMessage": "{code} has been pinned",
+  "unpinnedCodeMessage": "{code} has been unpinned",
+  "pinned": "Pinned",
 
-  "favorites": "Favorites",
-  "favoritedCodeMessage": "{code} has been added to favorites",
-  "unfavoritedCodeMessage": "{code} has been removed from favorites",
   "tags": "Tags",
   "createNewTag": "Create New Tag",
   "tag": "Tag",
