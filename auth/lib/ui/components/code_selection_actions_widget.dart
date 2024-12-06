@@ -58,9 +58,9 @@ class _CodeSelectionActionsWidgetState
       items.add(
         SelectionActionButton(
           labelText: widget.code.isPinned
-              ? context.l10n.unfav
-              : context.l10n.fav,
-          icon: widget.code.isPinned ? Icons.star_outline : Icons.star,
+              ? context.l10n.unpinText
+              : context.l10n.pinText,
+          icon: widget.code.isPinned ? Icons.push_pin_outlined : Icons.pin,
           onTap: widget.onPin,
         ),
       );

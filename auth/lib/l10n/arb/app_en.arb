@@ -451,9 +451,8 @@
   "customEndpoint": "Connected to {endpoint}",
   "pinText": "Pin",
   "unpinText": "Unpin",
-  "fav": "Favorite",
+
   "favorites": "Favorites",
-  "unfav": "Unfavorite",
   "favoritedCodeMessage": "{code} has been added to favorites",
   "unfavoritedCodeMessage": "{code} has been removed from favorites",
   "tags": "Tags",
