@@ -127,14 +127,6 @@ func GetCLIConfigDir() (string, error) {
     configDir = os.Getenv("ENTE_CLI_CONFIG_PATH")
   }
 
-  // Throw instructoin if none of the environment variables has been set.
-  if configDir == "" && oldConfigPath == "" {
-    if !secrets.IsKeyringAvailable() {
-      fmt.Println(`Environment variable for the config dir is not set. Please setup 
-the environment variable with export ENTE_CLI_CONFIG_DIR="/path/to/config"
-      `)
-    }
-  }
 	if configDir != "" {
 		// remove trailing slash (for all OS)
 		configDir = strings.TrimSuffix(configDir, string(filepath.Separator))
