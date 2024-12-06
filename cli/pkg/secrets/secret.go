@@ -37,7 +37,9 @@ func GetOrCreateClISecret() []byte {
 			if IsRunningInContainer() {
 				return GetSecretFromSecretText(fmt.Sprintf("%s.secret.txt", constants.CliDataPath))
 			} else {
-				log.Fatal(fmt.Errorf("error getting password from keyring: %w", err))
+				log.Fatal(fmt.Errorf(`error getting password from keyring: %w
+          Refer to https://help.ente.io/self-hosting/troubleshooting/keyring
+          `, err))
 			}
 		}
 		key := make([]byte, keyLength)
