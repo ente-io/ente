@@ -72,7 +72,7 @@ class _AppState extends State<App>
       }
     });
     locale = widget.locale;
-    UpdateService.instance.shouldUpdate().then((shouldUpdate) {
+    UpdateService.instance.showUpdateNotification().then((shouldUpdate) {
       if (shouldUpdate) {
         Future.delayed(Duration.zero, () {
           showDialog(
