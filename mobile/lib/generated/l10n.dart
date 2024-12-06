@@ -10498,6 +10498,126 @@ class S {
       args: [],
     );
   }
+
+  /// `Emergency Contacts`
+  String get emergencyContacts {
+    return Intl.message(
+      'Emergency Contacts',
+      name: 'emergencyContacts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Accept Invite`
+  String get acceptTrustInvite {
+    return Intl.message(
+      'Accept Invite',
+      name: 'acceptTrustInvite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Decline Invite`
+  String get declineTrustInvite {
+    return Intl.message(
+      'Decline Invite',
+      name: 'declineTrustInvite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove yourself as trusted contact`
+  String get removeYourselfAsTrustedContact {
+    return Intl.message(
+      'Remove yourself as trusted contact',
+      name: 'removeYourselfAsTrustedContact',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Trusted Contact`
+  String get addTrustedContact {
+    return Intl.message(
+      'Add Trusted Contact',
+      name: 'addTrustedContact',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `My Trusted Contact`
+  String get myTrustedContact {
+    return Intl.message(
+      'My Trusted Contact',
+      name: 'myTrustedContact',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Trusted Contacts`
+  String get trustedContacts {
+    return Intl.message(
+      'Trusted Contacts',
+      name: 'trustedContacts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove invite`
+  String get removeInvite {
+    return Intl.message(
+      'Remove invite',
+      name: 'removeInvite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cancel recovery`
+  String get cancelAccountRecovery {
+    return Intl.message(
+      'Cancel recovery',
+      name: 'cancelAccountRecovery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to cancel recovery?`
+  String get cancelAccountRecoveryBody {
+    return Intl.message(
+      'Are you sure you want to cancel recovery?',
+      name: 'cancelAccountRecoveryBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start recovery`
+  String get startAccountRecoveryTitle {
+    return Intl.message(
+      'Start recovery',
+      name: 'startAccountRecoveryTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Trusted contact can help in recovering your data.`
+  String get whyAddTrustContact {
+    return Intl.message(
+      'Trusted contact can help in recovering your data.',
+      name: 'whyAddTrustContact',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

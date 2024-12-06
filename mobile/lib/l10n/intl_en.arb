@@ -1514,5 +1514,17 @@
   "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
   "allow": "Allow",
   "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
-  "seePublicAlbumLinksInApp": "See public album links in app"
+  "seePublicAlbumLinksInApp": "See public album links in app",
+  "emergencyContacts": "Emergency Contacts",
+  "acceptTrustInvite": "Accept Invite",
+  "declineTrustInvite": "Decline Invite",
+  "removeYourselfAsTrustedContact": "Remove yourself as trusted contact",
+  "addTrustedContact": "Add Trusted Contact",
+  "myTrustedContact": "My Trusted Contact",
+  "trustedContacts": "Trusted Contacts",
+  "removeInvite": "Remove invite",
+  "cancelAccountRecovery": "Cancel recovery",
+  "cancelAccountRecoveryBody": "Are you sure you want to cancel recovery?",
+  "startAccountRecoveryTitle": "Start recovery",
+  "whyAddTrustContact": "Trusted contact can help in recovering your data."
 }
