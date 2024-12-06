@@ -112,7 +112,10 @@ class _AppState extends State<App>
 
   @override
   Widget build(BuildContext context) {
-    if (Platform.isAndroid || kDebugMode) {
+    if (Platform.isAndroid ||
+        Platform.isWindows ||
+        Platform.isLinux ||
+        kDebugMode) {
       return AdaptiveTheme(
         light: lightThemeData,
         dark: darkThemeData,
