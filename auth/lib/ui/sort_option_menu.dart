@@ -1,7 +1,6 @@
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class SortCodeMenuWidget extends StatelessWidget {
   final CodeSortKey currentKey;
