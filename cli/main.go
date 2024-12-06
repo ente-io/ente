@@ -119,8 +119,6 @@ func initConfig(cliConfigDir string) {
 // GetCLIConfigDir returns the path to the .ente-cli folder and creates it if it doesn't exist.
 func GetCLIConfigDir() (string, error) {
 	var configDir = os.Getenv("ENTE_CLI_CONFIG_DIR")
-  // For backward compatibility 
-  var oldConfigPath = os.Getenv("ENTE_CLI_CONFIG_PATH")
 
   if configDir == "" {
     // for backward compatibility, check for ENTE_CLI_CONFIG_PATH
