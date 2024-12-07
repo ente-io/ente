@@ -86,6 +86,17 @@
       ]
     },
     {
+      "title": "Binance TR",
+      "slug": "binance_tr"
+    },
+    {
+      "title": "BinanceUS",
+      "slug": "binance_us",
+      "altNames": [
+        "Binance US"
+      ]
+    },
+    {
       "title": "Bitfinex"
     },
     {
@@ -957,7 +968,8 @@
       ]
     },
     {
-      "title": "WARGAMING.NET"
+      "title": "WARGAMING.NET",
+      "slug": "wargamingnet"
     },
     {
       "title": "Wealthfront"
