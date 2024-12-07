@@ -13,7 +13,10 @@ import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
+import 'package:ente_auth/ui/components/custom_icon_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
+import 'package:ente_auth/ui/custom_icon_page.dart';
+import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
@@ -42,6 +45,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   late List<String> selectedTags = [...?widget.code?.display.tags];
   List<String> allTags = [];
   StreamSubscription<CodesUpdatedEvent>? _streamSubscription;
+  bool isCustomIcon = false;
+  String _customIcon = "";
+  late IconType _iconType;
 
   @override
   void initState() {
@@ -81,6 +87,10 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       _limitTextLength(_accountController, _otherTextLimit);
       _limitTextLength(_secretController, _otherTextLimit);
     }
+
+    isCustomIcon = widget.code?.display.isCustomIcon ?? false;
+    _customIcon = widget.code?.display.customIconData ?? "ente";
+    _iconType = widget.code?.display.iconType ?? IconType.simpleIcon;
     super.initState();
   }
 
@@ -305,6 +315,44 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                   child: Text(l10n.saveAction),
                 ),
               ),
+              const SizedBox(height: 32),
+              if (widget.code != null)
+                Row(
+                  children: [
+                    CustomIconWidget(
+                      isCustomIcon: isCustomIcon,
+                      iconData: _customIcon,
+                      onTap: () {
+                        setState(() {
+                          isCustomIcon = true;
+                        });
+                      },
+                    ),
+                    const SizedBox(width: 24),
+                    CustomIconWidget(
+                      isCustomIcon: !isCustomIcon,
+                      iconData: widget.code!.issuer,
+                      onTap: () {
+                        setState(() {
+                          isCustomIcon = false;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              const SizedBox(height: 24),
+              if (widget.code != null)
+                GestureDetector(
+                  onTap: () async {
+                    await navigateToCustomIconPage();
+                  },
+                  child: Text(
+                    "Change Icon",
+                    style: isCustomIcon
+                        ? getEnteTextTheme(context).small
+                        : getEnteTextTheme(context).smallFaint,
+                  ),
+                ),
             ],
           ),
         ),
@@ -324,6 +372,13 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
           widget.code?.display.copyWith(tags: selectedTags) ??
               CodeDisplay(tags: selectedTags);
       display.note = notes;
+      if (isCustomIcon) {
+        display.isCustomIcon = true;
+        display.customIconData = _customIcon.toLowerCase();
+        display.iconType = _iconType;
+      } else {
+        display.isCustomIcon = false;
+      }
       if (widget.code != null && widget.code!.secret != secret) {
         ButtonResult? result = await showChoiceActionSheet(
           context,
@@ -372,5 +427,31 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       context.l10n.incorrectDetails,
       message ?? context.l10n.pleaseVerifyDetails,
     );
+  }
+
+  Future<void> navigateToCustomIconPage() async {
+    if (isCustomIcon) {
+      final allIcons = IconUtils.instance.getAllIcons();
+      String currentIcon;
+      if (widget.code!.display.isCustomIcon) {
+        currentIcon = widget.code!.display.customIconData;
+      } else {
+        currentIcon = widget.code!.issuer;
+      }
+      final AllIconData newCustomIcon = await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) {
+            return CustomIconPage(
+              currentIcon: currentIcon,
+              allIcons: allIcons,
+            );
+          },
+        ),
+      );
+      setState(() {
+        _customIcon = newCustomIcon.title;
+        _iconType = newCustomIcon.type;
+      });
+    }
   }
 }
