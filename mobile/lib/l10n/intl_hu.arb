@@ -10,14 +10,5 @@
   "deleteAccount": "Fiók törlése",
   "askDeleteReason": "Miért törli a fiókját?",
   "deleteAccountFeedbackPrompt": "Sajnáljuk, hogy távozik. Kérjük, ossza meg velünk visszajelzéseit, hogy segítsen nekünk a fejlődésben.",
-  "feedback": "Visszajelzés",
-  "faceNotClusteredYet": "Face not clustered yet, please come back later",
-  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
-  "openFile": "Open file",
-  "backupFile": "Backup file",
-  "openAlbumInBrowser": "Open album in browser",
-  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
-  "allow": "Allow",
-  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
-  "seePublicAlbumLinksInApp": "See public album links in app"
+  "feedback": "Visszajelzés"
 }

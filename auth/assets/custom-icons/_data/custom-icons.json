@@ -1,7 +1,8 @@
 {
   "icons": [
     {
-      "title": "1xBet"
+      "title": "1xBet",
+      "slug": "1x_bet"
     },
     {
       "title": "23andme"
@@ -45,13 +46,15 @@
     },
     {
       "title": "BaiduCloud",
+      "slug": "baidu_cloud",
       "altNames": [
         "百度云",
         "baiduyun"
       ]
     },
     {
-      "title": "Band"
+      "title": "Band",
+      "slug": "band"
     },
     {
       "title": "Battle.net",
@@ -63,6 +66,7 @@
     },
     {
       "title": "BBS.NGA",
+      "slug": "bbs_nga",
       "altNames": [
         "NGA玩家社区",
         "NGA社区"
@@ -76,6 +80,7 @@
     },
     {
       "title": "Binance",
+      "slug": "binance_exchange",
       "altNames": [
         "币安"
       ]
@@ -128,7 +133,8 @@
       ]
     },
     {
-      "title": "Bluesky"
+      "title": "Bluesky",
+      "slug": "blue_sky"
     },
     {
       "title": "Booking",
@@ -138,6 +144,7 @@
     },
     {
       "title": "BorgBase",
+      "slug": "borg_base",
       "altNames": [
         "borg"
       ]
@@ -170,7 +177,8 @@
       ]
     },
     {
-      "title": "CERN"
+      "title": "CERN",
+      "slug": "cern"
     },
     {
       "title": "ChangeNOW"
@@ -268,11 +276,15 @@
       ]
     },
     {
+      "title": "eneba"
+    },
+    {
       "title": "ente",
       "hex": "1DB954"
     },
     {
-      "title": "enom"
+      "title": "enom",
+      "slug": "enom_v1"
     },
     {
       "title": "Epic Games",
@@ -319,7 +331,7 @@
     },
     {
       "title": "Gosuslugi",
-      "slug": "Gosuslugi",
+      "slug": "gosuslugi",
       "altNames": [
         "Госуслуги"
       ]
@@ -366,11 +378,12 @@
       ]
     },
     {
-      "title": "IceDrive"
+      "title": "IceDrive",
+      "slug": "ice_drive"
     },
     {
       "title": "ID.me",
-      "slug": "IDme"
+      "slug": "id_me"
     },
     {
       "title": "Infomaniak"
@@ -398,7 +411,8 @@
       "hex": "000000"
     },
     {
-      "title": "IVPN"
+      "title": "IVPN",
+      "slug": "ivpn"
     },
     {
       "title": "Jagex",
@@ -428,6 +442,7 @@
     },
     {
       "title": "Ko-fi",
+      "slug": "ko_fi",
       "altNames": [
         "Ko fi",
         "Kofi"
@@ -455,6 +470,7 @@
     },
     {
       "title": "Lark",
+      "slug": "lark",
       "altNames": [
         "飞书"
       ]
@@ -464,7 +480,7 @@
     },
     {
       "title": "Linux.Do",
-      "slug": "LINUX_DO",
+      "slug": "linux_do",
       "altNames": [
         "LINUX DO",
         "LinxDo"
@@ -496,6 +512,10 @@
         "fosstodon"
       ],
       "hex": "6364FF"
+    },
+    {
+      "title": "matlab",
+      "altNames": ["mathworks"]
     },
     {
       "title": "Mercado Livre",
@@ -563,6 +583,7 @@
     },
     {
       "title": "NeteaseMail",
+      "slug": "netease_mail",
       "altNames": [
         "网易邮箱",
         "Mail.163"
@@ -582,7 +603,7 @@
       "hex": "858585"
     },
     {
-      "title": "Nintendo",
+      "title": "nintendo",
       "altNames": [
         "任天堂"
       ]
@@ -632,10 +653,12 @@
       "hex": "f08222"
     },
     {
-      "title": "pCloud"
+      "title": "pCloud",
+      "slug": "pcloud"
     },
     {
       "title": "PebbleHost",
+      "slug": "pebble_host",
       "altNames": [
         "Pebble Host"
       ]
@@ -692,6 +715,9 @@
       ]
     },
     {
+      "title": "randstad"
+    },
+    {
       "title": "Real-Debrid",
       "slug": "real_debrid"
     },
@@ -712,6 +738,7 @@
     },
     {
       "title": "Restream",
+      "slug": "restream",
       "altNames": [
         "restream.io"
       ]
@@ -782,6 +809,9 @@
       "title": "Snapchat"
     },
     {
+      "title": "SpaceHey"
+    },
+    {
       "title": "Standard Notes",
       "slug": "standardnotes"
     },
@@ -834,6 +864,7 @@
     },
     {
       "title": "Terabit",
+      "slug": "terabit",
       "altNames": [
         "Terabit Hosting",
         "terabit.io"
@@ -949,6 +980,9 @@
       "title": "Wise"
     },
     {
+      "title": "Wolvesville"
+    },
+    {
       "title": "WorkOS",
       "altNames": [
         "Work OS"
@@ -962,6 +996,7 @@
     },
     {
       "title": "Yandex",
+      "slug": "yandex",
       "altNames": [
         "Ya",
         "Яндекс"

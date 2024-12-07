@@ -412,7 +412,6 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "写真のグリッドサイズ",
-  "manageDeviceStorage": "デバイスのストレージを管理",
   "machineLearning": "機械学習",
   "mlConsent": "機械学習を有効にする",
   "mlConsentTitle": "機械学習を有効にしますか？",
@@ -816,16 +815,6 @@
   "referFriendsAnd2xYourPlan": "友達に紹介して2倍",
   "shareAlbumHint": "アルバムを開いて右上のシェアボタンをタップ",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "完全に削除されるまでの日数が項目に表示されます",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1日} other {{count} 日}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "全て削除",
   "renameAlbum": "アルバムの名前変更",
   "convertToAlbum": "アルバムに変換",
@@ -1356,7 +1345,6 @@
   "mostRelevant": "関連度順",
   "loadingYourPhotos": "写真を読み込んでいます...",
   "processingImport": "{folderName} を処理中...",
-  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "personName": "人名名",
   "addNewPerson": "新しい人物を追加",
   "addNameOrMerge": "名前をつける、あるいは既存の人物にまとめる",
@@ -1374,13 +1362,5 @@
   },
   "extraPhotosFound": "追加の写真が見つかりました",
   "configuration": "設定",
-  "localIndexing": "このデバイス上での実行",
-  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
-  "openFile": "Open file",
-  "backupFile": "Backup file",
-  "openAlbumInBrowser": "Open album in browser",
-  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
-  "allow": "Allow",
-  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
-  "seePublicAlbumLinksInApp": "See public album links in app"
+  "localIndexing": "このデバイス上での実行"
 }

@@ -408,7 +408,6 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Размер сетки фотографий",
-  "manageDeviceStorage": "Управление хранилищем устройства",
   "machineLearning": "Machine learning",
   "mlConsent": "Включить машинное обучение",
   "mlConsentTitle": "Включить машинное обучение?",
@@ -790,16 +789,6 @@
   "referFriendsAnd2xYourPlan": "Пригласите друзей и удвойте свой план",
   "shareAlbumHint": "Откройте альбом и нажмите кнопку \"Поделиться\" в правом верхнем углу экрана.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Элементы показывают количество дней, оставшихся до окончательного удаления",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1 день} other {{count} дней}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "Удалить всё",
   "renameAlbum": "Переименовать альбом",
   "convertToAlbum": "Преобразовать в альбом",
@@ -1300,14 +1289,5 @@
   "removePublicLinks": "Удалить публичные ссылки",
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Это удалит публичные ссылки на все выбранные быстрые ссылки.",
   "guestView": "Гостевой вид",
-  "guestViewEnablePreSteps": "Чтобы включить гостевой вид, настройте пароль устройства или блокировку экрана в настройках системы.",
-  "faceNotClusteredYet": "Face not clustered yet, please come back later",
-  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
-  "openFile": "Open file",
-  "backupFile": "Backup file",
-  "openAlbumInBrowser": "Open album in browser",
-  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
-  "allow": "Allow",
-  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
-  "seePublicAlbumLinksInApp": "See public album links in app"
+  "guestViewEnablePreSteps": "Чтобы включить гостевой вид, настройте пароль устройства или блокировку экрана в настройках системы."
 }

@@ -22,6 +22,18 @@ jobs:
               with:
                   submodules: recursive
 
+            - name: Verify custom icons are lowercase including optional understores, and end with .svg
+              run: |
+                  find assets/custom-icons -type f -name "*.svg" | while read -r file; do
+                      if [[ "$(basename "$file")" != "$(basename "$file" | tr '[:upper:]' '[:lower:]' | tr ' ' '_')" ]]; then
+                          echo "File name is not lowercase: $file"
+                          exit 1
+                      fi
+                  done
+
+            - name: Verify custom icon JSON
+              run: cat assets/custom-icons/_data/custom-icons.json | jq empty
+
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2
               with:
@@ -32,6 +44,3 @@ jobs:
             - run: flutter pub get
 
             - run: flutter analyze --no-fatal-infos
-
-            - name: Verify custom icon JSON
-              run: cat assets/custom-icons/_data/custom-icons.json | jq empty

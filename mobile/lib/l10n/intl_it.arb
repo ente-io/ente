@@ -412,7 +412,6 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Dimensione griglia foto",
-  "manageDeviceStorage": "Gestisci memoria dispositivo",
   "machineLearning": "Apprendimento automatico (ML)",
   "mlConsent": "Abilita l'apprendimento automatico",
   "mlConsentTitle": "Abilita l'apprendimento automatico?",
@@ -1365,7 +1364,6 @@
   "yesResetPerson": "Sì, resetta persona",
   "onlyThem": "Solo loro",
   "checkingModels": "Verifica dei modelli...",
-  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "searchDiscoverEmptySection": "Le immagini saranno mostrate qui una volta che l'elaborazione sarà completata",
   "accountIsAlreadyConfigured": "L'account è già configurato.",
   "sessionIdMismatch": "ID sessione non corrispondente",
@@ -1407,13 +1405,5 @@
   "changeLogBackupStatusTitle": "Stato Backup",
   "changeLogDiscoverTitle": "Esplora",
   "selectCoverPhoto": "Seleziona foto di copertina",
-  "newLocation": "Nuova posizione",
-  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
-  "openFile": "Open file",
-  "backupFile": "Backup file",
-  "openAlbumInBrowser": "Open album in browser",
-  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
-  "allow": "Allow",
-  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
-  "seePublicAlbumLinksInApp": "See public album links in app"
+  "newLocation": "Nuova posizione"
 }

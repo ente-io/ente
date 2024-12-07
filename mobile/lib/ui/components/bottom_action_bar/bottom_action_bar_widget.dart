@@ -31,7 +31,7 @@ class BottomActionBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
     final widthOfScreen = MediaQuery.of(context).size.width;
     final colorScheme = getEnteColorScheme(context);
     final double leftRightPadding = widthOfScreen > restrictedMaxWidth

@@ -1,22 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg id="logosandtypes_com" data-name="logosandtypes com" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
-  <defs>
-    <style>
-      .cls-1 {
-        fill: none;
-      }
-
-      .cls-2 {
-        fill: #005ed9;
-      }
-    </style>
-  </defs>
-  <g id="Layer_3" data-name="Layer 3">
-    <g id="Layer_3-2" data-name="Layer 3">
-      <g id="Layer_2" data-name="Layer 2">
-        <path id="Layer_3-3" data-name="Layer 3" class="cls-1" d="M0,0H150V150H0V0Z"/>
-      </g>
-    </g>
-  </g>
-  <path class="cls-2" d="M133.15,14.8h-7.69v7.69h7.69v-7.69Zm-26.9,53.84v-15.4h0s15.37,0,15.37,0v15.38h15.37c.26,14.25-.82,26.68-8.06,39.12-20.96,36.88-72.74,41.85-100.21,9.49h0c-6.41-7.45-11.02-16.51-13.18-26.18-1.1-5.25-1.58-11.92-1.58-17.55V15.76h30.75l.06,58.57c.15,7.58,1.52,15.37,6.05,21.31,13.04,17.66,40.64,16.06,51.33-3.18,3.84-6.42,4.19-16.61,4.09-23.82h0Zm3.84-42.31h11.53v11.53h15.38v15.38h-15.38v-15.37h-11.53v-11.53Z"/>
-</svg>
+<?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<svg xmlns="http://www.w3.org/2000/svg"
+aria-label="Ubiquiti" role="img"
+viewBox="0 0 512 512"><rect
+width="512" height="512"
+rx="15"
+fill="#399cdb"/><path d="M112 94v18h18V94h-18zm288 0c-82 0-90 31-90 61v172a147 147 0 01-3 28c43-9 72-36 86-82l7-23V94zm-234 18v18h18v-18h-18zm-18 18v18h18v-18h-18zm36 9v18h18v-18h-18zm-72 4v147c0 73 53 128 144 128 0 0-54-30-54-91V197h-18v66h-18v-39h-18v17h-18v-98h-18zm54 18v18h18v-18h-18zm-18 27v18h18v-18h-18zm252 87c-19 64-65 92-131 89-24-1-43-7-57-16 10 42 46 63 48 64l10 6c82-5 130-59 130-128v-15z" fill="#ffffff"/></svg>

@@ -25,22 +25,42 @@ class CodeStore {
   }
 
   Future<bool> saveUpadedIndexes(List<Code> codes) async {
+    int changedCount = 0;
+    final existingAllCodes = await getAllCodes();
+    final existingPosition = {};
+    for (final code in existingAllCodes) {
+      if (code.hasError || code.isTrashed) {
+        continue;
+      }
+      existingPosition[code.generatedID] = code.display.position;
+    }
     for (final code in codes) {
       if (code.hasError || code.isTrashed) {
         continue;
       }
-      Code? c = _cacheCodes[code.generatedID];
-      if (c == null) {
+      int? oldIndex = existingPosition[code.generatedID];
+      if (oldIndex == null) {
         continue;
       }
-      int oldIndex = c.display.position;
+
       int newIndex = codes.indexOf(code);
       if (oldIndex != newIndex) {
         Code updatedCode =
-            c.copyWith(display: c.display.copyWith(position: newIndex));
-        await addCode(updatedCode);
+            code.copyWith(display: code.display.copyWith(position: newIndex));
+        await addCode(
+          updatedCode,
+          shouldSync: false,
+          existingAllCodes: existingAllCodes,
+        );
+        changedCount++;
       }
     }
+    _logger.info("changedCount index for  $changedCount codes");
+    if (changedCount > 0 &&
+        _authenticatorService.getAccountMode() == AccountMode.online) {
+      _authenticatorService.onlineSync().ignore();
+    }
+
     return true;
   }
 
@@ -115,9 +135,10 @@ class CodeStore {
     Code code, {
     bool shouldSync = true,
     AccountMode? accountMode,
+    List<Code>? existingAllCodes,
   }) async {
     final mode = accountMode ?? _authenticatorService.getAccountMode();
-    final allCodes = await getAllCodes(accountMode: mode);
+    final allCodes = existingAllCodes ?? (await getAllCodes(accountMode: mode));
     bool isExistingCode = false;
     bool hasSameCode = false;
     for (final existingCode in allCodes) {

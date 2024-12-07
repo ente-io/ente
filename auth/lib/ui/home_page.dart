@@ -31,6 +31,7 @@ import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
 import 'package:ente_auth/ui/reorder_codes_page.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
+import 'package:ente_auth/ui/sort_option_menu.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
@@ -79,14 +80,14 @@ class _HomePageState extends State<HomePage> {
   bool hasTrashedCodes = false;
   bool hasNonTrashedCodes = false;
   bool isCompactMode = false;
-  bool _isFavouriteOpen = false;
-  bool hasFavouriteCodes = false;
-  bool hasNonFavouriteCodes = false;
+
+  late CodeSortKey _codeSortKey;
 
   @override
   void initState() {
     super.initState();
     _textController.addListener(_applyFilteringAndRefresh);
+    _codeSortKey = PreferenceService.instance.codeSortKey();
     _loadCodes();
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
       _loadCodes();
@@ -95,6 +96,7 @@ class _HomePageState extends State<HomePage> {
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
       await autoLogoutAlert(context);
     });
+
     _initDeepLinks();
     Future.delayed(
       const Duration(seconds: 1),
@@ -113,8 +115,6 @@ class _HomePageState extends State<HomePage> {
       _allCodes = codes;
       hasTrashedCodes = false;
       hasNonTrashedCodes = false;
-      hasNonFavouriteCodes = false;
-      hasFavouriteCodes = false;
 
       for (final c in _allCodes ?? []) {
         if (c.isTrashed) {
@@ -122,17 +122,8 @@ class _HomePageState extends State<HomePage> {
         } else {
           hasNonTrashedCodes = true;
         }
-        if (!c.isTrashed) {
-          if (c.isPinned) {
-            hasFavouriteCodes = true;
-          } else {
-            hasNonFavouriteCodes = true;
-          }
-        }
-        if (hasTrashedCodes &&
-            hasNonTrashedCodes &&
-            hasFavouriteCodes &&
-            hasNonFavouriteCodes) {
+
+        if (hasTrashedCodes && hasNonTrashedCodes) {
           break;
         }
       }
@@ -141,12 +132,6 @@ class _HomePageState extends State<HomePage> {
       }
       if (!hasNonTrashedCodes && hasTrashedCodes) {
         _isTrashOpen = true;
-      }
-      if (!hasFavouriteCodes) {
-        _isFavouriteOpen = false;
-      }
-      if (!hasNonFavouriteCodes && hasFavouriteCodes) {
-        _isFavouriteOpen = true;
       }
 
       CodeDisplayStore.instance.getAllTags(allCodes: _allCodes).then((value) {
@@ -178,8 +163,7 @@ class _HomePageState extends State<HomePage> {
         if (codeState.hasError ||
             selectedTag != "" &&
                 !codeState.display.tags.contains(selectedTag) ||
-            (codeState.isTrashed != _isTrashOpen) ||
-            (codeState.isPinned != _isFavouriteOpen)) {
+            (codeState.isTrashed != _isTrashOpen)) {
           continue;
         }
 
@@ -198,14 +182,6 @@ class _HomePageState extends State<HomePage> {
               )
               .toList() ??
           [];
-    } else if (_isFavouriteOpen) {
-      _filteredCodes = _allCodes
-              ?.where(
-                (element) =>
-                    !element.hasError && !element.isTrashed && element.isPinned,
-              )
-              .toList() ??
-          [];
     } else {
       _filteredCodes = _allCodes
               ?.where(
@@ -219,8 +195,7 @@ class _HomePageState extends State<HomePage> {
           [];
     }
 
-    _filteredCodes
-        .sort((a, b) => a.display.position.compareTo(b.display.position));
+    sortFilteredCodes(_filteredCodes, _codeSortKey);
 
     if (mounted) {
       setState(() {});
@@ -237,6 +212,40 @@ class _HomePageState extends State<HomePage> {
     searchBoxFocusNode.dispose();
 
     super.dispose();
+  }
+
+  void sortFilteredCodes(List<Code> codes, CodeSortKey sortKey) {
+    switch (sortKey) {
+      case CodeSortKey.issuerName:
+        codes.sort((a, b) => a.issuer.compareTo(b.issuer));
+        break;
+      case CodeSortKey.accountName:
+        codes.sort((a, b) => a.account.compareTo(b.account));
+        break;
+      case CodeSortKey.mostFrequentlyUsed:
+        codes.sort((a, b) => b.display.tapCount.compareTo(a.display.tapCount));
+        break;
+      case CodeSortKey.recentlyUsed:
+        codes.sort(
+          (a, b) => b.display.lastUsedAt.compareTo(a.display.lastUsedAt),
+        );
+        break;
+      case CodeSortKey.manual:
+      default:
+        codes.sort((a, b) => a.display.position.compareTo(b.display.position));
+        break;
+    }
+    if (sortKey != CodeSortKey.manual) {
+      // move pinned codes to the using
+      int insertIndex = 0;
+      for (int i = 0; i < codes.length; i++) {
+        if (codes[i].isPinned) {
+          final code = codes.removeAt(i);
+          codes.insert(insertIndex, code);
+          insertIndex++;
+        }
+      }
+    }
   }
 
   Future<void> _redirectToScannerPage() async {
@@ -292,10 +301,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> navigateToReorderPage(List<Code> allCodes) async {
+    List<Code> sortCandidate = allCodes
+        .where((element) => !element.hasError && !element.isTrashed)
+        .toList();
+    sortCandidate
+        .sort((a, b) => a.display.position.compareTo(b.display.position));
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return ReorderCodesPage(codes: _filteredCodes);
+          return ReorderCodesPage(codes: sortCandidate);
         },
       ),
     ).then((value) {
@@ -358,11 +372,20 @@ class _HomePageState extends State<HomePage> {
                 ),
           centerTitle: PlatformUtil.isDesktop() ? false : true,
           actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.edit),
-              tooltip: l10n.edit,
-              onPressed: () {
-                navigateToReorderPage(_allCodes!);
+            SortCodeMenuWidget(
+              currentKey: PreferenceService.instance.codeSortKey(),
+              onSelected: (newOrder) async {
+                await PreferenceService.instance.setCodeSortKey(newOrder);
+                if (newOrder == CodeSortKey.manual &&
+                    newOrder == _codeSortKey) {
+                  await navigateToReorderPage(_allCodes!);
+                }
+                setState(() {
+                  _codeSortKey = newOrder;
+                });
+                if (mounted) {
+                  _applyFilteringAndRefresh();
+                }
               },
             ),
             PlatformUtil.isDesktop()
@@ -424,8 +447,7 @@ class _HomePageState extends State<HomePage> {
             _allCodes?.firstWhereOrNull((element) => element.hasError) != null;
         final indexOffset = anyCodeHasError ? 1 : 0;
         final itemCount = (hasNonTrashedCodes ? tags.length + 1 : 0) +
-            (hasTrashedCodes ? 1 : 0) +
-            (hasFavouriteCodes ? 1 : 0);
+            (hasTrashedCodes ? 1 : 0);
 
         final list = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -444,36 +466,19 @@ class _HomePageState extends State<HomePage> {
                     if (index == 0 && hasNonTrashedCodes) {
                       return TagChip(
                         label: l10n.all,
-                        state: selectedTag == "" &&
-                                _isTrashOpen == false &&
-                                _isFavouriteOpen == false
+                        state: selectedTag == "" && _isTrashOpen == false
                             ? TagChipState.selected
                             : TagChipState.unselected,
                         onTap: () {
                           selectedTag = "";
                           _isTrashOpen = false;
-                          _isFavouriteOpen = false;
+
                           setState(() {});
                           _applyFilteringAndRefresh();
                         },
                       );
                     }
-                    if (index == 1 && hasFavouriteCodes) {
-                      return TagChip(
-                        label: "Favourite",
-                        state: _isFavouriteOpen
-                            ? TagChipState.selected
-                            : TagChipState.unselected,
-                        onTap: () {
-                          selectedTag = "";
-                          _isTrashOpen = false;
-                          _isFavouriteOpen = !_isFavouriteOpen;
-                          setState(() {});
-                          _applyFilteringAndRefresh();
-                        },
-                        iconData: Icons.star,
-                      );
-                    }
+
                     if (index == itemCount - 1 && hasTrashedCodes) {
                       return TagChip(
                         label: l10n.trash,
@@ -483,15 +488,13 @@ class _HomePageState extends State<HomePage> {
                         onTap: () {
                           selectedTag = "";
                           _isTrashOpen = !_isTrashOpen;
-                          _isFavouriteOpen = false;
                           setState(() {});
                           _applyFilteringAndRefresh();
                         },
                         iconData: Icons.delete,
                       );
                     }
-                    final customTagIndex =
-                        hasFavouriteCodes ? index - 2 : index - 1;
+                    final customTagIndex = index - 1;
                     if (customTagIndex >= 0 && customTagIndex < tags.length) {
                       return TagChip(
                         label: tags[customTagIndex],
@@ -501,7 +504,6 @@ class _HomePageState extends State<HomePage> {
                             : TagChipState.unselected,
                         onTap: () {
                           _isTrashOpen = false;
-                          _isFavouriteOpen = false;
                           if (selectedTag == tags[customTagIndex]) {
                             selectedTag = "";
                             setState(() {});
@@ -543,6 +545,7 @@ class _HomePageState extends State<HomePage> {
                       key: ValueKey('${code.hashCode}_$newIndex'),
                       code,
                       isCompactMode: isCompactMode,
+                      sortKey: _codeSortKey,
                     ),
                   );
                 }),
