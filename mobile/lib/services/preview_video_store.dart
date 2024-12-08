@@ -170,6 +170,13 @@ class PreviewVideoStore {
 
   Future<File?> _getPlaylist(EnteFile file) async {
     _logger.info("Getting playlist for $file");
+    final tempDir = await getTemporaryDirectory();
+    final String playlistLocalPath =
+        "${tempDir.path}/${file.uploadedFileID}.m3u8";
+    // if path exists return the file
+    if (kDebugMode && File(playlistLocalPath).existsSync()) {
+      return File(playlistLocalPath);
+    }
     try {
       final response = await _dio.get(
         "/files/data/fetch/",
@@ -198,8 +205,8 @@ class PreviewVideoStore {
       final finalPlaylist = (playlistData["playlist"])
           .replaceAll('\nvideo.ts', '\n$previewURL')
           .replaceAll('\noutput.ts', '\n$previewURL');
-      final tempDir = await getTemporaryDirectory();
-      final playlistFile = File("${tempDir.path}/${file.generatedID}.m3u8");
+
+      final playlistFile = File("${tempDir.path}/${file.uploadedFileID}.m3u8");
       await playlistFile.writeAsString(finalPlaylist);
       _logger.info("Writing playlist to ${playlistFile.path}");
 
