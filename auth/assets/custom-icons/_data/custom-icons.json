@@ -623,6 +623,12 @@
       "title": "Njalla"
     },
     {
+      "title": "nordvpn",
+      "slug": "nordaccount",
+      "hex": "#4687FF",
+      "altNames": "Nord Account"
+    },
+    {
       "title": "Notesnook"
     },
     {
