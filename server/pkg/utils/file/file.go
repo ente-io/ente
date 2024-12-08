@@ -3,6 +3,7 @@ package file
 import (
 	"fmt"
 	"os"
+	"strings"
 	"syscall"
 
 	"github.com/ente-io/stacktrace"
@@ -51,6 +52,19 @@ func EnsureSufficientSpace(size int64) error {
 	}
 
 	return nil
+}
+
+// CreateTemporaryFile Create a file, and return both the path to the
+// file, and the handle to the file.
+// The caller must Close() the returned file if it is not nil.
+func CreateTemporaryFile(tempStorage string, tempFileName string) (string, *os.File, error) {
+	fileName := strings.ReplaceAll(tempFileName, "/", "_")
+	filePath := tempStorage + "/" + fileName
+	f, err := os.Create(filePath)
+	if err != nil {
+		return "", nil, stacktrace.Propagate(err, "Could not create temporary file at '%s' to download object", filePath)
+	}
+	return filePath, f, nil
 }
 
 func GetLockNameForObject(objectKey string) string {

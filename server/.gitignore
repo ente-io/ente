@@ -8,3 +8,4 @@ tmp/**
 museum.yaml
 bin/**
 data/
+__debug_bin*

@@ -5,8 +5,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/ente/filedata"
 	fileDataRepo "github.com/ente-io/museum/pkg/repo/filedata"
+	"github.com/ente-io/museum/pkg/utils/file"
 	enteTime "github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	log "github.com/sirupsen/logrus"
@@ -29,9 +31,37 @@ func (c *Controller) StartReplication() error {
 	if workerCount == 0 {
 		workerCount = 6
 	}
+	err := c.createTemporaryStorage()
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to create temporary storage")
+	}
 	go c.startWorkers(workerCount)
 	return nil
 }
+
+func (c *Controller) createTemporaryStorage() error {
+	tempStorage := viper.GetString("replication.file-data.tmp-storage")
+	if tempStorage == "" {
+		tempStorage = "tmp/replication-file-data"
+	}
+
+	log.Infof("Temporary storage for replication v3 is: %s", tempStorage)
+
+	err := file.DeleteAllFilesInDirectory(tempStorage)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to deleting old files from %s", tempStorage)
+	}
+
+	err = file.MakeDirectoryIfNotExists(tempStorage)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to create temporary storage %s", tempStorage)
+	}
+
+	c.tempStorage = tempStorage
+
+	return nil
+}
+
 func (c *Controller) startWorkers(n int) {
 	log.Infof("Starting %d workers for replication v3", n)
 
@@ -67,6 +97,7 @@ func (c *Controller) tryReplicate() error {
 		}
 		return err
 	}
+
 	err = c.replicateRowData(ctx, *row)
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -98,10 +129,26 @@ func (c *Controller) replicateRowData(ctx context.Context, row filedata.Row) err
 		if err != nil {
 			return stacktrace.Propagate(err, "error fetching metadata object "+row.S3FileMetadataObjectKey())
 		}
-		for bucketID := range wantInBucketIDs {
+		for key := range wantInBucketIDs {
+			bucketID := key
+			if regErr := c.Repo.RegisterReplicationAttempt(ctx, row, bucketID); regErr != nil {
+				return stacktrace.Propagate(regErr, "could not register replication attempt")
+			}
 			if err := c.uploadAndVerify(ctx, row, s3FileMetadata, bucketID); err != nil {
 				return stacktrace.Propagate(err, "error uploading and verifying metadata object")
 			}
+			if row.Type == ente.PreviewVideo {
+				req := ReplicateObjectReq{
+					ObjectKey:    row.GetS3FileObjectKey(),
+					SrcBucketID:  row.LatestBucket,
+					DestBucketID: bucketID,
+					ObjectSize:   *row.ObjectSize,
+				}
+				if err := c.replicateObject(ctx, &req); err != nil {
+					return stacktrace.Propagate(err, "error replicating video objects")
+				}
+			}
+			return c.Repo.MoveBetweenBuckets(row, bucketID, fileDataRepo.InflightRepColumn, fileDataRepo.ReplicationColumn)
 		}
 	} else {
 		log.Infof("No replication pending for file %d and type %s", row.FileID, string(row.Type))
@@ -110,15 +157,17 @@ func (c *Controller) replicateRowData(ctx context.Context, row filedata.Row) err
 }
 
 func (c *Controller) uploadAndVerify(ctx context.Context, row filedata.Row, s3FileMetadata filedata.S3FileMetadata, dstBucketID string) error {
-	if err := c.Repo.RegisterReplicationAttempt(ctx, row, dstBucketID); err != nil {
-		return stacktrace.Propagate(err, "could not register replication attempt")
-	}
 	metadataSize, err := c.uploadObject(s3FileMetadata, row.S3FileMetadataObjectKey(), dstBucketID)
+
 	if err != nil {
 		return err
 	}
-	if metadataSize != row.Size {
+	expectedSize := row.Size
+	if row.ObjectSize != nil {
+		expectedSize = expectedSize - *row.ObjectSize
+	}
+	if metadataSize != expectedSize {
 		return fmt.Errorf("uploaded metadata size %d does not match expected size %d", metadataSize, row.Size)
 	}
-	return c.Repo.MoveBetweenBuckets(row, dstBucketID, fileDataRepo.InflightRepColumn, fileDataRepo.ReplicationColumn)
+	return nil
 }
