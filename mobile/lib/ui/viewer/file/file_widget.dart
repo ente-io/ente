@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import "package:photos/service_locator.dart";
+import "package:photos/services/filedata/filedata_service.dart";
+import "package:photos/ui/viewer/file/preview_video_widget.dart";
 import "package:photos/ui/viewer/file/video_widget_native.dart";
 import "package:photos/ui/viewer/file/zoomable_live_image_new.dart";
 
@@ -38,15 +41,18 @@ class FileWidget extends StatelessWidget {
         key: key ?? ValueKey(fileKey),
       );
     } else if (file.fileType == FileType.video) {
-      // use old video widget on iOS simulator as the new one crashes while
-      // playing certain videos on iOS simulator
-      // if (kDebugMode && Platform.isIOS) {
-      //   return VideoWidget(
-      //     file,
-      //     tagPrefix: tagPrefix,
-      //     playbackCallback: playbackCallback,
-      //   );
-      // }
+      if (file.isRemoteFile &&
+          flagService.internalUser &&
+          (FileDataService.instance.previewIds
+                  ?.contains(file.uploadedFileID!) ??
+              false)) {
+        return PreviewVideoWidget(
+          file,
+          tagPrefix: tagPrefix,
+          playbackCallback: playbackCallback,
+          key: key ?? ValueKey(fileKey),
+        );
+      }
       return VideoWidgetNative(
         file,
         tagPrefix: tagPrefix,
