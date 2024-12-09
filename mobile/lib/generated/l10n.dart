@@ -10569,6 +10569,36 @@ class S {
     );
   }
 
+  /// `Legacy`
+  String get legacy {
+    return Intl.message(
+      'Legacy',
+      name: 'legacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Legacy is a feature that allows you to choose a trusted contact who can access your data in case of an emergency.`
+  String get legacyPageDesc {
+    return Intl.message(
+      'Legacy is a feature that allows you to choose a trusted contact who can access your data in case of an emergency.',
+      name: 'legacyPageDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.`
+  String get legacyPageDesc2 {
+    return Intl.message(
+      'Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.',
+      name: 'legacyPageDesc2',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Remove invite`
   String get removeInvite {
     return Intl.message(

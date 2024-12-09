@@ -80,7 +80,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).trustedContacts,
+              title: S.of(context).legacy,
             ),
           ),
           if (info == null)
