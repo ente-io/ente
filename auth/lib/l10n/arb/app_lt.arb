@@ -328,6 +328,10 @@
       }
     }
   },
+  "manualSort": "Pasirinktinis",
+  "editOrder": "Redaguoti tvarką",
+  "mostFrequentlyUsed": "Dažniausiai naudojamą",
+  "mostRecentlyUsed": "Neseniai naudotą",
   "activeSessions": "Aktyvūs seansai",
   "somethingWentWrongPleaseTryAgain": "Kažkas nutiko ne taip. Bandykite dar kartą.",
   "thisWillLogYouOutOfThisDevice": "Tai jus atjungs nuo šio įrenginio.",
@@ -449,6 +453,7 @@
   "unpinText": "Atsegti",
   "pinnedCodeMessage": "{code} buvo prisegtas",
   "unpinnedCodeMessage": "{code} buvo atsegtas",
+  "pinned": "Prisegta",
   "tags": "Žymės",
   "createNewTag": "Kurti naują žymę",
   "tag": "Žymė",

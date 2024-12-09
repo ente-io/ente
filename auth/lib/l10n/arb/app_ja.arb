@@ -446,8 +446,6 @@
   "customEndpoint": "{endpoint} に接続しました",
   "pinText": "固定",
   "unpinText": "固定を解除",
-  "pinnedCodeMessage": "{code} を固定しました",
-  "unpinnedCodeMessage": "{code} の固定が解除されました",
   "tags": "タグ",
   "createNewTag": "新しいタグの作成",
   "tag": "タグ",
