@@ -1094,7 +1094,6 @@
   "castInstruction": "Buka cast.ente.io pada perangkat yang ingin kamu tautkan.\n\nMasukkan kode yang ditampilkan untuk memutar album di TV.",
   "deviceCodeHint": "Masukkan kode",
   "joinDiscord": "Bergabung ke Discord",
-  "descriptions": "Keterangan",
   "addAName": "Tambahkan nama",
   "findPeopleByName": "Telusuri orang dengan mudah menggunakan nama",
   "addCollaborators": "{count, plural, other {Tambahkan kolaborator}}",
