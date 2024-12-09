@@ -6,6 +6,7 @@ import "package:encrypt/encrypt.dart";
 import "package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart";
 import "package:ffmpeg_kit_flutter_full_gpl/return_code.dart";
 import "package:flutter/foundation.dart" hide Key;
+import "package:flutter_cache_manager/flutter_cache_manager.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/network/network.dart";
@@ -23,6 +24,7 @@ class PreviewVideoStore {
       PreviewVideoStore._privateConstructor();
 
   final _logger = Logger("PreviewVideoStore");
+  final cacheManager = DefaultCacheManager();
   final _dio = NetworkClient.instance.enteDio;
   void init() {
     VideoCompress.compressProgress$.subscribe((progress) {
@@ -164,7 +166,20 @@ class PreviewVideoStore {
     }
   }
 
+  String _getCacheKey(EnteFile file) {
+    return "vid_preview_${file.uploadedFileID}";
+  }
+
   Future<File?> getPlaylist(EnteFile file) async {
+    if (file.uploadedFileID == null) return null;
+    final cachedFile = await cacheManager.getFileFromCache(
+      _getCacheKey(file),
+    );
+    if (cachedFile != null) {
+      unawaited(_getPlaylist(file));
+      return cachedFile.file;
+    }
+
     return await _getPlaylist(file);
   }
 
@@ -209,6 +224,13 @@ class PreviewVideoStore {
       final playlistFile = File("${tempDir.path}/${file.uploadedFileID}.m3u8");
       await playlistFile.writeAsString(finalPlaylist);
       _logger.info("Writing playlist to ${playlistFile.path}");
+
+      unawaited(
+        cacheManager.putFile(
+          _getCacheKey(file),
+          playlistFile.readAsBytesSync(),
+        ),
+      );
 
       return playlistFile;
     } catch (_) {
