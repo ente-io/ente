@@ -15,16 +15,21 @@ import { t } from "i18next";
 import React from "react";
 import { DialogCloseIconButton } from "./mui/Dialog";
 
-type CollectionMappingChoiceModalProps = ModalVisibilityProps & {
-    didSelect: (mapping: CollectionMapping) => void;
+type CollectionMappingChoiceProps = ModalVisibilityProps & {
+    /**
+     * Callback invoked with the mapping choice selected by the user.
+     *
+     * The dialog is automatically closed before this callback is invoked.
+     */
+    onSelect: (mapping: CollectionMapping) => void;
 };
 
 /**
  * A {@link Dialog} that allow the user to choose a collection mapping.
  */
-export const CollectionMappingChoiceDialog: React.FC<
-    CollectionMappingChoiceModalProps
-> = ({ open, onClose, didSelect }) => (
+export const CollectionMappingChoice: React.FC<
+    CollectionMappingChoiceProps
+> = ({ open, onClose, onSelect }) => (
     <Dialog
         open={open}
         onClose={onClose}
@@ -52,7 +57,7 @@ export const CollectionMappingChoiceDialog: React.FC<
                     startIcon={<FolderIcon />}
                     onClick={() => {
                         onClose();
-                        didSelect("root");
+                        onSelect("root");
                     }}
                 >
                     {t("upload_to_single_album")}
@@ -64,7 +69,7 @@ export const CollectionMappingChoiceDialog: React.FC<
                     startIcon={<FolderCopyIcon />}
                     onClick={() => {
                         onClose();
-                        didSelect("parent");
+                        onSelect("parent");
                     }}
                 >
                     {t("upload_to_album_per_folder")}

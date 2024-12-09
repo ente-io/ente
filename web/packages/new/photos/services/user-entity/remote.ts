@@ -78,7 +78,16 @@ const RemoteUserEntityChange = z.object({
      * Will be `null` when isDeleted is true.
      */
     header: z.string().nullable(),
+    /**
+     * `true` if the corresponding entity was deleted.
+     */
     isDeleted: z.boolean(),
+    /**
+     * Epoch milliseconds when this entity was last updated.
+     *
+     * This value is suitable for being passed as the `sinceTime` in the diff
+     * requests to implement pagination.
+     */
     updatedAt: z.number(),
 });
 

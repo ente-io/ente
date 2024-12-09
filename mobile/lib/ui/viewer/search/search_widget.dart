@@ -17,7 +17,7 @@ import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/debouncer.dart";
 
 class SearchWidget extends StatefulWidget {
-  const SearchWidget({Key? key}) : super(key: key);
+  const SearchWidget({super.key});
 
   @override
   State<SearchWidget> createState() => SearchWidgetState();
@@ -143,6 +143,7 @@ class SearchWidgetState extends State<SearchWidget> {
                     controller: textController,
                     focusNode: focusNode,
                     style: Theme.of(context).textTheme.titleMedium,
+                    textAlignVertical: const TextAlignVertical(y: 0),
                     // Below parameters are to disable auto-suggestion
                     // Above parameters are to disable auto-suggestion
                     decoration: InputDecoration(
@@ -154,21 +155,6 @@ class SearchWidgetState extends State<SearchWidget> {
                       ),
                       focusedBorder: const UnderlineInputBorder(
                         borderSide: BorderSide.none,
-                      ),
-                      prefixIconConstraints: const BoxConstraints(
-                        maxHeight: 44,
-                        maxWidth: 44,
-                        minHeight: 44,
-                        minWidth: 44,
-                      ),
-                      suffixIconConstraints: const BoxConstraints(
-                        maxHeight: 44,
-                        maxWidth: 44,
-                        minHeight: 44,
-                        minWidth: 44,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 8,
                       ),
                       prefixIcon: Hero(
                         tag: "search_icon",

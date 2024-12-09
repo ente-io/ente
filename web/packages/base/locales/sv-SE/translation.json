@@ -637,6 +637,7 @@
     "check_status": "",
     "passkey_login_instructions": "",
     "passkey_login": "Logga in med nyckel",
+    "totp_login": "",
     "passkey": "Nyckel",
     "passkey_verify_description": "Verifiera din nyckel för att logga in på ditt konto.",
     "waiting_for_verification": "",

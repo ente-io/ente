@@ -1,7 +1,8 @@
 {
   "icons": [
     {
-      "title": "1xBet"
+      "title": "1xBet",
+      "slug": "1x_bet"
     },
     {
       "title": "23andme"
@@ -45,13 +46,15 @@
     },
     {
       "title": "BaiduCloud",
+      "slug": "baidu_cloud",
       "altNames": [
         "百度云",
         "baiduyun"
       ]
     },
     {
-      "title": "Band"
+      "title": "Band",
+      "slug": "band"
     },
     {
       "title": "Battle.net",
@@ -63,6 +66,7 @@
     },
     {
       "title": "BBS.NGA",
+      "slug": "bbs_nga",
       "altNames": [
         "NGA玩家社区",
         "NGA社区"
@@ -76,6 +80,7 @@
     },
     {
       "title": "Binance",
+      "slug": "binance_exchange",
       "altNames": [
         "币安"
       ]
@@ -124,13 +129,6 @@
       "title": "Bitwarden"
     },
     {
-      "title": "Bloom Host",
-      "slug": "bloom_host",
-      "altNames": [
-        "Bloom Host Billing"
-      ]
-    },
-    {
       "title": "Blockchain",
       "altNames": [
         "blockchain.com",
@@ -146,7 +144,8 @@
       ]
     },
     {
-      "title": "Bluesky"
+      "title": "Bluesky",
+      "slug": "blue_sky"
     },
     {
       "title": "Booking",
@@ -156,14 +155,9 @@
     },
     {
       "title": "BorgBase",
+      "slug": "borg_base",
       "altNames": [
         "borg"
-      ]
-    },
-    {
-      "title": "Booking",
-      "altNames": [
-        "Booking.com"
       ]
     },
     {
@@ -174,6 +168,9 @@
         "Brave Rewards",
         "Brave Browser"
       ]
+    },
+    {
+      "title": "Bugzilla"
     },
     {
       "title": "Bybit"
@@ -191,7 +188,8 @@
       ]
     },
     {
-      "title": "CERN"
+      "title": "CERN",
+      "slug": "cern"
     },
     {
       "title": "ChangeNOW"
@@ -269,6 +267,9 @@
       "title": "Doppler"
     },
     {
+      "title": "Dropbox"
+    },
+    {
       "title": "dus.net",
       "slug": "dusnet"
     },
@@ -286,11 +287,15 @@
       ]
     },
     {
+      "title": "eneba"
+    },
+    {
       "title": "ente",
       "hex": "1DB954"
     },
     {
-      "title": "enom"
+      "title": "enom",
+      "slug": "enom_v1"
     },
     {
       "title": "Epic Games",
@@ -302,6 +307,13 @@
     },
     {
       "title": "Estateguru"
+    },
+    {
+      "title": "Fidelity",
+      "slug": "fidelity",
+      "altNames": [
+        "Fidelity Investments"
+      ]
     },
     {
       "title": "Filen"
@@ -330,7 +342,7 @@
     },
     {
       "title": "Gosuslugi",
-      "slug": "Gosuslugi",
+      "slug": "gosuslugi",
       "altNames": [
         "Госуслуги"
       ]
@@ -340,6 +352,15 @@
       "slug": "gov_uk",
       "altNames": [
         "Government Gateway"
+      ]
+    },
+    {
+      "title": "Government of Canada",
+      "slug": "canada_flag",
+      "altNames": [
+        "CRA",
+        "CRA/ARC",
+        "Canada Revenue Agency"
       ]
     },
     {
@@ -368,11 +389,12 @@
       ]
     },
     {
-      "title": "IceDrive"
+      "title": "IceDrive",
+      "slug": "ice_drive"
     },
     {
       "title": "ID.me",
-      "slug": "IDme"
+      "slug": "id_me"
     },
     {
       "title": "Infomaniak"
@@ -400,7 +422,8 @@
       "hex": "000000"
     },
     {
-      "title": "IVPN"
+      "title": "IVPN",
+      "slug": "ivpn"
     },
     {
       "title": "Jagex",
@@ -430,6 +453,7 @@
     },
     {
       "title": "Ko-fi",
+      "slug": "ko_fi",
       "altNames": [
         "Ko fi",
         "Kofi"
@@ -457,6 +481,7 @@
     },
     {
       "title": "Lark",
+      "slug": "lark",
       "altNames": [
         "飞书"
       ]
@@ -466,7 +491,7 @@
     },
     {
       "title": "Linux.Do",
-      "slug": "LINUX_DO",
+      "slug": "linux_do",
       "altNames": [
         "LINUX DO",
         "LinxDo"
@@ -500,6 +525,10 @@
       "hex": "6364FF"
     },
     {
+      "title": "matlab",
+      "altNames": ["mathworks"]
+    },
+    {
       "title": "Mercado Livre",
       "slug": "mercado_livre",
       "altNames": [
@@ -509,7 +538,7 @@
       ]
     },
     {
-      "title": "Microsoft"
+      "title": "microsoft"
     },
     {
       "title": "Microsoft 365",
@@ -565,6 +594,7 @@
     },
     {
       "title": "NeteaseMail",
+      "slug": "netease_mail",
       "altNames": [
         "网易邮箱",
         "Mail.163"
@@ -584,13 +614,19 @@
       "hex": "858585"
     },
     {
-      "title": "Nintendo",
+      "title": "nintendo",
       "altNames": [
         "任天堂"
       ]
     },
     {
       "title": "Njalla"
+    },
+    {
+      "title": "nordvpn",
+      "slug": "nordaccount",
+      "hex": "#4687FF",
+      "altNames": "Nord Account"
     },
     {
       "title": "Notesnook"
@@ -634,10 +670,12 @@
       "hex": "f08222"
     },
     {
-      "title": "pCloud"
+      "title": "pCloud",
+      "slug": "pcloud"
     },
     {
       "title": "PebbleHost",
+      "slug": "pebble_host",
       "altNames": [
         "Pebble Host"
       ]
@@ -676,6 +714,10 @@
       "title": "Proxmox"
     },
     {
+      "title": "Pushover",
+      "slug": "pushover"
+    },
+    {
       "title": "qiniuyun",
       "altNames": [
         "七牛云",
@@ -688,6 +730,9 @@
       "altNames": [
         "Raindrop"
       ]
+    },
+    {
+      "title": "randstad"
     },
     {
       "title": "Real-Debrid",
@@ -710,6 +755,7 @@
     },
     {
       "title": "Restream",
+      "slug": "restream",
       "altNames": [
         "restream.io"
       ]
@@ -780,6 +826,9 @@
       "title": "Snapchat"
     },
     {
+      "title": "SpaceHey"
+    },
+    {
       "title": "Standard Notes",
       "slug": "standardnotes"
     },
@@ -832,6 +881,7 @@
     },
     {
       "title": "Terabit",
+      "slug": "terabit",
       "altNames": [
         "Terabit Hosting",
         "terabit.io"
@@ -924,7 +974,8 @@
       ]
     },
     {
-      "title": "WARGAMING.NET"
+      "title": "WARGAMING.NET",
+      "slug": "wargamingnet"
     },
     {
       "title": "Wealthfront"
@@ -947,6 +998,9 @@
       "title": "Wise"
     },
     {
+      "title": "Wolvesville"
+    },
+    {
       "title": "WorkOS",
       "altNames": [
         "Work OS"
@@ -960,6 +1014,7 @@
     },
     {
       "title": "Yandex",
+      "slug": "yandex",
       "altNames": [
         "Ya",
         "Яндекс"

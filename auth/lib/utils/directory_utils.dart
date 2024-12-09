@@ -64,16 +64,22 @@ class DirectoryUtils {
         ),
       );
       Directory oldDataDir;
-      Directory newDataDir;
-
-      Directory? tempDir;
+      Directory newDataDir = await getApplicationSupportDirectory();
+      await newDataDir.create(recursive: true);
+      
       if (Platform.isLinux) {
         oldDataDir = Directory(
           p.join(dataHome.path, "ente_auth"),
         );
-        tempDir = Directory(
+        Directory tempDir = Directory(
           p.join(dataHome.path, "enteauth"),
         );
+        if (tempDir.existsSync()) {
+          oldDataDir = tempDir;
+        }
+        if (await oldDataDir.exists()) {
+          await copyPath(oldDataDir.path, newDataDir.path);
+        }
       } else if (Platform.isWindows) {
         oldDataDir = Directory(
           p.join(
@@ -81,12 +87,27 @@ class DirectoryUtils {
             "ente",
           ),
         );
-        tempDir = Directory(
+        Directory tempDir = Directory(
           p.join(
             (await getApplicationDocumentsDirectory()).path,
             "enteauth",
           ),
         );
+        if (tempDir.existsSync()) {
+          oldDataDir = tempDir;
+          databaseFile = File(
+            p.join(
+              tempDir.path,
+              ".ente.authenticator.db",
+            ),
+          );
+          offlineDatabaseFile = File(
+            p.join(
+              tempDir.path,
+              ".ente.offline_authenticator.db",
+            ),
+          );
+        }
       } else {
         oldDataDir = await getApplicationDocumentsDirectory();
         databaseFile = File(
@@ -103,12 +124,6 @@ class DirectoryUtils {
         );
       }
 
-      if (tempDir?.existsSync() ?? false) {
-        oldDataDir = tempDir!;
-      }
-      newDataDir = await getApplicationSupportDirectory();
-      await newDataDir.create(recursive: true);
-
       final prefix = Platform.isMacOS ? "" : ".";
       File newDatabaseFile =
           File(p.join(newDataDir.path, "${prefix}ente.authenticator.db"));
@@ -122,10 +137,6 @@ class DirectoryUtils {
       if (await offlineDatabaseFile.exists() &&
           !await newOfflineDatabaseFile.exists()) {
         await offlineDatabaseFile.copy(newOfflineDatabaseFile.path);
-      }
-
-      if (Platform.isLinux && await oldDataDir.exists()) {
-        await copyPath(oldDataDir.path, newDataDir.path);
       }
 
       sharedPrefs.setBool(migratedNamingChanges, true).ignore();

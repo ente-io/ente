@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/stacktrace"
@@ -14,7 +15,11 @@ import (
 	"net/http"
 )
 
-const Srp4096Params = 4096
+const (
+	Srp4096Params = 4096
+	// MaxUnverifiedSessionInAnHour is the number of unverified sessions in the last hour
+	MaxUnverifiedSessionInAnHour = 10
+)
 
 func (c *UserController) SetupSRP(context *gin.Context, userID int64, req ente.SetupSRPRequest) (*ente.SetupSRPResponse, error) {
 	srpB, sessionID, err := c.createAndInsertSRPSession(context, req.SrpUserID, req.SRPVerifier, req.SRPA)
@@ -159,6 +164,19 @@ func (c *UserController) createAndInsertSRPSession(
 	srpVerifier string,
 	srpA string,
 ) (*string, *uuid.UUID, error) {
+
+	unverifiedSessions, err := c.UserAuthRepo.GetUnverifiedSessionsInLastHour(srpUserID)
+	if err != nil {
+		return nil, nil, stacktrace.Propagate(err, "")
+	}
+	if unverifiedSessions >= MaxUnverifiedSessionInAnHour {
+		go c.DiscordController.NotifyPotentialAbuse(fmt.Sprintf("Too many unverified sessions for user %s", srpUserID.String()))
+		return nil, nil, stacktrace.Propagate(&ente.ApiError{
+			Code:           "TOO_MANY_UNVERIFIED_SESSIONS",
+			HttpStatusCode: http.StatusTooManyRequests,
+		}, "")
+
+	}
 
 	serverSecret := srp.GenKey()
 	srpParams := srp.GetParams(Srp4096Params)

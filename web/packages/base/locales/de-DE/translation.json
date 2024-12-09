@@ -637,6 +637,7 @@
     "check_status": "Status überprüfen",
     "passkey_login_instructions": "Folge den Schritten in deinem Browser, um mit dem Anmelden fortzufahren.",
     "passkey_login": "Mit Passkey anmelden",
+    "totp_login": "",
     "passkey": "Passkey",
     "passkey_verify_description": "Überprüfe deinen Passkey, um dich in dein Konto einzuloggen.",
     "waiting_for_verification": "Warte auf Bestätigung...",

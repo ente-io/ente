@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_store.dart';
@@ -34,7 +35,7 @@ class _ReorderCodesPageState extends State<ReorderCodesPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Edit Codes"),
+          title: Text(context.l10n.editOrder),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
@@ -44,66 +45,6 @@ class _ReorderCodesPageState extends State<ReorderCodesPage> {
               }
             },
           ),
-          actions: [
-            PopupMenuButton(
-              icon: const Icon(Icons.sort),
-              onSelected: (int value) {
-                selectedSortOption = value;
-                switch (value) {
-                  case 0:
-                    sortByIssuer();
-                    break;
-                  case 1:
-                    sortByAccount();
-                    break;
-                  case 2:
-                    setState(() {});
-                    break;
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 0,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      selectedSortOption == 0
-                          ? const Icon(Icons.check)
-                          : const SizedBox.square(dimension: 24),
-                      const SizedBox(width: 10),
-                      const Text("Issuer"),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 1,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      selectedSortOption == 1
-                          ? const Icon(Icons.check)
-                          : const SizedBox.square(dimension: 24),
-                      const SizedBox(width: 10),
-                      const Text("Account"),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 2,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      selectedSortOption == 2
-                          ? const Icon(Icons.check)
-                          : const SizedBox.square(dimension: 24),
-                      const SizedBox(width: 10),
-                      const Text("Manual"),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
         ),
         body: ReorderableListView(
           buildDefaultDragHandles: false,
@@ -157,15 +98,5 @@ class _ReorderCodesPageState extends State<ReorderCodesPage> {
       final Code code = widget.codes.removeAt(oldIndex);
       widget.codes.insert(newIndex, code);
     });
-  }
-
-  void sortByIssuer() {
-    widget.codes.sort((a, b) => a.issuer.compareTo(b.issuer));
-    setState(() {});
-  }
-
-  void sortByAccount() {
-    widget.codes.sort((a, b) => a.account.compareTo(b.account));
-    setState(() {});
   }
 }

@@ -637,6 +637,7 @@
     "check_status": "Check status",
     "passkey_login_instructions": "Follow the steps from your browser to continue logging in.",
     "passkey_login": "Login with passkey",
+    "totp_login": "Login with TOTP",
     "passkey": "Passkey",
     "passkey_verify_description": "Verify your passkey to login into your account.",
     "waiting_for_verification": "Waiting for verification...",

@@ -255,6 +255,7 @@ func main() {
 		UsageCtrl:             usageController,
 		CollectionRepo:        collectionRepo,
 		TaskLockingRepo:       taskLockingRepo,
+		DiscordController:     discordController,
 		QueueRepo:             queueRepo,
 		ObjectCleanupCtrl:     objectCleanupController,
 		LockController:        lockController,

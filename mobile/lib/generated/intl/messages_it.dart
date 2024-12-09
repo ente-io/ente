@@ -654,7 +654,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Eliminare l\'album condiviso?"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "L\'album verrà eliminato per tutti\n\nPerderai l\'accesso alle foto condivise in questo album che sono di proprietà di altri"),
-        "descriptions": MessageLookupByLibrary.simpleMessage("Descrizioni"),
         "deselectAll":
             MessageLookupByLibrary.simpleMessage("Deseleziona tutti"),
         "designedToOutlive":

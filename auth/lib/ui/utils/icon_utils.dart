@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -30,8 +31,12 @@ class IconUtils {
   }) {
     final providerTitle = _getProviderTitle(provider);
     final List<String> titlesList = [providerTitle];
-    titlesList.addAll(_titleSplitCharacters.where((char) => providerTitle.contains(char)).map((char) => providerTitle.split(char)[0]));
-    for(final title in titlesList){
+    titlesList.addAll(
+      _titleSplitCharacters
+          .where((char) => providerTitle.contains(char))
+          .map((char) => providerTitle.split(char)[0]),
+    );
+    for (final title in titlesList) {
       if (_customIcons.containsKey(title)) {
         return _getSVGIcon(
           "assets/custom-icons/icons/${_customIcons[title]!.slug ?? title}.svg",
@@ -55,7 +60,8 @@ class IconUtils {
       return CircleAvatar(
         radius: width / 2,
         backgroundColor: getEnteColorScheme(context).avatarColors[
-            providerTitle.hashCode % getEnteColorScheme(context).avatarColors.length],
+            providerTitle.hashCode %
+                getEnteColorScheme(context).avatarColors.length],
         child: Text(
           providerTitle.toUpperCase()[0],
           // fixed color
@@ -137,9 +143,8 @@ class IconUtils {
         );
         if (icon["altNames"] != null) {
           for (final name in icon["altNames"]) {
-            _customIcons[name.toString()
-                .replaceAll(' ', '')
-                .toLowerCase()] = CustomIconData(
+            _customIcons[name.toString().replaceAll(' ', '').toLowerCase()] =
+                CustomIconData(
               icon["slug"],
               icon["hex"],
             );
@@ -148,6 +153,9 @@ class IconUtils {
       }
     } catch (e) {
       Logger("IconUtils").severe("Error loading icons", e);
+      if (kDebugMode) {
+        rethrow;
+      }
     }
   }
 

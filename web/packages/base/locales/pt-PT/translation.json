@@ -637,6 +637,7 @@
     "check_status": "Verificar status",
     "passkey_login_instructions": "Siga os passos do seu browser para continuar a iniciar sessão.",
     "passkey_login": "Login com a chave de acesso",
+    "totp_login": "",
     "passkey": "Chave de acesso",
     "passkey_verify_description": "Verifique a sua chave de acesso para iniciar sessão na sua conta.",
     "waiting_for_verification": "Aguardando verificação...",

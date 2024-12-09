@@ -6,7 +6,7 @@ import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
 import type { Collection } from "@/media/collection";
 import type { EnteFile } from "@/media/file";
 import { UploaderNameInput } from "@/new/albums/components/UploaderNameInput";
-import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
+import { CollectionMappingChoice } from "@/new/photos/components/CollectionMappingChoice";
 import type { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelector";
 import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
@@ -134,7 +134,8 @@ export default function Uploader({
     const [percentComplete, setPercentComplete] = useState(0);
     const [hasLivePhotos, setHasLivePhotos] = useState(false);
 
-    const [openChoiceDialog, setOpenChoiceDialog] = useState(false);
+    const [openCollectionMappingChoice, setOpenCollectionMappingChoice] =
+        useState(false);
     const [importSuggestion, setImportSuggestion] = useState<ImportSuggestion>(
         DEFAULT_IMPORT_SUGGESTION,
     );
@@ -221,8 +222,8 @@ export default function Uploader({
 
     const closeUploadProgress = () => setUploadProgressView(false);
 
-    const handleChoiceModalClose = () => {
-        setOpenChoiceDialog(false);
+    const handleCollectionMappingChoiceClose = () => {
+        setOpenCollectionMappingChoice(false);
         uploadRunning.current = false;
     };
 
@@ -248,7 +249,7 @@ export default function Uploader({
                 setUploadProgressView,
             },
             onUploadFile,
-            publicCollectionGalleryContext,
+            publicCollectionGalleryContext.credentials,
         );
 
         if (uploadManager.isUploadRunning()) {
@@ -287,11 +288,7 @@ export default function Uploader({
                 setDesktopZipItems(zipItems);
             });
         }
-    }, [
-        publicCollectionGalleryContext.accessedThroughSharedURL,
-        publicCollectionGalleryContext.token,
-        publicCollectionGalleryContext.passwordToken,
-    ]);
+    }, [publicCollectionGalleryContext.credentials]);
 
     // Handle selected files when user selects files for upload through the open
     // file / open folder selection dialog, or drag-and-drops them.
@@ -416,10 +413,10 @@ export default function Uploader({
         props.setLoading(false);
 
         (async () => {
-            if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+            if (publicCollectionGalleryContext.credentials) {
                 const uploaderName = await getPublicCollectionUploaderName(
                     getPublicCollectionUID(
-                        publicCollectionGalleryContext.token,
+                        publicCollectionGalleryContext.credentials.accessToken,
                     ),
                 );
                 uploaderNameRef.current = uploaderName;
@@ -465,7 +462,7 @@ export default function Uploader({
 
             let showNextModal = () => {};
             if (importSuggestion.hasNestedFolders) {
-                showNextModal = () => setOpenChoiceDialog(true);
+                showNextModal = () => setOpenCollectionMappingChoice(true);
             } else {
                 showNextModal = () =>
                     showCollectionCreateModal(importSuggestion.rootFolderName);
@@ -726,7 +723,7 @@ export default function Uploader({
             if (!skipSave) {
                 savePublicCollectionUploaderName(
                     getPublicCollectionUID(
-                        publicCollectionGalleryContext.token,
+                        publicCollectionGalleryContext.credentials.accessToken,
                     ),
                     uploaderName,
                 );
@@ -740,7 +737,7 @@ export default function Uploader({
         }
     };
 
-    const didSelectCollectionMapping = (mapping: CollectionMapping) => {
+    const handleCollectionMappingSelect = (mapping: CollectionMapping) => {
         switch (mapping) {
             case "root":
                 uploadToSingleNewCollection(
@@ -781,10 +778,10 @@ export default function Uploader({
 
     return (
         <>
-            <CollectionMappingChoiceDialog
-                open={openChoiceDialog}
-                onClose={handleChoiceModalClose}
-                didSelect={didSelectCollectionMapping}
+            <CollectionMappingChoice
+                open={openCollectionMappingChoice}
+                onClose={handleCollectionMappingChoiceClose}
+                onSelect={handleCollectionMappingSelect}
             />
             <UploadTypeSelector
                 open={props.uploadTypeSelectorView}

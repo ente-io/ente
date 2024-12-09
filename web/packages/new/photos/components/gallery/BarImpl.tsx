@@ -223,7 +223,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     <CollectionsSortOptions
                         activeSortBy={collectionsSortBy}
                         onChangeSortBy={onChangeCollectionsSortBy}
-                        disableTriggerButtonBackground
+                        transparentTriggerButtonBackground
                     />
                     <IconButton onClick={onShowAllCollections}>
                         <ExpandMore />

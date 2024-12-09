@@ -19,13 +19,13 @@ import {
     updateAvailableForDownloadDialogAttributes,
     updateReadyToInstallDialogAttributes,
 } from "@/new/photos/components/utils/download";
+import { useIsOffline } from "@/new/photos/components/utils/use-is-offline";
 import { useLoadingBar } from "@/new/photos/components/utils/use-loading-bar";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import { runMigrations } from "@/new/photos/services/migrations";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
 import { AppContext } from "@/new/photos/types/context";
-import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
@@ -37,14 +37,14 @@ import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import type { User } from "@ente/shared/user/types";
 import ArrowForward from "@mui/icons-material/ArrowForward";
-import { CssBaseline } from "@mui/material";
+import { CssBaseline, styled } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import Notification from "components/Notification";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
@@ -55,9 +55,6 @@ export default function App({ Component, pageProps }: AppProps) {
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
-    const [offline, setOffline] = useState(
-        typeof window !== "undefined" && !window.navigator.onLine,
-    );
     const [showNavbar, setShowNavBar] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
@@ -66,6 +63,7 @@ export default function App({ Component, pageProps }: AppProps) {
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
 
+    const isOffline = useIsOffline();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
     const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
     const [themeColor, setThemeColor] = useLocalState(
@@ -128,9 +126,6 @@ export default function App({ Component, pageProps }: AppProps) {
         if (isDesktop) void resumeExportsIfNeeded();
     }, []);
 
-    const setUserOnline = () => setOffline(false);
-    const setUserOffline = () => setOffline(true);
-
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
         const needsFamilyRedirect = query.get("redirect") == "families";
@@ -155,21 +150,11 @@ export default function App({ Component, pageProps }: AppProps) {
         router.events.on("routeChangeComplete", () => {
             setLoading(false);
         });
-
-        window.addEventListener("online", setUserOnline);
-        window.addEventListener("offline", setUserOffline);
-
-        return () => {
-            window.removeEventListener("online", setUserOnline);
-            window.removeEventListener("offline", setUserOffline);
-        };
     }, []);
 
     useEffect(() => {
         setNotificationView(true);
     }, [notificationAttributes]);
-
-    const showNavBar = (show: boolean) => setShowNavBar(show);
 
     const onGenericError = useCallback((e: unknown) => {
         log.error(e);
@@ -185,21 +170,30 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const logout = useCallback(() => void photosLogout(), []);
 
-    const appContext = {
-        showNavBar,
-        showLoadingBar,
-        hideLoadingBar,
-        watchFolderView,
-        setWatchFolderView,
-        watchFolderFiles,
-        setWatchFolderFiles,
-        setNotificationAttributes,
-        themeColor,
-        setThemeColor,
-        showMiniDialog,
-        onGenericError,
-        logout,
-    };
+    const appContext = useMemo(
+        () => ({
+            showNavBar: (show: boolean) => setShowNavBar(show),
+            showLoadingBar,
+            hideLoadingBar,
+            watchFolderView,
+            setWatchFolderView,
+            watchFolderFiles,
+            setWatchFolderFiles,
+            setNotificationAttributes,
+            themeColor,
+            setThemeColor,
+            showMiniDialog,
+            onGenericError,
+            logout,
+        }),
+        [
+            showLoadingBar,
+            hideLoadingBar,
+            showMiniDialog,
+            onGenericError,
+            logout,
+        ],
+    );
 
     const title = isI18nReady ? t("title_photos") : staticAppTitle;
 
@@ -210,9 +204,9 @@ export default function App({ Component, pageProps }: AppProps) {
             <ThemeProvider theme={getTheme(themeColor, "photos")}>
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar />}
-                <MessageContainer>
-                    {isI18nReady && offline && t("OFFLINE_MSG")}
-                </MessageContainer>
+                <OfflineMessageContainer>
+                    {isI18nReady && isOffline && t("OFFLINE_MSG")}
+                </OfflineMessageContainer>
                 <LoadingBar color="#51cd7c" ref={loadingBarRef} />
 
                 <AttributedMiniDialog
@@ -248,6 +242,14 @@ export default function App({ Component, pageProps }: AppProps) {
         </>
     );
 }
+
+const OfflineMessageContainer = styled("div")`
+    background-color: #111;
+    padding: 0;
+    font-size: 14px;
+    text-align: center;
+    line-height: 32px;
+`;
 
 const redirectToFamilyPortal = () =>
     void getFamilyPortalRedirectURL().then((url) => {

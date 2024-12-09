@@ -325,7 +325,7 @@ export function PhotoList({
                 timeStampList.push(getEmptyListItem());
             }
             timeStampList.push(getVacuumItem(timeStampList));
-            if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+            if (publicCollectionGalleryContext.credentials) {
                 if (publicCollectionGalleryContext.photoListFooter) {
                     timeStampList.push(
                         getPhotoListFooter(
@@ -396,7 +396,7 @@ export function PhotoList({
             if (hasFooter) {
                 return timeStampList;
             }
-            if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+            if (publicCollectionGalleryContext.credentials) {
                 if (publicCollectionGalleryContext.photoListFooter) {
                     return [
                         ...timeStampList,
@@ -413,7 +413,7 @@ export function PhotoList({
             }
         });
     }, [
-        publicCollectionGalleryContext.accessedThroughSharedURL,
+        publicCollectionGalleryContext.credentials,
         showAppDownloadBanner,
         publicCollectionGalleryContext.photoListFooter,
     ]);
@@ -521,7 +521,7 @@ export function PhotoList({
 
     const getVacuumItem = (timeStampList) => {
         let footerHeight;
-        if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+        if (publicCollectionGalleryContext.credentials) {
             footerHeight = publicCollectionGalleryContext.referralCode
                 ? ALBUM_FOOTER_HEIGHT_WITH_REFERRAL
                 : ALBUM_FOOTER_HEIGHT;

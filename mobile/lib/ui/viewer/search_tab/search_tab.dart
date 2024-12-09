@@ -18,7 +18,6 @@ import "package:photos/ui/viewer/search/search_suggestions.dart";
 import "package:photos/ui/viewer/search/tab_empty_state.dart";
 import 'package:photos/ui/viewer/search_tab/albums_section.dart';
 import "package:photos/ui/viewer/search_tab/contacts_section.dart";
-import "package:photos/ui/viewer/search_tab/descriptions_section.dart";
 import "package:photos/ui/viewer/search_tab/file_type_section.dart";
 import "package:photos/ui/viewer/search_tab/locations_section.dart";
 import "package:photos/ui/viewer/search_tab/magic_section.dart";
@@ -26,7 +25,7 @@ import "package:photos/ui/viewer/search_tab/moments_section.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
 
 class SearchTab extends StatefulWidget {
-  const SearchTab({Key? key}) : super(key: key);
+  const SearchTab({super.key});
 
   @override
   State<SearchTab> createState() => _SearchTabState();
@@ -105,7 +104,10 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 72),
                     child: Text(
-                      S.of(context).searchSectionsLengthMismatch(snapshot.data!.length, searchTypes.length),
+                      S.of(context).searchSectionsLengthMismatch(
+                            snapshot.data!.length,
+                            searchTypes.length,
+                          ),
                     ),
                   );
                 }
@@ -134,11 +136,6 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                         );
                       case SectionType.moment:
                         return MomentsSection(
-                          snapshot.data!.elementAt(index)
-                              as List<GenericSearchResult>,
-                        );
-                      case SectionType.fileCaption:
-                        return DescriptionsSection(
                           snapshot.data!.elementAt(index)
                               as List<GenericSearchResult>,
                         );

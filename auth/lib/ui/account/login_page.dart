@@ -49,8 +49,12 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     } else {
-      await UserService.instance
-          .sendOtt(context, _email!, isCreateAccountScreen: false);
+      await UserService.instance.sendOtt(
+        context,
+        _email!,
+        isCreateAccountScreen: false,
+        purpose: 'login',
+      );
     }
     FocusScope.of(context).unfocus();
   }

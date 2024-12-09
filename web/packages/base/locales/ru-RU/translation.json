@@ -637,6 +637,7 @@
     "check_status": "Проверить статус",
     "passkey_login_instructions": "Следуйте инструкциям в вашем браузере, чтобы продолжить вход в систему.",
     "passkey_login": "Войдите в систему с помощью пароля",
+    "totp_login": "",
     "passkey": "Ключ",
     "passkey_verify_description": "Подтвердите свой ключ для входа в свою учетную запись.",
     "waiting_for_verification": "Ожидание подтверждения...",
