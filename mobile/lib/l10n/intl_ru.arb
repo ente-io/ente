@@ -1205,7 +1205,6 @@
   "deviceCodeHint": "Введите код",
   "joinDiscord": "Присоединиться в Discord",
   "locations": "Локации",
-  "descriptions": "Описания",
   "addAName": "Добавить имя",
   "findPeopleByName": "Быстрый поиск людей по имени",
   "addViewers": "{count, plural, one {Добавьте зрителя} few {Добавьте зрителей} many {Добавьте зрителей} other {Добавьте зрителей}}",
