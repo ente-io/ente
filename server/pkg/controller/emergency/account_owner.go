@@ -19,7 +19,7 @@ func (c *Controller) AddContact(ctx *gin.Context, userID int64, request ente.Add
 			return stacktrace.Propagate(err, "")
 		}
 	}
-	noticeInHrs := 24 * 7
+	noticeInHrs := 24 * 30
 	if request.RecoveryNoticeInDays != nil {
 		noticeInHrs = *request.RecoveryNoticeInDays * 24
 	}
