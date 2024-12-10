@@ -73,7 +73,7 @@ func (c *Controller) GetInfo(ctx *gin.Context, userID int64) (*ente.EmergencyDat
 				Email: emergencyContactUser.Email,
 			},
 			State:                contact.State,
-			RecoveryNoticeInDays: contact.NoticePeriodInHrs,
+			RecoveryNoticeInDays: contact.NoticePeriodInHrs / 24,
 		}
 		if contact.UserID == userID {
 			userEmergencyContacts = append(userEmergencyContacts, entity)

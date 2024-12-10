@@ -157,6 +157,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m52(storeName) => "Rate us on ${storeName}";
 
+  static String m83(days) =>
+      "You can access the account after ${days} days. You will get a notification on your registered email.";
+
   static String m53(storageInGB) =>
       "3. Both of you get ${storageInGB} GB* free";
 
@@ -1351,6 +1354,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Recover account"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Recover"),
+        "recoveryAccount":
+            MessageLookupByLibrary.simpleMessage("Recover account"),
+        "recoveryInitiated":
+            MessageLookupByLibrary.simpleMessage("Recovery initiated"),
+        "recoveryInitiatedDesc": m83,
         "recoveryKey": MessageLookupByLibrary.simpleMessage("Recovery key"),
         "recoveryKeyCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Recovery key copied to clipboard"),

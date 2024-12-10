@@ -10629,11 +10629,41 @@ class S {
     );
   }
 
+  /// `Recovery initiated`
+  String get recoveryInitiated {
+    return Intl.message(
+      'Recovery initiated',
+      name: 'recoveryInitiated',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can access the account after {days} days. You will get a notification on your registered email.`
+  String recoveryInitiatedDesc(int days) {
+    return Intl.message(
+      'You can access the account after $days days. You will get a notification on your registered email.',
+      name: 'recoveryInitiatedDesc',
+      desc: '',
+      args: [days],
+    );
+  }
+
   /// `Cancel recovery`
   String get cancelAccountRecovery {
     return Intl.message(
       'Cancel recovery',
       name: 'cancelAccountRecovery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recover account`
+  String get recoveryAccount {
+    return Intl.message(
+      'Recover account',
+      name: 'recoveryAccount',
       desc: '',
       args: [],
     );

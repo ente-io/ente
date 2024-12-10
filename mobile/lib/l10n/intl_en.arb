@@ -1529,7 +1529,18 @@
   "removeInvite": "Remove invite",
   "recoveryWarning": "A trusted contact is trying to access your account",
   "rejectRecovery": "Reject recovery",
+  "recoveryInitiated": "Recovery initiated",
+  "recoveryInitiatedDesc": "You can access the account after {days} days. You will get a notification on your registered email.", 
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
   "cancelAccountRecovery": "Cancel recovery",
+  "recoveryAccount":"Recover account",
   "cancelAccountRecoveryBody": "Are you sure you want to cancel recovery?",
   "startAccountRecoveryTitle": "Start recovery",
   "whyAddTrustContact": "Trusted contact can help in recovering your data."

@@ -5,9 +5,11 @@ import "package:photos/emergency/emergency_service.dart";
 import "package:photos/emergency/model.dart";
 import "package:photos/emergency/recover_others_account.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/key_attributes.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
@@ -36,7 +38,6 @@ class OtherContactPage extends StatefulWidget {
 }
 
 class _OtherContactPageState extends State<OtherContactPage> {
-  late String recoverDelayTime;
   late String accountEmail = widget.contact.user.email;
   RecoverySessions? recoverySession;
   String? waitTill;
@@ -46,7 +47,6 @@ class _OtherContactPageState extends State<OtherContactPage> {
   @override
   void initState() {
     super.initState();
-    recoverDelayTime = "${(widget.contact.recoveryNoticeInDays ~/ 24)} days";
     recoverySession = widget.emergencyInfo.othersRecoverySession
         .firstWhereOrNull((session) => session.user.email == accountEmail);
     _fetchData();
@@ -62,7 +62,9 @@ class _OtherContactPageState extends State<OtherContactPage> {
           );
         });
       }
-    } catch (ignored) {}
+    } catch (e) {
+      _logger.severe("Error fetching data", e);
+    }
   }
 
   @override
@@ -93,8 +95,8 @@ class _OtherContactPageState extends State<OtherContactPage> {
                   const SizedBox(
                     height: 12,
                   ),
-                  const TitleBarTitleWidget(
-                    title: "Recover account",
+                  TitleBarTitleWidget(
+                    title: context.l10n.recoverAccount,
                   ),
                   Text(
                     accountEmail,
@@ -108,16 +110,16 @@ class _OtherContactPageState extends State<OtherContactPage> {
             const SizedBox(height: 12),
             recoverySession == null
                 ? Text(
-                    "You can recover $accountEmail account  $recoverDelayTime"
-                    " after starting recovery process.",
+                    "You can recover $accountEmail's account in ${widget.contact.recoveryNoticeInDays} days"
+                    " after starting the recovery process.",
                     style: textTheme.body,
                   )
                 : Text(
                     "You can recover $accountEmail's"
-                    " account after $waitTill  ",
+                    " account after $waitTill.",
                     style: textTheme.bodyBold,
                   ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 24),
             if (recoverySession == null)
               ButtonWidget(
                 // icon: Icons.start_outlined,
@@ -143,9 +145,10 @@ class _OtherContactPageState extends State<OtherContactPage> {
                                 _fetchData().ignore();
                                 await showErrorDialog(
                                   context,
-                                  "Done",
-                                  "Please visit page after $recoverDelayTime to"
-                                      " recover $accountEmail's account.",
+                                  context.l10n.recoveryInitiated,
+                                  context.l10n.recoveryInitiatedDesc(
+                                    widget.contact.recoveryNoticeInDays,
+                                  ),
                                 );
                               }
                             } catch (e) {
@@ -161,7 +164,7 @@ class _OtherContactPageState extends State<OtherContactPage> {
               ButtonWidget(
                 // icon: Icons.start_outlined,
                 buttonType: ButtonType.primary,
-                labelText: "Recover account",
+                labelText: context.l10n.recoverAccount,
                 onTap: () async {
                   final (String key, KeyAttributes attributes) =
                       await EmergencyContactService.instance
@@ -210,31 +213,52 @@ class _OtherContactPageState extends State<OtherContactPage> {
               menuItemColor: getEnteColorScheme(context).fillFaint,
               surfaceExecutionStates: false,
               onTap: () async {
-                await showChoiceActionSheet(
-                  context,
-                  title: "Remove",
-                  firstButtonLabel: S.of(context).yes,
-                  body: "Are you sure your want to stop being a trusted "
-                      "contact for $accountEmail?",
-                  isCritical: true,
-                  firstButtonOnTap: () async {
-                    try {
-                      await EmergencyContactService.instance.updateContact(
-                        widget.contact,
-                        ContactState.contactLeft,
-                      );
-                      Navigator.of(context).pop(true);
-                    } catch (e) {
-                      showGenericErrorDialog(context: context, error: e)
-                          .ignore();
-                    }
-                  },
-                );
+                await showRemoveSheet();
               },
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> showRemoveSheet() async {
+    await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          labelText: context.l10n.remove,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonType: ButtonType.critical,
+          buttonAction: ButtonAction.first,
+          onTap: () async {
+            try {
+              await EmergencyContactService.instance.updateContact(
+                widget.contact,
+                ContactState.contactLeft,
+              );
+              Navigator.of(context).pop(true);
+            } catch (e) {
+              showGenericErrorDialog(context: context, error: e).ignore();
+            }
+          },
+          isInAlert: true,
+        ),
+        ButtonWidget(
+          labelText: S.of(context).cancel,
+          buttonType: ButtonType.tertiary,
+          buttonSize: ButtonSize.large,
+          buttonAction: ButtonAction.third,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+        ),
+      ],
+      body: "Are you sure your want to stop being a trusted "
+          "contact for $accountEmail?",
+      title: context.l10n.remove,
+      actionSheetType: ActionSheetType.defaultActionSheet,
+    );
+    return;
   }
 }

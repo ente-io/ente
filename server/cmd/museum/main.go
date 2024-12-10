@@ -621,7 +621,7 @@ func main() {
 	privateAPI.POST("/emergency-contacts/start-recovery", emergencyHandler.StartRecovery)
 	privateAPI.POST("/emergency-contacts/stop-recovery", emergencyHandler.StopRecovery)
 	privateAPI.POST("/emergency-contacts/reject-recovery", emergencyHandler.RejectRecovery)
-	privateAPI.POST("/emergency-contacts/approve-recovery", emergencyHandler.RejectRecovery)
+	privateAPI.POST("/emergency-contacts/approve-recovery", emergencyHandler.ApproveRecovery)
 	privateAPI.GET("/emergency-contacts/recovery-info/:id", emergencyHandler.GetRecoveryInfo)
 	privateAPI.POST("/emergency-contacts/init-change-password", emergencyHandler.InitChangePassword)
 	privateAPI.POST("/emergency-contacts/change-password", emergencyHandler.ChangePassword)

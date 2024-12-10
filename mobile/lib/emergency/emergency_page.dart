@@ -1,9 +1,7 @@
 import "dart:async";
 
-import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_svg/flutter_svg.dart";
-import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/emergency/emergency_service.dart";
 import "package:photos/emergency/model.dart";
@@ -316,13 +314,24 @@ class _EmergencyPageState extends State<EmergencyPage> {
                                   currentUser,
                                 );
                               } else {
-                                await routeToPage(
-                                  context,
-                                  OtherContactPage(
-                                    contact: currentUser,
-                                    emergencyInfo: info!,
+                                await Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (BuildContext context) {
+                                      return OtherContactPage(
+                                        contact: currentUser,
+                                        emergencyInfo: info!,
+                                      );
+                                    },
                                   ),
                                 );
+
+                                // await routeToPage(
+                                //   context,
+                                //   OtherContactPage(
+                                //     contact: currentUser,
+                                //     emergencyInfo: info!,
+                                //   ),
+                                // );
                                 if (mounted) {
                                   unawaited(_fetchData());
                                 }
@@ -538,7 +547,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
           isInAlert: true,
         ),
       ],
-      body: "$emergencyContactEmail is trying to recover your account.",
+      body: "$emergencyContactEmail is trying to recover your accountx.",
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     return;
