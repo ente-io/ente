@@ -822,9 +822,12 @@ class _FileSelectionActionsWidgetState
   }
 
   Future<void> _download(List<EnteFile> files) async {
+    final totalFiles = files.length;
+    int downloadedFiles = 0;
+
     final dialog = createProgressDialog(
       context,
-      S.of(context).downloading,
+      S.of(context).downloading + "$downloadedFiles/$totalFiles",
       isDismissible: true,
     );
     await dialog.show();
@@ -832,7 +835,12 @@ class _FileSelectionActionsWidgetState
       final futures = <Future>[];
       for (final file in files) {
         if (file.localID == null) {
-          futures.add(downloadToGallery(file));
+          futures.add(
+            downloadToGallery(file).then((_) {
+              downloadedFiles++;
+              dialog.update(message: S.of(context).downloading + " ($downloadedFiles/$totalFiles)");
+            }),
+          );
         }
       }
       await Future.wait(futures);
