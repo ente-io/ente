@@ -493,8 +493,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
           isInAlert: true,
         ),
       ],
-      body:
-          "You have been invited to be a legacy contact by ${contact.user.email}",
+      body: S.of(context).legacyInvite(contact.user.email),
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     return;

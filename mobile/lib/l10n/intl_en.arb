@@ -1543,5 +1543,7 @@
   "recoveryAccount":"Recover account",
   "cancelAccountRecoveryBody": "Are you sure you want to cancel recovery?",
   "startAccountRecoveryTitle": "Start recovery",
-  "whyAddTrustContact": "Trusted contact can help in recovering your data."
+  "whyAddTrustContact": "Trusted contact can help in recovering your data.",
+  "legacyInvite": "${email} has invited you to be a trusted contact",
+  "authToManageLegacy": "Please authenticate to manage your trusted contacts"
 }

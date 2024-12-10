@@ -120,6 +120,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m39(count) =>
       "${Intl.plural(count, one: '${count} item', other: '${count} items')}";
 
+  static String m83(email) =>
+      "\$${email} has invited you to be a trusted contact";
+
   static String m40(expiryTime) => "Link will expire on ${expiryTime}";
 
   static String m3(count, formattedCount) =>
@@ -157,7 +160,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m52(storeName) => "Rate us on ${storeName}";
 
-  static String m83(days) =>
+  static String m84(days) =>
       "You can access the account after ${days} days. You will get a notification on your registered email.";
 
   static String m53(storageInGB) =>
@@ -402,6 +405,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Please authenticate to configure two-factor authentication"),
         "authToInitiateAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to initiate account deletion"),
+        "authToManageLegacy": MessageLookupByLibrary.simpleMessage(
+            "Please authenticate to manage your trusted contacts"),
         "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to view your passkey"),
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
@@ -1027,6 +1032,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "legacy": MessageLookupByLibrary.simpleMessage("Legacy"),
         "legacyAccounts":
             MessageLookupByLibrary.simpleMessage("Legacy accounts"),
+        "legacyInvite": m83,
         "legacyPageDesc": MessageLookupByLibrary.simpleMessage(
             "Legacy allows trusted contacts to access your account in your absence."),
         "legacyPageDesc2": MessageLookupByLibrary.simpleMessage(
@@ -1358,7 +1364,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Recover account"),
         "recoveryInitiated":
             MessageLookupByLibrary.simpleMessage("Recovery initiated"),
-        "recoveryInitiatedDesc": m83,
+        "recoveryInitiatedDesc": m84,
         "recoveryKey": MessageLookupByLibrary.simpleMessage("Recovery key"),
         "recoveryKeyCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Recovery key copied to clipboard"),

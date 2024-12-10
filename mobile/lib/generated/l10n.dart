@@ -10698,6 +10698,26 @@ class S {
       args: [],
     );
   }
+
+  /// `${email} has invited you to be a trusted contact`
+  String legacyInvite(Object email) {
+    return Intl.message(
+      '\$$email has invited you to be a trusted contact',
+      name: 'legacyInvite',
+      desc: '',
+      args: [email],
+    );
+  }
+
+  /// `Please authenticate to manage your trusted contacts`
+  String get authToManageLegacy {
+    return Intl.message(
+      'Please authenticate to manage your trusted contacts',
+      name: 'authToManageLegacy',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
