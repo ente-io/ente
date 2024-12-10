@@ -1530,7 +1530,7 @@
   "recoveryWarning": "A trusted contact is trying to access your account",
   "rejectRecovery": "Reject recovery",
   "recoveryInitiated": "Recovery initiated",
-  "recoveryInitiatedDesc": "You can access the account after {days} days. You can access the account after 30 days. A notification will be sent to {email}.", 
+  "recoveryInitiatedDesc": "You can access the account after {days} days. A notification will be sent to {email}.", 
   "@recoveryInitiatedDesc": {
     "placeholders": {
       "days": {

@@ -10639,10 +10639,10 @@ class S {
     );
   }
 
-  /// `You can access the account after {days} days. You can access the account after 30 days. A notification will be sent to {email}.`
+  /// `You can access the account after {days} days. A notification will be sent to {email}.`
   String recoveryInitiatedDesc(int days, String email) {
     return Intl.message(
-      'You can access the account after $days days. You can access the account after 30 days. A notification will be sent to $email.',
+      'You can access the account after $days days. A notification will be sent to $email.',
       name: 'recoveryInitiatedDesc',
       desc: '',
       args: [days, email],

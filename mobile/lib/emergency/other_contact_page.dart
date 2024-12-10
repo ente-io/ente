@@ -173,13 +173,17 @@ class _OtherContactPageState extends State<OtherContactPage> {
                 buttonType: ButtonType.primary,
                 labelText: context.l10n.recoverAccount,
                 onTap: () async {
-                  final (String key, KeyAttributes attributes) =
-                      await EmergencyContactService.instance
-                          .getRecoveryInfo(recoverySession!);
-                  routeToPage(
-                    context,
-                    RecoverOthersAccount(key, attributes, recoverySession!),
-                  ).ignore();
+                  try {
+                    final (String key, KeyAttributes attributes) =
+                        await EmergencyContactService.instance
+                            .getRecoveryInfo(recoverySession!);
+                    routeToPage(
+                      context,
+                      RecoverOthersAccount(key, attributes, recoverySession!),
+                    ).ignore();
+                  } catch (e) {
+                    showGenericErrorDialog(context: context, error: e).ignore();
+                  }
                 },
               ),
             if (recoverySession != null && recoverySession!.status == "WAITING")
