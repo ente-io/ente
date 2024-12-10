@@ -6,6 +6,7 @@ import (
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	log "github.com/sirupsen/logrus"
 )
 
 func (c *Controller) GetRecoveryInfo(ctx *gin.Context,
@@ -50,6 +51,16 @@ func (c *Controller) ChangePassword(ctx *gin.Context, userID int64, request ente
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
+
+	hasUpdate, err := c.Repo.UpdateRecoveryStatusForID(ctx, sessionID, ente.RecoveryStatusRecovered)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to update recovery status")
+	}
+	if !hasUpdate {
+		log.WithField("userID", userID).WithField("req", request).
+			Warn("no row updated while rejecting recovery")
+	}
+
 	return resp, nil
 }
 

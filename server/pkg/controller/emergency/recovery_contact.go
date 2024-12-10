@@ -8,13 +8,13 @@ import (
 )
 
 func (c *Controller) StartRecovery(ctx *gin.Context,
-	userID int64,
+	actorUserID int64,
 	req ente.ContactIdentifier) error {
 	if req.EmergencyContactID == req.UserID {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage("contact and user can not be same"), "")
 	}
-	if req.EmergencyContactID != userID {
-		return stacktrace.Propagate(ente.ErrPermissionDenied, "user can only update his own state")
+	if req.EmergencyContactID != actorUserID {
+		return stacktrace.Propagate(ente.ErrPermissionDenied, "only the emergency contact can start recovery")
 	}
 
 	contact, err := c.Repo.GetActiveEmergencyContact(ctx, req.UserID, req.EmergencyContactID)
@@ -24,7 +24,7 @@ func (c *Controller) StartRecovery(ctx *gin.Context,
 
 	hasUpdate, err := c.Repo.InsertIntoRecovery(ctx, req, *contact)
 	if !hasUpdate {
-		log.WithField("userID", userID).WithField("req", req).
+		log.WithField("userID", actorUserID).WithField("req", req).
 			Warn("No need to send email")
 	}
 	if err != nil {
