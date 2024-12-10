@@ -10539,36 +10539,6 @@ class S {
     );
   }
 
-  /// `Add Trusted Contact`
-  String get addTrustedContact {
-    return Intl.message(
-      'Add Trusted Contact',
-      name: 'addTrustedContact',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `My Trusted Contact`
-  String get myTrustedContact {
-    return Intl.message(
-      'My Trusted Contact',
-      name: 'myTrustedContact',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Trusted Contacts`
-  String get trustedContacts {
-    return Intl.message(
-      'Trusted Contacts',
-      name: 'trustedContacts',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Legacy`
   String get legacy {
     return Intl.message(
@@ -10579,10 +10549,10 @@ class S {
     );
   }
 
-  /// `Legacy is a feature that allows you to choose a trusted contact who can access your data in case of an emergency.`
+  /// `Legacy allows trusted contacts to access your account in your absence.`
   String get legacyPageDesc {
     return Intl.message(
-      'Legacy is a feature that allows you to choose a trusted contact who can access your data in case of an emergency.',
+      'Legacy allows trusted contacts to access your account in your absence.',
       name: 'legacyPageDesc',
       desc: '',
       args: [],
@@ -10594,6 +10564,36 @@ class S {
     return Intl.message(
       'Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.',
       name: 'legacyPageDesc2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Legacy accounts`
+  String get legacyAccounts {
+    return Intl.message(
+      'Legacy accounts',
+      name: 'legacyAccounts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Trusted contacts`
+  String get trustedContacts {
+    return Intl.message(
+      'Trusted contacts',
+      name: 'trustedContacts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Trusted Contact`
+  String get addTrustedContact {
+    return Intl.message(
+      'Add Trusted Contact',
+      name: 'addTrustedContact',
       desc: '',
       args: [],
     );
@@ -10678,6 +10678,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'km'),
       Locale.fromSubtags(languageCode: 'ko'),
       Locale.fromSubtags(languageCode: 'lt'),
+      Locale.fromSubtags(languageCode: 'ml'),
       Locale.fromSubtags(languageCode: 'nl'),
       Locale.fromSubtags(languageCode: 'no'),
       Locale.fromSubtags(languageCode: 'pl'),

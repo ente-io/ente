@@ -324,7 +324,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "albums": MessageLookupByLibrary.simpleMessage("Albums"),
         "allClear": MessageLookupByLibrary.simpleMessage("✨ Tout est effacé"),
         "allMemoriesPreserved": MessageLookupByLibrary.simpleMessage(
-            "Tous les souvenirs conservés"),
+            "Tous les souvenirs sont conservés"),
         "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
             "Tous les groupements pour cette personne seront réinitialisés, et vous perdrez toutes les suggestions faites pour cette personne"),
         "allow": MessageLookupByLibrary.simpleMessage("Autoriser"),
@@ -687,7 +687,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteFromDevice":
             MessageLookupByLibrary.simpleMessage("Supprimer de l\'appareil"),
         "deleteFromEnte":
-            MessageLookupByLibrary.simpleMessage("Supprimé de Ente"),
+            MessageLookupByLibrary.simpleMessage("Supprimer de Ente"),
         "deleteItemCount": m22,
         "deleteLocation":
             MessageLookupByLibrary.simpleMessage("Supprimer la localisation"),

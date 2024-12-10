@@ -1022,8 +1022,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Leave shared album?"),
         "left": MessageLookupByLibrary.simpleMessage("Left"),
         "legacy": MessageLookupByLibrary.simpleMessage("Legacy"),
+        "legacyAccounts":
+            MessageLookupByLibrary.simpleMessage("Legacy accounts"),
         "legacyPageDesc": MessageLookupByLibrary.simpleMessage(
-            "Legacy is a feature that allows you to choose a trusted contact who can access your data in case of an emergency."),
+            "Legacy allows trusted contacts to access your account in your absence."),
         "legacyPageDesc2": MessageLookupByLibrary.simpleMessage(
             "Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account."),
         "light": MessageLookupByLibrary.simpleMessage("Light"),
@@ -1158,8 +1160,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "movedToTrash": MessageLookupByLibrary.simpleMessage("Moved to trash"),
         "movingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("Moving files to album..."),
-        "myTrustedContact":
-            MessageLookupByLibrary.simpleMessage("My Trusted Contact"),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
         "nameTheAlbum": MessageLookupByLibrary.simpleMessage("Name the album"),
         "networkConnectionRefusedErr": MessageLookupByLibrary.simpleMessage(
@@ -1749,7 +1749,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "trashDaysLeft": m73,
         "trim": MessageLookupByLibrary.simpleMessage("Trim"),
         "trustedContacts":
-            MessageLookupByLibrary.simpleMessage("Trusted Contacts"),
+            MessageLookupByLibrary.simpleMessage("Trusted contacts"),
         "tryAgain": MessageLookupByLibrary.simpleMessage("Try again"),
         "turnOnBackupForAutoUpload": MessageLookupByLibrary.simpleMessage(
             "Turn on backup to automatically upload files added to this device folder to Ente."),

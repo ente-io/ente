@@ -574,7 +574,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Kontolöschung bestätigen"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "Ja, ich möchte dieses Konto und alle enthaltenen Daten über alle Apps endgültig und unwiderruflich löschen."),
+            "Ja, ich möchte dieses Konto und alle enthaltenen Daten über alle Apps hinweg endgültig löschen."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Passwort wiederholen"),
         "confirmPlanChange":
@@ -661,7 +661,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteConfirmDialogBody": MessageLookupByLibrary.simpleMessage(
             "Dieses Konto ist mit anderen Ente-Apps verknüpft, falls du welche verwendest. Deine hochgeladenen Daten werden in allen Ente-Apps zur Löschung vorgemerkt und dein Konto wird endgültig gelöscht."),
         "deleteEmailRequest": MessageLookupByLibrary.simpleMessage(
-            "Bitte sende eine E-Mail an <warning>account-deletion@ente.io</warning> von Deiner bei uns hinterlegten E-Mail-Adresse."),
+            "Bitte sende eine E-Mail an <warning>account-deletion@ente.io</warning> von Ihrer bei uns hinterlegten E-Mail-Adresse."),
         "deleteEmptyAlbums":
             MessageLookupByLibrary.simpleMessage("Leere Alben löschen"),
         "deleteEmptyAlbumsWithQuestionMark":
@@ -803,7 +803,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enteCanEncryptAndPreserveFilesOnlyIfYouGrant":
             MessageLookupByLibrary.simpleMessage(
                 "Ente kann Dateien nur verschlüsseln und sichern, wenn du den Zugriff darauf gewährst"),
-        "entePhotosPerm": MessageLookupByLibrary.simpleMessage(""),
+        "entePhotosPerm": MessageLookupByLibrary.simpleMessage(
+            "Ente <i> benötigt Berechtigung, um <i> Ihre Fotos zu sichern"),
         "enteSubscriptionPitch": MessageLookupByLibrary.simpleMessage(
             "Ente sichert deine Erinnerungen, sodass sie dir nie verloren gehen, selbst wenn du dein Gerät verlierst."),
         "enteSubscriptionShareWithFamily": MessageLookupByLibrary.simpleMessage(

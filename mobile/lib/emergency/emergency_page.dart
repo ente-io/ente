@@ -1,5 +1,6 @@
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
+import "package:flutter_svg/flutter_svg.dart";
 import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/emergency/emergency_service.dart";
@@ -7,6 +8,8 @@ import "package:photos/emergency/model.dart";
 import "package:photos/emergency/other_contact_page.dart";
 import "package:photos/emergency/select_contact_page.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
+import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
@@ -36,6 +39,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
   late int currentUserID;
   EmergencyInfo? info;
   final Logger _logger = Logger('EmergencyPage');
+  bool hasTrustedContact = false;
 
   @override
   void initState() {
@@ -56,6 +60,9 @@ class _EmergencyPageState extends State<EmergencyPage> {
       if (mounted) {
         setState(() {
           info = result;
+          if (info != null) {
+            hasTrustedContact = info!.contacts.isNotEmpty;
+          }
         });
       }
     } catch (e) {
@@ -140,19 +147,18 @@ class _EmergencyPageState extends State<EmergencyPage> {
               ),
           if (info != null)
             SliverPadding(
-              padding: const EdgeInsets.only(top: 12, left: 16, right: 16),
+              padding:
+                  const EdgeInsets.only(top: 16, left: 4, right: 4, bottom: 8),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     if (index == 0 && trustedContacts.isNotEmpty) {
                       return MenuSectionTitle(
-                        title: S.of(context).myTrustedContact,
-                        iconData: Icons.emergency_outlined,
+                        title: S.of(context).trustedContacts,
                       );
                     } else if (index > 0 && index <= trustedContacts.length) {
                       final listIndex = index - 1;
                       final contact = trustedContacts[listIndex];
-                      final isLastItem = index == trustedContacts.length;
                       return Column(
                         children: [
                           MenuItemWidget(
@@ -177,40 +183,46 @@ class _EmergencyPageState extends State<EmergencyPage> {
                               await showRevokeOrRemoveDialog(context, contact);
                             },
                             isTopBorderRadiusRemoved: listIndex > 0,
-                            isBottomBorderRadiusRemoved: !isLastItem,
+                            isBottomBorderRadiusRemoved: true,
                             singleBorderRadius: 8,
                           ),
-                          isLastItem
-                              ? const SizedBox.shrink()
-                              : DividerWidget(
-                                  dividerType: DividerType.menu,
-                                  bgColor:
-                                      getEnteColorScheme(context).fillFaint,
-                                ),
+                          DividerWidget(
+                            dividerType: DividerType.menu,
+                            bgColor: getEnteColorScheme(context).fillFaint,
+                          ),
                         ],
                       );
                     } else if (index == (1 + trustedContacts.length)) {
                       if (trustedContacts.isEmpty) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 24.0,
-                            vertical: 12,
+                            horizontal: 16.0,
+                            vertical: 0,
                           ),
                           child: Column(
                             children: [
-                              Icon(
-                                Icons.emergency_outlined,
-                                color: colorScheme.strokeMuted,
-                                size: 48,
-                              ),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 20),
                               Text(
-                                "Your trusted contacts can help in recovering "
-                                "your account.",
-                                textAlign: TextAlign.center,
-                                style: getEnteTextTheme(context).bodyMuted,
+                                context.l10n.legacyPageDesc,
+                                style: getEnteTextTheme(context).body,
                               ),
-                              const SizedBox(height: 24),
+                              SizedBox(
+                                height: 200,
+                                width: 200,
+                                child: SvgPicture.asset(
+                                  getEnteColorScheme(context).backdropBase ==
+                                          backgroundBaseDark
+                                      ? "assets/icons/legacy-dark.svg"
+                                      : "assets/icons/legacy-light.svg",
+                                  width: 156,
+                                  height: 152,
+                                ),
+                              ),
+                              Text(
+                                context.l10n.legacyPageDesc2,
+                                style: getEnteTextTheme(context).smallMuted,
+                              ),
+                              const SizedBox(height: 8),
                               ButtonWidget(
                                 buttonType: ButtonType.primary,
                                 labelText: S.of(context).addTrustedContact,
@@ -255,14 +267,23 @@ class _EmergencyPageState extends State<EmergencyPage> {
             ),
           if (info != null && info!.othersEmergencyContact.isNotEmpty)
             SliverPadding(
-              padding: const EdgeInsets.only(top: 24, left: 16, right: 16),
+              padding: const EdgeInsets.only(top: 0, left: 16, right: 16),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     if (index == 0 && (othersTrustedContacts.isNotEmpty)) {
-                      return const MenuSectionTitle(
-                        title: "You're Their Trusted Contact",
-                        iconData: Icons.workspace_premium_outlined,
+                      return Column(
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: DividerWidget(
+                              dividerType: DividerType.solid,
+                            ),
+                          ),
+                          MenuSectionTitle(
+                            title: context.l10n.legacyAccounts,
+                          ),
+                        ],
                       );
                     } else if (index > 0 &&
                         index <= othersTrustedContacts.length) {
