@@ -168,27 +168,31 @@ class _OtherContactPageState extends State<OtherContactPage> {
                 // isTopBorderRadiusRemoved: true,
               ),
             if (recoverySession != null && recoverySession!.status == "READY")
-              ButtonWidget(
-                // icon: Icons.start_outlined,
-                buttonType: ButtonType.primary,
-                labelText: context.l10n.recoverAccount,
-                onTap: () async {
-                  try {
-                    final (String key, KeyAttributes attributes) =
-                        await EmergencyContactService.instance
-                            .getRecoveryInfo(recoverySession!);
-                    routeToPage(
-                      context,
-                      RecoverOthersAccount(key, attributes, recoverySession!),
-                    ).ignore();
-                  } catch (e) {
-                    showGenericErrorDialog(context: context, error: e).ignore();
-                  }
-                },
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: ButtonWidget(
+                  buttonType: ButtonType.primary,
+                  labelText: context.l10n.recoverAccount,
+                  onTap: () async {
+                    try {
+                      final (String key, KeyAttributes attributes) =
+                          await EmergencyContactService.instance
+                              .getRecoveryInfo(recoverySession!);
+                      routeToPage(
+                        context,
+                        RecoverOthersAccount(key, attributes, recoverySession!),
+                      ).ignore();
+                    } catch (e) {
+                      showGenericErrorDialog(context: context, error: e)
+                          .ignore();
+                    }
+                  },
+                ),
               ),
-            if (recoverySession != null && recoverySession!.status == "WAITING")
+            if (recoverySession != null &&
+                (recoverySession!.status == "WAITING" ||
+                    recoverySession!.status == "READY"))
               ButtonWidget(
-                // icon: Icons.start_outlined,
                 buttonType: ButtonType.neutral,
                 labelText: S.of(context).cancelAccountRecovery,
                 shouldSurfaceExecutionStates: false,
