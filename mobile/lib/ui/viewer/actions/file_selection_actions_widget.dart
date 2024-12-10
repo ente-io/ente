@@ -827,7 +827,7 @@ class _FileSelectionActionsWidgetState
 
     final dialog = createProgressDialog(
       context,
-      S.of(context).downloading + "$downloadedFiles/$totalFiles",
+      S.of(context).downloading + " ($downloadedFiles/$totalFiles)",
       isDismissible: true,
     );
     await dialog.show();
