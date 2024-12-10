@@ -53,6 +53,26 @@ func (c *Controller) RejectRecovery(ctx *gin.Context,
 	return nil
 }
 
+func (c *Controller) ApproveRecovery(ctx *gin.Context,
+	userID int64,
+	req ente.RecoveryIdentifier) error {
+	if req.EmergencyContactID == req.UserID {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage("contact and user can not be same"), "")
+	}
+	if req.UserID != userID {
+		return stacktrace.Propagate(ente.ErrPermissionDenied, "only account owner can reject recovery")
+	}
+	hasUpdate, err := c.Repo.UpdateRecoveryStatusForID(ctx, req.ID, ente.RecoveryStatusReady)
+	if !hasUpdate {
+		log.WithField("userID", userID).WithField("req", req).
+			Warn("no row updated while rejecting recovery")
+	}
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	return nil
+}
+
 func (c *Controller) StopRecovery(ctx *gin.Context,
 	userID int64,
 	req ente.RecoveryIdentifier) error {

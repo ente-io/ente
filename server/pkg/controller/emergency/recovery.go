@@ -13,7 +13,7 @@ func (c *Controller) GetRecoveryInfo(ctx *gin.Context,
 	userID int64,
 	sessionID uuid.UUID,
 ) (*string, *ente.KeyAttributes, error) {
-	contact, err := c.validateSessionAndGetContact(ctx, userID, sessionID)
+	contact, err := c.checkRecoveryAndGetContact(ctx, userID, sessionID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -30,7 +30,7 @@ func (c *Controller) GetRecoveryInfo(ctx *gin.Context,
 
 func (c *Controller) InitChangePassword(ctx *gin.Context, userID int64, request ente.RecoverySrpSetupRequest) (*ente.SetupSRPResponse, error) {
 	sessionID := request.RecoveryID
-	contact, err := c.validateSessionAndGetContact(ctx, userID, sessionID)
+	contact, err := c.checkRecoveryAndGetContact(ctx, userID, sessionID)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (c *Controller) InitChangePassword(ctx *gin.Context, userID int64, request 
 
 func (c *Controller) ChangePassword(ctx *gin.Context, userID int64, request ente.RecoveryUpdateSRPAndKeysRequest) (*ente.UpdateSRPSetupResponse, error) {
 	sessionID := request.RecoveryID
-	contact, err := c.validateSessionAndGetContact(ctx, userID, sessionID)
+	contact, err := c.checkRecoveryAndGetContact(ctx, userID, sessionID)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (c *Controller) ChangePassword(ctx *gin.Context, userID int64, request ente
 	return resp, nil
 }
 
-func (c *Controller) validateSessionAndGetContact(ctx *gin.Context,
+func (c *Controller) checkRecoveryAndGetContact(ctx *gin.Context,
 	userID int64,
 	sessionID uuid.UUID) (*emergency.ContactRow, error) {
 	recoverRow, err := c.Repo.GetRecoverRowByID(ctx, sessionID)

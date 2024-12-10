@@ -2,6 +2,7 @@ package emergency
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/utils/time"
@@ -62,9 +63,15 @@ FROM emergency_recovery WHERE (user_id=$1  OR emergency_contact_id=$1) AND statu
 
 func (repo *Repository) UpdateRecoveryStatusForID(ctx context.Context, sessionID uuid.UUID, status ente.RecoveryStatus) (bool, error) {
 	validPrevStatus := validPreviousStatus(status)
-	result, err := repo.DB.ExecContext(ctx, `UPDATE emergency_recovery SET status=$1 WHERE id=$2 and status = ANY($3)`, status, sessionID, pq.Array(validPrevStatus))
-	if err != nil {
-		return false, stacktrace.Propagate(err, "")
+	var result sql.Result
+	var err error
+	if status == ente.RecoveryStatusReady {
+		result, err = repo.DB.ExecContext(ctx, `UPDATE emergency_recovery SET status=$1, wait_till=$2 WHERE id=$3 and status = ANY($4)`, status, time.Microseconds(), sessionID, pq.Array(validPrevStatus))
+	} else {
+		result, err = repo.DB.ExecContext(ctx, `UPDATE emergency_recovery SET status=$1 WHERE id=$2 and status = ANY($3)`, status, sessionID, pq.Array(validPrevStatus))
+		if err != nil {
+			return false, stacktrace.Propagate(err, "")
+		}
 	}
 	rows, _ := result.RowsAffected()
 	return rows > 0, nil

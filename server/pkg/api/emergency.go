@@ -96,6 +96,20 @@ func (h *EmergencyHandler) RejectRecovery(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
+func (h *EmergencyHandler) ApproveRecovery(c *gin.Context) {
+	var request ente.RecoveryIdentifier
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), err.Error()))
+		return
+	}
+	err := h.Controller.ApproveRecovery(c, auth.GetUserID(c.Request.Header), request)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
+}
+
 func (h *EmergencyHandler) GetRecoveryInfo(c *gin.Context) {
 	sessionID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
