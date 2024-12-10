@@ -6,7 +6,6 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:media_kit/media_kit.dart";
 import "package:media_kit_video/media_kit_video.dart";
-import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/pause_video_event.dart";
@@ -15,18 +14,16 @@ import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/theme/colors.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/toast_util.dart";
 
-class VideoWidgetMediaKit extends StatefulWidget {
+class VideoWidgetMediaKitNew extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
-  const VideoWidgetMediaKit(
+  const VideoWidgetMediaKitNew(
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
@@ -34,12 +31,12 @@ class VideoWidgetMediaKit extends StatefulWidget {
   });
 
   @override
-  State<VideoWidgetMediaKit> createState() => _VideoWidgetMediaKitState();
+  State<VideoWidgetMediaKitNew> createState() => _VideoWidgetMediaKitNewState();
 }
 
-class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
+class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
     with WidgetsBindingObserver {
-  final Logger _logger = Logger("VideoWidgetMediaKit");
+  final Logger _logger = Logger("VideoWidgetMediaKitNew");
   static const verticalMargin = 72.0;
   late final player = Player();
   VideoController? controller;
@@ -124,61 +121,20 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    return Hero(
-      tag: widget.tagPrefix! + widget.file.tag,
-      child: MaterialVideoControlsTheme(
-        normal: MaterialVideoControlsThemeData(
-          backdropColor: null,
-          automaticallyImplySkipNextButton: false,
-          automaticallyImplySkipPreviousButton: false,
-          seekOnDoubleTap: false,
-          displaySeekBar: true,
-          seekBarMargin: const EdgeInsets.only(bottom: verticalMargin),
-          bottomButtonBarMargin: const EdgeInsets.only(bottom: 112),
-          controlsHoverDuration: const Duration(seconds: 3),
-          seekBarHeight: 2,
-          seekBarThumbSize: 16,
-          seekBarBufferColor: Colors.transparent,
-          seekBarThumbColor: backgroundElevatedLight,
-          seekBarColor: fillMutedDark,
-          seekBarPositionColor: colorScheme.primary300,
-          seekBarContainerHeight: 56,
-          seekBarAlignment: Alignment.center,
-
-          ///topButtonBarMargin is needed for keeping the buffering loading
-          ///indicator to be center aligned
-          topButtonBarMargin: const EdgeInsets.only(top: verticalMargin),
-          bottomButtonBar: [
-            const Spacer(),
-            PausePlayAndDuration(controller?.player),
-            const Spacer(),
-          ],
-          primaryButtonBar: [],
-        ),
-        fullscreen: const MaterialVideoControlsThemeData(),
-        child: GestureDetector(
-          onVerticalDragUpdate: isGuestView
-              ? null
-              : (d) => {
-                    if (d.delta.dy > dragSensitivity)
-                      {
-                        Navigator.of(context).pop(),
-                      }
-                    else if (d.delta.dy < (dragSensitivity * -1))
-                      {
-                        showDetailsSheet(context, widget.file),
-                      },
-                  },
-          child: Center(
-            child: controller != null
-                ? Video(
-                    controller: controller!,
-                  )
-                : _getLoadingWidget(),
-          ),
-        ),
-      ),
+    return Center(
+      child: controller != null
+          ? Video(
+              controller: controller!,
+              controls: (state) {
+                return Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    PlayPauseButtonMediaKit(controller),
+                  ],
+                );
+              },
+            )
+          : _getLoadingWidget(),
     );
   }
 
@@ -218,6 +174,16 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
         if (mounted) {
           setState(() {});
         }
+      });
+    }
+  }
+
+  void _setVideoController(String url) {
+    if (mounted) {
+      setState(() {
+        player.setPlaylistMode(PlaylistMode.single);
+        controller = VideoController(player);
+        player.open(Media(url), play: _isAppInFG);
       });
     }
   }
@@ -265,103 +231,83 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
       ),
     );
   }
-
-  void _setVideoController(String url) {
-    if (mounted) {
-      setState(() {
-        player.setPlaylistMode(PlaylistMode.single);
-        controller = VideoController(player);
-        player.open(Media(url), play: _isAppInFG);
-      });
-    }
-  }
 }
 
-class PausePlayAndDuration extends StatefulWidget {
-  final Player? player;
-  const PausePlayAndDuration(this.player, {super.key});
+class PlayPauseButtonMediaKit extends StatefulWidget {
+  final VideoController? controller;
+  const PlayPauseButtonMediaKit(
+    this.controller, {
+    super.key,
+  });
 
   @override
-  State<PausePlayAndDuration> createState() => _PausePlayAndDurationState();
+  State<PlayPauseButtonMediaKit> createState() => _PlayPauseButtonState();
 }
 
-class _PausePlayAndDurationState extends State<PausePlayAndDuration> {
-  Color backgroundColor = fillStrongLight;
+class _PlayPauseButtonState extends State<PlayPauseButtonMediaKit> {
+  bool _isPlaying = true;
+  late final StreamSubscription<bool>? isPlayingStreamSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+
+    isPlayingStreamSubscription =
+        widget.controller?.player.stream.playing.listen((isPlaying) {
+      setState(() {
+        _isPlaying = isPlaying;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    isPlayingStreamSubscription?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (details) {
-        setState(() {
-          backgroundColor = fillMutedDark;
-        });
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        if (widget.controller?.player.state.playing ?? false) {
+          widget.controller?.player.pause();
+        } else {
+          widget.controller?.player.play();
+        }
       },
-      onTapUp: (details) {
-        Future.delayed(const Duration(milliseconds: 175), () {
-          if (mounted) {
-            setState(() {
-              backgroundColor = fillStrongLight;
-            });
-          }
-        });
-      },
-      onTapCancel: () {
-        Future.delayed(const Duration(milliseconds: 175), () {
-          if (mounted) {
-            setState(() {
-              backgroundColor = fillStrongLight;
-            });
-          }
-        });
-      },
-      onTap: () => widget.player!.playOrPause(),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeInBack,
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      child: Container(
+        width: 54,
+        height: 54,
         decoration: BoxDecoration(
-          color: backgroundColor,
+          color: Colors.black.withOpacity(0.3),
+          shape: BoxShape.circle,
           border: Border.all(
             color: strokeFaintDark,
             width: 1,
           ),
-          borderRadius: BorderRadius.circular(24),
         ),
-        child: AnimatedSize(
-          duration: const Duration(seconds: 2),
-          curve: Curves.easeInOutExpo,
-          child: Row(
-            children: [
-              StreamBuilder(
-                builder: (context, snapshot) {
-                  final bool isPlaying = snapshot.data ?? false;
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 350),
-                    switchInCurve: Curves.easeInOutCirc,
-                    switchOutCurve: Curves.easeInOutCirc,
-                    child: Icon(
-                      key: ValueKey(
-                        isPlaying ? "pause_button" : "play_button",
-                      ),
-                      isPlaying
-                          ? Icons.pause_rounded
-                          : Icons.play_arrow_rounded,
-                      color: backdropBaseLight,
-                      size: 24,
-                    ),
-                  );
-                },
-                initialData: widget.player?.state.playing,
-                stream: widget.player?.stream.playing,
-              ),
-              const SizedBox(width: 8),
-              MaterialPositionIndicator(
-                style: getEnteTextTheme(context).tiny.copyWith(
-                      color: textBaseDark,
-                    ),
-              ),
-              const SizedBox(width: 10),
-            ],
-          ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 250),
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return ScaleTransition(scale: animation, child: child);
+          },
+          switchInCurve: Curves.easeInOutQuart,
+          switchOutCurve: Curves.easeInOutQuart,
+          child: _isPlaying
+              ? const Icon(
+                  Icons.pause,
+                  size: 32,
+                  key: ValueKey("pause"),
+                  color: Colors.white,
+                )
+              : const Icon(
+                  Icons.play_arrow,
+                  size: 36,
+                  key: ValueKey("play"),
+                  color: Colors.white,
+                ),
         ),
       ),
     );

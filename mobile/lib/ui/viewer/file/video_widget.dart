@@ -4,7 +4,7 @@ import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/use_media_kit_for_video.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/ui/viewer/file/video_widget_media_kit.dart";
+import "package:photos/ui/viewer/file/video_widget_media_kit_new.dart";
 import "package:photos/ui/viewer/file/video_widget_native.dart";
 
 class VideoWidget extends StatefulWidget {
@@ -53,7 +53,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         playbackCallback: widget.playbackCallback,
       );
     } else {
-      return VideoWidgetMediaKit(
+      return VideoWidgetMediaKitNew(
         widget.file,
         tagPrefix: widget.tagPrefix,
         playbackCallback: widget.playbackCallback,
