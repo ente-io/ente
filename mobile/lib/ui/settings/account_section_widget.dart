@@ -157,7 +157,7 @@ class AccountSectionWidget extends StatelessWidget {
                 await LocalAuthenticationService.instance
                     .requestLocalAuthentication(
                   context,
-                  S.of(context).authToChangeYourPassword,
+                  S.of(context).authToManageLegacy,
                 );
             if (hasAuthenticated) {
               Navigator.of(context).push(
