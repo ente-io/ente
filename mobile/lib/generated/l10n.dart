@@ -10609,6 +10609,26 @@ class S {
     );
   }
 
+  /// `A trusted contact is trying to access your account`
+  String get recoveryWarning {
+    return Intl.message(
+      'A trusted contact is trying to access your account',
+      name: 'recoveryWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reject recovery`
+  String get rejectRecovery {
+    return Intl.message(
+      'Reject recovery',
+      name: 'rejectRecovery',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Cancel recovery`
   String get cancelAccountRecovery {
     return Intl.message(

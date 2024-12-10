@@ -1527,6 +1527,8 @@
   "trustedContacts": "Trusted contacts",
   "addTrustedContact": "Add Trusted Contact",
   "removeInvite": "Remove invite",
+  "recoveryWarning": "A trusted contact is trying to access your account",
+  "rejectRecovery": "Reject recovery",
   "cancelAccountRecovery": "Cancel recovery",
   "cancelAccountRecoveryBody": "Are you sure you want to cancel recovery?",
   "startAccountRecoveryTitle": "Start recovery",

@@ -186,12 +186,12 @@ class _OtherContactPageState extends State<OtherContactPage> {
                     body: S.of(context).cancelAccountRecoveryBody,
                     isCritical: true,
                     firstButtonOnTap: () async {
-                      EmergencyContactService.instance
+                      await EmergencyContactService.instance
                           .stopRecovery(recoverySession!);
                     },
                   );
                   if (actionResult?.action == ButtonAction.first) {
-                    _fetchData();
+                    _fetchData().ignore();
                   }
                 },
               ),
@@ -217,6 +217,7 @@ class _OtherContactPageState extends State<OtherContactPage> {
                   body: "Are you sure your want to stop being a trusted "
                       "contact for $accountEmail?",
                   isCritical: true,
+                  
                   firstButtonOnTap: () async {
                     try {
                       await EmergencyContactService.instance.updateContact(

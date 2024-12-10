@@ -110,11 +110,10 @@ class _EmergencyPageState extends State<EmergencyPage> {
                     (context, index) {
                       if (index == 0) {
                         return Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
+                          padding: const EdgeInsets.only(bottom: 16.0),
                           child: NotificationWidget(
                             startIcon: Icons.warning_amber_rounded,
-                            text: "Your trusted contact is trying to "
-                                "access your account",
+                            text: context.l10n.recoveryWarning,
                             actionIcon: null,
                             onTap: () {},
                           ),
@@ -148,7 +147,11 @@ class _EmergencyPageState extends State<EmergencyPage> {
           if (info != null)
             SliverPadding(
               padding: const EdgeInsets.only(
-                  top: 16, left: 16, right: 16, bottom: 8),
+                top: 16,
+                left: 16,
+                right: 16,
+                bottom: 8,
+              ),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
@@ -479,7 +482,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
         ),
       ],
       body:
-          "You have been invited to be a trusted contact by ${contact.user.email}",
+          "You have been invited to be a legacy contact by ${contact.user.email}",
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     return;
@@ -491,7 +494,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
       context: context,
       buttons: [
         ButtonWidget(
-          labelText: "Reject Recovery",
+          labelText: context.l10n.rejectRecovery,
           buttonSize: ButtonSize.large,
           shouldStickToDarkTheme: true,
           buttonType: ButtonType.critical,
@@ -503,22 +506,22 @@ class _EmergencyPageState extends State<EmergencyPage> {
             if (mounted) {
               setState(() {});
             }
-            _fetchData();
+            _fetchData().ignore();
           },
           isInAlert: true,
         ),
-        if (kDebugMode)
-          ButtonWidget(
-            labelText: "Approve Recovery",
-            buttonType: ButtonType.primary,
-            buttonSize: ButtonSize.large,
-            buttonAction: ButtonAction.second,
-            shouldStickToDarkTheme: true,
-            onTap: () async {
-              showToast(context, "Coming soon for internal users");
-            },
-            isInAlert: true,
-          ),
+        // if (kDebugMode)
+        //   ButtonWidget(
+        //     labelText: "Approve recovery",
+        //     buttonType: ButtonType.primary,
+        //     buttonSize: ButtonSize.large,
+        //     buttonAction: ButtonAction.second,
+        //     shouldStickToDarkTheme: true,
+        //     onTap: () async {
+        //       showToast(context, "Coming soon for internal users");
+        //     },
+        //     isInAlert: true,
+        //   ),
         ButtonWidget(
           labelText: S.of(context).cancel,
           buttonType: ButtonType.tertiary,

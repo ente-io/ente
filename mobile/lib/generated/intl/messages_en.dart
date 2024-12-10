@@ -1366,6 +1366,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Your recovery key is the only way to recover your photos if you forget your password. You can find your recovery key in Settings > Account.\n\nPlease enter your recovery key here to verify that you have saved it correctly."),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Recovery successful!"),
+        "recoveryWarning": MessageLookupByLibrary.simpleMessage(
+            "A trusted contact is trying to access your account"),
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(
             "The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish)."),
         "recreatePasswordTitle":
@@ -1384,6 +1386,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "referrals": MessageLookupByLibrary.simpleMessage("Referrals"),
         "referralsAreCurrentlyPaused": MessageLookupByLibrary.simpleMessage(
             "Referrals are currently paused"),
+        "rejectRecovery":
+            MessageLookupByLibrary.simpleMessage("Reject recovery"),
         "remindToEmptyDeviceTrash": MessageLookupByLibrary.simpleMessage(
             "Also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space"),
         "remindToEmptyEnteTrash": MessageLookupByLibrary.simpleMessage(

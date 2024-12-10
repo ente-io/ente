@@ -23,8 +23,8 @@ class RecoverOthersAccount extends StatefulWidget {
     this.recoveryKey,
     this.attributes,
     this.sessions, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<RecoverOthersAccount> createState() => _RecoverOthersAccountState();
