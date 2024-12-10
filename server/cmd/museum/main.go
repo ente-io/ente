@@ -166,7 +166,7 @@ func main() {
 	fileRepo := &repo.FileRepository{DB: db, S3Config: s3Config, QueueRepo: queueRepo,
 		ObjectRepo: objectRepo, ObjectCleanupRepo: objectCleanupRepo,
 		ObjectCopiesRepo: objectCopiesRepo, UsageRepo: usageRepo}
-	fileDataRepo := &fileDataRepo.Repository{DB: db}
+	fileDataRepo := &fileDataRepo.Repository{DB: db, ObjectCleanupRepo: objectCleanupRepo}
 	familyRepo := &repo.FamilyRepository{DB: db}
 	trashRepo := &repo.TrashRepository{DB: db, ObjectRepo: objectRepo, FileRepo: fileRepo, QueueRepo: queueRepo}
 	publicCollectionRepo := repo.NewPublicCollectionRepository(db, viper.GetString("apps.public-albums"))
@@ -428,6 +428,7 @@ func main() {
 	privateAPI.GET("/files/preview/v2/:fileID", fileHandler.GetThumbnail)
 
 	privateAPI.PUT("/files/data", fileHandler.PutFileData)
+	privateAPI.PUT("/files/video-data", fileHandler.PutVideoData)
 	privateAPI.POST("/files/data/status-diff", fileHandler.FileDataStatusDiff)
 	privateAPI.POST("/files/data/fetch", fileHandler.GetFilesData)
 	privateAPI.GET("/files/data/fetch", fileHandler.GetFileData)

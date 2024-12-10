@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/ente-io/stacktrace"
 	log "github.com/sirupsen/logrus"
@@ -38,6 +39,22 @@ func (repo *ObjectCleanupRepository) AddTempObject(tempObject ente.TempObject, e
 func (repo *ObjectCleanupRepository) RemoveTempObjectKey(ctx context.Context, tx *sql.Tx, objectKey string, dc string) error {
 	_, err := tx.ExecContext(ctx, `DELETE FROM temp_objects WHERE object_key = $1`, objectKey)
 	return stacktrace.Propagate(err, "")
+}
+
+// RemoveTempObjectFromDC will also return how many rows were affected
+func (repo *ObjectCleanupRepository) RemoveTempObjectFromDC(ctx context.Context, tx *sql.Tx, objectKey string, dc string) error {
+	res, err := tx.ExecContext(ctx, `DELETE FROM temp_objects WHERE object_key = $1 and bucket_id = $2`, objectKey, dc)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if rowsAffected != 1 {
+		return stacktrace.Propagate(fmt.Errorf("only one row should be affected not %d", rowsAffected), "")
+	}
+	return nil
 }
 
 // GetExpiredObjects returns the list of object keys that have expired

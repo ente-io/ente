@@ -25,10 +25,32 @@ func (h *FileHandler) PutFileData(ctx *gin.Context) {
 		version := 1
 		reqInt.Version = &version
 	}
-	err := h.FileDataCtrl.InsertOrUpdate(ctx, &req)
+	err := h.FileDataCtrl.InsertOrUpdateMetadata(ctx, &req)
 	if err != nil {
 		handler.Error(ctx, err)
 
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{})
+}
+func (h *FileHandler) PutVideoData(ctx *gin.Context) {
+	var req fileData.VidPreviewRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		handler.Error(ctx, ente.NewBadRequestWithMessage(err.Error()))
+		return
+	}
+	if err := req.Validate(); err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+	reqInt := &req
+	if reqInt.Version == nil {
+		version := 1
+		reqInt.Version = &version
+	}
+	err := h.FileDataCtrl.InsertVideoPreview(ctx, &req)
+	if err != nil {
+		handler.Error(ctx, err)
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{})
@@ -72,7 +94,7 @@ func (h *FileHandler) FileDataStatusDiff(ctx *gin.Context) {
 
 func (h *FileHandler) GetFileData(ctx *gin.Context) {
 	var req fileData.GetFileData
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, ente.NewBadRequestWithMessage(err.Error()))
 		return
 	}
@@ -88,23 +110,21 @@ func (h *FileHandler) GetFileData(ctx *gin.Context) {
 
 func (h *FileHandler) GetPreviewUploadURL(c *gin.Context) {
 	var request fileData.PreviewUploadUrlRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := c.ShouldBindQuery(&request); err != nil {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
 		return
 	}
-	url, err := h.FileDataCtrl.PreviewUploadURL(c, request)
+	resp, err := h.FileDataCtrl.PreviewUploadURL(c, request)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"url": url,
-	})
+	c.JSON(http.StatusOK, resp)
 }
 
 func (h *FileHandler) GetPreviewURL(c *gin.Context) {
 	var request fileData.GetPreviewURLRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := c.ShouldBindQuery(&request); err != nil {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
 		return
 	}

@@ -30,6 +30,14 @@ func NewID(prefix string) (*string, error) {
 	return &result, nil
 }
 
+func MustNewID(prefix string) string {
+	id, err := NewID(prefix)
+	if err != nil {
+		panic(err)
+	}
+	return *id
+}
+
 func ServerReqID() string {
 	// Generate a nanoid with a custom alphabet and length of 22
 	id, err := NewID("ser")
