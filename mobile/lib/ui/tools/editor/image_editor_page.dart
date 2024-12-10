@@ -27,6 +27,7 @@ import 'package:photos/ui/tools/editor/filtered_image.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
+import "package:photos/utils/photo_manager_util.dart";
 import 'package:photos/utils/toast_util.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
@@ -358,7 +359,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               ".JPEG";
       //Disabling notifications for assets changing to insert the file into
       //files db before triggering a sync.
-      await PhotoManager.stopChangeNotify();
+      await PhotoManagerSafe.stopChangeNotify(widget.originalFile.title!);
       final AssetEntity? newAsset =
           await (PhotoManager.editor.saveImage(result, filename: fileName));
       final newFile = await ente.EnteFile.fromAsset(
@@ -410,7 +411,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       showToast(context, S.of(context).oopsCouldNotSaveEdits);
       _logger.severe(e, s);
     } finally {
-      await PhotoManager.startChangeNotify();
+      await PhotoManagerSafe.startChangeNotify(widget.originalFile.title!);
     }
   }
 
