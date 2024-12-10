@@ -1514,5 +1514,34 @@
   "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
   "allow": "Allow",
   "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
-  "seePublicAlbumLinksInApp": "See public album links in app"
+  "seePublicAlbumLinksInApp": "See public album links in app",
+  "emergencyContacts": "Emergency Contacts",
+  "acceptTrustInvite": "Accept Invite",
+  "declineTrustInvite": "Decline Invite",
+  "removeYourselfAsTrustedContact": "Remove yourself as trusted contact",
+
+  "legacy" : "Legacy",
+  "legacyPageDesc": "Legacy allows trusted contacts to access your account in your absence.",
+  "legacyPageDesc2": "Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.",
+  "legacyAccounts": "Legacy accounts",
+  "trustedContacts": "Trusted contacts",
+  "addTrustedContact": "Add Trusted Contact",
+  "removeInvite": "Remove invite",
+  "recoveryWarning": "A trusted contact is trying to access your account",
+  "rejectRecovery": "Reject recovery",
+  "recoveryInitiated": "Recovery initiated",
+  "recoveryInitiatedDesc": "You can access the account after {days} days. You will get a notification on your registered email.", 
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Cancel recovery",
+  "recoveryAccount":"Recover account",
+  "cancelAccountRecoveryBody": "Are you sure you want to cancel recovery?",
+  "startAccountRecoveryTitle": "Start recovery",
+  "whyAddTrustContact": "Trusted contact can help in recovering your data."
 }
