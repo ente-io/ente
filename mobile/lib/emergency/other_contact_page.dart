@@ -253,7 +253,7 @@ class _OtherContactPageState extends State<OtherContactPage> {
                 widget.contact,
                 ContactState.contactLeft,
               );
-              Navigator.of(context).pop(true);
+              Navigator.of(context).pop();
             } catch (e) {
               showGenericErrorDialog(context: context, error: e).ignore();
             }

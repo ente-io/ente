@@ -211,8 +211,8 @@ class _EmergencyPageState extends State<EmergencyPage> {
                               child: SvgPicture.asset(
                                 getEnteColorScheme(context).backdropBase ==
                                         backgroundBaseDark
-                                    ? "assets/icons/legacy-dark.svg"
-                                    : "assets/icons/legacy-light.svg",
+                                    ? "assets/icons/legacy-light.svg"
+                                    : "assets/icons/legacy-dark.svg",
                                 width: 156,
                                 height: 152,
                               ),
@@ -221,7 +221,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                               context.l10n.legacyPageDesc2,
                               style: getEnteTextTheme(context).smallMuted,
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 16),
                             ButtonWidget(
                               buttonType: ButtonType.primary,
                               labelText: S.of(context).addTrustedContact,
