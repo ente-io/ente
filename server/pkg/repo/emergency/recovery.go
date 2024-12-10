@@ -73,9 +73,9 @@ func (repo *Repository) UpdateRecoveryStatusForID(ctx context.Context, sessionID
 		result, err = repo.DB.ExecContext(ctx, `UPDATE emergency_recovery SET status=$1, wait_till=$2 WHERE id=$3 and status = ANY($4)`, status, time.Microseconds(), sessionID, pq.Array(validPrevStatus))
 	} else {
 		result, err = repo.DB.ExecContext(ctx, `UPDATE emergency_recovery SET status=$1 WHERE id=$2 and status = ANY($3)`, status, sessionID, pq.Array(validPrevStatus))
-		if err != nil {
-			return false, stacktrace.Propagate(err, "")
-		}
+	}
+	if err != nil {
+		return false, stacktrace.Propagate(err, "")
 	}
 	rows, _ := result.RowsAffected()
 	return rows > 0, nil
@@ -106,7 +106,6 @@ func validPreviousStatus(newStatus ente.RecoveryStatus) []ente.RecoveryStatus {
 		break
 	case ente.RecoveryStatusReady:
 		result = append(result, ente.RecoveryStatusWaiting, ente.RecoveryStatusReady)
-		break
 	case ente.RecoveryStatusStopped:
 		result = append(result, ente.RecoveryStatusWaiting, ente.RecoveryStatusReady)
 	case ente.RecoveryStatusRejected:

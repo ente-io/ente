@@ -152,6 +152,22 @@ class EmergencyContactService {
     }
   }
 
+  Future<void> approveRecovery(RecoverySessions session) async {
+    try {
+      await _enteDio.post(
+        "/emergency-contacts/approve-recovery",
+        data: {
+          "userID": session.user.id,
+          "emergencyContactID": session.emergencyContact.id,
+          "id": session.id,
+        },
+      );
+    } catch (e, s) {
+      Logger("EmergencyContact").severe('failed to approve recovery', e, s);
+      rethrow;
+    }
+  }
+
   Future<(String, KeyAttributes)> getRecoveryInfo(
     RecoverySessions sessions,
   ) async {
