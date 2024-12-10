@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_svg/flutter_svg.dart";
@@ -49,7 +51,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
     Future.delayed(
       const Duration(seconds: 0),
       () async {
-        await _fetchData();
+        unawaited(_fetchData());
       },
     );
   }
@@ -229,7 +231,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                                   context,
                                   AddContactPage(info!),
                                 );
-                                _fetchData();
+                                unawaited(_fetchData());
                               },
                             ),
                           ],
@@ -250,7 +252,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                             context,
                             AddContactPage(info!),
                           );
-                          _fetchData();
+                          unawaited(_fetchData());
                         },
                         isTopBorderRadiusRemoved: trustedContacts.isNotEmpty,
                         singleBorderRadius: 8,
@@ -321,7 +323,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                                   ),
                                 );
                                 if (mounted) {
-                                  _fetchData();
+                                  unawaited(_fetchData());
                                 }
                               }
                             },
@@ -372,11 +374,11 @@ class _EmergencyPageState extends State<EmergencyPage> {
             shouldShowSuccessConfirmation: false,
             onTap: () async {
               await EmergencyContactService.instance
-                  .updateContact(contact, ContactState.UserRevokedContact);
+                  .updateContact(contact, ContactState.userRevokedContact);
               info?.contacts.remove(contact);
               if (mounted) {
                 setState(() {});
-                _fetchData();
+                unawaited(_fetchData());
               }
             },
             isInAlert: true,
@@ -408,11 +410,11 @@ class _EmergencyPageState extends State<EmergencyPage> {
             shouldShowSuccessConfirmation: false,
             onTap: () async {
               await EmergencyContactService.instance
-                  .updateContact(contact, ContactState.UserRevokedContact);
+                  .updateContact(contact, ContactState.userRevokedContact);
               info?.contacts.remove(contact);
               if (mounted) {
                 setState(() {});
-                _fetchData();
+                unawaited(_fetchData());
               }
             },
             isInAlert: true,
@@ -445,9 +447,9 @@ class _EmergencyPageState extends State<EmergencyPage> {
           buttonAction: ButtonAction.first,
           onTap: () async {
             await EmergencyContactService.instance
-                .updateContact(contact, ContactState.ContactAccepted);
+                .updateContact(contact, ContactState.contactAccepted);
             final updatedContact =
-                contact.copyWith(state: ContactState.ContactAccepted);
+                contact.copyWith(state: ContactState.contactAccepted);
             info?.othersEmergencyContact.remove(contact);
             info?.othersEmergencyContact.add(updatedContact);
             if (mounted) {
@@ -464,7 +466,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
           shouldStickToDarkTheme: true,
           onTap: () async {
             await EmergencyContactService.instance
-                .updateContact(contact, ContactState.ContactDenied);
+                .updateContact(contact, ContactState.contactDenied);
             info?.othersEmergencyContact.remove(contact);
             if (mounted) {
               setState(() {});
@@ -506,7 +508,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
             if (mounted) {
               setState(() {});
             }
-            _fetchData().ignore();
+            unawaited(_fetchData());
           },
           isInAlert: true,
         ),

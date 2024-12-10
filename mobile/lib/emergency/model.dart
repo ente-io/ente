@@ -1,26 +1,26 @@
 import "package:photos/models/api/collection/user.dart";
 
 enum ContactState {
-  UserInvitedContact,
-  UserRevokedContact,
-  ContactAccepted,
-  ContactLeft,
-  ContactDenied,
-  Unknown,
+  userInvitedContact,
+  userRevokedContact,
+  contactAccepted,
+  contactLeft,
+  contactDenied,
+  unknown,
 }
 
 extension ContactStateExtension on ContactState {
   String get stringValue {
     switch (this) {
-      case ContactState.UserInvitedContact:
+      case ContactState.userInvitedContact:
         return "INVITED";
-      case ContactState.UserRevokedContact:
+      case ContactState.userRevokedContact:
         return "REVOKED";
-      case ContactState.ContactAccepted:
+      case ContactState.contactAccepted:
         return "ACCEPTED";
-      case ContactState.ContactLeft:
+      case ContactState.contactLeft:
         return "CONTACT_LEFT";
-      case ContactState.ContactDenied:
+      case ContactState.contactDenied:
         return "CONTACT_DENIED";
       default:
         return "UNKNOWN";
@@ -30,17 +30,17 @@ extension ContactStateExtension on ContactState {
   static ContactState fromString(String value) {
     switch (value) {
       case "INVITED":
-        return ContactState.UserInvitedContact;
+        return ContactState.userInvitedContact;
       case "REVOKED":
-        return ContactState.UserRevokedContact;
+        return ContactState.userRevokedContact;
       case "ACCEPTED":
-        return ContactState.ContactAccepted;
+        return ContactState.contactAccepted;
       case "CONTACT_LEFT":
-        return ContactState.ContactLeft;
+        return ContactState.contactLeft;
       case "CONTACT_DENIED":
-        return ContactState.ContactDenied;
+        return ContactState.contactDenied;
       default:
-        return ContactState.Unknown;
+        return ContactState.unknown;
     }
   }
 }
@@ -85,7 +85,7 @@ class EmergencyContact {
   }
 
   bool isPendingInvite() {
-    return state == ContactState.UserInvitedContact;
+    return state == ContactState.userInvitedContact;
   }
 }
 

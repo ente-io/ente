@@ -108,7 +108,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
   }
 
   Widget _getBody(String buttonTextAndHeading) {
-    final email = widget.sessions!.user.email;
+    final email = widget.sessions.user.email;
     var passwordStrengthText = S.of(context).weakStrength;
     var passwordStrengthColor = Colors.redAccent;
     if (_passwordStrength > kStrongPasswordStrengthThreshold) {

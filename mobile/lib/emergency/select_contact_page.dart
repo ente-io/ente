@@ -216,7 +216,7 @@ class _AddContactPage extends State<AddContactPage> {
                       }
                       final emailToAdd =
                           selectedEmail == '' ? _email : selectedEmail;
-                      showDialog(
+                      await showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return VerifyIdentifyDialog(
