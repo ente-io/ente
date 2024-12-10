@@ -23,25 +23,25 @@ import "package:photos/utils/wakelock_util.dart";
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-class VideoWidget extends StatefulWidget {
+class VideoWidgetChewie extends StatefulWidget {
   final EnteFile file;
   final bool? autoPlay;
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
 
-  const VideoWidget(
+  const VideoWidgetChewie(
     this.file, {
     this.autoPlay = false,
     this.tagPrefix,
     this.playbackCallback,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
-  State<VideoWidget> createState() => _VideoWidgetState();
+  State<VideoWidgetChewie> createState() => _VideoWidgetChewieState();
 }
 
-class _VideoWidgetState extends State<VideoWidget> {
+class _VideoWidgetChewieState extends State<VideoWidgetChewie> {
   final _logger = Logger("VideoWidget");
   VideoPlayerController? _videoPlayerController;
   ChewieController? _chewieController;
@@ -170,7 +170,8 @@ class _VideoWidgetState extends State<VideoWidget> {
               showErrorDialogForException(
                 context: context,
                 exception: error,
-                message: S.of(context).failedToPlayVideo + "\n" + error.toString(),
+                message:
+                    S.of(context).failedToPlayVideo + "\n" + error.toString(),
               );
             } else {
               showToast(context, S.of(context).failedToPlayVideo);
