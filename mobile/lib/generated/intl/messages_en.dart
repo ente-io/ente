@@ -157,8 +157,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m52(storeName) => "Rate us on ${storeName}";
 
-  static String m83(days) =>
-      "You can access the account after ${days} days. You will get a notification on your registered email.";
+  static String m83(days, email) =>
+      "You can access the account after ${days} days. You can access the account after 30 days. A notification will be sent to ${email}.";
 
   static String m53(storageInGB) =>
       "3. Both of you get ${storageInGB} GB* free";

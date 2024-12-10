@@ -1,6 +1,7 @@
 import "package:collection/collection.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/emergency/emergency_service.dart";
 import "package:photos/emergency/model.dart";
 import "package:photos/emergency/recover_others_account.dart";
@@ -114,11 +115,16 @@ class _OtherContactPageState extends State<OtherContactPage> {
                     " after starting the recovery process.",
                     style: textTheme.body,
                   )
-                : Text(
-                    "You can recover $accountEmail's"
-                    " account after $waitTill.",
-                    style: textTheme.bodyBold,
-                  ),
+                : (recoverySession!.status == "READY"
+                    ? Text(
+                        "You can recover $accountEmail's account now.\nPlease note, you can only recover the account once. You will need to start the recovery process again to recover the account again.",
+                        style: textTheme.body,
+                      )
+                    : Text(
+                        "You can recover $accountEmail's"
+                        " account after $waitTill.",
+                        style: textTheme.bodyBold,
+                      )),
             const SizedBox(height: 24),
             if (recoverySession == null)
               ButtonWidget(
@@ -148,6 +154,7 @@ class _OtherContactPageState extends State<OtherContactPage> {
                                   context.l10n.recoveryInitiated,
                                   context.l10n.recoveryInitiatedDesc(
                                     widget.contact.recoveryNoticeInDays,
+                                    Configuration.instance.getEmail()!,
                                   ),
                                 );
                               }
