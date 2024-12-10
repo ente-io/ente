@@ -160,6 +160,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m83(days, email) =>
       "You can access the account after ${days} days. A notification will be sent to ${email}.";
 
+  static String m84(email) =>
+      "You can now recover ${email}\'s account by setting a new password.";
+
   static String m53(storageInGB) =>
       "3. Both of you get ${storageInGB} GB* free";
 
@@ -1372,6 +1375,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Recovery key verified"),
         "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
             "Your recovery key is the only way to recover your photos if you forget your password. You can find your recovery key in Settings > Account.\n\nPlease enter your recovery key here to verify that you have saved it correctly."),
+        "recoveryReady": m84,
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Recovery successful!"),
         "recoveryWarning": MessageLookupByLibrary.simpleMessage(

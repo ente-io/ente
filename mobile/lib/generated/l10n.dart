@@ -10698,6 +10698,16 @@ class S {
       args: [],
     );
   }
+
+  /// `You can now recover {email}'s account by setting a new password.`
+  String recoveryReady(String email) {
+    return Intl.message(
+      'You can now recover $email\'s account by setting a new password.',
+      name: 'recoveryReady',
+      desc: '',
+      args: [email],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

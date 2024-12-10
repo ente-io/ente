@@ -117,7 +117,7 @@ class _OtherContactPageState extends State<OtherContactPage> {
                   )
                 : (recoverySession!.status == "READY"
                     ? Text(
-                        "You can recover $accountEmail's account now.\nPlease note, you can only recover the account once. You will need to start the recovery process again to recover the account again.",
+                        context.l10n.recoveryReady(accountEmail),
                         style: textTheme.body,
                       )
                     : Text(

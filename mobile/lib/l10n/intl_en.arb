@@ -1547,5 +1547,14 @@
   "recoveryAccount":"Recover account",
   "cancelAccountRecoveryBody": "Are you sure you want to cancel recovery?",
   "startAccountRecoveryTitle": "Start recovery",
-  "whyAddTrustContact": "Trusted contact can help in recovering your data."
+  "whyAddTrustContact": "Trusted contact can help in recovering your data.",
+  "recoveryReady": "You can now recover {email}'s account by setting a new password.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  }
 }
