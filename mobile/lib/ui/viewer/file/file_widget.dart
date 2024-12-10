@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
-import "package:photos/ui/viewer/file/video_widget_media_kit.dart";
+import "package:photos/ui/viewer/file/video_widget.dart";
 import "package:photos/ui/viewer/file/zoomable_live_image_new.dart";
 
 class FileWidget extends StatelessWidget {
@@ -47,13 +47,8 @@ class FileWidget extends StatelessWidget {
       //     playbackCallback: playbackCallback,
       //   );
       // }
-      // return VideoWidgetNative(
-      //   file,
-      //   tagPrefix: tagPrefix,
-      //   playbackCallback: playbackCallback,
-      //   key: key ?? ValueKey(fileKey),
-      // );
-      return VideoWidgetMediaKit(
+
+      return VideoWidget(
         file,
         tagPrefix: tagPrefix,
         playbackCallback: playbackCallback,
