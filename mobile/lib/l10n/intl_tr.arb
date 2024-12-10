@@ -1148,7 +1148,6 @@
   "deviceCodeHint": "Kodu girin",
   "joinDiscord": "Discord'a Katıl",
   "locations": "Konum",
-  "descriptions": "Açıklama",
   "addViewers": "{count, plural, zero {Görüntüleyen ekle} one {Görüntüleyen ekle} other {Görüntüleyen ekle}}",
   "addCollaborators": "{count, plural, zero {Ortak çalışan ekle} one {Ortak çalışan ekle} other {Ortak çalışan ekle}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Uçtan uca şifrelemeyi doğrulamak için bir e-postaya uzun basın.",

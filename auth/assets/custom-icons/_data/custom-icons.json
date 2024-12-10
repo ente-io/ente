@@ -86,6 +86,17 @@
       ]
     },
     {
+      "title": "Binance TR",
+      "slug": "binance_tr"
+    },
+    {
+      "title": "BinanceUS",
+      "slug": "binance_us",
+      "altNames": [
+        "Binance US"
+      ]
+    },
+    {
       "title": "Bitfinex"
     },
     {
@@ -434,6 +445,9 @@
       "title": "Kite"
     },
     {
+      "title": "Kotas"
+    },
+    {
       "title": "KnownHost",
       "altNames": [
         "Known Host",
@@ -527,7 +541,7 @@
       ]
     },
     {
-      "title": "Microsoft"
+      "title": "microsoft"
     },
     {
       "title": "Microsoft 365",
@@ -610,6 +624,12 @@
     },
     {
       "title": "Njalla"
+    },
+    {
+      "title": "nordvpn",
+      "slug": "nordaccount",
+      "hex": "#4687FF",
+      "altNames": "Nord Account"
     },
     {
       "title": "Notesnook"
@@ -957,7 +977,8 @@
       ]
     },
     {
-      "title": "WARGAMING.NET"
+      "title": "WARGAMING.NET",
+      "slug": "wargamingnet"
     },
     {
       "title": "Wealthfront"

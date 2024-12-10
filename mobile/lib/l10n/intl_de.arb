@@ -12,7 +12,7 @@
   "deleteAccountFeedbackPrompt": "Wir bedauern sehr, dass du dein Konto löschen möchtest. Du würdest uns sehr helfen, wenn du uns kurz einige Gründe hierfür nennen könntest.",
   "feedback": "Rückmeldung",
   "kindlyHelpUsWithThisInformation": "Bitte gib diese Daten ein",
-  "confirmDeletePrompt": "Ja, ich möchte dieses Konto und alle enthaltenen Daten über alle Apps endgültig und unwiderruflich löschen.",
+  "confirmDeletePrompt": "Ja, ich möchte dieses Konto und alle enthaltenen Daten über alle Apps hinweg endgültig löschen.",
   "confirmAccountDeletion": "Kontolöschung bestätigen",
   "deleteAccountPermanentlyButton": "Konto unwiderruflich löschen",
   "yourAccountHasBeenDeleted": "Dein Benutzerkonto wurde gelöscht",
@@ -23,8 +23,8 @@
   "deleteReason4": "Mein Grund ist nicht aufgeführt",
   "sendEmail": "E-Mail senden",
   "deleteRequestSLAText": "Deine Anfrage wird innerhalb von 72 Stunden bearbeitet.",
-  "deleteEmailRequest": "Bitte sende eine E-Mail an <warning>account-deletion@ente.io</warning> von Deiner bei uns hinterlegten E-Mail-Adresse.",
-  "entePhotosPerm": "",
+  "deleteEmailRequest": "Bitte sende eine E-Mail an <warning>account-deletion@ente.io</warning> von Ihrer bei uns hinterlegten E-Mail-Adresse.",
+  "entePhotosPerm": "Ente <i> benötigt Berechtigung, um <i> Ihre Fotos zu sichern",
   "ok": "Ok",
   "createAccount": "Konto erstellen",
   "createNewAccount": "Neues Konto erstellen",
@@ -817,7 +817,7 @@
   "referFriendsAnd2xYourPlan": "Begeistere Freunde für uns und verdopple deinen Speicher",
   "shareAlbumHint": "Öffne ein Album und tippe auf den Teilen-Button oben rechts, um zu teilen.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Elemente zeigen die Anzahl der Tage bis zum dauerhaften Löschen an",
-  "trashDaysLeft": "{count, plural, one {}=0 {Demnächst} =1 {1 Tag} other {{count} Tage}}",
+  "trashDaysLeft": "{count, plural, =0 {Demnächst} =1 {1 Tag} other {{count} Tage}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1246,7 +1246,6 @@
   "deviceCodeHint": "Code eingeben",
   "joinDiscord": "Discord beitreten",
   "locations": "Orte",
-  "descriptions": "Beschreibungen",
   "addAName": "Füge einen Namen hinzu",
   "findThemQuickly": "Finde sie schnell",
   "@findThemQuickly": {
@@ -1385,7 +1384,7 @@
   "enableMachineLearningBanner": "Aktiviere maschinelles Lernen für die magische Suche und Gesichtserkennung",
   "searchDiscoverEmptySection": "Bilder werden hier angezeigt, sobald die Verarbeitung abgeschlossen ist",
   "searchPersonsEmptySection": "Personen werden hier angezeigt, sobald die Verarbeitung abgeschlossen ist",
-  "viewersSuccessfullyAdded": "{count, plural, one {}=0 {0 Betrachter hinzugefügt} =1 {1 Betrachter hinzugefügt} other {{count} Betrachter hinzugefügt}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {0 Betrachter hinzugefügt} =1 {1 Betrachter hinzugefügt} other {{count} Betrachter hinzugefügt}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1394,17 +1393,7 @@
       }
     },
     "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, one {}=0 {0 Mitarbeiter hinzugefügt} =1 {1 Mitarbeiter hinzugefügt} other {{count} Mitarbeiter hinzugefügt}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
+  },  
   "accountIsAlreadyConfigured": "Das Konto ist bereits konfiguriert.",
   "sessionIdMismatch": "Sitzungs-ID stimmt nicht überein",
   "@sessionIdMismatch": {
