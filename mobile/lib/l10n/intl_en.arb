@@ -1556,5 +1556,7 @@
         "example": "me@example.com"
       }
     }
-  }
+  },
+  "recoveryWarningBody": "{email} is trying to recover your account.",
+  "trustedInviteBody": "You have been invited to be a legacy contact by {email}."
 }

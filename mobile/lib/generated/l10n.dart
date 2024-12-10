@@ -10708,6 +10708,26 @@ class S {
       args: [email],
     );
   }
+
+  /// `{email} is trying to recover your account.`
+  String recoveryWarningBody(Object email) {
+    return Intl.message(
+      '$email is trying to recover your account.',
+      name: 'recoveryWarningBody',
+      desc: '',
+      args: [email],
+    );
+  }
+
+  /// `You have been invited to be a legacy contact by {email}.`
+  String trustedInviteBody(Object email) {
+    return Intl.message(
+      'You have been invited to be a legacy contact by $email.',
+      name: 'trustedInviteBody',
+      desc: '',
+      args: [email],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

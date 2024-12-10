@@ -163,6 +163,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m84(email) =>
       "You can now recover ${email}\'s account by setting a new password.";
 
+  static String m85(email) => "${email} is trying to recover your account.";
+
   static String m53(storageInGB) =>
       "3. Both of you get ${storageInGB} GB* free";
 
@@ -229,6 +231,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m73(count) =>
       "${Intl.plural(count, zero: 'Soon', one: '1 day', other: '${count} days')}";
+
+  static String m86(email) =>
+      "You have been invited to be a legacy contact by ${email}.";
 
   static String m74(galleryType) =>
       "Type of gallery ${galleryType} is not supported for rename";
@@ -1380,6 +1385,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Recovery successful!"),
         "recoveryWarning": MessageLookupByLibrary.simpleMessage(
             "A trusted contact is trying to access your account"),
+        "recoveryWarningBody": m85,
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(
             "The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish)."),
         "recreatePasswordTitle":
@@ -1766,6 +1772,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "trim": MessageLookupByLibrary.simpleMessage("Trim"),
         "trustedContacts":
             MessageLookupByLibrary.simpleMessage("Trusted contacts"),
+        "trustedInviteBody": m86,
         "tryAgain": MessageLookupByLibrary.simpleMessage("Try again"),
         "turnOnBackupForAutoUpload": MessageLookupByLibrary.simpleMessage(
             "Turn on backup to automatically upload files added to this device folder to Ente."),

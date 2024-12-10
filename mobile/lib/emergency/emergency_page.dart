@@ -9,7 +9,6 @@ import "package:photos/emergency/other_contact_page.dart";
 import "package:photos/emergency/select_contact_page.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/common/loading_widget.dart";
@@ -493,8 +492,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
           isInAlert: true,
         ),
       ],
-      body:
-          "You have been invited to be a legacy contact by ${contact.user.email}",
+      body: context.l10n.trustedInviteBody(contact.user.email),
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     return;
@@ -546,7 +544,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
           isInAlert: true,
         ),
       ],
-      body: "$emergencyContactEmail is trying to recover your accountx.",
+      body: context.l10n.recoveryWarningBody(emergencyContactEmail),
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     return;
