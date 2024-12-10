@@ -17,7 +17,7 @@ enum NotificationType {
 
 class NotificationWidget extends StatelessWidget {
   final IconData startIcon;
-  final IconData actionIcon;
+  final IconData? actionIcon;
   final String text;
   final String? subText;
   final GestureTapCallback onTap;
@@ -155,14 +155,15 @@ class NotificationWidget extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                IconButtonWidget(
-                  icon: actionIcon,
-                  iconButtonType: IconButtonType.rounded,
-                  iconColor: strokeColorScheme.strokeBase,
-                  defaultColor: strokeColorScheme.fillFaint,
-                  pressedColor: strokeColorScheme.fillMuted,
-                  onTap: onTap,
-                ),
+                if (actionIcon != null)
+                  IconButtonWidget(
+                    icon: actionIcon!,
+                    iconButtonType: IconButtonType.rounded,
+                    iconColor: strokeColorScheme.strokeBase,
+                    defaultColor: strokeColorScheme.fillFaint,
+                    pressedColor: strokeColorScheme.fillMuted,
+                    onTap: onTap,
+                  ),
               ],
             ),
           ),

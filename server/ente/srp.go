@@ -26,6 +26,16 @@ type CompleteSRPSetupResponse struct {
 	SRPM2   string    `json:"srpM2" binding:"required"`
 }
 
+type RecoverySrpSetupRequest struct {
+	RecoveryID  uuid.UUID       `json:"recoveryID" binding:"required"`
+	SetUpSRPReq SetupSRPRequest `json:"setupSRPRequest" binding:"required"`
+}
+
+type RecoveryUpdateSRPAndKeysRequest struct {
+	RecoveryID uuid.UUID               `json:"recoveryID" binding:"required"`
+	UpdateSrp  UpdateSRPAndKeysRequest `json:"updateSrpAndKeysRequest" binding:"required"`
+}
+
 // UpdateSRPAndKeysRequest is used to update the SRP attributes (e.g. when user updates his password) and also
 // update the keys attributes
 type UpdateSRPAndKeysRequest struct {

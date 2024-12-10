@@ -29,7 +29,7 @@ func Nanoseconds() int64 {
 }
 
 // MicrosecondsAfterHours returns the time in micro seconds after noOfHours
-func MicrosecondsAfterHours(noOfHours int8) int64 {
+func MicrosecondsAfterHours(noOfHours int32) int64 {
 	return Microseconds() + int64(noOfHours)*MicroSecondsInOneHour
 }
 

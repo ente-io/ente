@@ -18,6 +18,10 @@ class EnteTheme {
     required this.shadowMenu,
     required this.shadowButton,
   });
+
+  bool isDark(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark;
+  }
 }
 
 EnteTheme lightTheme = EnteTheme(
