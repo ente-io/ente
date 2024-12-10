@@ -446,8 +446,6 @@
   "customEndpoint": "Verbonden met {endpoint}",
   "pinText": "Vastzetten",
   "unpinText": "Losmaken",
-  "pinnedCodeMessage": "{code} is vastgezet",
-  "unpinnedCodeMessage": "{code} is losgemaakt",
   "tags": "Labels",
   "createNewTag": "Nieuw label maken",
   "tag": "Label",

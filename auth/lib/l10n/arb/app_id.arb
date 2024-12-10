@@ -156,6 +156,7 @@
   "twoFactorAuthTitle": "Autentikasi dua langkah",
   "passkeyAuthTitle": "Verifikasi passkey",
   "verifyPasskey": "Verifikasi passkey",
+  "loginWithTOTP": "Login menggunakan TOTP",
   "recoverAccount": "Pulihkan akun",
   "enterRecoveryKeyHint": "Masukkan kunci pemulihanmu",
   "recover": "Pulihkan",
@@ -327,6 +328,10 @@
       }
     }
   },
+  "manualSort": "Kustom",
+  "editOrder": "Ubah pesanan",
+  "mostFrequentlyUsed": "Sering digunakan",
+  "mostRecentlyUsed": "Baru digunakan",
   "activeSessions": "Sesi aktif",
   "somethingWentWrongPleaseTryAgain": "Ada yang salah. Mohon coba kembali",
   "thisWillLogYouOutOfThisDevice": "Langkah ini akan mengeluarkan Anda dari gawai ini!",
@@ -446,8 +451,6 @@
   "customEndpoint": "Terkoneksi ke {endpoint}",
   "pinText": "Sematkan",
   "unpinText": "Awasematkan",
-  "pinnedCodeMessage": "{code} telah disematkan",
-  "unpinnedCodeMessage": "{code} telah diawasematkan",
   "tags": "Tanda",
   "createNewTag": "Buat Tanda Baru",
   "tag": "Tanda",

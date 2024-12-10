@@ -444,8 +444,6 @@
   "customEndpoint": "Mit {endpoint} verbunden",
   "pinText": "Anpinnen",
   "unpinText": "Lösen",
-  "pinnedCodeMessage": "{code} wurde angepinnt",
-  "unpinnedCodeMessage": "{code} wurde Losgelöst",
   "tags": "Tags",
   "createNewTag": "Neuen Tag erstellen",
   "tag": "Tag",

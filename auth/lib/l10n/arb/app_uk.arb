@@ -328,6 +328,10 @@
       }
     }
   },
+  "manualSort": "Власні",
+  "editOrder": "Змінити порядок",
+  "mostFrequentlyUsed": "Часто використовувані",
+  "mostRecentlyUsed": "Нещодавно використані",
   "activeSessions": "Активні сеанси",
   "somethingWentWrongPleaseTryAgain": "Щось пішло не так, спробуйте, будь ласка, знову",
   "thisWillLogYouOutOfThisDevice": "Це призведе до виходу на цьому пристрої!",
@@ -449,6 +453,7 @@
   "unpinText": "Відкріпити",
   "pinnedCodeMessage": "{code} закріплено",
   "unpinnedCodeMessage": "{code} відкріплено",
+  "pinned": "Закріплено",
   "tags": "Мітки",
   "createNewTag": "Створити нову мітку",
   "tag": "Мітка",

@@ -446,8 +446,6 @@
   "customEndpoint": "Bağlandı: {endpoint}",
   "pinText": "Sabitle",
   "unpinText": "Sabitlemeyi kaldır",
-  "pinnedCodeMessage": "{code} sabitlendi",
-  "unpinnedCodeMessage": "{code} sabitlemesi kaldırıldı",
   "tags": "Etiketler",
   "createNewTag": "Yeni etiket oluştur",
   "tag": "Etiket",

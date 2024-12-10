@@ -328,6 +328,10 @@
       }
     }
   },
+  "manualSort": "自定义",
+  "editOrder": "编辑顺序",
+  "mostFrequentlyUsed": "经常使用",
+  "mostRecentlyUsed": "最近使用",
   "activeSessions": "已登录的设备",
   "somethingWentWrongPleaseTryAgain": "出了点问题，请重试",
   "thisWillLogYouOutOfThisDevice": "这将使您登出该设备！",
@@ -449,6 +453,7 @@
   "unpinText": "取消置顶",
   "pinnedCodeMessage": "{code} 已被置顶",
   "unpinnedCodeMessage": "{code} 已被取消置顶",
+  "pinned": "已置顶",
   "tags": "标签",
   "createNewTag": "创建新标签",
   "tag": "标签",

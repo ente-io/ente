@@ -328,6 +328,10 @@
       }
     }
   },
+  "manualSort": "Tùy chỉnh",
+  "editOrder": "Chỉnh sửa đơn hàng",
+  "mostFrequentlyUsed": "Thường dùng",
+  "mostRecentlyUsed": "Dùng gần đây",
   "activeSessions": "Các phiên làm việc hiện tại",
   "somethingWentWrongPleaseTryAgain": "Phát hiện có lỗi, xin thử lại",
   "thisWillLogYouOutOfThisDevice": "Thao tác này sẽ đăng xuất bạn khỏi thiết bị này!",
@@ -449,6 +453,7 @@
   "unpinText": "Bỏ ghim",
   "pinnedCodeMessage": "{code} đã được ghim",
   "unpinnedCodeMessage": "{code} đã được bỏ ghim",
+  "pinned": "Đã ghim",
   "tags": "Thẻ",
   "createNewTag": "Tạo thẻ mới",
   "tag": "Thẻ",

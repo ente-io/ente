@@ -447,8 +447,6 @@
   "customEndpoint": "Conectado a {endpoint}",
   "pinText": "Anclar",
   "unpinText": "Desanclar",
-  "pinnedCodeMessage": "{code} ha sido anclado",
-  "unpinnedCodeMessage": "{code} ha sido desanclado",
   "tags": "Etiquetas",
   "createNewTag": "Crear Nueva Etiqueta",
   "tag": "Etiqueta",

@@ -445,8 +445,6 @@
   "customEndpoint": "Connecté à {endpoint}",
   "pinText": "Épingler",
   "unpinText": "Désépingler",
-  "pinnedCodeMessage": "{code} a été épinglé",
-  "unpinnedCodeMessage": "{code} a été désépinglé",
   "tags": "Tags",
   "createNewTag": "Créer un nouveau tag",
   "tag": "Tag",

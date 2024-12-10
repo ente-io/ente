@@ -401,8 +401,6 @@
   "customEndpoint": "متصل شده به {endpoint}",
   "pinText": "پین",
   "unpinText": "حذف پین",
-  "pinnedCodeMessage": "{code} پین شد",
-  "unpinnedCodeMessage": "{code} از پین حذف شد",
   "tags": "برچسب‌ها",
   "createNewTag": "ایجاد برچسب جدید",
   "tag": "برچسب",

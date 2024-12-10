@@ -435,8 +435,6 @@
   "customEndpoint": "متصل بـ{endpoint}",
   "pinText": "ثبت",
   "unpinText": "ألغِ التثبيت",
-  "pinnedCodeMessage": "ثُبِّت {code}",
-  "unpinnedCodeMessage": "أُلغِي تثبيت {code}",
   "tags": "الأوسمة",
   "createNewTag": "أنشيء وسم جديد",
   "tag": "وسم",

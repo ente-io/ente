@@ -446,8 +446,6 @@
   "customEndpoint": "Forbindelse oprettet til {endpoint}",
   "pinText": "Fastgør",
   "unpinText": "Frigør",
-  "pinnedCodeMessage": "{code} er blevet fastgjort",
-  "unpinnedCodeMessage": "{code} er blevet frigjort",
   "tags": "Tags",
   "createNewTag": "Opret nyt tag",
   "tag": "Tag",

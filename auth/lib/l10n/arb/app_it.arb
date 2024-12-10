@@ -156,6 +156,7 @@
   "twoFactorAuthTitle": "Autenticazione a due fattori",
   "passkeyAuthTitle": "Verifica della passkey",
   "verifyPasskey": "Verifica passkey",
+  "loginWithTOTP": "Login con TOTP",
   "recoverAccount": "Recupera account",
   "enterRecoveryKeyHint": "Inserisci la tua chiave di recupero",
   "recover": "Recupera",
@@ -327,6 +328,9 @@
       }
     }
   },
+  "manualSort": "Personalizzato",
+  "mostFrequentlyUsed": "Utilizzato di frequente",
+  "mostRecentlyUsed": "Utilizzato di recente",
   "activeSessions": "Sessioni attive",
   "somethingWentWrongPleaseTryAgain": "Qualcosa è andato storto, per favore riprova",
   "thisWillLogYouOutOfThisDevice": "Questo ti disconnetterà da questo dispositivo!",
@@ -446,8 +450,6 @@
   "customEndpoint": "Connesso a {endpoint}",
   "pinText": "Fissa",
   "unpinText": "Sgancia",
-  "pinnedCodeMessage": "{code} è stato fissato",
-  "unpinnedCodeMessage": "{code} è stato sganciato",
   "tags": "Tag",
   "createNewTag": "Crea un nuovo tag",
   "tag": "Tag",
