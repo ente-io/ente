@@ -34,8 +34,12 @@ func (r RecoverRow) CanRecover() error {
 
 func (repo *Repository) InsertIntoRecovery(ctx *gin.Context, req ente.ContactIdentifier, row ContactRow) (bool, error) {
 	waitTime := time.MicrosecondsAfterHours(row.NoticePeriodInHrs)
+	nextReminder := time.MicrosecondsAfterHours(row.NoticePeriodInHrs - 24)
+	if row.NoticePeriodInHrs < 25 {
+		nextReminder = time.Microseconds()
+	}
 	result, err := repo.DB.ExecContext(ctx, `INSERT INTO emergency_recovery (id,user_id, emergency_contact_id, status, wait_till, next_reminder_at) VALUES ($1, $2, $3, $4, $5, $6) on conflict DO NOTHING`,
-		uuid.New(), req.UserID, req.EmergencyContactID, ente.RecoveryStatusWaiting, waitTime, row.NoticePeriodInHrs)
+		uuid.New(), req.UserID, req.EmergencyContactID, ente.RecoveryStatusWaiting, waitTime, nextReminder)
 	if err != nil {
 		return false, stacktrace.Propagate(err, "")
 	}

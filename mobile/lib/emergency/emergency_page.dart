@@ -40,7 +40,7 @@ class EmergencyPage extends StatefulWidget {
 class _EmergencyPageState extends State<EmergencyPage> {
   late int currentUserID;
   EmergencyInfo? info;
-  final Logger _logger = Logger('EmergencyPage');
+
   bool hasTrustedContact = false;
 
   @override
