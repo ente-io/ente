@@ -228,6 +228,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                                 await routeToPage(
                                   context,
                                   AddContactPage(info!),
+                                  forceCustomPageRoute: true,
                                 );
                                 unawaited(_fetchData());
                               },
@@ -249,6 +250,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                           await routeToPage(
                             context,
                             AddContactPage(info!),
+                            forceCustomPageRoute: true,
                           );
                           unawaited(_fetchData());
                         },

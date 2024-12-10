@@ -10728,6 +10728,36 @@ class S {
       args: [email],
     );
   }
+
+  /// `Warning`
+  String get warning {
+    return Intl.message(
+      'Warning',
+      name: 'warning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Proceed`
+  String get proceed {
+    return Intl.message(
+      'Proceed',
+      name: 'proceed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You are about to add {email} as a trusted contact. They will be able to recover your account if you are absent for {numOfDays} days.`
+  String confirmAddingTrustedContact(String email, int numOfDays) {
+    return Intl.message(
+      'You are about to add $email as a trusted contact. They will be able to recover your account if you are absent for $numOfDays days.',
+      name: 'confirmAddingTrustedContact',
+      desc: '',
+      args: [email, numOfDays],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

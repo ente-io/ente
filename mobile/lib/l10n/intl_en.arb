@@ -1558,5 +1558,20 @@
     }
   },
   "recoveryWarningBody": "{email} is trying to recover your account.",
-  "trustedInviteBody": "You have been invited to be a legacy contact by {email}."
+  "trustedInviteBody": "You have been invited to be a legacy contact by {email}.",
+  "warning": "Warning",
+  "proceed": "Proceed",
+  "confirmAddingTrustedContact": "You are about to add {email} as a trusted contact. They will be able to recover your account if you are absent for {numOfDays} days.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  }
 }

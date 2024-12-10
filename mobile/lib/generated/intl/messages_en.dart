@@ -62,6 +62,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m82(count) =>
       "${Intl.plural(count, zero: 'Added 0 collaborator', one: 'Added 1 collaborator', other: 'Added ${count} collaborators')}";
 
+  static String m83(email, numOfDays) =>
+      "You are about to add ${email} as a trusted contact. They will be able to recover your account if you are absent for ${numOfDays} days.";
+
   static String m19(familyAdminEmail) =>
       "Please contact <green>${familyAdminEmail}</green> to manage your subscription";
 
@@ -157,13 +160,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m52(storeName) => "Rate us on ${storeName}";
 
-  static String m83(days, email) =>
+  static String m84(days, email) =>
       "You can access the account after ${days} days. A notification will be sent to ${email}.";
 
-  static String m84(email) =>
+  static String m85(email) =>
       "You can now recover ${email}\'s account by setting a new password.";
 
-  static String m85(email) => "${email} is trying to recover your account.";
+  static String m86(email) => "${email} is trying to recover your account.";
 
   static String m53(storageInGB) =>
       "3. Both of you get ${storageInGB} GB* free";
@@ -232,7 +235,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m73(count) =>
       "${Intl.plural(count, zero: 'Soon', one: '1 day', other: '${count} days')}";
 
-  static String m86(email) =>
+  static String m87(email) =>
       "You have been invited to be a legacy contact by ${email}.";
 
   static String m74(galleryType) =>
@@ -575,6 +578,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Are you sure you want to disable two-factor authentication?"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Confirm Account Deletion"),
+        "confirmAddingTrustedContact": m83,
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
             "Yes, I want to permanently delete this account and its data across all apps."),
         "confirmPassword":
@@ -1347,6 +1351,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Private backups"),
         "privateSharing":
             MessageLookupByLibrary.simpleMessage("Private sharing"),
+        "proceed": MessageLookupByLibrary.simpleMessage("Proceed"),
         "processingImport": m51,
         "publicLinkCreated":
             MessageLookupByLibrary.simpleMessage("Public link created"),
@@ -1366,7 +1371,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Recover account"),
         "recoveryInitiated":
             MessageLookupByLibrary.simpleMessage("Recovery initiated"),
-        "recoveryInitiatedDesc": m83,
+        "recoveryInitiatedDesc": m84,
         "recoveryKey": MessageLookupByLibrary.simpleMessage("Recovery key"),
         "recoveryKeyCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Recovery key copied to clipboard"),
@@ -1380,12 +1385,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Recovery key verified"),
         "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
             "Your recovery key is the only way to recover your photos if you forget your password. You can find your recovery key in Settings > Account.\n\nPlease enter your recovery key here to verify that you have saved it correctly."),
-        "recoveryReady": m84,
+        "recoveryReady": m85,
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Recovery successful!"),
         "recoveryWarning": MessageLookupByLibrary.simpleMessage(
             "A trusted contact is trying to access your account"),
-        "recoveryWarningBody": m85,
+        "recoveryWarningBody": m86,
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(
             "The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish)."),
         "recreatePasswordTitle":
@@ -1772,7 +1777,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "trim": MessageLookupByLibrary.simpleMessage("Trim"),
         "trustedContacts":
             MessageLookupByLibrary.simpleMessage("Trusted contacts"),
-        "trustedInviteBody": m86,
+        "trustedInviteBody": m87,
         "tryAgain": MessageLookupByLibrary.simpleMessage("Try again"),
         "turnOnBackupForAutoUpload": MessageLookupByLibrary.simpleMessage(
             "Turn on backup to automatically upload files added to this device folder to Ente."),
@@ -1871,6 +1876,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Waiting for verification..."),
         "waitingForWifi":
             MessageLookupByLibrary.simpleMessage("Waiting for WiFi..."),
+        "warning": MessageLookupByLibrary.simpleMessage("Warning"),
         "weAreOpenSource":
             MessageLookupByLibrary.simpleMessage("We are open source!"),
         "weDontSupportEditingPhotosAndAlbumsThatYouDont":
