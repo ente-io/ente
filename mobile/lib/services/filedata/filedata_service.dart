@@ -23,6 +23,7 @@ class FileDataService {
   final _logger = Logger("FileDataService");
   final _dio = NetworkClient.instance.enteDio;
   late final SharedPreferences _prefs;
+  Set<int>? previewIds;
 
   void init(SharedPreferences prefs) {
     _prefs = prefs;
@@ -136,6 +137,7 @@ class FileDataService {
         await _prefs.setInt("fd.lastSyncTime", maxUpdatedAt);
         _logger.info('found ${result.length} fd entries');
         hasMoreData = result.isNotEmpty;
+        previewIds = await MLDataDB.instance.getFileIDsVidPreview();
       } while (hasMoreData);
     } catch (e) {
       _logger.severe("Failed to syncDiff", e);
