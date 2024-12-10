@@ -147,8 +147,8 @@ class _EmergencyPageState extends State<EmergencyPage> {
               ),
           if (info != null)
             SliverPadding(
-              padding:
-                  const EdgeInsets.only(top: 16, left: 4, right: 4, bottom: 8),
+              padding: const EdgeInsets.only(
+                  top: 16, left: 16, right: 16, bottom: 8),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
@@ -194,48 +194,42 @@ class _EmergencyPageState extends State<EmergencyPage> {
                       );
                     } else if (index == (1 + trustedContacts.length)) {
                       if (trustedContacts.isEmpty) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 0,
-                          ),
-                          child: Column(
-                            children: [
-                              const SizedBox(height: 20),
-                              Text(
-                                context.l10n.legacyPageDesc,
-                                style: getEnteTextTheme(context).body,
+                        return Column(
+                          children: [
+                            const SizedBox(height: 20),
+                            Text(
+                              context.l10n.legacyPageDesc,
+                              style: getEnteTextTheme(context).body,
+                            ),
+                            SizedBox(
+                              height: 200,
+                              width: 200,
+                              child: SvgPicture.asset(
+                                getEnteColorScheme(context).backdropBase ==
+                                        backgroundBaseDark
+                                    ? "assets/icons/legacy-dark.svg"
+                                    : "assets/icons/legacy-light.svg",
+                                width: 156,
+                                height: 152,
                               ),
-                              SizedBox(
-                                height: 200,
-                                width: 200,
-                                child: SvgPicture.asset(
-                                  getEnteColorScheme(context).backdropBase ==
-                                          backgroundBaseDark
-                                      ? "assets/icons/legacy-dark.svg"
-                                      : "assets/icons/legacy-light.svg",
-                                  width: 156,
-                                  height: 152,
-                                ),
-                              ),
-                              Text(
-                                context.l10n.legacyPageDesc2,
-                                style: getEnteTextTheme(context).smallMuted,
-                              ),
-                              const SizedBox(height: 8),
-                              ButtonWidget(
-                                buttonType: ButtonType.primary,
-                                labelText: S.of(context).addTrustedContact,
-                                onTap: () async {
-                                  await routeToPage(
-                                    context,
-                                    AddContactPage(info!),
-                                  );
-                                  _fetchData();
-                                },
-                              ),
-                            ],
-                          ),
+                            ),
+                            Text(
+                              context.l10n.legacyPageDesc2,
+                              style: getEnteTextTheme(context).smallMuted,
+                            ),
+                            const SizedBox(height: 8),
+                            ButtonWidget(
+                              buttonType: ButtonType.primary,
+                              labelText: S.of(context).addTrustedContact,
+                              onTap: () async {
+                                await routeToPage(
+                                  context,
+                                  AddContactPage(info!),
+                                );
+                                _fetchData();
+                              },
+                            ),
+                          ],
                         );
                       }
                       return MenuItemWidget(
