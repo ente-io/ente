@@ -1,6 +1,7 @@
 import "package:collection/collection.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/emergency/emergency_service.dart";
 import "package:photos/emergency/model.dart";
 import "package:photos/emergency/recover_others_account.dart";
@@ -114,11 +115,16 @@ class _OtherContactPageState extends State<OtherContactPage> {
                     " after starting the recovery process.",
                     style: textTheme.body,
                   )
-                : Text(
-                    "You can recover $accountEmail's"
-                    " account after $waitTill.",
-                    style: textTheme.bodyBold,
-                  ),
+                : (recoverySession!.status == "READY"
+                    ? Text(
+                        context.l10n.recoveryReady(accountEmail),
+                        style: textTheme.body,
+                      )
+                    : Text(
+                        "You can recover $accountEmail's"
+                        " account after $waitTill.",
+                        style: textTheme.bodyBold,
+                      )),
             const SizedBox(height: 24),
             if (recoverySession == null)
               ButtonWidget(
@@ -148,6 +154,7 @@ class _OtherContactPageState extends State<OtherContactPage> {
                                   context.l10n.recoveryInitiated,
                                   context.l10n.recoveryInitiatedDesc(
                                     widget.contact.recoveryNoticeInDays,
+                                    Configuration.instance.getEmail()!,
                                   ),
                                 );
                               }
@@ -161,23 +168,31 @@ class _OtherContactPageState extends State<OtherContactPage> {
                 // isTopBorderRadiusRemoved: true,
               ),
             if (recoverySession != null && recoverySession!.status == "READY")
-              ButtonWidget(
-                // icon: Icons.start_outlined,
-                buttonType: ButtonType.primary,
-                labelText: context.l10n.recoverAccount,
-                onTap: () async {
-                  final (String key, KeyAttributes attributes) =
-                      await EmergencyContactService.instance
-                          .getRecoveryInfo(recoverySession!);
-                  routeToPage(
-                    context,
-                    RecoverOthersAccount(key, attributes, recoverySession!),
-                  ).ignore();
-                },
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: ButtonWidget(
+                  buttonType: ButtonType.primary,
+                  labelText: context.l10n.recoverAccount,
+                  onTap: () async {
+                    try {
+                      final (String key, KeyAttributes attributes) =
+                          await EmergencyContactService.instance
+                              .getRecoveryInfo(recoverySession!);
+                      routeToPage(
+                        context,
+                        RecoverOthersAccount(key, attributes, recoverySession!),
+                      ).ignore();
+                    } catch (e) {
+                      showGenericErrorDialog(context: context, error: e)
+                          .ignore();
+                    }
+                  },
+                ),
               ),
-            if (recoverySession != null && recoverySession!.status == "WAITING")
+            if (recoverySession != null &&
+                (recoverySession!.status == "WAITING" ||
+                    recoverySession!.status == "READY"))
               ButtonWidget(
-                // icon: Icons.start_outlined,
                 buttonType: ButtonType.neutral,
                 labelText: S.of(context).cancelAccountRecovery,
                 shouldSurfaceExecutionStates: false,
@@ -238,7 +253,7 @@ class _OtherContactPageState extends State<OtherContactPage> {
                 widget.contact,
                 ContactState.contactLeft,
               );
-              Navigator.of(context).pop(true);
+              Navigator.of(context).pop();
             } catch (e) {
               showGenericErrorDialog(context: context, error: e).ignore();
             }

@@ -186,20 +186,32 @@ class _AddContactPage extends State<AddContactPage> {
                         : () async {
                             final emailToAdd =
                                 selectedEmail == '' ? _email : selectedEmail;
-                            try {
-                              final result = await EmergencyContactService
-                                  .instance
-                                  .addContact(context, emailToAdd);
-                              if (result && mounted) {
-                                Navigator.of(context).pop(true);
+                            final choiceResult = await showChoiceActionSheet(
+                              context,
+                              title: S.of(context).warning,
+                              body: S.of(context).confirmAddingTrustedContact(
+                                    emailToAdd,
+                                    30,
+                                  ),
+                              firstButtonLabel: S.of(context).proceed,
+                              isCritical: true,
+                            );
+                            if (choiceResult != null &&
+                                choiceResult.action == ButtonAction.first) {
+                              try {
+                                final r = await EmergencyContactService.instance
+                                    .addContact(context, emailToAdd);
+                                if (r && mounted) {
+                                  Navigator.of(context).pop(true);
+                                }
+                              } catch (e) {
+                                _logger.severe('Failed to add contact', e);
+                                await showErrorDialog(
+                                  context,
+                                  S.of(context).error,
+                                  S.of(context).somethingWentWrong,
+                                );
                               }
-                            } catch (e) {
-                              _logger.severe('Failed to add contact', e);
-                              await showErrorDialog(
-                                context,
-                                S.of(context).error,
-                                S.of(context).somethingWentWrong,
-                              );
                             }
                           },
                   ),

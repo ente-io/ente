@@ -10639,13 +10639,13 @@ class S {
     );
   }
 
-  /// `You can access the account after {days} days. You will get a notification on your registered email.`
-  String recoveryInitiatedDesc(int days) {
+  /// `You can access the account after {days} days. A notification will be sent to {email}.`
+  String recoveryInitiatedDesc(int days, String email) {
     return Intl.message(
-      'You can access the account after $days days. You will get a notification on your registered email.',
+      'You can access the account after $days days. A notification will be sent to $email.',
       name: 'recoveryInitiatedDesc',
       desc: '',
-      args: [days],
+      args: [days, email],
     );
   }
 
@@ -10696,6 +10696,66 @@ class S {
       name: 'whyAddTrustContact',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `You can now recover {email}'s account by setting a new password.`
+  String recoveryReady(String email) {
+    return Intl.message(
+      'You can now recover $email\'s account by setting a new password.',
+      name: 'recoveryReady',
+      desc: '',
+      args: [email],
+    );
+  }
+
+  /// `{email} is trying to recover your account.`
+  String recoveryWarningBody(Object email) {
+    return Intl.message(
+      '$email is trying to recover your account.',
+      name: 'recoveryWarningBody',
+      desc: '',
+      args: [email],
+    );
+  }
+
+  /// `You have been invited to be a legacy contact by {email}.`
+  String trustedInviteBody(Object email) {
+    return Intl.message(
+      'You have been invited to be a legacy contact by $email.',
+      name: 'trustedInviteBody',
+      desc: '',
+      args: [email],
+    );
+  }
+
+  /// `Warning`
+  String get warning {
+    return Intl.message(
+      'Warning',
+      name: 'warning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Proceed`
+  String get proceed {
+    return Intl.message(
+      'Proceed',
+      name: 'proceed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You are about to add {email} as a trusted contact. They will be able to recover your account if you are absent for {numOfDays} days.`
+  String confirmAddingTrustedContact(String email, int numOfDays) {
+    return Intl.message(
+      'You are about to add $email as a trusted contact. They will be able to recover your account if you are absent for $numOfDays days.',
+      name: 'confirmAddingTrustedContact',
+      desc: '',
+      args: [email, numOfDays],
     );
   }
 
