@@ -10759,10 +10759,10 @@ class S {
     );
   }
 
-  /// `${email} has invited you to be a trusted contact`
+  /// `{email} has invited you to be a trusted contact`
   String legacyInvite(Object email) {
     return Intl.message(
-      '\$$email has invited you to be a trusted contact',
+      '$email has invited you to be a trusted contact',
       name: 'legacyInvite',
       desc: '',
       args: [email],

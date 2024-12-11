@@ -124,7 +124,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "${Intl.plural(count, one: '${count} item', other: '${count} items')}";
 
   static String m84(email) =>
-      "\$${email} has invited you to be a trusted contact";
+      "${email} has invited you to be a trusted contact";
 
   static String m40(expiryTime) => "Link will expire on ${expiryTime}";
 
