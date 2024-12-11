@@ -27,6 +27,8 @@ func (c *Controller) UpdateContact(ctx *gin.Context,
 	if !hasUpdate {
 		log.WithField("userID", userID).WithField("req", req).
 			Warn("No update applied for emergency contact")
+	} else {
+		go c.sendNotification(ctx, req.UserID, req.EmergencyContactID, req.State, nil)
 	}
 	recoverStatus := getNextRecoveryStatusFromContactState(req.State)
 	if recoverStatus != nil {
