@@ -479,30 +479,6 @@ class _SeekBarAndDuration extends StatelessWidget {
       return '${minutes.toString().padLeft(1, '0')}:${seconds.toString().padLeft(2, '0')}';
     }
   }
-
-  /// Returns the duration in seconds from the format "h:mm:ss" or "m:ss".
-  int? _durationToSeconds(String? duration) {
-    if (duration == null) {
-      return null;
-    }
-    final parts = duration.split(':');
-    int seconds = 0;
-
-    if (parts.length == 3) {
-      // Format: "h:mm:ss"
-      seconds += int.parse(parts[0]) * 3600; // Hours to seconds
-      seconds += int.parse(parts[1]) * 60; // Minutes to seconds
-      seconds += int.parse(parts[2]); // Seconds
-    } else if (parts.length == 2) {
-      // Format: "m:ss"
-      seconds += int.parse(parts[0]) * 60; // Minutes to seconds
-      seconds += int.parse(parts[1]); // Seconds
-    } else {
-      throw FormatException('Invalid duration format: $duration');
-    }
-
-    return seconds;
-  }
 }
 
 class _SeekBar extends StatefulWidget {
@@ -517,37 +493,29 @@ class _SeekBar extends StatefulWidget {
 }
 
 class _SeekBarState extends State<_SeekBar> {
-  final _positionNotifer = ValueNotifier<double>(0.0);
+  bool _isSeeking = false;
+  double _sliderValue = 0.0;
+  late final StreamSubscription<Duration> _positionStreamSubscription;
   final _debouncer = Debouncer(
-    const Duration(milliseconds: 100),
-    executionInterval: const Duration(milliseconds: 325),
+    const Duration(milliseconds: 200),
+    executionInterval: const Duration(milliseconds: 500),
   );
   @override
   void initState() {
     super.initState();
-
-    // widget.controller.onPlaybackStatusChanged.addListener(
-    //   _onPlaybackStatusChanged,
-    // );
-    // widget.controller.onPlaybackPositionChanged.addListener(
-    //   _onPlaybackPositionChanged,
-    // );
-
-    // _startMovingSeekbar();
-    widget.controller.player.stream.position.listen((event) {
-      _positionNotifer.value = event.inMilliseconds /
-          widget.controller.player.state.duration.inMilliseconds;
+    _positionStreamSubscription =
+        widget.controller.player.stream.position.listen((event) {
+      if (_isSeeking) return;
+      setState(() {
+        _sliderValue = event.inMilliseconds /
+            widget.controller.player.state.duration.inMilliseconds;
+      });
     });
   }
 
   @override
   void dispose() {
-    // widget.controller.onPlaybackStatusChanged.removeListener(
-    //   _onPlaybackStatusChanged,
-    // );
-    // widget.controller.onPlaybackPositionChanged.removeListener(
-    //   _onPlaybackPositionChanged,
-    // );
+    _positionStreamSubscription.cancel();
     _debouncer.cancelDebounceTimer();
     super.dispose();
   }
@@ -565,117 +533,39 @@ class _SeekBarState extends State<_SeekBar> {
         thumbColor: backgroundElevatedLight,
         overlayColor: fillMutedDark,
       ),
-      child: ValueListenableBuilder(
-        valueListenable: _positionNotifer,
-        builder: (BuildContext context, double value, _) {
-          return Slider(
-            min: 0.0,
-            max: 1.0,
-            value: value,
-            onChangeStart: (value) {
-              // widget.isSeeking.value = true;
-            },
-            onChanged: (value) {
-              // setState(() {
-              //   _animationController.value = value;
-              // });
-              // _seekTo(value);
-            },
-            divisions: 4500,
-            onChangeEnd: (value) {
-              // setState(() {
-              //   _animationController.value = value;
-              // });
-              // _seekTo(value);
-              // widget.isSeeking.value = false;
-            },
-            allowedInteraction: SliderInteraction.tapAndSlide,
+      child: Slider(
+        min: 0.0,
+        max: 1.0,
+        value: _sliderValue,
+        onChangeStart: (value) {
+          setState(() {
+            _isSeeking = true;
+          });
+        },
+        onChanged: (value) {
+          setState(() {
+            _sliderValue = value;
+          });
+        },
+        divisions: 4500,
+        onChangeEnd: (value) {
+          setState(() {
+            _isSeeking = false;
+          });
+          widget.controller.player.seek(
+            Duration(
+              milliseconds: (value *
+                      widget.controller.player.state.duration.inMilliseconds)
+                  .round(),
+            ),
           );
         },
+        allowedInteraction: SliderInteraction.tapAndSlide,
       ),
     );
   }
 
-  void _seekTo(double value) {
-    _debouncer.run(() async {
-      // unawaited(
-      //   widget.controller.seekTo((value * widget.duration!).round()),
-      // );
-    });
-  }
-
-  // void _startMovingSeekbar() {
-  //   //Video starts playing after a slight delay. This delay is to ensure that
-  //   //the seek bar animation starts after the video starts playing.
-  //   Future.delayed(const Duration(milliseconds: 700), () {
-  //     if (!mounted) {
-  //       return;
-  //     }
-  //     if (widget.duration != null) {
-  //       unawaited(
-  //         _animationController.animateTo(
-  //           (1 / widget.duration!),
-  //           duration: const Duration(seconds: 1),
-  //         ),
-  //       );
-  //     } else {
-  //       unawaited(
-  //         _animationController.animateTo(
-  //           0,
-  //           duration: const Duration(seconds: 1),
-  //         ),
-  //       );
-  //     }
-  //   });
-  // }
-
-  void _onPlaybackStatusChanged() {
-    // if (widget.controller.playbackInfo?.status == PlaybackStatus.paused) {
-    //   _animationController.stop();
-    // }
-  }
-
-  void _onPlaybackPositionChanged() async {
-    // if (widget.controller.playbackInfo?.status == PlaybackStatus.paused ||
-    //     (widget.controller.playbackInfo?.status == PlaybackStatus.stopped &&
-    //         widget.controller.playbackInfo?.positionFraction != 0)) {
-    //   return;
-    // }
-    // final target = widget.controller.playbackInfo?.positionFraction ?? 0;
-
-    // //To immediately set the position to 0 when the video ends
-    // if (_prevPositionFraction == 1.0 && target == 0.0) {
-    //   setState(() {
-    //     _animationController.value = 0;
-    //   });
-    //   if (!localSettings.shouldLoopVideo()) {
-    //     return;
-    //   }
-    // }
-
-    // //There is a slight delay (around 350 ms) for the event being listened to
-    // //by this listener on the next target (target that comes after 0). Adding
-    // //this buffer to keep the seek bar animation smooth.
-    // if (target == 0) {
-    //   await Future.delayed(const Duration(milliseconds: 450));
-    // }
-
-    // if (widget.duration != null) {
-    //   unawaited(
-    //     _animationController.animateTo(
-    //       target + (1 / widget.duration!),
-    //       duration: const Duration(seconds: 1),
-    //     ),
-    //   );
-    // } else {
-    //   unawaited(
-    //     _animationController.animateTo(
-    //       target,
-    //       duration: const Duration(seconds: 1),
-    //     ),
-    //   );
-    // }
-
-    // _prevPositionFraction = target;
-  }
+  //Upating slider's value notifier: If seeking, do not update on playback position change
+  // When seeking, update the slider's value depending on user gesture. After after seeking
+  // is done, update the slider's value based on the playback position.
 }
