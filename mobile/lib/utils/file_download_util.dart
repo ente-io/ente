@@ -21,7 +21,6 @@ import "package:photos/utils/data_util.dart";
 import "package:photos/utils/fake_progress.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/photo_manager_util.dart";
 
 final _logger = Logger("file_download_util");
 
@@ -197,7 +196,7 @@ Future<void> downloadToGallery(EnteFile file) async {
       final File? fileToSave = await getFile(file);
       //Disabling notifications for assets changing to insert the file into
       //files db before triggering a sync.
-      await PhotoManagerSafe.stopChangeNotify(file.generatedID.toString());
+      await PhotoManager.stopChangeNotify();
       if (type == FileType.image) {
         savedAsset = await PhotoManager.editor
             .saveImageWithPath(fileToSave!.path, title: file.title!);
@@ -220,6 +219,7 @@ Future<void> downloadToGallery(EnteFile file) async {
           );
         }
       }
+
       if (savedAsset != null) {
         file.localID = savedAsset!.id;
         await FilesDB.instance.insert(file);
@@ -237,7 +237,7 @@ Future<void> downloadToGallery(EnteFile file) async {
     _logger.severe("Failed to save file", e);
     rethrow;
   } finally {
-    await PhotoManagerSafe.startChangeNotify(file.generatedID.toString());
+    await PhotoManager.startChangeNotify();
     LocalSyncService.instance.checkAndSync().ignore();
   }
 }

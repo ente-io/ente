@@ -24,7 +24,6 @@ import "package:photos/ui/tools/editor/video_trim_page.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
-import "package:photos/utils/photo_manager_util.dart";
 import "package:photos/utils/toast_util.dart";
 import "package:video_editor/video_editor.dart";
 
@@ -239,7 +238,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
               ".mp4";
           //Disabling notifications for assets changing to insert the file into
           //files db before triggering a sync.
-          await PhotoManagerSafe.stopChangeNotify(widget.file.title!);
+          await PhotoManager.stopChangeNotify();
 
           try {
             final AssetEntity? newAsset =
@@ -301,7 +300,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     } catch (_) {
       await dialog.hide();
     } finally {
-      await PhotoManagerSafe.startChangeNotify(widget.file.title!);
+      await PhotoManager.startChangeNotify();
     }
   }
 }

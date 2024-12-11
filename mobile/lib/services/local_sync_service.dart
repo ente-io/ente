@@ -129,7 +129,7 @@ class LocalSyncService {
       final duration = Duration(microseconds: endTime - startTime);
       _logger.info("Load took " + duration.inMilliseconds.toString() + "ms");
     });
-    
+
     _existingSync?.complete();
     _existingSync = null;
   }
@@ -374,7 +374,7 @@ class LocalSyncService {
         unawaited(checkAndSync());
       });
     });
-    PhotoManagerSafe.startChangeNotify(null);
+    PhotoManager.startChangeNotify();
   }
 
   Future<void> checkAndSync() async {
