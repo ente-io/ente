@@ -6,7 +6,6 @@ import "package:photos/emergency/emergency_service.dart";
 import "package:photos/emergency/model.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
-import "package:photos/models/button_result.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/user_service.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -20,7 +19,6 @@ import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
 import "package:photos/ui/sharing/verify_identity_dialog.dart";
-import "package:photos/ui/tabs/nav_bar.dart";
 import "package:photos/utils/dialog_util.dart";
 
 class AddContactPage extends StatefulWidget {
