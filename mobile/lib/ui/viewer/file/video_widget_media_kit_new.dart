@@ -567,6 +567,9 @@ class _SeekBarState extends State<_SeekBar> {
         setState(() {
           _sliderValue = event.inMilliseconds /
               widget.controller.player.state.duration.inMilliseconds;
+          if (_sliderValue.isNaN) {
+            _sliderValue = 0.0;
+          }
         });
       }
     });
