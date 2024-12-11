@@ -1574,6 +1574,6 @@
       }
     }
   },
-  "legacyInvite": "${email} has invited you to be a trusted contact",
+  "legacyInvite": "{email} has invited you to be a trusted contact",
   "authToManageLegacy": "Please authenticate to manage your trusted contacts"
 }
