@@ -6,6 +6,7 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:media_kit/media_kit.dart";
 import "package:media_kit_video/media_kit_video.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/pause_video_event.dart";
@@ -15,6 +16,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -48,6 +50,7 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
   late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
   bool isGuestView = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
+  bool _isGuestView = false;
 
   @override
   void initState() {
@@ -90,7 +93,7 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
     _guestViewEventSubscription =
         Bus.instance.on<GuestViewEvent>().listen((event) {
       setState(() {
-        isGuestView = event.isGuestView;
+        _isGuestView = event.isGuestView;
       });
     });
   }
@@ -117,43 +120,58 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: controller != null
-          ? _VideoWidget(
-              controller!,
-              widget.playbackCallback,
-              isFromMemories: widget.isFromMemories,
-            )
-          : Stack(
-              children: [
-                _getThumbnail(),
-                Container(
-                  color: Colors.black12,
-                  constraints: const BoxConstraints.expand(),
-                ),
-                Center(
-                  child: SizedBox.fromSize(
-                    size: const Size.square(20),
-                    child: ValueListenableBuilder(
-                      valueListenable: _progressNotifier,
-                      builder: (BuildContext context, double? progress, _) {
-                        return progress == null || progress == 1
-                            ? const CupertinoActivityIndicator(
-                                color: Colors.white,
-                              )
-                            : CircularProgressIndicator(
-                                backgroundColor: Colors.black,
-                                value: progress,
-                                valueColor: const AlwaysStoppedAnimation<Color>(
-                                  Color.fromRGBO(45, 194, 98, 1.0),
-                                ),
-                              );
-                      },
+    return GestureDetector(
+      onVerticalDragUpdate: _isGuestView
+          ? null
+          : (d) => {
+                if (d.delta.dy > dragSensitivity)
+                  {
+                    Navigator.of(context).pop(),
+                  }
+                else if (d.delta.dy < (dragSensitivity * -1))
+                  {
+                    showDetailsSheet(context, widget.file),
+                  },
+              },
+      child: Center(
+        child: controller != null
+            ? _VideoWidget(
+                controller!,
+                widget.playbackCallback,
+                isFromMemories: widget.isFromMemories,
+              )
+            : Stack(
+                children: [
+                  _getThumbnail(),
+                  Container(
+                    color: Colors.black12,
+                    constraints: const BoxConstraints.expand(),
+                  ),
+                  Center(
+                    child: SizedBox.fromSize(
+                      size: const Size.square(20),
+                      child: ValueListenableBuilder(
+                        valueListenable: _progressNotifier,
+                        builder: (BuildContext context, double? progress, _) {
+                          return progress == null || progress == 1
+                              ? const CupertinoActivityIndicator(
+                                  color: Colors.white,
+                                )
+                              : CircularProgressIndicator(
+                                  backgroundColor: Colors.black,
+                                  value: progress,
+                                  valueColor:
+                                      const AlwaysStoppedAnimation<Color>(
+                                    Color.fromRGBO(45, 194, 98, 1.0),
+                                  ),
+                                );
+                        },
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+      ),
     );
   }
 
