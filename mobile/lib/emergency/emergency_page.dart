@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_svg/flutter_svg.dart";
 import 'package:photos/core/configuration.dart';
@@ -522,21 +523,22 @@ class _EmergencyPageState extends State<EmergencyPage> {
           },
           isInAlert: true,
         ),
-        ButtonWidget(
-          labelText: "Approve recovery (to be removed)",
-          buttonType: ButtonType.primary,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.second,
-          shouldStickToDarkTheme: true,
-          onTap: () async {
-            await EmergencyContactService.instance.approveRecovery(session);
-            if (mounted) {
-              setState(() {});
-            }
-            unawaited(_fetchData());
-          },
-          isInAlert: true,
-        ),
+        if (kDebugMode)
+          ButtonWidget(
+            labelText: "Approve recovery (to be removed)",
+            buttonType: ButtonType.primary,
+            buttonSize: ButtonSize.large,
+            buttonAction: ButtonAction.second,
+            shouldStickToDarkTheme: true,
+            onTap: () async {
+              await EmergencyContactService.instance.approveRecovery(session);
+              if (mounted) {
+                setState(() {});
+              }
+              unawaited(_fetchData());
+            },
+            isInAlert: true,
+          ),
         ButtonWidget(
           labelText: S.of(context).cancel,
           buttonType: ButtonType.tertiary,
