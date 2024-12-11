@@ -494,7 +494,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
           isInAlert: true,
         ),
       ],
-      body: context.l10n.trustedInviteBody(contact.user.email),
+      body: S.of(context).legacyInvite(contact.user.email),
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     return;
