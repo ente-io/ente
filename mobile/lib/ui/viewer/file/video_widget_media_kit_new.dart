@@ -350,7 +350,6 @@ class __VideoWidgetState extends State<_VideoWidget> {
                             controller: widget.controller,
                             isSeekingNotifier: _isSeekingNotifier,
                           ),
-                          // child: const SizedBox.shrink(),
                         ),
                       ),
                     ),
@@ -448,105 +447,80 @@ class _PlayPauseButtonState extends State<PlayPauseButtonMediaKit> {
 
 class _SeekBarAndDuration extends StatelessWidget {
   final VideoController? controller;
-  // final ValueNotifier<bool> showControls;
   final ValueNotifier<bool> isSeekingNotifier;
 
   const _SeekBarAndDuration({
     required this.controller,
-    // required this.showControls,
     required this.isSeekingNotifier,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      // valueListenable: showControls,
-      valueListenable: ValueNotifier(true),
-
-      builder: (
-        BuildContext context,
-        bool value,
-        _,
-      ) {
-        return AnimatedOpacity(
-          duration: const Duration(
-            milliseconds: 200,
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+      ),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          4,
+          16,
+          4,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.3),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(8),
           ),
-          curve: Curves.easeInQuad,
-          opacity: value ? 1 : 0,
-          child: IgnorePointer(
-            ignoring: !value,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-              ),
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(
-                  16,
-                  4,
-                  16,
-                  4,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.3),
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(8),
-                  ),
-                  border: Border.all(
-                    color: strokeFaintDark,
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    StreamBuilder(
-                      stream: controller?.player.stream.position,
-                      builder: (context, snapshot) {
-                        if (snapshot.data == null) {
-                          return Text(
-                            "0:00",
-                            style: getEnteTextTheme(
-                              context,
-                            ).mini.copyWith(
-                                  color: textBaseDark,
-                                ),
-                          );
-                        }
-                        return Text(
-                          _secondsToDuration(snapshot.data!.inSeconds),
-                          style: getEnteTextTheme(
-                            context,
-                          ).mini.copyWith(
-                                color: textBaseDark,
-                              ),
-                        );
-                      },
-                    ),
-                    Expanded(
-                      child: _SeekBar(
-                        controller!,
-                        isSeekingNotifier,
-
-                        // isSeeking,
+          border: Border.all(
+            color: strokeFaintDark,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            StreamBuilder(
+              stream: controller?.player.stream.position,
+              builder: (context, snapshot) {
+                if (snapshot.data == null) {
+                  return Text(
+                    "0:00",
+                    style: getEnteTextTheme(
+                      context,
+                    ).mini.copyWith(
+                          color: textBaseDark,
+                        ),
+                  );
+                }
+                return Text(
+                  _secondsToDuration(snapshot.data!.inSeconds),
+                  style: getEnteTextTheme(
+                    context,
+                  ).mini.copyWith(
+                        color: textBaseDark,
                       ),
-                    ),
-                    Text(
-                      _secondsToDuration(
-                        controller!.player.state.duration.inSeconds,
-                      ),
-                      style: getEnteTextTheme(
-                        context,
-                      ).mini.copyWith(
-                            color: textBaseDark,
-                          ),
-                    ),
-                  ],
-                ),
+                );
+              },
+            ),
+            Expanded(
+              child: _SeekBar(
+                controller!,
+                isSeekingNotifier,
               ),
             ),
-          ),
-        );
-      },
+            Text(
+              _secondsToDuration(
+                controller!.player.state.duration.inSeconds,
+              ),
+              style: getEnteTextTheme(
+                context,
+              ).mini.copyWith(
+                    color: textBaseDark,
+                  ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -589,10 +563,12 @@ class _SeekBarState extends State<_SeekBar> {
     _positionStreamSubscription =
         widget.controller.player.stream.position.listen((event) {
       if (widget.isSeekingNotifier.value) return;
-      setState(() {
-        _sliderValue = event.inMilliseconds /
-            widget.controller.player.state.duration.inMilliseconds;
-      });
+      if (mounted) {
+        setState(() {
+          _sliderValue = event.inMilliseconds /
+              widget.controller.player.state.duration.inMilliseconds;
+        });
+      }
     });
   }
 
@@ -621,14 +597,19 @@ class _SeekBarState extends State<_SeekBar> {
         max: 1.0,
         value: _sliderValue,
         onChangeStart: (value) {
-          setState(() {
-            widget.isSeekingNotifier.value = true;
-          });
+          if (mounted) {
+            setState(() {
+              widget.isSeekingNotifier.value = true;
+            });
+          }
         },
         onChanged: (value) {
-          setState(() {
-            _sliderValue = value;
-          });
+          if (mounted) {
+            setState(() {
+              _sliderValue = value;
+            });
+          }
+
           _debouncer.run(() async {
             await widget.controller.player.seek(
               Duration(
@@ -648,9 +629,11 @@ class _SeekBarState extends State<_SeekBar> {
                   .round(),
             ),
           );
-          setState(() {
-            widget.isSeekingNotifier.value = false;
-          });
+          if (mounted) {
+            setState(() {
+              widget.isSeekingNotifier.value = false;
+            });
+          }
         },
         allowedInteraction: SliderInteraction.tapAndSlide,
       ),
