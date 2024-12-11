@@ -41,11 +41,9 @@ class VideoWidgetMediaKitNew extends StatefulWidget {
 class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
     with WidgetsBindingObserver {
   final Logger _logger = Logger("VideoWidgetMediaKitNew");
-  static const verticalMargin = 72.0;
   late final player = Player();
   VideoController? controller;
   final _progressNotifier = ValueNotifier<double?>(null);
-  late StreamSubscription<bool> playingStreamSubscription;
   bool _isAppInFG = true;
   late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
   bool isGuestView = false;
@@ -85,11 +83,6 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
         }
       });
     }
-    playingStreamSubscription = player.stream.playing.listen((event) {
-      if (widget.playbackCallback != null && mounted) {
-        widget.playbackCallback!(event);
-      }
-    });
 
     pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
       player.pause();
@@ -118,7 +111,6 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
     removeCallBack(widget.file);
     _progressNotifier.dispose();
     WidgetsBinding.instance.removeObserver(this);
-    playingStreamSubscription.cancel();
     player.dispose();
     super.dispose();
   }
@@ -127,39 +119,41 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
   Widget build(BuildContext context) {
     return Center(
       child: controller != null
-          ? Video(
-              controller: controller!,
-              controls: (state) {
-                return Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    PlayPauseButtonMediaKit(controller),
-                    Positioned(
-                      bottom: verticalMargin,
-                      right: 0,
-                      left: 0,
-                      child: SafeArea(
-                        top: false,
-                        left: false,
-                        right: false,
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                            bottom: widget.isFromMemories ? 32 : 0,
-                          ),
-                          child: _SeekBarAndDuration(
-                            controller: controller,
-                            // showControls: _showControls,
-                            // isSeeking: _isSeeking,
-                          ),
-                          // child: const SizedBox.shrink(),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
+          ? _VideoWidget(
+              controller!,
+              widget.playbackCallback,
+              isFromMemories: widget.isFromMemories,
             )
-          : _getLoadingWidget(),
+          : Stack(
+              children: [
+                _getThumbnail(),
+                Container(
+                  color: Colors.black12,
+                  constraints: const BoxConstraints.expand(),
+                ),
+                Center(
+                  child: SizedBox.fromSize(
+                    size: const Size.square(20),
+                    child: ValueListenableBuilder(
+                      valueListenable: _progressNotifier,
+                      builder: (BuildContext context, double? progress, _) {
+                        return progress == null || progress == 1
+                            ? const CupertinoActivityIndicator(
+                                color: Colors.white,
+                              )
+                            : CircularProgressIndicator(
+                                backgroundColor: Colors.black,
+                                value: progress,
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Color.fromRGBO(45, 194, 98, 1.0),
+                                ),
+                              );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
     );
   }
 
@@ -213,39 +207,6 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
     }
   }
 
-  Widget _getLoadingWidget() {
-    return Stack(
-      children: [
-        _getThumbnail(),
-        Container(
-          color: Colors.black12,
-          constraints: const BoxConstraints.expand(),
-        ),
-        Center(
-          child: SizedBox.fromSize(
-            size: const Size.square(20),
-            child: ValueListenableBuilder(
-              valueListenable: _progressNotifier,
-              builder: (BuildContext context, double? progress, _) {
-                return progress == null || progress == 1
-                    ? const CupertinoActivityIndicator(
-                        color: Colors.white,
-                      )
-                    : CircularProgressIndicator(
-                        backgroundColor: Colors.black,
-                        value: progress,
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Color.fromRGBO(45, 194, 98, 1.0),
-                        ),
-                      );
-              },
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _getThumbnail() {
     return Container(
       color: Colors.black,
@@ -254,6 +215,134 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
         widget.file,
         fit: BoxFit.contain,
       ),
+    );
+  }
+}
+
+class _VideoWidget extends StatefulWidget {
+  final VideoController controller;
+  final Function(bool)? playbackCallback;
+  final bool isFromMemories;
+  const _VideoWidget(
+    this.controller,
+    this.playbackCallback, {
+    required this.isFromMemories,
+  });
+
+  @override
+  State<_VideoWidget> createState() => __VideoWidgetState();
+}
+
+class __VideoWidgetState extends State<_VideoWidget> {
+  final showControlsNotifier = ValueNotifier<bool>(true);
+  static const verticalMargin = 72.0;
+  final _hideControlsDebouncer = Debouncer(
+    const Duration(milliseconds: 2000),
+  );
+  final _isSeekingNotifier = ValueNotifier<bool>(false);
+  late final StreamSubscription<bool> _isPlayingStreamSubscription;
+
+  @override
+  void initState() {
+    _isPlayingStreamSubscription =
+        widget.controller.player.stream.playing.listen((isPlaying) {
+      if (isPlaying && !_isSeekingNotifier.value) {
+        _hideControlsDebouncer.run(() async {
+          showControlsNotifier.value = false;
+          widget.playbackCallback?.call(true);
+        });
+      }
+    });
+
+    _isSeekingNotifier.addListener(isSeekingListener);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    showControlsNotifier.dispose();
+    _isPlayingStreamSubscription.cancel();
+    _hideControlsDebouncer.cancelDebounceTimer();
+    _isSeekingNotifier.removeListener(isSeekingListener);
+    _isSeekingNotifier.dispose();
+    super.dispose();
+  }
+
+  void isSeekingListener() {
+    if (_isSeekingNotifier.value) {
+      _hideControlsDebouncer.cancelDebounceTimer();
+    } else {
+      if (widget.controller.player.state.playing) {
+        _hideControlsDebouncer.run(() async {
+          showControlsNotifier.value = false;
+          widget.playbackCallback?.call(false);
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Video(
+      controller: widget.controller,
+      controls: (state) {
+        return ValueListenableBuilder(
+          valueListenable: showControlsNotifier,
+          builder: (context, value, _) {
+            return AnimatedOpacity(
+              duration: const Duration(milliseconds: 200),
+              opacity: value ? 1 : 0,
+              curve: Curves.easeInOutQuad,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      showControlsNotifier.value = !showControlsNotifier.value;
+                      if (widget.playbackCallback != null) {
+                        widget.playbackCallback!(
+                          !showControlsNotifier.value,
+                        );
+                      }
+                    },
+                    child: Container(
+                      constraints: const BoxConstraints.expand(),
+                    ),
+                  ),
+                  IgnorePointer(
+                    ignoring: !value,
+                    child: PlayPauseButtonMediaKit(widget.controller),
+                  ),
+                  Positioned(
+                    bottom: verticalMargin,
+                    right: 0,
+                    left: 0,
+                    child: IgnorePointer(
+                      ignoring: !value,
+                      child: SafeArea(
+                        top: false,
+                        left: false,
+                        right: false,
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            bottom: widget.isFromMemories ? 32 : 0,
+                          ),
+                          child: _SeekBarAndDuration(
+                            controller: widget.controller,
+                            isSeekingNotifier: _isSeekingNotifier,
+                          ),
+                          // child: const SizedBox.shrink(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -342,12 +431,12 @@ class _PlayPauseButtonState extends State<PlayPauseButtonMediaKit> {
 class _SeekBarAndDuration extends StatelessWidget {
   final VideoController? controller;
   // final ValueNotifier<bool> showControls;
-  // final ValueNotifier<bool> isSeeking;
+  final ValueNotifier<bool> isSeekingNotifier;
 
   const _SeekBarAndDuration({
     required this.controller,
     // required this.showControls,
-    // required this.isSeeking,
+    required this.isSeekingNotifier,
   });
 
   @override
@@ -392,31 +481,6 @@ class _SeekBarAndDuration extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    // AnimatedSize(
-                    //   duration: const Duration(
-                    //     seconds: 5,
-                    //   ),
-                    //   curve: Curves.easeInOut,
-                    //   child: ValueListenableBuilder(
-                    //     valueListenable: controller!.onPlaybackPositionChanged,
-                    //     builder: (
-                    //       BuildContext context,
-                    //       int value,
-                    //       _,
-                    //     ) {
-                    //       return Text(
-                    //         _secondsToDuration(
-                    //           value,
-                    //         ),
-                    //         style: getEnteTextTheme(
-                    //           context,
-                    //         ).mini.copyWith(
-                    //               color: textBaseDark,
-                    //             ),
-                    //       );
-                    //     },
-                    //   ),
-                    // ),
                     StreamBuilder(
                       stream: controller?.player.stream.position,
                       builder: (context, snapshot) {
@@ -443,6 +507,7 @@ class _SeekBarAndDuration extends StatelessWidget {
                     Expanded(
                       child: _SeekBar(
                         controller!,
+                        isSeekingNotifier,
 
                         // isSeeking,
                       ),
@@ -483,9 +548,10 @@ class _SeekBarAndDuration extends StatelessWidget {
 
 class _SeekBar extends StatefulWidget {
   final VideoController controller;
-  // final ValueNotifier<bool> isSeeking;
+  final ValueNotifier<bool> isSeekingNotifier;
   const _SeekBar(
     this.controller,
+    this.isSeekingNotifier,
   );
 
   @override
@@ -493,7 +559,6 @@ class _SeekBar extends StatefulWidget {
 }
 
 class _SeekBarState extends State<_SeekBar> {
-  bool _isSeeking = false;
   double _sliderValue = 0.0;
   late final StreamSubscription<Duration> _positionStreamSubscription;
   final _debouncer = Debouncer(
@@ -505,7 +570,7 @@ class _SeekBarState extends State<_SeekBar> {
     super.initState();
     _positionStreamSubscription =
         widget.controller.player.stream.position.listen((event) {
-      if (_isSeeking) return;
+      if (widget.isSeekingNotifier.value) return;
       setState(() {
         _sliderValue = event.inMilliseconds /
             widget.controller.player.state.duration.inMilliseconds;
@@ -539,7 +604,7 @@ class _SeekBarState extends State<_SeekBar> {
         value: _sliderValue,
         onChangeStart: (value) {
           setState(() {
-            _isSeeking = true;
+            widget.isSeekingNotifier.value = true;
           });
         },
         onChanged: (value) {
@@ -566,7 +631,7 @@ class _SeekBarState extends State<_SeekBar> {
             ),
           );
           setState(() {
-            _isSeeking = false;
+            widget.isSeekingNotifier.value = false;
           });
         },
         allowedInteraction: SliderInteraction.tapAndSlide,
