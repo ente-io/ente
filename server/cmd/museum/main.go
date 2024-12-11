@@ -6,8 +6,10 @@ import (
 	b64 "encoding/base64"
 	"fmt"
 	"github.com/ente-io/museum/ente/base"
+	"github.com/ente-io/museum/pkg/controller/emergency"
 	"github.com/ente-io/museum/pkg/controller/file_copy"
 	"github.com/ente-io/museum/pkg/controller/filedata"
+	emergencyRepo "github.com/ente-io/museum/pkg/repo/emergency"
 	"net/http"
 	"os"
 	"os/signal"
@@ -604,6 +606,25 @@ func main() {
 	familiesJwtAuthAPI.DELETE("/family/remove-member/:id", familyHandler.RemoveMember)
 	familiesJwtAuthAPI.DELETE("/family/revoke-invite/:id", familyHandler.RevokeInvite)
 
+	emergencyCtrl := &emergency.Controller{
+		Repo:     &emergencyRepo.Repository{DB: db},
+		UserRepo: userRepo,
+		UserCtrl: userController,
+	}
+	emergencyHandler := &api.EmergencyHandler{
+		Controller: emergencyCtrl,
+	}
+
+	privateAPI.POST("/emergency-contacts/add", emergencyHandler.AddContact)
+	privateAPI.GET("/emergency-contacts/info", emergencyHandler.GetInfo)
+	privateAPI.POST("/emergency-contacts/update", emergencyHandler.UpdateContact)
+	privateAPI.POST("/emergency-contacts/start-recovery", emergencyHandler.StartRecovery)
+	privateAPI.POST("/emergency-contacts/stop-recovery", emergencyHandler.StopRecovery)
+	privateAPI.POST("/emergency-contacts/reject-recovery", emergencyHandler.RejectRecovery)
+	privateAPI.POST("/emergency-contacts/approve-recovery", emergencyHandler.ApproveRecovery)
+	privateAPI.GET("/emergency-contacts/recovery-info/:id", emergencyHandler.GetRecoveryInfo)
+	privateAPI.POST("/emergency-contacts/init-change-password", emergencyHandler.InitChangePassword)
+	privateAPI.POST("/emergency-contacts/change-password", emergencyHandler.ChangePassword)
 	billingHandler := &api.BillingHandler{
 		Controller:          billingController,
 		AppStoreController:  appStoreController,

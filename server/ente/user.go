@@ -215,3 +215,8 @@ type Session struct {
 	PrettyUA     string `json:"prettyUA"`
 	LastUsedTime int64  `json:"lastUsedTime"`
 }
+
+type BasicUser struct {
+	ID    int64  `json:"id"`
+	Email string `json:"email"`
+}

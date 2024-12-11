@@ -1514,5 +1514,66 @@
   "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
   "allow": "Allow",
   "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
-  "seePublicAlbumLinksInApp": "See public album links in app"
+  "seePublicAlbumLinksInApp": "See public album links in app",
+  "emergencyContacts": "Emergency Contacts",
+  "acceptTrustInvite": "Accept Invite",
+  "declineTrustInvite": "Decline Invite",
+  "removeYourselfAsTrustedContact": "Remove yourself as trusted contact",
+
+  "legacy" : "Legacy",
+  "legacyPageDesc": "Legacy allows trusted contacts to access your account in your absence.",
+  "legacyPageDesc2": "Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.",
+  "legacyAccounts": "Legacy accounts",
+  "trustedContacts": "Trusted contacts",
+  "addTrustedContact": "Add Trusted Contact",
+  "removeInvite": "Remove invite",
+  "recoveryWarning": "A trusted contact is trying to access your account",
+  "rejectRecovery": "Reject recovery",
+  "recoveryInitiated": "Recovery initiated",
+  "recoveryInitiatedDesc": "You can access the account after {days} days. A notification will be sent to {email}.", 
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Cancel recovery",
+  "recoveryAccount":"Recover account",
+  "cancelAccountRecoveryBody": "Are you sure you want to cancel recovery?",
+  "startAccountRecoveryTitle": "Start recovery",
+  "whyAddTrustContact": "Trusted contact can help in recovering your data.",
+  "recoveryReady": "You can now recover {email}'s account by setting a new password.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} is trying to recover your account.",
+  "trustedInviteBody": "You have been invited to be a legacy contact by {email}.",
+  "warning": "Warning",
+  "proceed": "Proceed",
+  "confirmAddingTrustedContact": "You are about to add {email} as a trusted contact. They will be able to recover your account if you are absent for {numOfDays} days.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} has invited you to be a trusted contact",
+  "authToManageLegacy": "Please authenticate to manage your trusted contacts"
 }
