@@ -9,6 +9,7 @@ import "package:flutter/foundation.dart" hide Key;
 import "package:flutter_cache_manager/flutter_cache_manager.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
+import "package:photos/core/cache/video_cache_manager.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
@@ -25,6 +26,8 @@ class PreviewVideoStore {
 
   final _logger = Logger("PreviewVideoStore");
   final cacheManager = DefaultCacheManager();
+  final videoCacheManager = VideoCacheManager.instance;
+
   final _dio = NetworkClient.instance.enteDio;
   void init() {
     VideoCompress.compressProgress$.subscribe((progress) {
@@ -167,7 +170,11 @@ class PreviewVideoStore {
   }
 
   String _getCacheKey(EnteFile file) {
-    return "vid_preview_${file.uploadedFileID}";
+    return "video_playlist_${file.uploadedFileID}";
+  }
+
+  String _getVideoPreviewKey(EnteFile file) {
+    return "video_preview_${file.uploadedFileID}";
   }
 
   Future<File?> getPlaylist(EnteFile file) async {
@@ -175,23 +182,24 @@ class PreviewVideoStore {
     final cachedFile = await cacheManager.getFileFromCache(
       _getCacheKey(file),
     );
-    if (cachedFile != null) {
-      unawaited(_getPlaylist(file));
-      return cachedFile.file;
+    final videoFile =
+        (await videoCacheManager.getFileFromCache(_getVideoPreviewKey(file)))
+            ?.file;
+    if (cachedFile != null && videoFile != null) {
+      final finalPlaylist = (cachedFile.file.readAsStringSync())
+          .replaceAll('\noutput.ts', '\n${videoFile.path}');
+      final tempDir = await getTemporaryDirectory();
+      final playlistFile = File("${tempDir.path}/${file.uploadedFileID}.m3u8");
+      playlistFile.writeAsStringSync(finalPlaylist);
+      unawaited(_getPlaylist(file, stopIfSame: true));
+      return playlistFile;
     }
 
-    return await _getPlaylist(file);
+    return await _getPlaylist(file, stopIfSame: false);
   }
 
-  Future<File?> _getPlaylist(EnteFile file) async {
+  Future<File?> _getPlaylist(EnteFile file, {required bool stopIfSame}) async {
     _logger.info("Getting playlist for $file");
-    final tempDir = await getTemporaryDirectory();
-    final String playlistLocalPath =
-        "${tempDir.path}/${file.uploadedFileID}.m3u8";
-    // if path exists return the file
-    if (kDebugMode && File(playlistLocalPath).existsSync()) {
-      return File(playlistLocalPath);
-    }
     try {
       final response = await _dio.get(
         "/files/data/fetch/",
@@ -208,6 +216,21 @@ class PreviewVideoStore {
         encryptedData: encryptedData,
         header: header,
       );
+      final playlistCache =
+          await cacheManager.getFileFromCache(_getCacheKey(file));
+      if (playlistCache != null &&
+          playlistData["playlist"] == playlistCache.file.readAsStringSync()) {
+        if (stopIfSame) {
+          return null;
+        }
+      } else {
+        unawaited(
+          cacheManager.putFile(
+            _getCacheKey(file),
+            Uint8List.fromList((playlistData["playlist"] as String).codeUnits),
+          ),
+        );
+      }
       final response2 = await _dio.get(
         "/files/data/preview",
         queryParameters: {
@@ -216,26 +239,29 @@ class PreviewVideoStore {
         },
       );
       final previewURL = response2.data["url"];
-      // todo: (prateek/neeraj) review this
-      final finalPlaylist = (playlistData["playlist"])
-          .replaceAll('\nvideo.ts', '\n$previewURL')
-          .replaceAll('\noutput.ts', '\n$previewURL');
+      unawaited(
+        downloadAndCacheVideo(
+          previewURL,
+          _getVideoPreviewKey(file),
+        ),
+      );
+      final finalPlaylist =
+          playlistData["playlist"].replaceAll('\noutput.ts', '\n$previewURL');
 
+      final tempDir = await getTemporaryDirectory();
       final playlistFile = File("${tempDir.path}/${file.uploadedFileID}.m3u8");
       await playlistFile.writeAsString(finalPlaylist);
       _logger.info("Writing playlist to ${playlistFile.path}");
-
-      unawaited(
-        cacheManager.putFile(
-          _getCacheKey(file),
-          playlistFile.readAsBytesSync(),
-        ),
-      );
 
       return playlistFile;
     } catch (_) {
       rethrow;
     }
+  }
+
+  Future downloadAndCacheVideo(String url, String key) async {
+    final file = await videoCacheManager.downloadFile(url, key: key);
+    return file;
   }
 
   Future<String> getPreviewUrl(EnteFile file) async {
