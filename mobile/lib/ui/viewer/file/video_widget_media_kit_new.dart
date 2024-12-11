@@ -497,8 +497,8 @@ class _SeekBarState extends State<_SeekBar> {
   double _sliderValue = 0.0;
   late final StreamSubscription<Duration> _positionStreamSubscription;
   final _debouncer = Debouncer(
-    const Duration(milliseconds: 200),
-    executionInterval: const Duration(milliseconds: 500),
+    const Duration(milliseconds: 300),
+    executionInterval: const Duration(milliseconds: 300),
   );
   @override
   void initState() {
@@ -546,26 +546,31 @@ class _SeekBarState extends State<_SeekBar> {
           setState(() {
             _sliderValue = value;
           });
+          _debouncer.run(() async {
+            await widget.controller.player.seek(
+              Duration(
+                milliseconds: (value *
+                        widget.controller.player.state.duration.inMilliseconds)
+                    .round(),
+              ),
+            );
+          });
         },
         divisions: 4500,
-        onChangeEnd: (value) {
-          setState(() {
-            _isSeeking = false;
-          });
-          widget.controller.player.seek(
+        onChangeEnd: (value) async {
+          await widget.controller.player.seek(
             Duration(
               milliseconds: (value *
                       widget.controller.player.state.duration.inMilliseconds)
                   .round(),
             ),
           );
+          setState(() {
+            _isSeeking = false;
+          });
         },
         allowedInteraction: SliderInteraction.tapAndSlide,
       ),
     );
   }
-
-  //Upating slider's value notifier: If seeking, do not update on playback position change
-  // When seeking, update the slider's value depending on user gesture. After after seeking
-  // is done, update the slider's value based on the playback position.
 }
