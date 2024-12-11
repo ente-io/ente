@@ -59,6 +59,8 @@ func (c *Controller) ChangePassword(ctx *gin.Context, userID int64, request ente
 	if !hasUpdate {
 		log.WithField("userID", userID).WithField("req", request).
 			Warn("no row updated while rejecting recovery")
+	} else {
+		go c.sendRecoveryNotification(ctx, contact.UserID, contact.EmergencyContactID, ente.RecoveryStatusRecovered)
 	}
 
 	return resp, nil

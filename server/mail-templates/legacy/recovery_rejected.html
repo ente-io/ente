@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{{define "content"}}
+<p>Hey {{.TrustedUser}}!</p>
 
-</body>
-</html>
+<p><strong>{{.LegacyUser}}</strong> has rejected your attempt to recovery their account.</p>
+
+<p>If you need help with anything, please write back!</p>
+{{end}}

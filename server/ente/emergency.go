@@ -48,6 +48,7 @@ type EmergencyContactEntity struct {
 type RecoveryStatus string
 
 const (
+	RecoveryStatusInitiated RecoveryStatus = "INITIATED"
 	RecoveryStatusWaiting   RecoveryStatus = "WAITING"
 	RecoveryStatusRejected  RecoveryStatus = "REJECTED"
 	RecoveryStatusRecovered RecoveryStatus = "RECOVERED"
