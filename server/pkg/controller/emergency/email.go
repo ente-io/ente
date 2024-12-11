@@ -52,7 +52,7 @@ func (c *Controller) sendNotification(ctx context.Context, legacyUserID int64, t
 
 	if newStatus == ente.UserInvitedContact {
 		templateName = InviteTemplate
-		title = "You've been invited to join as trusted contact on Ente!"
+		title = fmt.Sprintf("%s has added you as a Trusted Contact", legacyUser.Email)
 		emailTo = trustedUser.Email
 		inlineImage["content"] = HappyHeaderImage
 	} else if newStatus == ente.UserRevokedContact {
