@@ -167,6 +167,15 @@ func SendTemplatedEmail(to []string, fromName string, fromEmail string, subject 
 	return Send(to, fromName, fromEmail, subject, body, inlineImages)
 }
 
+func SendTemplatedEmailV2(to []string, fromName string, fromEmail string, subject string, baseTemplate, templateName string, templateData map[string]interface{}, inlineImages []map[string]interface{}) error {
+	body, err := getMailBodyWithBase(baseTemplate, templateName, templateData)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+
+	return Send(to, fromName, fromEmail, subject, body, inlineImages)
+}
+
 func GetMaskedEmail(email string) string {
 	at := strings.LastIndex(email, "@")
 	if at >= 0 {
@@ -191,4 +200,31 @@ func getMailBody(templateName string, templateData map[string]interface{}) (stri
 		return "", stacktrace.Propagate(err, "")
 	}
 	return htmlbody.String(), nil
+}
+
+// getMailBody generates the mail HTML body from the provided template and data, supporting inheritance
+func getMailBodyWithBase(baseTemplateName, templateName string, templateData map[string]interface{}) (string, error) {
+	htmlBody := new(bytes.Buffer)
+
+	// Define paths for the base template and the specific template
+	baseTemplate := "mail-templates/" + baseTemplateName
+	specificTemplate := "mail-templates/" + templateName
+
+	parts := strings.Split(baseTemplate, "/")
+	lastPart := parts[len(parts)-1]
+	baseTemplateID := strings.TrimSuffix(lastPart, path.Ext(lastPart))
+
+	// Parse the base and specific templates together
+	t, err := template.ParseFiles(baseTemplate, specificTemplate)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "failed to parse templates")
+	}
+
+	// Execute the base template with the provided data
+	err = t.ExecuteTemplate(htmlBody, baseTemplateID, templateData)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "failed to execute template")
+	}
+
+	return htmlBody.String(), nil
 }
