@@ -1,7 +1,6 @@
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class SortCodeMenuWidget extends StatelessWidget {
   final CodeSortKey currentKey;
@@ -60,7 +59,9 @@ class SortCodeMenuWidget extends StatelessWidget {
                   sortOptionText(CodeSortKey.values[index]),
                   if (CodeSortKey.values[index] == currentKey)
                     Icon(
-                      Icons.check,
+                      CodeSortKey.values[index] == CodeSortKey.manual
+                          ? Icons.mode_edit
+                          : Icons.check,
                       color: Theme.of(context).iconTheme.color,
                     ),
                 ],

@@ -362,6 +362,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                       itemBuilder: (context, index) {
                         final person = searchResults[index];
                         return PersonGridItem(
+                          key: ValueKey(person.$1.remoteID),
                           person: person.$1,
                           personFile: person.$2,
                           onTap: () async {

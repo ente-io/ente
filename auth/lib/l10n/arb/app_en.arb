@@ -329,6 +329,7 @@
     }
   },
   "manualSort": "Custom",
+  "editOrder": "Edit order",
   "mostFrequentlyUsed": "Frequently used",
   "mostRecentlyUsed": "Recently used",
   "activeSessions": "Active sessions",
@@ -450,10 +451,10 @@
   "customEndpoint": "Connected to {endpoint}",
   "pinText": "Pin",
   "unpinText": "Unpin",
-  "fav": "Favorite",
-  "unfav": "Unfavorite",
-  "favoritedCodeMessage": "{code} has been added to favorites",
-  "unfavoritedCodeMessage": "{code} has been removed from favorites",
+  "pinnedCodeMessage": "{code} has been pinned",
+  "unpinnedCodeMessage": "{code} has been unpinned",
+  "pinned": "Pinned",
+
   "tags": "Tags",
   "createNewTag": "Create New Tag",
   "tag": "Tag",

@@ -25,12 +25,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("आपका पुनः स्वागत है"),
         "activeSessions": MessageLookupByLibrary.simpleMessage("एक्टिव सेशन"),
-        "allow": MessageLookupByLibrary.simpleMessage("Allow"),
-        "allowAppToOpenSharedAlbumLinks": MessageLookupByLibrary.simpleMessage(
-            "Allow app to open shared album links"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "आपका अकाउंट हटाने का मुख्य कारण क्या है?"),
-        "backupFile": MessageLookupByLibrary.simpleMessage("Backup file"),
         "cancel": MessageLookupByLibrary.simpleMessage("रद्द करें"),
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "अकाउंट डिलीट करने की पुष्टि करें"),
@@ -68,8 +64,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("अपना ईमेल ऐड्रेस डालें"),
         "enterYourRecoveryKey":
             MessageLookupByLibrary.simpleMessage("अपनी रिकवरी कुंजी दर्ज करें"),
-        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
-            "Face not clustered yet, please come back later"),
         "feedback": MessageLookupByLibrary.simpleMessage("प्रतिपुष्टि"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("पासवर्ड भूल गए"),
@@ -87,17 +81,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "हमारे एंड-टू-एंड एन्क्रिप्शन प्रोटोकॉल की प्रकृति के कारण, आपके डेटा को आपके पासवर्ड या रिकवरी कुंजी के बिना डिक्रिप्ट नहीं किया जा सकता है"),
         "ok": MessageLookupByLibrary.simpleMessage("ठीक है"),
         "oops": MessageLookupByLibrary.simpleMessage("ओह!"),
-        "openAlbumInBrowser":
-            MessageLookupByLibrary.simpleMessage("Open album in browser"),
-        "openAlbumInBrowserTitle": MessageLookupByLibrary.simpleMessage(
-            "Please use the web app to add photos to this album"),
-        "openFile": MessageLookupByLibrary.simpleMessage("Open file"),
         "password": MessageLookupByLibrary.simpleMessage("पासवर्ड"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("पुनः प्राप्त"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("रिकवरी सफल हुई!"),
-        "seePublicAlbumLinksInApp": MessageLookupByLibrary.simpleMessage(
-            "See public album links in app"),
         "selectReason": MessageLookupByLibrary.simpleMessage("कारण चुनें"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("ईमेल भेजें"),
         "somethingWentWrongPleaseTryAgain":
@@ -107,9 +94,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "terminate": MessageLookupByLibrary.simpleMessage("रद्द करें"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("सेशन रद्द करें?"),
-        "theLinkYouAreTryingToAccessHasExpired":
-            MessageLookupByLibrary.simpleMessage(
-                "The link you are trying to access has expired."),
         "thisDevice": MessageLookupByLibrary.simpleMessage("यह डिवाइस"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(

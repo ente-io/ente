@@ -86,6 +86,17 @@
       ]
     },
     {
+      "title": "Binance TR",
+      "slug": "binance_tr"
+    },
+    {
+      "title": "BinanceUS",
+      "slug": "binance_us",
+      "altNames": [
+        "Binance US"
+      ]
+    },
+    {
       "title": "Bitfinex"
     },
     {
@@ -276,6 +287,9 @@
       ]
     },
     {
+      "title": "eneba"
+    },
+    {
       "title": "ente",
       "hex": "1DB954"
     },
@@ -431,6 +445,9 @@
       "title": "Kite"
     },
     {
+      "title": "Kotas"
+    },
+    {
       "title": "KnownHost",
       "altNames": [
         "Known Host",
@@ -511,6 +528,10 @@
       "hex": "6364FF"
     },
     {
+      "title": "matlab",
+      "altNames": ["mathworks"]
+    },
+    {
       "title": "Mercado Livre",
       "slug": "mercado_livre",
       "altNames": [
@@ -520,7 +541,7 @@
       ]
     },
     {
-      "title": "Microsoft"
+      "title": "microsoft"
     },
     {
       "title": "Microsoft 365",
@@ -596,13 +617,19 @@
       "hex": "858585"
     },
     {
-      "title": "Nintendo",
+      "title": "nintendo",
       "altNames": [
         "任天堂"
       ]
     },
     {
       "title": "Njalla"
+    },
+    {
+      "title": "nordvpn",
+      "slug": "nordaccount",
+      "hex": "#4687FF",
+      "altNames": "Nord Account"
     },
     {
       "title": "Notesnook"
@@ -706,6 +733,9 @@
       "altNames": [
         "Raindrop"
       ]
+    },
+    {
+      "title": "randstad"
     },
     {
       "title": "Real-Debrid",
@@ -947,7 +977,8 @@
       ]
     },
     {
-      "title": "WARGAMING.NET"
+      "title": "WARGAMING.NET",
+      "slug": "wargamingnet"
     },
     {
       "title": "Wealthfront"

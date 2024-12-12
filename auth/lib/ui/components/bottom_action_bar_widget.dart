@@ -19,10 +19,12 @@ class BottomActionBarWidget extends StatelessWidget {
   final VoidCallback? onRestore;
   final VoidCallback? onDelete;
   final VoidCallback? onTrashed;
+  final bool showPin;
 
   const BottomActionBarWidget({
     required this.code,
     this.onCancel,
+    this.showPin = true,
     this.backgroundColor,
     super.key,
     this.onShare,
@@ -65,6 +67,7 @@ class BottomActionBarWidget extends StatelessWidget {
           const SizedBox(height: 8),
           CodeSelectionActionsWidget(
             code: code,
+            showPin: showPin,
             onShare: onShare,
             onPin: onPin,
             onShowQR: onShowQR,

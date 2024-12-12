@@ -12,7 +12,7 @@
   "deleteAccountFeedbackPrompt": "Wir bedauern sehr, dass du dein Konto löschen möchtest. Du würdest uns sehr helfen, wenn du uns kurz einige Gründe hierfür nennen könntest.",
   "feedback": "Rückmeldung",
   "kindlyHelpUsWithThisInformation": "Bitte gib diese Daten ein",
-  "confirmDeletePrompt": "Ja, ich möchte dieses Konto und alle enthaltenen Daten über alle Apps endgültig und unwiderruflich löschen.",
+  "confirmDeletePrompt": "Ja, ich möchte dieses Konto und alle enthaltenen Daten über alle Apps hinweg endgültig löschen.",
   "confirmAccountDeletion": "Kontolöschung bestätigen",
   "deleteAccountPermanentlyButton": "Konto unwiderruflich löschen",
   "yourAccountHasBeenDeleted": "Dein Benutzerkonto wurde gelöscht",
@@ -23,8 +23,8 @@
   "deleteReason4": "Mein Grund ist nicht aufgeführt",
   "sendEmail": "E-Mail senden",
   "deleteRequestSLAText": "Deine Anfrage wird innerhalb von 72 Stunden bearbeitet.",
-  "deleteEmailRequest": "Bitte sende eine E-Mail an <warning>account-deletion@ente.io</warning> von Deiner bei uns hinterlegten E-Mail-Adresse.",
-  "entePhotosPerm": "",
+  "deleteEmailRequest": "Bitte sende eine E-Mail an <warning>account-deletion@ente.io</warning> von Ihrer bei uns hinterlegten E-Mail-Adresse.",
+  "entePhotosPerm": "Ente <i> benötigt Berechtigung, um <i> Ihre Fotos zu sichern",
   "ok": "Ok",
   "createAccount": "Konto erstellen",
   "createNewAccount": "Neues Konto erstellen",
@@ -412,7 +412,8 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Fotorastergröße",
-  "manageDeviceStorage": "Gerätespeicher verwalten",
+  "manageDeviceStorage": "Geräte-Cache verwalten",
+  "manageDeviceStorageDesc": "Lokalen Cache-Speicher überprüfen und löschen.",
   "machineLearning": "Maschinelles Lernen",
   "mlConsent": "Maschinelles Lernen aktivieren",
   "mlConsentTitle": "Maschinelles Lernen aktivieren?",
@@ -816,7 +817,7 @@
   "referFriendsAnd2xYourPlan": "Begeistere Freunde für uns und verdopple deinen Speicher",
   "shareAlbumHint": "Öffne ein Album und tippe auf den Teilen-Button oben rechts, um zu teilen.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Elemente zeigen die Anzahl der Tage bis zum dauerhaften Löschen an",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1 Tag} other {{count} Tage}}",
+  "trashDaysLeft": "{count, plural, =0 {Demnächst} =1 {1 Tag} other {{count} Tage}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1233,6 +1234,7 @@
   "waitingForVerification": "Warte auf Bestätigung...",
   "passkey": "Passkey",
   "passkeyAuthTitle": "Passkey-Verifizierung",
+  "loginWithTOTP": "Mit TOTP anmelden",
   "passKeyPendingVerification": "Verifizierung steht noch aus",
   "loginSessionExpired": "Sitzung abgelaufen",
   "loginSessionExpiredDetails": "Deine Sitzung ist abgelaufen. Bitte melde Dich erneut an.",
@@ -1244,7 +1246,6 @@
   "deviceCodeHint": "Code eingeben",
   "joinDiscord": "Discord beitreten",
   "locations": "Orte",
-  "descriptions": "Beschreibungen",
   "addAName": "Füge einen Namen hinzu",
   "findThemQuickly": "Finde sie schnell",
   "@findThemQuickly": {
@@ -1383,7 +1384,7 @@
   "enableMachineLearningBanner": "Aktiviere maschinelles Lernen für die magische Suche und Gesichtserkennung",
   "searchDiscoverEmptySection": "Bilder werden hier angezeigt, sobald die Verarbeitung abgeschlossen ist",
   "searchPersonsEmptySection": "Personen werden hier angezeigt, sobald die Verarbeitung abgeschlossen ist",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {0 Betrachter hinzugefügt} one {1 Betrachter hinzugefügt} other {{count} Betrachter hinzugefügt}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {0 Betrachter hinzugefügt} =1 {1 Betrachter hinzugefügt} other {{count} Betrachter hinzugefügt}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1392,7 +1393,7 @@
       }
     },
     "description": "Number of viewers that were successfully added to an album."
-  },
+  },  
   "accountIsAlreadyConfigured": "Das Konto ist bereits konfiguriert.",
   "sessionIdMismatch": "Sitzungs-ID stimmt nicht überein",
   "@sessionIdMismatch": {
@@ -1458,6 +1459,15 @@
   },
   "currentlyRunning": "läuft gerade",
   "ignored": "ignoriert",
+  "photosCount": "{count, plural, one {}=0 {0 Fotos} =1 {1 Foto} other {{count} Fotos}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "file": "Datei",
   "searchSectionsLengthMismatch": "Abschnittslänge stimmt nicht überein: {snapshotLenght} != {searchLenght}",
   "@searchSectionsLengthMismatch": {
@@ -1486,12 +1496,13 @@
   "changeLogDiscoverContent": "Suchst du nach Fotos deiner Ausweise, Notizen oder gar Memes? Öffne das Such-Tab und schau dir \"Entdecken\" an. An diesem Ort findest du, basierend auf unserer semantischen Suche, Fotos die wichtig für dich sein könnten.\\n\\nNur verfügbar, wenn du das maschinelle Lernen aktiviert hast.",
   "selectCoverPhoto": "Titelbild auswählen",
   "newLocation": "Neuer Ort",
-  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
-  "openFile": "Open file",
-  "backupFile": "Backup file",
-  "openAlbumInBrowser": "Open album in browser",
-  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
-  "allow": "Allow",
-  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
-  "seePublicAlbumLinksInApp": "See public album links in app"
+  "faceNotClusteredYet": "Gesicht ist noch nicht gruppiert, bitte komm später zurück",
+  "theLinkYouAreTryingToAccessHasExpired": "Der Link, den du aufrufen möchtest, ist abgelaufen.",
+  "openFile": "Datei öffnen",
+  "backupFile": "Datei sichern",
+  "openAlbumInBrowser": "Album im Browser öffnen",
+  "openAlbumInBrowserTitle": "Bitte nutze die Web-App, um Fotos zu diesem Album hinzuzufügen",
+  "allow": "Erlauben",
+  "allowAppToOpenSharedAlbumLinks": "Erlaube der App, geteilte Album-Links zu öffnen",
+  "seePublicAlbumLinksInApp": "Öffentliche Album-Links in der App ansehen"
 }

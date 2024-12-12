@@ -396,3 +396,29 @@ func (repo *UserRepository) GetEmailsFromHashes(hashes []string) ([]string, erro
 	}
 	return emails, nil
 }
+
+// GetActiveUsersForIds  returns a map of users by their IDs, similar to GetUserByID
+func (repo *UserRepository) GetActiveUsersForIds(id []int64) (map[int64]*ente.User, error) {
+	result := make(map[int64]*ente.User)
+	rows, err := repo.DB.Query(`SELECT user_id, encrypted_email, email_decryption_nonce, email_hash, creation_time FROM users WHERE  encrypted_email IS NOT NULL and user_id = ANY($1)`, pq.Array(id))
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var user ente.User
+		var encryptedEmail, nonce []byte
+		err := rows.Scan(&user.ID, &encryptedEmail, &nonce, &user.Hash, &user.CreationTime)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		user.Email = email
+		result[user.ID] = &user
+	}
+	return result, nil
+
+}

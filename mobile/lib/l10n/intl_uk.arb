@@ -412,7 +412,8 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Розмір сітки фотографій",
-  "manageDeviceStorage": "Керування сховищем пристрою",
+  "manageDeviceStorage": "Керування кешем пристрою",
+  "manageDeviceStorageDesc": "Переглянути та очистити локальне сховище кешу.",
   "machineLearning": "Машинне навчання",
   "mlConsent": "Увімкнути машинне навчання",
   "mlConsentTitle": "Увімкнути машинне навчання?",
@@ -816,7 +817,7 @@
   "referFriendsAnd2xYourPlan": "Запросіть друзів та подвойте свій план",
   "shareAlbumHint": "Відкрийте альбом та натисніть кнопку «Поділитися» у верхньому правому куті.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Елементи показують кількість днів, що залишилися до остаточного видалення",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1 день} few {{count} дні} many {{count} днів} other {{count} днів}}",
+  "trashDaysLeft": "{count, plural, one {{count} день} few {{count} дні} many {{count} днів}=0 {Незабаром} =1 {1 день} other {{count} днів}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1233,6 +1234,7 @@
   "waitingForVerification": "Очікується підтвердження...",
   "passkey": "Ключ доступу",
   "passkeyAuthTitle": "Перевірка через ключ доступу",
+  "loginWithTOTP": "Увійти за допомогою TOTP",
   "passKeyPendingVerification": "Перевірка все ще триває",
   "loginSessionExpired": "Час сеансу минув",
   "loginSessionExpiredDetails": "Термін дії вашого сеансу завершився. Увійдіть знову.",
@@ -1244,7 +1246,6 @@
   "deviceCodeHint": "Введіть код",
   "joinDiscord": "Приєднатися до Discord серверу",
   "locations": "Розташування",
-  "descriptions": "Описи",
   "addAName": "Додати ім'я",
   "findThemQuickly": "Знайдіть їх швидко",
   "@findThemQuickly": {
@@ -1383,7 +1384,6 @@
   "enableMachineLearningBanner": "Увімкніть машинне навчання для магічного пошуку та розпізнавання облич",
   "searchDiscoverEmptySection": "Зображення будуть показані тут після завершення обробки",
   "searchPersonsEmptySection": "Люди будуть показані тут після завершення обробки",
-  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "viewersSuccessfullyAdded": "{count, plural, one {} few {Додано {count} глядачі} many {Додано {count} глядачів}=0 {Додано 0 глядачів} =1 {Додано 1 глядач} other {Додано {count} глядачів}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1453,12 +1453,66 @@
   "imageNotAnalyzed": "Зображення не проаналізовано",
   "noFacesFound": "Обличчя не знайдено",
   "fileNotUploadedYet": "Файл ще не завантажено",
-  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
-  "openFile": "Open file",
-  "backupFile": "Backup file",
-  "openAlbumInBrowser": "Open album in browser",
-  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
-  "allow": "Allow",
-  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
-  "seePublicAlbumLinksInApp": "See public album links in app"
+  "noSuggestionsForPerson": "Немає пропозицій для {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "місяць",
+  "yearShort": "рік",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "зараз працює",
+  "ignored": "ігнорується",
+  "photosCount": "{count, plural, one {{count} фото} few {{count} фото} many {{count} фото}=0 {0 фото} =1 {1 фото} other {{count} фото}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "file": "Файл",
+  "searchSectionsLengthMismatch": "Невідповідність довжини розділів: {snapshotLenght} != {searchLenght}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLenght": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLenght": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "selectMailApp": "Вибрати застосунок пошти",
+  "selectAllShort": "Усі",
+  "@selectAllShort": {
+    "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
+  },
+  "changeLogMagicSearchImprovementTitle": "Покращення магічного пошуку",
+  "changeLogMagicSearchImprovementContent": "Ми вдосконалили магічний пошук, щоб він став набагато швидше, тож вам не доведеться чекати, щоб знайти те, що хочеться.",
+  "changeLogBackupStatusTitle": "Стан резервних копій",
+  "changeLogBackupStatusContent": "Ми додали журнал всіх файлів, які були завантажені на Ente, включаючи помилки та поставлені в чергу.",
+  "changeLogDiscoverTitle": "Дізнайтеся",
+  "changeLogDiscoverContent": "Шукаєте фотографії своїх посвідчень особи, нотаток або навіть мемів? Перейдіть на вкладку «Пошук» і перевірте «Дізнайтеся». На основі нашого семантичного пошуку тут можна знайти фотографії, які можуть бути важливими для вас.\\n\\nДоступно лише за умови увімкненого машинного навчання.",
+  "selectCoverPhoto": "Вибрати обкладинку",
+  "newLocation": "Нове розташування",
+  "faceNotClusteredYet": "Обличчя ще не згруповані, поверніться пізніше",
+  "theLinkYouAreTryingToAccessHasExpired": "Термін дії посилання, за яким ви намагаєтеся отримати доступ, закінчився.",
+  "openFile": "Відкрити файл",
+  "backupFile": "Файл резервної копії",
+  "openAlbumInBrowser": "Відкрити альбом у браузері",
+  "openAlbumInBrowserTitle": "Використовуйте вебзастосунок, щоби додавати фотографії до цього альбому",
+  "allow": "Дозволити",
+  "allowAppToOpenSharedAlbumLinks": "Дозволити застосунку відкривати спільні альбоми",
+  "seePublicAlbumLinksInApp": "Посилання на публічні альбоми в застосунку"
 }

@@ -398,7 +398,6 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "גודל לוח של התמונה",
-  "manageDeviceStorage": "נהל את מקום אחסון המכשיר",
   "selectFoldersForBackup": "בחר תיקיות לגיבוי",
   "selectedFoldersWillBeEncryptedAndBackedUp": "התיקיות שנבחרו יוצפנו ויגובו",
   "unselectAll": "בטל בחירה של הכל",
@@ -816,14 +815,5 @@
   "addPhotos": "הוסף תמונות",
   "create": "צור",
   "viewAll": "הצג הכל",
-  "hiding": "מחביא...",
-  "faceNotClusteredYet": "Face not clustered yet, please come back later",
-  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
-  "openFile": "Open file",
-  "backupFile": "Backup file",
-  "openAlbumInBrowser": "Open album in browser",
-  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
-  "allow": "Allow",
-  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
-  "seePublicAlbumLinksInApp": "See public album links in app"
+  "hiding": "מחביא..."
 }
