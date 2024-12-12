@@ -44,80 +44,82 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
   }
 
   Widget _getBody() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 4,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    if (selectedGrids.length == _duplicateCodes.length) {
-                      _removeAllGrids();
-                    } else {
-                      _selectAllGrids();
-                    }
-                    setState(() {});
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
+    return SafeArea(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 4,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      if (selectedGrids.length == _duplicateCodes.length) {
+                        _removeAllGrids();
+                      } else {
+                        _selectAllGrids();
+                      }
+                      setState(() {});
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          selectedGrids.length == _duplicateCodes.length
+                              ? "Deselect All"
+                              : "Select All",
+                          style:
+                              Theme.of(context).textTheme.titleMedium!.copyWith(
+                                    fontSize: 14,
+                                    color: Theme.of(context)
+                                        .iconTheme
+                                        .color!
+                                        .withOpacity(0.7),
+                                  ),
+                        ),
+                        const Padding(padding: EdgeInsets.only(left: 4)),
                         selectedGrids.length == _duplicateCodes.length
-                            ? "Deselect All"
-                            : "Select All",
-                        style:
-                            Theme.of(context).textTheme.titleMedium!.copyWith(
-                                  fontSize: 14,
-                                  color: Theme.of(context)
-                                      .iconTheme
-                                      .color!
-                                      .withOpacity(0.7),
-                                ),
-                      ),
-                      const Padding(padding: EdgeInsets.only(left: 4)),
-                      selectedGrids.length == _duplicateCodes.length
-                          ? const Icon(
-                              Icons.check_circle,
-                              size: 24,
-                            )
-                          : Icon(
-                              Icons.check_circle_outlined,
-                              color: getEnteColorScheme(context).strokeMuted,
-                              size: 24,
-                            ),
-                    ],
+                            ? const Icon(
+                                Icons.check_circle,
+                                size: 24,
+                              )
+                            : Icon(
+                                Icons.check_circle_outlined,
+                                color: getEnteColorScheme(context).strokeMuted,
+                                size: 24,
+                              ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Expanded(
-          child: ListView.builder(
-            itemCount: _duplicateCodes.length,
-            shrinkWrap: true,
-            itemBuilder: (context, index) {
-              final List<Code> codes = _duplicateCodes[index].codes;
-              return _getGridView(
-                codes,
-                index,
-              );
-            },
+          const SizedBox(height: 8),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _duplicateCodes.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                final List<Code> codes = _duplicateCodes[index].codes;
+                return _getGridView(
+                  codes,
+                  index,
+                );
+              },
+            ),
           ),
-        ),
-        selectedGrids.isEmpty ? const SizedBox.shrink() : _getDeleteButton(),
-      ],
+          selectedGrids.isEmpty ? const SizedBox.shrink() : _getDeleteButton(),
+        ],
+      ),
     );
   }
 
