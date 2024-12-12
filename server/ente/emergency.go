@@ -33,7 +33,6 @@ const (
 	UserInvitedContact ContactState = "INVITED"
 	UserRevokedContact ContactState = "REVOKED"
 	ContactAccepted    ContactState = "ACCEPTED"
-	ContactDeleted     ContactState = "DELETED"
 	ContactLeft        ContactState = "CONTACT_LEFT"
 	ContactDenied      ContactState = "CONTACT_DENIED"
 )
