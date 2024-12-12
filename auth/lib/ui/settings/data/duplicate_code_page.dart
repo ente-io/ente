@@ -36,7 +36,7 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Deduplicate Codes'),
+        title: Text(context.l10n.deduplicateCodes),
         elevation: 0,
       ),
       body: _getBody(),
@@ -44,6 +44,7 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
   }
 
   Widget _getBody() {
+    final l10n = context.l10n;
     return SafeArea(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,8 +75,8 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
                       children: [
                         Text(
                           selectedGrids.length == _duplicateCodes.length
-                              ? "Deselect All"
-                              : "Select All",
+                              ? l10n.deselectAll
+                              : l10n.selectAll,
                           style:
                               Theme.of(context).textTheme.titleMedium!.copyWith(
                                     fontSize: 14,
@@ -224,7 +225,7 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
         "Are you sure you want to trash ${selectedGrids.length} items?";
     await showChoiceActionSheet(
       context,
-      title: "Delete duplicates",
+      title: l10n.deleteDuplicates,
       body: message,
       firstButtonLabel: l10n.trash,
       isCritical: true,

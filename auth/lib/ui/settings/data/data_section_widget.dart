@@ -59,8 +59,8 @@ class DataSectionWidget extends StatelessWidget {
       ),
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Duplicate codes",
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.duplicateCodes,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
@@ -72,8 +72,8 @@ class DataSectionWidget extends StatelessWidget {
             unawaited(
               showErrorDialog(
                 context,
-                "✨ No duplicates",
-                "You\'ve no duplicate codes that can be cleared",
+                l10n.noDuplicates,
+                l10n.youveNoDuplicateCodesThatCanBeCleared,
               ),
             );
             return;
