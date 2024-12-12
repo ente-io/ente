@@ -12,6 +12,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/smtp"
+	"path"
 	"strings"
 
 	"github.com/ente-io/museum/ente"
