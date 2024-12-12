@@ -17,7 +17,6 @@ class ReorderCodesPage extends StatefulWidget {
 }
 
 class _ReorderCodesPageState extends State<ReorderCodesPage> {
-  int selectedSortOption = 2;
   bool hasChanged = false;
   final logger = Logger('ReorderCodesPage');
 
@@ -70,24 +69,18 @@ class _ReorderCodesPageState extends State<ReorderCodesPage> {
         },
         children: [
           for (final code in widget.codes)
-            selectedSortOption == 2
-                ? ReorderableDragStartListener(
-                    key: ValueKey('${code.hashCode}_${code.generatedID}'),
-                    index: widget.codes.indexOf(code),
-                    child: CodeWidget(
-                      key: ValueKey(code.generatedID),
-                      code,
-                      isCompactMode: isCompactMode,
-                    ),
-                  )
-                : CodeWidget(
-                    key: ValueKey('${code.hashCode}_${code.generatedID}'),
-                    code,
-                    isCompactMode: isCompactMode,
-                  ),
+            ReorderableDragStartListener(
+              key: ValueKey('${code.hashCode}_${code.generatedID}'),
+              index: widget.codes.indexOf(code),
+              child: CodeWidget(
+                key: ValueKey(code.generatedID),
+                code,
+                isCompactMode: isCompactMode,
+              ),
+            ),
         ],
         onReorder: (oldIndex, newIndex) {
-          if (selectedSortOption == 2) updateCodeIndex(oldIndex, newIndex);
+          updateCodeIndex(oldIndex, newIndex);
         },
       ),
     );
