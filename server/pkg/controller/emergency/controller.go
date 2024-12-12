@@ -64,6 +64,41 @@ func (c *Controller) UpdateContact(ctx *gin.Context,
 	return nil
 }
 
+func (c *Controller) HandleAccountDeletion(ctx *gin.Context, userID int64, logger *log.Entry) error {
+	logger.Info("Clean up emergency contacts on account deletion")
+	contacts, err := c.Repo.GetActiveContactForUser(ctx, userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if len(contacts) == 0 {
+		return nil
+	}
+	for _, contact := range contacts {
+		if contact.UserID == userID {
+			logger.Info("Removing emergency contact from user side")
+			removeErr := c.UpdateContact(ctx, userID, ente.UpdateContact{
+				UserID:             userID,
+				EmergencyContactID: contact.EmergencyContactID,
+				State:              ente.UserRevokedContact,
+			})
+			if removeErr != nil {
+				return stacktrace.Propagate(removeErr, "")
+			}
+		} else {
+			logger.Info("Removing user from emergency contact side")
+			leaveErr := c.UpdateContact(ctx, userID, ente.UpdateContact{
+				UserID:             contact.UserID,
+				EmergencyContactID: userID,
+				State:              ente.ContactLeft,
+			})
+			if leaveErr != nil {
+				return stacktrace.Propagate(leaveErr, "")
+			}
+		}
+	}
+	return nil
+}
+
 func validateUpdateReq(userID int64, req ente.UpdateContact) error {
 	if req.EmergencyContactID == req.UserID {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage("contact and user can not be same"), "")

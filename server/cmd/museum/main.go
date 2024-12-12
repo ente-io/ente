@@ -461,8 +461,14 @@ func main() {
 	privateAPI.POST("/trash/delete", trashHandler.Delete)
 	privateAPI.POST("/trash/empty", trashHandler.Empty)
 
+	emergencyCtrl := &emergency.Controller{
+		Repo:     &emergencyRepo.Repository{DB: db},
+		UserRepo: userRepo,
+		UserCtrl: userController,
+	}
 	userHandler := &api.UserHandler{
-		UserController: userController,
+		UserController:      userController,
+		EmergencyController: emergencyCtrl,
 	}
 	publicAPI.POST("/users/ott", userHandler.SendOTT)
 	publicAPI.POST("/users/verify-email", userHandler.VerifyEmail)
@@ -606,11 +612,6 @@ func main() {
 	familiesJwtAuthAPI.DELETE("/family/remove-member/:id", familyHandler.RemoveMember)
 	familiesJwtAuthAPI.DELETE("/family/revoke-invite/:id", familyHandler.RevokeInvite)
 
-	emergencyCtrl := &emergency.Controller{
-		Repo:     &emergencyRepo.Repository{DB: db},
-		UserRepo: userRepo,
-		UserCtrl: userController,
-	}
 	emergencyHandler := &api.EmergencyHandler{
 		Controller: emergencyCtrl,
 	}
@@ -665,6 +666,7 @@ func main() {
 		UserAuthRepo:            userAuthRepo,
 		UserController:          userController,
 		FamilyController:        familyController,
+		EmergencyController:     emergencyCtrl,
 		RemoteStoreController:   remoteStoreController,
 		FileRepo:                fileRepo,
 		StorageBonusRepo:        storagBonusRepo,
