@@ -12,6 +12,7 @@ import (
 const (
 	BaseTemplate           string = "legacy/legacy_base.html"
 	InviteTemplate         string = "legacy/legacy_invite.html"
+	InviteSentTemplate     string = "legacy/legacy_invite_sent.html"
 	RemovedTemplate        string = "legacy/legacy_removed.html"
 	LeftTemplate           string = "legacy/legacy_left.html"
 	AcceptedTemplate       string = "legacy/legacy_invite_accepted.html"
@@ -30,7 +31,76 @@ const (
 	SadHeaderImage   = "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"
 )
 
-func (c *Controller) sendNotification(ctx context.Context, legacyUserID int64, trustedUserID int64, newStatus ente.ContactState) error {
+type emailData struct {
+	title        string
+	templateName string
+	emailTo      string
+	templateData map[string]interface{}
+	inlineImages []map[string]interface{}
+}
+
+func (c *Controller) createEmailData(legacyUser, trustedUser ente.User, newStatus ente.ContactState) ([]emailData, error) {
+	templateData := map[string]interface{}{
+		"LegacyUser":  legacyUser.Email,
+		"TrustedUser": trustedUser.Email,
+	}
+
+	var emailContent []emailData
+	switch newStatus {
+	case ente.UserInvitedContact:
+		emailContent = append(emailContent, emailData{
+			title:        fmt.Sprintf("%s has added you as a Trusted Contact", legacyUser.Email),
+			templateName: InviteTemplate,
+			emailTo:      trustedUser.Email,
+			templateData: templateData,
+			inlineImages: []map[string]interface{}{},
+		})
+		emailContent = append(emailContent, emailData{
+			title:        fmt.Sprintf("You have added %s as a Trusted Contact", trustedUser.Email),
+			templateName: InviteSentTemplate,
+			emailTo:      legacyUser.Email,
+			templateData: templateData,
+			inlineImages: []map[string]interface{}{},
+		})
+	case ente.UserRevokedContact:
+		emailContent = append(emailContent, emailData{
+			title:        fmt.Sprintf("%s has removed you as a Trusted Contact", legacyUser.Email),
+			templateName: RemovedTemplate,
+			emailTo:      trustedUser.Email,
+			templateData: templateData,
+			inlineImages: []map[string]interface{}{},
+		})
+	case ente.ContactLeft:
+		emailContent = append(emailContent, emailData{
+			title:        fmt.Sprintf("%s  has removed themselves as a Trusted Contact", trustedUser.Email),
+			templateName: LeftTemplate,
+			emailTo:      legacyUser.Email,
+			templateData: templateData,
+			inlineImages: []map[string]interface{}{},
+		})
+	case ente.ContactDenied:
+		emailContent = append(emailContent, emailData{
+			title:        fmt.Sprintf("%s has rejected your request to be a Trusted Contact", trustedUser.Email),
+			templateName: RejectedInviteTemplate,
+			emailTo:      legacyUser.Email,
+			templateData: templateData,
+			inlineImages: []map[string]interface{}{},
+		})
+	case ente.ContactAccepted:
+		emailContent = append(emailContent, emailData{
+			title:        fmt.Sprintf("%s has accepted your request to be a Trusted Contact", trustedUser.Email),
+			templateName: AcceptedTemplate,
+			emailTo:      legacyUser.Email,
+			templateData: templateData,
+			inlineImages: []map[string]interface{}{},
+		})
+	default:
+		return nil, fmt.Errorf("unsupported status %s", newStatus)
+	}
+	return emailContent, nil
+}
+
+func (c *Controller) sendContactNotification(ctx context.Context, legacyUserID int64, trustedUserID int64, newStatus ente.ContactState) error {
 	legacyUser, err := c.UserRepo.Get(legacyUserID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -39,52 +109,26 @@ func (c *Controller) sendNotification(ctx context.Context, legacyUserID int64, t
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	templateData := map[string]interface{}{
-		"LegacyUser":  legacyUser.Email,
-		"TrustedUser": trustedUser.Email,
-	}
 
-	var templateName, emailTo, title string
-	var inlineImages []map[string]interface{}
-	inlineImage := make(map[string]interface{})
-	inlineImage["mime_type"] = "image/png"
-	inlineImage["cid"] = "header-image"
-
-	if newStatus == ente.UserInvitedContact {
-		templateName = InviteTemplate
-		title = fmt.Sprintf("%s has added you as a Trusted Contact", legacyUser.Email)
-		emailTo = trustedUser.Email
-		inlineImage["content"] = HappyHeaderImage
-	} else if newStatus == ente.UserRevokedContact {
-		emailTo = trustedUser.Email
-		templateName = RemovedTemplate
-		title = "You have been removed as a trusted contact on Ente"
-		inlineImage["content"] = SadHeaderImage
-	} else if newStatus == ente.ContactLeft {
-		emailTo = legacyUser.Email
-		templateName = LeftTemplate
-		title = fmt.Sprintf("%s has left as trusted contact", trustedUser.Email)
-		inlineImage["content"] = SadHeaderImage
-	} else if newStatus == ente.ContactDenied {
-		emailTo = legacyUser.Email
-		templateName = RejectedInviteTemplate
-		title = fmt.Sprintf("%s has declined your invite for trusted contact", trustedUser.Email)
-		inlineImage["content"] = SadHeaderImage
-	} else if newStatus == ente.ContactAccepted {
-		emailTo = legacyUser.Email
-		templateName = AcceptedTemplate
-		title = fmt.Sprintf("%s has accepted your invitation!", trustedUser.Email)
-		inlineImage["content"] = HappyHeaderImage
-	} else {
-		return stacktrace.Propagate(fmt.Errorf("unsupported status %s", newStatus), "")
-	}
-	inlineImages = append(inlineImages, inlineImage)
-	err = emailUtil.SendTemplatedEmailV2([]string{emailTo}, "Ente", "legacy@ente.io",
-		title, BaseTemplate, templateName, templateData, inlineImages)
+	emailDatas, err := c.createEmailData(legacyUser, trustedUser, newStatus)
 	if err != nil {
-		log.WithError(err).WithField("state", newStatus).Error("failed to send email")
 		return stacktrace.Propagate(err, "")
 	}
+
+	for _, data := range emailDatas {
+		content := data
+		err = emailUtil.SendTemplatedEmailV2([]string{content.emailTo}, "Ente", "legacy@ente.io",
+			content.title, BaseTemplate, content.templateName, content.templateData, content.inlineImages)
+		if err != nil {
+			log.WithError(err).WithFields(log.Fields{
+				"state":    newStatus,
+				"to":       content.emailTo,
+				"template": content.templateName,
+			}).Error("failed to send email")
+			return stacktrace.Propagate(err, "")
+		}
+	}
+
 	return nil
 }
 

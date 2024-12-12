@@ -27,7 +27,7 @@ func (c *Controller) AddContact(ctx *gin.Context, userID int64, request ente.Add
 		return stacktrace.Propagate(err, "")
 	}
 	if hasUpdated {
-		go c.sendNotification(ctx, userID, emergencyContactID, ente.UserInvitedContact)
+		go c.sendContactNotification(ctx, userID, emergencyContactID, ente.UserInvitedContact)
 	}
 	return nil
 }
