@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:ente_auth/models/all_icon_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
@@ -13,9 +12,8 @@ class CodeDisplay {
   String note;
   final List<String> tags;
   int position;
-  String customIconData;
-  bool isCustomIcon;
-  IconType iconType;
+  String iconSrc;
+  String iconID;
 
   CodeDisplay({
     this.pinned = false,
@@ -25,10 +23,11 @@ class CodeDisplay {
     this.tags = const [],
     this.note = '',
     this.position = 0,
-    this.customIconData = 'ente',
-    this.isCustomIcon = false,
-    this.iconType = IconType.simpleIcon,
+    this.iconSrc = 'ente',
+    this.iconID = '',
   });
+
+  bool get isCustomIcon => (iconSrc != '' && iconID != '');
 
   // copyWith
   CodeDisplay copyWith({
@@ -39,9 +38,8 @@ class CodeDisplay {
     List<String>? tags,
     String? note,
     int? position,
-    String? customIconData,
-    IconType? iconType,
-    bool? isCustomIcon,
+    String? iconSrc,
+    String? iconID,
   }) {
     final bool updatedPinned = pinned ?? this.pinned;
     final bool updatedTrashed = trashed ?? this.trashed;
@@ -50,9 +48,8 @@ class CodeDisplay {
     final List<String> updatedTags = tags ?? this.tags;
     final String updatedNote = note ?? this.note;
     final int updatedPosition = position ?? this.position;
-    final String updatedIconData = customIconData ?? this.customIconData;
-    final bool updatedIsCustomIcon = isCustomIcon ?? this.isCustomIcon;
-    final IconType updatedIconType = iconType ?? this.iconType;
+    final String updatedIconSrc = iconSrc ?? this.iconSrc;
+    final String updatedIconID = iconID ?? this.iconID;
 
     return CodeDisplay(
       pinned: updatedPinned,
@@ -62,9 +59,8 @@ class CodeDisplay {
       tags: updatedTags,
       note: updatedNote,
       position: updatedPosition,
-      customIconData: updatedIconData,
-      isCustomIcon: updatedIsCustomIcon,
-      iconType: updatedIconType,
+      iconSrc: updatedIconSrc,
+      iconID: updatedIconID,
     );
   }
 
@@ -80,11 +76,8 @@ class CodeDisplay {
       tags: List<String>.from(json['tags'] ?? []),
       note: json['note'] ?? '',
       position: json['position'] ?? 0,
-      customIconData: json['customIconData'] ?? 'ente',
-      isCustomIcon: json['isCustomIcon'] ?? false,
-      iconType: json['iconType'] == 'simpleIcon'
-          ? IconType.simpleIcon
-          : IconType.customIcon,
+      iconSrc: json['iconSrc'] ?? 'ente',
+      iconID: json['iconID'] ?? '',
     );
   }
 
@@ -127,9 +120,8 @@ class CodeDisplay {
       'tags': tags,
       'note': note,
       'position': position,
-      'customIconData': customIconData,
-      'isCustomIcon': isCustomIcon,
-      'iconType': iconType == IconType.simpleIcon ? 'simpleIcon' : 'customIcon',
+      'iconSrc': iconSrc,
+      'iconID': iconID,
     };
   }
 

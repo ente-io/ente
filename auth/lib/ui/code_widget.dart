@@ -444,7 +444,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   Widget _getIcon() {
     final String iconData;
     if (widget.code.display.isCustomIcon) {
-      iconData = widget.code.display.customIconData;
+      iconData = widget.code.display.iconSrc;
     } else {
       iconData = widget.code.issuer;
     }

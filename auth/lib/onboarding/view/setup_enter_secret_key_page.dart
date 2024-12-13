@@ -47,8 +47,8 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   List<String> allTags = [];
   StreamSubscription<CodesUpdatedEvent>? _streamSubscription;
   bool isCustomIcon = false;
-  String _customIcon = "";
-  late IconType _iconType;
+  String _customIconSrc = "";
+  late IconType _iconID;
 
   @override
   void initState() {
@@ -90,8 +90,11 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     }
 
     isCustomIcon = widget.code?.display.isCustomIcon ?? false;
-    _customIcon = widget.code?.display.customIconData ?? "ente";
-    _iconType = widget.code?.display.iconType ?? IconType.simpleIcon;
+    _customIconSrc = widget.code?.display.iconSrc ?? "ente";
+    _iconID = widget.code?.display.iconID == "simpleIcon"
+        ? IconType.simpleIcon
+        : IconType.customIcon;
+
     super.initState();
   }
 
@@ -322,7 +325,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                   children: [
                     CustomIconWidget(
                       isCustomIcon: isCustomIcon,
-                      iconData: _customIcon,
+                      iconData: _customIconSrc,
                       onTap: () {
                         setState(() {
                           isCustomIcon = true;
@@ -374,11 +377,11 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
               CodeDisplay(tags: selectedTags);
       display.note = notes;
       if (isCustomIcon) {
-        display.isCustomIcon = true;
-        display.customIconData = _customIcon.toLowerCase();
-        display.iconType = _iconType;
+        display.iconSrc = _customIconSrc.toLowerCase();
+        display.iconID =
+            _iconID == IconType.simpleIcon ? 'simpleIcon' : 'customIcon';
       } else {
-        display.isCustomIcon = false;
+        display.iconID = '';
       }
       if (widget.code != null && widget.code!.secret != secret) {
         ButtonResult? result = await showChoiceActionSheet(
@@ -435,7 +438,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       final allIcons = IconUtils.instance.getAllIcons();
       String currentIcon;
       if (widget.code!.display.isCustomIcon) {
-        currentIcon = widget.code!.display.customIconData;
+        currentIcon = widget.code!.display.iconSrc;
       } else {
         currentIcon = widget.code!.issuer;
       }
@@ -450,8 +453,8 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
         ),
       );
       setState(() {
-        _customIcon = newCustomIcon.title;
-        _iconType = newCustomIcon.type;
+        _customIconSrc = newCustomIcon.title;
+        _iconID = newCustomIcon.type;
       });
     }
   }
