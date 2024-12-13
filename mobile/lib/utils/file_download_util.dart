@@ -1,3 +1,5 @@
+import "dart:async";
+import "dart:collection";
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -189,11 +191,11 @@ Future<void> downloadToGallery(EnteFile file) async {
     final bool downloadLivePhotoOnDroid =
         type == FileType.livePhoto && Platform.isAndroid;
     AssetEntity? savedAsset;
+    final File? fileToSave = await getFile(file);
     // We use a lock to prevent synchronisation to occur while it is downloading
     // as this introduces wrong entry in FilesDB due to race condition
     // This is a fix for https://github.com/ente-io/ente/issues/4296
     await LocalSyncService.instance.getLock().synchronized(() async {
-      final File? fileToSave = await getFile(file);
       //Disabling notifications for assets changing to insert the file into
       //files db before triggering a sync.
       await PhotoManager.stopChangeNotify();
@@ -277,4 +279,38 @@ Future<void> _saveLivePhotoOnDroid(
     "remoteDownload",
   );
   await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
+}
+
+class DownloadQueue {
+  final int maxConcurrent;
+  final Queue<Future<void> Function()> _queue = Queue();
+  int _runningTasks = 0;
+
+  DownloadQueue({this.maxConcurrent = 5});
+
+  Future<void> add(Future<void> Function() task) async {
+    final completer = Completer<void>();
+    _queue.add(() async {
+      try {
+        await task();
+        completer.complete();
+      } catch (e) {
+        completer.completeError(e);
+      } finally {
+        _runningTasks--;
+        _processQueue();
+      }
+      return completer.future;
+    });
+    _processQueue();
+    return completer.future;
+  }
+
+  void _processQueue() {
+    while (_runningTasks < maxConcurrent && _queue.isNotEmpty) {
+      final task = _queue.removeFirst();
+      _runningTasks++;
+      task();
+    }
+  }
 }

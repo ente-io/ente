@@ -832,11 +832,13 @@ class _FileSelectionActionsWidgetState
     );
     await dialog.show();
     try {
+      final downloadQueue = DownloadQueue(maxConcurrent: 5);
       final futures = <Future>[];
       for (final file in files) {
         if (file.localID == null) {
           futures.add(
-            downloadToGallery(file).then((_) {
+            downloadQueue.add(() async {
+              await downloadToGallery(file);
               downloadedFiles++;
               dialog.update(message: S.of(context).downloading + " ($downloadedFiles/$totalFiles)");
             }),
