@@ -122,4 +122,4 @@ func validateUpdateReq(userID int64, req ente.UpdateContact) error {
 		}
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("Can not update state to %s", req.State)), "")
 	}
-}
+	}
