@@ -1,4 +1,5 @@
 import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/models/all_icon_data.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:ente_auth/ui/utils/icon_utils.dart';
+import 'package:ente_auth/models/all_icon_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 

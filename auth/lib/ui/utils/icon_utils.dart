@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/models/all_icon_data.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -214,20 +215,4 @@ class CustomIconData {
   final String? color;
 
   CustomIconData(this.slug, this.color);
-}
-
-enum IconType { simpleIcon, customIcon }
-
-class AllIconData {
-  final String title;
-  final IconType type;
-  final String? color;
-  final String? slug;
-
-  AllIconData({
-    required this.title,
-    required this.type,
-    required this.color,
-    this.slug,
-  });
 }
