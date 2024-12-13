@@ -328,6 +328,10 @@
       }
     }
   },
+  "manualSort": "Niestandardowe",
+  "editOrder": "Zmień kolejność",
+  "mostFrequentlyUsed": "Często używane",
+  "mostRecentlyUsed": "Ostatnio używane",
   "activeSessions": "Aktywne sesje",
   "somethingWentWrongPleaseTryAgain": "Coś poszło nie tak, spróbuj ponownie",
   "thisWillLogYouOutOfThisDevice": "To wyloguje Cię z tego urządzenia!",
@@ -449,6 +453,7 @@
   "unpinText": "Odepnij",
   "pinnedCodeMessage": "Przypięto {code}",
   "unpinnedCodeMessage": "Odpięto {code}",
+  "pinned": "Przypięte",
   "tags": "Etykiety",
   "createNewTag": "Utwórz nową etykietę",
   "tag": "Etykieta",

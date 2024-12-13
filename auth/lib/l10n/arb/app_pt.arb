@@ -142,7 +142,7 @@
   "suggestFeatures": "Sugerir recursos",
   "faq": "Perguntas frequentes",
   "somethingWentWrongMessage": "Algo deu errado. Tente outra vez",
-  "leaveFamily": "Sair da família",
+  "leaveFamily": "Sair do plano familiar",
   "leaveFamilyMessage": "Deseja mesmo sair do plano familiar?",
   "inFamilyPlanMessage": "Você está em um plano familiar!",
   "hintForMobile": "Pressione em um código para editar ou excluir.",
@@ -328,6 +328,10 @@
       }
     }
   },
+  "manualSort": "Personalizado",
+  "editOrder": "Editar ordem",
+  "mostFrequentlyUsed": "Usado com frequência",
+  "mostRecentlyUsed": "Usado recentemente",
   "activeSessions": "Sessões ativas",
   "somethingWentWrongPleaseTryAgain": "Algo deu errado. Tente outra vez",
   "thisWillLogYouOutOfThisDevice": "Isso fará com que você saia deste dispositivo!",
@@ -449,6 +453,7 @@
   "unpinText": "Desafixar",
   "pinnedCodeMessage": "{code} foi fixado",
   "unpinnedCodeMessage": "{code} foi desafixado",
+  "pinned": "Fixado",
   "tags": "Etiquetas",
   "createNewTag": "Criar nova etiqueta",
   "tag": "Etiqueta",

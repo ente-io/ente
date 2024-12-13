@@ -446,8 +446,6 @@
   "customEndpoint": "Povezano na {endpoint}",
   "pinText": "Pripni",
   "unpinText": "Odpni",
-  "pinnedCodeMessage": "{code} je bila pripeta",
-  "unpinnedCodeMessage": "{code} je bila odpeta",
   "tags": "Oznake",
   "createNewTag": "Ustvari novo oznako",
   "tag": "Oznaka",
