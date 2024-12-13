@@ -183,16 +183,22 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
   }
 
   Widget _getDeleteButton() {
+    int selectedItemsCount = 0;
+    for (int idx = 0; idx < _duplicateCodes.length; idx++) {
+      if (selectedGrids.contains(idx)) {
+        selectedItemsCount += _duplicateCodes[idx].codes.length - 1;
+      }
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20),
       child: SizedBox(
         width: 400,
         child: OutlinedButton(
           onPressed: () async {
-            await deleteDuplicates();
+            await deleteDuplicates(selectedItemsCount);
           },
           child: Text(
-            "Delete ${selectedGrids.length} items",
+            "Delete $selectedItemsCount items",
           ),
         ),
       ),
@@ -210,7 +216,7 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
     selectedGrids.clear();
   }
 
-  Future<void> deleteDuplicates() async {
+  Future<void> deleteDuplicates(int itemCount) async {
     bool isAuthSuccessful =
         await LocalAuthenticationService.instance.requestLocalAuthentication(
       context,
@@ -221,8 +227,7 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
     }
     FocusScope.of(context).requestFocus();
     final l10n = context.l10n;
-    final String message =
-        "Are you sure you want to trash ${selectedGrids.length} items?";
+    final String message = "Are you sure you want to trash $itemCount items?";
     await showChoiceActionSheet(
       context,
       title: l10n.deleteDuplicates,
