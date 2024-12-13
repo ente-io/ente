@@ -138,10 +138,6 @@ func (c *Controller) createRecoveryEmailData(legacyUser, trustedUser ente.User, 
 	}
 
 	var emailDatas []emailData
-	inlineImage := map[string]interface{}{
-		"mime_type": "image/png",
-		"cid":       "header-image",
-	}
 
 	switch newStatus {
 	case ente.RecoveryStatusInitiated:
@@ -150,7 +146,7 @@ func (c *Controller) createRecoveryEmailData(legacyUser, trustedUser ente.User, 
 			templateName: RecoveryStartedTemplate,
 			emailTo:      legacyUser.Email,
 			templateData: templateData,
-			inlineImages: []map[string]interface{}{inlineImage},
+			inlineImages: []map[string]interface{}{},
 		})
 	case ente.RecoveryStatusRecovered:
 		emailDatas = append(emailDatas, emailData{
@@ -158,14 +154,14 @@ func (c *Controller) createRecoveryEmailData(legacyUser, trustedUser ente.User, 
 			templateName: RecoveryCompletedLegacyTemplate,
 			emailTo:      legacyUser.Email,
 			templateData: templateData,
-			inlineImages: []map[string]interface{}{inlineImage},
+			inlineImages: []map[string]interface{}{},
 		})
 		emailDatas = append(emailDatas, emailData{
 			title:        "Ente account recovery successful",
 			templateName: RecoveryCompletedTrustedTemplate,
 			emailTo:      trustedUser.Email,
 			templateData: templateData,
-			inlineImages: []map[string]interface{}{inlineImage},
+			inlineImages: []map[string]interface{}{},
 		})
 
 	case ente.RecoveryStatusStopped:
@@ -174,7 +170,7 @@ func (c *Controller) createRecoveryEmailData(legacyUser, trustedUser ente.User, 
 			templateName: RecoveryCancelledTemplate,
 			emailTo:      legacyUser.Email,
 			templateData: templateData,
-			inlineImages: []map[string]interface{}{inlineImage},
+			inlineImages: []map[string]interface{}{},
 		})
 	case ente.RecoveryStatusRejected:
 		emailDatas = append(emailDatas, emailData{
@@ -182,7 +178,7 @@ func (c *Controller) createRecoveryEmailData(legacyUser, trustedUser ente.User, 
 			templateName: RecoveryRejectedTemplate,
 			emailTo:      trustedUser.Email,
 			templateData: templateData,
-			inlineImages: []map[string]interface{}{inlineImage},
+			inlineImages: []map[string]interface{}{},
 		})
 	case ente.RecoveryStatusWaiting:
 		emailDatas = append(emailDatas, emailData{
@@ -190,7 +186,7 @@ func (c *Controller) createRecoveryEmailData(legacyUser, trustedUser ente.User, 
 			templateName: RecoveryReminderTemplate,
 			emailTo:      legacyUser.Email,
 			templateData: templateData,
-			inlineImages: []map[string]interface{}{inlineImage},
+			inlineImages: []map[string]interface{}{},
 		})
 	case ente.RecoveryStatusReady:
 		emailDatas = append(emailDatas, emailData{
@@ -198,14 +194,14 @@ func (c *Controller) createRecoveryEmailData(legacyUser, trustedUser ente.User, 
 			templateName: RecoveryReadyTrustedTemplate,
 			emailTo:      trustedUser.Email,
 			templateData: templateData,
-			inlineImages: []map[string]interface{}{inlineImage},
+			inlineImages: []map[string]interface{}{},
 		})
 		emailDatas = append(emailDatas, emailData{
 			title:        "Ente account recoverable",
 			templateName: RecoveryReadyLegacyTemplate,
 			emailTo:      legacyUser.Email,
 			templateData: templateData,
-			inlineImages: []map[string]interface{}{inlineImage},
+			inlineImages: []map[string]interface{}{},
 		})
 	default:
 		return nil, fmt.Errorf("unsupported status %s", newStatus)
