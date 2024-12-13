@@ -617,6 +617,9 @@
       "hex": "858585"
     },
     {
+      "title": "Nelnet"
+    },
+    {
       "title": "nintendo",
       "altNames": [
         "任天堂"
@@ -966,6 +969,10 @@
     },
     {
       "title": "Upstox"
+    },
+    {
+      "title": "US Mobile",
+      "slug": "us_mobile"
     },
     {
       "title": "Vikunja"
