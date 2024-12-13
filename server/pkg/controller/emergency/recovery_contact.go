@@ -26,6 +26,8 @@ func (c *Controller) StartRecovery(ctx *gin.Context,
 	if !hasUpdate {
 		log.WithField("userID", actorUserID).WithField("req", req).
 			Warn("No need to send email")
+	} else {
+		go c.sendRecoveryNotification(ctx, req.UserID, req.EmergencyContactID, ente.RecoveryStatusInitiated)
 	}
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -46,6 +48,8 @@ func (c *Controller) RejectRecovery(ctx *gin.Context,
 	if !hasUpdate {
 		log.WithField("userID", userID).WithField("req", req).
 			Warn("no row updated while rejecting recovery")
+	} else {
+		go c.sendRecoveryNotification(ctx, req.UserID, req.EmergencyContactID, ente.RecoveryStatusRejected)
 	}
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -66,6 +70,8 @@ func (c *Controller) ApproveRecovery(ctx *gin.Context,
 	if !hasUpdate {
 		log.WithField("userID", userID).WithField("req", req).
 			Warn("no row updated while rejecting recovery")
+	} else {
+		go c.sendRecoveryNotification(ctx, req.UserID, req.EmergencyContactID, ente.RecoveryStatusReady)
 	}
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -83,11 +89,14 @@ func (c *Controller) StopRecovery(ctx *gin.Context,
 		return stacktrace.Propagate(ente.ErrPermissionDenied, "only the emergency contact can stop recovery")
 	}
 	hasUpdate, err := c.Repo.UpdateRecoveryStatusForID(ctx, req.ID, ente.RecoveryStatusStopped)
-	if !hasUpdate && err == nil {
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if !hasUpdate {
 		log.WithField("userID", userID).WithField("req", req).
 			Warn("no row updated while stopping recovery")
 	} else {
-		log.WithField("userID", userID).WithField("req", req).Info("stopped recovery")
+		go c.sendRecoveryNotification(ctx, req.UserID, req.EmergencyContactID, ente.RecoveryStatusStopped)
 	}
 	return stacktrace.Propagate(err, "")
 }
