@@ -46,7 +46,7 @@ class FileWidget extends StatelessWidget {
       if (file.isRemoteFile &&
           flagService.internalUser &&
           (FileDataService.instance.previewIds
-                  ?.contains(file.uploadedFileID!) ??
+                  ?.containsKey(file.uploadedFileID!) ??
               false)) {
         return PreviewVideoWidget(
           file,

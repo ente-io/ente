@@ -13,6 +13,7 @@ import "package:photos/core/cache/video_cache_manager.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/gzip.dart";
@@ -169,84 +170,78 @@ class PreviewVideoStore {
     }
   }
 
-  String _getCacheKey(EnteFile file) {
-    return "video_playlist_${file.uploadedFileID}";
+  String _getCacheKey(String objectKey) {
+    return "video_playlist_$objectKey";
   }
 
-  String _getVideoPreviewKey(EnteFile file) {
-    return "video_preview_${file.uploadedFileID}";
+  String _getVideoPreviewKey(String objectKey) {
+    return "video_preview_$objectKey";
   }
 
   Future<File?> getPlaylist(EnteFile file) async {
-    if (file.uploadedFileID == null) return null;
-    final cachedFile = await cacheManager.getFileFromCache(
-      _getCacheKey(file),
-    );
-    final videoFile =
-        (await videoCacheManager.getFileFromCache(_getVideoPreviewKey(file)))
-            ?.file;
-    if (cachedFile != null && videoFile != null) {
-      final finalPlaylist = (cachedFile.file.readAsStringSync())
-          .replaceAll('\noutput.ts', '\n${videoFile.path}');
-      final tempDir = await getTemporaryDirectory();
-      final playlistFile = File("${tempDir.path}/${file.uploadedFileID}.m3u8");
-      playlistFile.writeAsStringSync(finalPlaylist);
-      unawaited(_getPlaylist(file, stopIfSame: true));
-      return playlistFile;
-    }
-
-    return await _getPlaylist(file, stopIfSame: false);
+    return await _getPlaylist(file);
   }
 
-  Future<File?> _getPlaylist(EnteFile file, {required bool stopIfSame}) async {
+  Future<File?> _getPlaylist(EnteFile file) async {
     _logger.info("Getting playlist for $file");
     try {
-      final response = await _dio.get(
-        "/files/data/fetch/",
-        queryParameters: {
-          "fileID": file.uploadedFileID,
-          "type": "vid_preview",
-        },
-      );
-      final encryptedData = response.data["data"]["encryptedData"];
-      final header = response.data["data"]["decryptionHeader"];
-      final encryptionKey = getFileKey(file);
-      final playlistData = await decryptAndUnzipJson(
-        encryptionKey,
-        encryptedData: encryptedData,
-        header: header,
-      );
+      final objectKey =
+          FileDataService.instance.previewIds![file.uploadedFileID!]!;
       final playlistCache =
-          await cacheManager.getFileFromCache(_getCacheKey(file));
-      if (playlistCache != null &&
-          playlistData["playlist"] == playlistCache.file.readAsStringSync()) {
-        if (stopIfSame) {
-          return null;
-        }
+          await cacheManager.getFileFromCache(_getCacheKey(objectKey));
+      String finalPlaylist;
+      if (playlistCache != null) {
+        finalPlaylist = playlistCache.file.readAsStringSync();
       } else {
+        final response = await _dio.get(
+          "/files/data/fetch/",
+          queryParameters: {
+            "fileID": file.uploadedFileID,
+            "type": "vid_preview",
+          },
+        );
+        final encryptedData = response.data["data"]["encryptedData"];
+        final header = response.data["data"]["decryptionHeader"];
+        final encryptionKey = getFileKey(file);
+        final playlistData = await decryptAndUnzipJson(
+          encryptionKey,
+          encryptedData: encryptedData,
+          header: header,
+        );
+        finalPlaylist = playlistData["playlist"];
+
         unawaited(
           cacheManager.putFile(
-            _getCacheKey(file),
+            _getCacheKey(objectKey),
             Uint8List.fromList((playlistData["playlist"] as String).codeUnits),
           ),
         );
       }
-      final response2 = await _dio.get(
-        "/files/data/preview",
-        queryParameters: {
-          "fileID": file.uploadedFileID,
-          "type": "vid_preview",
-        },
-      );
-      final previewURL = response2.data["url"];
-      unawaited(
-        downloadAndCacheVideo(
-          previewURL,
-          _getVideoPreviewKey(file),
-        ),
-      );
-      final finalPlaylist =
-          playlistData["playlist"].replaceAll('\noutput.ts', '\n$previewURL');
+
+      final videoFile = (await videoCacheManager
+              .getFileFromCache(_getVideoPreviewKey(objectKey)))
+          ?.file;
+      if (videoFile == null) {
+        final response2 = await _dio.get(
+          "/files/data/preview",
+          queryParameters: {
+            "fileID": file.uploadedFileID,
+            "type": "vid_preview",
+          },
+        );
+        final previewURL = response2.data["url"];
+        unawaited(
+          downloadAndCacheVideo(
+            previewURL,
+            _getVideoPreviewKey(objectKey),
+          ),
+        );
+        finalPlaylist =
+            finalPlaylist.replaceAll('\noutput.ts', '\n$previewURL');
+      } else {
+        finalPlaylist =
+            finalPlaylist.replaceAll('\noutput.ts', '\n${videoFile.path}');
+      }
 
       final tempDir = await getTemporaryDirectory();
       final playlistFile = File("${tempDir.path}/${file.uploadedFileID}.m3u8");
