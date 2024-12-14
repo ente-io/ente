@@ -533,7 +533,9 @@
     },
     {
       "title": "matlab",
-      "altNames": ["mathworks"]
+      "altNames": [
+        "mathworks"
+      ]
     },
     {
       "title": "Mercado Livre",
@@ -636,7 +638,9 @@
       "title": "nordvpn",
       "slug": "nordaccount",
       "hex": "#4687FF",
-      "altNames": "Nord Account"
+      "altNames": [
+        "Nord Account"
+      ]
     },
     {
       "title": "Notesnook"
