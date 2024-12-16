@@ -14,8 +14,8 @@ class CustomIconWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 70, // Fixed width
-      height: 70, // Fixed height
+      width: 70,
+      height: 70,
       decoration: BoxDecoration(
         border: Border.all(
           width: 1.5,
@@ -25,7 +25,7 @@ class CustomIconWidget extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(8),
       child: FittedBox(
-        fit: BoxFit.contain, // Ensures the icon fits within the box
+        fit: BoxFit.contain,
         child: IconUtils.instance.getIcon(
           context,
           safeDecode(iconData).trim(),
