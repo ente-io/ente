@@ -42,7 +42,6 @@ class _CustomIconPageState extends State<CustomIconPage> {
   void dispose() {
     _textController.dispose();
     searchBoxFocusNode.dispose();
-    searchBoxFocusNode.dispose();
     super.dispose();
   }
 
