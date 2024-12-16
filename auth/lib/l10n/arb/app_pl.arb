@@ -490,5 +490,12 @@
   "appLockNotEnabled": "Blokada aplikacji nie jest włączona",
   "appLockNotEnabledDescription": "Prosimy włączyć blokadę aplikacji z Zabezpieczenia > Blokada aplikacji",
   "authToViewPasskey": "Prosimy uwierzytelnić się, aby wyświetlić klucz dostępu",
-  "appLockOfflineModeWarning": "Wybrano kontynuowanie bez kopii zapasowych. Jeśli zapomnisz blokady aplikacji, utracisz dostęp do swoich danych."
+  "appLockOfflineModeWarning": "Wybrano kontynuowanie bez kopii zapasowych. Jeśli zapomnisz blokady aplikacji, utracisz dostęp do swoich danych.",
+  "duplicateCodes": "Duplikuj kody",
+  "noDuplicates": "✨ Brak duplikatów",
+  "youveNoDuplicateCodesThatCanBeCleared": "Nie masz duplikatów kodów, które mogą być wyczyszczone",
+  "deduplicateCodes": "Deduplikuj kody",
+  "deselectAll": "Odznacz wszystko",
+  "selectAll": "Zaznacz wszystko",
+  "deleteDuplicates": "Usuń duplikaty"
 }

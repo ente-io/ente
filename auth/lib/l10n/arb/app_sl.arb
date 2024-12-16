@@ -327,6 +327,8 @@
       }
     }
   },
+  "mostFrequentlyUsed": "Pogosto uporabljeni",
+  "mostRecentlyUsed": "Nedavno uporabljeno",
   "activeSessions": "Aktivne seje",
   "somethingWentWrongPleaseTryAgain": "Nekaj je šlo narobe, prosimo poizkusite znova.",
   "thisWillLogYouOutOfThisDevice": "To vas bo odjavilo iz te naprave!",
@@ -446,6 +448,7 @@
   "customEndpoint": "Povezano na {endpoint}",
   "pinText": "Pripni",
   "unpinText": "Odpni",
+  "pinned": "Pripeto",
   "tags": "Oznake",
   "createNewTag": "Ustvari novo oznako",
   "tag": "Oznaka",

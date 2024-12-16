@@ -329,6 +329,7 @@
     }
   },
   "manualSort": "사용자 정의",
+  "editOrder": "순서 변경",
   "mostFrequentlyUsed": "자주 사용됨",
   "mostRecentlyUsed": "최근에 사용됨",
   "activeSessions": "활성화된 세션",
@@ -450,6 +451,9 @@
   "customEndpoint": "{endpoint}에 접속됨",
   "pinText": "핀",
   "unpinText": "핀 해제",
+  "pinnedCodeMessage": "{code}가 핀 되었습니다.",
+  "unpinnedCodeMessage": "{code}의 핀이 해제되었습니다.",
+  "pinned": "고정됨",
   "tags": "태그",
   "createNewTag": "새 태그 만들기",
   "tag": "태그",
