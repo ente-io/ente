@@ -380,7 +380,7 @@ class ExportService {
             );
 
             log.info(
-                `files:${files.length} unexported files: ${filesToExport.length}, deleted exported files: ${removedFileUIDs.length}, renamed collections: ${renamedCollections.length}, deleted collections: ${deletedExportedCollections.length}`,
+                `[export] files: ${files.length}, disk files: ${diskFileRecordIDs?.size ?? "<na>"}, unexported files: ${filesToExport.length}, deleted exported files: ${removedFileUIDs.length}, renamed collections: ${renamedCollections.length}, deleted collections: ${deletedExportedCollections.length}`,
             );
             let success = 0;
             let failed = 0;
@@ -1256,7 +1256,7 @@ const readOnDiskFileExportRecordIDs = async (
     //
     // -   `exportDir` traces its origin to `electron.selectDirectory()`, which
     //     returns POSIX paths. Down below we use it as the base directory when
-    //     construction paths for the items to export.
+    //     constructing paths for the items to export.
     //
     // -   `findFiles` is also guaranteed to return POSIX paths.
     //
