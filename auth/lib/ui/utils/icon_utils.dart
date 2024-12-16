@@ -25,6 +25,7 @@ class IconUtils {
   }
 
   Map<String, AllIconData> getAllIcons() {
+    Set<String> processedIconPaths = {};
     final allIcons = <String, AllIconData>{};
 
     final simpleIterator = _simpleIcons.entries.iterator;
@@ -33,43 +34,67 @@ class IconUtils {
     var simpleEntry = simpleIterator.moveNext() ? simpleIterator.current : null;
     var customEntry = customIterator.moveNext() ? customIterator.current : null;
 
+    String simpleIconPath, customIconPath;
+
     while (simpleEntry != null && customEntry != null) {
       if (simpleEntry.key.compareTo(customEntry.key) <= 0) {
+        simpleIconPath = "assets/simple-icons/icons/${simpleEntry.key}.svg";
+        if (!processedIconPaths.contains(simpleIconPath)) {
+          allIcons[simpleEntry.key] = AllIconData(
+            title: simpleEntry.key,
+            type: IconType.simpleIcon,
+            color: simpleEntry.value,
+          );
+          processedIconPaths.add(simpleIconPath);
+        }
+        simpleEntry = simpleIterator.moveNext() ? simpleIterator.current : null;
+      } else {
+        customIconPath =
+            "assets/custom-icons/icons/${customEntry.value.slug ?? customEntry.key}.svg";
+
+        if (!processedIconPaths.contains(customIconPath)) {
+          allIcons[customEntry.key] = AllIconData(
+            title: customEntry.key,
+            type: IconType.customIcon,
+            color: customEntry.value.color,
+            slug: customEntry.value.slug,
+          );
+          processedIconPaths.add(customIconPath);
+        }
+        customEntry = customIterator.moveNext() ? customIterator.current : null;
+      }
+    }
+
+    while (simpleEntry != null) {
+      simpleIconPath = "assets/simple-icons/icons/${simpleEntry.key}.svg";
+
+      if (!processedIconPaths.contains(simpleIconPath)) {
         allIcons[simpleEntry.key] = AllIconData(
           title: simpleEntry.key,
           type: IconType.simpleIcon,
           color: simpleEntry.value,
         );
-        simpleEntry = simpleIterator.moveNext() ? simpleIterator.current : null;
-      } else {
+        processedIconPaths.add(simpleIconPath);
+      }
+      simpleEntry = simpleIterator.moveNext() ? simpleIterator.current : null;
+    }
+
+    while (customEntry != null) {
+      customIconPath =
+          "assets/custom-icons/icons/${customEntry.value.slug ?? customEntry.key}.svg";
+
+      if (!processedIconPaths.contains(customIconPath)) {
         allIcons[customEntry.key] = AllIconData(
           title: customEntry.key,
           type: IconType.customIcon,
           color: customEntry.value.color,
           slug: customEntry.value.slug,
         );
-        customEntry = customIterator.moveNext() ? customIterator.current : null;
+        processedIconPaths.add(customIconPath);
       }
-    }
-
-    while (simpleEntry != null) {
-      allIcons[simpleEntry.key] = AllIconData(
-        title: simpleEntry.key,
-        type: IconType.simpleIcon,
-        color: simpleEntry.value,
-      );
-      simpleEntry = simpleIterator.moveNext() ? simpleIterator.current : null;
-    }
-
-    while (customEntry != null) {
-      allIcons[customEntry.key] = AllIconData(
-        title: customEntry.key,
-        type: IconType.customIcon,
-        color: customEntry.value.color,
-        slug: customEntry.value.slug,
-      );
       customEntry = customIterator.moveNext() ? customIterator.current : null;
     }
+
     return allIcons;
   }
 
