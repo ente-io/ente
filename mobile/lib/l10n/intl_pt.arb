@@ -1514,5 +1514,65 @@
   "openAlbumInBrowserTitle": "Use o aplicativo da web para adicionar fotos a este álbum",
   "allow": "Permitir",
   "allowAppToOpenSharedAlbumLinks": "Permitir aplicativo abrir links de álbum compartilhado",
-  "seePublicAlbumLinksInApp": "Ver links de álbum compartilhado no aplicativo"
+  "seePublicAlbumLinksInApp": "Ver links de álbum compartilhado no aplicativo",
+  "emergencyContacts": "Contatos de emergência",
+  "acceptTrustInvite": "Aceitar convite",
+  "declineTrustInvite": "Recusar convite",
+  "removeYourselfAsTrustedContact": "Remover si mesmo dos contatos confiáveis",
+  "legacy": "Legado",
+  "legacyPageDesc": "O legado permite que contatos confiáveis acessem sua conta em sua ausência.",
+  "legacyPageDesc2": "Contatos confiáveis podem iniciar recuperação de conta, e se não for cancelado dentro de 30 dias, redefina sua senha e acesse sua conta.",
+  "legacyAccounts": "Contas legado",
+  "trustedContacts": "Contatos confiáveis",
+  "addTrustedContact": "Adicionar contato confiável",
+  "removeInvite": "Remover convite",
+  "recoveryWarning": "Um contato confiável está tentando acessar sua conta",
+  "rejectRecovery": "Rejeitar recuperação",
+  "recoveryInitiated": "A recuperação iniciou",
+  "recoveryInitiatedDesc": "Você poderá acessar a conta após {days} dias.  Uma notificação será enviada para {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Cancelar recuperação",
+  "recoveryAccount": "Recuperar conta",
+  "cancelAccountRecoveryBody": "Deseja mesmo cancelar a recuperação de conta?",
+  "startAccountRecoveryTitle": "Iniciar recuperação",
+  "whyAddTrustContact": "Um contato confiável pode ajudá-lo em recuperar seus dados.",
+  "recoveryReady": "Você pode recuperar a conta com e-mail {email} por definir uma nova senha.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} está tentando recuperar sua conta.",
+  "trustedInviteBody": "Você foi convidado para ser um contato legado por {email}.",
+  "warning": "Aviso",
+  "proceed": "Continuar",
+  "confirmAddingTrustedContact": "Você está prestes a adicionar {email} como contato confiável. Eles poderão recuperar sua conta se você estiver ausente por {numOfDays} dias.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} convidou você para ser um contato confiável",
+  "authToManageLegacy": "Autentique-se para gerenciar seus contatos confiáveis"
 }
