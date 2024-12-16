@@ -79,11 +79,6 @@ apps and configure them to use your
 
 ## Contributing!
 
-While we would love to provide a completely seamless self-hosting experience,
-right now we do not have the engineering bandwidth to answer all queries,
-document everything exactly etc. We will try (that's why we're writing this!),
-but we also hope that community members will step up to fill any gaps.
-
 One particular way in which you can help is by adding new [guides](guides/) on
 this help site. The documentation is written in Markdown and adding new pages is
 [easy](https://github.com/ente-io/ente/tree/main/docs#readme). Editing existing
