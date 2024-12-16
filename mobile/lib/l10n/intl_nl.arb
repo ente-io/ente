@@ -620,7 +620,7 @@
   "yesCancel": "Ja, opzeggen",
   "failedToRenew": "Verlengen mislukt",
   "failedToCancel": "Opzeggen mislukt",
-  "twoMonthsFreeOnYearlyPlans": "Krijg 2 maanden gratis op jaarlijkse abonnementen",
+  "twoMonthsFreeOnYearlyPlans": "Krijg 2 maanden gratis bij jaarlijkse abonnementen",
   "monthly": "Maandelijks",
   "@monthly": {
     "description": "The text to display for monthly plans",
