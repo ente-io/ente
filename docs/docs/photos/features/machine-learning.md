@@ -39,6 +39,10 @@ device.
 > desktop app first, because it can index your existing photos faster. Once your
 > existing photos have been indexed, then you can use either. The mobile app is
 > fast enough to index new photos as they are being backed up.
+>
+> Also, it is beneficial to enable machine learning before importing your
+> photos, as this allows the Ente app to index your files as they are getting
+> uploaded instead of needing to download them again.
 
 The indexes are synced across all your devices automatically using the same
 end-to-end encrypted security that we use for syncing your photos.
