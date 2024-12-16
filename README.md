@@ -30,7 +30,7 @@ Learn more at [ente.io](https://ente.io).
 
 ![Screenshots of Ente Photos](.github/assets/photos.png)
 
-Our flagship product. 3x data replication. On device machine learning. Cross
+Our flagship product. 3x data replication. Face & Object search, powered by on device machine learning. Cross
 platform. Private sharing. Collaborative albums. Family plans. Easy import,
 easier export. Background uploads. The list goes on. And of course, all of this,
 while being fully end-to-end encrypted.
