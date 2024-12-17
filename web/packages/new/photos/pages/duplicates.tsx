@@ -225,13 +225,13 @@ const Duplicates: React.FC = () => {
                     )}
                 </Autosizer>
             </Box>
-            <Box sx={{ margin: 1,  }}>
+            <Box sx={{ margin: 1 }}>
                 <FocusVisibleButton
                     sx={{
                         display: "flex",
                         flexDirection: "column",
                         minWidth: "320px",
-                        margin: "auto"
+                        margin: "auto",
                     }}
                 >
                     <Typography>Test</Typography>
