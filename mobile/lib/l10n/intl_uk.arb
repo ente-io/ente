@@ -1574,5 +1574,6 @@
     }
   },
   "legacyInvite": "{email} запросив вас стати довіреною особою",
-  "authToManageLegacy": "Авторизуйтесь, щоби керувати довіреними контактами"
+  "authToManageLegacy": "Авторизуйтесь, щоби керувати довіреними контактами",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }

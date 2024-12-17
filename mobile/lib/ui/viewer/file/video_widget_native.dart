@@ -349,8 +349,10 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                                         _elTooltipController
                                                             .hide();
                                                       },
-                                                      child: const Text(
-                                                        "Trouble playing this video? Long press here to use different player.",
+                                                      child: Text(
+                                                        S
+                                                            .of(context)
+                                                            .useDifferentPlayerInfo,
                                                       ),
                                                     ),
                                                     position: ElTooltipPosition

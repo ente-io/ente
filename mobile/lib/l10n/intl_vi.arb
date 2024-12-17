@@ -1574,5 +1574,6 @@
     }
   },
   "legacyInvite": "{email} đã mời bạn trở thành một liên hệ tin cậy",
-  "authToManageLegacy": "Vui lòng xác thực để quản lý các liên hệ tin cậy của bạn"
+  "authToManageLegacy": "Vui lòng xác thực để quản lý các liên hệ tin cậy của bạn",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }

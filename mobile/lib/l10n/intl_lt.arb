@@ -1256,5 +1256,6 @@
     }
   },
   "legacyInvite": "{email} pakvietė jus būti patikimu kontaktu",
-  "authToManageLegacy": "Nustatykite tapatybę, kad tvarkytumėte patikimus kontaktus"
+  "authToManageLegacy": "Nustatykite tapatybę, kad tvarkytumėte patikimus kontaktus",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }
