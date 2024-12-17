@@ -541,7 +541,7 @@ const PlanRow: React.FC<PlanRowProps> = ({
     return (
         <PlanRowContainer>
             <TopAlignedFluidContainer>
-                <Typography variant="h1" fontWeight={"bold"}>
+                <Typography variant="h1">
                     {bytesInGB(plan.storage)}
                 </Typography>
                 <FlexWrapper flexWrap={"wrap"} gap={1}>
