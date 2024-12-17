@@ -90,7 +90,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                 if (
                     await isMuseumHTTPError(e, 409, "USER_ALREADY_REGISTERED")
                 ) {
-                    setFieldError("email", "Email already registered");
+                    setFieldError("email", t("email_already_registered"));
                 } else {
                     setFieldError("email", t("generic_error"));
                 }

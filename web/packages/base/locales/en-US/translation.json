@@ -12,6 +12,8 @@
     "ENTER_EMAIL": "Enter email address",
     "EMAIL_ERROR": "Enter a valid email",
     "required": "required",
+    "email_not_registered": "Email not registered",
+    "email_already_registered": "Email already registered",
     "EMAIL_SENT": "Verification code sent to <a>{{email}}</a>",
     "CHECK_INBOX": "Please check your inbox (and spam) to complete verification",
     "ENTER_OTT": "Verification code",

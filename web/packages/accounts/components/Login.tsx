@@ -1,4 +1,5 @@
 import { FormPaperFooter, FormPaperTitle } from "@/base/components/FormPaper";
+import { isMuseumHTTPError } from "@/base/http";
 import log from "@/base/log";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
@@ -11,7 +12,6 @@ import { useRouter } from "next/router";
 import { PAGES } from "../constants/pages";
 import { getSRPAttributes } from "../services/srp-remote";
 import { sendOTT } from "../services/user";
-import { isMuseumHTTPError } from "@/base/http";
 
 interface LoginProps {
     signUp: () => void;
@@ -36,7 +36,7 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
                     if (
                         await isMuseumHTTPError(e, 404, "USER_NOT_REGISTERED")
                     ) {
-                        setFieldError("Email not registered");
+                        setFieldError(t("email_not_registered"));
                         return;
                     }
                     throw e;
