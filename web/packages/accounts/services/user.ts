@@ -2,14 +2,12 @@ import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import {
     authenticatedRequestHeaders,
     ensureOk,
-    HTTPError,
     publicRequestHeaders,
 } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import type { KeyAttributes } from "@ente/shared/user/types";
-import { z } from "zod";
 
 export interface UserVerificationResponse {
     id: number;
@@ -67,11 +65,8 @@ export interface RecoveryKey {
  * @param email The email to verify.
  *
  * @param purpose In which context is the email being verified. Remote applies
- * additional business rules depending on this.
- *
- * For example, passing the purpose "login" ensures that the OTT is only sent to
- * an already registered email, otherwise an error is thrown (which can be
- * checked for by using {@link isSendOTTUserNotRegisteredError}).
+ * additional business rules depending on this. For example, passing the purpose
+ * "login" ensures that the OTT is only sent to an already registered email.
  *
  * In cases where the purpose is ambiguous (e.g. we're not sure if it is an
  * existing login or a new signup), the purpose can be set to `undefined`.
@@ -87,26 +82,6 @@ export const sendOTT = async (
             body: JSON.stringify({ email, purpose }),
         }),
     );
-
-/**
- * Return `true` if this is an error returned by remote when we try to call
- * {@link sendOTT} with purpose "login" for an email which does not have an
- * existing account corresponding to it.
- */
-export const isSendOTTUserNotRegisteredError = async (e: unknown) => {
-    if (e instanceof HTTPError && e.res.status == 404) {
-        try {
-            // {"code":"USER_NOT_REGISTERED","message":"User is not registered"}
-            const code = z
-                .object({ code: z.string() })
-                .parse(await e.res.json()).code;
-            return code == "USER_NOT_REGISTERED";
-        } catch {
-            return false;
-        }
-    }
-    return false;
-};
 
 export const verifyOtt = async (
     email: string,

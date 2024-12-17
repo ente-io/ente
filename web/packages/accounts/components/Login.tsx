@@ -10,7 +10,8 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { PAGES } from "../constants/pages";
 import { getSRPAttributes } from "../services/srp-remote";
-import { isSendOTTUserNotRegisteredError, sendOTT } from "../services/user";
+import { sendOTT } from "../services/user";
+import { isMuseumHTTPError } from "@/base/http";
 
 interface LoginProps {
     signUp: () => void;
@@ -32,7 +33,9 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
                 try {
                     await sendOTT(email, "login");
                 } catch (e) {
-                    if (await isSendOTTUserNotRegisteredError(e)) {
+                    if (
+                        await isMuseumHTTPError(e, 404, "USER_NOT_REGISTERED")
+                    ) {
                         setFieldError("Email not registered");
                         return;
                     }
