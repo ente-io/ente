@@ -4,6 +4,7 @@ import {
     FormPaperTitle,
 } from "@/base/components/FormPaper";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
+import { isHTTPErrorWithStatus } from "@/base/http";
 import log from "@/base/log";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
@@ -18,7 +19,6 @@ import * as Yup from "yup";
 import { appHomeRoute } from "../services/redirect";
 import { changeEmail, sendOTT } from "../services/user";
 import type { PageProps } from "../types/page";
-import { isHTTPErrorWithStatus } from "@/base/http";
 
 const Page: React.FC<PageProps> = () => {
     const router = useRouter();
