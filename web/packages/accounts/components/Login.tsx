@@ -10,7 +10,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { PAGES } from "../constants/pages";
 import { getSRPAttributes } from "../services/srp-remote";
-import { sendOtt } from "../services/user";
+import { sendOTT } from "../services/user";
 
 interface LoginProps {
     signUp: () => void;
@@ -30,7 +30,7 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
             const srpAttributes = await getSRPAttributes(email);
             log.debug(() => ["srpAttributes", JSON.stringify(srpAttributes)]);
             if (!srpAttributes || srpAttributes.isEmailMFAEnabled) {
-                await sendOtt(email);
+                await sendOTT(email, "login");
                 void router.push(PAGES.VERIFY);
             } else {
                 setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);

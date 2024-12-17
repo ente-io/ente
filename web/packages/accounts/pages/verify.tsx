@@ -42,7 +42,7 @@ import { configureSRP } from "../services/srp";
 import type { SRPAttributes, SRPSetupAttributes } from "../services/srp-remote";
 import { getSRPAttributes } from "../services/srp-remote";
 import type { UserVerificationResponse } from "../services/user";
-import { putAttributes, sendOtt, verifyOtt } from "../services/user";
+import { putAttributes, sendOTT, verifyOtt } from "../services/user";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
@@ -170,7 +170,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
     const resendEmail = async () => {
         setResend(1);
-        await sendOtt(email);
+        await sendOTT(email, undefined);
         setResend(2);
         setTimeout(() => setResend(0), 3000);
     };

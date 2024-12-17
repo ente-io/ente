@@ -16,7 +16,7 @@ import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";
 import { appHomeRoute } from "../services/redirect";
-import { changeEmail, sendOTTForEmailChange } from "../services/user";
+import { changeEmail, sendOTT } from "../services/user";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = () => {
@@ -60,7 +60,7 @@ const ChangeEmailForm: React.FC = () => {
     ) => {
         try {
             setLoading(true);
-            await sendOTTForEmailChange(email);
+            await sendOTT(email, "change");
             setEmail(email);
             setShowOttInputVisibility(true);
             setShowMessage(true);

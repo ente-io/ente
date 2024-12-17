@@ -66,20 +66,19 @@ export interface RecoveryKey {
  *
  * @param purpose In which context is the email being verified. Remote applies
  * additional business rules depending on this. For example, passing the purpose
- * "login" ensures that the OTT is only sent to an already registered email.
+ * "login" ensures that the OTT is only sent to an already registered email. In
+ * cases where the purpose is ambiguous (e.g. we're not sure if it is an
+ * existing login or a new signup), the purpose can be set to `undefined`.
  */
 export const sendOTT = async (
     email: string,
-    purpose: "change" | "signup" | "login",
+    purpose: "change" | "signup" | "login" | undefined,
 ) =>
     ensureOk(
         await fetch(await apiURL("/users/ott"), {
             method: "POST",
             headers: publicRequestHeaders(),
-            body: JSON.stringify({
-                email,
-                purpose: purpose,
-            }),
+            body: JSON.stringify({ email, purpose }),
         }),
     );
 

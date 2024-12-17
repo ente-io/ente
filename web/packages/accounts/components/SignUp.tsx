@@ -37,7 +37,7 @@ import { Trans } from "react-i18next";
 import * as Yup from "yup";
 import { PAGES } from "../constants/pages";
 import { generateKeyAndSRPAttributes } from "../services/srp";
-import { sendOtt } from "../services/user";
+import { sendOTT } from "../services/user";
 import { isWeakPassword } from "../utils/password";
 import { PasswordStrengthHint } from "./PasswordStrength";
 
@@ -83,7 +83,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
             try {
                 await setLSUser({ email });
                 setLocalReferralSource(referral);
-                await sendOtt(email);
+                await sendOTT(email, "signup");
             } catch (e) {
                 const message = e instanceof Error ? e.message : "";
                 setFieldError(

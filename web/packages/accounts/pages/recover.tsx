@@ -1,5 +1,5 @@
 import { PAGES } from "@/accounts/constants/pages";
-import { sendOtt } from "@/accounts/services/user";
+import { sendOTT } from "@/accounts/services/user";
 import {
     FormPaper,
     FormPaperFooter,
@@ -48,7 +48,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             return;
         }
         if (!user?.encryptedToken && !user?.token) {
-            void sendOtt(user.email);
+            void sendOTT(user.email, "login");
             stashRedirect(PAGES.RECOVER);
             void router.push(PAGES.VERIFY);
             return;
