@@ -37,15 +37,8 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
                 void router.push(PAGES.CREDENTIALS);
             }
         } catch (e) {
-            if (e instanceof Error) {
-                setFieldError(
-                    `${t("generic_error_retry")} (reason:${e.message})`,
-                );
-            } else {
-                setFieldError(
-                    `${t("generic_error_retry")} (reason:${JSON.stringify(e)})`,
-                );
-            }
+            log.error("Login failed", e);
+            setFieldError(t("generic_error_retry"));
         }
     };
 
