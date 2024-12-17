@@ -140,37 +140,38 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
                 widget.playbackCallback,
                 isFromMemories: widget.isFromMemories,
               )
-            : Stack(
-                children: [
-                  _getThumbnail(),
-                  Container(
-                    color: Colors.black12,
-                    constraints: const BoxConstraints.expand(),
-                  ),
-                  Center(
-                    child: SizedBox.fromSize(
-                      size: const Size.square(20),
-                      child: ValueListenableBuilder(
-                        valueListenable: _progressNotifier,
-                        builder: (BuildContext context, double? progress, _) {
-                          return progress == null || progress == 1
-                              ? const CupertinoActivityIndicator(
-                                  color: Colors.white,
-                                )
-                              : CircularProgressIndicator(
-                                  backgroundColor: Colors.black,
-                                  value: progress,
-                                  valueColor:
-                                      const AlwaysStoppedAnimation<Color>(
-                                    Color.fromRGBO(45, 194, 98, 1.0),
-                                  ),
-                                );
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            // : Stack(
+            //     children: [
+            //       _getThumbnail(),
+            //       Container(
+            //         color: Colors.black12,
+            //         constraints: const BoxConstraints.expand(),
+            //       ),
+            //       Center(
+            //         child: SizedBox.fromSize(
+            //           size: const Size.square(20),
+            //           child: ValueListenableBuilder(
+            //             valueListenable: _progressNotifier,
+            //             builder: (BuildContext context, double? progress, _) {
+            //               return progress == null || progress == 1
+            //                   ? const CupertinoActivityIndicator(
+            //                       color: Colors.white,
+            //                     )
+            //                   : CircularProgressIndicator(
+            //                       backgroundColor: Colors.black,
+            //                       value: progress,
+            //                       valueColor:
+            //                           const AlwaysStoppedAnimation<Color>(
+            //                         Color.fromRGBO(45, 194, 98, 1.0),
+            //                       ),
+            //                     );
+            //             },
+            //           ),
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            : const SizedBox.shrink(),
       ),
     );
   }
