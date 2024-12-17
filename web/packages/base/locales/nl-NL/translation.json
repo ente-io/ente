@@ -12,6 +12,8 @@
     "ENTER_EMAIL": "Vul e-mailadres in",
     "EMAIL_ERROR": "Vul een geldig e-mailadres in",
     "required": "Vereist",
+    "email_not_registered": "",
+    "email_already_registered": "",
     "EMAIL_SENT": "Verificatiecode verzonden naar <a>{{email}}</a>",
     "CHECK_INBOX": "Controleer je inbox (en spam) om verificatie te voltooien",
     "ENTER_OTT": "Verificatiecode",

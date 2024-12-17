@@ -12,6 +12,8 @@
     "ENTER_EMAIL": "",
     "EMAIL_ERROR": "",
     "required": "",
+    "email_not_registered": "",
+    "email_already_registered": "",
     "EMAIL_SENT": "",
     "CHECK_INBOX": "",
     "ENTER_OTT": "",

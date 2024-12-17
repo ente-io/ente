@@ -12,6 +12,8 @@
     "ENTER_EMAIL": "Syötä sähköpostiosoite",
     "EMAIL_ERROR": "Syötä voimassa oleva sähköpostiosoite",
     "required": "Pakollinen",
+    "email_not_registered": "",
+    "email_already_registered": "",
     "EMAIL_SENT": "Vahvistuskoodi lähetetty osoitteeseen <a>{{email}}</a>",
     "CHECK_INBOX": "Tarkista saapuneet-kansiosi (ja roskaposti) suorittaaksesi vahvistuksen",
     "ENTER_OTT": "Vahvistuskoodi",

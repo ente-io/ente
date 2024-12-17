@@ -12,6 +12,8 @@
     "ENTER_EMAIL": "Introduza o endereço de email",
     "EMAIL_ERROR": "Introduza um endereço de email válido",
     "required": "Obrigatório",
+    "email_not_registered": "",
+    "email_already_registered": "",
     "EMAIL_SENT": "Código de verificação enviado para <a>{{email}}</a>",
     "CHECK_INBOX": "Verifique a sua caixa de entrada (e spam) para concluir a verificação",
     "ENTER_OTT": "Código de verificação",
