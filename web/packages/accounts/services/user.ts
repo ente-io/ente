@@ -1,4 +1,3 @@
-import { appName } from "@/base/app";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import {
     authenticatedRequestHeaders,
@@ -66,16 +65,20 @@ export interface RecoveryKey {
  * @param email The email to verify.
  *
  * @param purpose In which context is the email being verified. Remote applies
- * additional business rules depending on this.
+ * additional business rules depending on this. For example, passing the purpose
+ * "login" ensures that the OTT is only sent to an already registered email.
  */
-export const sendOTT = async (email: string, purpose: "change" | undefined) =>
+export const sendOTT = async (
+    email: string,
+    purpose: "change" | "signup" | "login",
+) =>
     ensureOk(
         await fetch(await apiURL("/users/ott"), {
             method: "POST",
             headers: publicRequestHeaders(),
             body: JSON.stringify({
                 email,
-                purpose: purpose ?? "",
+                purpose: purpose,
             }),
         }),
     );
