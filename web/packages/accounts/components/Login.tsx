@@ -10,7 +10,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { PAGES } from "../constants/pages";
 import { getSRPAttributes } from "../services/srp-remote";
-import { sendOTT } from "../services/user";
+import { isSendOTTUserNotRegisteredError, sendOTT } from "../services/user";
 
 interface LoginProps {
     signUp: () => void;
@@ -38,7 +38,11 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
             }
         } catch (e) {
             log.error("Login failed", e);
-            setFieldError(t("generic_error_retry"));
+            if (await isSendOTTUserNotRegisteredError(e)) {
+                setFieldError("No account with the given email exists");
+            } else {
+                setFieldError(t("generic_error"));
+            }
         }
     };
 
