@@ -411,7 +411,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                                             size: 16,
                                                             color: Colors.white
                                                                 .withOpacity(
-                                                              0.15,
+                                                              0.2,
                                                             ),
                                                           ),
                                                         ),
