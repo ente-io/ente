@@ -1,14 +1,12 @@
-
-
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class ThemeSwitchWidget extends StatefulWidget {
   const ThemeSwitchWidget({super.key});
@@ -42,7 +40,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: "Theme",
+      title: context.l10n.theme,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Theme.of(context).brightness == Brightness.light
           ? Icons.light_mode_outlined
@@ -64,10 +62,21 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
     );
   }
 
+  String _name(BuildContext ctx, AdaptiveThemeMode mode) {
+    switch (mode) {
+      case AdaptiveThemeMode.light:
+        return ctx.l10n.lightTheme;
+      case AdaptiveThemeMode.dark:
+        return ctx.l10n.darkTheme;
+      case AdaptiveThemeMode.system:
+        return ctx.l10n.systemTheme;
+    }
+  }
+
   Widget _menuItem(BuildContext context, AdaptiveThemeMode themeMode) {
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
-        title: toBeginningOfSentenceCase(themeMode.name)!,
+        title: _name(context, themeMode),
         textStyle: Theme.of(context).colorScheme.enteTheme.textTheme.body,
       ),
       pressedColor: getEnteColorScheme(context).fillFaint,
