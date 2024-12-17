@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
+import 'package:ente_auth/models/all_icon_data.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/models/code_display.dart';
 import 'package:ente_auth/onboarding/model/tag_enums.dart';
@@ -13,7 +14,10 @@ import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
+import 'package:ente_auth/ui/components/custom_icon_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
+import 'package:ente_auth/ui/custom_icon_page.dart';
+import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
@@ -42,6 +46,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   late List<String> selectedTags = [...?widget.code?.display.tags];
   List<String> allTags = [];
   StreamSubscription<CodesUpdatedEvent>? _streamSubscription;
+  bool isCustomIcon = false;
+  String _customIconID = "";
+  late IconType _iconSrc;
 
   @override
   void initState() {
@@ -81,6 +88,19 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       _limitTextLength(_accountController, _otherTextLimit);
       _limitTextLength(_secretController, _otherTextLimit);
     }
+
+    isCustomIcon = widget.code?.display.isCustomIcon ?? false;
+    if (isCustomIcon) {
+      _customIconID = widget.code?.display.iconID ?? "ente";
+    } else {
+      if (widget.code != null) {
+        _customIconID = widget.code!.issuer;
+      }
+    }
+    _iconSrc = widget.code?.display.iconSrc == "simpleIcon"
+        ? IconType.simpleIcon
+        : IconType.customIcon;
+
     super.initState();
   }
 
@@ -280,9 +300,21 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 40,
-              ),
+              const SizedBox(height: 32),
+              if (widget.code != null)
+                CustomIconWidget(iconData: _customIconID),
+              const SizedBox(height: 24),
+              if (widget.code != null)
+                GestureDetector(
+                  onTap: () async {
+                    await navigateToCustomIconPage();
+                  },
+                  child: Text(
+                    "Change Icon",
+                    style: getEnteTextTheme(context).small,
+                  ),
+                ),
+              const SizedBox(height: 40),
               SizedBox(
                 width: 400,
                 child: OutlinedButton(
@@ -324,6 +356,11 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
           widget.code?.display.copyWith(tags: selectedTags) ??
               CodeDisplay(tags: selectedTags);
       display.note = notes;
+
+      display.iconID = _customIconID.toLowerCase();
+      display.iconSrc =
+          _iconSrc == IconType.simpleIcon ? 'simpleIcon' : 'customIcon';
+
       if (widget.code != null && widget.code!.secret != secret) {
         ButtonResult? result = await showChoiceActionSheet(
           context,
@@ -372,5 +409,29 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       context.l10n.incorrectDetails,
       message ?? context.l10n.pleaseVerifyDetails,
     );
+  }
+
+  Future<void> navigateToCustomIconPage() async {
+    final allIcons = IconUtils.instance.getAllIcons();
+    String currentIcon;
+    if (widget.code!.display.isCustomIcon) {
+      currentIcon = widget.code!.display.iconID;
+    } else {
+      currentIcon = widget.code!.issuer;
+    }
+    final AllIconData newCustomIcon = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return CustomIconPage(
+            currentIcon: currentIcon,
+            allIcons: allIcons,
+          );
+        },
+      ),
+    );
+    setState(() {
+      _customIconID = newCustomIcon.title;
+      _iconSrc = newCustomIcon.type;
+    });
   }
 }
