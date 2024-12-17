@@ -274,92 +274,155 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                               bottom: widget.isFromMemories ? 32 : 0,
                             ),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Platform.isAndroid
-                                    ? ValueListenableBuilder(
-                                        valueListenable: _showControls,
-                                        builder: (context, value, _) {
-                                          return AnimatedOpacity(
-                                            duration: const Duration(
-                                              milliseconds: 200,
-                                            ),
-                                            curve: Curves.easeInQuad,
-                                            opacity: value ? 1 : 0,
-                                            child: ElTooltip(
-                                              padding: const EdgeInsets.all(12),
-                                              distance: 4,
-                                              controller: _elTooltipController,
-                                              content: GestureDetector(
-                                                onLongPress: () {
-                                                  Bus.instance.fire(
-                                                    UseMediaKitForVideo(),
-                                                  );
-                                                  HapticFeedback.vibrate();
-                                                  _elTooltipController.hide();
-                                                },
-                                                child: const Text(
-                                                  "Trouble playing video? Long press here to use different player.",
-                                                ),
-                                              ),
-                                              position:
-                                                  ElTooltipPosition.topEnd,
-                                              color: backgroundElevatedDark,
-                                              appearAnimationDuration:
-                                                  const Duration(
-                                                milliseconds: 200,
-                                              ),
-                                              disappearAnimationDuration:
-                                                  const Duration(
-                                                milliseconds: 200,
-                                              ),
-                                              child: GestureDetector(
-                                                onTap: () {
-                                                  if (_elTooltipController
-                                                          .value ==
-                                                      ElTooltipStatus.hidden) {
-                                                    _elTooltipController.show();
-                                                  } else {
-                                                    _elTooltipController.hide();
-                                                  }
-                                                  _controller?.pause();
-                                                },
-                                                behavior:
-                                                    HitTestBehavior.translucent,
-                                                onLongPress: () {
-                                                  Bus.instance.fire(
-                                                    UseMediaKitForVideo(),
-                                                  );
-                                                  HapticFeedback.vibrate();
-                                                },
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.fromLTRB(
-                                                    12,
-                                                    0,
-                                                    0,
-                                                    4,
+                                Row(
+                                  mainAxisAlignment: Platform.isAndroid
+                                      ? MainAxisAlignment.spaceBetween
+                                      : MainAxisAlignment.center,
+                                  children: [
+                                    widget.file.caption?.isNotEmpty ?? false
+                                        ? Expanded(
+                                            child: ValueListenableBuilder(
+                                              valueListenable: _showControls,
+                                              builder: (context, value, _) {
+                                                return AnimatedOpacity(
+                                                  duration: const Duration(
+                                                    milliseconds: 200,
                                                   ),
-                                                  child: Container(
+                                                  curve: Curves.easeInQuad,
+                                                  opacity: value ? 1 : 0,
+                                                  child: Padding(
+                                                    padding: const EdgeInsets
+                                                        .fromLTRB(
+                                                      16,
+                                                      12,
+                                                      16,
+                                                      8,
+                                                    ),
+                                                    child: Text(
+                                                      widget.file.caption!,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      maxLines: 1,
+                                                      style: getEnteTextTheme(
+                                                        context,
+                                                      ).mini.copyWith(
+                                                            color: textBaseDark,
+                                                          ),
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          )
+                                        : const SizedBox.shrink(),
+                                    Platform.isAndroid
+                                        ? ValueListenableBuilder(
+                                            valueListenable: _showControls,
+                                            builder: (context, value, _) {
+                                              return IgnorePointer(
+                                                ignoring: !value,
+                                                child: AnimatedOpacity(
+                                                  duration: const Duration(
+                                                    milliseconds: 200,
+                                                  ),
+                                                  curve: Curves.easeInQuad,
+                                                  opacity: value ? 1 : 0,
+                                                  child: ElTooltip(
                                                     padding:
                                                         const EdgeInsets.all(
                                                       12,
                                                     ),
-                                                    child: Icon(
-                                                      Icons
-                                                          .question_mark_rounded,
-                                                      size: 16,
-                                                      color: Colors.white
-                                                          .withOpacity(0.15),
+                                                    distance: 4,
+                                                    controller:
+                                                        _elTooltipController,
+                                                    content: GestureDetector(
+                                                      onLongPress: () {
+                                                        Bus.instance.fire(
+                                                          UseMediaKitForVideo(),
+                                                        );
+                                                        HapticFeedback
+                                                            .vibrate();
+                                                        _elTooltipController
+                                                            .hide();
+                                                      },
+                                                      child: const Text(
+                                                        "Trouble playing this video? Long press here to use different player.",
+                                                      ),
+                                                    ),
+                                                    position: ElTooltipPosition
+                                                        .topEnd,
+                                                    color:
+                                                        backgroundElevatedDark,
+                                                    appearAnimationDuration:
+                                                        const Duration(
+                                                      milliseconds: 200,
+                                                    ),
+                                                    disappearAnimationDuration:
+                                                        const Duration(
+                                                      milliseconds: 200,
+                                                    ),
+                                                    child: GestureDetector(
+                                                      onTap: () {
+                                                        if (_elTooltipController
+                                                                .value ==
+                                                            ElTooltipStatus
+                                                                .hidden) {
+                                                          _elTooltipController
+                                                              .show();
+                                                        } else {
+                                                          _elTooltipController
+                                                              .hide();
+                                                        }
+                                                        _controller?.pause();
+                                                      },
+                                                      behavior: HitTestBehavior
+                                                          .translucent,
+                                                      onLongPress: () {
+                                                        Bus.instance.fire(
+                                                          UseMediaKitForVideo(),
+                                                        );
+                                                        HapticFeedback
+                                                            .vibrate();
+                                                      },
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .fromLTRB(
+                                                          12,
+                                                          0,
+                                                          0,
+                                                          4,
+                                                        ),
+                                                        child: Container(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(
+                                                            12,
+                                                          ),
+                                                          child: Icon(
+                                                            Icons
+                                                                .question_mark_rounded,
+                                                            size: 16,
+                                                            color: Colors.white
+                                                                .withOpacity(
+                                                              0.15,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      )
-                                    : const SizedBox.shrink(),
+                                              );
+                                            },
+                                          )
+                                        : const SizedBox.shrink(),
+                                  ],
+                                ),
                                 ValueListenableBuilder(
                                   valueListenable: _isPlaybackReady,
                                   builder:

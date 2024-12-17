@@ -136,6 +136,7 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
       child: Center(
         child: controller != null
             ? _VideoWidget(
+                widget.file,
                 controller!,
                 widget.playbackCallback,
                 isFromMemories: widget.isFromMemories,
@@ -239,10 +240,12 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
 }
 
 class _VideoWidget extends StatefulWidget {
+  final EnteFile file;
   final VideoController controller;
   final Function(bool)? playbackCallback;
   final bool isFromMemories;
   const _VideoWidget(
+    this.file,
     this.controller,
     this.playbackCallback, {
     required this.isFromMemories,
@@ -347,9 +350,32 @@ class __VideoWidgetState extends State<_VideoWidget> {
                           padding: EdgeInsets.only(
                             bottom: widget.isFromMemories ? 32 : 0,
                           ),
-                          child: _SeekBarAndDuration(
-                            controller: widget.controller,
-                            isSeekingNotifier: _isSeekingNotifier,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  12,
+                                  16,
+                                  8,
+                                ),
+                                child: Text(
+                                  widget.file.caption!,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  style:
+                                      getEnteTextTheme(context).mini.copyWith(
+                                            color: textBaseDark,
+                                          ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              _SeekBarAndDuration(
+                                controller: widget.controller,
+                                isSeekingNotifier: _isSeekingNotifier,
+                              ),
+                            ],
                           ),
                         ),
                       ),
