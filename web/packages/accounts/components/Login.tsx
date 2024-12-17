@@ -33,7 +33,7 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
                     await sendOTT(email, "login");
                 } catch (e) {
                     if (await isSendOTTUserNotRegisteredError(e)) {
-                        setFieldError("No account with the given email exists");
+                        setFieldError("Email not registered");
                         return;
                     }
                     throw e;
