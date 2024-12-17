@@ -1,4 +1,6 @@
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { pt } from "@/base/i18n";
+import { VerticallyCentered } from "@ente/shared/components/Container";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import SortIcon from "@mui/icons-material/Sort";
@@ -9,14 +11,16 @@ import { useAppContext } from "../types/context";
 
 const Page: React.FC = () => {
     const { showNavBar } = useAppContext();
+
     useEffect(() => {
         showNavBar(false);
     }, []);
+
     return (
-        <div>
+        <Stack sx={{ flex: 1 }}>
             <Navbar />
-            Hello
-        </div>
+            <Contents />
+        </Stack>
     );
 };
 
@@ -50,5 +54,13 @@ const Navbar: React.FC = () => {
                 </IconButton>
             </Stack>
         </Stack>
+    );
+};
+
+const Contents: React.FC = () => {
+    return (
+        <VerticallyCentered>
+            <ActivityIndicator />
+        </VerticallyCentered>
     );
 };
