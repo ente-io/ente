@@ -217,10 +217,11 @@ class _HomePageState extends State<HomePage> {
   void sortFilteredCodes(List<Code> codes, CodeSortKey sortKey) {
     switch (sortKey) {
       case CodeSortKey.issuerName:
-        codes.sort((a, b) => compareNatural(a.issuer, b.issuer));
+        codes.sort((a, b) => compareAsciiLowerCaseNatural(a.issuer, b.issuer));
         break;
       case CodeSortKey.accountName:
-        codes.sort((a, b) => compareNatural(a.account, b.account));
+        codes
+            .sort((a, b) => compareAsciiLowerCaseNatural(a.account, b.account));
         break;
       case CodeSortKey.mostFrequentlyUsed:
         codes.sort((a, b) => b.display.tapCount.compareTo(a.display.tapCount));
