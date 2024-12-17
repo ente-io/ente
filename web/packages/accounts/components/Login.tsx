@@ -26,23 +26,28 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
         setFieldError,
     ) => {
         try {
-            await setLSUser({ email });
             const srpAttributes = await getSRPAttributes(email);
             log.debug(() => ["srpAttributes", JSON.stringify(srpAttributes)]);
             if (!srpAttributes || srpAttributes.isEmailMFAEnabled) {
-                await sendOTT(email, "login");
+                try {
+                    await sendOTT(email, "login");
+                } catch (e) {
+                    if (await isSendOTTUserNotRegisteredError(e)) {
+                        setFieldError("No account with the given email exists");
+                        return;
+                    }
+                    throw e;
+                }
+                await setLSUser({ email });
                 void router.push(PAGES.VERIFY);
             } else {
+                await setLSUser({ email });
                 setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
                 void router.push(PAGES.CREDENTIALS);
             }
         } catch (e) {
             log.error("Login failed", e);
-            if (await isSendOTTUserNotRegisteredError(e)) {
-                setFieldError("No account with the given email exists");
-            } else {
-                setFieldError(t("generic_error"));
-            }
+            setFieldError(t("generic_error"));
         }
     };
 
