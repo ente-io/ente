@@ -1,6 +1,10 @@
 import { appName } from "@/base/app";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
-import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
+import {
+    authenticatedRequestHeaders,
+    ensureOk,
+    publicRequestHeaders,
+} from "@/base/http";
 import { apiURL } from "@/base/origins";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
@@ -54,12 +58,28 @@ export interface RecoveryKey {
     recoveryKeyDecryptionNonce: string;
 }
 
-export const sendOtt = async (email: string) => {
-    return HTTPService.post(await apiURL("/users/ott"), {
-        email,
-        client: appName == "auth" ? "totp" : "web",
-    });
-};
+/**
+ * Ask remote to send a OTP / OTT to the given email to verify that the user has
+ * access to it. Subsequent the app will pass this OTT back via the
+ * {@link verifyOTT} method.
+ *
+ * @param email The email to verify.
+ *
+ * @param purpose In which context is the email being verified. Remote applies
+ * additional business rules depending on this.
+ */
+export const sendOTT = async (email: string, purpose: "change" | undefined) =>
+    ensureOk(
+        await fetch(await apiURL("/users/ott"), {
+            headers: publicRequestHeaders(),
+            method: "POST",
+            body: JSON.stringify({
+                email,
+                client: appName == "auth" ? "totp" : "web",
+                purpose: purpose ?? "",
+            }),
+        }),
+    );
 
 export const verifyOtt = async (
     email: string,
