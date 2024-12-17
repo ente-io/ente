@@ -12,6 +12,8 @@
     "ENTER_EMAIL": "Ange e-postadress",
     "EMAIL_ERROR": "Ange en giltig e-postadress",
     "required": "Obligatoriskt",
+    "email_not_registered": "",
+    "email_already_registered": "",
     "EMAIL_SENT": "Verifieringskod skickas till <a>{{email}}</a>",
     "CHECK_INBOX": "Kontrollera din inkorg (och skräppost) för att slutföra verifieringen",
     "ENTER_OTT": "Verifieringskod",
