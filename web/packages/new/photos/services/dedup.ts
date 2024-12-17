@@ -1,4 +1,5 @@
 import type { EnteFile } from "@/media/file";
+import { wait } from "@/utils/promise";
 
 /**
  * A group of duplicates as shown in the UI.
@@ -63,6 +64,7 @@ export interface DuplicateGroup {
  *
  * 4. Delete the remaining files.
  */
-export const deduceDuplicates = () => {
+export const deduceDuplicates = async () => {
+    await wait(1000);
     return [];
 };

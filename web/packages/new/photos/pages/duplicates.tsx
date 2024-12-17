@@ -1,13 +1,15 @@
+import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { CenteredFill } from "@/base/components/mui/Container";
 import { pt } from "@/base/i18n";
-import { VerticallyCentered } from "@ente/shared/components/Container";
+import log from "@/base/log";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import SortIcon from "@mui/icons-material/Sort";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/router";
 import React, { useEffect, useReducer } from "react";
-import type { DuplicateGroup } from "../services/dedup";
+import { deduceDuplicates, type DuplicateGroup } from "../services/dedup";
 import { useAppContext } from "../types/context";
 
 const Page: React.FC = () => {
@@ -16,15 +18,33 @@ const Page: React.FC = () => {
     const [state, dispatch] = useReducer(dedupReducer, initialDedupState);
 
     useEffect(() => {
+        // TODO: Remove me
         showNavBar(false);
-        console.log(dispatch);
-    }, []);
+
+        dispatch({ type: "analyze" });
+        void deduceDuplicates()
+            .then((duplicateGroups) =>
+                dispatch({ type: "analysisCompleted", duplicateGroups }),
+            )
+            .catch((e: unknown) => {
+                log.error("Failed to detect duplicates", e);
+                dispatch({ type: "analysisFailed" });
+            });
+    }, [showNavBar]);
 
     const contents = (() => {
         switch (state.status) {
             case undefined:
             case "analyzing":
                 return <Loading />;
+            case "analysisFailed":
+                return <LoadFailed />;
+            case "analysisCompleted":
+                if (state.duplicateGroups.length == 0) {
+                    return <NoDuplicatesFound />;
+                } else {
+                    return <Loading />;
+                }
             default:
                 return <Loading />;
         }
@@ -45,9 +65,9 @@ interface DedupState {
         | undefined
         | "analyzing"
         | "analysisFailed"
-        | "showingResults"
-        | "deleting"
-        | "deletionFailed";
+        | "analysisCompleted"
+        | "dedupe"
+        | "dedupeFailed";
     /**
      * Groups of duplicates.
      *
@@ -78,14 +98,14 @@ interface DedupState {
 type DedupAction =
     | { type: "analyze" }
     | { type: "analysisFailed" }
-    | { type: "analyzed"; duplicateGroups: DuplicateGroup[] }
+    | { type: "analysisCompleted"; duplicateGroups: DuplicateGroup[] }
     | { type: "changeSortOrder"; sortOrder: DedupState["sortOrder"] }
     | { type: "select"; index: number }
     | { type: "deselect"; index: number }
     | { type: "deselectAll" }
-    | { type: "dedup" }
-    | { type: "dedupCompleted" }
-    | { type: "dedupFailed" };
+    | { type: "dedupe" }
+    | { type: "dedupeCompleted" }
+    | { type: "dedupeFailed" };
 
 const initialDedupState: DedupState = {
     status: undefined,
@@ -100,6 +120,29 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
     action,
 ) => {
     switch (action.type) {
+        case "analyze":
+            return { ...state, status: "analyzing" };
+        case "analysisFailed":
+            return { ...state, status: "analysisFailed" };
+        case "analysisCompleted": {
+            const duplicateGroups = action.duplicateGroups;
+            const prunableCount = duplicateGroups.reduce(
+                (sum, { prunableCount }) => sum + prunableCount,
+                0,
+            );
+            const prunableSize = duplicateGroups.reduce(
+                (sum, { prunableSize }) => sum + prunableSize,
+                0,
+            );
+            return {
+                ...state,
+                status: "analysisCompleted",
+                duplicateGroups,
+                prunableCount,
+                prunableSize,
+            };
+        }
+
         default:
             return state;
     }
@@ -136,10 +179,22 @@ const Navbar: React.FC = () => {
     );
 };
 
-const Loading: React.FC = () => {
-    return (
-        <VerticallyCentered>
-            <ActivityIndicator />
-        </VerticallyCentered>
-    );
-};
+const Loading: React.FC = () => (
+    <CenteredFill>
+        <ActivityIndicator />
+    </CenteredFill>
+);
+
+const LoadFailed: React.FC = () => (
+    <CenteredFill>
+        <ActivityErrorIndicator />
+    </CenteredFill>
+);
+
+const NoDuplicatesFound: React.FC = () => (
+    <CenteredFill>
+        <Typography color="text.muted" sx={{ textAlign: "center" }}>
+            {pt("No duplicates")}
+        </Typography>
+    </CenteredFill>
+);
