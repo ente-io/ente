@@ -38,7 +38,10 @@ Future<String> generateOTPEntryHtml(
   BuildContext context,
 ) async {
   final qrBase64 = await generateQRImageBase64(code.rawData);
-
+  String notes = code.display.note;
+  if (notes.isNotEmpty) {
+    notes = '<p>Note: <b>$notes</b></p>';
+  }
   return '''
     <div class="otp-entry">
       <div>
@@ -48,6 +51,8 @@ Future<String> generateOTPEntryHtml(
         <p>Type: <b>${code.type.name}</b></p>
         <p>Algorithm: <b>${code.algorithm.name}</b></p>
         <p>Digits: <b>${code.digits}</b></p>
+        <p>Recovery Code: <b>${code.secret}</b></p>
+        $notes
       </div>
         <img src="data:image/png;base64,$qrBase64" alt="QR Code">
     </div>
