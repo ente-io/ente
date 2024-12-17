@@ -18,6 +18,7 @@ import * as Yup from "yup";
 import { appHomeRoute } from "../services/redirect";
 import { changeEmail, sendOTT } from "../services/user";
 import type { PageProps } from "../types/page";
+import { isHTTPErrorWithStatus } from "@/base/http";
 
 const Page: React.FC<PageProps> = () => {
     const router = useRouter();
@@ -71,7 +72,12 @@ const ChangeEmailForm: React.FC = () => {
             // }, 250);
         } catch (e) {
             log.error(e);
-            setFieldError("email", t("email_already_taken"));
+            setFieldError(
+                "email",
+                isHTTPErrorWithStatus(e, 403)
+                    ? t("email_already_taken")
+                    : t("generic_error"),
+            );
         }
         setLoading(false);
     };

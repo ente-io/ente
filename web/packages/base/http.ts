@@ -104,6 +104,12 @@ export const ensureOk = (res: Response) => {
 };
 
 /**
+ * Return true if this is a HTTP error with the given {@link httpStatus}.
+ */
+export const isHTTPErrorWithStatus = (e: unknown, httpStatus: number) =>
+    e instanceof HTTPError && e.res.status == httpStatus;
+
+/**
  * Return true if this is a HTTP "client" error.
  *
  * This is a convenience matcher to check if {@link e} is an instance of
