@@ -71,11 +71,10 @@ export interface RecoveryKey {
 export const sendOTT = async (email: string, purpose: "change" | undefined) =>
     ensureOk(
         await fetch(await apiURL("/users/ott"), {
-            headers: publicRequestHeaders(),
             method: "POST",
+            headers: publicRequestHeaders(),
             body: JSON.stringify({
                 email,
-                client: appName == "auth" ? "totp" : "web",
                 purpose: purpose ?? "",
             }),
         }),
@@ -189,14 +188,6 @@ export const changeEmail = async (email: string, ott: string) => {
             "X-Auth-Token": getToken(),
         },
     );
-};
-
-export const sendOTTForEmailChange = async (email: string) => {
-    await HTTPService.post(await apiURL("/users/ott"), {
-        email,
-        client: "web",
-        purpose: "change",
-    });
 };
 
 export const setupTwoFactor = async () => {
