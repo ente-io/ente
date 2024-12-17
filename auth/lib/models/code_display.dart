@@ -23,7 +23,7 @@ class CodeDisplay {
     this.tags = const [],
     this.note = '',
     this.position = 0,
-    this.iconSrc = 'ente',
+    this.iconSrc = '',
     this.iconID = '',
   });
 
