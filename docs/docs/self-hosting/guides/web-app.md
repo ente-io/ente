@@ -197,7 +197,6 @@ photos.yourdomain.com {
 auth.yourdomain.com {
     reverse_proxy http://localhost:3002
 }
-doesn't work. The
 # and so on ...
 ```
 
