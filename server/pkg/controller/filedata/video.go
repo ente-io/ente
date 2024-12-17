@@ -24,7 +24,7 @@ func (c *Controller) InsertVideoPreview(ctx *gin.Context, req *filedata.VidPrevi
 
 	bucketID := c.S3Config.GetBucketID(ente.PreviewVideo)
 	fileObjectKey := filedata.ObjectKey(req.FileID, fileOwnerID, ente.PreviewVideo, &req.ObjectID)
-	objectKey := filedata.ObjectMedata(req.FileID, fileOwnerID, ente.PreviewVideo, &req.ObjectID)
+	objectKey := filedata.ObjectMetadataKey(req.FileID, fileOwnerID, ente.PreviewVideo, &req.ObjectID)
 
 	if sizeErr := c.verifySize(bucketID, fileObjectKey, req.ObjectSize); sizeErr != nil {
 		return stacktrace.Propagate(sizeErr, "failed to validate size")

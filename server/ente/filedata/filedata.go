@@ -133,7 +133,7 @@ type Row struct {
 // S3FileMetadataObjectKey returns the object key for the metadata stored in the S3 bucket.
 func (r *Row) S3FileMetadataObjectKey() string {
 	if r.Type == ente.MlData || r.Type == ente.PreviewVideo {
-		return ObjectMedata(r.FileID, r.UserID, r.Type, r.ObjectID)
+		return ObjectMetadataKey(r.FileID, r.UserID, r.Type, r.ObjectID)
 	}
 	panic(fmt.Sprintf("S3FileMetadata should not be written for %s type", r.Type))
 }

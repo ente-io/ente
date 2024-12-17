@@ -35,7 +35,7 @@ func ObjectKey(fileID int64, ownerID int64, oType ente.ObjectType, id *string) s
 	}
 }
 
-func ObjectMedata(fileID int64, ownerID int64, oType ente.ObjectType, id *string) string {
+func ObjectMetadataKey(fileID int64, ownerID int64, oType ente.ObjectType, id *string) string {
 	switch oType {
 	case ente.PreviewVideo:
 		return fmt.Sprintf("%s_playlist", ObjectKey(fileID, ownerID, oType, id))

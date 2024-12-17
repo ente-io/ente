@@ -13,7 +13,7 @@ type VidPreviewRequest struct {
 
 func (r VidPreviewRequest) Validate() error {
 	if r.Playlist == "" || r.PlayListHeader == "" {
-		return ente.NewBadRequestWithMessage("playlist and playListNonce are required for preview video")
+		return ente.NewBadRequestWithMessage("playlist and playListHeader are required for preview video")
 	}
 	return nil
 }
