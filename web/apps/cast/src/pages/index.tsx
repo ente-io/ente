@@ -1,6 +1,6 @@
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
-import { styled } from "@mui/material";
+import { styled, Typography } from "@mui/material";
 import { PairingCode } from "components/PairingCode";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -64,9 +64,13 @@ export default function Index() {
     return (
         <Container>
             <img width={150} src="/images/ente.svg" />
-            <h1>
+            <Typography
+                variant="h2"
+                fontWeight="500"
+                sx={{ marginBlock: "2rem" }}
+            >
                 Enter this code on <b>Ente Photos</b> to pair this screen
-            </h1>
+            </Typography>
             {pairingCode ? <PairingCode code={pairingCode} /> : <Spinner />}
             <p>
                 Visit{" "}
@@ -86,10 +90,6 @@ const Container = styled("div")`
     justify-content: center;
     align-items: center;
     text-align: center;
-
-    h1 {
-        font-weight: normal;
-    }
 
     p {
         font-size: 1.2rem;

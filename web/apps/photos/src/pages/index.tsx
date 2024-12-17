@@ -144,11 +144,13 @@ export default function LandingPage() {
                     </MobileBox>
                     <DesktopBox>
                         <SideBox>
-                            {showLogin ? (
-                                <Login {...{ signUp, host }} />
-                            ) : (
-                                <SignUp {...{ router, login, host }} />
-                            )}
+                            <Box sx={{ maxWidth: "320px" }}>
+                                {showLogin ? (
+                                    <Login {...{ signUp, host }} />
+                                ) : (
+                                    <SignUp {...{ router, login, host }} />
+                                )}
+                            </Box>
                         </SideBox>
                     </DesktopBox>
                 </>

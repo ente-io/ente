@@ -12,6 +12,8 @@
     "ENTER_EMAIL": "أدخل عنوان البريد الإلكتروني",
     "EMAIL_ERROR": "أدخل بريد إلكتروني صالح",
     "required": "مطلوب",
+    "email_not_registered": "",
+    "email_already_registered": "",
     "EMAIL_SENT": "تم إرسال رمز التحقق إلى <a>{{email}}</a>",
     "CHECK_INBOX": "الرجاء التحقق من صندوق الوارد (والرسائل غير المرغوب فيها) لإكمال التحقق",
     "ENTER_OTT": "رمز التحقق",

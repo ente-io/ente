@@ -12,6 +12,8 @@
     "ENTER_EMAIL": "E-Mail-Adresse eingeben",
     "EMAIL_ERROR": "Geben Sie eine gültige E-Mail-Adresse ein",
     "required": "Erforderlich",
+    "email_not_registered": "",
+    "email_already_registered": "",
     "EMAIL_SENT": "Bestätigungscode an <a>{{email}}</a> gesendet",
     "CHECK_INBOX": "Bitte überprüfe deinen E-Mail-Posteingang (und Spam), um die Verifizierung abzuschließen",
     "ENTER_OTT": "Bestätigungscode",

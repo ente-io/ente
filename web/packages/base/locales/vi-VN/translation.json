@@ -12,6 +12,8 @@
     "ENTER_EMAIL": "Nhập địa chỉ email",
     "EMAIL_ERROR": "Nhập một email hợp lệ",
     "required": "bắt buộc",
+    "email_not_registered": "",
+    "email_already_registered": "",
     "EMAIL_SENT": "Mã xác minh đã được gửi đến <a>{{email}}</a>",
     "CHECK_INBOX": "Vui lòng kiểm tra hộp thư đến (và thư rác) để hoàn tất xác minh",
     "ENTER_OTT": "Mã xác minh",

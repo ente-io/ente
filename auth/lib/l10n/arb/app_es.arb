@@ -328,6 +328,10 @@
       }
     }
   },
+  "manualSort": "Personalizado",
+  "editOrder": "Editar orden",
+  "mostFrequentlyUsed": "Usados frecuentemente",
+  "mostRecentlyUsed": "Usados recientemente",
   "activeSessions": "Sesiones activas",
   "somethingWentWrongPleaseTryAgain": "Algo ha ido mal, por favor, inténtelo de nuevo",
   "thisWillLogYouOutOfThisDevice": "¡Esto cerrará la sesión de este dispositivo!",
@@ -449,6 +453,7 @@
   "unpinText": "Desanclar",
   "pinnedCodeMessage": "{code} ha sido anclado",
   "unpinnedCodeMessage": "{code} ha sido desanclado",
+  "pinned": "Anclado",
   "tags": "Etiquetas",
   "createNewTag": "Crear Nueva Etiqueta",
   "tag": "Etiqueta",
@@ -485,5 +490,12 @@
   "appLockNotEnabled": "Bloqueo de aplicación no activado",
   "appLockNotEnabledDescription": "Por favor, activa el bloqueo de aplicación desde Seguridad > Bloqueo de aplicación",
   "authToViewPasskey": "Por favor, autentícate para ver tu clave de acceso",
-  "appLockOfflineModeWarning": "Has elegido proceder sin copia de seguridad. Si olvidas el código de desbloqueo de la aplicación, se bloqueará el acceso a sus datos."
+  "appLockOfflineModeWarning": "Has elegido proceder sin copia de seguridad. Si olvidas el código de desbloqueo de la aplicación, se bloqueará el acceso a sus datos.",
+  "duplicateCodes": "Duplicar códigos",
+  "noDuplicates": "✨ No hay duplicados",
+  "youveNoDuplicateCodesThatCanBeCleared": "No tienes códigos duplicados que se puedan borrar",
+  "deduplicateCodes": "Desduplicar códigos",
+  "deselectAll": "Deseleccionar todo",
+  "selectAll": "Seleccionar todo",
+  "deleteDuplicates": "Eliminar duplicados"
 }

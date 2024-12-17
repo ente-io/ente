@@ -23,6 +23,7 @@ import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/photo_manager_util.dart";
 import "package:photos/utils/sqlite_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:synchronized/synchronized.dart';
 import 'package:tuple/tuple.dart';
 
 class LocalSyncService {
@@ -31,6 +32,7 @@ class LocalSyncService {
   late SharedPreferences _prefs;
   Completer<void>? _existingSync;
   late Debouncer _changeCallbackDebouncer;
+  final Lock _lock = Lock();
 
   static const kDbUpdationTimeKey = "db_updation_time";
   static const kHasCompletedFirstImportKey = "has_completed_firstImport";
@@ -77,50 +79,57 @@ class LocalSyncService {
     }
     _existingSync = Completer<void>();
     final int ownerID = Configuration.instance.getUserID()!;
-    final existingLocalFileIDs = await _db.getExistingLocalFileIDs(ownerID);
-    _logger.info("${existingLocalFileIDs.length} localIDs were discovered");
+    
+    // We use a lock to prevent synchronisation to occur while it is downloading
+    // as this introduces wrong entry in FilesDB due to race condition
+    // This is a fix for https://github.com/ente-io/ente/issues/4296
+    await _lock.synchronized(() async {
+      final existingLocalFileIDs = await _db.getExistingLocalFileIDs(ownerID);
+      _logger.info("${existingLocalFileIDs.length} localIDs were discovered");
 
-    final syncStartTime = DateTime.now().microsecondsSinceEpoch;
-    final lastDBUpdationTime = _prefs.getInt(kDbUpdationTimeKey) ?? 0;
-    final startTime = DateTime.now().microsecondsSinceEpoch;
-    if (lastDBUpdationTime != 0) {
-      await _loadAndStoreDiff(
-        existingLocalFileIDs,
-        fromTime: lastDBUpdationTime,
-        toTime: syncStartTime,
-      );
-    } else {
-      // Load from 0 - 01.01.2010
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.startedFirstGalleryImport));
-      var startTime = 0;
-      var toYear = 2010;
-      var toTime = DateTime(toYear).microsecondsSinceEpoch;
-      while (toTime < syncStartTime) {
+      final syncStartTime = DateTime.now().microsecondsSinceEpoch;
+      final lastDBUpdationTime = _prefs.getInt(kDbUpdationTimeKey) ?? 0;
+      final startTime = DateTime.now().microsecondsSinceEpoch;
+      if (lastDBUpdationTime != 0) {
+        await _loadAndStoreDiff(
+          existingLocalFileIDs,
+          fromTime: lastDBUpdationTime,
+          toTime: syncStartTime,
+        );
+      } else {
+        // Load from 0 - 01.01.2010
+        Bus.instance.fire(SyncStatusUpdate(SyncStatus.startedFirstGalleryImport));
+        var startTime = 0;
+        var toYear = 2010;
+        var toTime = DateTime(toYear).microsecondsSinceEpoch;
+        while (toTime < syncStartTime) {
+          await _loadAndStoreDiff(
+            existingLocalFileIDs,
+            fromTime: startTime,
+            toTime: toTime,
+          );
+          startTime = toTime;
+          toYear++;
+          toTime = DateTime(toYear).microsecondsSinceEpoch;
+        }
         await _loadAndStoreDiff(
           existingLocalFileIDs,
           fromTime: startTime,
-          toTime: toTime,
+          toTime: syncStartTime,
         );
-        startTime = toTime;
-        toYear++;
-        toTime = DateTime(toYear).microsecondsSinceEpoch;
       }
-      await _loadAndStoreDiff(
-        existingLocalFileIDs,
-        fromTime: startTime,
-        toTime: syncStartTime,
-      );
-    }
-    if (!hasCompletedFirstImport()) {
-      await _prefs.setBool(kHasCompletedFirstImportKey, true);
-      await _refreshDeviceFolderCountAndCover(isFirstSync: true);
-      _logger.fine("first gallery import finished");
-      Bus.instance
-          .fire(SyncStatusUpdate(SyncStatus.completedFirstGalleryImport));
-    }
-    final endTime = DateTime.now().microsecondsSinceEpoch;
-    final duration = Duration(microseconds: endTime - startTime);
-    _logger.info("Load took " + duration.inMilliseconds.toString() + "ms");
+      if (!hasCompletedFirstImport()) {
+        await _prefs.setBool(kHasCompletedFirstImportKey, true);
+        await _refreshDeviceFolderCountAndCover(isFirstSync: true);
+        _logger.fine("first gallery import finished");
+        Bus.instance
+            .fire(SyncStatusUpdate(SyncStatus.completedFirstGalleryImport));
+      }
+      final endTime = DateTime.now().microsecondsSinceEpoch;
+      final duration = Duration(microseconds: endTime - startTime);
+      _logger.info("Load took " + duration.inMilliseconds.toString() + "ms");
+    });
+
     _existingSync?.complete();
     _existingSync = null;
   }
@@ -238,6 +247,10 @@ class LocalSyncService {
     } else {
       return <String>[];
     }
+  }
+
+  Lock getLock() {
+    return _lock;
   }
 
   bool hasGrantedPermissions() {
