@@ -651,7 +651,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Usunąć udostępniony album?"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "Album zostanie usunięty dla wszystkich\n\nUtracisz dostęp do udostępnionych zdjęć w tym albumie, które są własnością innych osób"),
-        "descriptions": MessageLookupByLibrary.simpleMessage("Opisy"),
         "deselectAll": MessageLookupByLibrary.simpleMessage("Odznacz wszystko"),
         "designedToOutlive": MessageLookupByLibrary.simpleMessage(
             "Zaprojektowane do przetrwania"),

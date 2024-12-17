@@ -412,14 +412,15 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Kích thước lưới ảnh",
-  "manageDeviceStorage": "Quản lý lưu trữ thiết bị",
+  "manageDeviceStorage": "Manage device Cache",
+  "manageDeviceStorageDesc": "Review and clear local cache storage.",
   "machineLearning": "Học máy",
   "mlConsent": "Kích hoạt học máy",
   "mlConsentTitle": "Kích hoạt học máy?",
   "mlConsentDescription": "Nếu bạn kích hoạt học máy, Ente sẽ trích xuất thông tin như hình dạng khuôn mặt từ các tệp, bao gồm cả những tệp được chia sẻ với bạn.\n\nĐiều này sẽ xảy ra trên thiết bị của bạn, và bất kỳ thông tin sinh trắc học nào được tạo ra sẽ được mã hóa đầu cuối.",
   "mlConsentPrivacy": "Vui lòng nhấp vào đây để biết thêm chi tiết về tính năng này trong chính sách quyền riêng tư của chúng tôi",
   "mlConsentConfirmation": "Tôi hiểu và muốn kích hoạt học máy",
-  "magicSearch": "Tìm kiếm kỳ diệu",
+  "magicSearch": "Tìm kiếm ma thuật",
   "discover": "Khám phá",
   "@discover": {
     "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
@@ -816,7 +817,7 @@
   "referFriendsAnd2xYourPlan": "Giới thiệu bạn bè và gấp đôi gói của bạn",
   "shareAlbumHint": "Mở album và nhấn nút chia sẻ ở góc trên bên phải để chia sẻ.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Các mục cho biết số ngày còn lại trước khi xóa vĩnh viễn",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1 ngày} other {{count} ngày}}",
+  "trashDaysLeft": "{count, plural, =0 {Soon} =1 {1 day} other {{count} days}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1197,7 +1198,7 @@
   "searchHint2": "Ngày tháng, mô tả ảnh",
   "searchHint3": "Album, tên tệp và loại",
   "searchHint4": "Vị trí",
-  "searchHint5": "Sắp có: Nhận diện khuôn mặt & tìm kiếm kỳ diệu ✨",
+  "searchHint5": "Sắp có: Nhận diện khuôn mặt & tìm kiếm ma thuật ✨",
   "addYourPhotosNow": "Thêm ảnh của bạn ngay bây giờ",
   "searchResultCount": "{count, plural, one{{count} kết quả được tìm thấy} other{{count} kết quả được tìm thấy}}",
   "@searchResultCount": {
@@ -1233,6 +1234,7 @@
   "waitingForVerification": "Đang chờ xác minh...",
   "passkey": "Mã khóa",
   "passkeyAuthTitle": "Xác minh mã khóa",
+  "loginWithTOTP": "Login with TOTP",
   "passKeyPendingVerification": "Xác minh vẫn đang chờ",
   "loginSessionExpired": "Phiên đăng nhập đã hết hạn",
   "loginSessionExpiredDetails": "Phiên đăng nhập của bạn đã hết hạn. Vui lòng đăng nhập lại.",
@@ -1312,8 +1314,8 @@
   "enable": "Bật",
   "enabled": "Đã bật",
   "moreDetails": "Thêm chi tiết",
-  "enableMLIndexingDesc": "Ente hỗ trợ học máy trên thiết bị cho nhận diện khuôn mặt, tìm kiếm kỳ diệu và các tính năng tìm kiếm nâng cao khác",
-  "magicSearchHint": "Tìm kiếm kỳ diệu cho phép tìm kiếm ảnh theo nội dung của chúng, ví dụ: 'hoa', 'xe hơi đỏ', 'tài liệu nhận dạng'",
+  "enableMLIndexingDesc": "Ente hỗ trợ học máy trên thiết bị cho nhận diện khuôn mặt, tìm kiếm ma thuật và các tính năng tìm kiếm nâng cao khác",
+  "magicSearchHint": "Tìm kiếm ma thuật cho phép tìm kiếm ảnh theo nội dung của chúng, ví dụ: 'hoa', 'xe hơi đỏ', 'tài liệu nhận dạng'",
   "panorama": "Toàn cảnh",
   "reenterPassword": "Nhập lại mật khẩu",
   "reenterPin": "Nhập lại PIN",
@@ -1380,7 +1382,7 @@
   "yesResetPerson": "Có, đặt lại người",
   "onlyThem": "Chỉ họ",
   "checkingModels": "Đang kiểm tra các mô hình...",
-  "enableMachineLearningBanner": "Bật học máy cho tìm kiếm kỳ diệu và nhận diện khuôn mặt",
+  "enableMachineLearningBanner": "Bật học máy cho tìm kiếm ma thuật và nhận diện khuôn mặt",
   "searchDiscoverEmptySection": "Hình ảnh sẽ được hiển thị ở đây khi quá trình xử lý hoàn tất",
   "searchPersonsEmptySection": "Người sẽ được hiển thị ở đây khi quá trình xử lý hoàn tất",
   "viewersSuccessfullyAdded": "{count, plural, =0 {Đã thêm 0 người xem} =1 {Đã thêm 1 người xem} other {Đã thêm {count} người xem}}",
@@ -1452,13 +1454,66 @@
   "imageNotAnalyzed": "Hình ảnh chưa được phân tích",
   "noFacesFound": "Không tìm thấy khuôn mặt",
   "fileNotUploadedYet": "Tệp chưa được tải lên",
-  "faceNotClusteredYet": "Face not clustered yet, please come back later",
-  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
-  "openFile": "Open file",
-  "backupFile": "Backup file",
-  "openAlbumInBrowser": "Open album in browser",
-  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
-  "allow": "Allow",
-  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
-  "seePublicAlbumLinksInApp": "See public album links in app"
+  "noSuggestionsForPerson": "Không có gợi ý cho {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "tháng",
+  "yearShort": "năm",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "đang chạy",
+  "ignored": "bỏ qua",
+  "photosCount": "{count, plural, =0 {không có hình ảnh} =1 {1 hình ảnh} other {{count} hình ảnh}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "file": "Tệp",
+  "searchSectionsLengthMismatch": "Chiều dài các phần không khớp: {snapshotLenght} != {searchLenght}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLenght": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLenght": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "selectMailApp": "Chọn ứng dụng email",
+  "selectAllShort": "Tất cả",
+  "@selectAllShort": {
+    "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
+  },
+  "changeLogMagicSearchImprovementTitle": "Cải tiến Tìm kiếm Ma thuật",
+  "changeLogMagicSearchImprovementContent": "Chúng tôi đã cải tiến tìm kiếm ma thuật để nhanh hơn rất nhiều, vì vậy bạn không phải chờ đợi để tìm những gì bạn đang tìm kiếm.",
+  "changeLogBackupStatusTitle": "Trạng thái Sao lưu",
+  "changeLogBackupStatusContent": "Chúng tôi đã thêm một nhật ký của tất cả các tệp đã được tải lên Ente, bao gồm cả các tệp thất bại và đang chờ xử lý.",
+  "changeLogDiscoverTitle": "Khám Phá",
+  "changeLogDiscoverContent": "Bạn đang tìm kiếm ảnh thẻ ID, ghi chú, hoặc thậm chí là meme? Hãy đến tab tìm kiếm và kiểm tra Khám Phá. Dựa trên tìm kiếm ngữ nghĩa của chúng tôi, đây là nơi để tìm những bức ảnh có thể quan trọng với bạn.\\n\\nChỉ có sẵn nếu bạn đã bật Học máy.",
+  "selectCoverPhoto": "Chọn ảnh bìa",
+  "newLocation": "Vị trí mới",
+  "faceNotClusteredYet": "Khuôn mặt chưa được phân cụm, vui lòng quay lại sau",
+  "theLinkYouAreTryingToAccessHasExpired": "Liên kết bạn đang cố gắng truy cập đã hết hạn.",
+  "openFile": "Mở tệp",
+  "backupFile": "Tệp sao lưu",
+  "openAlbumInBrowser": "Mở album trong trình duyệt",
+  "openAlbumInBrowserTitle": "Vui lòng sử dụng ứng dụng web để thêm ảnh vào album này",
+  "allow": "Cho phép",
+  "allowAppToOpenSharedAlbumLinks": "Cho phép ứng dụng mở liên kết album chia sẻ",
+  "seePublicAlbumLinksInApp": "Xem liên kết album công khai trong ứng dụng"
 }

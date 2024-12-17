@@ -18,7 +18,7 @@ import "package:photos/ui/viewer/gallery/collect_photos_bottom_buttons.dart";
 import "package:photos/ui/viewer/gallery/empty_album_state.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
-import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
 import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
@@ -130,7 +130,7 @@ class CollectionPage extends StatelessWidget {
                   c.collection,
                   selectedFiles: _selectedFiles,
                 )
-              : const SizedBox.shrink(),
+              : null,
           body: SelectionState(
             selectedFiles: _selectedFiles,
             child: Stack(

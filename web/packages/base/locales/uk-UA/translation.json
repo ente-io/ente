@@ -637,7 +637,7 @@
     "check_status": "Перевірити стан",
     "passkey_login_instructions": "Виконайте кілька кроків з вашого браузера для продовження входу.",
     "passkey_login": "Увійти за допомогою ключ доступу",
-    "totp_login": "",
+    "totp_login": "Увійти за допомогою TOTP",
     "passkey": "Ключ доступу",
     "passkey_verify_description": "Підтвердьте свій ключ доступу для входу в обліковий запис.",
     "waiting_for_verification": "Очікується підтвердження...",

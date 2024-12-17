@@ -156,6 +156,7 @@
   "twoFactorAuthTitle": "Двофакторна аутентифікація",
   "passkeyAuthTitle": "Перевірка секретного ключа",
   "verifyPasskey": "Підтвердження секретного ключа",
+  "loginWithTOTP": "Увійти за допомогою TOTP",
   "recoverAccount": "Відновити обліковий запис",
   "enterRecoveryKeyHint": "Введіть ваш ключ відновлення",
   "recover": "Відновлення",

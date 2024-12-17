@@ -2743,9 +2743,9 @@ levn@^0.4.1:
     type-check "~0.4.0"
 
 libheif-js@^1.17.1:
-  version "1.18.0"
-  resolved "https://registry.yarnpkg.com/libheif-js/-/libheif-js-1.18.0.tgz#fa1b23ec0d4e3d01a9bc78bf69fd9c19cac9b579"
-  integrity sha512-C/MaC0mYd3b2u21Hp76FoR8JDexwRjCZyJhdPMmzjdFnNyBkk6NQXyu9XaTl31GcT/xBR/y7mSPeg62CzyLxkg==
+  version "1.18.2"
+  resolved "https://registry.yarnpkg.com/libheif-js/-/libheif-js-1.18.2.tgz#4ec1af720101704ed6d038f971a3c60b06ad1e03"
+  integrity sha512-4Nk0dKhhRfVS4mECcX2jSDpNU6gcHQLneJjkGQq61N8COGtjSpSA3CI+1Q3kUYv5Vf+SwIqUtaDSdU6JO37c6w==
 
 libsodium-sumo@^0.7.15:
   version "0.7.15"

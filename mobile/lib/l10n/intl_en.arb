@@ -412,7 +412,8 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Photo grid size",
-  "manageDeviceStorage": "Manage device storage",
+  "manageDeviceStorage": "Manage device Cache",
+  "manageDeviceStorageDesc": "Review and clear local cache storage.",
   "machineLearning": "Machine learning",
   "mlConsent": "Enable machine learning",
   "mlConsentTitle": "Enable machine learning?",
@@ -1245,7 +1246,6 @@
   "deviceCodeHint": "Enter the code",
   "joinDiscord": "Join Discord",
   "locations": "Locations",
-  "descriptions": "Descriptions",
   "addAName": "Add a name",
   "findThemQuickly": "Find them quickly",
   "@findThemQuickly": {

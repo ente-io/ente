@@ -18,6 +18,7 @@ import "package:photos/ui/components/menu_section_description_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
+import "package:photos/ui/tools/debug/app_storage_viewer.dart";
 import "package:photos/ui/tools/deduplicate_page.dart";
 import "package:photos/ui/tools/free_space_page.dart";
 import "package:photos/ui/viewer/gallery/large_files_page.dart";
@@ -71,6 +72,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 20),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Column(
                           children: [
@@ -207,6 +209,35 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                 ),
                                 MenuSectionDescriptionWidget(
                                   content: S.of(context).viewLargeFilesDesc,
+                                ),
+                                const SizedBox(
+                                  height: 24,
+                                ),
+                                MenuItemWidget(
+                                  captionedTextWidget: CaptionedTextWidget(
+                                    title: S.of(context).manageDeviceStorage,
+                                  ),
+                                  menuItemColor: colorScheme.fillFaint,
+                                  trailingWidget: Icon(
+                                    Icons.chevron_right_outlined,
+                                    color: colorScheme.strokeBase,
+                                  ),
+                                  singleBorderRadius: 8,
+                                  alignCaptionedTextToLeft: true,
+                                  onTap: () async {
+                                    // ignore: unawaited_futures
+                                    routeToPage(
+                                      context,
+                                      const AppStorageViewer(),
+                                    );
+                                  },
+                                ),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: MenuSectionDescriptionWidget(
+                                    content:
+                                        S.of(context).manageDeviceStorageDesc,
+                                  ),
                                 ),
                               ],
                             ),

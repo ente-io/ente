@@ -6,7 +6,7 @@
   "@counterAppBarTitle": {
     "description": "Text shown in the AppBar of the Counter Page"
   },
-  "onBoardingBody": "Saugiai kurkite atsargines 2FA kodų kopijas",
+  "onBoardingBody": "Saugiai kurkite savo atsargines 2FA kodų kopijas",
   "onBoardingGetStarted": "Pradėti",
   "setupFirstAccount": "Nustatykite savo pirmąją paskyrą",
   "importScanQrCode": "Skenuoti QR kodą",
@@ -154,8 +154,9 @@
   "enterCodeHint": "Įveskite 6 skaitmenų kodą\niš autentifikatoriaus programos",
   "lostDeviceTitle": "Prarastas įrenginys?",
   "twoFactorAuthTitle": "Dvigubas tapatybės nustatymas",
-  "passkeyAuthTitle": "Slaptarakto patvirtinimas",
-  "verifyPasskey": "Patvirtinti slaptaraktą",
+  "passkeyAuthTitle": "Slaptarakčio patvirtinimas",
+  "verifyPasskey": "Patvirtinti slaptaraktį",
+  "loginWithTOTP": "Prisijungti su TOTP",
   "recoverAccount": "Atkurti paskyrą",
   "enterRecoveryKeyHint": "Įveskite atkūrimo raktą",
   "recover": "Atkurti",
@@ -299,7 +300,7 @@
   },
   "authToExportCodes": "Nustatykite tapatybę, kad eksportuotumėte savo kodus",
   "importSuccessTitle": "Valio!",
-  "importSuccessDesc": "Importavote {count} kodų.",
+  "importSuccessDesc": "Importavote {count} kodus (-ų).",
   "@importSuccessDesc": {
     "placeholders": {
       "count": {
@@ -313,10 +314,10 @@
   "importFailureDesc": "Nepavyko išanalizuoti pasirinkto failo.\nJei reikia pagalbos, rašykite adresu support@ente.io.",
   "pendingSyncs": "Įspėjimas",
   "pendingSyncsWarningBody": "Kai kurių jūsų kodų atsarginės kopijos nebuvo sukurtos.\n\nPrieš atsijungdami įsitikinkite, kad turite atsarginę šių kodų kopiją.",
-  "checkInboxAndSpamFolder": "Patikrinkite savo gautieją (ir šlamštą), kad užbaigtumėte patvirtinimą",
+  "checkInboxAndSpamFolder": "Patikrinkite savo gautieją (ir šlamštą), kad užbaigtumėte patvirtinimą.",
   "tapToEnterCode": "Palieskite, kad įvestumėte kodą",
   "resendEmail": "Iš naujo siųsti el. laišką",
-  "weHaveSendEmailTo": "Išsiuntėme laišką adresu <green>{email}</green>",
+  "weHaveSendEmailTo": "Išsiuntėme laišką adresu <green>{email}</green>.",
   "@weHaveSendEmailTo": {
     "description": "Text to indicate that we have sent a mail to the user",
     "placeholders": {
@@ -337,12 +338,12 @@
   "toResetVerifyEmail": "Kad iš naujo nustatytumėte slaptažodį, pirmiausia patvirtinkite savo el. paštą.",
   "thisEmailIsAlreadyInUse": "Šis el. paštas jau naudojamas.",
   "verificationFailedPleaseTryAgain": "Patvirtinimas nepavyko. Bandykite dar kartą.",
-  "yourVerificationCodeHasExpired": "Jūsų patvirtinimo kodo laikas nebegaliojantis.",
+  "yourVerificationCodeHasExpired": "Jūsų patvirtinimo kodas nebegaliojantis.",
   "incorrectCode": "Neteisingas kodas",
   "sorryTheCodeYouveEnteredIsIncorrect": "Atsiprašome, įvestas kodas yra neteisingas.",
   "emailChangedTo": "El. paštas pakeistas į {newEmail}",
   "authenticationFailedPleaseTryAgain": "Tapatybės nustatymas nepavyko. Bandykite dar kartą.",
-  "authenticationSuccessful": "Tapatybės nustatymas sėkmingas!",
+  "authenticationSuccessful": "Tapatybės nustatymas sėkmingas.",
   "twofactorAuthenticationSuccessfullyReset": "Dvigubas tapatybės nustatymas sėkmingai iš naujo nustatytas.",
   "incorrectRecoveryKey": "Neteisingas atkūrimo raktas",
   "theRecoveryKeyYouEnteredIsIncorrect": "Įvestas atkūrimo raktas yra neteisingas.",
@@ -433,7 +434,7 @@
   "recoveryKeySaved": "Atkūrimo raktas išsaugotas atsisiuntimų aplanke.",
   "waitingForBrowserRequest": "Laukiama naršyklės užklausos...",
   "waitingForVerification": "Laukiama patvirtinimo...",
-  "passkey": "Slaptaraktas",
+  "passkey": "Slaptaraktis",
   "passKeyPendingVerification": "Vis dar laukiama patvirtinimo",
   "loginSessionExpired": "Seansas baigėsi",
   "loginSessionExpiredDetails": "Jūsų seansas baigėsi. Prisijunkite iš naujo.",
@@ -473,9 +474,9 @@
   "setNewPassword": "Nustatykite naują slaptažodį",
   "deviceLock": "Įrenginio užraktas",
   "hideContent": "Slėpti turinį",
-  "hideContentDescriptionAndroid": "Paslepia programų turinį programų perjungiklyje ir išjungia ekrano kopijas",
-  "hideContentDescriptioniOS": "Paslepia programos turinį programos perjungiklyje",
-  "autoLockFeatureDescription": "Laikas, po kurio programa užrakinama perkėlus ją į foną",
+  "hideContentDescriptionAndroid": "Paslepia programų turinį programų perjungiklyje ir išjungia ekrano kopijas.",
+  "hideContentDescriptioniOS": "Paslepia programos turinį programos perjungiklyje.",
+  "autoLockFeatureDescription": "Laikas, po kurio programa užrakinama perkėlus ją į foną.",
   "appLockDescription": "Pasirinkite tarp numatytojo įrenginio užrakinimo ekrano ir pasirinktinio užrakinimo ekrano su PIN kodu arba slaptažodžiu.",
   "pinLock": "PIN užraktas",
   "enterPin": "Įveskite PIN",
@@ -483,6 +484,6 @@
   "importFailureDescNew": "Nepavyko išanalizuoti pasirinkto failo.",
   "appLockNotEnabled": "Programos užraktas neįjungtas",
   "appLockNotEnabledDescription": "Įjunkite programos užraktą iš Saugumas > Programos užraktas",
-  "authToViewPasskey": "Nustatykite tapatybę, kad peržiūrėtumėte slaptaraktą",
+  "authToViewPasskey": "Nustatykite tapatybę, kad peržiūrėtumėte slaptaraktį",
   "appLockOfflineModeWarning": "Pasirinkote tęsti be atsarginių kopijų. Jei pamiršite programos užraktą, jums bus užrakinta prieiga prie duomenų."
 }

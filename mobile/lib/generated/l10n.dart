@@ -2896,11 +2896,21 @@ class S {
     );
   }
 
-  /// `Manage device storage`
+  /// `Manage device Cache`
   String get manageDeviceStorage {
     return Intl.message(
-      'Manage device storage',
+      'Manage device Cache',
       name: 'manageDeviceStorage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review and clear local cache storage.`
+  String get manageDeviceStorageDesc {
+    return Intl.message(
+      'Review and clear local cache storage.',
+      name: 'manageDeviceStorageDesc',
       desc: '',
       args: [],
     );
@@ -8834,16 +8844,6 @@ class S {
     return Intl.message(
       'Locations',
       name: 'locations',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Descriptions`
-  String get descriptions {
-    return Intl.message(
-      'Descriptions',
-      name: 'descriptions',
       desc: '',
       args: [],
     );
