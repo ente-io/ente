@@ -46,6 +46,7 @@ dependencies:
   dots_indicator: ^2.0.0
   dotted_border: ^2.1.0
   dropdown_button2: ^2.0.0
+  el_tooltip: ^2.2.1
   email_validator: ^2.0.1
   ente_cast:
     path: plugins/ente_cast

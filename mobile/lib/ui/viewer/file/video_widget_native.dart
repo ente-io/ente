@@ -1,13 +1,16 @@
 import "dart:async";
 import "dart:io";
 
+import "package:el_tooltip/el_tooltip.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:native_video_player/native_video_player.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/pause_video_event.dart";
+import "package:photos/events/use_media_kit_for_video.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -62,6 +65,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   final _showControls = ValueNotifier(true);
   final _isSeeking = ValueNotifier(false);
   final _debouncer = Debouncer(const Duration(milliseconds: 2000));
+  final _elTooltipController = ElTooltipController();
 
   @override
   void initState() {
@@ -150,6 +154,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _isSeeking.removeListener(_seekListener);
     _isSeeking.dispose();
     _debouncer.cancelDebounceTimer();
+    _elTooltipController.dispose();
     super.dispose();
   }
 
@@ -202,6 +207,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                         behavior: HitTestBehavior.opaque,
                         onTap: () {
                           _showControls.value = !_showControls.value;
+                          _elTooltipController.hide();
                           if (widget.playbackCallback != null) {
                             widget.playbackCallback!(!_showControls.value);
                           }
@@ -210,6 +216,25 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                           constraints: const BoxConstraints.expand(),
                         ),
                       ),
+                      Platform.isAndroid
+                          ? Positioned(
+                              bottom: verticalMargin,
+                              right: 0,
+                              child: SafeArea(
+                                child: GestureDetector(
+                                  onLongPress: () {
+                                    Bus.instance.fire(UseMediaKitForVideo());
+                                    HapticFeedback.vibrate();
+                                  },
+                                  child: Container(
+                                    width: 100,
+                                    height: 180,
+                                    color: Colors.transparent,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                       Positioned.fill(
                         child: Center(
                           child: ValueListenableBuilder(
@@ -248,18 +273,108 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                             padding: EdgeInsets.only(
                               bottom: widget.isFromMemories ? 32 : 0,
                             ),
-                            child: ValueListenableBuilder(
-                              valueListenable: _isPlaybackReady,
-                              builder: (BuildContext context, bool value, _) {
-                                return value
-                                    ? _SeekBarAndDuration(
-                                        controller: _controller,
-                                        duration: duration,
-                                        showControls: _showControls,
-                                        isSeeking: _isSeeking,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Platform.isAndroid
+                                    ? ValueListenableBuilder(
+                                        valueListenable: _showControls,
+                                        builder: (context, value, _) {
+                                          return AnimatedOpacity(
+                                            duration: const Duration(
+                                              milliseconds: 200,
+                                            ),
+                                            curve: Curves.easeInQuad,
+                                            opacity: value ? 1 : 0,
+                                            child: ElTooltip(
+                                              padding: const EdgeInsets.all(12),
+                                              distance: 4,
+                                              controller: _elTooltipController,
+                                              content: GestureDetector(
+                                                onLongPress: () {
+                                                  Bus.instance.fire(
+                                                    UseMediaKitForVideo(),
+                                                  );
+                                                  HapticFeedback.vibrate();
+                                                  _elTooltipController.hide();
+                                                },
+                                                child: const Text(
+                                                  "Trouble playing video? Long press here to use different player.",
+                                                ),
+                                              ),
+                                              position:
+                                                  ElTooltipPosition.topEnd,
+                                              color: backgroundElevatedDark,
+                                              appearAnimationDuration:
+                                                  const Duration(
+                                                milliseconds: 200,
+                                              ),
+                                              disappearAnimationDuration:
+                                                  const Duration(
+                                                milliseconds: 200,
+                                              ),
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  if (_elTooltipController
+                                                          .value ==
+                                                      ElTooltipStatus.hidden) {
+                                                    _elTooltipController.show();
+                                                  } else {
+                                                    _elTooltipController.hide();
+                                                  }
+                                                  _controller?.pause();
+                                                },
+                                                behavior:
+                                                    HitTestBehavior.translucent,
+                                                onLongPress: () {
+                                                  Bus.instance.fire(
+                                                    UseMediaKitForVideo(),
+                                                  );
+                                                  HapticFeedback.vibrate();
+                                                },
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.fromLTRB(
+                                                    12,
+                                                    0,
+                                                    0,
+                                                    4,
+                                                  ),
+                                                  child: Container(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                      12,
+                                                    ),
+                                                    child: Icon(
+                                                      Icons
+                                                          .question_mark_rounded,
+                                                      size: 16,
+                                                      color: Colors.white
+                                                          .withOpacity(0.15),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        },
                                       )
-                                    : const SizedBox();
-                              },
+                                    : const SizedBox.shrink(),
+                                ValueListenableBuilder(
+                                  valueListenable: _isPlaybackReady,
+                                  builder:
+                                      (BuildContext context, bool value, _) {
+                                    return value
+                                        ? _SeekBarAndDuration(
+                                            controller: _controller,
+                                            duration: duration,
+                                            showControls: _showControls,
+                                            isSeeking: _isSeeking,
+                                          )
+                                        : const SizedBox();
+                                  },
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -350,6 +465,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       "Error in native video player controller for file gen id: ${widget.file.generatedID}",
     );
     _logger.severe(_controller!.onError.value);
+    Bus.instance.fire(UseMediaKitForVideo());
   }
 
   Future<void> _onPlaybackReady() async {

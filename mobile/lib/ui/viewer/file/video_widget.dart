@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/use_media_kit_for_video.dart";
 import "package:photos/models/file/file.dart";
@@ -23,6 +24,7 @@ class VideoWidget extends StatefulWidget {
 }
 
 class _VideoWidgetState extends State<VideoWidget> {
+  final _logger = Logger("VideoWidget");
   bool useNativeVideoPlayer = true;
   late final StreamSubscription<UseMediaKitForVideo>
       useMediaKitForVideoSubscription;
@@ -32,6 +34,7 @@ class _VideoWidgetState extends State<VideoWidget> {
     super.initState();
     useMediaKitForVideoSubscription =
         Bus.instance.on<UseMediaKitForVideo>().listen((event) {
+      _logger.info("Switching to MediaKit for video playback");
       setState(() {
         useNativeVideoPlayer = false;
       });
