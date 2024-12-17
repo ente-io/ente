@@ -66,5 +66,13 @@ export interface DuplicateGroup {
  */
 export const deduceDuplicates = async () => {
     await wait(1000);
-    return [];
+    return [
+        {
+            items: [],
+            itemSize: 0,
+            prunableCount: 0,
+            prunableSize: 0,
+            isSelected: true,
+        },
+    ];
 };

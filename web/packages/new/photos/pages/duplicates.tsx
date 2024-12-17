@@ -1,6 +1,7 @@
 import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { CenteredFill } from "@/base/components/mui/Container";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -9,6 +10,7 @@ import SortIcon from "@mui/icons-material/Sort";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/router";
 import React, { useEffect, useReducer } from "react";
+import Autosizer from "react-virtualized-auto-sizer";
 import { deduceDuplicates, type DuplicateGroup } from "../services/dedup";
 import { useAppContext } from "../types/context";
 
@@ -43,7 +45,7 @@ const Page: React.FC = () => {
                 if (state.duplicateGroups.length == 0) {
                     return <NoDuplicatesFound />;
                 } else {
-                    return <Loading />;
+                    return <Duplicates />;
                 }
             default:
                 return <Loading />;
@@ -198,3 +200,34 @@ const NoDuplicatesFound: React.FC = () => (
         </Typography>
     </CenteredFill>
 );
+
+const Duplicates: React.FC = () => {
+    return (
+        <Stack sx={{ flex: 1 }}>
+            <Box sx={{ flex: 1, overflow: "hidden" }}>
+                <Autosizer>
+                    {({ height, width }) => (
+                        <Box
+                            sx={{
+                                width,
+                                height,
+                                border: "1px solid red",
+                                fontSize: "4rem",
+                            }}
+                        >
+                            <div>1</div>
+                            <div>1</div>
+                            <div>1</div>
+                            <div>1</div>
+                            <div>1</div>
+                            <div>1</div>
+                        </Box>
+                    )}
+                </Autosizer>
+            </Box>
+            <Box>
+                <FocusVisibleButton>Test</FocusVisibleButton>
+            </Box>
+        </Stack>
+    );
+};
