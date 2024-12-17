@@ -48,7 +48,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             return;
         }
         if (!user?.encryptedToken && !user?.token) {
-            void sendOTT(user.email, "login");
+            void sendOTT(user.email, undefined);
             stashRedirect(PAGES.RECOVER);
             void router.push(PAGES.VERIFY);
             return;
