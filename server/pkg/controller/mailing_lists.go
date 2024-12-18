@@ -140,11 +140,7 @@ func (c *MailingListsController) Unsubscribe(email string) error {
 // shouldSkipZoho() checks if the MailingListsController
 // should be skipped due to missing credentials.
 func (c *MailingListsController) shouldSkipZoho() bool {
-	if c.zohoCredentials.RefreshToken == "" {
-		// Skip
-		return true
-	}
-	return false
+	return c.zohoCredentials.RefreshToken == ""
 }
 
 // shouldSkipListmonk() checks if the Listmonk mailing list

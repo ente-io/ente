@@ -77,7 +77,7 @@ import {
     clearKeys,
     getKey,
 } from "@ente/shared/storage/sessionStorage";
-import ArrowBack from "@mui/icons-material/ArrowBack";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import type { ButtonProps, IconButtonProps } from "@mui/material";
@@ -1181,7 +1181,7 @@ const HiddenSectionNavbarContents: React.FC<
         }}
     >
         <IconButton onClick={onBack}>
-            <ArrowBack />
+            <ArrowBackIcon />
         </IconButton>
         <FlexWrapper>
             <Typography>{t("section_hidden")}</Typography>

@@ -40,6 +40,10 @@ export const sidebar = [
                     },
                     { text: "Hidden photos", link: "/photos/features/hide" },
                     {
+                        text: "Legacy",
+                        link: "/photos/features/legacy/",
+                    },
+                    {
                         text: "Location tags",
                         link: "/photos/features/location-tags",
                     },

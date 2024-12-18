@@ -446,8 +446,6 @@
   "customEndpoint": "Connectat a {endpoint}",
   "pinText": "Fixa",
   "unpinText": "Desfixa",
-  "pinnedCodeMessage": "{code} fixat",
-  "unpinnedCodeMessage": "{code} deixat de fixar",
   "tags": "Etiquetes",
   "createNewTag": "Crea una nova etiqueta",
   "tag": "Etiqueta",

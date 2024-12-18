@@ -4,6 +4,7 @@ import {
     FormPaperTitle,
 } from "@/base/components/FormPaper";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
+import { isHTTPErrorWithStatus } from "@/base/http";
 import log from "@/base/log";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
@@ -16,7 +17,7 @@ import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";
 import { appHomeRoute } from "../services/redirect";
-import { changeEmail, sendOTTForEmailChange } from "../services/user";
+import { changeEmail, sendOTT } from "../services/user";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = () => {
@@ -60,7 +61,7 @@ const ChangeEmailForm: React.FC = () => {
     ) => {
         try {
             setLoading(true);
-            await sendOTTForEmailChange(email);
+            await sendOTT(email, "change");
             setEmail(email);
             setShowOttInputVisibility(true);
             setShowMessage(true);
@@ -71,7 +72,12 @@ const ChangeEmailForm: React.FC = () => {
             // }, 250);
         } catch (e) {
             log.error(e);
-            setFieldError("email", t("email_already_taken"));
+            setFieldError(
+                "email",
+                isHTTPErrorWithStatus(e, 403)
+                    ? t("email_already_taken")
+                    : t("generic_error"),
+            );
         }
         setLoading(false);
     };

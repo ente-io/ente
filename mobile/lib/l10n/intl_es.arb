@@ -184,7 +184,7 @@
     "description": "Switch button to enable uploading photos to a public link"
   },
   "allowAddPhotosDescription": "Permitir a las personas con el enlace añadir fotos al álbum compartido.",
-  "passwordLock": "Bloqueo por contraseña",
+  "passwordLock": "Bloqueo con contraseña",
   "disableDownloadWarningTitle": "Por favor, ten en cuenta",
   "disableDownloadWarningBody": "Los espectadores todavía pueden tomar capturas de pantalla o guardar una copia de tus fotos usando herramientas externas",
   "allowDownloads": "Permitir descargas",
@@ -477,7 +477,7 @@
   "backupStatusDescription": "Los elementos con copia seguridad aparecerán aquí",
   "backupOverMobileData": "Copia de seguridad usando datos móviles",
   "backupVideos": "Copia de seguridad de vídeos",
-  "disableAutoLock": "Desactivar autobloqueo",
+  "disableAutoLock": "Desactivar bloqueo automático",
   "deviceLockExplanation": "Deshabilita el bloqueo de pantalla del dispositivo cuando Ente está en primer plano y haya una copia de seguridad en curso. Normalmente esto no es necesario, pero puede ayudar a que las grandes cargas y las importaciones iniciales de grandes bibliotecas se completen más rápido.",
   "about": "Acerca de",
   "weAreOpenSource": "¡Somos de código abierto!",
@@ -1109,7 +1109,7 @@
   "@androidCancelButton": {
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
   },
-  "androidSignInTitle": "Autentificación requerida",
+  "androidSignInTitle": "Se necesita autenticación biométrica",
   "@androidSignInTitle": {
     "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
   },
@@ -1229,7 +1229,7 @@
   "selectALocationFirst": "Primero, selecciona una ubicación",
   "changeLocationOfSelectedItems": "¿Cambiar la ubicación de los elementos seleccionados?",
   "editsToLocationWillOnlyBeSeenWithinEnte": "Las ediciones a la ubicación sólo se verán dentro de Ente",
-  "cleanUncategorized": "Limpiar no categorizado",
+  "cleanUncategorized": "Limpiar sin categorizar",
   "cleanUncategorizedDescription": "Elimina todos los archivos de Sin categorizar que están presentes en otros álbumes",
   "waitingForVerification": "Esperando verificación...",
   "passkey": "Clave de acceso",
@@ -1246,7 +1246,6 @@
   "deviceCodeHint": "Introduce el código",
   "joinDiscord": "Únete al Discord",
   "locations": "Ubicaciones",
-  "descriptions": "Descripciones",
   "addAName": "Añade un nombre",
   "findThemQuickly": "Encuéntralos rápidamente",
   "@findThemQuickly": {
@@ -1319,8 +1318,8 @@
   "panorama": "Panorama",
   "reenterPassword": "Rescribe tu contraseña",
   "reenterPin": "Rescribe tu PIN",
-  "deviceLock": "Dispositivo Bloqueado",
-  "pinLock": "PIN Bloqueado",
+  "deviceLock": "Bloqueo del dispositivo",
+  "pinLock": "Bloqueo con Pin",
   "next": "Siguiente",
   "setNewPassword": "Ingresa tu nueva contraseña",
   "enterPin": "Ingresa tu contraseña",
@@ -1330,7 +1329,7 @@
   "tapToUnlock": "Toca para desbloquear",
   "tooManyIncorrectAttempts": "Demasiados intentos incorrectos",
   "videoInfo": "Información de video",
-  "autoLock": "Autobloqueo",
+  "autoLock": "Bloqueo automático",
   "immediately": "Inmediatamente",
   "autoLockFeatureDescription": "Tiempo después de que la aplicación esté en segundo plano",
   "hideContent": "Ocultar contenido",
@@ -1515,5 +1514,65 @@
   "openAlbumInBrowserTitle": "Por favor, utiliza la aplicación web para añadir fotos a este álbum",
   "allow": "Permitir",
   "allowAppToOpenSharedAlbumLinks": "Permitir a la aplicación abrir enlaces de álbum compartidos",
-  "seePublicAlbumLinksInApp": "Ver enlaces del álbum público en la aplicación"
+  "seePublicAlbumLinksInApp": "Ver enlaces del álbum público en la aplicación",
+  "emergencyContacts": "Contactos de emergencia",
+  "acceptTrustInvite": "Aceptar invitación",
+  "declineTrustInvite": "Rechazar invitación",
+  "removeYourselfAsTrustedContact": "Quitarse como contacto de confianza",
+  "legacy": "Legado",
+  "legacyPageDesc": "Legado permite a los contactos de confianza acceder a su cuenta en su ausencia.",
+  "legacyPageDesc2": "Los contactos de confianza pueden iniciar la recuperación de la cuenta, y si no están bloqueados en un plazo de 30 días, restablecer su contraseña y acceder a su cuenta.",
+  "legacyAccounts": "Cuentas legadas",
+  "trustedContacts": "Contactos de confianza",
+  "addTrustedContact": "Añadir contacto de confianza",
+  "removeInvite": "Eliminar invitación",
+  "recoveryWarning": "Un contacto de confianza está intentando acceder a tu cuenta",
+  "rejectRecovery": "Rechazar la recuperación",
+  "recoveryInitiated": "Recuperación iniciada",
+  "recoveryInitiatedDesc": "Puedes acceder a la cuenta después de {days} días. Se enviará una notificación a {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Cancelar la recuperación",
+  "recoveryAccount": "Recuperar cuenta",
+  "cancelAccountRecoveryBody": "¿Estás seguro de que quieres cancelar la recuperación?",
+  "startAccountRecoveryTitle": "Iniciar la recuperación",
+  "whyAddTrustContact": "Un contacto de confianza puede ayudar a recuperar sus datos.",
+  "recoveryReady": "Ahora puedes recuperar la cuenta de {email} estableciendo una nueva contraseña.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} está intentando recuperar tu cuenta.",
+  "trustedInviteBody": "Has sido invitado a ser un contacto legado por {email}.",
+  "warning": "Advertencia",
+  "proceed": "Continuar",
+  "confirmAddingTrustedContact": "Estás a punto de añadir {email} como un contacto de confianza. Esta persona podrá recuperar tu cuenta si no estás durante {numOfDays} días.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} te ha invitado a ser un contacto de confianza",
+  "authToManageLegacy": "Por favor, autentícate para administrar tus contactos de confianza"
 }

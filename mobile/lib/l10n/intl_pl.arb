@@ -8,7 +8,7 @@
   "invalidEmailAddress": "Nieprawidłowy adres e-mail",
   "enterValidEmail": "Prosimy podać prawidłowy adres e-mail.",
   "deleteAccount": "Usuń konto",
-  "askDeleteReason": "Jaka jest przyczyna usunięcia konta?",
+  "askDeleteReason": "Jaka jest główna przyczyna usunięcia Twojego konta?",
   "deleteAccountFeedbackPrompt": "Przykro nam, że odchodzisz. Wyjaśnij nam, dlaczego nas opuszczasz, aby pomóc ulepszać nasze usługi.",
   "feedback": "Opinia",
   "kindlyHelpUsWithThisInformation": "Pomóż nam z tą informacją",
@@ -1246,7 +1246,6 @@
   "deviceCodeHint": "Wprowadź kod",
   "joinDiscord": "Dołącz do serwera Discord",
   "locations": "Lokalizacje",
-  "descriptions": "Opisy",
   "addAName": "Dodaj nazwę",
   "findThemQuickly": "Znajdź ich szybko",
   "@findThemQuickly": {
@@ -1514,5 +1513,64 @@
   "openAlbumInBrowserTitle": "Prosimy użyć aplikacji internetowej, aby dodać zdjęcia do tego albumu",
   "allow": "Zezwól",
   "allowAppToOpenSharedAlbumLinks": "Zezwalaj aplikacji na otwieranie udostępnianych linków do albumu",
-  "seePublicAlbumLinksInApp": "Zobacz publiczne linki do albumów w aplikacji"
+  "seePublicAlbumLinksInApp": "Zobacz publiczne linki do albumów w aplikacji",
+  "emergencyContacts": "Kontakty Alarmowe",
+  "acceptTrustInvite": "Zaakceptuj Zaproszenie",
+  "declineTrustInvite": "Odrzuć Zaproszenie",
+  "removeYourselfAsTrustedContact": "Usuń siebie z listy zaufanych kontaktów",
+  "legacy": "Dziedzictwo",
+  "legacyPageDesc": "Dziedzictwo pozwala zaufanym kontaktom na dostęp do Twojego konta w razie Twojej nieobecności.",
+  "legacyPageDesc2": "Zaufane kontakty mogą rozpocząć odzyskiwanie konta, a jeśli nie zostaną zablokowane w ciągu 30 dni, zresetować Twoje hasło i uzyskać dostęp do Twojego konta.",
+  "trustedContacts": "Zaufane kontakty",
+  "addTrustedContact": "Dodaj Zaufany Kontakt",
+  "removeInvite": "Usuń zaproszenie",
+  "recoveryWarning": "Zaufany kontakt próbuje uzyskać dostęp do Twojego konta",
+  "rejectRecovery": "Odrzuć odzyskiwanie",
+  "recoveryInitiated": "Odzyskiwanie rozpoczęte",
+  "recoveryInitiatedDesc": "Możesz uzyskać dostęp do konta po dniu {days} dni. Powiadomienie zostanie wysłane na {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Anuluj odzyskiwanie",
+  "recoveryAccount": "Odzyskaj konto",
+  "cancelAccountRecoveryBody": "Czy na pewno chcesz anulować odzyskiwanie?",
+  "startAccountRecoveryTitle": "Rozpocznij odzyskiwanie",
+  "whyAddTrustContact": "Zaufany kontakt może pomóc w odzyskaniu Twoich danych.",
+  "recoveryReady": "Możesz teraz odzyskać konto {email} poprzez ustawienie nowego hasła.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} próbuje odzyskać Twoje konto.",
+  "trustedInviteBody": "Zostałeś zaproszony do bycia dziedzicznym kontaktem przez {email}.",
+  "warning": "Uwaga",
+  "proceed": "Kontynuuj",
+  "confirmAddingTrustedContact": "Zamierzasz dodać {email} jako zaufany kontakt. Będą mogli odzyskać Twoje konto, jeśli jesteś nieobecny przez {numOfDays} dni.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} zaprosił Cię do zostania zaufanym kontaktem",
+  "authToManageLegacy": "Prosimy uwierzytelnić się, aby zarządzać zaufanymi kontaktami"
 }

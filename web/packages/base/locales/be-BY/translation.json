@@ -12,6 +12,8 @@
     "ENTER_EMAIL": "Увядзіце адрас электроннай пошты",
     "EMAIL_ERROR": "Увядзіце сапраўдны адрас электроннай пошты",
     "required": "патрабуецца",
+    "email_not_registered": "",
+    "email_already_registered": "",
     "EMAIL_SENT": "",
     "CHECK_INBOX": "Праверце свае ўваходныя лісты (і спам) для завяршэння праверкі",
     "ENTER_OTT": "Код пацвярджэння",

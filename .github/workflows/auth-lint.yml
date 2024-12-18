@@ -30,6 +30,18 @@ jobs:
                           exit 1
                       fi
                   done
+            
+            - name: Verify all icons are less than 20KB
+              run: |
+                  find assets/custom-icons -type f -name "*.svg" | while read -r file; do
+                      if [[ "$file" == "assets/custom-icons/icons/bbs_nga.svg" ]]; then
+                          continue
+                      fi
+                      if [[ "$(stat --printf="%s" "$file")" -gt 20480 ]]; then
+                          echo "File size is greater than 20KB: $file ($file_size bytes)"
+                          exit 1
+                      fi
+                  done
 
             - name: Verify custom icon JSON
               run: cat assets/custom-icons/_data/custom-icons.json | jq empty

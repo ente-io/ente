@@ -359,7 +359,7 @@
   "singleFileInBothLocalAndRemote": "Cette {fileType} est à la fois sur ente et sur votre appareil.",
   "singleFileInRemoteOnly": "Cette {fileType} sera supprimée de l'Ente.",
   "singleFileDeleteFromDevice": "Elle {fileType} sera supprimée de votre appareil.",
-  "deleteFromEnte": "Supprimé de Ente",
+  "deleteFromEnte": "Supprimer de Ente",
   "yesDelete": "Oui, supprimer",
   "movedToTrash": "Déplacé dans la corbeille",
   "deleteFromDevice": "Supprimer de l'appareil",
@@ -951,7 +951,7 @@
   "emailChangedTo": "L'e-mail a été changé en {newEmail}",
   "verifying": "Validation en cours...",
   "disablingTwofactorAuthentication": "Désactiver la double-authentification...",
-  "allMemoriesPreserved": "Tous les souvenirs conservés",
+  "allMemoriesPreserved": "Tous les souvenirs sont conservés",
   "loadingGallery": "Chargement de la galerie...",
   "syncing": "En cours de synchronisation...",
   "encryptingBackup": "Chiffrement de la sauvegarde...",
@@ -1246,7 +1246,6 @@
   "deviceCodeHint": "Saisissez le code",
   "joinDiscord": "Rejoindre Discord",
   "locations": "Emplacements",
-  "descriptions": "Descriptions",
   "addAName": "Ajouter un nom",
   "findThemQuickly": "Trouvez-les rapidement",
   "@findThemQuickly": {
@@ -1515,5 +1514,65 @@
   "openAlbumInBrowserTitle": "Veuillez utiliser l'application web pour ajouter des photos à cet album",
   "allow": "Autoriser",
   "allowAppToOpenSharedAlbumLinks": "Autoriser l'application à ouvrir les liens d'albums partagés",
-  "seePublicAlbumLinksInApp": "Ouvrir les liens des albums publics dans l'application"
+  "seePublicAlbumLinksInApp": "Ouvrir les liens des albums publics dans l'application",
+  "emergencyContacts": "Contacts d'urgence",
+  "acceptTrustInvite": "Accepter l'invitation",
+  "declineTrustInvite": "Refuser l’invitation",
+  "removeYourselfAsTrustedContact": "Retirez-vous comme contact de confiance",
+  "legacy": "Héritage",
+  "legacyPageDesc": "Héritage permet aux contacts de confiance d'accéder à votre compte en votre absence.",
+  "legacyPageDesc2": "Les contacts de confiance peuvent initier la récupération du compte et, s'ils ne sont pas bloqués dans les 30 jours qui suivent, peuvent réinitialiser votre mot de passe et accéder à votre compte.",
+  "legacyAccounts": "Comptes hérités",
+  "trustedContacts": "Contacts de confiance",
+  "addTrustedContact": "Ajouter un contact de confiance",
+  "removeInvite": "Supprimer l’Invitation",
+  "recoveryWarning": "Un contact de confiance tente d'accéder à votre compte",
+  "rejectRecovery": "Rejeter la récupération",
+  "recoveryInitiated": "Récupération initiée",
+  "recoveryInitiatedDesc": "Vous pourrez accéder au compte d'ici {days} jours. Une notification sera envoyée à {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Annuler la récupération",
+  "recoveryAccount": "Récupérer un compte",
+  "cancelAccountRecoveryBody": "Êtes-vous sûr de vouloir annuler la récupération ?",
+  "startAccountRecoveryTitle": "Démarrer la récupération",
+  "whyAddTrustContact": "Un contact de confiance peut vous aider à récupérer vos données.",
+  "recoveryReady": "Vous pouvez maintenant récupérer le compte de {email} en définissant un nouveau mot de passe.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} tente de récupérer votre compte.",
+  "trustedInviteBody": "Vous avez été invité(e) à être un(e) héritier(e) par {email}.",
+  "warning": "Attention",
+  "proceed": "Procéder",
+  "confirmAddingTrustedContact": "Vous êtes sur le point d'ajouter {email} en tant que contact sûr. Il pourra récupérer votre compte si vous êtes absent pendant {numOfDays} jours.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} vous a invité à être un contact sûr",
+  "authToManageLegacy": "Veuillez vous authentifier pour gérer vos contacts de confiance"
 }

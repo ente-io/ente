@@ -156,6 +156,7 @@
   "twoFactorAuthTitle": "Tweestapsverificatie",
   "passkeyAuthTitle": "Passkey verificatie",
   "verifyPasskey": "Bevestig passkey",
+  "loginWithTOTP": "Inloggen met TOTP",
   "recoverAccount": "Account herstellen",
   "enterRecoveryKeyHint": "Voer je herstelsleutel in",
   "recover": "Herstellen",
@@ -327,6 +328,10 @@
       }
     }
   },
+  "manualSort": "Aangepast",
+  "editOrder": "Volgorde wijzigen",
+  "mostFrequentlyUsed": "Vaak gebruikt",
+  "mostRecentlyUsed": "Recent gebruikt",
   "activeSessions": "Actieve sessies",
   "somethingWentWrongPleaseTryAgain": "Er is iets fout gegaan, probeer het opnieuw",
   "thisWillLogYouOutOfThisDevice": "Dit zal je uitloggen van dit apparaat!",
@@ -448,6 +453,7 @@
   "unpinText": "Losmaken",
   "pinnedCodeMessage": "{code} is vastgezet",
   "unpinnedCodeMessage": "{code} is losgemaakt",
+  "pinned": "Vastgezet",
   "tags": "Labels",
   "createNewTag": "Nieuw label maken",
   "tag": "Label",

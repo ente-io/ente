@@ -1233,7 +1233,6 @@
   "deviceCodeHint": "输入代码",
   "joinDiscord": "加入 Discord",
   "locations": "位置",
-  "descriptions": "描述",
   "addAName": "添加一个名称",
   "findPeopleByName": "按名称快速查找人物",
   "addViewers": "{count, plural, zero {添加查看者} one {添加查看者} other {添加查看者}}",

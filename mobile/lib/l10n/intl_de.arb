@@ -12,7 +12,7 @@
   "deleteAccountFeedbackPrompt": "Wir bedauern sehr, dass du dein Konto löschen möchtest. Du würdest uns sehr helfen, wenn du uns kurz einige Gründe hierfür nennen könntest.",
   "feedback": "Rückmeldung",
   "kindlyHelpUsWithThisInformation": "Bitte gib diese Daten ein",
-  "confirmDeletePrompt": "Ja, ich möchte dieses Konto und alle enthaltenen Daten über alle Apps endgültig und unwiderruflich löschen.",
+  "confirmDeletePrompt": "Ja, ich möchte dieses Konto und alle enthaltenen Daten über alle Apps hinweg endgültig löschen.",
   "confirmAccountDeletion": "Kontolöschung bestätigen",
   "deleteAccountPermanentlyButton": "Konto unwiderruflich löschen",
   "yourAccountHasBeenDeleted": "Dein Benutzerkonto wurde gelöscht",
@@ -23,8 +23,8 @@
   "deleteReason4": "Mein Grund ist nicht aufgeführt",
   "sendEmail": "E-Mail senden",
   "deleteRequestSLAText": "Deine Anfrage wird innerhalb von 72 Stunden bearbeitet.",
-  "deleteEmailRequest": "Bitte sende eine E-Mail an <warning>account-deletion@ente.io</warning> von Deiner bei uns hinterlegten E-Mail-Adresse.",
-  "entePhotosPerm": "",
+  "deleteEmailRequest": "Bitte sende eine E-Mail an <warning>account-deletion@ente.io</warning> von Ihrer bei uns hinterlegten E-Mail-Adresse.",
+  "entePhotosPerm": "Ente <i> benötigt Berechtigung, um <i> Ihre Fotos zu sichern",
   "ok": "Ok",
   "createAccount": "Konto erstellen",
   "createNewAccount": "Neues Konto erstellen",
@@ -1246,7 +1246,6 @@
   "deviceCodeHint": "Code eingeben",
   "joinDiscord": "Discord beitreten",
   "locations": "Orte",
-  "descriptions": "Beschreibungen",
   "addAName": "Füge einen Namen hinzu",
   "findThemQuickly": "Finde sie schnell",
   "@findThemQuickly": {
@@ -1515,5 +1514,65 @@
   "openAlbumInBrowserTitle": "Bitte nutze die Web-App, um Fotos zu diesem Album hinzuzufügen",
   "allow": "Erlauben",
   "allowAppToOpenSharedAlbumLinks": "Erlaube der App, geteilte Album-Links zu öffnen",
-  "seePublicAlbumLinksInApp": "Öffentliche Album-Links in der App ansehen"
+  "seePublicAlbumLinksInApp": "Öffentliche Album-Links in der App ansehen",
+  "emergencyContacts": "Notfallkontakte",
+  "acceptTrustInvite": "Einladung annehmen",
+  "declineTrustInvite": "Einladung ablehnen",
+  "removeYourselfAsTrustedContact": "Entferne dich als vertrauenswürdigen Kontakt",
+  "legacy": "Digitales Erbe",
+  "legacyPageDesc": "Das digitale Erbe erlaubt vertrauenswürdigen Kontakten den Zugriff auf dein Konto in deiner Abwesenheit.",
+  "legacyPageDesc2": "Vertrauenswürdige Kontakte können eine Kontowiederherstellung einleiten und, wenn dies nicht innerhalb von 30 Tagen blockiert wird, dein Passwort und den Kontozugriff zurücksetzen.",
+  "legacyAccounts": "Digital geerbte Konten",
+  "trustedContacts": "Vertrauenswürdige Kontakte",
+  "addTrustedContact": "Vertrauenswürdigen Kontakt hinzufügen",
+  "removeInvite": "Einladung entfernen",
+  "recoveryWarning": "Ein vertrauenswürdiger Kontakt versucht, auf dein Konto zuzugreifen",
+  "rejectRecovery": "Wiederherstellung ablehnen",
+  "recoveryInitiated": "Wiederherstellung gestartet",
+  "recoveryInitiatedDesc": "Du kannst nach {days} Tagen auf das Konto zugreifen. Eine Benachrichtigung wird an {email} versendet.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Wiederherstellung abbrechen",
+  "recoveryAccount": "Konto wiederherstellen",
+  "cancelAccountRecoveryBody": "Bist du sicher, dass du die Wiederherstellung abbrechen möchtest?",
+  "startAccountRecoveryTitle": "Wiederherstellung starten",
+  "whyAddTrustContact": "Ein vertrauenswürdiger Kontakt kann helfen, deine Daten wiederherzustellen.",
+  "recoveryReady": "Du kannst jetzt das Konto von {email} wiederherstellen, indem du ein neues Passwort setzt.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} versucht, dein Konto wiederherzustellen.",
+  "trustedInviteBody": "Du wurdest von {email} eingeladen, ein Kontakt für das digitale Erbe zu werden.",
+  "warning": "Warnung",
+  "proceed": "Fortfahren",
+  "confirmAddingTrustedContact": "Du bist dabei, {email} als vertrauenswürdigen Kontakt hinzuzufügen. Die Person wird in der Lage sein, dein Konto wiederherzustellen, wenn du für {numOfDays} Tage abwesend bist.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} hat dich eingeladen, ein vertrauenswürdiger Kontakt zu werden",
+  "authToManageLegacy": "Bitte authentifiziere dich, um deine vertrauenswürdigen Kontakte zu verwalten"
 }

@@ -203,6 +203,7 @@
   "enterPassword": "Įveskite slaptažodį",
   "removeLink": "Šalinti nuorodą",
   "manageLink": "Tvarkyti nuorodą",
+  "linkExpiresOn": "Nuoroda nebegalios {expiryTime}",
   "albumUpdated": "Atnaujintas albumas",
   "never": "Niekada",
   "custom": "Pasirinktinis",
@@ -215,16 +216,39 @@
   "after1Month": "Po 1 mėnesio",
   "after1Year": "Po 1 metų",
   "manageParticipants": "Tvarkyti",
+  "albumParticipantsCount": "{count, plural, one {{count} dalyvis} few {{count} dalyviai} many {{count} dalyvio}=0 {0 dalyvių} =1 {1 dalyvis} other {{count} dalyvių}}",
+  "@albumParticipantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    },
+    "description": "Number of participants in an album, including the album owner."
+  },
   "collabLinkSectionDescription": "Sukurkite nuorodą, kad asmenys galėtų pridėti ir peržiūrėti nuotraukas bendrinamame albume, nereikalaujant „Ente“ programos ar paskyros. Puikiai tinka įvykių nuotraukoms rinkti.",
   "collectPhotos": "Rinkti nuotraukas",
+  "collaborativeLink": "Bendradarbiavimo nuoroda",
   "shareWithNonenteUsers": "Bendrinkite su ne „Ente“ naudotojais.",
   "createPublicLink": "Kurti viešą nuorodą",
   "sendLink": "Siųsti nuorodą",
   "copyLink": "Kopijuoti nuorodą",
+  "linkHasExpired": "Nuoroda nebegalioja",
+  "publicLinkEnabled": "Įjungta viešoji nuoroda",
+  "shareALink": "Bendrinkite nuorodą",
   "sharedAlbumSectionDescription": "Sukurkite bendrinamus ir bendradarbiaujamus albumus su kitais „Ente“ naudotojais, įskaitant naudotojus nemokamuose planuose.",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {Bendrinima su {numberOfPeople} asmeniu} few {Bendrinima su {numberOfPeople} asmenims} many {Bendrinima su {numberOfPeople} asmens}=0 {Bendrinti su konkrečiais asmenimis} =1 {Bendrinima su 1 asmeniu} other {Bendrinima su {numberOfPeople} asmenų}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "thisIsYourVerificationId": "Tai – jūsų patvirtinimo ID",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Asmuo, kuris bendrina albumus su jumis, savo įrenginyje turėtų matyti tą patį ID.",
-  "howToViewShareeVerificationID": "Paprašykite jų ilgai paspausti savo el. pašto adresą nustatymų ekrane ir patvirtinkite, kad abiejų įrenginių ID sutampa.",
+  "howToViewShareeVerificationID": "Paprašykite jų ilgai paspausti savo el. pašto adresą nustatymų ekrane ir patvirtinti, kad abiejų įrenginių ID sutampa.",
   "thisIsPersonVerificationId": "Tai – {email} patvirtinimo ID",
   "@thisIsPersonVerificationId": {
     "placeholders": {
@@ -247,7 +271,9 @@
   "enterCodeDescription": "Įveskite draugo pateiktą kodą, kad gautumėte nemokamą saugyklą abiem.",
   "apply": "Taikyti",
   "failedToApplyCode": "Nepavyko pritaikyti kodo.",
+  "enterReferralCode": "Įveskite rekomendacijos kodą",
   "codeAppliedPageTitle": "Pritaikytas kodas",
+  "changeYourReferralCode": "Keisti savo rekomendacijos kodą",
   "change": "Keisti",
   "unavailableReferralCode": "Atsiprašome, šis kodas nepasiekiamas.",
   "codeChangeLimitReached": "Atsiprašome, pasiekėte kodo pakeitimų ribą.",
@@ -257,13 +283,31 @@
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
   "claimMore": "Gaukite daugiau!",
+  "freeStorageOnReferralSuccess": "{storageAmountInGB} GB kiekvieną kartą, kai kas nors užsiregistruoja mokamam planui ir pritaiko jūsų kodą.",
+  "shareTextReferralCode": "„Ente“ rekomendacijos kodas: {referralCode} \n\nTaikykite jį per Nustatymai → Bendrieji → Rekomendacijos, kad gautumėte {referralStorageInGB} GB nemokamai po to, kai užsiregistruosite mokamam planui.\n\nhttps://ente.io",
   "inviteYourFriends": "Kviesti savo draugus",
+  "failedToFetchReferralDetails": "Nepavyksta gauti rekomendacijos informacijos. Bandykite dar kartą vėliau.",
   "referralStep1": "1. Duokite šį kodą savo draugams",
   "referralStep2": "2. Jie užsiregistruoja mokamą planą",
   "referralStep3": "3. Abu gaunate {storageInGB} GB* nemokamai",
+  "referralsAreCurrentlyPaused": "Šiuo metu rekomendacijos yra pristabdytos",
   "youCanAtMaxDoubleYourStorage": "* Galite daugiausiai padvigubinti savo saugyklą.",
+  "claimedStorageSoFar": "{isFamilyMember, select, true {Jūsų šeima gavo {storageAmountInGb} GB iki šiol} false {Jūs gavote {storageAmountInGb} GB iki šiol} other {Jūs gavote {storageAmountInGb} GB iki šiol.}}",
+  "@claimedStorageSoFar": {
+    "placeholders": {
+      "isFamilyMember": {
+        "type": "String",
+        "example": "true"
+      },
+      "storageAmountInGb": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
   "faq": "DUK",
   "total": "iš viso",
+  "usableReferralStorageInfo": "Naudojama saugykla ribojama pagal jūsų dabartinį planą. Perteklinė gauta saugykla automatiškai taps tinkama naudoti, kai pakeisite planą.",
   "removeFromAlbumTitle": "Pašalinti iš albumo?",
   "removeFromAlbum": "Šalinti iš albumo",
   "itemsWillBeRemovedFromAlbum": "Pasirinkti elementai bus pašalinti iš šio albumo",
@@ -272,17 +316,20 @@
   "subscribeToEnableSharing": "Kad įjungtumėte bendrinimą, reikia aktyvios mokamos prenumeratos.",
   "subscribe": "Prenumeruoti",
   "canOnlyRemoveFilesOwnedByYou": "Galima pašalinti tik jums priklausančius failus",
+  "deleteSharedAlbum": "Ištrinti bendrinamą albumą?",
   "deleteAlbum": "Ištrinti albumą",
   "deleteAlbumDialog": "Taip pat ištrinti šiame albume esančias nuotraukas (ir vaizdo įrašus) iš <bold>visų</bold> kitų albumų, kuriuose jos yra dalis?",
+  "deleteSharedAlbumDialogBody": "Albumas bus ištrintas visiems.\n\nPrarasite prieigą prie bendrinamų nuotraukų, esančių šiame albume ir priklausančių kitiems.",
   "yesRemove": "Taip, šalinti",
   "creatingLink": "Kuriama nuoroda...",
   "removeWithQuestionMark": "Šalinti?",
-  "removeParticipantBody": "{userEmail} bus pašalintas iš šio bendrinamo albumo\n\nVisos jų pridėtos nuotraukos taip pat bus pašalintos iš albumo",
+  "removeParticipantBody": "{userEmail} bus pašalintas iš šio bendrinamo albumo.\n\nVisos jų pridėtos nuotraukos taip pat bus pašalintos iš albumo.",
   "keepPhotos": "Palikti nuotraukas",
   "deletePhotos": "Ištrinti nuotraukas",
   "inviteToEnte": "Kviesti į „Ente“",
   "removePublicLink": "Šalinti viešą nuorodą",
   "sharing": "Bendrinima...",
+  "youCannotShareWithYourself": "Negalite bendrinti su savimi.",
   "archive": "Archyvas",
   "importing": "Importuojama....",
   "hidden": "Paslėpti",
@@ -406,9 +453,26 @@
   "authToInitiateAccountDeletion": "Nustatykite tapatybę, kad pradėtumėte paskyros ištrynimą",
   "areYouSureYouWantToLogout": "Ar tikrai norite atsijungti?",
   "yesLogout": "Taip, atsijungti",
+  "ignoreUpdate": "Ignoruoti",
+  "downloading": "Atsisiunčiama...",
   "backup": "Kurti atsarginę kopiją",
   "removeDuplicates": "Šalinti dublikatus",
+  "noDuplicates": "✨ Dublikatų nėra",
   "youveNoDuplicateFilesThatCanBeCleared": "Neturite dubliuotų failų, kuriuos būtų galima išvalyti",
+  "success": "Sėkmė",
+  "rateUs": "Vertinti mus",
+  "remindToEmptyDeviceTrash": "Taip pat ištuštinkite Neseniai ištrinti iš Nustatymai -> Saugykla, kad atlaisvintumėte vietos.",
+  "familyPlans": "Šeimos planai",
+  "notifications": "Pranešimai",
+  "sharedPhotoNotifications": "Naujos bendrintos nuotraukos",
+  "sharedPhotoNotificationsExplanation": "Gaukite pranešimus, kai kas nors prideda nuotrauką į bendrinamą albumą, kuriame dalyvaujate.",
+  "advanced": "Išplėstiniai",
+  "general": "Bendrieji",
+  "security": "Saugumas",
+  "authToViewYourRecoveryKey": "Nustatykite tapatybę, kad peržiūrėtumėte savo atkūrimo raktą",
+  "twofactor": "Dvigubas tapatybės nustatymas",
+  "disableTwofactor": "Išjungti dvigubą tapatybės nustatymą",
+  "confirm2FADisable": "Ar tikrai norite išjungti dvigubą tapatybės nustatymą?",
   "no": "Ne",
   "yes": "Taip",
   "social": "Socialinės",
@@ -432,6 +496,7 @@
   "freeTrial": "Nemokamas bandomasis laikotarpis",
   "selectYourPlan": "Pasirinkite planą",
   "enteSubscriptionPitch": "„Ente“ išsaugo jūsų prisiminimus, todėl jie visada bus pasiekiami, net jei prarasite įrenginį.",
+  "enteSubscriptionShareWithFamily": "Į planą galima pridėti ir savo šeimą.",
   "currentUsageIs": "Dabartinis naudojimas – ",
   "@currentUsageIs": {
     "description": "This text is followed by storage usage",
@@ -441,8 +506,10 @@
     "type": "text"
   },
   "faqs": "DUK",
+  "renewsOn": "Prenumerata atnaujinama {endDate}",
   "freeTrialValidTill": "Nemokamas bandomasis laikotarpis galioja iki {endDate}",
   "validTill": "Galioja iki {endDate}",
+  "playStoreFreeTrialValidTill": "Nemokama bandomoji versija galioja iki {endDate}.\nVėliau galėsite pasirinkti mokamą planą.",
   "subscription": "Prenumerata",
   "paymentDetails": "Mokėjimo duomenys",
   "manageFamily": "Tvarkyti šeimą",
@@ -477,6 +544,7 @@
   },
   "optionalAsShortAsYouLike": "Nebūtina, trumpai, kaip jums patinka...",
   "send": "Siųsti",
+  "askCancelReason": "Jūsų prenumerata buvo atšaukta. Ar norėtumėte pasidalyti priežastimi?",
   "googlePlayId": "„Google Play“ ID",
   "appleId": "„Apple ID“",
   "playstoreSubscription": "„PlayStore“ prenumerata",
@@ -534,6 +602,8 @@
   "allowPeopleToAddPhotos": "Leiskite asmenims pridėti nuotraukų",
   "shareAnAlbumNow": "Bendrinti albumą dabar",
   "collectEventPhotos": "Rinkti įvykių nuotraukas",
+  "sessionExpired": "Seansas baigėsi",
+  "loggingOut": "Atsijungiama...",
   "@onDevice": {
     "description": "The text displayed above folders/albums stored on device",
     "type": "text"
@@ -547,6 +617,10 @@
   "name": "Pavadinimą",
   "newest": "Naujausią",
   "lastUpdated": "Paskutinį kartą atnaujintą",
+  "deleteEmptyAlbums": "Ištrinti tuščius albumus",
+  "deleteEmptyAlbumsWithQuestionMark": "Ištrinti tuščius albumus?",
+  "deleteAlbumsDialogBody": "Tai ištrins visus tuščius albumus. Tai naudinga, kai norite sumažinti netvarką savo albumų sąraše.",
+  "deleteProgress": "Ištrinama {currentlyDeleting} / {totalCount}",
   "genericProgress": "Apdorojama {currentlyProcessing} / {totalCount}",
   "@genericProgress": {
     "description": "Generic progress text to display when processing multiple items",
@@ -562,6 +636,7 @@
       }
     }
   },
+  "permanentlyDelete": "Ištrinti negrįžtamai",
   "restore": "Atkurti",
   "@restore": {
     "description": "Display text for an action which triggers a restore of item from trash",
@@ -569,6 +644,7 @@
   },
   "unarchive": "Išarchyvuoti",
   "removeFromFavorite": "Šalinti iš mėgstamų",
+  "shareLink": "Bendrinti nuorodą",
   "addToEnte": "Pridėti į „Ente“",
   "addToAlbum": "Pridėti į albumą",
   "delete": "Ištrinti",
@@ -581,6 +657,8 @@
   },
   "createOrSelectAlbum": "Kurkite arba pasirinkite albumą",
   "enterAlbumName": "Įveskite albumo pavadinimą",
+  "restoringFiles": "Atkuriami failai...",
+  "sharedWithMe": "Bendrinta su manimi",
   "doubleYourStorage": "Padvigubinkite saugyklą",
   "referFriendsAnd2xYourPlan": "Rekomenduokite draugams ir 2 kartus padidinkite savo planą",
   "shareAlbumHint": "Atidarykite albumą ir palieskite bendrinimo mygtuką viršuje dešinėje, kad bendrintumėte.",
@@ -604,6 +682,7 @@
   "sortNewestFirst": "Naujausią pirmiausiai",
   "sortOldestFirst": "Seniausią pirmiausiai",
   "rename": "Pervadinti",
+  "leaveSharedAlbum": "Palikti bendrinamą albumą?",
   "leaveAlbum": "Palikti albumą",
   "photosAddedByYouWillBeRemovedFromTheAlbum": "Jūsų pridėtos nuotraukos bus pašalintos iš albumo",
   "youDontHaveAnyArchivedItems": "Neturite jokių archyvuotų elementų.",
@@ -616,6 +695,8 @@
   "thisImageHasNoExifData": "Šis vaizdas neturi Exif duomenų",
   "exif": "EXIF",
   "noResults": "Rezultatų nėra.",
+  "weDontSupportEditingPhotosAndAlbumsThatYouDont": "Nepalaikome nuotraukų ir albumų redagavimo, kurių dar neturite.",
+  "failedToFetchOriginalForEdit": "Nepavyko gauti originalo redagavimui.",
   "close": "Uždaryti",
   "setAs": "Nustatyti kaip",
   "download": "Atsisiųsti",
@@ -626,9 +707,16 @@
   "reviewDeduplicateItems": "Peržiūrėkite ir ištrinkite elementus, kurie, jūsų manymu, yra dublikatai.",
   "unlock": "Atrakinti",
   "freeUpAmount": "Atlaisvinti {sizeInMBorGB}",
+  "thisEmailIsAlreadyInUse": "Šis el. paštas jau naudojamas.",
+  "incorrectCode": "Neteisingas kodas.",
+  "authenticationFailedPleaseTryAgain": "Tapatybės nustatymas nepavyko. Bandykite dar kartą.",
   "verificationFailedPleaseTryAgain": "Patvirtinimas nepavyko. Bandykite dar kartą.",
+  "authenticating": "Nustatoma tapatybė...",
+  "authenticationSuccessful": "Tapatybės nustatymas sėkmingas.",
+  "incorrectRecoveryKey": "Neteisingas atkūrimo raktas",
+  "theRecoveryKeyYouEnteredIsIncorrect": "Įvestas atkūrimo raktas yra neteisingas.",
   "pleaseVerifyTheCodeYouHaveEntered": "Patvirtinkite įvestą kodą.",
-  "yourVerificationCodeHasExpired": "Jūsų patvirtinimo kodo laikas nebegaliojantis.",
+  "yourVerificationCodeHasExpired": "Jūsų patvirtinimo kodas nebegaliojantis.",
   "verifying": "Patvirtinama...",
   "allMemoriesPreserved": "Išsaugoti visi prisiminimai",
   "loadingGallery": "Įkeliama galerija...",
@@ -669,7 +757,12 @@
   "localGallery": "Vietinė galerija",
   "todaysLogs": "Šiandienos žurnalai",
   "viewLogs": "Peržiūrėti žurnalus",
+  "logsDialogBody": "Tai nusiųs žurnalus, kurie padės mums išspręsti jūsų problemą. Atkreipkite dėmesį, kad failų pavadinimai bus įtraukti, kad būtų lengviau atsekti problemas su konkrečiais failais.",
+  "preparingLogs": "Ruošiami žurnalai...",
+  "emailYourLogs": "Atsiųskite žurnalus el. laišku",
+  "pleaseSendTheLogsTo": "Siųskite žurnalus adresu\n{toEmail}",
   "copyEmailAddress": "Kopijuoti el. pašto adresą",
+  "exportLogs": "Eksportuoti žurnalus",
   "didYouKnow": "Ar žinojote?",
   "loadMessage1": "Galite bendrinti savo prenumeratą su šeima.",
   "loadMessage2": "Iki šiol išsaugojome daugiau kaip 30 milijonų prisiminimų.",
@@ -719,6 +812,7 @@
   "@setLabel": {
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
+  "familyPlanPortalTitle": "Šeima",
   "androidBiometricHint": "Patvirtinkite tapatybę",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -731,9 +825,29 @@
   "@androidSignInTitle": {
     "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
   },
+  "androidBiometricRequiredTitle": "Privaloma biometrija",
+  "@androidBiometricRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsRequiredTitle": "Privalomi įrenginio kredencialai",
+  "@androidDeviceCredentialsRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up credentials authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsSetupDescription": "Privalomi įrenginio kredencialai",
+  "@androidDeviceCredentialsSetupDescription": {
+    "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
+  },
   "goToSettings": "Eiti į nustatymus",
   "@goToSettings": {
     "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "androidGoToSettingsDescription": "Biometrinis tapatybės nustatymas jūsų įrenginyje nenustatytas. Eikite į Nustatymai > Saugumas ir pridėkite biometrinį tapatybės nustatymą.",
+  "@androidGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
+  },
+  "iOSLockOut": "Biometrinis tapatybės nustatymas išjungtas. Kad jį įjungtumėte, užrakinkite ir atrakinkite ekraną.",
+  "@iOSLockOut": {
+    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
   },
   "iOSGoToSettingsDescription": "Biometrinis tapatybės nustatymas jūsų įrenginyje nenustatytas. Telefone įjunkite „Touch ID“ arba „Face ID“.",
   "@iOSGoToSettingsDescription": {
@@ -756,12 +870,24 @@
   "create": "Kurti",
   "viewAll": "Peržiūrėti viską",
   "nothingSharedWithYouYet": "Kol kas su jumis niekuo nesibendrinama.",
+  "sharedWithYou": "Bendrinta su jumis",
+  "sharedByYou": "Bendrinta iš jūsų",
+  "hiding": "Slepiama...",
   "fileTypes": "Failų tipai",
   "deleteConfirmDialogBody": "Ši paskyra susieta su kitomis „Ente“ programomis, jei jas naudojate. Jūsų įkelti duomenys per visas „Ente“ programas bus planuojama ištrinti, o jūsų paskyra bus ištrinta negrįžtamai.",
+  "hearUsWhereTitle": "Kaip išgirdote apie „Ente“? (nebūtina)",
+  "hearUsExplanation": "Mes nesekame programų diegimų. Mums padėtų, jei pasakytumėte, kur mus radote.",
   "viewAddOnButton": "Peržiūrėti priedus",
+  "addOns": "Priedai",
   "yourMap": "Jūsų žemėlapis",
+  "blackFridaySale": "Juodojo penktadienio išpardavimas",
+  "upto50OffUntil4thDec": "Iki 50% nuolaida, gruodžio 4 d.",
+  "photos": "Nuotraukos",
+  "videos": "Vaizdo įrašai",
+  "livePhotos": "Gyvos nuotraukos",
   "searchHint3": "Albumai, failų pavadinimai ir tipai",
   "searchHint4": "Vietovė",
+  "searchHint5": "Jau netrukus: veidų ir magiškos paieškos ✨",
   "searchResultCount": "{count, plural, one{Rastas {count} rezultatas} few {Rasti {count} rezultatai} many {Rasta {count} rezultato} other{Rasta {count} rezultatų}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
@@ -805,7 +931,6 @@
   "deviceCodeHint": "Įveskite kodą",
   "joinDiscord": "Jungtis prie „Discord“",
   "locations": "Vietovės",
-  "descriptions": "Aprašymai",
   "addAName": "Pridėti vardą",
   "findThemQuickly": "Raskite juos greitai",
   "@findThemQuickly": {
@@ -1071,5 +1196,65 @@
   "openAlbumInBrowserTitle": "Naudokite interneto programą, kad pridėtumėte nuotraukų į šį albumą.",
   "allow": "Leisti",
   "allowAppToOpenSharedAlbumLinks": "Leisti programai atverti bendrinamų albumų nuorodas",
-  "seePublicAlbumLinksInApp": "Žiūrėti viešų albumų nuorodas programoje"
+  "seePublicAlbumLinksInApp": "Žiūrėti viešų albumų nuorodas programoje",
+  "emergencyContacts": "Skubios pagalbos kontaktai",
+  "acceptTrustInvite": "Priimti kvietimą",
+  "declineTrustInvite": "Atmesti kvietimą",
+  "removeYourselfAsTrustedContact": "Šalinti save kaip patikimą kontaktą",
+  "legacy": "Palikimas",
+  "legacyPageDesc": "Palikimas leidžia patikimiems kontaktams pasiekti jūsų paskyrą jums nesant.",
+  "legacyPageDesc2": "Patikimi kontaktai gali pradėti paskyros atkūrimą, o jei per 30 dienų paskyra neužblokuojama, iš naujo nustatyti slaptažodį ir pasiekti paskyrą.",
+  "legacyAccounts": "Palikimo paskyros",
+  "trustedContacts": "Patikimi kontaktai",
+  "addTrustedContact": "Pridėti patikimą kontaktą",
+  "removeInvite": "Šalinti kvietimą",
+  "recoveryWarning": "Patikimas kontaktas bando pasiekti jūsų paskyrą.",
+  "rejectRecovery": "Atmesti atkūrimą",
+  "recoveryInitiated": "Pradėtas atkūrimas",
+  "recoveryInitiatedDesc": "Paskyrą galėsite pasiekti po {days} dienų. Pranešimas bus išsiųstas į {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Atšaukti atkūrimą",
+  "recoveryAccount": "Atkurti paskyrą",
+  "cancelAccountRecoveryBody": "Ar tikrai norite atšaukti atkūrimą?",
+  "startAccountRecoveryTitle": "Pradėti atkūrimą",
+  "whyAddTrustContact": "Patikimas kontaktas gali padėti atkurti jūsų duomenis.",
+  "recoveryReady": "Dabar galite atkurti {email} paskyrą nustatydami naują slaptažodį.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} bando atkurti jūsų paskyrą.",
+  "trustedInviteBody": "Buvote pakviesti tapti {email} palikimo kontaktu.",
+  "warning": "Įspėjimas",
+  "proceed": "Tęsti",
+  "confirmAddingTrustedContact": "Ketinate pridėti {email} kaip patikimą kontaktą. Jie galės atkurti jūsų paskyrą, jei jūsų nebus {numOfDays} dienų.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} pakvietė jus būti patikimu kontaktu",
+  "authToManageLegacy": "Nustatykite tapatybę, kad tvarkytumėte patikimus kontaktus"
 }
