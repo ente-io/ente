@@ -10,6 +10,7 @@ import { Titlebar } from "@/base/components/Titlebar";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
+import { appendCollectionKeyToShareURL } from "@/gallery/services/share";
 import type {
     Collection,
     PublicURL,
@@ -65,10 +66,7 @@ import {
     unshareCollection,
     updateShareableURL,
 } from "services/collectionService";
-import {
-    appendCollectionKeyToShareURL,
-    getDeviceLimitOptions,
-} from "utils/collection";
+import { getDeviceLimitOptions } from "utils/collection";
 import * as Yup from "yup";
 
 interface CollectionShareProps {
@@ -1224,7 +1222,7 @@ const PublicShare: React.FC<PublicShareProps> = ({
     }, [collection]);
 
     useEffect(() => {
-        if (publicShareProp) {
+        if (publicShareProp?.url) {
             const url = appendCollectionKeyToShareURL(
                 publicShareProp.url,
                 collection.key,
