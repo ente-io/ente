@@ -11,6 +11,7 @@ import { sharedCryptoWorker } from "@/base/crypto";
 import { isHTTP401Error, PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
+import { extractCollectionKeyFromShareURL } from "@/gallery/services/share";
 import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
 import type { Collection } from "@/media/collection";
 import { type EnteFile, mergeMetadata } from "@/media/file";
@@ -222,12 +223,11 @@ export default function PublicCollectionGallery() {
         const main = async () => {
             let redirectingToWebsite = false;
             try {
-                const cryptoWorker = await sharedCryptoWorker();
 
                 url.current = window.location.href;
                 const currentURL = new URL(url.current);
                 const t = currentURL.searchParams.get("t");
-                const ck = currentURL.hash.slice(1);
+                const ck = await extractCollectionKeyFromShareURL(currentURL);
                 if (!t && !ck) {
                     window.location.href = "https://ente.io";
                     redirectingToWebsite = true;
@@ -235,11 +235,7 @@ export default function PublicCollectionGallery() {
                 if (!t || !ck) {
                     return;
                 }
-                const dck =
-                    ck.length < 50
-                        ? await cryptoWorker.toB64(bs58.decode(ck))
-                        : await cryptoWorker.fromHex(ck);
-                collectionKey.current = dck;
+                collectionKey.current = ck;
                 url.current = window.location.href;
                 const localCollection = await getLocalPublicCollection(
                     collectionKey.current,
