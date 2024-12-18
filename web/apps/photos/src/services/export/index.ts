@@ -1264,31 +1264,17 @@ const readOnDiskFileExportRecordIDs = async (
 
     const fileExportNames = exportRecord.fileExportNames ?? {};
 
-    const ls2 = new Array([...ls].slice(0, 100));
-    log.info(JSON.stringify({ exportDir, ls: ls2, fileExportNames }));
-
     for (const file of files) {
         if (isCanceled.status) throw Error(CustomError.EXPORT_STOPPED);
 
         const collectionExportName = collectionIDFolderNameMap.get(
             file.collectionID,
         );
-        log.info(
-            JSON.stringify({ cid: file.collectionID, collectionExportName }),
-        );
         if (!collectionExportName) continue;
 
         const collectionExportPath = `${exportDir}/${collectionExportName}`;
         const recordID = getExportRecordFileUID(file);
         const exportName = fileExportNames[recordID];
-        log.info(
-            JSON.stringify({
-                exportName,
-                constructed: `${collectionExportPath}/${exportName}`,
-                has: ls.has(`${collectionExportPath}/${exportName}`),
-            }),
-        );
-
         if (!exportName) continue;
 
         if (ls.has(`${collectionExportPath}/${exportName}`)) {
