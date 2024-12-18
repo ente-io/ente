@@ -7,7 +7,6 @@ import {
     useIsSmallWidth,
     useIsTouchscreen,
 } from "@/base/components/utils/hooks";
-import { sharedCryptoWorker } from "@/base/crypto";
 import { isHTTP401Error, PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
@@ -48,7 +47,6 @@ import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import bs58 from "bs58";
 import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
@@ -223,7 +221,6 @@ export default function PublicCollectionGallery() {
         const main = async () => {
             let redirectingToWebsite = false;
             try {
-
                 url.current = window.location.href;
                 const currentURL = new URL(url.current);
                 const t = currentURL.searchParams.get("t");
