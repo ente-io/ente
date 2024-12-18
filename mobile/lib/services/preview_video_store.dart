@@ -12,7 +12,9 @@ import "package:flutter_cache_manager/flutter_cache_manager.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/cache/video_cache_manager.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/network/network.dart";
+import "package:photos/models/base/id.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/services/filedata/filedata_service.dart";
@@ -70,8 +72,9 @@ class PreviewVideoStore {
       );
       return;
     }
-    final tmpDirectory = await getApplicationDocumentsDirectory();
-    final prefix = "${tmpDirectory.path}/${enteFile.generatedID}";
+    final String tempDir = Configuration.instance.getTempDirectory();
+    final String prefix =
+        "${tempDir}_${enteFile.uploadedFileID}_${newID("pv")}";
     Directory(prefix).createSync();
     _logger.info('Compressing video ${enteFile.displayName}');
     final mediaInfo = await VideoCompress.compressVideo(
@@ -89,7 +92,9 @@ class PreviewVideoStore {
     final keyinfo = File('$prefix/mykey.keyinfo');
     keyinfo.writeAsStringSync("data:text/plain;base64,${key.base64}\n"
         "${keyfile.path}\n");
-    _logger.info('Generating HLS Playlist ${enteFile.displayName}');
+    _logger.info(
+      'Generating HLS Playlist ${enteFile.displayName} at $prefix/output.m3u8}',
+    );
     final session = await FFmpegKit.execute(
       '-i "${mediaInfo!.path}" '
       '-c copy -f hls -hls_time 10 -hls_flags single_file '
