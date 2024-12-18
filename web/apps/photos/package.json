@@ -11,7 +11,6 @@
         "@ente/shared": "*",
         "@stripe/stripe-js": "^1.13.2",
         "bip39": "^3.0.4",
-        "bs58": "^5.0.0",
         "chrono-node": "^2.7.6",
         "debounce": "^2.1.1",
         "exifreader": "^4",
@@ -36,8 +35,8 @@
     "devDependencies": {
         "@/build-config": "*",
         "@next/bundle-analyzer": "^14.1",
-        "@types/bs58": "^4.0.1",
         "@types/leaflet": "^1.9",
+        "@types/node": "^20",
         "@types/photoswipe": "^4.1.1",
         "@types/react-virtualized-auto-sizer": "^1.0",
         "@types/react-window": "^1.8.8"
