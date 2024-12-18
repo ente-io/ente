@@ -1,4 +1,4 @@
-import { sharedCryptoWorker } from "@/base/crypto";
+import { fromHex, toB64 } from "@/base/crypto";
 import bs58 from "bs58";
 
 /**
@@ -42,9 +42,5 @@ export const appendCollectionKeyToShareURL = (
  */
 export const extractCollectionKeyFromShareURL = async (url: URL) => {
     const ck = url.hash.slice(1);
-    const cryptoWorker = await sharedCryptoWorker();
-
-    return ck.length < 50
-        ? await cryptoWorker.toB64(bs58.decode(ck))
-        : await cryptoWorker.fromHex(ck);
+    return ck.length < 50 ? await toB64(bs58.decode(ck)) : await fromHex(ck);
 };
