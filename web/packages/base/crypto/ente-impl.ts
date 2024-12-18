@@ -2,6 +2,16 @@
 import * as libsodium from "./libsodium";
 import type { BytesOrB64, EncryptedBlob, EncryptedFile } from "./types";
 
+export const _toB64 = libsodium.toB64;
+
+export const _toB64URLSafe = libsodium.toB64URLSafe;
+
+export const _fromB64 = libsodium.fromB64;
+
+export const _toHex = libsodium.toHex;
+
+export const _fromHex = libsodium.fromHex;
+
 export const _generateBoxKey = libsodium.generateBoxKey;
 
 export const _generateBlobOrStreamKey = libsodium.generateBlobOrStreamKey;
