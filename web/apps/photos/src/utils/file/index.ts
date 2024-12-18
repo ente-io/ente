@@ -1,4 +1,5 @@
 import { sharedCryptoWorker } from "@/base/crypto";
+import { joinPath } from "@/base/file-name";
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
@@ -404,7 +405,7 @@ async function downloadFileDesktop(
         const imageStream = new Response(imageData).body;
         await writeStream(
             electron,
-            `${downloadDir}/${imageExportName}`,
+            joinPath(downloadDir, imageExportName),
             imageStream,
         );
         try {
@@ -416,11 +417,11 @@ async function downloadFileDesktop(
             const videoStream = new Response(videoData).body;
             await writeStream(
                 electron,
-                `${downloadDir}/${videoExportName}`,
+                joinPath(downloadDir, videoExportName),
                 videoStream,
             );
         } catch (e) {
-            await fs.rm(`${downloadDir}/${imageExportName}`);
+            await fs.rm(joinPath(downloadDir, imageExportName));
             throw e;
         }
     } else {
@@ -429,7 +430,11 @@ async function downloadFileDesktop(
             file.metadata.title,
             fs.exists,
         );
-        await writeStream(electron, `${downloadDir}/${fileExportName}`, stream);
+        await writeStream(
+            electron,
+            joinPath(downloadDir, fileExportName),
+            stream,
+        );
     }
 }
 
