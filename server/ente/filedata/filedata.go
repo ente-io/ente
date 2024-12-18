@@ -6,6 +6,21 @@ import (
 	"github.com/ente-io/museum/ente"
 )
 
+/*
+We store three types of derived data from a file, whose information is stored in the file_data table.
+Each derived data can have multiple objects, and each object is stored in the S3 bucket.
+1) MLData: This is the derived data from the file that is used for machine learning purposes.There's only
+one object for S3FileMetadata type.
+2) PreviewVideo: This is the derived data from the file that is used for previewing the video. This contains two objects.
+2.1) One object of type S3FileMetadata that contains the encrypted HLS playlist.
+2.2) Second object contains the encrypted video. The objectKey for this object is derived via ObjectKey function. The OG size column in the file_data
+contains sum of S3Metadata object size and the video object size. The object size is stored in the ObjectSize column.
+
+3) PreviewImage: This is the derived data from the file that is used for previewing the image. This just contain one object.
+The objectKey for this object is derived via ObjectKey function. We also store the nonce of the object in the ObjectNonce column.
+ObjectNonce is not stored for PreviewVideo type as HLS playlist contains a random key, that's only used once to encrypt the video with default nonce.
+*/
+
 type Entity struct {
 	FileID           int64           `json:"fileID"`
 	Type             ente.ObjectType `json:"type"`

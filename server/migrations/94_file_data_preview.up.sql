@@ -4,5 +4,3 @@ ALTER TABLE file_data
     ADD COLUMN obj_id TEXT,
     ADD COLUMN obj_nonce TEXT,
     ADD COLUMN obj_size INTEGER;
-
-
