@@ -276,171 +276,11 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Row(
-                                  mainAxisAlignment: Platform.isAndroid
-                                      ? MainAxisAlignment.spaceBetween
-                                      : MainAxisAlignment.center,
-                                  children: [
-                                    widget.file.caption?.isNotEmpty ?? false
-                                        ? Expanded(
-                                            child: ValueListenableBuilder(
-                                              valueListenable: _showControls,
-                                              builder: (context, value, _) {
-                                                return AnimatedOpacity(
-                                                  duration: const Duration(
-                                                    milliseconds: 200,
-                                                  ),
-                                                  curve: Curves.easeInQuad,
-                                                  opacity: value ? 1 : 0,
-                                                  child: Padding(
-                                                    padding: const EdgeInsets
-                                                        .fromLTRB(
-                                                      16,
-                                                      12,
-                                                      16,
-                                                      8,
-                                                    ),
-                                                    child: Text(
-                                                      widget.file.caption!,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      maxLines: 1,
-                                                      style: getEnteTextTheme(
-                                                        context,
-                                                      ).mini.copyWith(
-                                                            color: textBaseDark,
-                                                          ),
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          )
-                                        : const SizedBox.shrink(),
-                                    Platform.isAndroid
-                                        ? ValueListenableBuilder(
-                                            valueListenable: _showControls,
-                                            builder: (context, value, _) {
-                                              return IgnorePointer(
-                                                ignoring: !value,
-                                                child: AnimatedOpacity(
-                                                  duration: const Duration(
-                                                    milliseconds: 200,
-                                                  ),
-                                                  curve: Curves.easeInQuad,
-                                                  opacity: value ? 1 : 0,
-                                                  child: ElTooltip(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                      12,
-                                                    ),
-                                                    distance: 4,
-                                                    controller:
-                                                        _elTooltipController,
-                                                    content: GestureDetector(
-                                                      onLongPress: () {
-                                                        Bus.instance.fire(
-                                                          UseMediaKitForVideo(),
-                                                        );
-                                                        HapticFeedback
-                                                            .vibrate();
-                                                        _elTooltipController
-                                                            .hide();
-                                                      },
-                                                      child: Text(
-                                                        S
-                                                            .of(context)
-                                                            .useDifferentPlayerInfo,
-                                                      ),
-                                                    ),
-                                                    position: ElTooltipPosition
-                                                        .topEnd,
-                                                    color:
-                                                        backgroundElevatedDark,
-                                                    appearAnimationDuration:
-                                                        const Duration(
-                                                      milliseconds: 200,
-                                                    ),
-                                                    disappearAnimationDuration:
-                                                        const Duration(
-                                                      milliseconds: 200,
-                                                    ),
-                                                    child: GestureDetector(
-                                                      onTap: () {
-                                                        if (_elTooltipController
-                                                                .value ==
-                                                            ElTooltipStatus
-                                                                .hidden) {
-                                                          _elTooltipController
-                                                              .show();
-                                                        } else {
-                                                          _elTooltipController
-                                                              .hide();
-                                                        }
-                                                        _controller?.pause();
-                                                      },
-                                                      behavior: HitTestBehavior
-                                                          .translucent,
-                                                      onLongPress: () {
-                                                        Bus.instance.fire(
-                                                          UseMediaKitForVideo(),
-                                                        );
-                                                        HapticFeedback
-                                                            .vibrate();
-                                                      },
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .fromLTRB(
-                                                          12,
-                                                          0,
-                                                          0,
-                                                          4,
-                                                        ),
-                                                        child: Container(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(
-                                                            12,
-                                                          ),
-                                                          child: Stack(
-                                                            alignment: Alignment
-                                                                .bottomRight,
-                                                            children: [
-                                                              Icon(
-                                                                Icons
-                                                                    .play_arrow_outlined,
-                                                                size: 24,
-                                                                color: Colors
-                                                                    .white
-                                                                    .withOpacity(
-                                                                  0.2,
-                                                                ),
-                                                              ),
-                                                              Icon(
-                                                                Icons
-                                                                    .question_mark_rounded,
-                                                                size: 10,
-                                                                color: Colors
-                                                                    .white
-                                                                    .withOpacity(
-                                                                  0.2,
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          )
-                                        : const SizedBox.shrink(),
-                                  ],
+                                _VideoDescriptionAndSwitchToMediaKitButton(
+                                  file: widget.file,
+                                  showControls: _showControls,
+                                  elTooltipController: _elTooltipController,
+                                  controller: _controller,
                                 ),
                                 ValueListenableBuilder(
                                   valueListenable: _isPlaybackReady,
@@ -836,5 +676,133 @@ class _SeekBarAndDuration extends StatelessWidget {
     }
 
     return seconds;
+  }
+}
+
+class _VideoDescriptionAndSwitchToMediaKitButton extends StatelessWidget {
+  final EnteFile file;
+  final ValueNotifier<bool> showControls;
+  final ElTooltipController elTooltipController;
+  final NativeVideoPlayerController? controller;
+
+  const _VideoDescriptionAndSwitchToMediaKitButton({
+    required this.file,
+    required this.showControls,
+    required this.elTooltipController,
+    required this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: Platform.isAndroid
+          ? MainAxisAlignment.spaceBetween
+          : MainAxisAlignment.center,
+      children: [
+        file.caption?.isNotEmpty ?? false
+            ? Expanded(
+                child: ValueListenableBuilder(
+                  valueListenable: showControls,
+                  builder: (context, value, _) {
+                    return AnimatedOpacity(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeInQuad,
+                      opacity: value ? 1 : 0,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                        child: Text(
+                          file.caption!,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: getEnteTextTheme(context)
+                              .mini
+                              .copyWith(color: textBaseDark),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              )
+            : const SizedBox.shrink(),
+        Platform.isAndroid
+            ? ValueListenableBuilder(
+                valueListenable: showControls,
+                builder: (context, value, _) {
+                  return IgnorePointer(
+                    ignoring: !value,
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeInQuad,
+                      opacity: value ? 1 : 0,
+                      child: ElTooltip(
+                        padding: const EdgeInsets.all(12),
+                        distance: 4,
+                        controller: elTooltipController,
+                        content: GestureDetector(
+                          onLongPress: () {
+                            Bus.instance.fire(
+                              UseMediaKitForVideo(),
+                            );
+                            HapticFeedback.vibrate();
+                            elTooltipController.hide();
+                          },
+                          child: Text(S.of(context).useDifferentPlayerInfo),
+                        ),
+                        position: ElTooltipPosition.topEnd,
+                        color: backgroundElevatedDark,
+                        appearAnimationDuration: const Duration(
+                          milliseconds: 200,
+                        ),
+                        disappearAnimationDuration: const Duration(
+                          milliseconds: 200,
+                        ),
+                        child: GestureDetector(
+                          onTap: () {
+                            if (elTooltipController.value ==
+                                ElTooltipStatus.hidden) {
+                              elTooltipController.show();
+                            } else {
+                              elTooltipController.hide();
+                            }
+                            controller?.pause();
+                          },
+                          behavior: HitTestBehavior.translucent,
+                          onLongPress: () {
+                            Bus.instance.fire(
+                              UseMediaKitForVideo(),
+                            );
+                            HapticFeedback.vibrate();
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 0, 0, 4),
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              child: Stack(
+                                alignment: Alignment.bottomRight,
+                                children: [
+                                  Icon(
+                                    Icons.play_arrow_outlined,
+                                    size: 24,
+                                    color: Colors.white.withOpacity(0.2),
+                                  ),
+                                  Icon(
+                                    Icons.question_mark_rounded,
+                                    size: 10,
+                                    color: Colors.white.withOpacity(0.2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              )
+            : const SizedBox.shrink(),
+      ],
+    );
   }
 }
