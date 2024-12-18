@@ -1382,8 +1382,8 @@
   "onlyThem": "Only them",
   "checkingModels": "Checking models...",
   "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
-  "searchDiscoverEmptySection": "Images will be shown here once processing is complete",
-  "searchPersonsEmptySection": "People will be shown here once processing is complete",
+  "searchDiscoverEmptySection": "Images will be shown here once processing and syncing is complete",
+  "searchPersonsEmptySection": "People will be shown here once processing and syncing is complete",
   "viewersSuccessfullyAdded": "{count, plural, =0 {Added 0 viewer} =1 {Added 1 viewer} other {Added {count} viewers}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {

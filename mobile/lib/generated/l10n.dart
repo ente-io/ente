@@ -10027,20 +10027,20 @@ class S {
     );
   }
 
-  /// `Images will be shown here once processing is complete`
+  /// `Images will be shown here once processing and syncing is complete`
   String get searchDiscoverEmptySection {
     return Intl.message(
-      'Images will be shown here once processing is complete',
+      'Images will be shown here once processing and syncing is complete',
       name: 'searchDiscoverEmptySection',
       desc: '',
       args: [],
     );
   }
 
-  /// `People will be shown here once processing is complete`
+  /// `People will be shown here once processing and syncing is complete`
   String get searchPersonsEmptySection {
     return Intl.message(
-      'People will be shown here once processing is complete',
+      'People will be shown here once processing and syncing is complete',
       name: 'searchPersonsEmptySection',
       desc: '',
       args: [],
