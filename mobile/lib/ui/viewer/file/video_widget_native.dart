@@ -405,14 +405,31 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                                                   .all(
                                                             12,
                                                           ),
-                                                          child: Icon(
-                                                            Icons
-                                                                .question_mark_rounded,
-                                                            size: 16,
-                                                            color: Colors.white
-                                                                .withOpacity(
-                                                              0.2,
-                                                            ),
+                                                          child: Stack(
+                                                            alignment: Alignment
+                                                                .bottomRight,
+                                                            children: [
+                                                              Icon(
+                                                                Icons
+                                                                    .play_arrow_outlined,
+                                                                size: 24,
+                                                                color: Colors
+                                                                    .white
+                                                                    .withOpacity(
+                                                                  0.2,
+                                                                ),
+                                                              ),
+                                                              Icon(
+                                                                Icons
+                                                                    .question_mark_rounded,
+                                                                size: 10,
+                                                                color: Colors
+                                                                    .white
+                                                                    .withOpacity(
+                                                                  0.2,
+                                                                ),
+                                                              ),
+                                                            ],
                                                           ),
                                                         ),
                                                       ),
