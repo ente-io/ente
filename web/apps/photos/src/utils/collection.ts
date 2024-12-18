@@ -22,7 +22,6 @@ import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import { safeDirectoryName } from "@/new/photos/utils/native-fs";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
-import bs58 from "bs58";
 import { t } from "i18next";
 import {
     addToCollection,
@@ -175,21 +174,6 @@ async function createCollectionDownloadFolder(
     );
     await fs.mkdirIfNeeded(collectionDownloadPath);
     return collectionDownloadPath;
-}
-
-export function appendCollectionKeyToShareURL(
-    url: string,
-    collectionKey: string,
-) {
-    if (!url) {
-        return null;
-    }
-
-    const sharableURL = new URL(url);
-
-    const bytes = Buffer.from(collectionKey, "base64");
-    sharableURL.hash = bs58.encode(bytes);
-    return sharableURL.href;
 }
 
 const _intSelectOption = (i: number) => {
