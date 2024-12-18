@@ -1091,5 +1091,6 @@
   },
   "enable": "Activare",
   "enabled": "Activat",
-  "moreDetails": "Mai multe detalii"
+  "moreDetails": "Mai multe detalii",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }

@@ -1574,5 +1574,6 @@
     }
   },
   "legacyInvite": "{email} te ha invitado a ser un contacto de confianza",
-  "authToManageLegacy": "Por favor, autentícate para administrar tus contactos de confianza"
+  "authToManageLegacy": "Por favor, autentícate para administrar tus contactos de confianza",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }

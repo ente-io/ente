@@ -1,3 +1,4 @@
 {
-  "@@locale ": "en"
+  "@@locale ": "en",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }

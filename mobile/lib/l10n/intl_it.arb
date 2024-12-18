@@ -1404,5 +1404,6 @@
   "changeLogBackupStatusTitle": "Stato Backup",
   "changeLogDiscoverTitle": "Esplora",
   "selectCoverPhoto": "Seleziona foto di copertina",
-  "newLocation": "Nuova posizione"
+  "newLocation": "Nuova posizione",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }

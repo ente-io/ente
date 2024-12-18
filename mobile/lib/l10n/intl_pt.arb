@@ -1574,5 +1574,6 @@
     }
   },
   "legacyInvite": "{email} convidou você para ser um contato confiável",
-  "authToManageLegacy": "Autentique-se para gerenciar seus contatos confiáveis"
+  "authToManageLegacy": "Autentique-se para gerenciar seus contatos confiáveis",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }

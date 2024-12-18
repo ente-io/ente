@@ -1361,5 +1361,6 @@
   },
   "extraPhotosFound": "追加の写真が見つかりました",
   "configuration": "設定",
-  "localIndexing": "このデバイス上での実行"
+  "localIndexing": "このデバイス上での実行",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }

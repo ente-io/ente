@@ -1131,5 +1131,6 @@
   "rotate": "Putar",
   "left": "Kiri",
   "right": "Kanan",
-  "whatsNew": "Hal yang baru"
+  "whatsNew": "Hal yang baru",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }
