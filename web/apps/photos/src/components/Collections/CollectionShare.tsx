@@ -1223,11 +1223,10 @@ const PublicShare: React.FC<PublicShareProps> = ({
 
     useEffect(() => {
         if (publicShareProp?.url) {
-            const url = appendCollectionKeyToShareURL(
+            appendCollectionKeyToShareURL(
                 publicShareProp.url,
                 collection.key,
-            );
-            setPublicShareUrl(url);
+            ).then((url) => setPublicShareUrl(url));
         } else {
             setPublicShareUrl(null);
         }

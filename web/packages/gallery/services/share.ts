@@ -1,4 +1,4 @@
-import { fromHex, toB64 } from "@/base/crypto";
+import { fromB64, fromHex, toB64 } from "@/base/crypto";
 import bs58 from "bs58";
 
 /**
@@ -18,13 +18,13 @@ import bs58 from "bs58";
  * @returns A URL that includes the base-58 encoded collection key as the hash
  * fragment.
  */
-export const appendCollectionKeyToShareURL = (
+export const appendCollectionKeyToShareURL = async (
     url: string,
     collectionKey: string,
 ) => {
     const sharableURL = new URL(url);
 
-    const bytes = Buffer.from(collectionKey, "base64");
+    const bytes = await fromB64(collectionKey);
     sharableURL.hash = bs58.encode(bytes);
     return sharableURL.href;
 };
