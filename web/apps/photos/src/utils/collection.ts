@@ -1,4 +1,5 @@
 import { ensureElectron } from "@/base/electron";
+import { joinPath } from "@/base/file-name";
 import log from "@/base/log";
 import {
     COLLECTION_ROLE,
@@ -168,7 +169,10 @@ async function createCollectionDownloadFolder(
         collectionName,
         fs.exists,
     );
-    const collectionDownloadPath = `${downloadDirPath}/${collectionDownloadName}`;
+    const collectionDownloadPath = joinPath(
+        downloadDirPath,
+        collectionDownloadName,
+    );
     await fs.mkdirIfNeeded(collectionDownloadPath);
     return collectionDownloadPath;
 }

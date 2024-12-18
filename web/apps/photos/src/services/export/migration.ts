@@ -1,5 +1,5 @@
 import { ensureElectron } from "@/base/electron";
-import { nameAndExtension } from "@/base/file-name";
+import { joinPath, nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
 import type { Collection } from "@/media/collection";
@@ -225,7 +225,10 @@ const migrateCollectionFolders = async (
 ) => {
     const fs = ensureElectron().fs;
     for (const collection of collections) {
-        const oldPath = `${exportDir}/${collection.id}_${oldSanitizeName(collection.name)}`;
+        const oldPath = joinPath(
+            exportDir,
+            `${collection.id}_${oldSanitizeName(collection.name)}`,
+        );
         const newPath = await safeDirectoryName(
             exportDir,
             collection.name,
@@ -249,19 +252,28 @@ async function migrateFiles(
     const fs = ensureElectron().fs;
     for (const file of files) {
         const collectionPath = collectionIDPathMap.get(file.collectionID);
-        const metadataPath = `${collectionPath}/${exportMetadataDirectoryName}`;
+        const metadataPath = joinPath(
+            collectionPath,
+            exportMetadataDirectoryName,
+        );
 
         const oldFileName = `${file.id}_${oldSanitizeName(file.metadata.title)}`;
-        const oldFilePath = `${collectionPath}/${oldFileName}`;
-        const oldFileMetadataPath = `${metadataPath}/${oldFileName}.json`;
+        const oldFilePath = joinPath(collectionPath, oldFileName);
+        const oldFileMetadataPath = joinPath(
+            metadataPath,
+            `${oldFileName}.json`,
+        );
 
         const newFileName = await safeFileName(
             collectionPath,
             file.metadata.title,
             fs.exists,
         );
-        const newFilePath = `${collectionPath}/${newFileName}`;
-        const newFileMetadataPath = `${metadataPath}/${newFileName}.json`;
+        const newFilePath = joinPath(collectionPath, newFileName);
+        const newFileMetadataPath = joinPath(
+            metadataPath,
+            `${newFileName}.json`,
+        );
 
         if (!(await fs.exists(oldFilePath))) continue;
 
@@ -444,7 +456,7 @@ async function removeCollectionExportMissingMetadataFolder(
         if (
             await fs.exists(
                 getMetadataFolderExportPath(
-                    `${exportDir}/${collectionExportName}`,
+                    joinPath(exportDir, collectionExportName),
                 ),
             )
         ) {
@@ -511,7 +523,7 @@ const oldSanitizeName = (name: string) =>
     name.replaceAll("/", "_").replaceAll(" ", "_");
 
 const getFileSavePath = (collectionFolderPath: string, fileSaveName: string) =>
-    `${collectionFolderPath}/${fileSaveName}`;
+    joinPath(collectionFolderPath, fileSaveName);
 
 const getUniqueFileExportNameForMigration = (
     collectionPath: string,
