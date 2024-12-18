@@ -59,9 +59,9 @@ class UpdateService {
     return _latestVersion;
   }
 
-  Future<void> showUpdateNotification() async {
+  Future<bool> showUpdateNotification() async {
     if (!isIndependent()) {
-      return;
+      return false;
     }
     final shouldUpdate = await this.shouldUpdate();
     final lastNotificationShownTime =
@@ -72,15 +72,19 @@ class UpdateService {
     if (shouldUpdate &&
         hasBeen3DaysSinceLastNotification &&
         _latestVersion!.shouldNotify!) {
-      unawaited(
-        NotificationService.instance.showNotification(
-          "Update available",
-          "Click to install our best version yet",
-        ),
-      );
       await _prefs.setInt(kUpdateAvailableShownTimeKey, now);
+      if (Platform.isAndroid) {
+        unawaited(
+          NotificationService.instance.showNotification(
+            "Update available",
+            "Click to install our best version yet",
+          ),
+        );
+      }
+      return true;
     } else {
       _logger.info("Debouncing notification");
+      return false;
     }
   }
 

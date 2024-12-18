@@ -156,6 +156,7 @@
   "twoFactorAuthTitle": "Uwierzytelnianie dwustopniowe",
   "passkeyAuthTitle": "Weryfikacja kluczem dostępu",
   "verifyPasskey": "Zweryfikuj klucz dostępu",
+  "loginWithTOTP": "Zaloguj się za pomocą TOTP",
   "recoverAccount": "Odzyskaj konto",
   "enterRecoveryKeyHint": "Wprowadź swój klucz odzyskiwania",
   "recover": "Odzyskaj",
@@ -327,6 +328,10 @@
       }
     }
   },
+  "manualSort": "Niestandardowe",
+  "editOrder": "Zmień kolejność",
+  "mostFrequentlyUsed": "Często używane",
+  "mostRecentlyUsed": "Ostatnio używane",
   "activeSessions": "Aktywne sesje",
   "somethingWentWrongPleaseTryAgain": "Coś poszło nie tak, spróbuj ponownie",
   "thisWillLogYouOutOfThisDevice": "To wyloguje Cię z tego urządzenia!",
@@ -448,6 +453,7 @@
   "unpinText": "Odepnij",
   "pinnedCodeMessage": "Przypięto {code}",
   "unpinnedCodeMessage": "Odpięto {code}",
+  "pinned": "Przypięte",
   "tags": "Etykiety",
   "createNewTag": "Utwórz nową etykietę",
   "tag": "Etykieta",
@@ -484,5 +490,12 @@
   "appLockNotEnabled": "Blokada aplikacji nie jest włączona",
   "appLockNotEnabledDescription": "Prosimy włączyć blokadę aplikacji z Zabezpieczenia > Blokada aplikacji",
   "authToViewPasskey": "Prosimy uwierzytelnić się, aby wyświetlić klucz dostępu",
-  "appLockOfflineModeWarning": "Wybrano kontynuowanie bez kopii zapasowych. Jeśli zapomnisz blokady aplikacji, utracisz dostęp do swoich danych."
+  "appLockOfflineModeWarning": "Wybrano kontynuowanie bez kopii zapasowych. Jeśli zapomnisz blokady aplikacji, utracisz dostęp do swoich danych.",
+  "duplicateCodes": "Duplikuj kody",
+  "noDuplicates": "✨ Brak duplikatów",
+  "youveNoDuplicateCodesThatCanBeCleared": "Nie masz duplikatów kodów, które mogą być wyczyszczone",
+  "deduplicateCodes": "Deduplikuj kody",
+  "deselectAll": "Odznacz wszystko",
+  "selectAll": "Zaznacz wszystko",
+  "deleteDuplicates": "Usuń duplikaty"
 }

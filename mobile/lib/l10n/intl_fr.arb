@@ -359,14 +359,14 @@
   "singleFileInBothLocalAndRemote": "Cette {fileType} est à la fois sur ente et sur votre appareil.",
   "singleFileInRemoteOnly": "Cette {fileType} sera supprimée de l'Ente.",
   "singleFileDeleteFromDevice": "Elle {fileType} sera supprimée de votre appareil.",
-  "deleteFromEnte": "Supprimé de Ente",
+  "deleteFromEnte": "Supprimer de Ente",
   "yesDelete": "Oui, supprimer",
   "movedToTrash": "Déplacé dans la corbeille",
   "deleteFromDevice": "Supprimer de l'appareil",
   "deleteFromBoth": "Supprimer des deux",
   "newAlbum": "Nouvel album",
   "albums": "Albums",
-  "memoryCount": "{count, plural, one{{formattedCount} mémoire} other{{formattedCount} souvenirs}}",
+  "memoryCount": "{count, plural, one{{formattedCount} souvenir} other{{formattedCount} souvenirs}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",
@@ -412,7 +412,8 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Taille de la grille photo",
-  "manageDeviceStorage": "Gérer le stockage de l'appareil",
+  "manageDeviceStorage": "Gérer le cache de l'appareil",
+  "manageDeviceStorageDesc": "Examiner et vider le cache.",
   "machineLearning": "Apprentissage automatique",
   "mlConsent": "Activer l'apprentissage automatique",
   "mlConsentTitle": "Activer l'apprentissage automatique ?",
@@ -813,10 +814,10 @@
   "sharedWithMe": "Partagés avec moi",
   "sharedByMe": "Partagé par moi",
   "doubleYourStorage": "Doubler votre espace de stockage",
-  "referFriendsAnd2xYourPlan": "Parrainez des amis et 2x votre abonnement",
+  "referFriendsAnd2xYourPlan": "Parrainez des amis et doublez votre abonnement",
   "shareAlbumHint": "Ouvrez un album et appuyez sur le bouton de partage en haut à droite pour le partager.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Les éléments montrent le nombre de jours restants avant la suppression définitive",
-  "trashDaysLeft": "{count, plural, =0 {0 jour} =1 {1 jour} other {{count} jours}}",
+  "trashDaysLeft": "{count, plural, =0 {Bientôt} =1 {1 jour} other {{count} jours}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -950,7 +951,7 @@
   "emailChangedTo": "L'e-mail a été changé en {newEmail}",
   "verifying": "Validation en cours...",
   "disablingTwofactorAuthentication": "Désactiver la double-authentification...",
-  "allMemoriesPreserved": "Tous les souvenirs conservés",
+  "allMemoriesPreserved": "Tous les souvenirs sont conservés",
   "loadingGallery": "Chargement de la galerie...",
   "syncing": "En cours de synchronisation...",
   "encryptingBackup": "Chiffrement de la sauvegarde...",
@@ -1070,7 +1071,7 @@
   "dayToday": "Aujourd'hui",
   "dayYesterday": "Hier",
   "storage": "Stockage",
-  "usedSpace": "Mémoire utilisée",
+  "usedSpace": "Stockage utilisé",
   "storageBreakupFamily": "Famille",
   "storageBreakupYou": "Vous",
   "@storageBreakupYou": {
@@ -1080,7 +1081,7 @@
   "@storageUsageInfo": {
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
-  "availableStorageSpace": "{freeAmount} {storageUnit} gratuit",
+  "availableStorageSpace": "{freeAmount} {storageUnit} libre",
   "appVersion": "Version : {versionValue}",
   "verifyIDLabel": "Vérifier",
   "fileInfoAddDescHint": "Ajouter une description...",
@@ -1233,6 +1234,7 @@
   "waitingForVerification": "En attente de vérification...",
   "passkey": "Code d'accès",
   "passkeyAuthTitle": "Vérification du code d'accès",
+  "loginWithTOTP": "Se connecter avec TOTP",
   "passKeyPendingVerification": "La vérification est toujours en attente",
   "loginSessionExpired": "Session expirée",
   "loginSessionExpiredDetails": "Votre session a expiré. Veuillez vous reconnecter.",
@@ -1244,7 +1246,6 @@
   "deviceCodeHint": "Saisissez le code",
   "joinDiscord": "Rejoindre Discord",
   "locations": "Emplacements",
-  "descriptions": "Descriptions",
   "addAName": "Ajouter un nom",
   "findThemQuickly": "Trouvez-les rapidement",
   "@findThemQuickly": {
@@ -1383,7 +1384,6 @@
   "enableMachineLearningBanner": "Activer l'apprentissage automatique pour la recherche magique et la reconnaissance faciale",
   "searchDiscoverEmptySection": "Les images seront affichées ici une fois le traitement terminé",
   "searchPersonsEmptySection": "Les personnes seront affichées ici une fois le traitement terminé",
-  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "viewersSuccessfullyAdded": "{count, plural, =0 {0 observateur ajouté} =1 {1 observateur ajouté} other {{count} observateurs ajoutés}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1506,12 +1506,73 @@
   "changeLogDiscoverContent": "Vous cherchez des photos de vos cartes d'identité, des notes ou même des memes? Allez dans l'onglet de recherche et découvrez Découverte. Sur la base de notre recherche sémantique, vous trouverez des photos qui pourraient être importantes pour vous.\\n\\nUniquement disponible si vous avez activé l'apprentissage automatique.",
   "selectCoverPhoto": "Sélectionnez la photo de couverture",
   "newLocation": "Nouveau lieu",
-  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
-  "openFile": "Open file",
-  "backupFile": "Backup file",
-  "openAlbumInBrowser": "Open album in browser",
-  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
-  "allow": "Allow",
-  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
-  "seePublicAlbumLinksInApp": "See public album links in app"
+  "faceNotClusteredYet": "Ce visage n'a pas encore été regroupé, veuillez revenir plus tard",
+  "theLinkYouAreTryingToAccessHasExpired": "Le lien que vous essayez d'accéder a expiré.",
+  "openFile": "Ouvrir le fichier",
+  "backupFile": "Sauvegarder le fichier",
+  "openAlbumInBrowser": "Ouvrir l'album dans le navigateur",
+  "openAlbumInBrowserTitle": "Veuillez utiliser l'application web pour ajouter des photos à cet album",
+  "allow": "Autoriser",
+  "allowAppToOpenSharedAlbumLinks": "Autoriser l'application à ouvrir les liens d'albums partagés",
+  "seePublicAlbumLinksInApp": "Ouvrir les liens des albums publics dans l'application",
+  "emergencyContacts": "Contacts d'urgence",
+  "acceptTrustInvite": "Accepter l'invitation",
+  "declineTrustInvite": "Refuser l’invitation",
+  "removeYourselfAsTrustedContact": "Retirez-vous comme contact de confiance",
+  "legacy": "Héritage",
+  "legacyPageDesc": "Héritage permet aux contacts de confiance d'accéder à votre compte en votre absence.",
+  "legacyPageDesc2": "Les contacts de confiance peuvent initier la récupération du compte et, s'ils ne sont pas bloqués dans les 30 jours qui suivent, peuvent réinitialiser votre mot de passe et accéder à votre compte.",
+  "legacyAccounts": "Comptes hérités",
+  "trustedContacts": "Contacts de confiance",
+  "addTrustedContact": "Ajouter un contact de confiance",
+  "removeInvite": "Supprimer l’Invitation",
+  "recoveryWarning": "Un contact de confiance tente d'accéder à votre compte",
+  "rejectRecovery": "Rejeter la récupération",
+  "recoveryInitiated": "Récupération initiée",
+  "recoveryInitiatedDesc": "Vous pourrez accéder au compte d'ici {days} jours. Une notification sera envoyée à {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Annuler la récupération",
+  "recoveryAccount": "Récupérer un compte",
+  "cancelAccountRecoveryBody": "Êtes-vous sûr de vouloir annuler la récupération ?",
+  "startAccountRecoveryTitle": "Démarrer la récupération",
+  "whyAddTrustContact": "Un contact de confiance peut vous aider à récupérer vos données.",
+  "recoveryReady": "Vous pouvez maintenant récupérer le compte de {email} en définissant un nouveau mot de passe.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} tente de récupérer votre compte.",
+  "trustedInviteBody": "Vous avez été invité(e) à être un(e) héritier(e) par {email}.",
+  "warning": "Attention",
+  "proceed": "Procéder",
+  "confirmAddingTrustedContact": "Vous êtes sur le point d'ajouter {email} en tant que contact sûr. Il pourra récupérer votre compte si vous êtes absent pendant {numOfDays} jours.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} vous a invité à être un contact sûr",
+  "authToManageLegacy": "Veuillez vous authentifier pour gérer vos contacts de confiance"
 }

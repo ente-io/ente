@@ -397,7 +397,6 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Fotoğraf ızgara boyutu",
-  "manageDeviceStorage": "Cihaz depolamasını yönet",
   "machineLearning": "Makine öğrenimi",
   "magicSearch": "Sihirli arama",
   "loadingModel": "Modeller indiriliyor...",
@@ -758,16 +757,6 @@
   "referFriendsAnd2xYourPlan": "Arkadaşlarınıza önerin ve planınızı 2 katına çıkarın",
   "shareAlbumHint": "Bir albüm açın ve paylaşmak için sağ üstteki paylaş düğmesine dokunun.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Öğeler, kalıcı olarak silinmeden önce kalan gün sayısını gösterir",
-  "trashDaysLeft": "{count, plural, =0{gün} =1{1 gün} other{{count} gün}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "Hepsini Sil",
   "renameAlbum": "Albümü yeniden adlandır",
   "convertToAlbum": "Albüme taşı",
@@ -1159,7 +1148,6 @@
   "deviceCodeHint": "Kodu girin",
   "joinDiscord": "Discord'a Katıl",
   "locations": "Konum",
-  "descriptions": "Açıklama",
   "addViewers": "{count, plural, zero {Görüntüleyen ekle} one {Görüntüleyen ekle} other {Görüntüleyen ekle}}",
   "addCollaborators": "{count, plural, zero {Ortak çalışan ekle} one {Ortak çalışan ekle} other {Ortak çalışan ekle}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Uçtan uca şifrelemeyi doğrulamak için bir e-postaya uzun basın.",
@@ -1169,14 +1157,5 @@
   "invalidEndpoint": "Geçersiz uç nokta",
   "invalidEndpointMessage": "Üzgünüz, girdiğiniz uç nokta geçersiz. Lütfen geçerli bir uç nokta girin ve tekrar deneyin.",
   "endpointUpdatedMessage": "Fatura başarıyla güncellendi",
-  "customEndpoint": "{endpoint}'e bağlanıldı",
-  "faceNotClusteredYet": "Face not clustered yet, please come back later",
-  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
-  "openFile": "Open file",
-  "backupFile": "Backup file",
-  "openAlbumInBrowser": "Open album in browser",
-  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
-  "allow": "Allow",
-  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
-  "seePublicAlbumLinksInApp": "See public album links in app"
+  "customEndpoint": "{endpoint}'e bağlanıldı"
 }

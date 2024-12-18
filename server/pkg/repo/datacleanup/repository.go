@@ -64,7 +64,7 @@ func (r *Repository) MoveToNextStage(ctx context.Context, userID int64, stage en
 }
 
 // ScheduleNextAttemptAfterNHours bumps the attempt count by one and schedule next attempt after n hr(s)
-func (r *Repository) ScheduleNextAttemptAfterNHours(ctx context.Context, userID int64, n int8) error {
+func (r *Repository) ScheduleNextAttemptAfterNHours(ctx context.Context, userID int64, n int32) error {
 	_, err := r.DB.ExecContext(ctx, `UPDATE data_cleanup SET stage_attempt_count = stage_attempt_count +1, stage_schedule_time = $1
 			 WHERE user_id = $2`, time.MicrosecondsAfterHours(n), userID)
 	return stacktrace.Propagate(err, "failed to insert/update")

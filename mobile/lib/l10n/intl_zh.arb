@@ -412,7 +412,6 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "照片网格大小",
-  "manageDeviceStorage": "管理设备存储",
   "machineLearning": "机器学习",
   "mlConsent": "启用机器学习",
   "mlConsentTitle": "要启用机器学习吗？",
@@ -816,16 +815,6 @@
   "referFriendsAnd2xYourPlan": "把我们推荐给你的朋友然后获得延长一倍的订阅计划",
   "shareAlbumHint": "打开相册并点击右上角的分享按钮进行分享",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "项目显示永久删除前剩余的天数",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1天} other {{count} 天}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "全部删除",
   "renameAlbum": "重命名相册",
   "convertToAlbum": "转换为相册",
@@ -1244,7 +1233,6 @@
   "deviceCodeHint": "输入代码",
   "joinDiscord": "加入 Discord",
   "locations": "位置",
-  "descriptions": "描述",
   "addAName": "添加一个名称",
   "findPeopleByName": "按名称快速查找人物",
   "addViewers": "{count, plural, zero {添加查看者} one {添加查看者} other {添加查看者}}",
@@ -1345,14 +1333,5 @@
   "mostRelevant": "最相关",
   "loadingYourPhotos": "正在加载您的照片...",
   "processingImport": "正在处理 {folderName}...",
-  "extraPhotosFound": "发现额外照片",
-  "faceNotClusteredYet": "Face not clustered yet, please come back later",
-  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
-  "openFile": "Open file",
-  "backupFile": "Backup file",
-  "openAlbumInBrowser": "Open album in browser",
-  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
-  "allow": "Allow",
-  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
-  "seePublicAlbumLinksInApp": "See public album links in app"
+  "extraPhotosFound": "发现额外照片"
 }

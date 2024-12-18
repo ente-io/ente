@@ -36,8 +36,9 @@ import exportService, {
     ExportStage,
     selectAndPrepareExportDirectory,
     type ExportOpts,
+    type ExportProgress,
+    type ExportSettings,
 } from "services/export";
-import { ExportProgress, ExportSettings } from "types/export";
 import ExportFinished from "./ExportFinished";
 import ExportInProgress from "./ExportInProgress";
 import ExportInit from "./ExportInit";

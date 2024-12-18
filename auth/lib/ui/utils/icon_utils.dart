@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/models/all_icon_data.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -23,6 +25,80 @@ class IconUtils {
     await _loadJson();
   }
 
+  Map<String, AllIconData> getAllIcons() {
+    Set<String> processedIconPaths = {};
+    final allIcons = <String, AllIconData>{};
+
+    final simpleIterator = _simpleIcons.entries.iterator;
+    final customIterator = _customIcons.entries.iterator;
+
+    var simpleEntry = simpleIterator.moveNext() ? simpleIterator.current : null;
+    var customEntry = customIterator.moveNext() ? customIterator.current : null;
+
+    String simpleIconPath, customIconPath;
+
+    while (simpleEntry != null && customEntry != null) {
+      if (simpleEntry.key.compareTo(customEntry.key) <= 0) {
+        simpleIconPath = "assets/simple-icons/icons/${simpleEntry.key}.svg";
+        if (!processedIconPaths.contains(simpleIconPath)) {
+          allIcons[simpleEntry.key] = AllIconData(
+            title: simpleEntry.key,
+            type: IconType.simpleIcon,
+            color: simpleEntry.value,
+          );
+          processedIconPaths.add(simpleIconPath);
+        }
+        simpleEntry = simpleIterator.moveNext() ? simpleIterator.current : null;
+      } else {
+        customIconPath =
+            "assets/custom-icons/icons/${customEntry.value.slug ?? customEntry.key}.svg";
+
+        if (!processedIconPaths.contains(customIconPath)) {
+          allIcons[customEntry.key] = AllIconData(
+            title: customEntry.key,
+            type: IconType.customIcon,
+            color: customEntry.value.color,
+            slug: customEntry.value.slug,
+          );
+          processedIconPaths.add(customIconPath);
+        }
+        customEntry = customIterator.moveNext() ? customIterator.current : null;
+      }
+    }
+
+    while (simpleEntry != null) {
+      simpleIconPath = "assets/simple-icons/icons/${simpleEntry.key}.svg";
+
+      if (!processedIconPaths.contains(simpleIconPath)) {
+        allIcons[simpleEntry.key] = AllIconData(
+          title: simpleEntry.key,
+          type: IconType.simpleIcon,
+          color: simpleEntry.value,
+        );
+        processedIconPaths.add(simpleIconPath);
+      }
+      simpleEntry = simpleIterator.moveNext() ? simpleIterator.current : null;
+    }
+
+    while (customEntry != null) {
+      customIconPath =
+          "assets/custom-icons/icons/${customEntry.value.slug ?? customEntry.key}.svg";
+
+      if (!processedIconPaths.contains(customIconPath)) {
+        allIcons[customEntry.key] = AllIconData(
+          title: customEntry.key,
+          type: IconType.customIcon,
+          color: customEntry.value.color,
+          slug: customEntry.value.slug,
+        );
+        processedIconPaths.add(customIconPath);
+      }
+      customEntry = customIterator.moveNext() ? customIterator.current : null;
+    }
+
+    return allIcons;
+  }
+
   Widget getIcon(
     BuildContext context,
     String provider, {
@@ -30,10 +106,14 @@ class IconUtils {
   }) {
     final providerTitle = _getProviderTitle(provider);
     final List<String> titlesList = [providerTitle];
-    titlesList.addAll(_titleSplitCharacters.where((char) => providerTitle.contains(char)).map((char) => providerTitle.split(char)[0]));
-    for(final title in titlesList){
+    titlesList.addAll(
+      _titleSplitCharacters
+          .where((char) => providerTitle.contains(char))
+          .map((char) => providerTitle.split(char)[0]),
+    );
+    for (final title in titlesList) {
       if (_customIcons.containsKey(title)) {
-        return _getSVGIcon(
+        return getSVGIcon(
           "assets/custom-icons/icons/${_customIcons[title]!.slug ?? title}.svg",
           title,
           _customIcons[title]!.color,
@@ -41,7 +121,7 @@ class IconUtils {
           context,
         );
       } else if (_simpleIcons.containsKey(title)) {
-        return _getSVGIcon(
+        return getSVGIcon(
           "assets/simple-icons/icons/$title.svg",
           title,
           _simpleIcons[title],
@@ -55,7 +135,8 @@ class IconUtils {
       return CircleAvatar(
         radius: width / 2,
         backgroundColor: getEnteColorScheme(context).avatarColors[
-            providerTitle.hashCode % getEnteColorScheme(context).avatarColors.length],
+            providerTitle.hashCode %
+                getEnteColorScheme(context).avatarColors.length],
         child: Text(
           providerTitle.toUpperCase()[0],
           // fixed color
@@ -69,7 +150,7 @@ class IconUtils {
     }
   }
 
-  Widget _getSVGIcon(
+  Widget getSVGIcon(
     String path,
     String title,
     String? color,
@@ -137,9 +218,8 @@ class IconUtils {
         );
         if (icon["altNames"] != null) {
           for (final name in icon["altNames"]) {
-            _customIcons[name.toString()
-                .replaceAll(' ', '')
-                .toLowerCase()] = CustomIconData(
+            _customIcons[name.toString().replaceAll(' ', '').toLowerCase()] =
+                CustomIconData(
               icon["slug"],
               icon["hex"],
             );
@@ -148,6 +228,9 @@ class IconUtils {
       }
     } catch (e) {
       Logger("IconUtils").severe("Error loading icons", e);
+      if (kDebugMode) {
+        rethrow;
+      }
     }
   }
 

@@ -12,6 +12,8 @@
     "ENTER_EMAIL": "Masukkan alamat email",
     "EMAIL_ERROR": "Masukkan email yang sah",
     "required": "Wajib",
+    "email_not_registered": "",
+    "email_already_registered": "",
     "EMAIL_SENT": "Kode verifikasi dikirim ke <a>{{email}}</a>",
     "CHECK_INBOX": "Silakan periksa kotak masuk (serta kotak spam) untuk menyelesaikan verifikasi",
     "ENTER_OTT": "Kode verifikasi",

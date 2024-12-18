@@ -37,7 +37,7 @@ services:
       POSTGRES_USER: pguser
       POSTGRES_PASSWORD: pgpass
       POSTGRES_DB: ente_db
-    # Wait for postgres to be accept connections before starting museum.
+    # Wait for postgres to accept connections before starting museum.
     healthcheck:
       test:
         [

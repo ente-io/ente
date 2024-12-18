@@ -12,6 +12,8 @@
     "ENTER_EMAIL": "이메일 주소를 입력하세요",
     "EMAIL_ERROR": "올바른 이메일을 입력하세요",
     "required": "필수",
+    "email_not_registered": "",
+    "email_already_registered": "",
     "EMAIL_SENT": "<a>{{email}}</a> 로 인증 코드가 전송되었습니다",
     "CHECK_INBOX": "인증을 완료하기 위해 당신의 메일 수신함(그리고 스팸 수신함)을 확인하세요.",
     "ENTER_OTT": "인증 코드",

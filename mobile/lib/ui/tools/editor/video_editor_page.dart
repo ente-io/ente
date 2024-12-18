@@ -299,6 +299,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       );
     } catch (_) {
       await dialog.hide();
+    } finally {
+      await PhotoManager.startChangeNotify();
     }
   }
 }

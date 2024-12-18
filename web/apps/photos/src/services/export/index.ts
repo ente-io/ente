@@ -25,16 +25,8 @@ import { PromiseQueue } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import i18n from "i18next";
-import {
-    CollectionExportNames,
-    ExportProgress,
-    ExportRecord,
-    ExportSettings,
-    ExportUIUpdaters,
-    FileExportNames,
-} from "types/export";
 import { getAllLocalCollections } from "../collectionService";
-import { migrateExport } from "./migration";
+import { migrateExport, type ExportRecord } from "./migration";
 
 /** Name of the JSON file in which we keep the state of the export. */
 const exportRecordFileName = "export_status.json";
@@ -56,6 +48,21 @@ export enum ExportStage {
     FINISHED = 7,
 }
 
+export interface ExportProgress {
+    success: number;
+    failed: number;
+    total: number;
+}
+
+export interface ExportSettings {
+    folder: string;
+    continuousExport: boolean;
+}
+
+export type CollectionExportNames = Record<number, string>;
+
+export type FileExportNames = Record<string, string>;
+
 export const NULL_EXPORT_RECORD: ExportRecord = {
     version: 3,
     lastAttemptTimestamp: null,
@@ -74,6 +81,13 @@ export interface ExportOpts {
      * - If the user explicitly presses the "Resync" button.
      */
     resync?: boolean;
+}
+
+interface ExportUIUpdaters {
+    setExportStage: (stage: ExportStage) => void;
+    setExportProgress: (progress: ExportProgress) => void;
+    setLastExportTime: (exportTime: number) => void;
+    setPendingExports: (pendingExports: EnteFile[]) => void;
 }
 
 interface RequestCanceller {
@@ -366,7 +380,7 @@ class ExportService {
             );
 
             log.info(
-                `files:${files.length} unexported files: ${filesToExport.length}, deleted exported files: ${removedFileUIDs.length}, renamed collections: ${renamedCollections.length}, deleted collections: ${deletedExportedCollections.length}`,
+                `[export] files: ${files.length}, disk files: ${diskFileRecordIDs?.size ?? "<na>"}, unexported files: ${filesToExport.length}, deleted exported files: ${removedFileUIDs.length}, renamed collections: ${renamedCollections.length}, deleted collections: ${deletedExportedCollections.length}`,
             );
             let success = 0;
             let failed = 0;
@@ -1242,7 +1256,7 @@ const readOnDiskFileExportRecordIDs = async (
     //
     // -   `exportDir` traces its origin to `electron.selectDirectory()`, which
     //     returns POSIX paths. Down below we use it as the base directory when
-    //     construction paths for the items to export.
+    //     constructing paths for the items to export.
     //
     // -   `findFiles` is also guaranteed to return POSIX paths.
     //
@@ -1250,17 +1264,31 @@ const readOnDiskFileExportRecordIDs = async (
 
     const fileExportNames = exportRecord.fileExportNames ?? {};
 
+    const ls2 = new Array([...ls].slice(0, 100));
+    log.info(JSON.stringify({ exportDir, ls: ls2, fileExportNames }));
+
     for (const file of files) {
         if (isCanceled.status) throw Error(CustomError.EXPORT_STOPPED);
 
         const collectionExportName = collectionIDFolderNameMap.get(
             file.collectionID,
         );
+        log.info(
+            JSON.stringify({ cid: file.collectionID, collectionExportName }),
+        );
         if (!collectionExportName) continue;
 
         const collectionExportPath = `${exportDir}/${collectionExportName}`;
         const recordID = getExportRecordFileUID(file);
         const exportName = fileExportNames[recordID];
+        log.info(
+            JSON.stringify({
+                exportName,
+                constructed: `${collectionExportPath}/${exportName}`,
+                has: ls.has(`${collectionExportPath}/${exportName}`),
+            }),
+        );
+
         if (!exportName) continue;
 
         if (ls.has(`${collectionExportPath}/${exportName}`)) {

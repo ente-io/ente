@@ -380,7 +380,8 @@ class UserService {
         Widget page;
         final String passkeySessionID = response.data["passkeySessionID"];
         String twoFASessionID = response.data["twoFactorSessionID"];
-        if (twoFASessionID.isEmpty) {
+        if (twoFASessionID.isEmpty &&
+            response.data["twoFactorSessionIDV2"] != null) {
           twoFASessionID = response.data["twoFactorSessionIDV2"];
         }
         if (passkeySessionID.isNotEmpty) {
@@ -692,7 +693,8 @@ class UserService {
       Widget? page;
       final String passkeySessionID = response.data["passkeySessionID"];
       String twoFASessionID = response.data["twoFactorSessionID"];
-      if (twoFASessionID.isEmpty) {
+      if (twoFASessionID.isEmpty &&
+          response.data["twoFactorSessionIDV2"] != null) {
         twoFASessionID = response.data["twoFactorSessionIDV2"];
       }
       Configuration.instance.setVolatilePassword(userPassword);

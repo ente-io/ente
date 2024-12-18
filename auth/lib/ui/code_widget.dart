@@ -32,11 +32,13 @@ import 'package:move_to_background/move_to_background.dart';
 class CodeWidget extends StatefulWidget {
   final Code code;
   final bool isCompactMode;
+  final CodeSortKey? sortKey;
 
   const CodeWidget(
     this.code, {
     super.key,
     required this.isCompactMode,
+    this.sortKey,
   });
 
   @override
@@ -55,6 +57,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   bool isMaskingEnabled = false;
   int _codeTimeStep = -1;
   int lastRefreshTime = 0;
+  bool ignorePin = false;
 
   @override
   void initState() {
@@ -97,6 +100,7 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    ignorePin = widget.sortKey == null || widget.sortKey == CodeSortKey.manual;
     final colorScheme = getEnteColorScheme(context);
     if (isMaskingEnabled != PreferenceService.instance.shouldHideCodes()) {
       isMaskingEnabled = PreferenceService.instance.shouldHideCodes();
@@ -115,7 +119,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     Widget getCardContents(AppLocalizations l10n) {
       return Stack(
         children: [
-          if (widget.code.isPinned)
+          if (!ignorePin && widget.code.isPinned)
             Align(
               alignment: Alignment.topRight,
               child: CustomPaint(
@@ -169,7 +173,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                   : const SizedBox(height: 32),
             ],
           ),
-          if (widget.code.isPinned) ...[
+          if (!ignorePin && widget.code.isPinned) ...[
             Align(
               alignment: Alignment.topRight,
               child: Padding(
@@ -222,6 +226,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                   builder: (_) {
                     return BottomActionBarWidget(
                       code: widget.code,
+                      showPin: !ignorePin,
                       onEdit: () => _onEditPressed(true),
                       onShare: () => _onSharePressed(true),
                       onPin: () => _onPinPressed(true),
@@ -270,7 +275,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                       icon: Icons.notes_outlined,
                       onSelected: () => _onShowNotesPressed(null),
                     ),
-                  if (!widget.code.isTrashed)
+                  if (!widget.code.isTrashed && !ignorePin)
                     MenuItem(
                       label:
                           widget.code.isPinned ? l10n.unpinText : l10n.pinText,
@@ -440,13 +445,19 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Widget _getIcon() {
+    final String iconData;
+    if (widget.code.display.isCustomIcon) {
+      iconData = widget.code.display.iconID;
+    } else {
+      iconData = widget.code.issuer;
+    }
     return Padding(
       padding: _shouldShowLargeIcon
           ? EdgeInsets.only(left: widget.isCompactMode ? 12 : 16)
           : const EdgeInsets.all(0),
       child: IconUtils.instance.getIcon(
         context,
-        safeDecode(widget.code.issuer).trim(),
+        safeDecode(iconData).trim(),
         width: widget.isCompactMode
             ? (_shouldShowLargeIcon ? 32 : 24)
             : (_shouldShowLargeIcon ? 42 : 24),
@@ -454,11 +465,12 @@ class _CodeWidgetState extends State<CodeWidget> {
     );
   }
 
-  void _copyCurrentOTPToClipboard() async {
+  void _copyCurrentOTPToClipboard() {
     _copyToClipboard(
       _getCurrentOTP(),
       confirmationMessage: context.l10n.copiedToClipboard,
     );
+    _udateCodeMetadata().ignore();
   }
 
   void _copyNextToClipboard() {
@@ -466,6 +478,26 @@ class _CodeWidgetState extends State<CodeWidget> {
       _getNextTotp(),
       confirmationMessage: context.l10n.copiedNextToClipboard,
     );
+    _udateCodeMetadata().ignore();
+  }
+
+  Future<void> _udateCodeMetadata() async {
+    if (widget.sortKey == null) return;
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        if (widget.sortKey == CodeSortKey.mostFrequentlyUsed ||
+            widget.sortKey == CodeSortKey.recentlyUsed) {
+          final display = widget.code.display;
+          final Code code = widget.code.copyWith(
+            display: display.copyWith(
+              tapCount: display.tapCount + 1,
+              lastUsedAt: DateTime.now().microsecondsSinceEpoch,
+            ),
+          );
+          unawaited(CodeStore.instance.addCode(code));
+        }
+      }
+    });
   }
 
   void _copyToClipboard(

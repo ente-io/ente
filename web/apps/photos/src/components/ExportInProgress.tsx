@@ -12,8 +12,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
-import { ExportStage } from "services/export";
-import { ExportProgress } from "types/export";
+import { ExportStage, type ExportProgress } from "services/export";
 
 export const ComfySpan = styled("span")`
     padding: 0 0.5rem;

@@ -12,6 +12,8 @@
     "ENTER_EMAIL": "メールアドレスを入力してください",
     "EMAIL_ERROR": "有効なメールアドレスを入力してください",
     "required": "必須",
+    "email_not_registered": "",
+    "email_already_registered": "",
     "EMAIL_SENT": "<a>{{email}}</a> に認証コードが送信されました",
     "CHECK_INBOX": "認証を完了するために、受信トレイ（および迷惑メール）を確認してください。",
     "ENTER_OTT": "認証コード",

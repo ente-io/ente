@@ -140,11 +140,7 @@ func (c *MailingListsController) Unsubscribe(email string) error {
 // shouldSkipZoho() checks if the MailingListsController
 // should be skipped due to missing credentials.
 func (c *MailingListsController) shouldSkipZoho() bool {
-	if c.zohoCredentials.RefreshToken == "" {
-		log.Info("Skipping Zoho mailing list update because credentials are not configured")
-		return true
-	}
-	return false
+	return c.zohoCredentials.RefreshToken == ""
 }
 
 // shouldSkipListmonk() checks if the Listmonk mailing list
@@ -157,7 +153,7 @@ func (c *MailingListsController) shouldSkipZoho() bool {
 func (c *MailingListsController) shouldSkipListmonk() bool {
 	if c.listmonkCredentials.BaseURL == "" || c.listmonkCredentials.Username == "" ||
 		c.listmonkCredentials.Password == "" || len(c.listmonkListIDs) == 0 {
-		log.Info("Skipping Listmonk mailing list because credentials are not configured")
+		// Skip
 		return true
 	}
 	return false

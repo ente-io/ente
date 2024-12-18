@@ -412,7 +412,8 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Tamanho da grade de fotos",
-  "manageDeviceStorage": "Gerenciar armazenamento do dispositivo",
+  "manageDeviceStorage": "Gerenciar cache do dispositivo",
+  "manageDeviceStorageDesc": "Reveja e limpe o armazenamento de cache local.",
   "machineLearning": "Aprendizagem automática",
   "mlConsent": "Ativar aprendizagem automática",
   "mlConsentTitle": "Ativar aprendizagem automática?",
@@ -816,7 +817,7 @@
   "referFriendsAnd2xYourPlan": "Recomende seus amigos e duplique seu plano",
   "shareAlbumHint": "Abra um álbum e toque no botão compartilhar no canto superior direito para compartilhar.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Os itens exibem o número de dias restantes antes da exclusão permanente",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1 dia} other {{count} dias}}",
+  "trashDaysLeft": "{count, plural, =0 {Em breve} =1 {1 dia} other {{count} dias}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1056,7 +1057,7 @@
   "flip": "Inverter",
   "rotateRight": "Girar para a direita",
   "saveCopy": "Salvar cópia",
-  "light": "Claro",
+  "light": "Brilho",
   "color": "Cor",
   "yesDiscardChanges": "Sim, descartar alterações",
   "doYouWantToDiscardTheEditsYouHaveMade": "Você quer descartar as edições que você fez?",
@@ -1233,6 +1234,7 @@
   "waitingForVerification": "Esperando verificação...",
   "passkey": "Chave de acesso",
   "passkeyAuthTitle": "Verificação de chave de acesso",
+  "loginWithTOTP": "Registrar com TOTP",
   "passKeyPendingVerification": "Verificação pendente",
   "loginSessionExpired": "Sessão expirada",
   "loginSessionExpiredDetails": "Sua sessão expirou. Registre-se novamente.",
@@ -1244,7 +1246,6 @@
   "deviceCodeHint": "Insira o código",
   "joinDiscord": "Junte-se ao Discord",
   "locations": "Localizações",
-  "descriptions": "Descrições",
   "addAName": "Adicione um nome",
   "findThemQuickly": "Busque-os rapidamente",
   "@findThemQuickly": {
@@ -1383,7 +1384,6 @@
   "enableMachineLearningBanner": "Ativar aprendizagem de máquina para busca mágica e reconhecimento facial",
   "searchDiscoverEmptySection": "As imagens serão exibidas aqui quando o processamento for concluído",
   "searchPersonsEmptySection": "As pessoas serão exibidas aqui quando o processamento for concluído",
-  "faceNotClusteredYet": "Face not clustered yet, please come back later",
   "viewersSuccessfullyAdded": "{count, plural, =0 {Adicionado 0 visualizadores} =1 {Adicionado 1 visualizador} other {Adicionado {count} visualizadores}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1506,12 +1506,73 @@
   "changeLogDiscoverContent": "Procurando por fotos dos seus cartões de identidade, notas, ou até memes? Vá à aba de busca e confira o Descobrir. Baseado na busca semântica, é um local para encontrar fotos importantes para você.\\nApenas disponível se a Aprendizagem automática estiver ativa.",
   "selectCoverPhoto": "Selecionar foto da capa",
   "newLocation": "Nova localização",
-  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
-  "openFile": "Open file",
-  "backupFile": "Backup file",
-  "openAlbumInBrowser": "Open album in browser",
-  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
-  "allow": "Allow",
-  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
-  "seePublicAlbumLinksInApp": "See public album links in app"
+  "faceNotClusteredYet": "Rosto não agrupado ainda, volte aqui mais tarde",
+  "theLinkYouAreTryingToAccessHasExpired": "O link que você está tentando acessar já expirou.",
+  "openFile": "Abrir arquivo",
+  "backupFile": "Copiar arquivo com segurança",
+  "openAlbumInBrowser": "Abrir álbum no navegador",
+  "openAlbumInBrowserTitle": "Use o aplicativo da web para adicionar fotos a este álbum",
+  "allow": "Permitir",
+  "allowAppToOpenSharedAlbumLinks": "Permitir aplicativo abrir links de álbum compartilhado",
+  "seePublicAlbumLinksInApp": "Ver links de álbum compartilhado no aplicativo",
+  "emergencyContacts": "Contatos de emergência",
+  "acceptTrustInvite": "Aceitar convite",
+  "declineTrustInvite": "Recusar convite",
+  "removeYourselfAsTrustedContact": "Remover si mesmo dos contatos confiáveis",
+  "legacy": "Legado",
+  "legacyPageDesc": "O legado permite que contatos confiáveis acessem sua conta em sua ausência.",
+  "legacyPageDesc2": "Contatos confiáveis podem iniciar recuperação de conta, e se não for cancelado dentro de 30 dias, redefina sua senha e acesse sua conta.",
+  "legacyAccounts": "Contas legado",
+  "trustedContacts": "Contatos confiáveis",
+  "addTrustedContact": "Adicionar contato confiável",
+  "removeInvite": "Remover convite",
+  "recoveryWarning": "Um contato confiável está tentando acessar sua conta",
+  "rejectRecovery": "Rejeitar recuperação",
+  "recoveryInitiated": "A recuperação iniciou",
+  "recoveryInitiatedDesc": "Você poderá acessar a conta após {days} dias.  Uma notificação será enviada para {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Cancelar recuperação",
+  "recoveryAccount": "Recuperar conta",
+  "cancelAccountRecoveryBody": "Deseja mesmo cancelar a recuperação de conta?",
+  "startAccountRecoveryTitle": "Iniciar recuperação",
+  "whyAddTrustContact": "Um contato confiável pode ajudá-lo em recuperar seus dados.",
+  "recoveryReady": "Você pode recuperar a conta com e-mail {email} por definir uma nova senha.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} está tentando recuperar sua conta.",
+  "trustedInviteBody": "Você foi convidado para ser um contato legado por {email}.",
+  "warning": "Aviso",
+  "proceed": "Continuar",
+  "confirmAddingTrustedContact": "Você está prestes a adicionar {email} como contato confiável. Eles poderão recuperar sua conta se você estiver ausente por {numOfDays} dias.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} convidou você para ser um contato confiável",
+  "authToManageLegacy": "Autentique-se para gerenciar seus contatos confiáveis"
 }
