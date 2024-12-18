@@ -41,7 +41,7 @@ class FileWidget extends StatelessWidget {
         key: key ?? ValueKey(fileKey),
       );
     } else if (file.fileType == FileType.video) {
-      if (file.isRemoteFile &&
+      if (file.isUploaded &&
           flagService.internalUser &&
           (FileDataService.instance.previewIds
                   ?.containsKey(file.uploadedFileID!) ??

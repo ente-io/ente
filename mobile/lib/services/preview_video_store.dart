@@ -2,10 +2,12 @@ import "dart:async";
 import "dart:io";
 
 import "package:dio/dio.dart";
-import "package:encrypt/encrypt.dart";
+import "package:encrypt/encrypt.dart" as enc;
 import "package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart";
 import "package:ffmpeg_kit_flutter_full_gpl/return_code.dart";
-import "package:flutter/foundation.dart" hide Key;
+import "package:flutter/foundation.dart";
+// import "package:flutter/wid.dart";
+import "package:flutter/widgets.dart";
 import "package:flutter_cache_manager/flutter_cache_manager.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
@@ -17,6 +19,7 @@ import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/gzip.dart";
+import "package:photos/utils/toast_util.dart";
 import "package:video_compress/video_compress.dart";
 
 class PreviewVideoStore {
@@ -28,17 +31,19 @@ class PreviewVideoStore {
   final _logger = Logger("PreviewVideoStore");
   final cacheManager = DefaultCacheManager();
   final videoCacheManager = VideoCacheManager.instance;
+  double _progress = 0;
 
   final _dio = NetworkClient.instance.enteDio;
   void init() {
     VideoCompress.compressProgress$.subscribe((progress) {
       if (kDebugMode) {
+        _progress = progress;
         _logger.info("Compression progress: $progress");
       }
     });
   }
 
-  Future<void> chunkAndUploadVideo(EnteFile enteFile) async {
+  Future<void> chunkAndUploadVideo(BuildContext ctx, EnteFile enteFile) async {
     if (!enteFile.isUploaded) return;
     final file = await getFile(enteFile, isOrigin: true);
     if (file == null) return;
@@ -46,6 +51,9 @@ class PreviewVideoStore {
       // check if playlist already exist
       await getPlaylist(enteFile);
       final resultUrl = await getPreviewUrl(enteFile);
+      if (ctx.mounted) {
+        showShortToast(ctx, 'Video preview already exists');
+      }
       debugPrint("previewUrl $resultUrl");
       return;
     } catch (e) {
@@ -54,6 +62,13 @@ class PreviewVideoStore {
       } else {
         _logger.warning("Failed to get playlist for $enteFile", e);
       }
+    }
+    if (VideoCompress.isCompressing) {
+      showShortToast(
+        ctx,
+        "Another is being compressed ($_progress %), please wait",
+      );
+      return;
     }
     final tmpDirectory = await getApplicationDocumentsDirectory();
     final prefix = "${tmpDirectory.path}/${enteFile.generatedID}";
@@ -66,7 +81,7 @@ class PreviewVideoStore {
     if (mediaInfo?.path == null) return;
     _logger.info('CompressionDone ${enteFile.displayName}');
 
-    final key = Key.fromLength(16);
+    final key = enc.Key.fromLength(16);
 
     final keyfile = File('$prefix/keyfile.key');
     keyfile.writeAsBytesSync(key.bytes);
@@ -97,7 +112,7 @@ class PreviewVideoStore {
         objectID: objectID,
         objectSize: objectSize,
       );
-      _logger.info("XXXHLS Video preview uploaded for $enteFile");
+      _logger.info("Video preview uploaded for $enteFile");
     } else if (ReturnCode.isCancel(returnCode)) {
       _logger.warning("FFmpeg command cancelled");
     } else {

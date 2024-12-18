@@ -402,6 +402,7 @@ class FileAppBarState extends State<FileAppBar> {
             } else if (value == 99) {
               try {
                 await PreviewVideoStore.instance.chunkAndUploadVideo(
+                  context,
                   widget.file,
                 );
               } catch (e) {
