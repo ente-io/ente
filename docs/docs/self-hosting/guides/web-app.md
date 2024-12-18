@@ -1,7 +1,7 @@
 ---
-title: Hosting the web app
+title: Hosting the web apps
 description:
-    Building and hosting Ente's web app, connecting it to your self-hosted
+    Building and hosting Ente's web apps, connecting it to your self-hosted
     server
 ---
 
@@ -21,7 +21,7 @@ This is fine for trying the web app and verifying that your self-hosted server i
 working as expected etc. But if you would like to use the web app for a longer term, 
 then it is recommended to follow the Docker approach. 
 
-## With Docker/Docker Compose ~Recommended~
+## With Docker/Docker Compose (Recommended)
 
 > [!IMPORTANT]
 >
@@ -85,6 +85,9 @@ Lets build a Docker image from the above Dockerfile. Copy and paste the above Do
 contents in the root of your web directory which is inside `ente/web`. Execute the 
 below command to create an image from this Dockerfile.
 
+You can always edit the Dockerfile and remove the steps for apps which you do not 
+intend to install on your system (like auth or cast) and opt out of it. 
+
 ```sh
 # Build the image
 docker build -t <image-name>:<tag> --no-cache --progress plain . 
@@ -121,12 +124,15 @@ Next part is to configure a [web server](#web-server-configuration).
 
 ## Without Docker / Docker compose
 
-One way to run all the apps together without Docker is by using PM2 in this setup. The
-configuration and usage is very simple and just needs one configuration file for it.
-You can run the apps both in dev server mode as well as static files. The below way
-runs them in a static way.
+One way to run all the apps together without Docker is by using [PM2](https://pm2.keymetrics.io/) 
+in this setup. The configuration and usage is very simple and just needs one 
+configuration file for it. You can run the apps both in dev server mode as 
+well as static files. 
+
+The below configuration will run the apps in dev server mode.
 
 ### Install PM2
+
 ```sh 
 npm install pm2@latest 
 ```
@@ -185,9 +191,10 @@ pm2 logs all
 # Web server configuration 
 
 The last step ahead is configuring reverse_proxy for the ports on which the 
-apps are being served (you will have to make changes, if you customized the ports).
+apps are being served (you will have to make changes, if you have cusotmized the ports).
 The web server of choice in this guide is [Caddy](https://caddyserver.com) because
-with caddy you don't have to configure/setup SSL ceritifcates as caddy will manage that.
+with caddy you don't have to manually configure/setup SSL ceritifcates as caddy 
+will take care of that.
 
 ```sh
 photos.yourdomain.com {
