@@ -471,6 +471,12 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ),
                 collectionSummaries,
                 selectedCollectionSummaryID,
+                pendingSearchSuggestions:
+                    enqueuePendingSearchSuggestionsIfNeeded(
+                        state.searchSuggestion,
+                        state.pendingSearchSuggestions,
+                        state.isInSearchMode,
+                    ),
                 view,
             });
         }
@@ -529,6 +535,12 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 collectionSummaries,
                 hiddenCollectionSummaries,
                 selectedCollectionSummaryID,
+                pendingSearchSuggestions:
+                    enqueuePendingSearchSuggestionsIfNeeded(
+                        state.searchSuggestion,
+                        state.pendingSearchSuggestions,
+                        state.isInSearchMode,
+                    ),
                 view,
             });
         }
@@ -550,6 +562,12 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.trashedFiles,
                     state.archivedCollectionIDs,
                 ),
+                pendingSearchSuggestions:
+                    enqueuePendingSearchSuggestionsIfNeeded(
+                        state.searchSuggestion,
+                        state.pendingSearchSuggestions,
+                        state.isInSearchMode,
+                    ),
             });
         }
 
@@ -574,6 +592,12 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.trashedFiles,
                     state.archivedCollectionIDs,
                 ),
+                pendingSearchSuggestions:
+                    enqueuePendingSearchSuggestionsIfNeeded(
+                        state.searchSuggestion,
+                        state.pendingSearchSuggestions,
+                        state.isInSearchMode,
+                    ),
             });
         }
 
@@ -596,6 +620,12 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.trashedFiles,
                     state.archivedCollectionIDs,
                 ),
+                pendingSearchSuggestions:
+                    enqueuePendingSearchSuggestionsIfNeeded(
+                        state.searchSuggestion,
+                        state.pendingSearchSuggestions,
+                        state.isInSearchMode,
+                    ),
             });
         }
 
@@ -1433,3 +1463,20 @@ const derivePeopleFilteredFiles = (
         }),
     );
 };
+
+/**
+ * Trigger a recomputation of search results if needed.
+ *
+ * This convenience helper is used on updates to some state (collections, files)
+ * that is used to derive the base set of files on which the search are
+ * performed. It re-enqueues the current search suggestion as pending, which'll
+ * trigger a recomputation of the state's {@link searchResults}.
+ */
+const enqueuePendingSearchSuggestionsIfNeeded = (
+    searchSuggestion: GalleryState["searchSuggestion"],
+    pendingSearchSuggestions: GalleryState["pendingSearchSuggestions"],
+    isInSearchMode: GalleryState["isInSearchMode"],
+) =>
+    searchSuggestion && isInSearchMode
+        ? [...pendingSearchSuggestions, searchSuggestion]
+        : pendingSearchSuggestions;
