@@ -102,6 +102,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "इससे आप इस डिवाइस से लॉग आउट हो जाएँगे!"),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(
             "अपना पासवर्ड रीसेट करने के लिए, कृपया पहले अपना ईमेल सत्यापित करें।"),
+        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
+            "Having trouble playing this video? Long press here to try a different player."),
         "verify": MessageLookupByLibrary.simpleMessage("सत्यापित करें"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("ईमेल सत्यापित करें"),

@@ -1921,6 +1921,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Der verwendbare Speicherplatz ist von deinem aktuellen Abonnement eingeschränkt. Überschüssiger, beanspruchter Speicherplatz wird automatisch verwendbar werden, wenn du ein höheres Abonnement buchst."),
         "useAsCover":
             MessageLookupByLibrary.simpleMessage("Als Titelbild festlegen"),
+        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
+            "Having trouble playing this video? Long press here to try a different player."),
         "usePublicLinksForPeopleNotOnEnte": MessageLookupByLibrary.simpleMessage(
             "Verwende öffentliche Links für Personen, die kein Ente-Konto haben"),
         "useRecoveryKey": MessageLookupByLibrary.simpleMessage(

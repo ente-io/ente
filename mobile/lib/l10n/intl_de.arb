@@ -817,7 +817,7 @@
   "referFriendsAnd2xYourPlan": "Begeistere Freunde für uns und verdopple deinen Speicher",
   "shareAlbumHint": "Öffne ein Album und tippe auf den Teilen-Button oben rechts, um zu teilen.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Elemente zeigen die Anzahl der Tage bis zum dauerhaften Löschen an",
-  "trashDaysLeft": "{count, plural, one {}=0 {Demnächst} =1 {1 Tag} other {{count} Tage}}",
+  "trashDaysLeft": "{count, plural, =0 {Demnächst} =1 {1 Tag} other {{count} Tage}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1384,7 +1384,7 @@
   "enableMachineLearningBanner": "Aktiviere maschinelles Lernen für die magische Suche und Gesichtserkennung",
   "searchDiscoverEmptySection": "Bilder werden hier angezeigt, sobald die Verarbeitung abgeschlossen ist",
   "searchPersonsEmptySection": "Personen werden hier angezeigt, sobald die Verarbeitung abgeschlossen ist",
-  "viewersSuccessfullyAdded": "{count, plural, one {}=0 {0 Betrachter hinzugefügt} =1 {1 Betrachter hinzugefügt} other {{count} Betrachter hinzugefügt}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {0 Betrachter hinzugefügt} one {1 Betrachter hinzugefügt} other {{count} Betrachter hinzugefügt}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1394,7 +1394,7 @@
     },
     "description": "Number of viewers that were successfully added to an album."
   },
-  "collaboratorsSuccessfullyAdded": "{count, plural, one {}=0 {0 Mitarbeiter hinzugefügt} =1 {1 Mitarbeiter hinzugefügt} other {{count} Mitarbeiter hinzugefügt}}",
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 Mitarbeiter hinzugefügt} =1 {1 Mitarbeiter hinzugefügt} other {{count} Mitarbeiter hinzugefügt}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1469,7 +1469,7 @@
   },
   "currentlyRunning": "läuft gerade",
   "ignored": "ignoriert",
-  "photosCount": "{count, plural, one {}=0 {0 Fotos} =1 {1 Foto} other {{count} Fotos}}",
+  "photosCount": "{count, plural, one {1 Foto} =0 {0 Fotos} =1 {1 Foto} other {{count} Fotos}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -1574,5 +1574,6 @@
     }
   },
   "legacyInvite": "{email} hat dich eingeladen, ein vertrauenswürdiger Kontakt zu werden",
-  "authToManageLegacy": "Bitte authentifiziere dich, um deine vertrauenswürdigen Kontakte zu verwalten"
+  "authToManageLegacy": "Bitte authentifiziere dich, um deine vertrauenswürdigen Kontakte zu verwalten",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }

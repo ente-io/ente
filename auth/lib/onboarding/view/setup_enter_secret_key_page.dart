@@ -140,202 +140,207 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
-                children: [
-                  FieldLabel(l10n.codeIssuerHint),
-                  Expanded(
-                    child: TextFormField(
-                      // The validator receives the text that the user has entered.
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Please enter some text";
-                        }
-                        return null;
-                      },
-                      decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.symmetric(vertical: 12.0),
-                      ),
-                      style: getEnteTextTheme(context).small,
-                      controller: _issuerController,
-                      autofocus: true,
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  FieldLabel(l10n.secret),
-                  Expanded(
-                    child: TextFormField(
-                      // The validator receives the text that the user has entered.
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Please enter some text";
-                        }
-                        return null;
-                      },
-                      style: getEnteTextTheme(context).small,
-                      decoration: InputDecoration(
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 12.0),
-                        suffixIcon: GestureDetector(
-                          // padding: EdgeInsets.zero,
-                          onTap: () {
-                            setState(() {
-                              _secretKeyObscured = !_secretKeyObscured;
-                            });
-                          },
-                          child: _secretKeyObscured
-                              ? const Icon(
-                                  Icons.visibility_off_rounded,
-                                  size: 18,
-                                )
-                              : const Icon(
-                                  Icons.visibility_rounded,
-                                  size: 18,
-                                ),
-                        ),
-                      ),
-                      obscureText: _secretKeyObscured,
-                      controller: _secretController,
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  FieldLabel(l10n.account),
-                  Expanded(
-                    child: TextFormField(
-                      // The validator receives the text that the user has entered.
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Please enter some text";
-                        }
-                        return null;
-                      },
-                      decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.symmetric(vertical: 12.0),
-                      ),
-                      style: getEnteTextTheme(context).small,
-                      controller: _accountController,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  FieldLabel(l10n.notes),
-                  Expanded(
-                    child: TextFormField(
-                      // The validator receives the text that the user has entered.
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Please enter some text";
-                        }
-                        if (value.length > _notesLimit) {
-                          return "Notes can't be more than 1000 characters";
-                        }
-                        return null;
-                      },
-                      maxLength: _notesLimit,
-                      minLines: 1,
-                      maxLines: 5,
-                      decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.symmetric(vertical: 12.0),
-                      ),
-                      style: getEnteTextTheme(context).small,
-                      controller: _notesController,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 12,
-                alignment: WrapAlignment.start,
-                children: [
-                  ...allTags.map(
-                    (e) => TagChip(
-                      label: e,
-                      action: TagChipAction.check,
-                      state: selectedTags.contains(e)
-                          ? TagChipState.selected
-                          : TagChipState.unselected,
-                      onTap: () {
-                        if (selectedTags.contains(e)) {
-                          selectedTags.remove(e);
-                        } else {
-                          selectedTags.add(e);
-                        }
-                        setState(() {});
-                      },
-                    ),
-                  ),
-                  AddChip(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AddTagDialog(
-                            onTap: (tag) {
-                              final exist = allTags.contains(tag);
-                              if (exist && selectedTags.contains(tag)) {
-                                return Navigator.pop(context);
-                              }
-                              if (!exist) allTags.add(tag);
-                              selectedTags.add(tag);
-                              setState(() {});
-                              Navigator.pop(context);
-                            },
-                          );
-                        },
-                        barrierColor: Colors.black.withOpacity(0.85),
-                        barrierDismissible: false,
-                      );
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
-              if (widget.code != null)
-                CustomIconWidget(iconData: _customIconID),
-              const SizedBox(height: 24),
               if (widget.code != null)
                 GestureDetector(
                   onTap: () async {
                     await navigateToCustomIconPage();
                   },
-                  child: Text(
-                    "Change Icon",
-                    style: getEnteTextTheme(context).small,
+                  child: CustomIconWidget(iconData: _customIconID),
+                ),
+              const SizedBox(height: 20),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      FieldLabel(l10n.codeIssuerHint),
+                      Expanded(
+                        child: TextFormField(
+                          // The validator receives the text that the user has entered.
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please enter some text";
+                            }
+                            return null;
+                          },
+                          decoration: const InputDecoration(
+                            contentPadding:
+                                EdgeInsets.symmetric(vertical: 12.0),
+                          ),
+                          style: getEnteTextTheme(context).small,
+                          controller: _issuerController,
+                          autofocus: true,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              const SizedBox(height: 40),
-              SizedBox(
-                width: 400,
-                child: OutlinedButton(
-                  onPressed: () async {
-                    if ((_accountController.text.trim().isEmpty &&
-                            _issuerController.text.trim().isEmpty) ||
-                        _secretController.text.trim().isEmpty) {
-                      String message;
-                      if (_secretController.text.trim().isEmpty) {
-                        message = context.l10n.secretCanNotBeEmpty;
-                      } else {
-                        message =
-                            context.l10n.bothIssuerAndAccountCanNotBeEmpty;
-                      }
-                      _showIncorrectDetailsDialog(context, message: message);
-                      return;
-                    }
-                    await _saveCode();
-                  },
-                  child: Text(l10n.saveAction),
-                ),
+                  Row(
+                    children: [
+                      FieldLabel(l10n.secret),
+                      Expanded(
+                        child: TextFormField(
+                          // The validator receives the text that the user has entered.
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please enter some text";
+                            }
+                            return null;
+                          },
+                          style: getEnteTextTheme(context).small,
+                          decoration: InputDecoration(
+                            contentPadding:
+                                const EdgeInsets.symmetric(vertical: 12.0),
+                            suffixIcon: GestureDetector(
+                              // padding: EdgeInsets.zero,
+                              onTap: () {
+                                setState(() {
+                                  _secretKeyObscured = !_secretKeyObscured;
+                                });
+                              },
+                              child: _secretKeyObscured
+                                  ? const Icon(
+                                      Icons.visibility_off_rounded,
+                                      size: 18,
+                                    )
+                                  : const Icon(
+                                      Icons.visibility_rounded,
+                                      size: 18,
+                                    ),
+                            ),
+                          ),
+                          obscureText: _secretKeyObscured,
+                          controller: _secretController,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      FieldLabel(l10n.account),
+                      Expanded(
+                        child: TextFormField(
+                          // The validator receives the text that the user has entered.
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please enter some text";
+                            }
+                            return null;
+                          },
+                          decoration: const InputDecoration(
+                            contentPadding:
+                                EdgeInsets.symmetric(vertical: 12.0),
+                          ),
+                          style: getEnteTextTheme(context).small,
+                          controller: _accountController,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      FieldLabel(l10n.notes),
+                      Expanded(
+                        child: TextFormField(
+                          // The validator receives the text that the user has entered.
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please enter some text";
+                            }
+                            if (value.length > _notesLimit) {
+                              return "Notes can't be more than 1000 characters";
+                            }
+                            return null;
+                          },
+                          maxLength: _notesLimit,
+                          minLines: 1,
+                          maxLines: 5,
+                          decoration: const InputDecoration(
+                            contentPadding:
+                                EdgeInsets.symmetric(vertical: 12.0),
+                          ),
+                          style: getEnteTextTheme(context).small,
+                          controller: _notesController,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    alignment: WrapAlignment.start,
+                    children: [
+                      ...allTags.map(
+                        (e) => TagChip(
+                          label: e,
+                          action: TagChipAction.check,
+                          state: selectedTags.contains(e)
+                              ? TagChipState.selected
+                              : TagChipState.unselected,
+                          onTap: () {
+                            if (selectedTags.contains(e)) {
+                              selectedTags.remove(e);
+                            } else {
+                              selectedTags.add(e);
+                            }
+                            setState(() {});
+                          },
+                        ),
+                      ),
+                      AddChip(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AddTagDialog(
+                                onTap: (tag) {
+                                  final exist = allTags.contains(tag);
+                                  if (exist && selectedTags.contains(tag)) {
+                                    return Navigator.pop(context);
+                                  }
+                                  if (!exist) allTags.add(tag);
+                                  selectedTags.add(tag);
+                                  setState(() {});
+                                  Navigator.pop(context);
+                                },
+                              );
+                            },
+                            barrierColor: Colors.black.withOpacity(0.85),
+                            barrierDismissible: false,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 40),
+                  SizedBox(
+                    width: 400,
+                    child: OutlinedButton(
+                      onPressed: () async {
+                        if ((_accountController.text.trim().isEmpty &&
+                                _issuerController.text.trim().isEmpty) ||
+                            _secretController.text.trim().isEmpty) {
+                          String message;
+                          if (_secretController.text.trim().isEmpty) {
+                            message = context.l10n.secretCanNotBeEmpty;
+                          } else {
+                            message =
+                                context.l10n.bothIssuerAndAccountCanNotBeEmpty;
+                          }
+                          _showIncorrectDetailsDialog(
+                            context,
+                            message: message,
+                          );
+                          return;
+                        }
+                        await _saveCode();
+                      },
+                      child: Text(l10n.saveAction),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

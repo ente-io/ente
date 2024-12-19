@@ -1892,6 +1892,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bruikbare opslag is beperkt door je huidige abonnement. Buitensporige geclaimde opslag zal automatisch bruikbaar worden wanneer je je abonnement upgrade."),
         "useAsCover":
             MessageLookupByLibrary.simpleMessage("Als cover gebruiken"),
+        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
+            "Having trouble playing this video? Long press here to try a different player."),
         "usePublicLinksForPeopleNotOnEnte": MessageLookupByLibrary.simpleMessage(
             "Gebruik publieke links voor mensen die geen Ente account hebben"),
         "useRecoveryKey":

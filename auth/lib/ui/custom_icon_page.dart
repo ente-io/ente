@@ -71,7 +71,7 @@ class _CustomIconPageState extends State<CustomIconPage> {
     return Scaffold(
       appBar: AppBar(
         title: !_showSearchBox
-            ? const Text('Custom Branding')
+            ? const Text('Choose icon')
             : TextField(
                 autocorrect: false,
                 enableSuggestions: false,
@@ -93,7 +93,7 @@ class _CustomIconPageState extends State<CustomIconPage> {
             icon: _showSearchBox
                 ? const Icon(Icons.clear)
                 : const Icon(Icons.search),
-            tooltip: "Search",
+            tooltip: l10n.search,
             onPressed: () {
               setState(
                 () {

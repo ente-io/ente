@@ -10778,6 +10778,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Having trouble playing this video? Long press here to try a different player.`
+  String get useDifferentPlayerInfo {
+    return Intl.message(
+      'Having trouble playing this video? Long press here to try a different player.',
+      name: 'useDifferentPlayerInfo',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

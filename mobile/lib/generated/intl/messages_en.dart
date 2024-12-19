@@ -1835,6 +1835,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
             "Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan."),
         "useAsCover": MessageLookupByLibrary.simpleMessage("Use as cover"),
+        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
+            "Having trouble playing this video? Long press here to try a different player."),
         "usePublicLinksForPeopleNotOnEnte":
             MessageLookupByLibrary.simpleMessage(
                 "Use public links for people not on Ente"),

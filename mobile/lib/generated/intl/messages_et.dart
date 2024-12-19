@@ -246,6 +246,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "tryAgain": MessageLookupByLibrary.simpleMessage("Proovi uuesti"),
         "twitter": MessageLookupByLibrary.simpleMessage("Twitter"),
         "uncategorized": MessageLookupByLibrary.simpleMessage("Liigitamata"),
+        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
+            "Having trouble playing this video? Long press here to try a different player."),
         "useRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Kasuta taastevõtit"),
         "usedSpace":

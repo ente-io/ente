@@ -894,6 +894,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("מעלה קבצים לאלבום..."),
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
             "כמות האחסון השמישה שלך מוגבלת בתוכנית הנוכחית. אחסון עודף יהפוך שוב לשמיש אחרי שתשדרג את התוכנית שלך."),
+        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
+            "Having trouble playing this video? Long press here to try a different player."),
         "useRecoveryKey":
             MessageLookupByLibrary.simpleMessage("השתמש במפתח שחזור"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("מקום בשימוש"),

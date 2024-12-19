@@ -1534,5 +1534,6 @@
   "cancelAccountRecoveryBody": "Weet je zeker dat je het herstel wilt annuleren?",
   "startAccountRecoveryTitle": "Herstel starten",
   "whyAddTrustContact": "Vertrouwde contacten kunnen helpen bij het herstellen van je data.",
-  "authToManageLegacy": "Verifieer om je vertrouwde contacten te beheren"
+  "authToManageLegacy": "Verifieer om je vertrouwde contacten te beheren",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }

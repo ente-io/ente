@@ -1519,8 +1519,7 @@
   "acceptTrustInvite": "Accept Invite",
   "declineTrustInvite": "Decline Invite",
   "removeYourselfAsTrustedContact": "Remove yourself as trusted contact",
-
-  "legacy" : "Legacy",
+  "legacy": "Legacy",
   "legacyPageDesc": "Legacy allows trusted contacts to access your account in your absence.",
   "legacyPageDesc2": "Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.",
   "legacyAccounts": "Legacy accounts",
@@ -1530,7 +1529,7 @@
   "recoveryWarning": "A trusted contact is trying to access your account",
   "rejectRecovery": "Reject recovery",
   "recoveryInitiated": "Recovery initiated",
-  "recoveryInitiatedDesc": "You can access the account after {days} days. A notification will be sent to {email}.", 
+  "recoveryInitiatedDesc": "You can access the account after {days} days. A notification will be sent to {email}.",
   "@recoveryInitiatedDesc": {
     "placeholders": {
       "days": {
@@ -1544,7 +1543,7 @@
     }
   },
   "cancelAccountRecovery": "Cancel recovery",
-  "recoveryAccount":"Recover account",
+  "recoveryAccount": "Recover account",
   "cancelAccountRecoveryBody": "Are you sure you want to cancel recovery?",
   "startAccountRecoveryTitle": "Start recovery",
   "whyAddTrustContact": "Trusted contact can help in recovering your data.",
@@ -1575,5 +1574,6 @@
     }
   },
   "legacyInvite": "{email} has invited you to be a trusted contact",
-  "authToManageLegacy": "Please authenticate to manage your trusted contacts"
+  "authToManageLegacy": "Please authenticate to manage your trusted contacts",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }

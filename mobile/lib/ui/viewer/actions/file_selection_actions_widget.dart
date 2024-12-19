@@ -248,6 +248,17 @@ class _FileSelectionActionsWidgetState
       );
     }
 
+    if (widget.type.showDeleteOption()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.delete_outline,
+          labelText: S.of(context).delete,
+          onTap: anyOwnedFiles ? _onDeleteClick : null,
+          shouldShow: ownedAndPendingUploadFilesCount > 0,
+        ),
+      );
+    }
+
     if (widget.type.showRemoveFromAlbum()) {
       items.add(
         SelectionActionButton(
@@ -302,17 +313,6 @@ class _FileSelectionActionsWidgetState
           labelText: S.of(context).createCollage,
           onTap: _onCreateCollageClicked,
           shouldShow: showCollageOption,
-        ),
-      );
-    }
-
-    if (widget.type.showDeleteOption()) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.delete_outline,
-          labelText: S.of(context).delete,
-          onTap: anyOwnedFiles ? _onDeleteClick : null,
-          shouldShow: ownedAndPendingUploadFilesCount > 0,
         ),
       );
     }
@@ -840,7 +840,10 @@ class _FileSelectionActionsWidgetState
             downloadQueue.add(() async {
               await downloadToGallery(file);
               downloadedFiles++;
-              dialog.update(message: S.of(context).downloading + " ($downloadedFiles/$totalFiles)");
+              dialog.update(
+                message: S.of(context).downloading +
+                    " ($downloadedFiles/$totalFiles)",
+              );
             }),
           );
         }

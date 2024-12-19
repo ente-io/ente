@@ -11,10 +11,12 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/service_locator.dart";
+import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/preview_video_store.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
-import 'package:photos/ui/viewer/file/video_controls.dart';
+import "package:photos/ui/viewer/file/video_control.dart";
+// import 'package:photos/ui/viewer/file/video_controls.dart';
 import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -86,6 +88,7 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
     });
     if (!mounted) return;
     if (file != null) {
+      // FileDataService.instance.previewIds![widget.file.uploadedFileID!] = file;
       Fluttertoast.showToast(msg: "Playing Preview!").ignore();
       previewFile = file;
       _setVideoPlayerController();

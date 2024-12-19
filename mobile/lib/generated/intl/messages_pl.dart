@@ -1909,6 +1909,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
             "Użyteczna przestrzeń dyskowa jest ograniczona przez Twój obecny plan. Nadmiar zadeklarowanej przestrzeni dyskowej stanie się automatycznie użyteczny po uaktualnieniu planu."),
         "useAsCover": MessageLookupByLibrary.simpleMessage("Użyj jako okładki"),
+        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
+            "Having trouble playing this video? Long press here to try a different player."),
         "usePublicLinksForPeopleNotOnEnte":
             MessageLookupByLibrary.simpleMessage(
                 "Użyj publicznych linków dla osób spoza Ente"),

@@ -1961,6 +1961,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Le stockage utilisable est limité par votre offre actuelle. Le stockage excédentaire deviendra automatiquement utilisable lorsque vous mettez à niveau votre offre."),
         "useAsCover":
             MessageLookupByLibrary.simpleMessage("Utiliser comme couverture"),
+        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
+            "Having trouble playing this video? Long press here to try a different player."),
         "usePublicLinksForPeopleNotOnEnte": MessageLookupByLibrary.simpleMessage(
             "Utiliser des liens publics pour les personnes qui ne sont pas sur Ente"),
         "useRecoveryKey":

@@ -131,6 +131,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Dette vil logge dig ud af følgende enhed:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "Dette vil logge dig ud af denne enhed!"),
+        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
+            "Having trouble playing this video? Long press here to try a different player."),
         "verify": MessageLookupByLibrary.simpleMessage("Bekræft"),
         "viewAddOnButton":
             MessageLookupByLibrary.simpleMessage("Vis tilføjelser"),

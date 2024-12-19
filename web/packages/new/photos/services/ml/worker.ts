@@ -226,7 +226,15 @@ export class MLWorker {
             this.state = "indexing";
 
         // Use the liveQ if present, otherwise get the next batch to backfill.
-        const items = liveQ.length ? liveQ : await this.backfillQ();
+        const items = liveQ.length
+            ? liveQ
+            : await this.backfillQ().catch((e: unknown) => {
+                  // Ignore the error (e.g. a network failure) when determining
+                  // the items to backfill, and return an empty items array so
+                  // that the next retry happens after an exponential backoff.
+                  log.warn("Ignoring error when determining backfillQ", e);
+                  return [];
+              });
 
         this.countSinceLastIdle += items.length;
 

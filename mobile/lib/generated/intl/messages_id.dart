@@ -1428,6 +1428,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Potongan hingga 50%, sampai 4 Des."),
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
             "Kuota yang dapat digunakan dibatasi oleh paket kamu saat ini. Kelebihan kuota yang diklaim akan dapat digunakan secara otomatis saat meningkatkan paket kamu."),
+        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
+            "Having trouble playing this video? Long press here to try a different player."),
         "usePublicLinksForPeopleNotOnEnte":
             MessageLookupByLibrary.simpleMessage(
                 "Bagikan link publik ke orang yang tidak menggunakan Ente"),

@@ -1780,6 +1780,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Lo spazio disponibile è limitato dal tuo piano corrente. L\'archiviazione in eccesso diventerà automaticamente utilizzabile quando aggiornerai il tuo piano."),
         "useAsCover":
             MessageLookupByLibrary.simpleMessage("Usa come copertina"),
+        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
+            "Having trouble playing this video? Long press here to try a different player."),
         "usePublicLinksForPeopleNotOnEnte":
             MessageLookupByLibrary.simpleMessage(
                 "Usa link pubblici per persone non registrate su Ente"),

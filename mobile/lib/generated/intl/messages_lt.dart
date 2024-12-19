@@ -1476,6 +1476,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Naudojama saugykla ribojama pagal jūsų dabartinį planą. Perteklinė gauta saugykla automatiškai taps tinkama naudoti, kai pakeisite planą."),
         "useAsCover":
             MessageLookupByLibrary.simpleMessage("Naudoti kaip viršelį"),
+        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
+            "Having trouble playing this video? Long press here to try a different player."),
         "usePublicLinksForPeopleNotOnEnte": MessageLookupByLibrary.simpleMessage(
             "Naudokite viešas nuorodas asmenimis, kurie nėra sistemoje „Ente“"),
         "useRecoveryKey":

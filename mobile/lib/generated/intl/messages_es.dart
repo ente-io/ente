@@ -1933,6 +1933,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "El almacenamiento utilizable está limitado por tu plan actual. El exceso de almacenamiento que obtengas se volverá automáticamente utilizable cuando actualices tu plan."),
         "useAsCover":
             MessageLookupByLibrary.simpleMessage("Usar como cubierta"),
+        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
+            "Having trouble playing this video? Long press here to try a different player."),
         "usePublicLinksForPeopleNotOnEnte":
             MessageLookupByLibrary.simpleMessage(
                 "Usar enlaces públicos para personas que no están en Ente"),

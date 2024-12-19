@@ -1478,5 +1478,6 @@
   "removeInvite": "Удалить приглашение",
   "recoveryWarning": "Доверенный контакт пытается получить доступ к вашей учетной записи",
   "rejectRecovery": "Отклонить восстановление",
-  "recoveryInitiated": "Восстановление запущено"
+  "recoveryInitiated": "Восстановление запущено",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }

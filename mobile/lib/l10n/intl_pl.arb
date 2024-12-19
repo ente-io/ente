@@ -1572,5 +1572,6 @@
     }
   },
   "legacyInvite": "{email} zaprosił Cię do zostania zaufanym kontaktem",
-  "authToManageLegacy": "Prosimy uwierzytelnić się, aby zarządzać zaufanymi kontaktami"
+  "authToManageLegacy": "Prosimy uwierzytelnić się, aby zarządzać zaufanymi kontaktami",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }
