@@ -8,7 +8,7 @@
  */
 
 import { CenteredFill } from "@/base/components/mui/Container";
-import type { SearchOption } from "@/new/photos/services/search/types";
+import type { SearchSuggestion } from "@/new/photos/services/search/types";
 import { Paper, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import React, { useState } from "react";
@@ -29,19 +29,21 @@ export type SelectionContext =
     | { mode: "people"; personID: string };
 
 interface SearchResultsHeaderProps {
-    selectedOption: SearchOption;
+    searchSuggestion: SearchSuggestion;
+    fileCount: number;
 }
 
 export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
-    selectedOption,
+    searchSuggestion,
+    fileCount,
 }) => (
     <GalleryItemsHeaderAdapter>
         <Typography color="text.muted" variant="large">
             {t("search_results")}
         </Typography>
         <GalleryItemsSummary
-            name={selectedOption.suggestion.label}
-            fileCount={selectedOption.fileCount}
+            name={searchSuggestion.label}
+            fileCount={fileCount}
         />
     </GalleryItemsHeaderAdapter>
 );

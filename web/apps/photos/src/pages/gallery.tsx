@@ -63,7 +63,6 @@ import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
 import { useFileInput } from "@ente/shared/hooks/useFileInput";
-import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
     getToken,
@@ -258,10 +257,6 @@ export default function Gallery() {
     const closeAuthenticateUserModal = () =>
         setAuthenticateUserModalView(false);
 
-    // The option selected by the user selected from the search bar dropdown.
-    const [selectedSearchOption, setSelectedSearchOption] = useState<
-        SearchOption | undefined
-    >();
     // If the fix creation time dialog is being shown, then the list of files on
     // which it should act.
     const [fixCreationTimeFiles, setFixCreationTimeFiles] = useState<
@@ -449,28 +444,31 @@ export default function Gallery() {
     }, [peopleState]);
 
     useEffect(() => {
-        if (isInSearchMode && selectedSearchOption) {
+        if (isInSearchMode && state.searchSuggestion) {
             setPhotoListHeader({
                 height: 104,
                 item: (
                     <SearchResultsHeader
-                        selectedOption={selectedSearchOption}
+                        searchSuggestion={state.searchSuggestion}
+                        fileCount={state.searchResults?.length ?? 0}
                     />
                 ),
                 itemType: ITEM_TYPE.HEADER,
             });
         }
-    }, [isInSearchMode, selectedSearchOption]);
+    }, [isInSearchMode, state.searchSuggestion, state.searchResults]);
 
-    // TODO: Make this a normal useEffect.
-    useMemoSingleThreaded(async () => {
-        if (selectedSearchOption) {
-            const searchResults = await filterSearchableFiles(
-                selectedSearchOption.suggestion,
+    useEffect(() => {
+        const pendingSearchSuggestion = state.pendingSearchSuggestions.at(-1);
+        if (!state.isRecomputingSearchResults && pendingSearchSuggestion) {
+            dispatch({ type: "updatingSearchResults" });
+            filterSearchableFiles(pendingSearchSuggestion).then(
+                (searchResults) => {
+                    dispatch({ type: "setSearchResults", searchResults });
+                },
             );
-            dispatch({ type: "setSearchResults", searchResults });
         }
-    }, [selectedSearchOption]);
+    }, [state.isRecomputingSearchResults, state.pendingSearchSuggestions]);
 
     const selectAll = (e: KeyboardEvent) => {
         // ignore ctrl/cmd + a if the user is typing in a text field
@@ -783,13 +781,13 @@ export default function Gallery() {
                     personID: searchOption.suggestion.person.id,
                 });
             }
-            setSelectedSearchOption(undefined);
         } else if (searchOption) {
-            dispatch({ type: "enterSearchMode" });
-            setSelectedSearchOption(searchOption);
+            dispatch({
+                type: "enterSearchMode",
+                searchSuggestion: searchOption.suggestion,
+            });
         } else {
             dispatch({ type: "exitSearch" });
-            setSelectedSearchOption(undefined);
         }
         setIsClipSearchResult(type == "clip");
     };
