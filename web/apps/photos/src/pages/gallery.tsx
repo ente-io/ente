@@ -258,10 +258,6 @@ export default function Gallery() {
     const closeAuthenticateUserModal = () =>
         setAuthenticateUserModalView(false);
 
-    // The option selected by the user selected from the search bar dropdown.
-    const [selectedSearchOption, setSelectedSearchOption] = useState<
-        SearchOption | undefined
-    >();
     // If the fix creation time dialog is being shown, then the list of files on
     // which it should act.
     const [fixCreationTimeFiles, setFixCreationTimeFiles] = useState<
@@ -313,6 +309,7 @@ export default function Gallery() {
         state.view?.type == "people" ? state.view.activePerson : undefined;
     const activePersonID = activePerson?.id;
     const isInSearchMode = state.isInSearchMode;
+    const selectedSearchOption = state.selectedSearchOption;
     const filteredFiles = state.filteredFiles;
 
     if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) console.log("render", state);
@@ -783,13 +780,10 @@ export default function Gallery() {
                     personID: searchOption.suggestion.person.id,
                 });
             }
-            setSelectedSearchOption(undefined);
         } else if (searchOption) {
-            dispatch({ type: "enterSearchMode" });
-            setSelectedSearchOption(searchOption);
+            dispatch({ type: "enterSearchMode", searchOption });
         } else {
             dispatch({ type: "exitSearch" });
-            setSelectedSearchOption(undefined);
         }
         setIsClipSearchResult(type == "clip");
     };
@@ -937,7 +931,10 @@ export default function Gallery() {
                                 openUploader,
                                 isInSearchMode,
                                 onShowSearchInput: () =>
-                                    dispatch({ type: "enterSearchMode" }),
+                                    dispatch({
+                                        type: "enterSearchMode",
+                                        searchOption: undefined,
+                                    }),
                                 onSelectSearchOption: handleSelectSearchOption,
                                 onSelectPeople: () =>
                                     dispatch({ type: "showPeople" }),

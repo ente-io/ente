@@ -39,6 +39,7 @@ import {
     isPinnedCollection,
 } from "../../services/magic-metadata";
 import type { PeopleState, Person } from "../../services/ml/people";
+import type { SearchOption } from "../../services/search/types";
 import type { FamilyData } from "../../services/user-details";
 
 /**
@@ -245,6 +246,12 @@ export interface GalleryState {
      */
     extraVisiblePerson: Person | undefined;
     /**
+     * The option selected by the user selected from the search bar dropdown.
+     *
+     * This is used to compute the {@link searchResults}.
+     */
+    selectedSearchOption: SearchOption | undefined;
+    /**
      * List of files that match the selected search option.
      *
      * This will be set only if we are showing search results.
@@ -324,7 +331,7 @@ export type GalleryAction =
     | { type: "showPeople" }
     | { type: "showPerson"; personID: string }
     | { type: "setSearchResults"; searchResults: EnteFile[] }
-    | { type: "enterSearchMode" }
+    | { type: "enterSearchMode"; searchOption: SearchOption | undefined }
     | { type: "exitSearch" };
 
 const initialGalleryState: GalleryState = {
@@ -349,6 +356,7 @@ const initialGalleryState: GalleryState = {
     selectedCollectionSummaryID: undefined,
     selectedPersonID: undefined,
     extraVisiblePerson: undefined,
+    selectedSearchOption: undefined,
     searchResults: undefined,
     view: undefined,
     filteredFiles: [],
@@ -681,6 +689,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ...state,
                 selectedCollectionSummaryID: undefined,
                 extraVisiblePerson: undefined,
+                selectedSearchOption: undefined,
                 searchResults: undefined,
                 view: {
                     type: "albums",
@@ -695,6 +704,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ...state,
                 selectedCollectionSummaryID: undefined,
                 extraVisiblePerson: undefined,
+                selectedSearchOption: undefined,
                 searchResults: undefined,
                 view: {
                     type: "hidden-albums",
@@ -715,6 +725,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ...state,
                 selectedCollectionSummaryID,
                 extraVisiblePerson: undefined,
+                selectedSearchOption: undefined,
                 searchResults: undefined,
                 view,
                 isInSearchMode: false,
@@ -727,6 +738,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 selectedCollectionSummaryID: action.collectionSummaryID,
                 extraVisiblePerson: undefined,
                 searchResults: undefined,
+                selectedSearchOption: undefined,
                 view: {
                     type:
                         action.collectionSummaryID !== undefined &&
@@ -757,6 +769,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 selectedPersonID: view.activePerson?.id,
                 extraVisiblePerson,
                 searchResults: undefined,
+                selectedSearchOption: undefined,
                 view,
                 isInSearchMode: false,
             });
@@ -772,9 +785,10 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             );
             return stateByUpdatingFilteredFiles({
                 ...state,
-                searchResults: undefined,
                 selectedPersonID: view.activePerson?.id,
                 extraVisiblePerson,
+                searchResults: undefined,
+                selectedSearchOption: undefined,
                 view,
                 isInSearchMode: false,
             });
@@ -790,11 +804,14 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             return stateByUpdatingFilteredFiles({
                 ...state,
                 isInSearchMode: true,
+                selectedSearchOption: action.searchOption,
             });
 
         case "exitSearch":
             return stateByUpdatingFilteredFiles({
                 ...state,
+                searchResults: undefined,
+                selectedSearchOption: undefined,
                 isInSearchMode: false,
             });
     }
