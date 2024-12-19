@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.9.72+972
+version: 0.9.73+973
 publish_to: none
 
 environment:
@@ -48,6 +48,7 @@ dependencies:
   dropdown_button2: ^2.0.0
   el_tooltip: ^2.2.1
   email_validator: ^2.0.1
+  encrypt: ^5.0.3
   ente_cast:
     path: plugins/ente_cast
   ente_cast_normal:
@@ -62,7 +63,7 @@ dependencies:
   extended_image: ^8.1.1
   fade_indexed_stack: ^0.2.2
   fast_base58: ^0.2.1
-  ffmpeg_kit_flutter_min: ^6.0.3
+  ffmpeg_kit_flutter_full_gpl: ^6.0.3
   figma_squircle: ^0.5.3
   file_saver:
     # Use forked version till this PR is merged: https://github.com/incrediblezayed/file_saver/pull/87
@@ -80,7 +81,7 @@ dependencies:
   flutter_image_compress: ^1.1.0
   flutter_inappwebview: ^6.1.4
   flutter_launcher_icons: ^0.13.1
-  flutter_local_notifications: ^17.2.1+2
+  flutter_local_notifications: ^17.2.2
   flutter_localizations:
     sdk: flutter
   flutter_map: ^6.2.0
@@ -118,6 +119,7 @@ dependencies:
       url: "https://github.com/ente-io/media_extension.git"
       ref: deeplink_fixes
   media_kit: ^1.1.10+1
+  media_kit_libs_ios_video: ^1.1.4
   media_kit_libs_video: ^1.0.4
   media_kit_video: ^1.2.4
   ml_linalg: ^13.11.31
@@ -181,8 +183,10 @@ dependencies:
   ua_client_hints: ^1.4.0
   uni_links: ^0.5.1
   url_launcher: ^6.3.0
-
   uuid: ^4.5.0
+  video_compress:
+    git:
+      url: https://github.com/RmanAkbarzadeh/VideoCompress.git
   video_editor:
     git:
       url: https://github.com/prateekmedia/video_editor.git
@@ -191,6 +195,7 @@ dependencies:
       url: https://github.com/ente-io/packages.git
       ref: android_video_roation_fix
       path: packages/video_player/video_player/
+  video_player_media_kit: ^1.0.5
   video_thumbnail: ^0.5.3
   visibility_detector: ^0.3.3
   wakelock_plus: ^1.1.1
@@ -211,7 +216,7 @@ dependency_overrides:
       ref: android_video_roation_fix
       path: packages/video_player/video_player/
   watcher: ^1.1.0
-  win32: ^5.5.3
+  win32: ^5.5.4
 
 flutter_intl:
   enabled: true
