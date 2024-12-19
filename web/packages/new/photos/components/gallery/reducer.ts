@@ -330,8 +330,8 @@ export type GalleryAction =
       }
     | { type: "showPeople" }
     | { type: "showPerson"; personID: string }
-    | { type: "setSearchResults"; searchResults: EnteFile[] }
     | { type: "enterSearchMode"; searchOption: SearchOption | undefined }
+    | { type: "setSearchResults"; searchResults: EnteFile[] }
     | { type: "exitSearch" };
 
 const initialGalleryState: GalleryState = {
@@ -794,17 +794,17 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             });
         }
 
-        case "setSearchResults":
-            return stateByUpdatingFilteredFiles({
-                ...state,
-                searchResults: action.searchResults,
-            });
-
         case "enterSearchMode":
             return stateByUpdatingFilteredFiles({
                 ...state,
                 isInSearchMode: true,
                 selectedSearchOption: action.searchOption,
+            });
+
+        case "setSearchResults":
+            return stateByUpdatingFilteredFiles({
+                ...state,
+                searchResults: action.searchResults,
             });
 
         case "exitSearch":

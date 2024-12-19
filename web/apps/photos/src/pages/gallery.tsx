@@ -452,12 +452,13 @@ export default function Gallery() {
                 item: (
                     <SearchResultsHeader
                         selectedOption={selectedSearchOption}
+                        fileCount={state.searchResults?.length ?? 0}
                     />
                 ),
                 itemType: ITEM_TYPE.HEADER,
             });
         }
-    }, [isInSearchMode, selectedSearchOption]);
+    }, [isInSearchMode, selectedSearchOption, state.searchResults]);
 
     // TODO: Make this a normal useEffect.
     useMemoSingleThreaded(async () => {

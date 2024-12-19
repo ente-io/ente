@@ -40,6 +40,16 @@ export type SearchSuggestion = { label: string } & (
  */
 export interface SearchOption {
     suggestion: SearchSuggestion;
+    /**
+     * The count of files that matched the search option when it was initially
+     * computed.
+     *
+     * Later updates (e.g. deletion of files that are being shown as search
+     * results) may make this diverge from the correct count, so the gallery
+     * should instead take the count from the count of the computed search
+     * results. This property is thus meant only for the search dropdown to the
+     * show the count.
+     */
     fileCount: number;
     previewFiles: EnteFile[];
 }

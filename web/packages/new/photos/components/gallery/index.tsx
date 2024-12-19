@@ -30,10 +30,12 @@ export type SelectionContext =
 
 interface SearchResultsHeaderProps {
     selectedOption: SearchOption;
+    fileCount: number;
 }
 
 export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
     selectedOption,
+    fileCount,
 }) => (
     <GalleryItemsHeaderAdapter>
         <Typography color="text.muted" variant="large">
@@ -41,7 +43,7 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
         </Typography>
         <GalleryItemsSummary
             name={selectedOption.suggestion.label}
-            fileCount={selectedOption.fileCount}
+            fileCount={fileCount}
         />
     </GalleryItemsHeaderAdapter>
 );
