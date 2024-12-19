@@ -26,11 +26,11 @@ then it is recommended to follow the Docker approach.
 > [!IMPORTANT]
 >
 > This docker image is still in testing stage and it might show up with some
-> variables in different scenarios. But this image has been tested on a production 
+> unknown variables in different scenarios. But this image has been tested on a production 
 > ente site. 
 > 
 > Recurring changes might be made by the team or from community if more
-> improvements can be made.  
+> improvements can be made so that we are able to build a full-fledged docker image.
 
 ```dockerfile
 FROM node:20-bookworm-slim as builder
@@ -42,6 +42,10 @@ COPY apps/ .
 
 # Will help default to yarn versoin 1.22.22
 RUN corepack enable
+
+# Configure Albums and Accounts Endpoints
+ENV NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=https://your-domain.com 
+ENV NEXT_PUBLIC_ENTE_ACCOUNTS_ENDPOINT=https://your-domain.com
 
 RUN yarn cache clean
 RUN yarn install --network-timeout 1000000000
@@ -70,7 +74,10 @@ EXPOSE ${AUTH}
 ENV CAST=3003
 EXPOSE ${CAST}
 
-CMD ["sh", "-c", "serve /app/photos -l tcp://0.0.0.0:${PHOTOS} & serve tcp://0.0.0.0:${ACCOUNTS} -l /app/accounts & server tcp://0.0.0.0:${AUTH} -l /app/auth & server -l tcp://0.0.0.0:${CAST} & serve /app/cast]
+ENV ALBUMS=3004
+EXPOSE ${ALBUMS}
+
+CMD ["sh", "-c", "serve /app/photos -l tcp://0.0.0.0:${PHOTOS} & serve /app/accounts -l tcp://0.0.0.0:${ACCOUNTS} & serve /app/albums -l tcp://0.0.0.0:3003 & serve /app/auth -l tcp://0.0.0.0:${AUTH} & serve /app/cast -l tcp://0.0.0.0:${CAST}"]
 ```
 
 The above is a multi-stage Dockerfile which creates a production ready static output
@@ -85,13 +92,18 @@ Lets build a Docker image from the above Dockerfile. Copy and paste the above Do
 contents in the root of your web directory which is inside `ente/web`. Execute the 
 below command to create an image from this Dockerfile.
 
-You can always edit the Dockerfile and remove the steps for apps which you do not 
-intend to install on your system (like auth or cast) and opt out of it. 
 
 ```sh
 # Build the image
 docker build -t <image-name>:<tag> --no-cache --progress plain . 
 ```
+
+You can always edit the Dockerfile and remove the steps for apps which you do not 
+intend to install on your system (like auth or cast) and opt out of those. 
+
+Regarding Albums App, please take a note that they are not web pages with 
+navigable pages, if accessed on the web-browser they will simply redirect to 
+ente.web.io. 
 
 ## compose.yaml
 
@@ -106,12 +118,15 @@ Moving ahead, we need to paste the below contents into the compose.yaml inside
       - 3001:3001
       - 3002:3002
       - 3003:3003
+      - 3004:3004
     environment:
+      - NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=https://your-domain.com 
+      - NEXT_PUBLIC_ENTE_ACCOUNTS_ENDPOINT=https://your-domain.com
       - NODE_ENV=development
     restart: always
 ```
 
-Now, we're good to go. All we are left to do is start the containers. 
+Now, we're good to go. All we are left to do now is start the containers. 
 
 ```sh 
 docker compose up -d # --build 
