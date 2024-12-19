@@ -63,7 +63,6 @@ import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
 import { useFileInput } from "@ente/shared/hooks/useFileInput";
-import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
     getToken,
@@ -459,15 +458,17 @@ export default function Gallery() {
         }
     }, [isInSearchMode, state.searchSuggestion, state.searchResults]);
 
-    // TODO: Make this a normal useEffect.
-    useMemoSingleThreaded(async () => {
-        if (state.searchSuggestion) {
-            const searchResults = await filterSearchableFiles(
-                state.searchSuggestion,
+    useEffect(() => {
+        const pendingSearchSuggestion = state.pendingSearchSuggestions.at(-1);
+        if (!state.isRecomputingSearchResults && pendingSearchSuggestion) {
+            dispatch({ type: "updatingSearchResults" });
+            filterSearchableFiles(pendingSearchSuggestion).then(
+                (searchResults) => {
+                    dispatch({ type: "setSearchResults", searchResults });
+                },
             );
-            dispatch({ type: "setSearchResults", searchResults });
         }
-    }, [state.searchSuggestion]);
+    }, [state.isRecomputingSearchResults, state.pendingSearchSuggestions]);
 
     const selectAll = (e: KeyboardEvent) => {
         // ignore ctrl/cmd + a if the user is typing in a text field

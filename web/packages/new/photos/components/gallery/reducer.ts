@@ -262,6 +262,19 @@ export interface GalleryState {
      * set this value to the result.
      */
     searchResults: EnteFile[] | undefined;
+    /**
+     * `true` an external effect is currently (asynchronously) updating search
+     * results.
+     */
+    isRecomputingSearchResults: boolean;
+    /**
+     * {@link SearchSuggestion}s that have been enqueued while we were
+     * recomputing the current search results.
+     *
+     * We only need the last element of this array (if any), the rest are
+     * discarded when we get around to processing these.
+     */
+    pendingSearchSuggestions: SearchSuggestion[];
 
     /*--<  Transient UI state  >--*/
 
@@ -331,6 +344,7 @@ export type GalleryAction =
     | { type: "showPeople" }
     | { type: "showPerson"; personID: string }
     | { type: "enterSearchMode"; searchSuggestion?: SearchSuggestion }
+    | { type: "updatingSearchResults" }
     | { type: "setSearchResults"; searchResults: EnteFile[] }
     | { type: "exitSearch" };
 
@@ -358,6 +372,8 @@ const initialGalleryState: GalleryState = {
     extraVisiblePerson: undefined,
     searchSuggestion: undefined,
     searchResults: undefined,
+    isRecomputingSearchResults: false,
+    pendingSearchSuggestions: [],
     view: undefined,
     filteredFiles: [],
     isInSearchMode: false,
@@ -691,6 +707,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 extraVisiblePerson: undefined,
                 searchSuggestion: undefined,
                 searchResults: undefined,
+                isRecomputingSearchResults: false,
+                pendingSearchSuggestions: [],
                 view: {
                     type: "albums",
                     activeCollectionSummaryID: ALL_SECTION,
@@ -706,6 +724,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 extraVisiblePerson: undefined,
                 searchSuggestion: undefined,
                 searchResults: undefined,
+                isRecomputingSearchResults: false,
+                pendingSearchSuggestions: [],
                 view: {
                     type: "hidden-albums",
                     activeCollectionSummaryID: HIDDEN_ITEMS_SECTION,
@@ -727,6 +747,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 extraVisiblePerson: undefined,
                 searchSuggestion: undefined,
                 searchResults: undefined,
+                isRecomputingSearchResults: false,
+                pendingSearchSuggestions: [],
                 view,
                 isInSearchMode: false,
             });
@@ -739,6 +761,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 extraVisiblePerson: undefined,
                 searchResults: undefined,
                 searchSuggestion: undefined,
+                isRecomputingSearchResults: false,
+                pendingSearchSuggestions: [],
                 view: {
                     type:
                         action.collectionSummaryID !== undefined &&
@@ -770,6 +794,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 extraVisiblePerson,
                 searchResults: undefined,
                 searchSuggestion: undefined,
+                isRecomputingSearchResults: false,
+                pendingSearchSuggestions: [],
                 view,
                 isInSearchMode: false,
             });
@@ -789,22 +815,41 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 extraVisiblePerson,
                 searchResults: undefined,
                 searchSuggestion: undefined,
+                isRecomputingSearchResults: false,
+                pendingSearchSuggestions: [],
                 view,
                 isInSearchMode: false,
             });
         }
 
-        case "enterSearchMode":
+        case "enterSearchMode": {
+            const pendingSearchSuggestions = action.searchSuggestion
+                ? [...state.pendingSearchSuggestions, action.searchSuggestion]
+                : state.pendingSearchSuggestions;
+
             return stateByUpdatingFilteredFiles({
                 ...state,
                 isInSearchMode: true,
                 searchSuggestion: action.searchSuggestion,
+                pendingSearchSuggestions,
+            });
+        }
+
+        case "updatingSearchResults":
+            return stateByUpdatingFilteredFiles({
+                ...state,
+                isRecomputingSearchResults: true,
+                pendingSearchSuggestions: [],
             });
 
         case "setSearchResults":
+            // Discard stale updates
+            if (!state.isRecomputingSearchResults) return state;
+
             return stateByUpdatingFilteredFiles({
                 ...state,
                 searchResults: action.searchResults,
+                isRecomputingSearchResults: false,
             });
 
         case "exitSearch":
@@ -812,6 +857,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ...state,
                 searchResults: undefined,
                 searchSuggestion: undefined,
+                isRecomputingSearchResults: false,
+                pendingSearchSuggestions: [],
                 isInSearchMode: false,
             });
     }
