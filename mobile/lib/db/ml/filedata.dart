@@ -26,14 +26,19 @@ extension FileDataTable on MLDataDB {
     );
   }
 
-  Future<Map<int, String>> getFileIDsVidPreview() async {
+  Future<Map<int, PreviewInfo>> getFileIDsVidPreview() async {
     final db = await MLDataDB.instance.asyncDB;
     final res = await db.execute(
-      "SELECT $fileIDColumn, $objectIdColumn FROM $fileDataTable WHERE type='vid_preview'",
+      "SELECT $fileIDColumn, $objectIdColumn, size FROM $fileDataTable WHERE type='vid_preview'",
     );
     return res.asMap().map(
-          (i, e) =>
-              MapEntry(e[fileIDColumn] as int, e[objectIdColumn] as String),
+          (i, e) => MapEntry(
+            e[fileIDColumn] as int,
+            PreviewInfo(
+              objectId: e[objectIdColumn] as String,
+              objectSize: e['size'] as int,
+            ),
+          ),
         );
   }
 

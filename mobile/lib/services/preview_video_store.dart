@@ -207,7 +207,7 @@ class PreviewVideoStore {
     _logger.info("Getting playlist for $file");
     try {
       final objectKey =
-          FileDataService.instance.previewIds![file.uploadedFileID!]!;
+          FileDataService.instance.previewIds![file.uploadedFileID!]!.objectId;
       final playlistCache =
           await cacheManager.getFileFromCache(_getCacheKey(objectKey));
       String finalPlaylist;
