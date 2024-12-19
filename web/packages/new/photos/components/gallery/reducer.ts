@@ -1214,7 +1214,12 @@ const derivePeopleView = (
  */
 const stateByUpdatingFilteredFiles = (state: GalleryState) => {
     if (state.isInSearchMode) {
-        const filteredFiles = state.searchResults ?? state.filteredFiles;
+        const filteredFiles = deriveSearchFilteredFiles(
+            state.searchResults,
+            state.filteredFiles,
+            state.trashedFiles,
+            state.tempDeletedFileIDs,
+        );
         return { ...state, filteredFiles };
     } else if (state.view?.type == "albums") {
         const filteredFiles = deriveAlbumsFilteredFiles(
@@ -1304,6 +1309,32 @@ const deriveAlbumsFilteredFiles = (
     });
 
     return sortAndUniqueFilteredFiles(filteredFiles, view.activeCollection);
+};
+
+/**
+ * Compute the sorted list of files to show when we're showing search results
+ * and dependencies change.
+ */
+const deriveSearchFilteredFiles = (
+    searchResults: GalleryState["searchResults"],
+    filteredFiles: GalleryState["filteredFiles"],
+    trashedFiles: GalleryState["trashedFiles"],
+    tempDeletedFileIDs: GalleryState["tempDeletedFileIDs"],
+) => {
+    const baseResults = searchResults ?? filteredFiles;
+
+    // The user might deleted files in the search results view itself. The
+    // search results in such cases will continue showing already deleted files.
+    // This'll get fixed the next time the search results are refreshed, but
+    // meanwhile prune deleted files from the active search results.
+
+    const trashedFilesSet = new Set(trashedFiles.map(({ id }) => id));
+
+    return baseResults.filter((file) => {
+        if (tempDeletedFileIDs.has(file.id)) return false;
+        if (trashedFilesSet.has(file.id)) return false;
+        return true;
+    });
 };
 
 /**
