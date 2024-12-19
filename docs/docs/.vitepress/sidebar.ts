@@ -258,7 +258,7 @@ export const sidebar = [
                         link: "/self-hosting/guides/configuring-s3",
                     },
                     {
-                        text: "Using external S3",
+                        text: "Hosting Ente with external S3 (Community)",
                         link: "/self-hosting/guides/external-s3",
                     },
                     {
