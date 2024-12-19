@@ -32,8 +32,7 @@ export type SearchSuggestion = { label: string } & (
  * An option shown in the the search bar's select dropdown.
  *
  * The {@link SearchOption} wraps a {@link SearchSuggestion} with some metadata
- * used when showing a corresponding entry in the dropdown, and in the results
- * header.
+ * used when showing a corresponding entry in the dropdown.
  *
  * If the user selects the option, then we will re-run the search using the
  * {@link suggestion} to filter the list of files shown to the user.
@@ -43,12 +42,6 @@ export interface SearchOption {
     /**
      * The count of files that matched the search option when it was initially
      * computed.
-     *
-     * Later updates (e.g. deletion of files that are being shown as search
-     * results) may make this diverge from the correct count, so the gallery
-     * should instead take the count from the count of the computed search
-     * results. This property is thus meant only for the search dropdown to the
-     * show the count.
      */
     fileCount: number;
     previewFiles: EnteFile[];
