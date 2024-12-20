@@ -45,7 +45,9 @@ const Page: React.FC = () => {
                 if (state.duplicateGroups.length == 0) {
                     return <NoDuplicatesFound />;
                 } else {
-                    return <Duplicates />;
+                    return (
+                        <Duplicates duplicateGroups={state.duplicateGroups} />
+                    );
                 }
             default:
                 return <Loading />;
@@ -128,6 +130,7 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
             return { ...state, status: "analysisFailed" };
         case "analysisCompleted": {
             const duplicateGroups = action.duplicateGroups;
+            sortDuplicateGroups(duplicateGroups, state.sortOrder);
             const prunableCount = duplicateGroups.reduce(
                 (sum, { prunableCount }) => sum + prunableCount,
                 0,
@@ -149,6 +152,16 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
             return state;
     }
 };
+
+const sortDuplicateGroups = (
+    duplicateGroups: DuplicateGroup[],
+    sortOrder: DedupState["sortOrder"],
+) =>
+    duplicateGroups.sort((a, b) =>
+        sortOrder == "prunableSize"
+            ? b.prunableSize - a.prunableSize
+            : b.prunableCount - a.prunableCount,
+    );
 
 const Navbar: React.FC = () => {
     const router = useRouter();
@@ -201,7 +214,14 @@ const NoDuplicatesFound: React.FC = () => (
     </CenteredFill>
 );
 
-const Duplicates: React.FC = () => {
+interface DuplicatesProps {
+    /**
+     * Groups of duplicates. Guaranteed to be non-empty.
+     */
+    duplicateGroups: DuplicateGroup[];
+}
+
+const Duplicates: React.FC<DuplicatesProps> = ({ duplicateGroups }) => {
     return (
         <Stack sx={{ flex: 1 }}>
             <Box sx={{ flex: 1, overflow: "hidden" }}>
@@ -215,12 +235,9 @@ const Duplicates: React.FC = () => {
                                 fontSize: "4rem",
                             }}
                         >
-                            <div>1</div>
-                            <div>1</div>
-                            <div>1</div>
-                            <div>1</div>
-                            <div>1</div>
-                            <div>1</div>
+                            {duplicateGroups.map((dup, i) => (
+                                <div key={i}>{dup.items.length}</div>
+                            ))}
                         </Box>
                     )}
                 </Autosizer>
