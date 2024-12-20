@@ -11,6 +11,7 @@ import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { downloadManager } from "@/gallery/services/download";
 import { EnteFile } from "@/media/file";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
+import { getLocalCollections } from "@/new/photos/services/collection";
 import { AppContext } from "@/new/photos/types/context";
 import {
     CenteredFlex,
@@ -52,7 +53,6 @@ import React, {
     type MutableRefObject,
     type Ref,
 } from "react";
-import { getLocalCollections } from "services/collectionService";
 import uploadManager from "services/upload/uploadManager";
 
 interface ImageEditorOverlayProps {

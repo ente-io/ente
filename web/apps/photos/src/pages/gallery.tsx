@@ -113,8 +113,8 @@ import {
     createAlbum,
     createUnCategorizedCollection,
     getAllLatestCollections,
-    getAllLocalCollections,
 } from "services/collectionService";
+import { getAllLocalCollections } from "@/new/photos/services/collection";
 import { syncFiles } from "services/fileService";
 import { preFileInfoSync, sync } from "services/sync";
 import { syncTrash } from "services/trashService";

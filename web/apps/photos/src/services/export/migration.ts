@@ -6,6 +6,7 @@ import type { Collection } from "@/media/collection";
 import { mergeMetadata, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
+import { getLocalCollections } from "@/new/photos/services/collection";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import { getAllLocalFiles } from "@/new/photos/services/files";
 import {
@@ -16,7 +17,6 @@ import {
 import { wait } from "@/utils/promise";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
-import { getLocalCollections } from "services/collectionService";
 import { getIDBasedSortedFiles, getPersonalFiles } from "utils/file";
 import {
     getCollectionIDFromFileUID,

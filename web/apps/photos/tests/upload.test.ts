@@ -2,7 +2,7 @@
 import { FileType } from "@/media/file-type";
 import { groupFilesByCollectionID } from "@/new/photos/services/file";
 import { getLocalFiles } from "@/new/photos/services/files";
-import { getLocalCollections } from "services/collectionService";
+import { getLocalCollections } from "@/new/photos/services/collection";
 import { parseDateFromDigitGroups } from "services/upload/date";
 import {
     MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
