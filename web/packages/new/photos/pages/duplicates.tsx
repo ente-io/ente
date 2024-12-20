@@ -289,12 +289,7 @@ const NoDuplicatesFound: React.FC = () => (
     </CenteredFill>
 );
 
-type DuplicatesProps = DeduplicateButtonProps & {
-    /**
-     * Groups of duplicates. Guaranteed to be non-empty.
-     */
-    duplicateGroups: DuplicateGroup[];
-};
+type DuplicatesProps = DuplicatesListProps & DeduplicateButtonProps;
 
 const Duplicates: React.FC<DuplicatesProps> = ({
     duplicateGroups,
@@ -303,27 +298,33 @@ const Duplicates: React.FC<DuplicatesProps> = ({
     return (
         <Stack sx={{ flex: 1 }}>
             <Box sx={{ flex: 1, overflow: "hidden" }}>
-                <Autosizer>
-                    {({ height, width }) => (
-                        <Box
-                            sx={{
-                                width,
-                                height,
-                                border: "1px solid red",
-                                fontSize: "4rem",
-                            }}
-                        >
-                            {duplicateGroups.map((dup, i) => (
-                                <div key={i}>{dup.items.length}</div>
-                            ))}
-                        </Box>
-                    )}
-                </Autosizer>
+                <DuplicatesList {...{ duplicateGroups }} />
             </Box>
             <Stack sx={{ margin: 1 }}>
                 <DeduplicateButton {...deduplicateButtonProps} />
             </Stack>
         </Stack>
+    );
+};
+
+interface DuplicatesListProps {
+    /**
+     * Groups of duplicates. Guaranteed to be non-empty.
+     */
+    duplicateGroups: DuplicateGroup[];
+}
+
+const DuplicatesList: React.FC<DuplicatesListProps> = ({ duplicateGroups }) => {
+    return (
+        <Autosizer>
+            {({ height, width }) => (
+                <Box sx={{ width, height }}>
+                    {duplicateGroups.map((dup, i) => (
+                        <div key={i}>{dup.items.length}</div>
+                    ))}
+                </Box>
+            )}
+        </Autosizer>
     );
 };
 
