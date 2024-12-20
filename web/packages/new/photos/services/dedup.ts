@@ -36,10 +36,6 @@ export interface DuplicateGroup {
      * group.
      */
     prunableSize: number;
-    /**
-     * `true` if the user has marked this group for deduping.
-     */
-    isSelected: boolean;
 }
 
 /**
@@ -115,7 +111,6 @@ export const deduceDuplicates = async () => {
             itemSize: size,
             prunableCount: duplicates.length - 1,
             prunableSize: size * (duplicates.length - 1),
-            isSelected: true,
         });
     }
 
