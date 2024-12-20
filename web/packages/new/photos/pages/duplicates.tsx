@@ -12,7 +12,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import TickIcon from "@mui/icons-material/Done";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import SortIcon from "@mui/icons-material/Sort";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { useRouter } from "next/router";
 import React, { useEffect, useReducer } from "react";
 import Autosizer from "react-virtualized-auto-sizer";
@@ -222,7 +222,14 @@ const SortMenu: React.FC<SortMenuProps> = ({
     sortOrder,
     onChangeSortOrder,
 }) => (
-    <OverflowMenu ariaID="duplicates-sort" triggerButtonIcon={<SortIcon />}>
+    <OverflowMenu
+        ariaID="duplicates-sort"
+        triggerButtonIcon={
+            <Tooltip title={pt("Sort")}>
+                <SortIcon />
+            </Tooltip>
+        }
+    >
         <OverflowMenuOption
             endIcon={sortOrder == "prunableSize" ? <TickIcon /> : undefined}
             onClick={() => onChangeSortOrder("prunableSize")}
