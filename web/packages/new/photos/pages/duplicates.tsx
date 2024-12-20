@@ -9,13 +9,14 @@ import {
 } from "@/base/components/OverflowMenu";
 import { pt } from "@/base/i18n";
 import log from "@/base/log";
+import { formattedByteSize } from "@/new/photos/utils/units";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import TickIcon from "@mui/icons-material/Done";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import SortIcon from "@mui/icons-material/Sort";
 import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { useRouter } from "next/router";
-import React, { useEffect, useReducer } from "react";
+import React, { useCallback, useEffect, useReducer } from "react";
 import Autosizer from "react-virtualized-auto-sizer";
 import { deduceDuplicates, type DuplicateGroup } from "../services/dedup";
 import { useAppContext } from "../types/context";
@@ -42,6 +43,10 @@ const Page: React.FC = () => {
             });
     }, [showNavBar]);
 
+    const handleRemoveDuplicates = useCallback(() => {
+        dispatch({ type: "dedupe" });
+    }, []);
+
     const contents = (() => {
         switch (state.status) {
             case undefined:
@@ -54,7 +59,12 @@ const Page: React.FC = () => {
                     return <NoDuplicatesFound />;
                 } else {
                     return (
-                        <Duplicates duplicateGroups={state.duplicateGroups} />
+                        <Duplicates
+                            duplicateGroups={state.duplicateGroups}
+                            prunableCount={state.prunableCount}
+                            prunableSize={state.prunableSize}
+                            onRemoveDuplicates={handleRemoveDuplicates}
+                        />
                     );
                 }
             default:
@@ -279,14 +289,17 @@ const NoDuplicatesFound: React.FC = () => (
     </CenteredFill>
 );
 
-interface DuplicatesProps {
+type DuplicatesProps = DeduplicateButtonProps & {
     /**
      * Groups of duplicates. Guaranteed to be non-empty.
      */
     duplicateGroups: DuplicateGroup[];
-}
+};
 
-const Duplicates: React.FC<DuplicatesProps> = ({ duplicateGroups }) => {
+const Duplicates: React.FC<DuplicatesProps> = ({
+    duplicateGroups,
+    ...deduplicateButtonProps
+}) => {
     return (
         <Stack sx={{ flex: 1 }}>
             <Box sx={{ flex: 1, overflow: "hidden" }}>
@@ -307,19 +320,42 @@ const Duplicates: React.FC<DuplicatesProps> = ({ duplicateGroups }) => {
                     )}
                 </Autosizer>
             </Box>
-            <Box sx={{ margin: 1 }}>
-                <FocusVisibleButton
-                    sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        minWidth: "320px",
-                        margin: "auto",
-                    }}
-                >
-                    <Typography>Test</Typography>
-                    <Typography>Test</Typography>
-                </FocusVisibleButton>
-            </Box>
+            <Stack sx={{ margin: 1 }}>
+                <DeduplicateButton {...deduplicateButtonProps} />
+            </Stack>
         </Stack>
     );
 };
+
+interface DeduplicateButtonProps {
+    /**
+     * See {@link prunableCount} in {@link DedupState}.
+     */
+    prunableCount: number;
+    /**
+     * See {@link prunableSize} in {@link DedupState}.
+     */
+    prunableSize: number;
+    /**
+     * Called when the user presses the button to remove duplicates.
+     */
+    onRemoveDuplicates: () => void;
+}
+
+const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
+    prunableCount,
+    prunableSize,
+    onRemoveDuplicates,
+}) => (
+    <FocusVisibleButton
+        sx={{ minWidth: "min(100%, 320px)", margin: "auto" }}
+        onClick={onRemoveDuplicates}
+    >
+        <Stack sx={{ gap: 1 }}>
+            <Typography>{pt(`Delete ${prunableCount} items`)}</Typography>
+            <Typography variant="small" fontWeight={"normal"}>
+                {formattedByteSize(prunableSize)}
+            </Typography>
+        </Stack>
+    </FocusVisibleButton>
+);
