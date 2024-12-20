@@ -163,6 +163,14 @@ const sortDuplicateGroups = (
             : b.prunableCount - a.prunableCount,
     );
 
+interface NavbarProps {
+    /**
+     * Called when the user changes the sort order using the sort order menu
+     * visible via the navbar.
+     */
+    onChangeSortOrder: (sortOrder: DedupState["sortOrder"]) => void;
+}
+
 const Navbar: React.FC = () => {
     const router = useRouter();
 
