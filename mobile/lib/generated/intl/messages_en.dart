@@ -1515,7 +1515,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Search by a date, month or year"),
         "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Images will be shown here once processing is complete"),
+            "Images will be shown here once processing and syncing is complete"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "People will be shown here once indexing is done"),
         "searchFileTypesAndNamesEmptySection":
@@ -1534,7 +1534,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Invite people, and you\'ll see all photos shared by them here"),
         "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
+            "People will be shown here once processing and syncing is complete"),
         "searchResultCount": m62,
         "searchSectionsLengthMismatch": m63,
         "security": MessageLookupByLibrary.simpleMessage("Security"),
