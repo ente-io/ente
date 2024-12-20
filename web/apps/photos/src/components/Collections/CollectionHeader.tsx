@@ -1,6 +1,10 @@
 import { assertionFailed } from "@/base/assert";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SpaceBetweenFlex } from "@/base/components/mui/Container";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@/base/components/OverflowMenu";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import type { Collection } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
@@ -23,11 +27,7 @@ import {
 } from "@/new/photos/services/magic-metadata";
 import { useAppContext } from "@/new/photos/types/context";
 import { HorizontalFlex } from "@ente/shared/components/Container";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-    StyledMenu,
-} from "@ente/shared/components/OverflowMenu";
+import { StyledMenu } from "@ente/shared/components/OverflowMenu";
 import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
@@ -330,7 +330,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
             />
 
             <OverflowMenu
-                ariaID={"collection-options"}
+                ariaID="collection-options"
                 triggerButtonIcon={<MoreHoriz ref={overFlowMenuIconRef} />}
             >
                 {collectionSummaryType == "trash" ? (

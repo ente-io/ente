@@ -91,11 +91,15 @@ export const OverflowMenu: React.FC<
 
 interface OverflowMenuOptionProps {
     /**
+     * Called when the menu option is clicked.
+     */
+    onClick: () => void;
+    /**
      * The color of the text and icons.
      *
      * Default: "primary".
      */
-    color?: "primary";
+    color?: "primary" | "critical";
     /**
      * An optional icon to show at the leading edge of the menu option.
      */
@@ -104,10 +108,6 @@ interface OverflowMenuOptionProps {
      * An optional icon to show at the trailing edge of the menu option.
      */
     endIcon?: React.ReactNode;
-    /**
-     * Called when the menu option is clicked.
-     */
-    onClick: () => void;
 }
 
 /**
@@ -138,7 +138,14 @@ export const OverflowMenuOption: React.FC<
         >
             <Stack
                 direction="row"
-                sx={{ gap: 1.5, alignItems: "center", width: "100%" }}
+                sx={{
+                    gap: 1.5,
+                    alignItems: "center",
+                    // Fill our container.
+                    width: "100%",
+                    // MUI has responsive padding, use a static value instead.
+                    paddingBlock: 1,
+                }}
             >
                 {startIcon}
                 <Typography sx={{ flex: 1, fontWeight: "bold" }}>
