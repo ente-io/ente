@@ -45,6 +45,8 @@ class PreviewVideoStore {
     });
   }
 
+  List<VideoQuality> get qualities => VideoQuality.values;
+
   Future<void> chunkAndUploadVideo(BuildContext ctx, EnteFile enteFile) async {
     if (!enteFile.isUploaded) return;
     final file = await getFile(enteFile, isOrigin: true);
@@ -80,7 +82,7 @@ class PreviewVideoStore {
     _logger.info('Compressing video ${enteFile.displayName}');
     final mediaInfo = await VideoCompress.compressVideo(
       file.path,
-      quality: VideoQuality.Res1280x720Quality,
+      quality: VideoQuality.MediumQuality,
     );
     if (mediaInfo?.path == null) return;
     _logger.info('CompressionDone ${enteFile.displayName}');
@@ -102,6 +104,26 @@ class PreviewVideoStore {
       '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
       '$prefix/output.m3u8',
     );
+
+    // final session = await FFmpegKit.execute('-i "${file.path}" '
+    //     // Video encoding settings
+    //     '-c:v libx264 ' // Use H.264 codec
+    //     '-preset medium ' // Encoding speed preset
+    //     '-crf 23 ' // Quality setting (lower = better quality, 23 is a good balance)
+    //     '-profile:v main ' // H.264 profile for better compatibility
+    //     '-level:v 4.0 ' // H.264 level for device compatibility
+    //     '-vf scale=-2:720 ' // Scale to 720p while maintaining aspect ratio
+    //     // Audio encoding settings
+    //     '-c:a aac ' // Use AAC audio codec
+    //     '-b:a 128k ' // Audio bitrate
+    //     // HLS specific settings
+    //     '-f hls '
+    //     '-hls_time 10 '
+    //     '-hls_flags single_file '
+    //     '-hls_list_size 0 '
+    //     '-hls_key_info_file ${keyinfo.path} '
+    //     // Output
+    //     '$prefix/output.m3u8');
 
     final returnCode = await session.getReturnCode();
 
