@@ -11,8 +11,8 @@ import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import TickIcon from "@mui/icons-material/Done";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import DoneIcon from "@mui/icons-material/Done";
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import SortIcon from "@mui/icons-material/Sort";
 import {
     Box,
@@ -91,6 +91,7 @@ const Page: React.FC = () => {
                 onChangeSortOrder={(sortOrder) =>
                     dispatch({ type: "changeSortOrder", sortOrder })
                 }
+                onDeselectAll={() => dispatch({ type: "deselectAll" })}
             />
             {contents}
         </Stack>
@@ -214,6 +215,20 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
             };
         }
 
+        case "deselectAll": {
+            const selected = state.selected.map(() => false);
+            const { prunableCount, prunableSize } = deducePrunableCountAndSize(
+                state.duplicateGroups,
+                selected,
+            );
+            return {
+                ...state,
+                selected,
+                prunableCount,
+                prunableSize,
+            };
+        }
+
         default:
             return state;
     }
@@ -258,9 +273,17 @@ interface NavbarProps {
      * visible via the navbar.
      */
     onChangeSortOrder: (sortOrder: SortOrder) => void;
+    /**
+     * Called when the user selects the deselect all option.
+     */
+    onDeselectAll: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ sortOrder, onChangeSortOrder }) => {
+const Navbar: React.FC<NavbarProps> = ({
+    sortOrder,
+    onChangeSortOrder,
+    onDeselectAll,
+}) => {
     const router = useRouter();
 
     return (
@@ -281,9 +304,7 @@ const Navbar: React.FC<NavbarProps> = ({ sortOrder, onChangeSortOrder }) => {
             <Typography variant="large">{pt("Remove duplicates")}</Typography>
             <Stack direction="row" sx={{ gap: "4px" }}>
                 <SortMenu {...{ sortOrder, onChangeSortOrder }} />
-                <IconButton>
-                    <MoreHorizIcon />
-                </IconButton>
+                <OptionsMenu {...{ onDeselectAll }} />
             </Stack>
         </Stack>
     );
@@ -304,16 +325,29 @@ const SortMenu: React.FC<SortMenuProps> = ({
         }
     >
         <OverflowMenuOption
-            endIcon={sortOrder == "prunableSize" ? <TickIcon /> : undefined}
+            endIcon={sortOrder == "prunableSize" ? <DoneIcon /> : undefined}
             onClick={() => onChangeSortOrder("prunableSize")}
         >
             {pt("Total size")}
         </OverflowMenuOption>
         <OverflowMenuOption
-            endIcon={sortOrder == "prunableCount" ? <TickIcon /> : undefined}
+            endIcon={sortOrder == "prunableCount" ? <DoneIcon /> : undefined}
             onClick={() => onChangeSortOrder("prunableCount")}
         >
             {pt("Count")}
+        </OverflowMenuOption>
+    </OverflowMenu>
+);
+
+type OptionsMenuProps = Pick<NavbarProps, "onDeselectAll">;
+
+const OptionsMenu: React.FC<OptionsMenuProps> = ({ onDeselectAll }) => (
+    <OverflowMenu ariaID="duplicates-options">
+        <OverflowMenuOption
+            startIcon={<RemoveCircleOutlineIcon />}
+            onClick={onDeselectAll}
+        >
+            {pt("Deselect all")}
         </OverflowMenuOption>
     </OverflowMenu>
 );
@@ -452,6 +486,7 @@ const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
 }) => (
     <FocusVisibleButton
         sx={{ minWidth: "min(100%, 320px)", margin: "auto" }}
+        disabled={prunableCount == 0}
         onClick={onRemoveDuplicates}
     >
         <Stack sx={{ gap: 1 }}>
