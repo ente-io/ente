@@ -131,6 +131,9 @@ interface OverflowMenuOptionProps {
     onClick: () => void;
 }
 
+/**
+ * Individual options meant to be shown inside an {@link OverflowMenu}.
+ */
 export const OverflowMenuOption: React.FC<
     React.PropsWithChildren<OverflowMenuOptionProps>
 > = ({ onClick, color = "primary", startIcon, endIcon, children }) => {

@@ -2,9 +2,14 @@ import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { CenteredFill } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@/base/components/OverflowMenu";
 import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import TickIcon from "@mui/icons-material/Done";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import SortIcon from "@mui/icons-material/Sort";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
@@ -56,13 +61,20 @@ const Page: React.FC = () => {
 
     return (
         <Stack sx={{ flex: 1 }}>
-            <Navbar />
+            <Navbar
+                sortOrder={state.sortOrder}
+                onChangeSortOrder={(sortOrder) =>
+                    dispatch({ type: "changeSortOrder", sortOrder })
+                }
+            />
             {contents}
         </Stack>
     );
 };
 
 export default Page;
+
+type SortOrder = "prunableCount" | "prunableSize";
 
 interface DedupState {
     status:
@@ -86,7 +98,7 @@ interface DedupState {
     /**
      * The attribute to use for sorting {@link duplicateGroups}.
      */
-    sortOrder: "prunableCount" | "prunableSize";
+    sortOrder: SortOrder;
     /**
      * The number of files that will be pruned if the user decides to dedup the
      * current selection.
@@ -103,7 +115,7 @@ type DedupAction =
     | { type: "analyze" }
     | { type: "analysisFailed" }
     | { type: "analysisCompleted"; duplicateGroups: DuplicateGroup[] }
-    | { type: "changeSortOrder"; sortOrder: DedupState["sortOrder"] }
+    | { type: "changeSortOrder"; sortOrder: SortOrder }
     | { type: "select"; index: number }
     | { type: "deselect"; index: number }
     | { type: "deselectAll" }
@@ -165,13 +177,17 @@ const sortDuplicateGroups = (
 
 interface NavbarProps {
     /**
+     * The current sort order.
+     */
+    sortOrder: SortOrder;
+    /**
      * Called when the user changes the sort order using the sort order menu
      * visible via the navbar.
      */
-    onChangeSortOrder: (sortOrder: DedupState["sortOrder"]) => void;
+    onChangeSortOrder: (sortOrder: SortOrder) => void;
 }
 
-const Navbar: React.FC = () => {
+const Navbar: React.FC<NavbarProps> = ({ sortOrder, onChangeSortOrder }) => {
     const router = useRouter();
 
     return (
@@ -191,6 +207,31 @@ const Navbar: React.FC = () => {
             </Box>
             <Typography variant="large">{pt("Remove duplicates")}</Typography>
             <Stack direction="row" sx={{ gap: "4px" }}>
+                <OverflowMenu
+                    ariaID="duplicates-sort"
+                    triggerButtonIcon={<SortIcon />}
+                >
+                    <OverflowMenuOption
+                        endIcon={
+                            sortOrder == "prunableSize" ? (
+                                <TickIcon />
+                            ) : undefined
+                        }
+                        onClick={() => onChangeSortOrder("prunableSize")}
+                    >
+                        {pt("Total size")}
+                    </OverflowMenuOption>
+                    <OverflowMenuOption
+                        endIcon={
+                            sortOrder == "prunableCount" ? (
+                                <TickIcon />
+                            ) : undefined
+                        }
+                        onClick={() => onChangeSortOrder("prunableCount")}
+                    >
+                        {pt("Count")}
+                    </OverflowMenuOption>
+                </OverflowMenu>
                 <IconButton>
                     <SortIcon />
                 </IconButton>
