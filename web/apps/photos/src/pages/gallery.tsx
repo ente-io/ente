@@ -32,6 +32,7 @@ import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import {
     ALL_SECTION,
     DUMMY_UNCATEGORIZED_COLLECTION,
+    getAllLocalCollections,
     isHiddenCollection,
 } from "@/new/photos/services/collection";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
@@ -114,7 +115,6 @@ import {
     createUnCategorizedCollection,
     getAllLatestCollections,
 } from "services/collectionService";
-import { getAllLocalCollections } from "@/new/photos/services/collection";
 import { syncFiles } from "services/fileService";
 import { preFileInfoSync, sync } from "services/sync";
 import { syncTrash } from "services/trashService";
