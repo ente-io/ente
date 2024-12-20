@@ -69,7 +69,6 @@ const Page: React.FC = () => {
                     return (
                         <Duplicates
                             duplicateGroups={state.duplicateGroups}
-                            selected={state.selected}
                             onToggleSelection={(index) =>
                                 dispatch({ type: "toggleSelection", index })
                             }
@@ -122,11 +121,6 @@ interface DedupState {
      */
     duplicateGroups: DuplicateGroup[];
     /**
-     * An array of the same length as {@link duplicateGroups}, with `true` for
-     * all indexes which are selected.
-     */
-    selected: boolean[];
-    /**
      * The attribute to use for sorting {@link duplicateGroups}.
      */
     sortOrder: SortOrder;
@@ -156,7 +150,6 @@ type DedupAction =
 const initialDedupState: DedupState = {
     status: undefined,
     duplicateGroups: [],
-    selected: [],
     sortOrder: "prunableSize",
     prunableCount: 0,
     prunableSize: 0,
@@ -175,10 +168,8 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
             const duplicateGroups = action.duplicateGroups;
             sortDuplicateGroups(duplicateGroups, state.sortOrder);
             const selected = duplicateGroups.map(() => true);
-            const { prunableCount, prunableSize } = deducePrunableCountAndSize(
-                duplicateGroups,
-                selected,
-            );
+            const { prunableCount, prunableSize } =
+                deducePrunableCountAndSize(duplicateGroups);
             return {
                 ...state,
                 status: "analysisCompleted",
@@ -201,29 +192,28 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
         }
 
         case "toggleSelection": {
-            const selected = state.selected;
-            selected[action.index] = !selected[action.index]!;
-            const { prunableCount, prunableSize } = deducePrunableCountAndSize(
-                state.duplicateGroups,
-                selected,
-            );
+            const duplicateGroups = state.duplicateGroups;
+            const duplicateGroup = duplicateGroups[action.index]!;
+            duplicateGroup.isSelected = !duplicateGroup.isSelected;
+            const { prunableCount, prunableSize } =
+                deducePrunableCountAndSize(duplicateGroups);
             return {
                 ...state,
-                selected,
+                duplicateGroups,
                 prunableCount,
                 prunableSize,
             };
         }
 
         case "deselectAll": {
-            const selected = state.selected.map(() => false);
-            const { prunableCount, prunableSize } = deducePrunableCountAndSize(
-                state.duplicateGroups,
-                selected,
+            const duplicateGroups = state.duplicateGroups.map(
+                (duplicateGroup) => ({ ...duplicateGroup, selected: false }),
             );
+            const { prunableCount, prunableSize } =
+                deducePrunableCountAndSize(duplicateGroups);
             return {
                 ...state,
-                selected,
+                duplicateGroups,
                 prunableCount,
                 prunableSize,
             };
@@ -246,18 +236,15 @@ const sortDuplicateGroups = (
     );
 
 /** Helper method for the reducer */
-const deducePrunableCountAndSize = (
-    duplicateGroups: DuplicateGroup[],
-    selected: boolean[],
-) => {
+const deducePrunableCountAndSize = (duplicateGroups: DuplicateGroup[]) => {
     const prunableCount = duplicateGroups.reduce(
-        (sum, { prunableCount }, index) =>
-            sum + (selected[index] ? prunableCount : 0),
+        (sum, { prunableCount, isSelected }) =>
+            sum + (isSelected ? prunableCount : 0),
         0,
     );
     const prunableSize = duplicateGroups.reduce(
-        (sum, { prunableSize }, index) =>
-            sum + (selected[index] ? prunableSize : 0),
+        (sum, { prunableSize, isSelected }) =>
+            sum + (isSelected ? prunableSize : 0),
         0,
     );
     return { prunableCount, prunableSize };
@@ -376,16 +363,13 @@ type DuplicatesProps = DuplicatesListProps & DeduplicateButtonProps;
 
 const Duplicates: React.FC<DuplicatesProps> = ({
     duplicateGroups,
-    selected,
     onToggleSelection,
     ...deduplicateButtonProps
 }) => {
     return (
         <Stack sx={{ flex: 1 }}>
             <Box sx={{ flex: 1, overflow: "hidden", paddingBlock: 1 }}>
-                <DuplicatesList
-                    {...{ duplicateGroups, selected, onToggleSelection }}
-                />
+                <DuplicatesList {...{ duplicateGroups, onToggleSelection }} />
             </Box>
             <Stack sx={{ margin: 1 }}>
                 <DeduplicateButton {...deduplicateButtonProps} />
@@ -400,10 +384,6 @@ interface DuplicatesListProps {
      */
     duplicateGroups: DuplicateGroup[];
     /**
-     * See {@link selected} in {@link DedupState}.
-     */
-    selected: boolean[];
-    /**
      * Called when the user toggles the selection for the duplicate group at the
      * given {@link index}.
      */
@@ -412,7 +392,6 @@ interface DuplicatesListProps {
 
 const DuplicatesList: React.FC<DuplicatesListProps> = ({
     duplicateGroups,
-    selected,
     onToggleSelection,
 }) => {
     const itemCount = duplicateGroups.length;
@@ -423,7 +402,7 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
             {({ height, width }) => (
                 <FixedSizeList
                     {...{ height, width, itemCount, itemSize }}
-                    itemData={{ duplicateGroups, selected, onToggleSelection }}
+                    itemData={{ duplicateGroups, onToggleSelection }}
                 >
                     {ListItem}
                 </FixedSizeList>
@@ -437,12 +416,12 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListProps>> = ({
     style,
     data,
 }) => {
-    const { duplicateGroups, selected, onToggleSelection } = data;
+    const { duplicateGroups, onToggleSelection } = data;
 
     const duplicateGroup = duplicateGroups[index]!;
     const count = duplicateGroup.items.length;
     const itemSize = formattedByteSize(duplicateGroup.itemSize);
-    const checked = selected[index]!;
+    const checked = duplicateGroup.isSelected;
     const onChange = () => onToggleSelection(index);
 
     return (
