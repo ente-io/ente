@@ -339,8 +339,14 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListProps>> = ({
     data,
 }) => {
     const { duplicateGroups } = data;
-    const dup = duplicateGroups[index]!;
-    return <div {...{ style }}>{dup.items.length}</div>;
+    const duplicateGroup = duplicateGroups[index]!;
+    const count = duplicateGroup.items.length;
+    const itemSize = formattedByteSize(duplicateGroup.itemSize);
+    return (
+        <Stack {...{ style }}>
+            <Typography>{pt(`${count} items, ${itemSize} each`)}</Typography>
+        </Stack>
+    );
 };
 
 interface DeduplicateButtonProps {
