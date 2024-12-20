@@ -207,34 +207,7 @@ const Navbar: React.FC<NavbarProps> = ({ sortOrder, onChangeSortOrder }) => {
             </Box>
             <Typography variant="large">{pt("Remove duplicates")}</Typography>
             <Stack direction="row" sx={{ gap: "4px" }}>
-                <OverflowMenu
-                    ariaID="duplicates-sort"
-                    triggerButtonIcon={<SortIcon />}
-                >
-                    <OverflowMenuOption
-                        endIcon={
-                            sortOrder == "prunableSize" ? (
-                                <TickIcon />
-                            ) : undefined
-                        }
-                        onClick={() => onChangeSortOrder("prunableSize")}
-                    >
-                        {pt("Total size")}
-                    </OverflowMenuOption>
-                    <OverflowMenuOption
-                        endIcon={
-                            sortOrder == "prunableCount" ? (
-                                <TickIcon />
-                            ) : undefined
-                        }
-                        onClick={() => onChangeSortOrder("prunableCount")}
-                    >
-                        {pt("Count")}
-                    </OverflowMenuOption>
-                </OverflowMenu>
-                <IconButton>
-                    <SortIcon />
-                </IconButton>
+                <SortMenu {...{ sortOrder, onChangeSortOrder }} />
                 <IconButton>
                     <MoreHorizIcon />
                 </IconButton>
@@ -242,6 +215,28 @@ const Navbar: React.FC<NavbarProps> = ({ sortOrder, onChangeSortOrder }) => {
         </Stack>
     );
 };
+
+type SortMenuProps = Pick<NavbarProps, "sortOrder" | "onChangeSortOrder">;
+
+const SortMenu: React.FC<SortMenuProps> = ({
+    sortOrder,
+    onChangeSortOrder,
+}) => (
+    <OverflowMenu ariaID="duplicates-sort" triggerButtonIcon={<SortIcon />}>
+        <OverflowMenuOption
+            endIcon={sortOrder == "prunableSize" ? <TickIcon /> : undefined}
+            onClick={() => onChangeSortOrder("prunableSize")}
+        >
+            {pt("Total size")}
+        </OverflowMenuOption>
+        <OverflowMenuOption
+            endIcon={sortOrder == "prunableCount" ? <TickIcon /> : undefined}
+            onClick={() => onChangeSortOrder("prunableCount")}
+        >
+            {pt("Count")}
+        </OverflowMenuOption>
+    </OverflowMenu>
+);
 
 const Loading: React.FC = () => (
     <CenteredFill>
