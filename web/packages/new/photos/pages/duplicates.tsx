@@ -421,7 +421,7 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListProps>> = ({
                     paddingInline: 1,
                 }}
             >
-                <Typography>
+                <Typography color={checked ? "text.base" : "text.muted"}>
                     {pt(`${count} items, ${itemSize} each`)}
                 </Typography>
                 <Checkbox {...{ checked, onChange }} />
