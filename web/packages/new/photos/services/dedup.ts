@@ -13,9 +13,13 @@ export interface DuplicateGroup {
      * These are sorted by the collectionName.
      */
     items: {
-        /** The underlying collection file. */
+        /**
+         * The underlying collection file.
+         */
         file: EnteFile;
-        /** The name of the collection to which this file belongs. */
+        /**
+         * The name of the collection to which this file belongs.
+         */
         collectionName: string;
     }[];
     /**
@@ -97,13 +101,23 @@ export const deduceDuplicates = async () => {
         const duplicates = potentialDuplicates.filter(
             (file) => file.info?.fileSize == size,
         );
-        if (duplicates.length < 2) continue;
+        const items = duplicates
+            .map((file) => {
+                const collectionName = collectionNameByID.get(
+                    file.collectionID,
+                );
+                return collectionName ? { file, collectionName } : undefined;
+            })
+            .filter((item) => !!item);
+        if (items.length < 2) continue;
         duplicateGroups.push({
-            items: duplicates.map((file) => ({ file, collectionName: "TODO" })),
+            items,
             itemSize: size,
             prunableCount: duplicates.length - 1,
             prunableSize: size * (duplicates.length - 1),
             isSelected: true,
         });
     }
+
+    return duplicateGroups;
 };
