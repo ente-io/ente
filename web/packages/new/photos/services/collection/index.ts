@@ -60,7 +60,6 @@ export const isHiddenCollection = (collection: Collection) =>
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     collection.magicMetadata?.data.visibility === ItemVisibility.hidden;
 
-// TODO: Does this need localizations?
 export const DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME = "Hidden";
 
 /**
@@ -79,10 +78,5 @@ export const getCollectionUserFacingName = (collection: Collection) => {
 /**
  * Return a map of the (user-facing) collection name, indexed by collection ID.
  */
-export const createCollectionNameByID = (allCollections: Collection[]) =>
-    new Map<number, string>(
-        allCollections.map((collection) => [
-            collection.id,
-            getCollectionUserFacingName(collection),
-        ]),
-    );
+export const createCollectionNameByID = (collections: Collection[]) =>
+    new Map(collections.map((c) => [c.id, getCollectionUserFacingName(c)]));
