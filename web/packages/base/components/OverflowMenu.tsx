@@ -43,21 +43,6 @@ interface OverflowMenuProps {
     menuPaperProps?: Partial<PaperProps>;
 }
 
-/**
- * A custom MUI {@link Menu} with some Ente specific styling applied to it.
- */
-export const StyledMenu = styled(Menu)`
-    & .MuiPaper-root {
-        margin: 16px auto;
-        box-shadow:
-            0px 0px 6px rgba(0, 0, 0, 0.16),
-            0px 3px 6px rgba(0, 0, 0, 0.12);
-    }
-    & .MuiList-root {
-        padding: 0;
-        border: none;
-    }
-`;
 
 /**
  * An overflow menu showing {@link OverflowMenuOptions}, alongwith a button to
@@ -88,7 +73,7 @@ export const OverflowMenu: React.FC<
             >
                 {triggerButtonIcon ?? <MoreHorizIcon />}
             </IconButton>
-            <StyledMenu
+            <Menu
                 id={ariaID}
                 {...(anchorEl ? { anchorEl } : {})}
                 open={!!anchorEl}
@@ -110,7 +95,7 @@ export const OverflowMenu: React.FC<
                 }}
             >
                 {children}
-            </StyledMenu>
+            </Menu>
         </OverflowMenuContext.Provider>
     );
 };
