@@ -18,7 +18,7 @@ import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useReducer } from "react";
 import Autosizer from "react-virtualized-auto-sizer";
-import { FixedSizeList } from "react-window";
+import { FixedSizeList, type ListChildComponentProps } from "react-window";
 import { deduceDuplicates, type DuplicateGroup } from "../services/dedup";
 import { useAppContext } from "../types/context";
 
@@ -322,7 +322,10 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({ duplicateGroups }) => {
     return (
         <Autosizer>
             {({ height, width }) => (
-                <FixedSizeList {...{ height, width, itemCount, itemSize }}>
+                <FixedSizeList
+                    {...{ height, width, itemCount, itemSize }}
+                    itemData={{ duplicateGroups }}
+                >
                     {ListItem}
                 </FixedSizeList>
             )}
@@ -330,9 +333,14 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({ duplicateGroups }) => {
     );
 };
 
-const ListItem = ({ index, style }) => {
-    // const dup = duplicateGroups[index]!;
-    return <div {...{ style }}>{index}</div>;
+const ListItem: React.FC<ListChildComponentProps<DuplicatesListProps>> = ({
+    index,
+    style,
+    data,
+}) => {
+    const { duplicateGroups } = data;
+    const dup = duplicateGroups[index]!;
+    return <div {...{ style }}>{dup.items.length}</div>;
 };
 
 interface DeduplicateButtonProps {
