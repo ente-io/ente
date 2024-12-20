@@ -48,6 +48,8 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
     final title = _getTitle(widget.memories[index]);
     final memory = widget.memories[index];
     final isSeen = memory.isSeen();
+    final brightness =
+        SchedulerBinding.instance.platformDispatcher.platformBrightness;
 
     return AnimatedBuilder(
       animation: widget.controller,
@@ -80,9 +82,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                   height: widget.maxHeight * scale,
                   width: widget.maxWidth * scale,
                   decoration: BoxDecoration(
-                    boxShadow: SchedulerBinding.instance.platformDispatcher
-                                .platformBrightness ==
-                            Brightness.dark
+                    boxShadow: brightness == Brightness.dark
                         ? [
                             const BoxShadow(
                               color: strokeFainterDark,
