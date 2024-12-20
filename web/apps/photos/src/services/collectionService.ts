@@ -29,6 +29,10 @@ import {
     CollectionSummaryOrder,
     CollectionsSortBy,
 } from "@/new/photos/services/collection/ui";
+import {
+    getAllLocalCollections,
+    getLocalCollections,
+} from "@/new/photos/services/collections";
 import { groupFilesByCollectionID } from "@/new/photos/services/file";
 import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
 import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
@@ -42,8 +46,6 @@ import { getActualKey } from "@ente/shared/user";
 import type { User } from "@ente/shared/user/types";
 import {
     changeCollectionSubType,
-    getHiddenCollections,
-    getNonHiddenCollections,
     isQuickLinkCollection,
     isValidMoveTarget,
 } from "utils/collection";
@@ -51,6 +53,7 @@ import { UpdateMagicMetadataRequest } from "./fileService";
 import { getPublicKey } from "./userService";
 
 const COLLECTION_TABLE = "collections";
+
 const COLLECTION_UPDATION_TIME = "collection-updation-time";
 const HIDDEN_COLLECTION_IDS = "hidden-collection-ids";
 
@@ -192,21 +195,6 @@ const getCollections = async (
     }
 };
 
-export const getLocalCollections = async (
-    type: "normal" | "hidden" = "normal",
-): Promise<Collection[]> => {
-    const collections = await getAllLocalCollections();
-    return type === "normal"
-        ? getNonHiddenCollections(collections)
-        : getHiddenCollections(collections);
-};
-
-export const getAllLocalCollections = async (): Promise<Collection[]> => {
-    const collections: Collection[] =
-        (await localForage.getItem(COLLECTION_TABLE)) ?? [];
-    return collections;
-};
-
 export const getCollectionUpdationTime = async (): Promise<number> =>
     (await localForage.getItem<number>(COLLECTION_UPDATION_TIME)) ?? 0;
 
@@ -217,10 +205,11 @@ export const getLatestCollections = async (
     type: "normal" | "hidden" = "normal",
 ): Promise<Collection[]> => {
     const collections = await getAllLatestCollections();
-    return type === "normal"
-        ? getNonHiddenCollections(collections)
-        : getHiddenCollections(collections);
+    return type == "normal"
+        ? collections.filter((c) => !isHiddenCollection(c))
+        : collections.filter((c) => isHiddenCollection(c));
 };
+
 export const getAllLatestCollections = async (): Promise<Collection[]> => {
     const collections = await syncCollections();
     return collections;

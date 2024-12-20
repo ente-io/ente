@@ -17,6 +17,10 @@ import {
     isHiddenCollection,
     isIncomingShare,
 } from "@/new/photos/services/collection";
+import {
+    getAllLocalCollections,
+    getLocalCollections,
+} from "@/new/photos/services/collections";
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
 import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import { safeDirectoryName } from "@/new/photos/utils/native-fs";
@@ -26,8 +30,6 @@ import { t } from "i18next";
 import {
     addToCollection,
     createAlbum,
-    getAllLocalCollections,
-    getLocalCollections,
     moveToCollection,
     removeFromCollection,
     restoreToCollection,
@@ -341,16 +343,6 @@ export function getCollectionNameMap(
     return new Map<number, string>(
         collections.map((collection) => [collection.id, collection.name]),
     );
-}
-
-export function getNonHiddenCollections(
-    collections: Collection[],
-): Collection[] {
-    return collections.filter((collection) => !isHiddenCollection(collection));
-}
-
-export function getHiddenCollections(collections: Collection[]): Collection[] {
-    return collections.filter((collection) => isHiddenCollection(collection));
 }
 
 export const getOrCreateAlbum = async (

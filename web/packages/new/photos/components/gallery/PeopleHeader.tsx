@@ -7,6 +7,10 @@ import {
 } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@/base/components/OverflowMenu";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import {
     useModalVisibility,
@@ -30,10 +34,6 @@ import {
     type PersonSuggestionUpdates,
     type PreviewableCluster,
 } from "@/new/photos/services/ml/people";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "@ente/shared/components/OverflowMenu";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -145,24 +145,21 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
                 name={name}
                 fileCount={person.fileIDs.length}
             />
-            <OverflowMenu ariaID={"person-options"}>
+            <OverflowMenu ariaID="person-options">
                 <OverflowMenuOption
                     startIcon={<ListAltOutlinedIcon />}
-                    centerAlign
                     onClick={showSuggestions}
                 >
                     {t("review_suggestions")}
                 </OverflowMenuOption>
                 <OverflowMenuOption
                     startIcon={<EditIcon />}
-                    centerAlign
                     onClick={showNameInput}
                 >
                     {t("rename")}
                 </OverflowMenuOption>
                 <OverflowMenuOption
                     startIcon={<ClearIcon />}
-                    centerAlign
                     onClick={handleReset}
                 >
                     {t("reset")}
@@ -206,10 +203,9 @@ const IgnoredPersonHeader: React.FC<IgnoredPersonHeaderProps> = ({
                 nameProps={{ color: "text.muted" }}
                 fileCount={person.fileIDs.length}
             />
-            <OverflowMenu ariaID={"person-options"}>
+            <OverflowMenu ariaID="person-options">
                 <OverflowMenuOption
                     startIcon={<VisibilityOutlinedIcon />}
-                    centerAlign
                     onClick={handleUndoIgnore}
                 >
                     {t("show_person")}
@@ -264,17 +260,15 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
                     </IconButton>
                 </Tooltip>
 
-                <OverflowMenu ariaID={"person-options"}>
+                <OverflowMenu ariaID="person-options">
                     <OverflowMenuOption
                         startIcon={<AddIcon />}
-                        centerAlign
                         onClick={showAddPerson}
                     >
                         {t("add_a_name")}
                     </OverflowMenuOption>
                     <OverflowMenuOption
                         startIcon={<HideImageOutlinedIcon />}
-                        centerAlign
                         onClick={confirmIgnore}
                     >
                         {t("ignore")}

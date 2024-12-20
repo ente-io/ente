@@ -2,12 +2,17 @@ import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { CenteredFill } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@/base/components/OverflowMenu";
 import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import TickIcon from "@mui/icons-material/Done";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import SortIcon from "@mui/icons-material/Sort";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { useRouter } from "next/router";
 import React, { useEffect, useReducer } from "react";
 import Autosizer from "react-virtualized-auto-sizer";
@@ -45,7 +50,9 @@ const Page: React.FC = () => {
                 if (state.duplicateGroups.length == 0) {
                     return <NoDuplicatesFound />;
                 } else {
-                    return <Duplicates />;
+                    return (
+                        <Duplicates duplicateGroups={state.duplicateGroups} />
+                    );
                 }
             default:
                 return <Loading />;
@@ -54,13 +61,20 @@ const Page: React.FC = () => {
 
     return (
         <Stack sx={{ flex: 1 }}>
-            <Navbar />
+            <Navbar
+                sortOrder={state.sortOrder}
+                onChangeSortOrder={(sortOrder) =>
+                    dispatch({ type: "changeSortOrder", sortOrder })
+                }
+            />
             {contents}
         </Stack>
     );
 };
 
 export default Page;
+
+type SortOrder = "prunableCount" | "prunableSize";
 
 interface DedupState {
     status:
@@ -84,7 +98,7 @@ interface DedupState {
     /**
      * The attribute to use for sorting {@link duplicateGroups}.
      */
-    sortOrder: "prunableCount" | "prunableSize";
+    sortOrder: SortOrder;
     /**
      * The number of files that will be pruned if the user decides to dedup the
      * current selection.
@@ -101,7 +115,7 @@ type DedupAction =
     | { type: "analyze" }
     | { type: "analysisFailed" }
     | { type: "analysisCompleted"; duplicateGroups: DuplicateGroup[] }
-    | { type: "changeSortOrder"; sortOrder: DedupState["sortOrder"] }
+    | { type: "changeSortOrder"; sortOrder: SortOrder }
     | { type: "select"; index: number }
     | { type: "deselect"; index: number }
     | { type: "deselectAll" }
@@ -128,6 +142,7 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
             return { ...state, status: "analysisFailed" };
         case "analysisCompleted": {
             const duplicateGroups = action.duplicateGroups;
+            sortDuplicateGroups(duplicateGroups, state.sortOrder);
             const prunableCount = duplicateGroups.reduce(
                 (sum, { prunableCount }) => sum + prunableCount,
                 0,
@@ -150,7 +165,29 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
     }
 };
 
-const Navbar: React.FC = () => {
+const sortDuplicateGroups = (
+    duplicateGroups: DuplicateGroup[],
+    sortOrder: DedupState["sortOrder"],
+) =>
+    duplicateGroups.sort((a, b) =>
+        sortOrder == "prunableSize"
+            ? b.prunableSize - a.prunableSize
+            : b.prunableCount - a.prunableCount,
+    );
+
+interface NavbarProps {
+    /**
+     * The current sort order.
+     */
+    sortOrder: SortOrder;
+    /**
+     * Called when the user changes the sort order using the sort order menu
+     * visible via the navbar.
+     */
+    onChangeSortOrder: (sortOrder: SortOrder) => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ sortOrder, onChangeSortOrder }) => {
     const router = useRouter();
 
     return (
@@ -170,9 +207,7 @@ const Navbar: React.FC = () => {
             </Box>
             <Typography variant="large">{pt("Remove duplicates")}</Typography>
             <Stack direction="row" sx={{ gap: "4px" }}>
-                <IconButton>
-                    <SortIcon />
-                </IconButton>
+                <SortMenu {...{ sortOrder, onChangeSortOrder }} />
                 <IconButton>
                     <MoreHorizIcon />
                 </IconButton>
@@ -180,6 +215,35 @@ const Navbar: React.FC = () => {
         </Stack>
     );
 };
+
+type SortMenuProps = Pick<NavbarProps, "sortOrder" | "onChangeSortOrder">;
+
+const SortMenu: React.FC<SortMenuProps> = ({
+    sortOrder,
+    onChangeSortOrder,
+}) => (
+    <OverflowMenu
+        ariaID="duplicates-sort"
+        triggerButtonIcon={
+            <Tooltip title={pt("Sort")}>
+                <SortIcon />
+            </Tooltip>
+        }
+    >
+        <OverflowMenuOption
+            endIcon={sortOrder == "prunableSize" ? <TickIcon /> : undefined}
+            onClick={() => onChangeSortOrder("prunableSize")}
+        >
+            {pt("Total size")}
+        </OverflowMenuOption>
+        <OverflowMenuOption
+            endIcon={sortOrder == "prunableCount" ? <TickIcon /> : undefined}
+            onClick={() => onChangeSortOrder("prunableCount")}
+        >
+            {pt("Count")}
+        </OverflowMenuOption>
+    </OverflowMenu>
+);
 
 const Loading: React.FC = () => (
     <CenteredFill>
@@ -201,7 +265,14 @@ const NoDuplicatesFound: React.FC = () => (
     </CenteredFill>
 );
 
-const Duplicates: React.FC = () => {
+interface DuplicatesProps {
+    /**
+     * Groups of duplicates. Guaranteed to be non-empty.
+     */
+    duplicateGroups: DuplicateGroup[];
+}
+
+const Duplicates: React.FC<DuplicatesProps> = ({ duplicateGroups }) => {
     return (
         <Stack sx={{ flex: 1 }}>
             <Box sx={{ flex: 1, overflow: "hidden" }}>
@@ -215,12 +286,9 @@ const Duplicates: React.FC = () => {
                                 fontSize: "4rem",
                             }}
                         >
-                            <div>1</div>
-                            <div>1</div>
-                            <div>1</div>
-                            <div>1</div>
-                            <div>1</div>
-                            <div>1</div>
+                            {duplicateGroups.map((dup, i) => (
+                                <div key={i}>{dup.items.length}</div>
+                            ))}
                         </Box>
                     )}
                 </Autosizer>

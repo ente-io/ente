@@ -14,6 +14,7 @@ import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import {
     createCollectionNameByID,
+    getAllLocalCollections,
     getCollectionUserFacingName,
 } from "@/new/photos/services/collection";
 import {
@@ -26,7 +27,6 @@ import { PromiseQueue } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import i18n from "i18next";
-import { getAllLocalCollections } from "../collectionService";
 import { migrateExport, type ExportRecord } from "./migration";
 
 /** Name of the JSON file in which we keep the state of the export. */

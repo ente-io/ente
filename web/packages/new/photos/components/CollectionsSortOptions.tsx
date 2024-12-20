@@ -1,8 +1,8 @@
-import type { CollectionsSortBy } from "@/new/photos/services/collection/ui";
 import {
     OverflowMenu,
     OverflowMenuOption,
-} from "@ente/shared/components/OverflowMenu";
+} from "@/base/components/OverflowMenu";
+import type { CollectionsSortBy } from "@/new/photos/services/collection/ui";
 import TickIcon from "@mui/icons-material/Done";
 import SortIcon from "@mui/icons-material/Sort";
 import SvgIcon from "@mui/material/SvgIcon";
@@ -45,6 +45,10 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
         triggerButtonIcon={<SortIcon />}
         menuPaperProps={{
             sx: {
+                // The trigger button has a colored background, so add some
+                // vertical margin to avoid showing the menu squat under the
+                // trigger button.
+                marginBlock: 1,
                 backgroundColor: (theme) =>
                     nestedInDialog
                         ? theme.colors.background.elevated2

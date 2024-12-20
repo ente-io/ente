@@ -1,5 +1,7 @@
 import type { EnteFile } from "@/media/file";
-import { wait } from "@/utils/promise";
+import { createCollectionNameByID } from "./collection";
+import { getLocalCollections } from "./collections";
+import { getLocalFiles, uniqueFilesByID } from "./files";
 
 /**
  * A group of duplicates as shown in the UI.
@@ -11,9 +13,13 @@ export interface DuplicateGroup {
      * These are sorted by the collectionName.
      */
     items: {
-        /** The underlying collection file. */
+        /**
+         * The underlying collection file.
+         */
         file: EnteFile;
-        /** The name of the collection to which this file belongs. */
+        /**
+         * The name of the collection to which this file belongs.
+         */
         collectionName: string;
     }[];
     /**
@@ -65,14 +71,53 @@ export interface DuplicateGroup {
  * 4. Delete the remaining files.
  */
 export const deduceDuplicates = async () => {
-    await wait(1000);
-    return [
-        {
-            items: [],
-            itemSize: 0,
-            prunableCount: 0,
-            prunableSize: 0,
+    const collectionFiles = await getLocalFiles();
+    const files = uniqueFilesByID(collectionFiles);
+
+    const filesByHash = new Map<string, EnteFile[]>();
+    for (const file of files) {
+        let hash = file.metadata.hash;
+        if (!hash && file.metadata.imageHash && file.metadata.videoHash)
+            hash = `${file.metadata.imageHash}_${file.metadata.hash}`;
+        if (!hash) {
+            // Some very old files uploaded by ancient versions of Ente might
+            // not have hashes. Ignore these.
+            continue;
+        }
+
+        filesByHash.set(hash, [...(filesByHash.get(hash) ?? []), file]);
+    }
+
+    const collectionNameByID = createCollectionNameByID(
+        await getLocalCollections(),
+    );
+
+    const duplicateGroups: DuplicateGroup[] = [];
+
+    for (const potentialDuplicates of filesByHash.values()) {
+        if (potentialDuplicates.length < 2) continue;
+        const size = potentialDuplicates[0]?.info?.fileSize;
+        if (!size) continue;
+        const duplicates = potentialDuplicates.filter(
+            (file) => file.info?.fileSize == size,
+        );
+        const items = duplicates
+            .map((file) => {
+                const collectionName = collectionNameByID.get(
+                    file.collectionID,
+                );
+                return collectionName ? { file, collectionName } : undefined;
+            })
+            .filter((item) => !!item);
+        if (items.length < 2) continue;
+        duplicateGroups.push({
+            items,
+            itemSize: size,
+            prunableCount: duplicates.length - 1,
+            prunableSize: size * (duplicates.length - 1),
             isSelected: true,
-        },
-    ];
+        });
+    }
+
+    return duplicateGroups;
 };

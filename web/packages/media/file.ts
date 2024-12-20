@@ -22,6 +22,9 @@ export interface S3FileAttributes {
 }
 
 export interface FileInfo {
+    /**
+     * The size of the file, in bytes.
+     */
     fileSize: number;
     thumbSize: number;
 }

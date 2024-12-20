@@ -3,6 +3,7 @@ import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import log from "@/base/log";
 import { ALL_SECTION } from "@/new/photos/services/collection";
+import { getLocalCollections } from "@/new/photos/services/collections";
 import { createFileCollectionIDs } from "@/new/photos/services/file";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { useAppContext } from "@/new/photos/types/context";
@@ -19,10 +20,7 @@ import PhotoFrame from "components/PhotoFrame";
 import { t } from "i18next";
 import { default as Router, default as router } from "next/router";
 import { createContext, useEffect, useState } from "react";
-import {
-    getAllLatestCollections,
-    getLocalCollections,
-} from "services/collectionService";
+import { getAllLatestCollections } from "services/collectionService";
 import { Duplicate, getDuplicates } from "services/deduplicationService";
 import { syncFiles, trashFiles } from "services/fileService";
 import { syncTrash } from "services/trashService";
