@@ -27,7 +27,6 @@ import {
 } from "@/new/photos/services/magic-metadata";
 import { useAppContext } from "@/new/photos/types/context";
 import { HorizontalFlex } from "@ente/shared/components/Container";
-import { StyledMenu } from "@ente/shared/components/OverflowMenu";
 import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
@@ -44,7 +43,7 @@ import TvIcon from "@mui/icons-material/Tv";
 import Unarchive from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlined from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
-import { Box, IconButton, Stack, Tooltip } from "@mui/material";
+import { Box, IconButton, Menu, Stack, Tooltip } from "@mui/material";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
@@ -721,8 +720,8 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
     };
 
     return (
-        <StyledMenu
-            id={"collection-files-sort"}
+        <Menu
+            id="collection-files-sort"
             anchorEl={overFlowMenuIconRef.current}
             open={open}
             onClose={onClose}
@@ -745,6 +744,6 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
             <OverflowMenuOption onClick={handleAscClick}>
                 {t("oldest_first")}
             </OverflowMenuOption>
-        </StyledMenu>
+        </Menu>
     );
 };
