@@ -1,6 +1,9 @@
 import "package:flutter/material.dart";
+import "package:flutter/scheduler.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/memory.dart";
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
@@ -78,137 +81,166 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                   height: widget.maxHeight * scale,
                   width: widget.maxWidth * scale,
                   decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: isSeen
-                            ? currentTheme == Brightness.dark
-                                ? const Color.fromRGBO(104, 104, 104, 0.32)
-                                : Colors.transparent
-                            : const Color.fromRGBO(1, 222, 77, 0.11),
-                        spreadRadius: MemoryCoverWidget.centerStrokeWidth / 2,
-                        blurRadius: 0,
-                      ),
-                      const BoxShadow(
-                        color: Color.fromRGBO(0, 0, 0, 0.13),
-                        blurRadius: 3,
-                        offset: Offset(1, 1),
-                      ),
-                    ],
+                    boxShadow: SchedulerBinding.instance.platformDispatcher
+                                .platformBrightness ==
+                            Brightness.dark
+                        ? [
+                            const BoxShadow(
+                              // color: strokeFainterDark,
+                              color: strokeFaintDark,
+                              spreadRadius: MemoryCoverWidget.centerStrokeWidth,
+                              blurRadius: 0,
+                            ),
+                          ]
+                        : [...shadowFloatFaintestLight],
                     borderRadius: BorderRadius.circular(5),
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(5),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      alignment: Alignment.bottomCenter,
-                      children: [
-                        child!,
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: isSeen
-                                  ? currentTheme == Brightness.dark
-                                      ? const Color.fromRGBO(
-                                          104,
-                                          104,
-                                          104,
-                                          0.32,
-                                        )
-                                      : Colors.transparent
-                                  : const Color.fromRGBO(1, 222, 77, 0.11),
-                              width: MemoryCoverWidget.centerStrokeWidth / 2,
+                    child: isSeen
+                        ? ColorFiltered(
+                            colorFilter: const ColorFilter.mode(
+                              Color(0xFFBFBFBF),
+                              BlendMode.hue,
                             ),
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.black.withOpacity(0.5),
-                                Colors.transparent,
-                              ],
-                              stops: const [0, 0.85],
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
-                            ),
-                          ),
-                        ),
-                        isSeen
-                            ? const SizedBox.shrink()
-                            : Container(
-                                decoration: const BoxDecoration(
-                                  gradient: LinearGradient(
-                                    stops: [0, 0.27, 0.4],
-                                    colors: [
-                                      Color.fromRGBO(1, 222, 78, 0.293),
-                                      Color.fromRGBO(1, 222, 77, 0.07),
-                                      Colors.transparent,
-                                    ],
-                                    transform: GradientRotation(-1.1),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              alignment: Alignment.bottomCenter,
+                              children: [
+                                child!,
+                                Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: currentTheme == Brightness.dark
+                                          ? const Color.fromRGBO(
+                                              104,
+                                              104,
+                                              104,
+                                              0.32,
+                                            )
+                                          : Colors.transparent,
+                                      width:
+                                          MemoryCoverWidget.centerStrokeWidth,
+                                      strokeAlign:
+                                          BorderSide.strokeAlignOutside,
+                                    ),
+                                    borderRadius: BorderRadius.circular(5),
                                   ),
                                 ),
-                              ),
-                        isSeen
-                            ? const SizedBox.shrink()
-                            : Stack(
-                                fit: StackFit.expand,
-                                alignment: Alignment.bottomCenter,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Transform.scale(
-                                        scale: scale,
-                                        child: Container(
-                                          decoration: const BoxDecoration(
-                                            gradient: LinearGradient(
-                                              stops: [0, 0.1, 0.5, 0.9, 1],
-                                              colors: [
-                                                Colors.transparent,
-                                                Color.fromRGBO(1, 222, 77, 0.1),
-                                                Color.fromRGBO(1, 222, 77, 1),
-                                                Color.fromRGBO(1, 222, 77, 0.1),
-                                                Colors.transparent,
-                                              ],
-                                            ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.black.withOpacity(0.5),
+                                        Colors.transparent,
+                                      ],
+                                      stops: const [0, 1],
+                                      begin: Alignment.bottomCenter,
+                                      end: Alignment.topCenter,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 8 * scale,
+                                  child: Transform.scale(
+                                    scale: scale,
+                                    child: SizedBox(
+                                      width: widget.maxWidth,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8.0,
+                                        ),
+                                        child: Hero(
+                                          tag: title,
+                                          child: Text(
+                                            title,
+                                            style: getEnteTextTheme(context)
+                                                .miniBold
+                                                .copyWith(
+                                                  color: isSeen
+                                                      ? textFaintDark
+                                                      : Colors.white,
+                                                ),
+                                            textAlign: TextAlign.center,
                                           ),
-                                          height: 1 * scale,
-                                          width: (widget.maxWidth - 16) * scale,
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                        Positioned(
-                          bottom: 8 * scale,
-                          child: Transform.scale(
-                            scale: scale,
-                            child: SizedBox(
-                              width: widget.maxWidth,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0,
-                                ),
-                                child: Hero(
-                                  tag: title,
-                                  child: Text(
-                                    title,
-                                    style: getEnteTextTheme(context)
-                                        .miniBold
-                                        .copyWith(
-                                          color: Colors.white,
-                                        ),
+                                    ),
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
+                          )
+                        : Stack(
+                            fit: StackFit.expand,
+                            alignment: Alignment.bottomCenter,
+                            children: [
+                              child!,
+                              Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: isSeen
+                                        ? currentTheme == Brightness.dark
+                                            ? const Color.fromRGBO(
+                                                104,
+                                                104,
+                                                104,
+                                                0.32,
+                                              )
+                                            : Colors.transparent
+                                        : const Color.fromRGBO(
+                                            1,
+                                            222,
+                                            77,
+                                            0.11,
+                                          ),
+                                    width: MemoryCoverWidget.centerStrokeWidth,
+                                    strokeAlign: BorderSide.strokeAlignOutside,
+                                  ),
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.black.withOpacity(0.5),
+                                      Colors.transparent,
+                                    ],
+                                    stops: const [0, 1],
+                                    begin: Alignment.bottomCenter,
+                                    end: Alignment.topCenter,
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 8 * scale,
+                                child: Transform.scale(
+                                  scale: scale,
+                                  child: SizedBox(
+                                    width: widget.maxWidth,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0,
+                                      ),
+                                      child: Hero(
+                                        tag: title,
+                                        child: Text(
+                                          title,
+                                          style: getEnteTextTheme(context)
+                                              .miniBold
+                                              .copyWith(
+                                                color: Colors.white,
+                                              ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
               ],

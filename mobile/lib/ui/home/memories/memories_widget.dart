@@ -10,7 +10,7 @@ import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/home/memories/memory_cover_widget.dart';
 
 class MemoriesWidget extends StatefulWidget {
-  const MemoriesWidget({Key? key}) : super(key: key);
+  const MemoriesWidget({super.key});
 
   @override
   State<MemoriesWidget> createState() => _MemoriesWidgetState();
