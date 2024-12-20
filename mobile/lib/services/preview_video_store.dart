@@ -207,12 +207,13 @@ class PreviewVideoStore {
     _logger.info("Getting playlist for $file");
     try {
       final objectKey =
-          FileDataService.instance.previewIds![file.uploadedFileID!]!.objectId;
-      final playlistCache =
-          await cacheManager.getFileFromCache(_getCacheKey(objectKey));
+          FileDataService.instance.previewIds![file.uploadedFileID!]?.objectId;
+      final FileInfo? playlistCache = (objectKey == null)
+          ? null
+          : await cacheManager.getFileFromCache(_getCacheKey(objectKey));
       String finalPlaylist;
       if (playlistCache != null) {
-        finalPlaylist = playlistCache.file.readAsStringSync();
+        finalPlaylist = playlistCache!.file.readAsStringSync();
       } else {
         final response = await _dio.get(
           "/files/data/fetch/",
@@ -230,18 +231,23 @@ class PreviewVideoStore {
           header: header,
         );
         finalPlaylist = playlistData["playlist"];
-
-        unawaited(
-          cacheManager.putFile(
-            _getCacheKey(objectKey),
-            Uint8List.fromList((playlistData["playlist"] as String).codeUnits),
-          ),
-        );
+        if (objectKey != null) {
+          unawaited(
+            cacheManager.putFile(
+              _getCacheKey(objectKey),
+              Uint8List.fromList(
+                (playlistData["playlist"] as String).codeUnits,
+              ),
+            ),
+          );
+        }
       }
 
-      final videoFile = (await videoCacheManager
-              .getFileFromCache(_getVideoPreviewKey(objectKey)))
-          ?.file;
+      final videoFile = objectKey == null
+          ? null
+          : (await videoCacheManager
+                  .getFileFromCache(_getVideoPreviewKey(objectKey)))
+              ?.file;
       if (videoFile == null) {
         final response2 = await _dio.get(
           "/files/data/preview",
@@ -251,12 +257,14 @@ class PreviewVideoStore {
           },
         );
         final previewURL = response2.data["url"];
-        unawaited(
-          downloadAndCacheVideo(
-            previewURL,
-            _getVideoPreviewKey(objectKey),
-          ),
-        );
+        if (objectKey != null) {
+          unawaited(
+            downloadAndCacheVideo(
+              previewURL,
+              _getVideoPreviewKey(objectKey),
+            ),
+          );
+        }
         finalPlaylist =
             finalPlaylist.replaceAll('\noutput.ts', '\n$previewURL');
       } else {
@@ -268,7 +276,6 @@ class PreviewVideoStore {
       final playlistFile = File("${tempDir.path}/${file.uploadedFileID}.m3u8");
       await playlistFile.writeAsString(finalPlaylist);
       _logger.info("Writing playlist to ${playlistFile.path}");
-
       return playlistFile;
     } catch (_) {
       rethrow;
