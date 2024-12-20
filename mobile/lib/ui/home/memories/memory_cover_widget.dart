@@ -15,7 +15,7 @@ class MemoryCoverWidget extends StatefulWidget {
   final double offsetOfItem;
   final double maxHeight;
   final double maxWidth;
-  static const centerStrokeWidth = 1.0;
+  static const outerStrokeWidth = 1.0;
   static const aspectRatio = 0.68;
   static const horizontalPadding = 2.5;
   final double maxScaleOffsetX;
@@ -48,7 +48,6 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
     final title = _getTitle(widget.memories[index]);
     final memory = widget.memories[index];
     final isSeen = memory.isSeen();
-    final currentTheme = MediaQuery.platformBrightnessOf(context);
 
     return AnimatedBuilder(
       animation: widget.controller,
@@ -86,9 +85,8 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                             Brightness.dark
                         ? [
                             const BoxShadow(
-                              // color: strokeFainterDark,
-                              color: strokeFaintDark,
-                              spreadRadius: MemoryCoverWidget.centerStrokeWidth,
+                              color: strokeFainterDark,
+                              spreadRadius: MemoryCoverWidget.outerStrokeWidth,
                               blurRadius: 0,
                             ),
                           ]
@@ -108,25 +106,6 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                               alignment: Alignment.bottomCenter,
                               children: [
                                 child!,
-                                Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: currentTheme == Brightness.dark
-                                          ? const Color.fromRGBO(
-                                              104,
-                                              104,
-                                              104,
-                                              0.32,
-                                            )
-                                          : Colors.transparent,
-                                      width:
-                                          MemoryCoverWidget.centerStrokeWidth,
-                                      strokeAlign:
-                                          BorderSide.strokeAlignOutside,
-                                    ),
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                ),
                                 Container(
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
@@ -176,30 +155,6 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                             alignment: Alignment.bottomCenter,
                             children: [
                               child!,
-                              Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: isSeen
-                                        ? currentTheme == Brightness.dark
-                                            ? const Color.fromRGBO(
-                                                104,
-                                                104,
-                                                104,
-                                                0.32,
-                                              )
-                                            : Colors.transparent
-                                        : const Color.fromRGBO(
-                                            1,
-                                            222,
-                                            77,
-                                            0.11,
-                                          ),
-                                    width: MemoryCoverWidget.centerStrokeWidth,
-                                    strokeAlign: BorderSide.strokeAlignOutside,
-                                  ),
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                              ),
                               Container(
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(

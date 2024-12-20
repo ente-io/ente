@@ -89,7 +89,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     final collatedMemories = _collateMemories(memories);
 
     return SizedBox(
-      height: _maxHeight,
+      height: _maxHeight + MemoryCoverWidget.outerStrokeWidth * 2,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
