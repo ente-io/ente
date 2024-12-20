@@ -163,6 +163,17 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
             };
         }
 
+        case "changeSortOrder": {
+            const sortOrder = action.sortOrder;
+            const duplicateGroups = state.duplicateGroups;
+            sortDuplicateGroups(duplicateGroups, sortOrder);
+            return {
+                ...state,
+                sortOrder,
+                duplicateGroups,
+            };
+        }
+
         default:
             return state;
     }
