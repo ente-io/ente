@@ -1,12 +1,9 @@
-import { FluidContainer } from "@ente/shared/components/Container";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import {
-    Box,
     IconButton,
     MenuItem,
-    styled,
+    Stack,
     Typography,
-    type ButtonProps,
     type IconButtonProps,
     type PaperProps,
 } from "@mui/material";
@@ -43,7 +40,6 @@ interface OverflowMenuProps {
     menuPaperProps?: Partial<PaperProps>;
 }
 
-
 /**
  * An overflow menu showing {@link OverflowMenuOptions}, alongwith a button to
  * trigger the visibility of the menu.
@@ -79,20 +75,13 @@ export const OverflowMenu: React.FC<
                 open={!!anchorEl}
                 onClose={() => setAnchorEl(undefined)}
                 MenuListProps={{
+                    // Disable padding at the top and bottom of the menu list.
                     disablePadding: true,
                     "aria-labelledby": ariaID,
                 }}
-                slotProps={{
-                    paper: menuPaperProps,
-                }}
-                anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "right",
-                }}
-                transformOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                }}
+                slotProps={{ paper: menuPaperProps }}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
             >
                 {children}
             </Menu>
@@ -101,7 +90,12 @@ export const OverflowMenu: React.FC<
 };
 
 interface OverflowMenuOptionProps {
-    color?: ButtonProps["color"];
+    /**
+     * The color of the text and icons.
+     *
+     * Default: "primary".
+     */
+    color?: "primary";
     /**
      * An optional icon to show at the leading edge of the menu option.
      */
@@ -135,36 +129,23 @@ export const OverflowMenuOption: React.FC<
             sx={{
                 minWidth: 220,
                 color: (theme) => theme.palette[color].main,
-                padding: 1.5,
+                // Reduce the size of the icons a bit to make it fit better with
+                // the text.
                 "& .MuiSvgIcon-root": {
                     fontSize: "20px",
                 },
             }}
         >
-            <FluidContainer>
-                {startIcon && (
-                    <Box
-                        sx={{
-                            padding: 0,
-                            marginBlockStart: "6px",
-                            marginRight: 1.5,
-                        }}
-                    >
-                        {startIcon}
-                    </Box>
-                )}
-                <Typography fontWeight="bold">{children}</Typography>
-            </FluidContainer>
-            {endIcon && (
-                <Box
-                    sx={{
-                        padding: 0,
-                        marginLeft: 1,
-                    }}
-                >
-                    {endIcon}
-                </Box>
-            )}
+            <Stack
+                direction="row"
+                sx={{ gap: 1.5, alignItems: "center", width: "100%" }}
+            >
+                {startIcon}
+                <Typography sx={{ flex: 1, fontWeight: "bold" }}>
+                    {children}
+                </Typography>
+                {endIcon}
+            </Stack>
         </MenuItem>
     );
 };
