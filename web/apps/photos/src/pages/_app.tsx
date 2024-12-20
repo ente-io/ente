@@ -189,6 +189,9 @@ export default function App({ Component, pageProps }: AppProps) {
         [
             showLoadingBar,
             hideLoadingBar,
+            watchFolderView,
+            watchFolderFiles,
+            themeColor,
             showMiniDialog,
             onGenericError,
             logout,
