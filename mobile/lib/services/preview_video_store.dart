@@ -235,7 +235,7 @@ class PreviewVideoStore {
           : await cacheManager.getFileFromCache(_getCacheKey(objectKey));
       String finalPlaylist;
       if (playlistCache != null) {
-        finalPlaylist = playlistCache!.file.readAsStringSync();
+        finalPlaylist = playlistCache.file.readAsStringSync();
       } else {
         final response = await _dio.get(
           "/files/data/fetch/",
