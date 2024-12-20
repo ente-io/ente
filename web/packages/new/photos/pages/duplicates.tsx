@@ -1,3 +1,4 @@
+import { useRedirectIfNeedsCredentials } from "@/accounts/components/utils/use-redirect";
 import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { CenteredFill } from "@/base/components/mui/Container";
@@ -23,6 +24,8 @@ const Page: React.FC = () => {
     const { showNavBar } = useAppContext();
 
     const [state, dispatch] = useReducer(dedupReducer, initialDedupState);
+
+    useRedirectIfNeedsCredentials("/duplicates");
 
     useEffect(() => {
         // TODO: Remove me
