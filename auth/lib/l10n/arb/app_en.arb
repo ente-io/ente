@@ -458,7 +458,6 @@
   "pinnedCodeMessage": "{code} has been pinned",
   "unpinnedCodeMessage": "{code} has been unpinned",
   "pinned": "Pinned",
-
   "tags": "Tags",
   "createNewTag": "Create New Tag",
   "tag": "Tag",
@@ -502,5 +501,6 @@
   "deduplicateCodes": "Deduplicate codes",
   "deselectAll": "Deselect all",
   "selectAll": "Select all",
-  "deleteDuplicates": "Delete duplicates"
+  "deleteDuplicates": "Delete duplicates",
+  "plainHTML": "Plain HTML"
 }
