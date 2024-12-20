@@ -14,11 +14,13 @@ import { ItemVisibility } from "@/media/file-metadata";
 import {
     DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
     findDefaultHiddenCollectionIDs,
-    getAllLocalCollections,
-    getLocalCollections,
     isHiddenCollection,
     isIncomingShare,
 } from "@/new/photos/services/collection";
+import {
+    getAllLocalCollections,
+    getLocalCollections,
+} from "@/new/photos/services/collections";
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
 import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import { safeDirectoryName } from "@/new/photos/utils/native-fs";

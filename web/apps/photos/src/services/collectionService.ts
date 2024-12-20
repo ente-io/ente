@@ -21,8 +21,6 @@ import {
 import { EncryptedMagicMetadata, EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
 import {
-    getAllLocalCollections,
-    getLocalCollections,
     isDefaultHiddenCollection,
     isHiddenCollection,
 } from "@/new/photos/services/collection";
@@ -31,6 +29,10 @@ import {
     CollectionSummaryOrder,
     CollectionsSortBy,
 } from "@/new/photos/services/collection/ui";
+import {
+    getAllLocalCollections,
+    getLocalCollections,
+} from "@/new/photos/services/collections";
 import { groupFilesByCollectionID } from "@/new/photos/services/file";
 import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
 import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";

@@ -6,7 +6,7 @@ import type { Collection } from "@/media/collection";
 import { mergeMetadata, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import { getLocalCollections } from "@/new/photos/services/collection";
+import { getLocalCollections } from "@/new/photos/services/collections";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import { getAllLocalFiles } from "@/new/photos/services/files";
 import {

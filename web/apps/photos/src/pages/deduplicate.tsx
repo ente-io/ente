@@ -2,10 +2,8 @@ import { stashRedirect } from "@/accounts/services/redirect";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import log from "@/base/log";
-import {
-    ALL_SECTION,
-    getLocalCollections,
-} from "@/new/photos/services/collection";
+import { ALL_SECTION } from "@/new/photos/services/collection";
+import { getLocalCollections } from "@/new/photos/services/collections";
 import { createFileCollectionIDs } from "@/new/photos/services/file";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { useAppContext } from "@/new/photos/types/context";

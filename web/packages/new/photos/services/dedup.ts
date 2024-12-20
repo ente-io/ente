@@ -1,5 +1,6 @@
 import type { EnteFile } from "@/media/file";
-import { createCollectionNameByID, getLocalCollections } from "./collection";
+import { createCollectionNameByID } from "./collection";
+import { getLocalCollections } from "./collections";
 import { getLocalFiles, uniqueFilesByID } from "./files";
 
 /**
@@ -83,7 +84,9 @@ export const deduceDuplicates = async () => {
         filesByHash.set(hash, [...(filesByHash.get(hash) ?? []), file]);
     }
 
-    const collectionNameByID = createCollectionNameByID(await getLocalCollections());
+    const collectionNameByID = createCollectionNameByID(
+        await getLocalCollections(),
+    );
 
     const duplicateGroups: DuplicateGroup[] = [];
 
