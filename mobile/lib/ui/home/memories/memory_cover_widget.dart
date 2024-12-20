@@ -131,16 +131,18 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                                         ),
                                         child: Hero(
                                           tag: title,
-                                          child: Text(
-                                            title,
-                                            style: getEnteTextTheme(context)
-                                                .miniBold
-                                                .copyWith(
-                                                  color: isSeen
-                                                      ? textFaintDark
-                                                      : Colors.white,
-                                                ),
-                                            textAlign: TextAlign.center,
+                                          child: Center(
+                                            child: Text(
+                                              title,
+                                              style: getEnteTextTheme(context)
+                                                  .miniBold
+                                                  .copyWith(
+                                                    color: isSeen
+                                                        ? textFaintDark
+                                                        : Colors.white,
+                                                  ),
+                                              textAlign: TextAlign.left,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -180,14 +182,16 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                                       ),
                                       child: Hero(
                                         tag: title,
-                                        child: Text(
-                                          title,
-                                          style: getEnteTextTheme(context)
-                                              .miniBold
-                                              .copyWith(
-                                                color: Colors.white,
-                                              ),
-                                          textAlign: TextAlign.center,
+                                        child: Center(
+                                          child: Text(
+                                            title,
+                                            style: getEnteTextTheme(context)
+                                                .miniBold
+                                                .copyWith(
+                                                  color: Colors.white,
+                                                ),
+                                            textAlign: TextAlign.left,
+                                          ),
                                         ),
                                       ),
                                     ),
