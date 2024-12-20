@@ -160,6 +160,9 @@ For more details, see [translations.md](translations.md).
     identifiers. For one particular use case, we also need
     [uuid](https://github.com/uuidjs/uuid) for UUID v4 generation.
 
+-   [bs58](https://github.com/cryptocoinjs/bs58) is used for base-58 conversion
+    (used for encoding the collection key to use as the hash in the share URL).
+
 -   [debounce](https://github.com/sindresorhus/debounce) and its
     promise-supporting sibling
     [pDebounce](https://github.com/sindresorhus/p-debounce) are used for

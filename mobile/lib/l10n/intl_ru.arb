@@ -415,6 +415,17 @@
   "mlConsentPrivacy": "Пожалуйста, нажмите здесь, чтобы узнать больше об этой функции в нашей политике конфиденциальности",
   "mlConsentConfirmation": "Я понимаю и хочу включить машинное обучение",
   "magicSearch": "Волшебный поиск",
+  "discover_notes": "Заметки",
+  "discover_memes": "Мемы",
+  "discover_babies": "Дети",
+  "discover_pets": "Питомцы",
+  "discover_selfies": "Селфи",
+  "discover_wallpapers": "Обои",
+  "discover_food": "Еда",
+  "discover_celebrations": "Поздравления",
+  "discover_sunset": "Закат",
+  "discover_hills": "Горы",
+  "discover_greenery": "Зелень",
   "mlIndexingDescription": "Обратите внимание, что машинное обучение приведёт к повышенному потреблению трафика и батареи, пока все элементы не будут проиндексированы. Рекомендуем использовать ПК версию для более быстрого индексирования. Полученные результаты будут синхронизированы автоматически между устройствами.",
   "loadingModel": "Загрузка моделей...",
   "waitingForWifi": "Ожидание WiFi...",
@@ -448,6 +459,7 @@
   "showMemories": "Показать воспоминания",
   "yearsAgo": "{count, plural, one{{count} год назад} other{{count} лет назад}}",
   "backupSettings": "Настройки резервного копирования",
+  "backupStatusDescription": "Здесь будут сохранены резервные копии",
   "backupOverMobileData": "Резервное копирование через мобильную сеть",
   "backupVideos": "Резервное копирование видео",
   "disableAutoLock": "Отключить автоблокировку",
@@ -1220,6 +1232,13 @@
   "createCollaborativeLink": "Создать совместную ссылку",
   "search": "Поиск",
   "enterPersonName": "Введите имя",
+  "enterName": "Введите имя",
+  "savePerson": "Сохранить человека",
+  "editPerson": "Отредактировать человека",
+  "mergedPhotos": "Объединенные фото",
+  "orMergeWithExistingPerson": "Или объединить с существующими",
+  "enterDateOfBirth": "Дата рождения (необязательно)",
+  "birthday": "День рождения",
   "removePersonLabel": "Удалить метку человека",
   "autoPairDesc": "Автоматическое подключение работает только с устройствами, поддерживающими Chromecast.",
   "manualPairDesc": "Пара с PIN-кодом работает с любым экраном, на котором вы хотите посмотреть ваш альбом.",
@@ -1246,6 +1265,7 @@
   "right": "Вправо",
   "whatsNew": "Что нового",
   "reviewSuggestions": "Посмотреть предложения",
+  "review": "Отзыв",
   "useAsCover": "Использовать для обложки",
   "notPersonLabel": "Не {name}?",
   "@notPersonLabel": {
@@ -1288,5 +1308,176 @@
   "removePublicLinks": "Удалить публичные ссылки",
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Это удалит публичные ссылки на все выбранные быстрые ссылки.",
   "guestView": "Гостевой вид",
-  "guestViewEnablePreSteps": "Чтобы включить гостевой вид, настройте пароль устройства или блокировку экрана в настройках системы."
+  "guestViewEnablePreSteps": "Чтобы включить гостевой вид, настройте пароль устройства или блокировку экрана в настройках системы.",
+  "nameTheAlbum": "Назовите альбом",
+  "collectPhotosDescription": "Создайте ссылку, где ваши друзья смогут загружать фото в оригинальном качестве.",
+  "collect": "Собрать",
+  "appLockDescriptions": "Выберите между экраном блокировки вашего устройства и пользовательским экраном блокировки с PIN-кодом или паролем.",
+  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Чтобы включить блокировку, настройте пароль устройства или блокировку экрана в настройках системы.",
+  "authToViewPasskey": "Пожалуйста, авторизуйтесь, чтобы просмотреть ваш пароль",
+  "loopVideoOn": "Цикл видео включен",
+  "loopVideoOff": "Цикл видео выключен",
+  "localSyncErrorMessage": "Похоже, что-то пошло не так, так как локальная синхронизация фото занимает больше времени, чем ожидалось. Пожалуйста, свяжитесь с нашей службой поддержки",
+  "showPerson": "Показать человека",
+  "sort": "Сортировать",
+  "mostRecent": "Недавние",
+  "mostRelevant": "Сначала актуальные",
+  "loadingYourPhotos": "Загрузка фотографий...",
+  "processingImport": "Обработка {folderName}...",
+  "personName": "Имя человека",
+  "addNewPerson": "Добавить новую персону",
+  "addNameOrMerge": "Добавить имя или объединить",
+  "mergeWithExisting": "Объединить с существующим",
+  "newPerson": "Новое лицо",
+  "addName": "Добавить имя",
+  "add": "Добавить",
+  "extraPhotosFoundFor": "Дополнительные фотографии найдены для {text}",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "extraPhotosFound": "Найдены дополнительные фотографии",
+  "configuration": "Настройки",
+  "localIndexing": "Локальное индексирование",
+  "resetPerson": "Убрать",
+  "areYouSureYouWantToResetThisPerson": "Вы уверены, что хотите сбросить этого человека?",
+  "allPersonGroupingWillReset": "Все группы этого человека будут сброшены, и вы потеряете все предложения, сделанные для этого человека",
+  "yesResetPerson": "Да, сбросить человека",
+  "onlyThem": "Только их",
+  "checkingModels": "Проверка моделей...",
+  "enableMachineLearningBanner": "Включить автоматическое обучение для Магического Поиска и распознавания лица",
+  "searchDiscoverEmptySection": "Изображения будут показаны здесь после завершения обработки",
+  "searchPersonsEmptySection": "Люди будут показаны здесь после выполнения обработки",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Добавлено 0 зрителей}=1 {Добавлен 1 зритель} other {Добавлено {count} зрителей}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Добавлено 0 соавторов} =1 {Добавлен 1 соавтор} other {Добавлено {count} соавторов}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  },
+  "accountIsAlreadyConfigured": "Аккаунт уже настроен.",
+  "sessionIdMismatch": "Несоответствие ID сеанса",
+  "@sessionIdMismatch": {
+    "description": "In passkey page, deeplink is ignored because of session ID mismatch."
+  },
+  "failedToFetchActiveSessions": "Не удалось получить активные сеансы",
+  "@failedToFetchActiveSessions": {
+    "description": "In session page, warn user (in toast) that active sessions could not be fetched."
+  },
+  "failedToRefreshStripeSubscription": "Не удалось обновить подписку",
+  "failedToPlayVideo": "Не удалось воспроизвести видео",
+  "uploadIsIgnoredDueToIgnorereason": "Загрузка игнорируется из-за {ignoreReason}",
+  "@uploadIsIgnoredDueToIgnorereason": {
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "typeOfGallerGallerytypeIsNotSupportedForRename": "Тип галереи {galleryType} не поддерживается для переименования",
+  "@typeOfGallerGallerytypeIsNotSupportedForRename": {
+    "placeholders": {
+      "galleryType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "info": "Информация",
+  "addFiles": "Добавить файлы",
+  "castAlbum": "Трансляция альбома",
+  "imageNotAnalyzed": "Изображение не анализировано",
+  "noFacesFound": "Лица не найдены",
+  "fileNotUploadedYet": "Файл ещё не загружен",
+  "noSuggestionsForPerson": "Нет предложений для {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "месяц",
+  "yearShort": "г.",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "сейчас запущено",
+  "ignored": "игнорировать",
+  "photosCount": "{count, plural, =0 {0 photo} =1 {1 photo} other {{count} photos}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "file": "Файл",
+  "searchSectionsLengthMismatch": "Длина разделов не совпадает: {snapshotLenght} != {searchLenght}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLenght": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLenght": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "selectMailApp": "Выберите приложение почты",
+  "selectAllShort": "Все",
+  "@selectAllShort": {
+    "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
+  },
+  "changeLogMagicSearchImprovementTitle": "Улучшение Магического Поиска",
+  "changeLogMagicSearchImprovementContent": "Мы улучшили Магический Поиск, чтобы искать гораздо быстрее, поэтому вам не нужно ждать, чтобы найти то, что вы ищете.",
+  "changeLogBackupStatusTitle": "Состояние резервных копий",
+  "changeLogBackupStatusContent": "Мы добавили журнал всех файлов, которые были загружены в Ente, включая сбои и очереди.",
+  "changeLogDiscoverTitle": "Узнать",
+  "changeLogDiscoverContent": "Ищете фотографии ваших идентификационных карт, заметок или даже мемов? Перейдите во вкладку поиска и проверьте \"Узнать\". Основываясь на нашем поиске, это место для поиска фотографий, которые могут быть важны для вас.\\n\\nдоступно только в том случае, если вы включили Машинное обучение.",
+  "selectCoverPhoto": "Выберите обложку",
+  "newLocation": "Новое местоположение",
+  "faceNotClusteredYet": "Лицо еще не кластеризовано, пожалуйста, вернитесь позже",
+  "theLinkYouAreTryingToAccessHasExpired": "Ссылка, к которой вы пытаетесь получить доступ, устарела.",
+  "openFile": "Открыть файл",
+  "backupFile": "Резервный файл",
+  "openAlbumInBrowser": "Открыть альбом в браузере",
+  "openAlbumInBrowserTitle": "Пожалуйста, используйте веб-приложение, чтобы добавить фотографии в этот альбом",
+  "allow": "Разрешить",
+  "allowAppToOpenSharedAlbumLinks": "Разрешить приложению открывать общие ссылки на альбомы",
+  "seePublicAlbumLinksInApp": "Смотреть ссылки публичного альбома в приложении",
+  "emergencyContacts": "Экстренные контакты",
+  "acceptTrustInvite": "Принять приглашение",
+  "declineTrustInvite": "Отклонить приглашение",
+  "removeYourselfAsTrustedContact": "Удалить себя как доверенный контакт",
+  "legacyPageDesc2": "Доверенные контакты могут инициировать восстановление учетной записи, если они не будут заблокированы в течение 30 дней, сбросить пароль и получить доступ к вашей учетной записи.",
+  "trustedContacts": "Доверенные контакты",
+  "addTrustedContact": "Добавить доверенный контакт",
+  "removeInvite": "Удалить приглашение",
+  "recoveryWarning": "Доверенный контакт пытается получить доступ к вашей учетной записи",
+  "rejectRecovery": "Отклонить восстановление",
+  "recoveryInitiated": "Восстановление запущено",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }

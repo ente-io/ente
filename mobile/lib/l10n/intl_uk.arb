@@ -318,7 +318,7 @@
   "codeUsedByYou": "Код використано вами",
   "freeStorageClaimed": "Безплатне сховище отримано",
   "freeStorageUsable": "Безплатне сховище можна використовувати",
-  "usableReferralStorageInfo": "Доступний обсяг пам'яті обмежений вашим поточним тарифом. Надлишок заявленого обсягу автоматично стане доступним, коли ви покращте тариф.",
+  "usableReferralStorageInfo": "Доступний обсяг пам'яті обмежений вашим поточним тарифом. Надлишок заявленого обсягу автоматично стане доступним, коли ви покращите тариф.",
   "removeFromAlbumTitle": "Видалити з альбому?",
   "removeFromAlbum": "Видалити з альбому",
   "itemsWillBeRemovedFromAlbum": "Вибрані елементи будуть видалені з цього альбому",
@@ -771,7 +771,7 @@
   "moveToAlbum": "Перемістити до альбому",
   "unhide": "Показати",
   "unarchive": "Розархівувати",
-  "favorite": "В улюблене",
+  "favorite": "Додати до улюбленого",
   "removeFromFavorite": "Вилучити з улюбленого",
   "shareLink": "Поділитися посиланням",
   "createCollage": "Створити колаж",
@@ -1054,10 +1054,10 @@
   "edit": "Редагувати",
   "deleteLocation": "Видалити розташування",
   "rotateLeft": "Повернути ліворуч",
-  "flip": "Перевернути",
+  "flip": "Відзеркалити",
   "rotateRight": "Повернути праворуч",
   "saveCopy": "Зберегти копію",
-  "light": "Світла",
+  "light": "Яскравість",
   "color": "Колір",
   "yesDiscardChanges": "Так, відхилити зміни",
   "doYouWantToDiscardTheEditsYouHaveMade": "Ви хочете відхилити внесені зміни?",
@@ -1514,5 +1514,66 @@
   "openAlbumInBrowserTitle": "Використовуйте вебзастосунок, щоби додавати фотографії до цього альбому",
   "allow": "Дозволити",
   "allowAppToOpenSharedAlbumLinks": "Дозволити застосунку відкривати спільні альбоми",
-  "seePublicAlbumLinksInApp": "Посилання на публічні альбоми в застосунку"
+  "seePublicAlbumLinksInApp": "Посилання на публічні альбоми в застосунку",
+  "emergencyContacts": "Екстрені контакти",
+  "acceptTrustInvite": "Прийняти запрошення",
+  "declineTrustInvite": "Відхилити запрошення",
+  "removeYourselfAsTrustedContact": "Видалити себе як довірений контакт",
+  "legacy": "Спадок",
+  "legacyPageDesc": "«Спадок» дозволяє довіреним контактам отримати доступ до вашого облікового запису під час вашої відсутності.",
+  "legacyPageDesc2": "Довірені контакти можуть ініціювати відновлення облікового запису, і якщо його не буде заблоковано протягом 30 днів, скинути пароль і отримати доступ до нього.",
+  "legacyAccounts": "Облікові записи «Спадку»",
+  "trustedContacts": "Довірені контакти",
+  "addTrustedContact": "Додати довірений контакт",
+  "removeInvite": "Видалити запрошення",
+  "recoveryWarning": "Довірений контакт намагається отримати доступ до вашого облікового запису",
+  "rejectRecovery": "Відхилити відновлення",
+  "recoveryInitiated": "Почато відновлення",
+  "recoveryInitiatedDesc": "Ви зможете отримати доступ до облікового запису через {days} днів. Повідомлення буде надіслано на {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Скасувати відновлення",
+  "recoveryAccount": "Відновити обліковий запис",
+  "cancelAccountRecoveryBody": "Ви впевнені, що хочете скасувати відновлення?",
+  "startAccountRecoveryTitle": "Почати відновлення",
+  "whyAddTrustContact": "Довірений контакт може допомогти у відновленні ваших даних.",
+  "recoveryReady": "Тепер ви можете відновити обліковий запис {email}, встановивши новий пароль.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} намагається відновити ваш обліковий запис.",
+  "trustedInviteBody": "Ви отримали запрошення стати спадковим контактом від {email}.",
+  "warning": "Увага",
+  "proceed": "Продовжити",
+  "confirmAddingTrustedContact": "Ви збираєтеся додати {email} як довірений контакт. Вони зможуть відновити ваш обліковий запис, якщо ви будете відсутні протягом {numOfDays} днів.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} запросив вас стати довіреною особою",
+  "authToManageLegacy": "Авторизуйтесь, щоби керувати довіреними контактами",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }

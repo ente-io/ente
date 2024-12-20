@@ -3,6 +3,7 @@ package api
 import (
 	"errors"
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller/emergency"
 	"github.com/ente-io/museum/pkg/controller/remotestore"
 	"github.com/ente-io/museum/pkg/repo/authenticator"
 	"net/http"
@@ -47,6 +48,7 @@ type AdminHandler struct {
 	StorageBonusRepo        *storagebonus.Repository
 	BillingController       *controller.BillingController
 	UserController          *user.UserController
+	EmergencyController     *emergency.Controller
 	FamilyController        *family.Controller
 	RemoteStoreController   *remotestore.Controller
 	ObjectCleanupController *controller.ObjectCleanupController
@@ -182,6 +184,13 @@ func (h *AdminHandler) DeleteUser(c *gin.Context) {
 		"req_id":     requestid.Get(c),
 		"req_ctx":    "account_deletion",
 	})
+
+	// todo: (neeraj) refactor this part, currently there's a circular dependency between user and emergency controllers
+	removeLegacyErr := h.EmergencyController.HandleAccountDeletion(c, user.ID, logger)
+	if removeLegacyErr != nil {
+		handler.Error(c, stacktrace.Propagate(removeLegacyErr, ""))
+		return
+	}
 	response, err := h.UserController.HandleAccountDeletion(c, user.ID, logger)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))

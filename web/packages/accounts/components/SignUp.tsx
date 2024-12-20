@@ -1,5 +1,6 @@
 import { FormPaperFooter, FormPaperTitle } from "@/base/components/FormPaper";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
+import { isMuseumHTTPError } from "@/base/http";
 import log from "@/base/log";
 import { LS_KEYS, setLSUser } from "@ente/shared//storage/localStorage";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -37,7 +38,7 @@ import { Trans } from "react-i18next";
 import * as Yup from "yup";
 import { PAGES } from "../constants/pages";
 import { generateKeyAndSRPAttributes } from "../services/srp";
-import { sendOtt } from "../services/user";
+import { sendOTT } from "../services/user";
 import { isWeakPassword } from "../utils/password";
 import { PasswordStrengthHint } from "./PasswordStrength";
 
@@ -81,15 +82,18 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
             }
             setLoading(true);
             try {
-                await setLSUser({ email });
                 setLocalReferralSource(referral);
-                await sendOtt(email);
+                await sendOTT(email, "signup");
+                await setLSUser({ email });
             } catch (e) {
-                const message = e instanceof Error ? e.message : "";
-                setFieldError(
-                    "confirm",
-                    `${t("generic_error_retry")} ${message}`,
-                );
+                log.error("Signup failed", e);
+                if (
+                    await isMuseumHTTPError(e, 409, "USER_ALREADY_REGISTERED")
+                ) {
+                    setFieldError("email", t("email_already_registered"));
+                } else {
+                    setFieldError("email", t("generic_error"));
+                }
                 throw e;
             }
             try {

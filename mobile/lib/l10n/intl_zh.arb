@@ -1333,5 +1333,6 @@
   "mostRelevant": "最相关",
   "loadingYourPhotos": "正在加载您的照片...",
   "processingImport": "正在处理 {folderName}...",
-  "extraPhotosFound": "发现额外照片"
+  "extraPhotosFound": "发现额外照片",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }

@@ -82,3 +82,24 @@ export const dirname = (path: string) => {
     }
     return pathComponents.join("/");
 };
+
+/**
+ * Return a new path by joining two path components using the POSIX path
+ * separator ("/").
+ *
+ * This is usually a trivial `p1/p2`, however it also handles the case where p1
+ * already ends with a trailing slash. This can happen even if p1 is obtained
+ * from a place which guarantees that only directory paths will be returned,
+ * because p1 can be the path to a root folder (e.g. "/" on Linux, or "C:/" on
+ * Windows), and the trivial join would then result in double slashes.
+ *
+ * @param p1 A path component that is expected to be using POSIX path
+ * separators.
+ *
+ * @param p2 A path component that is expected to be using POSIX path
+ * separators.
+ *
+ * @returns A path by joining p1 and p2 with a POSIX path separator if needed.
+ */
+export const joinPath = (p1: string, p2: string) =>
+    p1.endsWith("/") ? p1 + p2 : `${p1}/${p2}`;

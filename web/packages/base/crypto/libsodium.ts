@@ -100,15 +100,27 @@ export const fromB64URLSafeNoPaddingString = async (input: string) => {
     return sodium.to_string(await fromB64URLSafeNoPadding(input));
 };
 
-export async function toHex(input: string) {
+/**
+ * Convert a base64 string to the hex representation of the bytes that the base
+ * 64 string encodes.
+ *
+ * Use {@link fromHex} to go back.
+ */
+export const toHex = async (input: string) => {
     await sodium.ready;
     return sodium.to_hex(await fromB64(input));
-}
+};
 
-export async function fromHex(input: string) {
+/**
+ * Convert a hex string to the base 64 representation of the bytes that the hex
+ * string encodes.
+ *
+ * This is the inverse of {@link toHex}.
+ */
+export const fromHex = async (input: string) => {
     await sodium.ready;
     return await toB64(sodium.from_hex(input));
-}
+};
 
 /**
  * If the provided {@link bob} ("Bytes or B64 string") is already a

@@ -64,7 +64,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
           onTap: () async {
             // ignore: unawaited_futures
             launchUrlString(
-              githubIssuesUrl,
+              githubFeatureRequestUrl,
               mode: LaunchMode.externalApplication,
             );
           },

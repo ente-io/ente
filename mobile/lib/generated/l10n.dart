@@ -10498,6 +10498,296 @@ class S {
       args: [],
     );
   }
+
+  /// `Emergency Contacts`
+  String get emergencyContacts {
+    return Intl.message(
+      'Emergency Contacts',
+      name: 'emergencyContacts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Accept Invite`
+  String get acceptTrustInvite {
+    return Intl.message(
+      'Accept Invite',
+      name: 'acceptTrustInvite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Decline Invite`
+  String get declineTrustInvite {
+    return Intl.message(
+      'Decline Invite',
+      name: 'declineTrustInvite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove yourself as trusted contact`
+  String get removeYourselfAsTrustedContact {
+    return Intl.message(
+      'Remove yourself as trusted contact',
+      name: 'removeYourselfAsTrustedContact',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Legacy`
+  String get legacy {
+    return Intl.message(
+      'Legacy',
+      name: 'legacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Legacy allows trusted contacts to access your account in your absence.`
+  String get legacyPageDesc {
+    return Intl.message(
+      'Legacy allows trusted contacts to access your account in your absence.',
+      name: 'legacyPageDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.`
+  String get legacyPageDesc2 {
+    return Intl.message(
+      'Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.',
+      name: 'legacyPageDesc2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Legacy accounts`
+  String get legacyAccounts {
+    return Intl.message(
+      'Legacy accounts',
+      name: 'legacyAccounts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Trusted contacts`
+  String get trustedContacts {
+    return Intl.message(
+      'Trusted contacts',
+      name: 'trustedContacts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Trusted Contact`
+  String get addTrustedContact {
+    return Intl.message(
+      'Add Trusted Contact',
+      name: 'addTrustedContact',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove invite`
+  String get removeInvite {
+    return Intl.message(
+      'Remove invite',
+      name: 'removeInvite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A trusted contact is trying to access your account`
+  String get recoveryWarning {
+    return Intl.message(
+      'A trusted contact is trying to access your account',
+      name: 'recoveryWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reject recovery`
+  String get rejectRecovery {
+    return Intl.message(
+      'Reject recovery',
+      name: 'rejectRecovery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recovery initiated`
+  String get recoveryInitiated {
+    return Intl.message(
+      'Recovery initiated',
+      name: 'recoveryInitiated',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can access the account after {days} days. A notification will be sent to {email}.`
+  String recoveryInitiatedDesc(int days, String email) {
+    return Intl.message(
+      'You can access the account after $days days. A notification will be sent to $email.',
+      name: 'recoveryInitiatedDesc',
+      desc: '',
+      args: [days, email],
+    );
+  }
+
+  /// `Cancel recovery`
+  String get cancelAccountRecovery {
+    return Intl.message(
+      'Cancel recovery',
+      name: 'cancelAccountRecovery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recover account`
+  String get recoveryAccount {
+    return Intl.message(
+      'Recover account',
+      name: 'recoveryAccount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to cancel recovery?`
+  String get cancelAccountRecoveryBody {
+    return Intl.message(
+      'Are you sure you want to cancel recovery?',
+      name: 'cancelAccountRecoveryBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start recovery`
+  String get startAccountRecoveryTitle {
+    return Intl.message(
+      'Start recovery',
+      name: 'startAccountRecoveryTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Trusted contact can help in recovering your data.`
+  String get whyAddTrustContact {
+    return Intl.message(
+      'Trusted contact can help in recovering your data.',
+      name: 'whyAddTrustContact',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can now recover {email}'s account by setting a new password.`
+  String recoveryReady(String email) {
+    return Intl.message(
+      'You can now recover $email\'s account by setting a new password.',
+      name: 'recoveryReady',
+      desc: '',
+      args: [email],
+    );
+  }
+
+  /// `{email} is trying to recover your account.`
+  String recoveryWarningBody(Object email) {
+    return Intl.message(
+      '$email is trying to recover your account.',
+      name: 'recoveryWarningBody',
+      desc: '',
+      args: [email],
+    );
+  }
+
+  /// `You have been invited to be a legacy contact by {email}.`
+  String trustedInviteBody(Object email) {
+    return Intl.message(
+      'You have been invited to be a legacy contact by $email.',
+      name: 'trustedInviteBody',
+      desc: '',
+      args: [email],
+    );
+  }
+
+  /// `Warning`
+  String get warning {
+    return Intl.message(
+      'Warning',
+      name: 'warning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Proceed`
+  String get proceed {
+    return Intl.message(
+      'Proceed',
+      name: 'proceed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You are about to add {email} as a trusted contact. They will be able to recover your account if you are absent for {numOfDays} days.`
+  String confirmAddingTrustedContact(String email, int numOfDays) {
+    return Intl.message(
+      'You are about to add $email as a trusted contact. They will be able to recover your account if you are absent for $numOfDays days.',
+      name: 'confirmAddingTrustedContact',
+      desc: '',
+      args: [email, numOfDays],
+    );
+  }
+
+  /// `{email} has invited you to be a trusted contact`
+  String legacyInvite(Object email) {
+    return Intl.message(
+      '$email has invited you to be a trusted contact',
+      name: 'legacyInvite',
+      desc: '',
+      args: [email],
+    );
+  }
+
+  /// `Please authenticate to manage your trusted contacts`
+  String get authToManageLegacy {
+    return Intl.message(
+      'Please authenticate to manage your trusted contacts',
+      name: 'authToManageLegacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Having trouble playing this video? Long press here to try a different player.`
+  String get useDifferentPlayerInfo {
+    return Intl.message(
+      'Having trouble playing this video? Long press here to try a different player.',
+      name: 'useDifferentPlayerInfo',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -10528,6 +10818,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'km'),
       Locale.fromSubtags(languageCode: 'ko'),
       Locale.fromSubtags(languageCode: 'lt'),
+      Locale.fromSubtags(languageCode: 'ml'),
       Locale.fromSubtags(languageCode: 'nl'),
       Locale.fromSubtags(languageCode: 'no'),
       Locale.fromSubtags(languageCode: 'pl'),

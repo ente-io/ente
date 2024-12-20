@@ -35,14 +35,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "albumOwner": MessageLookupByLibrary.simpleMessage("Omanik"),
         "albumUpdated":
             MessageLookupByLibrary.simpleMessage("Albumit on uuendatud"),
-        "allow": MessageLookupByLibrary.simpleMessage("Allow"),
-        "allowAppToOpenSharedAlbumLinks": MessageLookupByLibrary.simpleMessage(
-            "Allow app to open shared album links"),
         "allowDownloads":
             MessageLookupByLibrary.simpleMessage("Luba allalaadimised"),
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Rakenda"),
-        "backupFile": MessageLookupByLibrary.simpleMessage("Backup file"),
         "blog": MessageLookupByLibrary.simpleMessage("Blogi"),
         "cancel": MessageLookupByLibrary.simpleMessage("Loobu"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("Muuda e-posti"),
@@ -114,8 +110,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sisesta oma parool"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Ekspordi oma andmed"),
-        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
-            "Face not clustered yet, please come back later"),
         "faq": MessageLookupByLibrary.simpleMessage("KKK"),
         "faqs": MessageLookupByLibrary.simpleMessage("KKK"),
         "feedback": MessageLookupByLibrary.simpleMessage("Tagasiside"),
@@ -175,11 +169,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "oops": MessageLookupByLibrary.simpleMessage("Oih"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Oih, midagi läks valesti"),
-        "openAlbumInBrowser":
-            MessageLookupByLibrary.simpleMessage("Open album in browser"),
-        "openAlbumInBrowserTitle": MessageLookupByLibrary.simpleMessage(
-            "Please use the web app to add photos to this album"),
-        "openFile": MessageLookupByLibrary.simpleMessage("Open file"),
         "password": MessageLookupByLibrary.simpleMessage("Parool"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("foto"),
         "pleaseTryAgain":
@@ -215,8 +204,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Skaneeri seda QR koodi\noma autentimisrakendusega"),
         "security": MessageLookupByLibrary.simpleMessage("Turvalisus"),
-        "seePublicAlbumLinksInApp": MessageLookupByLibrary.simpleMessage(
-            "See public album links in app"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Vali kõik"),
         "selectLanguage": MessageLookupByLibrary.simpleMessage("Vali keel"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Vali põhjus"),
@@ -253,15 +240,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "terms": MessageLookupByLibrary.simpleMessage("Tingimused"),
         "termsOfServicesTitle":
             MessageLookupByLibrary.simpleMessage("Tingimused"),
-        "theLinkYouAreTryingToAccessHasExpired":
-            MessageLookupByLibrary.simpleMessage(
-                "The link you are trying to access has expired."),
         "theme": MessageLookupByLibrary.simpleMessage("Teema"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("See seade"),
         "trash": MessageLookupByLibrary.simpleMessage("Prügikast"),
         "tryAgain": MessageLookupByLibrary.simpleMessage("Proovi uuesti"),
         "twitter": MessageLookupByLibrary.simpleMessage("Twitter"),
         "uncategorized": MessageLookupByLibrary.simpleMessage("Liigitamata"),
+        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
+            "Having trouble playing this video? Long press here to try a different player."),
         "useRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Kasuta taastevõtit"),
         "usedSpace":

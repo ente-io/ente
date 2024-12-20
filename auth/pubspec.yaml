@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 4.1.6+416
+version: 4.1.8+418
 publish_to: none
 
 environment:
@@ -31,6 +31,7 @@ dependencies:
   expandable: ^5.0.1
   expansion_tile_card: ^3.0.0
   ffi: ^2.1.0
+  figma_squircle: ^0.5.3
   file_picker: ^8.1.2
   # https://github.com/incrediblezayed/file_saver/issues/86
   file_saver: ^0.2.11

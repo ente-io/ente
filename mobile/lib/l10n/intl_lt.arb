@@ -271,7 +271,9 @@
   "enterCodeDescription": "Įveskite draugo pateiktą kodą, kad gautumėte nemokamą saugyklą abiem.",
   "apply": "Taikyti",
   "failedToApplyCode": "Nepavyko pritaikyti kodo.",
+  "enterReferralCode": "Įveskite rekomendacijos kodą",
   "codeAppliedPageTitle": "Pritaikytas kodas",
+  "changeYourReferralCode": "Keisti savo rekomendacijos kodą",
   "change": "Keisti",
   "unavailableReferralCode": "Atsiprašome, šis kodas nepasiekiamas.",
   "codeChangeLimitReached": "Atsiprašome, pasiekėte kodo pakeitimų ribą.",
@@ -281,10 +283,14 @@
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
   "claimMore": "Gaukite daugiau!",
+  "freeStorageOnReferralSuccess": "{storageAmountInGB} GB kiekvieną kartą, kai kas nors užsiregistruoja mokamam planui ir pritaiko jūsų kodą.",
+  "shareTextReferralCode": "„Ente“ rekomendacijos kodas: {referralCode} \n\nTaikykite jį per Nustatymai → Bendrieji → Rekomendacijos, kad gautumėte {referralStorageInGB} GB nemokamai po to, kai užsiregistruosite mokamam planui.\n\nhttps://ente.io",
   "inviteYourFriends": "Kviesti savo draugus",
+  "failedToFetchReferralDetails": "Nepavyksta gauti rekomendacijos informacijos. Bandykite dar kartą vėliau.",
   "referralStep1": "1. Duokite šį kodą savo draugams",
   "referralStep2": "2. Jie užsiregistruoja mokamą planą",
   "referralStep3": "3. Abu gaunate {storageInGB} GB* nemokamai",
+  "referralsAreCurrentlyPaused": "Šiuo metu rekomendacijos yra pristabdytos",
   "youCanAtMaxDoubleYourStorage": "* Galite daugiausiai padvigubinti savo saugyklą.",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Jūsų šeima gavo {storageAmountInGb} GB iki šiol} false {Jūs gavote {storageAmountInGb} GB iki šiol} other {Jūs gavote {storageAmountInGb} GB iki šiol.}}",
   "@claimedStorageSoFar": {
@@ -301,6 +307,7 @@
   },
   "faq": "DUK",
   "total": "iš viso",
+  "usableReferralStorageInfo": "Naudojama saugykla ribojama pagal jūsų dabartinį planą. Perteklinė gauta saugykla automatiškai taps tinkama naudoti, kai pakeisite planą.",
   "removeFromAlbumTitle": "Pašalinti iš albumo?",
   "removeFromAlbum": "Šalinti iš albumo",
   "itemsWillBeRemovedFromAlbum": "Pasirinkti elementai bus pašalinti iš šio albumo",
@@ -502,6 +509,7 @@
   "renewsOn": "Prenumerata atnaujinama {endDate}",
   "freeTrialValidTill": "Nemokamas bandomasis laikotarpis galioja iki {endDate}",
   "validTill": "Galioja iki {endDate}",
+  "playStoreFreeTrialValidTill": "Nemokama bandomoji versija galioja iki {endDate}.\nVėliau galėsite pasirinkti mokamą planą.",
   "subscription": "Prenumerata",
   "paymentDetails": "Mokėjimo duomenys",
   "manageFamily": "Tvarkyti šeimą",
@@ -749,7 +757,12 @@
   "localGallery": "Vietinė galerija",
   "todaysLogs": "Šiandienos žurnalai",
   "viewLogs": "Peržiūrėti žurnalus",
+  "logsDialogBody": "Tai nusiųs žurnalus, kurie padės mums išspręsti jūsų problemą. Atkreipkite dėmesį, kad failų pavadinimai bus įtraukti, kad būtų lengviau atsekti problemas su konkrečiais failais.",
+  "preparingLogs": "Ruošiami žurnalai...",
+  "emailYourLogs": "Atsiųskite žurnalus el. laišku",
+  "pleaseSendTheLogsTo": "Siųskite žurnalus adresu\n{toEmail}",
   "copyEmailAddress": "Kopijuoti el. pašto adresą",
+  "exportLogs": "Eksportuoti žurnalus",
   "didYouKnow": "Ar žinojote?",
   "loadMessage1": "Galite bendrinti savo prenumeratą su šeima.",
   "loadMessage2": "Iki šiol išsaugojome daugiau kaip 30 milijonų prisiminimų.",
@@ -799,6 +812,7 @@
   "@setLabel": {
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
+  "familyPlanPortalTitle": "Šeima",
   "androidBiometricHint": "Patvirtinkite tapatybę",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -811,9 +825,29 @@
   "@androidSignInTitle": {
     "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
   },
+  "androidBiometricRequiredTitle": "Privaloma biometrija",
+  "@androidBiometricRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsRequiredTitle": "Privalomi įrenginio kredencialai",
+  "@androidDeviceCredentialsRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up credentials authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsSetupDescription": "Privalomi įrenginio kredencialai",
+  "@androidDeviceCredentialsSetupDescription": {
+    "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
+  },
   "goToSettings": "Eiti į nustatymus",
   "@goToSettings": {
     "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "androidGoToSettingsDescription": "Biometrinis tapatybės nustatymas jūsų įrenginyje nenustatytas. Eikite į Nustatymai > Saugumas ir pridėkite biometrinį tapatybės nustatymą.",
+  "@androidGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
+  },
+  "iOSLockOut": "Biometrinis tapatybės nustatymas išjungtas. Kad jį įjungtumėte, užrakinkite ir atrakinkite ekraną.",
+  "@iOSLockOut": {
+    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
   },
   "iOSGoToSettingsDescription": "Biometrinis tapatybės nustatymas jūsų įrenginyje nenustatytas. Telefone įjunkite „Touch ID“ arba „Face ID“.",
   "@iOSGoToSettingsDescription": {
@@ -1162,5 +1196,66 @@
   "openAlbumInBrowserTitle": "Naudokite interneto programą, kad pridėtumėte nuotraukų į šį albumą.",
   "allow": "Leisti",
   "allowAppToOpenSharedAlbumLinks": "Leisti programai atverti bendrinamų albumų nuorodas",
-  "seePublicAlbumLinksInApp": "Žiūrėti viešų albumų nuorodas programoje"
+  "seePublicAlbumLinksInApp": "Žiūrėti viešų albumų nuorodas programoje",
+  "emergencyContacts": "Skubios pagalbos kontaktai",
+  "acceptTrustInvite": "Priimti kvietimą",
+  "declineTrustInvite": "Atmesti kvietimą",
+  "removeYourselfAsTrustedContact": "Šalinti save kaip patikimą kontaktą",
+  "legacy": "Palikimas",
+  "legacyPageDesc": "Palikimas leidžia patikimiems kontaktams pasiekti jūsų paskyrą jums nesant.",
+  "legacyPageDesc2": "Patikimi kontaktai gali pradėti paskyros atkūrimą, o jei per 30 dienų paskyra neužblokuojama, iš naujo nustatyti slaptažodį ir pasiekti paskyrą.",
+  "legacyAccounts": "Palikimo paskyros",
+  "trustedContacts": "Patikimi kontaktai",
+  "addTrustedContact": "Pridėti patikimą kontaktą",
+  "removeInvite": "Šalinti kvietimą",
+  "recoveryWarning": "Patikimas kontaktas bando pasiekti jūsų paskyrą.",
+  "rejectRecovery": "Atmesti atkūrimą",
+  "recoveryInitiated": "Pradėtas atkūrimas",
+  "recoveryInitiatedDesc": "Paskyrą galėsite pasiekti po {days} dienų. Pranešimas bus išsiųstas į {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Atšaukti atkūrimą",
+  "recoveryAccount": "Atkurti paskyrą",
+  "cancelAccountRecoveryBody": "Ar tikrai norite atšaukti atkūrimą?",
+  "startAccountRecoveryTitle": "Pradėti atkūrimą",
+  "whyAddTrustContact": "Patikimas kontaktas gali padėti atkurti jūsų duomenis.",
+  "recoveryReady": "Dabar galite atkurti {email} paskyrą nustatydami naują slaptažodį.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} bando atkurti jūsų paskyrą.",
+  "trustedInviteBody": "Buvote pakviesti tapti {email} palikimo kontaktu.",
+  "warning": "Įspėjimas",
+  "proceed": "Tęsti",
+  "confirmAddingTrustedContact": "Ketinate pridėti {email} kaip patikimą kontaktą. Jie galės atkurti jūsų paskyrą, jei jūsų nebus {numOfDays} dienų.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} pakvietė jus būti patikimu kontaktu",
+  "authToManageLegacy": "Nustatykite tapatybę, kad tvarkytumėte patikimus kontaktus",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
 }

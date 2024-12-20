@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/ente-io/museum/pkg/controller/offer"
-	"github.com/ente-io/museum/pkg/utils/network"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,6 +15,6 @@ type OfferHandler struct {
 // Deprecated for now
 func (h *OfferHandler) GetBlackFridayOffers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"offers": h.Controller.GetBlackFridayOffers(network.GetClientCountry(c)),
+		"offers": []interface{}{},
 	})
 }
