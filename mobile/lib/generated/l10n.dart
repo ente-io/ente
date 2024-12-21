@@ -4916,6 +4916,26 @@ class S {
     );
   }
 
+  /// `Allow access to photos`
+  String get allowPermTitle {
+    return Intl.message(
+      'Allow access to photos',
+      name: 'allowPermTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please allow access to your photos from Settings so Ente can display and backup your library.`
+  String get allowPermBody {
+    return Intl.message(
+      'Please allow access to your photos from Settings so Ente can display and backup your library.',
+      name: 'allowPermBody',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Open Settings`
   String get openSettings {
     return Intl.message(

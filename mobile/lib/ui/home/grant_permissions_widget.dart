@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photo_manager/photo_manager.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/settings/general_section_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/photo_manager_util.dart";
 import "package:styled_text/styled_text.dart";
@@ -111,38 +113,16 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                   state == PermissionState.limited) {
                 await SyncService.instance.onPermissionGranted(state);
               } else if (state == PermissionState.denied) {
-                final AlertDialog alert = AlertDialog(
-                  title: Text(S.of(context).pleaseGrantPermissions),
-                  content: Text(
-                    S.of(context).enteCanEncryptAndPreserveFilesOnlyIfYouGrant,
-                  ),
-                  actions: [
-                    TextButton(
-                      child: Text(
-                        S.of(context).ok,
-                        style:
-                            Theme.of(context).textTheme.titleMedium!.copyWith(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).pop('dialog');
-                        if (Platform.isIOS) {
-                          PhotoManager.openSetting();
-                        }
-                      },
-                    ),
-                  ],
-                );
-                // ignore: unawaited_futures
-                showDialog(
-                  useRootNavigator: false,
-                  context: context,
-                  builder: (BuildContext context) {
-                    return alert;
+                await showChoiceDialog(
+                  context,
+                  title: context.l10n.allowPermTitle,
+                  body: context.l10n.allowPermBody,
+                  firstButtonLabel: context.l10n.openSettings,
+                  firstButtonOnTap: () async {
+                    if (Platform.isIOS) {
+                      await PhotoManager.openSetting();
+                    }
                   },
-                  barrierColor: Colors.black12,
                 );
               } else {
                 throw Exception("Unknown permission state: $state");

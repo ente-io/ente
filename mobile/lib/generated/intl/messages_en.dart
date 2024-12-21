@@ -346,6 +346,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Allow downloads"),
         "allowPeopleToAddPhotos":
             MessageLookupByLibrary.simpleMessage("Allow people to add photos"),
+        "allowPermBody": MessageLookupByLibrary.simpleMessage(
+            "Please allow access to your photos from Settings so Ente can display and backup your library."),
+        "allowPermTitle":
+            MessageLookupByLibrary.simpleMessage("Allow access to photos"),
         "androidBiometricHint":
             MessageLookupByLibrary.simpleMessage("Verify identity"),
         "androidBiometricNotRecognized":

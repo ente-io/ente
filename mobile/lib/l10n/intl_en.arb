@@ -689,6 +689,8 @@
   "noPhotosAreBeingBackedUpRightNow": "No photos are being backed up right now",
   "preserveMore": "Preserve more",
   "grantFullAccessPrompt": "Please allow access to all photos in the Settings app",
+  "allowPermTitle": "Allow access to photos",
+  "allowPermBody": "Please allow access to your photos from Settings so Ente can display and backup your library.",
   "openSettings": "Open Settings",
   "selectMorePhotos": "Select more photos",
   "existingUser": "Existing user",
