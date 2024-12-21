@@ -71,11 +71,10 @@ class IconUtils {
 
       if (!processedIconPaths.contains(simpleIconPath)) {
         allIcons[simpleEntry.key] = AllIconData(
-          title: simpleEntry.key,
-          type: IconType.simpleIcon,
-          color: simpleEntry.value,
-          slug: simpleEntry.value
-        );
+            title: simpleEntry.key,
+            type: IconType.simpleIcon,
+            color: simpleEntry.value,
+            slug: simpleEntry.value);
         processedIconPaths.add(simpleIconPath);
       }
       simpleEntry = simpleIterator.moveNext() ? simpleIterator.current : null;
@@ -222,7 +221,7 @@ class IconUtils {
           for (final name in icon["altNames"]) {
             _customIcons[name.toString().replaceAll(' ', '').toLowerCase()] =
                 CustomIconData(
-              icon["slug"],
+              icon["slug"] ?? ((icon["title"] as String).toLowerCase()),
               icon["hex"],
             );
           }
