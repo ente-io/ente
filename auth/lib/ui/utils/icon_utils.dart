@@ -71,10 +71,10 @@ class IconUtils {
 
       if (!processedIconPaths.contains(simpleIconPath)) {
         allIcons[simpleEntry.key] = AllIconData(
-            title: simpleEntry.key,
-            type: IconType.simpleIcon,
-            color: simpleEntry.value,
-            slug: simpleEntry.value);
+          title: simpleEntry.key,
+          type: IconType.simpleIcon,
+          color: simpleEntry.value,
+        );
         processedIconPaths.add(simpleIconPath);
       }
       simpleEntry = simpleIterator.moveNext() ? simpleIterator.current : null;
