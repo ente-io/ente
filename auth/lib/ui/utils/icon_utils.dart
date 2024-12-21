@@ -121,8 +121,9 @@ class IconUtils {
           context,
         );
       } else if (_simpleIcons.containsKey(title)) {
+        final simpleIconPath = normalizeSimpleIconName(title);
         return getSVGIcon(
-          "assets/simple-icons/icons/$title.svg",
+          "assets/simple-icons/icons/$simpleIconPath.svg",
           title,
           _simpleIcons[title],
           width,
@@ -244,4 +245,41 @@ class CustomIconData {
   final String? color;
 
   CustomIconData(this.slug, this.color);
+}
+
+String normalizeSimpleIconName(String input) {
+  final charMap = {
+    'á': 'a',
+    'à': 'a',
+    'â': 'a',
+    'ä': 'a',
+    'é': 'e',
+    'è': 'e',
+    'ê': 'e',
+    'ë': 'e',
+    'í': 'i',
+    'ì': 'i',
+    'î': 'i',
+    'ï': 'i',
+    'ó': 'o',
+    'ò': 'o',
+    'ô': 'o',
+    'ö': 'o',
+    'ú': 'u',
+    'ù': 'u',
+    'û': 'u',
+    'ü': 'u',
+    'ç': 'c',
+    'ñ': 'n',
+    '.': 'dot',
+    '-': 'dash',
+    '&': 'and',
+  };
+
+  final buffer = StringBuffer();
+
+  for (var char in input.characters) {
+    buffer.write(charMap[char] ?? char);
+  }
+  return buffer.toString().trim();
 }

@@ -136,11 +136,11 @@ class _CustomIconPageState extends State<CustomIconPage> {
                     IconType iconType = iconData.type;
                     String? color = iconData.color;
                     String? slug = iconData.slug;
-
                     Widget iconWidget;
                     if (iconType == IconType.simpleIcon) {
+                      final simpleIconPath = normalizeSimpleIconName(title);
                       iconWidget = IconUtils.instance.getSVGIcon(
-                        "assets/simple-icons/icons/$title.svg",
+                        "assets/simple-icons/icons/$simpleIconPath.svg",
                         title,
                         color,
                         40,
@@ -157,6 +157,7 @@ class _CustomIconPageState extends State<CustomIconPage> {
                     }
 
                     return GestureDetector(
+                      key: ValueKey(title),
                       onTap: () {
                         final newIcon = AllIconData(
                           title: title,
