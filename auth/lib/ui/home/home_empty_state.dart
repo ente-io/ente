@@ -9,11 +9,13 @@ import 'package:logging/logging.dart';
 class HomeEmptyStateWidget extends StatelessWidget {
   final VoidCallback? onScanTap;
   final VoidCallback? onManuallySetupTap;
+  final VoidCallback? onImportFromGallery;
 
   const HomeEmptyStateWidget({
     super.key,
     required this.onScanTap,
     required this.onManuallySetupTap,
+    this.onImportFromGallery,
   });
 
   @override
@@ -47,6 +49,15 @@ class HomeEmptyStateWidget extends StatelessWidget {
                         child: OutlinedButton(
                           onPressed: onScanTap,
                           child: Text(l10n.importScanQrCode),
+                        ),
+                      ),
+                    const SizedBox(height: 18),
+                    if (PlatformUtil.isMobile())
+                      SizedBox(
+                        width: 400,
+                        child: OutlinedButton(
+                          onPressed: onImportFromGallery,
+                          child: const Text("Import from gallery"),
                         ),
                       ),
                     const SizedBox(height: 18),
