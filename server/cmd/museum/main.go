@@ -463,9 +463,10 @@ func main() {
 	privateAPI.POST("/trash/empty", trashHandler.Empty)
 
 	emergencyCtrl := &emergency.Controller{
-		Repo:     &emergencyRepo.Repository{DB: db},
-		UserRepo: userRepo,
-		UserCtrl: userController,
+		Repo:              &emergencyRepo.Repository{DB: db},
+		UserRepo:          userRepo,
+		UserCtrl:          userController,
+		PasskeyController: passkeyCtrl,
 	}
 	userHandler := &api.UserHandler{
 		UserController:      userController,

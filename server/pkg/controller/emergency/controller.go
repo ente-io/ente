@@ -2,6 +2,7 @@ package emergency
 
 import (
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller/user"
@@ -13,9 +14,10 @@ import (
 )
 
 type Controller struct {
-	Repo     *emergency.Repository
-	UserRepo *repo.UserRepository
-	UserCtrl *user.UserController
+	Repo              *emergency.Repository
+	UserRepo          *repo.UserRepository
+	UserCtrl          *user.UserController
+	PasskeyController *controller.PasskeyController
 }
 
 func (c *Controller) UpdateContact(ctx *gin.Context,
@@ -122,4 +124,4 @@ func validateUpdateReq(userID int64, req ente.UpdateContact) error {
 		}
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("Can not update state to %s", req.State)), "")
 	}
-	}
+}
