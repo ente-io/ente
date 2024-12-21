@@ -74,6 +74,7 @@ class IconUtils {
           title: simpleEntry.key,
           type: IconType.simpleIcon,
           color: simpleEntry.value,
+          slug: simpleEntry.value
         );
         processedIconPaths.add(simpleIconPath);
       }
@@ -247,37 +248,40 @@ class CustomIconData {
   CustomIconData(this.slug, this.color);
 }
 
+final charMap = {
+  'á': 'a',
+  'à': 'a',
+  'â': 'a',
+  'ä': 'a',
+  'é': 'e',
+  'è': 'e',
+  'ê': 'e',
+  'ë': 'e',
+  'í': 'i',
+  'ì': 'i',
+  'î': 'i',
+  'ï': 'i',
+  'ó': 'o',
+  'ò': 'o',
+  'ô': 'o',
+  'ö': 'o',
+  'ú': 'u',
+  'ù': 'u',
+  'û': 'u',
+  'ü': 'u',
+  'ç': 'c',
+  'ñ': 'n',
+  '.': 'dot',
+  '-': '',
+  '&': 'and',
+  '+': 'plus',
+  ':': '',
+  "'": '',
+  '/': '',
+  '!': '',
+};
 String normalizeSimpleIconName(String input) {
-  final charMap = {
-    'á': 'a',
-    'à': 'a',
-    'â': 'a',
-    'ä': 'a',
-    'é': 'e',
-    'è': 'e',
-    'ê': 'e',
-    'ë': 'e',
-    'í': 'i',
-    'ì': 'i',
-    'î': 'i',
-    'ï': 'i',
-    'ó': 'o',
-    'ò': 'o',
-    'ô': 'o',
-    'ö': 'o',
-    'ú': 'u',
-    'ù': 'u',
-    'û': 'u',
-    'ü': 'u',
-    'ç': 'c',
-    'ñ': 'n',
-    '.': 'dot',
-    '-': 'dash',
-    '&': 'and',
-  };
-
   final buffer = StringBuffer();
-
   for (var char in input.characters) {
     buffer.write(charMap[char] ?? char);
   }
