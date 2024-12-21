@@ -8,7 +8,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/settings/general_section_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/photo_manager_util.dart";
 import "package:styled_text/styled_text.dart";
