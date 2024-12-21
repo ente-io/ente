@@ -120,92 +120,95 @@ class _CustomIconPageState extends State<CustomIconPage> {
           child: Column(
             children: [
               Expanded(
-                child: GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: (MediaQuery.sizeOf(context).width ~/ 90)
-                        .clamp(1, double.infinity)
-                        .toInt(),
-                    crossAxisSpacing: 14,
-                    mainAxisSpacing: 14,
-                    childAspectRatio: 1,
-                  ),
-                  itemCount: _filteredIcons.length,
-                  itemBuilder: (context, index) {
-                    final title = _filteredIcons.keys.elementAt(index);
-                    final iconData = _filteredIcons[title]!;
-                    IconType iconType = iconData.type;
-                    String? color = iconData.color;
-                    String? slug = iconData.slug;
-                    Widget iconWidget;
-                    if (iconType == IconType.simpleIcon) {
-                      final simpleIconPath = normalizeSimpleIconName(title);
-                      iconWidget = IconUtils.instance.getSVGIcon(
-                        "assets/simple-icons/icons/$simpleIconPath.svg",
-                        title,
-                        color,
-                        40,
-                        context,
-                      );
-                    } else {
-                      iconWidget = IconUtils.instance.getSVGIcon(
-                        "assets/custom-icons/icons/${slug ?? title}.svg",
-                        title,
-                        color,
-                        40,
-                        context,
-                      );
-                    }
-
-                    return GestureDetector(
-                      key: ValueKey(title),
-                      onTap: () {
-                        final newIcon = AllIconData(
-                          title: title,
-                          type: iconType,
-                          color: color,
-                          slug: slug,
+                child: Scrollbar(
+                  thumbVisibility: true,
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: (MediaQuery.sizeOf(context).width ~/ 90)
+                          .clamp(1, double.infinity)
+                          .toInt(),
+                      crossAxisSpacing: 14,
+                      mainAxisSpacing: 14,
+                      childAspectRatio: 1,
+                    ),
+                    itemCount: _filteredIcons.length,
+                    itemBuilder: (context, index) {
+                      final title = _filteredIcons.keys.elementAt(index);
+                      final iconData = _filteredIcons[title]!;
+                      IconType iconType = iconData.type;
+                      String? color = iconData.color;
+                      String? slug = iconData.slug;
+                      Widget iconWidget;
+                      if (iconType == IconType.simpleIcon) {
+                        final simpleIconPath = normalizeSimpleIconName(title);
+                        iconWidget = IconUtils.instance.getSVGIcon(
+                          "assets/simple-icons/icons/$simpleIconPath.svg",
+                          title,
+                          color,
+                          40,
+                          context,
                         );
-                        Navigator.of(context).pop(newIcon);
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            width: 1.5,
-                            color: title.toLowerCase() ==
-                                    widget.currentIcon.toLowerCase()
-                                ? getEnteColorScheme(context)
-                                    .tagChipSelectedColor
-                                : Colors.transparent,
-                          ),
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(12.0),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 8),
-                            Expanded(
-                              child: iconWidget,
-                            ),
-                            const SizedBox(height: 12),
-                            Padding(
-                              padding: title.toLowerCase() ==
+                      } else {
+                        iconWidget = IconUtils.instance.getSVGIcon(
+                          "assets/custom-icons/icons/${slug ?? title}.svg",
+                          title,
+                          color,
+                          40,
+                          context,
+                        );
+                      }
+
+                      return GestureDetector(
+                        key: ValueKey(title),
+                        onTap: () {
+                          final newIcon = AllIconData(
+                            title: title,
+                            type: iconType,
+                            color: color,
+                            slug: slug,
+                          );
+                          Navigator.of(context).pop(newIcon);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              width: 1.5,
+                              color: title.toLowerCase() ==
                                       widget.currentIcon.toLowerCase()
-                                  ? const EdgeInsets.only(left: 2, right: 2)
-                                  : const EdgeInsets.all(0.0),
-                              child: Text(
-                                '${title[0].toUpperCase()}${title.substring(1)}',
-                                style: getEnteTextTheme(context).mini,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
+                                  ? getEnteColorScheme(context)
+                                      .tagChipSelectedColor
+                                  : Colors.transparent,
                             ),
-                            const SizedBox(height: 4),
-                          ],
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(12.0),
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 8),
+                              Expanded(
+                                child: iconWidget,
+                              ),
+                              const SizedBox(height: 12),
+                              Padding(
+                                padding: title.toLowerCase() ==
+                                        widget.currentIcon.toLowerCase()
+                                    ? const EdgeInsets.only(left: 2, right: 2)
+                                    : const EdgeInsets.all(0.0),
+                                child: Text(
+                                  '${title[0].toUpperCase()}${title.substring(1)}',
+                                  style: getEnteTextTheme(context).mini,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
