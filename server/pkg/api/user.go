@@ -7,6 +7,7 @@ import (
 	"github.com/ente-io/museum/pkg/controller/emergency"
 	"github.com/gin-contrib/requestid"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"net/http"
 	"strconv"
 	"strings"
@@ -473,6 +474,7 @@ func (h *UserHandler) GetFamiliesToken(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"familiesToken": token,
+		"familyUrl":     viper.GetString("apps.family"),
 	})
 }
 
@@ -485,6 +487,7 @@ func (h *UserHandler) GetAccountsToken(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"accountsToken": token,
+		"accountUrl":    viper.GetString("apps.account"),
 	})
 }
 

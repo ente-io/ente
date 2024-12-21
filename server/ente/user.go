@@ -49,12 +49,14 @@ type EmailVerificationResponse struct {
 // EmailAuthorizationResponse represents the response after user has verified his email,
 // if two factor enabled just `TwoFactorSessionID` is sent else the keyAttributes and encryptedToken
 type EmailAuthorizationResponse struct {
-	ID                 int64          `json:"id"`
-	KeyAttributes      *KeyAttributes `json:"keyAttributes,omitempty"`
-	EncryptedToken     string         `json:"encryptedToken,omitempty"`
-	Token              string         `json:"token,omitempty"`
-	PasskeySessionID   string         `json:"passkeySessionID"`
-	TwoFactorSessionID string         `json:"twoFactorSessionID"`
+	ID               int64          `json:"id"`
+	KeyAttributes    *KeyAttributes `json:"keyAttributes,omitempty"`
+	EncryptedToken   string         `json:"encryptedToken,omitempty"`
+	Token            string         `json:"token,omitempty"`
+	PasskeySessionID string         `json:"passkeySessionID"`
+	// AccountUrl is the url used for passkey validation
+	AccountUrl         string `json:"accountUrl"`
+	TwoFactorSessionID string `json:"twoFactorSessionID"`
 	// TwoFactorSessionIDV2 is set only if user has both passkey and two factor enabled.
 	// This is to ensure older clients keep using passkey flow when both are set. We can remove
 	// This field once the clients starts surface both options for performing 2fa
