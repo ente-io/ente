@@ -79,6 +79,14 @@ apps:
     # If you're running a self hosted instance and wish to serve public links,
     # set this to the URL where your albums web app is running.
     public-albums:
+    # Default is https://cast.ente.io
+    cast-album:
+    # Default is https://accounts.ente.io
+    # Set this to the URL where your accounts web app is running, primarily used for
+    # passkey based 2FA.
+    accounts:
+    # Default is https://family.ente.io
+    family:
 
 # Database connection parameters
 db:
