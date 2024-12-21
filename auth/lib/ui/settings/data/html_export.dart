@@ -48,7 +48,7 @@ Future<String> generateOTPEntryHtml(Code code, BuildContext context) async {
           <p class="group">Type: <b>${code.type.name}</b></p>
           <p>Algorithm: <b>${code.algorithm.name}</b></p>
           <p>Digits: <b>${code.digits}</b></p>
-          <p>Recovery Code: <b>${code.secret}</b></p>
+          <p>Secret: <b>${code.secret}</b></p>
           $notes
         </td>
         <td class="otp-qr">
