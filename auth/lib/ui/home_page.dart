@@ -354,7 +354,7 @@ class _HomePageState extends State<HomePage> {
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: !_showSearchBox
-              ? const Text('Ente Auth')
+              ? const Text('Ente Auth', style: brandStyleMedium)
               : TextField(
                   autocorrect: false,
                   enableSuggestions: false,
