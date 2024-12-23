@@ -80,7 +80,7 @@ apps:
     # set this to the URL where your albums web app is running.
     public-albums:
     # Default is https://cast.ente.io
-    cast-album:
+    cast:
     # Default is https://accounts.ente.io
     # Set this to the URL where your accounts web app is running, primarily used for
     # passkey based 2FA.

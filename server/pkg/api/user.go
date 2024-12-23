@@ -487,7 +487,7 @@ func (h *UserHandler) GetAccountsToken(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"accountsToken": token,
-		"accountUrl":    viper.GetString("apps.account"),
+		"accountsUrl":   viper.GetString("apps.accounts"),
 	})
 }
 
