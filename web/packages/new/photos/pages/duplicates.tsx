@@ -24,13 +24,23 @@ import {
     Typography,
 } from "@mui/material";
 import { useRouter } from "next/router";
-import React, { memo, useCallback, useEffect, useReducer } from "react";
+import React, {
+    memo,
+    useCallback,
+    useEffect,
+    useMemo,
+    useReducer,
+} from "react";
 import Autosizer from "react-virtualized-auto-sizer";
 import {
     areEqual,
     FixedSizeList,
     type ListChildComponentProps,
 } from "react-window";
+import {
+    computeThumbnailGridLayoutParams,
+    type ThumbnailGridLayoutParams,
+} from "../components/utils/thumbnail-grid-layout";
 import { deduceDuplicates, type DuplicateGroup } from "../services/dedup";
 import { useAppContext } from "../types/context";
 
@@ -374,7 +384,18 @@ const Duplicates: React.FC<DuplicatesProps> = ({
     return (
         <Stack sx={{ flex: 1 }}>
             <Box sx={{ flex: 1, overflow: "hidden", paddingBlock: 1 }}>
-                <DuplicatesList {...{ duplicateGroups, onToggleSelection }} />
+                <Autosizer>
+                    {({ width, height }) => (
+                        <DuplicatesList
+                            {...{
+                                width,
+                                height,
+                                duplicateGroups,
+                                onToggleSelection,
+                            }}
+                        />
+                    )}
+                </Autosizer>
             </Box>
             <Stack sx={{ margin: 1 }}>
                 <DeduplicateButton {...deduplicateButtonProps} />
@@ -384,6 +405,14 @@ const Duplicates: React.FC<DuplicatesProps> = ({
 };
 
 interface DuplicatesListProps {
+    /**
+     * The width (px) that the list should size itself to.
+     */
+    width: number;
+    /**
+     * The height (px) that the list should size itself to.
+     */
+    height: number;
     /**
      * Groups of duplicates. Guaranteed to be non-empty.
      */
@@ -395,29 +424,37 @@ interface DuplicatesListProps {
     onToggleSelection: (index: number) => void;
 }
 
+type DuplicatesListItemData = Pick<
+    DuplicatesListProps,
+    "duplicateGroups" | "onToggleSelection"
+> & {
+    layoutParams: ThumbnailGridLayoutParams;
+};
+
 const DuplicatesList: React.FC<DuplicatesListProps> = ({
+    width,
+    height,
     duplicateGroups,
     onToggleSelection,
 }) => {
+    const layoutParams = useMemo(
+        () => computeThumbnailGridLayoutParams(width),
+        [width],
+    );
+
     const itemCount = duplicateGroups.length;
     const itemSize = 100;
+    const itemData = { layoutParams, duplicateGroups, onToggleSelection };
 
     return (
-        <Autosizer>
-            {({ height, width }) => (
-                <FixedSizeList
-                    {...{ height, width, itemCount, itemSize }}
-                    itemData={{ duplicateGroups, onToggleSelection }}
-                >
-                    {ListItem}
-                </FixedSizeList>
-            )}
-        </Autosizer>
+        <FixedSizeList {...{ height, width, itemCount, itemSize, itemData }}>
+            {ListItem}
+        </FixedSizeList>
     );
 };
 
-const ListItem: React.FC<ListChildComponentProps<DuplicatesListProps>> = memo(
-    ({ index, style, data }) => {
+const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
+    memo(({ index, style, data }) => {
         const { duplicateGroups, onToggleSelection } = data;
 
         const duplicateGroup = duplicateGroups[index]!;
@@ -461,9 +498,7 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListProps>> = memo(
                 </ItemGrid>
             </Stack>
         );
-    },
-    areEqual,
-);
+    }, areEqual);
 
 const ItemGrid = styled("div")`
     display: grid;
