@@ -411,6 +411,8 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
     );
 };
 
+const renderCount = new Map<number, number>();
+
 const ListItem: React.FC<ListChildComponentProps<DuplicatesListProps>> = ({
     index,
     style,
@@ -423,6 +425,9 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListProps>> = ({
     const itemSize = formattedByteSize(duplicateGroup.itemSize);
     const checked = duplicateGroup.isSelected;
     const onChange = () => onToggleSelection(index);
+
+    renderCount.set(index, (renderCount.get(index) ?? 0) + 1);
+    console.log("rendering", index, Object.fromEntries(renderCount.entries()));
 
     return (
         <Stack {...{ style }}>
