@@ -142,7 +142,7 @@ export const BaseTileButton = styled(UnstyledButton)`
     /* Buttons reset this to center */
     text-align: inherit;
 
-    /* Rest of this is mostly verbatim from ItemTile ... */
+    /* Rest of this is mostly verbatim from BaseTile ... */
 
     display: flex;
     /* Act as container for the absolutely positioned ItemTileOverlays. */

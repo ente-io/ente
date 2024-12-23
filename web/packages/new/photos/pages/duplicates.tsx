@@ -37,6 +37,7 @@ import {
     VariableSizeList,
     type ListChildComponentProps,
 } from "react-window";
+import { BaseTile, ItemCard } from "../components/Tiles";
 import {
     computeThumbnailGridLayoutParams,
     type ThumbnailGridLayoutParams,
@@ -500,20 +501,23 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                 </Stack>
                 <ItemGrid {...{ layoutParams }}>
                     {items.map((item, j) => (
-                        <div
+                        <ItemCard
                             key={j}
-                            style={{
-                                background: "red",
-                                border: "2px solid green",
-                            }}
+                            TileComponent={ItemTile}
+                            coverFile={item.file}
                         >
-                            {item.collectionName}
-                        </div>
+                            {/* {item.collectionName} */}
+                        </ItemCard>
                     ))}
                 </ItemGrid>
             </Stack>
         );
     }, areEqual);
+
+export const ItemTile = styled(BaseTile)`
+    /* The thumbnails are not interactable, reset the pointer */
+    cursor: initial;
+`;
 
 type ItemGridProps = Pick<DuplicatesListItemData, "layoutParams">;
 
@@ -523,7 +527,8 @@ const ItemGrid = styled("div", {
     ({ layoutParams }) => `
     display: grid;
     padding-inline: ${layoutParams.paddingInline}px;
-    grid-template-columns: repeat(${layoutParams.columns}, 1fr);
+    grid-template-columns: repeat(${layoutParams.columns}, ${layoutParams.itemWidth}px);
+    grid-auto-rows: ${layoutParams.itemHeight}px;
     gap: ${layoutParams.gap}px;
 `,
 );
