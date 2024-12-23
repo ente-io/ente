@@ -258,6 +258,10 @@
   "areYouSureYouWantToLogout": "您确定要登出吗？",
   "yesLogout": "是的，登出",
   "exit": "退出",
+  "theme": "主题",
+  "lightTheme": "浅色",
+  "darkTheme": "深色",
+  "systemTheme": "系统",
   "verifyingRecoveryKey": "正在验证恢复密钥...",
   "recoveryKeyVerified": "恢复密钥已验证",
   "recoveryKeySuccessBody": "太棒了！ 您的恢复密钥是有效的。 感谢您的验证。\n\n请记住要安全备份您的恢复密钥。",
@@ -490,5 +494,13 @@
   "appLockNotEnabled": "应用锁未启用",
   "appLockNotEnabledDescription": "请从“安全”>“应用锁”启用应用锁",
   "authToViewPasskey": "请验证身份以查看通行密钥",
-  "appLockOfflineModeWarning": "您已选择继续而不备份。如果您忘记了应用锁，您将无法访问数据。"
+  "appLockOfflineModeWarning": "您已选择继续而不备份。如果您忘记了应用锁，您将无法访问数据。",
+  "duplicateCodes": "重复代码",
+  "noDuplicates": "✨ 没有重复",
+  "youveNoDuplicateCodesThatCanBeCleared": "您没有可清除的重复代码",
+  "deduplicateCodes": "删除重复代码",
+  "deselectAll": "取消全选",
+  "selectAll": "全选",
+  "deleteDuplicates": "删除重复项",
+  "plainHTML": "Plain HTML"
 }

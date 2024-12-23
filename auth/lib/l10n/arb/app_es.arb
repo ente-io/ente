@@ -54,7 +54,7 @@
   "viewLogsAction": "Ver Registros",
   "sendLogsDescription": "Esto enviará registros para ayudarnos a depurar su problema. Aunque tomamos precauciones para asegurarnos que no se registre información sensible, le recomendamos que consulte estos registros antes de compartirlos.",
   "preparingLogsTitle": "Preparando registros...",
-  "emailLogsTitle": "Enviar registros por email",
+  "emailLogsTitle": "Enviar registros por correo electrónico",
   "emailLogsMessage": "Por favor, envíe los registros a {email}",
   "@emailLogsMessage": {
     "placeholders": {
@@ -115,7 +115,7 @@
   "importCodeDelimiterInfo": "Los códigos pueden separarse por una coma o una nueva línea",
   "selectFile": "Seleccionar archivo",
   "emailVerificationToggle": "Verificación de correo electrónico",
-  "emailVerificationEnableWarning": "Para evitar quedarte bloqueado fuera de tu cuenta, asegúrate de guardar una copia de su código 2FA de tu correo electrónico fuera de Ente Auth antes de habilitar la verificación de correo electrónico.",
+  "emailVerificationEnableWarning": "Para evitar quedarte bloqueado fuera de tu cuenta, asegúrate de guardar una copia de tu código 2FA de tu correo electrónico fuera de Ente Auth antes de habilitar la verificación de correo electrónico.",
   "authToChangeEmailVerificationSetting": "Por favor, autentícate para cambiar tu correo electrónico",
   "authenticateGeneric": "Por favor, autentícate",
   "authToViewYourRecoveryKey": "Por favor, autentícate para ver tu clave de recuperación",
@@ -160,7 +160,7 @@
   "recoverAccount": "Recuperar cuenta",
   "enterRecoveryKeyHint": "Introduce tu clave de recuperación",
   "recover": "Recuperar",
-  "contactSupportViaEmailMessage": "Por favor, envía un email a {email} desde la dirección de correo electrónico que usó durante el registro",
+  "contactSupportViaEmailMessage": "Por favor, envía un correo electrónico a {email} desde la dirección de correo electrónico que usó durante el registro",
   "@contactSupportViaEmailMessage": {
     "placeholders": {
       "email": {
@@ -258,6 +258,10 @@
   "areYouSureYouWantToLogout": "¿Seguro que quieres cerrar la sesión?",
   "yesLogout": "Sí, cerrar la sesión",
   "exit": "Salir",
+  "theme": "Tema",
+  "lightTheme": "Claro",
+  "darkTheme": "Oscuro",
+  "systemTheme": "Sistema",
   "verifyingRecoveryKey": "Verificando clave de recuperación...",
   "recoveryKeyVerified": "Clave de recuperación verificada",
   "recoveryKeySuccessBody": "¡Genial! Su clave de recuperación es válida. Gracias por verificar.\n\nPor favor, recuerde mantener su clave de recuperación segura.",
@@ -317,7 +321,7 @@
   "checkInboxAndSpamFolder": "Por favor revisa tu bandeja de entrada (y spam) para completar la verificación",
   "tapToEnterCode": "Toca para introducir el código",
   "resendEmail": "Reenviar correo electrónico",
-  "weHaveSendEmailTo": "Hemos enviado un correo a <green>{email}</green>",
+  "weHaveSendEmailTo": "Hemos enviado un correo electrónico a <green>{email}</green>",
   "@weHaveSendEmailTo": {
     "description": "Text to indicate that we have sent a mail to the user",
     "placeholders": {
