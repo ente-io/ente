@@ -467,7 +467,7 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
 
 const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
     memo(({ index, style, data }) => {
-        const { duplicateGroups, onToggleSelection } = data;
+        const { layoutParams, duplicateGroups, onToggleSelection } = data;
 
         const duplicateGroup = duplicateGroups[index]!;
         const items = duplicateGroup.items;
@@ -483,7 +483,8 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                     sx={{
                         justifyContent: "space-between",
                         alignItems: "center",
-                        paddingInline: 1,
+                        marginInline: 1,
+                        paddingInline: `${layoutParams.paddingInline}px`,
                     }}
                 >
                     <Typography color={checked ? "text.base" : "text.muted"}>
@@ -495,7 +496,7 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                      */}
                     <Checkbox {...{ checked, onChange }} />
                 </Stack>
-                <ItemGrid>
+                <ItemGrid {...{ layoutParams }}>
                     {items.map((item, j) => (
                         <div
                             key={j}
@@ -512,10 +513,18 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
         );
     }, areEqual);
 
-const ItemGrid = styled("div")`
+type ItemGridProps = Pick<DuplicatesListItemData, "layoutParams">;
+
+const ItemGrid = styled("div", {
+    shouldForwardProp: (prop) => prop != "layoutParams",
+})<ItemGridProps>(
+    ({ layoutParams }) => `
     display: grid;
-    grid-template-columns: 200px 200px 200px;
-`;
+    padding-inline: ${layoutParams.paddingInline}px;
+    grid-template-columns: repeat(${layoutParams.columns}, 1fr);
+    gap: ${layoutParams.gap}px;
+`,
+);
 
 interface DeduplicateButtonProps {
     /**
