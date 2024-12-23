@@ -49,7 +49,7 @@ ENV NEXT_PUBLIC_ENTE_ACCOUNTS_ENDPOINT=https://your-domain.com
 
 RUN yarn cache clean
 RUN yarn install --network-timeout 1000000000
-RUN yarn build:photos && yarn build:auth && yarn build:accounts && yarn build:cast
+RUN yarn build:photos && yarn build:accounts && yarn build:auth && yarn build:cast
 
 FROM node:20-bookworm-slim
 
@@ -217,6 +217,10 @@ will take care of that.
 ```sh
 photos.yourdomain.com {
 	reverse_proxy http://localhost:3001
+    # for logging
+    log {
+        level error
+    }
 }
 
 auth.yourdomain.com {
