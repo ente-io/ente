@@ -2896,10 +2896,10 @@ class S {
     );
   }
 
-  /// `Manage device Cache`
+  /// `Manage device cache`
   String get manageDeviceStorage {
     return Intl.message(
-      'Manage device Cache',
+      'Manage device cache',
       name: 'manageDeviceStorage',
       desc: '',
       args: [],
