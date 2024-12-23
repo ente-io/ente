@@ -374,35 +374,37 @@ const NoDuplicatesFound: React.FC = () => (
     </CenteredFill>
 );
 
-type DuplicatesProps = DuplicatesListProps & DeduplicateButtonProps;
+type DuplicatesProps = Pick<
+    DuplicatesListProps,
+    "duplicateGroups" | "onToggleSelection"
+> &
+    DeduplicateButtonProps;
 
 const Duplicates: React.FC<DuplicatesProps> = ({
     duplicateGroups,
     onToggleSelection,
     ...deduplicateButtonProps
-}) => {
-    return (
-        <Stack sx={{ flex: 1 }}>
-            <Box sx={{ flex: 1, overflow: "hidden", paddingBlock: 1 }}>
-                <Autosizer>
-                    {({ width, height }) => (
-                        <DuplicatesList
-                            {...{
-                                width,
-                                height,
-                                duplicateGroups,
-                                onToggleSelection,
-                            }}
-                        />
-                    )}
-                </Autosizer>
-            </Box>
-            <Stack sx={{ margin: 1 }}>
-                <DeduplicateButton {...deduplicateButtonProps} />
-            </Stack>
+}) => (
+    <Stack sx={{ flex: 1 }}>
+        <Box sx={{ flex: 1, overflow: "hidden", paddingBlock: 1 }}>
+            <Autosizer>
+                {({ width, height }) => (
+                    <DuplicatesList
+                        {...{
+                            width,
+                            height,
+                            duplicateGroups,
+                            onToggleSelection,
+                        }}
+                    />
+                )}
+            </Autosizer>
+        </Box>
+        <Stack sx={{ margin: 1 }}>
+            <DeduplicateButton {...deduplicateButtonProps} />
         </Stack>
-    );
-};
+    </Stack>
+);
 
 interface DuplicatesListProps {
     /**
