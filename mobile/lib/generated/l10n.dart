@@ -10318,13 +10318,13 @@ class S {
     );
   }
 
-  /// `Sections length mismatch: {snapshotLenght} != {searchLenght}`
-  String searchSectionsLengthMismatch(int snapshotLenght, int searchLenght) {
+  /// `Sections length mismatch: {snapshotLength} != {searchLength}`
+  String searchSectionsLengthMismatch(int snapshotLength, int searchLength) {
     return Intl.message(
-      'Sections length mismatch: $snapshotLenght != $searchLenght',
+      'Sections length mismatch: $snapshotLength != $searchLength',
       name: 'searchSectionsLengthMismatch',
       desc: 'Appears in search tab page',
-      args: [snapshotLenght, searchLenght],
+      args: [snapshotLength, searchLength],
     );
   }
 

@@ -1479,15 +1479,15 @@
     }
   },
   "file": "Bestand",
-  "searchSectionsLengthMismatch": "Lengte van secties komt niet overeen: {snapshotLenght} != {searchLenght}",
+  "searchSectionsLengthMismatch": "Lengte van secties komt niet overeen: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
     "description": "Appears in search tab page",
     "placeholders": {
-      "snapshotLenght": {
+      "snapshotLength": {
         "type": "int",
         "example": "1"
       },
-      "searchLenght": {
+      "searchLength": {
         "type": "int",
         "example": "2"
       }

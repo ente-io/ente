@@ -1479,15 +1479,15 @@
     }
   },
   "file": "Tệp",
-  "searchSectionsLengthMismatch": "Chiều dài các phần không khớp: {snapshotLenght} != {searchLenght}",
+  "searchSectionsLengthMismatch": "Chiều dài các phần không khớp: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
     "description": "Appears in search tab page",
     "placeholders": {
-      "snapshotLenght": {
+      "snapshotLength": {
         "type": "int",
         "example": "1"
       },
-      "searchLenght": {
+      "searchLength": {
         "type": "int",
         "example": "2"
       }

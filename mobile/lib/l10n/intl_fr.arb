@@ -1479,15 +1479,15 @@
     }
   },
   "file": "Fichier",
-  "searchSectionsLengthMismatch": "Incompatibilité de la longueur des sections: {snapshotLenght} != {searchLenght}",
+  "searchSectionsLengthMismatch": "Incompatibilité de la longueur des sections: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
     "description": "Appears in search tab page",
     "placeholders": {
-      "snapshotLenght": {
+      "snapshotLength": {
         "type": "int",
         "example": "1"
       },
-      "searchLenght": {
+      "searchLength": {
         "type": "int",
         "example": "2"
       }
