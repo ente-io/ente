@@ -93,6 +93,11 @@ func main() {
 		panic(err)
 	}
 
+	viper.SetDefault("apps.public-albums", "https://albums.ente.io")
+	viper.SetDefault("apps.accounts", "https://accounts.ente.io")
+	viper.SetDefault("apps.cast", "https://cast.ente.io")
+	viper.SetDefault("apps.family", "https://family.ente.io")
+
 	setupLogger(environment)
 	log.Infof("Booting up %s server with commit #%s", environment, os.Getenv("GIT_COMMIT"))
 

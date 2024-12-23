@@ -405,10 +405,11 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 		}
 	}
+	accountUrl := viper.GetString("apps.accounts")
 	if hasPasskeys && isTwoFactorEnabled {
-		return ente.EmailAuthorizationResponse{ID: userID, PasskeySessionID: passKeySessionID, TwoFactorSessionIDV2: twoFactorSessionID}, nil
+		return ente.EmailAuthorizationResponse{ID: userID, PasskeySessionID: passKeySessionID, AccountUrl: accountUrl, TwoFactorSessionIDV2: twoFactorSessionID}, nil
 	} else if hasPasskeys {
-		return ente.EmailAuthorizationResponse{ID: userID, PasskeySessionID: passKeySessionID}, nil
+		return ente.EmailAuthorizationResponse{ID: userID, PasskeySessionID: passKeySessionID, AccountUrl: accountUrl}, nil
 	} else if isTwoFactorEnabled {
 		return ente.EmailAuthorizationResponse{ID: userID, TwoFactorSessionID: twoFactorSessionID}, nil
 	}
