@@ -19,13 +19,28 @@ import {
     Checkbox,
     IconButton,
     Stack,
+    styled,
     Tooltip,
     Typography,
 } from "@mui/material";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useReducer } from "react";
+import React, {
+    memo,
+    useCallback,
+    useEffect,
+    useMemo,
+    useReducer,
+} from "react";
 import Autosizer from "react-virtualized-auto-sizer";
-import { FixedSizeList, type ListChildComponentProps } from "react-window";
+import {
+    areEqual,
+    VariableSizeList,
+    type ListChildComponentProps,
+} from "react-window";
+import {
+    computeThumbnailGridLayoutParams,
+    type ThumbnailGridLayoutParams,
+} from "../components/utils/thumbnail-grid-layout";
 import { deduceDuplicates, type DuplicateGroup } from "../services/dedup";
 import { useAppContext } from "../types/context";
 
@@ -359,26 +374,47 @@ const NoDuplicatesFound: React.FC = () => (
     </CenteredFill>
 );
 
-type DuplicatesProps = DuplicatesListProps & DeduplicateButtonProps;
+type DuplicatesProps = Pick<
+    DuplicatesListProps,
+    "duplicateGroups" | "onToggleSelection"
+> &
+    DeduplicateButtonProps;
 
 const Duplicates: React.FC<DuplicatesProps> = ({
     duplicateGroups,
     onToggleSelection,
     ...deduplicateButtonProps
-}) => {
-    return (
-        <Stack sx={{ flex: 1 }}>
-            <Box sx={{ flex: 1, overflow: "hidden", paddingBlock: 1 }}>
-                <DuplicatesList {...{ duplicateGroups, onToggleSelection }} />
-            </Box>
-            <Stack sx={{ margin: 1 }}>
-                <DeduplicateButton {...deduplicateButtonProps} />
-            </Stack>
+}) => (
+    <Stack sx={{ flex: 1 }}>
+        <Box sx={{ flex: 1, overflow: "hidden", paddingBlock: 1 }}>
+            <Autosizer>
+                {({ width, height }) => (
+                    <DuplicatesList
+                        {...{
+                            width,
+                            height,
+                            duplicateGroups,
+                            onToggleSelection,
+                        }}
+                    />
+                )}
+            </Autosizer>
+        </Box>
+        <Stack sx={{ margin: 1 }}>
+            <DeduplicateButton {...deduplicateButtonProps} />
         </Stack>
-    );
-};
+    </Stack>
+);
 
 interface DuplicatesListProps {
+    /**
+     * The width (px) that the list should size itself to.
+     */
+    width: number;
+    /**
+     * The height (px) that the list should size itself to.
+     */
+    height: number;
     /**
      * Groups of duplicates. Guaranteed to be non-empty.
      */
@@ -390,58 +426,107 @@ interface DuplicatesListProps {
     onToggleSelection: (index: number) => void;
 }
 
+type DuplicatesListItemData = Pick<
+    DuplicatesListProps,
+    "duplicateGroups" | "onToggleSelection"
+> & {
+    layoutParams: ThumbnailGridLayoutParams;
+};
+
 const DuplicatesList: React.FC<DuplicatesListProps> = ({
+    width,
+    height,
     duplicateGroups,
     onToggleSelection,
 }) => {
+    const layoutParams = useMemo(
+        () => computeThumbnailGridLayoutParams(width),
+        [width],
+    );
+
     const itemCount = duplicateGroups.length;
-    const itemSize = 100;
+    const itemSize = (index: number) => {
+        // The height of the header is driven by the height of the Checkbox, and
+        // currently it is always a fixed 42 px high.
+        const headerHeight = 42;
+
+        const duplicateGroup = duplicateGroups[index]!;
+        const rowCount = Math.ceil(
+            duplicateGroup.items.length / layoutParams.columns,
+        );
+        const rowHeight = layoutParams.itemHeight + layoutParams.gap;
+
+        return headerHeight + rowCount * rowHeight;
+    };
+    const itemData = { layoutParams, duplicateGroups, onToggleSelection };
 
     return (
-        <Autosizer>
-            {({ height, width }) => (
-                <FixedSizeList
-                    {...{ height, width, itemCount, itemSize }}
-                    itemData={{ duplicateGroups, onToggleSelection }}
+        <VariableSizeList {...{ height, width, itemCount, itemSize, itemData }}>
+            {ListItem}
+        </VariableSizeList>
+    );
+};
+
+const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
+    memo(({ index, style, data }) => {
+        const { layoutParams, duplicateGroups, onToggleSelection } = data;
+
+        const duplicateGroup = duplicateGroups[index]!;
+        const items = duplicateGroup.items;
+        const count = items.length;
+        const itemSize = formattedByteSize(duplicateGroup.itemSize);
+        const checked = duplicateGroup.isSelected;
+        const onChange = () => onToggleSelection(index);
+
+        return (
+            <Stack {...{ style }}>
+                <Stack
+                    direction="row"
+                    sx={{
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginInline: 1,
+                        paddingInline: `${layoutParams.paddingInline}px`,
+                    }}
                 >
-                    {ListItem}
-                </FixedSizeList>
-            )}
-        </Autosizer>
-    );
-};
-
-const ListItem: React.FC<ListChildComponentProps<DuplicatesListProps>> = ({
-    index,
-    style,
-    data,
-}) => {
-    const { duplicateGroups, onToggleSelection } = data;
-
-    const duplicateGroup = duplicateGroups[index]!;
-    const count = duplicateGroup.items.length;
-    const itemSize = formattedByteSize(duplicateGroup.itemSize);
-    const checked = duplicateGroup.isSelected;
-    const onChange = () => onToggleSelection(index);
-
-    return (
-        <Stack {...{ style }}>
-            <Stack
-                direction="row"
-                sx={{
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    paddingInline: 1,
-                }}
-            >
-                <Typography color={checked ? "text.base" : "text.muted"}>
-                    {pt(`${count} items, ${itemSize} each`)}
-                </Typography>
-                <Checkbox {...{ checked, onChange }} />
+                    <Typography color={checked ? "text.base" : "text.muted"}>
+                        {pt(`${count} items, ${itemSize} each`)}
+                    </Typography>
+                    {/*
+                      The size of this Checkbox, 42px, drives the height of
+                      the header.
+                     */}
+                    <Checkbox {...{ checked, onChange }} />
+                </Stack>
+                <ItemGrid {...{ layoutParams }}>
+                    {items.map((item, j) => (
+                        <div
+                            key={j}
+                            style={{
+                                background: "red",
+                                border: "2px solid green",
+                            }}
+                        >
+                            {item.collectionName}
+                        </div>
+                    ))}
+                </ItemGrid>
             </Stack>
-        </Stack>
-    );
-};
+        );
+    }, areEqual);
+
+type ItemGridProps = Pick<DuplicatesListItemData, "layoutParams">;
+
+const ItemGrid = styled("div", {
+    shouldForwardProp: (prop) => prop != "layoutParams",
+})<ItemGridProps>(
+    ({ layoutParams }) => `
+    display: grid;
+    padding-inline: ${layoutParams.paddingInline}px;
+    grid-template-columns: repeat(${layoutParams.columns}, 1fr);
+    gap: ${layoutParams.gap}px;
+`,
+);
 
 interface DeduplicateButtonProps {
     /**
