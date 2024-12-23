@@ -440,6 +440,10 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListProps>> = memo(
                     <Typography color={checked ? "text.base" : "text.muted"}>
                         {pt(`${count} items, ${itemSize} each`)}
                     </Typography>
+                    {/*
+                      The size of this Checkbox, 42px, drives the height of
+                      the header.
+                     */}
                     <Checkbox {...{ checked, onChange }} />
                 </Stack>
                 <ItemGrid>
