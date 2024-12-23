@@ -7,6 +7,7 @@ import {
     OverflowMenu,
     OverflowMenuOption,
 } from "@/base/components/OverflowMenu";
+import { Ellipsized2LineTypography } from "@/base/components/Typography";
 import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import { formattedByteSize } from "@/new/photos/utils/units";
@@ -511,7 +512,9 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                             coverFile={item.file}
                         >
                             <DuplicateTileTextOverlay>
-                                <Typography color="text.muted">{item.collectionName}</Typography>
+                                <Ellipsized2LineTypography color="text.muted">
+                                    {item.collectionName}
+                                </Ellipsized2LineTypography>
                             </DuplicateTileTextOverlay>
                         </ItemCard>
                     ))}

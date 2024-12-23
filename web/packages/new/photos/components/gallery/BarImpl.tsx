@@ -1,5 +1,6 @@
 import { FilledIconButton } from "@/base/components/mui";
 import { Overlay } from "@/base/components/mui/Container";
+import { Ellipsized2LineTypography } from "@/base/components/Typography";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
 import {
@@ -508,20 +509,12 @@ const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
 const CardText: React.FC<React.PropsWithChildren> = ({ children }) => (
     <TileTextOverlay>
         <Box height={"2.1em"}>
-            <Ellipsized variant="small">{children}</Ellipsized>
+            <Ellipsized2LineTypography variant="small">
+                {children}
+            </Ellipsized2LineTypography>
         </Box>
     </TileTextOverlay>
 );
-
-const Ellipsized = styled(Typography)`
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; // number of lines to show
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    word-break: break-word;
-`;
 
 interface CollectionBarCardIconProps {
     type: CollectionSummaryType;

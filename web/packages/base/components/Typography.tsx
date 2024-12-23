@@ -14,8 +14,24 @@ export const EllipsizedTypography = styled(Typography)`
        hidden instead. */
     overflow: hidden;
     /* Specify handling of text when it overflows, asking the browser to insert
-       ellipsis instead of clipping. */
+       ellipsis instead of clipping.
+
+       Note that both overflow and text-overflow are required.
+      */
     text-overflow: ellipsis;
     /* Don't automatically wrap the text by inserting line breaks. */
     white-space: nowrap;
+`;
+
+/**
+ * A variant of {@link EllipsizedTypography} that takes up to 2 lines.
+ */
+export const Ellipsized2LineTypography = styled(Typography)`
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* number of lines to show */
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
 `;
