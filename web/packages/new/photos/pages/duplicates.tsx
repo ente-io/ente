@@ -19,6 +19,7 @@ import {
     Checkbox,
     IconButton,
     Stack,
+    styled,
     Tooltip,
     Typography,
 } from "@mui/material";
@@ -420,7 +421,8 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListProps>> = memo(
         const { duplicateGroups, onToggleSelection } = data;
 
         const duplicateGroup = duplicateGroups[index]!;
-        const count = duplicateGroup.items.length;
+        const items = duplicateGroup.items;
+        const count = items.length;
         const itemSize = formattedByteSize(duplicateGroup.itemSize);
         const checked = duplicateGroup.isSelected;
         const onChange = () => onToggleSelection(index);
@@ -440,11 +442,29 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListProps>> = memo(
                     </Typography>
                     <Checkbox {...{ checked, onChange }} />
                 </Stack>
+                <ItemGrid>
+                    {items.map((item, j) => (
+                        <div
+                            key={j}
+                            style={{
+                                background: "red",
+                                border: "2px solid green",
+                            }}
+                        >
+                            {item.collectionName}
+                        </div>
+                    ))}
+                </ItemGrid>
             </Stack>
         );
     },
     areEqual,
 );
+
+const ItemGrid = styled("div")`
+    display: grid;
+    grid-template-columns: 200px 200px 200px;
+`;
 
 interface DeduplicateButtonProps {
     /**
