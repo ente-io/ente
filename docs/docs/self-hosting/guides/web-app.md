@@ -74,10 +74,13 @@ EXPOSE ${AUTH}
 ENV CAST=3003
 EXPOSE ${CAST}
 
+# The albums app does not have navigable pages on it, but the 
+# port will be exposed in-order to self up the albums endpoint 
+# `apps.public-albums` in museum.yaml configuration file.
 ENV ALBUMS=3004
 EXPOSE ${ALBUMS}
 
-CMD ["sh", "-c", "serve /app/photos -l tcp://0.0.0.0:${PHOTOS} & serve /app/accounts -l tcp://0.0.0.0:${ACCOUNTS} & serve /app/albums -l tcp://0.0.0.0:3003 & serve /app/auth -l tcp://0.0.0.0:${AUTH} & serve /app/cast -l tcp://0.0.0.0:${CAST}"]
+CMD ["sh", "-c", "serve /app/photos -l tcp://0.0.0.0:${PHOTOS} & serve /app/accounts -l tcp://0.0.0.0:${ACCOUNTS} & serve /app/auth -l tcp://0.0.0.0:${AUTH} & serve /app/cast -l tcp://0.0.0.0:${CAST}"]
 ```
 
 The above is a multi-stage Dockerfile which creates a production ready static output
