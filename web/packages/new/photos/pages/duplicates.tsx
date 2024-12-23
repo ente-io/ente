@@ -23,9 +23,13 @@ import {
     Typography,
 } from "@mui/material";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useReducer } from "react";
+import React, { memo, useCallback, useEffect, useReducer } from "react";
 import Autosizer from "react-virtualized-auto-sizer";
-import { FixedSizeList, type ListChildComponentProps } from "react-window";
+import {
+    areEqual,
+    FixedSizeList,
+    type ListChildComponentProps,
+} from "react-window";
 import { deduceDuplicates, type DuplicateGroup } from "../services/dedup";
 import { useAppContext } from "../types/context";
 
@@ -411,42 +415,36 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
     );
 };
 
-const renderCount = new Map<number, number>();
+const ListItem: React.FC<ListChildComponentProps<DuplicatesListProps>> = memo(
+    ({ index, style, data }) => {
+        const { duplicateGroups, onToggleSelection } = data;
 
-const ListItem: React.FC<ListChildComponentProps<DuplicatesListProps>> = ({
-    index,
-    style,
-    data,
-}) => {
-    const { duplicateGroups, onToggleSelection } = data;
+        const duplicateGroup = duplicateGroups[index]!;
+        const count = duplicateGroup.items.length;
+        const itemSize = formattedByteSize(duplicateGroup.itemSize);
+        const checked = duplicateGroup.isSelected;
+        const onChange = () => onToggleSelection(index);
 
-    const duplicateGroup = duplicateGroups[index]!;
-    const count = duplicateGroup.items.length;
-    const itemSize = formattedByteSize(duplicateGroup.itemSize);
-    const checked = duplicateGroup.isSelected;
-    const onChange = () => onToggleSelection(index);
-
-    renderCount.set(index, (renderCount.get(index) ?? 0) + 1);
-    console.log("rendering", index, Object.fromEntries(renderCount.entries()));
-
-    return (
-        <Stack {...{ style }}>
-            <Stack
-                direction="row"
-                sx={{
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    paddingInline: 1,
-                }}
-            >
-                <Typography color={checked ? "text.base" : "text.muted"}>
-                    {pt(`${count} items, ${itemSize} each`)}
-                </Typography>
-                <Checkbox {...{ checked, onChange }} />
+        return (
+            <Stack {...{ style }}>
+                <Stack
+                    direction="row"
+                    sx={{
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        paddingInline: 1,
+                    }}
+                >
+                    <Typography color={checked ? "text.base" : "text.muted"}>
+                        {pt(`${count} items, ${itemSize} each`)}
+                    </Typography>
+                    <Checkbox {...{ checked, onChange }} />
+                </Stack>
             </Stack>
-        </Stack>
-    );
-};
+        );
+    },
+    areEqual,
+);
 
 interface DeduplicateButtonProps {
     /**
