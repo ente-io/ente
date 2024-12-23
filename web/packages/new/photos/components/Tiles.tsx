@@ -102,7 +102,7 @@ export const ItemCard: React.FC<React.PropsWithChildren<ItemCardProps>> = ({
  * Use {@link ItemTileOverlay} (usually via one of its presets) to overlay
  * content on top of the tile.
  */
-export const BaseTile = styled("div")`
+const BaseTile = styled("div")`
     display: flex;
     /* Act as container for the absolutely positioned ItemTileOverlays. */
     position: relative;
@@ -133,6 +133,14 @@ export const PreviewItemTile = styled(BaseTile)`
 export const BarItemTile = styled(BaseTile)`
     width: 90px;
     height: 64px;
+`;
+
+/**
+ * A square tile used on the duplicates listing.
+ */
+export const DuplicateItemTile = styled(BaseTile)`
+    /* The thumbnails are not interactable, reset the pointer */
+    cursor: initial;
 `;
 
 /**
@@ -181,8 +189,8 @@ export const ItemTileOverlay = styled("div")`
 `;
 
 /**
- * An {@link ItemTileOverlay} suitable for hosting textual content for small and
- * medium sized tiles.
+ * An {@link ItemTileOverlay} suitable for hosting textual content at the top
+ * left of small and medium sized tiles.
  */
 export const TileTextOverlay = styled(ItemTileOverlay)`
     padding: 4px;
@@ -215,4 +223,16 @@ export const LargeTilePlusOverlay = styled(ItemTileOverlay)`
     align-items: center;
     font-size: 42px;
     color: ${({ theme }) => theme.colors.stroke.muted};
+`;
+
+/**
+ * An {@link ItemTileOverlay} suitable for holding the collection name shown
+ * atop the tiles in the duplicates listing.
+ */
+export const DuplicateTileTextOverlay = styled(ItemTileOverlay)`
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding: 4px;
+    background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.7));
 `;
