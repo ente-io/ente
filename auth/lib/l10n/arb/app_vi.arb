@@ -258,6 +258,10 @@
   "areYouSureYouWantToLogout": "Bạn có chắc chắn muốn đăng xuất?",
   "yesLogout": "Có, đăng xuất",
   "exit": "Thoát",
+  "theme": "Chủ đề",
+  "lightTheme": "Sáng",
+  "darkTheme": "Tối",
+  "systemTheme": "Hệ thống",
   "verifyingRecoveryKey": "Đang xác minh khóa khôi phục...",
   "recoveryKeyVerified": "Khóa khôi phục đã được xác thực",
   "recoveryKeySuccessBody": "Tuyệt vời! Khóa khôi phục của bạn hợp lệ. Cảm ơn bạn đã xác minh.\n\nHãy nhớ sao lưu khóa khôi phục của bạn một cách an toàn.",
@@ -490,5 +494,12 @@
   "appLockNotEnabled": "Khóa ứng dụng chưa được bật",
   "appLockNotEnabledDescription": "Vui lòng bật khóa ứng dụng từ Bảo mật > Khóa ứng dụng",
   "authToViewPasskey": "Vui lòng xác thực để xem mã khóa",
-  "appLockOfflineModeWarning": "Bạn đã chọn tiếp tục mà không có bản sao lưu. Nếu bạn quên khóa ứng dụng, bạn sẽ bị khóa khỏi việc truy cập dữ liệu của mình."
+  "appLockOfflineModeWarning": "Bạn đã chọn tiếp tục mà không có bản sao lưu. Nếu bạn quên khóa ứng dụng, bạn sẽ bị khóa khỏi việc truy cập dữ liệu của mình.",
+  "duplicateCodes": "Mã trùng lặp",
+  "noDuplicates": "✨ Không có trùng lặp",
+  "youveNoDuplicateCodesThatCanBeCleared": "Bạn không có mã trùng lặp nào có thể được xóa",
+  "deduplicateCodes": "Loại bỏ mã trùng lặp",
+  "deselectAll": "Bỏ chọn tất cả",
+  "selectAll": "Chọn tất cả",
+  "deleteDuplicates": "Xóa trùng lặp"
 }

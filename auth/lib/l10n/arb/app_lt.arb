@@ -258,6 +258,10 @@
   "areYouSureYouWantToLogout": "Ar tikrai norite atsijungti?",
   "yesLogout": "Taip, atsijungti",
   "exit": "Išeiti",
+  "theme": "Tema",
+  "lightTheme": "Šviesi",
+  "darkTheme": "Tamsi",
+  "systemTheme": "Sistemos",
   "verifyingRecoveryKey": "Patvirtinima atkūrimo raktą...",
   "recoveryKeyVerified": "Patvirtintas atkūrimo raktas",
   "recoveryKeySuccessBody": "Puiku! Jūsų atkūrimo raktas tinkamas. Dėkojame už patvirtinimą.\n\nNepamirškite sukurti saugią atkūrimo rakto atsarginę kopiją.",
@@ -490,5 +494,13 @@
   "appLockNotEnabled": "Programos užraktas neįjungtas",
   "appLockNotEnabledDescription": "Įjunkite programos užraktą iš Saugumas > Programos užraktas",
   "authToViewPasskey": "Nustatykite tapatybę, kad peržiūrėtumėte slaptaraktį",
-  "appLockOfflineModeWarning": "Pasirinkote tęsti be atsarginių kopijų. Jei pamiršite programos užraktą, jums bus užrakinta prieiga prie duomenų."
+  "appLockOfflineModeWarning": "Pasirinkote tęsti be atsarginių kopijų. Jei pamiršite programos užraktą, jums bus užrakinta prieiga prie duomenų.",
+  "duplicateCodes": "Dubliuoti kodus",
+  "noDuplicates": "✨ Dublikatų nėra",
+  "youveNoDuplicateCodesThatCanBeCleared": "Neturite dubliuotų kodų, kuriuos būtų galima išvalyti.",
+  "deduplicateCodes": "Atdubliuoti kodus",
+  "deselectAll": "Naikinti visų pasirinkimą",
+  "selectAll": "Pasirinkti viską",
+  "deleteDuplicates": "Ištrinti dublikatus",
+  "plainHTML": "Grynasis HTML"
 }

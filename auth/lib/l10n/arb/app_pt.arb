@@ -258,6 +258,10 @@
   "areYouSureYouWantToLogout": "Deseja mesmo sair?",
   "yesLogout": "Sim, quero sair",
   "exit": "Sair",
+  "theme": "Tema",
+  "lightTheme": "Claro",
+  "darkTheme": "Escuro",
+  "systemTheme": "Sistema",
   "verifyingRecoveryKey": "Verificando chave de recuperação...",
   "recoveryKeyVerified": "Chave de recuperação verificada",
   "recoveryKeySuccessBody": "Ótimo! Sua chave de recuperação é válida. Obrigada por verificar.\n\nLembre-se de manter sua chave de recuperação copiada com segurança.",
@@ -497,5 +501,6 @@
   "deduplicateCodes": "Desduplicar códigos",
   "deselectAll": "Deselecionar tudo",
   "selectAll": "Selecionar tudo",
-  "deleteDuplicates": "Excluir duplicados"
+  "deleteDuplicates": "Excluir duplicados",
+  "plainHTML": "HTML simples"
 }
