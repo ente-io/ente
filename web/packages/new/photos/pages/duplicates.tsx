@@ -7,6 +7,7 @@ import {
     OverflowMenu,
     OverflowMenuOption,
 } from "@/base/components/OverflowMenu";
+import { Ellipsized2LineTypography } from "@/base/components/Typography";
 import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import { formattedByteSize } from "@/new/photos/utils/units";
@@ -37,6 +38,11 @@ import {
     VariableSizeList,
     type ListChildComponentProps,
 } from "react-window";
+import {
+    DuplicateItemTile,
+    DuplicateTileTextOverlay,
+    ItemCard,
+} from "../components/Tiles";
 import {
     computeThumbnailGridLayoutParams,
     type ThumbnailGridLayoutParams,
@@ -500,15 +506,17 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                 </Stack>
                 <ItemGrid {...{ layoutParams }}>
                     {items.map((item, j) => (
-                        <div
+                        <ItemCard
                             key={j}
-                            style={{
-                                background: "red",
-                                border: "2px solid green",
-                            }}
+                            TileComponent={DuplicateItemTile}
+                            coverFile={item.file}
                         >
-                            {item.collectionName}
-                        </div>
+                            <DuplicateTileTextOverlay>
+                                <Ellipsized2LineTypography color="text.muted">
+                                    {item.collectionName}
+                                </Ellipsized2LineTypography>
+                            </DuplicateTileTextOverlay>
+                        </ItemCard>
                     ))}
                 </ItemGrid>
             </Stack>
@@ -523,7 +531,8 @@ const ItemGrid = styled("div", {
     ({ layoutParams }) => `
     display: grid;
     padding-inline: ${layoutParams.paddingInline}px;
-    grid-template-columns: repeat(${layoutParams.columns}, 1fr);
+    grid-template-columns: repeat(${layoutParams.columns}, ${layoutParams.itemWidth}px);
+    grid-auto-rows: ${layoutParams.itemHeight}px;
     gap: ${layoutParams.gap}px;
 `,
 );
