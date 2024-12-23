@@ -34,7 +34,7 @@ import React, {
 import Autosizer from "react-virtualized-auto-sizer";
 import {
     areEqual,
-    FixedSizeList,
+    VariableSizeList,
     type ListChildComponentProps,
 } from "react-window";
 import {
@@ -443,13 +443,25 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
     );
 
     const itemCount = duplicateGroups.length;
-    const itemSize = 100;
+    const itemSize = (index: number) => {
+        // The height of the header is driven by the height of the Checkbox, and
+        // currently it is always a fixed 42 px high.
+        const headerHeight = 42;
+
+        const duplicateGroup = duplicateGroups[index]!;
+        const rowCount = Math.ceil(
+            duplicateGroup.items.length / layoutParams.columns,
+        );
+        const rowHeight = layoutParams.itemHeight + layoutParams.gap;
+
+        return headerHeight + rowCount * rowHeight;
+    };
     const itemData = { layoutParams, duplicateGroups, onToggleSelection };
 
     return (
-        <FixedSizeList {...{ height, width, itemCount, itemSize, itemData }}>
+        <VariableSizeList {...{ height, width, itemCount, itemSize, itemData }}>
             {ListItem}
-        </FixedSizeList>
+        </VariableSizeList>
     );
 };
 
