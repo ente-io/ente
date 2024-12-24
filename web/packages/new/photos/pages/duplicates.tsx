@@ -198,8 +198,10 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
         case "analysisFailed":
             return { ...state, status: "analysisFailed" };
         case "analysisCompleted": {
-            const duplicateGroups = action.duplicateGroups;
-            sortDuplicateGroups(duplicateGroups, state.sortOrder);
+            const duplicateGroups = sortedCopyOfDuplicateGroups(
+                action.duplicateGroups,
+                state.sortOrder,
+            );
             const selected = duplicateGroups.map(() => true);
             const { prunableCount, prunableSize } =
                 deducePrunableCountAndSize(duplicateGroups);
@@ -215,8 +217,10 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
 
         case "changeSortOrder": {
             const sortOrder = action.sortOrder;
-            const duplicateGroups = state.duplicateGroups;
-            sortDuplicateGroups(duplicateGroups, sortOrder);
+            const duplicateGroups = sortedCopyOfDuplicateGroups(
+                state.duplicateGroups,
+                sortOrder,
+            );
             return {
                 ...state,
                 sortOrder,
@@ -225,7 +229,7 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
         }
 
         case "toggleSelection": {
-            const duplicateGroups = state.duplicateGroups;
+            const duplicateGroups = [...state.duplicateGroups];
             const duplicateGroup = duplicateGroups[action.index]!;
             duplicateGroup.isSelected = !duplicateGroup.isSelected;
             const { prunableCount, prunableSize } =
@@ -268,12 +272,16 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
     }
 };
 
-/** Helper method for the reducer */
-const sortDuplicateGroups = (
+/**
+ * Return a copy of the given {@link duplicateGroups}, also sorting them as per
+ * the given {@link sortOrder}.
+ *
+ * Helper method for the reducer */
+const sortedCopyOfDuplicateGroups = (
     duplicateGroups: DuplicateGroup[],
     sortOrder: DedupState["sortOrder"],
 ) =>
-    duplicateGroups.sort((a, b) =>
+    [...duplicateGroups].sort((a, b) =>
         sortOrder == "prunableSize"
             ? b.prunableSize - a.prunableSize
             : b.prunableCount - a.prunableCount,
