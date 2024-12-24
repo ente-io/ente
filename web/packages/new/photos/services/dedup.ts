@@ -1,8 +1,9 @@
+import { newID } from "@/base/id";
 import type { EnteFile } from "@/media/file";
+import { wait } from "@/utils/promise";
 import { createCollectionNameByID } from "./collection";
 import { getLocalCollections } from "./collections";
 import { getLocalFiles, uniqueFilesByID } from "./files";
-import { newID } from "@/base/id";
 
 /**
  * A group of duplicates as shown in the UI.
@@ -128,4 +129,22 @@ export const deduceDuplicates = async () => {
     }
 
     return duplicateGroups;
+};
+
+/**
+ * Remove duplicate groups that the user has retained from those that we
+ * returned in {@link deduceDuplicates}.
+ *
+ * @param duplicateGroups A list of duplicate groups. This is the same list as
+ * would've been returned from a previous call to {@link deduceDuplicates},
+ * except (a) their sort order might've changed, and (b) the user may have
+ * unselected some of them (i.e. isSelected for such items would be `false`).
+ *
+ * This function will only process entries for which isSelected is `true`.
+ */
+export const removeSelectedDuplicateGroups = async (
+    duplicateGroups: DuplicateGroup[],
+) => {
+    console.log(duplicateGroups);
+    await wait(1000);
 };
