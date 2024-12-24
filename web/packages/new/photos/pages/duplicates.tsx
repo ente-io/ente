@@ -392,7 +392,7 @@ const Duplicates: React.FC<DuplicatesProps> = ({
     ...deduplicateButtonProps
 }) => (
     <Stack sx={{ flex: 1 }}>
-        <Box sx={{ flex: 1, overflow: "hidden", paddingBlock: 1 }}>
+        <Box sx={{ flex: 1, overflow: "hidden", paddingBlockEnd: 1 }}>
             <Autosizer>
                 {({ width, height }) => (
                     <DuplicatesList
@@ -452,9 +452,11 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
 
     const itemCount = duplicateGroups.length;
     const itemSize = (index: number) => {
-        // The height of the header is driven by the height of the Checkbox, and
-        // currently it is always a fixed 42 px high.
-        const headerHeight = 42;
+        // The height of the header is driven by the height of the Checkbox,
+        // which is 42px high. The rest of the height comes from the fixed
+        // paddings on the header and the row itself.
+        const headerHeight = 20 + 42 + 8;
+        const paddingBlockEnd = 8;
 
         const duplicateGroup = duplicateGroups[index]!;
         const rowCount = Math.ceil(
@@ -462,7 +464,7 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
         );
         const rowHeight = layoutParams.itemHeight + layoutParams.gap;
 
-        return headerHeight + rowCount * rowHeight;
+        return headerHeight + rowCount * rowHeight + paddingBlockEnd;
     };
     const itemData = { layoutParams, duplicateGroups, onToggleSelection };
 
@@ -485,7 +487,7 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
         const onChange = () => onToggleSelection(index);
 
         return (
-            <Stack {...{ style }}>
+            <Stack {...{ style }} sx={{ paddingBlockEnd: "8px" }}>
                 <Stack
                     direction="row"
                     sx={{
@@ -493,6 +495,7 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                         alignItems: "center",
                         marginInline: 1,
                         paddingInline: `${layoutParams.paddingInline}px`,
+                        paddingBlock: "20px 8px",
                     }}
                 >
                     <Typography color={checked ? "text.base" : "text.muted"}>
