@@ -79,6 +79,9 @@ class DiffFetcher {
           file.pubMagicMetadata =
               PubMagicMetadata.fromEncodedJson(file.pubMmdEncodedJson!);
         }
+
+        // To avoid local file to be used as thumbnail or full file.
+        file.localID = null;
         sharedFiles.add(file);
       }
 
