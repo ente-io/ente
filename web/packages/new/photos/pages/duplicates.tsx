@@ -18,6 +18,7 @@ import SortIcon from "@mui/icons-material/Sort";
 import {
     Box,
     Checkbox,
+    Divider,
     IconButton,
     Stack,
     styled,
@@ -453,10 +454,10 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
     const itemCount = duplicateGroups.length;
     const itemSize = (index: number) => {
         // The height of the header is driven by the height of the Checkbox,
-        // which is 42px high. The rest of the height comes from the fixed
-        // paddings on the header and the row itself.
-        const headerHeight = 20 + 42 + 8;
-        const paddingBlockEnd = 8;
+        // which is 42px high, and the divider, which is 1px. The rest of the
+        // height comes from the fixed paddings, margins on the header, the
+        // divider, and on the row itself.
+        const fixedHeight = 24 + 42 + 4 + 1 + 20 + 16;
 
         const duplicateGroup = duplicateGroups[index]!;
         const rowCount = Math.ceil(
@@ -464,7 +465,7 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
         );
         const rowHeight = layoutParams.itemHeight + layoutParams.gap;
 
-        return headerHeight + rowCount * rowHeight + paddingBlockEnd;
+        return fixedHeight + rowCount * rowHeight;
     };
     const itemData = { layoutParams, duplicateGroups, onToggleSelection };
 
@@ -487,7 +488,10 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
         const onChange = () => onToggleSelection(index);
 
         return (
-            <Stack {...{ style }} sx={{ paddingBlockEnd: "8px" }}>
+            <Stack
+                {...{ style }}
+                sx={{ paddingBlockEnd: "16px", opacity: checked ? 1 : 0.8 }}
+            >
                 <Stack
                     direction="row"
                     sx={{
@@ -495,18 +499,22 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                         alignItems: "center",
                         marginInline: 1,
                         paddingInline: `${layoutParams.paddingInline}px`,
-                        paddingBlock: "20px 8px",
+                        paddingBlock: "24px 0px",
                     }}
                 >
                     <Typography color={checked ? "text.base" : "text.muted"}>
                         {pt(`${count} items, ${itemSize} each`)}
                     </Typography>
-                    {/*
-                      The size of this Checkbox, 42px, drives the height of
-                      the header.
-                     */}
+                    {/* The size of this Checkbox is 42px. */}
                     <Checkbox {...{ checked, onChange }} />
                 </Stack>
+                <Divider
+                    variant="middle"
+                    sx={{
+                        opacity: 0.8,
+                        marginBlock: "4px 20px",
+                    }}
+                />
                 <ItemGrid {...{ layoutParams }}>
                     {items.map((item, j) => (
                         <ItemCard
