@@ -81,10 +81,8 @@ export interface DuplicateGroup {
  */
 export const deduceDuplicates = async () => {
     // TODO: Ignore non-owned files.
-    const collectionFiles = await getLocalFiles();
+    const collectionFiles = await getLocalFiles("normal");
     const files = uniqueFilesByID(collectionFiles);
-
-    // TODO: Only do a hash comparison
 
     const filesByHash = new Map<string, EnteFile[]>();
     for (const file of files) {
@@ -104,13 +102,32 @@ export const deduceDuplicates = async () => {
 
     const duplicateGroups: DuplicateGroup[] = [];
 
-    for (const potentialDuplicates of filesByHash.values()) {
-        if (potentialDuplicates.length < 2) continue;
-        const size = potentialDuplicates[0]?.info?.fileSize;
+    for (const duplicates of filesByHash.values()) {
+        if (duplicates.length < 2) continue;
+
+        // Take the size of any of the items, they should all be the same since
+        // the hashes are the same.
+        //
+        // Note that this is not guaranteed in the case of live photos, since
+        // the hash originates from the image and video contents, but the size
+        // comes from the size of their combined zip, and different clients
+        // might use different zip implementation to arrive at non-exact but
+        // similar sizes. The delta should be minor so we can use any of the
+        // sizes, this is only meant as a rough UI hint anyway.
+        let size = 0;
+        for (const file of duplicates) {
+            if (file.info?.fileSize) {
+                size = file.info.fileSize;
+                break;
+            }
+        }
+
+        // If none of the files marked as duplicates have a size, ignored this
+        // group. This shouldn't really happen in practice, but it can happen in
+        // rare cases (group of duplicates uploaded by ancient version of Ente
+        // which did not attach the file size during uploads).
         if (!size) continue;
-        const duplicates = potentialDuplicates.filter(
-            (file) => file.info?.fileSize == size,
-        );
+
         const items = duplicates
             .map((file) => {
                 const collectionName = collectionNameByID.get(
@@ -120,6 +137,7 @@ export const deduceDuplicates = async () => {
             })
             .filter((item) => !!item);
         if (items.length < 2) continue;
+
         duplicateGroups.push({
             id: newID("dg_"),
             items,

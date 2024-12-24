@@ -175,9 +175,9 @@ export const clearCachedThumbnailsIfChanged = async (
         // TODO: Add an extra truthy check the EnteFile type is null safe
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (!m1 || !m2) continue;
-        // Both files exist, have metadata, but their (appropriate) hashes
-        // differ, which indicates that the change was in the file's contents,
-        // not the metadata itself, and thus we should refresh the thumbnail.
+        // Both files exist, have metadata, but their hashes differ, which
+        // indicates that the change was in the file's contents, not the
+        // metadata itself, and thus we should refresh the thumbnail.
         if (metadataHash(m1) != metadataHash(m2)) {
             // This is an infrequent occurrence, so we lazily get the cache.
             const thumbnailCache = await blobCache("thumbs");
