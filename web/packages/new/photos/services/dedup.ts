@@ -2,11 +2,18 @@ import type { EnteFile } from "@/media/file";
 import { createCollectionNameByID } from "./collection";
 import { getLocalCollections } from "./collections";
 import { getLocalFiles, uniqueFilesByID } from "./files";
+import { newID } from "@/base/id";
 
 /**
  * A group of duplicates as shown in the UI.
  */
 export interface DuplicateGroup {
+    /**
+     * A nanoid for this group.
+     *
+     * This can be used as the key when rendering the group in a list.
+     */
+    id: string;
     /**
      * Files which our algorithm has determined to be duplicates of each other.
      *
@@ -111,6 +118,7 @@ export const deduceDuplicates = async () => {
             .filter((item) => !!item);
         if (items.length < 2) continue;
         duplicateGroups.push({
+            id: newID("dg_"),
             items,
             itemSize: size,
             prunableCount: duplicates.length - 1,

@@ -91,6 +91,7 @@ const Page: React.FC = () => {
                     return (
                         <Duplicates
                             duplicateGroups={state.duplicateGroups}
+                            sortOrder={state.sortOrder}
                             onToggleSelection={(index) =>
                                 dispatch({ type: "toggleSelection", index })
                             }
@@ -383,12 +384,13 @@ const NoDuplicatesFound: React.FC = () => (
 
 type DuplicatesProps = Pick<
     DuplicatesListProps,
-    "duplicateGroups" | "onToggleSelection"
+    "duplicateGroups" | "sortOrder" | "onToggleSelection"
 > &
     DeduplicateButtonProps;
 
 const Duplicates: React.FC<DuplicatesProps> = ({
     duplicateGroups,
+    sortOrder,
     onToggleSelection,
     ...deduplicateButtonProps
 }) => (
@@ -401,6 +403,7 @@ const Duplicates: React.FC<DuplicatesProps> = ({
                             width,
                             height,
                             duplicateGroups,
+                            sortOrder,
                             onToggleSelection,
                         }}
                     />
@@ -427,6 +430,10 @@ interface DuplicatesListProps {
      */
     duplicateGroups: DuplicateGroup[];
     /**
+     * The current {@link SortOrder} that is being used for sorting {@link duplicateGroups}.
+     */
+    sortOrder: SortOrder;
+    /**
      * Called when the user toggles the selection for the duplicate group at the
      * given {@link index}.
      */
@@ -444,6 +451,7 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
     width,
     height,
     duplicateGroups,
+    sortOrder,
     onToggleSelection,
 }) => {
     const layoutParams = useMemo(
@@ -451,6 +459,7 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
         [width],
     );
 
+    const itemData = { layoutParams, duplicateGroups, onToggleSelection };
     const itemCount = duplicateGroups.length;
     const itemSize = (index: number) => {
         // The height of the header is driven by the height of the Checkbox,
@@ -467,10 +476,18 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
 
         return fixedHeight + rowCount * rowHeight;
     };
-    const itemData = { layoutParams, duplicateGroups, onToggleSelection };
+    const itemKey = (index: number, itemData: DuplicatesListItemData) =>
+        itemData.duplicateGroups[index]!.id;
+
+    // Derive a key based on aspects whose change should cause the list to be
+    // recreated. This is the easiest way I've found to get react-window to
+    // invalidate `itemSize` values when, say, the width changes.
+    const key = `${width}-${sortOrder}`;
 
     return (
-        <VariableSizeList {...{ height, width, itemCount, itemSize, itemData }}>
+        <VariableSizeList
+            {...{ key, height, width, itemData, itemCount, itemSize, itemKey }}
+        >
             {ListItem}
         </VariableSizeList>
     );
