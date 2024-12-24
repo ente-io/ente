@@ -138,6 +138,10 @@ export const deduceDuplicates = async () => {
             .filter((item) => !!item);
         if (items.length < 2) continue;
 
+        // Within each duplicate group, keep the files sorted by collection name
+        // so that it is easier to scan them at glance.
+        items.sort((a, b) => a.collectionName.localeCompare(b.collectionName));
+
         duplicateGroups.push({
             id: newID("dg_"),
             items,
