@@ -43,7 +43,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m0(passwordStrengthValue) =>
       "ความแข็งแรงของรหัสผ่าน: ${passwordStrengthValue}";
 
-  static String m72(
+  static String m71(
           usedAmount, usedStorageUnit, totalAmount, totalStorageUnit) =>
       "ใช้ไป ${usedAmount} ${usedStorageUnit} จาก ${totalAmount} ${totalStorageUnit}";
 
@@ -306,7 +306,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "storageBreakupFamily":
             MessageLookupByLibrary.simpleMessage("ครอบครัว"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("คุณ"),
-        "storageUsageInfo": m72,
+        "storageUsageInfo": m71,
         "strongStrength": MessageLookupByLibrary.simpleMessage("แข็งแรง"),
         "syncStopped": MessageLookupByLibrary.simpleMessage("หยุดการซิงค์แล้ว"),
         "syncing": MessageLookupByLibrary.simpleMessage("กำลังซิงค์..."),
@@ -333,8 +333,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "unhideToAlbum":
             MessageLookupByLibrary.simpleMessage("เลิกซ่อนไปยังอัลบั้ม"),
         "unselectAll": MessageLookupByLibrary.simpleMessage("ไม่เลือกทั้งหมด"),
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
         "useRecoveryKey":
             MessageLookupByLibrary.simpleMessage("ใช้คีย์การกู้คืน"),
         "verify": MessageLookupByLibrary.simpleMessage("ยืนยัน"),

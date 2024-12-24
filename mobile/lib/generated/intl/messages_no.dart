@@ -51,20 +51,20 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m4(count) => "${count} valgt";
 
-  static String m64(count, yourCount) => "${count} valgt (${yourCount} dine)";
+  static String m63(count, yourCount) => "${count} valgt (${yourCount} dine)";
 
-  static String m65(verificationID) =>
+  static String m64(verificationID) =>
       "Her er min verifiserings-ID: ${verificationID} for ente.io.";
 
   static String m5(verificationID) =>
       "Hei, kan du bekrefte at dette er din ente.io verifiserings-ID: ${verificationID}";
 
-  static String m67(numberOfPeople) =>
+  static String m66(numberOfPeople) =>
       "${Intl.plural(numberOfPeople, zero: 'Del med bestemte personer', one: 'Delt med 1 person', other: 'Delt med ${numberOfPeople} personer')}";
 
-  static String m78(email) => "Dette er ${email} sin verifiserings-ID";
+  static String m77(email) => "Dette er ${email} sin verifiserings-ID";
 
-  static String m85(email) => "Verifiser ${email}";
+  static String m84(email) => "Verifiser ${email}";
 
   static String m2(email) =>
       "Vi har sendt en e-post til <green>${email}</green>";
@@ -355,7 +355,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Valgte mapper vil bli kryptert og sikkerhetskopiert"),
         "selectedPhotos": m4,
-        "selectedPhotosWithYours": m64,
+        "selectedPhotosWithYours": m63,
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send e-post"),
         "sendInvite": MessageLookupByLibrary.simpleMessage("Send invitasjon"),
         "sendLink": MessageLookupByLibrary.simpleMessage("Send lenke"),
@@ -365,9 +365,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "setupComplete":
             MessageLookupByLibrary.simpleMessage("Oppsett fullført"),
         "shareALink": MessageLookupByLibrary.simpleMessage("Del en lenke"),
-        "shareMyVerificationID": m65,
+        "shareMyVerificationID": m64,
         "shareTextConfirmOthersVerificationID": m5,
-        "shareWithPeopleSectionTitle": m67,
+        "shareWithPeopleSectionTitle": m66,
         "sharedPhotoNotifications":
             MessageLookupByLibrary.simpleMessage("Nye delte bilder"),
         "sharedPhotoNotificationsExplanation": MessageLookupByLibrary.simpleMessage(
@@ -405,7 +405,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Dette kan brukes til å gjenopprette kontoen din hvis du mister din andre faktor"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("Denne enheten"),
-        "thisIsPersonVerificationId": m78,
+        "thisIsPersonVerificationId": m77,
         "thisIsYourVerificationId": MessageLookupByLibrary.simpleMessage(
             "Dette er din bekreftelses-ID"),
         "thisWillLogYouOutOfTheFollowingDevice":
@@ -425,8 +425,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "unselectAll": MessageLookupByLibrary.simpleMessage("Velg bort alle"),
         "updatingFolderSelection":
             MessageLookupByLibrary.simpleMessage("Oppdaterer mappevalg..."),
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
         "useRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Bruk gjenopprettingsnøkkel"),
         "verificationId":
@@ -434,7 +432,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verify": MessageLookupByLibrary.simpleMessage("Bekreft"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("Bekreft e-postadresse"),
-        "verifyEmailID": m85,
+        "verifyEmailID": m84,
         "verifyPassword":
             MessageLookupByLibrary.simpleMessage("Bekreft passord"),
         "verifyingRecoveryKey": MessageLookupByLibrary.simpleMessage(

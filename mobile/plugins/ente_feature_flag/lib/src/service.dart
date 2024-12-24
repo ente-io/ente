@@ -74,4 +74,6 @@ class FlagService {
   bool get hasGrantedMLConsent => flags.faceSearchEnabled;
 
   bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
+
+  String get castUrl => flags.castUrl;
 }
