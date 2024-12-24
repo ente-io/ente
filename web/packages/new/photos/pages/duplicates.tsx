@@ -8,6 +8,7 @@ import {
     OverflowMenuOption,
 } from "@/base/components/OverflowMenu";
 import { Ellipsized2LineTypography } from "@/base/components/Typography";
+import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import { formattedByteSize } from "@/new/photos/utils/units";
@@ -57,16 +58,13 @@ import {
 import { useAppContext } from "../types/context";
 
 const Page: React.FC = () => {
-    const { showNavBar } = useAppContext();
+    const { showMiniDialog } = useAppContext();
 
     const [state, dispatch] = useReducer(dedupReducer, initialDedupState);
 
     useRedirectIfNeedsCredentials("/duplicates");
 
     useEffect(() => {
-        // TODO: Remove me
-        showNavBar(false);
-
         dispatch({ type: "analyze" });
         void deduceDuplicates()
             .then((duplicateGroups) =>
@@ -76,17 +74,24 @@ const Page: React.FC = () => {
                 log.error("Failed to detect duplicates", e);
                 dispatch({ type: "analysisFailed" });
             });
-    }, [showNavBar]);
+    }, []);
 
     const handleRemoveDuplicates = useCallback(() => {
         dispatch({ type: "dedupe" });
-        void removeSelectedDuplicateGroups(state.duplicateGroups)
-            .then(() => dispatch({ type: "dedupeCompleted" }))
-            .catch((e: unknown) => {
-                log.error("Failed to remove duplicates", e);
-                dispatch({ type: "dedupeFailed" });
-            });
-    }, [state.duplicateGroups]);
+        void removeSelectedDuplicateGroups(
+            state.duplicateGroups,
+            (duplicateGroup: DuplicateGroup) =>
+                dispatch({ type: "didRemoveDuplicateGroup", duplicateGroup }),
+        ).then((allSuccess) => {
+            dispatch({ type: "dedupeCompleted" });
+            if (!allSuccess) {
+                const msg = pt(
+                    "Some errors occurred when trying to remove duplicates.",
+                );
+                showMiniDialog(errorDialogAttributes(msg));
+            }
+        });
+    }, [state.duplicateGroups, showMiniDialog]);
 
     const contents = (() => {
         switch (state.status) {
@@ -108,7 +113,7 @@ const Page: React.FC = () => {
                             }
                             prunableCount={state.prunableCount}
                             prunableSize={state.prunableSize}
-                            dedupeStatus={state.dedupeStatus}
+                            isDeduping={state.isDeduping}
                             onRemoveDuplicates={handleRemoveDuplicates}
                         />
                     );
@@ -139,8 +144,8 @@ type SortOrder = "prunableCount" | "prunableSize";
 interface DedupState {
     /** Status of the screen, between initial state => analysis */
     status: undefined | "analyzing" | "analysisFailed" | "analysisCompleted";
-    /** Status of the screen post analysis. */
-    dedupeStatus: undefined | "deduping" | "dedupeFailed";
+    /** `true` if a dedupe is in progress. */
+    isDeduping: boolean;
     /**
      * Groups of duplicates.
      *
@@ -176,12 +181,12 @@ type DedupAction =
     | { type: "toggleSelection"; index: number }
     | { type: "deselectAll" }
     | { type: "dedupe" }
-    | { type: "dedupeCompleted" }
-    | { type: "dedupeFailed" };
+    | { type: "didRemoveDuplicateGroup"; duplicateGroup: DuplicateGroup }
+    | { type: "dedupeCompleted" };
 
 const initialDedupState: DedupState = {
     status: undefined,
-    dedupeStatus: undefined,
+    isDeduping: false,
     duplicateGroups: [],
     sortOrder: "prunableSize",
     prunableCount: 0,
@@ -257,18 +262,24 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
         }
 
         case "dedupe":
-            return { ...state, dedupeStatus: "deduping" };
+            return { ...state, isDeduping: true };
+
+        case "didRemoveDuplicateGroup": {
+            const duplicateGroups = state.duplicateGroups.filter(
+                ({ id }) => id != action.duplicateGroup.id,
+            );
+            const { prunableCount, prunableSize } =
+                deducePrunableCountAndSize(duplicateGroups);
+            return {
+                ...state,
+                duplicateGroups,
+                prunableCount,
+                prunableSize,
+            };
+        }
 
         case "dedupeCompleted":
-            // TODO: Partials
-            return { ...state, dedupeStatus: undefined };
-
-        case "dedupeFailed":
-            // TODO: Resync?
-            return { ...state, dedupeStatus: undefined };
-
-        default:
-            return state;
+            return { ...state, isDeduping: false };
     }
 };
 
@@ -610,9 +621,9 @@ interface DeduplicateButtonProps {
      */
     prunableSize: number;
     /**
-     * if a deduplication is in progress, then its status.
+     * `true` if a deduplication is in progress
      */
-    dedupeStatus: DedupState["dedupeStatus"];
+    isDeduping: DedupState["isDeduping"];
     /**
      * Called when the user presses the button to remove duplicates.
      */
@@ -622,16 +633,16 @@ interface DeduplicateButtonProps {
 const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
     prunableCount,
     prunableSize,
-    dedupeStatus,
+    isDeduping,
     onRemoveDuplicates,
 }) => (
     <FocusVisibleButton
         sx={{ minWidth: "min(100%, 320px)", margin: "auto" }}
-        disabled={prunableCount == 0 || !!dedupeStatus}
+        disabled={prunableCount == 0 || isDeduping}
         onClick={onRemoveDuplicates}
     >
         <Stack sx={{ gap: 1, minHeight: "45px", justifyContent: "center" }}>
-            {dedupeStatus ? (
+            {isDeduping ? (
                 <Typography sx={{}}>
                     <CircularProgress color="primary" size="24px" />
                 </Typography>
