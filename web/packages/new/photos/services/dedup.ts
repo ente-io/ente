@@ -1,5 +1,6 @@
 import { newID } from "@/base/id";
 import type { EnteFile } from "@/media/file";
+import { metadataHash } from "@/media/file-metadata";
 import { wait } from "@/utils/promise";
 import { createCollectionNameByID } from "./collection";
 import { getLocalCollections } from "./collections";
@@ -87,9 +88,7 @@ export const deduceDuplicates = async () => {
 
     const filesByHash = new Map<string, EnteFile[]>();
     for (const file of files) {
-        let hash = file.metadata.hash;
-        if (!hash && file.metadata.imageHash && file.metadata.videoHash)
-            hash = `${file.metadata.imageHash}_${file.metadata.videoHash}`;
+        const hash = metadataHash(file.metadata);
         if (!hash) {
             // Some very old files uploaded by ancient versions of Ente might
             // not have hashes. Ignore these.
@@ -149,7 +148,6 @@ export const removeSelectedDuplicateGroups = async (
     duplicateGroups: DuplicateGroup[],
 ) => {
     console.log(duplicateGroups);
-    for (const duplicateGroup of duplicateGroups) {
-    }
+    // for (const duplicateGroup of duplicateGroups) {}
     await wait(1000);
 };

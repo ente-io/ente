@@ -1,6 +1,6 @@
 import { blobCache } from "@/base/blob-cache";
 import { mergeMetadata, type EnteFile, type Trash } from "@/media/file";
-import { FileType } from "@/media/file-type";
+import { metadataHash } from "@/media/file-metadata";
 import localForage from "@ente/shared/storage/localForage";
 
 const FILES_TABLE = "files";
@@ -178,11 +178,7 @@ export const clearCachedThumbnailsIfChanged = async (
         // Both files exist, have metadata, but their (appropriate) hashes
         // differ, which indicates that the change was in the file's contents,
         // not the metadata itself, and thus we should refresh the thumbnail.
-        if (
-            m1.fileType == FileType.livePhoto && m1.imageHash
-                ? m1.imageHash != m2.imageHash
-                : m1.hash != m2.hash
-        ) {
+        if (metadataHash(m1) != metadataHash(m2)) {
             // This is an infrequent occurrence, so we lazily get the cache.
             const thumbnailCache = await blobCache("thumbs");
             const key = newFile.id.toString();

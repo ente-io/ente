@@ -293,6 +293,32 @@ const PublicMagicMetadata = z
     .passthrough();
 
 /**
+ * Return the hash of the file by reading it from its metadata.
+ *
+ * This is a convenience function that directly reads the information from the
+ * metadata in the happy path, but also has branches to handle the legacy format
+ * that older clients used to upload. For more details, see the note in the
+ * documentation for {@link hash} in {@link Metadata}.
+ */
+export const metadataHash = (metadata: Metadata) => {
+    const hash = metadata.hash;
+    if (hash) return hash;
+
+    // Handle past live photos upload from web client.
+    if (
+        metadata.fileType == FileType.livePhoto &&
+        metadata.imageHash &&
+        metadata.videoHash
+    ) {
+        return `${metadata.imageHash}:${metadata.videoHash}`;
+    }
+
+    // Items uploaded by very old clients might not have a hash, so this is not
+    // necessarily an error even if rare.
+    return undefined;
+};
+
+/**
  * Return the public magic metadata for the given {@link file}.
  *
  * The file we persist in our local db has the metadata in the encrypted form

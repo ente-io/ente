@@ -328,5 +328,3 @@ export const mergeMetadata1 = (file: EnteFile): EnteFile => {
 export const mergeMetadata = (files: EnteFile[]) =>
     files.map((file) => mergeMetadata1(file));
 
-export const hasFileHash = (file: Metadata) =>
-    !!file.hash || (!!file.imageHash && !!file.videoHash);

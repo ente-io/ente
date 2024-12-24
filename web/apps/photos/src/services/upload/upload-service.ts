@@ -15,17 +15,17 @@ import { readStream } from "@/gallery/utils/native-stream";
 import {
     EncryptedMagicMetadata,
     EnteFile,
-    hasFileHash,
     MetadataFileAttributes,
     S3FileAttributes,
     type EncryptedEnteFile,
     type FilePublicMagicMetadata,
     type FilePublicMagicMetadataProps,
 } from "@/media/file";
-import type {
-    Metadata,
-    ParsedMetadata,
-    PublicMagicMetadata,
+import {
+    metadataHash,
+    type Metadata,
+    type ParsedMetadata,
+    type PublicMagicMetadata,
 } from "@/media/file-metadata";
 import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
@@ -1140,52 +1140,12 @@ const computeHash = async (uploadItem: UploadItem, worker: CryptoWorker) => {
  * available), so this also in effect compares the contents of the files, not
  * just the "meta" information about them.
  */
-const areFilesSame = (f: Metadata, g: Metadata) =>
-    hasFileHash(f) && hasFileHash(g)
-        ? areFilesSameHash(f, g)
-        : areFilesSameNoHash(f, g);
+const areFilesSame = (f: Metadata, g: Metadata) => {
+    if (f.fileType !== g.fileType || f.title !== g.title) return false;
 
-const areFilesSameHash = (f: Metadata, g: Metadata) => {
-    if (f.fileType !== g.fileType || f.title !== g.title) {
-        return false;
-    }
-    if (
-        f.fileType === FileType.livePhoto &&
-        (f.hash === undefined || g.hash === undefined)
-    ) {
-        return f.imageHash === g.imageHash && f.videoHash === g.videoHash;
-    } else {
-        return f.hash === g.hash;
-    }
-};
-
-/**
- * Older files that were uploaded before we introduced hashing will not have
- * hashes, so retain and use the logic we used back then for such files.
- *
- * Deprecation notice April 2024: Note that hashing was introduced very early
- * (years ago), so the chance of us finding files without hashes is rare. And
- * even in these cases, the worst that'll happen is that a duplicate file would
- * get uploaded which can later be deduped. So we can get rid of this case at
- * some point (e.g. the mobile app doesn't do this extra check, just uploads).
- */
-const areFilesSameNoHash = (f: Metadata, g: Metadata) => {
-    /*
-     * The maximum difference in the creation/modification times of two similar
-     * files is set to 1 second. This is because while uploading files in the
-     * web - browsers and users could have set reduced precision of file times
-     * to prevent timing attacks and fingerprinting.
-     *
-     * See:
-     * https://developer.mozilla.org/en-US/docs/Web/API/File/lastModified#reduced_time_precision
-     */
-    const oneSecond = 1e6;
-    return (
-        f.fileType == g.fileType &&
-        f.title == g.title &&
-        Math.abs(f.creationTime - g.creationTime) < oneSecond &&
-        Math.abs(f.modificationTime - g.modificationTime) < oneSecond
-    );
+    const fh = metadataHash(f);
+    const gh = metadataHash(g);
+    return fh && gh && fh == gh;
 };
 
 const readAsset = async (
