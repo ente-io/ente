@@ -501,7 +501,7 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
         // For smaller screens, hide to divider to reduce visual noise. For
         // larger screens, the divider is helpful in guiding the user's eyes to
         // the checkbox which is otherwise at the right end of the header.
-        const showDivider = layoutParams.containerWidth > 700;
+        const hideDivider = layoutParams.isSmallerLayout;
 
         const duplicateGroup = duplicateGroups[index]!;
         const items = duplicateGroup.items;
@@ -534,7 +534,7 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                 <Divider
                     variant="middle"
                     sx={{
-                        opacity: showDivider ? 0.8 : 0,
+                        opacity: hideDivider ? 0 : 0.8,
                         marginBlock: "4px 20px",
                     }}
                 />

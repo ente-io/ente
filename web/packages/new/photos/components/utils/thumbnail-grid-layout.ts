@@ -7,6 +7,12 @@ export interface ThumbnailGridLayoutParams {
      */
     containerWidth: number;
     /**
+     * `true` if the container width is classified as a smaller screen for the
+     * purpose of the thumbnail grid, and some dimensions are reduced to account
+     * for the lesser space available to us.
+     */
+    isSmallerLayout: boolean;
+    /**
      * The inline padding (px) of the thumbnail grid.
      */
     paddingInline: number;
@@ -39,6 +45,10 @@ export interface ThumbnailGridLayoutParams {
 export const computeThumbnailGridLayoutParams = (
     containerWidth: number,
 ): ThumbnailGridLayoutParams => {
+    const isSmallerLayout = !(
+        containerWidth >
+        MIN_COLUMNS * IMAGE_CONTAINER_MAX_WIDTH
+    );
     const paddingInline = getGapFromScreenEdge(containerWidth);
     const fittableColumns = getFractionFittableColumns(containerWidth);
 
@@ -54,6 +64,7 @@ export const computeThumbnailGridLayoutParams = (
 
     return {
         containerWidth,
+        isSmallerLayout,
         paddingInline,
         columns,
         itemWidth,
