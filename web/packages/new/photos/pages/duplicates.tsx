@@ -486,7 +486,8 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
 
     return (
         <VariableSizeList
-            {...{ key, height, width, itemData, itemCount, itemSize, itemKey }}
+            key={key}
+            {...{ height, width, itemData, itemCount, itemSize, itemKey }}
         >
             {ListItem}
         </VariableSizeList>
@@ -496,6 +497,11 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
 const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
     memo(({ index, style, data }) => {
         const { layoutParams, duplicateGroups, onToggleSelection } = data;
+
+        // For smaller screens, hide to divider to reduce visual noise. For
+        // larger screens, the divider is helpful in guiding the user's eyes to
+        // the checkbox which is otherwise at the right end of the header.
+        const showDivider = layoutParams.containerWidth > 700;
 
         const duplicateGroup = duplicateGroups[index]!;
         const items = duplicateGroup.items;
@@ -528,7 +534,7 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                 <Divider
                     variant="middle"
                     sx={{
-                        opacity: 0.8,
+                        opacity: showDivider ? 0.8 : 0,
                         marginBlock: "4px 20px",
                     }}
                 />
