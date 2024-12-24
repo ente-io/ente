@@ -216,7 +216,7 @@
   "after1Month": "Po 1 mėnesio",
   "after1Year": "Po 1 metų",
   "manageParticipants": "Tvarkyti",
-  "albumParticipantsCount": "{count, plural, one {{count} dalyvis} few {{count} dalyviai} many {{count} dalyvio}=0 {0 dalyvių} =1 {1 dalyvis} other {{count} dalyvių}}",
+  "albumParticipantsCount": "{count, plural, =0 {Nėra dalyvių} =1 {1 dalyvis} other {{count} dalyviai}}",
   "@albumParticipantsCount": {
     "placeholders": {
       "count": {
@@ -237,7 +237,7 @@
   "publicLinkEnabled": "Įjungta viešoji nuoroda",
   "shareALink": "Bendrinkite nuorodą",
   "sharedAlbumSectionDescription": "Sukurkite bendrinamus ir bendradarbiaujamus albumus su kitais „Ente“ naudotojais, įskaitant naudotojus nemokamuose planuose.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {Bendrinima su {numberOfPeople} asmeniu} few {Bendrinima su {numberOfPeople} asmenims} many {Bendrinima su {numberOfPeople} asmens}=0 {Bendrinti su konkrečiais asmenimis} =1 {Bendrinima su 1 asmeniu} other {Bendrinima su {numberOfPeople} asmenų}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Bendrinti su konkrečiais asmenimis} =1 {Bendrinta su 1 asmeniu} other {Bendrinta su {numberOfPeople} asmenimis}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -377,6 +377,7 @@
   "@advancedSettings": {
     "description": "The text to display in the advanced settings section"
   },
+  "manageDeviceStorage": "Tvarkyti įrenginio podėlį",
   "manageDeviceStorageDesc": "Peržiūrėkite ir išvalykite vietinę podėlį.",
   "machineLearning": "Mašininis mokymasis",
   "mlConsent": "Įjungti mašininį mokymąsi",
@@ -664,7 +665,7 @@
   "referFriendsAnd2xYourPlan": "Rekomenduokite draugams ir 2 kartus padidinkite savo planą",
   "shareAlbumHint": "Atidarykite albumą ir palieskite bendrinimo mygtuką viršuje dešinėje, kad bendrintumėte.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Elementai rodo likusių dienų skaičių iki visiško ištrynimo.",
-  "trashDaysLeft": "{count, plural, one {{count} diena} few {{count} dienos} many {{count} dienos}=0 {Netrukus} =1 {1 diena} other {{count} dienų}}",
+  "trashDaysLeft": "{count, plural, =0 {Netrukus} =1 {1 diena} other {{count} dienų}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1067,7 +1068,7 @@
   "enableMachineLearningBanner": "Įjunkite mašininį mokymąsi magiškai paieškai ir veidų atpažinimui",
   "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
   "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
-  "viewersSuccessfullyAdded": "{count, plural, one {Pridėtas {count} žiūrėtojas} few {Pridėti {count} žiūrėtojai} many {Pridėta {count} žiūrėtojo}=0 {Pridėta 0 žiūrėtojų} =1 {Pridėtas 1 žiūrėtojas} other {Pridėta {count} žiūrėtojų}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Pridėta 0 žiūrėtojų} =1 {Pridėtas 1 žiūrėtojas} other {Pridėta {count} žiūrėtojų}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1077,7 +1078,7 @@
     },
     "description": "Number of viewers that were successfully added to an album."
   },
-  "collaboratorsSuccessfullyAdded": "{count, plural, one {Pridėtas {count} bendradarbis} few {Pridėti {count} bendradarbiai} many {Pridėta {count} bendradarbio}=0 {Pridėta 0 bendradarbių} =1 {Pridėtas 1 bendradarbis} other {Pridėta {count} bendradarbių}}",
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Pridėta 0 bendradarbių} =1 {Pridėtas 1 bendradarbis} other {Pridėta {count} bendradarbių}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1152,16 +1153,21 @@
   },
   "currentlyRunning": "šiuo metu vykdoma",
   "ignored": "ignoruota",
-  "photosCount": "{count, plural, one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos}=0 {0 nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
-  "@photosCount": {
+  "file": "Failas",
+  "searchSectionsLengthMismatch": "Sekcijų ilgio neatitikimas: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
     "placeholders": {
-      "count": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
         "type": "int",
         "example": "2"
       }
     }
   },
-  "file": "Failas",
   "selectMailApp": "Pasirinkti pašto programą",
   "selectAllShort": "Viskas",
   "@selectAllShort": {

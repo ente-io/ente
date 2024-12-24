@@ -818,7 +818,7 @@
   "referFriendsAnd2xYourPlan": "Begeistere Freunde für uns und verdopple deinen Speicher",
   "shareAlbumHint": "Öffne ein Album und tippe auf den Teilen-Button oben rechts, um zu teilen.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Elemente zeigen die Anzahl der Tage bis zum dauerhaften Löschen an",
-  "trashDaysLeft": "{count, plural, one {}=0 {Demnächst} =1 {1 Tag} other {{count} Tage}}",
+  "trashDaysLeft": "{count, plural, =0 {Demnächst} =1 {1 Tag} other {{count} Tage}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1385,7 +1385,7 @@
   "enableMachineLearningBanner": "Aktiviere maschinelles Lernen für die magische Suche und Gesichtserkennung",
   "searchDiscoverEmptySection": "Bilder werden hier angezeigt, sobald Verarbeitung und Synchronisation abgeschlossen sind",
   "searchPersonsEmptySection": "Personen werden hier angezeigt, sobald Verarbeitung und Synchronisierung abgeschlossen sind",
-  "viewersSuccessfullyAdded": "{count, plural, one {}=0 {0 Betrachter hinzugefügt} =1 {1 Betrachter hinzugefügt} other {{count} Betrachter hinzugefügt}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {0 Betrachter hinzugefügt} =1 {1 Betrachter hinzugefügt} other {{count} Betrachter hinzugefügt}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
