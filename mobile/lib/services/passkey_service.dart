@@ -27,10 +27,6 @@ class PasskeyService {
     return response.data!["isPasskeyRecoveryEnabled"] as bool;
   }
 
-  String get accountsUrl {
-    return kDebugMode ? "http://localhost:3001" : "https://accounts.ente.io";
-  }
-
   Future<void> configurePasskeyRecovery(
     String secret,
     String userEncryptedSecret,

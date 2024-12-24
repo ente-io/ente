@@ -1194,11 +1194,13 @@ class UserService {
     }
   }
 
-  Future<String> getFamiliesToken() async {
+  Future<String> getFamilyPortalUrl(bool familyExist) async {
     try {
       final response = await _enteDio.get("/users/families-token");
       if (response.statusCode == 200) {
-        return response.data["familiesToken"];
+        final String url = response.data["familyUrl"] ?? kFamilyUrl;
+        final String jwtToken = response.data["familiesToken"];
+        return '$url?token=$jwtToken&isFamilyCreated=$familyExist';
       } else {
         throw Exception("non 200 ok response");
       }
