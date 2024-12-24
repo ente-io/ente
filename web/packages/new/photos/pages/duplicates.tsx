@@ -18,6 +18,7 @@ import SortIcon from "@mui/icons-material/Sort";
 import {
     Box,
     Checkbox,
+    CircularProgress,
     Divider,
     IconButton,
     Stack,
@@ -48,7 +49,11 @@ import {
     computeThumbnailGridLayoutParams,
     type ThumbnailGridLayoutParams,
 } from "../components/utils/thumbnail-grid-layout";
-import { deduceDuplicates, type DuplicateGroup } from "../services/dedup";
+import {
+    deduceDuplicates,
+    removeSelectedDuplicateGroups,
+    type DuplicateGroup,
+} from "../services/dedup";
 import { useAppContext } from "../types/context";
 
 const Page: React.FC = () => {
@@ -75,6 +80,12 @@ const Page: React.FC = () => {
 
     const handleRemoveDuplicates = useCallback(() => {
         dispatch({ type: "dedupe" });
+        void removeSelectedDuplicateGroups(state.duplicateGroups)
+            .then(() => dispatch({ type: "dedupeCompleted" }))
+            .catch((e: unknown) => {
+                log.error("Failed to remove duplicates", e);
+                dispatch({ type: "dedupeFailed" });
+            });
     }, []);
 
     const contents = (() => {
@@ -97,6 +108,7 @@ const Page: React.FC = () => {
                             }
                             prunableCount={state.prunableCount}
                             prunableSize={state.prunableSize}
+                            dedupeStatus={state.dedupeStatus}
                             onRemoveDuplicates={handleRemoveDuplicates}
                         />
                     );
@@ -125,13 +137,10 @@ export default Page;
 type SortOrder = "prunableCount" | "prunableSize";
 
 interface DedupState {
-    status:
-        | undefined
-        | "analyzing"
-        | "analysisFailed"
-        | "analysisCompleted"
-        | "dedupe"
-        | "dedupeFailed";
+    /** Status of the screen, between initial state => analysis */
+    status: undefined | "analyzing" | "analysisFailed" | "analysisCompleted";
+    /** Status of the screen post analysis. */
+    dedupeStatus: undefined | "deduping" | "dedupeFailed";
     /**
      * Groups of duplicates.
      *
@@ -172,6 +181,7 @@ type DedupAction =
 
 const initialDedupState: DedupState = {
     status: undefined,
+    dedupeStatus: undefined,
     duplicateGroups: [],
     sortOrder: "prunableSize",
     prunableCount: 0,
@@ -241,6 +251,17 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
                 prunableSize,
             };
         }
+
+        case "dedupe":
+            return { ...state, dedupeStatus: "deduping" };
+
+        case "dedupeCompleted":
+            // TODO: Partials
+            return { ...state, dedupeStatus: undefined };
+
+        case "dedupeFailed":
+            // TODO: Resync?
+            return { ...state, dedupeStatus: undefined };
 
         default:
             return state;
@@ -581,6 +602,10 @@ interface DeduplicateButtonProps {
      */
     prunableSize: number;
     /**
+     * if a deduplication is in progress, then its status.
+     */
+    dedupeStatus: DedupState["dedupeStatus"];
+    /**
      * Called when the user presses the button to remove duplicates.
      */
     onRemoveDuplicates: () => void;
@@ -589,6 +614,7 @@ interface DeduplicateButtonProps {
 const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
     prunableCount,
     prunableSize,
+    dedupeStatus,
     onRemoveDuplicates,
 }) => (
     <FocusVisibleButton
@@ -599,7 +625,11 @@ const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
         <Stack sx={{ gap: 1 }}>
             <Typography>{pt(`Delete ${prunableCount} items`)}</Typography>
             <Typography variant="small" fontWeight={"normal"}>
-                {formattedByteSize(prunableSize)}
+                {dedupeStatus ? (
+                    <CircularProgress color="accent" size="14px" />
+                ) : (
+                    formattedByteSize(prunableSize)
+                )}
             </Typography>
         </Stack>
     </FocusVisibleButton>
