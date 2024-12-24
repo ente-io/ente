@@ -118,7 +118,7 @@
   "recoveryKeyCopiedToClipboard": "Clave de recuperación copiada al portapapeles",
   "recoverAccount": "Recuperar cuenta",
   "recover": "Recuperar",
-  "dropSupportEmail": "Por favor, envía un correo electrónico a {supportEmail} desde tu dirección de correo electrónico registrada",
+  "dropSupportEmail": "Por favor, envía un correo electrónico a {supportEmail} desde tu dirección de correo electrónico que usó para registrarse",
   "@dropSupportEmail": {
     "placeholders": {
       "supportEmail": {
@@ -248,7 +248,7 @@
   },
   "thisIsYourVerificationId": "Esta es tu ID de verificación",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Alguien que comparta álbumes contigo debería ver el mismo ID en su dispositivo.",
-  "howToViewShareeVerificationID": "Por favor, pídeles que mantengan presionada su dirección de correo electrónico en la pantalla de ajustes, y verifica que los IDs de ambos dispositivos coincidan.",
+  "howToViewShareeVerificationID": "Por favor, pídeles que mantengan presionada su dirección de correo electrónico en la pantalla de ajustes, y verifica que los identificadores de ambos dispositivos coincidan.",
   "thisIsPersonVerificationId": "Este es el ID de verificación de {email}",
   "@thisIsPersonVerificationId": {
     "placeholders": {
@@ -412,7 +412,6 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Tamaño de la cuadrícula de fotos",
-  "manageDeviceStorage": "Gestionar almacenamiento caché del dispositivo",
   "manageDeviceStorageDesc": "Revisar y borrar almacenamiento caché local.",
   "machineLearning": "Aprendizaje automático",
   "mlConsent": "Habilitar aprendizaje automático",
@@ -1382,8 +1381,6 @@
   "onlyThem": "Solo ellos",
   "checkingModels": "Comprobando modelos...",
   "enableMachineLearningBanner": "Activar aprendizaje automático para búsqueda mágica y reconocimiento facial",
-  "searchDiscoverEmptySection": "Las imágenes se mostrarán aquí cuando se complete el procesamiento",
-  "searchPersonsEmptySection": "Las personas se mostrarán aquí cuando se complete el procesamiento",
   "viewersSuccessfullyAdded": "{count, plural, =0 {0 espectadores añadidos} =1 {1 espectador añadido} other {{count} espectadores añadidos}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1479,20 +1476,6 @@
     }
   },
   "file": "Archivo",
-  "searchSectionsLengthMismatch": "La longitud de las secciones no coincide: {snapshotLength} != {searchLength}",
-  "@searchSectionsLengthMismatch": {
-    "description": "Appears in search tab page",
-    "placeholders": {
-      "snapshotLength": {
-        "type": "int",
-        "example": "1"
-      },
-      "searchLength": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "selectMailApp": "Seleccionar app de correo",
   "selectAllShort": "Todas",
   "@selectAllShort": {
@@ -1575,5 +1558,5 @@
   },
   "legacyInvite": "{email} te ha invitado a ser un contacto de confianza",
   "authToManageLegacy": "Por favor, autentícate para administrar tus contactos de confianza",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "useDifferentPlayerInfo": "¿Tienes problemas para reproducir este video? Mantén pulsado aquí para probar un reproductor diferente."
 }

@@ -412,7 +412,6 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Розмір сітки фотографій",
-  "manageDeviceStorage": "Керування кешем пристрою",
   "manageDeviceStorageDesc": "Переглянути та очистити локальне сховище кешу.",
   "machineLearning": "Машинне навчання",
   "mlConsent": "Увімкнути машинне навчання",
@@ -689,6 +688,8 @@
   "noPhotosAreBeingBackedUpRightNow": "Наразі немає резервних копій фотографій",
   "preserveMore": "Зберегти більше",
   "grantFullAccessPrompt": "Надайте доступ до всіх фотографій в налаштуваннях застосунку",
+  "allowPermTitle": "Дозволити доступ до фотографій",
+  "allowPermBody": "Надайте доступ до ваших фотографій з налаштувань, щоб Ente міг показувати та створювати резервну копію вашої бібліотеки.",
   "openSettings": "Відкрити налаштування",
   "selectMorePhotos": "Вибрати більше фотографій",
   "existingUser": "Існуючий користувач",
@@ -1382,8 +1383,8 @@
   "onlyThem": "Тільки вони",
   "checkingModels": "Перевірка моделей...",
   "enableMachineLearningBanner": "Увімкніть машинне навчання для магічного пошуку та розпізнавання облич",
-  "searchDiscoverEmptySection": "Зображення будуть показані тут після завершення обробки",
-  "searchPersonsEmptySection": "Люди будуть показані тут після завершення обробки",
+  "searchDiscoverEmptySection": "Зображення будуть показані тут після завершення оброблення та синхронізації",
+  "searchPersonsEmptySection": "Люди будуть показані тут після завершення оброблення та синхронізації",
   "viewersSuccessfullyAdded": "{count, plural, one {} few {Додано {count} глядачі} many {Додано {count} глядачів}=0 {Додано 0 глядачів} =1 {Додано 1 глядач} other {Додано {count} глядачів}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1479,20 +1480,6 @@
     }
   },
   "file": "Файл",
-  "searchSectionsLengthMismatch": "Невідповідність довжини розділів: {snapshotLength} != {searchLength}",
-  "@searchSectionsLengthMismatch": {
-    "description": "Appears in search tab page",
-    "placeholders": {
-      "snapshotLength": {
-        "type": "int",
-        "example": "1"
-      },
-      "searchLength": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "selectMailApp": "Вибрати застосунок пошти",
   "selectAllShort": "Усі",
   "@selectAllShort": {
@@ -1575,5 +1562,5 @@
   },
   "legacyInvite": "{email} запросив вас стати довіреною особою",
   "authToManageLegacy": "Авторизуйтесь, щоби керувати довіреними контактами",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "useDifferentPlayerInfo": "Виникли проблеми з відтворенням цього відео? Натисніть і утримуйте тут, щоб спробувати інший плеєр."
 }

@@ -1363,7 +1363,6 @@
   "yesResetPerson": "Sì, resetta persona",
   "onlyThem": "Solo loro",
   "checkingModels": "Verifica dei modelli...",
-  "searchDiscoverEmptySection": "Le immagini saranno mostrate qui una volta che l'elaborazione sarà completata",
   "accountIsAlreadyConfigured": "L'account è già configurato.",
   "sessionIdMismatch": "ID sessione non corrispondente",
   "@sessionIdMismatch": {
@@ -1404,6 +1403,5 @@
   "changeLogBackupStatusTitle": "Stato Backup",
   "changeLogDiscoverTitle": "Esplora",
   "selectCoverPhoto": "Seleziona foto di copertina",
-  "newLocation": "Nuova posizione",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "newLocation": "Nuova posizione"
 }

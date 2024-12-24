@@ -19,7 +19,7 @@ Suntem aici pentru a crea cea mai sigură aplicație de fotografii, veniți ală
 -    Editor de imagini, pentru a adăuga ultimele retușuri
 -    Evidențiați, ascundeți și retrăiți-vă amintirile, căci sunt prețioase
 -    Import cu o singură apăsare din Google, Apple, hard disk și multe altele
--    Temă întunecată, deoarece fotografiile dvs. arată cu ea
+-    Temă întunecată, deoarece fotografiile dvs. arată bine și cu ea
 -    2FA, 3FA, autentificare biometrică
 -    și MULTE altele!
 
