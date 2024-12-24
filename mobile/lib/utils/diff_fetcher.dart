@@ -27,66 +27,75 @@ class DiffFetcher {
           .getSharedPublicAlbumToken(collectionID);
       final authJWTToken = await CollectionsService.instance
           .getSharedPublicAlbumTokenJWT(collectionID);
+      bool hasMore = false;
+      final sharedFiles = <EnteFile>[];
 
       final headers = {
         "X-Auth-Access-Token": authToken,
         if (authJWTToken != null) "X-Auth-Access-Token-JWT": authJWTToken,
       };
 
-      final response = await _enteDio.get(
-        "/public-collection/diff",
-        options: Options(headers: headers),
-        queryParameters: {"sinceTime": 0},
-      );
+      int sinceTime = 0;
 
-      final diff = response.data["diff"] as List;
-      final startTime = DateTime.now();
-      final sharedFiles = <EnteFile>[];
-
-      for (final item in diff) {
-        final file = EnteFile();
-        if (item["isDeleted"]) {
-          continue;
-        }
-        file.uploadedFileID = item["id"];
-        file.collectionID = item["collectionID"];
-        file.ownerID = item["ownerID"];
-        file.encryptedKey = item["encryptedKey"];
-        file.keyDecryptionNonce = item["keyDecryptionNonce"];
-        file.fileDecryptionHeader = item["file"]["decryptionHeader"];
-        file.thumbnailDecryptionHeader = item["thumbnail"]["decryptionHeader"];
-        file.metadataDecryptionHeader = item["metadata"]["decryptionHeader"];
-        if (item["info"] != null) {
-          file.fileSize = item["info"]["fileSize"];
-        }
-        final fileKey = getFileKey(file);
-        final encodedMetadata = await CryptoUtil.decryptChaCha(
-          CryptoUtil.base642bin(item["metadata"]["encryptedData"]),
-          fileKey,
-          CryptoUtil.base642bin(file.metadataDecryptionHeader!),
+      do {
+        final response = await _enteDio.get(
+          "/public-collection/diff",
+          options: Options(headers: headers),
+          queryParameters: {"sinceTime": sinceTime},
         );
-        final Map<String, dynamic> metadata =
-            jsonDecode(utf8.decode(encodedMetadata));
-        file.applyMetadata(metadata);
-        if (item['pubMagicMetadata'] != null) {
-          final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-            CryptoUtil.base642bin(item['pubMagicMetadata']['data']),
+
+        final diff = response.data["diff"] as List;
+        hasMore = response.data["hasMore"] as bool;
+
+        for (final item in diff) {
+          final file = EnteFile();
+          if (item["isDeleted"]) {
+            continue;
+          }
+          file.uploadedFileID = item["id"];
+          file.collectionID = item["collectionID"];
+          file.ownerID = item["ownerID"];
+          file.encryptedKey = item["encryptedKey"];
+          file.keyDecryptionNonce = item["keyDecryptionNonce"];
+          file.fileDecryptionHeader = item["file"]["decryptionHeader"];
+          file.thumbnailDecryptionHeader =
+              item["thumbnail"]["decryptionHeader"];
+          file.metadataDecryptionHeader = item["metadata"]["decryptionHeader"];
+          if (item["info"] != null) {
+            file.fileSize = item["info"]["fileSize"];
+          }
+          final fileKey = getFileKey(file);
+          final encodedMetadata = await CryptoUtil.decryptChaCha(
+            CryptoUtil.base642bin(item["metadata"]["encryptedData"]),
             fileKey,
-            CryptoUtil.base642bin(item['pubMagicMetadata']['header']),
+            CryptoUtil.base642bin(file.metadataDecryptionHeader!),
           );
-          file.pubMmdEncodedJson = utf8.decode(utfEncodedMmd);
-          file.pubMmdVersion = item['pubMagicMetadata']['version'];
-          file.pubMagicMetadata =
-              PubMagicMetadata.fromEncodedJson(file.pubMmdEncodedJson!);
+          final Map<String, dynamic> metadata =
+              jsonDecode(utf8.decode(encodedMetadata));
+          file.applyMetadata(metadata);
+          if (item['pubMagicMetadata'] != null) {
+            final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+              CryptoUtil.base642bin(item['pubMagicMetadata']['data']),
+              fileKey,
+              CryptoUtil.base642bin(item['pubMagicMetadata']['header']),
+            );
+            file.pubMmdEncodedJson = utf8.decode(utfEncodedMmd);
+            file.pubMmdVersion = item['pubMagicMetadata']['version'];
+            file.pubMagicMetadata =
+                PubMagicMetadata.fromEncodedJson(file.pubMmdEncodedJson!);
+          }
+
+          // To avoid local file to be used as thumbnail or full file.
+          file.localID = null;
+
+          sharedFiles.add(file);
         }
 
-        // To avoid local file to be used as thumbnail or full file.
-        file.localID = null;
-        sharedFiles.add(file);
-      }
+        if (diff.isNotEmpty) {
+          sinceTime = diff.last["updationTime"];
+        }
+      } while (hasMore);
 
-      _logger.info('[Collection-$collectionID] parsed ${diff.length} '
-          'diff items ( ${sharedFiles.length} updated) in ${DateTime.now().difference(startTime).inMilliseconds}ms');
       return sharedFiles;
     } catch (e, s) {
       _logger.severe("Failed to decrypt collection ", e, s);
