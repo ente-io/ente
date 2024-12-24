@@ -129,8 +129,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("നിബന്ധനകൾ"),
         "thankYou": MessageLookupByLibrary.simpleMessage("നന്ദി"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("ഈ ഉപകരണം"),
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
         "verify": MessageLookupByLibrary.simpleMessage("ഉറപ്പിക്കുക"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("ഇമെയിൽ ദൃഢീകരിക്കുക"),

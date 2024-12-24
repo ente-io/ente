@@ -21,8 +21,5 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'bg';
 
   final messages = _notInlinedMessages(_notInlinedMessages);
-  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player.")
-      };
+  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{};
 }

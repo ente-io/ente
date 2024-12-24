@@ -267,8 +267,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "update": MessageLookupByLibrary.simpleMessage("Абнавіць"),
         "updateAvailable":
             MessageLookupByLibrary.simpleMessage("Даступна абнаўленне"),
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
         "useRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Выкарыстоўваць ключ аднаўлення"),
         "verify": MessageLookupByLibrary.simpleMessage("Праверыць"),
