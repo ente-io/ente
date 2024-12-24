@@ -21,6 +21,7 @@ class DiffFetcher {
   Future<List<EnteFile>> getPublicFiles(
     BuildContext context,
     int collectionID,
+    bool sortAsc,
   ) async {
     try {
       final authToken = await CollectionsService.instance
@@ -95,7 +96,9 @@ class DiffFetcher {
           sinceTime = diff.last["updationTime"];
         }
       } while (hasMore);
-
+      if (sortAsc) {
+        sharedFiles.sort((a, b) => a.creationTime!.compareTo(b.creationTime!));
+      }
       return sharedFiles;
     } catch (e, s) {
       _logger.severe("Failed to decrypt collection ", e, s);

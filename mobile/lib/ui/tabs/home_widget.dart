@@ -306,8 +306,12 @@ class _HomeWidgetState extends State<HomeWidget> {
                   if (result) {
                     await dialog.show();
 
-                    final List<EnteFile> sharedFiles = await _diffFetcher
-                        .getPublicFiles(context, collection.id);
+                    final List<EnteFile> sharedFiles =
+                        await _diffFetcher.getPublicFiles(
+                      context,
+                      collection.id,
+                      collection.pubMagicMetadata.asc ?? false,
+                    );
                     await dialog.hide();
                     Navigator.of(context).pop();
 
@@ -334,8 +338,11 @@ class _HomeWidgetState extends State<HomeWidget> {
       } else {
         await dialog.show();
 
-        final List<EnteFile> sharedFiles =
-            await _diffFetcher.getPublicFiles(context, collection.id);
+        final List<EnteFile> sharedFiles = await _diffFetcher.getPublicFiles(
+          context,
+          collection.id,
+          collection.pubMagicMetadata.asc ?? false,
+        );
         await dialog.hide();
 
         await routeToPage(
