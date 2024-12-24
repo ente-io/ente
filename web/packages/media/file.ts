@@ -21,11 +21,17 @@ export interface S3FileAttributes {
     size: number;
 }
 
+/**
+ * Static information associated with a file.
+ */
 export interface FileInfo {
     /**
-     * The size of the file, in bytes.
+     * The size of the file (in bytes).
      */
     fileSize: number;
+    /**
+     * The size of the thumbnail associated with the file (in bytes).
+     */
     thumbSize: number;
 }
 
@@ -39,14 +45,56 @@ export interface MagicMetadataCore<T> {
 export type EncryptedMagicMetadata = MagicMetadataCore<string>;
 
 export interface EncryptedEnteFile {
+    /**
+     * The file's ID.
+     *
+     * The file's ID is a integer assigned by remote that is unique across all
+     * files stored by an Ente instance. That is, the file ID is a global unique
+     * identifier for this {@link EnteFile}.
+     */
     id: number;
+    /**
+     * The ID of the collection with which this file as associated.
+     *
+     * The same file (ID) may be associated with multiple collectionID, in which
+     * case there will be multiple {@link EnteFile} entries for each
+     * ({@link id}, {@link collectionID}) pair. See: [Note: Collection File].
+     */
     collectionID: number;
+    /**
+     * The ID of the user who owns the file.
+     */
     ownerID: number;
     file: S3FileAttributes;
     thumbnail: S3FileAttributes;
+    /**
+     * Static metadata associated with a file.
+     *
+     * See: [Note: Metadatum].
+     */
     metadata: MetadataFileAttributes;
+    /**
+     * Static, remote visible, information associated with a file.
+     *
+     * This is information about storage used by the file and its metadata (in
+     * the future if needed). Unlike {@link metadata} which is E2EE, the
+     * {@link FileInfo} is remote visible for bookkeeping purposes.
+     *
+     * Files uploaded by very old versions of Ente might not have this structure
+     * present.
+     */
     info: FileInfo | undefined;
+    /**
+     * Private mutable metadata associated with a file.
+     *
+     * See: [Note: Metadatum].
+     */
     magicMetadata: EncryptedMagicMetadata;
+    /**
+     * Public mutable metadata associated with a file.
+     *
+     * See: [Note: Metadatum].
+     */
     pubMagicMetadata: EncryptedMagicMetadata;
     encryptedKey: string;
     keyDecryptionNonce: string;
@@ -65,6 +113,11 @@ export interface EncryptedEnteFile {
  * an Ente instance. Each file is also always associated with a collection, and
  * has an owner (both of these linkages are stored as the corresponding numeric
  * IDs within the EnteFile structure).
+ *
+ * While the file ID is unique, we'd can still have multiple entries for each
+ * file ID in our local state, one per collection IDs to which the file belongs.
+ * That is, the uniqueness is across the (fileID, collectionID) pairs. See
+ * [Note: Collection Files].
  */
 export interface EnteFile
     extends Omit<
