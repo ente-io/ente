@@ -412,6 +412,7 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Taille de la grille photo",
+  "manageDeviceStorage": "Gérer le cache de l'appareil",
   "manageDeviceStorageDesc": "Examiner et vider le cache.",
   "machineLearning": "Apprentissage automatique",
   "mlConsent": "Activer l'apprentissage automatique",
@@ -1480,6 +1481,20 @@
     }
   },
   "file": "Fichier",
+  "searchSectionsLengthMismatch": "Incompatibilité de longueur des sections : {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "selectMailApp": "Sélectionnez l'application mail",
   "selectAllShort": "Tout",
   "@selectAllShort": {
