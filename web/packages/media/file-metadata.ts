@@ -101,16 +101,37 @@ export interface Metadata {
     /**
      * A hash of the file's contents.
      *
-     * It is only valid for images and videos. For live photos, see
-     * {@link imageHash} and {@link videoHash}.
+     * For images and videos this is the hash of the file's contents. For live
+     * photos, this is the image hash joined with video hash using a colon (i.e.
+     * `${imageHash}:{videoHash}`).
+     *
+     * Legacy compatibility:
+     *
+     * - The hash might not be present for files uploaded from ancient versions
+     *   of Ente (Newer clients will always include it in the metadata).
+     *
+     * - For live photos, older version of the web and desktop client used to
+     *   add two separate fields - {@link imageHash} and {@link videoHash} - to
+     *   the file's metadata instead of setting the {@link hash}. This behaviour
+     *   is deprecated, and if we now see a live photo without a {@link hash},
+     *   we should reconstruct the hash locally from the image and video hashes
+     *   by combining them as `${imageHash}:{videoHash}`.
      */
     hash?: string;
     /**
      * The hash of the image component of a live photo.
+     *
+     * This is a legacy field, and should not be added by us anymore. It is
+     * retained to allow us to reconstruct the hash for live photos uploaded by
+     * older clients.
      */
     imageHash?: string;
     /**
      * The hash of the video component of a live photo.
+     *
+     * This is a legacy field, and should not be added by us anymore. It is
+     * retained to allow us to reconstruct the hash for live photos uploaded by
+     * older clients.
      */
     videoHash?: string;
     hasStaticThumbnail?: boolean;

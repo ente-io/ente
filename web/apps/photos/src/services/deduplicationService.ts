@@ -173,7 +173,10 @@ async function sortDuplicateFiles(
 }
 
 function areFileHashesSame(firstFile: Metadata, secondFile: Metadata) {
-    if (firstFile.fileType === FileType.livePhoto) {
+    if (
+        firstFile.fileType === FileType.livePhoto &&
+        firstFile.hash === undefined
+    ) {
         return (
             firstFile.imageHash === secondFile.imageHash &&
             firstFile.videoHash === secondFile.videoHash

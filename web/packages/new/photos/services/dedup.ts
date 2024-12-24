@@ -58,7 +58,7 @@ export interface DuplicateGroup {
  *
  * Detecting duplicates:
  *
- * 1. Identify and divide files into multiple groups based on (size + hash).
+ * 1. Identify and divide files into multiple groups based on hash.
  *
  * 2. By default select all group, with option to unselect individual groups or
  *    all groups.
@@ -79,14 +79,17 @@ export interface DuplicateGroup {
  * 4. Delete the remaining files.
  */
 export const deduceDuplicates = async () => {
+    // TODO: Ignore non-owned files.
     const collectionFiles = await getLocalFiles();
     const files = uniqueFilesByID(collectionFiles);
+
+    // TODO: Only do a hash comparison
 
     const filesByHash = new Map<string, EnteFile[]>();
     for (const file of files) {
         let hash = file.metadata.hash;
         if (!hash && file.metadata.imageHash && file.metadata.videoHash)
-            hash = `${file.metadata.imageHash}_${file.metadata.hash}`;
+            hash = `${file.metadata.imageHash}_${file.metadata.videoHash}`;
         if (!hash) {
             // Some very old files uploaded by ancient versions of Ente might
             // not have hashes. Ignore these.
@@ -146,5 +149,7 @@ export const removeSelectedDuplicateGroups = async (
     duplicateGroups: DuplicateGroup[],
 ) => {
     console.log(duplicateGroups);
+    for (const duplicateGroup of duplicateGroups) {
+    }
     await wait(1000);
 };

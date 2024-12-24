@@ -7,8 +7,22 @@ export interface MetadataFileAttributes {
     decryptionHeader: string;
 }
 
+/**
+ * Attributes about an object uploaded to S3.
+ *
+ * TODO: Split between fields needed during upload, and the fields we get back
+ * from remote in the /diff response.
+ */
 export interface S3FileAttributes {
+    /**
+     * Upload only: This should be present during upload, but is not returned
+     * back from remote in the /diff response.
+     */
     objectKey: string;
+    /**
+     * Upload and diff: This is present both during upload and also returned by
+     * remote in the /diff response.
+     */
     decryptionHeader: string;
     /**
      * The size of the file, in bytes.
@@ -17,6 +31,9 @@ export interface S3FileAttributes {
      * encrypted file (as per the client) while creating a new object on remote.
      * This allows the server to validate that the size of the objects is same
      * as what client is reporting.
+     *
+     * Upload only: This should be present during upload, but is not returned
+     * back from remote in the /diff response.
      */
     size: number;
 }
@@ -96,7 +113,9 @@ export interface EncryptedEnteFile {
      * See: [Note: Metadatum].
      */
     pubMagicMetadata: EncryptedMagicMetadata;
+    /* always present */
     encryptedKey: string;
+    /* always present */
     keyDecryptionNonce: string;
     isDeleted: boolean;
     updationTime: number;

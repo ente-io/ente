@@ -179,7 +179,7 @@ export const clearCachedThumbnailsIfChanged = async (
         // differ, which indicates that the change was in the file's contents,
         // not the metadata itself, and thus we should refresh the thumbnail.
         if (
-            m1.fileType == FileType.livePhoto
+            m1.fileType == FileType.livePhoto && m1.imageHash
                 ? m1.imageHash != m2.imageHash
                 : m1.hash != m2.hash
         ) {

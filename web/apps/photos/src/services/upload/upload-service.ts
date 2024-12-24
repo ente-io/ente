@@ -968,16 +968,17 @@ const extractLivePhotoMetadata = async (
             worker,
         );
 
+    const imageHash = imageMetadata.hash;
     const videoHash = await computeHash(livePhotoAssets.video, worker);
+
+    const hash = `${imageHash}:${videoHash}`;
 
     return {
         metadata: {
             ...imageMetadata,
             title: uploadItemFileName(livePhotoAssets.image),
             fileType: FileType.livePhoto,
-            imageHash: imageMetadata.hash,
-            videoHash: videoHash,
-            hash: undefined,
+            hash,
         },
         publicMagicMetadata,
     };
@@ -1148,7 +1149,10 @@ const areFilesSameHash = (f: Metadata, g: Metadata) => {
     if (f.fileType !== g.fileType || f.title !== g.title) {
         return false;
     }
-    if (f.fileType === FileType.livePhoto) {
+    if (
+        f.fileType === FileType.livePhoto &&
+        (f.hash === undefined || g.hash === undefined)
+    ) {
         return f.imageHash === g.imageHash && f.videoHash === g.videoHash;
     } else {
         return f.hash === g.hash;
