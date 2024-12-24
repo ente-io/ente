@@ -192,26 +192,36 @@ export const deduceDuplicates = async () => {
  *
  * This function will only process entries for which isSelected is `true`.
  *
+ * @param onRemoveDuplicateGroup A function that is called each time a duplicate
+ * group is successfully removed. The duplicate group that was removed is passed
+ * as an argument to it.
+ *
  * @returns true if all selected duplicate groups were successfully removed, and
  * false if there were any errors.
  */
 export const removeSelectedDuplicateGroups = async (
     duplicateGroups: DuplicateGroup[],
+    onRemoveDuplicateGroup: (g: DuplicateGroup) => void,
 ) => {
     const selectedDuplicateGroups = duplicateGroups.filter((g) => g.isSelected);
     let allSuccess = true;
     for (const duplicateGroup of selectedDuplicateGroups) {
         try {
-            const fileToRetain = duplicateGroupFileToRetain(duplicateGroup);
-            console.log({ fileToRetain });
+            await removeDuplicateGroup(duplicateGroup);
+            onRemoveDuplicateGroup(duplicateGroup);
         } catch (e) {
             log.warn("Failed to remove duplicate group", e);
             allSuccess = false;
         }
     }
-    // TODO: Remove me after testing the UI
-    await wait(3000);
     return allSuccess;
+};
+
+const removeDuplicateGroup = async (duplicateGroup: DuplicateGroup) => {
+    const fileToRetain = duplicateGroupFileToRetain(duplicateGroup);
+    console.log({ fileToRetain });
+    // TODO: Remove me after testing the UI
+    await wait(1000);
 };
 
 /**
