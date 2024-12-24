@@ -412,7 +412,6 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Fotorastergröße",
-  "manageDeviceStorage": "Geräte-Cache verwalten",
   "manageDeviceStorageDesc": "Lokalen Cache-Speicher überprüfen und löschen.",
   "machineLearning": "Maschinelles Lernen",
   "mlConsent": "Maschinelles Lernen aktivieren",
@@ -689,6 +688,8 @@
   "noPhotosAreBeingBackedUpRightNow": "Momentan werden keine Fotos gesichert",
   "preserveMore": "Mehr Daten sichern",
   "grantFullAccessPrompt": "Bitte gewähre Zugang zu allen Fotos in der Einstellungen App",
+  "allowPermTitle": "Zugriff auf Fotos erlauben",
+  "allowPermBody": "Bitte erlaube den Zugriff auf Deine Fotos in den Einstellungen, damit Ente sie anzeigen und sichern kann.",
   "openSettings": "Öffne Einstellungen",
   "selectMorePhotos": "Mehr Fotos auswählen",
   "existingUser": "Existierender Benutzer",
@@ -1382,8 +1383,8 @@
   "onlyThem": "Nur diese",
   "checkingModels": "Prüfe Modelle...",
   "enableMachineLearningBanner": "Aktiviere maschinelles Lernen für die magische Suche und Gesichtserkennung",
-  "searchDiscoverEmptySection": "Bilder werden hier angezeigt, sobald die Verarbeitung abgeschlossen ist",
-  "searchPersonsEmptySection": "Personen werden hier angezeigt, sobald die Verarbeitung abgeschlossen ist",
+  "searchDiscoverEmptySection": "Bilder werden hier angezeigt, sobald Verarbeitung und Synchronisation abgeschlossen sind",
+  "searchPersonsEmptySection": "Personen werden hier angezeigt, sobald Verarbeitung und Synchronisierung abgeschlossen sind",
   "viewersSuccessfullyAdded": "{count, plural, one {}=0 {0 Betrachter hinzugefügt} =1 {1 Betrachter hinzugefügt} other {{count} Betrachter hinzugefügt}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1479,20 +1480,6 @@
     }
   },
   "file": "Datei",
-  "searchSectionsLengthMismatch": "Abschnittslänge stimmt nicht überein: {snapshotLength} != {searchLength}",
-  "@searchSectionsLengthMismatch": {
-    "description": "Appears in search tab page",
-    "placeholders": {
-      "snapshotLength": {
-        "type": "int",
-        "example": "1"
-      },
-      "searchLength": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "selectMailApp": "E-Mail-App auswählen",
   "selectAllShort": "Alle",
   "@selectAllShort": {
@@ -1575,5 +1562,5 @@
   },
   "legacyInvite": "{email} hat dich eingeladen, ein vertrauenswürdiger Kontakt zu werden",
   "authToManageLegacy": "Bitte authentifiziere dich, um deine vertrauenswürdigen Kontakte zu verwalten",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "useDifferentPlayerInfo": "Hast du Probleme beim Abspielen dieses Videos? Halte hier gedrückt, um einen anderen Player auszuprobieren."
 }

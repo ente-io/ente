@@ -412,7 +412,6 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Tamanho da grade de fotos",
-  "manageDeviceStorage": "Gerenciar cache do dispositivo",
   "manageDeviceStorageDesc": "Reveja e limpe o armazenamento de cache local.",
   "machineLearning": "Aprendizagem automática",
   "mlConsent": "Ativar aprendizagem automática",
@@ -572,7 +571,7 @@
   "no": "Não",
   "yes": "Sim",
   "social": "Redes sociais",
-  "rateUsOnStore": "Avalie-nos em {storeName}",
+  "rateUsOnStore": "Avalie-nos no {storeName}",
   "blog": "Blog",
   "merchandise": "Produtos",
   "twitter": "Twitter/X",
@@ -689,6 +688,8 @@
   "noPhotosAreBeingBackedUpRightNow": "No momento não há fotos sendo copiadas com segurança",
   "preserveMore": "Preservar mais",
   "grantFullAccessPrompt": "Permita o acesso a todas as fotos nas opções do aplicativo",
+  "allowPermTitle": "Permita acesso às Fotos",
+  "allowPermBody": "Permita o acesso a suas fotos das Configurações para que Ente possa exibir e copiar com segurança sua biblioteca.",
   "openSettings": "Abrir opções",
   "selectMorePhotos": "Selecionar mais fotos",
   "existingUser": "Usuário existente",
@@ -1382,8 +1383,8 @@
   "onlyThem": "Apenas eles",
   "checkingModels": "Verificando modelos...",
   "enableMachineLearningBanner": "Ativar aprendizagem de máquina para busca mágica e reconhecimento facial",
-  "searchDiscoverEmptySection": "As imagens serão exibidas aqui quando o processamento for concluído",
-  "searchPersonsEmptySection": "As pessoas serão exibidas aqui quando o processamento for concluído",
+  "searchDiscoverEmptySection": "As imagens serão exibidas aqui quando o processamento e sincronização for concluído",
+  "searchPersonsEmptySection": "As pessoas serão exibidas aqui quando o processamento e sincronização for concluído",
   "viewersSuccessfullyAdded": "{count, plural, =0 {Adicionado 0 visualizadores} =1 {Adicionado 1 visualizador} other {Adicionado {count} visualizadores}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1479,20 +1480,6 @@
     }
   },
   "file": "Arquivo",
-  "searchSectionsLengthMismatch": "Incompatibilidade do comprimento de seções: {snapshotLength} != {searchLength}",
-  "@searchSectionsLengthMismatch": {
-    "description": "Appears in search tab page",
-    "placeholders": {
-      "snapshotLength": {
-        "type": "int",
-        "example": "1"
-      },
-      "searchLength": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "selectMailApp": "Selecionar aplicativo de e-mail",
   "selectAllShort": "Tudo",
   "@selectAllShort": {
@@ -1575,5 +1562,5 @@
   },
   "legacyInvite": "{email} convidou você para ser um contato confiável",
   "authToManageLegacy": "Autentique-se para gerenciar seus contatos confiáveis",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "useDifferentPlayerInfo": "Enfrentando problemas ao reproduzir este vídeo? Mantenha pressionado aqui ou tente outro reprodutor de vídeo"
 }

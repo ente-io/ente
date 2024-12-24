@@ -370,6 +370,5 @@
   "advanced": "Avansert",
   "general": "Generelt",
   "security": "Sikkerhet",
-  "authToViewYourRecoveryKey": "Vennligst autentiser deg for å se gjennopprettingsnøkkelen din",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "authToViewYourRecoveryKey": "Vennligst autentiser deg for å se gjennopprettingsnøkkelen din"
 }

@@ -377,7 +377,6 @@
   "@advancedSettings": {
     "description": "The text to display in the advanced settings section"
   },
-  "manageDeviceStorage": "Tvarkyti įrenginio podėlį",
   "manageDeviceStorageDesc": "Peržiūrėkite ir išvalykite vietinę podėlį.",
   "machineLearning": "Mašininis mokymasis",
   "mlConsent": "Įjungti mašininį mokymąsi",
@@ -572,6 +571,8 @@
   "leave": "Palikti",
   "rateTheApp": "Vertinti programą",
   "startBackup": "Pradėti kurti atsarginę kopiją",
+  "allowPermTitle": "Leisti prieigą prie nuotraukų",
+  "allowPermBody": "Iš nustatymų leiskite prieigą prie nuotraukų, kad „Ente“ galėtų rodyti ir kurti atsargines bibliotekos kopijas.",
   "existingUser": "Esamas naudotojas",
   "privateBackups": "Privačios atsarginės kopijos",
   "forYourMemories": "jūsų prisiminimams",
@@ -1064,8 +1065,8 @@
   "onlyThem": "Tik jiems",
   "checkingModels": "Tikrinami modeliai...",
   "enableMachineLearningBanner": "Įjunkite mašininį mokymąsi magiškai paieškai ir veidų atpažinimui",
-  "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas",
-  "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas",
+  "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
+  "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
   "viewersSuccessfullyAdded": "{count, plural, one {Pridėtas {count} žiūrėtojas} few {Pridėti {count} žiūrėtojai} many {Pridėta {count} žiūrėtojo}=0 {Pridėta 0 žiūrėtojų} =1 {Pridėtas 1 žiūrėtojas} other {Pridėta {count} žiūrėtojų}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1161,20 +1162,6 @@
     }
   },
   "file": "Failas",
-  "searchSectionsLengthMismatch": "Skyrių ilgio neatitikimas: {snapshotLength} != {searchLength}",
-  "@searchSectionsLengthMismatch": {
-    "description": "Appears in search tab page",
-    "placeholders": {
-      "snapshotLength": {
-        "type": "int",
-        "example": "1"
-      },
-      "searchLength": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "selectMailApp": "Pasirinkti pašto programą",
   "selectAllShort": "Viskas",
   "@selectAllShort": {
@@ -1257,5 +1244,5 @@
   },
   "legacyInvite": "{email} pakvietė jus būti patikimu kontaktu",
   "authToManageLegacy": "Nustatykite tapatybę, kad tvarkytumėte patikimus kontaktus",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "useDifferentPlayerInfo": "Turite problemų paleidžiant šį vaizdo įrašą? Ilgai paspauskite čia, kad išbandytumėte kitą leistuvę."
 }
