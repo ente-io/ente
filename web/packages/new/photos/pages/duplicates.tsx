@@ -86,7 +86,7 @@ const Page: React.FC = () => {
                 log.error("Failed to remove duplicates", e);
                 dispatch({ type: "dedupeFailed" });
             });
-    }, []);
+    }, [state.duplicateGroups]);
 
     const contents = (() => {
         switch (state.status) {

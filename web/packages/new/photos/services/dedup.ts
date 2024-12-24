@@ -4,6 +4,7 @@ import { ensureLocalUser } from "@/base/local-user";
 import type { EnteFile } from "@/media/file";
 import { metadataHash } from "@/media/file-metadata";
 import { wait } from "@/utils/promise";
+import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import { createCollectionNameByID } from "./collection";
 import { getLocalCollections } from "./collections";
 import { getLocalFiles, uniqueFilesByID } from "./files";
@@ -193,7 +194,35 @@ export const deduceDuplicates = async () => {
 export const removeSelectedDuplicateGroups = async (
     duplicateGroups: DuplicateGroup[],
 ) => {
-    console.log(duplicateGroups);
-    // for (const duplicateGroup of duplicateGroups) {}
-    await wait(1000);
+    const selectedDuplicateGroups = duplicateGroups.filter((g) => g.isSelected);
+    for (const duplicateGroup of selectedDuplicateGroups) {
+        const fileToRetain = duplicateGroupFileToRetain(duplicateGroup);
+        console.log({ fileToRetain });
+    }
+    await wait(3000);
+};
+
+/**
+ * Find the most eligible file from amongst the duplicates to retain.
+ *
+ * Give preference to files which have a caption or edited name or edited time,
+ * otherwise pick arbitrarily.
+ */
+const duplicateGroupFileToRetain = (duplicateGroup: DuplicateGroup) => {
+    const filesWithCaption: EnteFile[] = [];
+    const filesWithOtherEdits: EnteFile[] = [];
+    for (const { file } of duplicateGroup.items) {
+        const pubMM = getPublicMagicMetadataSync(file);
+        if (!pubMM) continue;
+        if (pubMM.caption) filesWithCaption.push(file);
+        if (pubMM.editedName ?? pubMM.editedTime)
+            filesWithOtherEdits.push(file);
+    }
+
+    // Duplicate group items should not be empty, so we'll get something always.
+    return (
+        filesWithCaption[0] ??
+        filesWithOtherEdits[0] ??
+        duplicateGroup.items[0]!.file
+    );
 };
