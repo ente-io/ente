@@ -1,8 +1,7 @@
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
-import { EnteFile, hasFileHash } from "@/media/file";
-import type { Metadata } from "@/media/file-metadata";
-import { FileType } from "@/media/file-type";
+import { EnteFile } from "@/media/file";
+import { metadataHash, type Metadata } from "@/media/file-metadata";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 
@@ -65,6 +64,8 @@ export async function getDuplicates(
     }
 }
 
+const hasFileHash = (file: Metadata) => !!metadataHash(file);
+
 function getDupesGroupedBySameFileHashes(dupe: Duplicate) {
     const result: Duplicate[] = [];
 
@@ -103,9 +104,7 @@ function groupDupesByFileHashes(dupe: Duplicate) {
         .map((file) => {
             return {
                 file,
-                hash:
-                    file.metadata.hash ??
-                    `${file.metadata.imageHash}_${file.metadata.videoHash}`,
+                hash: metadataHash(file.metadata),
             };
         })
         .sort((firstFile, secondFile) => {
@@ -173,12 +172,5 @@ async function sortDuplicateFiles(
 }
 
 function areFileHashesSame(firstFile: Metadata, secondFile: Metadata) {
-    if (firstFile.fileType === FileType.livePhoto) {
-        return (
-            firstFile.imageHash === secondFile.imageHash &&
-            firstFile.videoHash === secondFile.videoHash
-        );
-    } else {
-        return firstFile.hash === secondFile.hash;
-    }
+    return metadataHash(firstFile) === metadataHash(secondFile);
 }

@@ -1,13 +1,36 @@
 export interface ThumbnailGridLayoutParams {
-    /** The inline padding (px) of the thumbnail grid. */
+    /**
+     * The overall width available to us.
+     *
+     * This is the height that is the input to the computation, stashed here so
+     * that other parts of the code downstream can also get at it if needed.
+     */
+    containerWidth: number;
+    /**
+     * `true` if the container width is classified as a smaller screen for the
+     * purpose of the thumbnail grid, and some dimensions are reduced to account
+     * for the lesser space available to us.
+     */
+    isSmallerLayout: boolean;
+    /**
+     * The inline padding (px) of the thumbnail grid.
+     */
     paddingInline: number;
-    /** The number of columns in the thumbnail grid. */
+    /**
+     * The number of columns in the thumbnail grid.
+     */
     columns: number;
-    /** The width (px) of each item. */
+    /**
+     * The width (px) of each item.
+     */
     itemWidth: number;
-    /** The height (px) of each item. */
+    /**
+     *  The height (px) of each item.
+     */
     itemHeight: number;
-    /** The gap (px) between each grid item. */
+    /**
+     * The gap (px) between each grid item.
+     */
     gap: number;
 }
 
@@ -22,6 +45,10 @@ export interface ThumbnailGridLayoutParams {
 export const computeThumbnailGridLayoutParams = (
     containerWidth: number,
 ): ThumbnailGridLayoutParams => {
+    const isSmallerLayout = !(
+        containerWidth >
+        MIN_COLUMNS * IMAGE_CONTAINER_MAX_WIDTH
+    );
     const paddingInline = getGapFromScreenEdge(containerWidth);
     const fittableColumns = getFractionFittableColumns(containerWidth);
 
@@ -36,6 +63,8 @@ export const computeThumbnailGridLayoutParams = (
     const gap = GAP_BTW_TILES;
 
     return {
+        containerWidth,
+        isSmallerLayout,
         paddingInline,
         columns,
         itemWidth,

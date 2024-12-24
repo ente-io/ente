@@ -1,6 +1,6 @@
 import { blobCache } from "@/base/blob-cache";
 import { mergeMetadata, type EnteFile, type Trash } from "@/media/file";
-import { FileType } from "@/media/file-type";
+import { metadataHash } from "@/media/file-metadata";
 import localForage from "@ente/shared/storage/localForage";
 
 const FILES_TABLE = "files";
@@ -66,6 +66,8 @@ export const sortFiles = (files: EnteFile[], sortAsc = false) => {
 };
 
 /**
+ * [Note: Collection Files]
+ *
  * File IDs themselves are unique across all the files for the user (in fact,
  * they're unique across all the files in an Ente instance). However, we still
  * can have multiple entries for the same file ID in our local database because
@@ -76,8 +78,14 @@ export const sortFiles = (files: EnteFile[], sortAsc = false) => {
  * have two "Collection File" entries for it, both with the same file ID, but
  * with different collection IDs.
  *
- * This function returns files such that only one of these entries (the newer
- * one in case of dupes) is returned.
+ * This function returns files such that only one of these entries is returned.
+ * The entry that is returned is arbitrary in general, this function just picks
+ * the first one for each unique file ID.
+ *
+ * If this function is invoked on a list on which {@link sortFiles} has already
+ * been called, which by default sorts such that the newest file is first, then
+ * this function's behaviour would be to return the newest file from among
+ * multiple files with the same ID but different collections.
  */
 export const uniqueFilesByID = (files: EnteFile[]) => {
     const seen = new Set<number>();
@@ -167,14 +175,10 @@ export const clearCachedThumbnailsIfChanged = async (
         // TODO: Add an extra truthy check the EnteFile type is null safe
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (!m1 || !m2) continue;
-        // Both files exist, have metadata, but their (appropriate) hashes
-        // differ, which indicates that the change was in the file's contents,
-        // not the metadata itself, and thus we should refresh the thumbnail.
-        if (
-            m1.fileType == FileType.livePhoto
-                ? m1.imageHash != m2.imageHash
-                : m1.hash != m2.hash
-        ) {
+        // Both files exist, have metadata, but their hashes differ, which
+        // indicates that the change was in the file's contents, not the
+        // metadata itself, and thus we should refresh the thumbnail.
+        if (metadataHash(m1) != metadataHash(m2)) {
             // This is an infrequent occurrence, so we lazily get the cache.
             const thumbnailCache = await blobCache("thumbs");
             const key = newFile.id.toString();
