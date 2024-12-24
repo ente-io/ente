@@ -1,5 +1,6 @@
 import { assertionFailed } from "@/base/assert";
 import { newID } from "@/base/id";
+import { ensureLocalUser } from "@/base/local-user";
 import type { EnteFile } from "@/media/file";
 import { metadataHash } from "@/media/file-metadata";
 import { wait } from "@/utils/promise";
@@ -81,10 +82,31 @@ export interface DuplicateGroup {
  * 4. Delete the remaining files.
  */
 export const deduceDuplicates = async () => {
-    // TODO: Ignore non-owned files.
-    const collectionFiles = await getLocalFiles("normal");
-    const files = uniqueFilesByID(collectionFiles);
+    // Find the user's ID.
+    const userID = ensureLocalUser().id;
 
+    // Find all non-hidden collections owned by the user, and also use that to
+    // keep a map of their names (we'll attach this info to the result later).
+    const nonHiddenCollections = await getLocalCollections("normal");
+    const nonHiddenOwnedCollections = nonHiddenCollections.filter(
+        ({ owner }) => owner.id == userID,
+    );
+    const allowedCollectionIDs = new Set(
+        nonHiddenOwnedCollections.map(({ id }) => id),
+    );
+    const collectionNameByID = createCollectionNameByID(
+        nonHiddenOwnedCollections,
+    );
+
+    // Final all non-hidden collection files owned by the user that are in a
+    // non-hidden owned collection.
+    const nonHiddenCollectionFiles = await getLocalFiles("normal");
+    const filteredCollectionFiles = nonHiddenCollectionFiles.filter((f) =>
+        allowedCollectionIDs.has(f.collectionID),
+    );
+
+    // Group the filtered collection files by their hashes.
+    const files = uniqueFilesByID(filteredCollectionFiles);
     const filesByHash = new Map<string, EnteFile[]>();
     for (const file of files) {
         const hash = metadataHash(file.metadata);
@@ -97,10 +119,8 @@ export const deduceDuplicates = async () => {
         filesByHash.set(hash, [...(filesByHash.get(hash) ?? []), file]);
     }
 
-    const collectionNameByID = createCollectionNameByID(
-        await getLocalCollections(),
-    );
-
+    // Construct the results from groups that have more than one file with the
+    // same hash.
     const duplicateGroups: DuplicateGroup[] = [];
 
     for (const duplicates of filesByHash.values()) {
