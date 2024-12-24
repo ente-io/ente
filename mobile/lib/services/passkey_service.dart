@@ -1,6 +1,6 @@
 import "package:flutter/cupertino.dart";
-import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/utils/dialog_util.dart";
 import 'package:url_launcher/url_launcher_string.dart';
@@ -11,11 +11,13 @@ class PasskeyService {
 
   final _enteDio = NetworkClient.instance.enteDio;
 
-  Future<String> getJwtToken() async {
+  Future<String> getAccountsUrl() async {
     final response = await _enteDio.get(
       "/users/accounts-token",
     );
-    return response.data!["accountsToken"] as String;
+    final accountsUrl = response.data!["accountsUrl"] ?? kAccountsUrl;
+    final jwtToken = response.data!["accountsToken"] as String;
+    return "$accountsUrl/passkeys?token=$jwtToken";
   }
 
   Future<bool> isPasskeyRecoveryEnabled() async {
@@ -46,8 +48,7 @@ class PasskeyService {
 
   Future<void> openPasskeyPage(BuildContext context) async {
     try {
-      final jwtToken = await getJwtToken();
-      final url = "$accountsUrl/passkeys?token=$jwtToken";
+      final url = await getAccountsUrl();
       await launchUrlString(
         url,
         mode: LaunchMode.externalApplication,
