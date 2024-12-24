@@ -1,3 +1,4 @@
+import { assertionFailed } from "@/base/assert";
 import { newID } from "@/base/id";
 import type { EnteFile } from "@/media/file";
 import { metadataHash } from "@/media/file-metadata";
@@ -133,6 +134,9 @@ export const deduceDuplicates = async () => {
                 const collectionName = collectionNameByID.get(
                     file.collectionID,
                 );
+                // Ignore duplicates for which we do not have a collection. This
+                // shouldn't really happen though, so retain an assert.
+                if (!collectionName) assertionFailed();
                 return collectionName ? { file, collectionName } : undefined;
             })
             .filter((item) => !!item);
@@ -146,8 +150,8 @@ export const deduceDuplicates = async () => {
             id: newID("dg_"),
             items,
             itemSize: size,
-            prunableCount: duplicates.length - 1,
-            prunableSize: size * (duplicates.length - 1),
+            prunableCount: items.length - 1,
+            prunableSize: size * (items.length - 1),
             isSelected: true,
         });
     }
