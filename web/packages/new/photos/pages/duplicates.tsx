@@ -230,7 +230,7 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
 
         case "deselectAll": {
             const duplicateGroups = state.duplicateGroups.map(
-                (duplicateGroup) => ({ ...duplicateGroup, selected: false }),
+                (duplicateGroup) => ({ ...duplicateGroup, isSelected: false }),
             );
             const { prunableCount, prunableSize } =
                 deducePrunableCountAndSize(duplicateGroups);
