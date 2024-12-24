@@ -1,6 +1,7 @@
 import { assertionFailed } from "@/base/assert";
 import { newID } from "@/base/id";
 import { ensureLocalUser } from "@/base/local-user";
+import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { metadataHash } from "@/media/file-metadata";
 import { wait } from "@/utils/promise";
@@ -190,16 +191,27 @@ export const deduceDuplicates = async () => {
  * unselected some of them (i.e. isSelected for such items would be `false`).
  *
  * This function will only process entries for which isSelected is `true`.
+ *
+ * @returns true if all selected duplicate groups were successfully removed, and
+ * false if there were any errors.
  */
 export const removeSelectedDuplicateGroups = async (
     duplicateGroups: DuplicateGroup[],
 ) => {
     const selectedDuplicateGroups = duplicateGroups.filter((g) => g.isSelected);
+    let allSuccess = true;
     for (const duplicateGroup of selectedDuplicateGroups) {
-        const fileToRetain = duplicateGroupFileToRetain(duplicateGroup);
-        console.log({ fileToRetain });
+        try {
+            const fileToRetain = duplicateGroupFileToRetain(duplicateGroup);
+            console.log({ fileToRetain });
+        } catch (e) {
+            log.warn("Failed to remove duplicate group", e);
+            allSuccess = false;
+        }
     }
+    // TODO: Remove me after testing the UI
     await wait(3000);
+    return allSuccess;
 };
 
 /**
