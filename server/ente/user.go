@@ -54,8 +54,8 @@ type EmailAuthorizationResponse struct {
 	EncryptedToken   string         `json:"encryptedToken,omitempty"`
 	Token            string         `json:"token,omitempty"`
 	PasskeySessionID string         `json:"passkeySessionID"`
-	// AccountUrl is the url used for passkey validation
-	AccountUrl         string `json:"accountUrl"`
+	// AccountsUrl is the url used for passkey validation
+	AccountsUrl        string `json:"accountsUrl"`
 	TwoFactorSessionID string `json:"twoFactorSessionID"`
 	// TwoFactorSessionIDV2 is set only if user has both passkey and two factor enabled.
 	// This is to ensure older clients keep using passkey flow when both are set. We can remove

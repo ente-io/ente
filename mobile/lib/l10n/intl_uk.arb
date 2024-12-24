@@ -818,7 +818,7 @@
   "referFriendsAnd2xYourPlan": "Запросіть друзів та подвойте свій план",
   "shareAlbumHint": "Відкрийте альбом та натисніть кнопку «Поділитися» у верхньому правому куті.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Елементи показують кількість днів, що залишилися до остаточного видалення",
-  "trashDaysLeft": "{count, plural, one {{count} день} few {{count} дні} many {{count} днів}=0 {Незабаром} =1 {1 день} other {{count} днів}}",
+  "trashDaysLeft": "{count, plural, =0 {Незабаром} =1 {1 день} other {{count} днів}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1385,26 +1385,6 @@
   "enableMachineLearningBanner": "Увімкніть машинне навчання для магічного пошуку та розпізнавання облич",
   "searchDiscoverEmptySection": "Зображення будуть показані тут після завершення оброблення та синхронізації",
   "searchPersonsEmptySection": "Люди будуть показані тут після завершення оброблення та синхронізації",
-  "viewersSuccessfullyAdded": "{count, plural, one {} few {Додано {count} глядачі} many {Додано {count} глядачів}=0 {Додано 0 глядачів} =1 {Додано 1 глядач} other {Додано {count} глядачів}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, one {} few {Додано {count} співавтора} many {Додано {count} співавторів}=0 {Додано 0 співавторів} =1 {Додано 1 співавтор} other {Додано {count} співавторів}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
   "accountIsAlreadyConfigured": "Обліковий запис уже налаштовано.",
   "sessionIdMismatch": "Невідповідність ідентифікатора сеансу",
   "@sessionIdMismatch": {
@@ -1470,15 +1450,6 @@
   },
   "currentlyRunning": "зараз працює",
   "ignored": "ігнорується",
-  "photosCount": "{count, plural, one {{count} фото} few {{count} фото} many {{count} фото}=0 {0 фото} =1 {1 фото} other {{count} фото}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Файл",
   "selectMailApp": "Вибрати застосунок пошти",
   "selectAllShort": "Усі",
