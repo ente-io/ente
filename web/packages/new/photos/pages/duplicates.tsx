@@ -619,18 +619,24 @@ const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
 }) => (
     <FocusVisibleButton
         sx={{ minWidth: "min(100%, 320px)", margin: "auto" }}
-        disabled={prunableCount == 0}
+        disabled={prunableCount == 0 || !!dedupeStatus}
         onClick={onRemoveDuplicates}
     >
-        <Stack sx={{ gap: 1 }}>
-            <Typography>{pt(`Delete ${prunableCount} items`)}</Typography>
-            <Typography variant="small" fontWeight={"normal"}>
-                {dedupeStatus ? (
-                    <CircularProgress color="accent" size="14px" />
-                ) : (
-                    formattedByteSize(prunableSize)
-                )}
-            </Typography>
+        <Stack sx={{ gap: 1, minHeight: "45px", justifyContent: "center" }}>
+            {dedupeStatus ? (
+                <Typography sx={{}}>
+                    <CircularProgress color="primary" size="24px" />
+                </Typography>
+            ) : (
+                <>
+                    <Typography>
+                        {pt(`Delete ${prunableCount} items`)}
+                    </Typography>
+                    <Typography variant="small" fontWeight={"normal"}>
+                        {formattedByteSize(prunableSize)}
+                    </Typography>
+                </>
+            )}
         </Stack>
     </FocusVisibleButton>
 );
