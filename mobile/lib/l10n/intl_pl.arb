@@ -1478,15 +1478,15 @@
     }
   },
   "file": "Plik",
-  "searchSectionsLengthMismatch": "Niezgodność długości sekcji: {snapshotLenght} != {searchLenght}",
+  "searchSectionsLengthMismatch": "Niezgodność długości sekcji: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
     "description": "Appears in search tab page",
     "placeholders": {
-      "snapshotLenght": {
+      "snapshotLength": {
         "type": "int",
         "example": "1"
       },
-      "searchLenght": {
+      "searchLength": {
         "type": "int",
         "example": "2"
       }

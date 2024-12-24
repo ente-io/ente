@@ -182,8 +182,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m62(count) =>
       "${Intl.plural(count, one: '${count} result found', other: '${count} results found')}";
 
-  static String m63(snapshotLenght, searchLenght) =>
-      "Sections length mismatch: ${snapshotLenght} != ${searchLenght}";
+  static String m63(snapshotLength, searchLength) =>
+      "Sections length mismatch: ${snapshotLength} != ${searchLength}";
 
   static String m4(count) => "${count} selected";
 
@@ -1134,7 +1134,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Magic search allows to search photos by their contents, e.g. \'flower\', \'red car\', \'identity documents\'"),
         "manage": MessageLookupByLibrary.simpleMessage("Manage"),
         "manageDeviceStorage":
-            MessageLookupByLibrary.simpleMessage("Manage device Cache"),
+            MessageLookupByLibrary.simpleMessage("Manage device cache"),
         "manageDeviceStorageDesc": MessageLookupByLibrary.simpleMessage(
             "Review and clear local cache storage."),
         "manageFamily": MessageLookupByLibrary.simpleMessage("Manage Family"),

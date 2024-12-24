@@ -1479,15 +1479,15 @@
     }
   },
   "file": "Datei",
-  "searchSectionsLengthMismatch": "Abschnittslänge stimmt nicht überein: {snapshotLenght} != {searchLenght}",
+  "searchSectionsLengthMismatch": "Abschnittslänge stimmt nicht überein: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
     "description": "Appears in search tab page",
     "placeholders": {
-      "snapshotLenght": {
+      "snapshotLength": {
         "type": "int",
         "example": "1"
       },
-      "searchLenght": {
+      "searchLength": {
         "type": "int",
         "example": "2"
       }

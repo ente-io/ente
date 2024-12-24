@@ -412,7 +412,7 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Kích thước lưới ảnh",
-  "manageDeviceStorage": "Manage device Cache",
+  "manageDeviceStorage": "Manage device cache",
   "manageDeviceStorageDesc": "Review and clear local cache storage.",
   "machineLearning": "Học máy",
   "mlConsent": "Kích hoạt học máy",
@@ -1479,15 +1479,15 @@
     }
   },
   "file": "Tệp",
-  "searchSectionsLengthMismatch": "Chiều dài các phần không khớp: {snapshotLenght} != {searchLenght}",
+  "searchSectionsLengthMismatch": "Chiều dài các phần không khớp: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
     "description": "Appears in search tab page",
     "placeholders": {
-      "snapshotLenght": {
+      "snapshotLength": {
         "type": "int",
         "example": "1"
       },
-      "searchLenght": {
+      "searchLength": {
         "type": "int",
         "example": "2"
       }

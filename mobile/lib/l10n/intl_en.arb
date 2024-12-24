@@ -412,7 +412,7 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Photo grid size",
-  "manageDeviceStorage": "Manage device Cache",
+  "manageDeviceStorage": "Manage device cache",
   "manageDeviceStorageDesc": "Review and clear local cache storage.",
   "machineLearning": "Machine learning",
   "mlConsent": "Enable machine learning",
@@ -1481,15 +1481,15 @@
     }
   },
   "file": "File",
-  "searchSectionsLengthMismatch": "Sections length mismatch: {snapshotLenght} != {searchLenght}",
+  "searchSectionsLengthMismatch": "Sections length mismatch: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
     "description": "Appears in search tab page",
     "placeholders": {
-      "snapshotLenght": {
+      "snapshotLength": {
         "type": "int",
         "example": "1"
       },
-      "searchLenght": {
+      "searchLength": {
         "type": "int",
         "example": "2"
       }

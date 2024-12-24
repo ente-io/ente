@@ -186,8 +186,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m62(count) =>
       "${Intl.plural(count, one: '${count} resultado encontrado', other: '${count} resultados encontrados')}";
 
-  static String m63(snapshotLenght, searchLenght) =>
-      "La longitud de las secciones no coincide: ${snapshotLenght} != ${searchLenght}";
+  static String m63(snapshotLength, searchLength) =>
+      "La longitud de las secciones no coincide: ${snapshotLength} != ${searchLength}";
 
   static String m4(count) => "${count} seleccionados";
 

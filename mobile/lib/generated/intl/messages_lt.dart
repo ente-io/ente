@@ -125,8 +125,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m62(count) =>
       "${Intl.plural(count, one: 'Rastas ${count} rezultatas', few: 'Rasti ${count} rezultatai', many: 'Rasta ${count} rezultato', other: 'Rasta ${count} rezultatų')}";
 
-  static String m63(snapshotLenght, searchLenght) =>
-      "Skyrių ilgio neatitikimas: ${snapshotLenght} != ${searchLenght}";
+  static String m63(snapshotLength, searchLength) =>
+      "Skyrių ilgio neatitikimas: ${snapshotLength} != ${searchLength}";
 
   static String m4(count) => "${count} pasirinkta";
 

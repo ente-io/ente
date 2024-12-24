@@ -1161,15 +1161,15 @@
     }
   },
   "file": "Failas",
-  "searchSectionsLengthMismatch": "Skyrių ilgio neatitikimas: {snapshotLenght} != {searchLenght}",
+  "searchSectionsLengthMismatch": "Skyrių ilgio neatitikimas: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
     "description": "Appears in search tab page",
     "placeholders": {
-      "snapshotLenght": {
+      "snapshotLength": {
         "type": "int",
         "example": "1"
       },
-      "searchLenght": {
+      "searchLength": {
         "type": "int",
         "example": "2"
       }
