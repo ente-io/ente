@@ -135,8 +135,8 @@ export default function Deduplicate() {
             const selectedFiles = getSelectedFiles(selected, duplicateFiles);
             await moveToTrash(selectedFiles);
 
-            // trashFiles above does an API request, we still need to update our
-            // local state.
+            // moveToTrash above does an API request, we still need to update
+            // our local state.
             //
             // Enhancement: This can be done in a more granular manner. Also, it
             // is better to funnel these syncs instead of adding these here and
