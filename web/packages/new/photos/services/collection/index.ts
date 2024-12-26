@@ -9,7 +9,16 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import type { User } from "@ente/shared/user/types";
 
-export const REQUEST_BATCH_SIZE = 1000;
+/**
+ * An reasonable but otherwise arbitrary number of items (e.g. files) to include
+ * in a single API request.
+ *
+ * Remote will reject too big payloads, and requests which affect multiple items
+ * (e.g. files when moving files to a collection) are expected to be batched to
+ * keep each request of a reasonable size. By default, we break the request into
+ * batches of 1000.
+ */
+const requestBatchSize = 1000;
 
 export const ARCHIVE_SECTION = -1;
 export const TRASH_SECTION = -2;
@@ -95,7 +104,7 @@ export const addToCollection = async (
 ) => {
     try {
         const token = getToken();
-        const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
+        const batchedFiles = batch(files, requestBatchSize);
         for (const batch of batchedFiles) {
             const fileKeysEncryptedWithNewCollection =
                 await encryptWithNewCollectionKey(collection, batch);
@@ -125,7 +134,7 @@ export const restoreToCollection = async (
 ) => {
     try {
         const token = getToken();
-        const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
+        const batchedFiles = batch(files, requestBatchSize);
         for (const batch of batchedFiles) {
             const fileKeysEncryptedWithNewCollection =
                 await encryptWithNewCollectionKey(collection, batch);
@@ -155,7 +164,7 @@ export const moveToCollection = async (
 ) => {
     try {
         const token = getToken();
-        const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
+        const batchedFiles = batch(files, requestBatchSize);
         for (const batch of batchedFiles) {
             const fileKeysEncryptedWithNewCollection =
                 await encryptWithNewCollectionKey(toCollection, batch);
