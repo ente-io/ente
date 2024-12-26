@@ -81,21 +81,36 @@ export const getCollectionUserFacingName = (collection: Collection) => {
 export const createCollectionNameByID = (collections: Collection[]) =>
     new Map(collections.map((c) => [c.id, getCollectionUserFacingName(c)]));
 
-export interface EncryptedFileKey {
+/**
+ * A CollectionFileItem represents a file in a API request to add, move or
+ * restore files to a particular collection.
+ */
+interface CollectionFileItem {
+    /**
+     * The file's ID.
+     */
     id: number;
+    /**
+     * The file's key (as a base64 string), encrypted with the key of the
+     * collection to which it is being added or moved.
+     */
     encryptedKey: string;
+    /**
+     * The nonce (as a base64 string) that was used during the encryption of
+     * {@link encryptedKey}.
+     */
     keyDecryptionNonce: string;
 }
 
 export interface AddToCollectionRequest {
     collectionID: number;
-    files: EncryptedFileKey[];
+    files: CollectionFileItem[];
 }
 
 export interface MoveToCollectionRequest {
     fromCollectionID: number;
     toCollectionID: number;
-    files: EncryptedFileKey[];
+    files: CollectionFileItem[];
 }
 
 export const addToCollection = async (
@@ -192,8 +207,8 @@ export const moveToCollection = async (
 const encryptWithNewCollectionKey = async (
     newCollection: Collection,
     files: EnteFile[],
-): Promise<EncryptedFileKey[]> => {
-    const fileKeysEncryptedWithNewCollection: EncryptedFileKey[] = [];
+): Promise<CollectionFileItem[]> => {
+    const fileKeysEncryptedWithNewCollection: CollectionFileItem[] = [];
     const cryptoWorker = await sharedCryptoWorker();
     for (const file of files) {
         const newEncryptedKey = await cryptoWorker.encryptToB64(
