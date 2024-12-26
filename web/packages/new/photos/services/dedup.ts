@@ -26,16 +26,24 @@ export interface DuplicateGroup {
      */
     items: {
         /**
-         * The underlying collection file.
+         * The underlying file to delete.
+         *
+         * This is one of the files from amongst {@link collectionFiles},
+         * arbitrarily picked to stand in for the entire set of files in the UI.
          */
         file: EnteFile;
         /**
-         * The IDs of the collections to which this file belongs.
+         * All the collection files for the underlying file.
+         *
+         * This includes {@link file} too.
          */
-        collectionIDs: number[];
+        collectionFiles: EnteFile[];
         /**
-         * The name of the collection (or of one of them, arbitrarily picked) to
-         * which this file belongs.
+         * The name of the collection to which {@link file} belongs.
+         *
+         * Like {@link file} itself, this is an arbitrary pick. Logically, none
+         * of the collections to which the file belongs are given more
+         * preference than the other.
          */
         collectionName: string;
     }[];
@@ -112,9 +120,9 @@ export const deduceDuplicates = async () => {
     );
 
     // Group the filtered collection files by their hashes, keeping only one
-    // entry per file ID, but also retaining all the collections IDs to which
-    // that file belongs.
-    const collectionIDsByFileID = new Map<number, number[]>();
+    // entry per file ID. We also retain all the collections files for a
+    // particular file ID.
+    const collectionFilesByFileID = new Map<number, EnteFile[]>();
     const filesByHash = new Map<string, EnteFile[]>();
     for (const file of filteredCollectionFiles) {
         const hash = metadataHash(file.metadata);
@@ -124,15 +132,15 @@ export const deduceDuplicates = async () => {
             continue;
         }
 
-        const collectionIDs = collectionIDsByFileID.get(file.id);
-        if (!collectionIDs) {
+        const collectionFiles = collectionFilesByFileID.get(file.id);
+        if (!collectionFiles) {
             // This is the first collection file we're seeing for a particular
             // file ID, so also create an entry in the filesByHash map.
             filesByHash.set(hash, [...(filesByHash.get(hash) ?? []), file]);
         }
-        collectionIDsByFileID.set(file.id, [
-            ...(collectionIDs ?? []),
-            file.collectionID,
+        collectionFilesByFileID.set(file.id, [
+            ...(collectionFiles ?? []),
+            file,
         ]);
     }
 
@@ -171,15 +179,15 @@ export const deduceDuplicates = async () => {
                 const collectionName = collectionNameByID.get(
                     file.collectionID,
                 );
-                const collectionIDs = collectionIDsByFileID.get(file.id);
+                const collectionFiles = collectionFilesByFileID.get(file.id);
                 // Ignore duplicates for which we do not have a collection. This
                 // shouldn't really happen though, so retain an assert.
-                if (!collectionName || !collectionIDs) {
+                if (!collectionName || !collectionFiles) {
                     assertionFailed();
                     return undefined;
                 }
 
-                return { file, collectionIDs, collectionName };
+                return { file, collectionFiles, collectionName };
             })
             .filter((item) => !!item);
         if (items.length < 2) continue;
@@ -222,15 +230,22 @@ export const removeSelectedDuplicateGroups = async (
     onProgress: (progress: number) => void,
 ) => {
     const selectedDuplicateGroups = duplicateGroups.filter((g) => g.isSelected);
-    let i = selectedDuplicateGroups.length;
+
+    // See: "Pruning duplicates" under [Note: Deduplication logic]. A tl;dr; is
+    //
+    // 1. For each selected duplicate group, determine the file to retain.
+    // 2. Add these to the user owned collections the other files exist in.
+    // 3. Delete the other files.
+    //
+
     for (const duplicateGroup of selectedDuplicateGroups) {
         await removeDuplicateGroup(duplicateGroup);
         console.log(onProgress);
-        onProgress(
-            ((selectedDuplicateGroups.length - i++) /
-                selectedDuplicateGroups.length) *
-                -100,
-        );
+        // onProgress(
+        //     ((selectedDuplicateGroups.length - i++) /
+        //         selectedDuplicateGroups.length) *
+        //         -100,
+        // );
     }
     return new Set(selectedDuplicateGroups.map((g) => g.id));
 };
@@ -239,10 +254,6 @@ export const removeSelectedDuplicateGroups = async (
  * Retain only file from amongst these duplicates whilst keeping the existing
  * collection entries intact.
  *
- * See: "Pruning duplicates" under [Note: Deduplication logic]. To summarize:
- * 1. Find the file to retain.
- * 2. Add it to the user owned collections the other files exist in.
- * 3. Delete the other files.
  */
 const removeDuplicateGroup = async (duplicateGroup: DuplicateGroup) => {
     const fileToRetain = duplicateGroupFileToRetain(duplicateGroup);
