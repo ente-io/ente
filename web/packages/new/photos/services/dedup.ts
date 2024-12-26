@@ -247,26 +247,33 @@ export const removeSelectedDuplicateGroups = async (
 
     for (const duplicateGroup of selectedDuplicateGroups) {
         const retainedItem = duplicateGroupItemToRetain(duplicateGroup);
+
         // Find the existing collection IDs to which this item already belongs.
         const existingCollectionIDs = new Set(
             retainedItem.collectionFiles.map((cf) => cf.collectionID),
         );
-        // For each item,
+
+        // For each item, find all the collections to which any of the files
+        // (except the file we're retaining) belongs.
+        const collectionIDs = new Set<number>();
         for (const item of duplicateGroup.items) {
-            // except the one we're retaining,
+            // Skip the item we're retaining,
             if (item.file.id == retainedItem.file.id) continue;
-            // Add the file we're retaining to each collection to which this
-            // item belongs.
+            // Determine the collections to which any of the item's files belong.
             for (const { collectionID } of item.collectionFiles) {
-                // Skip if already there
-                if (existingCollectionIDs.has(collectionID)) continue;
-                filesToAdd.set(collectionID, [
-                    ...(filesToAdd.get(collectionID) ?? []),
-                    retainedItem.file,
-                ]);
+                if (!existingCollectionIDs.has(collectionID))
+                    collectionIDs.add(collectionID);
             }
-            // Add it to the list of items to be trashed.
+            // Add the item's files to list of collection files to be trashed.
             filesToTrash = filesToTrash.concat(item.collectionFiles);
+        }
+
+        // Add the file we're retaining to these (uniqued) collections.
+        for (const collectionID of collectionIDs) {
+            filesToAdd.set(collectionID, [
+                ...(filesToAdd.get(collectionID) ?? []),
+                retainedItem.file,
+            ]);
         }
     }
 
