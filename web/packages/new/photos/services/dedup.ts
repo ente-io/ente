@@ -5,7 +5,7 @@ import type { EnteFile } from "@/media/file";
 import { metadataHash } from "@/media/file-metadata";
 import { wait } from "@/utils/promise";
 import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
-import { createCollectionNameByID } from "./collection";
+import { addToCollection, createCollectionNameByID } from "./collection";
 import { getLocalCollections } from "./collections";
 import { getLocalFiles } from "./files";
 
@@ -238,9 +238,50 @@ export const removeSelectedDuplicateGroups = async (
     // 3. Delete the other files.
     //
 
+    const filesToAdd = new Map<number, EnteFile[]>();
+    let filesToTrash: EnteFile[] = [];
+
     for (const duplicateGroup of selectedDuplicateGroups) {
-        await removeDuplicateGroup(duplicateGroup);
-        console.log(onProgress);
+        const retainedItem = duplicateGroupItemToRetain(duplicateGroup);
+        // Find the existing collection IDs to which this item already belongs.
+        const existingCollectionIDs = new Set(
+            retainedItem.collectionFiles.map((cf) => cf.collectionID),
+        );
+        // For each item,
+        for (const item of duplicateGroup.items) {
+            // except the one we're retaining,
+            if (item.file.id == retainedItem.file.id) continue;
+            // Add the file we're retaining to each collection to which this
+            // item belongs.
+            for (const { collectionID } of item.collectionFiles) {
+                // Skip if already there
+                if (existingCollectionIDs.has(collectionID)) continue;
+                filesToAdd.set(collectionID, [
+                    ...(filesToAdd.get(collectionID) ?? []),
+                    retainedItem.file,
+                ]);
+            }
+            // Add it to the list of items to be trashed.
+            filesToTrash = filesToTrash.concat(item.collectionFiles);
+        }
+    }
+
+    let np = 0;
+    const ntotal = filesToAdd.size + filesToTrash.length ? 1 : 0;
+    const tickProgress = () => onProgress((np++ / ntotal) * 100);
+
+    // Process the adds.
+    const collections = await getLocalCollections("normal");
+    const collectionsByID = new Map(collections.map((c) => [c.id, c]));
+    for (const [collectionID, collectionFiles] of filesToAdd.entries()) {
+        await addToCollection(collectionsByID.get(collectionID)!, collectionFiles)
+        tickProgress();
+    }
+
+    // Process the removes.
+    if (filesToTrash.length) {
+        // await trashFiles(filesToTrash);
+
         // onProgress(
         //     ((selectedDuplicateGroups.length - i++) /
         //         selectedDuplicateGroups.length) *
@@ -256,7 +297,6 @@ export const removeSelectedDuplicateGroups = async (
  *
  */
 const removeDuplicateGroup = async (duplicateGroup: DuplicateGroup) => {
-    const fileToRetain = duplicateGroupFileToRetain(duplicateGroup);
     console.log({ fileToRetain });
 
     // const collections;
@@ -265,26 +305,26 @@ const removeDuplicateGroup = async (duplicateGroup: DuplicateGroup) => {
 };
 
 /**
- * Find the most eligible file from amongst the duplicates to retain.
+ * Find the most eligible item from amongst the duplicates to retain.
  *
  * Give preference to files which have a caption or edited name or edited time,
  * otherwise pick arbitrarily.
  */
-const duplicateGroupFileToRetain = (duplicateGroup: DuplicateGroup) => {
-    const filesWithCaption: EnteFile[] = [];
-    const filesWithOtherEdits: EnteFile[] = [];
-    for (const { file } of duplicateGroup.items) {
-        const pubMM = getPublicMagicMetadataSync(file);
+const duplicateGroupItemToRetain = (duplicateGroup: DuplicateGroup) => {
+    const itemsWithCaption: DuplicateGroup["items"] = [];
+    const itemsWithOtherEdits: DuplicateGroup["items"] = [];
+    for (const item of duplicateGroup.items) {
+        const pubMM = getPublicMagicMetadataSync(item.file);
         if (!pubMM) continue;
-        if (pubMM.caption) filesWithCaption.push(file);
+        if (pubMM.caption) itemsWithCaption.push(item);
         if (pubMM.editedName ?? pubMM.editedTime)
-            filesWithOtherEdits.push(file);
+            itemsWithOtherEdits.push(item);
     }
 
     // Duplicate group items should not be empty, so we'll get something always.
     return (
-        filesWithCaption[0] ??
-        filesWithOtherEdits[0] ??
-        duplicateGroup.items[0]!.file
+        itemsWithCaption[0] ??
+        itemsWithOtherEdits[0] ??
+        duplicateGroup.items[0]!
     );
 };
