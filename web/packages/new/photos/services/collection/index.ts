@@ -1,4 +1,5 @@
 import { sharedCryptoWorker } from "@/base/crypto";
+import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { SUB_TYPE, type Collection } from "@/media/collection";
@@ -113,33 +114,31 @@ export interface MoveToCollectionRequest {
     files: CollectionFileItem[];
 }
 
+/**
+ * Make a remote request to add the given {@link files} to the given
+ * {@link collection}.
+ *
+ * Does not modify local state.
+ */
 export const addToCollection = async (
     collection: Collection,
     files: EnteFile[],
 ) => {
-    try {
-        const token = getToken();
-        const batchedFiles = batch(files, requestBatchSize);
-        for (const batch of batchedFiles) {
-            const fileKeysEncryptedWithNewCollection =
-                await encryptWithNewCollectionKey(collection, batch);
-
-            const requestBody: AddToCollectionRequest = {
-                collectionID: collection.id,
-                files: fileKeysEncryptedWithNewCollection,
-            };
-            await HTTPService.post(
-                await apiURL("/collections/add-files"),
-                requestBody,
-                null,
-                {
-                    "X-Auth-Token": token,
-                },
-            );
-        }
-    } catch (e) {
-        log.error("Add to collection Failed ", e);
-        throw e;
+    for (const batchFiles of batch(files, requestBatchSize)) {
+        const encryptedFileKeys = await encryptWithNewCollectionKey(
+            collection,
+            batchFiles,
+        );
+        ensureOk(
+            await fetch(await apiURL("/collections/add-files"), {
+                method: "POST",
+                headers: await authenticatedRequestHeaders(),
+                body: JSON.stringify({
+                    collectionID: collection.id,
+                    files: encryptedFileKeys,
+                }),
+            }),
+        );
     }
 };
 
