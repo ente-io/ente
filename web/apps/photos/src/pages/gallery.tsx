@@ -38,6 +38,7 @@ import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
 import {
     getAllLatestCollections,
     getAllLocalCollections,
+    syncTrash,
 } from "@/new/photos/services/collections";
 import {
     getLocalFiles,
@@ -120,7 +121,6 @@ import {
 } from "services/collectionService";
 import exportService from "services/export";
 import { preCollectionsAndFilesSync, sync } from "services/sync";
-import { syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
 import { isTokenValid } from "services/userService";
 import {

@@ -1,11 +1,13 @@
 import { isHiddenCollection } from "@/new/photos/services/collection";
-import { getAllLatestCollections } from "@/new/photos/services/collections";
+import {
+    getAllLatestCollections,
+    syncTrash,
+} from "@/new/photos/services/collections";
 import { syncFiles } from "@/new/photos/services/files";
 import { isMLSupported, mlStatusSync, mlSync } from "@/new/photos/services/ml";
 import { searchDataSync } from "@/new/photos/services/search";
 import { syncSettings } from "@/new/photos/services/settings";
 import { splitByPredicate } from "@/utils/array";
-import { syncTrash } from "./trashService";
 
 /**
  * Part 1 of {@link sync}. See TODO below for why this is split.

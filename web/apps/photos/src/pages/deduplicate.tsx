@@ -6,6 +6,7 @@ import { ALL_SECTION, moveToTrash } from "@/new/photos/services/collection";
 import {
     getAllLatestCollections,
     getLocalCollections,
+    syncTrash,
 } from "@/new/photos/services/collections";
 import {
     createFileCollectionIDs,
@@ -27,7 +28,6 @@ import { t } from "i18next";
 import { default as Router, default as router } from "next/router";
 import { createContext, useEffect, useState } from "react";
 import { Duplicate, getDuplicates } from "services/deduplicationService";
-import { syncTrash } from "services/trashService";
 import { SelectedState } from "types/gallery";
 import { getSelectedFiles } from "utils/file";
 
