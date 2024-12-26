@@ -1,13 +1,10 @@
 import { encryptBoxB64 } from "@/base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
-import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { SUB_TYPE, type Collection } from "@/media/collection";
 import { type EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
 import { batch } from "@/utils/array";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import type { User } from "@ente/shared/user/types";
 
 /**
@@ -142,64 +139,62 @@ export const addToCollection = async (
     }
 };
 
+/**
+ * Make a remote request to restore the given {@link files} to the given
+ * {@link collection}.
+ *
+ * Does not modify local state.
+ */
 export const restoreToCollection = async (
     collection: Collection,
     files: EnteFile[],
 ) => {
-    try {
-        const token = getToken();
-        const batchedFiles = batch(files, requestBatchSize);
-        for (const batch of batchedFiles) {
-            const fileKeysEncryptedWithNewCollection =
-                await encryptWithCollectionKey(collection, batch);
-
-            const requestBody: AddToCollectionRequest = {
-                collectionID: collection.id,
-                files: fileKeysEncryptedWithNewCollection,
-            };
-            await HTTPService.post(
-                await apiURL("/collections/restore-files"),
-                requestBody,
-                null,
-                {
-                    "X-Auth-Token": token,
-                },
-            );
-        }
-    } catch (e) {
-        log.error("restore to collection Failed ", e);
-        throw e;
+    for (const batchFiles of batch(files, requestBatchSize)) {
+        const encryptedFileKeys = await encryptWithCollectionKey(
+            collection,
+            batchFiles,
+        );
+        ensureOk(
+            await fetch(await apiURL("/collections/restore-files"), {
+                method: "POST",
+                headers: await authenticatedRequestHeaders(),
+                body: JSON.stringify({
+                    collectionID: collection.id,
+                    files: encryptedFileKeys,
+                }),
+            }),
+        );
     }
 };
+
+/**
+ * Make a remote request to move the given {@link files} from a collection (as
+ * identified by its {@link fromCollectionID}) to the given
+ * {@link toCollection}.
+ *
+ * Does not modify local state.
+ */
 export const moveToCollection = async (
     fromCollectionID: number,
     toCollection: Collection,
     files: EnteFile[],
 ) => {
-    try {
-        const token = getToken();
-        const batchedFiles = batch(files, requestBatchSize);
-        for (const batch of batchedFiles) {
-            const fileKeysEncryptedWithNewCollection =
-                await encryptWithCollectionKey(toCollection, batch);
-
-            const requestBody: MoveToCollectionRequest = {
-                fromCollectionID: fromCollectionID,
-                toCollectionID: toCollection.id,
-                files: fileKeysEncryptedWithNewCollection,
-            };
-            await HTTPService.post(
-                await apiURL("/collections/move-files"),
-                requestBody,
-                null,
-                {
-                    "X-Auth-Token": token,
-                },
-            );
-        }
-    } catch (e) {
-        log.error("move to collection Failed ", e);
-        throw e;
+    for (const batchFiles of batch(files, requestBatchSize)) {
+        const encryptedFileKeys = await encryptWithCollectionKey(
+            toCollection,
+            batchFiles,
+        );
+        ensureOk(
+            await fetch(await apiURL("/collections/move-files"), {
+                method: "POST",
+                headers: await authenticatedRequestHeaders(),
+                body: JSON.stringify({
+                    fromCollectionID: fromCollectionID,
+                    toCollectionID: toCollection.id,
+                    files: encryptedFileKeys,
+                }),
+            }),
+        );
     }
 };
 
