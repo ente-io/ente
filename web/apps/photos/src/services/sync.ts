@@ -1,11 +1,16 @@
+import { isHiddenCollection } from "@/new/photos/services/collection";
 import { isMLSupported, mlStatusSync, mlSync } from "@/new/photos/services/ml";
 import { searchDataSync } from "@/new/photos/services/search";
 import { syncSettings } from "@/new/photos/services/settings";
+import { splitByPredicate } from "@/utils/array";
+import { getAllLatestCollections } from "./collectionService";
+import { syncFiles } from "./fileService";
+import { syncTrash } from "./trashService";
 
 /**
  * Part 1 of {@link sync}. See TODO below for why this is split.
  */
-export const preFileInfoSync = async () => {
+export const preCollectionsAndFilesSync = async () => {
     await Promise.all([syncSettings(), isMLSupported && mlStatusSync()]);
 };
 
@@ -33,4 +38,38 @@ export const sync = async () => {
     // ML sync might take a very long time for initial indexing, so don't wait
     // for it to finish.
     void mlSync();
+};
+
+/**
+ * Sync our local file and collection state with remote.
+ *
+ * This is a subset of {@link sync}, independently exposed for use at times when
+ * we only want to sync collections and files (e.g. we just made some API
+ * request that modified collections or files, and so now want to sync our local
+ * changes to match remote).
+ *
+ * A bespoke version of this in currently used by the gallery component when it
+ * syncs - it needs a broken down, bespoke version because it also keeps local
+ * state variables that need to be updated with the various callbacks that we
+ * ignore in this version.
+ */
+export const syncFilesAndCollections = async () => {
+    const allCollections = await getAllLatestCollections();
+    const [hiddenCollections, normalCollections] = splitByPredicate(
+        allCollections,
+        isHiddenCollection,
+    );
+    await syncFiles(
+        "normal",
+        normalCollections,
+        () => {},
+        () => {},
+    );
+    await syncFiles(
+        "hidden",
+        hiddenCollections,
+        () => {},
+        () => {},
+    );
+    await syncTrash(allCollections, () => {});
 };

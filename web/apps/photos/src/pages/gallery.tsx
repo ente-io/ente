@@ -116,7 +116,7 @@ import {
     getAllLatestCollections,
 } from "services/collectionService";
 import { syncFiles } from "services/fileService";
-import { preFileInfoSync, sync } from "services/sync";
+import { preCollectionsAndFilesSync, sync } from "services/sync";
 import { syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
 import { isTokenValid } from "services/userService";
@@ -566,7 +566,7 @@ export default function Gallery() {
                 throw new Error(CustomError.SESSION_EXPIRED);
             }
             !silent && showLoadingBar();
-            await preFileInfoSync();
+            await preCollectionsAndFilesSync();
             const allCollections = await getAllLatestCollections();
             const [hiddenCollections, collections] = splitByPredicate(
                 allCollections,
