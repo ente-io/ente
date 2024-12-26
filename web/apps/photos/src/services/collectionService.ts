@@ -33,8 +33,11 @@ import {
     getAllLocalCollections,
     getLocalCollections,
 } from "@/new/photos/services/collections";
-import { groupFilesByCollectionID } from "@/new/photos/services/file";
-import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
+import {
+    getLocalFiles,
+    groupFilesByCollectionID,
+    sortFiles,
+} from "@/new/photos/services/files";
 import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import type { FamilyData } from "@/new/photos/services/user-details";
 import { batch } from "@/utils/array";
