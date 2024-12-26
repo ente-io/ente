@@ -2,7 +2,6 @@ import { encryptMetadataJSON, sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import {
-    AddToCollectionRequest,
     Collection,
     CollectionMagicMetadata,
     CollectionMagicMetadataProps,
@@ -11,8 +10,6 @@ import {
     CollectionType,
     CreatePublicAccessTokenRequest,
     EncryptedCollection,
-    EncryptedFileKey,
-    MoveToCollectionRequest,
     PublicURL,
     RemoveFromCollectionRequest,
     SUB_TYPE,
@@ -21,8 +18,10 @@ import {
 import { EncryptedMagicMetadata, EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
 import {
+    addToCollection,
     isDefaultHiddenCollection,
     isHiddenCollection,
+    moveToCollection,
 } from "@/new/photos/services/collection";
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
 import {
@@ -33,8 +32,11 @@ import {
     getAllLocalCollections,
     getLocalCollections,
 } from "@/new/photos/services/collections";
-import { groupFilesByCollectionID } from "@/new/photos/services/file";
-import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
+import {
+    getLocalFiles,
+    groupFilesByCollectionID,
+    sortFiles,
+} from "@/new/photos/services/files";
 import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import type { FamilyData } from "@/new/photos/services/user-details";
 import { batch } from "@/utils/array";
@@ -419,119 +421,6 @@ export const removeFromFavorites = async (file: EnteFile) => {
     }
 };
 
-export const addToCollection = async (
-    collection: Collection,
-    files: EnteFile[],
-) => {
-    try {
-        const token = getToken();
-        const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
-        for (const batch of batchedFiles) {
-            const fileKeysEncryptedWithNewCollection =
-                await encryptWithNewCollectionKey(collection, batch);
-
-            const requestBody: AddToCollectionRequest = {
-                collectionID: collection.id,
-                files: fileKeysEncryptedWithNewCollection,
-            };
-            await HTTPService.post(
-                await apiURL("/collections/add-files"),
-                requestBody,
-                null,
-                {
-                    "X-Auth-Token": token,
-                },
-            );
-        }
-    } catch (e) {
-        log.error("Add to collection Failed ", e);
-        throw e;
-    }
-};
-
-export const restoreToCollection = async (
-    collection: Collection,
-    files: EnteFile[],
-) => {
-    try {
-        const token = getToken();
-        const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
-        for (const batch of batchedFiles) {
-            const fileKeysEncryptedWithNewCollection =
-                await encryptWithNewCollectionKey(collection, batch);
-
-            const requestBody: AddToCollectionRequest = {
-                collectionID: collection.id,
-                files: fileKeysEncryptedWithNewCollection,
-            };
-            await HTTPService.post(
-                await apiURL("/collections/restore-files"),
-                requestBody,
-                null,
-                {
-                    "X-Auth-Token": token,
-                },
-            );
-        }
-    } catch (e) {
-        log.error("restore to collection Failed ", e);
-        throw e;
-    }
-};
-export const moveToCollection = async (
-    fromCollectionID: number,
-    toCollection: Collection,
-    files: EnteFile[],
-) => {
-    try {
-        const token = getToken();
-        const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
-        for (const batch of batchedFiles) {
-            const fileKeysEncryptedWithNewCollection =
-                await encryptWithNewCollectionKey(toCollection, batch);
-
-            const requestBody: MoveToCollectionRequest = {
-                fromCollectionID: fromCollectionID,
-                toCollectionID: toCollection.id,
-                files: fileKeysEncryptedWithNewCollection,
-            };
-            await HTTPService.post(
-                await apiURL("/collections/move-files"),
-                requestBody,
-                null,
-                {
-                    "X-Auth-Token": token,
-                },
-            );
-        }
-    } catch (e) {
-        log.error("move to collection Failed ", e);
-        throw e;
-    }
-};
-
-const encryptWithNewCollectionKey = async (
-    newCollection: Collection,
-    files: EnteFile[],
-): Promise<EncryptedFileKey[]> => {
-    const fileKeysEncryptedWithNewCollection: EncryptedFileKey[] = [];
-    const cryptoWorker = await sharedCryptoWorker();
-    for (const file of files) {
-        const newEncryptedKey = await cryptoWorker.encryptToB64(
-            file.key,
-            newCollection.key,
-        );
-        const encryptedKey = newEncryptedKey.encryptedData;
-        const keyDecryptionNonce = newEncryptedKey.nonce;
-
-        fileKeysEncryptedWithNewCollection.push({
-            id: file.id,
-            encryptedKey,
-            keyDecryptionNonce,
-        });
-    }
-    return fileKeysEncryptedWithNewCollection;
-};
 export const removeFromCollection = async (
     collectionID: number,
     toRemoveFiles: EnteFile[],

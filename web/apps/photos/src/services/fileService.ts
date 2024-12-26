@@ -10,9 +10,9 @@ import {
     FileWithUpdatedPublicMagicMetadata,
     TrashRequest,
 } from "@/media/file";
-import { getLatestVersionFiles } from "@/new/photos/services/file";
 import {
     clearCachedThumbnailsIfChanged,
+    getLatestVersionFiles,
     getLocalFiles,
     setLocalFiles,
 } from "@/new/photos/services/files";

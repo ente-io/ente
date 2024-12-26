@@ -13,9 +13,12 @@ import { EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
 import {
     DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
+    addToCollection,
     findDefaultHiddenCollectionIDs,
     isHiddenCollection,
     isIncomingShare,
+    moveToCollection,
+    restoreToCollection,
 } from "@/new/photos/services/collection";
 import {
     getAllLocalCollections,
@@ -28,11 +31,8 @@ import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import {
-    addToCollection,
     createAlbum,
-    moveToCollection,
     removeFromCollection,
-    restoreToCollection,
     unhideToCollection,
     updateCollectionMagicMetadata,
     updatePublicCollectionMagicMetadata,

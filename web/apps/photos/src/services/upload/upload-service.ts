@@ -29,6 +29,7 @@ import {
 } from "@/media/file-metadata";
 import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
+import { addToCollection } from "@/new/photos/services/collection";
 import { extractExif } from "@/new/photos/services/exif";
 import {
     getNonEmptyMagicMetadataProps,
@@ -42,7 +43,6 @@ import {
 import { mergeUint8Arrays } from "@/utils/array";
 import { ensureInteger, ensureNumber } from "@/utils/ensure";
 import { CustomError, handleUploadError } from "@ente/shared/error";
-import { addToCollection } from "services/collectionService";
 import { type LivePhotoAssets } from "services/upload/uploadManager";
 import * as convert from "xml-js";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";

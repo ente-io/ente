@@ -8,7 +8,7 @@ import { wait } from "@/utils/promise";
 import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import { createCollectionNameByID } from "./collection";
 import { getLocalCollections } from "./collections";
-import { getLocalFiles, uniqueFilesByID } from "./files";
+import { getLocalFiles } from "./files";
 
 /**
  * A group of duplicates as shown in the UI.
@@ -31,7 +31,12 @@ export interface DuplicateGroup {
          */
         file: EnteFile;
         /**
-         * The name of the collection to which this file belongs.
+         * The IDs of the collections to which this file belongs.
+         */
+        collectionIDs: number[];
+        /**
+         * The name of the collection (or of one of them, arbitrarily picked) to
+         * which this file belongs.
          */
         collectionName: string;
     }[];
@@ -107,10 +112,12 @@ export const deduceDuplicates = async () => {
         allowedCollectionIDs.has(f.collectionID),
     );
 
-    // Group the filtered collection files by their hashes.
-    const files = uniqueFilesByID(filteredCollectionFiles);
+    // Group the filtered collection files by their hashes, keeping only one
+    // entry per file ID, but also retaining all the collections IDs to which
+    // that file belongs.
+    const collectionIDsByFileID = new Map<number, number[]>();
     const filesByHash = new Map<string, EnteFile[]>();
-    for (const file of files) {
+    for (const file of filteredCollectionFiles) {
         const hash = metadataHash(file.metadata);
         if (!hash) {
             // Some very old files uploaded by ancient versions of Ente might
@@ -118,7 +125,16 @@ export const deduceDuplicates = async () => {
             continue;
         }
 
-        filesByHash.set(hash, [...(filesByHash.get(hash) ?? []), file]);
+        const collectionIDs = collectionIDsByFileID.get(file.id);
+        if (!collectionIDs) {
+            // This is the first collection file we're seeing for a particular
+            // file ID, so also create an entry in the filesByHash map.
+            filesByHash.set(hash, [...(filesByHash.get(hash) ?? []), file]);
+        }
+        collectionIDsByFileID.set(file.id, [
+            ...(collectionIDs ?? []),
+            file.collectionID,
+        ]);
     }
 
     // Construct the results from groups that have more than one file with the
@@ -156,10 +172,15 @@ export const deduceDuplicates = async () => {
                 const collectionName = collectionNameByID.get(
                     file.collectionID,
                 );
+                const collectionIDs = collectionIDsByFileID.get(file.id);
                 // Ignore duplicates for which we do not have a collection. This
                 // shouldn't really happen though, so retain an assert.
-                if (!collectionName) assertionFailed();
-                return collectionName ? { file, collectionName } : undefined;
+                if (!collectionName || !collectionIDs) {
+                    assertionFailed();
+                    return undefined;
+                }
+
+                return { file, collectionIDs, collectionName };
             })
             .filter((item) => !!item);
         if (items.length < 2) continue;
@@ -217,9 +238,20 @@ export const removeSelectedDuplicateGroups = async (
     return allSuccess;
 };
 
+/**
+ * Retain only file from amongst these duplicates whilst keeping the existing
+ * collection entries intact.
+ *
+ * See: "Pruning duplicates" under [Note: Deduplication logic]. To summarize:
+ * 1. Find the file to retain.
+ * 2. Add it to the user owned collections the other files exist in.
+ * 3. Delete the other files.
+ */
 const removeDuplicateGroup = async (duplicateGroup: DuplicateGroup) => {
     const fileToRetain = duplicateGroupFileToRetain(duplicateGroup);
     console.log({ fileToRetain });
+
+    // const collections;
     // TODO: Remove me after testing the UI
     await wait(1000);
 };
