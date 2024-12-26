@@ -1,6 +1,15 @@
+import { sharedCryptoWorker } from "@/base/crypto";
+import log from "@/base/log";
+import { apiURL } from "@/base/origins";
 import { SUB_TYPE, type Collection } from "@/media/collection";
+import { type EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
+import { batch } from "@/utils/array";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import type { User } from "@ente/shared/user/types";
+
+export const REQUEST_BATCH_SIZE = 1000;
 
 export const ARCHIVE_SECTION = -1;
 export const TRASH_SECTION = -2;
@@ -62,3 +71,134 @@ export const getCollectionUserFacingName = (collection: Collection) => {
  */
 export const createCollectionNameByID = (collections: Collection[]) =>
     new Map(collections.map((c) => [c.id, getCollectionUserFacingName(c)]));
+
+export interface EncryptedFileKey {
+    id: number;
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+}
+
+export interface AddToCollectionRequest {
+    collectionID: number;
+    files: EncryptedFileKey[];
+}
+
+export interface MoveToCollectionRequest {
+    fromCollectionID: number;
+    toCollectionID: number;
+    files: EncryptedFileKey[];
+}
+
+export const addToCollection = async (
+    collection: Collection,
+    files: EnteFile[],
+) => {
+    try {
+        const token = getToken();
+        const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
+        for (const batch of batchedFiles) {
+            const fileKeysEncryptedWithNewCollection =
+                await encryptWithNewCollectionKey(collection, batch);
+
+            const requestBody: AddToCollectionRequest = {
+                collectionID: collection.id,
+                files: fileKeysEncryptedWithNewCollection,
+            };
+            await HTTPService.post(
+                await apiURL("/collections/add-files"),
+                requestBody,
+                null,
+                {
+                    "X-Auth-Token": token,
+                },
+            );
+        }
+    } catch (e) {
+        log.error("Add to collection Failed ", e);
+        throw e;
+    }
+};
+
+export const restoreToCollection = async (
+    collection: Collection,
+    files: EnteFile[],
+) => {
+    try {
+        const token = getToken();
+        const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
+        for (const batch of batchedFiles) {
+            const fileKeysEncryptedWithNewCollection =
+                await encryptWithNewCollectionKey(collection, batch);
+
+            const requestBody: AddToCollectionRequest = {
+                collectionID: collection.id,
+                files: fileKeysEncryptedWithNewCollection,
+            };
+            await HTTPService.post(
+                await apiURL("/collections/restore-files"),
+                requestBody,
+                null,
+                {
+                    "X-Auth-Token": token,
+                },
+            );
+        }
+    } catch (e) {
+        log.error("restore to collection Failed ", e);
+        throw e;
+    }
+};
+export const moveToCollection = async (
+    fromCollectionID: number,
+    toCollection: Collection,
+    files: EnteFile[],
+) => {
+    try {
+        const token = getToken();
+        const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
+        for (const batch of batchedFiles) {
+            const fileKeysEncryptedWithNewCollection =
+                await encryptWithNewCollectionKey(toCollection, batch);
+
+            const requestBody: MoveToCollectionRequest = {
+                fromCollectionID: fromCollectionID,
+                toCollectionID: toCollection.id,
+                files: fileKeysEncryptedWithNewCollection,
+            };
+            await HTTPService.post(
+                await apiURL("/collections/move-files"),
+                requestBody,
+                null,
+                {
+                    "X-Auth-Token": token,
+                },
+            );
+        }
+    } catch (e) {
+        log.error("move to collection Failed ", e);
+        throw e;
+    }
+};
+
+const encryptWithNewCollectionKey = async (
+    newCollection: Collection,
+    files: EnteFile[],
+): Promise<EncryptedFileKey[]> => {
+    const fileKeysEncryptedWithNewCollection: EncryptedFileKey[] = [];
+    const cryptoWorker = await sharedCryptoWorker();
+    for (const file of files) {
+        const newEncryptedKey = await cryptoWorker.encryptToB64(
+            file.key,
+            newCollection.key,
+        );
+        const encryptedKey = newEncryptedKey.encryptedData;
+        const keyDecryptionNonce = newEncryptedKey.nonce;
+
+        fileKeysEncryptedWithNewCollection.push({
+            id: file.id,
+            encryptedKey,
+            keyDecryptionNonce,
+        });
+    }
+    return fileKeysEncryptedWithNewCollection;
+};

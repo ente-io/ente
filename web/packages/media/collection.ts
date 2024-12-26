@@ -95,23 +95,6 @@ export interface CreatePublicAccessTokenRequest {
     deviceLimit?: number;
 }
 
-export interface EncryptedFileKey {
-    id: number;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-}
-
-export interface AddToCollectionRequest {
-    collectionID: number;
-    files: EncryptedFileKey[];
-}
-
-export interface MoveToCollectionRequest {
-    fromCollectionID: number;
-    toCollectionID: number;
-    files: EncryptedFileKey[];
-}
-
 export interface collectionAttributes {
     encryptedPath?: string;
     pathDecryptionNonce?: string;
