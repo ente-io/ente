@@ -19,13 +19,14 @@ import SortIcon from "@mui/icons-material/Sort";
 import {
     Box,
     Checkbox,
-    CircularProgress,
     Divider,
     IconButton,
+    LinearProgress,
     Stack,
     styled,
     Tooltip,
     Typography,
+    type LinearProgressProps,
 } from "@mui/material";
 import { useRouter } from "next/router";
 import React, {
@@ -641,11 +642,18 @@ const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
         disabled={prunableCount == 0 || isDeduping}
         onClick={onRemoveDuplicates}
     >
-        <Stack sx={{ gap: 1, minHeight: "45px", justifyContent: "center" }}>
+        <Stack
+            sx={{
+                gap: 1,
+                // Prevent a layout shift by giving a minHeight that is larger
+                // than all expected states.
+                minHeight: "45px",
+                justifyContent: "center",
+                flex: 1,
+            }}
+        >
             {isDeduping ? (
-                <Typography sx={{}}>
-                    <CircularProgress color="primary" size="24px" />
-                </Typography>
+                <LinearProgressWithLabel value={50} />
             ) : (
                 <>
                     <Typography>
@@ -658,4 +666,17 @@ const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
             )}
         </Stack>
     </FocusVisibleButton>
+);
+
+interface LinearProgressWithLabelProps {
+    value: Exclude<LinearProgressProps["value"], undefined>;
+}
+
+export const LinearProgressWithLabel: React.FC<
+    LinearProgressWithLabelProps
+> = ({ value }) => (
+    <Stack direction="row" sx={{ flex: 1, gap: 2, alignItems: "center" }}>
+        <LinearProgress sx={{ flex: 1 }} variant="determinate" value={value} />
+        <Typography sx={{ minWidth: "3ex" }}>`{Math.round(value)}%</Typography>
+    </Stack>
 );
