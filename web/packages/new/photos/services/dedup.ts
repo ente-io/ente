@@ -3,9 +3,12 @@ import { newID } from "@/base/id";
 import { ensureLocalUser } from "@/base/local-user";
 import type { EnteFile } from "@/media/file";
 import { metadataHash } from "@/media/file-metadata";
-import { wait } from "@/utils/promise";
 import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
-import { addToCollection, createCollectionNameByID } from "./collection";
+import {
+    addToCollection,
+    createCollectionNameByID,
+    moveToTrash,
+} from "./collection";
 import { getLocalCollections } from "./collections";
 import { getLocalFiles } from "./files";
 
@@ -274,34 +277,20 @@ export const removeSelectedDuplicateGroups = async (
     const collections = await getLocalCollections("normal");
     const collectionsByID = new Map(collections.map((c) => [c.id, c]));
     for (const [collectionID, collectionFiles] of filesToAdd.entries()) {
-        await addToCollection(collectionsByID.get(collectionID)!, collectionFiles)
+        await addToCollection(
+            collectionsByID.get(collectionID)!,
+            collectionFiles,
+        );
         tickProgress();
     }
 
     // Process the removes.
     if (filesToTrash.length) {
-        // await trashFiles(filesToTrash);
-
-        // onProgress(
-        //     ((selectedDuplicateGroups.length - i++) /
-        //         selectedDuplicateGroups.length) *
-        //         -100,
-        // );
+        await moveToTrash(filesToTrash);
+        tickProgress();
     }
+
     return new Set(selectedDuplicateGroups.map((g) => g.id));
-};
-
-/**
- * Retain only file from amongst these duplicates whilst keeping the existing
- * collection entries intact.
- *
- */
-const removeDuplicateGroup = async (duplicateGroup: DuplicateGroup) => {
-    console.log({ fileToRetain });
-
-    // const collections;
-    // TODO: Remove me after testing the UI
-    await wait(1000);
 };
 
 /**
