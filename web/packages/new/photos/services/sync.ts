@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { isHiddenCollection } from "@/new/photos/services/collection";
 import {
     getAllLatestCollections,

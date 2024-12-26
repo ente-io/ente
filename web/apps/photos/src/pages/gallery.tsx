@@ -52,6 +52,7 @@ import {
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { initSettings } from "@/new/photos/services/settings";
+import { preCollectionsAndFilesSync, sync } from "@/new/photos/services/sync";
 import {
     initUserDetailsOrTriggerSync,
     redirectToCustomerPortal,
@@ -120,7 +121,6 @@ import {
     createUnCategorizedCollection,
 } from "services/collectionService";
 import exportService from "services/export";
-import { preCollectionsAndFilesSync, sync } from "services/sync";
 import uploadManager from "services/upload/uploadManager";
 import { isTokenValid } from "services/userService";
 import {
