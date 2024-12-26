@@ -355,18 +355,10 @@ Future<bool> deleteLocalFiles(
     // batches. Similar in Android, for large number of files, we have observed
     // that the library fails to delete any file. So, we initiate deletion in
     // batches.
-    if (deletedIDs.isEmpty) {
+    if (deletedIDs.isEmpty && Platform.isIOS) {
       deletedIDs.addAll(
-        await deleteLocalFilesInBatches(
-          context,
-          localAssetIDs,
-          maximumBatchSize: 1000,
-          minimumBatchSize: 10,
-        ),
+        await _iosDeleteLocalFilesInBatchesFallback(context, localAssetIDs),
       );
-      _logger
-          .severe("iOS free-space fallback, deleted ${deletedIDs.length} files "
-              "in batches}");
     }
 
     if (deletedIDs.isNotEmpty) {
@@ -655,4 +647,36 @@ Future<void> showDeleteSheet(
   } else {
     selectedFiles.clearAll();
   }
+}
+
+Future<List<String>> _iosDeleteLocalFilesInBatchesFallback(
+  BuildContext context,
+  List<String> localAssetIDs,
+) async {
+  int maximumBatchSize = 1000;
+  final List<String> deletedIDs = [];
+  do {
+    _logger.info(
+      "Trying to delete local files in batches with maximumBatchSize: $maximumBatchSize",
+    );
+    deletedIDs.addAll(
+      await deleteLocalFilesInBatches(
+        context,
+        localAssetIDs,
+        maximumBatchSize: maximumBatchSize,
+        minimumBatchSize: 10,
+      ),
+    );
+    if (deletedIDs.isEmpty) {
+      _logger.warning(
+        "Failed to delete local files in batchs with maximumBatchSize: $maximumBatchSize",
+      );
+    }
+    maximumBatchSize = max((maximumBatchSize ~/ 2), 10);
+  } while (deletedIDs.isEmpty && maximumBatchSize >= 10);
+
+  _logger.severe("iOS free-space fallback, deleted ${deletedIDs.length} files "
+      "in batches}");
+
+  return deletedIDs;
 }
