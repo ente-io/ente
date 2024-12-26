@@ -1,4 +1,4 @@
-import { sharedCryptoWorker } from "@/base/crypto";
+import { encryptBoxB64 } from "@/base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
@@ -125,7 +125,7 @@ export const addToCollection = async (
     files: EnteFile[],
 ) => {
     for (const batchFiles of batch(files, requestBatchSize)) {
-        const encryptedFileKeys = await encryptWithNewCollectionKey(
+        const encryptedFileKeys = await encryptWithCollectionKey(
             collection,
             batchFiles,
         );
@@ -151,7 +151,7 @@ export const restoreToCollection = async (
         const batchedFiles = batch(files, requestBatchSize);
         for (const batch of batchedFiles) {
             const fileKeysEncryptedWithNewCollection =
-                await encryptWithNewCollectionKey(collection, batch);
+                await encryptWithCollectionKey(collection, batch);
 
             const requestBody: AddToCollectionRequest = {
                 collectionID: collection.id,
@@ -181,7 +181,7 @@ export const moveToCollection = async (
         const batchedFiles = batch(files, requestBatchSize);
         for (const batch of batchedFiles) {
             const fileKeysEncryptedWithNewCollection =
-                await encryptWithNewCollectionKey(toCollection, batch);
+                await encryptWithCollectionKey(toCollection, batch);
 
             const requestBody: MoveToCollectionRequest = {
                 fromCollectionID: fromCollectionID,
@@ -203,25 +203,22 @@ export const moveToCollection = async (
     }
 };
 
-const encryptWithNewCollectionKey = async (
-    newCollection: Collection,
+/**
+ * Return an array of {@link CollectionFileItem}s, one for each file in
+ * {@link files}, containing the corresponding file' ID and keys, but this time
+ * encrypted using the key of the given {@link collection}.
+ */
+const encryptWithCollectionKey = async (
+    collection: Collection,
     files: EnteFile[],
-): Promise<CollectionFileItem[]> => {
-    const fileKeysEncryptedWithNewCollection: CollectionFileItem[] = [];
-    const cryptoWorker = await sharedCryptoWorker();
-    for (const file of files) {
-        const newEncryptedKey = await cryptoWorker.encryptToB64(
-            file.key,
-            newCollection.key,
-        );
-        const encryptedKey = newEncryptedKey.encryptedData;
-        const keyDecryptionNonce = newEncryptedKey.nonce;
-
-        fileKeysEncryptedWithNewCollection.push({
-            id: file.id,
-            encryptedKey,
-            keyDecryptionNonce,
-        });
-    }
-    return fileKeysEncryptedWithNewCollection;
-};
+): Promise<CollectionFileItem[]> =>
+    Promise.all(
+        files.map(async (file) => {
+            const box = await encryptBoxB64(file.key, collection.key);
+            return {
+                id: file.id,
+                encryptedKey: box.encryptedData,
+                keyDecryptionNonce: box.nonce,
+            };
+        }),
+    );
