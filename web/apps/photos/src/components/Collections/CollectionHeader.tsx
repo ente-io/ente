@@ -21,6 +21,7 @@ import type {
     CollectionSummary,
     CollectionSummaryType,
 } from "@/new/photos/services/collection/ui";
+import { clearLocalTrash, emptyTrash } from "@/new/photos/services/collections";
 import {
     isArchivedCollection,
     isPinnedCollection,
@@ -50,10 +51,6 @@ import { GalleryContext } from "pages/gallery";
 import React, { useCallback, useContext, useRef } from "react";
 import { Trans } from "react-i18next";
 import * as CollectionAPI from "services/collectionService";
-import {
-    emptyTrash,
-    clearLocalTrash,
-} from "@/new/photos/services/collections";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     changeCollectionOrder,
