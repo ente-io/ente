@@ -11,6 +11,7 @@ import {
 } from "./collection";
 import { getLocalCollections } from "./collections";
 import { getLocalFiles } from "./files";
+import { syncFilesAndCollections } from "./sync";
 
 /**
  * A group of duplicates as shown in the UI.
@@ -270,7 +271,7 @@ export const removeSelectedDuplicateGroups = async (
     }
 
     let np = 0;
-    const ntotal = filesToAdd.size + filesToTrash.length ? 1 : 0;
+    const ntotal = filesToAdd.size + filesToTrash.length ? 1 : 0 + /* sync */ 1;
     const tickProgress = () => onProgress((np++ / ntotal) * 100);
 
     // Process the adds.
@@ -289,6 +290,9 @@ export const removeSelectedDuplicateGroups = async (
         await moveToTrash(filesToTrash);
         tickProgress();
     }
+
+    await syncFilesAndCollections();
+    tickProgress();
 
     return new Set(selectedDuplicateGroups.map((g) => g.id));
 };
