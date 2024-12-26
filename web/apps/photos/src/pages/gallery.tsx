@@ -35,7 +35,10 @@ import {
     isHiddenCollection,
 } from "@/new/photos/services/collection";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
-import { getAllLocalCollections } from "@/new/photos/services/collections";
+import {
+    getAllLatestCollections,
+    getAllLocalCollections,
+} from "@/new/photos/services/collections";
 import {
     getLocalFiles,
     getLocalTrashedFiles,
@@ -114,7 +117,6 @@ import {
     constructUserIDToEmailMap,
     createAlbum,
     createUnCategorizedCollection,
-    getAllLatestCollections,
 } from "services/collectionService";
 import exportService from "services/export";
 import { preCollectionsAndFilesSync, sync } from "services/sync";

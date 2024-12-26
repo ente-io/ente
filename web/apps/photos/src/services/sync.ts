@@ -1,10 +1,10 @@
 import { isHiddenCollection } from "@/new/photos/services/collection";
+import { getAllLatestCollections } from "@/new/photos/services/collections";
+import { syncFiles } from "@/new/photos/services/files";
 import { isMLSupported, mlStatusSync, mlSync } from "@/new/photos/services/ml";
 import { searchDataSync } from "@/new/photos/services/search";
 import { syncSettings } from "@/new/photos/services/settings";
 import { splitByPredicate } from "@/utils/array";
-import { getAllLatestCollections } from "./collectionService";
-import { syncFiles } from "./fileService";
 import { syncTrash } from "./trashService";
 
 /**

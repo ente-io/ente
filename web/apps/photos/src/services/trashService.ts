@@ -7,6 +7,7 @@ import {
     Trash,
     type EnteFile,
 } from "@/media/file";
+import { getCollection } from "@/new/photos/services/collections";
 import {
     getLocalTrash,
     getTrashedFiles,
@@ -15,7 +16,6 @@ import {
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { getCollection } from "./collectionService";
 
 const TRASH_TIME = "trash-time";
 const DELETED_COLLECTION = "deleted-collection";
