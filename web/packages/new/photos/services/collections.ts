@@ -92,7 +92,8 @@ export const syncCollections = async () => {
     allCollectionsInstances.forEach((collection) => {
         if (
             !latestCollectionsInstances.has(collection.id) ||
-            // @ts-expect-error TODO fixme
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             latestCollectionsInstances.get(collection.id).updationTime <
                 collection.updationTime
         ) {
@@ -223,7 +224,8 @@ export const getCollectionWithSecrets = async (
     if (collection.magicMetadata?.data) {
         collectionMagicMetadata = {
             ...collection.magicMetadata,
-            // @ts-expect-error TODO fixme
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             data: await cryptoWorker.decryptMetadataJSON({
                 encryptedDataB64: collection.magicMetadata.data,
                 decryptionHeaderB64: collection.magicMetadata.header,
@@ -235,7 +237,8 @@ export const getCollectionWithSecrets = async (
     if (collection.pubMagicMetadata?.data) {
         collectionPublicMagicMetadata = {
             ...collection.pubMagicMetadata,
-            // @ts-expect-error TODO fixme
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             data: await cryptoWorker.decryptMetadataJSON({
                 encryptedDataB64: collection.pubMagicMetadata.data,
                 decryptionHeaderB64: collection.pubMagicMetadata.header,
@@ -248,7 +251,8 @@ export const getCollectionWithSecrets = async (
     if (collection.sharedMagicMetadata?.data) {
         collectionShareeMagicMetadata = {
             ...collection.sharedMagicMetadata,
-            // @ts-expect-error TODO fixme
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             data: await cryptoWorker.decryptMetadataJSON({
                 encryptedDataB64: collection.sharedMagicMetadata.data,
                 decryptionHeaderB64: collection.sharedMagicMetadata.header,
@@ -261,11 +265,14 @@ export const getCollectionWithSecrets = async (
         ...collection,
         name: collectionName,
         key: collectionKey,
-        // @ts-expect-error TODO fixme
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         magicMetadata: collectionMagicMetadata,
-        // @ts-expect-error TODO fixme
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         pubMagicMetadata: collectionPublicMagicMetadata,
-        // @ts-expect-error TODO fixme
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         sharedMagicMetadata: collectionShareeMagicMetadata,
     };
 };
@@ -276,12 +283,14 @@ export const getCollection = async (
     try {
         const token = getToken();
         if (!token) {
-            // @ts-expect-error TODO fixme
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             return;
         }
         const resp = await HTTPService.get(
             await apiURL(`/collections/${collectionID}`),
-            // @ts-expect-error TODO fixme
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             null,
             { "X-Auth-Token": token },
         );

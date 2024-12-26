@@ -315,7 +315,8 @@ export async function decryptFile(
         if (magicMetadata?.data) {
             fileMagicMetadata = {
                 ...file.magicMetadata,
-                // @ts-expect-error TODO update types
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
                 data: await worker.decryptMetadataJSON({
                     encryptedDataB64: magicMetadata.data,
                     decryptionHeaderB64: magicMetadata.header,
@@ -327,7 +328,8 @@ export async function decryptFile(
         if (pubMagicMetadata?.data) {
             filePubMagicMetadata = {
                 ...pubMagicMetadata,
-                // @ts-expect-error TODO update types
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
                 data: await worker.decryptMetadataJSON({
                     encryptedDataB64: pubMagicMetadata.data,
                     decryptionHeaderB64: pubMagicMetadata.header,
@@ -340,9 +342,11 @@ export async function decryptFile(
             key: fileKey,
             // @ts-expect-error TODO: Need to use zod here.
             metadata: fileMetadata,
-            // @ts-expect-error TODO update types
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             magicMetadata: fileMagicMetadata,
-            // @ts-expect-error TODO update types
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             pubMagicMetadata: filePubMagicMetadata,
         };
     } catch (e) {
