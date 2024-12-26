@@ -14,9 +14,9 @@ import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import {
     createCollectionNameByID,
-    getAllLocalCollections,
     getCollectionUserFacingName,
 } from "@/new/photos/services/collection";
+import { getAllLocalCollections } from "@/new/photos/services/collections";
 import {
     exportMetadataDirectoryName,
     exportTrashDirectoryName,

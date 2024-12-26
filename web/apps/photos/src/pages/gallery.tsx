@@ -32,10 +32,10 @@ import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import {
     ALL_SECTION,
     DUMMY_UNCATEGORIZED_COLLECTION,
-    getAllLocalCollections,
     isHiddenCollection,
 } from "@/new/photos/services/collection";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
+import { getAllLocalCollections } from "@/new/photos/services/collections";
 import {
     getLocalFiles,
     getLocalTrashedFiles,
