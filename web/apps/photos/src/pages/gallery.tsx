@@ -40,6 +40,7 @@ import {
     getLocalFiles,
     getLocalTrashedFiles,
     sortFiles,
+    syncFiles,
 } from "@/new/photos/services/files";
 import {
     filterSearchableFiles,
@@ -115,7 +116,7 @@ import {
     createUnCategorizedCollection,
     getAllLatestCollections,
 } from "services/collectionService";
-import { syncFiles } from "services/fileService";
+import exportService from "services/export";
 import { preCollectionsAndFilesSync, sync } from "services/sync";
 import { syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
@@ -577,13 +578,13 @@ export default function Gallery() {
                 collections,
                 hiddenCollections,
             });
-            await syncFiles(
+            const didUpdateNormalFiles = await syncFiles(
                 "normal",
                 collections,
                 (files) => dispatch({ type: "setFiles", files }),
                 (files) => dispatch({ type: "fetchFiles", files }),
             );
-            await syncFiles(
+            const didUpdateHiddenFiles = await syncFiles(
                 "hidden",
                 hiddenCollections,
                 (hiddenFiles) =>
@@ -591,6 +592,8 @@ export default function Gallery() {
                 (hiddenFiles) =>
                     dispatch({ type: "fetchHiddenFiles", hiddenFiles }),
             );
+            if (didUpdateNormalFiles || didUpdateHiddenFiles)
+                exportService.onLocalFilesUpdated();
             await syncTrash(allCollections, (trashedFiles: EnteFile[]) =>
                 dispatch({ type: "setTrashedFiles", trashedFiles }),
             );
