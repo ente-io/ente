@@ -2,7 +2,7 @@ import { stashRedirect } from "@/accounts/services/redirect";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import log from "@/base/log";
-import { ALL_SECTION } from "@/new/photos/services/collection";
+import { ALL_SECTION, moveToTrash } from "@/new/photos/services/collection";
 import { getLocalCollections } from "@/new/photos/services/collections";
 import {
     createFileCollectionIDs,
@@ -24,7 +24,7 @@ import { default as Router, default as router } from "next/router";
 import { createContext, useEffect, useState } from "react";
 import { getAllLatestCollections } from "services/collectionService";
 import { Duplicate, getDuplicates } from "services/deduplicationService";
-import { syncFiles, trashFiles } from "services/fileService";
+import { syncFiles } from "services/fileService";
 import { syncTrash } from "services/trashService";
 import { SelectedState } from "types/gallery";
 import { getSelectedFiles } from "utils/file";
@@ -133,7 +133,7 @@ export default function Deduplicate() {
         try {
             showLoadingBar();
             const selectedFiles = getSelectedFiles(selected, duplicateFiles);
-            await trashFiles(selectedFiles);
+            await moveToTrash(selectedFiles);
 
             // trashFiles above does an API request, we still need to update our
             // local state.

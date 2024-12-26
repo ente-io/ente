@@ -8,7 +8,6 @@ import {
     EnteFile,
     FileWithUpdatedMagicMetadata,
     FileWithUpdatedPublicMagicMetadata,
-    TrashRequest,
 } from "@/media/file";
 import {
     clearCachedThumbnailsIfChanged,
@@ -16,14 +15,12 @@ import {
     getLocalFiles,
     setLocalFiles,
 } from "@/new/photos/services/files";
-import { batch } from "@/utils/array";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import exportService from "services/export";
 import { decryptFile } from "utils/file";
 import {
     getCollectionLastSyncTime,
-    REQUEST_BATCH_SIZE,
     setCollectionLastSyncTime,
 } from "./collectionService";
 
@@ -131,59 +128,6 @@ const removeDeletedCollectionFiles = async (
     }
     files = files.filter((file) => syncedCollectionIds.has(file.collectionID));
     return files;
-};
-
-export const trashFiles = async (filesToTrash: EnteFile[]) => {
-    try {
-        const token = getToken();
-        if (!token) {
-            return;
-        }
-        const batchedFilesToTrash = batch(filesToTrash, REQUEST_BATCH_SIZE);
-        for (const batch of batchedFilesToTrash) {
-            const trashRequest: TrashRequest = {
-                items: batch.map((file) => ({
-                    fileID: file.id,
-                    collectionID: file.collectionID,
-                })),
-            };
-            await HTTPService.post(
-                await apiURL("/files/trash"),
-                trashRequest,
-                null,
-                {
-                    "X-Auth-Token": token,
-                },
-            );
-        }
-    } catch (e) {
-        log.error("trash file failed", e);
-        throw e;
-    }
-};
-
-export const deleteFromTrash = async (filesToDelete: number[]) => {
-    try {
-        const token = getToken();
-        if (!token) {
-            return;
-        }
-        const batchedFilesToDelete = batch(filesToDelete, REQUEST_BATCH_SIZE);
-
-        for (const batch of batchedFilesToDelete) {
-            await HTTPService.post(
-                await apiURL("/trash/delete"),
-                { fileIDs: batch },
-                null,
-                {
-                    "X-Auth-Token": token,
-                },
-            );
-        }
-    } catch (e) {
-        log.error("deleteFromTrash failed", e);
-        throw e;
-    }
 };
 
 export interface UpdateMagicMetadataRequest {

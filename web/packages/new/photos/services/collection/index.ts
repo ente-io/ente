@@ -217,3 +217,44 @@ const encryptWithCollectionKey = async (
             };
         }),
     );
+
+/**
+ * Make a remote request to move the given {@link collectionFiles} to trash.
+ *
+ * Does not modify local state.
+ */
+export const moveToTrash = async (collectionFiles: EnteFile[]) => {
+    for (const batchFiles of batch(collectionFiles, requestBatchSize)) {
+        ensureOk(
+            await fetch(await apiURL("/files/trash"), {
+                method: "POST",
+                headers: await authenticatedRequestHeaders(),
+                body: JSON.stringify({
+                    items: batchFiles.map((file) => ({
+                        fileID: file.id,
+                        collectionID: file.collectionID,
+                    })),
+                }),
+            }),
+        );
+    }
+};
+
+/**
+ * Make a remote request to delete the given {@link fileIDs} from trash.
+ *
+ * Does not modify local state.
+ */
+export const deleteFromTrash = async (fileIDs: number[]) => {
+    for (const batchIDs of batch(fileIDs, requestBatchSize)) {
+        ensureOk(
+            await fetch(await apiURL("/trash/delete"), {
+                method: "POST",
+                headers: await authenticatedRequestHeaders(),
+                body: JSON.stringify({
+                    fileIDs: batchIDs,
+                }),
+            }),
+        );
+    }
+};

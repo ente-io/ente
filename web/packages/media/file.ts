@@ -182,15 +182,6 @@ export interface EnteFile
     key: string;
 }
 
-export interface TrashRequest {
-    items: TrashRequestItems[];
-}
-
-export interface TrashRequestItems {
-    fileID: number;
-    collectionID: number;
-}
-
 export interface FileWithUpdatedMagicMetadata {
     file: EnteFile;
     updatedMagicMetadata: FileMagicMetadata;

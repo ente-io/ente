@@ -63,7 +63,7 @@ const UNCATEGORIZED_COLLECTION_NAME = "Uncategorized";
 export const HIDDEN_COLLECTION_NAME = ".hidden";
 const FAVORITE_COLLECTION_NAME = "Favorites";
 
-export const REQUEST_BATCH_SIZE = 1000;
+const REQUEST_BATCH_SIZE = 1000;
 
 export const getCollectionLastSyncTime = async (collection: Collection) =>
     (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;

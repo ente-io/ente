@@ -12,6 +12,7 @@ import {
 import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
+import { moveToTrash } from "@/new/photos/services/collection";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import { AppContext } from "@/new/photos/types/context";
 import { FlexWrapper } from "@ente/shared/components/Container";
@@ -58,7 +59,6 @@ import {
     addToFavorites,
     removeFromFavorites,
 } from "services/collectionService";
-import { trashFiles } from "services/fileService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     copyFileToClipboard,
@@ -550,7 +550,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         try {
             showLoadingBar();
             try {
-                await trashFiles([file]);
+                await moveToTrash([file]);
             } finally {
                 hideLoadingBar();
             }

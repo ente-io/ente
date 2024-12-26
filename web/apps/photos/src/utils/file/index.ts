@@ -19,6 +19,7 @@ import {
 import { ItemVisibility } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
+import { deleteFromTrash, moveToTrash } from "@/new/photos/services/collection";
 import {
     isArchivedFile,
     updateMagicMetadata,
@@ -33,8 +34,6 @@ import {
     moveToHiddenCollection,
 } from "services/collectionService";
 import {
-    deleteFromTrash,
-    trashFiles,
     updateFileMagicMetadata,
     updateFilePublicMagicMetadata,
 } from "services/fileService";
@@ -544,7 +543,7 @@ export const handleFileOps = async (
         case FILE_OPS_TYPE.TRASH:
             try {
                 markTempDeleted(files);
-                await trashFiles(files);
+                await moveToTrash(files);
             } catch (e) {
                 clearTempDeleted();
                 throw e;
