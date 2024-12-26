@@ -219,12 +219,16 @@ const encryptWithCollectionKey = async (
     );
 
 /**
- * Make a remote request to move the given {@link collectionFiles} to trash.
+ * Make a remote request to move the given {@link files} to trash.
+ *
+ * @param files The {@link EnteFile}s to move to trash. The API request needs
+ * both a file ID and a collection ID, but there should be at most one entry for
+ * a particular fileID in this array.
  *
  * Does not modify local state.
  */
-export const moveToTrash = async (collectionFiles: EnteFile[]) => {
-    for (const batchFiles of batch(collectionFiles, requestBatchSize)) {
+export const moveToTrash = async (files: EnteFile[]) => {
+    for (const batchFiles of batch(files, requestBatchSize)) {
         ensureOk(
             await fetch(await apiURL("/files/trash"), {
                 method: "POST",

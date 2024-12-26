@@ -243,11 +243,10 @@ export const removeSelectedDuplicateGroups = async (
     //
 
     const filesToAdd = new Map<number, EnteFile[]>();
-    let filesToTrash: EnteFile[] = [];
+    const filesToTrash: EnteFile[] = [];
 
     for (const duplicateGroup of selectedDuplicateGroups) {
         const retainedItem = duplicateGroupItemToRetain(duplicateGroup);
-
         // Find the existing collection IDs to which this item already belongs.
         const existingCollectionIDs = new Set(
             retainedItem.collectionFiles.map((cf) => cf.collectionID),
@@ -257,15 +256,15 @@ export const removeSelectedDuplicateGroups = async (
         // (except the file we're retaining) belongs.
         const collectionIDs = new Set<number>();
         for (const item of duplicateGroup.items) {
-            // Skip the item we're retaining,
+            // Skip the item we're retaining.
             if (item.file.id == retainedItem.file.id) continue;
             // Determine the collections to which any of the item's files belong.
             for (const { collectionID } of item.collectionFiles) {
                 if (!existingCollectionIDs.has(collectionID))
                     collectionIDs.add(collectionID);
             }
-            // Add the item's files to list of collection files to be trashed.
-            filesToTrash = filesToTrash.concat(item.collectionFiles);
+            // Move the item's file to trash.
+            filesToTrash.push(item.file);
         }
 
         // Add the file we're retaining to these (uniqued) collections.
