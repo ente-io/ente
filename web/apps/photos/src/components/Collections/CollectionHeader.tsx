@@ -21,6 +21,7 @@ import type {
     CollectionSummary,
     CollectionSummaryType,
 } from "@/new/photos/services/collection/ui";
+import { clearLocalTrash, emptyTrash } from "@/new/photos/services/collections";
 import {
     isArchivedCollection,
     isPinnedCollection,
@@ -50,7 +51,6 @@ import { GalleryContext } from "pages/gallery";
 import React, { useCallback, useContext, useRef } from "react";
 import { Trans } from "react-i18next";
 import * as CollectionAPI from "services/collectionService";
-import * as TrashService from "services/trashService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     changeCollectionOrder,
@@ -229,13 +229,13 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
             continue: {
                 text: t("empty_trash"),
                 color: "critical",
-                action: emptyTrash,
+                action: doEmptyTrash,
             },
         });
 
-    const emptyTrash = wrap(async () => {
-        await TrashService.emptyTrash();
-        await TrashService.clearLocalTrash();
+    const doEmptyTrash = wrap(async () => {
+        await emptyTrash();
+        await clearLocalTrash();
         setActiveCollectionID(ALL_SECTION);
     });
 

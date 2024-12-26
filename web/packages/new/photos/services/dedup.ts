@@ -1,14 +1,17 @@
 import { assertionFailed } from "@/base/assert";
 import { newID } from "@/base/id";
 import { ensureLocalUser } from "@/base/local-user";
-import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { metadataHash } from "@/media/file-metadata";
-import { wait } from "@/utils/promise";
 import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
-import { createCollectionNameByID } from "./collection";
+import {
+    addToCollection,
+    createCollectionNameByID,
+    moveToTrash,
+} from "./collection";
 import { getLocalCollections } from "./collections";
 import { getLocalFiles } from "./files";
+import { syncFilesAndCollections } from "./sync";
 
 /**
  * A group of duplicates as shown in the UI.
@@ -27,16 +30,24 @@ export interface DuplicateGroup {
      */
     items: {
         /**
-         * The underlying collection file.
+         * The underlying file to delete.
+         *
+         * This is one of the files from amongst {@link collectionFiles},
+         * arbitrarily picked to stand in for the entire set of files in the UI.
          */
         file: EnteFile;
         /**
-         * The IDs of the collections to which this file belongs.
+         * All the collection files for the underlying file.
+         *
+         * This includes {@link file} too.
          */
-        collectionIDs: number[];
+        collectionFiles: EnteFile[];
         /**
-         * The name of the collection (or of one of them, arbitrarily picked) to
-         * which this file belongs.
+         * The name of the collection to which {@link file} belongs.
+         *
+         * Like {@link file} itself, this is an arbitrary pick. Logically, none
+         * of the collections to which the file belongs are given more
+         * preference than the other.
          */
         collectionName: string;
     }[];
@@ -113,9 +124,9 @@ export const deduceDuplicates = async () => {
     );
 
     // Group the filtered collection files by their hashes, keeping only one
-    // entry per file ID, but also retaining all the collections IDs to which
-    // that file belongs.
-    const collectionIDsByFileID = new Map<number, number[]>();
+    // entry per file ID. We also retain all the collections files for a
+    // particular file ID.
+    const collectionFilesByFileID = new Map<number, EnteFile[]>();
     const filesByHash = new Map<string, EnteFile[]>();
     for (const file of filteredCollectionFiles) {
         const hash = metadataHash(file.metadata);
@@ -125,15 +136,15 @@ export const deduceDuplicates = async () => {
             continue;
         }
 
-        const collectionIDs = collectionIDsByFileID.get(file.id);
-        if (!collectionIDs) {
+        const collectionFiles = collectionFilesByFileID.get(file.id);
+        if (!collectionFiles) {
             // This is the first collection file we're seeing for a particular
             // file ID, so also create an entry in the filesByHash map.
             filesByHash.set(hash, [...(filesByHash.get(hash) ?? []), file]);
         }
-        collectionIDsByFileID.set(file.id, [
-            ...(collectionIDs ?? []),
-            file.collectionID,
+        collectionFilesByFileID.set(file.id, [
+            ...(collectionFiles ?? []),
+            file,
         ]);
     }
 
@@ -172,15 +183,15 @@ export const deduceDuplicates = async () => {
                 const collectionName = collectionNameByID.get(
                     file.collectionID,
                 );
-                const collectionIDs = collectionIDsByFileID.get(file.id);
+                const collectionFiles = collectionFilesByFileID.get(file.id);
                 // Ignore duplicates for which we do not have a collection. This
                 // shouldn't really happen though, so retain an assert.
-                if (!collectionName || !collectionIDs) {
+                if (!collectionName || !collectionFiles) {
                     assertionFailed();
                     return undefined;
                 }
 
-                return { file, collectionIDs, collectionName };
+                return { file, collectionFiles, collectionName };
             })
             .filter((item) => !!item);
         if (items.length < 2) continue;
@@ -213,70 +224,106 @@ export const deduceDuplicates = async () => {
  *
  * This function will only process entries for which isSelected is `true`.
  *
- * @param onRemoveDuplicateGroup A function that is called each time a duplicate
- * group is successfully removed. The duplicate group that was removed is passed
- * as an argument to it.
+ * @param onProgress A function that is called with an estimated progress
+ * percentage of the operation (a number between 0 and 100).
  *
- * @returns true if all selected duplicate groups were successfully removed, and
- * false if there were any errors.
+ * @returns A set containing the IDs of the duplicate groups that were removed.
  */
 export const removeSelectedDuplicateGroups = async (
     duplicateGroups: DuplicateGroup[],
-    onRemoveDuplicateGroup: (g: DuplicateGroup) => void,
+    onProgress: (progress: number) => void,
 ) => {
     const selectedDuplicateGroups = duplicateGroups.filter((g) => g.isSelected);
-    let allSuccess = true;
+
+    // See: "Pruning duplicates" under [Note: Deduplication logic]. A tl;dr; is
+    //
+    // 1. For each selected duplicate group, determine the file to retain.
+    // 2. Add these to the user owned collections the other files exist in.
+    // 3. Delete the other files.
+    //
+
+    const filesToAdd = new Map<number, EnteFile[]>();
+    const filesToTrash: EnteFile[] = [];
+
     for (const duplicateGroup of selectedDuplicateGroups) {
-        try {
-            await removeDuplicateGroup(duplicateGroup);
-            onRemoveDuplicateGroup(duplicateGroup);
-        } catch (e) {
-            log.warn("Failed to remove duplicate group", e);
-            allSuccess = false;
+        const retainedItem = duplicateGroupItemToRetain(duplicateGroup);
+        // Find the existing collection IDs to which this item already belongs.
+        const existingCollectionIDs = new Set(
+            retainedItem.collectionFiles.map((cf) => cf.collectionID),
+        );
+
+        // For each item, find all the collections to which any of the files
+        // (except the file we're retaining) belongs.
+        const collectionIDs = new Set<number>();
+        for (const item of duplicateGroup.items) {
+            // Skip the item we're retaining.
+            if (item.file.id == retainedItem.file.id) continue;
+            // Determine the collections to which any of the item's files belong.
+            for (const { collectionID } of item.collectionFiles) {
+                if (!existingCollectionIDs.has(collectionID))
+                    collectionIDs.add(collectionID);
+            }
+            // Move the item's file to trash.
+            filesToTrash.push(item.file);
+        }
+
+        // Add the file we're retaining to these (uniqued) collections.
+        for (const collectionID of collectionIDs) {
+            filesToAdd.set(collectionID, [
+                ...(filesToAdd.get(collectionID) ?? []),
+                retainedItem.file,
+            ]);
         }
     }
-    return allSuccess;
+
+    let np = 0;
+    const ntotal = filesToAdd.size + filesToTrash.length ? 1 : 0 + /* sync */ 1;
+    const tickProgress = () => onProgress((np++ / ntotal) * 100);
+
+    // Process the adds.
+    const collections = await getLocalCollections("normal");
+    const collectionsByID = new Map(collections.map((c) => [c.id, c]));
+    for (const [collectionID, collectionFiles] of filesToAdd.entries()) {
+        await addToCollection(
+            collectionsByID.get(collectionID)!,
+            collectionFiles,
+        );
+        tickProgress();
+    }
+
+    // Process the removes.
+    if (filesToTrash.length) {
+        await moveToTrash(filesToTrash);
+        tickProgress();
+    }
+
+    await syncFilesAndCollections();
+    tickProgress();
+
+    return new Set(selectedDuplicateGroups.map((g) => g.id));
 };
 
 /**
- * Retain only file from amongst these duplicates whilst keeping the existing
- * collection entries intact.
- *
- * See: "Pruning duplicates" under [Note: Deduplication logic]. To summarize:
- * 1. Find the file to retain.
- * 2. Add it to the user owned collections the other files exist in.
- * 3. Delete the other files.
- */
-const removeDuplicateGroup = async (duplicateGroup: DuplicateGroup) => {
-    const fileToRetain = duplicateGroupFileToRetain(duplicateGroup);
-    console.log({ fileToRetain });
-
-    // const collections;
-    // TODO: Remove me after testing the UI
-    await wait(1000);
-};
-
-/**
- * Find the most eligible file from amongst the duplicates to retain.
+ * Find the most eligible item from amongst the duplicates to retain.
  *
  * Give preference to files which have a caption or edited name or edited time,
  * otherwise pick arbitrarily.
  */
-const duplicateGroupFileToRetain = (duplicateGroup: DuplicateGroup) => {
-    const filesWithCaption: EnteFile[] = [];
-    const filesWithOtherEdits: EnteFile[] = [];
-    for (const { file } of duplicateGroup.items) {
-        const pubMM = getPublicMagicMetadataSync(file);
+const duplicateGroupItemToRetain = (duplicateGroup: DuplicateGroup) => {
+    const itemsWithCaption: DuplicateGroup["items"] = [];
+    const itemsWithOtherEdits: DuplicateGroup["items"] = [];
+    for (const item of duplicateGroup.items) {
+        const pubMM = getPublicMagicMetadataSync(item.file);
         if (!pubMM) continue;
-        if (pubMM.caption) filesWithCaption.push(file);
+        if (pubMM.caption) itemsWithCaption.push(item);
         if (pubMM.editedName ?? pubMM.editedTime)
-            filesWithOtherEdits.push(file);
+            itemsWithOtherEdits.push(item);
     }
 
     // Duplicate group items should not be empty, so we'll get something always.
     return (
-        filesWithCaption[0] ??
-        filesWithOtherEdits[0] ??
-        duplicateGroup.items[0]!.file
+        itemsWithCaption[0] ??
+        itemsWithOtherEdits[0] ??
+        duplicateGroup.items[0]!
     );
 };

@@ -35,11 +35,16 @@ import {
     isHiddenCollection,
 } from "@/new/photos/services/collection";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
-import { getAllLocalCollections } from "@/new/photos/services/collections";
+import {
+    getAllLatestCollections,
+    getAllLocalCollections,
+    syncTrash,
+} from "@/new/photos/services/collections";
 import {
     getLocalFiles,
     getLocalTrashedFiles,
     sortFiles,
+    syncFiles,
 } from "@/new/photos/services/files";
 import {
     filterSearchableFiles,
@@ -47,6 +52,7 @@ import {
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { initSettings } from "@/new/photos/services/settings";
+import { preCollectionsAndFilesSync, sync } from "@/new/photos/services/sync";
 import {
     initUserDetailsOrTriggerSync,
     redirectToCustomerPortal,
@@ -113,11 +119,8 @@ import {
     constructUserIDToEmailMap,
     createAlbum,
     createUnCategorizedCollection,
-    getAllLatestCollections,
 } from "services/collectionService";
-import { syncFiles } from "services/fileService";
-import { preFileInfoSync, sync } from "services/sync";
-import { syncTrash } from "services/trashService";
+import exportService from "services/export";
 import uploadManager from "services/upload/uploadManager";
 import { isTokenValid } from "services/userService";
 import {
@@ -566,7 +569,7 @@ export default function Gallery() {
                 throw new Error(CustomError.SESSION_EXPIRED);
             }
             !silent && showLoadingBar();
-            await preFileInfoSync();
+            await preCollectionsAndFilesSync();
             const allCollections = await getAllLatestCollections();
             const [hiddenCollections, collections] = splitByPredicate(
                 allCollections,
@@ -577,13 +580,13 @@ export default function Gallery() {
                 collections,
                 hiddenCollections,
             });
-            await syncFiles(
+            const didUpdateNormalFiles = await syncFiles(
                 "normal",
                 collections,
                 (files) => dispatch({ type: "setFiles", files }),
                 (files) => dispatch({ type: "fetchFiles", files }),
             );
-            await syncFiles(
+            const didUpdateHiddenFiles = await syncFiles(
                 "hidden",
                 hiddenCollections,
                 (hiddenFiles) =>
@@ -591,6 +594,8 @@ export default function Gallery() {
                 (hiddenFiles) =>
                     dispatch({ type: "fetchHiddenFiles", hiddenFiles }),
             );
+            if (didUpdateNormalFiles || didUpdateHiddenFiles)
+                exportService.onLocalFilesUpdated();
             await syncTrash(allCollections, (trashedFiles: EnteFile[]) =>
                 dispatch({ type: "setTrashedFiles", trashedFiles }),
             );

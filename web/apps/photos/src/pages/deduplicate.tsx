@@ -2,11 +2,16 @@ import { stashRedirect } from "@/accounts/services/redirect";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import log from "@/base/log";
-import { ALL_SECTION } from "@/new/photos/services/collection";
-import { getLocalCollections } from "@/new/photos/services/collections";
+import { ALL_SECTION, moveToTrash } from "@/new/photos/services/collection";
+import {
+    getAllLatestCollections,
+    getLocalCollections,
+    syncTrash,
+} from "@/new/photos/services/collections";
 import {
     createFileCollectionIDs,
     getLocalFiles,
+    syncFiles,
 } from "@/new/photos/services/files";
 import { useAppContext } from "@/new/photos/types/context";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -22,10 +27,7 @@ import PhotoFrame from "components/PhotoFrame";
 import { t } from "i18next";
 import { default as Router, default as router } from "next/router";
 import { createContext, useEffect, useState } from "react";
-import { getAllLatestCollections } from "services/collectionService";
 import { Duplicate, getDuplicates } from "services/deduplicationService";
-import { syncFiles, trashFiles } from "services/fileService";
-import { syncTrash } from "services/trashService";
 import { SelectedState } from "types/gallery";
 import { getSelectedFiles } from "utils/file";
 
@@ -133,10 +135,10 @@ export default function Deduplicate() {
         try {
             showLoadingBar();
             const selectedFiles = getSelectedFiles(selected, duplicateFiles);
-            await trashFiles(selectedFiles);
+            await moveToTrash(selectedFiles);
 
-            // trashFiles above does an API request, we still need to update our
-            // local state.
+            // moveToTrash above does an API request, we still need to update
+            // our local state.
             //
             // Enhancement: This can be done in a more granular manner. Also, it
             // is better to funnel these syncs instead of adding these here and

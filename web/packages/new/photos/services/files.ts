@@ -1,7 +1,22 @@
 import { blobCache } from "@/base/blob-cache";
-import { mergeMetadata, type EnteFile, type Trash } from "@/media/file";
+import log from "@/base/log";
+import { apiURL } from "@/base/origins";
+import type { Collection } from "@/media/collection";
+import {
+    decryptFile,
+    mergeMetadata,
+    type EncryptedEnteFile,
+    type EnteFile,
+    type Trash,
+} from "@/media/file";
 import { metadataHash } from "@/media/file-metadata";
+import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import {
+    getCollectionLastSyncTime,
+    setCollectionLastSyncTime,
+} from "./collections";
 
 const FILES_TABLE = "files";
 const HIDDEN_FILES_TABLE = "hidden-files";
@@ -35,6 +50,118 @@ export const setLocalFiles = async (
 ) => {
     const tableName = type === "normal" ? FILES_TABLE : HIDDEN_FILES_TABLE;
     await localForage.setItem(tableName, files);
+};
+
+/**
+ * Fetch all files of the given {@link type}, belonging to the given
+ * {@link collections}, from remote and update our local database.
+ *
+ * If this is the initial read, or if the count of files we have differs from
+ * the state of the local database (these two are expected to be the same case),
+ * then the {@link onResetFiles} callback is invoked to give the caller a chance
+ * to bring its state up to speed.
+ *
+ * In addition to updating the local database, it also calls the provided
+ * {@link onFetchFiles} callback with the latest decrypted files after each
+ * batch the new and/or updated files are received from remote.
+ *
+ * @returns true if one or more files were updated locally, false otherwise.
+ */
+export const syncFiles = async (
+    type: "normal" | "hidden",
+    collections: Collection[],
+    onResetFiles: (fs: EnteFile[]) => void,
+    onFetchFiles: (fs: EnteFile[]) => void,
+) => {
+    const localFiles = await getLocalFiles(type);
+    let files = removeDeletedCollectionFiles(collections, localFiles);
+    let didUpdateFiles = false;
+    if (files.length !== localFiles.length) {
+        await setLocalFiles(type, files);
+        onResetFiles(files);
+        didUpdateFiles = true;
+    }
+    for (const collection of collections) {
+        if (!getToken()) {
+            continue;
+        }
+        const lastSyncTime = await getCollectionLastSyncTime(collection);
+        if (collection.updationTime === lastSyncTime) {
+            continue;
+        }
+
+        const newFiles = await getFiles(collection, lastSyncTime, onFetchFiles);
+        await clearCachedThumbnailsIfChanged(localFiles, newFiles);
+        files = getLatestVersionFiles([...files, ...newFiles]);
+        await setLocalFiles(type, files);
+        didUpdateFiles = true;
+        await setCollectionLastSyncTime(collection, collection.updationTime);
+    }
+    return didUpdateFiles;
+};
+
+export const getFiles = async (
+    collection: Collection,
+    sinceTime: number,
+    onFetchFiles: (fs: EnteFile[]) => void,
+): Promise<EnteFile[]> => {
+    try {
+        let decryptedFiles: EnteFile[] = [];
+        let time = sinceTime;
+        let resp;
+        do {
+            const token = getToken();
+            if (!token) {
+                break;
+            }
+            resp = await HTTPService.get(
+                await apiURL("/collections/v2/diff"),
+                {
+                    collectionID: collection.id,
+                    sinceTime: time,
+                },
+                {
+                    "X-Auth-Token": token,
+                },
+            );
+
+            const newDecryptedFilesBatch = await Promise.all(
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+                resp.data.diff.map(async (file: EncryptedEnteFile) => {
+                    if (!file.isDeleted) {
+                        return await decryptFile(file, collection.key);
+                    } else {
+                        return file;
+                    }
+                }) as Promise<EnteFile>[],
+            );
+            decryptedFiles = [...decryptedFiles, ...newDecryptedFilesBatch];
+
+            onFetchFiles(decryptedFiles);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            if (resp.data.diff.length) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+                time = resp.data.diff.slice(-1)[0].updationTime;
+            }
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        } while (resp.data.hasMore);
+        return decryptedFiles;
+    } catch (e) {
+        log.error("Get files failed", e);
+        throw e;
+    }
+};
+
+const removeDeletedCollectionFiles = (
+    collections: Collection[],
+    files: EnteFile[],
+) => {
+    const syncedCollectionIds = new Set<number>();
+    for (const collection of collections) {
+        syncedCollectionIds.add(collection.id);
+    }
+    files = files.filter((file) => syncedCollectionIds.has(file.collectionID));
+    return files;
 };
 
 /**
