@@ -113,9 +113,21 @@ export interface EncryptedEnteFile {
      * See: [Note: Metadatum].
      */
     pubMagicMetadata: EncryptedMagicMetadata;
-    /* always present */
+    /**
+     * The file's encryption key (as a base64 string), encrypted by the key of
+     * the collection to which it belongs.
+     *
+     * (note: This is always present. retaining this note until we remove
+     * nullability uncertainity from the types).
+     */
     encryptedKey: string;
-    /* always present */
+    /**
+     * The nonce (as a base64 string) that was used when encrypting the file's
+     * encryption key.
+     *
+     * (note: This is always present. retaining this note until we remove
+     * nullability uncertainity from the types).
+     */
     keyDecryptionNonce: string;
     isDeleted: boolean;
     updationTime: number;
@@ -161,7 +173,8 @@ export interface EnteFile
     isTrashed?: boolean;
     deleteBy?: number;
     /**
-     * The base64 encoded encryption key associated with this file.
+     * The base64 representation of the decrypted encryption key associated with
+     * this file.
      *
      * This key is used to encrypt both the file's contents, and any associated
      * data (e.g., metadatum, thumbnail) for the file.
