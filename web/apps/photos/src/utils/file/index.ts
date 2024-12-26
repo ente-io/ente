@@ -1,4 +1,3 @@
-import { sharedCryptoWorker } from "@/base/crypto";
 import { joinPath } from "@/base/file-name";
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
@@ -7,9 +6,7 @@ import { downloadManager } from "@/gallery/services/download";
 import { detectFileTypeInfo } from "@/gallery/utils/detect-type";
 import { writeStream } from "@/gallery/utils/native-stream";
 import {
-    EncryptedEnteFile,
     EnteFile,
-    FileMagicMetadata,
     FileMagicMetadataProps,
     FilePublicMagicMetadata,
     FilePublicMagicMetadataProps,
@@ -101,66 +98,6 @@ export function getSelectedFiles(
 ): EnteFile[] {
     const selectedFilesIDs = getSelectedFileIds(selected);
     return files.filter((file) => selectedFilesIDs.has(file.id));
-}
-
-export async function decryptFile(
-    file: EncryptedEnteFile,
-    collectionKey: string,
-): Promise<EnteFile> {
-    try {
-        const worker = await sharedCryptoWorker();
-        const {
-            encryptedKey,
-            keyDecryptionNonce,
-            metadata,
-            magicMetadata,
-            pubMagicMetadata,
-            ...restFileProps
-        } = file;
-        const fileKey = await worker.decryptB64(
-            encryptedKey,
-            keyDecryptionNonce,
-            collectionKey,
-        );
-        const fileMetadata = await worker.decryptMetadataJSON({
-            encryptedDataB64: metadata.encryptedData,
-            decryptionHeaderB64: metadata.decryptionHeader,
-            keyB64: fileKey,
-        });
-        let fileMagicMetadata: FileMagicMetadata;
-        let filePubMagicMetadata: FilePublicMagicMetadata;
-        if (magicMetadata?.data) {
-            fileMagicMetadata = {
-                ...file.magicMetadata,
-                data: await worker.decryptMetadataJSON({
-                    encryptedDataB64: magicMetadata.data,
-                    decryptionHeaderB64: magicMetadata.header,
-                    keyB64: fileKey,
-                }),
-            };
-        }
-        if (pubMagicMetadata?.data) {
-            filePubMagicMetadata = {
-                ...pubMagicMetadata,
-                data: await worker.decryptMetadataJSON({
-                    encryptedDataB64: pubMagicMetadata.data,
-                    decryptionHeaderB64: pubMagicMetadata.header,
-                    keyB64: fileKey,
-                }),
-            };
-        }
-        return {
-            ...restFileProps,
-            key: fileKey,
-            // @ts-expect-error TODO: Need to use zod here.
-            metadata: fileMetadata,
-            magicMetadata: fileMagicMetadata,
-            pubMagicMetadata: filePubMagicMetadata,
-        };
-    } catch (e) {
-        log.error("file decryption failed", e);
-        throw e;
-    }
 }
 
 export async function changeFilesVisibility(

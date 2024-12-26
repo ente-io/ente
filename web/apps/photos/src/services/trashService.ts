@@ -1,7 +1,12 @@
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import type { Collection } from "@/media/collection";
-import { EncryptedTrashItem, Trash, type EnteFile } from "@/media/file";
+import {
+    decryptFile,
+    EncryptedTrashItem,
+    Trash,
+    type EnteFile,
+} from "@/media/file";
 import {
     getLocalTrash,
     getTrashedFiles,
@@ -10,7 +15,6 @@ import {
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { decryptFile } from "utils/file";
 import { getCollection } from "./collectionService";
 
 const TRASH_TIME = "trash-time";

@@ -2,8 +2,9 @@ import { encryptMetadataJSON } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import type { Collection } from "@/media/collection";
-import type { EncryptedMagicMetadata } from "@/media/file";
 import {
+    type EncryptedMagicMetadata,
+    decryptFile,
     EncryptedEnteFile,
     EnteFile,
     FileWithUpdatedMagicMetadata,
@@ -18,7 +19,6 @@ import {
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import exportService from "services/export";
-import { decryptFile } from "utils/file";
 import {
     getCollectionLastSyncTime,
     setCollectionLastSyncTime,

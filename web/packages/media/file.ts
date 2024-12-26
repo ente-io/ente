@@ -1,3 +1,5 @@
+import { sharedCryptoWorker } from "@/base/crypto";
+import log from "@/base/log";
 import { type Metadata, ItemVisibility } from "./file-metadata";
 
 // TODO: Audit this file.
@@ -282,6 +284,72 @@ export const fileLogID = (file: EnteFile) =>
     // TODO: Remove this when file/metadata types have optionality annotations.
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     `file ${file.metadata.title ?? "-"} (${file.id})`;
+
+export async function decryptFile(
+    file: EncryptedEnteFile,
+    collectionKey: string,
+): Promise<EnteFile> {
+    try {
+        const worker = await sharedCryptoWorker();
+        const {
+            encryptedKey,
+            keyDecryptionNonce,
+            metadata,
+            magicMetadata,
+            pubMagicMetadata,
+            ...restFileProps
+        } = file;
+        const fileKey = await worker.decryptB64(
+            encryptedKey,
+            keyDecryptionNonce,
+            collectionKey,
+        );
+        const fileMetadata = await worker.decryptMetadataJSON({
+            encryptedDataB64: metadata.encryptedData,
+            decryptionHeaderB64: metadata.decryptionHeader,
+            keyB64: fileKey,
+        });
+        let fileMagicMetadata: FileMagicMetadata;
+        let filePubMagicMetadata: FilePublicMagicMetadata;
+        /* eslint-disable @typescript-eslint/no-unnecessary-condition */
+        if (magicMetadata?.data) {
+            fileMagicMetadata = {
+                ...file.magicMetadata,
+                // @ts-expect-error TODO update types
+                data: await worker.decryptMetadataJSON({
+                    encryptedDataB64: magicMetadata.data,
+                    decryptionHeaderB64: magicMetadata.header,
+                    keyB64: fileKey,
+                }),
+            };
+        }
+        /* eslint-disable @typescript-eslint/no-unnecessary-condition */
+        if (pubMagicMetadata?.data) {
+            filePubMagicMetadata = {
+                ...pubMagicMetadata,
+                // @ts-expect-error TODO update types
+                data: await worker.decryptMetadataJSON({
+                    encryptedDataB64: pubMagicMetadata.data,
+                    decryptionHeaderB64: pubMagicMetadata.header,
+                    keyB64: fileKey,
+                }),
+            };
+        }
+        return {
+            ...restFileProps,
+            key: fileKey,
+            // @ts-expect-error TODO: Need to use zod here.
+            metadata: fileMetadata,
+            // @ts-expect-error TODO update types
+            magicMetadata: fileMagicMetadata,
+            // @ts-expect-error TODO update types
+            pubMagicMetadata: filePubMagicMetadata,
+        };
+    } catch (e) {
+        log.error("file decryption failed", e);
+        throw e;
+    }
+}
 
 /**
  * Update the immutable fields of an (in-memory) {@link EnteFile} with any edits
