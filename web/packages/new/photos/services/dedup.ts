@@ -1,7 +1,6 @@
 import { assertionFailed } from "@/base/assert";
 import { newID } from "@/base/id";
 import { ensureLocalUser } from "@/base/local-user";
-import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { metadataHash } from "@/media/file-metadata";
 import { wait } from "@/utils/promise";
@@ -213,29 +212,21 @@ export const deduceDuplicates = async () => {
  *
  * This function will only process entries for which isSelected is `true`.
  *
- * @param onRemoveDuplicateGroup A function that is called each time a duplicate
- * group is successfully removed. The duplicate group that was removed is passed
- * as an argument to it.
+ * @param onProgress A function that is called with an estimated progress
+ * percentage of the operation (a number between 0 and 100).
  *
- * @returns true if all selected duplicate groups were successfully removed, and
- * false if there were any errors.
+ * @returns A set containing the IDs of the duplicate groups that were removed.
  */
 export const removeSelectedDuplicateGroups = async (
     duplicateGroups: DuplicateGroup[],
-    onRemoveDuplicateGroup: (g: DuplicateGroup) => void,
+    onProgress: (progress: number) => void,
 ) => {
     const selectedDuplicateGroups = duplicateGroups.filter((g) => g.isSelected);
-    let allSuccess = true;
     for (const duplicateGroup of selectedDuplicateGroups) {
-        try {
-            await removeDuplicateGroup(duplicateGroup);
-            onRemoveDuplicateGroup(duplicateGroup);
-        } catch (e) {
-            log.warn("Failed to remove duplicate group", e);
-            allSuccess = false;
-        }
+        await removeDuplicateGroup(duplicateGroup);
+        console.log(onProgress);
     }
-    return allSuccess;
+    return new Set(selectedDuplicateGroups.map((g) => g.id));
 };
 
 /**

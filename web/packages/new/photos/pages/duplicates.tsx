@@ -8,7 +8,6 @@ import {
     OverflowMenuOption,
 } from "@/base/components/OverflowMenu";
 import { Ellipsized2LineTypography } from "@/base/components/Typography";
-import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import { formattedByteSize } from "@/new/photos/utils/units";
@@ -59,7 +58,7 @@ import {
 import { useAppContext } from "../types/context";
 
 const Page: React.FC = () => {
-    const { showMiniDialog } = useAppContext();
+    const { onGenericError } = useAppContext();
 
     const [state, dispatch] = useReducer(dedupReducer, initialDedupState);
 
@@ -81,18 +80,18 @@ const Page: React.FC = () => {
         dispatch({ type: "dedupe" });
         void removeSelectedDuplicateGroups(
             state.duplicateGroups,
-            (duplicateGroup: DuplicateGroup) =>
-                dispatch({ type: "didRemoveDuplicateGroup", duplicateGroup }),
-        ).then((allSuccess) => {
-            dispatch({ type: "dedupeCompleted" });
-            if (!allSuccess) {
-                const msg = pt(
-                    "Some errors occurred when trying to remove duplicates.",
-                );
-                showMiniDialog(errorDialogAttributes(msg));
-            }
-        });
-    }, [state.duplicateGroups, showMiniDialog]);
+            (progress: number) =>
+                dispatch({ type: "setDedupeProgress", progress }),
+        )
+            .then((removedGroupIDs) =>
+                dispatch({ type: "dedupeCompleted", removedGroupIDs }),
+            )
+
+            .catch((e: unknown) => {
+                onGenericError(e);
+                dispatch({ type: "dedupeFailed" });
+            });
+    }, [state.duplicateGroups, onGenericError]);
 
     const contents = (() => {
         switch (state.status) {
@@ -114,7 +113,7 @@ const Page: React.FC = () => {
                             }
                             prunableCount={state.prunableCount}
                             prunableSize={state.prunableSize}
-                            isDeduping={state.isDeduping}
+                            dedupeProgress={state.dedupeProgress}
                             onRemoveDuplicates={handleRemoveDuplicates}
                         />
                     );
@@ -145,8 +144,6 @@ type SortOrder = "prunableCount" | "prunableSize";
 interface DedupState {
     /** Status of the screen, between initial state => analysis */
     status: undefined | "analyzing" | "analysisFailed" | "analysisCompleted";
-    /** `true` if a dedupe is in progress. */
-    isDeduping: boolean;
     /**
      * Groups of duplicates.
      *
@@ -172,6 +169,11 @@ interface DedupState {
      * current selection.
      */
     prunableSize: number;
+    /**
+     * If a dedupe is in progress, then this will indicate its progress
+     * percentage (a number between 0 and 100).
+     */
+    dedupeProgress: number | undefined;
 }
 
 type DedupAction =
@@ -182,16 +184,17 @@ type DedupAction =
     | { type: "toggleSelection"; index: number }
     | { type: "deselectAll" }
     | { type: "dedupe" }
-    | { type: "didRemoveDuplicateGroup"; duplicateGroup: DuplicateGroup }
-    | { type: "dedupeCompleted" };
+    | { type: "setDedupeProgress"; progress: number }
+    | { type: "dedupeFailed" }
+    | { type: "dedupeCompleted"; removedGroupIDs: Set<string> };
 
 const initialDedupState: DedupState = {
     status: undefined,
-    isDeduping: false,
     duplicateGroups: [],
     sortOrder: "prunableSize",
     prunableCount: 0,
     prunableSize: 0,
+    dedupeProgress: undefined,
 };
 
 const dedupReducer: React.Reducer<DedupState, DedupAction> = (
@@ -263,11 +266,18 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
         }
 
         case "dedupe":
-            return { ...state, isDeduping: true };
+            return { ...state, dedupeProgress: 0 };
 
-        case "didRemoveDuplicateGroup": {
+        case "setDedupeProgress": {
+            return { ...state, dedupeProgress: action.progress };
+        }
+
+        case "dedupeFailed":
+            return { ...state, dedupeProgress: undefined };
+
+        case "dedupeCompleted": {
             const duplicateGroups = state.duplicateGroups.filter(
-                ({ id }) => id != action.duplicateGroup.id,
+                ({ id }) => !action.removedGroupIDs.has(id),
             );
             const { prunableCount, prunableSize } =
                 deducePrunableCountAndSize(duplicateGroups);
@@ -278,9 +288,6 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
                 prunableSize,
             };
         }
-
-        case "dedupeCompleted":
-            return { ...state, isDeduping: false };
     }
 };
 
@@ -612,34 +619,25 @@ const ItemGrid = styled("div", {
 `,
 );
 
-interface DeduplicateButtonProps {
-    /**
-     * See {@link prunableCount} in {@link DedupState}.
-     */
-    prunableCount: number;
-    /**
-     * See {@link prunableSize} in {@link DedupState}.
-     */
-    prunableSize: number;
-    /**
-     * `true` if a deduplication is in progress
-     */
-    isDeduping: DedupState["isDeduping"];
+type DeduplicateButtonProps = Pick<
+    DedupState,
+    "prunableCount" | "prunableSize" | "dedupeProgress"
+> & {
     /**
      * Called when the user presses the button to remove duplicates.
      */
     onRemoveDuplicates: () => void;
-}
+};
 
 const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
     prunableCount,
     prunableSize,
-    isDeduping,
+    dedupeProgress,
     onRemoveDuplicates,
 }) => (
     <FocusVisibleButton
         sx={{ minWidth: "min(100%, 320px)", margin: "auto" }}
-        disabled={prunableCount == 0 || isDeduping}
+        disabled={prunableCount == 0 || dedupeProgress !== undefined}
         onClick={onRemoveDuplicates}
     >
         <Stack
@@ -652,8 +650,8 @@ const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
                 flex: 1,
             }}
         >
-            {isDeduping ? (
-                <LinearProgressWithLabel value={50} />
+            {dedupeProgress !== undefined ? (
+                <LinearProgressWithLabel value={dedupeProgress} />
             ) : (
                 <>
                     <Typography>
