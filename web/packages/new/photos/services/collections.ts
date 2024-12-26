@@ -18,3 +18,14 @@ export const getAllLocalCollections = async (): Promise<Collection[]> => {
         (await localForage.getItem(COLLECTION_TABLE)) ?? [];
     return collections;
 };
+
+export const getCollectionLastSyncTime = async (collection: Collection) =>
+    (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
+
+export const setCollectionLastSyncTime = async (
+    collection: Collection,
+    time: number,
+) => await localForage.setItem<number>(`${collection.id}-time`, time);
+
+export const removeCollectionLastSyncTime = async (collection: Collection) =>
+    await localForage.removeItem(`${collection.id}-time`);

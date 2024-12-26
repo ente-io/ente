@@ -31,6 +31,7 @@ import {
 import {
     getAllLocalCollections,
     getLocalCollections,
+    removeCollectionLastSyncTime,
 } from "@/new/photos/services/collections";
 import {
     getLocalFiles,
@@ -64,17 +65,6 @@ export const HIDDEN_COLLECTION_NAME = ".hidden";
 const FAVORITE_COLLECTION_NAME = "Favorites";
 
 const REQUEST_BATCH_SIZE = 1000;
-
-export const getCollectionLastSyncTime = async (collection: Collection) =>
-    (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
-
-export const setCollectionLastSyncTime = async (
-    collection: Collection,
-    time: number,
-) => await localForage.setItem<number>(`${collection.id}-time`, time);
-
-export const removeCollectionLastSyncTime = async (collection: Collection) =>
-    await localForage.removeItem(`${collection.id}-time`);
 
 const getCollectionWithSecrets = async (
     collection: EncryptedCollection,

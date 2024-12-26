@@ -11,6 +11,10 @@ import {
     FileWithUpdatedPublicMagicMetadata,
 } from "@/media/file";
 import {
+    getCollectionLastSyncTime,
+    setCollectionLastSyncTime,
+} from "@/new/photos/services/collections";
+import {
     clearCachedThumbnailsIfChanged,
     getLatestVersionFiles,
     getLocalFiles,
@@ -19,10 +23,6 @@ import {
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import exportService from "services/export";
-import {
-    getCollectionLastSyncTime,
-    setCollectionLastSyncTime,
-} from "./collectionService";
 
 /**
  * Fetch all files of the given {@link type}, belonging to the given
