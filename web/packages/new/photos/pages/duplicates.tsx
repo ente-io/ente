@@ -25,7 +25,6 @@ import {
     styled,
     Tooltip,
     Typography,
-    type LinearProgressProps,
 } from "@mui/material";
 import { useRouter } from "next/router";
 import React, {
@@ -286,6 +285,7 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
                 duplicateGroups,
                 prunableCount,
                 prunableSize,
+                dedupeProgress: undefined,
             };
         }
     }
@@ -651,7 +651,13 @@ const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
             }}
         >
             {dedupeProgress !== undefined ? (
-                <LinearProgressWithLabel value={dedupeProgress} />
+                <LinearProgress
+                    sx={{ borderRadius: "4px" }}
+                    variant={
+                        dedupeProgress === 0 ? "indeterminate" : "determinate"
+                    }
+                    value={dedupeProgress}
+                />
             ) : (
                 <>
                     <Typography>
@@ -664,17 +670,4 @@ const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
             )}
         </Stack>
     </FocusVisibleButton>
-);
-
-interface LinearProgressWithLabelProps {
-    value: Exclude<LinearProgressProps["value"], undefined>;
-}
-
-export const LinearProgressWithLabel: React.FC<
-    LinearProgressWithLabelProps
-> = ({ value }) => (
-    <Stack direction="row" sx={{ flex: 1, gap: 2, alignItems: "center" }}>
-        <LinearProgress sx={{ flex: 1 }} variant="determinate" value={value} />
-        <Typography sx={{ minWidth: "3ex" }}>`{Math.round(value)}%</Typography>
-    </Stack>
 );

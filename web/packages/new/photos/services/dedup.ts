@@ -222,9 +222,15 @@ export const removeSelectedDuplicateGroups = async (
     onProgress: (progress: number) => void,
 ) => {
     const selectedDuplicateGroups = duplicateGroups.filter((g) => g.isSelected);
+    let i = selectedDuplicateGroups.length;
     for (const duplicateGroup of selectedDuplicateGroups) {
         await removeDuplicateGroup(duplicateGroup);
         console.log(onProgress);
+        onProgress(
+            ((selectedDuplicateGroups.length - i++) /
+                selectedDuplicateGroups.length) *
+                -100,
+        );
     }
     return new Set(selectedDuplicateGroups.map((g) => g.id));
 };
