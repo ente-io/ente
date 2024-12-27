@@ -1029,7 +1029,6 @@ export default function Gallery() {
                     <PeopleEmptyState />
                 ) : (
                     <PhotoFrame
-                        page={PAGES.GALLERY}
                         mode={barMode}
                         modePlus={isInSearchMode ? "search" : barMode}
                         files={filteredFiles}

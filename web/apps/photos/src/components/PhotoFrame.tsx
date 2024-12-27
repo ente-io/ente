@@ -8,7 +8,6 @@ import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
-import { PHOTOS_PAGES } from "@ente/shared/constants/pages";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { styled } from "@mui/material";
 import PhotoViewer, { type PhotoViewerProps } from "components/PhotoViewer";
@@ -17,14 +16,12 @@ import { GalleryContext } from "pages/gallery";
 import PhotoSwipe from "photoswipe";
 import { useContext, useEffect, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { Duplicate } from "services/deduplicationService";
 import {
     SelectedState,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 import { handleSelectCreator } from "utils/photoFrame";
 import { PhotoList } from "./PhotoList";
-import { DedupePhotoList } from "./PhotoList/dedupe";
 import PreviewCard from "./pages/gallery/PreviewCard";
 
 const Container = styled("div")`
@@ -60,10 +57,6 @@ export type DisplayFile = EnteFile & {
 };
 
 export interface PhotoFrameProps {
-    page:
-        | PHOTOS_PAGES.GALLERY
-        | PHOTOS_PAGES.DEDUPLICATE
-        | PHOTOS_PAGES.SHARED_ALBUMS;
     mode?: GalleryBarMode;
     /**
      * This is an experimental prop, to see if we can merge the separate
@@ -72,7 +65,6 @@ export interface PhotoFrameProps {
      */
     modePlus?: GalleryBarMode | "search";
     files: EnteFile[];
-    duplicates?: Duplicate[];
     syncWithRemote: () => Promise<void>;
     favItemIds?: Set<number>;
     setSelected: (
@@ -96,8 +88,6 @@ export interface PhotoFrameProps {
 }
 
 const PhotoFrame = ({
-    page,
-    duplicates,
     mode,
     modePlus,
     files,
@@ -476,30 +466,19 @@ const PhotoFrame = ({
     return (
         <Container>
             <AutoSizer>
-                {({ height, width }) =>
-                    page === PHOTOS_PAGES.DEDUPLICATE ? (
-                        <DedupePhotoList
-                            width={width}
-                            height={height}
-                            getThumbnail={getThumbnail}
-                            duplicates={duplicates}
-                            activeCollectionID={activeCollectionID}
-                            showAppDownloadBanner={showAppDownloadBanner}
-                        />
-                    ) : (
-                        <PhotoList
-                            width={width}
-                            height={height}
-                            getThumbnail={getThumbnail}
-                            mode={mode}
-                            modePlus={modePlus}
-                            displayFiles={displayFiles}
-                            activeCollectionID={activeCollectionID}
-                            activePersonID={activePersonID}
-                            showAppDownloadBanner={showAppDownloadBanner}
-                        />
-                    )
-                }
+                {({ height, width }) => (
+                    <PhotoList
+                        width={width}
+                        height={height}
+                        getThumbnail={getThumbnail}
+                        mode={mode}
+                        modePlus={modePlus}
+                        displayFiles={displayFiles}
+                        activeCollectionID={activeCollectionID}
+                        activePersonID={activePersonID}
+                        showAppDownloadBanner={showAppDownloadBanner}
+                    />
+                )}
             </AutoSizer>
             <PhotoViewer
                 isOpen={open}

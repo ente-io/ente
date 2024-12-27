@@ -8,7 +8,6 @@ import {
     OverflowMenuOption,
 } from "@/base/components/OverflowMenu";
 import { Ellipsized2LineTypography } from "@/base/components/Typography";
-import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -26,6 +25,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
+import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, {
     memo,
@@ -57,13 +57,14 @@ import {
 import { useAppContext } from "../types/context";
 
 const Page: React.FC = () => {
-    const { onGenericError } = useAppContext();
+    const { showNavBar, onGenericError } = useAppContext();
 
     const [state, dispatch] = useReducer(dedupReducer, initialDedupState);
 
     useRedirectIfNeedsCredentials("/duplicates");
 
     useEffect(() => {
+        showNavBar(false);
         dispatch({ type: "analyze" });
         void deduceDuplicates()
             .then((duplicateGroups) =>
@@ -93,13 +94,13 @@ const Page: React.FC = () => {
     }, [state.duplicateGroups, onGenericError]);
 
     const contents = (() => {
-        switch (state.status) {
+        switch (state.analysisStatus) {
             case undefined:
-            case "analyzing":
+            case "started":
                 return <Loading />;
-            case "analysisFailed":
+            case "failed":
                 return <LoadFailed />;
-            case "analysisCompleted":
+            case "completed":
                 if (state.duplicateGroups.length == 0) {
                     return <NoDuplicatesFound />;
                 } else {
@@ -117,8 +118,6 @@ const Page: React.FC = () => {
                         />
                     );
                 }
-            default:
-                return <Loading />;
         }
     })();
 
@@ -141,8 +140,8 @@ export default Page;
 type SortOrder = "prunableCount" | "prunableSize";
 
 interface DedupState {
-    /** Status of the screen, between initial state => analysis */
-    status: undefined | "analyzing" | "analysisFailed" | "analysisCompleted";
+    /** Status of the analysis ("loading") process. */
+    analysisStatus: undefined | "started" | "failed" | "completed";
     /**
      * Groups of duplicates.
      *
@@ -188,7 +187,7 @@ type DedupAction =
     | { type: "dedupeCompleted"; removedGroupIDs: Set<string> };
 
 const initialDedupState: DedupState = {
-    status: undefined,
+    analysisStatus: undefined,
     duplicateGroups: [],
     sortOrder: "prunableSize",
     prunableCount: 0,
@@ -202,9 +201,9 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
 ) => {
     switch (action.type) {
         case "analyze":
-            return { ...state, status: "analyzing" };
+            return { ...state, analysisStatus: "started" };
         case "analysisFailed":
-            return { ...state, status: "analysisFailed" };
+            return { ...state, analysisStatus: "failed" };
         case "analysisCompleted": {
             const duplicateGroups = sortedCopyOfDuplicateGroups(
                 action.duplicateGroups,
@@ -215,7 +214,7 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
                 deducePrunableCountAndSize(duplicateGroups);
             return {
                 ...state,
-                status: "analysisCompleted",
+                analysisStatus: "completed",
                 duplicateGroups,
                 selected,
                 prunableCount,
@@ -295,7 +294,8 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
  * Return a copy of the given {@link duplicateGroups}, also sorting them as per
  * the given {@link sortOrder}.
  *
- * Helper method for the reducer */
+ * Helper method for the reducer.
+ */
 const sortedCopyOfDuplicateGroups = (
     duplicateGroups: DuplicateGroup[],
     sortOrder: DedupState["sortOrder"],
@@ -306,7 +306,7 @@ const sortedCopyOfDuplicateGroups = (
             : b.prunableCount - a.prunableCount,
     );
 
-/** Helper method for the reducer */
+/** Helper method for the reducer. */
 const deducePrunableCountAndSize = (duplicateGroups: DuplicateGroup[]) => {
     const prunableCount = duplicateGroups.reduce(
         (sum, { prunableCount, isSelected }) =>
@@ -359,7 +359,7 @@ const Navbar: React.FC<NavbarProps> = ({
                     <ArrowBackIcon />
                 </IconButton>
             </Box>
-            <Typography variant="large">{pt("Remove duplicates")}</Typography>
+            <Typography variant="large">{t("remove_duplicates")}</Typography>
             <Stack direction="row" sx={{ gap: "4px" }}>
                 <SortMenu {...{ sortOrder, onChangeSortOrder }} />
                 <OptionsMenu {...{ onDeselectAll }} />
@@ -377,7 +377,7 @@ const SortMenu: React.FC<SortMenuProps> = ({
     <OverflowMenu
         ariaID="duplicates-sort"
         triggerButtonIcon={
-            <Tooltip title={pt("Sort")}>
+            <Tooltip title={t("sort_by")}>
                 <SortIcon />
             </Tooltip>
         }
@@ -386,13 +386,13 @@ const SortMenu: React.FC<SortMenuProps> = ({
             endIcon={sortOrder == "prunableSize" ? <DoneIcon /> : undefined}
             onClick={() => onChangeSortOrder("prunableSize")}
         >
-            {pt("Total size")}
+            {t("total_size")}
         </OverflowMenuOption>
         <OverflowMenuOption
             endIcon={sortOrder == "prunableCount" ? <DoneIcon /> : undefined}
             onClick={() => onChangeSortOrder("prunableCount")}
         >
-            {pt("Count")}
+            {t("count")}
         </OverflowMenuOption>
     </OverflowMenu>
 );
@@ -405,7 +405,7 @@ const OptionsMenu: React.FC<OptionsMenuProps> = ({ onDeselectAll }) => (
             startIcon={<RemoveCircleOutlineIcon />}
             onClick={onDeselectAll}
         >
-            {pt("Deselect all")}
+            {t("deselect_all")}
         </OverflowMenuOption>
     </OverflowMenu>
 );
@@ -425,7 +425,7 @@ const LoadFailed: React.FC = () => (
 const NoDuplicatesFound: React.FC = () => (
     <CenteredFill>
         <Typography color="text.muted" sx={{ textAlign: "center" }}>
-            {pt("No duplicates")}
+            {t("no_duplicates")}
         </Typography>
     </CenteredFill>
 );
@@ -574,7 +574,7 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                     }}
                 >
                     <Typography color={checked ? "text.base" : "text.muted"}>
-                        {pt(`${count} items, ${itemSize} each`)}
+                        {t("duplicate_group_description", { count, itemSize })}
                     </Typography>
                     {/* The size of this Checkbox is 42px. */}
                     <Checkbox {...{ checked, onChange }} />
@@ -661,7 +661,9 @@ const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
             ) : (
                 <>
                     <Typography>
-                        {pt(`Delete ${prunableCount} items`)}
+                        {t("remove_duplicates_button_count", {
+                            count: prunableCount,
+                        })}
                     </Typography>
                     <Typography variant="small" fontWeight={"normal"}>
                         {formattedByteSize(prunableSize)}
