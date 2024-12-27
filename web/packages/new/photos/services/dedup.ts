@@ -42,7 +42,7 @@ export interface DuplicateGroup {
          * IDs of the collection to which {@link file} and its collection file
          * siblings belong.
          */
-        collectionIDs: number[];
+        collectionIDs: Set<number>;
         /**
          * The name of the collection to which {@link file} belongs.
          *
@@ -127,7 +127,7 @@ export const deduceDuplicates = async () => {
     // Group the filtered collection files by their hashes, keeping only one
     // entry per file ID. Also retain the IDs of all the collections to which a
     // particular file (ID) belongs.
-    const collectionIDsByFileID = new Map<number, number[]>();
+    const collectionIDsByFileID = new Map<number, Set<number>>();
     const filesByHash = new Map<string, EnteFile[]>();
     for (const file of filteredCollectionFiles) {
         const hash = metadataHash(file.metadata);
@@ -137,16 +137,14 @@ export const deduceDuplicates = async () => {
             continue;
         }
 
-        const collectionIDs = collectionIDsByFileID.get(file.id);
+        let collectionIDs = collectionIDsByFileID.get(file.id);
         if (!collectionIDs) {
+            collectionIDsByFileID.set(file.id, (collectionIDs = new Set()));
             // This is the first collection file we're seeing for a particular
             // file ID, so also create an entry in the filesByHash map.
             filesByHash.set(hash, [...(filesByHash.get(hash) ?? []), file]);
         }
-        collectionIDsByFileID.set(file.id, [
-            ...(collectionIDs ?? []),
-            file.collectionID,
-        ]);
+        collectionIDs.add(file.collectionID);
     }
 
     // Construct the results from groups that have more than one file with the
@@ -215,7 +213,7 @@ export const deduceDuplicates = async () => {
 };
 
 /**
- * Remove duplicate groups that the user has retained from those that we
+ * Remove duplicate groups that the user has selected from those that we
  * returned in {@link deduceDuplicates}.
  *
  * @param duplicateGroups A list of duplicate groups. This is the same list as
@@ -241,34 +239,30 @@ export const removeSelectedDuplicateGroups = async (
     // 1. For each selected duplicate group, determine the file to retain.
     // 2. Add these to the user owned collections the other files exist in.
     // 3. Delete the other files.
-    //
 
+    /* collection ID => files */
     const filesToAdd = new Map<number, EnteFile[]>();
+    /* only one entry per fileID */
     const filesToTrash: EnteFile[] = [];
 
     for (const duplicateGroup of selectedDuplicateGroups) {
         const retainedItem = duplicateGroupItemToRetain(duplicateGroup);
-        // Find the existing collection IDs to which this item already belongs.
-        const existingCollectionIDs = new Set(
-            retainedItem.collectionFiles.map((cf) => cf.collectionID),
-        );
 
         // For each item, find all the collections to which any of the files
         // (except the file we're retaining) belongs.
-        const collectionIDs = new Set<number>();
+        let collectionIDs = new Set<number>();
         for (const item of duplicateGroup.items) {
             // Skip the item we're retaining.
             if (item.file.id == retainedItem.file.id) continue;
-            // Determine the collections to which any of the item's files belong.
-            for (const { collectionID } of item.collectionFiles) {
-                if (!existingCollectionIDs.has(collectionID))
-                    collectionIDs.add(collectionID);
-            }
+            collectionIDs = collectionIDs.union(item.collectionIDs);
             // Move the item's file to trash.
             filesToTrash.push(item.file);
         }
 
-        // Add the file we're retaining to these (uniqued) collections.
+        // Skip the existing collection IDs to which this item already belongs.
+        collectionIDs = collectionIDs.difference(retainedItem.collectionIDs);
+
+        // Add the file we're retaining to these collections.
         for (const collectionID of collectionIDs) {
             filesToAdd.set(collectionID, [
                 ...(filesToAdd.get(collectionID) ?? []),
@@ -284,11 +278,8 @@ export const removeSelectedDuplicateGroups = async (
     // Process the adds.
     const collections = await getLocalCollections("normal");
     const collectionsByID = new Map(collections.map((c) => [c.id, c]));
-    for (const [collectionID, collectionFiles] of filesToAdd.entries()) {
-        await addToCollection(
-            collectionsByID.get(collectionID)!,
-            collectionFiles,
-        );
+    for (const [collectionID, files] of filesToAdd.entries()) {
+        await addToCollection(collectionsByID.get(collectionID)!, files);
         tickProgress();
     }
 
@@ -298,6 +289,7 @@ export const removeSelectedDuplicateGroups = async (
         tickProgress();
     }
 
+    // Sync our local state.
     await syncFilesAndCollections();
     tickProgress();
 
