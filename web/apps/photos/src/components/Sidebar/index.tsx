@@ -574,7 +574,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             <EnteMenuItem
                 variant="secondary"
                 onClick={handleDeduplicate}
-                label={t("DEDUPLICATE_FILES")}
+                label={t("deduplicate_files")}
             />
             <EnteMenuItem
                 variant="secondary"
@@ -666,7 +666,7 @@ const HelpSection: React.FC = () => {
             />
             <EnteMenuItem
                 onClick={handleExport}
-                label={t("EXPORT")}
+                label={t("export_data")}
                 endIcon={
                     exportService.isExportInProgress() && (
                         <ActivityIndicator size="20px" />

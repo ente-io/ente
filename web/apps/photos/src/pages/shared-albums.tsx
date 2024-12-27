@@ -436,7 +436,7 @@ export default function PublicCollectionGallery() {
             const selectedFiles = getSelectedFiles(selected, publicFiles);
             const setFilesDownloadProgressAttributes =
                 setFilesDownloadProgressAttributesCreator(
-                    `${selectedFiles.length} ${t("FILES")}`,
+                    t("files_count", { count: selectedFiles.length }),
                 );
             await downloadSelectedFiles(
                 selectedFiles,

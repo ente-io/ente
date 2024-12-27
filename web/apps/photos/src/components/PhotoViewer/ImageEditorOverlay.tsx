@@ -695,7 +695,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                             setInvert={setInvert}
                         />
                     )}
-                    <MenuSectionTitle title={t("EXPORT")} />
+                    <MenuSectionTitle title={t("export_data")} />
                     <MenuItemGroup>
                         <EnteMenuItem
                             startIcon={<DownloadIcon />}

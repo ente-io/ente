@@ -507,7 +507,7 @@ export const handleFileOps = async (
         case FILE_OPS_TYPE.DOWNLOAD: {
             const setSelectedFileDownloadProgressAttributes =
                 setFilesDownloadProgressAttributesCreator(
-                    `${files.length} ${t("FILES")}`,
+                    t("files_count", { count: files.length }),
                 );
             await downloadSelectedFiles(
                 files,
