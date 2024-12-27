@@ -71,6 +71,7 @@
     "NO_ACCOUNT": "",
     "ACCOUNT_EXISTS": "",
     "CREATE": "",
+    "files_count": "",
     "download": "",
     "download_album": "",
     "download_favorites": "",

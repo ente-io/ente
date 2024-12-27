@@ -71,6 +71,7 @@
     "NO_ACCOUNT": "Neturiu paskyros",
     "ACCOUNT_EXISTS": "Jau turiu paskyrą",
     "CREATE": "Kurti",
+    "files_count": "",
     "download": "Atsisiųsti",
     "download_album": "Atsisiųsti albumą",
     "download_favorites": "Atsisiųsti mėgstamus",

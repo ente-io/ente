@@ -71,6 +71,7 @@
     "NO_ACCOUNT": "没有账号",
     "ACCOUNT_EXISTS": "已有账号",
     "CREATE": "创建",
+    "files_count": "",
     "download": "下载",
     "download_album": "下载相册",
     "download_favorites": "下载收藏",
