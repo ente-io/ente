@@ -139,7 +139,7 @@
     "ok": "OK",
     "success": "Bem-sucedido",
     "error": "Erro",
-    "OFFLINE_MSG": "Está offline, estão a ser mostradas memórias em cache",
+    "offline_message": "Está offline, estão a ser mostradas memórias em cache",
     "install": "Instalar",
     "install_mobile_app": "Instale nosso aplicativo <a>Android</a> ou <b>iOS</b> para fazer backup automático de todas as suas fotos",
     "download_app": "Descarregar a aplicação para computador",

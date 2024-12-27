@@ -139,7 +139,7 @@
     "ok": "OK",
     "success": "Thành công",
     "error": "Lỗi",
-    "OFFLINE_MSG": "Bạn đang ngoại tuyến, các kỷ niệm đã được lưu vào bộ nhớ cache đang được hiển thị",
+    "offline_message": "Bạn đang ngoại tuyến, các kỷ niệm đã được lưu vào bộ nhớ cache đang được hiển thị",
     "install": "Cài đặt",
     "install_mobile_app": "Cài đặt ứng dụng <a>Android</a> hoặc <b>iOS</b> của chúng tôi để tự động sao lưu tất cả ảnh của bạn",
     "download_app": "Tải xuống ứng dụng desktop",

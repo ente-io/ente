@@ -208,7 +208,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar />}
                 <OfflineMessageContainer>
-                    {isI18nReady && isOffline && t("OFFLINE_MSG")}
+                    {isI18nReady && isOffline && t("offline_message")}
                 </OfflineMessageContainer>
                 <LoadingBar color="#51cd7c" ref={loadingBarRef} />
 

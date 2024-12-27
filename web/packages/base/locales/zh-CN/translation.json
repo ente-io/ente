@@ -139,7 +139,7 @@
     "ok": "确定",
     "success": "成功",
     "error": "错误",
-    "OFFLINE_MSG": "您处于离线状态，正在显示已缓存的回忆",
+    "offline_message": "您处于离线状态，正在显示已缓存的回忆",
     "install": "安装",
     "install_mobile_app": "安装我们的 <a>Android</a> 或 <b>iOS</b> 应用程序来自动备份您的所有照片",
     "download_app": "下载桌面应用程序",

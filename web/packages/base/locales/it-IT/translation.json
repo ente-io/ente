@@ -139,7 +139,7 @@
     "ok": "OK",
     "success": "Operazione riuscita",
     "error": "Errore",
-    "OFFLINE_MSG": "Sei offline, i ricordi memorizzati nella cache vengono mostrati",
+    "offline_message": "Sei offline, i ricordi memorizzati nella cache vengono mostrati",
     "install": "Installa",
     "install_mobile_app": "Installa la nostra app <a>Android</a> o <b>iOS</b> per eseguire il backup automatico di tutte le tue foto",
     "download_app": "Scarica l'app per desktop",

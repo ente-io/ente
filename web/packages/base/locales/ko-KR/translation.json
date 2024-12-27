@@ -139,7 +139,7 @@
     "ok": "확인",
     "success": "성공",
     "error": "",
-    "OFFLINE_MSG": "",
+    "offline_message": "",
     "install": "",
     "install_mobile_app": "",
     "download_app": "",

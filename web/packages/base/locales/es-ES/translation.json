@@ -139,7 +139,7 @@
     "ok": "OK",
     "success": "Completado",
     "error": "Error",
-    "OFFLINE_MSG": "Estás desconectado, se están mostrando recuerdos en caché",
+    "offline_message": "Estás desconectado, se están mostrando recuerdos en caché",
     "install": "Instalar",
     "install_mobile_app": "Instala nuestra aplicación <a>Android</a> o <b>iOS</b> para hacer una copia de seguridad automática de todas usted fotos",
     "download_app": "Descargar aplicación de computadora",

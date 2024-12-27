@@ -139,7 +139,7 @@
     "ok": "OK",
     "success": "Lyckades",
     "error": "Fel",
-    "OFFLINE_MSG": "",
+    "offline_message": "",
     "install": "Installera",
     "install_mobile_app": "Installera vår <a>Android</a> eller <b>iOS</b>-app för att automatiskt säkerhetskopiera alla dina foton",
     "download_app": "",

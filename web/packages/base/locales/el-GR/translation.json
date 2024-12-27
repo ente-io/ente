@@ -139,7 +139,7 @@
     "ok": "ΟΚ",
     "success": "Επιτυχία",
     "error": "Σφάλμα",
-    "OFFLINE_MSG": "",
+    "offline_message": "",
     "install": "",
     "install_mobile_app": "",
     "download_app": "Λήψη εφαρμογής για υπολογιστές",

@@ -140,7 +140,7 @@
     "ok": "OK",
     "success": "Success",
     "error": "Error",
-    "OFFLINE_MSG": "You are offline, cached memories are being shown",
+    "offline_message": "You are offline, cached memories are being shown",
     "install": "Install",
     "install_mobile_app": "Install our <a>Android</a> or <b>iOS</b> app to automatically backup all your photos",
     "download_app": "Download desktop app",

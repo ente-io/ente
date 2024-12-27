@@ -139,7 +139,7 @@
     "ok": "حسنا",
     "success": "تم بنجاح",
     "error": "خطأ",
-    "OFFLINE_MSG": "",
+    "offline_message": "",
     "install": "تثبيت",
     "install_mobile_app": "",
     "download_app": "تنزيل تطبيق سطح المكتب",

@@ -139,7 +139,7 @@
     "ok": "Oké",
     "success": "Succes",
     "error": "Foutmelding",
-    "OFFLINE_MSG": "Je bent offline, lokaal opgeslagen herinneringen worden getoond",
+    "offline_message": "Je bent offline, lokaal opgeslagen herinneringen worden getoond",
     "install": "Installeren",
     "install_mobile_app": "Installeer onze <a>Android</a> of <b>iOS</b> app om automatisch een back-up te maken van al uw foto's",
     "download_app": "Download de desktop app",

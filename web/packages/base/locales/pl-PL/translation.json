@@ -139,7 +139,7 @@
     "ok": "OK",
     "success": "Sukces",
     "error": "Błąd",
-    "OFFLINE_MSG": "Jesteś offline, wyświetlane są wspomnienia z pamięci podręcznej",
+    "offline_message": "Jesteś offline, wyświetlane są wspomnienia z pamięci podręcznej",
     "install": "Zainstaluj",
     "install_mobile_app": "Zainstaluj naszą aplikację na system <a>Android</a> lub <b>iOS</b>, aby automatycznie wykonać kopię zapasową wszystkich zdjęć",
     "download_app": "Pobierz aplikację komputerową",

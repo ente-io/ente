@@ -139,7 +139,7 @@
     "ok": "Í lagi",
     "success": "Tókst",
     "error": "Villa",
-    "OFFLINE_MSG": "",
+    "offline_message": "",
     "install": "",
     "install_mobile_app": "",
     "download_app": "",
