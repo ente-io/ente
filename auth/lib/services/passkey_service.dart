@@ -1,6 +1,6 @@
+import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -11,11 +11,13 @@ class PasskeyService {
 
   final _enteDio = Network.instance.enteDio;
 
-  Future<String> getJwtToken() async {
+  Future<String> getAccountsUrl() async {
     final response = await _enteDio.get(
       "/users/accounts-token",
     );
-    return response.data!["accountsToken"] as String;
+    final accountsUrl = response.data!["accountsUrl"] ?? kAccountsUrl;
+    final jwtToken = response.data!["accountsToken"] as String;
+    return "$accountsUrl/passkeys?token=$jwtToken";
   }
 
   Future<bool> isPasskeyRecoveryEnabled() async {
@@ -23,10 +25,6 @@ class PasskeyService {
       "/users/two-factor/recovery-status",
     );
     return response.data!["isPasskeyRecoveryEnabled"] as bool;
-  }
-
-  String get accountsUrl {
-    return kDebugMode ? "http://localhost:3001" : "https://accounts.ente.io";
   }
 
   Future<void> configurePasskeyRecovery(
@@ -46,8 +44,7 @@ class PasskeyService {
 
   Future<void> openPasskeyPage(BuildContext context) async {
     try {
-      final jwtToken = await getJwtToken();
-      final url = "$accountsUrl/passkeys?token=$jwtToken";
+      final url = await getAccountsUrl();
       await launchUrlString(
         url,
         mode: LaunchMode.externalApplication,

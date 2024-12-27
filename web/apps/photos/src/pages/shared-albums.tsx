@@ -436,7 +436,7 @@ export default function PublicCollectionGallery() {
             const selectedFiles = getSelectedFiles(selected, publicFiles);
             const setFilesDownloadProgressAttributes =
                 setFilesDownloadProgressAttributesCreator(
-                    `${selectedFiles.length} ${t("FILES")}`,
+                    t("files_count", { count: selectedFiles.length }),
                 );
             await downloadSelectedFiles(
                 selectedFiles,
@@ -497,7 +497,6 @@ export default function PublicCollectionGallery() {
                 />
                 <SharedAlbumNavbar onAddPhotos={onAddPhotos} />
                 <PhotoFrame
-                    page={PAGES.SHARED_ALBUMS}
                     files={publicFiles}
                     syncWithRemote={syncWithRemote}
                     setSelected={setSelected}

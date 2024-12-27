@@ -1,5 +1,4 @@
 import { EnteFile } from "@/media/file";
-import { formattedByteSize } from "@/new/photos/utils/units";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { formatDate } from "@ente/shared/time/format";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
@@ -26,7 +25,6 @@ import {
 import type { PhotoFrameProps } from "components/PhotoFrame";
 
 export const DATE_CONTAINER_HEIGHT = 48;
-export const SIZE_AND_COUNT_CONTAINER_HEIGHT = 72;
 export const SPACE_BTW_DATES = 44;
 
 const SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO = 0.244;
@@ -38,7 +36,6 @@ const ALBUM_FOOTER_HEIGHT_WITH_REFERRAL = 113;
 export enum ITEM_TYPE {
     TIME = "TIME",
     FILE = "FILE",
-    SIZE_AND_COUNT = "SIZE_AND_COUNT",
     HEADER = "HEADER",
     FOOTER = "FOOTER",
     MARKETING_FOOTER = "MARKETING_FOOTER",
@@ -141,11 +138,6 @@ const DateContainer = styled(ListItemContainer)`
     text-overflow: ellipsis;
     height: ${DATE_CONTAINER_HEIGHT}px;
     color: ${({ theme }) => theme.colors.text.muted};
-`;
-
-const SizeAndCountContainer = styled(DateContainer)`
-    margin-top: 1rem;
-    height: ${SIZE_AND_COUNT_CONTAINER_HEIGHT}px;
 `;
 
 const FooterContainer = styled(ListItemContainer)`
@@ -712,8 +704,6 @@ export function PhotoList({
         switch (timeStampList[index].itemType) {
             case ITEM_TYPE.TIME:
                 return DATE_CONTAINER_HEIGHT;
-            case ITEM_TYPE.SIZE_AND_COUNT:
-                return SIZE_AND_COUNT_CONTAINER_HEIGHT;
             case ITEM_TYPE.FILE:
                 return listItemHeight;
             default:
@@ -841,13 +831,6 @@ export function PhotoList({
                         )}
                         {listItem.date}
                     </DateContainer>
-                );
-            case ITEM_TYPE.SIZE_AND_COUNT:
-                return (
-                    <SizeAndCountContainer span={columns}>
-                        {listItem.fileCount} {t("FILES")},{" "}
-                        {formattedByteSize(listItem.fileSize || 0)} {t("EACH")}
-                    </SizeAndCountContainer>
                 );
             case ITEM_TYPE.FILE: {
                 const ret = listItem.items.map((item, idx) =>

@@ -412,6 +412,7 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "照片网格大小",
+  "manageDeviceStorageDesc": "检查并清除本地缓存存储。",
   "machineLearning": "机器学习",
   "mlConsent": "启用机器学习",
   "mlConsentTitle": "要启用机器学习吗？",
@@ -687,6 +688,8 @@
   "noPhotosAreBeingBackedUpRightNow": "目前没有照片正在备份",
   "preserveMore": "保留更多",
   "grantFullAccessPrompt": "请在手机“设置”中授权软件访问所有照片",
+  "allowPermTitle": "允许访问照片",
+  "allowPermBody": "请从“设置”中选择允许访问您的照片，以便 Ente 可以显示和备份您的图库。",
   "openSettings": "打开“设置”",
   "selectMorePhotos": "选择更多照片",
   "existingUser": "现有用户",
@@ -815,6 +818,16 @@
   "referFriendsAnd2xYourPlan": "把我们推荐给你的朋友然后获得延长一倍的订阅计划",
   "shareAlbumHint": "打开相册并点击右上角的分享按钮进行分享",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "项目显示永久删除前剩余的天数",
+  "trashDaysLeft": "{count, plural, =0 {马上} =1 {1 天} other {{count} 天}}",
+  "@trashDaysLeft": {
+    "description": "Text to indicate number of days remaining before permanent deletion",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
   "deleteAll": "全部删除",
   "renameAlbum": "重命名相册",
   "convertToAlbum": "转换为相册",
@@ -1222,6 +1235,7 @@
   "waitingForVerification": "等待验证...",
   "passkey": "通行密钥",
   "passkeyAuthTitle": "通行密钥认证",
+  "loginWithTOTP": "使用 TOTP 登录",
   "passKeyPendingVerification": "仍需进行验证",
   "loginSessionExpired": "会话已过期",
   "loginSessionExpiredDetails": "您的会话已过期。请重新登录。",
@@ -1234,6 +1248,10 @@
   "joinDiscord": "加入 Discord",
   "locations": "位置",
   "addAName": "添加一个名称",
+  "findThemQuickly": "快速找到它们",
+  "@findThemQuickly": {
+    "description": "Subtitle to indicate that the user can find people quickly by name"
+  },
   "findPeopleByName": "按名称快速查找人物",
   "addViewers": "{count, plural, zero {添加查看者} one {添加查看者} other {添加查看者}}",
   "addCollaborators": "{count, plural, zero {添加协作者} one {添加协作者} other {添加协作者}}",
@@ -1248,7 +1266,13 @@
   "createCollaborativeLink": "创建协作链接",
   "search": "搜索",
   "enterPersonName": "输入人物名称",
+  "enterName": "输入名称",
+  "savePerson": "保存人物",
+  "editPerson": "编辑人物",
   "mergedPhotos": "已合并照片",
+  "orMergeWithExistingPerson": "或与现有的合并",
+  "enterDateOfBirth": "生日(可选)",
+  "birthday": "生日",
   "removePersonLabel": "移除人物标签",
   "autoPairDesc": "自动配对仅适用于支持 Chromecast 的设备。",
   "manualPairDesc": "用 PIN 码配对适用于您希望在其上查看相册的任何屏幕。",
@@ -1275,6 +1299,7 @@
   "right": "向右",
   "whatsNew": "更新日志",
   "reviewSuggestions": "查看建议",
+  "review": "查看",
   "useAsCover": "用作封面",
   "notPersonLabel": "不是 {name}？",
   "@notPersonLabel": {
@@ -1333,6 +1358,209 @@
   "mostRelevant": "最相关",
   "loadingYourPhotos": "正在加载您的照片...",
   "processingImport": "正在处理 {folderName}...",
+  "personName": "人物名称",
+  "addNewPerson": "添加新人物",
+  "addNameOrMerge": "添加名称或合并",
+  "mergeWithExisting": "与现有的合并",
+  "newPerson": "新人物",
+  "addName": "添加名称",
+  "add": "添加",
+  "extraPhotosFoundFor": "为 {text} 找到额外照片",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "extraPhotosFound": "发现额外照片",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "configuration": "配置",
+  "localIndexing": "本地索引",
+  "resetPerson": "移除",
+  "areYouSureYouWantToResetThisPerson": "您确定要重设此人吗？",
+  "allPersonGroupingWillReset": "此人的所有分组都将被重设，并且您将丢失针对此人的所有建议",
+  "yesResetPerson": "是，重设人物",
+  "onlyThem": "仅限他们",
+  "checkingModels": "正在检查模型...",
+  "enableMachineLearningBanner": "启用机器学习进行魔法搜索和面部识别",
+  "searchDiscoverEmptySection": "处理和同步完成后，图像将显示在此处",
+  "searchPersonsEmptySection": "处理和同步完成后，人物将显示在此处",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {已添加 0 位查看者} =1 {已添加 1 位查看者} other {已添加 {count} 位查看者}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {已添加 0 位协作者} =1 {已添加 1 位协作者} other {已添加 {count} 位协作者}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  },
+  "accountIsAlreadyConfigured": "账户已配置。",
+  "sessionIdMismatch": "会话 ID 不匹配",
+  "@sessionIdMismatch": {
+    "description": "In passkey page, deeplink is ignored because of session ID mismatch."
+  },
+  "failedToFetchActiveSessions": "无法获取活动会话",
+  "@failedToFetchActiveSessions": {
+    "description": "In session page, warn user (in toast) that active sessions could not be fetched."
+  },
+  "failedToRefreshStripeSubscription": "刷新订阅失败",
+  "failedToPlayVideo": "播放视频失败",
+  "uploadIsIgnoredDueToIgnorereason": "由于 {ignoreReason}，上传被忽略",
+  "@uploadIsIgnoredDueToIgnorereason": {
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "typeOfGallerGallerytypeIsNotSupportedForRename": "相册类型 {galleryType} 不支持重命名",
+  "@typeOfGallerGallerytypeIsNotSupportedForRename": {
+    "placeholders": {
+      "galleryType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUploadIsIgnoredDue": "点按上传，由于{ignoreReason}，目前上传已被忽略",
+  "@tapToUploadIsIgnoredDue": {
+    "description": "Shown in upload icon widet, inside a tooltip.",
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUpload": "点按上传",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
+  "info": "详情",
+  "addFiles": "添加文件",
+  "castAlbum": "投放相册",
+  "imageNotAnalyzed": "图像未分析",
+  "noFacesFound": "未找到任何面部",
+  "fileNotUploadedYet": "文件尚未上传",
+  "noSuggestionsForPerson": "没有针对 {personName} 的建议",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "月",
+  "yearShort": "年",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "目前正在运行",
+  "ignored": "已忽略",
+  "photosCount": "{count, plural, =0 {0 张照片} =1 {1 张照片} other {{count} 张照片}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "file": "文件",
+  "selectMailApp": "选择邮件应用",
+  "selectAllShort": "全部",
+  "@selectAllShort": {
+    "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
+  },
+  "changeLogMagicSearchImprovementTitle": "魔法搜索改进",
+  "changeLogMagicSearchImprovementContent": "我们改进了魔法搜索，使其速度更快，因此您无需等待就能找到您要查找的内容。",
+  "changeLogBackupStatusTitle": "备份状态",
+  "changeLogBackupStatusContent": "我们添加了所有已上传到 Ente 的文件的日志，包括失败和排队的文件。",
+  "changeLogDiscoverTitle": "发现",
+  "changeLogDiscoverContent": "想要查找您的身份证、笔记甚至表情包的照片？转到搜索选项卡并查看“发现”。根据我们的语义搜索，您可以在这里找到对您来说可能很重要的照片。\\n\\n仅当您启用了机器学习时才可用。",
+  "selectCoverPhoto": "选择封面照片",
+  "newLocation": "新位置",
+  "faceNotClusteredYet": "人脸尚未聚类，请稍后再来",
+  "theLinkYouAreTryingToAccessHasExpired": "您尝试访问的链接已过期。",
+  "openFile": "打开文件",
+  "backupFile": "备份文件",
+  "openAlbumInBrowser": "在浏览器中打开相册",
+  "openAlbumInBrowserTitle": "请使用网络应用将照片添加到此相册",
+  "allow": "允许",
+  "allowAppToOpenSharedAlbumLinks": "允许应用打开共享相册链接",
+  "seePublicAlbumLinksInApp": "在应用程序中查看公开相册链接",
+  "emergencyContacts": "紧急联系人",
+  "acceptTrustInvite": "接受邀请",
+  "declineTrustInvite": "拒绝邀请",
+  "removeYourselfAsTrustedContact": "删除自己作为可信联系人",
+  "legacy": "遗产",
+  "legacyPageDesc": "遗产允许信任的联系人在您不在时访问您的账户。",
+  "legacyPageDesc2": "可信联系人可以启动账户恢复，如果 30 天内没有被阻止，则可以重置密码并访问您的账户。",
+  "legacyAccounts": "遗产账户",
+  "trustedContacts": "可信联系人",
+  "addTrustedContact": "添加可信联系人",
+  "removeInvite": "移除邀请",
+  "recoveryWarning": "一位可信联系人正在尝试访问您的账户",
+  "rejectRecovery": "拒绝恢复",
+  "recoveryInitiated": "已启动恢复",
+  "recoveryInitiatedDesc": "您可以在 {days} 天后访问该账户。通知将发送至 {email}。",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "取消恢复",
+  "recoveryAccount": "恢复账户",
+  "cancelAccountRecoveryBody": "您真的要取消恢复吗？",
+  "startAccountRecoveryTitle": "开始恢复",
+  "whyAddTrustContact": "可信联系人可以帮助恢复您的数据。",
+  "recoveryReady": "您现在可以通过设置新密码来恢复 {email} 的账户。",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} 正在尝试恢复您的账户。",
+  "trustedInviteBody": "您已受邀通过 {email} 成为遗产联系人。",
+  "warning": "警告",
+  "proceed": "继续",
+  "confirmAddingTrustedContact": "您即将添加 {email} 作为可信联系人。如果您离开了 {numOfDays} 天，他们将能够恢复您的帐户。",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} 已邀请您成为可信联系人",
+  "authToManageLegacy": "请验证身份以管理您的可信联系人",
+  "useDifferentPlayerInfo": "播放此视频时遇到问题了吗？长按此处可尝试使用其他播放器。"
 }

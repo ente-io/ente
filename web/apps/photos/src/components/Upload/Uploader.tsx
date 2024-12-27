@@ -9,6 +9,7 @@ import { UploaderNameInput } from "@/new/albums/components/UploaderNameInput";
 import { CollectionMappingChoice } from "@/new/photos/components/CollectionMappingChoice";
 import type { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelector";
 import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
+import { getLatestCollections } from "@/new/photos/services/collections";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import type {
     FileAndPath,
@@ -26,7 +27,6 @@ import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
-import { getLatestCollections } from "services/collectionService";
 import {
     getPublicCollectionUID,
     getPublicCollectionUploaderName,

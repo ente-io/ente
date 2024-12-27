@@ -8,7 +8,6 @@ import {
     OverflowMenuOption,
 } from "@/base/components/OverflowMenu";
 import { Ellipsized2LineTypography } from "@/base/components/Typography";
-import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -18,12 +17,15 @@ import SortIcon from "@mui/icons-material/Sort";
 import {
     Box,
     Checkbox,
+    Divider,
     IconButton,
+    LinearProgress,
     Stack,
     styled,
     Tooltip,
     Typography,
 } from "@mui/material";
+import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, {
     memo,
@@ -47,20 +49,22 @@ import {
     computeThumbnailGridLayoutParams,
     type ThumbnailGridLayoutParams,
 } from "../components/utils/thumbnail-grid-layout";
-import { deduceDuplicates, type DuplicateGroup } from "../services/dedup";
+import {
+    deduceDuplicates,
+    removeSelectedDuplicateGroups,
+    type DuplicateGroup,
+} from "../services/dedup";
 import { useAppContext } from "../types/context";
 
 const Page: React.FC = () => {
-    const { showNavBar } = useAppContext();
+    const { showNavBar, onGenericError } = useAppContext();
 
     const [state, dispatch] = useReducer(dedupReducer, initialDedupState);
 
     useRedirectIfNeedsCredentials("/duplicates");
 
     useEffect(() => {
-        // TODO: Remove me
         showNavBar(false);
-
         dispatch({ type: "analyze" });
         void deduceDuplicates()
             .then((duplicateGroups) =>
@@ -70,37 +74,50 @@ const Page: React.FC = () => {
                 log.error("Failed to detect duplicates", e);
                 dispatch({ type: "analysisFailed" });
             });
-    }, [showNavBar]);
+    }, []);
 
     const handleRemoveDuplicates = useCallback(() => {
         dispatch({ type: "dedupe" });
-    }, []);
+        void removeSelectedDuplicateGroups(
+            state.duplicateGroups,
+            (progress: number) =>
+                dispatch({ type: "setDedupeProgress", progress }),
+        )
+            .then((removedGroupIDs) =>
+                dispatch({ type: "dedupeCompleted", removedGroupIDs }),
+            )
+
+            .catch((e: unknown) => {
+                onGenericError(e);
+                dispatch({ type: "dedupeFailed" });
+            });
+    }, [state.duplicateGroups, onGenericError]);
 
     const contents = (() => {
-        switch (state.status) {
+        switch (state.analysisStatus) {
             case undefined:
-            case "analyzing":
+            case "started":
                 return <Loading />;
-            case "analysisFailed":
+            case "failed":
                 return <LoadFailed />;
-            case "analysisCompleted":
+            case "completed":
                 if (state.duplicateGroups.length == 0) {
                     return <NoDuplicatesFound />;
                 } else {
                     return (
                         <Duplicates
                             duplicateGroups={state.duplicateGroups}
+                            sortOrder={state.sortOrder}
                             onToggleSelection={(index) =>
                                 dispatch({ type: "toggleSelection", index })
                             }
                             prunableCount={state.prunableCount}
                             prunableSize={state.prunableSize}
+                            dedupeProgress={state.dedupeProgress}
                             onRemoveDuplicates={handleRemoveDuplicates}
                         />
                     );
                 }
-            default:
-                return <Loading />;
         }
     })();
 
@@ -123,13 +140,8 @@ export default Page;
 type SortOrder = "prunableCount" | "prunableSize";
 
 interface DedupState {
-    status:
-        | undefined
-        | "analyzing"
-        | "analysisFailed"
-        | "analysisCompleted"
-        | "dedupe"
-        | "dedupeFailed";
+    /** Status of the analysis ("loading") process. */
+    analysisStatus: undefined | "started" | "failed" | "completed";
     /**
      * Groups of duplicates.
      *
@@ -155,6 +167,11 @@ interface DedupState {
      * current selection.
      */
     prunableSize: number;
+    /**
+     * If a dedupe is in progress, then this will indicate its progress
+     * percentage (a number between 0 and 100).
+     */
+    dedupeProgress: number | undefined;
 }
 
 type DedupAction =
@@ -165,15 +182,17 @@ type DedupAction =
     | { type: "toggleSelection"; index: number }
     | { type: "deselectAll" }
     | { type: "dedupe" }
-    | { type: "dedupeCompleted" }
-    | { type: "dedupeFailed" };
+    | { type: "setDedupeProgress"; progress: number }
+    | { type: "dedupeFailed" }
+    | { type: "dedupeCompleted"; removedGroupIDs: Set<string> };
 
 const initialDedupState: DedupState = {
-    status: undefined,
+    analysisStatus: undefined,
     duplicateGroups: [],
     sortOrder: "prunableSize",
     prunableCount: 0,
     prunableSize: 0,
+    dedupeProgress: undefined,
 };
 
 const dedupReducer: React.Reducer<DedupState, DedupAction> = (
@@ -182,18 +201,20 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
 ) => {
     switch (action.type) {
         case "analyze":
-            return { ...state, status: "analyzing" };
+            return { ...state, analysisStatus: "started" };
         case "analysisFailed":
-            return { ...state, status: "analysisFailed" };
+            return { ...state, analysisStatus: "failed" };
         case "analysisCompleted": {
-            const duplicateGroups = action.duplicateGroups;
-            sortDuplicateGroups(duplicateGroups, state.sortOrder);
+            const duplicateGroups = sortedCopyOfDuplicateGroups(
+                action.duplicateGroups,
+                state.sortOrder,
+            );
             const selected = duplicateGroups.map(() => true);
             const { prunableCount, prunableSize } =
                 deducePrunableCountAndSize(duplicateGroups);
             return {
                 ...state,
-                status: "analysisCompleted",
+                analysisStatus: "completed",
                 duplicateGroups,
                 selected,
                 prunableCount,
@@ -203,8 +224,10 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
 
         case "changeSortOrder": {
             const sortOrder = action.sortOrder;
-            const duplicateGroups = state.duplicateGroups;
-            sortDuplicateGroups(duplicateGroups, sortOrder);
+            const duplicateGroups = sortedCopyOfDuplicateGroups(
+                state.duplicateGroups,
+                sortOrder,
+            );
             return {
                 ...state,
                 sortOrder,
@@ -213,7 +236,7 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
         }
 
         case "toggleSelection": {
-            const duplicateGroups = state.duplicateGroups;
+            const duplicateGroups = [...state.duplicateGroups];
             const duplicateGroup = duplicateGroups[action.index]!;
             duplicateGroup.isSelected = !duplicateGroup.isSelected;
             const { prunableCount, prunableSize } =
@@ -228,7 +251,7 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
 
         case "deselectAll": {
             const duplicateGroups = state.duplicateGroups.map(
-                (duplicateGroup) => ({ ...duplicateGroup, selected: false }),
+                (duplicateGroup) => ({ ...duplicateGroup, isSelected: false }),
             );
             const { prunableCount, prunableSize } =
                 deducePrunableCountAndSize(duplicateGroups);
@@ -240,23 +263,50 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
             };
         }
 
-        default:
-            return state;
+        case "dedupe":
+            return { ...state, dedupeProgress: 0 };
+
+        case "setDedupeProgress": {
+            return { ...state, dedupeProgress: action.progress };
+        }
+
+        case "dedupeFailed":
+            return { ...state, dedupeProgress: undefined };
+
+        case "dedupeCompleted": {
+            const duplicateGroups = state.duplicateGroups.filter(
+                ({ id }) => !action.removedGroupIDs.has(id),
+            );
+            const { prunableCount, prunableSize } =
+                deducePrunableCountAndSize(duplicateGroups);
+            return {
+                ...state,
+                duplicateGroups,
+                prunableCount,
+                prunableSize,
+                dedupeProgress: undefined,
+            };
+        }
     }
 };
 
-/** Helper method for the reducer */
-const sortDuplicateGroups = (
+/**
+ * Return a copy of the given {@link duplicateGroups}, also sorting them as per
+ * the given {@link sortOrder}.
+ *
+ * Helper method for the reducer.
+ */
+const sortedCopyOfDuplicateGroups = (
     duplicateGroups: DuplicateGroup[],
     sortOrder: DedupState["sortOrder"],
 ) =>
-    duplicateGroups.sort((a, b) =>
+    [...duplicateGroups].sort((a, b) =>
         sortOrder == "prunableSize"
             ? b.prunableSize - a.prunableSize
             : b.prunableCount - a.prunableCount,
     );
 
-/** Helper method for the reducer */
+/** Helper method for the reducer. */
 const deducePrunableCountAndSize = (duplicateGroups: DuplicateGroup[]) => {
     const prunableCount = duplicateGroups.reduce(
         (sum, { prunableCount, isSelected }) =>
@@ -309,7 +359,7 @@ const Navbar: React.FC<NavbarProps> = ({
                     <ArrowBackIcon />
                 </IconButton>
             </Box>
-            <Typography variant="large">{pt("Remove duplicates")}</Typography>
+            <Typography variant="large">{t("remove_duplicates")}</Typography>
             <Stack direction="row" sx={{ gap: "4px" }}>
                 <SortMenu {...{ sortOrder, onChangeSortOrder }} />
                 <OptionsMenu {...{ onDeselectAll }} />
@@ -327,7 +377,7 @@ const SortMenu: React.FC<SortMenuProps> = ({
     <OverflowMenu
         ariaID="duplicates-sort"
         triggerButtonIcon={
-            <Tooltip title={pt("Sort")}>
+            <Tooltip title={t("sort_by")}>
                 <SortIcon />
             </Tooltip>
         }
@@ -336,13 +386,13 @@ const SortMenu: React.FC<SortMenuProps> = ({
             endIcon={sortOrder == "prunableSize" ? <DoneIcon /> : undefined}
             onClick={() => onChangeSortOrder("prunableSize")}
         >
-            {pt("Total size")}
+            {t("total_size")}
         </OverflowMenuOption>
         <OverflowMenuOption
             endIcon={sortOrder == "prunableCount" ? <DoneIcon /> : undefined}
             onClick={() => onChangeSortOrder("prunableCount")}
         >
-            {pt("Count")}
+            {t("count")}
         </OverflowMenuOption>
     </OverflowMenu>
 );
@@ -355,7 +405,7 @@ const OptionsMenu: React.FC<OptionsMenuProps> = ({ onDeselectAll }) => (
             startIcon={<RemoveCircleOutlineIcon />}
             onClick={onDeselectAll}
         >
-            {pt("Deselect all")}
+            {t("deselect_all")}
         </OverflowMenuOption>
     </OverflowMenu>
 );
@@ -375,24 +425,25 @@ const LoadFailed: React.FC = () => (
 const NoDuplicatesFound: React.FC = () => (
     <CenteredFill>
         <Typography color="text.muted" sx={{ textAlign: "center" }}>
-            {pt("No duplicates")}
+            {t("no_duplicates")}
         </Typography>
     </CenteredFill>
 );
 
 type DuplicatesProps = Pick<
     DuplicatesListProps,
-    "duplicateGroups" | "onToggleSelection"
+    "duplicateGroups" | "sortOrder" | "onToggleSelection"
 > &
     DeduplicateButtonProps;
 
 const Duplicates: React.FC<DuplicatesProps> = ({
     duplicateGroups,
+    sortOrder,
     onToggleSelection,
     ...deduplicateButtonProps
 }) => (
     <Stack sx={{ flex: 1 }}>
-        <Box sx={{ flex: 1, overflow: "hidden", paddingBlock: 1 }}>
+        <Box sx={{ flex: 1, overflow: "hidden", paddingBlockEnd: 1 }}>
             <Autosizer>
                 {({ width, height }) => (
                     <DuplicatesList
@@ -400,6 +451,7 @@ const Duplicates: React.FC<DuplicatesProps> = ({
                             width,
                             height,
                             duplicateGroups,
+                            sortOrder,
                             onToggleSelection,
                         }}
                     />
@@ -426,6 +478,10 @@ interface DuplicatesListProps {
      */
     duplicateGroups: DuplicateGroup[];
     /**
+     * The current {@link SortOrder} that is being used for sorting {@link duplicateGroups}.
+     */
+    sortOrder: SortOrder;
+    /**
      * Called when the user toggles the selection for the duplicate group at the
      * given {@link index}.
      */
@@ -443,6 +499,7 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
     width,
     height,
     duplicateGroups,
+    sortOrder,
     onToggleSelection,
 }) => {
     const layoutParams = useMemo(
@@ -450,11 +507,14 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
         [width],
     );
 
+    const itemData = { layoutParams, duplicateGroups, onToggleSelection };
     const itemCount = duplicateGroups.length;
     const itemSize = (index: number) => {
-        // The height of the header is driven by the height of the Checkbox, and
-        // currently it is always a fixed 42 px high.
-        const headerHeight = 42;
+        // The height of the header is driven by the height of the Checkbox,
+        // which is 42px high, and the divider, which is 1px. The rest of the
+        // height comes from the fixed paddings, margins on the header, the
+        // divider, and on the row itself.
+        const fixedHeight = 24 + 42 + 4 + 1 + 20 + 16;
 
         const duplicateGroup = duplicateGroups[index]!;
         const rowCount = Math.ceil(
@@ -462,12 +522,21 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
         );
         const rowHeight = layoutParams.itemHeight + layoutParams.gap;
 
-        return headerHeight + rowCount * rowHeight;
+        return fixedHeight + rowCount * rowHeight;
     };
-    const itemData = { layoutParams, duplicateGroups, onToggleSelection };
+    const itemKey = (index: number, itemData: DuplicatesListItemData) =>
+        itemData.duplicateGroups[index]!.id;
+
+    // Derive a key based on aspects whose change should cause the list to be
+    // recreated. This is the easiest way I've found to get react-window to
+    // invalidate `itemSize` values when, say, the width changes.
+    const key = `${width}-${sortOrder}`;
 
     return (
-        <VariableSizeList {...{ height, width, itemCount, itemSize, itemData }}>
+        <VariableSizeList
+            key={key}
+            {...{ height, width, itemData, itemCount, itemSize, itemKey }}
+        >
             {ListItem}
         </VariableSizeList>
     );
@@ -477,6 +546,11 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
     memo(({ index, style, data }) => {
         const { layoutParams, duplicateGroups, onToggleSelection } = data;
 
+        // For smaller screens, hide to divider to reduce visual noise. For
+        // larger screens, the divider is helpful in guiding the user's eyes to
+        // the checkbox which is otherwise at the right end of the header.
+        const hideDivider = layoutParams.isSmallerLayout;
+
         const duplicateGroup = duplicateGroups[index]!;
         const items = duplicateGroup.items;
         const count = items.length;
@@ -485,7 +559,10 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
         const onChange = () => onToggleSelection(index);
 
         return (
-            <Stack {...{ style }}>
+            <Stack
+                {...{ style }}
+                sx={{ paddingBlockEnd: "16px", opacity: checked ? 1 : 0.8 }}
+            >
                 <Stack
                     direction="row"
                     sx={{
@@ -493,17 +570,22 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                         alignItems: "center",
                         marginInline: 1,
                         paddingInline: `${layoutParams.paddingInline}px`,
+                        paddingBlock: "24px 0px",
                     }}
                 >
                     <Typography color={checked ? "text.base" : "text.muted"}>
-                        {pt(`${count} items, ${itemSize} each`)}
+                        {t("duplicate_group_description", { count, itemSize })}
                     </Typography>
-                    {/*
-                      The size of this Checkbox, 42px, drives the height of
-                      the header.
-                     */}
+                    {/* The size of this Checkbox is 42px. */}
                     <Checkbox {...{ checked, onChange }} />
                 </Stack>
+                <Divider
+                    variant="middle"
+                    sx={{
+                        opacity: hideDivider ? 0 : 0.8,
+                        marginBlock: "4px 20px",
+                    }}
+                />
                 <ItemGrid {...{ layoutParams }}>
                     {items.map((item, j) => (
                         <ItemCard
@@ -537,36 +619,57 @@ const ItemGrid = styled("div", {
 `,
 );
 
-interface DeduplicateButtonProps {
-    /**
-     * See {@link prunableCount} in {@link DedupState}.
-     */
-    prunableCount: number;
-    /**
-     * See {@link prunableSize} in {@link DedupState}.
-     */
-    prunableSize: number;
+type DeduplicateButtonProps = Pick<
+    DedupState,
+    "prunableCount" | "prunableSize" | "dedupeProgress"
+> & {
     /**
      * Called when the user presses the button to remove duplicates.
      */
     onRemoveDuplicates: () => void;
-}
+};
 
 const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
     prunableCount,
     prunableSize,
+    dedupeProgress,
     onRemoveDuplicates,
 }) => (
     <FocusVisibleButton
         sx={{ minWidth: "min(100%, 320px)", margin: "auto" }}
-        disabled={prunableCount == 0}
+        disabled={prunableCount == 0 || dedupeProgress !== undefined}
         onClick={onRemoveDuplicates}
     >
-        <Stack sx={{ gap: 1 }}>
-            <Typography>{pt(`Delete ${prunableCount} items`)}</Typography>
-            <Typography variant="small" fontWeight={"normal"}>
-                {formattedByteSize(prunableSize)}
-            </Typography>
+        <Stack
+            sx={{
+                gap: 1,
+                // Prevent a layout shift by giving a minHeight that is larger
+                // than all expected states.
+                minHeight: "45px",
+                justifyContent: "center",
+                flex: 1,
+            }}
+        >
+            {dedupeProgress !== undefined ? (
+                <LinearProgress
+                    sx={{ borderRadius: "4px" }}
+                    variant={
+                        dedupeProgress === 0 ? "indeterminate" : "determinate"
+                    }
+                    value={dedupeProgress}
+                />
+            ) : (
+                <>
+                    <Typography>
+                        {t("remove_duplicates_button_count", {
+                            count: prunableCount,
+                        })}
+                    </Typography>
+                    <Typography variant="small" fontWeight={"normal"}>
+                        {formattedByteSize(prunableSize)}
+                    </Typography>
+                </>
+            )}
         </Stack>
     </FocusVisibleButton>
 );

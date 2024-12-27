@@ -8,6 +8,8 @@ const String sentryDSN =
 const String sentryTunnel = "https://sentry-reporter.ente.io";
 const String roadmapURL = "https://roadmap.ente.io";
 
+const String kAccountsUrl = "https://accounts.ente.io";
+
 const String githubFeatureRequestUrl =
     "https://github.com/ente-io/ente/discussions/categories/feature-requests?discussions_q=is%3Aopen+category%3A%22Feature+requests%22+label%3A%22-+auth%22+sort%3Atop";
 const int microSecondsInDay = 86400000000;

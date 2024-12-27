@@ -25,11 +25,6 @@ const kWebPaymentBaseEndpoint = String.fromEnvironment(
   defaultValue: "https://payments.ente.io",
 );
 
-const kFamilyPlanManagementUrl = String.fromEnvironment(
-  "web-family",
-  defaultValue: "https://family.ente.io",
-);
-
 class BillingService {
   late final _logger = Logger("BillingService");
   final Dio _enteDio;
@@ -185,16 +180,15 @@ class BillingService {
     );
     await dialog.show();
     try {
-      final String jwtToken = await UserService.instance.getFamiliesToken();
       final bool familyExist = userDetails.isPartOfFamily();
+      final String url =
+          await UserService.instance.getFamilyPortalUrl(familyExist);
+
       await dialog.hide();
       await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) {
-            return WebPage(
-              S.of(context).familyPlanPortalTitle,
-              '$kFamilyPlanManagementUrl?token=$jwtToken&isFamilyCreated=$familyExist',
-            );
+            return WebPage(S.of(context).familyPlanPortalTitle, url);
           },
         ),
       );

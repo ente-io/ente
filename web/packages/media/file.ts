@@ -1,3 +1,5 @@
+import { sharedCryptoWorker } from "@/base/crypto";
+import log from "@/base/log";
 import { type Metadata, ItemVisibility } from "./file-metadata";
 
 // TODO: Audit this file.
@@ -7,8 +9,22 @@ export interface MetadataFileAttributes {
     decryptionHeader: string;
 }
 
+/**
+ * Attributes about an object uploaded to S3.
+ *
+ * TODO: Split between fields needed during upload, and the fields we get back
+ * from remote in the /diff response.
+ */
 export interface S3FileAttributes {
+    /**
+     * Upload only: This should be present during upload, but is not returned
+     * back from remote in the /diff response.
+     */
     objectKey: string;
+    /**
+     * Upload and diff: This is present both during upload and also returned by
+     * remote in the /diff response.
+     */
     decryptionHeader: string;
     /**
      * The size of the file, in bytes.
@@ -17,15 +33,24 @@ export interface S3FileAttributes {
      * encrypted file (as per the client) while creating a new object on remote.
      * This allows the server to validate that the size of the objects is same
      * as what client is reporting.
+     *
+     * Upload only: This should be present during upload, but is not returned
+     * back from remote in the /diff response.
      */
     size: number;
 }
 
+/**
+ * Static information associated with a file.
+ */
 export interface FileInfo {
     /**
-     * The size of the file, in bytes.
+     * The size of the file (in bytes).
      */
     fileSize: number;
+    /**
+     * The size of the thumbnail associated with the file (in bytes).
+     */
     thumbSize: number;
 }
 
@@ -39,16 +64,72 @@ export interface MagicMetadataCore<T> {
 export type EncryptedMagicMetadata = MagicMetadataCore<string>;
 
 export interface EncryptedEnteFile {
+    /**
+     * The file's ID.
+     *
+     * The file's ID is a integer assigned by remote that is unique across all
+     * files stored by an Ente instance. That is, the file ID is a global unique
+     * identifier for this {@link EnteFile}.
+     */
     id: number;
+    /**
+     * The ID of the collection with which this file as associated.
+     *
+     * The same file (ID) may be associated with multiple collectionID, in which
+     * case there will be multiple {@link EnteFile} entries for each
+     * ({@link id}, {@link collectionID}) pair. See: [Note: Collection File].
+     */
     collectionID: number;
+    /**
+     * The ID of the user who owns the file.
+     */
     ownerID: number;
     file: S3FileAttributes;
     thumbnail: S3FileAttributes;
+    /**
+     * Static metadata associated with a file.
+     *
+     * See: [Note: Metadatum].
+     */
     metadata: MetadataFileAttributes;
+    /**
+     * Static, remote visible, information associated with a file.
+     *
+     * This is information about storage used by the file and its metadata (in
+     * the future if needed). Unlike {@link metadata} which is E2EE, the
+     * {@link FileInfo} is remote visible for bookkeeping purposes.
+     *
+     * Files uploaded by very old versions of Ente might not have this structure
+     * present.
+     */
     info: FileInfo | undefined;
+    /**
+     * Private mutable metadata associated with a file.
+     *
+     * See: [Note: Metadatum].
+     */
     magicMetadata: EncryptedMagicMetadata;
+    /**
+     * Public mutable metadata associated with a file.
+     *
+     * See: [Note: Metadatum].
+     */
     pubMagicMetadata: EncryptedMagicMetadata;
+    /**
+     * The file's encryption key (as a base64 string), encrypted by the key of
+     * the collection to which it belongs.
+     *
+     * (note: This is always present. retaining this note until we remove
+     * nullability uncertainity from the types).
+     */
     encryptedKey: string;
+    /**
+     * The nonce (as a base64 string) that was used when encrypting the file's
+     * encryption key.
+     *
+     * (note: This is always present. retaining this note until we remove
+     * nullability uncertainity from the types).
+     */
     keyDecryptionNonce: string;
     isDeleted: boolean;
     updationTime: number;
@@ -65,6 +146,11 @@ export interface EncryptedEnteFile {
  * an Ente instance. Each file is also always associated with a collection, and
  * has an owner (both of these linkages are stored as the corresponding numeric
  * IDs within the EnteFile structure).
+ *
+ * While the file ID is unique, we'd can still have multiple entries for each
+ * file ID in our local state, one per collection IDs to which the file belongs.
+ * That is, the uniqueness is across the (fileID, collectionID) pairs. See
+ * [Note: Collection Files].
  */
 export interface EnteFile
     extends Omit<
@@ -89,21 +175,13 @@ export interface EnteFile
     isTrashed?: boolean;
     deleteBy?: number;
     /**
-     * The base64 encoded encryption key associated with this file.
+     * The base64 representation of the decrypted encryption key associated with
+     * this file.
      *
      * This key is used to encrypt both the file's contents, and any associated
      * data (e.g., metadatum, thumbnail) for the file.
      */
     key: string;
-}
-
-export interface TrashRequest {
-    items: TrashRequestItems[];
-}
-
-export interface TrashRequestItems {
-    fileID: number;
-    collectionID: number;
 }
 
 export interface FileWithUpdatedMagicMetadata {
@@ -207,6 +285,76 @@ export const fileLogID = (file: EnteFile) =>
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     `file ${file.metadata.title ?? "-"} (${file.id})`;
 
+export async function decryptFile(
+    file: EncryptedEnteFile,
+    collectionKey: string,
+): Promise<EnteFile> {
+    try {
+        const worker = await sharedCryptoWorker();
+        const {
+            encryptedKey,
+            keyDecryptionNonce,
+            metadata,
+            magicMetadata,
+            pubMagicMetadata,
+            ...restFileProps
+        } = file;
+        const fileKey = await worker.decryptB64(
+            encryptedKey,
+            keyDecryptionNonce,
+            collectionKey,
+        );
+        const fileMetadata = await worker.decryptMetadataJSON({
+            encryptedDataB64: metadata.encryptedData,
+            decryptionHeaderB64: metadata.decryptionHeader,
+            keyB64: fileKey,
+        });
+        let fileMagicMetadata: FileMagicMetadata;
+        let filePubMagicMetadata: FilePublicMagicMetadata;
+        /* eslint-disable @typescript-eslint/no-unnecessary-condition */
+        if (magicMetadata?.data) {
+            fileMagicMetadata = {
+                ...file.magicMetadata,
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                data: await worker.decryptMetadataJSON({
+                    encryptedDataB64: magicMetadata.data,
+                    decryptionHeaderB64: magicMetadata.header,
+                    keyB64: fileKey,
+                }),
+            };
+        }
+        /* eslint-disable @typescript-eslint/no-unnecessary-condition */
+        if (pubMagicMetadata?.data) {
+            filePubMagicMetadata = {
+                ...pubMagicMetadata,
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                data: await worker.decryptMetadataJSON({
+                    encryptedDataB64: pubMagicMetadata.data,
+                    decryptionHeaderB64: pubMagicMetadata.header,
+                    keyB64: fileKey,
+                }),
+            };
+        }
+        return {
+            ...restFileProps,
+            key: fileKey,
+            // @ts-expect-error TODO: Need to use zod here.
+            metadata: fileMetadata,
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            magicMetadata: fileMagicMetadata,
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            pubMagicMetadata: filePubMagicMetadata,
+        };
+    } catch (e) {
+        log.error("file decryption failed", e);
+        throw e;
+    }
+}
+
 /**
  * Update the immutable fields of an (in-memory) {@link EnteFile} with any edits
  * that the user has made to their corresponding mutable metadata fields.
@@ -255,6 +403,3 @@ export const mergeMetadata1 = (file: EnteFile): EnteFile => {
  */
 export const mergeMetadata = (files: EnteFile[]) =>
     files.map((file) => mergeMetadata1(file));
-
-export const hasFileHash = (file: Metadata) =>
-    !!file.hash || (!!file.imageHash && !!file.videoHash);

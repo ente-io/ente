@@ -412,7 +412,6 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Kích thước lưới ảnh",
-  "manageDeviceStorage": "Manage device Cache",
   "manageDeviceStorageDesc": "Review and clear local cache storage.",
   "machineLearning": "Học máy",
   "mlConsent": "Kích hoạt học máy",
@@ -689,6 +688,8 @@
   "noPhotosAreBeingBackedUpRightNow": "Hiện tại không có ảnh nào đang được sao lưu",
   "preserveMore": "Lưu giữ nhiều hơn",
   "grantFullAccessPrompt": "Vui lòng cho phép truy cập vào tất cả ảnh trong ứng dụng Cài đặt",
+  "allowPermTitle": "Cho phép truy cập ảnh",
+  "allowPermBody": "Vui lòng cho phép truy cập vào ảnh của bạn từ Cài đặt để Ente có thể hiển thị và sao lưu thư viện của bạn.",
   "openSettings": "Mở Cài đặt",
   "selectMorePhotos": "Chọn thêm ảnh",
   "existingUser": "Người dùng hiện tại",
@@ -1382,8 +1383,8 @@
   "onlyThem": "Chỉ họ",
   "checkingModels": "Đang kiểm tra các mô hình...",
   "enableMachineLearningBanner": "Bật học máy cho tìm kiếm ma thuật và nhận diện khuôn mặt",
-  "searchDiscoverEmptySection": "Hình ảnh sẽ được hiển thị ở đây khi quá trình xử lý hoàn tất",
-  "searchPersonsEmptySection": "Người sẽ được hiển thị ở đây khi quá trình xử lý hoàn tất",
+  "searchDiscoverEmptySection": "Hình ảnh sẽ được hiển thị ở đây sau khi hoàn tất xử lý và đồng bộ",
+  "searchPersonsEmptySection": "Người sẽ được hiển thị ở đây sau khi hoàn tất xử lý và đồng bộ",
   "viewersSuccessfullyAdded": "{count, plural, =0 {Đã thêm 0 người xem} =1 {Đã thêm 1 người xem} other {Đã thêm {count} người xem}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1479,20 +1480,6 @@
     }
   },
   "file": "Tệp",
-  "searchSectionsLengthMismatch": "Chiều dài các phần không khớp: {snapshotLenght} != {searchLenght}",
-  "@searchSectionsLengthMismatch": {
-    "description": "Appears in search tab page",
-    "placeholders": {
-      "snapshotLenght": {
-        "type": "int",
-        "example": "1"
-      },
-      "searchLenght": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "selectMailApp": "Chọn ứng dụng email",
   "selectAllShort": "Tất cả",
   "@selectAllShort": {
@@ -1575,5 +1562,5 @@
   },
   "legacyInvite": "{email} đã mời bạn trở thành một liên hệ tin cậy",
   "authToManageLegacy": "Vui lòng xác thực để quản lý các liên hệ tin cậy của bạn",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "useDifferentPlayerInfo": "Phát video gặp vấn đề? Ấn giữ tại đây để thử một trình phát khác."
 }

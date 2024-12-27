@@ -101,16 +101,37 @@ export interface Metadata {
     /**
      * A hash of the file's contents.
      *
-     * It is only valid for images and videos. For live photos, see
-     * {@link imageHash} and {@link videoHash}.
+     * For images and videos this is the hash of the file's contents. For live
+     * photos, this is the image hash joined with video hash using a colon (i.e.
+     * `${imageHash}:{videoHash}`).
+     *
+     * Legacy compatibility:
+     *
+     * - The hash might not be present for files uploaded from ancient versions
+     *   of Ente (Newer clients will always include it in the metadata).
+     *
+     * - For live photos, older version of the web and desktop client used to
+     *   add two separate fields - {@link imageHash} and {@link videoHash} - to
+     *   the file's metadata instead of setting the {@link hash}. This behaviour
+     *   is deprecated, and if we now see a live photo without a {@link hash},
+     *   we should reconstruct the hash locally from the image and video hashes
+     *   by combining them as `${imageHash}:{videoHash}`.
      */
     hash?: string;
     /**
      * The hash of the image component of a live photo.
+     *
+     * This is a legacy field, and should not be added by us anymore. It is
+     * retained to allow us to reconstruct the hash for live photos uploaded by
+     * older clients.
      */
     imageHash?: string;
     /**
      * The hash of the video component of a live photo.
+     *
+     * This is a legacy field, and should not be added by us anymore. It is
+     * retained to allow us to reconstruct the hash for live photos uploaded by
+     * older clients.
      */
     videoHash?: string;
     hasStaticThumbnail?: boolean;
@@ -270,6 +291,32 @@ const PublicMagicMetadata = z
         editedTime: z.number().optional(),
     })
     .passthrough();
+
+/**
+ * Return the hash of the file by reading it from its metadata.
+ *
+ * This is a convenience function that directly reads the information from the
+ * metadata in the happy path, but also has branches to handle the legacy format
+ * that older clients used to upload. For more details, see the note in the
+ * documentation for {@link hash} in {@link Metadata}.
+ */
+export const metadataHash = (metadata: Metadata) => {
+    const hash = metadata.hash;
+    if (hash) return hash;
+
+    // Handle past live photos upload from web client.
+    if (
+        metadata.fileType == FileType.livePhoto &&
+        metadata.imageHash &&
+        metadata.videoHash
+    ) {
+        return `${metadata.imageHash}:${metadata.videoHash}`;
+    }
+
+    // Items uploaded by very old clients might not have a hash, so this is not
+    // necessarily an error even if rare.
+    return undefined;
+};
 
 /**
  * Return the public magic metadata for the given {@link file}.

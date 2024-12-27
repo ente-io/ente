@@ -412,7 +412,6 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Розмір сітки фотографій",
-  "manageDeviceStorage": "Керування кешем пристрою",
   "manageDeviceStorageDesc": "Переглянути та очистити локальне сховище кешу.",
   "machineLearning": "Машинне навчання",
   "mlConsent": "Увімкнути машинне навчання",
@@ -689,6 +688,8 @@
   "noPhotosAreBeingBackedUpRightNow": "Наразі немає резервних копій фотографій",
   "preserveMore": "Зберегти більше",
   "grantFullAccessPrompt": "Надайте доступ до всіх фотографій в налаштуваннях застосунку",
+  "allowPermTitle": "Дозволити доступ до фотографій",
+  "allowPermBody": "Надайте доступ до ваших фотографій з налаштувань, щоб Ente міг показувати та створювати резервну копію вашої бібліотеки.",
   "openSettings": "Відкрити налаштування",
   "selectMorePhotos": "Вибрати більше фотографій",
   "existingUser": "Існуючий користувач",
@@ -817,7 +818,7 @@
   "referFriendsAnd2xYourPlan": "Запросіть друзів та подвойте свій план",
   "shareAlbumHint": "Відкрийте альбом та натисніть кнопку «Поділитися» у верхньому правому куті.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Елементи показують кількість днів, що залишилися до остаточного видалення",
-  "trashDaysLeft": "{count, plural, one {{count} день} few {{count} дні} many {{count} днів}=0 {Незабаром} =1 {1 день} other {{count} днів}}",
+  "trashDaysLeft": "{count, plural, =0 {Незабаром} =1 {1 день} other {{count} днів}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1382,28 +1383,8 @@
   "onlyThem": "Тільки вони",
   "checkingModels": "Перевірка моделей...",
   "enableMachineLearningBanner": "Увімкніть машинне навчання для магічного пошуку та розпізнавання облич",
-  "searchDiscoverEmptySection": "Зображення будуть показані тут після завершення обробки",
-  "searchPersonsEmptySection": "Люди будуть показані тут після завершення обробки",
-  "viewersSuccessfullyAdded": "{count, plural, one {} few {Додано {count} глядачі} many {Додано {count} глядачів}=0 {Додано 0 глядачів} =1 {Додано 1 глядач} other {Додано {count} глядачів}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, one {} few {Додано {count} співавтора} many {Додано {count} співавторів}=0 {Додано 0 співавторів} =1 {Додано 1 співавтор} other {Додано {count} співавторів}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
+  "searchDiscoverEmptySection": "Зображення будуть показані тут після завершення оброблення та синхронізації",
+  "searchPersonsEmptySection": "Люди будуть показані тут після завершення оброблення та синхронізації",
   "accountIsAlreadyConfigured": "Обліковий запис уже налаштовано.",
   "sessionIdMismatch": "Невідповідність ідентифікатора сеансу",
   "@sessionIdMismatch": {
@@ -1469,30 +1450,7 @@
   },
   "currentlyRunning": "зараз працює",
   "ignored": "ігнорується",
-  "photosCount": "{count, plural, one {{count} фото} few {{count} фото} many {{count} фото}=0 {0 фото} =1 {1 фото} other {{count} фото}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Файл",
-  "searchSectionsLengthMismatch": "Невідповідність довжини розділів: {snapshotLenght} != {searchLenght}",
-  "@searchSectionsLengthMismatch": {
-    "description": "Appears in search tab page",
-    "placeholders": {
-      "snapshotLenght": {
-        "type": "int",
-        "example": "1"
-      },
-      "searchLenght": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "selectMailApp": "Вибрати застосунок пошти",
   "selectAllShort": "Усі",
   "@selectAllShort": {
@@ -1575,5 +1533,5 @@
   },
   "legacyInvite": "{email} запросив вас стати довіреною особою",
   "authToManageLegacy": "Авторизуйтесь, щоби керувати довіреними контактами",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "useDifferentPlayerInfo": "Виникли проблеми з відтворенням цього відео? Натисніть і утримуйте тут, щоб спробувати інший плеєр."
 }

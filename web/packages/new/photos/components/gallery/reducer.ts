@@ -31,8 +31,9 @@ import {
     createFileCollectionIDs,
     getLatestVersionFiles,
     groupFilesByCollectionID,
-} from "../../services/file";
-import { sortFiles, uniqueFilesByID } from "../../services/files";
+    sortFiles,
+    uniqueFilesByID,
+} from "../../services/files";
 import {
     isArchivedCollection,
     isArchivedFile,

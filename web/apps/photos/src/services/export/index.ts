@@ -14,9 +14,9 @@ import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import {
     createCollectionNameByID,
-    getAllLocalCollections,
     getCollectionUserFacingName,
 } from "@/new/photos/services/collection";
+import { getAllLocalCollections } from "@/new/photos/services/collections";
 import {
     exportMetadataDirectoryName,
     exportTrashDirectoryName,
@@ -750,19 +750,19 @@ class ExportService {
                         const { image, video } =
                             parseLivePhotoExportName(fileExportName);
 
-                        await moveToTrash(
+                        await moveToFSTrash(
                             exportDir,
                             collectionExportName,
                             image,
                         );
 
-                        await moveToTrash(
+                        await moveToFSTrash(
                             exportDir,
                             collectionExportName,
                             video,
                         );
                     } else {
-                        await moveToTrash(
+                        await moveToFSTrash(
                             exportDir,
                             collectionExportName,
                             fileExportName,
@@ -1459,14 +1459,15 @@ const isExportInProgress = (exportStage: ExportStage) =>
     exportStage > ExportStage.INIT && exportStage < ExportStage.FINISHED;
 
 /**
- * Move {@link fileName} in {@link collectionName} to Trash.
+ * Move {@link fileName} in {@link collectionName} to the special per-collection
+ * file system "Trash" folder we created under the export directory.
  *
  * Also move its associated metadata JSON to Trash.
  *
  * @param exportDir The root directory on the user's file system where we are
  * exporting to.
  * */
-const moveToTrash = async (
+const moveToFSTrash = async (
     exportDir: string,
     collectionName: string,
     fileName: string,

@@ -1067,6 +1067,24 @@ class CollectionsService {
       _cachedPublicAlbumToken[collection.id] = authToken!;
       _cachedPublicCollectionID.add(collection.id);
       _cachedPublicAlbumKey[collection.id] = albumKey;
+
+      if (collectionData['pubMagicMetadata'] != null) {
+        final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+          CryptoUtil.base642bin(collectionData['pubMagicMetadata']['data']),
+          collectionKey,
+          CryptoUtil.base642bin(
+            collectionData['pubMagicMetadata']['header'],
+          ),
+        );
+        collection.mMdPubEncodedJson = utf8.decode(utfEncodedMmd);
+        collection.mMbPubVersion =
+            collectionData['pubMagicMetadata']['version'];
+        collection.pubMagicMetadata =
+            CollectionPubMagicMetadata.fromEncodedJson(
+          collection.mMdPubEncodedJson ?? '{}',
+        );
+      }
+
       collection.setName(_getDecryptedCollectionName(collection));
       return collection;
     } catch (e, s) {
