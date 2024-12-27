@@ -32,16 +32,17 @@ export interface DuplicateGroup {
         /**
          * The underlying file to delete.
          *
-         * This is one of the files from amongst {@link collectionFiles},
-         * arbitrarily picked to stand in for the entire set of files in the UI.
+         * This is one of the files from amongst collection files that have the
+         * same ID, arbitrarily picked to stand in for the entire set of files
+         * in the UI. The set of the collections to which these files belong is
+         * retained separately in {@link collectionIDs}.
          */
         file: EnteFile;
         /**
-         * All the collection files for the underlying file.
-         *
-         * This includes {@link file} too.
+         * IDs of the collection to which {@link file} and its collection file
+         * siblings belong.
          */
-        collectionFiles: EnteFile[];
+        collectionIDs: number[];
         /**
          * The name of the collection to which {@link file} belongs.
          *
@@ -124,9 +125,9 @@ export const deduceDuplicates = async () => {
     );
 
     // Group the filtered collection files by their hashes, keeping only one
-    // entry per file ID. We also retain all the collections files for a
-    // particular file ID.
-    const collectionFilesByFileID = new Map<number, EnteFile[]>();
+    // entry per file ID. Also retain the IDs of all the collections to which a
+    // particular file (ID) belongs.
+    const collectionIDsByFileID = new Map<number, number[]>();
     const filesByHash = new Map<string, EnteFile[]>();
     for (const file of filteredCollectionFiles) {
         const hash = metadataHash(file.metadata);
@@ -136,15 +137,15 @@ export const deduceDuplicates = async () => {
             continue;
         }
 
-        const collectionFiles = collectionFilesByFileID.get(file.id);
-        if (!collectionFiles) {
+        const collectionIDs = collectionIDsByFileID.get(file.id);
+        if (!collectionIDs) {
             // This is the first collection file we're seeing for a particular
             // file ID, so also create an entry in the filesByHash map.
             filesByHash.set(hash, [...(filesByHash.get(hash) ?? []), file]);
         }
-        collectionFilesByFileID.set(file.id, [
-            ...(collectionFiles ?? []),
-            file,
+        collectionIDsByFileID.set(file.id, [
+            ...(collectionIDs ?? []),
+            file.collectionID,
         ]);
     }
 
@@ -183,15 +184,15 @@ export const deduceDuplicates = async () => {
                 const collectionName = collectionNameByID.get(
                     file.collectionID,
                 );
-                const collectionFiles = collectionFilesByFileID.get(file.id);
+                const collectionIDs = collectionIDsByFileID.get(file.id);
                 // Ignore duplicates for which we do not have a collection. This
                 // shouldn't really happen though, so retain an assert.
-                if (!collectionName || !collectionFiles) {
+                if (!collectionName || !collectionIDs) {
                     assertionFailed();
                     return undefined;
                 }
 
-                return { file, collectionFiles, collectionName };
+                return { file, collectionIDs, collectionName };
             })
             .filter((item) => !!item);
         if (items.length < 2) continue;

@@ -293,7 +293,8 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
  * Return a copy of the given {@link duplicateGroups}, also sorting them as per
  * the given {@link sortOrder}.
  *
- * Helper method for the reducer */
+ * Helper method for the reducer.
+ */
 const sortedCopyOfDuplicateGroups = (
     duplicateGroups: DuplicateGroup[],
     sortOrder: DedupState["sortOrder"],
@@ -304,7 +305,7 @@ const sortedCopyOfDuplicateGroups = (
             : b.prunableCount - a.prunableCount,
     );
 
-/** Helper method for the reducer */
+/** Helper method for the reducer. */
 const deducePrunableCountAndSize = (duplicateGroups: DuplicateGroup[]) => {
     const prunableCount = duplicateGroups.reduce(
         (sum, { prunableCount, isSelected }) =>
