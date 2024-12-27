@@ -71,6 +71,7 @@
     "NO_ACCOUNT": "계정이 없습니다",
     "ACCOUNT_EXISTS": "이미 계정이 있습니다",
     "CREATE": "만들기",
+    "files_count": "",
     "download": "다운로드",
     "download_album": "",
     "download_favorites": "즐겨찾기 다운로드",

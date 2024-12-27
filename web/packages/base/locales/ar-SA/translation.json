@@ -71,6 +71,7 @@
     "NO_ACCOUNT": "ليس لديك حساب",
     "ACCOUNT_EXISTS": "لديك حساب بالفعل",
     "CREATE": "إنشاء",
+    "files_count": "",
     "download": "تنزيل",
     "download_album": "تنزيل الألبوم",
     "download_favorites": "تنزيل المفضلات",

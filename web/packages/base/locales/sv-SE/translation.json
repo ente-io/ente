@@ -71,6 +71,7 @@
     "NO_ACCOUNT": "",
     "ACCOUNT_EXISTS": "",
     "CREATE": "Skapa",
+    "files_count": "",
     "download": "Ladda ner",
     "download_album": "Ladda ner album",
     "download_favorites": "Ladda ner favoriter",

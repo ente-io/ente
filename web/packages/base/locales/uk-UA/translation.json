@@ -71,6 +71,7 @@
     "NO_ACCOUNT": "Не маєте облікового запису",
     "ACCOUNT_EXISTS": "Уже маєте обліковий запис",
     "CREATE": "Створити",
+    "files_count": "",
     "download": "Завантажити",
     "download_album": "Завантажити альбом",
     "download_favorites": "Завантажити улюблене",

@@ -71,6 +71,7 @@
     "NO_ACCOUNT": "Não possui uma conta",
     "ACCOUNT_EXISTS": "Já possui uma conta",
     "CREATE": "Criar",
+    "files_count": "",
     "download": "Download",
     "download_album": "Download album",
     "download_favorites": "Download favoritos",

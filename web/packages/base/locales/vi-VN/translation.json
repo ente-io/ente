@@ -71,6 +71,7 @@
     "NO_ACCOUNT": "Không có tài khoản",
     "ACCOUNT_EXISTS": "Đã có tài khoản",
     "CREATE": "Tạo",
+    "files_count": "",
     "download": "Tải xuống",
     "download_album": "Tải xuống album",
     "download_favorites": "Tải xuống mục yêu thích",

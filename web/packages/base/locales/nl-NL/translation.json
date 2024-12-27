@@ -71,6 +71,7 @@
     "NO_ACCOUNT": "Heb nog geen account",
     "ACCOUNT_EXISTS": "Heb al een account",
     "CREATE": "Creëren",
+    "files_count": "",
     "download": "Downloaden",
     "download_album": "Download album",
     "download_favorites": "Favorieten downloaden",
