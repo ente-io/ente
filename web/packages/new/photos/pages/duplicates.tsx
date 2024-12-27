@@ -8,7 +8,6 @@ import {
     OverflowMenuOption,
 } from "@/base/components/OverflowMenu";
 import { Ellipsized2LineTypography } from "@/base/components/Typography";
-import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -26,6 +25,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
+import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, {
     memo,
@@ -358,7 +358,7 @@ const Navbar: React.FC<NavbarProps> = ({
                     <ArrowBackIcon />
                 </IconButton>
             </Box>
-            <Typography variant="large">{pt("Remove duplicates")}</Typography>
+            <Typography variant="large">{t("remove_duplicates")}</Typography>
             <Stack direction="row" sx={{ gap: "4px" }}>
                 <SortMenu {...{ sortOrder, onChangeSortOrder }} />
                 <OptionsMenu {...{ onDeselectAll }} />
@@ -376,7 +376,7 @@ const SortMenu: React.FC<SortMenuProps> = ({
     <OverflowMenu
         ariaID="duplicates-sort"
         triggerButtonIcon={
-            <Tooltip title={pt("Sort")}>
+            <Tooltip title={t("sort_by")}>
                 <SortIcon />
             </Tooltip>
         }
@@ -385,13 +385,13 @@ const SortMenu: React.FC<SortMenuProps> = ({
             endIcon={sortOrder == "prunableSize" ? <DoneIcon /> : undefined}
             onClick={() => onChangeSortOrder("prunableSize")}
         >
-            {pt("Total size")}
+            {t("total_size")}
         </OverflowMenuOption>
         <OverflowMenuOption
             endIcon={sortOrder == "prunableCount" ? <DoneIcon /> : undefined}
             onClick={() => onChangeSortOrder("prunableCount")}
         >
-            {pt("Count")}
+            {t("count")}
         </OverflowMenuOption>
     </OverflowMenu>
 );
@@ -404,7 +404,7 @@ const OptionsMenu: React.FC<OptionsMenuProps> = ({ onDeselectAll }) => (
             startIcon={<RemoveCircleOutlineIcon />}
             onClick={onDeselectAll}
         >
-            {pt("Deselect all")}
+            {t("deselect_all")}
         </OverflowMenuOption>
     </OverflowMenu>
 );
@@ -424,7 +424,7 @@ const LoadFailed: React.FC = () => (
 const NoDuplicatesFound: React.FC = () => (
     <CenteredFill>
         <Typography color="text.muted" sx={{ textAlign: "center" }}>
-            {pt("No duplicates")}
+            {t("no_duplicates")}
         </Typography>
     </CenteredFill>
 );
@@ -573,7 +573,7 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                     }}
                 >
                     <Typography color={checked ? "text.base" : "text.muted"}>
-                        {pt(`${count} items, ${itemSize} each`)}
+                        {t("duplicate_group_description", { count, itemSize })}
                     </Typography>
                     {/* The size of this Checkbox is 42px. */}
                     <Checkbox {...{ checked, onChange }} />
@@ -660,7 +660,9 @@ const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
             ) : (
                 <>
                     <Typography>
-                        {pt(`Delete ${prunableCount} items`)}
+                        {t("remove_duplicates_button_count", {
+                            count: prunableCount,
+                        })}
                     </Typography>
                     <Typography variant="small" fontWeight={"normal"}>
                         {formattedByteSize(prunableSize)}
