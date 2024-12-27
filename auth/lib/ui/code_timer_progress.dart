@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_launcher_icons/logger.dart';
 
 class CodeTimerProgress extends StatefulWidget {
   final int period;
