@@ -200,7 +200,7 @@ class IconUtils {
       final simpleIconData = await rootBundle
           .loadString('assets/simple-icons/_data/simple-icons.json');
       final simpleIcons = json.decode(simpleIconData);
-      for (final icon in simpleIcons["icons"]) {
+      for (final icon in simpleIcons) {
         _simpleIcons[icon["title"]
             .toString()
             .replaceAll(' ', '')
@@ -227,8 +227,8 @@ class IconUtils {
           }
         }
       }
-    } catch (e) {
-      Logger("IconUtils").severe("Error loading icons", e);
+    } catch (e, s) {
+      Logger("IconUtils").severe("Error loading icons", e, s);
       if (kDebugMode) {
         rethrow;
       }
