@@ -93,13 +93,13 @@ const Page: React.FC = () => {
     }, [state.duplicateGroups, onGenericError]);
 
     const contents = (() => {
-        switch (state.status) {
+        switch (state.analysisStatus) {
             case undefined:
-            case "analyzing":
+            case "started":
                 return <Loading />;
-            case "analysisFailed":
+            case "failed":
                 return <LoadFailed />;
-            case "analysisCompleted":
+            case "completed":
                 if (state.duplicateGroups.length == 0) {
                     return <NoDuplicatesFound />;
                 } else {
@@ -117,8 +117,6 @@ const Page: React.FC = () => {
                         />
                     );
                 }
-            default:
-                return <Loading />;
         }
     })();
 
@@ -141,8 +139,8 @@ export default Page;
 type SortOrder = "prunableCount" | "prunableSize";
 
 interface DedupState {
-    /** Status of the screen, between initial state => analysis */
-    status: undefined | "analyzing" | "analysisFailed" | "analysisCompleted";
+    /** Status of the analysis ("loading") process. */
+    analysisStatus: undefined | "started" | "failed" | "completed";
     /**
      * Groups of duplicates.
      *
@@ -188,7 +186,7 @@ type DedupAction =
     | { type: "dedupeCompleted"; removedGroupIDs: Set<string> };
 
 const initialDedupState: DedupState = {
-    status: undefined,
+    analysisStatus: undefined,
     duplicateGroups: [],
     sortOrder: "prunableSize",
     prunableCount: 0,
@@ -202,9 +200,9 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
 ) => {
     switch (action.type) {
         case "analyze":
-            return { ...state, status: "analyzing" };
+            return { ...state, analysisStatus: "started" };
         case "analysisFailed":
-            return { ...state, status: "analysisFailed" };
+            return { ...state, analysisStatus: "failed" };
         case "analysisCompleted": {
             const duplicateGroups = sortedCopyOfDuplicateGroups(
                 action.duplicateGroups,
@@ -215,7 +213,7 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
                 deducePrunableCountAndSize(duplicateGroups);
             return {
                 ...state,
-                status: "analysisCompleted",
+                analysisStatus: "completed",
                 duplicateGroups,
                 selected,
                 prunableCount,
