@@ -57,13 +57,14 @@ import {
 import { useAppContext } from "../types/context";
 
 const Page: React.FC = () => {
-    const { onGenericError } = useAppContext();
+    const { showNavBar, onGenericError } = useAppContext();
 
     const [state, dispatch] = useReducer(dedupReducer, initialDedupState);
 
     useRedirectIfNeedsCredentials("/duplicates");
 
     useEffect(() => {
+        showNavBar(false);
         dispatch({ type: "analyze" });
         void deduceDuplicates()
             .then((duplicateGroups) =>

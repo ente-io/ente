@@ -349,7 +349,6 @@
     "leave_shared_album_title": "Leave shared album?",
     "leave_shared_album_message": "You will leave the album, and it will stop being visible to you.",
     "leave_shared_album": "Yes, leave",
-    "not_file_owner_delete_error": "You cannot delete files in a shared album",
     "confirm_remove_message": "Selected items will be removed from this album. Items which are only in this album will be moved to Uncategorized.",
     "confirm_remove_incl_others_message": "Some of the items you are removing were added by other people, and you will lose access to them.",
     "oldest": "Oldest",
