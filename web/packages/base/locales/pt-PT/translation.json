@@ -416,7 +416,7 @@
     "file": "Arquivo",
     "folder": "Pasta",
     "google_takeout": "Google Takeout",
-    "DEDUPLICATE_FILES": "Arquivos duplicados",
+    "deduplicate_files": "Arquivos duplicados",
     "remove_duplicates": "",
     "total_size": "",
     "count": "",

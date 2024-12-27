@@ -416,7 +416,7 @@
     "file": "File",
     "folder": "Folder",
     "google_takeout": "Google takeout",
-    "DEDUPLICATE_FILES": "Deduplicate files",
+    "deduplicate_files": "Deduplicate files",
     "remove_duplicates": "Remove duplicates",
     "total_size": "Total size",
     "count": "Count",

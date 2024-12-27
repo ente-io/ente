@@ -416,7 +416,7 @@
     "file": "Файл",
     "folder": "Тека",
     "google_takeout": "Google Takeout",
-    "DEDUPLICATE_FILES": "Дублювати файли",
+    "deduplicate_files": "Дублювати файли",
     "remove_duplicates": "",
     "total_size": "",
     "count": "",

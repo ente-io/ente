@@ -416,7 +416,7 @@
     "file": "File",
     "folder": "Cartella",
     "google_takeout": "Google takeout",
-    "DEDUPLICATE_FILES": "Rimuovi i file duplicati",
+    "deduplicate_files": "Rimuovi i file duplicati",
     "remove_duplicates": "",
     "total_size": "",
     "count": "",

@@ -574,7 +574,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             <EnteMenuItem
                 variant="secondary"
                 onClick={handleDeduplicate}
-                label={t("DEDUPLICATE_FILES")}
+                label={t("deduplicate_files")}
             />
             <EnteMenuItem
                 variant="secondary"

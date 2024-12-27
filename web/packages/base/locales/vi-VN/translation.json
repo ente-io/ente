@@ -416,7 +416,7 @@
     "file": "Tệp",
     "folder": "Thư mục",
     "google_takeout": "Google takeout",
-    "DEDUPLICATE_FILES": "Xóa trùng tệp",
+    "deduplicate_files": "Xóa trùng tệp",
     "remove_duplicates": "",
     "total_size": "",
     "count": "",

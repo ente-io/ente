@@ -416,7 +416,7 @@
     "file": "Archivo",
     "folder": "Carpeta",
     "google_takeout": "Google takeout",
-    "DEDUPLICATE_FILES": "Deduplicar archivos",
+    "deduplicate_files": "Deduplicar archivos",
     "remove_duplicates": "",
     "total_size": "",
     "count": "",

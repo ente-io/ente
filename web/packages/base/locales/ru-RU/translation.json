@@ -416,7 +416,7 @@
     "file": "Файл",
     "folder": "Папка",
     "google_takeout": "Еда на вынос из Google",
-    "DEDUPLICATE_FILES": "Дедуплицировать файлы",
+    "deduplicate_files": "Дедуплицировать файлы",
     "remove_duplicates": "",
     "total_size": "",
     "count": "",

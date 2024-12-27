@@ -416,7 +416,7 @@
     "file": "Bestand",
     "folder": "Map",
     "google_takeout": "Google takeout",
-    "DEDUPLICATE_FILES": "Dubbele bestanden verwijderen",
+    "deduplicate_files": "Dubbele bestanden verwijderen",
     "remove_duplicates": "",
     "total_size": "",
     "count": "",
