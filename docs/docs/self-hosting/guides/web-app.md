@@ -45,7 +45,7 @@ RUN corepack enable
 
 # Configure Albums and Accounts Endpoints
 ENV NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=https://your-domain.com 
-ENV NEXT_PUBLIC_ENTE_ACCOUNTS_ENDPOINT=https://your-domain.com
+ENV NEXT_PUBLIC_ENTE_ACCOUNTS_URL=https://your-domain.com
 
 RUN yarn cache clean
 RUN yarn install --network-timeout 1000000000
@@ -124,7 +124,7 @@ Moving ahead, we need to paste the below contents into the compose.yaml inside
       - 3004:3004
     environment:
       - NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=https://your-domain.com 
-      - NEXT_PUBLIC_ENTE_ACCOUNTS_ENDPOINT=https://your-domain.com
+      - NEXT_PUBLIC_ENTE_ACCOUNTS_URL=https://your-domain.com
       - NODE_ENV=development
     restart: always
 ```
