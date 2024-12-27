@@ -86,7 +86,6 @@ dependencies:
   sentry_flutter: ^8.7.0
   share_plus: ^10.0.2
   shared_preferences: ^2.0.5
-  super_text_layout: ^0.1.17
   sqflite:
     git:
       url: https://github.com/tekartik/sqflite

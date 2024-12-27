@@ -146,8 +146,10 @@ class _CodeWidgetState extends State<CodeWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               if (widget.code.type.isTOTPCompatible)
-                CodeTimerProgressCache.getCachedWidget(
-                  widget.code.period,
+                CodeTimerProgress(
+                  key: ValueKey('period_${widget.code.period}'),
+                  period: widget.code.period,
+                  isCompactMode: widget.isCompactMode,
                 ),
               widget.isCompactMode
                   ? const SizedBox(height: 4)

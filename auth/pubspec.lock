@@ -94,14 +94,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.11.0"
-  attributed_text:
-    dependency: transitive
-    description:
-      name: attributed_text
-      sha256: fb65cf441784612544eda4d5df7a3caad56e7f673c68bf1d48d9048228375189
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.0"
   auto_size_text:
     dependency: "direct main"
     description:
@@ -294,14 +286,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.1"
-  coverage:
-    dependency: transitive
-    description:
-      name: coverage
-      sha256: e3493833ea012784c740e341952298f1cc77f1f01b1bbc3eb4eecf6984fb7f43
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.11.1"
   cross_file:
     dependency: transitive
     description:
@@ -1093,14 +1077,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.0"
-  node_preamble:
-    dependency: transitive
-    description:
-      name: node_preamble
-      sha256: "6e7eac89047ab8a8d26cf16127b5ed26de65209847630400f9aefd7cd5c730db"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.2"
   otp:
     dependency: "direct main"
     description:
@@ -1429,22 +1405,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.1"
-  shelf_packages_handler:
-    dependency: transitive
-    description:
-      name: shelf_packages_handler
-      sha256: "89f967eca29607c933ba9571d838be31d67f53f6e4ee15147d5dc2934fee1b1e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.2"
-  shelf_static:
-    dependency: transitive
-    description:
-      name: shelf_static
-      sha256: c87c3875f91262785dade62d135760c2c69cb217ac759485334c5857ad89f6e3
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.3"
   shelf_web_socket:
     dependency: transitive
     description:
@@ -1498,22 +1458,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.4"
-  source_map_stack_trace:
-    dependency: transitive
-    description:
-      name: source_map_stack_trace
-      sha256: c0713a43e323c3302c2abe2a1cc89aa057a387101ebd280371d6a6c9fa68516b
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.2"
-  source_maps:
-    dependency: transitive
-    description:
-      name: source_maps
-      sha256: "190222579a448b03896e0ca6eca5998fa810fda630c1d65e2f78b3f638f54812"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.10.13"
   source_span:
     dependency: transitive
     description:
@@ -1627,14 +1571,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "8.1.0"
-  super_text_layout:
-    dependency: "direct main"
-    description:
-      name: super_text_layout
-      sha256: "0c85c295164edaab175c477584f2b7abc295dfd2a7f81987a88e538cf75b7898"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.17"
   synchronized:
     dependency: transitive
     description:
@@ -1651,14 +1587,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"
-  test:
-    dependency: transitive
-    description:
-      name: test
-      sha256: "7ee44229615f8f642b68120165ae4c2a75fe77ae2065b1e55ae4711f6cf0899e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.25.7"
   test_api:
     dependency: transitive
     description:
@@ -1667,14 +1595,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.2"
-  test_core:
-    dependency: transitive
-    description:
-      name: test_core
-      sha256: "55ea5a652e38a1dfb32943a7973f3681a60f872f8c3a05a14664ad54ef9c6696"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.6.4"
   timezone:
     dependency: transitive
     description:
@@ -1875,14 +1795,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
-  webkit_inspection_protocol:
-    dependency: transitive
-    description:
-      name: webkit_inspection_protocol
-      sha256: "87d3f2333bb240704cd3f1c6b5b7acd8a10e7f0bc28c28dcf14e782014f4a572"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.1"
   win32:
     dependency: "direct main"
     description:
