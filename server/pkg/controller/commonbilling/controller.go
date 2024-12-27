@@ -2,10 +2,10 @@ package commonbilling
 
 import (
 	"context"
-	"fmt"
 	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/repo/storagebonus"
 	"github.com/ente-io/stacktrace"
+	"github.com/sirupsen/logrus"
 )
 
 type Controller struct {
@@ -27,34 +27,38 @@ func NewController(
 }
 
 func (c *Controller) CanDowngradeToGivenStorage(newStorage int64, userID int64) (bool, error) {
-	adminID, err := c.UserRepo.GetFamilyAdminID(userID)
-	if err != nil {
-		return false, stacktrace.Propagate(err, "")
+	adminID, adminErr := c.UserRepo.GetFamilyAdminID(userID)
+	if adminErr != nil {
+		return false, stacktrace.Propagate(adminErr, "")
 	}
 
 	if adminID == nil {
-		bonusStorage, bonErr := c.StorageBonusRepo.GetPaidAddonSurplusStorage(context.Background(), userID)
+		bonusStorage, bonErr := c.StorageBonusRepo.GetActiveStorageBonuses(context.Background(), userID)
 		if bonErr != nil {
-			return false, stacktrace.Propagate(err, "")
+			return false, stacktrace.Propagate(bonErr, "")
 		}
 		usage, err := c.UsageRepo.GetUsage(userID)
 		if err != nil {
 			return false, stacktrace.Propagate(err, "")
 		}
-		if usage > (newStorage + *bonusStorage) {
-			return false, stacktrace.Propagate(err, fmt.Sprintf("user with %d usage can not downgrade to %d", usage, newStorage))
+		// newStore + addOnStorage + referralStorage should not be greater than usage.
+
+		if usage > (newStorage + bonusStorage.GetUsableBonus(newStorage)) {
+			logrus.Infof("user with %d usage and %d bonus, can not downgrade to %d", usage, bonusStorage.GetUsableBonus(newStorage), newStorage)
+			return false, nil
 		}
 	} else {
-		bonusStorage, bonErr := c.StorageBonusRepo.GetPaidAddonSurplusStorage(context.Background(), *adminID)
+		bonusStorage, bonErr := c.StorageBonusRepo.GetActiveStorageBonuses(context.Background(), *adminID)
 		if bonErr != nil {
-			return false, stacktrace.Propagate(err, "")
+			return false, stacktrace.Propagate(bonErr, "")
 		}
 		usage, err := c.UsageRepo.StorageForFamilyAdmin(*adminID)
 		if err != nil {
 			return false, stacktrace.Propagate(err, "")
 		}
-		if usage > (newStorage + *bonusStorage) {
-			return false, stacktrace.Propagate(err, fmt.Sprintf("familyUser with %d usage can not downgrade to %d", usage, newStorage))
+		if usage > (newStorage + bonusStorage.GetUsableBonus(newStorage)) {
+			logrus.Infof("user with %d usage and %d bonus, can not downgrade to %d", usage, bonusStorage.GetUsableBonus(newStorage), newStorage)
+			return false, nil
 		}
 	}
 	return true, nil

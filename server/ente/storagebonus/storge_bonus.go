@@ -133,6 +133,8 @@ func (a *ActiveStorageBonus) GetAddonStorage() int64 {
 	return addonStorage
 }
 
+// GetUsableBonus Returns the add_on_bonus + referral_bonus for a given user. The referral bonus is restricted
+// to max of addonStorage + subStorage
 func (a *ActiveStorageBonus) GetUsableBonus(subStorage int64) int64 {
 	refBonus := a.GetReferralBonus()
 	totalSubAndAddOnStorage := a.GetAddonStorage() + subStorage
