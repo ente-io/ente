@@ -514,7 +514,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
         await openAccountsManagePasskeysPage();
     };
 
-    const redirectToDeduplicatePage = () => router.push(PAGES.DEDUPLICATE);
+    const handleDeduplicate = () => router.push("/duplicates");
 
     const toggleTheme = () =>
         setThemeColor(
@@ -573,7 +573,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             />
             <EnteMenuItem
                 variant="secondary"
-                onClick={redirectToDeduplicatePage}
+                onClick={handleDeduplicate}
                 label={t("DEDUPLICATE_FILES")}
             />
             <EnteMenuItem

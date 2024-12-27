@@ -497,7 +497,6 @@ export default function PublicCollectionGallery() {
                 />
                 <SharedAlbumNavbar onAddPhotos={onAddPhotos} />
                 <PhotoFrame
-                    page={PAGES.SHARED_ALBUMS}
                     files={publicFiles}
                     syncWithRemote={syncWithRemote}
                     setSelected={setSelected}
