@@ -6,9 +6,9 @@
 
 Launch the app in development mode:
 
--   Transpiles the files in `src/` and starts the main process.
+- Transpiles the files in `src/` and starts the main process.
 
--   Runs a development server for the renderer, with hot module reload.
+- Runs a development server for the renderer, with hot module reload.
 
 ### yarn build
 
