@@ -117,6 +117,10 @@ export const verifyEmail = async (
         }),
     });
     ensureOk(res);
+    // See: [Note: strict mode migration]
+    //
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     return EmailOrSRPAuthorizationResponse.parse(await res.json());
 };
 
