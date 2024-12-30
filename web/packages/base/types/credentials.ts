@@ -2,7 +2,29 @@ import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 
 // TODO: Provide types
-export const KeyAttributes = z.object({}).passthrough();
+/**
+ * Zod schema for {@link KeyAttributes}.
+ */
+export const KeyAttributes = z.object({
+    kekSalt: z.string(),
+    encryptedKey: z.string(),
+    keyDecryptionNonce: z.string(),
+    publicKey: z.string(),
+    encryptedSecretKey: z.string(),
+    secretKeyDecryptionNonce: z.string(),
+    memLimit: z.number(),
+    opsLimit: z.number(),
+    masterKeyEncryptedWithRecoveryKey: z
+        .string()
+        .nullish()
+        .transform(nullToUndefined),
+    masterKeyDecryptionNonce: z.string().nullish().transform(nullToUndefined),
+    recoveryKeyEncryptedWithMasterKey: z
+        .string()
+        .nullish()
+        .transform(nullToUndefined),
+    recoveryKeyDecryptionNonce: z.string().nullish().transform(nullToUndefined),
+});
 
 /**
  * The result of a successful two factor verification (totp or passkey).

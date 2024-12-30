@@ -1,3 +1,6 @@
+/**
+ * A structure containing the key related attributes for a user.
+ */
 export interface KeyAttributes {
     kekSalt: string;
     encryptedKey: string;
