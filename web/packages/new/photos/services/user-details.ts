@@ -505,25 +505,31 @@ export const familyUsage = (userDetails: UserDetails) =>
 export const getFamilyPortalRedirectURL = async () => {
     const userDetails = userDetailsSnapshot();
 
-    const token = await getFamiliesToken();
+    const { familiesToken: token, familyUrl: familiesURL } =
+        await getFamiliesTokenAndURL();
     const isFamilyCreated =
         userDetails && isPartOfFamily(userDetails) ? "true" : "false";
     const redirectURL = `${window.location.origin}/gallery`;
     const params = new URLSearchParams({ token, isFamilyCreated, redirectURL });
-    return `${familyAppOrigin()}?${params.toString()}`;
+    const baseURL = familiesURL ?? familyAppOrigin();
+    return `${baseURL}?${params.toString()}`;
 };
 
 /**
  * Fetch and return a one-time token that can be used to authenticate user's
- * requests to the families app.
+ * requests to the families app, alongwith the URL of the families app.
  */
-const getFamiliesToken = async () => {
+const getFamiliesTokenAndURL = async () => {
     const res = await fetch(await apiURL("/users/families-token"), {
         headers: await authenticatedRequestHeaders(),
     });
     ensureOk(res);
-    return z.object({ familiesToken: z.string() }).parse(await res.json())
-        .familiesToken;
+    return z
+        .object({
+            familiesToken: z.string(),
+            familyUrl: z.string().nullish().transform(nullToUndefined),
+        })
+        .parse(await res.json());
 };
 
 /**
