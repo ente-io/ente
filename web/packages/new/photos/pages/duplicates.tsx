@@ -74,7 +74,7 @@ const Page: React.FC = () => {
                 log.error("Failed to detect duplicates", e);
                 dispatch({ type: "analysisFailed" });
             });
-    }, []);
+    }, [showNavBar]);
 
     const handleRemoveDuplicates = useCallback(() => {
         dispatch({ type: "dedupe" });
