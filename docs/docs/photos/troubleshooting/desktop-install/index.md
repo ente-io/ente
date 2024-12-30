@@ -9,8 +9,8 @@ The latest version of the Ente Photos desktop app can be downloaded from
 [ente.io/download](https://ente.io/download). If you're having trouble, please
 see if any of the following cases apply.
 
--   [Windows](#windows)
--   [Linux](#linux)
+- [Windows](#windows)
+- [Linux](#linux)
 
 ## Windows
 
@@ -36,9 +36,9 @@ https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=ms
 AppImages are not fully standalone, and they require additional steps to enable
 full "desktop integration":
 
--   Showing the app icon,
--   Surfacing the app in the list of installed apps,
--   Handling redirection after passkey verification.
+- Showing the app icon,
+- Surfacing the app in the list of installed apps,
+- Handling redirection after passkey verification.
 
 All the ways of enabling AppImage desktop integration are mentioned in
 [AppImage documentation](https://docs.appimage.org/user-guide/run-appimages.html#integrating-appimages-into-the-desktop).
@@ -62,11 +62,11 @@ It is possible that the exact path might be different on your machine. Briefly,
 what we need to do is create `libz.so` as an alias for `libz.so.1`. For more
 details, see the following upstream issues:
 
--   libz.so cannot open shared object file on ARM64 -
-    [AppImage/AppImageKit/issues/1092](https://github.com/AppImage/AppImageKit/issues/1092)
+- libz.so cannot open shared object file on ARM64 -
+  [AppImage/AppImageKit/issues/1092](https://github.com/AppImage/AppImageKit/issues/1092)
 
--   libz.so: cannot open shared object file with Ubuntu arm64 -
-    [electron-userland/electron-builder/issues/7835](https://github.com/electron-userland/electron-builder/issues/7835)
+- libz.so: cannot open shared object file with Ubuntu arm64 -
+  [electron-userland/electron-builder/issues/7835](https://github.com/electron-userland/electron-builder/issues/7835)
 
 ### AppImage says it requires FUSE
 

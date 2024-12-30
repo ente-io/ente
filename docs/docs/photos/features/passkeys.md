@@ -14,11 +14,11 @@ a second factor to secure your Ente account.**
 > Passkeys are the colloquial term for a WebAuthn (Web Authentication)
 > credentials.
 >
-> -   More details about why and how are in the Passkeys announcement
->     [blog post](https://ente.io/blog/introducing-passkeys-on-ente/).
-> -   And to know more technical details about how our passkey verification
->     works, you can see this
->     [technical note in our source code](https://github.com/ente-io/ente/blob/main/web/docs/webauthn-passkeys.md).
+> - More details about why and how are in the Passkeys announcement
+>   [blog post](https://ente.io/blog/introducing-passkeys-on-ente/).
+> - And to know more technical details about how our passkey verification works,
+>   you can see this
+>   [technical note in our source code](https://github.com/ente-io/ente/blob/main/web/docs/webauthn-passkeys.md).
 
 ## Passkeys and TOTP
 

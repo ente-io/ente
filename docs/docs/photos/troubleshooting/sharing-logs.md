@@ -15,28 +15,28 @@ the logs just make the process a bit faster and easier.
 
 ## Mobile
 
--   Open settings (tap on the three horizontal lines button).
--   Tap on _Support_ from the settings.
--   Select for the option to _Report a Bug_.
--   Tap on _Report a bug_.
+- Open settings (tap on the three horizontal lines button).
+- Tap on _Support_ from the settings.
+- Select for the option to _Report a Bug_.
+- Tap on _Report a bug_.
 
 ## Desktop
 
--   Click on _Help_ menu at the top of your screen, and select the _View logs_
-    option.
--   Open settings (click on the three horizontal lines button located at the top
-    left corner of the screen).
--   Click on _Support_. This will open your email client where you can attach
-    the logs in the email and describe the issue.
+- Click on _Help_ menu at the top of your screen, and select the _View logs_
+  option.
+- Open settings (click on the three horizontal lines button located at the top
+  left corner of the screen).
+- Click on _Support_. This will open your email client where you can attach the
+  logs in the email and describe the issue.
 
 ## Web
 
--   Open settings (click on the three horizontal lines button located at the top
-    left corner of the screen).
--   Click on _Debug Logs_ towards the bottom of settings.
--   Click on _Download logs_
--   Click on _Support_. This will open your email client where you can attach
-    the logs in the email and describe the issue.
+- Open settings (click on the three horizontal lines button located at the top
+  left corner of the screen).
+- Click on _Debug Logs_ towards the bottom of settings.
+- Click on _Download logs_
+- Click on _Support_. This will open your email client where you can attach the
+  logs in the email and describe the issue.
 
 ## Send email manually
 

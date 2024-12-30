@@ -72,6 +72,7 @@ If you run into any issues during this migration, please reach out to
 > [!TIP]
 >
 > In case you wish to use face recognition and other advanced search features
-> provided by Ente, we recommend that you enable [machine
-> learning](/photos/features/machine-learning) before importing your photos so
-> that the Ente app can directly index files as they are getting uploaded.
+> provided by Ente, we recommend that you enable
+> [machine learning](/photos/features/machine-learning) before importing your
+> photos so that the Ente app can directly index files as they are getting
+> uploaded.
