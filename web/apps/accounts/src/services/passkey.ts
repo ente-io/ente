@@ -1,3 +1,4 @@
+import type { TwoFactorAuthorizationResponse } from "@/accounts/services/user";
 import { clientPackageName } from "@/base/app";
 import {
     fromB64URLSafeNoPadding,
@@ -7,7 +8,6 @@ import {
 import { isDevBuild } from "@/base/env";
 import { ensureOk, HTTPError, publicRequestHeaders } from "@/base/http";
 import { apiURL } from "@/base/origins";
-import { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 

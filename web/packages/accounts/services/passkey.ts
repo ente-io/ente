@@ -9,7 +9,7 @@ import {
 } from "@/base/http";
 import log from "@/base/log";
 import { accountsAppOrigin, apiURL } from "@/base/origins";
-import { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
+import type { TwoFactorAuthorizationResponse } from "@/accounts/services/user";
 import { nullToUndefined } from "@/utils/transform";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import HTTPService from "@ente/shared/network/HTTPService";

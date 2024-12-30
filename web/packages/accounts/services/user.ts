@@ -5,9 +5,11 @@ import {
     publicRequestHeaders,
 } from "@/base/http";
 import { apiURL } from "@/base/origins";
+import { nullToUndefined } from "@/utils/transform";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import type { KeyAttributes } from "@ente/shared/user/types";
+import { z } from "zod";
 
 export interface UserVerificationResponse {
     id: number;
@@ -106,6 +108,77 @@ export const verifyEmail = async (
         ...(source ? { source } : {}),
     });
 };
+
+/**
+ * Zod schema for {@link KeyAttributes}.
+ */
+const RemoteKeyAttributes = z.object({
+    kekSalt: z.string(),
+    encryptedKey: z.string(),
+    keyDecryptionNonce: z.string(),
+    publicKey: z.string(),
+    encryptedSecretKey: z.string(),
+    secretKeyDecryptionNonce: z.string(),
+    memLimit: z.number(),
+    opsLimit: z.number(),
+    masterKeyEncryptedWithRecoveryKey: z
+        .string()
+        .nullish()
+        .transform(nullToUndefined),
+    masterKeyDecryptionNonce: z.string().nullish().transform(nullToUndefined),
+    recoveryKeyEncryptedWithMasterKey: z
+        .string()
+        .nullish()
+        .transform(nullToUndefined),
+    recoveryKeyDecryptionNonce: z.string().nullish().transform(nullToUndefined),
+});
+
+/**
+ * Zod schema for response from remote on a successful user verification, either
+ * via {@link verifyEmail} or {@link verifySRPSession}.
+ *
+ * If a second factor is enabled than one of the two factor session IDs
+ * (`passkeySessionID`, `twoFactorSessionID` / `twoFactorSessionIDV2`) will be
+ * set. Otherwise `keyAttributes` and `encryptedToken` will be set.
+ */
+export const RemoteUserVerificationResponse = z.object({
+    id: z.number(),
+    keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
+    encryptedToken: z.string().nullish().transform(nullToUndefined),
+    token: z.string().nullish().transform(nullToUndefined),
+    passkeySessionID: z.string().nullish().transform(nullToUndefined),
+    // The baseURL of the accounts app, where we should redirect to for passkey
+    // validation.
+    accountsUrl: z.string().nullish().transform(nullToUndefined),
+    twoFactorSessionID: z.string().nullish().transform(nullToUndefined),
+    // TwoFactorSessionIDV2 is only set if user has both passkey and two factor
+    // enabled. This is to ensure older clients keep using passkey flow when
+    // both are set. It is intended to be removed once all clients starts
+    // surfacing both options for performing 2FA.
+    //
+    // See `useSecondFactorChoiceIfNeeded`.
+    twoFactorSessionIDV2: z.string().nullish().transform(nullToUndefined),
+    // srpM2 is sent only if the user is logging via SRP. It is is the SRP M2
+    // value aka the proof that the server has the verifier.
+    srpM2: z.string().nullish().transform(nullToUndefined),
+});
+
+/**
+ * The result of a successful two factor verification (totp or passkey).
+ */
+const TwoFactorAuthorizationResponse = z.object({
+    id: z.number(),
+    /** TODO: keyAttributes is guaranteed to be returned by museum, update the
+     * types to reflect that. */
+    keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
+    /** TODO: encryptedToken is guaranteed to be returned by museum, update the
+     * types to reflect that. */
+    encryptedToken: z.string().nullish().transform(nullToUndefined),
+});
+
+export type TwoFactorAuthorizationResponse = z.infer<
+    typeof TwoFactorAuthorizationResponse
+>;
 
 export const putAttributes = async (
     token: string,
