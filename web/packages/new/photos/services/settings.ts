@@ -2,6 +2,10 @@
  * @file Storage (in-memory, local, remote) and update of various settings.
  */
 
+// We want to map falsey values like empty strings to the default, for which
+// `||` is the appropriate operator, so turn off the eslint suggestion to use
+// `??` instead for this file.
+//
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 
 import { localUser } from "@/base/local-user";
@@ -55,12 +59,25 @@ export interface Settings {
      * this setting, this function returns only the saved user preference.
      */
     cfUploadProxyDisabled: boolean;
+
+    /**
+     * The URL we should ask the user to open should they wish to pair with the
+     * the cast app by manually entering a pairing code.
+     *
+     * Changing this only ever makes sense for self-hosters, who might want to
+     * point to their own self hosted cast app (See `apps.cast` in `local.yaml`
+     * in the museum code).
+     *
+     * Default: "https://cast.ente.io"
+     */
+    castURL: string;
 }
 
-const defaultSettings = (): Settings => ({
+const createDefaultSettings = (): Settings => ({
     isInternalUser: false,
     mapEnabled: false,
     cfUploadProxyDisabled: false,
+    castURL: "https://cast.ente.io",
 });
 
 /**
@@ -70,7 +87,7 @@ const defaultSettings = (): Settings => ({
  */
 class SettingsState {
     constructor() {
-        this.settingsSnapshot = defaultSettings();
+        this.settingsSnapshot = createDefaultSettings();
     }
 
     /**
@@ -127,16 +144,18 @@ const FeatureFlags = z.object({
     internalUser: z.boolean().nullish().transform(nullToUndefined),
     betaUser: z.boolean().nullish().transform(nullToUndefined),
     mapEnabled: z.boolean().nullish().transform(nullToUndefined),
+    castUrl: z.string().nullish().transform(nullToUndefined),
 });
 
 type FeatureFlags = z.infer<typeof FeatureFlags>;
 
 const syncSettingsSnapshotWithLocalStorage = () => {
     const flags = savedRemoteFeatureFlags();
-    const settings = defaultSettings();
+    const settings = createDefaultSettings();
     settings.isInternalUser = flags?.internalUser || isInternalUserViaEmail();
     settings.mapEnabled = flags?.mapEnabled || false;
     settings.cfUploadProxyDisabled = savedCFProxyDisabled();
+    if (flags?.castUrl) settings.castURL = flags.castUrl;
     setSettingsSnapshot(settings);
 };
 
