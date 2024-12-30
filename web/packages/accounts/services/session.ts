@@ -49,10 +49,10 @@ type SessionValidity =
  *
  * The `/session-validity` API call tells us:
  *
- * 1.  Whether or not the session has been invalidated (by the user choosing to
- *     log out from all devices elsewhere).
+ * 1. Whether or not the session has been invalidated (by the user choosing to
+ *    log out from all devices elsewhere).
  *
- * 2.  What are their latest key attributes.
+ * 2. What are their latest key attributes.
  *
  * If the session has been invalidated, we log them out here too.
  *

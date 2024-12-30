@@ -29,21 +29,21 @@ let _isNativeJPEGConversionAvailable = true;
  *
  * The logic used by this function is:
  *
- * 1.  Try to detect the MIME type of the file from its contents and/or name.
+ * 1. Try to detect the MIME type of the file from its contents and/or name.
  *
- * 2.  If this detected type is one of the types that we know that the browser
- *     likely cannot render, continue. Otherwise return the imageBlob that was
- *     passed in (after setting its MIME type).
+ * 2. If this detected type is one of the types that we know that the browser
+ *    likely cannot render, continue. Otherwise return the imageBlob that was
+ *    passed in (after setting its MIME type).
  *
- * 3.  If we're running in our desktop app and this MIME type is something our
- *     desktop app can natively convert to a JPEG (using ffmpeg), do that and
- *     return the resultant JPEG blob.
+ * 3. If we're running in our desktop app and this MIME type is something our
+ *    desktop app can natively convert to a JPEG (using ffmpeg), do that and
+ *    return the resultant JPEG blob.
  *
- * 4.  If this is an HEIC file, use our (WASM) HEIC converter and return the
- *     resultant JPEG blob.
+ * 4. If this is an HEIC file, use our (WASM) HEIC converter and return the
+ *    resultant JPEG blob.
  *
- * 5.  Otherwise return the original (with the MIME type if we were able to
- *     deduce one).
+ * 5. Otherwise return the original (with the MIME type if we were able to
+ *    deduce one).
  *
  * In will catch all errors and return the original in those cases.
  */

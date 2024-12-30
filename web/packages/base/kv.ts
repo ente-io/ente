@@ -62,10 +62,10 @@ interface KVDBSchema extends DBSchema {
  * promise to the database. To ensure that all connections get torn down
  * correctly, we need to perform the following logout sequence:
  *
- * 1.  Terminate all the workers which might have one of the instances in
- *     memory. This closes their connections.
+ * 1. Terminate all the workers which might have one of the instances in memory.
+ *    This closes their connections.
  *
- * 2.  Delete the database on the main thread.
+ * 2. Delete the database on the main thread.
  */
 let _kvDB: ReturnType<typeof openKVDB> | undefined;
 

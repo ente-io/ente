@@ -20,21 +20,21 @@ import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
  *
  * At a high level, this is how the app manages remote flags:
  *
- * 1.  On app start, the initial are read from local storage in
- *     {@link initSettings}.
+ * 1. On app start, the initial are read from local storage in
+ *    {@link initSettings}.
  *
- * 2.  During the remote sync, remote flags are fetched and saved in local
- *     storage, and the in-memory state updated to reflect the latest values
- *     ({@link syncSettings}).
+ * 2. During the remote sync, remote flags are fetched and saved in local
+ *    storage, and the in-memory state updated to reflect the latest values
+ *    ({@link syncSettings}).
  *
- * 3.  Updating a value also cause an unconditional fetch and update
- *     ({@link syncSettings}).
+ * 3. Updating a value also cause an unconditional fetch and update
+ *    ({@link syncSettings}).
  *
- * 4.  The individual getter functions for the flags (e.g.
- *     {@link isInternalUser}) return the in-memory values, and so are suitable
- *     for frequent use during UI rendering.
+ * 4. The individual getter functions for the flags (e.g.
+ *    {@link isInternalUser}) return the in-memory values, and so are suitable
+ *    for frequent use during UI rendering.
  *
- * 5.  Everything gets reset to the default state on {@link logoutSettings}.
+ * 5. Everything gets reset to the default state on {@link logoutSettings}.
  */
 export interface Settings {
     /**

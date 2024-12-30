@@ -732,10 +732,10 @@ export const parseMetadataDate = (
     //
     // In its full generality, this is non-trivial. The approach we take is:
     //
-    // 1.   Rely on the browser to be able to partial ISO 8601 string. This
-    //      relies on non-standard behaviour but works in practice seemingly.
+    // 1. Rely on the browser to be able to partial ISO 8601 string. This relies
+    //    on non-standard behaviour but works in practice seemingly.
     //
-    // 2.   Get an ISO 8601 representation of it. This is standard.
+    // 2. Get an ISO 8601 representation of it. This is standard.
     //
     // A thing to watch out for is that browsers treat date only and date time
     // strings differently when the offset is not present (as would be for us).

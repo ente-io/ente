@@ -14,11 +14,11 @@ import { z } from "zod";
  *
  * There are two APIs to get the current state from remote:
  *
- * 1.  GET /remote-store/feature-flags fetches the combined state (nb: even
- *     though the name of the endpoint has the word feature-flags, it also
- *     includes user preferences).
+ * 1. GET /remote-store/feature-flags fetches the combined state (nb: even
+ *    though the name of the endpoint has the word feature-flags, it also
+ *    includes user preferences).
  *
- * 2.  GET /remote-store fetches individual values.
+ * 2. GET /remote-store fetches individual values.
  *
  * Usually 1 is what we use, since it gets us everything in a single go, and
  * which we can also easily cache in local storage by saving the entire response
