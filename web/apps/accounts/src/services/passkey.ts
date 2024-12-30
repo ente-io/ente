@@ -184,14 +184,14 @@ const beginPasskeyRegistration = async (token: string) => {
     //
     // So we do the conversion here.
     //
-    // 1.  To avoid inventing an intermediary type and the boilerplate that'd
-    //     come with it, we do a force typecast the options in the response to
-    //     one that has `PublicKeyCredentialCreationOptions`.
+    // 1. To avoid inventing an intermediary type and the boilerplate that'd
+    //    come with it, we do a force typecast the options in the response to
+    //    one that has `PublicKeyCredentialCreationOptions`.
     //
-    // 2.  Convert the two binary data fields that are expected to be in the
-    //     response from URLEncodedBase64 strings to Uint8Arrays. There is a
-    //     third possibility, excludedCredentials[].id, but that we don't
-    //     currently use.
+    // 2. Convert the two binary data fields that are expected to be in the
+    //    response from URLEncodedBase64 strings to Uint8Arrays. There is a
+    //    third possibility, excludedCredentials[].id, but that we don't
+    //    currently use.
     //
     // The web.dev guide calls this out too:
     //

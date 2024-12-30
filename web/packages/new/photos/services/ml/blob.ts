@@ -56,10 +56,10 @@ export const createImageBitmapAndData = async (
  * The blob from the relevant image component is either constructed using the
  * given {@link uploadItem} if present, otherwise it is downloaded from remote.
  *
- * -   For images it is constructed from the image.
- * -   For videos it is constructed from the thumbnail.
- * -   For live photos it is constructed from the image component of the live
- *     photo.
+ * - For images it is constructed from the image.
+ * - For videos it is constructed from the thumbnail.
+ * - For live photos it is constructed from the image component of the live
+ *   photo.
  *
  * Then, if the image blob we have seems to be something that the browser cannot
  * handle, we convert it into a JPEG blob so that it can subsequently be used to

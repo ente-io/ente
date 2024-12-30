@@ -296,11 +296,11 @@ const updateFiles = async (
  * This is generally treated as the creation date of the underlying asset
  * (photo, video, live photo) that this file stores.
  *
- * -   For images, this function allows us to update this date from the Exif and
- *     other metadata embedded in the file.
+ * - For images, this function allows us to update this date from the Exif and
+ *   other metadata embedded in the file.
  *
- * -   For all types of files (including images), this function allows us to
- *     update this date to an explicitly provided value.
+ * - For all types of files (including images), this function allows us to
+ *   update this date to an explicitly provided value.
  *
  * If an Exif-involving {@link fixOption} is passed for an non-image file, then
  * that file is just skipped over. Similarly, if an Exif-involving

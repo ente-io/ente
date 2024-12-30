@@ -7,9 +7,9 @@ Stripe's API for payments.
 
 There are three pieces that need to be connected to have a working local setup:
 
--   A client app
--   This web app
--   Museum
+- A client app
+- This web app
+- Museum
 
 ### Client app
 

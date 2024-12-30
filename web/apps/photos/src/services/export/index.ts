@@ -1270,11 +1270,11 @@ const readOnDiskFileExportRecordIDs = async (
     // Both the paths involved are guaranteed to use POSIX separators and thus
     // can directly be compared.
     //
-    // -   `exportDir` traces its origin to `electron.selectDirectory()`, which
-    //     returns POSIX paths. Down below we use it as the base directory when
-    //     constructing paths for the items to export.
+    // - `exportDir` traces its origin to `electron.selectDirectory()`, which
+    //   returns POSIX paths. Down below we use it as the base directory when
+    //   constructing paths for the items to export.
     //
-    // -   `findFiles` is also guaranteed to return POSIX paths.
+    // - `findFiles` is also guaranteed to return POSIX paths.
     //
     const ls = new Set(await ensureElectron().fs.findFiles(exportDir));
 
