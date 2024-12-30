@@ -31,9 +31,9 @@
  * and when changing one of them, remember to see if the other two also need
  * changing:
  *
- * -    [renderer]  web/packages/base/types/ipc.ts      contains docs
- * -    [preload]   desktop/src/preload.ts                    ↕︎
- * -    [main]      desktop/src/main/ipc.ts             contains impl
+ * - [renderer]  web/packages/base/types/ipc.ts      contains docs
+ * - [preload]   desktop/src/preload.ts                    ↕︎
+ * - [main]      desktop/src/main/ipc.ts             contains impl
  */
 
 // This code runs in the (isolated) web layer. Contrary to the impression given
