@@ -495,7 +495,7 @@
   "appLockNotEnabledDescription": "Prosimy włączyć blokadę aplikacji z Zabezpieczenia > Blokada aplikacji",
   "authToViewPasskey": "Prosimy uwierzytelnić się, aby wyświetlić klucz dostępu",
   "appLockOfflineModeWarning": "Wybrano kontynuowanie bez kopii zapasowych. Jeśli zapomnisz blokady aplikacji, utracisz dostęp do swoich danych.",
-  "duplicateCodes": "Duplikuj kody",
+  "duplicateCodes": "Zduplikowane kody",
   "noDuplicates": "✨ Brak duplikatów",
   "youveNoDuplicateCodesThatCanBeCleared": "Nie masz duplikatów kodów, które mogą być wyczyszczone",
   "deduplicateCodes": "Deduplikuj kody",
