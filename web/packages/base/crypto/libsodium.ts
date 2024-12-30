@@ -57,14 +57,13 @@ export const toB64URLSafe = async (input: Uint8Array) => {
  * trailing padding character(s) "=" to make the resultant string's length be an
  * integer multiple of 4.
  *
- * -   In some contexts, for example when serializing WebAuthn binary for
- *     transmission over the network, this is the required / recommended
- *     approach.
+ * - In some contexts, for example when serializing WebAuthn binary for
+ *   transmission over the network, this is the required / recommended approach.
  *
- * -   In other cases, for example when trying to pass an arbitrary JSON string
- *     via a URL parameter, this is also convenient so that we do not have to
- *     deal with any ambiguity surrounding the "=" which is also the query
- *     parameter key value separator.
+ * - In other cases, for example when trying to pass an arbitrary JSON string
+ *   via a URL parameter, this is also convenient so that we do not have to deal
+ *   with any ambiguity surrounding the "=" which is also the query parameter
+ *   key value separator.
  */
 export const toB64URLSafeNoPadding = async (input: Uint8Array) => {
     await sodium.ready;
@@ -279,9 +278,9 @@ export const encryptBoxB64 = async (
  *
  * @returns The encrypted data and the decryption header as {@link Uint8Array}s.
  *
- * -   See: [Note: 3 forms of encryption (Box | Blob | Stream)].
+ * - See: [Note: 3 forms of encryption (Box | Blob | Stream)].
  *
- * -   See: https://doc.libsodium.org/secret-key_cryptography/secretstream
+ * - See: https://doc.libsodium.org/secret-key_cryptography/secretstream
  */
 export const encryptBlob = async (
     data: BytesOrB64,
@@ -348,9 +347,9 @@ export const streamEncryptionChunkSize = 4 * 1024 * 1024;
  * @returns The encrypted bytes ({@link Uint8Array}) and the decryption header
  * (as a base64 string).
  *
- * -   See: [Note: 3 forms of encryption (Box | Blob | Stream)].
+ * - See: [Note: 3 forms of encryption (Box | Blob | Stream)].
  *
- * -   See: https://doc.libsodium.org/secret-key_cryptography/secretstream
+ * - See: https://doc.libsodium.org/secret-key_cryptography/secretstream
  */
 export const encryptStreamBytes = async (
     data: Uint8Array,

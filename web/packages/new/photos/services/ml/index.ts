@@ -48,14 +48,15 @@ class MLState {
     /**
      * In-memory flag that tracks if ML is enabled.
      *
-     * -   On app start, this is read from local storage during {@link initML}.
+     * - On app start, this is read from local storage during {@link initML}.
      *
-     * -   It gets updated when we sync with remote (so if the user enables/disables
-     *     ML on a different device, this local value will also become true/false).
+     * - It gets updated when we sync with remote (so if the user
+     *   enables/disables ML on a different device, this local value will also
+     *   become true/false).
      *
-     * -   It gets updated when the user enables/disables ML on this device.
+     * - It gets updated when the user enables/disables ML on this device.
      *
-     * -   It is cleared in {@link logoutML}.
+     * - It is cleared in {@link logoutML}.
      */
     isMLEnabled = false;
 

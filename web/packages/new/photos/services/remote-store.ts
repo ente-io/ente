@@ -8,9 +8,9 @@ import { z } from "zod";
  * The remote store provides a unified interface for persisting varied "remote
  * flags":
  *
- * -   User preferences like "mapEnabled"
+ * - User preferences like "mapEnabled"
  *
- * -   Feature flags like "isInternalUser"
+ * - Feature flags like "isInternalUser"
  *
  * There are two APIs to get the current state from remote:
  *

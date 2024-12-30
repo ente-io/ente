@@ -41,10 +41,10 @@ export const apiURL = async (
  * Return the overridden API origin, if one is defined by either (in priority
  * order):
  *
- * -   Setting the custom server on the landing page (See: [Note: Configuring
- *     custom server]); or by
+ * - Setting the custom server on the landing page (See: [Note: Configuring
+ *   custom server]); or by
  *
- * -   Setting the `NEXT_PUBLIC_ENTE_ENDPOINT` environment variable.
+ * - Setting the `NEXT_PUBLIC_ENTE_ENDPOINT` environment variable.
  *
  * Otherwise return undefined.
  */

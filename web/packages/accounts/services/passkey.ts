@@ -73,13 +73,13 @@ interface OpenPasskeyVerificationURLOptions {
  * way it works in the mobile app - the system browser is invoked to open
  * accounts.ente.io.
  *
- * -   For passkey creation, this is a one-way open. Passkeys get created at
- *     accounts.ente.io, and that's it.
+ * - For passkey creation, this is a one-way open. Passkeys get created at
+ *   accounts.ente.io, and that's it.
  *
- * -   For passkey verification, the flow is two-way. We register a custom
- *     protocol and provide that as a return path redirect. Passkey
- *     authentication happens at accounts.ente.io, and on success there is
- *     redirected back to the desktop app.
+ * - For passkey verification, the flow is two-way. We register a custom
+ *   protocol and provide that as a return path redirect. Passkey authentication
+ *   happens at accounts.ente.io, and on success there is redirected back to the
+ *   desktop app.
  */
 export const openPasskeyVerificationURL = ({
     passkeySessionID,

@@ -58,12 +58,12 @@ type ContentsProps = Pick<DevSettingsProps, "onClose">;
 const Contents: React.FC<ContentsProps> = (props) => {
     // We need two nested components.
     //
-    // -   The initialAPIOrigin cannot be in our parent (the top level
-    //     DevSettings) otherwise it gets preserved across dialog reopens
-    //     instead of being read from storage on opening the dialog.
+    // - The initialAPIOrigin cannot be in our parent (the top level
+    //   DevSettings) otherwise it gets preserved across dialog reopens instead
+    //   of being read from storage on opening the dialog.
     //
-    // -   The initialAPIOrigin cannot be in our child (Form) because Formik
-    //     doesn't have supported for async initial values.
+    // - The initialAPIOrigin cannot be in our child (Form) because Formik
+    //   doesn't have supported for async initial values.
     const [initialAPIOrigin, setInitialAPIOrigin] = useState<
         string | undefined
     >();
