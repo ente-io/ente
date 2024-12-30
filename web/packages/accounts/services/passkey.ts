@@ -1,10 +1,16 @@
 import { clientPackageName, isDesktop } from "@/base/app";
 import { sharedCryptoWorker } from "@/base/crypto";
 import { encryptToB64, generateEncryptionKey } from "@/base/crypto/libsodium";
-import { HTTPError, publicRequestHeaders } from "@/base/http";
+import {
+    authenticatedRequestHeaders,
+    ensureOk,
+    HTTPError,
+    publicRequestHeaders,
+} from "@/base/http";
 import log from "@/base/log";
 import { accountsAppOrigin, apiURL } from "@/base/origins";
 import { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
+import { nullToUndefined } from "@/utils/transform";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
@@ -14,6 +20,7 @@ import {
     setLSUser,
 } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { z } from "zod";
 import { unstashRedirect } from "./redirect";
 
 /**
@@ -120,10 +127,11 @@ export const openAccountsManagePasskeysPage = async () => {
 
     // Redirect to the Ente Accounts app where they can view and add and manage
     // their passkeys.
-    const token = await getAccountsToken();
-    const params = new URLSearchParams({ token });
+    const remoteParams = await getAccountsTokenAndURL();
+    const params = new URLSearchParams({ token: remoteParams.accountsToken });
+    const baseURL = remoteParams.accountsUrl ?? accountsAppOrigin();
 
-    window.open(`${accountsAppOrigin()}/passkeys?${params.toString()}`);
+    window.open(`${baseURL}/passkeys?${params.toString()}`);
 };
 
 export const isPasskeyRecoveryEnabled = async () => {
@@ -182,19 +190,20 @@ const configurePasskeyRecovery = async (
 /**
  * Fetch an Ente Accounts specific JWT token.
  *
- * This token can be used to authenticate with the Ente accounts app.
+ * This token can be used to authenticate with the Ente accounts app running at
+ * accountsURL (the result contains both pieces of information).
  */
-const getAccountsToken = async () => {
-    const token = getToken();
-
-    const resp = await HTTPService.get(
-        await apiURL("/users/accounts-token"),
-        undefined,
-        {
-            "X-Auth-Token": token,
-        },
-    );
-    return resp.data.accountsToken;
+const getAccountsTokenAndURL = async () => {
+    const res = await fetch(await apiURL("/users/accounts-token"), {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return z
+        .object({
+            accountsToken: z.string(),
+            accountsUrl: z.string().nullish().transform(nullToUndefined),
+        })
+        .parse(await res.json());
 };
 
 /**
