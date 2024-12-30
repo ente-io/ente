@@ -30,10 +30,16 @@ import { unstashRedirect } from "./redirect";
  * On successful verification, the accounts app will redirect back to our
  * `/passkeys/finish` page.
  *
+ * @param accountsURL Base URL for the accounts app (provided to us by remote in
+ * the email or SRP verification response).
+ *
  * @param passkeySessionID An identifier provided by museum for this passkey
  * verification session.
  */
-export const passkeyVerificationRedirectURL = (passkeySessionID: string) => {
+export const passkeyVerificationRedirectURL = (
+    accountsURL: string | undefined,
+    passkeySessionID: string,
+) => {
     const clientPackage = clientPackageName;
     // Using `window.location.origin` will work both when we're running in a web
     // browser, and in our desktop app. See: [Note: Using deeplinks to navigate
@@ -49,7 +55,8 @@ export const passkeyVerificationRedirectURL = (passkeySessionID: string) => {
         redirect,
         ...recoverOption,
     });
-    return `${accountsAppOrigin()}/passkeys/verify?${params.toString()}`;
+    const baseURL = accountsURL ?? accountsAppOrigin();
+    return `${baseURL}/passkeys/verify?${params.toString()}`;
 };
 
 interface OpenPasskeyVerificationURLOptions {

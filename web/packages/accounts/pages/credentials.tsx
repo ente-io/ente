@@ -224,6 +224,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     id,
                     twoFactorSessionID,
                     passkeySessionID,
+                    accountsUrl,
                 } =
                     await userVerificationResultAfterResolvingSecondFactorChoice(
                         await loginViaSRP(srpAttributes!, kek),
@@ -245,8 +246,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         isTwoFactorPasskeysEnabled: true,
                     });
                     stashRedirect("/");
-                    const url =
-                        passkeyVerificationRedirectURL(passkeySessionID);
+                    const url = passkeyVerificationRedirectURL(
+                        accountsUrl,
+                        passkeySessionID,
+                    );
                     setPasskeyVerificationData({ passkeySessionID, url });
                     openPasskeyVerificationURL({ passkeySessionID, url });
                     throw Error(CustomError.TWO_FACTOR_ENABLED);

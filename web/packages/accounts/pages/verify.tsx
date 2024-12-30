@@ -90,6 +90,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 id,
                 twoFactorSessionID,
                 passkeySessionID,
+                accountsUrl,
             } = await userVerificationResultAfterResolvingSecondFactorChoice(
                 await verifyEmail(email, ott, cleanedReferral),
             );
@@ -107,7 +108,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 // Update: This flag causes the interactive encryption key to be
                 // generated, so it has a functional impact we need.
                 setIsFirstLogin(true);
-                const url = passkeyVerificationRedirectURL(passkeySessionID);
+                const url = passkeyVerificationRedirectURL(
+                    accountsUrl,
+                    passkeySessionID,
+                );
                 setPasskeyVerificationData({ passkeySessionID, url });
                 openPasskeyVerificationURL({ passkeySessionID, url });
             } else if (twoFactorSessionID) {

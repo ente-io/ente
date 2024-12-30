@@ -17,6 +17,11 @@ export interface UserVerificationResponse {
     encryptedToken?: string | undefined;
     token?: string;
     twoFactorSessionID?: string | undefined;
+    /**
+     * Base URL for the accounts app where we should redirect to for passkey
+     * verification.
+     */
+    accountsUrl?: string | undefined;
     passkeySessionID?: string | undefined;
     /**
      * If both passkeys and TOTP based two factors are enabled, then {@link
@@ -153,8 +158,8 @@ export const EmailOrSRPAuthorizationResponse = z.object({
     encryptedToken: z.string().nullish().transform(nullToUndefined),
     token: z.string().nullish().transform(nullToUndefined),
     passkeySessionID: z.string().nullish().transform(nullToUndefined),
-    // The baseURL of the accounts app, where we should redirect to for passkey
-    // validation.
+    // Base URL for the accounts app where we should redirect to for passkey
+    // verification.
     accountsUrl: z.string().nullish().transform(nullToUndefined),
     twoFactorSessionID: z.string().nullish().transform(nullToUndefined),
     // TwoFactorSessionIDV2 is only set if user has both passkey and two factor
