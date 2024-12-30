@@ -412,6 +412,7 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Tamanho da grade de fotos",
+  "manageDeviceStorage": "Gerenciar cache do dispositivo",
   "manageDeviceStorageDesc": "Reveja e limpe o armazenamento de cache local.",
   "machineLearning": "Aprendizagem automática",
   "mlConsent": "Ativar aprendizagem automática",
@@ -1480,6 +1481,20 @@
     }
   },
   "file": "Arquivo",
+  "searchSectionsLengthMismatch": "Incompatibilidade de comprimento de seções: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "selectMailApp": "Selecionar aplicativo de e-mail",
   "selectAllShort": "Tudo",
   "@selectAllShort": {
