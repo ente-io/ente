@@ -83,7 +83,19 @@ export const sendOTT = async (
         }),
     );
 
-export const verifyOtt = async (
+/**
+ * Verify user's access to the given {@link email} by comparing the OTT that
+ * remote previously sent to that email.
+ *
+ * @param email The email to verify.
+ *
+ * @param ott The OTT that the user entered.
+ *
+ * @param source During signup, we ask the user the referral "source" through
+ * which they heard about Ente. When present (i.e. during signup, and if the
+ * user indeed provided it), that source should be passed as this parameter.
+ */
+export const verifyEmail = async (
     email: string,
     ott: string,
     source: string | undefined,

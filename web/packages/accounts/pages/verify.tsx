@@ -42,7 +42,7 @@ import { configureSRP } from "../services/srp";
 import type { SRPAttributes, SRPSetupAttributes } from "../services/srp-remote";
 import { getSRPAttributes } from "../services/srp-remote";
 import type { UserVerificationResponse } from "../services/user";
-import { putAttributes, sendOTT, verifyOtt } from "../services/user";
+import { putAttributes, sendOTT, verifyEmail } from "../services/user";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
@@ -81,8 +81,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     ) => {
         try {
             const referralSource = getLocalReferralSource()?.trim();
-            const cleanedReferral = referralSource ? `web:${referralSource}` : undefined;
-            const resp = await verifyOtt(email, ott, cleanedReferral);
+            const cleanedReferral = referralSource
+                ? `web:${referralSource}`
+                : undefined;
+            const resp = await verifyEmail(email, ott, cleanedReferral);
             const {
                 keyAttributes,
                 encryptedToken,
