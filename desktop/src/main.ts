@@ -255,10 +255,10 @@ const registerPrivilegedSchemes = () => {
  * See: [Note: Passkey verification in the desktop app].
  *
  * Implementation notes:
- * -   https://www.electronjs.org/docs/latest/tutorial/launch-app-from-url-in-another-app
- * -   This works only when the app is packaged.
- * -   On Windows and Linux, we get the deeplink in the "second-instance" event.
- * -   On macOS, we get the deeplink in the "open-url" event.
+ * - https://www.electronjs.org/docs/latest/tutorial/launch-app-from-url-in-another-app
+ * - This works only when the app is packaged.
+ * - On Windows and Linux, we get the deeplink in the "second-instance" event.
+ * - On macOS, we get the deeplink in the "open-url" event.
  */
 const registerForEnteLinks = () => app.setAsDefaultProtocolClient("ente");
 
