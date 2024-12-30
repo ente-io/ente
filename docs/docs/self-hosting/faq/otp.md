@@ -8,9 +8,9 @@ description: Getting the OTP for a self hosted Ente
 The self-hosted Ente by default does not send out emails, so you can pick the
 verification code by:
 
--   Getting it from the server logs, or
+- Getting it from the server logs, or
 
--   Reading it from the DB (otts table)
+- Reading it from the DB (otts table)
 
 You can also set pre-defined hardcoded OTTs for certain users when running
 locally by creating a `museum.yaml` and adding the `internal.hardcoded-ott`

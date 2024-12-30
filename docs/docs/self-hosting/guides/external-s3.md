@@ -167,10 +167,10 @@ RUN chmod +x /docker-entrypoint.d/replace_ente_endpoints.sh
 This runs nginx inside to handle both the web & album URLs so we don't have to
 make two web images with different port.
 
--   `DOCKER_RUNTIME_REPLACE_ENDPOINT` this is your public museum API URL.
--   `DOCKER_RUNTIME_REPLACE_ALBUMS_ENDPOINT` this is the shared albums URL (for
-    more details about configuring shared albums, see
-    [faq/sharing](/self-hosting/faq/sharing)).
+- `DOCKER_RUNTIME_REPLACE_ENDPOINT` this is your public museum API URL.
+- `DOCKER_RUNTIME_REPLACE_ALBUMS_ENDPOINT` this is the shared albums URL (for
+  more details about configuring shared albums, see
+  [faq/sharing](/self-hosting/faq/sharing)).
 
 Note how above we had updated the `compose.yaml` file for the server with
 
@@ -218,11 +218,11 @@ s3:
     use_path_style_urls: true
     # The key must be named like so
     b2-eu-cen:
-        key:      $YOUR_S3_KEY
-        secret:   $YOUR_S3_SECRET
+        key: $YOUR_S3_KEY
+        secret: $YOUR_S3_SECRET
         endpoint: $YOUR_S3_ENDPOINT
-        region:   $YOUR_S3_REGION
-        bucket:   $YOUR_S3_BUCKET_NAME
+        region: $YOUR_S3_REGION
+        bucket: $YOUR_S3_BUCKET_NAME
 # The same value as the one specified in ALBUMS_ENDPOINT
 apps:
     public-albums: http://localhost:8082
@@ -235,10 +235,12 @@ background).
 
 ## 4. Create an account and increase storage quota
 
-Open `http://localhost:8080` or whatever Endpoint you mentioned for the web app and create an account. 
-If your SMTP related configurations are all set and right, you will receive an email with 
-your OTT in it. There are two work arounds to retrieve the OTP, 
-checkout [this document](https://help.ente.io/self-hosting/faq/otp) for getting your OTT's..
+Open `http://localhost:8080` or whatever Endpoint you mentioned for the web app
+and create an account. If your SMTP related configurations are all set and
+right, you will receive an email with your OTT in it. There are two work arounds
+to retrieve the OTP, checkout
+[this document](https://help.ente.io/self-hosting/faq/otp) for getting your
+OTT's..
 
 If you successfully log in, select any plan and increase the storage quota with
 the following command:
@@ -251,8 +253,7 @@ After few reloads, you should see 1 To of quota.
 
 ## 5. Fix potential CORS issue with your bucket
 
-
-### For AWS S3 
+### For AWS S3
 
 If you cannot upload a photo due to a CORS issue, you need to fix the CORS
 configuration of your bucket.
@@ -275,7 +276,8 @@ Create a `cors.json` file with the following content:
 
 You may want to change the `AllowedOrigins` to a more restrictive value.
 
-If you are using AWS for S3, you can execute the below command to get rid of CORS. Make sure to enter the right path for the `cors.json` file.
+If you are using AWS for S3, you can execute the below command to get rid of
+CORS. Make sure to enter the right path for the `cors.json` file.
 
 ```bash
 aws s3api put-bucket-cors --bucket YOUR_S3_BUCKET --cors-configuration /path/to/cors.json
@@ -283,18 +285,27 @@ aws s3api put-bucket-cors --bucket YOUR_S3_BUCKET --cors-configuration /path/to/
 
 ### For Self-hosted Minio Instance
 
-> Important: MinIO does not take JSON CORS file as the input, instead you will have to build a CORS.xml file or just convert the above `cors.json` to XML.
+> Important: MinIO does not take JSON CORS file as the input, instead you will
+> have to build a CORS.xml file or just convert the above `cors.json` to XML.
 
-A minor requirement here is the tool `mc` for managing buckets via command line interface. Checkout the `mc set alias` document to configure alias for your instance and bucket. 
-After this you will be prompted for your AccessKey and Secret, which is your username and password, go ahead and enter that.
+A minor requirement here is the tool `mc` for managing buckets via command line
+interface. Checkout the `mc set alias` document to configure alias for your
+instance and bucket. After this you will be prompted for your AccessKey and
+Secret, which is your username and password, go ahead and enter that.
+
 ```sh
 mc cors set <your-minio>/<your-bucket-name /path/to/cors.xml
 ```
-or, if you just want to just set the `AllowedOrigins` Header, you can use the following command to do so. 
-```sh 
+
+or, if you just want to just set the `AllowedOrigins` Header, you can use the
+following command to do so.
+
+```sh
 mc admin config set <your-minio>/<your-bucket-name> set "cors_allowed_origin=*"
 ```
-You can create also `.csv` file and dump the list of origins you would like to allow and replace the `*` with `path` to the CSV file.
+
+You can create also `.csv` file and dump the list of origins you would like to
+allow and replace the `*` with `path` to the CSV file.
 
 Now, uploads should be working fine.
 
@@ -302,6 +313,6 @@ Now, uploads should be working fine.
 
 Some other users have also shared their setups.
 
--   [Using Traefik](https://github.com/ente-io/ente/pull/3663)
+- [Using Traefik](https://github.com/ente-io/ente/pull/3663)
 
--   [Building custom images from source (Linux)](https://github.com/ente-io/ente/discussions/3778)
+- [Building custom images from source (Linux)](https://github.com/ente-io/ente/discussions/3778)
