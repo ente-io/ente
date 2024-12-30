@@ -1007,7 +1007,9 @@ func cors() gin.HandlerFunc {
 		c.Writer.Header().Set("Access-Control-Max-Age", "1728000")
 
 		if c.Request.Method == http.MethodOptions {
-			c.AbortWithStatus(http.StatusNoContent)
+			// While 204 No Content is more appropriate, Safari intermittently
+			// (intermittently!) fails CORS if we return 204 instead of 200 OK.
+			c.Status(http.StatusOK)
 			return
 		}
 		c.Next()
