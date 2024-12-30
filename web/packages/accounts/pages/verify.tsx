@@ -41,7 +41,6 @@ import { stashedRedirect, unstashRedirect } from "../services/redirect";
 import { configureSRP } from "../services/srp";
 import type { SRPAttributes, SRPSetupAttributes } from "../services/srp-remote";
 import { getSRPAttributes } from "../services/srp-remote";
-import type { UserVerificationResponse } from "../services/user";
 import { putAttributes, sendOTT, verifyEmail } from "../services/user";
 import type { PageProps } from "../types/page";
 
@@ -84,7 +83,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             const cleanedReferral = referralSource
                 ? `web:${referralSource}`
                 : undefined;
-            const resp = await verifyEmail(email, ott, cleanedReferral);
             const {
                 keyAttributes,
                 encryptedToken,
@@ -93,7 +91,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 twoFactorSessionID,
                 passkeySessionID,
             } = await userVerificationResultAfterResolvingSecondFactorChoice(
-                resp.data as UserVerificationResponse,
+                await verifyEmail(email, ott, cleanedReferral),
             );
             if (passkeySessionID) {
                 const user = getData(LS_KEYS.USER);
