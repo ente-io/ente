@@ -1,3 +1,4 @@
+import { TwoFactorAuthorizationResponse } from "@/accounts/services/user";
 import { clientPackageName, isDesktop } from "@/base/app";
 import { sharedCryptoWorker } from "@/base/crypto";
 import { encryptToB64, generateEncryptionKey } from "@/base/crypto/libsodium";
@@ -9,7 +10,6 @@ import {
 } from "@/base/http";
 import log from "@/base/log";
 import { accountsAppOrigin, apiURL } from "@/base/origins";
-import type { TwoFactorAuthorizationResponse } from "@/accounts/services/user";
 import { nullToUndefined } from "@/utils/transform";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import HTTPService from "@ente/shared/network/HTTPService";

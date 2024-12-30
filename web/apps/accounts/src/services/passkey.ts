@@ -1,4 +1,4 @@
-import type { TwoFactorAuthorizationResponse } from "@/accounts/services/user";
+import { TwoFactorAuthorizationResponse } from "@/accounts/services/user";
 import { clientPackageName } from "@/base/app";
 import {
     fromB64URLSafeNoPadding,

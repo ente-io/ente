@@ -13,18 +13,18 @@ import { z } from "zod";
 
 export interface UserVerificationResponse {
     id: number;
-    keyAttributes?: KeyAttributes;
-    encryptedToken?: string;
+    keyAttributes?: KeyAttributes | undefined;
+    encryptedToken?: string | undefined;
     token?: string;
-    twoFactorSessionID: string;
-    passkeySessionID: string;
+    twoFactorSessionID?: string | undefined;
+    passkeySessionID?: string | undefined;
     /**
      * If both passkeys and TOTP based two factors are enabled, then {@link
      * twoFactorSessionIDV2} will be set to the TOTP session ID instead of
      * {@link twoFactorSessionID}.
      */
     twoFactorSessionIDV2?: string | undefined;
-    srpM2?: string;
+    srpM2?: string | undefined;
 }
 
 export interface TwoFactorVerificationResponse {
@@ -101,12 +101,18 @@ export const verifyEmail = async (
     email: string,
     ott: string,
     source: string | undefined,
-) => {
-    return HTTPService.post(await apiURL("/users/verify-email"), {
-        email,
-        ott,
-        ...(source ? { source } : {}),
+): Promise<UserVerificationResponse> => {
+    const res = await fetch(await apiURL("/users/verify-email"), {
+        method: "POST",
+        headers: publicRequestHeaders(),
+        body: JSON.stringify({
+            email,
+            ott,
+            ...(source ? { source } : {}),
+        }),
     });
+    ensureOk(res);
+    return EmailOrSRPAuthorizationResponse.parse(await res.json());
 };
 
 /**
@@ -141,7 +147,7 @@ const RemoteKeyAttributes = z.object({
  * (`passkeySessionID`, `twoFactorSessionID` / `twoFactorSessionIDV2`) will be
  * set. Otherwise `keyAttributes` and `encryptedToken` will be set.
  */
-export const RemoteUserVerificationResponse = z.object({
+export const EmailOrSRPAuthorizationResponse = z.object({
     id: z.number(),
     keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
     encryptedToken: z.string().nullish().transform(nullToUndefined),
@@ -166,7 +172,7 @@ export const RemoteUserVerificationResponse = z.object({
 /**
  * The result of a successful two factor verification (totp or passkey).
  */
-const TwoFactorAuthorizationResponse = z.object({
+export const TwoFactorAuthorizationResponse = z.object({
     id: z.number(),
     /** TODO: keyAttributes is guaranteed to be returned by museum, update the
      * types to reflect that. */

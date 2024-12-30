@@ -11,11 +11,11 @@ export interface KeyAttributes {
     encryptedSecretKey: string;
     secretKeyDecryptionNonce: string;
     /** Doesn't change after being initially created. */
-    masterKeyEncryptedWithRecoveryKey: string;
-    masterKeyDecryptionNonce: string;
+    masterKeyEncryptedWithRecoveryKey?: string;
+    masterKeyDecryptionNonce?: string;
     /** Doesn't change after being initially created. */
-    recoveryKeyEncryptedWithMasterKey: string;
-    recoveryKeyDecryptionNonce: string;
+    recoveryKeyEncryptedWithMasterKey?: string;
+    recoveryKeyDecryptionNonce?: string;
 }
 
 export interface User {

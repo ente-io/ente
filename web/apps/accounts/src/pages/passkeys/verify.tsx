@@ -1,4 +1,4 @@
-import type { TwoFactorAuthorizationResponse } from "@/accounts/services/user";
+import { TwoFactorAuthorizationResponse } from "@/accounts/services/user";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import log from "@/base/log";
