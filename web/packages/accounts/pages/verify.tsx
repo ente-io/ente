@@ -80,8 +80,9 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         setFieldError,
     ) => {
         try {
-            const referralSource = getLocalReferralSource();
-            const resp = await verifyOtt(email, ott, referralSource);
+            const referralSource = getLocalReferralSource()?.trim();
+            const cleanedReferral = referralSource ? `web:${referralSource}` : undefined;
+            const resp = await verifyOtt(email, ott, cleanedReferral);
             const {
                 keyAttributes,
                 encryptedToken,

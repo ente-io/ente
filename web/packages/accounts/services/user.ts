@@ -86,13 +86,12 @@ export const sendOTT = async (
 export const verifyOtt = async (
     email: string,
     ott: string,
-    referral: string,
+    source: string | undefined,
 ) => {
-    const cleanedReferral = `web:${referral?.trim() || ""}`;
     return HTTPService.post(await apiURL("/users/verify-email"), {
         email,
         ott,
-        source: cleanedReferral,
+        ...(source ? { source } : {}),
     });
 };
 
