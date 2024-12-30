@@ -2,12 +2,12 @@
 
 Conceptually, the release is straightforward:
 
-1.  We trigger a GitHub workflow that creates a (pre-)release with the build.
+1. We trigger a GitHub workflow that creates a (pre-)release with the build.
 
-2.  When ready, we make that release the latest.
+2. When ready, we make that release the latest.
 
-3.  The download links on our website, and existing apps already check the
-    latest GitHub release and update automatically.
+3. The download links on our website, and existing apps already check the latest
+   GitHub release and update automatically.
 
 The complication comes from the fact that electron-builder's auto updater (the
 mechanism that we use for auto updates) doesn't work with monorepos. So we need
@@ -32,17 +32,17 @@ gh workflow run desktop-release.yml --source=<branch>
 
 ## Release checklist
 
-1.  Update source repo to set version `1.x.x` in `package.json` and finalize the
-    CHANGELOG.
+1. Update source repo to set version `1.x.x` in `package.json` and finalize the
+   CHANGELOG.
 
-2.  Merge PR then tag the merge commit on `main` in the source repo:
+2. Merge PR then tag the merge commit on `main` in the source repo:
 
     ```sh
     git tag photosd-v1.x.x
     git push origin photosd-v1.x.x
     ```
 
-3.  In the release repo:
+3. In the release repo:
 
     ```sh
     ./.github/trigger-release.sh v1.x.x
@@ -56,20 +56,20 @@ Once it is marked as latest, the release goes live.
 We are done at this point, and can now update the other pre-release that'll hold
 subsequent nightly builds.
 
-1.  Update `package.json` in the source repo to use version `1.x.x-beta`, and
-    merge these changes into `main`.
+1. Update `package.json` in the source repo to use version `1.x.x-beta`, and
+   merge these changes into `main`.
 
-2.  In the release repo, delete the existing _nightly_ pre-release, then:
+2. In the release repo, delete the existing _nightly_ pre-release, then:
 
     ```sh
     git tag v1.x.x-beta
     git push origin v1.x.x-beta
     ```
 
-3.  Start a new run of the workflow (`gh workflow run desktop-release.yml`).
+3. Start a new run of the workflow (`gh workflow run desktop-release.yml`).
 
-4.  Once the workflow creates the new 1.x.x-beta pre-release, edit its
-    description to "Nightly builds".
+4. Once the workflow creates the new 1.x.x-beta pre-release, edit its
+   description to "Nightly builds".
 
 Subsequent scheduled nightly workflows will keep updating this pre-release.
 
@@ -77,14 +77,14 @@ Subsequent scheduled nightly workflows will keep updating this pre-release.
 
 To create extra one-off pre-releases in addition to the nightly `1.x.x-beta`s,
 
-1.  In your branch in the source repository, set the version in `package.json`
-    to something different, say `1.x.x-foo`.
+1. In your branch in the source repository, set the version in `package.json` to
+   something different, say `1.x.x-foo`.
 
-2.  Create a new pre-release in the release repo with title `1.x.x-foo`. In the
-    tag input enter `v1.x.x-foo` and select the option to "Create a new tag on
-    publish".
+2. Create a new pre-release in the release repo with title `1.x.x-foo`. In the
+   tag input enter `v1.x.x-foo` and select the option to "Create a new tag on
+   publish".
 
-3.  Trigger the workflow in the release repo:
+3. Trigger the workflow in the release repo:
 
     ```sh
     gh workflow run desktop-release.yml --source=my-branch
