@@ -412,6 +412,7 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Kích thước lưới ảnh",
+  "manageDeviceStorage": "Quản lý bộ nhớ đệm của thiết bị",
   "manageDeviceStorageDesc": "Review and clear local cache storage.",
   "machineLearning": "Học máy",
   "mlConsent": "Kích hoạt học máy",
@@ -1480,6 +1481,20 @@
     }
   },
   "file": "Tệp",
+  "searchSectionsLengthMismatch": "Độ dài các phần không khớp: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "selectMailApp": "Chọn ứng dụng email",
   "selectAllShort": "Tất cả",
   "@selectAllShort": {
