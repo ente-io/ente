@@ -4,8 +4,8 @@
 
 We recommend VS Code, with the following extensions:
 
--   Prettier - reformats your code automatically (enable format on save),
--   ESLint - warns you about issues
+- Prettier - reformats your code automatically (enable format on save),
+- ESLint - warns you about issues
 
 Optionally, if you're going to make many changes to the CSS in JS, you might
 also find it useful to install the _vscode-styled-components_ extension.
