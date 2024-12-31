@@ -83,6 +83,7 @@ class _HomePageState extends State<HomePage> {
   bool isCompactMode = false;
 
   late CodeSortKey _codeSortKey;
+  final Set<LogicalKeyboardKey> _pressedKeys = <LogicalKeyboardKey>{};
 
   @override
   void initState() {
@@ -109,6 +110,38 @@ class _HomePageState extends State<HomePage> {
     _showSearchBox = _autoFocusSearch;
 
     searchBoxFocusNode = FocusNode();
+    ServicesBinding.instance.keyboard.addHandler(_handleKeyEvent);
+  }
+
+  bool _handleKeyEvent(KeyEvent event) {
+    if (event is KeyDownEvent) {
+      setState(() {
+        _pressedKeys.add(event.logicalKey);
+        if ((_pressedKeys.contains(LogicalKeyboardKey.controlLeft) ||
+                _pressedKeys.contains(LogicalKeyboardKey.control) ||
+                _pressedKeys.contains(LogicalKeyboardKey.controlRight)) &&
+            event.logicalKey == LogicalKeyboardKey.keyF) {
+          _showSearchBox = true;
+          searchBoxFocusNode.requestFocus();
+          _textController.clear();
+          _searchText = "";
+          return;
+        }
+        if (event.logicalKey == LogicalKeyboardKey.escape) {
+          setState(() {
+            _textController.clear();
+            _searchText = "";
+            _showSearchBox = false;
+            _applyFilteringAndRefresh();
+          });
+        } else if (event is KeyUpEvent) {
+          setState(() {
+            _pressedKeys.remove(event.logicalKey);
+          });
+        }
+      });
+    }
+    return false;
   }
 
   void _loadCodes() {
@@ -209,7 +242,7 @@ class _HomePageState extends State<HomePage> {
     _triggerLogoutEvent?.cancel();
     _iconsChangedEvent?.cancel();
     _textController.removeListener(_applyFilteringAndRefresh);
-
+    ServicesBinding.instance.keyboard.removeHandler(_handleKeyEvent);
     searchBoxFocusNode.dispose();
 
     super.dispose();
