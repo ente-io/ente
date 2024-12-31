@@ -241,6 +241,7 @@ class _HomePageState extends State<HomePage> {
     _streamSubscription?.cancel();
     _triggerLogoutEvent?.cancel();
     _iconsChangedEvent?.cancel();
+    _textController.dispose();
     _textController.removeListener(_applyFilteringAndRefresh);
     ServicesBinding.instance.keyboard.removeHandler(_handleKeyEvent);
     searchBoxFocusNode.dispose();
