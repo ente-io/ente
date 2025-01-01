@@ -44,9 +44,8 @@ COPY apps/ .
 # Will help default to yarn versoin 1.22.22
 RUN corepack enable
 
-# Configure Albums and Accounts Endpoints
-ENV NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=https://your-domain.com
-ENV NEXT_PUBLIC_ENTE_ACCOUNTS_URL=https://your-domain.com
+# Endpoint for Ente Server
+NEXT_PUBLIC_ENTE_ENDPOINT=https://your-ente-endpoint.com
 
 RUN yarn cache clean
 RUN yarn install --network-timeout 1000000000
@@ -124,8 +123,6 @@ ente-web:
         - 3003:3003
         - 3004:3004
     environment:
-        - NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=https://your-domain.com
-        - NEXT_PUBLIC_ENTE_ACCOUNTS_URL=https://your-domain.com
         - NODE_ENV=development
     restart: always
 ```
@@ -139,8 +136,6 @@ docker compose up -d # --build
 docker compose logs <container-name>
 ```
 
-Next part is to configure a [web server](#web-server-configuration).
-
 ## Without Docker / Docker compose
 
 One way to run all the apps together without Docker is by using
@@ -149,6 +144,8 @@ very simple and just needs one configuration file for it. You can run the apps
 both in dev server mode as well as static files.
 
 The below configuration will run the apps in dev server mode.
+
+
 
 ### Install PM2
 
@@ -206,6 +203,20 @@ pm2 start
 # for logs
 pm2 logs all
 ```
+
+## Configure App Endpoints 
+
+> [!NOTE] 
+> Previously, this was dependent on the env variables `NEXT_ENTE_PUBLIC_ALBUMS_ENDPOINT`
+> and etc. Please check the below documentation to update your setup configurations
+
+You can configure the web endpoints for the other apps including Accounts, Albums 
+Family and Cast in your `museum.yaml`` configuration file. Checkout 
+[`local.yaml`](https://github.com/ente-io/ente/blob/543411254b2bb55bd00a0e515dcafa12d12d3b35/server/configurations/local.yaml#L76-L89)
+to configure the endpoints. Make sure to setup up your DNS Records accordingly to the 
+similar URL's you set up in `museum.yaml``
+
+Next part is to configure the web server.
 
 # Web server configuration
 
