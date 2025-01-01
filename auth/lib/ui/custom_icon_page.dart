@@ -51,31 +51,30 @@ class _CustomIconPageState extends State<CustomIconPage> {
 
   bool _handleKeyEvent(KeyEvent event) {
     if (event is KeyDownEvent) {
-      setState(() {
-        _pressedKeys.add(event.logicalKey);
-        if ((_pressedKeys.contains(LogicalKeyboardKey.controlLeft) ||
-                _pressedKeys.contains(LogicalKeyboardKey.control) ||
-                _pressedKeys.contains(LogicalKeyboardKey.controlRight)) &&
-            event.logicalKey == LogicalKeyboardKey.keyF) {
+      _pressedKeys.add(event.logicalKey);
+      if ((_pressedKeys.contains(LogicalKeyboardKey.controlLeft) ||
+              _pressedKeys.contains(LogicalKeyboardKey.control) ||
+              _pressedKeys.contains(LogicalKeyboardKey.controlRight)) &&
+          event.logicalKey == LogicalKeyboardKey.keyF) {
+        setState(() {
           _showSearchBox = true;
           searchBoxFocusNode.requestFocus();
           _textController.clear();
           _searchText = "";
-          return;
-        }
-        if (event.logicalKey == LogicalKeyboardKey.escape) {
-          setState(() {
-            _textController.clear();
-            _searchText = "";
-            _showSearchBox = false;
-            _applyFilteringAndRefresh();
-          });
-        } else if (event is KeyUpEvent) {
-          setState(() {
-            _pressedKeys.remove(event.logicalKey);
-          });
-        }
-      });
+        });
+        return true;
+      }
+      if (event.logicalKey == LogicalKeyboardKey.escape) {
+        setState(() {
+          _textController.clear();
+          _searchText = "";
+          _showSearchBox = false;
+          _applyFilteringAndRefresh();
+        });
+        return true;
+      }
+    } else if (event is KeyUpEvent) {
+      _pressedKeys.remove(event.logicalKey);
     }
     return false;
   }
