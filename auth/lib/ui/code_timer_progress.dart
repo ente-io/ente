@@ -22,9 +22,6 @@ class _CodeTimerProgressState extends State<CodeTimerProgress> {
   late final ValueNotifier<double> _progress;
   late final int _periodInMicros;
 
-  // Cache the start time to avoid repeated system calls
-  late final int _startMicros;
-
   // Reduce update frequency
   final int _updateIntervalMs =
       (Platform.isAndroid || Platform.isIOS) ? 16 : 500; // approximately 60 FPS
@@ -34,9 +31,8 @@ class _CodeTimerProgressState extends State<CodeTimerProgress> {
     super.initState();
     _periodInMicros = widget.period * 1000000;
     _progress = ValueNotifier<double>(0.0);
-    _startMicros = DateTime.now().microsecondsSinceEpoch;
+    _updateTimeRemaining(DateTime.now().microsecondsSinceEpoch);
 
-    // Use a Timer instead of a Ticker
     _timer = Timer.periodic(Duration(milliseconds: _updateIntervalMs), (timer) {
       final now = DateTime.now().microsecondsSinceEpoch;
       _updateTimeRemaining(now);
@@ -45,9 +41,18 @@ class _CodeTimerProgressState extends State<CodeTimerProgress> {
 
   void _updateTimeRemaining(int currentMicros) {
     // More efficient time calculation using modulo
-    final elapsed = (currentMicros - _startMicros) % _periodInMicros;
+    final elapsed = (currentMicros) % _periodInMicros;
     final timeRemaining = _periodInMicros - elapsed;
     _progress.value = timeRemaining / _periodInMicros;
+  }
+
+  @override
+  void didUpdateWidget(covariant CodeTimerProgress oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.period != widget.period) {
+      _periodInMicros = widget.period * 1000000;
+      _updateTimeRemaining(DateTime.now().microsecondsSinceEpoch);
+    }
   }
 
   @override
