@@ -501,5 +501,6 @@
   "deduplicateCodes": "Loại bỏ mã trùng lặp",
   "deselectAll": "Bỏ chọn tất cả",
   "selectAll": "Chọn tất cả",
-  "deleteDuplicates": "Xóa trùng lặp"
+  "deleteDuplicates": "Xóa trùng lặp",
+  "plainHTML": "HTML thuần"
 }

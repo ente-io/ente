@@ -487,7 +487,7 @@
   "hideContentDescriptioniOS": "Ocultar el contenido de la aplicación en el selector de aplicaciones",
   "autoLockFeatureDescription": "Tiempo tras el cual la aplicación se bloquea después de ser colocada en segundo plano",
   "appLockDescription": "Elija entre la pantalla de bloqueo por defecto de su dispositivo y una pantalla de bloqueo personalizada con un PIN o contraseña.",
-  "pinLock": "Bloqueo con Pin",
+  "pinLock": "Bloqueo con PIN",
   "enterPin": "Ingresa el PIN",
   "setNewPin": "Establecer nuevo PIN",
   "importFailureDescNew": "No se pudo analizar el archivo seleccionado.",
@@ -501,5 +501,6 @@
   "deduplicateCodes": "Desduplicar códigos",
   "deselectAll": "Deseleccionar todo",
   "selectAll": "Seleccionar todo",
-  "deleteDuplicates": "Eliminar duplicados"
+  "deleteDuplicates": "Eliminar duplicados",
+  "plainHTML": "HTML plano"
 }

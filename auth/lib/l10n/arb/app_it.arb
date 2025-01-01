@@ -258,6 +258,10 @@
   "areYouSureYouWantToLogout": "Sei sicuro di volerti disconnettere?",
   "yesLogout": "Si, effettua la disconnessione",
   "exit": "Esci",
+  "theme": "Tema",
+  "lightTheme": "Chiaro",
+  "darkTheme": "Scuro",
+  "systemTheme": "Sistema",
   "verifyingRecoveryKey": "Verifica della chiave di recupero...",
   "recoveryKeyVerified": "Chiave di recupero verificata",
   "recoveryKeySuccessBody": "Ottimo! La tua chiave di recupero è valida. Grazie per averla verificata.\n\nRicordati di effettuare il backup sicuro della tua chiave di recupero.",
@@ -497,5 +501,6 @@
   "deduplicateCodes": "Codici deduplicati",
   "deselectAll": "Deselezionare tutti",
   "selectAll": "Seleziona tutti",
-  "deleteDuplicates": "Elimina i duplicati"
+  "deleteDuplicates": "Elimina i duplicati",
+  "plainHTML": "HTML semplice"
 }
