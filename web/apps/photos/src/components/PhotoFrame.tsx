@@ -8,7 +8,6 @@ import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
-import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { styled } from "@mui/material";
 import PhotoViewer, { type PhotoViewerProps } from "components/PhotoViewer";
 import { useRouter } from "next/router";
@@ -120,22 +119,21 @@ const PhotoFrame = ({
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
     const router = useRouter();
 
-    const displayFiles = useMemoSingleThreaded(() => {
-        return files.map((item) => {
-            const filteredItem = {
-                ...item,
-                w: window.innerWidth,
-                h: window.innerHeight,
-                title: item.pubMagicMetadata?.data.caption,
-            };
-            return filteredItem as DisplayFile;
-        });
-    }, [files]);
+    const [displayFiles, setDisplayFiles] = useState<DisplayFile[] | undefined>(
+        undefined,
+    );
 
     useEffect(() => {
+        const result = files.map((file) => ({
+            ...file,
+            w: window.innerWidth,
+            h: window.innerHeight,
+            title: file.pubMagicMetadata?.data.caption,
+        }));
+        setDisplayFiles(result);
         setFetching({});
         setThumbFetching({});
-    }, [displayFiles]);
+    }, [files]);
 
     useEffect(() => {
         const currentURL = new URL(window.location.href);
