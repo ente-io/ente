@@ -21,7 +21,7 @@ export interface UserVerificationResponse {
      * Base URL for the accounts app where we should redirect to for passkey
      * verification.
      */
-    accountsUrl?: string | undefined;
+    accountsUrl: string;
     passkeySessionID?: string | undefined;
     /**
      * If both passkeys and TOTP based two factors are enabled, then {@link
@@ -164,7 +164,7 @@ export const EmailOrSRPAuthorizationResponse = z.object({
     passkeySessionID: z.string().nullish().transform(nullToUndefined),
     // Base URL for the accounts app where we should redirect to for passkey
     // verification.
-    accountsUrl: z.string().nullish().transform(nullToUndefined),
+    accountsUrl: z.string(),
     twoFactorSessionID: z.string().nullish().transform(nullToUndefined),
     // TwoFactorSessionIDV2 is only set if user has both passkey and two factor
     // enabled. This is to ensure older clients keep using passkey flow when
