@@ -2692,6 +2692,16 @@ class S {
     );
   }
 
+  /// `Please authenticate to view your trashed files`
+  String get authToViewTrashedFiles {
+    return Intl.message(
+      'Please authenticate to view your trashed files',
+      name: 'authToViewTrashedFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Trash`
   String get trash {
     return Intl.message(

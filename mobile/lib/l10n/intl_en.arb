@@ -351,6 +351,7 @@
   "failedToLoadAlbums": "Failed to load albums",
   "hidden": "Hidden",
   "authToViewYourHiddenFiles": "Please authenticate to view your hidden files",
+  "authToViewTrashedFiles": "Please authenticate to view your trashed files",
   "trash": "Trash",
   "uncategorized": "Uncategorized",
   "videoSmallCase": "video",
