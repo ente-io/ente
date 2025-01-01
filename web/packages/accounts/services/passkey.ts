@@ -9,8 +9,7 @@ import {
     publicRequestHeaders,
 } from "@/base/http";
 import log from "@/base/log";
-import { accountsAppOrigin, apiURL } from "@/base/origins";
-import { nullToUndefined } from "@/utils/transform";
+import { apiURL } from "@/base/origins";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
@@ -30,14 +29,14 @@ import { unstashRedirect } from "./redirect";
  * On successful verification, the accounts app will redirect back to our
  * `/passkeys/finish` page.
  *
- * @param accountsURL Base URL for the accounts app (provided to us by remote in
+ * @param accountsURL The URL for the accounts app (provided to us by remote in
  * the email or SRP verification response).
  *
  * @param passkeySessionID An identifier provided by museum for this passkey
  * verification session.
  */
 export const passkeyVerificationRedirectURL = (
-    accountsURL: string | undefined,
+    accountsURL: string,
     passkeySessionID: string,
 ) => {
     const clientPackage = clientPackageName;
@@ -55,8 +54,7 @@ export const passkeyVerificationRedirectURL = (
         redirect,
         ...recoverOption,
     });
-    const baseURL = accountsURL ?? accountsAppOrigin();
-    return `${baseURL}/passkeys/verify?${params.toString()}`;
+    return `${accountsURL}/passkeys/verify?${params.toString()}`;
 };
 
 interface OpenPasskeyVerificationURLOptions {
@@ -134,11 +132,11 @@ export const openAccountsManagePasskeysPage = async () => {
 
     // Redirect to the Ente Accounts app where they can view and add and manage
     // their passkeys.
-    const remoteParams = await getAccountsTokenAndURL();
-    const params = new URLSearchParams({ token: remoteParams.accountsToken });
-    const baseURL = remoteParams.accountsUrl ?? accountsAppOrigin();
+    const { accountsToken: token, accountsUrl: accountsURL } =
+        await getAccountsTokenAndURL();
+    const params = new URLSearchParams({ token });
 
-    window.open(`${baseURL}/passkeys?${params.toString()}`);
+    window.open(`${accountsURL}/passkeys?${params.toString()}`);
 };
 
 export const isPasskeyRecoveryEnabled = async () => {
@@ -207,8 +205,10 @@ const getAccountsTokenAndURL = async () => {
     ensureOk(res);
     return z
         .object({
+            // The origin that serves the accounts app.
+            accountsUrl: z.string(),
+            // A token that can be used to autheticate with the accounts app.
             accountsToken: z.string(),
-            accountsUrl: z.string().nullish().transform(nullToUndefined),
         })
         .parse(await res.json());
 };

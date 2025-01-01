@@ -1,7 +1,7 @@
 import { isDesktop } from "@/base/app";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { getKV, setKV } from "@/base/kv";
-import { apiURL, familyAppOrigin, paymentsAppOrigin } from "@/base/origins";
+import { apiURL } from "@/base/origins";
 import {
     nullishToEmpty,
     nullishToZero,
@@ -367,6 +367,8 @@ export const cancelStripeSubscription = async () => {
     return syncUserDetails();
 };
 
+const paymentsAppOrigin = "https://payments.ente.io";
+
 /**
  * Start the flow to purchase or update a subscription by redirecting the user
  * to the payments app.
@@ -381,7 +383,7 @@ export const redirectToPaymentsApp = async (
 ) => {
     const paymentToken = await getPaymentToken();
     const redirectURL = paymentCompletionRedirectURL();
-    window.location.href = `${paymentsAppOrigin()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${redirectURL}`;
+    window.location.href = `${paymentsAppOrigin}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${redirectURL}`;
 };
 
 /**
@@ -390,7 +392,7 @@ export const redirectToPaymentsApp = async (
  */
 const paymentCompletionRedirectURL = () =>
     isDesktop
-        ? `${paymentsAppOrigin()}/desktop-redirect`
+        ? `${paymentsAppOrigin}/desktop-redirect`
         : `${window.location.origin}/gallery`;
 
 /**
@@ -511,8 +513,7 @@ export const getFamilyPortalRedirectURL = async () => {
         userDetails && isPartOfFamily(userDetails) ? "true" : "false";
     const redirectURL = `${window.location.origin}/gallery`;
     const params = new URLSearchParams({ token, isFamilyCreated, redirectURL });
-    const baseURL = familiesURL ?? familyAppOrigin();
-    return `${baseURL}?${params.toString()}`;
+    return `${familiesURL}?${params.toString()}`;
 };
 
 /**
@@ -526,8 +527,12 @@ const getFamiliesTokenAndURL = async () => {
     ensureOk(res);
     return z
         .object({
+            // The origin that serves the family dashboard which can be used to
+            // create or manage family plans.
+            familyUrl: z.string(),
+            // A token that can be used to authenticate with the family
+            // dashboard.
             familiesToken: z.string(),
-            familyUrl: z.string().nullish().transform(nullToUndefined),
         })
         .parse(await res.json());
 };

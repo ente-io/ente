@@ -76,6 +76,26 @@ const desktopAppVersion = isDesktop
           .version
     : undefined;
 
+// Fail the build if the user is setting any of the legacy environment variables
+// which have now been replaced with museum configuration. This is meant to help
+// self hosters find the new setting instead of being caught unawares.
+
+if (process.env.NEXT_PUBLIC_ENTE_ACCOUNTS_URL) {
+    console.log(
+        "The NEXT_PUBLIC_ENTE_ACCOUNTS_URL environment variable is not supported.",
+    );
+    console.log("Use apps.accounts in the museum configuration instead.");
+    process.exit(1);
+}
+
+if (process.env.NEXT_PUBLIC_ENTE_FAMILY_URL) {
+    console.log(
+        "The NEXT_PUBLIC_ENTE_FAMILY_URL environment variable is not supported.",
+    );
+    console.log("Use apps.family in the museum configuration instead.");
+    process.exit(1);
+}
+
 /**
  * Configuration for the Next.js build
  *
