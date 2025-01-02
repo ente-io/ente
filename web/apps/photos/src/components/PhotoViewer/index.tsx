@@ -71,9 +71,23 @@ export type PhotoViewerProps = Pick<
     PhotoFrameProps,
     "favoriteFileIDs" | "markUnsyncedFavoriteUpdate" | "markTempDeleted"
 > & {
+    /**
+     * The PhotoViewer is shown when this is `true`.
+     */
     isOpen: boolean;
+    /**
+     * The list of files that we are showing in the current context.
+     *
+     * These are the (ordered) siblings of the file that is currently being
+     * shown in the PhotoViewer. The meaning of siblings depends on the context:
+     * for example, when viewing a collection, this will be set to the list of
+     * files present in the collection.
+     */
     items: any[];
     currentIndex?: number;
+    /**
+     * Callback fired when the PhotoViewer requests to be closed.
+     */
     onClose?: (needUpdate: boolean) => void;
     gettingData: (instance: any, index: number, item: EnteFile) => void;
     forceConvertItem: (instance: any, index: number, item: EnteFile) => void;
