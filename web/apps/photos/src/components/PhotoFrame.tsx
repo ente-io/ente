@@ -10,7 +10,7 @@ import { FileType } from "@/media/file-type";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
 import { styled } from "@mui/material";
-import PhotoViewer, { type PhotoViewerProps } from "components/PhotoViewer";
+import { PhotoViewer, type PhotoViewerProps } from "components/PhotoViewer";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import PhotoSwipe from "photoswipe";
@@ -87,14 +87,25 @@ export interface PhotoFrameProps {
      */
     favoriteFileIDs?: Set<number>;
     /**
-     * Callback to invoke when the in-memory, unsynced, favorite status of a
-     * file is changed. For more details, see {@link unsyncedFavoriteUpdates} in
-     * the gallery reducer's documentation.
+     * Called when the component wants to update the in-memory, unsynced,
+     * favorite status of a file.
+     *
+     * For more details, see {@link unsyncedFavoriteUpdates} in the gallery
+     * reducer's documentation.
      *
      * Not set in the context of the shared albums app.
      */
     markUnsyncedFavoriteUpdate?: (fileID: number, isFavorite: boolean) => void;
-    markTempDeleted?: (tempDeletedFiles: EnteFile[]) => void;
+    /**
+     * Called when the component wants to mark the given files as deleted in the
+     * the in-memory, unsynced, state maintained by the top level gallery.
+     *
+     * For more details, see {@link unsyncedFavoriteUpdates} in the gallery
+     * reducer's documentation.
+     *
+     * Not set in the context of the shared albums app.
+     */
+    markTempDeleted?: (files: EnteFile[]) => void;
     /** This will be set if mode is not "people". */
     activeCollectionID: number;
     /** This will be set if mode is "people". */
@@ -510,7 +521,6 @@ const PhotoFrame = ({
                 onClose={handleClose}
                 gettingData={getSlideData}
                 forceConvertItem={forceConvertItem}
-                markTempDeleted={markTempDeleted}
                 isTrashCollection={activeCollectionID === TRASH_SECTION}
                 isInHiddenSection={isInHiddenSection}
                 enableDownload={enableDownload}
@@ -520,7 +530,7 @@ const PhotoFrame = ({
                     setFilesDownloadProgressAttributesCreator
                 }
                 onSelectPerson={onSelectPerson}
-                {...{ favoriteFileIDs, markUnsyncedFavoriteUpdate }}
+                {...{ favoriteFileIDs, markUnsyncedFavoriteUpdate, markTempDeleted }}
             />
         </Container>
     );

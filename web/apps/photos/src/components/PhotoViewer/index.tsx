@@ -69,7 +69,7 @@ import { ImageEditorOverlay } from "./ImageEditorOverlay";
 
 export type PhotoViewerProps = Pick<
     PhotoFrameProps,
-    "favoriteFileIDs" | "markUnsyncedFavoriteUpdate"
+    "favoriteFileIDs" | "markUnsyncedFavoriteUpdate" | "markTempDeleted"
 > & {
     isOpen: boolean;
     items: any[];
@@ -78,7 +78,6 @@ export type PhotoViewerProps = Pick<
     gettingData: (instance: any, index: number, item: EnteFile) => void;
     forceConvertItem: (instance: any, index: number, item: EnteFile) => void;
     id?: string;
-    markTempDeleted?: (tempDeletedFiles: EnteFile[]) => void;
     isTrashCollection: boolean;
     isInHiddenSection: boolean;
     enableDownload: boolean;
@@ -101,12 +100,15 @@ export type PhotoViewerProps = Pick<
  *
  * The underlying library that we use is called PhotoSwipe.
  */
-function PhotoViewer(props: PhotoViewerProps) {
+export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
     const {
         id,
+        isOpen,
+        items,
         forceConvertItem,
         favoriteFileIDs,
         markUnsyncedFavoriteUpdate,
+        markTempDeleted,
     } = props;
 
     const galleryContext = useContext(GalleryContext);
@@ -115,8 +117,6 @@ function PhotoViewer(props: PhotoViewerProps) {
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
     );
-
-    const { isOpen, items, markTempDeleted } = props;
 
     const pswpElement = useRef<HTMLDivElement>();
     const [photoSwipe, setPhotoSwipe] =
@@ -966,9 +966,7 @@ function PhotoViewer(props: PhotoViewerProps) {
             />
         </>
     );
-}
-
-export default PhotoViewer;
+};
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
