@@ -622,6 +622,7 @@ export default function Gallery() {
         } finally {
             dispatch({ type: "clearTempDeleted" });
             dispatch({ type: "clearTempHidden" });
+            dispatch({ type: "clearUnsyncedFavoriteUpdates" });
             !silent && hideLoadingBar();
         }
         syncInProgress.current = false;
@@ -1036,9 +1037,9 @@ export default function Gallery() {
                         setSelected={setSelected}
                         selected={selected}
                         favoriteFileIDs={state.favoriteFileIDs}
-                        addUnsyncedFavoriteUpdate={(fileID, isFavorite) =>
+                        markUnsyncedFavoriteUpdate={(fileID, isFavorite) =>
                             dispatch({
-                                type: "addUnsyncedFavoriteUpdate",
+                                type: "markUnsyncedFavoriteUpdate",
                                 fileID,
                                 isFavorite,
                             })

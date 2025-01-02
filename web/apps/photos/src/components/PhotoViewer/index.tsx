@@ -116,7 +116,7 @@ const CaptionContainer = styled("div")(({ theme }) => ({
 
 export type PhotoViewerProps = Pick<
     PhotoFrameProps,
-    "favoriteFileIDs" | "addUnsyncedFavoriteUpdate"
+    "favoriteFileIDs" | "markUnsyncedFavoriteUpdate"
 > & {
     isOpen: boolean;
     items: any[];
@@ -136,8 +136,12 @@ export type PhotoViewerProps = Pick<
 };
 
 function PhotoViewer(props: PhotoViewerProps) {
-    const { id, forceConvertItem, favoriteFileIDs, addUnsyncedFavoriteUpdate } =
-        props;
+    const {
+        id,
+        forceConvertItem,
+        favoriteFileIDs,
+        markUnsyncedFavoriteUpdate,
+    } = props;
 
     const galleryContext = useContext(GalleryContext);
     const { showLoadingBar, hideLoadingBar, showMiniDialog } =
@@ -523,16 +527,16 @@ function PhotoViewer(props: PhotoViewerProps) {
             // Whe get here when we're showing the favorites scaffolding, and so
             // we can assert the presence of the favoriteFileIDs.
             if (favoriteFileIDs!.has(file.id)) {
-                addUnsyncedFavoriteUpdate(file.id, true);
+                markUnsyncedFavoriteUpdate(file.id, true);
                 void addToFavorites(file).catch((e: unknown) => {
                     log.error("Failed to add favorite", e);
-                    addUnsyncedFavoriteUpdate(file.id, undefined);
+                    markUnsyncedFavoriteUpdate(file.id, undefined);
                 });
             } else {
-                addUnsyncedFavoriteUpdate(file.id, false);
+                markUnsyncedFavoriteUpdate(file.id, false);
                 void removeFromFavorites(file).catch((e: unknown) => {
                     log.error("Failed to remove favorite", e);
-                    addUnsyncedFavoriteUpdate(file.id, undefined);
+                    markUnsyncedFavoriteUpdate(file.id, undefined);
                 });
             }
             needUpdate.current = true;

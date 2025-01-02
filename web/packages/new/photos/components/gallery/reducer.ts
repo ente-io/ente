@@ -363,7 +363,13 @@ export type GalleryAction =
     | { type: "clearTempDeleted" }
     | { type: "markTempHidden"; files: EnteFile[] }
     | { type: "clearTempHidden" }
-    | { type: "addUnsyncedFavoriteUpdate"; fileID: number; isFavorite: boolean }
+    | {
+          type: "markUnsyncedFavoriteUpdate";
+          fileID: number;
+          // Passing undefined clears any existing entry, concrete values add or
+          // update one.
+          isFavorite: boolean | undefined;
+      }
     | { type: "clearUnsyncedFavoriteUpdates" }
     | { type: "showAll" }
     | { type: "showHidden" }
@@ -768,11 +774,15 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 tempHiddenFileIDs: new Set(),
             });
 
-        case "addUnsyncedFavoriteUpdate": {
+        case "markUnsyncedFavoriteUpdate": {
             const unsyncedFavoriteUpdates = new Map(
                 state.unsyncedFavoriteUpdates,
             );
-            unsyncedFavoriteUpdates.set(action.fileID, action.isFavorite);
+            if (action.isFavorite === undefined) {
+                unsyncedFavoriteUpdates.delete(action.fileID);
+            } else {
+                unsyncedFavoriteUpdates.set(action.fileID, action.isFavorite);
+            }
             // Skipping a call to stateByUpdatingFilteredFiles since it
             // currently doesn't depend on favorites.
             return {

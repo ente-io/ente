@@ -76,13 +76,13 @@ export interface PhotoFrameProps {
      */
     favoriteFileIDs?: Set<number>;
     /**
-     * Callback to invoke when the in-memory favorite status of a file is
-     * changed. For more details, see {@link unsyncedFavoriteUpdates} in the
-     * gallery reducer's documentation.
+     * Callback to invoke when the in-memory, unsynced, favorite status of a
+     * file is changed. For more details, see {@link unsyncedFavoriteUpdates} in
+     * the gallery reducer's documentation.
      *
      * Not set in the context of the shared albums app.
      */
-    addUnsyncedFavoriteUpdate?: (fileID: number, isFavorite: boolean) => void;
+    markUnsyncedFavoriteUpdate?: (fileID: number, isFavorite: boolean) => void;
     markTempDeleted?: (tempDeletedFiles: EnteFile[]) => void;
     /** This will be set if mode is not "people". */
     activeCollectionID: number;
@@ -107,7 +107,7 @@ const PhotoFrame = ({
     setSelected,
     selected,
     favoriteFileIDs,
-    addUnsyncedFavoriteUpdate,
+    markUnsyncedFavoriteUpdate,
     markTempDeleted,
     activeCollectionID,
     activePersonID,
@@ -509,7 +509,7 @@ const PhotoFrame = ({
                     setFilesDownloadProgressAttributesCreator
                 }
                 onSelectPerson={onSelectPerson}
-                {...{ favoriteFileIDs, addUnsyncedFavoriteUpdate }}
+                {...{ favoriteFileIDs, markUnsyncedFavoriteUpdate }}
             />
         </Container>
     );
