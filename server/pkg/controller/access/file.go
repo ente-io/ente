@@ -31,29 +31,35 @@ func (c controllerImpl) VerifyFileOwnership(ctx *gin.Context, req *VerifyFileOwn
 	})
 	return c.FileRepo.VerifyFileOwner(ctx, req.FileIDs, ownerID, logger)
 }
-
 func (c controllerImpl) CanAccessFile(ctx *gin.Context, req *CanAccessFileParams) error {
 	if enteArray.ContainsDuplicateInInt64Array(req.FileIDs) {
 		return stacktrace.Propagate(ente.ErrBadRequest, "duplicate fileIDs")
 	}
+
 	ownerToFilesMap, err := c.FileRepo.GetOwnerToFileIDsMap(ctx, req.FileIDs)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to get owner to fileIDs map")
 	}
-	// iterate over the map and check if the ownerID has access to the fileIDs
+
+	// Only fetch shared collections once when needed
+	var sharedCollections []int64
+
 	for owner, fileIDs := range ownerToFilesMap {
 		if owner == req.ActorUserID {
 			continue
 		}
-		cIDs, collErr := c.CollectionRepo.GetCollectionsSharedWithOrByUser(req.ActorUserID)
-		if collErr != nil {
-			return stacktrace.Propagate(collErr, "")
+
+		// Lazy load collections only when we need to check permissions
+		if sharedCollections == nil {
+			sharedCollections, err = c.CollectionRepo.GetCollectionsSharedWithOrByUser(req.ActorUserID)
+			if err != nil {
+				return stacktrace.Propagate(err, "failed to get shared collections")
+			}
 		}
-		accessErr := c.CollectionRepo.DoAllFilesExistInGivenCollections(fileIDs, cIDs)
-		if accessErr != nil {
+		if err := c.CollectionRepo.DoAllFilesExistInGivenCollections(fileIDs, sharedCollections); err != nil {
 			log.WithFields(log.Fields{
 				"req_id": requestid.Get(ctx),
-			}).WithError(accessErr).Error("access check failed")
+			}).WithError(err).Error("access check failed")
 			return stacktrace.Propagate(ente.ErrPermissionDenied, "access denied")
 		}
 	}
