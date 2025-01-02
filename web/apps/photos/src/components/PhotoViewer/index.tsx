@@ -1,4 +1,5 @@
 import { isDesktop } from "@/base/app";
+import { assertionFailed } from "@/base/assert";
 import { FilledIconButton, type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Overlay } from "@/base/components/mui/Container";
@@ -514,35 +515,37 @@ function PhotoViewer(props: PhotoViewerProps) {
         handleCloseInfo();
     };
 
-    const onFavClick = async (file: DisplayFile) => {
-        try {
-            if (
-                !file ||
-                props.isTrashCollection ||
-                !isOwnFile ||
-                props.isInHiddenSection
-            ) {
-                return;
-            }
-            // Whe get here when we're showing the favorites scaffolding, and so
-            // we can assert the presence of the favoriteFileIDs.
-            if (favoriteFileIDs!.has(file.id)) {
-                markUnsyncedFavoriteUpdate(file.id, true);
-                void addToFavorites(file).catch((e: unknown) => {
-                    log.error("Failed to add favorite", e);
-                    markUnsyncedFavoriteUpdate(file.id, undefined);
-                });
-            } else {
-                markUnsyncedFavoriteUpdate(file.id, false);
-                void removeFromFavorites(file).catch((e: unknown) => {
-                    log.error("Failed to remove favorite", e);
-                    markUnsyncedFavoriteUpdate(file.id, undefined);
-                });
-            }
-            needUpdate.current = true;
-        } catch (e) {
-            log.error("onFavClick failed", e);
+    const handleFavoriteClick = async () => {
+        const file = photoSwipe?.currItem as EnteFile;
+        if (
+            !file ||
+            props.isTrashCollection ||
+            !isOwnFile ||
+            props.isInHiddenSection
+        ) {
+            assertionFailed();
+            return;
         }
+
+        // Whe get here when we're showing the favorites scaffolding, and so
+        // we can assert the presence of the favoriteFileIDs.
+        const isFavorite = favoriteFileIDs!.has(file.id);
+
+        if (!isFavorite) {
+            markUnsyncedFavoriteUpdate(file.id, true);
+            void addToFavorites(file).catch((e: unknown) => {
+                log.error("Failed to add favorite", e);
+                markUnsyncedFavoriteUpdate(file.id, undefined);
+            });
+        } else {
+            markUnsyncedFavoriteUpdate(file.id, false);
+            void removeFromFavorites(file).catch((e: unknown) => {
+                log.error("Failed to remove favorite", e);
+                markUnsyncedFavoriteUpdate(file.id, undefined);
+            });
+        }
+
+        needUpdate.current = true;
     };
 
     const trashFile = async (file: DisplayFile) => {
@@ -933,11 +936,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                                                     : t("favorite_key")
                                             }
                                             className="pswp__button pswp__button--custom"
-                                            onClick={() => {
-                                                onFavClick(
-                                                    photoSwipe?.currItem as EnteFile,
-                                                );
-                                            }}
+                                            onClick={handleFavoriteClick}
                                         >
                                             {isFav ? (
                                                 <FavoriteIcon />
