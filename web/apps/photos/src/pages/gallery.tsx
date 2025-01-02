@@ -1033,9 +1033,16 @@ export default function Gallery() {
                         modePlus={isInSearchMode ? "search" : barMode}
                         files={filteredFiles}
                         syncWithRemote={syncWithRemote}
-                        favItemIds={state.favoriteFileIDs}
                         setSelected={setSelected}
                         selected={selected}
+                        favoriteFileIDs={state.favoriteFileIDs}
+                        addUnsyncedFavoriteUpdate={(fileID, isFavorite) =>
+                            dispatch({
+                                type: "addUnsyncedFavoriteUpdate",
+                                fileID,
+                                isFavorite,
+                            })
+                        }
                         markTempDeleted={(files) =>
                             dispatch({ type: "markTempDeleted", files })
                         }

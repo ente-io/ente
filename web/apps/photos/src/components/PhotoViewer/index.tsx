@@ -42,7 +42,7 @@ import {
     type ButtonProps,
     type CircularProgressProps,
 } from "@mui/material";
-import type { DisplayFile } from "components/PhotoFrame";
+import type { DisplayFile, PhotoFrameProps } from "components/PhotoFrame";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import Photoswipe from "photoswipe";
@@ -114,7 +114,10 @@ const CaptionContainer = styled("div")(({ theme }) => ({
     backdropFilter: `blur(${theme.colors.blur.base})`,
 }));
 
-export interface PhotoViewerProps {
+export type PhotoViewerProps = Pick<
+    PhotoFrameProps,
+    "favoriteFileIDs" | "addUnsyncedFavoriteUpdate"
+> & {
     isOpen: boolean;
     items: any[];
     currentIndex?: number;
@@ -122,7 +125,6 @@ export interface PhotoViewerProps {
     gettingData: (instance: any, index: number, item: EnteFile) => void;
     forceConvertItem: (instance: any, index: number, item: EnteFile) => void;
     id?: string;
-    favItemIds: Set<number>;
     markTempDeleted?: (tempDeletedFiles: EnteFile[]) => void;
     isTrashCollection: boolean;
     isInHiddenSection: boolean;
@@ -131,10 +133,11 @@ export interface PhotoViewerProps {
     collectionNameMap: Map<number, string>;
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
     onSelectPerson?: FileInfoProps["onSelectPerson"];
-}
+};
 
 function PhotoViewer(props: PhotoViewerProps) {
-    const { id, forceConvertItem } = props;
+    const { id, forceConvertItem, favoriteFileIDs, addUnsyncedFavoriteUpdate } =
+        props;
 
     const galleryContext = useContext(GalleryContext);
     const { showLoadingBar, hideLoadingBar, showMiniDialog } =
@@ -148,7 +151,6 @@ function PhotoViewer(props: PhotoViewerProps) {
     const pswpElement = useRef<HTMLDivElement>();
     const [photoSwipe, setPhotoSwipe] =
         useState<Photoswipe<Photoswipe.Options>>();
-    const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
     const [exif, setExif] = useState<
         | {
@@ -339,10 +341,6 @@ function PhotoViewer(props: PhotoViewerProps) {
         exifCopy.current = exif;
     }, [exif]);
 
-    function updateFavButton(file: EnteFile) {
-        setIsFav(isInFav(file));
-    }
-
     function updateIsOwnFile(file: EnteFile) {
         const isOwnFile =
             !publicCollectionGalleryContext.credentials &&
@@ -474,7 +472,6 @@ function PhotoViewer(props: PhotoViewerProps) {
             for (const videoTag of videoTags) {
                 videoTag.pause();
             }
-            updateFavButton(currItem);
             updateIsOwnFile(currItem);
             updateConversionFailedNotification(currItem);
             updateExif(currItem);
@@ -512,13 +509,6 @@ function PhotoViewer(props: PhotoViewerProps) {
         }
         handleCloseInfo();
     };
-    const isInFav = (file: DisplayFile) => {
-        const { favItemIds } = props;
-        if (favItemIds && file) {
-            return favItemIds.has(file.id);
-        }
-        return false;
-    };
 
     const onFavClick = async (file: DisplayFile) => {
         try {
@@ -530,15 +520,20 @@ function PhotoViewer(props: PhotoViewerProps) {
             ) {
                 return;
             }
-            const { favItemIds } = props;
-            if (!isInFav(file)) {
-                favItemIds.add(file.id);
-                addToFavorites(file);
-                setIsFav(true);
+            // Whe get here when we're showing the favorites scaffolding, and so
+            // we can assert the presence of the favoriteFileIDs.
+            if (favoriteFileIDs!.has(file.id)) {
+                addUnsyncedFavoriteUpdate(file.id, true);
+                void addToFavorites(file).catch((e: unknown) => {
+                    log.error("Failed to add favorite", e);
+                    addUnsyncedFavoriteUpdate(file.id, undefined);
+                });
             } else {
-                favItemIds.delete(file.id);
-                removeFromFavorites(file);
-                setIsFav(false);
+                addUnsyncedFavoriteUpdate(file.id, false);
+                void removeFromFavorites(file).catch((e: unknown) => {
+                    log.error("Failed to remove favorite", e);
+                    addUnsyncedFavoriteUpdate(file.id, undefined);
+                });
             }
             needUpdate.current = true;
         } catch (e) {
@@ -761,6 +756,11 @@ function PhotoViewer(props: PhotoViewerProps) {
         );
 
     const scheduleUpdate = () => (needUpdate.current = true);
+
+    const isFav =
+        photoSwipe.currItem &&
+        !!favoriteFileIDs?.has((photoSwipe.currItem as EnteFile).id);
+
     return (
         <>
             <div
