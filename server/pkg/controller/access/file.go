@@ -45,15 +45,10 @@ func (c controllerImpl) CanAccessFile(ctx *gin.Context, req *CanAccessFileParams
 		if owner == req.ActorUserID {
 			continue
 		}
-		cIDs, collErr := c.CollectionRepo.GetCollectionIDsSharedWithUser(req.ActorUserID)
+		cIDs, collErr := c.CollectionRepo.GetCollectionsSharedWithOrByUser(req.ActorUserID)
 		if collErr != nil {
 			return stacktrace.Propagate(collErr, "")
 		}
-		cwIDS, collErr := c.CollectionRepo.GetCollectionIDsSharedWithUser(owner)
-		if collErr != nil {
-			return stacktrace.Propagate(collErr, "")
-		}
-		cIDs = append(cIDs, cwIDS...)
 		accessErr := c.CollectionRepo.DoAllFilesExistInGivenCollections(fileIDs, cIDs)
 		if accessErr != nil {
 			log.WithFields(log.Fields{
