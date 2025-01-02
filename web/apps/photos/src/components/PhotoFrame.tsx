@@ -65,11 +65,24 @@ export interface PhotoFrameProps {
     modePlus?: GalleryBarMode | "search";
     files: EnteFile[];
     syncWithRemote: () => Promise<void>;
-    favItemIds?: Set<number>;
     setSelected: (
         selected: SelectedState | ((selected: SelectedState) => SelectedState),
     ) => void;
     selected: SelectedState;
+    /**
+     * File IDs of all the files that the user has marked as a favorite.
+     *
+     * Not set in the context of the shared albums app.
+     */
+    favoriteFileIDs?: Set<number>;
+    /**
+     * Callback to invoke when the in-memory, unsynced, favorite status of a
+     * file is changed. For more details, see {@link unsyncedFavoriteUpdates} in
+     * the gallery reducer's documentation.
+     *
+     * Not set in the context of the shared albums app.
+     */
+    markUnsyncedFavoriteUpdate?: (fileID: number, isFavorite: boolean) => void;
     markTempDeleted?: (tempDeletedFiles: EnteFile[]) => void;
     /** This will be set if mode is not "people". */
     activeCollectionID: number;
@@ -91,9 +104,10 @@ const PhotoFrame = ({
     modePlus,
     files,
     syncWithRemote,
-    favItemIds,
     setSelected,
     selected,
+    favoriteFileIDs,
+    markUnsyncedFavoriteUpdate,
     markTempDeleted,
     activeCollectionID,
     activePersonID,
@@ -303,7 +317,7 @@ const PhotoFrame = ({
             }
             activeCollectionID={activeCollectionID}
             showPlaceholder={isScrolling}
-            isFav={favItemIds?.has(item.id)}
+            isFav={favoriteFileIDs?.has(item.id)}
         />
     );
 
@@ -485,7 +499,6 @@ const PhotoFrame = ({
                 onClose={handleClose}
                 gettingData={getSlideData}
                 forceConvertItem={forceConvertItem}
-                favItemIds={favItemIds}
                 markTempDeleted={markTempDeleted}
                 isTrashCollection={activeCollectionID === TRASH_SECTION}
                 isInHiddenSection={isInHiddenSection}
@@ -496,6 +509,7 @@ const PhotoFrame = ({
                     setFilesDownloadProgressAttributesCreator
                 }
                 onSelectPerson={onSelectPerson}
+                {...{ favoriteFileIDs, markUnsyncedFavoriteUpdate }}
             />
         </Container>
     );

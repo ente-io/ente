@@ -1,4 +1,5 @@
 import { isDesktop } from "@/base/app";
+import { assertionFailed } from "@/base/assert";
 import { FilledIconButton, type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Overlay } from "@/base/components/mui/Container";
@@ -42,7 +43,7 @@ import {
     type ButtonProps,
     type CircularProgressProps,
 } from "@mui/material";
-import type { DisplayFile } from "components/PhotoFrame";
+import type { DisplayFile, PhotoFrameProps } from "components/PhotoFrame";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import Photoswipe from "photoswipe";
@@ -114,7 +115,10 @@ const CaptionContainer = styled("div")(({ theme }) => ({
     backdropFilter: `blur(${theme.colors.blur.base})`,
 }));
 
-export interface PhotoViewerProps {
+export type PhotoViewerProps = Pick<
+    PhotoFrameProps,
+    "favoriteFileIDs" | "markUnsyncedFavoriteUpdate"
+> & {
     isOpen: boolean;
     items: any[];
     currentIndex?: number;
@@ -122,7 +126,6 @@ export interface PhotoViewerProps {
     gettingData: (instance: any, index: number, item: EnteFile) => void;
     forceConvertItem: (instance: any, index: number, item: EnteFile) => void;
     id?: string;
-    favItemIds: Set<number>;
     markTempDeleted?: (tempDeletedFiles: EnteFile[]) => void;
     isTrashCollection: boolean;
     isInHiddenSection: boolean;
@@ -131,10 +134,15 @@ export interface PhotoViewerProps {
     collectionNameMap: Map<number, string>;
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
     onSelectPerson?: FileInfoProps["onSelectPerson"];
-}
+};
 
 function PhotoViewer(props: PhotoViewerProps) {
-    const { id, forceConvertItem } = props;
+    const {
+        id,
+        forceConvertItem,
+        favoriteFileIDs,
+        markUnsyncedFavoriteUpdate,
+    } = props;
 
     const galleryContext = useContext(GalleryContext);
     const { showLoadingBar, hideLoadingBar, showMiniDialog } =
@@ -148,7 +156,6 @@ function PhotoViewer(props: PhotoViewerProps) {
     const pswpElement = useRef<HTMLDivElement>();
     const [photoSwipe, setPhotoSwipe] =
         useState<Photoswipe<Photoswipe.Options>>();
-    const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
     const [exif, setExif] = useState<
         | {
@@ -245,7 +252,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                     break;
                 case "l":
                 case "L":
-                    onFavClick(photoSwipe?.currItem as EnteFile);
+                    handleFavoriteClick();
                     break;
                 case "ArrowLeft":
                     handleArrowClick(event, "left");
@@ -268,7 +275,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                 window.removeEventListener("copy", handleCopyEvent);
             }
         };
-    }, [isOpen, photoSwipe, showInfo]);
+    }, [isOpen, photoSwipe, showInfo, favoriteFileIDs]);
 
     useEffect(() => {
         if (photoSwipe) {
@@ -338,10 +345,6 @@ function PhotoViewer(props: PhotoViewerProps) {
     useEffect(() => {
         exifCopy.current = exif;
     }, [exif]);
-
-    function updateFavButton(file: EnteFile) {
-        setIsFav(isInFav(file));
-    }
 
     function updateIsOwnFile(file: EnteFile) {
         const isOwnFile =
@@ -474,7 +477,6 @@ function PhotoViewer(props: PhotoViewerProps) {
             for (const videoTag of videoTags) {
                 videoTag.pause();
             }
-            updateFavButton(currItem);
             updateIsOwnFile(currItem);
             updateConversionFailedNotification(currItem);
             updateExif(currItem);
@@ -512,38 +514,38 @@ function PhotoViewer(props: PhotoViewerProps) {
         }
         handleCloseInfo();
     };
-    const isInFav = (file: DisplayFile) => {
-        const { favItemIds } = props;
-        if (favItemIds && file) {
-            return favItemIds.has(file.id);
-        }
-        return false;
-    };
 
-    const onFavClick = async (file: DisplayFile) => {
-        try {
-            if (
-                !file ||
-                props.isTrashCollection ||
-                !isOwnFile ||
-                props.isInHiddenSection
-            ) {
-                return;
-            }
-            const { favItemIds } = props;
-            if (!isInFav(file)) {
-                favItemIds.add(file.id);
-                addToFavorites(file);
-                setIsFav(true);
-            } else {
-                favItemIds.delete(file.id);
-                removeFromFavorites(file);
-                setIsFav(false);
-            }
-            needUpdate.current = true;
-        } catch (e) {
-            log.error("onFavClick failed", e);
+    const handleFavoriteClick = () => {
+        const file = photoSwipe?.currItem as EnteFile;
+        if (
+            !file ||
+            props.isTrashCollection ||
+            !isOwnFile ||
+            props.isInHiddenSection
+        ) {
+            assertionFailed();
+            return;
         }
+
+        // Whe get here when we're showing the favorites scaffolding, and so
+        // we can assert the presence of the favoriteFileIDs.
+        const isFavorite = favoriteFileIDs!.has(file.id);
+
+        if (!isFavorite) {
+            markUnsyncedFavoriteUpdate(file.id, true);
+            void addToFavorites(file).catch((e: unknown) => {
+                log.error("Failed to add favorite", e);
+                markUnsyncedFavoriteUpdate(file.id, undefined);
+            });
+        } else {
+            markUnsyncedFavoriteUpdate(file.id, false);
+            void removeFromFavorites(file).catch((e: unknown) => {
+                log.error("Failed to remove favorite", e);
+                markUnsyncedFavoriteUpdate(file.id, undefined);
+            });
+        }
+
+        needUpdate.current = true;
     };
 
     const trashFile = async (file: DisplayFile) => {
@@ -761,6 +763,11 @@ function PhotoViewer(props: PhotoViewerProps) {
         );
 
     const scheduleUpdate = () => (needUpdate.current = true);
+
+    const isFav =
+        !!photoSwipe?.currItem &&
+        !!favoriteFileIDs?.has((photoSwipe.currItem as EnteFile).id);
+
     return (
         <>
             <div
@@ -929,11 +936,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                                                     : t("favorite_key")
                                             }
                                             className="pswp__button pswp__button--custom"
-                                            onClick={() => {
-                                                onFavClick(
-                                                    photoSwipe?.currItem as EnteFile,
-                                                );
-                                            }}
+                                            onClick={handleFavoriteClick}
                                         >
                                             {isFav ? (
                                                 <FavoriteIcon />

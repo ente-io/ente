@@ -620,8 +620,7 @@ export default function Gallery() {
                     log.error("syncWithRemote failed", e);
             }
         } finally {
-            dispatch({ type: "clearTempDeleted" });
-            dispatch({ type: "clearTempHidden" });
+            dispatch({ type: "clearUnsyncedState" });
             !silent && hideLoadingBar();
         }
         syncInProgress.current = false;
@@ -1033,9 +1032,16 @@ export default function Gallery() {
                         modePlus={isInSearchMode ? "search" : barMode}
                         files={filteredFiles}
                         syncWithRemote={syncWithRemote}
-                        favItemIds={state.favoriteFileIDs}
                         setSelected={setSelected}
                         selected={selected}
+                        favoriteFileIDs={state.favoriteFileIDs}
+                        markUnsyncedFavoriteUpdate={(fileID, isFavorite) =>
+                            dispatch({
+                                type: "markUnsyncedFavoriteUpdate",
+                                fileID,
+                                isFavorite,
+                            })
+                        }
                         markTempDeleted={(files) =>
                             dispatch({ type: "markTempDeleted", files })
                         }
