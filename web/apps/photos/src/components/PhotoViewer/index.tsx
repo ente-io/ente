@@ -115,26 +115,24 @@ export type PhotoViewerProps = Pick<
  *
  * The underlying library that we use is called PhotoSwipe.
  */
-export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
-    const {
-        isOpen,
-        items,
-        currentIndex,
-        onClose,
-        gettingData,
-        forceConvertItem,
-        favoriteFileIDs,
-        markUnsyncedFavoriteUpdate,
-        markTempDeleted,
-        isTrashCollection,
-        isInHiddenSection,
-        enableDownload,
-        setFilesDownloadProgressAttributesCreator,
-        fileToCollectionsMap,
-        collectionNameMap,
-        onSelectPerson,
-    } = props;
-
+export const PhotoViewer: React.FC<PhotoViewerProps> = ({
+    isOpen,
+    items,
+    currentIndex,
+    onClose,
+    gettingData,
+    forceConvertItem,
+    favoriteFileIDs,
+    markUnsyncedFavoriteUpdate,
+    markTempDeleted,
+    isTrashCollection,
+    isInHiddenSection,
+    enableDownload,
+    setFilesDownloadProgressAttributesCreator,
+    fileToCollectionsMap,
+    collectionNameMap,
+    onSelectPerson,
+}) => {
     const galleryContext = useContext(GalleryContext);
     const { showLoadingBar, hideLoadingBar, showMiniDialog } =
         useContext(AppContext);
@@ -983,26 +981,6 @@ const defaultLivePhotoDefaultOptions = {
     loading: false,
     visible: false,
 };
-
-const photoSwipeV4Events = [
-    "beforeChange",
-    "afterChange",
-    "imageLoadComplete",
-    "resize",
-    "gettingData",
-    "mouseUsed",
-    "initialZoomIn",
-    "initialZoomInEnd",
-    "initialZoomOut",
-    "initialZoomOutEnd",
-    "parseVerticalMargin",
-    "close",
-    "unbindEvents",
-    "destroy",
-    "updateScrollOffset",
-    "preventDragEvent",
-    "shareLinkClick",
-];
 
 const CaptionContainer = styled("div")(({ theme }) => ({
     padding: theme.spacing(2),
