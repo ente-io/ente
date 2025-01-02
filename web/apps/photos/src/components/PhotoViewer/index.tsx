@@ -67,51 +67,6 @@ import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { FileInfo, type FileInfoExif, type FileInfoProps } from "./FileInfo";
 import { ImageEditorOverlay } from "./ImageEditorOverlay";
 
-interface PhotoswipeFullscreenAPI {
-    enter: () => void;
-    exit: () => void;
-    isFullscreen: () => boolean;
-}
-
-const defaultLivePhotoDefaultOptions = {
-    click: () => {},
-    hide: () => {},
-    show: () => {},
-    loading: false,
-    visible: false,
-};
-
-const photoSwipeV4Events = [
-    "beforeChange",
-    "afterChange",
-    "imageLoadComplete",
-    "resize",
-    "gettingData",
-    "mouseUsed",
-    "initialZoomIn",
-    "initialZoomInEnd",
-    "initialZoomOut",
-    "initialZoomOutEnd",
-    "parseVerticalMargin",
-    "close",
-    "unbindEvents",
-    "destroy",
-    "updateScrollOffset",
-    "preventDragEvent",
-    "shareLinkClick",
-];
-
-const CaptionContainer = styled("div")(({ theme }) => ({
-    padding: theme.spacing(2),
-    wordBreak: "break-word",
-    textAlign: "right",
-    maxWidth: "375px",
-    fontSize: "14px",
-    lineHeight: "17px",
-    backgroundColor: theme.colors.backdrop.faint,
-    backdropFilter: `blur(${theme.colors.blur.base})`,
-}));
-
 export type PhotoViewerProps = Pick<
     PhotoFrameProps,
     "favoriteFileIDs" | "markUnsyncedFavoriteUpdate"
@@ -1014,6 +969,51 @@ function PhotoViewer(props: PhotoViewerProps) {
 }
 
 export default PhotoViewer;
+
+interface PhotoswipeFullscreenAPI {
+    enter: () => void;
+    exit: () => void;
+    isFullscreen: () => boolean;
+}
+
+const defaultLivePhotoDefaultOptions = {
+    click: () => {},
+    hide: () => {},
+    show: () => {},
+    loading: false,
+    visible: false,
+};
+
+const photoSwipeV4Events = [
+    "beforeChange",
+    "afterChange",
+    "imageLoadComplete",
+    "resize",
+    "gettingData",
+    "mouseUsed",
+    "initialZoomIn",
+    "initialZoomInEnd",
+    "initialZoomOut",
+    "initialZoomOutEnd",
+    "parseVerticalMargin",
+    "close",
+    "unbindEvents",
+    "destroy",
+    "updateScrollOffset",
+    "preventDragEvent",
+    "shareLinkClick",
+];
+
+const CaptionContainer = styled("div")(({ theme }) => ({
+    padding: theme.spacing(2),
+    wordBreak: "break-word",
+    textAlign: "right",
+    maxWidth: "375px",
+    fontSize: "14px",
+    lineHeight: "17px",
+    backgroundColor: theme.colors.backdrop.faint,
+    backdropFilter: `blur(${theme.colors.blur.base})`,
+}));
 
 function CircularProgressWithLabel(
     props: CircularProgressProps & { value: number },
