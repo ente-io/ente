@@ -370,7 +370,7 @@ export type GalleryAction =
           // update one.
           isFavorite: boolean | undefined;
       }
-    | { type: "clearUnsyncedFavoriteUpdates" }
+    | { type: "clearUnsyncedState" }
     | { type: "showAll" }
     | { type: "showHidden" }
     | { type: "showAlbums" }
@@ -796,19 +796,19 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             };
         }
 
-        case "clearUnsyncedFavoriteUpdates": {
+        case "clearUnsyncedState": {
             const unsyncedFavoriteUpdates = new Map<number, boolean>();
-            // Skipping a call to stateByUpdatingFilteredFiles since it
-            // currently doesn't depend on favorites.
-            return {
+            return stateByUpdatingFilteredFiles({
                 ...state,
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     state.collections,
                     state.files,
                     unsyncedFavoriteUpdates,
                 ),
+                tempDeletedFileIDs: new Set(),
+                tempHiddenFileIDs: new Set(),
                 unsyncedFavoriteUpdates,
-            };
+            });
         }
 
         case "showAll":

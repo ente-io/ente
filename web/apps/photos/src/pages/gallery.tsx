@@ -620,9 +620,7 @@ export default function Gallery() {
                     log.error("syncWithRemote failed", e);
             }
         } finally {
-            dispatch({ type: "clearTempDeleted" });
-            dispatch({ type: "clearTempHidden" });
-            dispatch({ type: "clearUnsyncedFavoriteUpdates" });
+            dispatch({ type: "clearUnsyncedState" });
             !silent && hideLoadingBar();
         }
         syncInProgress.current = false;
