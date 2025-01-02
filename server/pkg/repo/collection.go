@@ -317,6 +317,29 @@ func (repo *CollectionRepository) GetCollectionIDsSharedWithUser(userID int64) (
 	return cIDs, nil
 }
 
+func (repo *CollectionRepository) GetCollectionsSharedWithOrByUser(userID int64) ([]int64, error) {
+	rows, err := repo.DB.Query(`
+		SELECT collection_id
+		FROM collection_shares
+		WHERE (to_user_id = $1 OR from_user_id = $1)
+		AND is_deleted = $2`, userID, false)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+
+	cIDs := make([]int64, 0)
+	for rows.Next() {
+		var cID int64
+		if err := rows.Scan(&cID); err != nil {
+			return cIDs, stacktrace.Propagate(err, "")
+		}
+		cIDs = append(cIDs, cID)
+	}
+	return cIDs, nil
+
+}
+
 // GetCollectionIDsOwnedByUser returns the map of collectionID (owned by user) to collection deletion status
 func (repo *CollectionRepository) GetCollectionIDsOwnedByUser(userID int64) (map[int64]bool, error) {
 	rows, err := repo.DB.Query(`
