@@ -5,6 +5,7 @@ import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { haveWindow } from "@/base/env";
 import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import type { Location } from "@/base/types";
@@ -72,7 +73,7 @@ import type { DisplayFile } from "components/PhotoFrame";
 import { Formik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
     changeCaption,
     changeFileName,
@@ -80,7 +81,16 @@ import {
 } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import * as Yup from "yup";
-import MapBox from "./MapBox";
+
+// Re-uses images from ~leaflet package.
+import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css";
+import "leaflet/dist/leaflet.css";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+haveWindow() && require("leaflet-defaulticon-compatibility");
+const leaflet = haveWindow()
+    ? // eslint-disable-next-line @typescript-eslint/no-require-imports
+      (require("leaflet") as typeof import("leaflet"))
+    : null;
 
 export interface FileInfoExif {
     tags: RawExifTags | undefined;
@@ -840,6 +850,73 @@ const BasicDeviceCamera: React.FC<{ parsedExif: ExifInfo }> = ({
 
 const openStreetMapLink = ({ latitude, longitude }: Location) =>
     `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=15/${latitude}/${longitude}`;
+
+interface MapBoxProps {
+    location: Location;
+    mapEnabled: boolean;
+    openUpdateMapConfirmationDialog: () => void;
+}
+
+const MapBox: React.FC<MapBoxProps> = ({
+    location,
+    mapEnabled,
+    openUpdateMapConfirmationDialog,
+}) => {
+    const urlTemplate = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+    const attribution =
+        '&copy; <a target="_blank" rel="noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+    const zoom = 16;
+
+    const mapBoxContainerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const mapContainer = mapBoxContainerRef.current;
+        if (mapEnabled) {
+            const position: L.LatLngTuple = [
+                location.latitude,
+                location.longitude,
+            ];
+            if (mapContainer && !mapContainer.hasChildNodes()) {
+                const map = leaflet.map(mapContainer).setView(position, zoom);
+                leaflet
+                    .tileLayer(urlTemplate, {
+                        attribution,
+                    })
+                    .addTo(map);
+                leaflet.marker(position).addTo(map).openPopup();
+            }
+        } else {
+            if (mapContainer?.hasChildNodes()) {
+                if (mapContainer.firstChild) {
+                    mapContainer.removeChild(mapContainer.firstChild);
+                }
+            }
+        }
+    }, [mapEnabled]);
+
+    return mapEnabled ? (
+        <MapBoxContainer ref={mapBoxContainerRef} />
+    ) : (
+        <MapBoxEnableContainer>
+            <ChipButton onClick={openUpdateMapConfirmationDialog}>
+                {t("enable_map")}
+            </ChipButton>
+        </MapBoxEnableContainer>
+    );
+};
+
+const MapBoxContainer = styled("div")`
+    height: 200px;
+    width: 100%;
+`;
+
+const MapBoxEnableContainer = styled(MapBoxContainer)`
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.09);
+`;
 
 interface RawExifProps {
     open: boolean;
