@@ -439,7 +439,6 @@ func (repo *CollectionRepository) DoAllFilesExistInGivenCollections(fileIDs []in
 		}
 	}
 	if len(missingFiles) > 0 {
-		logrus.WithField("missingFiles", missingFiles).Info("missing files")
 		return stacktrace.Propagate(fmt.Errorf("missing files %v", missingFiles), "")
 	}
 	return nil
