@@ -762,7 +762,7 @@ function PhotoViewer(props: PhotoViewerProps) {
     const scheduleUpdate = () => (needUpdate.current = true);
 
     const isFav =
-        photoSwipe.currItem &&
+        !!photoSwipe?.currItem &&
         !!favoriteFileIDs?.has((photoSwipe.currItem as EnteFile).id);
 
     return (
