@@ -370,7 +370,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
             const ctx = canvasRef.current.getContext("2d");
             ctx.imageSmoothingEnabled = false;
             if (!fileURL) {
-                const srcURLs = await downloadManager.getFileForPreview(
+                const srcURLs = await downloadManager.renderableSourceURLs(
                     props.file,
                 );
                 img.src = srcURLs.url as string;

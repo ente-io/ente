@@ -2,7 +2,7 @@ import log from "@/base/log";
 import {
     downloadManager,
     type LivePhotoSourceURL,
-    type SourceURLs,
+    type RenderableSourceURLs,
 } from "@/gallery/services/download";
 import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
@@ -44,7 +44,7 @@ const PHOTOSWIPE_HASH_SUFFIX = "&opened";
  */
 export type DisplayFile = EnteFile & {
     src?: string;
-    srcURLs?: SourceURLs;
+    srcURLs?: RenderableSourceURLs;
     msrc?: string;
     html?: string;
     w?: number;
@@ -365,12 +365,12 @@ const PhotoFrame = ({
         try {
             log.info(`[${item.id}] new file src request`);
             fetching[item.id] = true;
-            const srcURLs = await downloadManager.getFileForPreview(item);
+            const srcURLs = await downloadManager.renderableSourceURLs(item);
             if (item.metadata.fileType === FileType.livePhoto) {
                 const srcImgURL = srcURLs.url as LivePhotoSourceURL;
                 const imageURL = await srcImgURL.image();
 
-                const dummyImgSrcUrl: SourceURLs = {
+                const dummyImgSrcUrl: RenderableSourceURLs = {
                     url: imageURL,
                     type: "normal",
                 };
@@ -381,7 +381,7 @@ const PhotoFrame = ({
                 }
 
                 const videoURL = await srcImgURL.video();
-                const loadedLivePhotoSrcURL: SourceURLs = {
+                const loadedLivePhotoSrcURL: RenderableSourceURLs = {
                     url: { video: videoURL, image: imageURL },
                     type: "livePhoto",
                 };
@@ -429,7 +429,7 @@ const PhotoFrame = ({
         instance: PhotoSwipe<PhotoSwipe.Options>,
         index: number,
         item: DisplayFile,
-        srcURL: SourceURLs,
+        srcURL: RenderableSourceURLs,
         overwrite: boolean,
     ) => {
         const file = displayFiles[index];
@@ -463,7 +463,7 @@ const PhotoFrame = ({
             );
             fetching[item.id] = true;
 
-            const srcURL = await downloadManager.getFileForPreview(item, {
+            const srcURL = await downloadManager.renderableSourceURLs(item, {
                 forceConvert: true,
             });
 
@@ -537,7 +537,7 @@ const updateDisplayFileThumbnail = (file: DisplayFile, url: string) => {
 
 const updateDisplayFileSource = (
     file: DisplayFile,
-    srcURLs: SourceURLs,
+    srcURLs: RenderableSourceURLs,
     enableDownload: boolean,
 ) => {
     const { url } = srcURLs;
