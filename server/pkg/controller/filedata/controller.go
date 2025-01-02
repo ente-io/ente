@@ -81,7 +81,7 @@ func (c *Controller) InsertOrUpdateMetadata(ctx *gin.Context, req *fileData.PutF
 		return stacktrace.Propagate(err, "validation failed")
 	}
 	userID := auth.GetUserID(ctx.Request.Header)
-	err := c._validatePermission(ctx, req.FileID, userID)
+	err := c._validateWritePermission(ctx, req.FileID, userID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
@@ -126,7 +126,7 @@ func (c *Controller) GetFileData(ctx *gin.Context, req fileData.GetFileData) (*f
 	if err := req.Validate(); err != nil {
 		return nil, stacktrace.Propagate(err, "validation failed")
 	}
-	if err := c._validatePermission(ctx, req.FileID, auth.GetUserID(ctx.Request.Header)); err != nil {
+	if err := c._validateWritePermission(ctx, req.FileID, auth.GetUserID(ctx.Request.Header)); err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
 	doRows, err := c.Repo.GetFilesData(ctx, req.Type, []int64{req.FileID})
@@ -150,7 +150,7 @@ func (c *Controller) GetFileData(ctx *gin.Context, req fileData.GetFileData) (*f
 
 func (c *Controller) GetFilesData(ctx *gin.Context, req fileData.GetFilesData) (*fileData.GetFilesDataResponse, error) {
 	userID := auth.GetUserID(ctx.Request.Header)
-	if err := c._validateGetFilesData(ctx, userID, req); err != nil {
+	if err := c._validateReadPermission(ctx, userID, req); err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
 
@@ -273,21 +273,20 @@ func (c *Controller) fetchS3FileMetadata(ctx context.Context, row fileData.Row, 
 	return nil, stacktrace.Propagate(errors.New("failed to fetch object"), "")
 }
 
-func (c *Controller) _validateGetFilesData(ctx *gin.Context, userID int64, req fileData.GetFilesData) error {
+func (c *Controller) _validateReadPermission(ctx *gin.Context, userID int64, req fileData.GetFilesData) error {
 	if err := req.Validate(); err != nil {
 		return stacktrace.Propagate(err, "validation failed")
 	}
-	if err := c.AccessCtrl.VerifyFileOwnership(ctx, &access.VerifyFileOwnershipParams{
-		ActorUserId: userID,
+	if err := c.AccessCtrl.CanAccessFile(ctx, &access.CanAccessFileParams{
+		ActorUserID: userID,
 		FileIDs:     req.FileIDs,
 	}); err != nil {
 		return stacktrace.Propagate(err, "User does not own some file(s)")
 	}
-
 	return nil
 }
 
-func (c *Controller) _validatePermission(ctx *gin.Context, fileID int64, actorID int64) error {
+func (c *Controller) _validateWritePermission(ctx *gin.Context, fileID int64, actorID int64) error {
 	err := c.AccessCtrl.VerifyFileOwnership(ctx, &access.VerifyFileOwnershipParams{
 		ActorUserId: actorID,
 		FileIDs:     []int64{fileID},
