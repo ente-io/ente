@@ -1,3 +1,4 @@
+import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
@@ -24,7 +25,10 @@ import {
     confirmEnableMapsDialogAttributes,
 } from "@/new/photos/components/utils/dialog";
 import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
-import { fileInfoDrawerZIndex } from "@/new/photos/components/utils/z-index";
+import {
+    fileInfoDrawerZIndex,
+    photosDialogZIndex,
+} from "@/new/photos/components/utils/z-index";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import {
     getAnnotatedFacesForFile,
@@ -36,6 +40,9 @@ import { AppContext } from "@/new/photos/types/context";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import CopyButton from "@ente/shared/components/CopyButton";
+import SingleInputForm, {
+    type SingleInputFormProps,
+} from "@ente/shared/components/SingleInputForm";
 import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -63,7 +70,6 @@ import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { changeFileName, updateExistingFilePubMetadata } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import { FileNameEditDialog } from "./FileNameEditDialog";
 import MapBox from "./MapBox";
 import { RenderCaption } from "./RenderCaption";
 
@@ -650,6 +656,46 @@ const getCaption = (file: EnteFile, exifInfo: ExifInfo | undefined) => {
                 <Box key={caption}> {caption}</Box>
             ))}
         </FlexWrapper>
+    );
+};
+
+const FileNameEditDialog = ({
+    isInEditMode,
+    closeEditMode,
+    filename,
+    extension,
+    saveEdits,
+}) => {
+    const onSubmit: SingleInputFormProps["callback"] = async (
+        filename,
+        setFieldError,
+    ) => {
+        try {
+            await saveEdits(filename);
+            closeEditMode();
+        } catch (e) {
+            log.error(e);
+            setFieldError(t("generic_error_retry"));
+        }
+    };
+    return (
+        <TitledMiniDialog
+            sx={{ zIndex: photosDialogZIndex }}
+            open={isInEditMode}
+            onClose={closeEditMode}
+            title={t("rename_file")}
+        >
+            <SingleInputForm
+                initialValue={filename}
+                callback={onSubmit}
+                placeholder={t("enter_file_name")}
+                buttonText={t("rename")}
+                fieldType="text"
+                caption={extension}
+                secondaryButtonAction={closeEditMode}
+                submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
+            />
+        </TitledMiniDialog>
     );
 };
 
