@@ -294,27 +294,21 @@ class DownloadManager {
     renderableSourceURLs = async (
         file: EnteFile,
         opts?: { forceConvert?: boolean },
-    ): Promise<RenderableSourceURLs | undefined> => {
+    ): Promise<RenderableSourceURLs> => {
         const forceConvert = opts?.forceConvert ?? false;
         if (forceConvert || !this.renderableSourceURLPromises.has(file.id)) {
             this.renderableSourceURLPromises.set(
                 file.id,
-                (async () => {
-                    const originalFileURL =
-                        await this.fileURLDownloadAndCacheIfNeeded(file);
-                    const res = await fetch(originalFileURL);
-                    const fileBlob = await res.blob();
-                    return await getRenderableFileURL(
-                        file,
-                        fileBlob,
-                        originalFileURL,
-                        forceConvert,
-                    );
-                })(),
+                createRenderableSourceURLs(
+                    file,
+                    this.fileURLDownloadAndCacheIfNeeded(file),
+                    forceConvert,
+                ),
             );
         }
+
         try {
-            return await this.renderableSourceURLPromises.get(file.id);
+            return await this.renderableSourceURLPromises.get(file.id)!;
         } catch (e) {
             log.error("Failed to obtain renderableSourceURLs", e);
             this.renderableSourceURLPromises.delete(file.id);
@@ -522,12 +516,22 @@ class DownloadManager {
  */
 export const downloadManager = new DownloadManager();
 
-async function getRenderableFileURL(
+/**
+ * Create and return a {@link RenderableSourceURLs} for the given {@link file},
+ * where {@link originalFileURLPromise} is a promise that resolves with an
+ * (object) URL to the contents of the original file.
+ *
+ * @param forceConvert `true` when the user presses the "Convert" button. See:
+ * [Note: Forcing conversion of playable videos].
+ */
+const createRenderableSourceURLs = async (
     file: EnteFile,
-    fileBlob: Blob,
-    originalFileURL: string,
+    originalFileURLPromise: Promise<string>,
     forceConvert: boolean,
-): Promise<RenderableSourceURLs> {
+): Promise<RenderableSourceURLs> => {
+    const originalFileURL = await originalFileURLPromise;
+    const fileBlob = await fetch(originalFileURL).then((res) => res.blob());
+
     const existingOrNewObjectURL = (convertedBlob: Blob | null | undefined) =>
         convertedBlob
             ? convertedBlob === fileBlob
@@ -586,7 +590,7 @@ async function getRenderableFileURL(
         mimeType,
         canForceConvert,
     };
-}
+};
 
 async function getRenderableLivePhotoURL(
     file: EnteFile,
