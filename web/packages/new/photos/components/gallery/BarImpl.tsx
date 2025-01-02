@@ -20,12 +20,12 @@ import type {
 } from "@/new/photos/services/collection/ui";
 import type { Person } from "@/new/photos/services/ml/people";
 import ArchiveIcon from "@mui/icons-material/Archive";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import Favorite from "@mui/icons-material/FavoriteRounded";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import LinkIcon from "@mui/icons-material/Link";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PeopleIcon from "@mui/icons-material/People";
-import PushPin from "@mui/icons-material/PushPin";
+import PushPinIcon from "@mui/icons-material/PushPin";
 import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, {
@@ -227,7 +227,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         transparentTriggerButtonBackground
                     />
                     <IconButton onClick={onShowAllCollections}>
-                        <ExpandMore />
+                        <ExpandMoreIcon />
                     </IconButton>
                 </>
             )}
@@ -241,7 +241,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 onChangeSortBy={onChangeCollectionsSortBy}
             />
             <FilledIconButton onClick={onShowAllCollections}>
-                <ExpandMore />
+                <ExpandMoreIcon />
             </FilledIconButton>
         </Box>
     );
@@ -524,7 +524,7 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     type,
 }) => (
     <CollectionBarCardIcon_>
-        {type == "favorites" && <Favorite />}
+        {type == "favorites" && <FavoriteRoundedIcon />}
         {type == "archived" && (
             <ArchiveIcon
                 sx={(theme) => ({
@@ -536,7 +536,7 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
         {(type == "incomingShareViewer" ||
             type == "incomingShareCollaborator") && <PeopleIcon />}
         {type == "sharedOnlyViaLink" && <LinkIcon />}
-        {type == "pinned" && <PushPin />}
+        {type == "pinned" && <PushPinIcon />}
     </CollectionBarCardIcon_>
 );
 

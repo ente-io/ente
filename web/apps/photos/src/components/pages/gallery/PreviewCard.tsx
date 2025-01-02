@@ -12,8 +12,8 @@ import {
 } from "@/new/photos/components/PlaceholderThumbnails";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
 import useLongPress from "@ente/shared/hooks/useLongPress";
-import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
-import Favorite from "@mui/icons-material/FavoriteRounded";
+import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
+import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { styled } from "@mui/material";
 import type { DisplayFile } from "components/PhotoFrame";
@@ -342,7 +342,7 @@ export default function PreviewCard(props: IProps) {
             )}
             {file.metadata.fileType === FileType.livePhoto ? (
                 <FileTypeIndicatorOverlay>
-                    <AlbumOutlined />
+                    <AlbumOutlinedIcon />
                 </FileTypeIndicatorOverlay>
             ) : (
                 file.metadata.fileType === FileType.video && (
@@ -359,7 +359,7 @@ export default function PreviewCard(props: IProps) {
             )}
             {props.isFav && (
                 <FavOverlay>
-                    <Favorite />
+                    <FavoriteRoundedIcon />
                 </FavOverlay>
             )}
 

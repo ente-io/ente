@@ -27,22 +27,20 @@ import SingleInputForm, {
 } from "@ente/shared/components/SingleInputForm";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import { formatDateTime } from "@ente/shared/time/format";
-import { default as Add, default as AddIcon } from "@mui/icons-material/Add";
+import AddIcon from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import BlockIcon from "@mui/icons-material/Block";
-import ChevronRightIcon, {
-    default as ChevronRight,
-} from "@mui/icons-material/ChevronRight";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ContentCopyIcon from "@mui/icons-material/ContentCopyOutlined";
 import DoneIcon from "@mui/icons-material/Done";
-import DownloadSharp from "@mui/icons-material/DownloadSharp";
+import DownloadSharpIcon from "@mui/icons-material/DownloadSharp";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import LinkIcon from "@mui/icons-material/Link";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import Photo, { default as PhotoIcon } from "@mui/icons-material/Photo";
 import PublicIcon from "@mui/icons-material/Public";
-import RemoveCircleOutline from "@mui/icons-material/RemoveCircleOutline";
-import Workspaces from "@mui/icons-material/Workspaces";
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import WorkspacesIcon from "@mui/icons-material/Workspaces";
 import {
     Dialog,
     DialogProps,
@@ -297,7 +295,7 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
                 <MenuItemDivider hasIcon />
                 <EnteMenuItem
                     label={t("COLLECT_PHOTOS")}
-                    startIcon={<DownloadSharp />}
+                    startIcon={<DownloadSharpIcon />}
                     onClick={createCollectPhotoShareableURLHelper}
                 />
             </MenuItemGroup>
@@ -372,7 +370,7 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
                     title={t("shared_with_people_count", {
                         count: collection.sharees?.length ?? 0,
                     })}
-                    icon={<Workspaces />}
+                    icon={<WorkspacesIcon />}
                 />
                 <MenuItemGroup>
                     {collection.sharees.length > 0 ? (
@@ -388,7 +386,7 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
                                         ? collection.sharees[0]?.email
                                         : null
                                 }
-                                endIcon={<ChevronRight />}
+                                endIcon={<ChevronRightIcon />}
                             />
                             <MenuItemDivider hasIcon />
                         </>
@@ -948,7 +946,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                 ))}
 
                                 <EnteMenuItem
-                                    startIcon={<Add />}
+                                    startIcon={<AddIcon />}
                                     onClick={openAddCollab}
                                     label={
                                         collaborators?.length
@@ -981,7 +979,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                     </>
                                 ))}
                                 <EnteMenuItem
-                                    startIcon={<Add />}
+                                    startIcon={<AddIcon />}
                                     fontWeight={"bold"}
                                     onClick={openAddViewer}
                                     label={
@@ -1454,7 +1452,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                         <MenuItemGroup>
                             <EnteMenuItem
                                 color="critical"
-                                startIcon={<RemoveCircleOutline />}
+                                startIcon={<RemoveCircleOutlineIcon />}
                                 onClick={disablePublicSharing}
                                 label={t("REMOVE_LINK")}
                             />

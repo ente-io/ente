@@ -1,4 +1,4 @@
-import ExpandMore from "@mui/icons-material/ExpandMore";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
     Box,
     MenuItem,
@@ -39,7 +39,7 @@ export default function DropdownInput<T extends string>({
         <Stack spacing={"4px"}>
             <Typography {...labelProps}>{label}</Typography>
             <Select
-                IconComponent={ExpandMore}
+                IconComponent={ExpandMoreIcon}
                 displayEmpty
                 variant="standard"
                 MenuProps={{

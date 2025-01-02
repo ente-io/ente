@@ -268,3 +268,60 @@ const convertToMP4Native = async (electron: Electron, blob: Blob) => {
     await readConvertToMP4Done(electron, token);
     return mp4Blob;
 };
+
+/**
+ * Generate a preview variant of for the given video using a wasm FFmpeg running
+ * in a web worker.
+ *
+ * See: [Note: Preview variant of videos].
+ *
+ * @param blob The input video blob.
+ *
+ * @returns The data of the generated preview variant.
+ */
+export const generateVideoPreviewVariantWeb = async (blob: Blob) =>
+    ffmpegExecWeb(generateVideoPreviewMetadataCommand, blob, "mp4");
+
+/**
+ * The FFmpeg command to use to create a preview variant of videos.
+ *
+ * Current parameters
+ *
+ * - 720p width
+ * - 2000kbps bitrate
+ * - 30fps frame rate
+ *
+ * See: [Note: Preview variant of videos]
+ *
+ * Options:
+ *
+ * - `-vf` creates a filter graph for the video stream
+ *
+ * - `-vf scale=720:-1` scales the video to 720p width, keeping aspect ratio.
+ *
+ * - `-r` sets the frame rate.
+ *
+ * - `-c:v libx264` sets the codec for the video stream to H264.
+ *
+ * - `-b:v 2000k` sets the bitrate for the video stream.
+ *
+ * - `-c:a aac -b:a 128k` converts the audio stream to 128k bit AAC.
+ */
+const generateVideoPreviewMetadataCommand = [
+    ffmpegPathPlaceholder,
+    "-i",
+    inputPathPlaceholder,
+    "-vf",
+    "scale=720:-1",
+    "-r",
+    "30",
+    "-c:v",
+    "libx264",
+    "-b:v",
+    "2000k",
+    "-c:a",
+    "aac",
+    "-b:a",
+    "128k",
+    outputPathPlaceholder,
+];

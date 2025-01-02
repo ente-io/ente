@@ -95,7 +95,7 @@ const fetchRenderableUploadItemBlob = async (
         return new Blob([thumbnailData!]);
     } else {
         const blob = await readNonVideoUploadItem(uploadItem, electron);
-        return renderableImageBlob(file.metadata.title, blob);
+        return renderableImageBlob(blob, file.metadata.title);
     }
 };
 
@@ -157,9 +157,9 @@ export const fetchRenderableEnteFileBlob = async (
             file.metadata.title,
             originalFileBlob,
         );
-        return renderableImageBlob(imageFileName, new Blob([imageData]));
+        return renderableImageBlob(new Blob([imageData]), imageFileName);
     } else if (fileType == FileType.image) {
-        return await renderableImageBlob(file.metadata.title, originalFileBlob);
+        return await renderableImageBlob(originalFileBlob, file.metadata.title);
     } else {
         // A layer above us should've already filtered these out.
         throw new Error(`Cannot index unsupported file type ${fileType}`);

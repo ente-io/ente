@@ -2,7 +2,7 @@ import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { ensureElectron } from "@/base/electron";
 import { ut } from "@/base/i18n";
-import ArrowForward from "@mui/icons-material/ArrowForward";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import {
     Box,
     Dialog,
@@ -58,7 +58,7 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
                         onClick={onClose}
                         color="accent"
                         fullWidth
-                        endIcon={<ArrowForward />}
+                        endIcon={<ArrowForwardIcon />}
                     >
                         <ButtonContents>{ut("Continue")}</ButtonContents>
                     </FocusVisibleButton>

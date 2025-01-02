@@ -6,10 +6,7 @@ import { Overlay } from "@/base/components/mui/Container";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { lowercaseExtension } from "@/base/file-name";
 import log from "@/base/log";
-import {
-    downloadManager,
-    type LoadedLivePhotoSourceURL,
-} from "@/gallery/services/download";
+import { downloadManager } from "@/gallery/services/download";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
@@ -17,16 +14,16 @@ import { moveToTrash } from "@/new/photos/services/collection";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import { AppContext } from "@/new/photos/types/context";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
-import ChevronLeft from "@mui/icons-material/ChevronLeft";
-import ChevronRight from "@mui/icons-material/ChevronRight";
+import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
-import ContentCopy from "@mui/icons-material/ContentCopy";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorderRounded";
-import FavoriteIcon from "@mui/icons-material/FavoriteRounded";
-import DownloadIcon from "@mui/icons-material/FileDownloadOutlined";
+import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
 import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
 import InfoIcon from "@mui/icons-material/InfoOutlined";
@@ -70,88 +67,78 @@ import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { FileInfo, type FileInfoExif, type FileInfoProps } from "./FileInfo";
 import { ImageEditorOverlay } from "./ImageEditorOverlay";
 
-interface PhotoswipeFullscreenAPI {
-    enter: () => void;
-    exit: () => void;
-    isFullscreen: () => boolean;
-}
-
-const defaultLivePhotoDefaultOptions = {
-    click: () => {},
-    hide: () => {},
-    show: () => {},
-    loading: false,
-    visible: false,
-};
-
-const photoSwipeV4Events = [
-    "beforeChange",
-    "afterChange",
-    "imageLoadComplete",
-    "resize",
-    "gettingData",
-    "mouseUsed",
-    "initialZoomIn",
-    "initialZoomInEnd",
-    "initialZoomOut",
-    "initialZoomOutEnd",
-    "parseVerticalMargin",
-    "close",
-    "unbindEvents",
-    "destroy",
-    "updateScrollOffset",
-    "preventDragEvent",
-    "shareLinkClick",
-];
-
-const CaptionContainer = styled("div")(({ theme }) => ({
-    padding: theme.spacing(2),
-    wordBreak: "break-word",
-    textAlign: "right",
-    maxWidth: "375px",
-    fontSize: "14px",
-    lineHeight: "17px",
-    backgroundColor: theme.colors.backdrop.faint,
-    backdropFilter: `blur(${theme.colors.blur.base})`,
-}));
-
 export type PhotoViewerProps = Pick<
     PhotoFrameProps,
-    "favoriteFileIDs" | "markUnsyncedFavoriteUpdate"
+    "favoriteFileIDs" | "markUnsyncedFavoriteUpdate" | "markTempDeleted"
 > & {
+    /**
+     * The PhotoViewer is shown when this is `true`.
+     */
     isOpen: boolean;
+    /**
+     * The list of files that we are showing in the current context.
+     *
+     * These are the (ordered) siblings of the file that is currently being
+     * shown in the PhotoViewer. The meaning of siblings depends on the context:
+     * for example, when viewing a collection, this will be set to the list of
+     * files present in the collection.
+     */
     items: any[];
     currentIndex?: number;
+    /**
+     * Callback fired when the PhotoViewer requests to be closed.
+     */
     onClose?: (needUpdate: boolean) => void;
     gettingData: (instance: any, index: number, item: EnteFile) => void;
     forceConvertItem: (instance: any, index: number, item: EnteFile) => void;
-    id?: string;
-    markTempDeleted?: (tempDeletedFiles: EnteFile[]) => void;
     isTrashCollection: boolean;
     isInHiddenSection: boolean;
     enableDownload: boolean;
+    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
     fileToCollectionsMap: Map<number, number[]>;
     collectionNameMap: Map<number, string>;
-    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
     onSelectPerson?: FileInfoProps["onSelectPerson"];
 };
 
-function PhotoViewer(props: PhotoViewerProps) {
-    const {
-        id,
-        forceConvertItem,
-        favoriteFileIDs,
-        markUnsyncedFavoriteUpdate,
-    } = props;
-
+/**
+ * TODO: Rename me to FileViewer.
+ *
+ * A wrapper over PhotoSwipe.
+ *
+ * This is the component we use for showing files (images, videos, and their
+ * combinations like live photos). It shows each item, taking up the full
+ * dimensions of the window, and also surfaces some file specific commands (e.g.
+ * favorite a file, delete it) and controls (e.g. zooming). Further, it also
+ * allows the user to cycle through the sibling files in the current context
+ * (e.g. if opened from within the list of files for an album, then the arrows
+ * will cycle through the files within that album).
+ *
+ * The underlying library that we use is called PhotoSwipe.
+ */
+export const PhotoViewer: React.FC<PhotoViewerProps> = ({
+    isOpen,
+    items,
+    currentIndex,
+    onClose,
+    gettingData,
+    forceConvertItem,
+    favoriteFileIDs,
+    markUnsyncedFavoriteUpdate,
+    markTempDeleted,
+    isTrashCollection,
+    isInHiddenSection,
+    enableDownload,
+    setFilesDownloadProgressAttributesCreator,
+    fileToCollectionsMap,
+    collectionNameMap,
+    onSelectPerson,
+}) => {
     const galleryContext = useContext(GalleryContext);
     const { showLoadingBar, hideLoadingBar, showMiniDialog } =
         useContext(AppContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
     );
-
-    const { isOpen, items, markTempDeleted } = props;
 
     const pswpElement = useRef<HTMLDivElement>();
     const [photoSwipe, setPhotoSwipe] =
@@ -365,11 +352,7 @@ function PhotoViewer(props: PhotoViewerProps) {
             return;
         }
 
-        const key =
-            file.metadata.fileType === FileType.image
-                ? file.src
-                : (file.srcURLs.url as LoadedLivePhotoSourceURL).image;
-
+        const key = file.associatedImageURL;
         if (exifCopy?.current?.key === key) return;
 
         setExif({ key, value: undefined });
@@ -410,7 +393,6 @@ function PhotoViewer(props: PhotoViewerProps) {
     }
 
     const openPhotoSwipe = () => {
-        const { items, currentIndex } = props;
         const options = {
             history: false,
             maxSpreadZoom: 5,
@@ -453,23 +435,11 @@ function PhotoViewer(props: PhotoViewerProps) {
             items,
             options,
         );
-        photoSwipeV4Events.forEach((event) => {
-            const callback = props[event];
-            if (callback || event === "destroy") {
-                photoSwipe.listen(event, function (...args) {
-                    if (callback) {
-                        args.unshift(photoSwipe);
-                        callback(...args);
-                    }
-                    if (event === "destroy") {
-                        handleClose();
-                    }
-                    if (event === "close") {
-                        handleClose();
-                    }
-                });
-            }
-        });
+
+        photoSwipe.listen("destroy", handleClose);
+        photoSwipe.listen("gettingData", (index, item) =>
+            gettingData(photoSwipe, index, item as EnteFile),
+        );
         photoSwipe.listen("beforeChange", () => {
             if (!photoSwipe?.currItem) return;
             const currItem = photoSwipe.currItem as EnteFile;
@@ -504,7 +474,6 @@ function PhotoViewer(props: PhotoViewerProps) {
     };
 
     const handleClose = () => {
-        const { onClose } = props;
         if (typeof onClose === "function") {
             onClose(needUpdate.current);
         }
@@ -517,12 +486,7 @@ function PhotoViewer(props: PhotoViewerProps) {
 
     const handleFavoriteClick = () => {
         const file = photoSwipe?.currItem as EnteFile;
-        if (
-            !file ||
-            props.isTrashCollection ||
-            !isOwnFile ||
-            props.isInHiddenSection
-        ) {
+        if (!file || isTrashCollection || !isOwnFile || isInHiddenSection) {
             assertionFailed();
             return;
         }
@@ -557,7 +521,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                 hideLoadingBar();
             }
             markTempDeleted?.([file]);
-            updateItems(props.items.filter((item) => item.id !== file.id));
+            updateItems(items.filter((item) => item.id !== file.id));
             needUpdate.current = true;
         } catch (e) {
             log.error("trashFile failed", e);
@@ -565,7 +529,7 @@ function PhotoViewer(props: PhotoViewerProps) {
     };
 
     const confirmTrashFile = (file: EnteFile) => {
-        if (!file || !isOwnFile || props.isTrashCollection) {
+        if (!file || !isOwnFile || isTrashCollection) {
             return;
         }
         showMiniDialog({
@@ -638,12 +602,16 @@ function PhotoViewer(props: PhotoViewerProps) {
     const checkExifAvailable = async (enteFile: DisplayFile) => {
         if (exifExtractionInProgress.current === enteFile.src) return;
 
+        const associatedImageURL = enteFile.associatedImageURL;
+        if (!associatedImageURL) {
+            assertionFailed();
+            return;
+        }
+
         try {
             exifExtractionInProgress.current = enteFile.src;
             const file = await getFileFromURL(
-                enteFile.metadata.fileType === FileType.image
-                    ? (enteFile.src as string)
-                    : (enteFile.srcURLs.url as LoadedLivePhotoSourceURL).image,
+                associatedImageURL,
                 enteFile.metadata.title,
             );
             const tags = await extractRawExif(file);
@@ -691,12 +659,12 @@ function PhotoViewer(props: PhotoViewerProps) {
     const downloadFileHelper = async (file: EnteFile) => {
         if (
             file &&
-            props.enableDownload &&
-            props.setFilesDownloadProgressAttributesCreator
+            enableDownload &&
+            setFilesDownloadProgressAttributesCreator
         ) {
             try {
                 const setSingleFileDownloadProgress =
-                    props.setFilesDownloadProgressAttributesCreator(
+                    setFilesDownloadProgressAttributesCreator(
                         file.metadata.title,
                     );
                 await downloadSingleFile(file, setSingleFileDownloadProgress);
@@ -707,7 +675,7 @@ function PhotoViewer(props: PhotoViewerProps) {
     };
 
     const copyToClipboardHelper = async (file: DisplayFile) => {
-        if (file && props.enableDownload && shouldShowCopyOption) {
+        if (file && enableDownload && shouldShowCopyOption) {
             showLoadingBar();
             await copyFileToClipboard(file.src);
             hideLoadingBar();
@@ -771,7 +739,6 @@ function PhotoViewer(props: PhotoViewerProps) {
     return (
         <>
             <div
-                id={id}
                 className={"pswp"}
                 tabIndex={Number("-1")}
                 role="dialog"
@@ -790,7 +757,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                                 disabled={livePhotoBtnOptions.loading}
                             >
                                 <FlexWrapper gap={"4px"}>
-                                    {<AlbumOutlined />}{" "}
+                                    {<AlbumOutlinedIcon />}{" "}
                                     {t("live_photo_indicator")}
                                 </FlexWrapper>
                             </Button>
@@ -844,7 +811,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                                 <CloseIcon />
                             </button>
 
-                            {props.enableDownload && (
+                            {enableDownload && (
                                 <button
                                     className="pswp__button pswp__button--custom"
                                     title={t("download_key")}
@@ -854,10 +821,10 @@ function PhotoViewer(props: PhotoViewerProps) {
                                         )
                                     }
                                 >
-                                    <DownloadIcon />
+                                    <FileDownloadOutlinedIcon />
                                 </button>
                             )}
-                            {props.enableDownload && shouldShowCopyOption && (
+                            {enableDownload && shouldShowCopyOption && (
                                 <button
                                     className="pswp__button pswp__button--custom"
                                     title={t("copy_key")}
@@ -867,10 +834,10 @@ function PhotoViewer(props: PhotoViewerProps) {
                                         )
                                     }
                                 >
-                                    <ContentCopy fontSize="small" />
+                                    <ContentCopyIcon fontSize="small" />
                                 </button>
                             )}
-                            {isOwnFile && !props.isTrashCollection && (
+                            {isOwnFile && !isTrashCollection && (
                                 <button
                                     className="pswp__button pswp__button--custom"
                                     title={t("delete_key")}
@@ -918,8 +885,8 @@ function PhotoViewer(props: PhotoViewerProps) {
                                 <InfoIcon />
                             </button>
                             {isOwnFile &&
-                                !props.isTrashCollection &&
-                                !props.isInHiddenSection && (
+                                !isTrashCollection &&
+                                !isInHiddenSection && (
                                     <>
                                         {showEditButton && (
                                             <button
@@ -939,7 +906,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                                             onClick={handleFavoriteClick}
                                         >
                                             {isFav ? (
-                                                <FavoriteIcon />
+                                                <FavoriteRoundedIcon />
                                             ) : (
                                                 <FavoriteBorderIcon />
                                             )}
@@ -961,13 +928,13 @@ function PhotoViewer(props: PhotoViewerProps) {
                             className="pswp__button pswp__button--arrow--left"
                             title={t("previous_key")}
                         >
-                            <ChevronLeft sx={{ pointerEvents: "none" }} />
+                            <ChevronLeftIcon sx={{ pointerEvents: "none" }} />
                         </button>
                         <button
                             className="pswp__button pswp__button--arrow--right"
                             title={t("next_key")}
                         >
-                            <ChevronRight sx={{ pointerEvents: "none" }} />
+                            <ChevronRightIcon sx={{ pointerEvents: "none" }} />
                         </button>
                         <div className="pswp__caption pswp-custom-caption-container">
                             <CaptionContainer />
@@ -983,15 +950,13 @@ function PhotoViewer(props: PhotoViewerProps) {
                 exif={exif?.value}
                 shouldDisableEdits={!isOwnFile}
                 showCollectionChips={
-                    !props.isTrashCollection &&
-                    isOwnFile &&
-                    !props.isInHiddenSection
+                    !isTrashCollection && isOwnFile && !isInHiddenSection
                 }
                 scheduleUpdate={scheduleUpdate}
                 refreshPhotoswipe={refreshPhotoswipe}
-                fileToCollectionsMap={props.fileToCollectionsMap}
-                collectionNameMap={props.collectionNameMap}
-                onSelectPerson={props.onSelectPerson}
+                fileToCollectionsMap={fileToCollectionsMap}
+                collectionNameMap={collectionNameMap}
+                onSelectPerson={onSelectPerson}
             />
             <ImageEditorOverlay
                 show={showImageEditorOverlay}
@@ -1001,33 +966,54 @@ function PhotoViewer(props: PhotoViewerProps) {
             />
         </>
     );
+};
+
+interface PhotoswipeFullscreenAPI {
+    enter: () => void;
+    exit: () => void;
+    isFullscreen: () => boolean;
 }
 
-export default PhotoViewer;
+const defaultLivePhotoDefaultOptions = {
+    click: () => {},
+    hide: () => {},
+    show: () => {},
+    loading: false,
+    visible: false,
+};
 
-function CircularProgressWithLabel(
-    props: CircularProgressProps & { value: number },
-) {
-    return (
-        <>
-            <CircularProgress variant="determinate" {...props} color="accent" />
-            <Overlay
-                sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: "40px",
-                }}
-            >
-                <Typography
-                    variant="mini"
-                    component="div"
-                    color="text.secondary"
-                >{`${Math.round(props.value)}%`}</Typography>
-            </Overlay>
-        </>
-    );
-}
+const CaptionContainer = styled("div")(({ theme }) => ({
+    padding: theme.spacing(2),
+    wordBreak: "break-word",
+    textAlign: "right",
+    maxWidth: "375px",
+    fontSize: "14px",
+    lineHeight: "17px",
+    backgroundColor: theme.colors.backdrop.faint,
+    backdropFilter: `blur(${theme.colors.blur.base})`,
+}));
+
+const CircularProgressWithLabel: React.FC<
+    Pick<CircularProgressProps, "value">
+> = ({ value }) => (
+    <>
+        <CircularProgress value={value} variant="determinate" color="accent" />
+        <Overlay
+            sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "40px",
+            }}
+        >
+            <Typography
+                variant="mini"
+                component="div"
+                color="text.secondary"
+            >{`${Math.round(value)}%`}</Typography>
+        </Overlay>
+    </>
+);
 
 type ConversionFailedNotificationProps = ModalVisibilityProps & ButtonishProps;
 

@@ -1,6 +1,6 @@
 import { FlexWrapper } from "@ente/shared/components/Container";
-import ArrowBack from "@mui/icons-material/ArrowBack";
-import Close from "@mui/icons-material/Close";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CloseIcon from "@mui/icons-material/Close";
 import { Box, IconButton, Typography } from "@mui/material";
 import React from "react";
 
@@ -34,13 +34,13 @@ export const Titlebar: React.FC<TitlebarProps> = ({
                     onClick={onClose}
                     color={backIsClose ? "secondary" : "primary"}
                 >
-                    {backIsClose ? <Close /> : <ArrowBack />}
+                    {backIsClose ? <CloseIcon /> : <ArrowBackIcon />}
                 </IconButton>
                 <Box display={"flex"} gap="4px">
                     {actionButton && actionButton}
                     {!backIsClose && (
                         <IconButton onClick={onRootClose} color={"secondary"}>
-                            <Close />
+                            <CloseIcon />
                         </IconButton>
                     )}
                 </Box>

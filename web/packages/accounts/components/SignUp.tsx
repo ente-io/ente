@@ -16,7 +16,7 @@ import {
     setLocalReferralSource,
 } from "@ente/shared/storage/localStorage/helpers";
 import { SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Box,
     Checkbox,
@@ -233,7 +233,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                                         color="secondary"
                                                         edge={"end"}
                                                     >
-                                                        <InfoOutlined />
+                                                        <InfoOutlinedIcon />
                                                     </IconButton>
                                                 </Tooltip>
                                             </InputAdornment>

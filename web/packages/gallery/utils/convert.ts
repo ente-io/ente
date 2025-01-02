@@ -23,9 +23,9 @@ let _isNativeJPEGConversionAvailable = true;
  * The type of the returned blob is set, whenever possible, to the MIME type of
  * the data that we're dealing with.
  *
- * @param fileName The name of the file whose data is {@link imageBlob}.
- *
  * @param imageBlob A {@link Blob} containing the contents of an image file.
+ *
+ * @param fileName The name of the file whose data {@link imageBlob} is.
  *
  * The logic used by this function is:
  *
@@ -48,8 +48,8 @@ let _isNativeJPEGConversionAvailable = true;
  * In will catch all errors and return the original in those cases.
  */
 export const renderableImageBlob = async (
-    fileName: string,
     imageBlob: Blob,
+    fileName: string,
 ) => {
     try {
         const file = new File([imageBlob], fileName);
