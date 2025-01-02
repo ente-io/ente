@@ -101,6 +101,8 @@ export type PhotoViewerProps = Pick<
 };
 
 /**
+ * TODO: Rename me to FileViewer.
+ *
  * A wrapper over PhotoSwipe.
  *
  * This is the component we use for showing files (images, videos, and their

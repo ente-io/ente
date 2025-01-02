@@ -121,6 +121,9 @@ export interface PhotoFrameProps {
     onSelectPerson?: PhotoViewerProps["onSelectPerson"];
 }
 
+/**
+ * TODO: Rename me to FileListWithViewer
+ */
 const PhotoFrame = ({
     mode,
     modePlus,

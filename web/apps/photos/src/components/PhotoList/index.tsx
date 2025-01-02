@@ -245,6 +245,9 @@ const PhotoListRow = React.memo(
     areEqual,
 );
 
+/**
+ * TODO: Rename me to FileList.
+ */
 export function PhotoList({
     height,
     width,
