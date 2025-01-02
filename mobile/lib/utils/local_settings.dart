@@ -20,6 +20,8 @@ class LocalSettings {
   static const onGuestViewKey = "on_guest_view";
   static const _hasConfiguredLinksInAppPermissionKey =
       "has_configured_links_in_app_permission";
+  static const _hideSharedItemsFromHomeGalleryTag =
+      "hide_shared_items_from_home_gallery";
 
   final SharedPreferences _prefs;
 
@@ -118,4 +120,11 @@ class LocalSettings {
     final result = _prefs.getBool(_hasConfiguredLinksInAppPermissionKey);
     return result ?? false;
   }
+
+  Future<void> setHideSharedItemsFromHomeGallery(bool value) async {
+    await _prefs.setBool(_hideSharedItemsFromHomeGalleryTag, value);
+  }
+
+  bool get hideSharedItemsFromHomeGallery =>
+      _prefs.getBool(_hideSharedItemsFromHomeGalleryTag) ?? false;
 }

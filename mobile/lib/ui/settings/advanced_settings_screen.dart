@@ -2,6 +2,8 @@ import "dart:async";
 
 import 'package:flutter/material.dart';
 import "package:photos/core/error-reporting/super_logging.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/hide_shared_items_from_home_gallery_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/memories_service.dart";
@@ -185,6 +187,35 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                 onChanged: () async {
                                   await SuperLogging.setShouldReportCrashes(
                                     !SuperLogging.shouldReportCrashes(),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 24,
+                            ),
+                            MenuItemWidget(
+                              captionedTextWidget: const CaptionedTextWidget(
+                                title: "Hide shared items from home gallery",
+                              ),
+                              menuItemColor: colorScheme.fillFaint,
+                              singleBorderRadius: 8,
+                              alignCaptionedTextToLeft: true,
+                              trailingWidget: ToggleSwitchWidget(
+                                value: () => localSettings
+                                    .hideSharedItemsFromHomeGallery,
+                                onChanged: () async {
+                                  final prevSetting = localSettings
+                                      .hideSharedItemsFromHomeGallery;
+                                  await localSettings
+                                      .setHideSharedItemsFromHomeGallery(
+                                    !prevSetting,
+                                  );
+
+                                  Bus.instance.fire(
+                                    HideSharedItemsFromHomeGalleryEvent(
+                                      !prevSetting,
+                                    ),
                                   );
                                 },
                               ),
