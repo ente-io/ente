@@ -47,6 +47,8 @@ import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlinedIcon from "@mui/icons-material/CameraOutlined";
+import Close from "@mui/icons-material/Close";
+import Done from "@mui/icons-material/Done";
 import EditIcon from "@mui/icons-material/Edit";
 import FaceRetouchingNaturalIcon from "@mui/icons-material/FaceRetouchingNatural";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
@@ -62,16 +64,23 @@ import {
     Link,
     Stack,
     styled,
+    TextField,
     Typography,
 } from "@mui/material";
 import LinkButton from "components/pages/gallery/LinkButton";
+import type { DisplayFile } from "components/PhotoFrame";
+import { Formik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { changeFileName, updateExistingFilePubMetadata } from "utils/file";
+import {
+    changeCaption,
+    changeFileName,
+    updateExistingFilePubMetadata,
+} from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
+import * as Yup from "yup";
 import MapBox from "./MapBox";
-import { RenderCaption } from "./RenderCaption";
 
 export interface FileInfoExif {
     tags: RawExifTags | undefined;
@@ -482,6 +491,124 @@ const EditButton: React.FC<EditButtonProps> = ({ onClick, loading }) => (
         )}
     </IconButton>
 );
+
+interface RenderCaptionFormValues {
+    caption: string;
+}
+
+export function RenderCaption({
+    file,
+    scheduleUpdate,
+    refreshPhotoswipe,
+    shouldDisableEdits,
+}: {
+    shouldDisableEdits: boolean;
+    file: DisplayFile;
+    scheduleUpdate: () => void;
+    refreshPhotoswipe: () => void;
+}) {
+    const [caption, setCaption] = useState(
+        file?.pubMagicMetadata?.data.caption,
+    );
+
+    const [loading, setLoading] = useState(false);
+
+    const saveEdits = async (newCaption: string) => {
+        try {
+            if (file) {
+                if (caption === newCaption) {
+                    return;
+                }
+                setCaption(newCaption);
+
+                const updatedFile = await changeCaption(file, newCaption);
+                updateExistingFilePubMetadata(file, updatedFile);
+                file.title = file.pubMagicMetadata.data.caption;
+                refreshPhotoswipe();
+                scheduleUpdate();
+            }
+        } catch (e) {
+            log.error("failed to update caption", e);
+        }
+    };
+
+    const onSubmit = async (values: RenderCaptionFormValues) => {
+        try {
+            setLoading(true);
+            await saveEdits(values.caption);
+        } finally {
+            setLoading(false);
+        }
+    };
+    if (!caption?.length && shouldDisableEdits) {
+        return <></>;
+    }
+    return (
+        <Box p={1}>
+            <Formik<RenderCaptionFormValues>
+                initialValues={{ caption }}
+                validationSchema={Yup.object().shape({
+                    caption: Yup.string().max(
+                        5000,
+                        t("caption_character_limit"),
+                    ),
+                })}
+                validateOnBlur={false}
+                onSubmit={onSubmit}
+            >
+                {({
+                    values,
+                    errors,
+                    handleChange,
+                    handleSubmit,
+                    resetForm,
+                }) => (
+                    <form noValidate onSubmit={handleSubmit}>
+                        <TextField
+                            hiddenLabel
+                            fullWidth
+                            id="caption"
+                            name="caption"
+                            type="text"
+                            multiline
+                            placeholder={t("caption_placeholder")}
+                            value={values.caption}
+                            onChange={handleChange("caption")}
+                            error={Boolean(errors.caption)}
+                            helperText={errors.caption}
+                            disabled={loading || shouldDisableEdits}
+                        />
+                        {values.caption !== caption && (
+                            <FlexWrapper justifyContent={"flex-end"}>
+                                <IconButton type="submit" disabled={loading}>
+                                    {loading ? (
+                                        <CircularProgress
+                                            size={"18px"}
+                                            color="inherit"
+                                        />
+                                    ) : (
+                                        <Done />
+                                    )}
+                                </IconButton>
+                                <IconButton
+                                    onClick={() =>
+                                        resetForm({
+                                            values: { caption: caption ?? "" },
+                                            touched: { caption: false },
+                                        })
+                                    }
+                                    disabled={loading}
+                                >
+                                    <Close />
+                                </IconButton>
+                            </FlexWrapper>
+                        )}
+                    </form>
+                )}
+            </Formik>
+        </Box>
+    );
+}
 
 interface CreationTimeProps {
     file: EnteFile;
