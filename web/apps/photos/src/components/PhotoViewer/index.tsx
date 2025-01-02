@@ -252,7 +252,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                     break;
                 case "l":
                 case "L":
-                    onFavClick(photoSwipe?.currItem as EnteFile);
+                    handleFavoriteClick();
                     break;
                 case "ArrowLeft":
                     handleArrowClick(event, "left");
@@ -275,7 +275,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                 window.removeEventListener("copy", handleCopyEvent);
             }
         };
-    }, [isOpen, photoSwipe, showInfo]);
+    }, [isOpen, photoSwipe, showInfo, favoriteFileIDs]);
 
     useEffect(() => {
         if (photoSwipe) {
@@ -515,7 +515,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         handleCloseInfo();
     };
 
-    const handleFavoriteClick = async () => {
+    const handleFavoriteClick = () => {
         const file = photoSwipe?.currItem as EnteFile;
         if (
             !file ||
