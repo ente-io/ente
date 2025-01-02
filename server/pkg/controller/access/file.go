@@ -43,7 +43,6 @@ func (c controllerImpl) CanAccessFile(ctx *gin.Context, req *CanAccessFileParams
 
 	// Only fetch shared collections once when needed
 	var sharedCollections []int64
-
 	for owner, fileIDs := range ownerToFilesMap {
 		if owner == req.ActorUserID {
 			continue
@@ -56,10 +55,12 @@ func (c controllerImpl) CanAccessFile(ctx *gin.Context, req *CanAccessFileParams
 				return stacktrace.Propagate(err, "failed to get shared collections")
 			}
 		}
-		if err := c.CollectionRepo.DoAllFilesExistInGivenCollections(fileIDs, sharedCollections); err != nil {
+		if existsErr := c.CollectionRepo.DoAllFilesExistInGivenCollections(fileIDs, sharedCollections); existsErr != nil {
 			log.WithFields(log.Fields{
-				"req_id": requestid.Get(ctx),
-			}).WithError(err).Error("access check failed")
+				"req_id":            requestid.Get(ctx),
+				"sharedCollections": sharedCollections,
+				"fileIDs":           fileIDs,
+			}).WithError(existsErr).Error("access check failed")
 			return stacktrace.Propagate(ente.ErrPermissionDenied, "access denied")
 		}
 	}
