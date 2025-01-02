@@ -133,6 +133,19 @@ export type PhotoViewerProps = Pick<
     onSelectPerson?: FileInfoProps["onSelectPerson"];
 };
 
+/**
+ * A wrapper over PhotoSwipe.
+ *
+ * This is the component we use for showing files (images, videos, and their
+ * combinations like live photos). It shows each item, taking up the full
+ * dimensions of the window, and also surfaces some file specific commands (e.g.
+ * favorite a file, delete it) and controls (e.g. zooming). Further, it also
+ * allows the user to cycle through the sibling files in the current context
+ * (e.g. if opened from within the list of files for an album, then the arrows
+ * will cycle through the files within that album).
+ *
+ * The underlying library that we use is called PhotoSwipe.
+ */
 function PhotoViewer(props: PhotoViewerProps) {
     const {
         id,
