@@ -506,7 +506,7 @@ interface RenderCaptionFormValues {
     caption: string;
 }
 
-export function RenderCaption({
+function RenderCaption({
     file,
     scheduleUpdate,
     refreshPhotoswipe,
@@ -626,7 +626,7 @@ interface CreationTimeProps {
     scheduleUpdate: () => void;
 }
 
-export const CreationTime: React.FC<CreationTimeProps> = ({
+const CreationTime: React.FC<CreationTimeProps> = ({
     file,
     shouldDisableEdits,
     scheduleUpdate,
