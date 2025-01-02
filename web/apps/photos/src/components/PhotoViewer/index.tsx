@@ -91,7 +91,6 @@ export type PhotoViewerProps = Pick<
     onClose?: (needUpdate: boolean) => void;
     gettingData: (instance: any, index: number, item: EnteFile) => void;
     forceConvertItem: (instance: any, index: number, item: EnteFile) => void;
-    id?: string;
     isTrashCollection: boolean;
     isInHiddenSection: boolean;
     enableDownload: boolean;
@@ -116,7 +115,6 @@ export type PhotoViewerProps = Pick<
  */
 export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
     const {
-        id,
         isOpen,
         items,
         currentIndex,
@@ -752,7 +750,6 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
     return (
         <>
             <div
-                id={id}
                 className={"pswp"}
                 tabIndex={Number("-1")}
                 role="dialog"
