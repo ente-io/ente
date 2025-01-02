@@ -2,6 +2,7 @@ import log from "@/base/log";
 import {
     downloadManager,
     type LivePhotoSourceURL,
+    type LoadedLivePhotoSourceURL,
     type RenderableSourceURLs,
 } from "@/gallery/services/download";
 import { EnteFile } from "@/media/file";
@@ -45,6 +46,16 @@ const PHOTOSWIPE_HASH_SUFFIX = "&opened";
 export type DisplayFile = EnteFile & {
     src?: string;
     srcURLs?: RenderableSourceURLs;
+    /**
+     * An object URL corresponding to the image portion, if any, associated with
+     * the {@link DisplayFile}.
+     *
+     * - For images, this will be the object URL of the renderable image itself.
+     * - For live photos, this will be the object URL of the image portion of
+     *   the live photo.
+     * - For videos, this will not be defined.
+     */
+    associatedImageURL?: string | undefined;
     msrc?: string;
     html?: string;
     w?: number;
@@ -550,7 +561,16 @@ const updateDisplayFileSource = (
             : true;
     file.canForceConvert = srcURLs.canForceConvert;
     file.conversionFailed = !isRenderable;
-    file.srcURLs = srcURLs;
+    file.associatedImageURL = (() => {
+        switch (file.metadata.fileType) {
+            case FileType.image:
+                return srcURLs.url as string;
+            case FileType.livePhoto:
+                return (srcURLs.url as LoadedLivePhotoSourceURL).image;
+            default:
+                return undefined;
+        }
+    })();
     if (!isRenderable) {
         file.isSourceLoaded = true;
         return;
@@ -574,7 +594,7 @@ const updateDisplayFileSource = (
                 `;
         } else {
             const { image: imageURL, video: videoURL } =
-                url as LivePhotoSourceURL;
+                url as LoadedLivePhotoSourceURL;
 
             file.html = `
             <div class = 'pswp-item-container'>

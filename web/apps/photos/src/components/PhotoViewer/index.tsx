@@ -6,10 +6,7 @@ import { Overlay } from "@/base/components/mui/Container";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { lowercaseExtension } from "@/base/file-name";
 import log from "@/base/log";
-import {
-    downloadManager,
-    type LoadedLivePhotoSourceURL,
-} from "@/gallery/services/download";
+import { downloadManager } from "@/gallery/services/download";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
@@ -365,11 +362,7 @@ function PhotoViewer(props: PhotoViewerProps) {
             return;
         }
 
-        const key =
-            file.metadata.fileType === FileType.image
-                ? file.src
-                : (file.srcURLs.url as LoadedLivePhotoSourceURL).image;
-
+        const key = file.associatedImageURL;
         if (exifCopy?.current?.key === key) return;
 
         setExif({ key, value: undefined });
@@ -638,12 +631,16 @@ function PhotoViewer(props: PhotoViewerProps) {
     const checkExifAvailable = async (enteFile: DisplayFile) => {
         if (exifExtractionInProgress.current === enteFile.src) return;
 
+        const associatedImageURL = enteFile.associatedImageURL;
+        if (!associatedImageURL) {
+            assertionFailed();
+            return;
+        }
+
         try {
             exifExtractionInProgress.current = enteFile.src;
             const file = await getFileFromURL(
-                enteFile.metadata.fileType === FileType.image
-                    ? (enteFile.src as string)
-                    : (enteFile.srcURLs.url as LoadedLivePhotoSourceURL).image,
+                associatedImageURL,
                 enteFile.metadata.title,
             );
             const tags = await extractRawExif(file);
