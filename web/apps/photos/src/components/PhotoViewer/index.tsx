@@ -81,9 +81,9 @@ export type PhotoViewerProps = Pick<
     isTrashCollection: boolean;
     isInHiddenSection: boolean;
     enableDownload: boolean;
+    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
     fileToCollectionsMap: Map<number, number[]>;
     collectionNameMap: Map<number, string>;
-    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
     onSelectPerson?: FileInfoProps["onSelectPerson"];
 };
 
@@ -105,10 +105,19 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
         id,
         isOpen,
         items,
+        currentIndex,
+        onClose,
         forceConvertItem,
         favoriteFileIDs,
         markUnsyncedFavoriteUpdate,
         markTempDeleted,
+        isTrashCollection,
+        isInHiddenSection,
+        enableDownload,
+        setFilesDownloadProgressAttributesCreator,
+        fileToCollectionsMap,
+        collectionNameMap,
+        onSelectPerson,
     } = props;
 
     const galleryContext = useContext(GalleryContext);
@@ -371,7 +380,6 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
     }
 
     const openPhotoSwipe = () => {
-        const { items, currentIndex } = props;
         const options = {
             history: false,
             maxSpreadZoom: 5,
@@ -465,7 +473,6 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
     };
 
     const handleClose = () => {
-        const { onClose } = props;
         if (typeof onClose === "function") {
             onClose(needUpdate.current);
         }
@@ -478,12 +485,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
 
     const handleFavoriteClick = () => {
         const file = photoSwipe?.currItem as EnteFile;
-        if (
-            !file ||
-            props.isTrashCollection ||
-            !isOwnFile ||
-            props.isInHiddenSection
-        ) {
+        if (!file || isTrashCollection || !isOwnFile || isInHiddenSection) {
             assertionFailed();
             return;
         }
@@ -518,7 +520,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
                 hideLoadingBar();
             }
             markTempDeleted?.([file]);
-            updateItems(props.items.filter((item) => item.id !== file.id));
+            updateItems(items.filter((item) => item.id !== file.id));
             needUpdate.current = true;
         } catch (e) {
             log.error("trashFile failed", e);
@@ -526,7 +528,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
     };
 
     const confirmTrashFile = (file: EnteFile) => {
-        if (!file || !isOwnFile || props.isTrashCollection) {
+        if (!file || !isOwnFile || isTrashCollection) {
             return;
         }
         showMiniDialog({
@@ -656,12 +658,12 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
     const downloadFileHelper = async (file: EnteFile) => {
         if (
             file &&
-            props.enableDownload &&
-            props.setFilesDownloadProgressAttributesCreator
+            enableDownload &&
+            setFilesDownloadProgressAttributesCreator
         ) {
             try {
                 const setSingleFileDownloadProgress =
-                    props.setFilesDownloadProgressAttributesCreator(
+                    setFilesDownloadProgressAttributesCreator(
                         file.metadata.title,
                     );
                 await downloadSingleFile(file, setSingleFileDownloadProgress);
@@ -672,7 +674,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
     };
 
     const copyToClipboardHelper = async (file: DisplayFile) => {
-        if (file && props.enableDownload && shouldShowCopyOption) {
+        if (file && enableDownload && shouldShowCopyOption) {
             showLoadingBar();
             await copyFileToClipboard(file.src);
             hideLoadingBar();
@@ -809,7 +811,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
                                 <CloseIcon />
                             </button>
 
-                            {props.enableDownload && (
+                            {enableDownload && (
                                 <button
                                     className="pswp__button pswp__button--custom"
                                     title={t("download_key")}
@@ -822,7 +824,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
                                     <FileDownloadOutlinedIcon />
                                 </button>
                             )}
-                            {props.enableDownload && shouldShowCopyOption && (
+                            {enableDownload && shouldShowCopyOption && (
                                 <button
                                     className="pswp__button pswp__button--custom"
                                     title={t("copy_key")}
@@ -835,7 +837,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
                                     <ContentCopyIcon fontSize="small" />
                                 </button>
                             )}
-                            {isOwnFile && !props.isTrashCollection && (
+                            {isOwnFile && !isTrashCollection && (
                                 <button
                                     className="pswp__button pswp__button--custom"
                                     title={t("delete_key")}
@@ -883,8 +885,8 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
                                 <InfoIcon />
                             </button>
                             {isOwnFile &&
-                                !props.isTrashCollection &&
-                                !props.isInHiddenSection && (
+                                !isTrashCollection &&
+                                !isInHiddenSection && (
                                     <>
                                         {showEditButton && (
                                             <button
@@ -948,15 +950,13 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
                 exif={exif?.value}
                 shouldDisableEdits={!isOwnFile}
                 showCollectionChips={
-                    !props.isTrashCollection &&
-                    isOwnFile &&
-                    !props.isInHiddenSection
+                    !isTrashCollection && isOwnFile && !isInHiddenSection
                 }
                 scheduleUpdate={scheduleUpdate}
                 refreshPhotoswipe={refreshPhotoswipe}
-                fileToCollectionsMap={props.fileToCollectionsMap}
-                collectionNameMap={props.collectionNameMap}
-                onSelectPerson={props.onSelectPerson}
+                fileToCollectionsMap={fileToCollectionsMap}
+                collectionNameMap={collectionNameMap}
+                onSelectPerson={onSelectPerson}
             />
             <ImageEditorOverlay
                 show={showImageEditorOverlay}
