@@ -524,13 +524,15 @@ const PhotoFrame = ({
                 isTrashCollection={activeCollectionID === TRASH_SECTION}
                 isInHiddenSection={isInHiddenSection}
                 enableDownload={enableDownload}
-                fileToCollectionsMap={fileToCollectionsMap}
-                collectionNameMap={collectionNameMap}
-                setFilesDownloadProgressAttributesCreator={
-                    setFilesDownloadProgressAttributesCreator
-                }
-                onSelectPerson={onSelectPerson}
-                {...{ favoriteFileIDs, markUnsyncedFavoriteUpdate, markTempDeleted }}
+                {...{
+                    favoriteFileIDs,
+                    markUnsyncedFavoriteUpdate,
+                    markTempDeleted,
+                    collectionNameMap,
+                    fileToCollectionsMap,
+                    setFilesDownloadProgressAttributesCreator,
+                    onSelectPerson,
+                }}
             />
         </Container>
     );
