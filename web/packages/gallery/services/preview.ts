@@ -1,6 +1,7 @@
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { downloadManager } from "./download";
+import { generateVideoPreviewVariantWeb } from "./ffmpeg";
 
 /**
  * Create a preview variant of the given video {@link file}.
@@ -20,10 +21,13 @@ import { downloadManager } from "./download";
  * @param file The {@link EnteFile} of type video for which we want to create a
  * preview variant.
  */
-export const createVideoPreviewVariant = (file: EnteFile) => {
+export const createVideoPreviewVariant = async (file: EnteFile) => {
     if (file.metadata.fileType != FileType.video)
         throw new Error("Preview variant can only be created for video files");
 
-    const fileBlob = downloadManager.fileBlob(file);
-    console.log(fileBlob);
+    const fileBlob = await downloadManager.fileBlob(file);
+    const previewFileData = await generateVideoPreviewVariantWeb(fileBlob);
+    // Unrevoked currently.
+    const previewFileURL = URL.createObjectURL(new Blob([previewFileData]));
+    return previewFileURL;
 };
