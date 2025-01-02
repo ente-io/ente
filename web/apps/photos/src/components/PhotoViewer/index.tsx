@@ -1013,29 +1013,27 @@ const CaptionContainer = styled("div")(({ theme }) => ({
     backdropFilter: `blur(${theme.colors.blur.base})`,
 }));
 
-function CircularProgressWithLabel(
-    props: CircularProgressProps & { value: number },
-) {
-    return (
-        <>
-            <CircularProgress variant="determinate" {...props} color="accent" />
-            <Overlay
-                sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: "40px",
-                }}
-            >
-                <Typography
-                    variant="mini"
-                    component="div"
-                    color="text.secondary"
-                >{`${Math.round(props.value)}%`}</Typography>
-            </Overlay>
-        </>
-    );
-}
+const CircularProgressWithLabel: React.FC<
+    Pick<CircularProgressProps, "value">
+> = ({ value }) => (
+    <>
+        <CircularProgress value={value} variant="determinate" color="accent" />
+        <Overlay
+            sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "40px",
+            }}
+        >
+            <Typography
+                variant="mini"
+                component="div"
+                color="text.secondary"
+            >{`${Math.round(value)}%`}</Typography>
+        </Overlay>
+    </>
+);
 
 type ConversionFailedNotificationProps = ModalVisibilityProps & ButtonishProps;
 
