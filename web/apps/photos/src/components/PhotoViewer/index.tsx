@@ -121,6 +121,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
         items,
         currentIndex,
         onClose,
+        gettingData,
         forceConvertItem,
         favoriteFileIDs,
         markUnsyncedFavoriteUpdate,
@@ -436,23 +437,11 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
             items,
             options,
         );
-        photoSwipeV4Events.forEach((event) => {
-            const callback = props[event];
-            if (callback || event === "destroy") {
-                photoSwipe.listen(event, function (...args) {
-                    if (callback) {
-                        args.unshift(photoSwipe);
-                        callback(...args);
-                    }
-                    if (event === "destroy") {
-                        handleClose();
-                    }
-                    if (event === "close") {
-                        handleClose();
-                    }
-                });
-            }
-        });
+
+        photoSwipe.listen("destroy", handleClose);
+        photoSwipe.listen("gettingData", (index, item) =>
+            gettingData(photoSwipe, index, item as EnteFile),
+        );
         photoSwipe.listen("beforeChange", () => {
             if (!photoSwipe?.currItem) return;
             const currItem = photoSwipe.currItem as EnteFile;
