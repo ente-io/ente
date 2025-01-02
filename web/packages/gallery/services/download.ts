@@ -42,7 +42,9 @@ export interface LoadedLivePhotoSourceURL {
  * This structure originally arose as the source object URL, and a bunch of
  * associated metadata, that the file viewer needs when the user wants to see
  * the original file (as opposed to say, the thumbnail which we were showing
- * them earlier as the file is getting downloaded).
+ * them earlier as the file is getting downloaded). It is now also used in other
+ * places that need an as-close access to the original file as possible whilst
+ * still applying almost necessary conversions to be able to use that data.
  *
  * The word "renderable" is not a guarantee, but rather a best effort indicator
  * as we might not always be able to convert all formats to something that the
@@ -547,7 +549,7 @@ const createRenderableSourceURLs = async (
     const fileName = file.metadata.title;
     switch (file.metadata.fileType) {
         case FileType.image: {
-            const convertedBlob = await renderableImageBlob(fileName, fileBlob);
+            const convertedBlob = await renderableImageBlob(fileBlob, fileName);
             const convertedURL = existingOrNewObjectURL(convertedBlob);
             url = convertedURL;
             mimeType = convertedBlob.type;
@@ -602,7 +604,7 @@ async function getRenderableLivePhotoURL(
         try {
             const imageBlob = new Blob([livePhoto.imageData]);
             return URL.createObjectURL(
-                await renderableImageBlob(livePhoto.imageFileName, imageBlob),
+                await renderableImageBlob(imageBlob, livePhoto.imageFileName),
             );
         } catch {
             //ignore and return null
