@@ -375,6 +375,53 @@ func (repo *CollectionRepository) DoesFileExistInCollections(fileID int64, cIDs 
 	return exists, stacktrace.Propagate(err, "")
 }
 
+func (repo *CollectionRepository) DoAllFilesExistInGivenCollections(fileIDs []int64, cIDs []int64) error {
+	// Query to get all distinct file_ids that exist in the collections
+	rows, err := repo.DB.Query(`
+        SELECT DISTINCT file_id 
+        FROM collection_files 
+        WHERE file_id = ANY ($1) 
+        AND is_deleted = false 
+        AND collection_id = ANY ($2)`,
+		pq.Array(fileIDs), pq.Array(cIDs))
+
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+
+	// Create a map of input fileIDs for easy lookup
+	fileIDMap := make(map[int64]bool)
+	for _, id := range fileIDs {
+		fileIDMap[id] = false // false means not found yet
+	}
+	// Mark files that were found
+	for rows.Next() {
+		var fileID int64
+		if err := rows.Scan(&fileID); err != nil {
+			return stacktrace.Propagate(err, "")
+		}
+		fileIDMap[fileID] = true // mark as found
+	}
+
+	if err = rows.Err(); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+
+	// Collect missing files
+	var missingFiles []int64
+	for id, found := range fileIDMap {
+		if !found {
+			missingFiles = append(missingFiles, id)
+		}
+	}
+	if len(missingFiles) > 0 {
+		logrus.WithField("missingFiles", missingFiles).Info("missing files")
+		return stacktrace.Propagate(fmt.Errorf("missing files %v", missingFiles), "")
+	}
+	return nil
+}
+
 // VerifyAllFileIDsExistsInCollection returns error if the fileIDs don't exist in the collection
 func (repo *CollectionRepository) VerifyAllFileIDsExistsInCollection(ctx context.Context, cID int64, fileIDs []int64) error {
 	fileIdMap := make(map[int64]bool)
