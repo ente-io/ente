@@ -48,8 +48,8 @@ import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlinedIcon from "@mui/icons-material/CameraOutlined";
-import Close from "@mui/icons-material/Close";
-import Done from "@mui/icons-material/Done";
+import CloseIcon from "@mui/icons-material/Close";
+import DoneIcon from "@mui/icons-material/Done";
 import EditIcon from "@mui/icons-material/Edit";
 import FaceRetouchingNaturalIcon from "@mui/icons-material/FaceRetouchingNatural";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
@@ -597,7 +597,7 @@ export function RenderCaption({
                                             color="inherit"
                                         />
                                     ) : (
-                                        <Done />
+                                        <DoneIcon />
                                     )}
                                 </IconButton>
                                 <IconButton
@@ -609,7 +609,7 @@ export function RenderCaption({
                                     }
                                     disabled={loading}
                                 >
-                                    <Close />
+                                    <CloseIcon />
                                 </IconButton>
                             </FlexWrapper>
                         )}
