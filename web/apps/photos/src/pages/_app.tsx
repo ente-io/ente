@@ -36,7 +36,7 @@ import {
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import type { User } from "@ente/shared/user/types";
-import ArrowForward from "@mui/icons-material/ArrowForward";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { CssBaseline, styled } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import Notification from "components/Notification";
@@ -100,7 +100,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 showMiniDialog(updateReadyToInstallDialogAttributes(update));
             } else {
                 setNotificationAttributes({
-                    endIcon: <ArrowForward />,
+                    endIcon: <ArrowForwardIcon />,
                     variant: "secondary",
                     message: t("update_available"),
                     onClick: () =>

@@ -37,10 +37,10 @@ import {
     FluidContainer,
     SpaceBetweenFlex,
 } from "@ente/shared/components/Container";
-import ArrowForward from "@mui/icons-material/ArrowForward";
-import ChevronRight from "@mui/icons-material/ChevronRight";
-import Close from "@mui/icons-material/Close";
-import Done from "@mui/icons-material/Done";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CloseIcon from "@mui/icons-material/Close";
+import DoneIcon from "@mui/icons-material/Done";
 import {
     Button,
     type ButtonProps,
@@ -370,7 +370,7 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
                     </Typography>
                 </Box>
                 <IconButton onClick={onClose} color="secondary">
-                    <Close />
+                    <CloseIcon />
                 </IconButton>
             </SpaceBetweenFlex>
         </Box>
@@ -591,7 +591,7 @@ const TopAlignedFluidContainer = styled(FluidContainer)`
 `;
 
 const DisabledPlanButton = styled((props: ButtonProps) => (
-    <Button disabled endIcon={<Done />} {...props} />
+    <Button disabled endIcon={<DoneIcon />} {...props} />
 ))(({ theme }) => ({
     "&.Mui-disabled": {
         backgroundColor: "transparent",
@@ -600,7 +600,7 @@ const DisabledPlanButton = styled((props: ButtonProps) => (
 }));
 
 const ActivePlanButton = styled((props: ButtonProps) => (
-    <Button color="accent" {...props} endIcon={<ArrowForward />} />
+    <Button color="accent" {...props} endIcon={<ArrowForwardIcon />} />
 ))(() => ({
     ".MuiButton-endIcon": {
         transition: "transform .2s ease-in-out",
@@ -636,7 +636,7 @@ const FreePlanRow: React.FC<FreePlanRowProps> = ({ onClose, storage }) => (
             </Typography>
         </Box>
         <IconButton className={"endIcon"}>
-            <ArrowForward />
+            <ArrowForwardIcon />
         </IconButton>
     </FreePlanRow_>
 );
@@ -812,7 +812,7 @@ const ManageSubscriptionButton: React.FC<ButtonProps> = ({
     children,
     ...props
 }) => (
-    <Button size="large" endIcon={<ChevronRight />} {...props}>
+    <Button size="large" endIcon={<ChevronRightIcon />} {...props}>
         <FluidContainer>{children}</FluidContainer>
     </Button>
 );

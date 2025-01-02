@@ -8,7 +8,7 @@ import {
     SpaceBetweenFlex,
     VerticallyCenteredFlex,
 } from "@ente/shared/components/Container";
-import Close from "@mui/icons-material/Close";
+import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
@@ -228,7 +228,7 @@ const UploadProgressTitle: React.FC = () => {
                             {expanded ? <UnfoldLessIcon /> : <UnfoldMoreIcon />}
                         </FilledIconButton>
                         <FilledIconButton onClick={onClose}>
-                            <Close />
+                            <CloseIcon />
                         </FilledIconButton>
                     </Stack>
                 </Box>

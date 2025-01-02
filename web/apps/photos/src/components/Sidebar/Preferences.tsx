@@ -25,7 +25,7 @@ import {
 } from "@/new/photos/services/settings";
 import { useAppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
-import ChevronRight from "@mui/icons-material/ChevronRight";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { Stack } from "@mui/material";
 import DropdownInput from "components/DropdownInput";
 import { t } from "i18next";
@@ -67,7 +67,7 @@ export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                     {isMLSupported && (
                         <MenuItemGroup>
                             <EnteMenuItem
-                                endIcon={<ChevronRight />}
+                                endIcon={<ChevronRightIcon />}
                                 onClick={showMLSettings}
                                 label={t("ml_search")}
                             />
@@ -75,12 +75,12 @@ export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                     )}
                     <EnteMenuItem
                         onClick={showMapSettings}
-                        endIcon={<ChevronRight />}
+                        endIcon={<ChevronRightIcon />}
                         label={t("map")}
                     />
                     <EnteMenuItem
                         onClick={showAdvancedSettings}
-                        endIcon={<ChevronRight />}
+                        endIcon={<ChevronRightIcon />}
                         label={t("advanced")}
                     />
                 </Stack>

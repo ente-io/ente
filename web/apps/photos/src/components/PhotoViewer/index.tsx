@@ -14,16 +14,16 @@ import { moveToTrash } from "@/new/photos/services/collection";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import { AppContext } from "@/new/photos/types/context";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
-import ChevronLeft from "@mui/icons-material/ChevronLeft";
-import ChevronRight from "@mui/icons-material/ChevronRight";
+import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
-import ContentCopy from "@mui/icons-material/ContentCopy";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorderRounded";
-import FavoriteIcon from "@mui/icons-material/FavoriteRounded";
-import DownloadIcon from "@mui/icons-material/FileDownloadOutlined";
+import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
 import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
 import InfoIcon from "@mui/icons-material/InfoOutlined";
@@ -755,7 +755,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
                                 disabled={livePhotoBtnOptions.loading}
                             >
                                 <FlexWrapper gap={"4px"}>
-                                    {<AlbumOutlined />}{" "}
+                                    {<AlbumOutlinedIcon />}{" "}
                                     {t("live_photo_indicator")}
                                 </FlexWrapper>
                             </Button>
@@ -819,7 +819,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
                                         )
                                     }
                                 >
-                                    <DownloadIcon />
+                                    <FileDownloadOutlinedIcon />
                                 </button>
                             )}
                             {props.enableDownload && shouldShowCopyOption && (
@@ -832,7 +832,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
                                         )
                                     }
                                 >
-                                    <ContentCopy fontSize="small" />
+                                    <ContentCopyIcon fontSize="small" />
                                 </button>
                             )}
                             {isOwnFile && !props.isTrashCollection && (
@@ -904,7 +904,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
                                             onClick={handleFavoriteClick}
                                         >
                                             {isFav ? (
-                                                <FavoriteIcon />
+                                                <FavoriteRoundedIcon />
                                             ) : (
                                                 <FavoriteBorderIcon />
                                             )}
@@ -926,13 +926,13 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = (props) => {
                             className="pswp__button pswp__button--arrow--left"
                             title={t("previous_key")}
                         >
-                            <ChevronLeft sx={{ pointerEvents: "none" }} />
+                            <ChevronLeftIcon sx={{ pointerEvents: "none" }} />
                         </button>
                         <button
                             className="pswp__button pswp__button--arrow--right"
                             title={t("next_key")}
                         >
-                            <ChevronRight sx={{ pointerEvents: "none" }} />
+                            <ChevronRightIcon sx={{ pointerEvents: "none" }} />
                         </button>
                         <div className="pswp__caption pswp-custom-caption-container">
                             <CaptionContainer />

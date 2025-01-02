@@ -15,7 +15,7 @@ import {
     VerticallyCentered,
 } from "@ente/shared/components/Container";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
-import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import {
     Button,
     ButtonBase,
@@ -157,7 +157,7 @@ const AuthNavbar: React.FC = () => {
                 <OverflowMenu ariaID="auth-options">
                     <OverflowMenuOption
                         color="critical"
-                        startIcon={<LogoutOutlined />}
+                        startIcon={<LogoutOutlinedIcon />}
                         onClick={logout}
                     >
                         {t("logout")}
