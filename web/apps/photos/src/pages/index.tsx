@@ -335,94 +335,62 @@ const Slideshow: React.FC = () => {
         setTimeout(() => container.scrollTo({ left }), 500);
     }, [selectedIndex]);
 
-    console.log("rendering", selectedIndex);
     return (
-        <Stack
-            sx={{
-                alignItems: "center",
-                // Override the center align for ourselves so that we don't
-                // revert back to our intrinsic width.
-                alignSelf: "stretch",
-            }}
-        >
-            <SlidesContainer ref={containerRef}>
-                <Slide>
-                    <Img
-                        src="/images/onboarding-lock/1x.png"
-                        srcSet="/images/onboarding-lock/2x.png 2x,
-/images/onboarding-lock/3x.png 3x"
-                    />
-                    <FeatureText>
-                        <Trans i18nKey={"intro_slide_1_title"} />
-                    </FeatureText>
-                    <TextContainer>{t("intro_slide_1")}</TextContainer>
-                </Slide>
-                <Slide>
-                    <SlideContents>
-                        <Img
-                            src="/images/onboarding-safe/1x.png"
-                            srcSet="/images/onboarding-safe/2x.png 2x,
-                /images/onboarding-safe/3x.png 3x"
-                        />
-                        <FeatureText>
-                            <Trans i18nKey={"intro_slide_2_title"} />
-                        </FeatureText>
-                        <TextContainer>{t("intro_slide_2")}</TextContainer>
-                    </SlideContents>
-                </Slide>
-                <Slide>
-                    <SlideContents>
-                        <Img
-                            src="/images/onboarding-sync/1x.png"
-                            srcSet="/images/onboarding-sync/2x.png 2x,
-                /images/onboarding-sync/3x.png 3x"
-                        />
-                        <FeatureText>
-                            <Trans i18nKey={"intro_slide_3_title"} />
-                        </FeatureText>
-                        <TextContainer>{t("intro_slide_3")}</TextContainer>
-                    </SlideContents>
-                </Slide>
-            </SlidesContainer>
-            {/* <CustomDotGroup>
-                <button
-                    className={selectedIndex == 0 ? "dot-button-selected" : ""}
-                    onClick={() => setSelectedIndex(0)}
-                ></button>
-                <button
-                    className={selectedIndex == 1 ? "dot-button-selected" : ""}
-                    onClick={() => setSelectedIndex(1)}
-                ></button>
-                <button
-                    className={selectedIndex == 2 ? "dot-button-selected" : ""}
-                    onClick={() => setSelectedIndex(2)}
-                ></button>
-            </CustomDotGroup> */}
-        </Stack>
+        <SlidesContainer ref={containerRef}>
+            <Slide>
+                <Img
+                    src="/images/onboarding-lock/1x.png"
+                    srcSet="/images/onboarding-lock/2x.png 2x, /images/onboarding-lock/3x.png 3x"
+                />
+                <SlideTitle>
+                    <Trans i18nKey={"intro_slide_1_title"} />
+                </SlideTitle>
+                <SlideDescription>{t("intro_slide_1")}</SlideDescription>
+            </Slide>
+            <Slide>
+                <Img
+                    src="/images/onboarding-safe/1x.png"
+                    srcSet="/images/onboarding-safe/2x.png 2x, /images/onboarding-safe/3x.png 3x"
+                />
+                <SlideTitle>
+                    <Trans i18nKey={"intro_slide_2_title"} />
+                </SlideTitle>
+                <SlideDescription>{t("intro_slide_2")}</SlideDescription>
+            </Slide>
+            <Slide>
+                <Img
+                    src="/images/onboarding-sync/1x.png"
+                    srcSet="/images/onboarding-sync/2x.png 2x, /images/onboarding-sync/3x.png 3x"
+                />
+                <SlideTitle>
+                    <Trans i18nKey={"intro_slide_3_title"} />
+                </SlideTitle>
+                <SlideDescription>{t("intro_slide_3")}</SlideDescription>
+            </Slide>
+        </SlidesContainer>
     );
 };
 
 const SlidesContainer = styled("div")`
+    /* Override the center align for ourselves so that we don't revert back to
+       our intrinsic width. */
     align-self: stretch;
     display: flex;
     overflow-x: hidden;
-    // scroll-snap-type: x mandatory;
 `;
 
 const Slide = styled(Stack)`
-    // flex: 0 0 100%;
     min-width: 100%;
     align-items: center;
     text-align: center;
-    // scroll-snap-align: start;
 `;
 
-const TextContainer = (props: TypographyProps) => (
-    <Typography color={"text.muted"} mt={2} mb={3} {...props} />
+const SlideTitle = (props: TypographyProps) => (
+    <Typography variant="h3" mt={4} {...props} />
 );
 
-const FeatureText = (props: TypographyProps) => (
-    <Typography variant="h3" mt={4} {...props} />
+const SlideDescription = (props: TypographyProps) => (
+    <Typography color={"text.muted"} mt={2} mb={3} {...props} />
 );
 
 const Img = styled("img")`
@@ -432,32 +400,4 @@ const Img = styled("img")`
     @media (width <= 400px) {
         height: 180px;
     }
-`;
-
-// TODO
-const CustomDotGroup = styled("div")`
-    margin-block-start: 2px;
-    margin-block-end: 24px;
-
-    button {
-        margin-inline-end: 14px;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        padding: 0;
-        border: 0;
-        background-color: #fff;
-        opacity: 0.5;
-        transition: opacity 0.6s ease;
-    }
-
-    button.dot-button-selected {
-        background-color: #51cd7c;
-        opacity: 1;
-    }
-`;
-
-const SlideContents = styled("div")`
-    display: flex;
-    flex-direction: column;
 `;
