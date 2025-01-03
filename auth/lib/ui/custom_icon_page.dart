@@ -31,6 +31,7 @@ class _CustomIconPageState extends State<CustomIconPage> {
   // Used to request focus on the search box when clicked the search icon
   late FocusNode searchBoxFocusNode;
   final Set<LogicalKeyboardKey> _pressedKeys = <LogicalKeyboardKey>{};
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -45,6 +46,7 @@ class _CustomIconPageState extends State<CustomIconPage> {
   void dispose() {
     _textController.dispose();
     searchBoxFocusNode.dispose();
+    _scrollController.dispose();
     ServicesBinding.instance.keyboard.removeHandler(_handleKeyEvent);
     super.dispose();
   }
@@ -155,8 +157,11 @@ class _CustomIconPageState extends State<CustomIconPage> {
             children: [
               Expanded(
                 child: Scrollbar(
+                  controller: _scrollController,
                   thumbVisibility: true,
+                  interactive: true,
                   child: GridView.builder(
+                    controller: _scrollController,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: (MediaQuery.sizeOf(context).width ~/ 90)
                           .clamp(1, double.infinity)
