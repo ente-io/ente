@@ -97,11 +97,6 @@ MUI uses [Emotion](https://emotion.sh/) as its preferred CSS-in-JS library, for
 which we need to install install two Emotion packages (`@emotion/react` and
 `@emotion/styled`) as peer dependencies.
 
-We need to pin the emotion version (using the "resolutions" field in
-`package.json`) to those used by MUI since react-select (another package we use)
-specify a different emotion version directly instead of as a peer dependency,
-and we end up with two emotions at runtime otherwise.
-
 We also use MUI's
 [@mui/material-icons](https://mui.com/material-ui/material-icons/) package,
 which provides Material icons exported as React components (a `SvgIcon`).
@@ -132,7 +127,14 @@ with Next.js.
 
 For more details, see [translations.md](translations.md).
 
-### Other UI components
+### UI components
+
+- [react-window](https://github.com/bvaughn/react-window) is used for lazy-ily
+  rendering large lists of dynamically created content, each item being of a
+  variable height. It is usually used in tandem with its sibling package,
+  [react-virtualized-auto-sizer](https://github.com/bvaughn/react-virtualized-auto-sizer)
+  which allows the lazy list to resize itself automatically to fill the entire
+  remaining space available in the container.
 
 - [formik](https://github.com/jaredpalmer/formik) provides an easier to use
   abstraction for dealing with form state, validation and submission states when
