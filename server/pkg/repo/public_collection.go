@@ -91,14 +91,14 @@ func (pcr *PublicCollectionRepository) GetCollectionToActivePublicURLMap(ctx con
 // Note: The token could be expired or deviceLimit is already reached
 func (pcr *PublicCollectionRepository) GetActivePublicCollectionToken(ctx context.Context, collectionID int64) (ente.PublicCollectionToken, error) {
 	row := pcr.DB.QueryRowContext(ctx, `SELECT id, collection_id, access_token, valid_till, device_limit, 
-       is_disabled, pw_hash, pw_nonce, mem_limit, ops_limit, enable_download, enable_collect FROM 
+       is_disabled, pw_hash, pw_nonce, mem_limit, ops_limit, enable_download, enable_collect, enable_join FROM 
                                                    public_collection_tokens WHERE collection_id = $1 and is_disabled = FALSE`,
 		collectionID)
 
 	//defer rows.Close()
 	ret := ente.PublicCollectionToken{}
 	err := row.Scan(&ret.ID, &ret.CollectionID, &ret.Token, &ret.ValidTill, &ret.DeviceLimit,
-		&ret.IsDisabled, &ret.PassHash, &ret.Nonce, &ret.MemLimit, &ret.OpsLimit, &ret.EnableDownload, &ret.EnableCollect)
+		&ret.IsDisabled, &ret.PassHash, &ret.Nonce, &ret.MemLimit, &ret.OpsLimit, &ret.EnableDownload, &ret.EnableCollect, &ret.EnableJoin)
 	if err != nil {
 		return ente.PublicCollectionToken{}, stacktrace.Propagate(err, "")
 	}

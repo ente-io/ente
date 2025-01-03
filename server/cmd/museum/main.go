@@ -535,6 +535,7 @@ func main() {
 	privateAPI.GET("/collections", collectionHandler.Get)
 	privateAPI.GET("/collections/v2", collectionHandler.GetV2)
 	privateAPI.POST("/collections/share", collectionHandler.Share)
+	privateAPI.POST("/collections/join-link", collectionHandler.JoinLink)
 	privateAPI.POST("/collections/share-url", collectionHandler.ShareURL)
 	privateAPI.PUT("/collections/share-url", collectionHandler.UpdateShareURL)
 	privateAPI.DELETE("/collections/share-url/:collectionID", collectionHandler.UnShareURL)
