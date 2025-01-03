@@ -116,15 +116,18 @@ class _HomePageState extends State<HomePage> {
   bool _handleKeyEvent(KeyEvent event) {
     if (event is KeyDownEvent) {
       _pressedKeys.add(event.logicalKey);
-      if ((_pressedKeys.contains(LogicalKeyboardKey.controlLeft) ||
+      bool isMetaKeyPressed = Platform.isMacOS || Platform.isIOS
+          ? (_pressedKeys.contains(LogicalKeyboardKey.metaLeft) ||
+              _pressedKeys.contains(LogicalKeyboardKey.meta) ||
+              _pressedKeys.contains(LogicalKeyboardKey.metaRight))
+          : (_pressedKeys.contains(LogicalKeyboardKey.controlLeft) ||
               _pressedKeys.contains(LogicalKeyboardKey.control) ||
-              _pressedKeys.contains(LogicalKeyboardKey.controlRight)) &&
-          event.logicalKey == LogicalKeyboardKey.keyF) {
+              _pressedKeys.contains(LogicalKeyboardKey.controlRight));
+
+      if (isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyF) {
         setState(() {
           _showSearchBox = true;
           searchBoxFocusNode.requestFocus();
-          _textController.clear();
-          _searchText = "";
         });
         return true;
       }
