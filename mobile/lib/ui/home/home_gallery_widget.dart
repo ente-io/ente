@@ -93,9 +93,11 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
           result = await FilesDB.instance.getAllLocalAndUploadedFiles(
             creationStartTime,
             creationEndTime,
+            ownerID!,
             limit: limit,
             asc: asc,
             filterOptions: filterOptions,
+            ignoreSharedFiles: _shouldHideSharedItems,
           );
         } else {
           result = await FilesDB.instance.getAllPendingOrUploadedFiles(

@@ -726,24 +726,40 @@ class FilesDB {
 
   Future<FileLoadResult> getAllLocalAndUploadedFiles(
     int startTime,
-    int endTime, {
+    int endTime,
+    int ownerID, {
     int? limit,
     bool? asc,
+    bool ignoreSharedFiles = false,
     required DBFilterOptions filterOptions,
   }) async {
     final db = await instance.sqliteAsyncDB;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final args = [startTime, endTime, visibleVisibility];
-    String query =
+    final subQueries = <String>[];
+
+    subQueries.add(
         'SELECT * FROM $filesTable WHERE $columnCreationTime >= ? AND $columnCreationTime <= ?  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
-        ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))'
-        ' ORDER BY $columnCreationTime $order, $columnModificationTime $order';
+        ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))');
+
+    if (ignoreSharedFiles == true) {
+      subQueries.add(' AND $columnOwnerID = ?');
+      args.add(ownerID);
+    }
+
+    subQueries.add(
+      ' ORDER BY $columnCreationTime $order, $columnModificationTime $order',
+    );
+
     if (limit != null) {
-      query += ' LIMIT ?';
+      subQueries.add(' LIMIT ?');
       args.add(limit);
     }
+
+    final finalQuery = subQueries.join();
+
     final results = await db.getAll(
-      query,
+      finalQuery,
       args,
     );
     final files = convertToFiles(results);
