@@ -155,7 +155,7 @@ func (repo *CollectionRepository) GetCollectionsOwnedByUserV2(userID int64, upda
 		SELECT 
 c.collection_id, c.owner_id, c.encrypted_key,c.key_decryption_nonce, c.name, c.encrypted_name, c.name_decryption_nonce, c.type, c.app, c.attributes, c.updation_time, c.is_deleted, c.magic_metadata, c.pub_magic_metadata,
 users.user_id, users.encrypted_email, users.email_decryption_nonce, cs.role_type,
-pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_at, pct.pw_hash, pct.pw_nonce, pct.mem_limit, pct.ops_limit, pct.enable_download, pct.enable_collect 
+pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_at, pct.pw_hash, pct.pw_nonce, pct.mem_limit, pct.ops_limit, pct.enable_download, pct.enable_collect, pct.enable_join 
     FROM collections c
     LEFT JOIN collection_shares cs
     ON (cs.collection_id = c.collection_id AND cs.is_deleted = false)
@@ -175,14 +175,14 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 		var c ente.Collection
 		var name, encryptedName, nameDecryptionNonce sql.NullString
 		var pctDeviceLimit sql.NullInt32
-		var pctEnableDownload, pctEnableCollect sql.NullBool
+		var pctEnableDownload, pctEnableCollect, pctEnableJoin sql.NullBool
 		var shareUserID, pctValidTill, pctCreatedAt, pctUpdatedAt, pctMemLimit, pctOpsLimit sql.NullInt64
 		var encryptedEmail, nonce []byte
 		var shareeRoleType, pctToken, pctPwHash, pctPwNonce sql.NullString
 
 		if err := rows.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata,
 			&shareUserID, &encryptedEmail, &nonce, &shareeRoleType,
-			&pctToken, &pctValidTill, &pctDeviceLimit, &pctCreatedAt, &pctUpdatedAt, &pctPwHash, &pctPwNonce, &pctMemLimit, &pctOpsLimit, &pctEnableDownload, &pctEnableCollect); err != nil {
+			&pctToken, &pctValidTill, &pctDeviceLimit, &pctCreatedAt, &pctUpdatedAt, &pctPwHash, &pctPwNonce, &pctMemLimit, &pctOpsLimit, &pctEnableDownload, &pctEnableCollect, &pctEnableJoin); err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
 
@@ -222,6 +222,7 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 					EnableDownload:  pctEnableDownload.Bool,
 					EnableCollect:   pctEnableCollect.Bool,
 					PasswordEnabled: pctPwNonce.Valid,
+					EnableJoin:      pctEnableJoin.Bool,
 				}
 				if pctPwNonce.Valid {
 					url.Nonce = &pctPwNonce.String

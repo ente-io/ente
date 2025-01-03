@@ -3,7 +3,7 @@ package ente
 import (
 	"database/sql/driver"
 	"encoding/json"
-
+	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 )
 
@@ -11,8 +11,10 @@ import (
 type CreatePublicAccessTokenRequest struct {
 	CollectionID  int64 `json:"collectionID" binding:"required"`
 	EnableCollect bool  `json:"enableCollect"`
-	ValidTill     int64 `json:"validTill"`
-	DeviceLimit   int   `json:"deviceLimit"`
+	// defaults to true
+	EnableJoin  *bool `json:"joinViaLink"`
+	ValidTill   int64 `json:"validTill"`
+	DeviceLimit int   `json:"deviceLimit"`
 }
 
 type UpdatePublicAccessTokenRequest struct {
@@ -26,6 +28,7 @@ type UpdatePublicAccessTokenRequest struct {
 	EnableDownload  *bool   `json:"enableDownload"`
 	EnableCollect   *bool   `json:"enableCollect"`
 	DisablePassword *bool   `json:"disablePassword"`
+	EnableJoin      *bool   `json:"enableJoin"`
 }
 
 type VerifyPasswordRequest struct {
@@ -50,6 +53,23 @@ type PublicCollectionToken struct {
 	OpsLimit       *int64
 	EnableDownload bool
 	EnableCollect  bool
+	EnableJoin     bool
+}
+
+func (p PublicCollectionToken) CanJoin() error {
+	if p.IsDisabled {
+		return NewBadRequestWithMessage("link disabled")
+	}
+	if p.ValidTill > 0 && p.ValidTill < time.Microseconds() {
+		return NewBadRequestWithMessage("token expired")
+	}
+	if !p.EnableDownload {
+		return NewBadRequestWithMessage("can not join as download is disabled")
+	}
+	if !p.EnableJoin {
+		return NewBadRequestWithMessage("can not join as join is disabled")
+	}
+	return nil
 }
 
 // PublicURL represents information about non-disabled public url for a collection
@@ -62,9 +82,10 @@ type PublicURL struct {
 	EnableCollect   bool `json:"enableCollect"`
 	PasswordEnabled bool `json:"passwordEnabled"`
 	// Nonce contains the nonce value for the password if the link is password protected.
-	Nonce    *string `json:"nonce,omitempty"`
-	MemLimit *int64  `json:"memLimit,omitempty"`
-	OpsLimit *int64  `json:"opsLimit,omitempty"`
+	Nonce      *string `json:"nonce,omitempty"`
+	MemLimit   *int64  `json:"memLimit,omitempty"`
+	OpsLimit   *int64  `json:"opsLimit,omitempty"`
+	EnableJoin bool    `json:"enableJoinViaLink"`
 }
 
 type PublicAccessContext struct {
