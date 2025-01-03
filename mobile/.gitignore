@@ -40,3 +40,6 @@ android/.settings/
 .env
 
 fastlane/report.xml
+
+# Android related
+android/app/build/
