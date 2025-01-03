@@ -118,6 +118,14 @@ export default function LandingPage() {
     const redirectToSignupPage = () => router.push(PAGES.SIGNUP);
     const redirectToLoginPage = () => router.push(PAGES.LOGIN);
 
+    // return (
+    //     <SlideshowPanel>
+    //         <Logo_>
+    //             <EnteLogo height={24} />
+    //         </Logo_>
+    //         <Slideshow />
+    //     </SlideshowPanel>
+    // );
     return (
         <TappableContainer onMaybeChangeHost={refreshHost}>
             {loading ? (
@@ -239,15 +247,16 @@ const shouldAllowChangingAPIOrigin = () => {
 };
 
 const SlideshowPanel = styled("div")`
+    align-self: stretch;
+
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: center;
 
     @media (width <= 1024px) {
-        flex-grow: 0;
+        // flex-grow: 0;
     }
 `;
 
@@ -310,19 +319,19 @@ const SideBox = styled("div")`
 const Slide: React.FC<
     React.PropsWithChildren<{ index: number; ref: Ref<HTMLDivElement> }>
 > = ({ ref, children }) => {
-    return <Stack ref={ref}>{children}</Stack>;
+    return (
+        <Stack ref={ref} sx={{ alignItems: "center", textAlign: "center" }}>
+            {children}
+        </Stack>
+    );
 };
 
 const SlidesContainer = styled("div")`
     display: flex;
-    box-sizing: border-box;
-    width: max(350px, 100%);
-    overflow: hidden;
-    border: 1px solid red;
+    overflow-x: hidden;
     scroll-behavior: smooth;
     & > div {
         flex: 0 0 100%;
-        border: 1px solid green;
     }
 `;
 
@@ -334,7 +343,6 @@ const Slideshow: React.FC = () => {
         const intervalID = setInterval(() => {
             setSelectedIndex((selectedIndex + 1) % 3);
         }, 5000);
-
         return () => clearInterval(intervalID);
     });
 
@@ -354,7 +362,14 @@ const Slideshow: React.FC = () => {
         };
 
     return (
-        <div>
+        <Stack
+            sx={{
+                alignItems: "center",
+                // Override the center align for ourselves so that we don't
+                // revert back to our intrinsic width.
+                alignSelf: "stretch",
+            }}
+        >
             <SlidesContainer>
                 <Slide index={0} ref={createSlideRefCallback(0)}>
                     <Img
@@ -408,7 +423,7 @@ const Slideshow: React.FC = () => {
                     onClick={() => setSelectedIndex(2)}
                 ></button>
             </CustomDotGroup>
-        </div>
+        </Stack>
     );
 };
 
