@@ -173,7 +173,7 @@ const CollectionButton: React.FC<AllCollectionCardProps> = ({
     >
         <LargeTileTextOverlay>
             <Typography>{collectionSummary.name}</Typography>
-            <Typography variant="small" color="text.muted">
+            <Typography variant="small" sx={{ color: "text.muted" }}>
                 {t("photos_count", { count: collectionSummary.fileCount })}
             </Typography>
         </LargeTileTextOverlay>

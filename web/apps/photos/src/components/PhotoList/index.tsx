@@ -586,14 +586,17 @@ export function PhotoList({
                 >
                     {/* Make the entire area tappable, otherwise it is hard to
                         get at on mobile devices. */}
-                    <Box width={"100%"}>
+                    <Box sx={{ width: "100%" }}>
                         <Link
                             color="text.base"
                             sx={{ "&:hover": { color: "inherit" } }}
                             target="_blank"
                             href={"https://ente.io"}
                         >
-                            <Typography variant="small" display={"block"}>
+                            <Typography
+                                variant="small"
+                                sx={{ display: "block" }}
+                            >
                                 {t("SHARED_USING")}{" "}
                                 <Link target="_blank" href={"https://ente.io"}>
                                     ente.io
@@ -603,10 +606,7 @@ export function PhotoList({
                         {publicCollectionGalleryContext.referralCode ? (
                             <FullStretchContainer>
                                 <Typography
-                                    sx={{
-                                        marginTop: "12px",
-                                        padding: "8px",
-                                    }}
+                                    sx={{ marginTop: "12px", padding: "8px" }}
                                 >
                                     <Trans
                                         i18nKey={"SHARING_REFERRAL_CODE"}

@@ -80,7 +80,7 @@ export default function ItemList<T>(props: ItemListProps<T>) {
     };
 
     return (
-        <Box pl={2}>
+        <Box sx={{ pl: 2 }}>
             <List
                 itemData={itemData}
                 height={Math.min(

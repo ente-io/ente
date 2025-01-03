@@ -173,7 +173,6 @@ const DefaultOptions: React.FC<OptionsProps> = ({
                 </DialogTitle>
                 <DialogCloseIconButton {...{ onClose }} />
             </SpaceBetweenFlex>
-
             <Box sx={{ p: "12px", pt: "16px" }}>
                 <Stack spacing={0.5}>
                     {intent != "import" && (
@@ -200,8 +199,12 @@ const DefaultOptions: React.FC<OptionsProps> = ({
                     )}
                 </Stack>
                 <Typography
-                    color="text.muted"
-                    sx={{ p: "12px", pt: "24px", textAlign: "center" }}
+                    sx={{
+                        color: "text.muted",
+                        p: "12px",
+                        pt: "24px",
+                        textAlign: "center",
+                    }}
                 >
                     {t("drag_and_drop_hint")}
                 </Typography>
@@ -220,7 +223,6 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                 <DialogTitle variant="h5">{t("google_takeout")}</DialogTitle>
                 <DialogCloseIconButton {...{ onClose }} />
             </SpaceBetweenFlex>
-
             <Stack sx={{ padding: "18px 12px 20px 12px", gap: "16px" }}>
                 <Stack sx={{ gap: "8px" }}>
                     <FocusVisibleButton
@@ -248,7 +250,7 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                     </Link>
                 </Stack>
 
-                <Typography variant="small" color="text.muted">
+                <Typography variant="small" sx={{ color: "text.muted" }}>
                     {t("takeout_hint")}
                 </Typography>
             </Stack>

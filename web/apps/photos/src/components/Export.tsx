@@ -213,7 +213,7 @@ export const Export: React.FC<ExportProps> = ({
 function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
     return (
         <SpaceBetweenFlex minHeight={"48px"}>
-            <Typography color="text.muted" mr={"16px"}>
+            <Typography sx={{ color: "text.muted", mr: "16px" }}>
                 {t("destination")}
             </Typography>
             <>
@@ -279,7 +279,9 @@ const ChangeDirectoryOption: React.FC<ButtonishProps> = ({ onClick }) => (
 function ContinuousExport({ continuousExport, toggleContinuousExport }) {
     return (
         <SpaceBetweenFlex minHeight={"48px"}>
-            <Typography color="text.muted">{t("CONTINUOUS_EXPORT")}</Typography>
+            <Typography sx={{ color: "text.muted" }}>
+                {t("CONTINUOUS_EXPORT")}
+            </Typography>
             <Box>
                 <EnteSwitch
                     color="accent"

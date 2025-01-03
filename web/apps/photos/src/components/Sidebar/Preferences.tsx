@@ -120,7 +120,7 @@ const LanguageSelector = () => {
         <DropdownInput
             options={options}
             label={t("language")}
-            labelProps={{ color: "text.muted" }}
+            labelSxProps={{ color: "text.muted" }}
             selected={locale}
             setSelected={updateCurrentLocale}
         />

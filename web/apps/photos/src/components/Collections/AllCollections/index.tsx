@@ -113,8 +113,7 @@ const AllCollectionsHeader = ({
                     </Typography>
                     <Typography
                         variant="small"
-                        fontWeight={"normal"}
-                        color={"text.muted"}
+                        sx={{ fontWeight: "normal", color: "text.muted" }}
                     >
                         {t("albums_count", { count: collectionCount })}
                     </Typography>

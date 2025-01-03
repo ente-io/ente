@@ -41,7 +41,7 @@ export default function ExportInProgress(props: Props) {
         <>
             <DialogContent>
                 <VerticallyCentered>
-                    <Box mb={1.5}>
+                    <Box sx={{ mb: 1.5 }}>
                         {props.exportStage === ExportStage.STARTING ? (
                             t("EXPORT_STARTING")
                         ) : props.exportStage === ExportStage.MIGRATION ? (

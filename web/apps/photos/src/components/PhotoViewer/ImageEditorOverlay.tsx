@@ -531,12 +531,18 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                 }}
                 open
             >
-                <Box padding="1rem" width="100%" height="100%">
+                <Box
+                    sx={{
+                        padding: "1rem",
+                        width: "100%",
+                        height: "100%",
+                    }}
+                >
                     <HorizontalFlex
                         justifyContent={"space-between"}
                         alignItems={"center"}
                     >
-                        <Typography variant="h2" fontWeight="bold">
+                        <Typography variant="h2" sx={{ fontWeight: "bold" }}>
                             {t("photo_editor")}
                         </Typography>
                         <IconButton
@@ -548,17 +554,19 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         </IconButton>
                     </HorizontalFlex>
                     <Box
-                        width="100%"
-                        height="100%"
-                        overflow="hidden"
-                        boxSizing={"border-box"}
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
-                        position="relative"
                         onMouseUp={handleDragEnd}
                         onMouseMove={isDragging ? handleDrag : null}
                         onMouseDown={handleDragStart}
+                        sx={{
+                            width: "100%",
+                            height: "100%",
+                            overflow: "hidden",
+                            boxSizing: "border-box",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            position: "relative",
+                        }}
                     >
                         <Box
                             style={{
@@ -568,13 +576,15 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                             }}
                         >
                             <Box
-                                height="88%"
-                                width="100%"
                                 ref={parentRef}
-                                display="flex"
-                                alignItems="center"
-                                justifyContent="center"
-                                position="relative"
+                                sx={{
+                                    height: "88%",
+                                    width: "100%",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    position: "relative",
+                                }}
                             >
                                 {(fileURL === null || canvasLoading) && (
                                     <CircularProgress />
@@ -1350,7 +1360,7 @@ interface ColoursMenuProps {
 
 const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
     <>
-        <Box px={"8px"}>
+        <Box sx={{ px: "8px" }}>
             <MenuSectionTitle title={t("brightness")} />
             <Slider
                 min={0}
