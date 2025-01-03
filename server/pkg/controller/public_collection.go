@@ -91,7 +91,7 @@ func (c *PublicCollectionController) CreateAccessToken(ctx context.Context, req 
 	return response, nil
 }
 
-func (c *PublicCollectionController) GetCollectionSummaryByToken(ctx context.Context, collectionID int64) (ente.PublicCollectionToken, error) {
+func (c *PublicCollectionController) GetActivePublicCollectionToken(ctx context.Context, collectionID int64) (ente.PublicCollectionToken, error) {
 	return c.PublicCollectionRepo.GetActivePublicCollectionToken(ctx, collectionID)
 }
 

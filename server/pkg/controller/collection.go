@@ -193,7 +193,7 @@ func (c *CollectionController) JoinViaLink(ctx *gin.Context, req ente.JoinCollec
 	if !collection.AllowSharing() {
 		return stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("joining %s is not allowed", collection.Type))
 	}
-	publicCollectionToken, err := c.PublicCollectionCtrl.GetCollectionSummaryByToken(ctx, req.CollectionID)
+	publicCollectionToken, err := c.PublicCollectionCtrl.GetActivePublicCollectionToken(ctx, req.CollectionID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}

@@ -63,10 +63,10 @@ func (p PublicCollectionToken) CanJoin() error {
 	if p.ValidTill > 0 && p.ValidTill < time.Microseconds() {
 		return NewBadRequestWithMessage("token expired")
 	}
-	if p.EnableDownload == false {
+	if !p.EnableDownload {
 		return NewBadRequestWithMessage("can not join as download is disabled")
 	}
-	if p.EnableJoin == false {
+	if !p.EnableJoin {
 		return NewBadRequestWithMessage("can not join as join is disabled")
 	}
 	return nil
