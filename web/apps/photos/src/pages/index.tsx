@@ -407,6 +407,12 @@ const SlidesContainer = styled("div")`
     align-self: stretch;
     display: flex;
     overflow-x: hidden;
+    /* Note: smooth scroll doesn't work with Chrome intermittently. A common
+       workaround is to wrap the scrollTo in a setTimeout etc, but even that
+       doesn't help for our particular scenario.
+
+       Ref: https://github.com/facebook/react/issues/23396
+     */
     scroll-behavior: smooth;
     // scroll-snap-type: x mandatory;
 `;
