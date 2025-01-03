@@ -29,7 +29,7 @@ type UpdatePublicAccessTokenRequest struct {
 	EnableDownload  *bool   `json:"enableDownload"`
 	EnableCollect   *bool   `json:"enableCollect"`
 	DisablePassword *bool   `json:"disablePassword"`
-	JoinViaLink     *bool   `json:"joinViaLink"`
+	EnableJoin      *bool   `json:"enableJoin"`
 }
 
 type VerifyPasswordRequest struct {
