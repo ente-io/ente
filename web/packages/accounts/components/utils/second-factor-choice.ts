@@ -21,7 +21,7 @@ export const useSecondFactorChoiceIfNeeded = () => {
     const resolveSecondFactorChoice = useRef<
         | ((value: SecondFactorType | PromiseLike<SecondFactorType>) => void)
         | undefined
-    >();
+    >(undefined);
     const {
         show: showSecondFactorChoice,
         props: secondFactorChoiceVisibilityProps,
