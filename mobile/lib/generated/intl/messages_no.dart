@@ -226,6 +226,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Genererer krypteringsnøkler..."),
         "hidden": MessageLookupByLibrary.simpleMessage("Skjult"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "howItWorks":
             MessageLookupByLibrary.simpleMessage("Hvordan det fungerer"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(

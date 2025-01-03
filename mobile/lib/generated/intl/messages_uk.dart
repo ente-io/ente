@@ -986,6 +986,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Приховує вміст застосунку у перемикачі застосунків і вимикає знімки екрана"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Приховує вміст застосунку у перемикачі застосунків"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Приховуємо..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Розміщення на OSM Франція"),

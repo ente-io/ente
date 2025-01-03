@@ -36,6 +36,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("Adja meg az e-mail címét"),
         "feedback": MessageLookupByLibrary.simpleMessage("Visszajelzés"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Érvénytelen e-mail cím"),
         "verify": MessageLookupByLibrary.simpleMessage("Hitelesítés")

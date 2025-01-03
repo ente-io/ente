@@ -139,6 +139,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "general": MessageLookupByLibrary.simpleMessage("Асноўныя"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Генерацыя ключоў шыфравання..."),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Як гэта працуе"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Iгнараваць"),
         "incorrectPasswordTitle":

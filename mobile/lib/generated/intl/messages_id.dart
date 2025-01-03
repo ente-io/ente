@@ -744,6 +744,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("Bantuan"),
         "hidden": MessageLookupByLibrary.simpleMessage("Tersembunyi"),
         "hide": MessageLookupByLibrary.simpleMessage("Sembunyikan"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Menyembunyikan..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Dihosting oleh OSM France"),

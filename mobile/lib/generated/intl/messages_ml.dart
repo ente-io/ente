@@ -69,6 +69,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("സങ്കേതക്കുറി മറന്നുപോയി"),
         "general": MessageLookupByLibrary.simpleMessage("പൊതുവായവ"),
         "hide": MessageLookupByLibrary.simpleMessage("മറയ്ക്കുക"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("പ്രവർത്തന രീതി"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("അവഗണിക്കുക"),
         "incorrectPasswordTitle":

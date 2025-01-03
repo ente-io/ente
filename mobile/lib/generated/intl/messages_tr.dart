@@ -731,6 +731,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("Yardım"),
         "hidden": MessageLookupByLibrary.simpleMessage("Gizle"),
         "hide": MessageLookupByLibrary.simpleMessage("Gizle"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Gizleniyor..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("OSM Fransa\'da ağırlandı"),

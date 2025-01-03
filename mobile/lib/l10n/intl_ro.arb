@@ -1225,5 +1225,6 @@
   "panorama": "Panoramă",
   "reenterPassword": "Reintroduceți parola",
   "reenterPin": "Reintroduceți codul PIN",
-  "deviceLock": "Blocare dispozitiv"
+  "deviceLock": "Blocare dispozitiv",
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery"
 }

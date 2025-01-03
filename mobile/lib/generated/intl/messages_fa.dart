@@ -222,6 +222,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "ما نصب برنامه را ردیابی نمی‌کنیم. اگر بگویید کجا ما را پیدا کردید، به ما کمک می‌کند!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
             "از کجا در مورد Ente شنیدی؟ (اختیاری)"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("چگونه کار می‌کند"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("نادیده گرفتن"),
         "incorrectPasswordTitle":

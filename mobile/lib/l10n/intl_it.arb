@@ -1403,5 +1403,6 @@
   "changeLogBackupStatusTitle": "Stato Backup",
   "changeLogDiscoverTitle": "Esplora",
   "selectCoverPhoto": "Seleziona foto di copertina",
-  "newLocation": "Nuova posizione"
+  "newLocation": "Nuova posizione",
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery"
 }

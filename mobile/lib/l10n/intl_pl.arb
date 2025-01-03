@@ -1562,5 +1562,6 @@
   },
   "legacyInvite": "{email} zaprosił Cię do zostania zaufanym kontaktem",
   "authToManageLegacy": "Prosimy uwierzytelnić się, aby zarządzać zaufanymi kontaktami",
-  "useDifferentPlayerInfo": "Masz problem z odtwarzaniem tego wideo? Przytrzymaj tutaj, aby spróbować innego odtwarzacza."
+  "useDifferentPlayerInfo": "Masz problem z odtwarzaniem tego wideo? Przytrzymaj tutaj, aby spróbować innego odtwarzacza.",
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery"
 }

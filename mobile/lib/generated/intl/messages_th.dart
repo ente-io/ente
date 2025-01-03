@@ -175,6 +175,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "genericProgress": m40,
         "goToSettings": MessageLookupByLibrary.simpleMessage("ไปที่การตั้งค่า"),
         "hide": MessageLookupByLibrary.simpleMessage("ซ่อน"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("โฮสต์ที่ OSM ฝรั่งเศส"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("วิธีการทำงาน"),

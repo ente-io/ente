@@ -195,8 +195,10 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                               height: 24,
                             ),
                             MenuItemWidget(
-                              captionedTextWidget: const CaptionedTextWidget(
-                                title: "Hide shared items from home gallery",
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: S
+                                    .of(context)
+                                    .hideSharedItemsFromHomeGallery,
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               singleBorderRadius: 8,

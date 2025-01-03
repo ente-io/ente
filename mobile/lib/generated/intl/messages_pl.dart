@@ -1000,6 +1000,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ukrywa zawartość aplikacji w przełączniku aplikacji i wyłącza zrzuty ekranu"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Ukrywa zawartość aplikacji w przełączniku aplikacji"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Ukrywanie..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Hostowane w OSM Francja"),

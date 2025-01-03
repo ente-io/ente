@@ -825,6 +825,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("Asistență"),
         "hidden": MessageLookupByLibrary.simpleMessage("Ascunse"),
         "hide": MessageLookupByLibrary.simpleMessage("Ascundere"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Se ascunde..."),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Cum funcţionează"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(

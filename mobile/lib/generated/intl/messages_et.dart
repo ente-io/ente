@@ -122,6 +122,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("Abiinfo"),
         "hidden": MessageLookupByLibrary.simpleMessage("Peidetud"),
         "hide": MessageLookupByLibrary.simpleMessage("Peida"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "importing": MessageLookupByLibrary.simpleMessage("Importimine...."),
         "incorrectPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Vale parool"),

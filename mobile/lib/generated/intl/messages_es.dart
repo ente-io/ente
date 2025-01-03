@@ -1015,6 +1015,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Oculta el contenido de la aplicación en el selector de aplicaciones y desactivar capturas de pantalla"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Ocultar el contenido de la aplicación en el selector de aplicaciones"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Ocultando..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Alojado en OSM France"),

@@ -1157,5 +1157,6 @@
   "invalidEndpoint": "Geçersiz uç nokta",
   "invalidEndpointMessage": "Üzgünüz, girdiğiniz uç nokta geçersiz. Lütfen geçerli bir uç nokta girin ve tekrar deneyin.",
   "endpointUpdatedMessage": "Fatura başarıyla güncellendi",
-  "customEndpoint": "{endpoint}'e bağlanıldı"
+  "customEndpoint": "{endpoint}'e bağlanıldı",
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery"
 }

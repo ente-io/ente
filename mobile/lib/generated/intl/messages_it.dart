@@ -918,6 +918,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nasconde il contenuto nel selettore delle app e disabilita gli screenshot"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Nasconde il contenuto nel selettore delle app"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Nascondendo..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Ospitato presso OSM France"),

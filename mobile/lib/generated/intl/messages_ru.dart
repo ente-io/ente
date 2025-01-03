@@ -944,6 +944,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Скрывает содержимое приложения в переключателе приложений и отключает скриншоты"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Скрывает содержимое приложения в переключателе приложений"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Скрытие..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Размещено на OSM France"),

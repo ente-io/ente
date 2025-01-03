@@ -44,6 +44,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "உங்கள் மின்னஞ்சல் முகவரியை உள்ளிடவும்"),
         "feedback": MessageLookupByLibrary.simpleMessage("பின்னூட்டம்"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("தவறான மின்னஞ்சல் முகவரி"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(

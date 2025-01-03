@@ -288,6 +288,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Gå till inställningar"),
         "guestView": MessageLookupByLibrary.simpleMessage("Gästvy"),
         "help": MessageLookupByLibrary.simpleMessage("Hjälp"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "howItWorks":
             MessageLookupByLibrary.simpleMessage("Så här fungerar det"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(

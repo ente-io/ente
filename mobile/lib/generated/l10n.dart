@@ -10808,6 +10808,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Hide shared items from home gallery`
+  String get hideSharedItemsFromHomeGallery {
+    return Intl.message(
+      'Hide shared items from home gallery',
+      name: 'hideSharedItemsFromHomeGallery',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
