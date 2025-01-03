@@ -13,7 +13,7 @@
         "bip39": "^3.0.4",
         "chrono-node": "^2.7.7",
         "debounce": "^2.2.0",
-        "exifreader": "^4",
+        "exifreader": "^4.26.0",
         "fast-srp-hap": "^2.0.4",
         "leaflet": "^1.9.4",
         "leaflet-defaulticon-compatibility": "^0.1.2",
