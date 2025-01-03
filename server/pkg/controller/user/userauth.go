@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	t "time"
 
 	"github.com/ente-io/museum/pkg/utils/random"
 
@@ -15,11 +16,13 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/ente-io/museum/ente"
+	emailCtrl "github.com/ente-io/museum/pkg/controller/email"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/crypto"
 	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
+
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
@@ -93,9 +96,7 @@ func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpos
 		if isComplete && purpose == ente.SignUpOTTPurpose {
 			return stacktrace.Propagate(ente.ErrUserAlreadyRegistered, "user has already completed sign up process")
 		}
-		if purpose == ente.SignUpOTTPurpose && viper.GetBool("internal.disable-registration") {
-			return stacktrace.Propagate(ente.ErrPermissionDenied, "registration is disabled")
-		}
+
 		if !isComplete && purpose == ente.LoginOTTPurpose {
 			return stacktrace.Propagate(ente.ErrUserNotRegistered, "user has not completed sign up process")
 		}
@@ -332,6 +333,23 @@ func (c *UserController) GetActiveSessions(context *gin.Context, userID int64) (
 	return tokens, nil
 }
 
+func (c *UserController) LoginSuccess(ctx *gin.Context, userID int64, app ente.App, email string, token string, ip string, userAgent string) error {
+  err := c.UserAuthRepo.AddToken(userID, app, token, ip, userAgent)
+
+  log.Info("adding token")
+  // logrus for tests
+  if err == nil {
+    error := emailUtil.SendTemplatedEmail([]string{email}, "Ente", "team@ente.io", emailCtrl.LoginSuccessSubject, emailCtrl.LoginSuccessTemplate, map[string]interface{}{
+      "AppName": app,
+      "Date":    t.Now(),
+    }, nil)
+    if error != nil {
+      stacktrace.Propagate(error, "")
+    }
+  } 
+  return nil
+}
+
 // TerminateSession removes the token for a user from cache and database
 func (c *UserController) TerminateSession(userID int64, token string) error {
 	c.Cache.Delete(fmt.Sprintf("%s:%s", ente.Photos, token))
@@ -365,7 +383,6 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 	userID, err := c.UserRepo.GetUserIDWithEmail(email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			// Keep this check as users can still trigger ott via other means that can lead to this code path
 			if viper.GetBool("internal.disable-registration") {
 				return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(ente.ErrPermissionDenied, "")
 			} else {
