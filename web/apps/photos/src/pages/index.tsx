@@ -24,7 +24,13 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 // import { CarouselProvider, DotGroup, Slide, Slider } from "pure-react-carousel";
 // import "pure-react-carousel/dist/react-carousel.es.css";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useRef,
+    useState,
+} from "react";
 import { Trans } from "react-i18next";
 
 export default function LandingPage() {
@@ -118,14 +124,6 @@ export default function LandingPage() {
     const redirectToSignupPage = () => router.push(PAGES.SIGNUP);
     const redirectToLoginPage = () => router.push(PAGES.LOGIN);
 
-    // return (
-    //     <SlideshowPanel>
-    //         <Logo_>
-    //             <EnteLogo height={24} />
-    //         </Logo_>
-    //         <Slideshow />
-    //     </SlideshowPanel>
-    // );
     return (
         <TappableContainer onMaybeChangeHost={refreshHost}>
             {loading ? (
@@ -261,7 +259,8 @@ const SlideshowPanel = styled("div")`
 `;
 
 const Logo_ = styled("div")`
-    margin-block: 32px;
+    margin-block-start: 32px;
+    margin-block-end: 40px;
     @media (width >= 1024px) {
         margin-block-end: 48px;
     }
@@ -320,14 +319,14 @@ const Slideshow: React.FC = () => {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const containerRef = useRef<HTMLDivElement | undefined>(undefined);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const intervalID = setInterval(() => {
             setSelectedIndex((selectedIndex + 1) % 3);
         }, 5000);
         return () => clearInterval(intervalID);
     });
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         console.log(
             "scroll to",
             containerRef.current!.offsetWidth * selectedIndex,
@@ -337,6 +336,7 @@ const Slideshow: React.FC = () => {
         });
     }, [selectedIndex]);
 
+    console.log("rendering", selectedIndex);
     return (
         <Stack
             sx={{
@@ -404,6 +404,7 @@ const Slideshow: React.FC = () => {
 };
 
 const SlidesContainer = styled("div")`
+    align-self: stretch;
     display: flex;
     overflow-x: hidden;
     scroll-behavior: smooth;
@@ -411,7 +412,8 @@ const SlidesContainer = styled("div")`
 `;
 
 const Slide = styled(Stack)`
-    flex: 0 0 100%;
+    // flex: 0 0 100%;
+    min-width: 100%;
     align-items: center;
     text-align: center;
     // scroll-snap-align: start;
