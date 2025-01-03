@@ -24,13 +24,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 // import { CarouselProvider, DotGroup, Slide, Slider } from "pure-react-carousel";
 // import "pure-react-carousel/dist/react-carousel.es.css";
-import {
-    useCallback,
-    useEffect,
-    useLayoutEffect,
-    useRef,
-    useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 
 export default function LandingPage() {
@@ -319,21 +313,26 @@ const Slideshow: React.FC = () => {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const containerRef = useRef<HTMLDivElement | undefined>(undefined);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         const intervalID = setInterval(() => {
             setSelectedIndex((selectedIndex + 1) % 3);
         }, 5000);
         return () => clearInterval(intervalID);
     });
 
-    useLayoutEffect(() => {
-        console.log(
-            "scroll to",
-            containerRef.current!.offsetWidth * selectedIndex,
-        );
-        containerRef.current.scrollTo({
-            left: containerRef.current!.offsetWidth * selectedIndex,
-        });
+    useEffect(() => {
+        const container = containerRef.current!;
+        const left = containerRef.current!.offsetWidth * selectedIndex;
+        // Smooth scroll doesn't work with Chrome intermittently. A common
+        // workaround is to wrap the scrollTo in a setTimeout etc, but even that
+        // doesn't help for our particular scenario.
+        //
+        // Ref: https://github.com/facebook/react/issues/23396
+        //
+        // As an alternative, scroll twice (once smoothly, once without) to the
+        // same position so that at least the fallback works on Chrome.
+        container.scrollTo({ left, behavior: "smooth" });
+        setTimeout(() => container.scrollTo({ left }), 500);
     }, [selectedIndex]);
 
     console.log("rendering", selectedIndex);
@@ -407,13 +406,6 @@ const SlidesContainer = styled("div")`
     align-self: stretch;
     display: flex;
     overflow-x: hidden;
-    /* Note: smooth scroll doesn't work with Chrome intermittently. A common
-       workaround is to wrap the scrollTo in a setTimeout etc, but even that
-       doesn't help for our particular scenario.
-
-       Ref: https://github.com/facebook/react/issues/23396
-     */
-    scroll-behavior: smooth;
     // scroll-snap-type: x mandatory;
 `;
 
