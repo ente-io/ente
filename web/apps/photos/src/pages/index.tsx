@@ -22,8 +22,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-// import { CarouselProvider, DotGroup, Slide, Slider } from "pure-react-carousel";
-// import "pure-react-carousel/dist/react-carousel.es.css";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 

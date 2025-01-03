@@ -226,15 +226,10 @@ For more details, see [translations.md](translations.md).
   [similarity-transformation](https://github.com/shaileshpandit/similarity-transformation-js)
   during face alignment.
 
-### UI
-
 - [react-top-loading-bar](https://github.com/klendi/react-top-loading-bar) is
   used for showing a progress indicator for global actions (This shouldn't be
   used always, it is only meant as a fallback when there isn't an otherwise
   suitable place for showing a local activity indicator).
-
-- [pure-react-carousel](https://github.com/express-labs/pure-react-carousel) is
-  used for the feature carousel on the welcome (login / signup) screen.
 
 ## Auth app specific
 
