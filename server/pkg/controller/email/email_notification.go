@@ -33,7 +33,7 @@ const (
 	ReferralSuccessfulTemplate          = "successful_referral.html"
 	ReferralSuccessfulSubject           = "You've earned 10 GB on Ente! 🎁"
 
-  LoginSuccessSubject                 = "Login Successful"
+  LoginSuccessSubject                 = "New login to your Ente account"
   LoginSuccessTemplate                = "on_login.html"
 )
 

@@ -346,8 +346,7 @@ func (c *UserController) AddTokenAndNotify(userID int64, app ente.App, token str
 			return
 		}
 		emailSendErr := emailUtil.SendTemplatedEmail([]string{user.Email}, "Ente", "team@ente.io", emailCtrl.LoginSuccessSubject, emailCtrl.LoginSuccessTemplate, map[string]interface{}{
-			"AppName": app,
-      "Date":    t.Now().Format("02 Jan 2006 15:04"),
+      "Date":    t.Now().Format("02 Jan, 2006 15:04"),
 		}, nil)
 		if emailSendErr != nil {
 			log.WithError(emailSendErr).Error("Failed to send email")
