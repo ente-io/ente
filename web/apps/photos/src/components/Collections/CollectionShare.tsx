@@ -351,7 +351,7 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
 
     const participantType = useRef<
         COLLECTION_ROLE.COLLABORATOR | COLLECTION_ROLE.VIEWER
-    >();
+    >(undefined);
 
     const openAddCollab = () => {
         participantType.current = COLLECTION_ROLE.COLLABORATOR;
@@ -830,9 +830,9 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
 
     const participantType = useRef<
         COLLECTION_ROLE.COLLABORATOR | COLLECTION_ROLE.VIEWER
-    >();
+    >(null);
 
-    const selectedParticipant = useRef<CollectionUser>();
+    const selectedParticipant = useRef<CollectionUser>(null);
 
     const openAddCollab = () => {
         participantType.current = COLLECTION_ROLE.COLLABORATOR;
@@ -1885,7 +1885,7 @@ function PublicLinkSetPassword({
             open={open}
             onClose={onClose}
             disablePortal
-            BackdropProps={{ sx: { position: "absolute" } }}
+            slotProps={{ backdrop: { sx: { position: "absolute" } } }}
             sx={{ position: "absolute" }}
             PaperProps={{ sx: { p: 1 } }}
             maxWidth={"sm"}
