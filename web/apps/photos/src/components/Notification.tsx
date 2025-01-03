@@ -59,12 +59,12 @@ export default function Notification({
             <Button
                 color={attributes.variant}
                 onClick={handleClick}
-                sx={{
+                sx={(theme) => ({
                     textAlign: "left",
                     flex: "1",
-                    padding: (theme) => theme.spacing(1.5, 2),
+                    padding: theme.spacing(1.5, 2),
                     borderRadius: "8px",
-                }}
+                })}
             >
                 <Stack
                     flex={"1"}

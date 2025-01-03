@@ -102,11 +102,11 @@ export default function DropdownInput<T extends string>({
                         key={option.value}
                         divider={index !== options.length - 1}
                         value={option.value}
-                        sx={{
+                        sx={(theme) => ({
                             px: "16px",
                             py: "14px",
-                            color: (theme) => theme.palette.primary.main,
-                        }}
+                            color: theme.palette.primary.main,
+                        })}
                     >
                         {option.label}
                     </MenuItem>

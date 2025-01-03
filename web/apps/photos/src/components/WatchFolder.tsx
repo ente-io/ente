@@ -218,11 +218,11 @@ const CheckmarkIcon: React.FC = () => {
     return (
         <CheckIcon
             fontSize="small"
-            sx={{
+            sx={(theme) => ({
                 display: "inline",
                 fontSize: "15px",
-                color: (theme) => theme.palette.secondary.main,
-            }}
+                color: theme.palette.secondary.main,
+            })}
         />
     );
 };
