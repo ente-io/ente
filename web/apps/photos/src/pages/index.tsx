@@ -15,14 +15,15 @@ import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
 import {
     Box,
     Button,
+    Stack,
     Typography,
     styled,
     type TypographyProps,
 } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { CarouselProvider, DotGroup, Slide, Slider } from "pure-react-carousel";
-import "pure-react-carousel/dist/react-carousel.es.css";
+// import { CarouselProvider, DotGroup, Slide, Slider } from "pure-react-carousel";
+// import "pure-react-carousel/dist/react-carousel.es.css";
 import { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
@@ -123,12 +124,12 @@ export default function LandingPage() {
                 <ActivityIndicator />
             ) : (
                 <>
-                    <SlideContainer>
+                    <SlideshowPanel>
                         <Logo_>
                             <EnteLogo height={24} />
                         </Logo_>
                         <Slideshow />
-                    </SlideContainer>
+                    </SlideshowPanel>
                     <MobileBox>
                         <Button
                             color="accent"
@@ -237,7 +238,7 @@ const shouldAllowChangingAPIOrigin = () => {
     return !(hostname.endsWith(".ente.io") || hostname.endsWith(".ente.sh"));
 };
 
-const SlideContainer = styled("div")`
+const SlideshowPanel = styled("div")`
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -245,20 +246,22 @@ const SlideContainer = styled("div")`
     justify-content: center;
     text-align: center;
 
-    @media (max-width: 1024px) {
+    @media (width <= 1024px) {
         flex-grow: 0;
     }
 `;
 
 const Logo_ = styled("div")`
-    margin-block-start: 32px;
-    margin-block-end: 48px;
+    margin-block: 32px;
+    @media (width >= 1024px) {
+        margin-block-end: 48px;
+    }
 `;
 
 const MobileBox = styled("div")`
     display: none;
 
-    @media (max-width: 1024px) {
+    @media (width <= 1024px) {
         max-width: 375px;
         width: 100%;
         padding: 12px;
@@ -304,16 +307,32 @@ const SideBox = styled("div")`
     min-width: 320px;
 `;
 
+const Slide: React.FC<React.PropsWithChildren<{ index: number }>> = ({
+    children,
+}) => {
+    return <Stack>{children}</Stack>;
+};
+
+const SlidesContainer = styled("div")`
+    display: flex;
+    width: max(350px, 100%);
+    border: 1px solid red;
+    & > div {
+        min-width: 100%;
+        border: 1px solid green;
+    }
+`;
+
 const Slideshow: React.FC = () => {
     return (
-        <CarouselProvider
-            naturalSlideWidth={400}
-            naturalSlideHeight={300}
-            isIntrinsicHeight={true}
-            totalSlides={3}
-            isPlaying={true}
+        <div
+        // naturalSlideWidth={400}
+        // naturalSlideHeight={300}
+        // isIntrinsicHeight={true}
+        // totalSlides={3}
+        // isPlaying={true}
         >
-            <Slider>
+            <SlidesContainer>
                 <Slide index={0}>
                     <Img
                         src="/images/onboarding-lock/1x.png"
@@ -351,9 +370,9 @@ const Slideshow: React.FC = () => {
                         <TextContainer>{t("intro_slide_3")}</TextContainer>
                     </SlideContents>
                 </Slide>
-            </Slider>
+            </SlidesContainer>
             <CustomDotGroup />
-        </CarouselProvider>
+        </div>
     );
 };
 
@@ -374,7 +393,8 @@ const Img = styled("img")`
     }
 `;
 
-const CustomDotGroup = styled(DotGroup)`
+// TODO
+const CustomDotGroup = styled("div")`
     margin-block-start: 2px;
     margin-block-end: 24px;
 
