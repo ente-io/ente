@@ -90,6 +90,10 @@ func (c *PublicCollectionController) CreateAccessToken(ctx context.Context, req 
 	return response, nil
 }
 
+func (c *PublicCollectionController) GetCollectionSummaryByToken(ctx context.Context, collectionID int64) (ente.PublicCollectionToken, error) {
+	return c.PublicCollectionRepo.GetActivePublicCollectionToken(ctx, collectionID)
+}
+
 func (c *PublicCollectionController) CreateFile(ctx *gin.Context, file ente.File, app ente.App) (ente.File, error) {
 	collection, err := c.GetPublicCollection(ctx, true)
 	if err != nil {

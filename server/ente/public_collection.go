@@ -3,6 +3,7 @@ package ente
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"github.com/ente-io/museum/pkg/utils/time"
 
 	"github.com/ente-io/stacktrace"
 )
@@ -11,6 +12,7 @@ import (
 type CreatePublicAccessTokenRequest struct {
 	CollectionID  int64 `json:"collectionID" binding:"required"`
 	EnableCollect bool  `json:"enableCollect"`
+	JoinViaLink   bool  `json:"joinViaLink"`
 	ValidTill     int64 `json:"validTill"`
 	DeviceLimit   int   `json:"deviceLimit"`
 }
@@ -26,6 +28,7 @@ type UpdatePublicAccessTokenRequest struct {
 	EnableDownload  *bool   `json:"enableDownload"`
 	EnableCollect   *bool   `json:"enableCollect"`
 	DisablePassword *bool   `json:"disablePassword"`
+	JoinViaLink     *bool   `json:"joinViaLink"`
 }
 
 type VerifyPasswordRequest struct {
@@ -50,6 +53,7 @@ type PublicCollectionToken struct {
 	OpsLimit       *int64
 	EnableDownload bool
 	EnableCollect  bool
+	EnableJoin     bool
 }
 
 // PublicURL represents information about non-disabled public url for a collection
@@ -62,9 +66,10 @@ type PublicURL struct {
 	EnableCollect   bool `json:"enableCollect"`
 	PasswordEnabled bool `json:"passwordEnabled"`
 	// Nonce contains the nonce value for the password if the link is password protected.
-	Nonce    *string `json:"nonce,omitempty"`
-	MemLimit *int64  `json:"memLimit,omitempty"`
-	OpsLimit *int64  `json:"opsLimit,omitempty"`
+	Nonce             *string `json:"nonce,omitempty"`
+	MemLimit          *int64  `json:"memLimit,omitempty"`
+	OpsLimit          *int64  `json:"opsLimit,omitempty"`
+	EnableJoinViaLink bool    `json:"enableJoinViaLink"`
 }
 
 type PublicAccessContext struct {
@@ -86,6 +91,16 @@ type PublicCollectionSummary struct {
 	DeviceAccessCount int
 	// not empty value of passHash indicates that the link is password protected.
 	PassHash *string
+}
+
+func (p PublicCollectionToken) CanJoin() error {
+	if p.IsDisabled {
+		return stacktrace.NewError("disabled token")
+	}
+	if p.ValidTill > 0 && p.ValidTill < time.Microseconds() {
+		return stacktrace.NewError("expired token")
+	}
+	return nil
 }
 
 type AbuseReportRequest struct {

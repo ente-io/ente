@@ -97,6 +97,11 @@ type AlterShareRequest struct {
 	Role         *CollectionParticipantRole `json:"role"`
 }
 
+type JoinCollectionViaLinkRequest struct {
+	CollectionID int64  `json:"collectionID" binding:"required"`
+	EncryptedKey string `json:"encryptedKey" binding:"required"`
+}
+
 // AddFilesRequest represents a request to add files to a collection
 type AddFilesRequest struct {
 	CollectionID int64                `json:"collectionID" binding:"required"`

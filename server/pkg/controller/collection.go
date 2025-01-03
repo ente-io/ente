@@ -181,6 +181,47 @@ func (c *CollectionController) Share(ctx *gin.Context, req ente.AlterShareReques
 	return sharees, nil
 }
 
+func (c *CollectionController) JoinViaLink(ctx *gin.Context, req ente.JoinCollectionViaLinkRequest) error {
+	userID := auth.GetUserID(ctx.Request.Header)
+	collection, err := c.CollectionRepo.Get(req.CollectionID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if collection.Owner.ID == userID {
+		return stacktrace.Propagate(ente.ErrBadRequest, "owner can not join via link")
+	}
+	if !collection.AllowSharing() {
+		return stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("joining %s is not allowed", collection.Type))
+	}
+	publicCollectionToken, err := c.PublicCollectionCtrl.GetCollectionSummaryByToken(ctx, req.CollectionID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+
+	if canJoin := publicCollectionToken.CanJoin(); canJoin != nil {
+		return stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("can not join collection: %s", canJoin.Error()))
+	}
+	accessToken := auth.GetAccessToken(ctx)
+	if publicCollectionToken.Token != accessToken {
+		return stacktrace.Propagate(ente.ErrPermissionDenied, "token doesn't match collection")
+	}
+	if publicCollectionToken.PassHash != nil && *publicCollectionToken.PassHash != "" {
+		accessTokenJWT := auth.GetAccessTokenJWT(ctx)
+		if passCheckErr := c.PublicCollectionCtrl.ValidateJWTToken(ctx, accessTokenJWT, *publicCollectionToken.PassHash); passCheckErr != nil {
+			return stacktrace.Propagate(passCheckErr, "")
+		}
+	}
+	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(collection.Owner.ID, true)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	role := ente.VIEWER
+	if publicCollectionToken.EnableCollect {
+		role = ente.COLLABORATOR
+	}
+	return c.CollectionRepo.Share(req.CollectionID, collection.Owner.ID, userID, req.EncryptedKey, role, time.Microseconds())
+}
+
 // UnShare unshares a collection with a user
 func (c *CollectionController) UnShare(ctx *gin.Context, cID int64, fromUserID int64, toUserEmail string) ([]ente.CollectionUser, error) {
 	toUserID, err := c.UserRepo.GetUserIDWithEmail(toUserEmail)
