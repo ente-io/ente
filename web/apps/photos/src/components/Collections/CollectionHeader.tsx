@@ -697,7 +697,7 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
 interface CollectionSortOrderMenuProps {
     open: boolean;
     onClose: () => void;
-    overFlowMenuIconRef: React.MutableRefObject<SVGSVGElement>;
+    overFlowMenuIconRef: React.RefObject<SVGSVGElement>;
     onAscClick: () => void;
     onDescClick: () => void;
 }

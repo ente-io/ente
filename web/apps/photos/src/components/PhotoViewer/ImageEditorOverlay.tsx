@@ -50,8 +50,8 @@ import React, {
     useEffect,
     useRef,
     useState,
-    type MutableRefObject,
     type Ref,
+    type RefObject,
 } from "react";
 import uploadManager from "services/upload/uploadManager";
 
@@ -791,8 +791,8 @@ const canvasToFile = async (
 };
 
 interface CommonMenuProps {
-    canvasRef: MutableRefObject<HTMLCanvasElement>;
-    originalSizeCanvasRef: MutableRefObject<HTMLCanvasElement>;
+    canvasRef: RefObject<HTMLCanvasElement>;
+    originalSizeCanvasRef: RefObject<HTMLCanvasElement>;
     setTransformationPerformed: (v: boolean) => void;
     canvasLoading: boolean;
     setCanvasLoading: (v: boolean) => void;
@@ -802,7 +802,7 @@ interface CommonMenuProps {
 type CropMenuProps = CommonMenuProps & {
     previewScale: number;
     cropBoxProps: CropBoxProps;
-    cropBoxRef: MutableRefObject<HTMLDivElement>;
+    cropBoxRef: RefObject<HTMLDivElement>;
     resetCropBox: () => void;
 };
 
