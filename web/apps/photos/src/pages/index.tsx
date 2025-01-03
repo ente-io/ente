@@ -143,15 +143,13 @@ export default function LandingPage() {
                         <MobileBoxFooter {...{ host }} />
                     </MobileBox>
                     <DesktopBox>
-                        <SideBox>
-                            <Box sx={{ maxWidth: "320px" }}>
-                                {showLogin ? (
-                                    <Login {...{ signUp, host }} />
-                                ) : (
-                                    <SignUp {...{ router, login, host }} />
-                                )}
-                            </Box>
-                        </SideBox>
+                        <Box sx={{ width: "320px" }}>
+                            {showLogin ? (
+                                <Login {...{ signUp, host }} />
+                            ) : (
+                                <SignUp {...{ router, login, host }} />
+                            )}
+                        </Box>
                     </DesktopBox>
                 </>
             )}
@@ -217,8 +215,9 @@ const TappableContainer: React.FC<
 };
 
 const TappableContainer_ = styled("div")`
-    display: flex;
     flex: 1;
+    display: flex;
+
     align-items: center;
     justify-content: center;
     background-color: #000;
@@ -240,14 +239,19 @@ const shouldAllowChangingAPIOrigin = () => {
 const SlideshowPanel = styled("div")`
     align-self: stretch;
 
-    flex: 1;
+    flex-shrink: 1;
+    flex-grow: 1;
+    flex-basis: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 
     @media (width <= 1024px) {
-        // flex-grow: 0;
+        flex-grow: 0;
+    }
+    @media (width > 1024px) {
+        width: 700px;
     }
 `;
 
@@ -289,9 +293,12 @@ const MobileBoxFooter: React.FC<MobileBoxFooterProps> = ({ host }) => {
 };
 
 const DesktopBox = styled("div")`
-    flex: 1;
+    flex-shrink: 0;
+    flex-grow: 2;
+    flex-basis: auto;
+
     height: 100%;
-    padding: 10px;
+    padding-inline: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -300,12 +307,6 @@ const DesktopBox = styled("div")`
     @media (width <= 1024px) {
         display: none;
     }
-`;
-
-const SideBox = styled("div")`
-    display: flex;
-    flex-direction: column;
-    min-width: 320px;
 `;
 
 const Slideshow: React.FC = () => {
