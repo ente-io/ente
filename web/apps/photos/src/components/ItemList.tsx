@@ -43,12 +43,16 @@ const Row: <T>({
         const { renderListItem, items, getItemTitle } = data;
         return (
             <Tooltip
-                PopperProps={{
-                    sx: {
-                        ".MuiTooltip-tooltip.MuiTooltip-tooltip.MuiTooltip-tooltip":
+                slotProps={{
+                    // Reduce the vertical offset of the tooltip "popper" from
+                    // the element on which the tooltip appears.
+                    popper: {
+                        modifiers: [
                             {
-                                marginTop: 0,
+                                name: "offset",
+                                options: { offset: [0, -14] },
                             },
+                        ],
                     },
                 }}
                 title={getItemTitle(items[index])}

@@ -30,7 +30,7 @@ export default function CopyButton({
             arrow
             open={copied}
             title={t("COPIED")}
-            PopperProps={{ sx: { zIndex: 2000 } }}
+            slotProps={{ popper: { sx: { zIndex: 2000 } } }}
         >
             <IconButton onClick={copyToClipboardHelper(code)} color={color}>
                 {copied ? (
