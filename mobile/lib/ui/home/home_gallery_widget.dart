@@ -105,7 +105,7 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
             limit: limit,
             asc: asc,
             filterOptions: filterOptions,
-            applyOwnerCheck: _shouldHideSharedItems,
+            ignoreSharedFiles: _shouldHideSharedItems,
           );
         }
 
