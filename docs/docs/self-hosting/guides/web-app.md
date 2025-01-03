@@ -27,7 +27,7 @@ longer term, then it is recommended to follow the Docker approach.
 >
 > This docker image is still in testing stage and it might show up with some
 > unknown variables in different scenarios. But this image has been tested on a
-> production ente site.
+> production Ente site.
 >
 > Recurring changes might be made by the team or from community if more
 > improvements can be made so that we are able to build a full-fledged docker
@@ -46,6 +46,7 @@ RUN corepack enable
 
 # Endpoint for Ente Server
 NEXT_PUBLIC_ENTE_ENDPOINT=https://your-ente-endpoint.com
+NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=https://your-albums-endpoint.com
 
 RUN yarn cache clean
 RUN yarn install --network-timeout 1000000000
@@ -207,10 +208,10 @@ pm2 logs all
 ## Configure App Endpoints 
 
 > [!NOTE] 
-> Previously, this was dependent on the env variables `NEXT_ENTE_PUBLIC_ALBUMS_ENDPOINT`
+> Previously, this was dependent on the env variables `NEXT_ENTE_PUBLIC_ACCOUNTS_ENDPOINT`
 > and etc. Please check the below documentation to update your setup configurations
 
-You can configure the web endpoints for the other apps including Accounts, Albums 
+You can configure the web endpoints for the other apps including Accounts, Albums
 Family and Cast in your `museum.yaml`` configuration file. Checkout 
 [`local.yaml`](https://github.com/ente-io/ente/blob/543411254b2bb55bd00a0e515dcafa12d12d3b35/server/configurations/local.yaml#L76-L89)
 to configure the endpoints. Make sure to setup up your DNS Records accordingly to the 
