@@ -12,6 +12,10 @@ List<BoxShadow> shadowFloatFaintLight = const [
   BoxShadow(blurRadius: 10, color: Color.fromRGBO(0, 0, 0, 0.12)),
 ];
 
+List<BoxShadow> shadowFloatFaintestLight = const [
+  BoxShadow(blurRadius: 1, color: Color.fromRGBO(0, 0, 0, 0.25)),
+];
+
 List<BoxShadow> shadowMenuLight = const [
   BoxShadow(blurRadius: 6, color: Color.fromRGBO(0, 0, 0, 0.16)),
   BoxShadow(

@@ -1,4 +1,4 @@
-import ErrorOutline from "@mui/icons-material/ErrorOutline";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import {
     CircularProgress,
     Stack,
@@ -41,7 +41,7 @@ export const ErrorIndicator: React.FC<React.PropsWithChildren> = ({
     children,
 }) => (
     <Stack sx={{ gap: 2, alignItems: "center" }}>
-        <ErrorOutline color="secondary" sx={{ color: "critical" }} />
+        <ErrorOutlineIcon color="secondary" sx={{ color: "critical" }} />
         <Typography color="text.muted">
             {children ?? t("generic_error")}
         </Typography>

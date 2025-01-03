@@ -48,14 +48,14 @@ import {
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
-import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
+import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
 import CloseIcon from "@mui/icons-material/Close";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
-import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import LightModeIcon from "@mui/icons-material/LightMode";
-import LockOutlined from "@mui/icons-material/LockOutlined";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
     Box,
     Button,
@@ -447,7 +447,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                     ?.fileCount.toString()}
             />
             <EnteMenuItem
-                startIcon={<ArchiveOutlined />}
+                startIcon={<ArchiveOutlinedIcon />}
                 onClick={openArchiveSection}
                 variant="captioned"
                 label={t("section_archive")}
@@ -456,14 +456,14 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                     ?.fileCount.toString()}
             />
             <EnteMenuItem
-                startIcon={<VisibilityOff />}
+                startIcon={<VisibilityOffIcon />}
                 onClick={openHiddenSection}
                 variant="captioned"
                 label={t("section_hidden")}
-                subIcon={<LockOutlined />}
+                subIcon={<LockOutlinedIcon />}
             />
             <EnteMenuItem
-                startIcon={<DeleteOutline />}
+                startIcon={<DeleteOutlineIcon />}
                 onClick={openTrashSection}
                 variant="captioned"
                 label={t("section_trash")}
@@ -514,7 +514,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
         await openAccountsManagePasskeysPage();
     };
 
-    const redirectToDeduplicatePage = () => router.push(PAGES.DEDUPLICATE);
+    const handleDeduplicate = () => router.push("/duplicates");
 
     const toggleTheme = () =>
         setThemeColor(
@@ -573,8 +573,8 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             />
             <EnteMenuItem
                 variant="secondary"
-                onClick={redirectToDeduplicatePage}
-                label={t("DEDUPLICATE_FILES")}
+                onClick={handleDeduplicate}
+                label={t("deduplicate_files")}
             />
             <EnteMenuItem
                 variant="secondary"
@@ -666,7 +666,7 @@ const HelpSection: React.FC = () => {
             />
             <EnteMenuItem
                 onClick={handleExport}
-                label={t("EXPORT")}
+                label={t("export_data")}
                 endIcon={
                     exportService.isExportInProgress() && (
                         <ActivityIndicator size="20px" />

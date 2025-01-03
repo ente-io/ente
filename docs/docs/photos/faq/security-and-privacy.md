@@ -25,9 +25,9 @@ your files. For technical details, please see our
 
 We use the following encryption algorithms:
 
--   Encryption: `XChaCha20` and `XSalsa20`
--   Authentication: Poly1305 message authentication code (MAC)
--   Key derivation: Argon2id with high memory and computation parameters
+- Encryption: `XChaCha20` and `XSalsa20`
+- Authentication: Poly1305 message authentication code (MAC)
+- Key derivation: Argon2id with high memory and computation parameters
 
 These algorithms are implemented using
 [libsodium](https://libsodium.gitbook.io/doc/), a externally audited
@@ -38,9 +38,9 @@ provides full technical specifications.
 
 Your encrypted data is stored redundantly across multiple providers in the EU:
 
--   Amsterdam, Netherlands
--   Paris, France
--   Frankfurt, Germany
+- Amsterdam, Netherlands
+- Paris, France
+- Frankfurt, Germany
 
 We use a combination of object storage and distributed databases to ensure high
 availability and durability. Our
@@ -79,8 +79,8 @@ please choose a strong one.
 
 Yes, we recommend enabling 2FA for an additional layer of security. We support:
 
--   Time-based One-Time Passwords (TOTP)
--   WebAuthn/FIDO2 for hardware security keys
+- Time-based One-Time Passwords (TOTP)
+- WebAuthn/FIDO2 for hardware security keys
 
 You can set up 2FA in the settings of our mobile or desktop apps.
 

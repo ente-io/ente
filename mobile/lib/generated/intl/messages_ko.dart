@@ -38,10 +38,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("이메일을 입력하세요"),
         "feedback": MessageLookupByLibrary.simpleMessage("피드백"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("잘못된 이메일 주소"),
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
         "verify": MessageLookupByLibrary.simpleMessage("인증"),
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("계정이 삭제되었습니다.")

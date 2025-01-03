@@ -483,6 +483,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "freeUpDeviceSpace":
             MessageLookupByLibrary.simpleMessage("פנה אחסון במכשיר"),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("פנה מקום"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "general": MessageLookupByLibrary.simpleMessage("כללי"),
         "generatingEncryptionKeys":
             MessageLookupByLibrary.simpleMessage("יוצר מפתחות הצפנה..."),
@@ -492,6 +493,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "grantPermission": MessageLookupByLibrary.simpleMessage("הענק הרשאה"),
         "hidden": MessageLookupByLibrary.simpleMessage("מוסתר"),
         "hide": MessageLookupByLibrary.simpleMessage("הסתר"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("מחביא..."),
         "howItWorks": MessageLookupByLibrary.simpleMessage("איך זה עובד"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
@@ -894,8 +897,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("מעלה קבצים לאלבום..."),
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
             "כמות האחסון השמישה שלך מוגבלת בתוכנית הנוכחית. אחסון עודף יהפוך שוב לשמיש אחרי שתשדרג את התוכנית שלך."),
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
         "useRecoveryKey":
             MessageLookupByLibrary.simpleMessage("השתמש במפתח שחזור"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("מקום בשימוש"),

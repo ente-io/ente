@@ -1158,5 +1158,6 @@
   "invalidEndpointMessage": "Üzgünüz, girdiğiniz uç nokta geçersiz. Lütfen geçerli bir uç nokta girin ve tekrar deneyin.",
   "endpointUpdatedMessage": "Fatura başarıyla güncellendi",
   "customEndpoint": "{endpoint}'e bağlanıldı",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery"
 }

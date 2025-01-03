@@ -1,7 +1,7 @@
+import { TwoFactorAuthorizationResponse } from "@/accounts/services/user";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import log from "@/base/log";
-import type { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
 import { nullToUndefined } from "@/utils/transform";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import InfoIcon from "@mui/icons-material/Info";

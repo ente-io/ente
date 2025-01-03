@@ -3,7 +3,7 @@ import { decryptBox } from "./crypto";
 import { toB64 } from "./crypto/libsodium";
 
 /**
- * Return the user's master key from session storage.
+ * Return the decrypted user's master key from session storage.
  *
  * Precondition: The user should be logged in.
  */
@@ -19,8 +19,18 @@ export const masterKeyFromSession = async () => {
 };
 
 /**
- * Return the user's master key from session storage if they are logged in,
- * otherwise return `undefined`.
+ * Return `true` if the user's encrypted master key is present in the session.
+ *
+ * Use {@link masterKeyFromSessionIfLoggedIn} to get the actual master key after
+ * decrypting it. This function is instead useful as a quick check to verify if
+ * we have credentials at hand or not.
+ */
+export const haveCredentialsInSession = () =>
+    !!sessionStorage.getItem("encryptionKey");
+
+/**
+ * Return the decrypted user's master key from session storage if they are
+ * logged in, otherwise return `undefined`.
  */
 export const masterKeyFromSessionIfLoggedIn = async () => {
     // TODO: Same value as the deprecated SESSION_KEYS.ENCRYPTION_KEY.

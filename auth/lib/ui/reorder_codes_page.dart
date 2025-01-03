@@ -20,6 +20,14 @@ class _ReorderCodesPageState extends State<ReorderCodesPage> {
   bool hasChanged = false;
   final logger = Logger('ReorderCodesPage');
 
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isCompactMode = PreferenceService.instance.isCompactMode();
@@ -55,33 +63,40 @@ class _ReorderCodesPageState extends State<ReorderCodesPage> {
           ),
         ],
       ),
-      body: ReorderableListView(
-        buildDefaultDragHandles: false,
-        proxyDecorator: (Widget child, int index, Animation<double> animation) {
-          return AnimatedBuilder(
-            animation: animation,
-            builder: (BuildContext context, _) {
-              final animValue = Curves.easeInOut.transform(animation.value);
-              final scale = lerpDouble(1, 1.05, animValue)!;
-              return Transform.scale(scale: scale, child: child);
-            },
-          );
-        },
-        children: [
-          for (final code in widget.codes)
-            ReorderableDragStartListener(
-              key: ValueKey('${code.hashCode}_${code.generatedID}'),
-              index: widget.codes.indexOf(code),
-              child: CodeWidget(
-                key: ValueKey(code.generatedID),
-                code,
-                isCompactMode: isCompactMode,
+      body: Scrollbar(
+        controller: _scrollController,
+        thumbVisibility: true,
+        interactive: true,
+        child: ReorderableListView(
+          scrollController: _scrollController,
+          buildDefaultDragHandles: false,
+          proxyDecorator:
+              (Widget child, int index, Animation<double> animation) {
+            return AnimatedBuilder(
+              animation: animation,
+              builder: (BuildContext context, _) {
+                final animValue = Curves.easeInOut.transform(animation.value);
+                final scale = lerpDouble(1, 1.05, animValue)!;
+                return Transform.scale(scale: scale, child: child);
+              },
+            );
+          },
+          children: [
+            for (final code in widget.codes)
+              ReorderableDragStartListener(
+                key: ValueKey('${code.hashCode}_${code.generatedID}'),
+                index: widget.codes.indexOf(code),
+                child: CodeWidget(
+                  key: ValueKey(code.generatedID),
+                  code,
+                  isCompactMode: isCompactMode,
+                ),
               ),
-            ),
-        ],
-        onReorder: (oldIndex, newIndex) {
-          updateCodeIndex(oldIndex, newIndex);
-        },
+          ],
+          onReorder: (oldIndex, newIndex) {
+            updateCodeIndex(oldIndex, newIndex);
+          },
+        ),
       ),
     );
   }

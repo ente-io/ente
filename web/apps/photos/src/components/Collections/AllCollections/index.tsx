@@ -4,7 +4,7 @@ import { SlideUpTransition } from "@/new/photos/components/mui/SlideUpTransition
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
 import { CollectionsSortBy } from "@/new/photos/services/collection/ui";
 import { FlexWrapper, FluidContainer } from "@ente/shared/components/Container";
-import Close from "@mui/icons-material/Close";
+import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
     DialogTitle,
@@ -103,7 +103,7 @@ const AllCollectionsHeader = ({
                     nestedInDialog
                 />
                 <FilledIconButton onClick={onClose}>
-                    <Close />
+                    <CloseIcon />
                 </FilledIconButton>
             </Stack>
         </FlexWrapper>

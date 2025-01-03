@@ -85,6 +85,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Find folk hurtigt ved navn"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Glemt adgangskode"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "incorrectPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Forkert adgangskode"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(
@@ -131,8 +134,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Dette vil logge dig ud af følgende enhed:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "Dette vil logge dig ud af denne enhed!"),
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
         "verify": MessageLookupByLibrary.simpleMessage("Bekræft"),
         "viewAddOnButton":
             MessageLookupByLibrary.simpleMessage("Vis tilføjelser"),

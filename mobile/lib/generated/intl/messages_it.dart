@@ -887,6 +887,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Risparmia spazio sul tuo dispositivo cancellando i file che sono già stati salvati online."),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Libera spazio"),
         "freeUpSpaceSaving": m39,
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Fino a 1000 ricordi mostrati nella galleria"),
         "general": MessageLookupByLibrary.simpleMessage("Generali"),
@@ -918,6 +919,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nasconde il contenuto nel selettore delle app e disabilita gli screenshot"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Nasconde il contenuto nel selettore delle app"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Nascondendo..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Ospitato presso OSM France"),
@@ -1456,8 +1459,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Aggiungi descrizioni come \"#viaggio\" nelle informazioni delle foto per trovarle rapidamente qui"),
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Ricerca per data, mese o anno"),
-        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Le immagini saranno mostrate qui una volta che l\'elaborazione sarà completata"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "Le persone saranno mostrate qui una volta completata l\'indicizzazione"),
         "searchFileTypesAndNamesEmptySection":
@@ -1780,8 +1781,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Lo spazio disponibile è limitato dal tuo piano corrente. L\'archiviazione in eccesso diventerà automaticamente utilizzabile quando aggiornerai il tuo piano."),
         "useAsCover":
             MessageLookupByLibrary.simpleMessage("Usa come copertina"),
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
         "usePublicLinksForPeopleNotOnEnte":
             MessageLookupByLibrary.simpleMessage(
                 "Usa link pubblici per persone non registrate su Ente"),

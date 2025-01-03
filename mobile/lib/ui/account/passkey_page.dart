@@ -1,7 +1,6 @@
 import "dart:async";
 import 'dart:convert';
 
-import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -9,7 +8,6 @@ import "package:photos/core/errors.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/account/two_factor.dart";
-import "package:photos/services/passkey_service.dart";
 import 'package:photos/services/user_service.dart';
 import "package:photos/ui/account/two_factor_authentication_page.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
@@ -23,10 +21,12 @@ import 'package:url_launcher/url_launcher_string.dart';
 class PasskeyPage extends StatefulWidget {
   final String sessionID;
   final String totp2FASessionID;
+  final String accountsUrl;
 
   const PasskeyPage(
     this.sessionID, {
     required this.totp2FASessionID,
+    required this.accountsUrl,
     super.key,
   });
 
@@ -52,9 +52,8 @@ class _PasskeyPageState extends State<PasskeyPage> {
   }
 
   Future<void> launchPasskey() async {
-    final String accountsUrl = PasskeyService.instance.accountsUrl;
     await launchUrlString(
-      "$accountsUrl/passkeys/verify?"
+      "${widget.accountsUrl}/passkeys/verify?"
       "passkeySessionID=${widget.sessionID}"
       "&redirect=ente://passkey"
       "&clientPackage=io.ente.photos",

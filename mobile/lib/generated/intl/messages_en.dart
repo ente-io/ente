@@ -182,8 +182,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m62(count) =>
       "${Intl.plural(count, one: '${count} result found', other: '${count} results found')}";
 
-  static String m63(snapshotLenght, searchLenght) =>
-      "Sections length mismatch: ${snapshotLenght} != ${searchLenght}";
+  static String m63(snapshotLength, searchLength) =>
+      "Sections length mismatch: ${snapshotLength} != ${searchLength}";
 
   static String m4(count) => "${count} selected";
 
@@ -346,6 +346,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Allow downloads"),
         "allowPeopleToAddPhotos":
             MessageLookupByLibrary.simpleMessage("Allow people to add photos"),
+        "allowPermBody": MessageLookupByLibrary.simpleMessage(
+            "Please allow access to your photos from Settings so Ente can display and backup your library."),
+        "allowPermTitle":
+            MessageLookupByLibrary.simpleMessage("Allow access to photos"),
         "androidBiometricHint":
             MessageLookupByLibrary.simpleMessage("Verify identity"),
         "androidBiometricNotRecognized":
@@ -420,6 +424,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please authenticate to manage your trusted contacts"),
         "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to view your passkey"),
+        "authToViewTrashedFiles": MessageLookupByLibrary.simpleMessage(
+            "Please authenticate to view your trashed files"),
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to view your active sessions"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
@@ -939,6 +945,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Save space on your device by clearing files that have been already backed up."),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Free up space"),
         "freeUpSpaceSaving": m39,
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Up to 1000 memories shown in gallery"),
         "general": MessageLookupByLibrary.simpleMessage("General"),
@@ -968,6 +975,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Hides app content in the app switcher and disables screenshots"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Hides app content in the app switcher"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Hiding..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Hosted at OSM France"),
@@ -1130,7 +1139,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Magic search allows to search photos by their contents, e.g. \'flower\', \'red car\', \'identity documents\'"),
         "manage": MessageLookupByLibrary.simpleMessage("Manage"),
         "manageDeviceStorage":
-            MessageLookupByLibrary.simpleMessage("Manage device Cache"),
+            MessageLookupByLibrary.simpleMessage("Manage device cache"),
         "manageDeviceStorageDesc": MessageLookupByLibrary.simpleMessage(
             "Review and clear local cache storage."),
         "manageFamily": MessageLookupByLibrary.simpleMessage("Manage Family"),
@@ -1515,7 +1524,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Search by a date, month or year"),
         "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Images will be shown here once processing is complete"),
+            "Images will be shown here once processing and syncing is complete"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "People will be shown here once indexing is done"),
         "searchFileTypesAndNamesEmptySection":
@@ -1534,7 +1543,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Invite people, and you\'ll see all photos shared by them here"),
         "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
+            "People will be shown here once processing and syncing is complete"),
         "searchResultCount": m62,
         "searchSectionsLengthMismatch": m63,
         "security": MessageLookupByLibrary.simpleMessage("Security"),

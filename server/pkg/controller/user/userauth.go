@@ -93,6 +93,9 @@ func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpos
 		if isComplete && purpose == ente.SignUpOTTPurpose {
 			return stacktrace.Propagate(ente.ErrUserAlreadyRegistered, "user has already completed sign up process")
 		}
+		if purpose == ente.SignUpOTTPurpose && viper.GetBool("internal.disable-registration") {
+			return stacktrace.Propagate(ente.ErrPermissionDenied, "registration is disabled")
+		}
 		if !isComplete && purpose == ente.LoginOTTPurpose {
 			return stacktrace.Propagate(ente.ErrUserNotRegistered, "user has not completed sign up process")
 		}
@@ -362,6 +365,7 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 	userID, err := c.UserRepo.GetUserIDWithEmail(email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
+			// Keep this check as users can still trigger ott via other means that can lead to this code path
 			if viper.GetBool("internal.disable-registration") {
 				return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(ente.ErrPermissionDenied, "")
 			} else {
@@ -405,10 +409,11 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 		}
 	}
+	accountsUrl := viper.GetString("apps.accounts")
 	if hasPasskeys && isTwoFactorEnabled {
-		return ente.EmailAuthorizationResponse{ID: userID, PasskeySessionID: passKeySessionID, TwoFactorSessionIDV2: twoFactorSessionID}, nil
+		return ente.EmailAuthorizationResponse{ID: userID, PasskeySessionID: passKeySessionID, AccountsUrl: accountsUrl, TwoFactorSessionIDV2: twoFactorSessionID}, nil
 	} else if hasPasskeys {
-		return ente.EmailAuthorizationResponse{ID: userID, PasskeySessionID: passKeySessionID}, nil
+		return ente.EmailAuthorizationResponse{ID: userID, PasskeySessionID: passKeySessionID, AccountsUrl: accountsUrl}, nil
 	} else if isTwoFactorEnabled {
 		return ente.EmailAuthorizationResponse{ID: userID, TwoFactorSessionID: twoFactorSessionID}, nil
 	}

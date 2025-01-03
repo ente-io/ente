@@ -3,5 +3,6 @@
   "askDeleteReason": "Jaký je váš hlavní důvod, proč mažete svůj účet?",
   "incorrectRecoveryKeyBody": "",
   "checkInboxAndSpamFolder": "Zkontrolujte prosím svou doručenou poštu (a spam) pro dokončení ověření",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery"
 }

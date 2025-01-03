@@ -36,10 +36,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("Adja meg az e-mail címét"),
         "feedback": MessageLookupByLibrary.simpleMessage("Visszajelzés"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Érvénytelen e-mail cím"),
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
         "verify": MessageLookupByLibrary.simpleMessage("Hitelesítés")
       };
 }

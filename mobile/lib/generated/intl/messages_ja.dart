@@ -742,6 +742,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "すでにバックアップされているファイルを消去して、デバイスの容量を空けます。"),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("スペースを解放する"),
         "freeUpSpaceSaving": m39,
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "galleryMemoryLimitInfo":
             MessageLookupByLibrary.simpleMessage("ギャラリーに表示されるメモリは最大1000個までです"),
         "general": MessageLookupByLibrary.simpleMessage("設定"),
@@ -770,6 +771,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "アプリ画面を非表示にし、スクリーンショットを無効にします"),
         "hideContentDescriptionIos":
             MessageLookupByLibrary.simpleMessage("アプリ切り替え時に、アプリの画面を非表示にします"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("非表示にしています"),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("OSM Franceでホスト"),
@@ -1480,8 +1483,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
             "使用可能なストレージは現在のプランによって制限されています。プランをアップグレードすると、あなたが手に入れたストレージが自動的に使用可能になります。"),
         "useAsCover": MessageLookupByLibrary.simpleMessage("カバー写真として使用"),
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
         "usePublicLinksForPeopleNotOnEnte":
             MessageLookupByLibrary.simpleMessage(
                 "公開リンクを使用する(Enteを利用しない人と共有できます)"),

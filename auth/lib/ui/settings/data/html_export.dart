@@ -33,29 +33,29 @@ Future<String> generateQRImageBase64(String data) async {
   return base64Encode(pngBytes);
 }
 
-Future<String> generateOTPEntryHtml(
-  Code code,
-  BuildContext context,
-) async {
+Future<String> generateOTPEntryHtml(Code code, BuildContext context) async {
   final qrBase64 = await generateQRImageBase64(code.rawData);
   String notes = code.display.note;
   if (notes.isNotEmpty) {
-    notes = '<p>Note: <b>$notes</b></p>';
+    notes = '<p class="group">Note: <b>$notes</b></p>';
   }
   return '''
-    <div class="otp-entry">
-      <div>
-        <p><b>${code.issuer}</b> </p>
-        <p><b>${code.account}</b></p>
-        <br />
-        <p>Type: <b>${code.type.name}</b></p>
-        <p>Algorithm: <b>${code.algorithm.name}</b></p>
-        <p>Digits: <b>${code.digits}</b></p>
-        <p>Recovery Code: <b>${code.secret}</b></p>
-        $notes
-      </div>
-        <img src="data:image/png;base64,$qrBase64" alt="QR Code">
-    </div>
+    <table class="otp-entry">
+      <tr>
+        <td>
+          <p><b>${code.issuer}</b></p>
+          <p><b>${code.account}</b></p>
+          <p class="group">Type: <b>${code.type.name}</b></p>
+          <p>Algorithm: <b>${code.algorithm.name}</b></p>
+          <p>Digits: <b>${code.digits}</b></p>
+          <p>Secret: <b>${code.secret}</b></p>
+          $notes
+        </td>
+        <td class="otp-qr">
+          <img src="data:image/png;base64,$qrBase64" alt="QR Code">
+        </td>
+      </tr>
+    </table>
     <br/>
     <hr class="red-separator" />
     <br/>
@@ -80,116 +80,144 @@ Future<String> generateHtml(BuildContext context) async {
   <meta content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
   <style>
-    body {
-      background-color: #f0f1f3;
-      font-family: "Helvetica Neue", "Segoe UI", Helvetica, sans-serif;
-      font-size: 16px;
-      line-height: 27px;
-      margin: 0;
-      color: #444;
-    }
+  body {
+    background-color: #f0f1f3;
+    font-family: "Helvetica Neue", "Segoe UI", Helvetica, sans-serif;
+    font-size: 16px;
+    line-height: 27px;
+    margin: 0;
+    color: #444;
+  }
 
-    pre {
-      background: #f4f4f4f4;
-      padding: 2px;
-    }
+  pre {
+    background: #f4f4f4f4;
+    padding: 2px;
+  }
 
-    table {
-      width: 100%;
-      border: 1px solid #ddd;
-    }
+  table {
+    width: 100%;
+  }
 
-    table td {
-      border-color: #ddd;
-      padding: 5px;
-    }
+  table td {
+    border-color: #ddd;
+    padding: 5px;
+  }
 
-    .wrap {
-      background-color: #fff;
-      padding: 30px;
-      max-width: 600px;
-      margin: 0 auto;
-      border-radius: 5px;
-    }
+  .wrap {
+    background-color: #fff;
+    padding: 30px;
+    max-width: 600px;
+    margin: 0 auto;
+    border-radius: 5px;
+  }
 
-    .button {
-      background: #0055d4;
-      border-radius: 3px;
-      text-decoration: none !important;
-      color: #fff !important;
-      font-weight: bold;
-      padding: 10px 30px;
-      display: inline-block;
-    }
+  .button {
+    background: #0055d4;
+    border-radius: 3px;
+    text-decoration: none !important;
+    color: #fff !important;
+    font-weight: bold;
+    padding: 10px 30px;
+    display: inline-block;
+  }
 
-    .button:hover {
-      background: #111;
-    }
+  .button:hover {
+    background: #111;
+  }
 
-    .footer {
-      text-align: center;
-      font-size: 12px;
-      color: #888;
-    }
+  .footer {
+    text-align: center;
+    font-size: 12px;
+    color: #888;
+  }
 
-    .footer a {
-      color: #888;
-      margin-right: 5px;
-    }
+  .footer a {
+    color: #888;
+    margin-right: 5px;
+  }
 
-    .gutter {
-      padding: 30px;
-    }
+  .gutter {
+    padding: 30px;
+  }
 
-    img {
-      max-width: 100%;
-      height: auto;
-    }
+  img {
+    max-width: 100%;
+    height: auto;
+  }
 
-    a {
-      color: #0055d4;
-    }
+  a {
+    color: #0055d4;
+  }
 
-    a:hover {
-      color: #111;
-    }
+  a:hover {
+    color: #111;
+  }
 
-    @media screen and (max-width: 700px) {
-      .wrap {
-        max-width: auto;
-      }
-
-      .gutter {
-        padding: 10px;
-      }
-    }
-
-    .footer-icons {
-      padding: 4px !important;
-      width: 24px !important;
-    }
-
+  @media screen and (max-width: 700px) {
     .otp-entry {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: block;
     }
 
-    .otp-entry div {
-      flex: 1;
+    .otp-entry td {
+      display: block;
+      width: 100%;
     }
 
-    .otp-entry p {
-      margin: 2px 0;
+    .otp-qr img {
+      margin-top: 10px;
     }
+  }
 
-    hr.red-separator {
-      border: none;
-      height: 1px;
-      background-color: rgb(173, 0, 255);
-    }
+  .footer-icons {
+    padding: 4px !important;
+    width: 24px !important;
+  }
 
-  </style>
+  .otp-entry {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+
+  .otp-entry td {
+    padding: 20px;
+    margin: 0px;
+    vertical-align: middle;
+  }
+
+  .otp-entry td:first-child {
+    width: 70%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .otp-qr img {
+    max-width: 200px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .otp-entry td.otp-qr {
+    width: 30%;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .otp-entry p {
+    margin: 2px 0;
+  }
+
+  .otp-entry p.group {
+    margin-top: 15px;
+  }
+
+  hr.red-separator {
+    border: none;
+    height: 1px;
+    background-color: rgb(173, 0, 255);
+  }
+</style>
   </head>
   <body>
     <h1 style="text-align: center;">Ente Auth</h1>

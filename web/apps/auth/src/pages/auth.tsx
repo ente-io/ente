@@ -3,6 +3,10 @@ import { stashRedirect } from "@/accounts/services/redirect";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { NavbarBase } from "@/base/components/Navbar";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@/base/components/OverflowMenu";
 import { isHTTP401Error } from "@/base/http";
 import log from "@/base/log";
 import { masterKeyFromSessionIfLoggedIn } from "@/base/session-store";
@@ -10,12 +14,8 @@ import {
     HorizontalFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "@ente/shared/components/OverflowMenu";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
-import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import {
     Button,
     ButtonBase,
@@ -154,10 +154,10 @@ const AuthNavbar: React.FC = () => {
                 <EnteLogo />
             </HorizontalFlex>
             <HorizontalFlex position={"absolute"} right="24px">
-                <OverflowMenu ariaID={"auth-options"}>
+                <OverflowMenu ariaID="auth-options">
                     <OverflowMenuOption
                         color="critical"
-                        startIcon={<LogoutOutlined />}
+                        startIcon={<LogoutOutlinedIcon />}
                         onClick={logout}
                     >
                         {t("logout")}

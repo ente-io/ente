@@ -4,6 +4,10 @@ import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@/base/components/OverflowMenu";
+import {
     useIsSmallWidth,
     useIsTouchscreen,
 } from "@/base/components/utils/hooks";
@@ -30,17 +34,13 @@ import {
     FluidContainer,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "@ente/shared/components/OverflowMenu";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import { useFileInput } from "@ente/shared/hooks/useFileInput";
-import AddPhotoAlternateOutlined from "@mui/icons-material/AddPhotoAlternateOutlined";
+import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
@@ -436,7 +436,7 @@ export default function PublicCollectionGallery() {
             const selectedFiles = getSelectedFiles(selected, publicFiles);
             const setFilesDownloadProgressAttributes =
                 setFilesDownloadProgressAttributesCreator(
-                    `${selectedFiles.length} ${t("FILES")}`,
+                    t("files_count", { count: selectedFiles.length }),
                 );
             await downloadSelectedFiles(
                 selectedFiles,
@@ -497,7 +497,6 @@ export default function PublicCollectionGallery() {
                 />
                 <SharedAlbumNavbar onAddPhotos={onAddPhotos} />
                 <PhotoFrame
-                    page={PAGES.SHARED_ALBUMS}
                     files={publicFiles}
                     syncWithRemote={syncWithRemote}
                     setSelected={setSelected}
@@ -584,7 +583,7 @@ const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
     const isSmallWidth = useIsSmallWidth();
 
-    const icon = <AddPhotoAlternateOutlined />;
+    const icon = <AddPhotoAlternateOutlinedIcon />;
 
     return (
         <Box>
@@ -618,7 +617,7 @@ const AddMorePhotosButton: React.FC<ButtonProps> = (props) => {
                 {...props}
                 disabled={disabled}
                 color={"accent"}
-                startIcon={<AddPhotoAlternateOutlined />}
+                startIcon={<AddPhotoAlternateOutlinedIcon />}
             >
                 {t("add_more_photos")}
             </Button>
@@ -703,7 +702,7 @@ const ListHeader: React.FC<ListHeaderProps> = ({
                     fileCount={publicFiles.length}
                 />
                 {downloadEnabled && (
-                    <OverflowMenu ariaID={"collection-options"}>
+                    <OverflowMenu ariaID="collection-options">
                         <OverflowMenuOption
                             startIcon={<FileDownloadOutlinedIcon />}
                             onClick={downloadAllFiles}

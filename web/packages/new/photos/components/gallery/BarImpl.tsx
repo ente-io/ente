@@ -1,5 +1,6 @@
 import { FilledIconButton } from "@/base/components/mui";
 import { Overlay } from "@/base/components/mui/Container";
+import { Ellipsized2LineTypography } from "@/base/components/Typography";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
 import {
@@ -19,12 +20,12 @@ import type {
 } from "@/new/photos/services/collection/ui";
 import type { Person } from "@/new/photos/services/ml/people";
 import ArchiveIcon from "@mui/icons-material/Archive";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import Favorite from "@mui/icons-material/FavoriteRounded";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import LinkIcon from "@mui/icons-material/Link";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PeopleIcon from "@mui/icons-material/People";
-import PushPin from "@mui/icons-material/PushPin";
+import PushPinIcon from "@mui/icons-material/PushPin";
 import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, {
@@ -226,7 +227,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         transparentTriggerButtonBackground
                     />
                     <IconButton onClick={onShowAllCollections}>
-                        <ExpandMore />
+                        <ExpandMoreIcon />
                     </IconButton>
                 </>
             )}
@@ -240,7 +241,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 onChangeSortBy={onChangeCollectionsSortBy}
             />
             <FilledIconButton onClick={onShowAllCollections}>
-                <ExpandMore />
+                <ExpandMoreIcon />
             </FilledIconButton>
         </Box>
     );
@@ -508,20 +509,12 @@ const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
 const CardText: React.FC<React.PropsWithChildren> = ({ children }) => (
     <TileTextOverlay>
         <Box height={"2.1em"}>
-            <Ellipsized variant="small">{children}</Ellipsized>
+            <Ellipsized2LineTypography variant="small">
+                {children}
+            </Ellipsized2LineTypography>
         </Box>
     </TileTextOverlay>
 );
-
-const Ellipsized = styled(Typography)`
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; // number of lines to show
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    word-break: break-word;
-`;
 
 interface CollectionBarCardIconProps {
     type: CollectionSummaryType;
@@ -531,7 +524,7 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     type,
 }) => (
     <CollectionBarCardIcon_>
-        {type == "favorites" && <Favorite />}
+        {type == "favorites" && <FavoriteRoundedIcon />}
         {type == "archived" && (
             <ArchiveIcon
                 sx={(theme) => ({
@@ -543,7 +536,7 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
         {(type == "incomingShareViewer" ||
             type == "incomingShareCollaborator") && <PeopleIcon />}
         {type == "sharedOnlyViaLink" && <LinkIcon />}
-        {type == "pinned" && <PushPin />}
+        {type == "pinned" && <PushPinIcon />}
     </CollectionBarCardIcon_>
 );
 

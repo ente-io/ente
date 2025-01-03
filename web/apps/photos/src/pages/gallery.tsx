@@ -36,9 +36,15 @@ import {
 } from "@/new/photos/services/collection";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
 import {
+    getAllLatestCollections,
+    getAllLocalCollections,
+    syncTrash,
+} from "@/new/photos/services/collections";
+import {
     getLocalFiles,
     getLocalTrashedFiles,
     sortFiles,
+    syncFiles,
 } from "@/new/photos/services/files";
 import {
     filterSearchableFiles,
@@ -46,6 +52,7 @@ import {
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { initSettings } from "@/new/photos/services/settings";
+import { preCollectionsAndFilesSync, sync } from "@/new/photos/services/sync";
 import {
     initUserDetailsOrTriggerSync,
     redirectToCustomerPortal,
@@ -63,7 +70,6 @@ import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
 import { useFileInput } from "@ente/shared/hooks/useFileInput";
-import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
     getToken,
@@ -113,12 +119,8 @@ import {
     constructUserIDToEmailMap,
     createAlbum,
     createUnCategorizedCollection,
-    getAllLatestCollections,
-    getAllLocalCollections,
 } from "services/collectionService";
-import { syncFiles } from "services/fileService";
-import { preFileInfoSync, sync } from "services/sync";
-import { syncTrash } from "services/trashService";
+import exportService from "services/export";
 import uploadManager from "services/upload/uploadManager";
 import { isTokenValid } from "services/userService";
 import {
@@ -258,10 +260,6 @@ export default function Gallery() {
     const closeAuthenticateUserModal = () =>
         setAuthenticateUserModalView(false);
 
-    // The option selected by the user selected from the search bar dropdown.
-    const [selectedSearchOption, setSelectedSearchOption] = useState<
-        SearchOption | undefined
-    >();
     // If the fix creation time dialog is being shown, then the list of files on
     // which it should act.
     const [fixCreationTimeFiles, setFixCreationTimeFiles] = useState<
@@ -449,28 +447,31 @@ export default function Gallery() {
     }, [peopleState]);
 
     useEffect(() => {
-        if (isInSearchMode && selectedSearchOption) {
+        if (isInSearchMode && state.searchSuggestion) {
             setPhotoListHeader({
                 height: 104,
                 item: (
                     <SearchResultsHeader
-                        selectedOption={selectedSearchOption}
+                        searchSuggestion={state.searchSuggestion}
+                        fileCount={state.searchResults?.length ?? 0}
                     />
                 ),
                 itemType: ITEM_TYPE.HEADER,
             });
         }
-    }, [isInSearchMode, selectedSearchOption]);
+    }, [isInSearchMode, state.searchSuggestion, state.searchResults]);
 
-    // TODO: Make this a normal useEffect.
-    useMemoSingleThreaded(async () => {
-        if (selectedSearchOption) {
-            const searchResults = await filterSearchableFiles(
-                selectedSearchOption.suggestion,
+    useEffect(() => {
+        const pendingSearchSuggestion = state.pendingSearchSuggestions.at(-1);
+        if (!state.isRecomputingSearchResults && pendingSearchSuggestion) {
+            dispatch({ type: "updatingSearchResults" });
+            filterSearchableFiles(pendingSearchSuggestion).then(
+                (searchResults) => {
+                    dispatch({ type: "setSearchResults", searchResults });
+                },
             );
-            dispatch({ type: "setSearchResults", searchResults });
         }
-    }, [selectedSearchOption]);
+    }, [state.isRecomputingSearchResults, state.pendingSearchSuggestions]);
 
     const selectAll = (e: KeyboardEvent) => {
         // ignore ctrl/cmd + a if the user is typing in a text field
@@ -568,7 +569,7 @@ export default function Gallery() {
                 throw new Error(CustomError.SESSION_EXPIRED);
             }
             !silent && showLoadingBar();
-            await preFileInfoSync();
+            await preCollectionsAndFilesSync();
             const allCollections = await getAllLatestCollections();
             const [hiddenCollections, collections] = splitByPredicate(
                 allCollections,
@@ -579,13 +580,13 @@ export default function Gallery() {
                 collections,
                 hiddenCollections,
             });
-            await syncFiles(
+            const didUpdateNormalFiles = await syncFiles(
                 "normal",
                 collections,
                 (files) => dispatch({ type: "setFiles", files }),
                 (files) => dispatch({ type: "fetchFiles", files }),
             );
-            await syncFiles(
+            const didUpdateHiddenFiles = await syncFiles(
                 "hidden",
                 hiddenCollections,
                 (hiddenFiles) =>
@@ -593,6 +594,8 @@ export default function Gallery() {
                 (hiddenFiles) =>
                     dispatch({ type: "fetchHiddenFiles", hiddenFiles }),
             );
+            if (didUpdateNormalFiles || didUpdateHiddenFiles)
+                exportService.onLocalFilesUpdated();
             await syncTrash(allCollections, (trashedFiles: EnteFile[]) =>
                 dispatch({ type: "setTrashedFiles", trashedFiles }),
             );
@@ -617,8 +620,7 @@ export default function Gallery() {
                     log.error("syncWithRemote failed", e);
             }
         } finally {
-            dispatch({ type: "clearTempDeleted" });
-            dispatch({ type: "clearTempHidden" });
+            dispatch({ type: "clearUnsyncedState" });
             !silent && hideLoadingBar();
         }
         syncInProgress.current = false;
@@ -783,13 +785,13 @@ export default function Gallery() {
                     personID: searchOption.suggestion.person.id,
                 });
             }
-            setSelectedSearchOption(undefined);
         } else if (searchOption) {
-            dispatch({ type: "enterSearchMode" });
-            setSelectedSearchOption(searchOption);
+            dispatch({
+                type: "enterSearchMode",
+                searchSuggestion: searchOption.suggestion,
+            });
         } else {
             dispatch({ type: "exitSearch" });
-            setSelectedSearchOption(undefined);
         }
         setIsClipSearchResult(type == "clip");
     };
@@ -1026,14 +1028,20 @@ export default function Gallery() {
                     <PeopleEmptyState />
                 ) : (
                     <PhotoFrame
-                        page={PAGES.GALLERY}
                         mode={barMode}
                         modePlus={isInSearchMode ? "search" : barMode}
                         files={filteredFiles}
                         syncWithRemote={syncWithRemote}
-                        favItemIds={state.favoriteFileIDs}
                         setSelected={setSelected}
                         selected={selected}
+                        favoriteFileIDs={state.favoriteFileIDs}
+                        markUnsyncedFavoriteUpdate={(fileID, isFavorite) =>
+                            dispatch({
+                                type: "markUnsyncedFavoriteUpdate",
+                                fileID,
+                                isFavorite,
+                            })
+                        }
                         markTempDeleted={(files) =>
                             dispatch({ type: "markTempDeleted", files })
                         }

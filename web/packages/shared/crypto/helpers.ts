@@ -133,8 +133,8 @@ export const getRecoveryKey = async () => {
         let recoveryKey: string;
         if (recoveryKeyEncryptedWithMasterKey) {
             recoveryKey = await cryptoWorker.decryptB64(
-                recoveryKeyEncryptedWithMasterKey,
-                recoveryKeyDecryptionNonce,
+                recoveryKeyEncryptedWithMasterKey!,
+                recoveryKeyDecryptionNonce!,
                 masterKey,
             );
         } else {

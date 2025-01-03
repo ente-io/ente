@@ -11,6 +11,7 @@ import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { downloadManager } from "@/gallery/services/download";
 import { EnteFile } from "@/media/file";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
+import { getLocalCollections } from "@/new/photos/services/collections";
 import { AppContext } from "@/new/photos/types/context";
 import {
     CenteredFlex,
@@ -52,7 +53,6 @@ import React, {
     type MutableRefObject,
     type Ref,
 } from "react";
-import { getLocalCollections } from "services/collectionService";
 import uploadManager from "services/upload/uploadManager";
 
 interface ImageEditorOverlayProps {
@@ -370,7 +370,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
             const ctx = canvasRef.current.getContext("2d");
             ctx.imageSmoothingEnabled = false;
             if (!fileURL) {
-                const srcURLs = await downloadManager.getFileForPreview(
+                const srcURLs = await downloadManager.renderableSourceURLs(
                     props.file,
                 );
                 img.src = srcURLs.url as string;
@@ -695,7 +695,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                             setInvert={setInvert}
                         />
                     )}
-                    <MenuSectionTitle title={t("EXPORT")} />
+                    <MenuSectionTitle title={t("export_data")} />
                     <MenuItemGroup>
                         <EnteMenuItem
                             startIcon={<DownloadIcon />}

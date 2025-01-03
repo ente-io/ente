@@ -22,7 +22,7 @@ import {
 import { useIsOffline } from "@/new/photos/components/utils/use-is-offline";
 import { useLoadingBar } from "@/new/photos/components/utils/use-loading-bar";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
-import { runMigrations } from "@/new/photos/services/migrations";
+import { runMigrations } from "@/new/photos/services/migration";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
 import { AppContext } from "@/new/photos/types/context";
@@ -36,7 +36,7 @@ import {
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import type { User } from "@ente/shared/user/types";
-import ArrowForward from "@mui/icons-material/ArrowForward";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { CssBaseline, styled } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import Notification from "components/Notification";
@@ -100,7 +100,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 showMiniDialog(updateReadyToInstallDialogAttributes(update));
             } else {
                 setNotificationAttributes({
-                    endIcon: <ArrowForward />,
+                    endIcon: <ArrowForwardIcon />,
                     variant: "secondary",
                     message: t("update_available"),
                     onClick: () =>
@@ -189,6 +189,9 @@ export default function App({ Component, pageProps }: AppProps) {
         [
             showLoadingBar,
             hideLoadingBar,
+            watchFolderView,
+            watchFolderFiles,
+            themeColor,
             showMiniDialog,
             onGenericError,
             logout,
@@ -205,7 +208,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar />}
                 <OfflineMessageContainer>
-                    {isI18nReady && isOffline && t("OFFLINE_MSG")}
+                    {isI18nReady && isOffline && t("offline_message")}
                 </OfflineMessageContainer>
                 <LoadingBar color="#51cd7c" ref={loadingBarRef} />
 

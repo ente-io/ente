@@ -231,7 +231,9 @@ const CollectionButton: React.FC<CollectionButtonProps> = ({
 
 const AddCollectionButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <ItemCard TileComponent={LargeTileButton} onClick={onClick}>
-        <LargeTileTextOverlay>{t("create_albums")}</LargeTileTextOverlay>
+        <LargeTileTextOverlay>
+            <Typography>{t("create_albums")}</Typography>
+        </LargeTileTextOverlay>
         <LargeTilePlusOverlay>+</LargeTilePlusOverlay>
     </ItemCard>
 );

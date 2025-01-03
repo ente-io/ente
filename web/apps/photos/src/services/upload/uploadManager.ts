@@ -8,7 +8,11 @@ import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { shouldDisableCFUploadProxy } from "@/gallery/services/upload";
 import type { Collection } from "@/media/collection";
-import { EncryptedEnteFile, EnteFile } from "@/media/file";
+import {
+    decryptFile,
+    type EncryptedEnteFile,
+    type EnteFile,
+} from "@/media/file";
 import type { ParsedMetadata } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
@@ -28,7 +32,7 @@ import {
     getPublicCollectionUID,
 } from "services/publicCollectionService";
 import watcher from "services/watch";
-import { decryptFile, getUserOwnedFiles } from "utils/file";
+import { getUserOwnedFiles } from "utils/file";
 import {
     getMetadataJSONMapKeyForJSON,
     tryParseTakeoutMetadataJSON,

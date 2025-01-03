@@ -67,6 +67,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("प्रतिपुष्टि"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("पासवर्ड भूल गए"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(
             "आपके द्वारा दर्ज रिकवरी कुंजी ग़लत है"),
         "incorrectRecoveryKeyTitle":
@@ -102,8 +105,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "इससे आप इस डिवाइस से लॉग आउट हो जाएँगे!"),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(
             "अपना पासवर्ड रीसेट करने के लिए, कृपया पहले अपना ईमेल सत्यापित करें।"),
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
         "verify": MessageLookupByLibrary.simpleMessage("सत्यापित करें"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("ईमेल सत्यापित करें"),

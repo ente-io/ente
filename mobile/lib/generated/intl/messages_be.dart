@@ -136,9 +136,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Забыліся пароль"),
         "freeTrial":
             MessageLookupByLibrary.simpleMessage("Бясплатная пробная версія"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "general": MessageLookupByLibrary.simpleMessage("Асноўныя"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Генерацыя ключоў шыфравання..."),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Як гэта працуе"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Iгнараваць"),
         "incorrectPasswordTitle":
@@ -267,8 +270,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "update": MessageLookupByLibrary.simpleMessage("Абнавіць"),
         "updateAvailable":
             MessageLookupByLibrary.simpleMessage("Даступна абнаўленне"),
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
         "useRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Выкарыстоўваць ключ аднаўлення"),
         "verify": MessageLookupByLibrary.simpleMessage("Праверыць"),

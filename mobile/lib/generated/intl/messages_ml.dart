@@ -67,8 +67,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("അഭിപ്രായം"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("സങ്കേതക്കുറി മറന്നുപോയി"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "general": MessageLookupByLibrary.simpleMessage("പൊതുവായവ"),
         "hide": MessageLookupByLibrary.simpleMessage("മറയ്ക്കുക"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("പ്രവർത്തന രീതി"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("അവഗണിക്കുക"),
         "incorrectPasswordTitle":
@@ -129,8 +132,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("നിബന്ധനകൾ"),
         "thankYou": MessageLookupByLibrary.simpleMessage("നന്ദി"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("ഈ ഉപകരണം"),
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
         "verify": MessageLookupByLibrary.simpleMessage("ഉറപ്പിക്കുക"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("ഇമെയിൽ ദൃഢീകരിക്കുക"),

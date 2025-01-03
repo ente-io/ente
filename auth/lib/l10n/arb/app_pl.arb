@@ -258,6 +258,10 @@
   "areYouSureYouWantToLogout": "Czy na pewno chcesz się wylogować?",
   "yesLogout": "Tak, wyloguj",
   "exit": "Wyjdź",
+  "theme": "Motyw",
+  "lightTheme": "Jasny",
+  "darkTheme": "Ciemny",
+  "systemTheme": "Systemowy",
   "verifyingRecoveryKey": "Weryfikowanie klucza odzyskiwania...",
   "recoveryKeyVerified": "Klucz odzyskiwania zweryfikowany",
   "recoveryKeySuccessBody": "Znakomicie! Klucz odzyskiwania jest prawidłowy. Dziękujemy za weryfikację.\n\nPamiętaj, aby bezpiecznie przechowywać kopię zapasową klucza odzyskiwania.",
@@ -491,11 +495,12 @@
   "appLockNotEnabledDescription": "Prosimy włączyć blokadę aplikacji z Zabezpieczenia > Blokada aplikacji",
   "authToViewPasskey": "Prosimy uwierzytelnić się, aby wyświetlić klucz dostępu",
   "appLockOfflineModeWarning": "Wybrano kontynuowanie bez kopii zapasowych. Jeśli zapomnisz blokady aplikacji, utracisz dostęp do swoich danych.",
-  "duplicateCodes": "Duplikuj kody",
+  "duplicateCodes": "Zduplikowane kody",
   "noDuplicates": "✨ Brak duplikatów",
   "youveNoDuplicateCodesThatCanBeCleared": "Nie masz duplikatów kodów, które mogą być wyczyszczone",
   "deduplicateCodes": "Deduplikuj kody",
   "deselectAll": "Odznacz wszystko",
   "selectAll": "Zaznacz wszystko",
-  "deleteDuplicates": "Usuń duplikaty"
+  "deleteDuplicates": "Usuń duplikaty",
+  "plainHTML": "Zwykły HTML"
 }

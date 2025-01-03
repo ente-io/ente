@@ -19,7 +19,6 @@ import (
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"strings"
 	"sync"
 	gTime "time"
 )
@@ -49,7 +48,8 @@ type Controller struct {
 	CollectionRepo          *repo.CollectionRepository
 	downloadManagerCache    map[string]*s3manager.Downloader
 	// for downloading objects from s3 for replication
-	workerURL string
+	workerURL   string
+	tempStorage string
 }
 
 func New(repo *fileDataRepo.Repository,
@@ -57,7 +57,8 @@ func New(repo *fileDataRepo.Repository,
 	objectCleanupController *controller.ObjectCleanupController,
 	s3Config *s3config.S3Config,
 	fileRepo *repo.FileRepository,
-	collectionRepo *repo.CollectionRepository) *Controller {
+	collectionRepo *repo.CollectionRepository,
+) *Controller {
 	embeddingDcs := []string{s3Config.GetHotBackblazeDC(), s3Config.GetHotWasabiDC(), s3Config.GetWasabiDerivedDC(), s3Config.GetDerivedStorageDataCenter(), "b5"}
 	cache := make(map[string]*s3manager.Downloader, len(embeddingDcs))
 	for i := range embeddingDcs {
@@ -75,7 +76,7 @@ func New(repo *fileDataRepo.Repository,
 	}
 }
 
-func (c *Controller) InsertOrUpdate(ctx *gin.Context, req *fileData.PutFileDataRequest) error {
+func (c *Controller) InsertOrUpdateMetadata(ctx *gin.Context, req *fileData.PutFileDataRequest) error {
 	if err := req.Validate(); err != nil {
 		return stacktrace.Propagate(err, "validation failed")
 	}
@@ -84,22 +85,12 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, req *fileData.PutFileDataR
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	if req.Type != ente.MlData && req.Type != ente.PreviewVideo {
+	if req.Type != ente.MlData {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage("unsupported object type "+string(req.Type)), "")
 	}
 	fileOwnerID := userID
 	bucketID := c.S3Config.GetBucketID(req.Type)
-	if req.Type == ente.PreviewVideo {
-		fileObjectKey := req.S3FileObjectKey(fileOwnerID)
-		if !strings.Contains(*req.ObjectKey, fileObjectKey) {
-			return stacktrace.Propagate(ente.NewBadRequestWithMessage("objectKey should contain the file object key"), "")
-		}
-		err = c.copyObject(*req.ObjectKey, fileObjectKey, bucketID)
-		if err != nil {
-			return err
-		}
-	}
-	objectKey := req.S3FileMetadataObjectKey(fileOwnerID)
+	objectKey := fileData.ObjectMetadataKey(req.FileID, fileOwnerID, req.Type, nil)
 	obj := fileData.S3FileMetadata{
 		Version:          *req.Version,
 		EncryptedData:    *req.EncryptedData,

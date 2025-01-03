@@ -1,5 +1,6 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery"
 }

@@ -17,11 +17,11 @@ import type { Electron } from "@/base/types/ipc";
  *
  * On app start, we read the last saved version:
  *
- * -   If it is not present, we set it to the current version _without_ showing
- *     the what's new dialog. This is to handle fresh installs.
+ * - If it is not present, we set it to the current version _without_ showing
+ *   the what's new dialog. This is to handle fresh installs.
  *
- * -   If it is present and less than the current version, we show the what's
- *     new dialog. Otherwise do nothing.
+ * - If it is present and less than the current version, we show the what's new
+ *   dialog. Otherwise do nothing.
  *
  * The what's new dialog sets the saved version to the current one whenever it
  * is shown.

@@ -9,8 +9,8 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
 
   const HiddenCollectionsButtonWidget(
     this.textStyle, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

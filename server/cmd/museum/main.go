@@ -93,6 +93,11 @@ func main() {
 		panic(err)
 	}
 
+	viper.SetDefault("apps.public-albums", "https://albums.ente.io")
+	viper.SetDefault("apps.accounts", "https://accounts.ente.io")
+	viper.SetDefault("apps.cast", "https://cast.ente.io")
+	viper.SetDefault("apps.family", "https://family.ente.io")
+
 	setupLogger(environment)
 	log.Infof("Booting up %s server with commit #%s", environment, os.Getenv("GIT_COMMIT"))
 
@@ -166,7 +171,7 @@ func main() {
 	fileRepo := &repo.FileRepository{DB: db, S3Config: s3Config, QueueRepo: queueRepo,
 		ObjectRepo: objectRepo, ObjectCleanupRepo: objectCleanupRepo,
 		ObjectCopiesRepo: objectCopiesRepo, UsageRepo: usageRepo}
-	fileDataRepo := &fileDataRepo.Repository{DB: db}
+	fileDataRepo := &fileDataRepo.Repository{DB: db, ObjectCleanupRepo: objectCleanupRepo}
 	familyRepo := &repo.FamilyRepository{DB: db}
 	trashRepo := &repo.TrashRepository{DB: db, ObjectRepo: objectRepo, FileRepo: fileRepo, QueueRepo: queueRepo}
 	publicCollectionRepo := repo.NewPublicCollectionRepository(db, viper.GetString("apps.public-albums"))
@@ -428,6 +433,7 @@ func main() {
 	privateAPI.GET("/files/preview/v2/:fileID", fileHandler.GetThumbnail)
 
 	privateAPI.PUT("/files/data", fileHandler.PutFileData)
+	privateAPI.PUT("/files/video-data", fileHandler.PutVideoData)
 	privateAPI.POST("/files/data/status-diff", fileHandler.FileDataStatusDiff)
 	privateAPI.POST("/files/data/fetch", fileHandler.GetFilesData)
 	privateAPI.GET("/files/data/fetch", fileHandler.GetFileData)
@@ -462,9 +468,10 @@ func main() {
 	privateAPI.POST("/trash/empty", trashHandler.Empty)
 
 	emergencyCtrl := &emergency.Controller{
-		Repo:     &emergencyRepo.Repository{DB: db},
-		UserRepo: userRepo,
-		UserCtrl: userController,
+		Repo:              &emergencyRepo.Repository{DB: db},
+		UserRepo:          userRepo,
+		UserCtrl:          userController,
+		PasskeyController: passkeyCtrl,
 	}
 	userHandler := &api.UserHandler{
 		UserController:      userController,
@@ -1000,7 +1007,9 @@ func cors() gin.HandlerFunc {
 		c.Writer.Header().Set("Access-Control-Max-Age", "1728000")
 
 		if c.Request.Method == http.MethodOptions {
-			c.AbortWithStatus(http.StatusNoContent)
+			// While 204 No Content is more appropriate, Safari intermittently
+			// (intermittently!) fails CORS if we return 204 instead of 200 OK.
+			c.Status(http.StatusOK)
 			return
 		}
 		c.Next()

@@ -70,10 +70,12 @@ class DataSectionWidget extends StatelessWidget {
               await DeduplicationService.instance.getDuplicateCodes();
           if (duplicateCodes.isEmpty) {
             unawaited(
-              showErrorDialog(
+              showChoiceDialog(
                 context,
-                l10n.noDuplicates,
-                l10n.youveNoDuplicateCodesThatCanBeCleared,
+                title: l10n.noDuplicates,
+                firstButtonLabel: "OK",
+                secondButtonLabel: null,
+                body: l10n.youveNoDuplicateCodesThatCanBeCleared,
               ),
             );
             return;

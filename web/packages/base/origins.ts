@@ -41,10 +41,10 @@ export const apiURL = async (
  * Return the overridden API origin, if one is defined by either (in priority
  * order):
  *
- * -   Setting the custom server on the landing page (See: [Note: Configuring
- *     custom server]); or by
+ * - Setting the custom server on the landing page (See: [Note: Configuring
+ *   custom server]); or by
  *
- * -   Setting the `NEXT_PUBLIC_ENTE_ENDPOINT` environment variable.
+ * - Setting the `NEXT_PUBLIC_ENTE_ENDPOINT` environment variable.
  *
  * Otherwise return undefined.
  */
@@ -76,16 +76,6 @@ export const uploaderOrigin = async () =>
     (await customAPIOrigin()) ?? "https://uploader.ente.io";
 
 /**
- * Return the origin that serves the accounts app.
- *
- * Defaults to our production instance, "https://accounts.ente.io", but can be
- * overridden by setting the `NEXT_PUBLIC_ENTE_ACCOUNTS_URL` environment
- * variable.
- */
-export const accountsAppOrigin = () =>
-    process.env.NEXT_PUBLIC_ENTE_ACCOUNTS_URL ?? `https://accounts.ente.io`;
-
-/**
  * Return the origin that serves public albums.
  *
  * Defaults to our production instance, "https://albums.ente.io", but can be
@@ -94,22 +84,3 @@ export const accountsAppOrigin = () =>
  */
 export const albumsAppOrigin = () =>
     process.env.NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT ?? "https://albums.ente.io";
-
-/**
- * Return the origin that serves the family dashboard which can be used to
- * create or manage family plans..
- *
- * Defaults to our production instance, "https://family.ente.io", but can be
- * overridden by setting the `NEXT_PUBLIC_ENTE_FAMILY_URL` environment variable.
- */
-export const familyAppOrigin = () =>
-    process.env.NEXT_PUBLIC_ENTE_FAMILY_URL ?? "https://family.ente.io";
-
-/**
- * Return the origin that serves the payments app.
- *
- * Defaults to our production instance, "https://payments.ente.io", but can be
- * overridden by setting the `NEXT_PUBLIC_ENTE_PAYMENTS_URL` environment variable.
- */
-export const paymentsAppOrigin = () =>
-    process.env.NEXT_PUBLIC_ENTE_PAYMENTS_URL ?? "https://payments.ente.io";

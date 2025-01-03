@@ -51,6 +51,8 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
 
   @override
   void initState() {
+    super.initState();
+
     _enteFile = widget.enteFile;
     _logger.info(
       'initState for ${_enteFile.generatedID} with tag ${_enteFile.tag} and name ${_enteFile.displayName}',
@@ -64,7 +66,6 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
         isGuestView = event.isGuestView;
       });
     });
-    super.initState();
   }
 
   void _onLongPressEvent(bool isPressed) {

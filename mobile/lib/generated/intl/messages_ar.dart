@@ -35,6 +35,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("أدخل رمز الاسترداد"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("نسيت كلمة المرور"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(
             "مفتاح الاسترداد الذي أدخلته غير صحيح"),
         "incorrectRecoveryKeyTitle":
@@ -60,8 +63,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "سيؤدي هذا إلى تسجيل خروجك من هذا الجهاز!"),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(
             "لإعادة تعيين كلمة المرور، يرجى التحقق من بريدك الإلكتروني أولاً."),
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
         "verify": MessageLookupByLibrary.simpleMessage("التحقّق"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("التحقق من البريد الإلكتروني")

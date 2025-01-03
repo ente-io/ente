@@ -674,35 +674,47 @@ class FilesDB {
     int visibility = visibleVisibility,
     DBFilterOptions? filterOptions,
     bool applyOwnerCheck = false,
+    bool ignoreSharedFiles = false,
   }) async {
     final stopWatch = EnteWatch('getAllPendingOrUploadedFiles')..start();
     final order = (asc ?? false ? 'ASC' : 'DESC');
 
-    late String query;
+    final subQueries = <String>[];
     late List<Object?>? args;
     if (applyOwnerCheck) {
-      query =
+      subQueries.add(
           'SELECT * FROM $filesTable WHERE $columnCreationTime >= ? AND $columnCreationTime <= ? '
           'AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) '
-          'AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
-          ' AND $columnMMdVisibility = ? ORDER BY $columnCreationTime $order, $columnModificationTime $order';
-
-      args = [startTime, endTime, ownerID, visibility];
+          'AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)');
+      args = [startTime, endTime, ownerID];
     } else {
-      query =
+      subQueries.add(
           'SELECT * FROM $filesTable WHERE $columnCreationTime >= ? AND $columnCreationTime <= ? '
-          'AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
-          ' AND $columnMMdVisibility = ? ORDER BY $columnCreationTime $order, $columnModificationTime $order';
-      args = [startTime, endTime, visibility];
+          'AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)');
+      args = [startTime, endTime];
     }
 
+    subQueries.add(' AND $columnMMdVisibility = ?');
+    args.add(visibility);
+
+    if (ignoreSharedFiles == true) {
+      subQueries.add(' AND $columnOwnerID = ?');
+      args.add(ownerID);
+    }
+
+    subQueries.add(
+      ' ORDER BY $columnCreationTime $order, $columnModificationTime $order',
+    );
+
     if (limit != null) {
-      query += ' LIMIT ?';
+      subQueries.add(' LIMIT ?');
       args.add(limit);
     }
 
+    final finalQuery = subQueries.join();
+
     final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(query, args);
+    final results = await db.getAll(finalQuery, args);
     stopWatch.log('queryDone');
     final files = convertToFiles(results);
     stopWatch.log('convertDone');
@@ -714,24 +726,40 @@ class FilesDB {
 
   Future<FileLoadResult> getAllLocalAndUploadedFiles(
     int startTime,
-    int endTime, {
+    int endTime,
+    int ownerID, {
     int? limit,
     bool? asc,
+    bool ignoreSharedFiles = false,
     required DBFilterOptions filterOptions,
   }) async {
     final db = await instance.sqliteAsyncDB;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final args = [startTime, endTime, visibleVisibility];
-    String query =
+    final subQueries = <String>[];
+
+    subQueries.add(
         'SELECT * FROM $filesTable WHERE $columnCreationTime >= ? AND $columnCreationTime <= ?  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
-        ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))'
-        ' ORDER BY $columnCreationTime $order, $columnModificationTime $order';
+        ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))');
+
+    if (ignoreSharedFiles == true) {
+      subQueries.add(' AND $columnOwnerID = ?');
+      args.add(ownerID);
+    }
+
+    subQueries.add(
+      ' ORDER BY $columnCreationTime $order, $columnModificationTime $order',
+    );
+
     if (limit != null) {
-      query += ' LIMIT ?';
+      subQueries.add(' LIMIT ?');
       args.add(limit);
     }
+
+    final finalQuery = subQueries.join();
+
     final results = await db.getAll(
-      query,
+      finalQuery,
       args,
     );
     final files = convertToFiles(results);

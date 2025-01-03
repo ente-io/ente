@@ -258,6 +258,10 @@
   "areYouSureYouWantToLogout": "로그아웃 하시겠습니까?",
   "yesLogout": "네, 로그아웃하기",
   "exit": "나가기",
+  "theme": "테마",
+  "lightTheme": "라이트",
+  "darkTheme": "다크",
+  "systemTheme": "시스템",
   "verifyingRecoveryKey": "복구 키 확인 중...",
   "recoveryKeyVerified": "복구 키 확인 됨",
   "recoveryKeySuccessBody": "좋습니다! 복구 키가 확인되었습니다. 확인 절차를 거쳐주셔서 감사합니다.\n\n잊지 마시고 꼭 복구 키를 안전하게 보관해주세요.",
@@ -490,5 +494,13 @@
   "appLockNotEnabled": "어플 잠금 설정되지 않음",
   "appLockNotEnabledDescription": "설정 > 어플 잠금에서 어플 잠금을 활성화해주세요",
   "authToViewPasskey": "패스키를 보려면 인증절차를 거쳐주세요",
-  "appLockOfflineModeWarning": "백업 없이 진행하는 것을 선택하셨습니다. 어플 잠금 방법을 잊어버리신 경우, 데이터에 접근하실 수 없게 됩니다."
+  "appLockOfflineModeWarning": "백업 없이 진행하는 것을 선택하셨습니다. 어플 잠금 방법을 잊어버리신 경우, 데이터에 접근하실 수 없게 됩니다.",
+  "duplicateCodes": "중복된 코드",
+  "noDuplicates": "✨ 중복 없음",
+  "youveNoDuplicateCodesThatCanBeCleared": "지울 수 있는 중복 코드가 없습니다",
+  "deduplicateCodes": "중복된 코드 제거",
+  "deselectAll": "모두 선택 해제",
+  "selectAll": "모두 선택",
+  "deleteDuplicates": "중복 제거",
+  "plainHTML": "일반 HTML"
 }

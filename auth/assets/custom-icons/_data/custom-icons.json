@@ -73,6 +73,10 @@
       ]
     },
     {
+      "title": "Belo",
+      "hex": "5717d4"
+    },
+    {
       "title": "Bethesda",
       "altNames": [
         "Bethesda Softworks"
@@ -174,6 +178,9 @@
     },
     {
       "title": "Bybit"
+    },
+    {
+      "title": "Caixa"
     },
     {
       "title": "Canva"
@@ -637,7 +644,7 @@
     {
       "title": "nordvpn",
       "slug": "nordaccount",
-      "hex": "#4687FF",
+      "hex": "4687FF",
       "altNames": [
         "Nord Account"
       ]
@@ -747,7 +754,7 @@
     },
     {
       "title": "randstad",
-      "hex": "#2175D9"
+      "hex": "2175D9"
     },
     {
       "title": "Real-Debrid",

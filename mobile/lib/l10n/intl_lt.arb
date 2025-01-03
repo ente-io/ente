@@ -216,7 +216,7 @@
   "after1Month": "Po 1 mėnesio",
   "after1Year": "Po 1 metų",
   "manageParticipants": "Tvarkyti",
-  "albumParticipantsCount": "{count, plural, one {{count} dalyvis} few {{count} dalyviai} many {{count} dalyvio}=0 {0 dalyvių} =1 {1 dalyvis} other {{count} dalyvių}}",
+  "albumParticipantsCount": "{count, plural, =0 {Nėra dalyvių} =1 {1 dalyvis} other {{count} dalyviai}}",
   "@albumParticipantsCount": {
     "placeholders": {
       "count": {
@@ -237,7 +237,7 @@
   "publicLinkEnabled": "Įjungta viešoji nuoroda",
   "shareALink": "Bendrinkite nuorodą",
   "sharedAlbumSectionDescription": "Sukurkite bendrinamus ir bendradarbiaujamus albumus su kitais „Ente“ naudotojais, įskaitant naudotojus nemokamuose planuose.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {Bendrinima su {numberOfPeople} asmeniu} few {Bendrinima su {numberOfPeople} asmenims} many {Bendrinima su {numberOfPeople} asmens}=0 {Bendrinti su konkrečiais asmenimis} =1 {Bendrinima su 1 asmeniu} other {Bendrinima su {numberOfPeople} asmenų}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Bendrinti su konkrečiais asmenimis} =1 {Bendrinta su 1 asmeniu} other {Bendrinta su {numberOfPeople} asmenimis}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -572,6 +572,8 @@
   "leave": "Palikti",
   "rateTheApp": "Vertinti programą",
   "startBackup": "Pradėti kurti atsarginę kopiją",
+  "allowPermTitle": "Leisti prieigą prie nuotraukų",
+  "allowPermBody": "Iš nustatymų leiskite prieigą prie nuotraukų, kad „Ente“ galėtų rodyti ir kurti atsargines bibliotekos kopijas.",
   "existingUser": "Esamas naudotojas",
   "privateBackups": "Privačios atsarginės kopijos",
   "forYourMemories": "jūsų prisiminimams",
@@ -663,7 +665,7 @@
   "referFriendsAnd2xYourPlan": "Rekomenduokite draugams ir 2 kartus padidinkite savo planą",
   "shareAlbumHint": "Atidarykite albumą ir palieskite bendrinimo mygtuką viršuje dešinėje, kad bendrintumėte.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Elementai rodo likusių dienų skaičių iki visiško ištrynimo.",
-  "trashDaysLeft": "{count, plural, one {{count} diena} few {{count} dienos} many {{count} dienos}=0 {Netrukus} =1 {1 diena} other {{count} dienų}}",
+  "trashDaysLeft": "{count, plural, =0 {Netrukus} =1 {1 diena} other {{count} dienų}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1064,9 +1066,9 @@
   "onlyThem": "Tik jiems",
   "checkingModels": "Tikrinami modeliai...",
   "enableMachineLearningBanner": "Įjunkite mašininį mokymąsi magiškai paieškai ir veidų atpažinimui",
-  "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas",
-  "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas",
-  "viewersSuccessfullyAdded": "{count, plural, one {Pridėtas {count} žiūrėtojas} few {Pridėti {count} žiūrėtojai} many {Pridėta {count} žiūrėtojo}=0 {Pridėta 0 žiūrėtojų} =1 {Pridėtas 1 žiūrėtojas} other {Pridėta {count} žiūrėtojų}}",
+  "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
+  "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Pridėta 0 žiūrėtojų} =1 {Pridėtas 1 žiūrėtojas} other {Pridėta {count} žiūrėtojų}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1076,7 +1078,7 @@
     },
     "description": "Number of viewers that were successfully added to an album."
   },
-  "collaboratorsSuccessfullyAdded": "{count, plural, one {Pridėtas {count} bendradarbis} few {Pridėti {count} bendradarbiai} many {Pridėta {count} bendradarbio}=0 {Pridėta 0 bendradarbių} =1 {Pridėtas 1 bendradarbis} other {Pridėta {count} bendradarbių}}",
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Pridėta 0 bendradarbių} =1 {Pridėtas 1 bendradarbis} other {Pridėta {count} bendradarbių}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1151,25 +1153,16 @@
   },
   "currentlyRunning": "šiuo metu vykdoma",
   "ignored": "ignoruota",
-  "photosCount": "{count, plural, one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos}=0 {0 nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Failas",
-  "searchSectionsLengthMismatch": "Skyrių ilgio neatitikimas: {snapshotLenght} != {searchLenght}",
+  "searchSectionsLengthMismatch": "Sekcijų ilgio neatitikimas: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
     "description": "Appears in search tab page",
     "placeholders": {
-      "snapshotLenght": {
+      "snapshotLength": {
         "type": "int",
         "example": "1"
       },
-      "searchLenght": {
+      "searchLength": {
         "type": "int",
         "example": "2"
       }
@@ -1257,5 +1250,7 @@
   },
   "legacyInvite": "{email} pakvietė jus būti patikimu kontaktu",
   "authToManageLegacy": "Nustatykite tapatybę, kad tvarkytumėte patikimus kontaktus",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "useDifferentPlayerInfo": "Turite problemų paleidžiant šį vaizdo įrašą? Ilgai paspauskite čia, kad išbandytumėte kitą leistuvę.",
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery"
 }

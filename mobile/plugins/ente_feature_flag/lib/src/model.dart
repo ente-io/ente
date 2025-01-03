@@ -12,6 +12,7 @@ class RemoteFlags {
   final bool internalUser;
   final bool betaUser;
   final bool enableMobMultiPart;
+  final String castUrl;
 
   RemoteFlags({
     required this.enableStripe,
@@ -22,6 +23,7 @@ class RemoteFlags {
     required this.internalUser,
     required this.betaUser,
     required this.enableMobMultiPart,
+    required this.castUrl,
   });
 
   static RemoteFlags defaultValue = RemoteFlags(
@@ -33,6 +35,7 @@ class RemoteFlags {
     internalUser: kDebugMode,
     betaUser: kDebugMode,
     enableMobMultiPart: false,
+    castUrl: "https://cast.ente.io",
   );
 
   String toJson() => json.encode(toMap());
@@ -46,6 +49,7 @@ class RemoteFlags {
       'internalUser': internalUser,
       'betaUser': betaUser,
       'enableMobMultiPart': enableMobMultiPart,
+      'castUrl': castUrl,
     };
   }
 
@@ -62,6 +66,7 @@ class RemoteFlags {
       betaUser: map['betaUser'] ?? defaultValue.betaUser,
       enableMobMultiPart:
           map['enableMobMultiPart'] ?? defaultValue.enableMobMultiPart,
+      castUrl: map['castUrl'] ?? defaultValue.castUrl,
     );
   }
 }

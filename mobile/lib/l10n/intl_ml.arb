@@ -100,5 +100,6 @@
   "calculating": "കണക്കുകൂട്ടുന്നു...",
   "close": "അടക്കുക",
   "count": "എണ്ണം",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery"
 }

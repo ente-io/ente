@@ -413,9 +413,11 @@ Future<dynamic> showTextInputDialog(
   TextCapitalization textCapitalization = TextCapitalization.none,
   bool alwaysShowSuccessState = false,
   bool isPasswordInput = false,
+  bool useRootNavigator = false,
 }) {
   return showDialog(
     barrierColor: backdropFaintDark,
+    useRootNavigator: useRootNavigator,
     context: context,
     builder: (context) {
       final bottomInset = MediaQuery.of(context).viewInsets.bottom;

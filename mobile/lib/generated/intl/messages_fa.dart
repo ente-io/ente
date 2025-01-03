@@ -212,6 +212,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("برای خاطرات شما"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("رمز عبور را فراموش کرده‌اید"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "general": MessageLookupByLibrary.simpleMessage("عمومی"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "در حال تولید کلیدهای رمزگذاری..."),
@@ -222,6 +223,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "ما نصب برنامه را ردیابی نمی‌کنیم. اگر بگویید کجا ما را پیدا کردید، به ما کمک می‌کند!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
             "از کجا در مورد Ente شنیدی؟ (اختیاری)"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("چگونه کار می‌کند"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("نادیده گرفتن"),
         "incorrectPasswordTitle":
@@ -402,8 +405,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("به‌رورزرسانی در دسترس است"),
         "updatingFolderSelection": MessageLookupByLibrary.simpleMessage(
             "در حال به‌روزرسانی گزینش پوشه..."),
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
         "usePublicLinksForPeopleNotOnEnte":
             MessageLookupByLibrary.simpleMessage(
                 "استفاده از پیوندهای عمومی برای افرادی که در Ente نیستند"),

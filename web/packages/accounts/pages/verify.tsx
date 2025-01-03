@@ -41,8 +41,7 @@ import { stashedRedirect, unstashRedirect } from "../services/redirect";
 import { configureSRP } from "../services/srp";
 import type { SRPAttributes, SRPSetupAttributes } from "../services/srp-remote";
 import { getSRPAttributes } from "../services/srp-remote";
-import type { UserVerificationResponse } from "../services/user";
-import { putAttributes, sendOTT, verifyOtt } from "../services/user";
+import { putAttributes, sendOTT, verifyEmail } from "../services/user";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
@@ -80,8 +79,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         setFieldError,
     ) => {
         try {
-            const referralSource = getLocalReferralSource();
-            const resp = await verifyOtt(email, ott, referralSource);
+            const referralSource = getLocalReferralSource()?.trim();
+            const cleanedReferral = referralSource
+                ? `web:${referralSource}`
+                : undefined;
             const {
                 keyAttributes,
                 encryptedToken,
@@ -89,8 +90,9 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 id,
                 twoFactorSessionID,
                 passkeySessionID,
+                accountsUrl,
             } = await userVerificationResultAfterResolvingSecondFactorChoice(
-                resp.data as UserVerificationResponse,
+                await verifyEmail(email, ott, cleanedReferral),
             );
             if (passkeySessionID) {
                 const user = getData(LS_KEYS.USER);
@@ -106,7 +108,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 // Update: This flag causes the interactive encryption key to be
                 // generated, so it has a functional impact we need.
                 setIsFirstLogin(true);
-                const url = passkeyVerificationRedirectURL(passkeySessionID);
+                const url = passkeyVerificationRedirectURL(
+                    accountsUrl,
+                    passkeySessionID,
+                );
                 setPasskeyVerificationData({ passkeySessionID, url });
                 openPasskeyVerificationURL({ passkeySessionID, url });
             } else if (twoFactorSessionID) {

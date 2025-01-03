@@ -1349,8 +1349,6 @@
   "onlyThem": "Только их",
   "checkingModels": "Проверка моделей...",
   "enableMachineLearningBanner": "Включить автоматическое обучение для Магического Поиска и распознавания лица",
-  "searchDiscoverEmptySection": "Изображения будут показаны здесь после завершения обработки",
-  "searchPersonsEmptySection": "Люди будут показаны здесь после выполнения обработки",
   "viewersSuccessfullyAdded": "{count, plural, =0 {Добавлено 0 зрителей}=1 {Добавлен 1 зритель} other {Добавлено {count} зрителей}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1432,20 +1430,6 @@
     }
   },
   "file": "Файл",
-  "searchSectionsLengthMismatch": "Длина разделов не совпадает: {snapshotLenght} != {searchLenght}",
-  "@searchSectionsLengthMismatch": {
-    "description": "Appears in search tab page",
-    "placeholders": {
-      "snapshotLenght": {
-        "type": "int",
-        "example": "1"
-      },
-      "searchLenght": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "selectMailApp": "Выберите приложение почты",
   "selectAllShort": "Все",
   "@selectAllShort": {
@@ -1479,5 +1463,6 @@
   "recoveryWarning": "Доверенный контакт пытается получить доступ к вашей учетной записи",
   "rejectRecovery": "Отклонить восстановление",
   "recoveryInitiated": "Восстановление запущено",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery"
 }

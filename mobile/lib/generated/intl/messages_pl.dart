@@ -184,8 +184,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m62(count) =>
       "${Intl.plural(count, one: 'Znaleziono ${count} wynik', few: 'Znaleziono ${count} wyniki', other: 'Znaleziono ${count} wyników')}";
 
-  static String m63(snapshotLenght, searchLenght) =>
-      "Niezgodność długości sekcji: ${snapshotLenght} != ${searchLenght}";
+  static String m63(snapshotLength, searchLength) =>
+      "Niezgodność długości sekcji: ${snapshotLength} != ${searchLength}";
 
   static String m4(count) => "Wybrano ${count}";
 
@@ -355,6 +355,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Zezwól na pobieranie"),
         "allowPeopleToAddPhotos": MessageLookupByLibrary.simpleMessage(
             "Pozwól innym dodawać zdjęcia"),
+        "allowPermBody": MessageLookupByLibrary.simpleMessage(
+            "Prosimy zezwolić na dostęp do swoich zdjęć w Ustawieniach, aby Ente mogło wyświetlać i tworzyć kopię zapasową Twojej biblioteki."),
+        "allowPermTitle":
+            MessageLookupByLibrary.simpleMessage("Zezwól na dostęp do zdjęć"),
         "androidBiometricHint":
             MessageLookupByLibrary.simpleMessage("Potwierdź swoją tożsamość"),
         "androidBiometricNotRecognized": MessageLookupByLibrary.simpleMessage(
@@ -506,6 +510,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "cannotAddMorePhotosAfterBecomingViewer": m16,
         "cannotDeleteSharedFiles": MessageLookupByLibrary.simpleMessage(
             "Nie można usunąć udostępnionych plików"),
+        "castAlbum": MessageLookupByLibrary.simpleMessage("Odtwórz album"),
         "castIPMismatchBody": MessageLookupByLibrary.simpleMessage(
             "Upewnij się, że jesteś w tej samej sieci co telewizor."),
         "castIPMismatchTitle": MessageLookupByLibrary.simpleMessage(
@@ -844,8 +849,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterCode": MessageLookupByLibrary.simpleMessage("Wprowadź kod"),
         "enterCodeDescription": MessageLookupByLibrary.simpleMessage(
             "Wprowadź kod dostarczony przez znajomego, aby uzyskać bezpłatne miejsce dla was obojga"),
-        "enterDateOfBirth": MessageLookupByLibrary.simpleMessage(
-            "Data urodzenia (nieobowiązkowo)"),
+        "enterDateOfBirth":
+            MessageLookupByLibrary.simpleMessage("Urodziny (nieobowiązkowo)"),
         "enterEmail":
             MessageLookupByLibrary.simpleMessage("Wprowadź adres e-mail"),
         "enterFileName":
@@ -967,6 +972,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Oszczędzaj miejsce na urządzeniu poprzez wyczyszczenie plików, które zostały już przesłane."),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Zwolnij miejsce"),
         "freeUpSpaceSaving": m39,
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "W galerii wyświetlane jest do 1000 pamięci"),
         "general": MessageLookupByLibrary.simpleMessage("Ogólne"),
@@ -998,6 +1004,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ukrywa zawartość aplikacji w przełączniku aplikacji i wyłącza zrzuty ekranu"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Ukrywa zawartość aplikacji w przełączniku aplikacji"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Ukrywanie..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Hostowane w OSM Francja"),
@@ -1077,6 +1085,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Opuścić udostępniony album?"),
         "left": MessageLookupByLibrary.simpleMessage("W lewo"),
         "legacy": MessageLookupByLibrary.simpleMessage("Dziedzictwo"),
+        "legacyAccounts":
+            MessageLookupByLibrary.simpleMessage("Odziedziczone konta"),
         "legacyInvite": m42,
         "legacyPageDesc": MessageLookupByLibrary.simpleMessage(
             "Dziedzictwo pozwala zaufanym kontaktom na dostęp do Twojego konta w razie Twojej nieobecności."),
@@ -1574,7 +1584,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Szukaj według daty, miesiąca lub roku"),
         "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Obrazy będą wyświetlane tutaj po zakończeniu przetwarzania"),
+            "Obrazy będą wyświetlane tutaj po zakończeniu przetwarzania i synchronizacji"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "Po zakończeniu indeksowania ludzie będą tu wyświetlani"),
         "searchFileTypesAndNamesEmptySection":
@@ -1593,7 +1603,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Zaproś ludzi, a zobaczysz tutaj wszystkie udostępnione przez nich zdjęcia"),
         "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Osoby będą wyświetlane tutaj po zakończeniu przetwarzania"),
+            "Osoby będą wyświetlane tutaj po zakończeniu przetwarzania i synchronizacji"),
         "searchResultCount": m62,
         "searchSectionsLengthMismatch": m63,
         "security": MessageLookupByLibrary.simpleMessage("Bezpieczeństwo"),
@@ -1910,7 +1920,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Użyteczna przestrzeń dyskowa jest ograniczona przez Twój obecny plan. Nadmiar zadeklarowanej przestrzeni dyskowej stanie się automatycznie użyteczny po uaktualnieniu planu."),
         "useAsCover": MessageLookupByLibrary.simpleMessage("Użyj jako okładki"),
         "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
+            "Masz problem z odtwarzaniem tego wideo? Przytrzymaj tutaj, aby spróbować innego odtwarzacza."),
         "usePublicLinksForPeopleNotOnEnte":
             MessageLookupByLibrary.simpleMessage(
                 "Użyj publicznych linków dla osób spoza Ente"),
