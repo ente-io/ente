@@ -151,6 +151,9 @@ func (c *PublicCollectionController) UpdateSharedUrl(ctx context.Context, req en
 	if req.EnableCollect != nil {
 		publicCollectionToken.EnableCollect = *req.EnableCollect
 	}
+	if req.EnableJoin != nil {
+		publicCollectionToken.EnableJoin = *req.EnableJoin
+	}
 	err = c.PublicCollectionRepo.UpdatePublicCollectionToken(ctx, publicCollectionToken)
 	if err != nil {
 		return ente.PublicURL{}, stacktrace.Propagate(err, "")
@@ -161,6 +164,7 @@ func (c *PublicCollectionController) UpdateSharedUrl(ctx context.Context, req en
 		ValidTill:       publicCollectionToken.ValidTill,
 		EnableDownload:  publicCollectionToken.EnableDownload,
 		EnableCollect:   publicCollectionToken.EnableCollect,
+		EnableJoin:      publicCollectionToken.EnableJoin,
 		PasswordEnabled: publicCollectionToken.PassHash != nil && *publicCollectionToken.PassHash != "",
 		Nonce:           publicCollectionToken.Nonce,
 		MemLimit:        publicCollectionToken.MemLimit,
