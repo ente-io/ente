@@ -24,7 +24,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 // import { CarouselProvider, DotGroup, Slide, Slider } from "pure-react-carousel";
 // import "pure-react-carousel/dist/react-carousel.es.css";
-import { useCallback, useEffect, useRef, useState, type Ref } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 
 export default function LandingPage() {
@@ -316,28 +316,9 @@ const SideBox = styled("div")`
     min-width: 320px;
 `;
 
-const Slide: React.FC<
-    React.PropsWithChildren<{ index: number; ref: Ref<HTMLDivElement> }>
-> = ({ ref, children }) => {
-    return (
-        <Stack ref={ref} sx={{ alignItems: "center", textAlign: "center" }}>
-            {children}
-        </Stack>
-    );
-};
-
-const SlidesContainer = styled("div")`
-    display: flex;
-    overflow-x: hidden;
-    scroll-behavior: smooth;
-    & > div {
-        flex: 0 0 100%;
-    }
-`;
-
 const Slideshow: React.FC = () => {
     const [selectedIndex, setSelectedIndex] = useState(0);
-    const slideRefs = useRef<(HTMLDivElement | undefined)[]>([]);
+    const containerRef = useRef<HTMLDivElement | undefined>(undefined);
 
     useEffect(() => {
         const intervalID = setInterval(() => {
@@ -347,19 +328,10 @@ const Slideshow: React.FC = () => {
     });
 
     useEffect(() => {
-        slideRefs.current[selectedIndex]?.scrollIntoView({
-            // Prevent vertical shifting of the page.
-            block: "nearest",
+        containerRef.current.scrollTo({
+            left: containerRef.current.offsetWidth * selectedIndex,
         });
     }, [selectedIndex]);
-
-    // A function that creates a callback ref which saves the corresponding ref
-    // in the `slideRefs` array at the given index.
-    const createSlideRefCallback =
-        (index: number) => (node: HTMLDivElement) => {
-            slideRefs.current[index] = node;
-            return () => (slideRefs.current[index] = undefined);
-        };
 
     return (
         <Stack
@@ -370,8 +342,8 @@ const Slideshow: React.FC = () => {
                 alignSelf: "stretch",
             }}
         >
-            <SlidesContainer>
-                <Slide index={0} ref={createSlideRefCallback(0)}>
+            <SlidesContainer ref={containerRef}>
+                <Slide>
                     <Img
                         src="/images/onboarding-lock/1x.png"
                         srcSet="/images/onboarding-lock/2x.png 2x,
@@ -382,7 +354,7 @@ const Slideshow: React.FC = () => {
                     </FeatureText>
                     <TextContainer>{t("intro_slide_1")}</TextContainer>
                 </Slide>
-                <Slide index={1} ref={createSlideRefCallback(1)}>
+                <Slide>
                     <SlideContents>
                         <Img
                             src="/images/onboarding-safe/1x.png"
@@ -395,7 +367,7 @@ const Slideshow: React.FC = () => {
                         <TextContainer>{t("intro_slide_2")}</TextContainer>
                     </SlideContents>
                 </Slide>
-                <Slide index={2} ref={createSlideRefCallback(2)}>
+                <Slide>
                     <SlideContents>
                         <Img
                             src="/images/onboarding-sync/1x.png"
@@ -426,6 +398,20 @@ const Slideshow: React.FC = () => {
         </Stack>
     );
 };
+
+const SlidesContainer = styled("div")`
+    display: flex;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    & > div {
+        flex: 0 0 100%;
+    }
+`;
+
+const Slide = styled(Stack)`
+    align-items: center;
+    text-align: center;
+`;
 
 const TextContainer = (props: TypographyProps) => (
     <Typography color={"text.muted"} mt={2} mb={3} {...props} />
