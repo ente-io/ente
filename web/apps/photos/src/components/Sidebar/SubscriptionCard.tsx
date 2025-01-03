@@ -42,7 +42,7 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
     }
 
     return (
-        <Box position="relative">
+        <Box sx={{ position: "relative" }}>
             <BackgroundOverlay />
             <SubscriptionCardContentOverlay userDetails={userDetails} />
             <ClickOverlay onClick={onClick} />
@@ -144,14 +144,17 @@ interface StorageSectionProps {
 
 const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
     return (
-        <Box width="100%">
-            <Typography variant="small" color={"text.muted"}>
+        <Box sx={{ width: "100%" }}>
+            <Typography variant="small" sx={{ color: "text.muted" }}>
                 {t("storage")}
             </Typography>
             <DefaultBox>
                 <Typography
-                    fontWeight={"bold"}
-                    sx={{ fontSize: "24px", lineHeight: "30px" }}
+                    sx={{
+                        fontWeight: "bold",
+                        fontSize: "24px",
+                        lineHeight: "30px",
+                    }}
                 >
                     {`${formattedStorageByteSize(usage, { round: true })} ${t(
                         "of",
@@ -160,8 +163,11 @@ const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
             </DefaultBox>
             <MobileSmallBox>
                 <Typography
-                    fontWeight={"bold"}
-                    sx={{ fontSize: "24px", lineHeight: "30px" }}
+                    sx={{
+                        fontWeight: "bold",
+                        fontSize: "24px",
+                        lineHeight: "30px",
+                    }}
                 >
                     {`${bytesInGB(usage)} /  ${bytesInGB(storage)} ${t("storage_unit.gb")} ${t("used")}`}
                 </Typography>
@@ -193,17 +199,13 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
     // all such pluralizable strings use the _count suffix, but that's not a
     // requirement from the library).
     return (
-        <Box width="100%">
+        <Box sx={{ width: "100%" }}>
             <UsageBar used={usage} total={storage} />
-            <SpaceBetweenFlex
-                sx={{
-                    marginTop: 1.5,
-                }}
-            >
+            <SpaceBetweenFlex sx={{ marginTop: 1.5 }}>
                 <Typography variant="mini">{`${formattedStorageByteSize(
                     storage - usage,
                 )} ${t("free")}`}</Typography>
-                <Typography variant="mini" fontWeight={"bold"}>
+                <Typography variant="mini" sx={{ fontWeight: "bold" }}>
                     {t("photos_count", { count: fileCount ?? 0 })}
                 </Typography>
             </SpaceBetweenFlex>
@@ -249,22 +251,18 @@ const FamilyUsageSection: React.FC<FamilyUsageSectionProps> = ({
     totalStorage,
 }) => {
     return (
-        <Box width="100%">
+        <Box sx={{ width: "100%" }}>
             <FamilyUsageBar
                 totalUsage={totalUsage}
                 userUsage={userUsage}
                 totalStorage={totalStorage}
             />
-            <SpaceBetweenFlex
-                sx={{
-                    marginTop: 1.5,
-                }}
-            >
+            <SpaceBetweenFlex sx={{ marginTop: 1.5 }}>
                 <Stack direction={"row"} spacing={1.5}>
                     <Legend label={t("you")} color="text.base" />
                     <Legend label={t("family")} color="text.muted" />
                 </Stack>
-                <Typography variant="mini" fontWeight={"bold"}>
+                <Typography variant="mini" sx={{ fontWeight: "bold" }}>
                     {t("photos_count", { count: fileCount ?? 0 })}
                 </Typography>
             </SpaceBetweenFlex>
@@ -334,7 +332,7 @@ interface LegendProps {
 const Legend: React.FC<LegendProps> = ({ label, color }) => (
     <Box sx={{ display: "flex", alignItems: "center" }}>
         <LegendDot sx={{ color }} />
-        <Typography variant="mini" fontWeight={"bold"}>
+        <Typography variant="mini" sx={{ fontWeight: "bold" }}>
             {label}
         </Typography>
     </Box>

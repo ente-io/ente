@@ -461,7 +461,10 @@ export default function PublicCollectionGallery() {
             <VerticallyCentered>
                 <FormPaper>
                     <FormPaperTitle>{t("password")}</FormPaperTitle>
-                    <Typography color={"text.muted"} mb={2} variant="small">
+                    <Typography
+                        variant="small"
+                        sx={{ color: "text.muted", mb: 2 }}
+                    >
                         {t("link_password_description")}
                     </Typography>
                     <SingleInputForm
@@ -653,9 +656,11 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />
                 </IconButton>
-                <Box ml={1.5}>{t("selected_count", { selected: count })}</Box>
+                <Box sx={{ ml: 1.5 }}>
+                    {t("selected_count", { selected: count })}
+                </Box>
             </FluidContainer>
-            <Stack spacing={2} direction="row" mr={2}>
+            <Stack direction="row" sx={{ gap: 2, mr: 2 }}>
                 <Tooltip title={t("download")}>
                     <IconButton onClick={downloadFilesHelper}>
                         <DownloadIcon />

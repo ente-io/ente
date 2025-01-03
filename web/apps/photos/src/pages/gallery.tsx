@@ -885,7 +885,10 @@ export default function Gallery() {
                 )}
                 {isFirstLoad && (
                     <CenteredFlex>
-                        <Typography color="text.muted" variant="small">
+                        <Typography
+                            variant="small"
+                            sx={{ color: "text.muted" }}
+                        >
                             {t("INITIAL_LOAD_DELAY_WARNING")}
                         </Typography>
                     </CenteredFlex>

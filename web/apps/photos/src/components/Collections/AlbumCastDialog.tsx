@@ -139,7 +139,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                 <Stack sx={{ py: 1, gap: 4 }}>
                     {browserCanCast && (
                         <Stack sx={{ gap: 2 }}>
-                            <Typography color={"text.muted"}>
+                            <Typography sx={{ color: "text.muted" }}>
                                 {t("cast_auto_pair_description")}
                             </Typography>
 
@@ -149,7 +149,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                         </Stack>
                     )}
                     <Stack sx={{ gap: 2 }}>
-                        <Typography color="text.muted">
+                        <Typography sx={{ color: "text.muted" }}>
                             {t("pair_with_pin_description")}
                         </Typography>
                         <Button onClick={() => setView("pin")}>

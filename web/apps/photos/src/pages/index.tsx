@@ -12,18 +12,11 @@ import localForage from "@ente/shared/storage/localForage";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
-import {
-    Box,
-    Button,
-    Stack,
-    Typography,
-    styled,
-    type TypographyProps,
-} from "@mui/material";
+import { Box, Button, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 
 export default function LandingPage() {
@@ -285,9 +278,9 @@ interface MobileBoxFooterProps {
 
 const MobileBoxFooter: React.FC<MobileBoxFooterProps> = ({ host }) => {
     return (
-        <Box pt={4} textAlign="center">
+        <Box sx={{ pt: 4, textAlign: "center" }}>
             {host && (
-                <Typography variant="mini" color="text.faint">
+                <Typography variant="mini" sx={{ color: "text.faint" }}>
                     {host}
                 </Typography>
             )}
@@ -388,12 +381,16 @@ const Slide = styled(Stack)`
     text-align: center;
 `;
 
-const SlideTitle = (props: TypographyProps) => (
-    <Typography variant="h3" mt={4} {...props} />
+const SlideTitle: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <Typography variant="h3" sx={{ mt: 4 }}>
+        {children}
+    </Typography>
 );
 
-const SlideDescription = (props: TypographyProps) => (
-    <Typography color={"text.muted"} mt={2} mb={3} {...props} />
+const SlideDescription: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <Typography sx={{ color: "text.muted", mt: 2, mb: 3 }}>
+        {children}
+    </Typography>
 );
 
 const Img = styled("img")`

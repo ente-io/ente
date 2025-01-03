@@ -31,7 +31,6 @@ import {
     Typography,
     type AccordionProps,
     type DialogProps,
-    type TypographyProps,
 } from "@mui/material";
 import ItemList from "components/ItemList";
 import { t } from "i18next";
@@ -182,9 +181,11 @@ function UploadProgressSubtitleText() {
     return (
         <Typography
             variant="body"
-            fontWeight={"normal"}
-            color="text.muted"
-            marginTop={"4px"}
+            sx={{
+                fontWeight: "normal",
+                color: "text.muted",
+                marginTop: "4px",
+            }}
         >
             {subtitleText(uploadPhase, uploadCounter)}
         </Typography>
@@ -440,8 +441,16 @@ const SectionAccordionDetails = styled(AccordionDetails)(({ theme }) => ({
     padding: theme.spacing(2),
 }));
 
-const SectionInfo = (props: TypographyProps) => (
-    <Typography color="text.muted" variant="small" sx={{ mb: 1 }} {...props} />
+const SectionInfo: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <Typography
+        variant="small"
+        sx={{
+            color: "text.muted",
+            mb: 1,
+        }}
+    >
+        {children}
+    </Typography>
 );
 
 const NotUploadSectionHeader = styled("div")(
@@ -527,10 +536,10 @@ interface TitleTextProps {
 const TitleText: React.FC<TitleTextProps> = ({ title, count }) => (
     <VerticallyCenteredFlex gap={"4px"}>
         <Typography>{title}</Typography>
-        <Typography variant="small" color="text.faint">
+        <Typography variant="small" sx={{ color: "text.faint" }}>
             {"•"}
         </Typography>
-        <Typography variant="small" color="text.faint">
+        <Typography variant="small" sx={{ color: "text.faint" }}>
             {count ?? 0}
         </Typography>
     </VerticallyCenteredFlex>
