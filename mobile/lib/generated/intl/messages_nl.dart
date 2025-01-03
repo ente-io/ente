@@ -972,6 +972,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bespaar ruimte op je apparaat door bestanden die al geback-upt zijn te wissen."),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Ruimte vrijmaken"),
         "freeUpSpaceSaving": m39,
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Tot 1000 herinneringen getoond in de galerij"),
         "general": MessageLookupByLibrary.simpleMessage("Algemeen"),
@@ -1002,6 +1003,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Verbergt app-inhoud in de app-schakelaar en schakelt schermopnamen uit"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Verbergt de inhoud van de app in de app-schakelaar"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Verbergen..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Gehost bij OSM France"),

@@ -945,6 +945,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Save space on your device by clearing files that have been already backed up."),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Free up space"),
         "freeUpSpaceSaving": m39,
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Up to 1000 memories shown in gallery"),
         "general": MessageLookupByLibrary.simpleMessage("General"),
@@ -974,6 +975,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Hides app content in the app switcher and disables screenshots"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Hides app content in the app switcher"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Hiding..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Hosted at OSM France"),

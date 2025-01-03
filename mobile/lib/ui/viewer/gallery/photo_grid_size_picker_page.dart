@@ -5,6 +5,7 @@ import 'package:photos/events/force_reload_home_gallery_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
@@ -25,6 +26,18 @@ class PhotoGridSizePickerPage extends StatelessWidget {
             flexibleSpaceTitle: TitleBarTitleWidget(
               title: S.of(context).photoGridSize,
             ),
+            actionIcons: [
+              IconButtonWidget(
+                icon: Icons.close_outlined,
+                iconButtonType: IconButtonType.secondary,
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+              ),
+            ],
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(

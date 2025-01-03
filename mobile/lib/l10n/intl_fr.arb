@@ -1577,5 +1577,7 @@
   },
   "legacyInvite": "{email} vous a invité à être un contact de confiance",
   "authToManageLegacy": "Veuillez vous authentifier pour gérer vos contacts de confiance",
-  "useDifferentPlayerInfo": "Vous avez des difficultés pour lire cette vidéo ? Appuyez longuement ici pour essayer un autre lecteur."
+  "useDifferentPlayerInfo": "Vous avez des difficultés pour lire cette vidéo ? Appuyez longuement ici pour essayer un autre lecteur.",
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery"
 }

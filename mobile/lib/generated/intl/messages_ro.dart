@@ -805,6 +805,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Economisiți spațiu pe dispozitivul dvs. prin ștergerea fișierelor cărora li s-a făcut copie de rezervă."),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Eliberați spațiu"),
         "freeUpSpaceSaving": m39,
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Până la 1000 de amintiri afișate în galerie"),
         "general": MessageLookupByLibrary.simpleMessage("General"),
@@ -825,6 +826,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("Asistență"),
         "hidden": MessageLookupByLibrary.simpleMessage("Ascunse"),
         "hide": MessageLookupByLibrary.simpleMessage("Ascundere"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Se ascunde..."),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Cum funcţionează"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(

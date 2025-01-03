@@ -980,6 +980,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "freeUpSpace":
             MessageLookupByLibrary.simpleMessage("Speicherplatz freigeben"),
         "freeUpSpaceSaving": m39,
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Bis zu 1000 Erinnerungsstücke angezeigt in der Galerie"),
         "general": MessageLookupByLibrary.simpleMessage("Allgemein"),
@@ -1011,6 +1012,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Versteckt Inhalte der App beim Wechseln zwischen Apps und deaktiviert Screenshots"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Versteckt Inhalte der App beim Wechseln zwischen Apps"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Verstecken..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Gehostet bei OSM France"),

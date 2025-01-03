@@ -913,6 +913,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Сохраните место на вашем устройстве, очистив уже сохраненные файлы."),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Освободить место"),
         "freeUpSpaceSaving": m39,
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "До 1000 воспоминаний, отображаемых в галерее"),
         "general": MessageLookupByLibrary.simpleMessage("Общее"),
@@ -944,6 +945,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Скрывает содержимое приложения в переключателе приложений и отключает скриншоты"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Скрывает содержимое приложения в переключателе приложений"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Скрытие..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Размещено на OSM France"),

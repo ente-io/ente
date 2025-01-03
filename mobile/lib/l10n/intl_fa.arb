@@ -308,5 +308,7 @@
   "developerSettings": "تنظیمات توسعه‌دهنده",
   "search": "جستجو",
   "whatsNew": "تغییرات جدید",
-  "reviewSuggestions": "مرور پیشنهادها"
+  "reviewSuggestions": "مرور پیشنهادها",
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery"
 }
