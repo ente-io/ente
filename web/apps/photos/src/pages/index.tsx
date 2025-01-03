@@ -256,6 +256,9 @@ const SlideshowPanel = styled("div")`
 `;
 
 const Logo_ = styled("div")`
+    /* Bias towards the left for better visual alignment with the slides. */
+    padding-inline-end: 1rem;
+
     margin-block-start: 32px;
     margin-block-end: 40px;
     @media (width >= 1024px) {
