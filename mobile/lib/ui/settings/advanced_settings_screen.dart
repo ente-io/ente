@@ -31,8 +31,8 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
 
   @override
   void initState() {
-    _photoGridSize = localSettings.getPhotoGridSize();
     super.initState();
+    _photoGridSize = localSettings.getPhotoGridSize();
   }
 
   @override
@@ -67,162 +67,151 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Column(
-                          children: [
-                            Column(
-                              children: [
-                                MenuItemWidget(
-                                  captionedTextWidget: CaptionedTextWidget(
-                                    title: S.of(context).machineLearning,
-                                  ),
-                                  menuItemColor: colorScheme.fillFaint,
-                                  trailingWidget: Icon(
-                                    Icons.chevron_right_outlined,
-                                    color: colorScheme.strokeBase,
-                                  ),
-                                  singleBorderRadius: 8,
-                                  alignCaptionedTextToLeft: true,
-                                  onTap: () async {
-                                    // ignore: unawaited_futures
-                                    routeToPage(
-                                      context,
-                                      const MachineLearningSettingsPage(),
-                                    );
-                                  },
-                                ),
-                                const SizedBox(
-                                  height: 24,
-                                ),
-                              ],
+                        MenuItemWidget(
+                          captionedTextWidget: CaptionedTextWidget(
+                            title: S.of(context).machineLearning,
+                          ),
+                          menuItemColor: colorScheme.fillFaint,
+                          trailingWidget: Icon(
+                            Icons.chevron_right_outlined,
+                            color: colorScheme.strokeBase,
+                          ),
+                          singleBorderRadius: 8,
+                          alignCaptionedTextToLeft: true,
+                          onTap: () async {
+                            // ignore: unawaited_futures
+                            routeToPage(
+                              context,
+                              const MachineLearningSettingsPage(),
+                            );
+                          },
+                        ),
+                        const SizedBox(
+                          height: 24,
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            routeToPage(
+                              context,
+                              const PhotoGridSizePickerPage(),
+                            ).then((value) {
+                              setState(() {
+                                _photoGridSize =
+                                    localSettings.getPhotoGridSize();
+                              });
+                            });
+                          },
+                          child: MenuItemWidget(
+                            captionedTextWidget: CaptionedTextWidget(
+                              title: S.of(context).photoGridSize,
+                              subTitle: _photoGridSize.toString(),
                             ),
-                            GestureDetector(
-                              onTap: () {
-                                routeToPage(
-                                  context,
-                                  const PhotoGridSizePickerPage(),
-                                ).then((value) {
-                                  setState(() {
-                                    _photoGridSize =
-                                        localSettings.getPhotoGridSize();
-                                  });
-                                });
-                              },
-                              child: MenuItemWidget(
-                                captionedTextWidget: CaptionedTextWidget(
-                                  title: S.of(context).photoGridSize,
-                                  subTitle: _photoGridSize.toString(),
+                            menuItemColor: colorScheme.fillFaint,
+                            trailingWidget: Icon(
+                              Icons.chevron_right_outlined,
+                              color: colorScheme.strokeBase,
+                            ),
+                            singleBorderRadius: 8,
+                            alignCaptionedTextToLeft: true,
+                            isGestureDetectorDisabled: true,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 24,
+                        ),
+                        MenuItemWidget(
+                          captionedTextWidget: CaptionedTextWidget(
+                            title: S.of(context).showMemories,
+                          ),
+                          menuItemColor: colorScheme.fillFaint,
+                          singleBorderRadius: 8,
+                          alignCaptionedTextToLeft: true,
+                          trailingWidget: ToggleSwitchWidget(
+                            value: () => MemoriesService.instance.showMemories,
+                            onChanged: () async {
+                              unawaited(
+                                MemoriesService.instance.setShowMemories(
+                                  !MemoriesService.instance.showMemories,
                                 ),
-                                menuItemColor: colorScheme.fillFaint,
-                                trailingWidget: Icon(
-                                  Icons.chevron_right_outlined,
-                                  color: colorScheme.strokeBase,
-                                ),
-                                singleBorderRadius: 8,
-                                alignCaptionedTextToLeft: true,
-                                isGestureDetectorDisabled: true,
-                              ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 24,
+                        ),
+                        MenuItemWidget(
+                          captionedTextWidget: CaptionedTextWidget(
+                            title: S.of(context).maps,
+                          ),
+                          menuItemColor: colorScheme.fillFaint,
+                          singleBorderRadius: 8,
+                          alignCaptionedTextToLeft: true,
+                          trailingWidget: ToggleSwitchWidget(
+                            value: () =>
+                                userRemoteFlagService.getCachedBoolValue(
+                              UserRemoteFlagService.mapEnabled,
                             ),
-                            const SizedBox(
-                              height: 24,
-                            ),
-                            MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).showMemories,
-                              ),
-                              menuItemColor: colorScheme.fillFaint,
-                              singleBorderRadius: 8,
-                              alignCaptionedTextToLeft: true,
-                              trailingWidget: ToggleSwitchWidget(
-                                value: () =>
-                                    MemoriesService.instance.showMemories,
-                                onChanged: () async {
-                                  unawaited(
-                                    MemoriesService.instance.setShowMemories(
-                                      !MemoriesService.instance.showMemories,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 24,
-                            ),
-                            MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).maps,
-                              ),
-                              menuItemColor: colorScheme.fillFaint,
-                              singleBorderRadius: 8,
-                              alignCaptionedTextToLeft: true,
-                              trailingWidget: ToggleSwitchWidget(
-                                value: () =>
-                                    userRemoteFlagService.getCachedBoolValue(
-                                  UserRemoteFlagService.mapEnabled,
-                                ),
-                                onChanged: () async {
-                                  final isEnabled =
-                                      userRemoteFlagService.getCachedBoolValue(
-                                    UserRemoteFlagService.mapEnabled,
-                                  );
+                            onChanged: () async {
+                              final isEnabled =
+                                  userRemoteFlagService.getCachedBoolValue(
+                                UserRemoteFlagService.mapEnabled,
+                              );
 
-                                  await userRemoteFlagService.setBoolValue(
-                                    UserRemoteFlagService.mapEnabled,
-                                    !isEnabled,
-                                  );
-                                },
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 24,
-                            ),
-                            MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).crashReporting,
-                              ),
-                              menuItemColor: colorScheme.fillFaint,
-                              singleBorderRadius: 8,
-                              alignCaptionedTextToLeft: true,
-                              trailingWidget: ToggleSwitchWidget(
-                                value: () => SuperLogging.shouldReportCrashes(),
-                                onChanged: () async {
-                                  await SuperLogging.setShouldReportCrashes(
-                                    !SuperLogging.shouldReportCrashes(),
-                                  );
-                                },
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 24,
-                            ),
-                            MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: S
-                                    .of(context)
-                                    .hideSharedItemsFromHomeGallery,
-                              ),
-                              menuItemColor: colorScheme.fillFaint,
-                              singleBorderRadius: 8,
-                              alignCaptionedTextToLeft: true,
-                              trailingWidget: ToggleSwitchWidget(
-                                value: () => localSettings
-                                    .hideSharedItemsFromHomeGallery,
-                                onChanged: () async {
-                                  final prevSetting = localSettings
-                                      .hideSharedItemsFromHomeGallery;
-                                  await localSettings
-                                      .setHideSharedItemsFromHomeGallery(
-                                    !prevSetting,
-                                  );
+                              await userRemoteFlagService.setBoolValue(
+                                UserRemoteFlagService.mapEnabled,
+                                !isEnabled,
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 24,
+                        ),
+                        MenuItemWidget(
+                          captionedTextWidget: CaptionedTextWidget(
+                            title: S.of(context).crashReporting,
+                          ),
+                          menuItemColor: colorScheme.fillFaint,
+                          singleBorderRadius: 8,
+                          alignCaptionedTextToLeft: true,
+                          trailingWidget: ToggleSwitchWidget(
+                            value: () => SuperLogging.shouldReportCrashes(),
+                            onChanged: () async {
+                              await SuperLogging.setShouldReportCrashes(
+                                !SuperLogging.shouldReportCrashes(),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 24,
+                        ),
+                        MenuItemWidget(
+                          captionedTextWidget: CaptionedTextWidget(
+                            title: S.of(context).hideSharedItemsFromHomeGallery,
+                          ),
+                          menuItemColor: colorScheme.fillFaint,
+                          singleBorderRadius: 8,
+                          alignCaptionedTextToLeft: true,
+                          trailingWidget: ToggleSwitchWidget(
+                            value: () =>
+                                localSettings.hideSharedItemsFromHomeGallery,
+                            onChanged: () async {
+                              final prevSetting =
+                                  localSettings.hideSharedItemsFromHomeGallery;
+                              await localSettings
+                                  .setHideSharedItemsFromHomeGallery(
+                                !prevSetting,
+                              );
 
-                                  Bus.instance.fire(
-                                    HideSharedItemsFromHomeGalleryEvent(
-                                      !prevSetting,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
+                              Bus.instance.fire(
+                                HideSharedItemsFromHomeGalleryEvent(
+                                  !prevSetting,
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ],
                     ),
