@@ -328,8 +328,12 @@ const Slideshow: React.FC = () => {
     });
 
     useEffect(() => {
+        console.log(
+            "scroll to",
+            containerRef.current!.offsetWidth * selectedIndex,
+        );
         containerRef.current.scrollTo({
-            left: containerRef.current.offsetWidth * selectedIndex,
+            left: containerRef.current!.offsetWidth * selectedIndex,
         });
     }, [selectedIndex]);
 
@@ -381,7 +385,7 @@ const Slideshow: React.FC = () => {
                     </SlideContents>
                 </Slide>
             </SlidesContainer>
-            <CustomDotGroup>
+            {/* <CustomDotGroup>
                 <button
                     className={selectedIndex == 0 ? "dot-button-selected" : ""}
                     onClick={() => setSelectedIndex(0)}
@@ -394,7 +398,7 @@ const Slideshow: React.FC = () => {
                     className={selectedIndex == 2 ? "dot-button-selected" : ""}
                     onClick={() => setSelectedIndex(2)}
                 ></button>
-            </CustomDotGroup>
+            </CustomDotGroup> */}
         </Stack>
     );
 };
@@ -403,14 +407,14 @@ const SlidesContainer = styled("div")`
     display: flex;
     overflow-x: hidden;
     scroll-behavior: smooth;
-    & > div {
-        flex: 0 0 100%;
-    }
+    // scroll-snap-type: x mandatory;
 `;
 
 const Slide = styled(Stack)`
+    flex: 0 0 100%;
     align-items: center;
     text-align: center;
+    // scroll-snap-align: start;
 `;
 
 const TextContainer = (props: TypographyProps) => (
