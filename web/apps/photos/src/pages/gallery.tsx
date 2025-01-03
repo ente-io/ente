@@ -1183,10 +1183,10 @@ const HiddenSectionNavbarContents: React.FC<
 > = ({ onBack }) => (
     <HorizontalFlex
         gap={"24px"}
-        sx={{
+        sx={(theme) => ({
             width: "100%",
-            background: (theme) => theme.palette.background.default,
-        }}
+            background: theme.palette.background.default,
+        })}
     >
         <IconButton onClick={onBack}>
             <ArrowBackIcon />

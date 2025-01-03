@@ -303,10 +303,10 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
                 <Typography
                     textAlign={"center"}
                     variant="small"
-                    sx={{
-                        color: (theme) => theme.colors.danger.A700,
+                    sx={(theme) => ({
+                        color: theme.colors.danger.A700,
                         mt: 0.5,
-                    }}
+                    })}
                 >
                     {sharableLinkError}
                 </Typography>
@@ -1462,10 +1462,10 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                         <Typography
                             textAlign={"center"}
                             variant="small"
-                            sx={{
-                                color: (theme) => theme.colors.danger.A700,
+                            sx={(theme) => ({
+                                color: theme.colors.danger.A700,
                                 mt: 0.5,
-                            }}
+                            })}
                         >
                             {sharableLinkError}
                         </Typography>
