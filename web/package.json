@@ -29,11 +29,6 @@
         "preview:payments": "yarn workspace payments preview",
         "preview:photos": "yarn build:photos && python3 -m http.server -d apps/photos/out 3000"
     },
-    "resolutions": {
-        "@emotion/cache": "11.13.1",
-        "@emotion/react": "^11.13.3",
-        "@emotion/styled": "^11.13.0"
-    },
     "devDependencies": {
         "concurrently": "^9.1.1",
         "eslint": "^9.17.0",
