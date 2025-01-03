@@ -347,12 +347,11 @@ const Slideshow: React.FC = () => {
 
     // A function that creates a callback ref which saves the corresponding ref
     // in the `slideRefs` array at the given index.
-    const createSlideRefCallback = (index: number) => {
-        return (node) => {
+    const createSlideRefCallback =
+        (index: number) => (node: HTMLDivElement) => {
             slideRefs.current[index] = node;
             return () => (slideRefs.current[index] = undefined);
         };
-    };
 
     return (
         <div>
@@ -395,7 +394,20 @@ const Slideshow: React.FC = () => {
                     </SlideContents>
                 </Slide>
             </SlidesContainer>
-            <CustomDotGroup />
+            <CustomDotGroup>
+                <button
+                    className={selectedIndex == 0 ? "dot-button-selected" : ""}
+                    onClick={() => setSelectedIndex(0)}
+                ></button>
+                <button
+                    className={selectedIndex == 1 ? "dot-button-selected" : ""}
+                    onClick={() => setSelectedIndex(1)}
+                ></button>
+                <button
+                    className={selectedIndex == 2 ? "dot-button-selected" : ""}
+                    onClick={() => setSelectedIndex(2)}
+                ></button>
+            </CustomDotGroup>
         </div>
     );
 };
@@ -434,7 +446,7 @@ const CustomDotGroup = styled("div")`
         transition: opacity 0.6s ease;
     }
 
-    button.carousel__dot--selected {
+    button.dot-button-selected {
         background-color: #51cd7c;
         opacity: 1;
     }
