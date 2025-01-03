@@ -24,7 +24,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 // import { CarouselProvider, DotGroup, Slide, Slider } from "pure-react-carousel";
 // import "pure-react-carousel/dist/react-carousel.es.css";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type Ref } from "react";
 import { Trans } from "react-i18next";
 
 export default function LandingPage() {
@@ -224,7 +224,7 @@ const TappableContainer_ = styled("div")`
     justify-content: center;
     background-color: #000;
 
-    @media (max-width: 1024px) {
+    @media (width <= 1024px) {
         flex-direction: column;
     }
 `;
@@ -296,7 +296,7 @@ const DesktopBox = styled("div")`
     justify-content: center;
     background-color: #242424;
 
-    @media (max-width: 1024px) {
+    @media (width <= 1024px) {
         display: none;
     }
 `;
@@ -307,33 +307,57 @@ const SideBox = styled("div")`
     min-width: 320px;
 `;
 
-const Slide: React.FC<React.PropsWithChildren<{ index: number }>> = ({
-    children,
-}) => {
-    return <Stack>{children}</Stack>;
+const Slide: React.FC<
+    React.PropsWithChildren<{ index: number; ref: Ref<HTMLDivElement> }>
+> = ({ ref, children }) => {
+    return <Stack ref={ref}>{children}</Stack>;
 };
 
 const SlidesContainer = styled("div")`
     display: flex;
+    box-sizing: border-box;
     width: max(350px, 100%);
+    overflow: hidden;
     border: 1px solid red;
+    scroll-behavior: smooth;
     & > div {
-        min-width: 100%;
+        flex: 0 0 100%;
         border: 1px solid green;
     }
 `;
 
 const Slideshow: React.FC = () => {
+    const [selectedIndex, setSelectedIndex] = useState(0);
+    const slideRefs = useRef<(HTMLDivElement | undefined)[]>([]);
+
+    useEffect(() => {
+        const intervalID = setInterval(() => {
+            setSelectedIndex((selectedIndex + 1) % 3);
+        }, 5000);
+
+        return () => clearInterval(intervalID);
+    });
+
+    useEffect(() => {
+        slideRefs.current[selectedIndex]?.scrollIntoView({
+            // Prevent vertical shifting of the page.
+            block: "nearest",
+        });
+    }, [selectedIndex]);
+
+    // A function that creates a callback ref which saves the corresponding ref
+    // in the `slideRefs` array at the given index.
+    const createSlideRefCallback = (index: number) => {
+        return (node) => {
+            slideRefs.current[index] = node;
+            return () => (slideRefs.current[index] = undefined);
+        };
+    };
+
     return (
-        <div
-        // naturalSlideWidth={400}
-        // naturalSlideHeight={300}
-        // isIntrinsicHeight={true}
-        // totalSlides={3}
-        // isPlaying={true}
-        >
+        <div>
             <SlidesContainer>
-                <Slide index={0}>
+                <Slide index={0} ref={createSlideRefCallback(0)}>
                     <Img
                         src="/images/onboarding-lock/1x.png"
                         srcSet="/images/onboarding-lock/2x.png 2x,
@@ -344,7 +368,7 @@ const Slideshow: React.FC = () => {
                     </FeatureText>
                     <TextContainer>{t("intro_slide_1")}</TextContainer>
                 </Slide>
-                <Slide index={1}>
+                <Slide index={1} ref={createSlideRefCallback(1)}>
                     <SlideContents>
                         <Img
                             src="/images/onboarding-safe/1x.png"
@@ -357,7 +381,7 @@ const Slideshow: React.FC = () => {
                         <TextContainer>{t("intro_slide_2")}</TextContainer>
                     </SlideContents>
                 </Slide>
-                <Slide index={2}>
+                <Slide index={2} ref={createSlideRefCallback(2)}>
                     <SlideContents>
                         <Img
                             src="/images/onboarding-sync/1x.png"
@@ -388,7 +412,7 @@ const Img = styled("img")`
     height: 250px;
     object-fit: contain;
 
-    @media (max-width: 400px) {
+    @media (width <= 400px) {
         height: 180px;
     }
 `;
