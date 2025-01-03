@@ -12,9 +12,10 @@ import (
 type CreatePublicAccessTokenRequest struct {
 	CollectionID  int64 `json:"collectionID" binding:"required"`
 	EnableCollect bool  `json:"enableCollect"`
-	JoinViaLink   bool  `json:"joinViaLink"`
-	ValidTill     int64 `json:"validTill"`
-	DeviceLimit   int   `json:"deviceLimit"`
+	// defaults to true
+	EnableJoin  *bool `json:"joinViaLink"`
+	ValidTill   int64 `json:"validTill"`
+	DeviceLimit int   `json:"deviceLimit"`
 }
 
 type UpdatePublicAccessTokenRequest struct {
@@ -66,10 +67,10 @@ type PublicURL struct {
 	EnableCollect   bool `json:"enableCollect"`
 	PasswordEnabled bool `json:"passwordEnabled"`
 	// Nonce contains the nonce value for the password if the link is password protected.
-	Nonce             *string `json:"nonce,omitempty"`
-	MemLimit          *int64  `json:"memLimit,omitempty"`
-	OpsLimit          *int64  `json:"opsLimit,omitempty"`
-	EnableJoinViaLink bool    `json:"enableJoinViaLink"`
+	Nonce      *string `json:"nonce,omitempty"`
+	MemLimit   *int64  `json:"memLimit,omitempty"`
+	OpsLimit   *int64  `json:"opsLimit,omitempty"`
+	EnableJoin bool    `json:"enableJoinViaLink"`
 }
 
 type PublicAccessContext struct {
