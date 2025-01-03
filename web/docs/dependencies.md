@@ -87,6 +87,12 @@ is our core framework. We also import its a sibling
 [react-dom](https://github.com/facebook/react) package that renders JSX to the
 DOM.
 
+> [!NOTE]
+>
+> We need to repeat the dependency on react and its siblings in multiple
+> package.jsons to avoid the unmet peer dependency warnings printed by yarn.
+> Ideally, the react dependencies can be specified just in the _@/base_ package.
+
 ### MUI and Material Icons
 
 We use [MUI](https://mui.com)'s
@@ -100,6 +106,15 @@ which we need to install install two Emotion packages (`@emotion/react` and
 We also use MUI's
 [@mui/material-icons](https://mui.com/material-ui/material-icons/) package,
 which provides Material icons exported as React components (a `SvgIcon`).
+
+> [!NOTE]
+>
+> For a similar reason as with react,
+>
+> - the `@mui/material` dependency is also repeated at more places - the one in
+>   _@/base_ is the canonical one.
+> - we need to add an explicit dependency to `mui/system` in _@/new_ even though
+>   we don't directly depend on it.
 
 ### Date pickers
 
