@@ -7,7 +7,7 @@
         "@/gallery": "*",
         "@/utils": "*",
         "@ente/shared": "*",
-        "@mui/x-date-pickers": "^7.16.0",
+        "@mui/x-date-pickers": "^7.23.3",
         "dayjs": "^1.11.13",
         "formik": "^2.4.6"
     },
