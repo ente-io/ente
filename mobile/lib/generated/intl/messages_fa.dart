@@ -212,6 +212,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("برای خاطرات شما"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("رمز عبور را فراموش کرده‌اید"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "general": MessageLookupByLibrary.simpleMessage("عمومی"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "در حال تولید کلیدهای رمزگذاری..."),

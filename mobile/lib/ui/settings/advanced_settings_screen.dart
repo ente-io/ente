@@ -72,7 +72,7 @@ class AdvancedSettingsScreen extends StatelessWidget {
                       ),
                       MenuItemWidget(
                         captionedTextWidget: CaptionedTextWidget(
-                          title: "Gallery",
+                          title: S.of(context).gallery,
                         ),
                         menuItemColor: colorScheme.fillFaint,
                         trailingWidget: Icon(

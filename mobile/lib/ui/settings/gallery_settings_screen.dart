@@ -41,7 +41,7 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: "Gallery",
+              title: S.of(context).gallery,
             ),
             actionIcons: [
               IconButtonWidget(

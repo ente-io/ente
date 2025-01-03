@@ -1563,5 +1563,6 @@
   "legacyInvite": "{email} convidou você para ser um contato confiável",
   "authToManageLegacy": "Autentique-se para gerenciar seus contatos confiáveis",
   "useDifferentPlayerInfo": "Enfrentando problemas ao reproduzir este vídeo? Mantenha pressionado aqui ou tente outro reprodutor de vídeo",
-  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery"
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery"
 }

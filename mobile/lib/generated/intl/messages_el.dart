@@ -24,6 +24,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
             "Hide shared items from home gallery")
       };

@@ -1404,5 +1404,6 @@
   "changeLogDiscoverTitle": "Esplora",
   "selectCoverPhoto": "Seleziona foto di copertina",
   "newLocation": "Nuova posizione",
-  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery"
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery"
 }

@@ -1132,5 +1132,6 @@
   "left": "Kiri",
   "right": "Kanan",
   "whatsNew": "Hal yang baru",
-  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery"
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery"
 }

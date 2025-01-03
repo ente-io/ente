@@ -483,6 +483,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "freeUpDeviceSpace":
             MessageLookupByLibrary.simpleMessage("פנה אחסון במכשיר"),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("פנה מקום"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "general": MessageLookupByLibrary.simpleMessage("כללי"),
         "generatingEncryptionKeys":
             MessageLookupByLibrary.simpleMessage("יוצר מפתחות הצפנה..."),

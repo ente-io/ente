@@ -1563,5 +1563,6 @@
   "legacyInvite": "{email} đã mời bạn trở thành một liên hệ tin cậy",
   "authToManageLegacy": "Vui lòng xác thực để quản lý các liên hệ tin cậy của bạn",
   "useDifferentPlayerInfo": "Phát video gặp vấn đề? Ấn giữ tại đây để thử một trình phát khác.",
-  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery"
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery"
 }

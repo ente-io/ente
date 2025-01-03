@@ -816,5 +816,6 @@
   "create": "צור",
   "viewAll": "הצג הכל",
   "hiding": "מחביא...",
-  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery"
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery"
 }

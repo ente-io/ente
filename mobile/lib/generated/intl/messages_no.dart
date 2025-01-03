@@ -222,6 +222,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Familieabonnementer"),
         "feedback": MessageLookupByLibrary.simpleMessage("Tilbakemelding"),
         "forgotPassword": MessageLookupByLibrary.simpleMessage("Glemt passord"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "general": MessageLookupByLibrary.simpleMessage("Generelt"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Genererer krypteringsnøkler..."),

@@ -296,5 +296,6 @@
   },
   "maps": "แผนที่",
   "enableMaps": "เปิดใช้งานแผนที่",
-  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery"
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery"
 }

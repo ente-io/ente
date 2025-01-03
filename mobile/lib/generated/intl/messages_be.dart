@@ -136,6 +136,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Забыліся пароль"),
         "freeTrial":
             MessageLookupByLibrary.simpleMessage("Бясплатная пробная версія"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "general": MessageLookupByLibrary.simpleMessage("Асноўныя"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Генерацыя ключоў шыфравання..."),

@@ -1559,5 +1559,6 @@
   "legacyInvite": "{email} heeft je uitgenodigd om een vertrouwd contact te zijn",
   "authToManageLegacy": "Verifieer om je vertrouwde contacten te beheren",
   "useDifferentPlayerInfo": "Problemen met het afspelen van deze video? Hier ingedrukt houden om een andere speler te proberen.",
-  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery"
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery"
 }

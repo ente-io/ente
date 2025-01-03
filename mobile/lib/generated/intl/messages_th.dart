@@ -172,6 +172,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("เพิ่มคำอธิบาย..."),
         "forgotPassword": MessageLookupByLibrary.simpleMessage("ลืมรหัสผ่าน"),
         "freeTrial": MessageLookupByLibrary.simpleMessage("ทดลองใช้ฟรี"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "genericProgress": m40,
         "goToSettings": MessageLookupByLibrary.simpleMessage("ไปที่การตั้งค่า"),
         "hide": MessageLookupByLibrary.simpleMessage("ซ่อน"),

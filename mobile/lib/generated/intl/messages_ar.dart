@@ -35,6 +35,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("أدخل رمز الاسترداد"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("نسيت كلمة المرور"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
             "Hide shared items from home gallery"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(

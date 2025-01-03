@@ -115,6 +115,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("Tagasiside"),
         "flip": MessageLookupByLibrary.simpleMessage("Pööra ümber"),
         "freeTrial": MessageLookupByLibrary.simpleMessage("Tasuta prooviaeg"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "general": MessageLookupByLibrary.simpleMessage("Üldine"),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("Google Play ID"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage(

@@ -1463,5 +1463,6 @@
   "recoveryWarning": "Доверенный контакт пытается получить доступ к вашей учетной записи",
   "rejectRecovery": "Отклонить восстановление",
   "recoveryInitiated": "Восстановление запущено",
-  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery"
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery"
 }

@@ -282,6 +282,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Glömt lösenord"),
         "freeTrial": MessageLookupByLibrary.simpleMessage("Gratis provperiod"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Skapar krypteringsnycklar..."),
         "goToSettings":

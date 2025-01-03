@@ -200,5 +200,6 @@
   "systemTheme": "Сістэма",
   "freeTrial": "Бясплатная пробная версія",
   "faqs": "Частыя пытанні",
-  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery"
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery"
 }
