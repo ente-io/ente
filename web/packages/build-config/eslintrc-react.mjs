@@ -27,7 +27,7 @@ export default [
             // Otherwise we need to do unnecessary boilerplating when using memo.
             "react/display-name": "off",
             // Without React in scope, this rule starts causing false positives
-            // (We  don't use prop types in our own code anyways).
+            // (We don't use prop types in our own code anyways).
             "react/prop-types": "off",
         },
     },
