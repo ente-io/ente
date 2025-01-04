@@ -122,7 +122,7 @@ func (c *EmailNotificationController) OnSubscriptionCancelled(userID int64) {
 		return
 	}
 	log.Info(fmt.Sprintf("Emailing on subscription cancellation %d", user.ID))
-	err = email.SendTemplatedEmail([]string{user.Email}, "vishnu@ente.io", "vishnu@ente.io", SubscriptionUpgradedSubject, SubscriptionUpgradedTemplate, nil, nil)
+	err = email.SendTemplatedEmail([]string{user.Email}, "vishnu@ente.io", "vishnu@ente.io", SubscriptionCancelledSubject, SubscriptionCancelledTemplate, nil, nil)
 	if err != nil {
 		log.Error("Error sending email", err)
 	}
