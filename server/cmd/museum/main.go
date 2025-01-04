@@ -203,7 +203,7 @@ func main() {
 	plans := billing.GetPlans()
 	defaultPlan := billing.GetDefaultPlans(plans)
 	stripeClients := billing.GetStripeClients()
-	commonBillController := commonbilling.NewController(storagBonusRepo, userRepo, usageRepo)
+	commonBillController := commonbilling.NewController(emailNotificationCtrl, storagBonusRepo, userRepo, usageRepo, billingRepo)
 	appStoreController := controller.NewAppStoreController(defaultPlan,
 		billingRepo, fileRepo, userRepo, commonBillController)
 	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository}

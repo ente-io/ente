@@ -2,6 +2,8 @@ package commonbilling
 
 import (
 	"context"
+
+	"github.com/ente-io/museum/pkg/controller/email"
 	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/repo/storagebonus"
 	"github.com/ente-io/stacktrace"
@@ -9,20 +11,26 @@ import (
 )
 
 type Controller struct {
-	StorageBonusRepo *storagebonus.Repository
-	UserRepo         *repo.UserRepository
-	UsageRepo        *repo.UsageRepository
+	EmailNotificationController *email.EmailNotificationController
+	StorageBonusRepo            *storagebonus.Repository
+	UserRepo                    *repo.UserRepository
+	UsageRepo                   *repo.UsageRepository
+	BillingRepo                 *repo.BillingRepository
 }
 
 func NewController(
+	emailNotificationController *email.EmailNotificationController,
 	storageBonusRepo *storagebonus.Repository,
 	userRepo *repo.UserRepository,
 	usageRepo *repo.UsageRepository,
+	billingRepo *repo.BillingRepository,
 ) *Controller {
 	return &Controller{
-		StorageBonusRepo: storageBonusRepo,
-		UserRepo:         userRepo,
-		UsageRepo:        usageRepo,
+		EmailNotificationController: emailNotificationController,
+		StorageBonusRepo:            storageBonusRepo,
+		UserRepo:                    userRepo,
+		UsageRepo:                   usageRepo,
+		BillingRepo:                 billingRepo,
 	}
 }
 
@@ -62,4 +70,13 @@ func (c *Controller) CanDowngradeToGivenStorage(newStorage int64, userID int64) 
 		}
 	}
 	return true, nil
+}
+
+func (c *Controller) OnSubscriptionCancelled(userID int64) error {
+	err := c.BillingRepo.UpdateSubscriptionCancellationStatus(userID, true)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	go c.EmailNotificationController.OnSubscriptionCancelled(userID)
+	return nil
 }

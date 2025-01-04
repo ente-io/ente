@@ -24,6 +24,8 @@ const (
 	FilesCollectedSubject               = "You've got photos!"
 	SubscriptionUpgradedTemplate        = "subscription_upgraded.html"
 	SubscriptionUpgradedSubject         = "Thank you for choosing Ente!"
+	SubscriptionCancelledSubject        = "Good bye (?) from Ente"
+	SubscriptionCancelledTemplate       = "subscription_cancelled.html"
 	FilesCollectedMuteDurationInMinutes = 10
 	StorageLimitExceededSubject         = "[Alert] You have exceeded your storage limit"
 	ReferralSuccessfulTemplate          = "successful_referral.html"
@@ -110,6 +112,19 @@ func (c *EmailNotificationController) OnAccountUpgrade(userID int64) {
 	err = email.SendTemplatedEmail([]string{user.Email}, "team@ente.io", "team@ente.io", SubscriptionUpgradedSubject, SubscriptionUpgradedTemplate, nil, nil)
 	if err != nil {
 		log.Error("Error sending files collected email ", err)
+	}
+}
+
+func (c *EmailNotificationController) OnSubscriptionCancelled(userID int64) {
+	user, err := c.UserRepo.Get(userID)
+	if err != nil {
+		log.Error("Could not find user to email", err)
+		return
+	}
+	log.Info(fmt.Sprintf("Emailing on subscription cancellation %d", user.ID))
+	err = email.SendTemplatedEmail([]string{user.Email}, "vishnu@ente.io", "vishnu@ente.io", SubscriptionUpgradedSubject, SubscriptionUpgradedTemplate, nil, nil)
+	if err != nil {
+		log.Error("Error sending email", err)
 	}
 }
 
