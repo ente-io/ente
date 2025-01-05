@@ -24,16 +24,7 @@ class DirectoryUtils {
   }
 
   static Future<Directory> getDirectoryForInit() async {
-    Directory? directory;
-    if (Platform.isLinux) {
-      try {
-        return await getApplicationCacheDirectory();
-      } catch (e) {
-        logger.warning("Failed to get application cache directory: $e");
-      }
-    }
-
-    directory ??= await getApplicationDocumentsDirectory();
+    Directory directory = await getApplicationCacheDirectory();
 
     return Directory(p.join(directory.path, "enteauthinit"));
   }
