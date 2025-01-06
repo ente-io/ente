@@ -26,12 +26,12 @@ const (
 	FilesCollectedSubject               = "You've got photos!"
   FilesCollectedMuteDurationInMinutes = 10
 
-	SubscriptionUpgradedTemplate        = "subscription_upgraded.html"
-	SubscriptionUpgradedSubject         = "Thank you for choosing Ente!"
+  SubscriptionUpgradedTemplate        = "subscription_upgraded.html"
+  SubscriptionUpgradedSubject         = "Thank you for choosing Ente!"
 
-	StorageLimitExceededSubject         = "[Alert] You have exceeded your storage limit"
-	ReferralSuccessfulTemplate          = "successful_referral.html"
-	ReferralSuccessfulSubject           = "You've earned 10 GB on Ente! 🎁"
+  StorageLimitExceededSubject         = "[Alert] You have exceeded your storage limit"
+  ReferralSuccessfulTemplate          = "successful_referral.html"
+  ReferralSuccessfulSubject           = "You've earned 10 GB on Ente! 🎁"
 
   LoginSuccessSubject                 = "New login to your Ente account"
   LoginSuccessTemplate                = "on_login.html"
