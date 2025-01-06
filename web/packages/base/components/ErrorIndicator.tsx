@@ -14,12 +14,13 @@ export const ActivityErrorIndicator: React.FC<React.PropsWithChildren> = ({
     children,
 }) => (
     <Stack sx={{ gap: 2, alignItems: "center" }}>
-        <ErrorOutlineIcon color="secondary" sx={{ color: "critical" }} />
+        <ErrorOutlineIcon color="secondary" />
         <Typography sx={{ color: "text.muted" }}>
             {children ?? t("generic_error")}
         </Typography>
     </Stack>
 );
+
 /**
  * An smaller error message indicator suitable for being shown above or below
  * text fields.
