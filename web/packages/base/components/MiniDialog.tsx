@@ -259,7 +259,7 @@ export const AttributedMiniDialog: React.FC<
     );
 
     return (
-        (<Dialog
+        <Dialog
             open={open}
             fullWidth
             PaperProps={{
@@ -303,7 +303,7 @@ export const AttributedMiniDialog: React.FC<
                     {attributes.icon}
                 </Box>
             ) : (
-                (<Box sx={{ height: "8px" }} />) /* Spacer */
+                <Box sx={{ height: "8px" }} /> /* Spacer */
             )}
             <DialogContent>
                 {attributes.message && (
@@ -338,7 +338,7 @@ export const AttributedMiniDialog: React.FC<
                     )}
                 </Stack>
             </DialogContent>
-        </Dialog>)
+        </Dialog>
     );
 };
 

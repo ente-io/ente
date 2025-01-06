@@ -22,13 +22,12 @@ export const EnteSwitch: React.FC<SwitchProps> = styled((props) => (
             transform: "translateX(16px)",
             color: "#fff",
             "& + .MuiSwitch-track": {
-                backgroundColor:
-                    "#65C466",
+                backgroundColor: "#65C466",
                 opacity: 1,
                 border: 0,
                 ...theme.applyStyles("dark", {
-                    backgroundColor: "#2ECA45"
-                })
+                    backgroundColor: "#2ECA45",
+                }),
             },
             "&.Mui-disabled + .MuiSwitch-track": {
                 opacity: 0.5,
@@ -39,17 +38,16 @@ export const EnteSwitch: React.FC<SwitchProps> = styled((props) => (
             border: "6px solid #fff",
         },
         "&.Mui-disabled .MuiSwitch-thumb": {
-            color:
-                theme.palette.grey[600],
+            color: theme.palette.grey[600],
             ...theme.applyStyles("light", {
-                color: theme.palette.grey[100]
-            })
+                color: theme.palette.grey[100],
+            }),
         },
         "&.Mui-disabled + .MuiSwitch-track": {
             opacity: 0.3,
             ...theme.applyStyles("light", {
-                opacity: 0.7
-            })
+                opacity: 0.7,
+            }),
         },
     },
     "& .MuiSwitch-thumb": {
@@ -59,14 +57,13 @@ export const EnteSwitch: React.FC<SwitchProps> = styled((props) => (
     },
     "& .MuiSwitch-track": {
         borderRadius: 22 / 2,
-        backgroundColor:
-            theme.colors.fill.muted,
+        backgroundColor: theme.colors.fill.muted,
         opacity: 1,
         transition: theme.transitions.create(["background-color"], {
             duration: 500,
         }),
         ...theme.applyStyles("light", {
-            backgroundColor: "#E9E9EA"
-        })
+            backgroundColor: "#E9E9EA",
+        }),
     },
 }));
