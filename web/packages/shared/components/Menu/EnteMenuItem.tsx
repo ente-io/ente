@@ -66,21 +66,24 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
             disabled={disabled}
             onClick={handleButtonClick}
             disableRipple={variant == "toggle"}
-            sx={(theme) => ({
-                width: "100%",
-                backgroundColor: (theme) =>
-                    variant !== "secondary" && variant !== "mini"
-                        ? theme.colors.fill.faint
-                        : "inherit",
-                "&:hover": {
-                    backgroundColor: theme.colors.fill.faintPressed,
-                },
-                "& .MuiSvgIcon-root": {
-                    fontSize: "20px",
-                },
-                p: 0,
-                borderRadius: "4px",
-            })}
+            sx={[
+                (theme) => ({
+                    width: "100%",
+                    "&:hover": {
+                        backgroundColor: theme.colors.fill.faintPressed,
+                    },
+                    "& .MuiSvgIcon-root": {
+                        fontSize: "20px",
+                    },
+                    p: 0,
+                    borderRadius: "4px",
+                }),
+                variant !== "secondary" &&
+                    variant !== "mini" &&
+                    ((theme) => ({
+                        backgroundColor: theme.colors.fill.faint,
+                    })),
+            ]}
         >
             <SpaceBetweenFlex sx={{ pl: "16px", pr: "12px" }}>
                 <VerticallyCenteredFlex sx={{ py: "14px" }} gap={"10px"}>
