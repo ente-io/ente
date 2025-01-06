@@ -13,28 +13,28 @@ import (
 )
 
 const (
-	WebAppFirstUploadTemplate           = "web_app_first_upload.html"
-	MobileAppFirstUploadTemplate        = "mobile_app_first_upload.html"
-	FirstUploadEmailSubject             = "Congratulations! 🎉"
-	
-  StorageLimitExceededMailLock        = "storage_limit_exceeded_mail_lock"
-	StorageLimitExceededTemplateID      = "storage_limit_exceeded"
-	StorageLimitExceededTemplate        = "storage_limit_exceeded.html"
-	
-  FilesCollectedTemplate              = "files_collected.html"
+	WebAppFirstUploadTemplate    = "web_app_first_upload.html"
+	MobileAppFirstUploadTemplate = "mobile_app_first_upload.html"
+	FirstUploadEmailSubject      = "Congratulations! 🎉"
+
+	StorageLimitExceededMailLock   = "storage_limit_exceeded_mail_lock"
+	StorageLimitExceededTemplateID = "storage_limit_exceeded"
+	StorageLimitExceededTemplate   = "storage_limit_exceeded.html"
+
+	FilesCollectedTemplate              = "files_collected.html"
 	FilesCollectedTemplateID            = "files_collected"
 	FilesCollectedSubject               = "You've got photos!"
-  FilesCollectedMuteDurationInMinutes = 10
+	FilesCollectedMuteDurationInMinutes = 10
 
-  SubscriptionUpgradedTemplate        = "subscription_upgraded.html"
-  SubscriptionUpgradedSubject         = "Thank you for choosing Ente!"
+	SubscriptionUpgradedTemplate = "subscription_upgraded.html"
+	SubscriptionUpgradedSubject  = "Thank you for choosing Ente!"
 
-  StorageLimitExceededSubject         = "[Alert] You have exceeded your storage limit"
-  ReferralSuccessfulTemplate          = "successful_referral.html"
-  ReferralSuccessfulSubject           = "You've earned 10 GB on Ente! 🎁"
+	StorageLimitExceededSubject = "[Alert] You have exceeded your storage limit"
+	ReferralSuccessfulTemplate  = "successful_referral.html"
+	ReferralSuccessfulSubject   = "You've earned 10 GB on Ente! 🎁"
 
-  LoginSuccessSubject                 = "New login to your Ente account"
-  LoginSuccessTemplate                = "on_login.html"
+	LoginSuccessSubject  = "New login to your Ente account"
+	LoginSuccessTemplate = "on_login.html"
 )
 
 type EmailNotificationController struct {
