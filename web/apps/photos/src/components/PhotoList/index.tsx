@@ -595,14 +595,17 @@ export function PhotoList({
                             target="_blank"
                             href={"https://ente.io"}
                         >
-                            <Typography
-                                variant="small"
-                                sx={{ display: "block" }}
-                            >
+                            <Typography variant="small">
                                 {t("SHARED_USING")}{" "}
-                                <Link target="_blank" href={"https://ente.io"}>
+                                <Typography
+                                    variant="small"
+                                    component="span"
+                                    sx={(theme) => ({
+                                        color: theme.colors.accent.A500,
+                                    })}
+                                >
                                     ente.io
-                                </Link>
+                                </Typography>
                             </Typography>
                         </Link>
                         {publicCollectionGalleryContext.referralCode ? (
