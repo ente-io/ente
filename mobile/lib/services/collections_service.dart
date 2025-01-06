@@ -1114,7 +1114,7 @@ class CollectionsService {
     final authToken = await getSharedPublicAlbumToken(collectionID);
     try {
       final response = await _enteDio.post(
-        "https://api.ente.io/public-collection/verify-password",
+        "/public-collection/verify-password",
         data: {"passHash": passwordHash},
         options: Options(
           headers: {
