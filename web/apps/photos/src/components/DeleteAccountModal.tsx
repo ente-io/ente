@@ -1,3 +1,4 @@
+import { assertionFailed } from "@/base/assert";
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
@@ -40,10 +41,12 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     const { authenticateUser } = useContext(GalleryContext);
 
     const [loading, setLoading] = useState(false);
-    const deleteAccountChallenge = useRef<string>();
+    const deleteAccountChallenge = useRef<string | undefined>(undefined);
 
     const [acceptDataDeletion, setAcceptDataDeletion] = useState(false);
-    const reasonAndFeedbackRef = useRef<{ reason: string; feedback: string }>();
+    const reasonAndFeedbackRef = useRef<
+        { reason: string; feedback: string } | undefined
+    >(undefined);
 
     const initiateDelete = async (
         { reason, feedback }: FormValues,
@@ -113,6 +116,10 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     };
 
     const solveChallengeAndDeleteAccount = async () => {
+        if (!deleteAccountChallenge.current || !reasonAndFeedbackRef.current) {
+            assertionFailed();
+            return;
+        }
         const decryptedChallenge = await decryptDeleteAccountChallenge(
             deleteAccountChallenge.current,
         );
