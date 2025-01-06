@@ -721,6 +721,14 @@
       "title": "PostNL"
     },
     {
+      "title": "PostScan Mail",
+      "slug": "postscanmail",
+      "altNames": [
+        "Post Scan Mail",
+        "PostScanMail"
+      ]
+    },
+    {
       "title": "Privacy Guides",
       "slug": "privacyguides"
     },
