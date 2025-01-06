@@ -728,7 +728,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Hemat ruang penyimpanan di perangkatmu dengan membersihkan file yang sudah tercadangkan."),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Bersihkan ruang"),
         "freeUpSpaceSaving": m39,
-        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "general": MessageLookupByLibrary.simpleMessage("Umum"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Menghasilkan kunci enkripsi..."),
@@ -745,8 +744,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("Bantuan"),
         "hidden": MessageLookupByLibrary.simpleMessage("Tersembunyi"),
         "hide": MessageLookupByLibrary.simpleMessage("Sembunyikan"),
-        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
-            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Menyembunyikan..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Dihosting oleh OSM France"),

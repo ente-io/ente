@@ -709,7 +709,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Cihaz alanını boşaltın"),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Boş alan"),
         "freeUpSpaceSaving": m39,
-        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Galeride 1000\'e kadar anı gösterilir"),
         "general": MessageLookupByLibrary.simpleMessage("Genel"),
@@ -732,8 +731,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("Yardım"),
         "hidden": MessageLookupByLibrary.simpleMessage("Gizle"),
         "hide": MessageLookupByLibrary.simpleMessage("Gizle"),
-        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
-            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Gizleniyor..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("OSM Fransa\'da ağırlandı"),

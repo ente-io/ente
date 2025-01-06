@@ -790,7 +790,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("通过清除已备份的文件来节省设备空间。"),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("释放空间"),
         "freeUpSpaceSaving": m39,
-        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "galleryMemoryLimitInfo":
             MessageLookupByLibrary.simpleMessage("在图库中显示最多1000个回忆"),
         "general": MessageLookupByLibrary.simpleMessage("通用"),
@@ -818,8 +817,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("在应用切换器中隐藏应用内容并禁用屏幕截图"),
         "hideContentDescriptionIos":
             MessageLookupByLibrary.simpleMessage("在应用切换器中隐藏应用内容"),
-        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
-            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("正在隐藏..."),
         "hostedAtOsmFrance": MessageLookupByLibrary.simpleMessage("法国 OSM 主办"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("工作原理"),

@@ -953,7 +953,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "freeUpSpace":
             MessageLookupByLibrary.simpleMessage("Giải phóng không gian"),
         "freeUpSpaceSaving": m39,
-        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Tối đa 1000 kỷ niệm được hiển thị trong thư viện"),
         "general": MessageLookupByLibrary.simpleMessage("Chung"),
@@ -982,8 +981,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ẩn nội dung ứng dụng trong trình chuyển đổi ứng dụng và vô hiệu hóa chụp màn hình"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Ẩn nội dung ứng dụng trong trình chuyển đổi ứng dụng"),
-        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
-            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Đang ẩn..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Được lưu trữ tại OSM Pháp"),

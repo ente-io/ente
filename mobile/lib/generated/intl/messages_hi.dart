@@ -67,9 +67,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("प्रतिपुष्टि"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("पासवर्ड भूल गए"),
-        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
-        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
-            "Hide shared items from home gallery"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(
             "आपके द्वारा दर्ज रिकवरी कुंजी ग़लत है"),
         "incorrectRecoveryKeyTitle":

@@ -376,7 +376,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "askCancelReason": MessageLookupByLibrary.simpleMessage(
             "Ваша подписка была отменена. Хотите рассказать почему?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
-            "Какая основная причина удаления Вашего аккаунта?"),
+            "Какова основная причина, по которой вы удаляете свой аккаунт?"),
         "askYourLovedOnesToShare": MessageLookupByLibrary.simpleMessage(
             "Попросите ваших близких поделиться"),
         "atAFalloutShelter": MessageLookupByLibrary.simpleMessage("в бункере"),
@@ -560,7 +560,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
             "Вы уверены, что хотите отключить двухфакторную аутентификацию?"),
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
-            "Подтвердить удаление учётной записи"),
+            "Подтвердить удаление аккаунта"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
             "Да, я хочу навсегда удалить эту учётную запись и все её данные во всех приложениях Ente."),
         "confirmPassword":
@@ -638,7 +638,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteAccount":
             MessageLookupByLibrary.simpleMessage("Удалить аккаунт"),
         "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
-            "Мы сожалеем, что вы уходите. Пожалуйста, объясните, почему вы уходите, чтобы помочь нам развиваться."),
+            "Сожалеем, что вы уходите. Пожалуйста, поделитесь своим отзывом, чтобы помочь нам улучшиться."),
         "deleteAccountPermanentlyButton":
             MessageLookupByLibrary.simpleMessage("Удалить аккаунт навсегда"),
         "deleteAlbum": MessageLookupByLibrary.simpleMessage("Удалить альбом"),
@@ -672,8 +672,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Приложение или его некоторые функции не ведут себя так, как я думаю"),
         "deleteReason3": MessageLookupByLibrary.simpleMessage(
             "Я нашел другой сервис, который мне нравится больше"),
-        "deleteReason4":
-            MessageLookupByLibrary.simpleMessage("Моя проблема не указана"),
+        "deleteReason4": MessageLookupByLibrary.simpleMessage(
+            "Моя причина не указана в списке"),
         "deleteRequestSLAText": MessageLookupByLibrary.simpleMessage(
             "Ваш запрос будет обработан в течение 72 часов."),
         "deleteSharedAlbum":
@@ -872,7 +872,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "faqs":
             MessageLookupByLibrary.simpleMessage("Часто задаваемые вопросы"),
         "favorite": MessageLookupByLibrary.simpleMessage("В избранное"),
-        "feedback": MessageLookupByLibrary.simpleMessage("Отзыв"),
+        "feedback": MessageLookupByLibrary.simpleMessage("Обратная связь"),
         "file": MessageLookupByLibrary.simpleMessage("Файл"),
         "fileFailedToSaveToGallery": MessageLookupByLibrary.simpleMessage(
             "Не удалось сохранить файл в галерею"),
@@ -913,7 +913,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Сохраните место на вашем устройстве, очистив уже сохраненные файлы."),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Освободить место"),
         "freeUpSpaceSaving": m39,
-        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "До 1000 воспоминаний, отображаемых в галерее"),
         "general": MessageLookupByLibrary.simpleMessage("Общее"),
@@ -945,8 +944,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Скрывает содержимое приложения в переключателе приложений и отключает скриншоты"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Скрывает содержимое приложения в переключателе приложений"),
-        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
-            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Скрытие..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Размещено на OSM France"),
@@ -1925,8 +1922,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "youDontHaveAnyArchivedItems": MessageLookupByLibrary.simpleMessage(
             "У вас нет архивных элементов."),
         "youHaveSuccessfullyFreedUp": m88,
-        "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
-            "Ваша учетная запись была удалена"),
+        "yourAccountHasBeenDeleted":
+            MessageLookupByLibrary.simpleMessage("Ваш аккаунт был удален"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Ваша карта"),
         "yourPlanWasSuccessfullyDowngraded":
             MessageLookupByLibrary.simpleMessage(
