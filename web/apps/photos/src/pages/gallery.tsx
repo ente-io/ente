@@ -262,7 +262,7 @@ export default function Gallery() {
     const [authenticateUserModalView, setAuthenticateUserModalView] =
         useState(false);
 
-    const onAuthenticateCallback = useRef<() => void>();
+    const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
 
     const authenticateUser = (callback: () => void) => {
         onAuthenticateCallback.current = callback;
