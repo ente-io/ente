@@ -267,11 +267,12 @@ function MultilineInput({
             />
             <Typography
                 variant="small"
-                sx={{
-                    px: "8px",
-                    color: "text.secondary",
-                    ...(messageSxProps ?? {}),
-                }}
+                sx={[
+                    { px: "8px", color: "text.secondary" },
+                    ...(Array.isArray(messageSxProps)
+                        ? messageSxProps
+                        : [messageSxProps]),
+                ]}
             >
                 {message}
             </Typography>

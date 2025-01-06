@@ -117,11 +117,12 @@ export default function DropdownInput<T extends string>({
             {message && (
                 <Typography
                     variant="small"
-                    sx={{
-                        px: "8px",
-                        color: "text.muted",
-                        ...(messageSxProps ?? {}),
-                    }}
+                    sx={[
+                        { px: "8px", color: "text.muted" },
+                        ...(Array.isArray(messageSxProps)
+                            ? messageSxProps
+                            : [messageSxProps]),
+                    ]}
                 >
                     {message}
                 </Typography>
