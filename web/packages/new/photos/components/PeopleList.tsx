@@ -199,8 +199,10 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
     placeholderDimension,
 }) => {
     const [url, setURL] = useState<string | undefined>();
+
     useEffect(() => {
         let didCancel = false;
+
         void faceCrop(faceID, file).then((url) => !didCancel && setURL(url));
 
         return () => {
