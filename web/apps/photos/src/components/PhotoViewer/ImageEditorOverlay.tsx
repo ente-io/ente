@@ -538,8 +538,10 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                 >
                     <Stack
                         direction="row"
-                        justifyContent={"space-between"}
-                        alignItems={"center"}
+                        sx={{
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                        }}
                     >
                         <Typography variant="h2" sx={{ fontWeight: "bold" }}>
                             {t("photo_editor")}
@@ -635,7 +637,10 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                     open={showControlsDrawer}
                     onClose={handleCloseWithConfirmation}
                 >
-                    <Stack direction="row" justifyContent={"space-between"}>
+                    <Stack
+                        direction="row"
+                        sx={{ justifyContent: "space-between" }}
+                    >
                         <IconButton
                             onClick={() => {
                                 setShowControlsDrawer(false);
@@ -647,7 +652,13 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                             <CloseIcon />
                         </IconButton>
                     </Stack>
-                    <Stack direction="row" gap="0.5rem" marginBottom="1rem">
+                    <Stack
+                        direction="row"
+                        sx={{
+                            gap: "0.5rem",
+                            marginBottom: "1rem",
+                        }}
+                    >
                         <Tabs
                             value={currentTab}
                             onChange={(_, value) => {

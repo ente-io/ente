@@ -148,10 +148,10 @@ const AuthNavbar: React.FC = () => {
 
     return (
         <NavbarBase>
-            <Stack direction="row" flex={1} justifyContent={"center"}>
+            <Stack direction="row" sx={{ flex: 1, justifyContent: "center" }}>
                 <EnteLogo />
             </Stack>
-            <Stack direction="row" position={"absolute"} right="24px">
+            <Stack direction="row" sx={{ position: "absolute", right: "24px" }}>
                 <OverflowMenu ariaID="auth-options">
                     <OverflowMenuOption
                         color="critical"
