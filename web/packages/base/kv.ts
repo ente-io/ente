@@ -145,6 +145,10 @@ export const _getKV = async <T extends string | number | boolean>(
     if (v === undefined) return undefined;
     if (typeof v != type)
         throw new Error(
+            // This is just an error message, it is fine if stringification
+            // produces nothing useful always, it might too in some cases.
+            //
+            // eslint-disable-next-line @typescript-eslint/no-base-to-string
             `Expected the value corresponding to key ${key} to be a ${type}, but instead got ${String(v)}`,
         );
     return v as T;

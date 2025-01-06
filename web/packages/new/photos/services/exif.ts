@@ -531,7 +531,7 @@ export const extractRawExif = async (blob: Blob): Promise<RawExifTags> => {
  * values and returns a number.
  */
 export const tagNumericValue = (
-    tag: ExifReader.NumberTag & ExifReader.NumberArrayTag,
+    tag: ExifReader.NumberTag | ExifReader.NumberArrayTag,
 ) => {
     const v = tag.value;
     return Array.isArray(v) ? (v[0] ?? 0) / (v[1] ?? 1) : v;

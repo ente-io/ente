@@ -245,7 +245,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     );
 };
 
-const SearchInputWrapper = styled(Box)`
+const SearchInputWrapper = styled("div")`
     display: flex;
     width: 100%;
     align-items: center;
@@ -320,13 +320,13 @@ const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
             }}
         >
             <Box
-                sx={{
+                sx={(theme) => ({
                     display: "inline-flex",
                     // Match the default padding of the ValueContainer to make
                     // the icon look properly spaced and aligned.
                     pl: "8px",
-                    color: (theme) => theme.colors.stroke.muted,
-                }}
+                    color: theme.colors.stroke.muted,
+                })}
             >
                 {iconForOption(props.getValue()[0])}
             </Box>
@@ -433,7 +433,7 @@ const EmptyState: React.FC<
 
 const SearchPeopleHeader: React.FC<ButtonishProps> = ({ onClick }) => (
     <SearchPeopleHeaderButton {...{ onClick }}>
-        <Typography color="text.muted">{t("people")}</Typography>
+        <Typography sx={{ color: "text.muted" }}>{t("people")}</Typography>
     </SearchPeopleHeaderButton>
 );
 
@@ -456,14 +456,17 @@ const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
 );
 
 const OptionContents = ({ data: option }: { data: SearchOption }) => (
-    <Stack className="option-contents" gap="4px" px={2} py={1}>
-        <Typography variant="mini" color="text.muted">
+    <Stack className="option-contents" sx={{ gap: "4px", px: 2, py: 1 }}>
+        <Typography variant="mini" sx={{ color: "text.muted" }}>
             {labelForOption(option)}
         </Typography>
         <Stack
             direction="row"
-            gap={1}
-            sx={{ alignItems: "center", justifyContent: "space-between" }}
+            sx={{
+                gap: 1,
+                alignItems: "center",
+                justifyContent: "space-between",
+            }}
         >
             <Box>
                 <Typography
@@ -471,12 +474,12 @@ const OptionContents = ({ data: option }: { data: SearchOption }) => (
                 >
                     {option.suggestion.label}
                 </Typography>
-                <Typography color="text.muted">
+                <Typography sx={{ color: "text.muted" }}>
                     {t("photos_count", { count: option.fileCount })}
                 </Typography>
             </Box>
 
-            <Stack direction={"row"} gap={1}>
+            <Stack direction={"row"} sx={{ gap: 1 }}>
                 {option.previewFiles.map((file) => (
                     <ItemCard
                         key={file.id}

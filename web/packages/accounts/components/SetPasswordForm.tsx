@@ -20,10 +20,12 @@ export interface SetPasswordFormProps {
     ) => Promise<void>;
     buttonText: string;
 }
+
 export interface SetPasswordFormValues {
     passphrase: string;
     confirm: string;
 }
+
 function SetPasswordForm(props: SetPasswordFormProps) {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -78,7 +80,10 @@ function SetPasswordForm(props: SetPasswordFormProps) {
         >
             {({ values, errors, handleChange, handleSubmit }) => (
                 <form noValidate onSubmit={handleSubmit}>
-                    <Typography mb={2} color="text.muted" variant="small">
+                    <Typography
+                        variant="small"
+                        sx={{ mb: 2, color: "text.muted" }}
+                    >
                         {t("ENTER_ENC_PASSPHRASE")}
                     </Typography>
 
@@ -103,18 +108,20 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         helperText={errors.passphrase}
                         autoFocus
                         disabled={loading}
-                        InputProps={{
-                            endAdornment: (
-                                <ShowHidePassword
-                                    showPassword={showPassword}
-                                    handleClickShowPassword={
-                                        handleClickShowPassword
-                                    }
-                                    handleMouseDownPassword={
-                                        handleMouseDownPassword
-                                    }
-                                />
-                            ),
+                        slotProps={{
+                            input: {
+                                endAdornment: (
+                                    <ShowHidePassword
+                                        showPassword={showPassword}
+                                        handleClickShowPassword={
+                                            handleClickShowPassword
+                                        }
+                                        handleMouseDownPassword={
+                                            handleMouseDownPassword
+                                        }
+                                    />
+                                ),
+                            },
                         }}
                     />
                     <TextField
@@ -132,11 +139,11 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                     />
                     <PasswordStrengthHint password={values.passphrase} />
 
-                    <Typography my={2} variant="small">
+                    <Typography variant="small" sx={{ my: 2 }}>
                         <Trans i18nKey={"PASSPHRASE_DISCLAIMER"} />
                     </Typography>
 
-                    <Box my={4}>
+                    <Box sx={{ my: 4 }}>
                         <LoadingButton
                             fullWidth
                             color="accent"
@@ -148,10 +155,12 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         </LoadingButton>
                         {loading && (
                             <Typography
-                                textAlign="center"
-                                mt={1}
-                                color="text.muted"
                                 variant="small"
+                                sx={{
+                                    textAlign: "center",
+                                    mt: 1,
+                                    color: "text.muted",
+                                }}
                             >
                                 {t("key_generation_in_progress")}
                             </Typography>

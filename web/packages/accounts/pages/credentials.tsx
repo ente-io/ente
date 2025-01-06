@@ -390,7 +390,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 />
 
                 <LoginFlowFormFooter>
-                    <Stack direction="row" justifyContent="space-between">
+                    <Stack
+                        direction="row"
+                        sx={{ justifyContent: "space-between" }}
+                    >
                         <LinkButton onClick={() => router.push(PAGES.RECOVER)}>
                             {t("FORGOT_PASSWORD")}
                         </LinkButton>
@@ -400,7 +403,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     </Stack>
                 </LoginFlowFormFooter>
             </FormPaper>
-
             <SecondFactorChoice {...secondFactorChoiceProps} />
         </VerticallyCentered>
     );

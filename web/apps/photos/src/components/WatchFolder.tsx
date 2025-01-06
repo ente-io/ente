@@ -24,7 +24,6 @@ import DoNotDisturbOutlinedIcon from "@mui/icons-material/DoNotDisturbOutlined";
 import FolderCopyOutlinedIcon from "@mui/icons-material/FolderCopyOutlined";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import {
-    Box,
     Button,
     CircularProgress,
     Dialog,
@@ -128,7 +127,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
                     <DialogCloseIconButton {...{ onClose }} />
                 </SpaceBetweenFlex>
                 <DialogContent sx={{ flex: 1 }}>
-                    <Stack spacing={1} p={1.5} height={"100%"}>
+                    <Stack sx={{ gap: 1, p: 1.5, height: "100%" }}>
                         <WatchList {...{ watches, removeWatch }} />
                         <Button fullWidth color="accent" onClick={addNewWatch}>
                             <span>+</span>
@@ -173,7 +172,7 @@ const WatchList: React.FC<WatchList> = ({ watches, removeWatch }) => {
     );
 };
 
-const WatchesContainer = styled(Box)(() => ({
+const WatchesContainer = styled("div")(() => ({
     height: "278px",
     overflow: "auto",
     "&::-webkit-scrollbar": {
@@ -185,19 +184,22 @@ const NoWatches: React.FC = () => {
     return (
         <NoWatchesContainer>
             <Stack spacing={1}>
-                <Typography variant="large" fontWeight={"bold"}>
+                <Typography variant="large" sx={{ fontWeight: "bold" }}>
                     {t("no_folders_added")}
                 </Typography>
-                <Typography py={0.5} variant={"small"} color="text.muted">
+                <Typography
+                    variant={"small"}
+                    sx={{ py: 0.5, color: "text.muted" }}
+                >
                     {t("watch_folders_hint_1")}
                 </Typography>
-                <Typography variant={"small"} color="text.muted">
+                <Typography variant={"small"} sx={{ color: "text.muted" }}>
                     <FlexWrapper gap={1}>
                         <CheckmarkIcon />
                         {t("watch_folders_hint_2")}
                     </FlexWrapper>
                 </Typography>
-                <Typography variant={"small"} color="text.muted">
+                <Typography variant={"small"} sx={{ color: "text.muted" }}>
                     <FlexWrapper gap={1}>
                         <CheckmarkIcon />
                         {t("watch_folders_hint_3")}
@@ -218,11 +220,11 @@ const CheckmarkIcon: React.FC = () => {
     return (
         <CheckIcon
             fontSize="small"
-            sx={{
+            sx={(theme) => ({
                 display: "inline",
                 fontSize: "15px",
-                color: (theme) => theme.palette.secondary.main,
-            }}
+                color: theme.palette.secondary.main,
+            })}
         />
     );
 };
@@ -249,11 +251,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
 
     return (
         <SpaceBetweenFlex>
-            <HorizontalFlex
-                sx={{
-                    overflow: "hidden",
-                }}
-            >
+            <HorizontalFlex sx={{ overflow: "hidden" }}>
                 {watch.collectionMapping === "root" ? (
                     <Tooltip title={t("UPLOADED_TO_SINGLE_COLLECTION")}>
                         <FolderOpenIcon />
@@ -273,7 +271,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
     );
 };
 
-const EntryContainer = styled(Box)({
+const EntryContainer = styled("div")({
     overflow: "hidden",
     marginLeft: "12px",
     marginRight: "6px",

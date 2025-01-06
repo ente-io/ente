@@ -67,15 +67,13 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
                     <Input sx={{ display: "none" }} type="password" value="" />
                 }
             />
-
             <FormPaperFooter>
-                <Stack gap={4}>
+                <Stack sx={{ gap: 4 }}>
                     <LinkButton onClick={signUp}>{t("NO_ACCOUNT")}</LinkButton>
 
                     <Typography
                         variant="mini"
-                        color="text.faint"
-                        minHeight={"32px"}
+                        sx={{ color: "text.faint", minHeight: "32px" }}
                     >
                         {host ?? "" /* prevent layout shift with a minHeight */}
                     </Typography>

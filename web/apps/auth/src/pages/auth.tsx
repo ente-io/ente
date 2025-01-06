@@ -126,7 +126,7 @@ const Page: React.FC = () => {
                             {searchTerm.length > 0 ? (
                                 <Typography>{t("no_results")}</Typography>
                             ) : (
-                                <Typography color="text.muted">
+                                <Typography sx={{ color: "text.muted" }}>
                                     {t("no_codes_added_yet")}
                                 </Typography>
                             )}

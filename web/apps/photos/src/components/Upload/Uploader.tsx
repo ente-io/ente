@@ -213,7 +213,7 @@ export default function Uploader({
      */
     const pickedUploadType = useRef<PICKED_UPLOAD_TYPE>(null);
 
-    const currentUploadPromise = useRef<Promise<void> | undefined>();
+    const currentUploadPromise = useRef<Promise<void> | undefined>(undefined);
     const uploadRunning = useRef(false);
     const uploaderNameRef = useRef<string>(null);
     const isDragAndDrop = useRef(false);

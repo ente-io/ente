@@ -196,7 +196,12 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                 <Trans
                     i18nKey={"delete_album_message"}
                     components={{
-                        a: <Box component={"span"} color="text.base" />,
+                        a: (
+                            <Box
+                                component={"span"}
+                                sx={{ color: "text.base" }}
+                            />
+                        ),
                     }}
                 />
             ),
@@ -697,7 +702,7 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
 interface CollectionSortOrderMenuProps {
     open: boolean;
     onClose: () => void;
-    overFlowMenuIconRef: React.MutableRefObject<SVGSVGElement>;
+    overFlowMenuIconRef: React.RefObject<SVGSVGElement>;
     onAscClick: () => void;
     onDescClick: () => void;
 }

@@ -317,7 +317,7 @@ const Failed: React.FC<FailedProps> = ({ message }) => {
         <Content>
             <InfoIcon color="secondary" />
             <Typography variant="h3">{t("passkey_login_failed")}</Typography>
-            <Typography color="text.muted">{message}</Typography>
+            <Typography sx={{ color: "text.muted" }}>{message}</Typography>
         </Content>
     );
 };
@@ -361,7 +361,7 @@ const Verify: React.FC<VerifyProps> = ({ onVerify }) => {
         <Content>
             <KeyIcon color="secondary" fontSize="large" />
             <Typography variant="h3">{t("passkey")}</Typography>
-            <Typography color="text.muted">
+            <Typography sx={{ color: "text.muted" }}>
                 {t("passkey_verify_description")}
             </Typography>
             <ButtonStack>
@@ -403,7 +403,7 @@ const RetriableFailed: React.FC<RetriableFailedProps> = ({
         <Content>
             <InfoIcon color="secondary" fontSize="large" />
             <Typography variant="h3">{t("passkey_login_failed")}</Typography>
-            <Typography color="text.muted">
+            <Typography sx={{ color: "text.muted" }}>
                 {duringSignChallenge
                     ? t("passkey_login_credential_hint")
                     : t("passkey_login_generic_error")}
@@ -441,10 +441,10 @@ const ButtonStack = styled("div")`
 const WaitingForUser: React.FC = () => {
     return (
         <Content>
-            <Typography fontWeight="bold" variant="h2">
+            <Typography variant="h2" sx={{ fontWeight: "bold" }}>
                 {t("passkey_login")}
             </Typography>
-            <Typography color="text.muted">
+            <Typography sx={{ color: "text.muted" }}>
                 {t("passkey_login_instructions")}
             </Typography>
             <WaitingImgContainer>
@@ -470,7 +470,7 @@ const RedirectingWeb: React.FC = () => {
         <Content>
             <InfoIcon color="accent" fontSize="large" />
             <Typography variant="h3">{t("passkey_verified")}</Typography>
-            <Typography color="text.muted">
+            <Typography sx={{ color: "text.muted" }}>
                 {t("redirecting_back_to_app")}
             </Typography>
         </Content>
@@ -487,10 +487,10 @@ const RedirectingApp: React.FC<RedirectingAppProps> = ({ onRetry }) => {
         <Content>
             <InfoIcon color="accent" fontSize="large" />
             <Typography variant="h3">{t("passkey_verified")}</Typography>
-            <Typography color="text.muted">
+            <Typography sx={{ color: "text.muted" }}>
                 {t("redirecting_back_to_app")}
             </Typography>
-            <Typography color="text.muted">
+            <Typography sx={{ color: "text.muted" }}>
                 {t("redirect_close_instructions")}
             </Typography>
             <ButtonStack>
