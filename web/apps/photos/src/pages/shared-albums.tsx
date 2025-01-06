@@ -175,8 +175,7 @@ export default function PublicCollectionGallery() {
             return updater;
         };
 
-    // Create a regular array from the readonly array returned by the dropzone
-    // library.
+    // Create a regular array from the readonly array returned by dropzone.
     const dragAndDropFiles = useMemo(
         () => [...dragAndDropFilesReadOnly],
         [dragAndDropFilesReadOnly],

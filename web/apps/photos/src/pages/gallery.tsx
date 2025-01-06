@@ -111,7 +111,7 @@ import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
-import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Trans } from "react-i18next";
 import {
@@ -194,7 +194,7 @@ export default function Gallery() {
         // ... the props we should apply to the <input> element,
         getInputProps: getDragAndDropInputProps,
         // ... and the files that we got.
-        acceptedFiles: dragAndDropFiles,
+        acceptedFiles: dragAndDropFilesReadOnly,
     } = useDropzone({
         noClick: true,
         noKeyboard: true,
@@ -547,6 +547,12 @@ export default function Gallery() {
             clearSelection,
         };
     }, [selectAll, clearSelection]);
+
+    // Create a regular array from the readonly array returned by dropzone.
+    const dragAndDropFiles = useMemo(
+        () => [...dragAndDropFilesReadOnly],
+        [dragAndDropFilesReadOnly],
+    );
 
     const showSessionExpiredDialog = () =>
         showMiniDialog(sessionExpiredDialogAttributes(logout));
