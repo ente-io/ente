@@ -24,7 +24,7 @@ export const PublicLinkCreated: React.FC<PublicLinkCreatedProps> = ({
     <Dialog
         {...{ open, onClose }}
         disablePortal
-        componentsProps={{ backdrop: { sx: { position: "absolute" } } }}
+        slotProps={{ backdrop: { sx: { position: "absolute" } } }}
         sx={{ position: "absolute" }}
     >
         <DialogTitle sx={{ textAlign: "center" }}>
