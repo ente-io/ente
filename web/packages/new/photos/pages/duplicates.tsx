@@ -535,6 +535,11 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
     return (
         <VariableSizeList
             key={key}
+            style={
+                {
+                    "--paddingInline": `${layoutParams.paddingInline}px`,
+                } as React.CSSProperties
+            }
             {...{ height, width, itemData, itemCount, itemSize, itemKey }}
         >
             {ListItem}
