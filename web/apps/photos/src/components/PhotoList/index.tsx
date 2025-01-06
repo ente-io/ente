@@ -153,7 +153,9 @@ const FooterContainer = styled(ListItemContainer)`
     margin-top: calc(2rem + 20px);
 `;
 
-const AlbumFooterContainer = styled(ListItemContainer)<{
+const AlbumFooterContainer = styled(ListItemContainer, {
+    shouldForwardProp: (propName) => propName != "hasReferral",
+})<{
     hasReferral: boolean;
 }>`
     margin-top: 48px;
