@@ -24,7 +24,6 @@ const (
   FilesCollectedTemplate              = "files_collected.html"
 	FilesCollectedTemplateID            = "files_collected"
 	FilesCollectedSubject               = "You've got photos!"
-  FilesCollectedMuteDurationInMinutes = 10
 
 	SubscriptionUpgradedTemplate        = "subscription_upgraded.html"
 	SubscriptionUpgradedSubject         = "Thank you for choosing Ente!"
