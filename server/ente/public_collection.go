@@ -3,6 +3,7 @@ package ente
 import (
 	"database/sql/driver"
 	"encoding/json"
+
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 )
@@ -85,7 +86,7 @@ type PublicURL struct {
 	Nonce      *string `json:"nonce,omitempty"`
 	MemLimit   *int64  `json:"memLimit,omitempty"`
 	OpsLimit   *int64  `json:"opsLimit,omitempty"`
-	EnableJoin bool    `json:"enableJoinViaLink"`
+	EnableJoin bool    `json:"enableJoin"`
 }
 
 type PublicAccessContext struct {

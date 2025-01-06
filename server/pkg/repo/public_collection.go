@@ -60,7 +60,7 @@ func (pcr *PublicCollectionRepository) DisableSharing(ctx context.Context, cID i
 // GetCollectionToActivePublicURLMap will return map of collectionID to PublicURLs which are not disabled yet.
 // Note: The url could be expired or deviceLimit is already reached
 func (pcr *PublicCollectionRepository) GetCollectionToActivePublicURLMap(ctx context.Context, collectionIDs []int64) (map[int64][]ente.PublicURL, error) {
-	rows, err := pcr.DB.QueryContext(ctx, `SELECT collection_id, access_token, valid_till, device_limit, enable_download, enable_collect, pw_nonce, mem_limit, ops_limit FROM 
+	rows, err := pcr.DB.QueryContext(ctx, `SELECT collection_id, access_token, valid_till, device_limit, enable_download, enable_collect, enable_join, pw_nonce, mem_limit, ops_limit FROM 
                                                    public_collection_tokens WHERE collection_id = ANY($1) and is_disabled = FALSE`,
 		pq.Array(collectionIDs))
 	if err != nil {
@@ -77,7 +77,7 @@ func (pcr *PublicCollectionRepository) GetCollectionToActivePublicURLMap(ctx con
 		var accessToken string
 		var nonce *string
 		var opsLimit, memLimit *int64
-		if err = rows.Scan(&collectionID, &accessToken, &publicUrl.ValidTill, &publicUrl.DeviceLimit, &publicUrl.EnableDownload, &publicUrl.EnableCollect, &nonce, &memLimit, &opsLimit); err != nil {
+		if err = rows.Scan(&collectionID, &accessToken, &publicUrl.ValidTill, &publicUrl.DeviceLimit, &publicUrl.EnableDownload, &publicUrl.EnableCollect, &publicUrl.EnableJoin, &nonce, &memLimit, &opsLimit); err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
 		publicUrl.URL = pcr.GetAlbumUrl(accessToken)

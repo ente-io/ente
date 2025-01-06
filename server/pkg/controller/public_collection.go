@@ -331,6 +331,7 @@ func (c *PublicCollectionController) GetPublicCollection(ctx *gin.Context, mustA
 			Nonce:           publicUrl.Nonce,
 			MemLimit:        publicUrl.MemLimit,
 			OpsLimit:        publicUrl.OpsLimit,
+			EnableJoin:      publicUrl.EnableJoin,
 		})
 	}
 	collection.PublicURLs = publicURLsWithLimitedInfo
