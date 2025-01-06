@@ -48,7 +48,7 @@ Future<File?> downloadAndDecryptPublicFile(
       if (authJWTToken != null) "X-Auth-Access-Token-JWT": authJWTToken,
     };
     final response = (await NetworkClient.instance.getDio().download(
-      "https://public-albums.ente.io/download/?fileID=${file.uploadedFileID}",
+      file.publicDownloadUrl,
       encryptedFilePath,
       options: Options(
         headers: headers,
@@ -203,8 +203,8 @@ Future<void> downloadToGallery(EnteFile file) async {
         savedAsset = await PhotoManager.editor
             .saveImageWithPath(fileToSave!.path, title: file.title!);
       } else if (type == FileType.video) {
-        savedAsset =
-            await PhotoManager.editor.saveVideo(fileToSave!, title: file.title!);
+        savedAsset = await PhotoManager.editor
+            .saveVideo(fileToSave!, title: file.title!);
       } else if (type == FileType.livePhoto) {
         final File? liveVideoFile =
             await getFileFromServer(file, liveVideo: true);
