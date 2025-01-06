@@ -66,8 +66,7 @@ export default function Index() {
             <img width={150} src="/images/ente.svg" />
             <Typography
                 variant="h2"
-                fontWeight="500"
-                sx={{ marginBlock: "2rem" }}
+                sx={{ fontWeight: "500", marginBlock: "2rem" }}
             >
                 Enter this code on <b>Ente Photos</b> to pair this screen
             </Typography>
