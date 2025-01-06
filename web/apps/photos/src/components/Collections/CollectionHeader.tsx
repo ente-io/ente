@@ -27,7 +27,6 @@ import {
     isPinnedCollection,
 } from "@/new/photos/services/magic-metadata";
 import { useAppContext } from "@/new/photos/types/context";
-import { HorizontalFlex } from "@ente/shared/components/Container";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
@@ -324,7 +323,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     );
 
     return (
-        <HorizontalFlex sx={{ display: "inline-flex", gap: "16px" }}>
+        <Box sx={{ display: "inline-flex", gap: "16px" }}>
             <QuickOptions
                 collectionSummaryType={collectionSummaryType}
                 isDownloadInProgress={isActiveCollectionDownloadInProgress}
@@ -390,7 +389,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                 onAscClick={changeSortOrderAsc}
                 onDescClick={changeSortOrderDesc}
             />
-        </HorizontalFlex>
+        </Box>
     );
 };
 

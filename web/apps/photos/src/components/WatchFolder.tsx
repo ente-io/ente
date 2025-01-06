@@ -15,7 +15,6 @@ import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import {
     FlexWrapper,
-    HorizontalFlex,
     SpaceBetweenFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
@@ -251,7 +250,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
 
     return (
         <SpaceBetweenFlex>
-            <HorizontalFlex sx={{ overflow: "hidden" }}>
+            <Stack direction="row" sx={{ overflow: "hidden" }}>
                 {watch.collectionMapping === "root" ? (
                     <Tooltip title={t("UPLOADED_TO_SINGLE_COLLECTION")}>
                         <FolderOpenIcon />
@@ -265,7 +264,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
                     <EntryHeading watch={watch} />
                     <FolderPath>{watch.folderPath}</FolderPath>
                 </EntryContainer>
-            </HorizontalFlex>
+            </Stack>
             <EntryOptions {...{ confirmStopWatching }} />
         </SpaceBetweenFlex>
     );

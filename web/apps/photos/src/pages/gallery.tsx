@@ -61,11 +61,7 @@ import {
 } from "@/new/photos/services/user-details";
 import { useAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
-import {
-    CenteredFlex,
-    FlexWrapper,
-    HorizontalFlex,
-} from "@ente/shared/components/Container";
+import { CenteredFlex, FlexWrapper } from "@ente/shared/components/Container";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
@@ -87,7 +83,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import type { ButtonProps, IconButtonProps } from "@mui/material";
-import { Box, Button, IconButton, Typography } from "@mui/material";
+import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import CollectionNamer, {
     CollectionNamerAttributes,
@@ -1201,9 +1197,10 @@ interface HiddenSectionNavbarContentsProps {
 const HiddenSectionNavbarContents: React.FC<
     HiddenSectionNavbarContentsProps
 > = ({ onBack }) => (
-    <HorizontalFlex
-        gap={"24px"}
+    <Stack
+        direction="row"
         sx={(theme) => ({
+            gap: "24px",
             width: "100%",
             background: theme.palette.background.default,
         })}
@@ -1214,7 +1211,7 @@ const HiddenSectionNavbarContents: React.FC<
         <FlexWrapper>
             <Typography>{t("section_hidden")}</Typography>
         </FlexWrapper>
-    </HorizontalFlex>
+    </Stack>
 );
 
 /**

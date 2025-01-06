@@ -13,10 +13,7 @@ import { EnteFile } from "@/media/file";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import { getLocalCollections } from "@/new/photos/services/collections";
 import { AppContext } from "@/new/photos/types/context";
-import {
-    CenteredFlex,
-    HorizontalFlex,
-} from "@ente/shared/components/Container";
+import { CenteredFlex } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
@@ -38,6 +35,7 @@ import {
     CircularProgress,
     IconButton,
     Slider,
+    Stack,
     Tab,
     Tabs,
     Typography,
@@ -538,7 +536,8 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         height: "100%",
                     }}
                 >
-                    <HorizontalFlex
+                    <Stack
+                        direction="row"
                         justifyContent={"space-between"}
                         alignItems={"center"}
                     >
@@ -552,7 +551,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         >
                             <MenuIcon />
                         </IconButton>
-                    </HorizontalFlex>
+                    </Stack>
                     <Box
                         onMouseUp={handleDragEnd}
                         onMouseMove={isDragging ? handleDrag : null}
@@ -636,7 +635,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                     open={showControlsDrawer}
                     onClose={handleCloseWithConfirmation}
                 >
-                    <HorizontalFlex justifyContent={"space-between"}>
+                    <Stack direction="row" justifyContent={"space-between"}>
                         <IconButton
                             onClick={() => {
                                 setShowControlsDrawer(false);
@@ -647,8 +646,8 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         <IconButton onClick={handleCloseWithConfirmation}>
                             <CloseIcon />
                         </IconButton>
-                    </HorizontalFlex>
-                    <HorizontalFlex gap="0.5rem" marginBottom="1rem">
+                    </Stack>
+                    <Stack direction="row" gap="0.5rem" marginBottom="1rem">
                         <Tabs
                             value={currentTab}
                             onChange={(_, value) => {
@@ -663,7 +662,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                 disabled={transformationPerformed}
                             />
                         </Tabs>
-                    </HorizontalFlex>
+                    </Stack>
                     <MenuSectionTitle title={t("reset")} />
                     <MenuItemGroup
                         style={{
