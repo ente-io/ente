@@ -13,10 +13,7 @@ import { EnteFile } from "@/media/file";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import { getLocalCollections } from "@/new/photos/services/collections";
 import { AppContext } from "@/new/photos/types/context";
-import {
-    CenteredFlex,
-    HorizontalFlex,
-} from "@ente/shared/components/Container";
+import { CenteredFlex } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
@@ -38,6 +35,7 @@ import {
     CircularProgress,
     IconButton,
     Slider,
+    Stack,
     Tab,
     Tabs,
     Typography,
@@ -538,9 +536,12 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         height: "100%",
                     }}
                 >
-                    <HorizontalFlex
-                        justifyContent={"space-between"}
-                        alignItems={"center"}
+                    <Stack
+                        direction="row"
+                        sx={{
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                        }}
                     >
                         <Typography variant="h2" sx={{ fontWeight: "bold" }}>
                             {t("photo_editor")}
@@ -552,8 +553,9 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         >
                             <MenuIcon />
                         </IconButton>
-                    </HorizontalFlex>
-                    <Box
+                    </Stack>
+                    <Stack
+                        direction="row"
                         onMouseUp={handleDragEnd}
                         onMouseMove={isDragging ? handleDrag : null}
                         onMouseDown={handleDragStart}
@@ -562,7 +564,6 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                             height: "100%",
                             overflow: "hidden",
                             boxSizing: "border-box",
-                            display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             position: "relative",
@@ -575,12 +576,12 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                 height: "100%",
                             }}
                         >
-                            <Box
+                            <Stack
                                 ref={parentRef}
+                                direction="row"
                                 sx={{
                                     height: "88%",
                                     width: "100%",
-                                    display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
                                     position: "relative",
@@ -615,7 +616,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                         setIsDragging={setIsDragging}
                                     />
                                 )}
-                            </Box>
+                            </Stack>
                             {currentTab === "crop" && (
                                 <CenteredFlex marginTop="1rem">
                                     <Button
@@ -628,7 +629,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                 </CenteredFlex>
                             )}
                         </Box>
-                    </Box>
+                    </Stack>
                 </Box>
                 <SidebarDrawer
                     variant="persistent"
@@ -636,7 +637,10 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                     open={showControlsDrawer}
                     onClose={handleCloseWithConfirmation}
                 >
-                    <HorizontalFlex justifyContent={"space-between"}>
+                    <Stack
+                        direction="row"
+                        sx={{ justifyContent: "space-between" }}
+                    >
                         <IconButton
                             onClick={() => {
                                 setShowControlsDrawer(false);
@@ -647,8 +651,14 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         <IconButton onClick={handleCloseWithConfirmation}>
                             <CloseIcon />
                         </IconButton>
-                    </HorizontalFlex>
-                    <HorizontalFlex gap="0.5rem" marginBottom="1rem">
+                    </Stack>
+                    <Stack
+                        direction="row"
+                        sx={{
+                            gap: "0.5rem",
+                            marginBottom: "1rem",
+                        }}
+                    >
                         <Tabs
                             value={currentTab}
                             onChange={(_, value) => {
@@ -663,7 +673,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                 disabled={transformationPerformed}
                             />
                         </Tabs>
-                    </HorizontalFlex>
+                    </Stack>
                     <MenuSectionTitle title={t("reset")} />
                     <MenuItemGroup
                         style={{

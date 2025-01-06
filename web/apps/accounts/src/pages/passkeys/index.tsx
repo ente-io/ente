@@ -331,7 +331,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
 };
 
 const CreatedAtEntry: React.FC<React.PropsWithChildren> = ({ children }) => (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, pb: 1 }}>
+    <Stack direction="row" sx={{ alignItems: "center", gap: 0.5, pb: 1 }}>
         <CalendarTodayIcon color="secondary" sx={{ m: "16px" }} />
         <Box sx={{ py: 0.5 }}>
             <Typography>{t("created_at")}</Typography>
@@ -339,7 +339,7 @@ const CreatedAtEntry: React.FC<React.PropsWithChildren> = ({ children }) => (
                 {children}
             </Typography>
         </Box>
-    </Box>
+    </Stack>
 );
 
 interface RenamePasskeyDialogProps {

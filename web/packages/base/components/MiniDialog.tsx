@@ -273,9 +273,9 @@ export const AttributedMiniDialog: React.FC<
             {...rest}
         >
             {(attributes.icon ?? attributes.title) ? (
-                <Box
+                <Stack
+                    direction="row"
                     sx={(theme) => ({
-                        display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
                         "& > svg": {
@@ -301,7 +301,7 @@ export const AttributedMiniDialog: React.FC<
                         </DialogTitle>
                     )}
                     {attributes.icon}
-                </Box>
+                </Stack>
             ) : (
                 <Box sx={{ height: "8px" }} /> /* Spacer */
             )}

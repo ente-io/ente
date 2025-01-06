@@ -3,10 +3,10 @@ import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import {
-    Box,
     Dialog,
     DialogContent,
     DialogTitle,
+    Stack,
     TextField,
     type TextFieldProps,
 } from "@mui/material";
@@ -105,7 +105,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                 helperText={formik.errors.value ?? " "}
                 {...rest}
             />
-            <Box sx={{ display: "flex", gap: "12px" }}>
+            <Stack direction="row" sx={{ gap: "12px" }}>
                 <FocusVisibleButton
                     size="large"
                     color="secondary"
@@ -121,7 +121,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                 >
                     {submitButtonTitle}
                 </LoadingButton>
-            </Box>
+            </Stack>
         </form>
     );
 };

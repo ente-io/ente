@@ -435,6 +435,7 @@ const AvatarContainerOuter = styled("div")({
     alignItems: "center",
     marginLeft: 8,
 });
+
 const AvatarCounter = styled(NumberAvatar)({
     height: 20,
     width: 20,

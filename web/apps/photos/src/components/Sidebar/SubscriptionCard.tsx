@@ -330,12 +330,12 @@ interface LegendProps {
 }
 
 const Legend: React.FC<LegendProps> = ({ label, color }) => (
-    <Box sx={{ display: "flex", alignItems: "center" }}>
+    <Stack direction="row" sx={{ alignItems: "center" }}>
         <LegendDot sx={{ color }} />
         <Typography variant="mini" sx={{ fontWeight: "bold" }}>
             {label}
         </Typography>
-    </Box>
+    </Stack>
 );
 
 const LegendDot = styled(CircleIcon)`
