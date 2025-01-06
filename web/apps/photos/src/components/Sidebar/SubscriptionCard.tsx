@@ -123,14 +123,14 @@ const IndividualSubscriptionCardContent: React.FC<
     );
 };
 
-const MobileSmallBox = styled(Box)`
+const MobileSmallBox = styled("div")`
     display: none;
     @media (max-width: 359px) {
         display: block;
     }
 `;
 
-const DefaultBox = styled(Box)`
+const DefaultBox = styled("div")`
     display: none;
     @media (min-width: 360px) {
         display: block;

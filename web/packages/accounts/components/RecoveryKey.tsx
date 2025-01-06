@@ -10,7 +10,6 @@ import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import CodeBlock from "@ente/shared/components/CodeBlock";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import {
-    Box,
     Dialog,
     DialogActions,
     DialogContent,
@@ -112,7 +111,7 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
     );
 };
 
-const DashedBorderWrapper = styled(Box)(({ theme }) => ({
+const DashedBorderWrapper = styled("div")(({ theme }) => ({
     border: `1px dashed ${theme.palette.grey.A400}`,
     borderRadius: theme.spacing(1),
 }));

@@ -82,7 +82,7 @@ export const GalleryItemsSummary: React.FC<GalleryItemsSummaryProps> = ({
  * the gallery items list itself so that it scrolls alongwith the items. This
  * wrapper makes it take the full width of the "row" that it occupies.
  */
-export const GalleryItemsHeaderAdapter = styled(Box)`
+export const GalleryItemsHeaderAdapter = styled("div")`
     width: 100%;
     margin-bottom: 12px;
 `;

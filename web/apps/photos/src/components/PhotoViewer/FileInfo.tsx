@@ -1015,7 +1015,7 @@ const RawExif: React.FC<RawExifProps> = ({
     );
 };
 
-const ExifItem = styled(Box)`
+const ExifItem = styled("div")`
     padding-left: 8px;
     padding-right: 8px;
     display: flex;

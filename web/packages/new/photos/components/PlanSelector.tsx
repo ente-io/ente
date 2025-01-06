@@ -621,7 +621,7 @@ const ActivePlanButton = styled((props: ButtonProps) => (
     },
 }));
 
-const Badge = styled(Box)(({ theme }) => ({
+const Badge = styled("div")(({ theme }) => ({
     borderRadius: theme.shape.borderRadius,
     padding: "2px 4px",
     backgroundColor: theme.colors.black.muted,

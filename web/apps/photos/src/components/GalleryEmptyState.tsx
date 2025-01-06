@@ -5,7 +5,7 @@ import {
 } from "@ente/shared/components/Container";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import FolderIcon from "@mui/icons-material/FolderOutlined";
-import { Box, Button, Stack, Typography, styled } from "@mui/material";
+import { Button, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
 import uploadManager from "services/upload/uploadManager";
@@ -92,7 +92,7 @@ export default function GalleryEmptyState({ openUploader }) {
     );
 }
 
-const Wrapper = styled(Box)`
+const Wrapper = styled("div")`
     display: flex;
     flex-direction: column;
     align-items: center;

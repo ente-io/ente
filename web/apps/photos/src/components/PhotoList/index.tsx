@@ -164,7 +164,7 @@ const AlbumFooterContainer = styled(ListItemContainer, {
     justify-content: center;
 `;
 
-const FullStretchContainer = styled(Box)`
+const FullStretchContainer = styled("div")`
     margin: 0 -24px;
     width: calc(100% + 46px);
     left: -24px;

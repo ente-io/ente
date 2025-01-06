@@ -24,7 +24,6 @@ import DoNotDisturbOutlinedIcon from "@mui/icons-material/DoNotDisturbOutlined";
 import FolderCopyOutlinedIcon from "@mui/icons-material/FolderCopyOutlined";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import {
-    Box,
     Button,
     CircularProgress,
     Dialog,
@@ -173,7 +172,7 @@ const WatchList: React.FC<WatchList> = ({ watches, removeWatch }) => {
     );
 };
 
-const WatchesContainer = styled(Box)(() => ({
+const WatchesContainer = styled("div")(() => ({
     height: "278px",
     overflow: "auto",
     "&::-webkit-scrollbar": {
@@ -272,7 +271,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
     );
 };
 
-const EntryContainer = styled(Box)({
+const EntryContainer = styled("div")({
     overflow: "hidden",
     marginLeft: "12px",
     marginRight: "6px",

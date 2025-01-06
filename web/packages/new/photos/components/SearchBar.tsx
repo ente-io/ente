@@ -245,7 +245,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     );
 };
 
-const SearchInputWrapper = styled(Box)`
+const SearchInputWrapper = styled("div")`
     display: flex;
     width: 100%;
     align-items: center;
