@@ -1,5 +1,5 @@
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import { Box, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import type React from "react";
 
@@ -32,10 +32,10 @@ export const ActivityErrorIndicator: React.FC<React.PropsWithChildren> = ({
 export const InlineErrorIndicator: React.FC<React.PropsWithChildren> = ({
     children,
 }) => (
-    <Box sx={{ display: "flex", gap: "5px", alignItems: "center" }}>
+    <Stack direction="row" sx={{ gap: "5px", alignItems: "center" }}>
         <ErrorOutlineIcon sx={{ fontSize: "16px", color: "critical.main" }} />
         <Typography variant="small" sx={{ color: "critical.main" }}>
             {children ?? t("generic_error")}
         </Typography>
-    </Box>
+    </Stack>
 );

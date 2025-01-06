@@ -554,7 +554,8 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                             <MenuIcon />
                         </IconButton>
                     </Stack>
-                    <Box
+                    <Stack
+                        direction="row"
                         onMouseUp={handleDragEnd}
                         onMouseMove={isDragging ? handleDrag : null}
                         onMouseDown={handleDragStart}
@@ -563,7 +564,6 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                             height: "100%",
                             overflow: "hidden",
                             boxSizing: "border-box",
-                            display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             position: "relative",
@@ -576,12 +576,12 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                 height: "100%",
                             }}
                         >
-                            <Box
+                            <Stack
                                 ref={parentRef}
+                                direction="row"
                                 sx={{
                                     height: "88%",
                                     width: "100%",
-                                    display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
                                     position: "relative",
@@ -616,7 +616,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                         setIsDragging={setIsDragging}
                                     />
                                 )}
-                            </Box>
+                            </Stack>
                             {currentTab === "crop" && (
                                 <CenteredFlex marginTop="1rem">
                                     <Button
@@ -629,7 +629,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                 </CenteredFlex>
                             )}
                         </Box>
-                    </Box>
+                    </Stack>
                 </Box>
                 <SidebarDrawer
                     variant="persistent"

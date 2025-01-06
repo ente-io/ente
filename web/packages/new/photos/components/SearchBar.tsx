@@ -120,11 +120,11 @@ interface MobileSearchAreaProps {
 }
 
 const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
-    <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+    <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
         <IconButton onClick={onSearch}>
             <SearchIcon />
         </IconButton>
-    </Box>
+    </Stack>
 );
 
 const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({

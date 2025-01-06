@@ -218,13 +218,9 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 
     const controls1 = isSmallWidth && (
-        <Box
-            sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                minHeight: "64px",
-            }}
+        <Stack
+            direction="row"
+            sx={{ alignItems: "center", gap: 1, minHeight: "64px" }}
         >
             {mode != "people" && (
                 <>
@@ -238,17 +234,13 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     </IconButton>
                 </>
             )}
-        </Box>
+        </Stack>
     );
 
     const controls2 = !isSmallWidth && mode != "people" && (
-        <Box
-            sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                height: "64px",
-            }}
+        <Stack
+            direction="row"
+            sx={{ alignItems: "center", gap: 1, height: "64px" }}
         >
             <CollectionsSortOptions
                 activeSortBy={collectionsSortBy}
@@ -257,7 +249,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             <FilledIconButton onClick={onShowAllCollections}>
                 <ExpandMoreIcon />
             </FilledIconButton>
-        </Box>
+        </Stack>
     );
 
     return (

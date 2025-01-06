@@ -320,9 +320,9 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 )}
                 {showCollectionChips && (
                     <InfoItem icon={<FolderOutlinedIcon />}>
-                        <Box
+                        <Stack
+                            direction="row"
                             sx={{
-                                display: "flex",
                                 gap: 1,
                                 flexWrap: "wrap",
                                 justifyContent: "flex-start",
@@ -344,7 +344,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                         {collectionNameMap.get(collectionID)}
                                     </ChipButton>
                                 ))}
-                        </Box>
+                        </Stack>
                     </InfoItem>
                 )}
             </Stack>
@@ -448,13 +448,9 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
     trailingButton,
     children,
 }) => (
-    <Box
-        sx={{
-            display: "flex",
-            alignItems: "flex-start",
-            flex: 1,
-            gap: "12px",
-        }}
+    <Stack
+        direction="row"
+        sx={{ alignItems: "flex-start", flex: 1, gap: "12px" }}
     >
         <InfoItemIconContainer>{icon}</InfoItemIconContainer>
         <Box sx={{ flex: 1, mt: "4px" }}>
@@ -478,7 +474,7 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
             )}
         </Box>
         {trailingButton}
-    </Box>
+    </Stack>
 );
 
 const InfoItemIconContainer = styled("div")(
