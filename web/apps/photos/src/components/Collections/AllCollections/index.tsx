@@ -71,6 +71,8 @@ export default function AllCollections(props: AllCollectionsProps) {
     );
 }
 
+export const AllCollectionMobileBreakpoint = 559
+
 const AllCollectionDialog = styled(Dialog)(({ theme }) => ({
     "& .MuiDialog-container": {
         justifyContent: "flex-end",
@@ -85,7 +87,7 @@ const AllCollectionDialog = styled(Dialog)(({ theme }) => ({
     "& .MuiDialogContent-root": {
         padding: theme.spacing(2),
     },
-    [theme.breakpoints.down(559)]: {
+    [theme.breakpoints.down(AllCollectionMobileBreakpoint)]: {
         "& .MuiPaper-root": {
             width: "324px",
         },

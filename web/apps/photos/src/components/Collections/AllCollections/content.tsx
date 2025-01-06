@@ -15,7 +15,7 @@ import {
     ListChildComponentProps,
     areEqual,
 } from "react-window";
-import { AllCollectionMobileBreakpoint } from "./dialog";
+import { AllCollectionMobileBreakpoint } from ".";
 
 const MobileColumns = 2;
 const DesktopColumns = 3;
