@@ -78,6 +78,10 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
                     p: 0,
                     borderRadius: "4px",
                 }),
+                variant !== "captioned" &&
+                    ((theme) => ({
+                        color: theme.palette[color].main,
+                    })),
                 variant !== "secondary" &&
                     variant !== "mini" &&
                     ((theme) => ({
@@ -140,15 +144,15 @@ const CaptionedText: React.FC<CaptionedTextProps> = ({
     return (
         <VerticallyCenteredFlex gap={"4px"}>
             <Typography>{mainText}</Typography>
-            <Typography variant="small" color={subTextColor}>
+            <Typography variant="small" sx={{ color: subTextColor }}>
                 {"•"}
             </Typography>
             {subText ? (
-                <Typography variant="small" color={subTextColor}>
+                <Typography variant="small" sx={{ color: subTextColor }}>
                     {subText}
                 </Typography>
             ) : (
-                <Typography variant="small" color={subTextColor}>
+                <Typography variant="small" sx={{ color: subTextColor }}>
                     {subIcon}
                 </Typography>
             )}
