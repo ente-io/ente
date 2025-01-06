@@ -42,9 +42,9 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
             maxWidth="xs"
             fullWidth
         >
-            <Box m={1}>
+            <Box sx={{ m: 1 }}>
                 <DialogTitle mt={2}>
-                    <Typography variant="h4" color="text.muted">
+                    <Typography variant="h4" sx={{ color: "text.muted" }}>
                         {ut("What's new")}
                     </Typography>
                 </DialogTitle>

@@ -218,7 +218,14 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 
     const controls1 = isSmallWidth && (
-        <Box display="flex" alignItems={"center"} gap={1} minHeight={"64px"}>
+        <Box
+            sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                minHeight: "64px",
+            }}
+        >
             {mode != "people" && (
                 <>
                     <CollectionsSortOptions
@@ -235,7 +242,14 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 
     const controls2 = !isSmallWidth && mode != "people" && (
-        <Box display="flex" alignItems={"center"} gap={1} height={"64px"}>
+        <Box
+            sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                height: "64px",
+            }}
+        >
             <CollectionsSortOptions
                 activeSortBy={collectionsSortBy}
                 onChangeSortBy={onChangeCollectionsSortBy}
@@ -344,7 +358,7 @@ const ModeIndicator: React.FC<
 const ModeButton = styled(UnstyledButton, {
     shouldForwardProp: (propName) => propName != "active",
 })<{ active: boolean }>(
-    ({ active, theme }) => `
+    ({ theme, active }) => `
     p { color: ${active ? theme.colors.text.base : theme.colors.text.muted} }
     p:hover { color: ${theme.colors.text.base} }
 `,
@@ -367,11 +381,9 @@ const ScrollButtonBase_ = styled("button")`
     border: none;
     padding: 0;
     margin: 0;
-
     border-radius: 50%;
     background-color: ${({ theme }) => theme.colors.backdrop.muted};
     color: ${({ theme }) => theme.colors.stroke.base};
-
     & > svg {
         border-radius: 50%;
         height: 30px;
@@ -383,7 +395,6 @@ const ScrollButtonLeft = styled(ScrollButtonBase)`
     left: 0;
     text-align: right;
     transform: translate(-50%, 0%);
-
     & > svg {
         transform: rotate(180deg);
     }
@@ -465,7 +476,6 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
             );
             break;
         }
-
         case "people": {
             const { people, activePerson, onSelectPerson } = data;
             const person = people[index]!;
@@ -508,7 +518,7 @@ const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
 
 const CardText: React.FC<React.PropsWithChildren> = ({ children }) => (
     <TileTextOverlay>
-        <Box height={"2.1em"}>
+        <Box sx={{ height: "2.1em" }}>
             <Ellipsized2LineTypography variant="small">
                 {children}
             </Ellipsized2LineTypography>
@@ -527,9 +537,7 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
         {type == "favorites" && <FavoriteRoundedIcon />}
         {type == "archived" && (
             <ArchiveIcon
-                sx={(theme) => ({
-                    color: theme.colors.white.muted,
-                })}
+                sx={(theme) => ({ color: theme.colors.white.muted })}
             />
         )}
         {type == "outgoingShare" && <PeopleIcon />}

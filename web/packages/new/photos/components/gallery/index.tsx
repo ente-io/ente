@@ -38,7 +38,7 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
     fileCount,
 }) => (
     <GalleryItemsHeaderAdapter>
-        <Typography color="text.muted" variant="large">
+        <Typography variant="large" sx={{ color: "text.muted" }}>
             {t("search_results")}
         </Typography>
         <GalleryItemsSummary
@@ -74,8 +74,8 @@ export const PeopleEmptyStateMessage: React.FC<React.PropsWithChildren> = ({
 }) => (
     <CenteredFill>
         <Typography
-            color="text.muted"
             sx={{
+                color: "text.muted",
                 mx: 1,
                 // Approximately compensate for the hidden section bar (86px),
                 // and then add a bit extra padding so that the message appears

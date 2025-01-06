@@ -55,13 +55,13 @@ export const GalleryItemsSummary: React.FC<GalleryItemsSummaryProps> = ({
 
         <Stack
             direction="row"
-            gap={1.5}
             sx={{
+                gap: 1.5,
                 // Keep height the same even when there is no endIcon
                 minHeight: "24px",
             }}
         >
-            <Typography variant="small" color="text.muted">
+            <Typography variant="small" sx={{ color: "text.muted" }}>
                 {t("photos_count", { count: fileCount })}
             </Typography>
             {endIcon && (

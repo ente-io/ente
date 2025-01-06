@@ -651,7 +651,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                             ? t("saved_choices")
                             : t("review_suggestions")}
                     </DialogTitle>
-                    <Typography color="text.muted">
+                    <Typography sx={{ color: "text.muted" }}>
                         {person.name ?? " "}
                     </Typography>
                 </Stack>
@@ -698,8 +698,10 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 ) : state.suggestions.length == 0 ? (
                     <CenteredFill>
                         <Typography
-                            color="text.muted"
-                            sx={{ textAlign: "center" }}
+                            sx={{
+                                color: "text.muted",
+                                textAlign: "center",
+                            }}
                         >
                             {t("people_suggestions_empty")}
                         </Typography>
@@ -760,7 +762,7 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
                 }}
             >
                 <Stack sx={{ gap: "10px" }}>
-                    <Typography variant="small" color="text.muted">
+                    <Typography variant="small" sx={{ color: "text.muted" }}>
                         {/* Use the face count as as stand-in for the photo count */}
                         {t("photos_count", { count: item.faces.length })}
                     </Typography>
