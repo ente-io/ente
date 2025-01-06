@@ -351,6 +351,7 @@
   "failedToLoadAlbums": "Error al cargar álbumes",
   "hidden": "Oculto",
   "authToViewYourHiddenFiles": "Por favor, autentícate para ver tus archivos ocultos",
+  "authToViewTrashedFiles": "Por favor, autentícate para ver los archivos enviados a la papelera",
   "trash": "Papelera",
   "uncategorized": "Sin categorizar",
   "videoSmallCase": "vídeo",
@@ -1578,6 +1579,6 @@
   "legacyInvite": "{email} te ha invitado a ser un contacto de confianza",
   "authToManageLegacy": "Por favor, autentícate para administrar tus contactos de confianza",
   "useDifferentPlayerInfo": "¿Tienes problemas para reproducir este video? Mantén pulsado aquí para probar un reproductor diferente.",
-  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
-  "gallery": "Gallery"
+  "hideSharedItemsFromHomeGallery": "Ocultar elementos compartidos de la galería de inicio",
+  "gallery": "Galería"
 }

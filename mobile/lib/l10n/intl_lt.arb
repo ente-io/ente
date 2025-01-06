@@ -334,6 +334,7 @@
   "importing": "Importuojama....",
   "hidden": "Paslėpti",
   "authToViewYourHiddenFiles": "Nustatykite tapatybę, kad peržiūrėtumėte paslėptus failus",
+  "authToViewTrashedFiles": "Nustatykite tapatybę, kad peržiūrėtumėte išmestus failus",
   "trash": "Šiukšlinė",
   "uncategorized": "Nekategorizuoti",
   "videoSmallCase": "vaizdo įrašas",
@@ -1251,6 +1252,6 @@
   "legacyInvite": "{email} pakvietė jus būti patikimu kontaktu",
   "authToManageLegacy": "Nustatykite tapatybę, kad tvarkytumėte patikimus kontaktus",
   "useDifferentPlayerInfo": "Turite problemų paleidžiant šį vaizdo įrašą? Ilgai paspauskite čia, kad išbandytumėte kitą leistuvę.",
-  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
-  "gallery": "Gallery"
+  "hideSharedItemsFromHomeGallery": "Slėpti bendrinamus elementus iš pagrindinės galerijos",
+  "gallery": "Galerija"
 }
