@@ -20,10 +20,12 @@ export interface SetPasswordFormProps {
     ) => Promise<void>;
     buttonText: string;
 }
+
 export interface SetPasswordFormValues {
     passphrase: string;
     confirm: string;
 }
+
 function SetPasswordForm(props: SetPasswordFormProps) {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -103,18 +105,20 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         helperText={errors.passphrase}
                         autoFocus
                         disabled={loading}
-                        InputProps={{
-                            endAdornment: (
-                                <ShowHidePassword
-                                    showPassword={showPassword}
-                                    handleClickShowPassword={
-                                        handleClickShowPassword
-                                    }
-                                    handleMouseDownPassword={
-                                        handleMouseDownPassword
-                                    }
-                                />
-                            ),
+                        slotProps={{
+                            input: {
+                                endAdornment: (
+                                    <ShowHidePassword
+                                        showPassword={showPassword}
+                                        handleClickShowPassword={
+                                            handleClickShowPassword
+                                        }
+                                        handleMouseDownPassword={
+                                            handleMouseDownPassword
+                                        }
+                                    />
+                                ),
+                            },
                         }}
                     />
                     <TextField

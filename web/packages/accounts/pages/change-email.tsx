@@ -147,9 +147,6 @@ const ChangeEmailForm: React.FC = () => {
                         <VerticallyCentered>
                             <TextField
                                 fullWidth
-                                InputProps={{
-                                    readOnly: ottInputVisible,
-                                }}
                                 type="email"
                                 label={t("ENTER_EMAIL")}
                                 value={values.email}
@@ -158,6 +155,11 @@ const ChangeEmailForm: React.FC = () => {
                                 helperText={errors.email}
                                 autoFocus
                                 disabled={loading}
+                                slotProps={{
+                                    input: {
+                                        readOnly: ottInputVisible,
+                                    },
+                                }}
                             />
                             {ottInputVisible && (
                                 <TextField

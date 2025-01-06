@@ -180,18 +180,20 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                 error={Boolean(errors.passphrase)}
                                 helperText={errors.passphrase}
                                 disabled={loading}
-                                InputProps={{
-                                    endAdornment: (
-                                        <ShowHidePassword
-                                            showPassword={showPassword}
-                                            handleClickShowPassword={
-                                                handleClickShowPassword
-                                            }
-                                            handleMouseDownPassword={
-                                                handleMouseDownPassword
-                                            }
-                                        />
-                                    ),
+                                slotProps={{
+                                    input: {
+                                        endAdornment: (
+                                            <ShowHidePassword
+                                                showPassword={showPassword}
+                                                handleClickShowPassword={
+                                                    handleClickShowPassword
+                                                }
+                                                handleMouseDownPassword={
+                                                    handleMouseDownPassword
+                                                }
+                                            />
+                                        ),
+                                    },
                                 }}
                             />
 
@@ -222,23 +224,6 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                 </Typography>
                                 <TextField
                                     hiddenLabel
-                                    InputProps={{
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                <Tooltip
-                                                    title={t("REFERRAL_INFO")}
-                                                >
-                                                    <IconButton
-                                                        tabIndex={-1}
-                                                        color="secondary"
-                                                        edge={"end"}
-                                                    >
-                                                        <InfoOutlinedIcon />
-                                                    </IconButton>
-                                                </Tooltip>
-                                            </InputAdornment>
-                                        ),
-                                    }}
                                     fullWidth
                                     name="referral"
                                     type="text"
@@ -246,6 +231,27 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                     onChange={handleChange("referral")}
                                     error={Boolean(errors.referral)}
                                     disabled={loading}
+                                    slotProps={{
+                                        input: {
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <Tooltip
+                                                        title={t(
+                                                            "REFERRAL_INFO",
+                                                        )}
+                                                    >
+                                                        <IconButton
+                                                            tabIndex={-1}
+                                                            color="secondary"
+                                                            edge={"end"}
+                                                        >
+                                                            <InfoOutlinedIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </InputAdornment>
+                                            ),
+                                        },
+                                    }}
                                 />
                             </Box>
                             <FormGroup sx={{ width: "100%" }}>
@@ -318,7 +324,6 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                     </form>
                 )}
             </Formik>
-
             <FormPaperFooter>
                 <Stack gap={4}>
                     <LinkButton onClick={login}>

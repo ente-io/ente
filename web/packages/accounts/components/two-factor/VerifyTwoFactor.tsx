@@ -3,7 +3,7 @@ import {
     CenteredFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import { Box, Typography, styled, type TypographyProps } from "@mui/material";
+import { Box, Typography, styled } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import React, { useState } from "react";
@@ -119,7 +119,6 @@ const IndividualInput = styled("input")(
     border-radius: 1px;
     outline-color: ${theme.colors.accent.A300};
     transition: 0.5s;
-
     ${theme.breakpoints.down("sm")} {
         font-size: 1rem;
         padding: 4px;
@@ -128,16 +127,13 @@ const IndividualInput = styled("input")(
 `,
 );
 
-const InvalidInputMessage: React.FC<TypographyProps> = (props) => {
-    return (
-        <Typography
-            variant="mini"
-            sx={{
-                color: (theme) => theme.colors.danger.A700,
-            }}
-            {...props}
-        >
-            {props.children}
-        </Typography>
-    );
-};
+const InvalidInputMessage: React.FC<React.PropsWithChildren> = ({
+    children,
+}) => (
+    <Typography
+        variant="mini"
+        sx={(theme) => ({ color: theme.colors.danger.A700 })}
+    >
+        {children}
+    </Typography>
+);
