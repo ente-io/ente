@@ -351,6 +351,7 @@
   "failedToLoadAlbums": "Laden der Alben fehlgeschlagen",
   "hidden": "Versteckt",
   "authToViewYourHiddenFiles": "Bitte authentifizieren, um die versteckten Dateien anzusehen",
+  "authToViewTrashedFiles": "Bitte authentifizieren, um die gelöschten Dateien anzuzeigen",
   "trash": "Papierkorb",
   "uncategorized": "Unkategorisiert",
   "videoSmallCase": "Video",
@@ -1578,6 +1579,6 @@
   "legacyInvite": "{email} hat dich eingeladen, ein vertrauenswürdiger Kontakt zu werden",
   "authToManageLegacy": "Bitte authentifiziere dich, um deine vertrauenswürdigen Kontakte zu verwalten",
   "useDifferentPlayerInfo": "Hast du Probleme beim Abspielen dieses Videos? Halte hier gedrückt, um einen anderen Player auszuprobieren.",
-  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
-  "gallery": "Gallery"
+  "hideSharedItemsFromHomeGallery": "Geteilte Elemente in der Home-Galerie ausblenden",
+  "gallery": "Galerie"
 }

@@ -1361,7 +1361,5 @@
   },
   "extraPhotosFound": "追加の写真が見つかりました",
   "configuration": "設定",
-  "localIndexing": "このデバイス上での実行",
-  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
-  "gallery": "Gallery"
+  "localIndexing": "このデバイス上での実行"
 }
