@@ -577,15 +577,9 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                         justifyContent: "space-between",
                         alignItems: "center",
                         marginInline: 1,
-                        paddingInline: "var(--layoutParams-paddingInline)px",
+                        paddingInline: "var(--paddingInline)",
                         paddingBlock: "24px 0px",
                     }}
-                    style={
-                        {
-                            "--layoutParams-paddingInline":
-                                layoutParams.paddingInline,
-                        } as React.CSSProperties
-                    }
                 >
                     <Typography color={checked ? "text.base" : "text.muted"}>
                         {t("duplicate_group_description", { count, itemSize })}
