@@ -111,7 +111,14 @@ import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
-import { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+    createContext,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { useDropzone } from "react-dropzone";
 import { Trans } from "react-i18next";
 import {
@@ -224,8 +231,12 @@ export default function Gallery() {
     });
 
     const syncInProgress = useRef(false);
-    const syncInterval = useRef<NodeJS.Timeout>();
-    const resync = useRef<{ force: boolean; silent: boolean }>();
+    const syncInterval = useRef<ReturnType<typeof setInterval> | undefined>(
+        undefined,
+    );
+    const resync = useRef<{ force: boolean; silent: boolean } | undefined>(
+        undefined,
+    );
 
     const {
         showLoadingBar,
@@ -633,7 +644,7 @@ export default function Gallery() {
         if (resync.current) {
             const { force, silent } = resync.current;
             setTimeout(() => syncWithRemote(force, silent), 0);
-            resync.current = null;
+            resync.current = undefined;
         }
     };
 
