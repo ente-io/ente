@@ -216,9 +216,11 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
 
                             <Box sx={{ width: "100%" }}>
                                 <Typography
-                                    textAlign={"left"}
-                                    color="text.secondary"
-                                    mt={"24px"}
+                                    sx={{
+                                        textAlign: "left",
+                                        color: "text.secondary",
+                                        mt: "24px",
+                                    }}
                                 >
                                     {t("REFERRAL_CODE_HINT")}
                                 </Typography>
@@ -297,7 +299,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                 />
                             </FormGroup>
                         </VerticallyCentered>
-                        <Box mb={4}>
+                        <Box sx={{ mb: 4 }}>
                             <LoadingButton
                                 fullWidth
                                 color="accent"
@@ -312,10 +314,12 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                             </LoadingButton>
                             {loading && (
                                 <Typography
-                                    mt={1}
-                                    textAlign={"center"}
-                                    color="text.muted"
                                     variant="small"
+                                    sx={{
+                                        mt: 1,
+                                        textAlign: "center",
+                                        color: "text.muted",
+                                    }}
                                 >
                                     {t("key_generation_in_progress")}
                                 </Typography>
@@ -325,15 +329,14 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                 )}
             </Formik>
             <FormPaperFooter>
-                <Stack gap={4}>
+                <Stack sx={{ gap: 4 }}>
                     <LinkButton onClick={login}>
                         {t("ACCOUNT_EXISTS")}
                     </LinkButton>
 
                     <Typography
                         variant="mini"
-                        color="text.faint"
-                        minHeight={"32px"}
+                        sx={{ color: "text.faint", minHeight: "32px" }}
                     >
                         {host ?? "" /* prevent layout shift with a minHeight */}
                     </Typography>

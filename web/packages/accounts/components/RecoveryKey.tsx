@@ -81,12 +81,15 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
                 </DialogTitle>
                 <DialogCloseIconButton {...{ onClose }} />
             </SpaceBetweenFlex>
-
             <DialogContent>
-                <Typography mb={3}>{t("recovery_key_description")}</Typography>
+                <Typography sx={{ mb: 3 }}>
+                    {t("recovery_key_description")}
+                </Typography>
                 <DashedBorderWrapper>
                     <CodeBlock code={recoveryKey} />
-                    <Typography m={2}>{t("key_not_stored_note")}</Typography>
+                    <Typography sx={{ m: 2 }}>
+                        {t("key_not_stored_note")}
+                    </Typography>
                 </DashedBorderWrapper>
             </DialogContent>
             <DialogActions>

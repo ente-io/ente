@@ -134,8 +134,8 @@ const ChangeEmailForm: React.FC = () => {
                                 components={{
                                     a: (
                                         <Box
-                                            color="text.muted"
                                             component={"span"}
+                                            sx={{ color: "text.muted" }}
                                         />
                                     ),
                                 }}

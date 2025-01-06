@@ -225,12 +225,17 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     <Trans
                         i18nKey="EMAIL_SENT"
                         components={{
-                            a: <Box color="text.muted" component={"span"} />,
+                            a: (
+                                <Box
+                                    component={"span"}
+                                    sx={{ color: "text.muted" }}
+                                />
+                            ),
                         }}
                         values={{ email }}
                     />
                 </FormPaperTitle>
-                <Typography color={"text.muted"} mb={2} variant="small">
+                <Typography variant="small" sx={{ color: "text.muted", mb: 2 }}>
                     {t("CHECK_INBOX")}
                 </Typography>
                 <SingleInputForm
@@ -242,7 +247,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 />
 
                 <LoginFlowFormFooter>
-                    <Stack direction="row" justifyContent="space-between">
+                    <Stack
+                        direction="row"
+                        sx={{ justifyContent: "space-between" }}
+                    >
                         {resend === 0 && (
                             <LinkButton onClick={resendEmail}>
                                 {t("RESEND_MAIL")}
@@ -256,7 +264,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     </Stack>
                 </LoginFlowFormFooter>
             </FormPaper>
-
             <SecondFactorChoice {...secondFactorChoiceProps} />
         </VerticallyCentered>
     );
