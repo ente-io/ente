@@ -36,12 +36,7 @@ export const Titlebar: React.FC<TitlebarProps> = ({
                 >
                     {backIsClose ? <CloseIcon /> : <ArrowBackIcon />}
                 </IconButton>
-                <Box
-                    sx={{
-                        display: "flex",
-                        gap: "4px",
-                    }}
-                >
+                <Box sx={{ display: "flex", gap: "4px" }}>
                     {actionButton && actionButton}
                     {!backIsClose && (
                         <IconButton onClick={onRootClose} color={"secondary"}>
@@ -50,18 +45,8 @@ export const Titlebar: React.FC<TitlebarProps> = ({
                     )}
                 </Box>
             </FlexWrapper>
-            <Box
-                sx={{
-                    py: 0.5,
-                    px: 2,
-                }}
-            >
-                <Typography
-                    variant="h3"
-                    sx={{
-                        fontWeight: "bold",
-                    }}
-                >
+            <Box sx={{ py: 0.5, px: 2 }}>
+                <Typography variant="h3" sx={{ fontWeight: "bold" }}>
                     {title}
                 </Typography>
                 <Typography

@@ -118,12 +118,7 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
             <IconButton onClick={onClose} color={"primary"}>
                 <ArrowBackIcon />
             </IconButton>
-            <Box
-                sx={{
-                    display: "flex",
-                    gap: "4px",
-                }}
-            >
+            <Box sx={{ display: "flex", gap: "4px" }}>
                 {actionButton && actionButton}
                 <IconButton onClick={onRootClose} color={"secondary"}>
                     <CloseIcon />
@@ -131,12 +126,7 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
             </Box>
         </SpaceBetweenFlex>
         <Box sx={{ px: "16px", py: "4px" }}>
-            <Typography
-                variant="h3"
-                sx={{
-                    fontWeight: "bold",
-                }}
-            >
+            <Typography variant="h3" sx={{ fontWeight: "bold" }}>
                 {title}
             </Typography>
             <Typography
