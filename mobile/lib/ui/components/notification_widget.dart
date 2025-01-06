@@ -18,6 +18,7 @@ enum NotificationType {
 class NotificationWidget extends StatelessWidget {
   final IconData startIcon;
   final IconData? actionIcon;
+  final Widget? actionWidget;
   final String text;
   final String? subText;
   final GestureTapCallback onTap;
@@ -34,6 +35,7 @@ class NotificationWidget extends StatelessWidget {
     this.mainTextStyle,
     this.isBlackFriday = false,
     this.subText,
+    this.actionWidget,
     this.type = NotificationType.warning,
   });
 
@@ -103,7 +105,10 @@ class NotificationWidget extends StatelessWidget {
             gradient: backgroundGradient,
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: actionWidget != null ? 12 : 8,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -155,7 +160,9 @@ class NotificationWidget extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                if (actionIcon != null)
+                if (actionWidget != null)
+                  actionWidget!
+                else if (actionIcon != null)
                   IconButtonWidget(
                     icon: actionIcon!,
                     iconButtonType: IconButtonType.rounded,
@@ -219,7 +226,7 @@ class NotificationNoteWidget extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         border: Border.all(color: colorScheme.strokeMuted),
         color: colorScheme.backgroundBase,

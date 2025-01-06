@@ -12,6 +12,8 @@ import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/remote_sync_service.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/notification_widget.dart";
 import "package:photos/ui/sharing/share_collection_page.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
@@ -95,38 +97,20 @@ class _SharedPublicCollectionPageState
       header: Padding(
         padding: const EdgeInsets.all(8.0),
         child: NotificationWidget(
-          actionIcon: Icons.join_right,
           startIcon: Icons.people_alt_outlined,
+          actionIcon: null,
+          actionWidget: ButtonWidget(
+            buttonType: ButtonType.primary,
+            labelText: "Join",
+            buttonSize: ButtonSize.small,
+            onTap: _joinAlbum,
+          ),
           text: 'Join album',
           subText: widget.c.collection.isCollectEnabledForPublicLink()
               ? "to view and add your photos"
               : 'to add this to shared albums',
           type: NotificationType.notice,
-          onTap: () async {
-            final dialog =
-                createProgressDialog(context, S.of(context).pleaseWait);
-            await dialog.show();
-            try {
-              logger.info("Joining collection ${widget.c.collection.id}");
-              await RemoteSyncService.instance
-                  .joinAndSyncCollection(context, widget.c.collection.id);
-              logger.info("Syncing collections");
-
-              // route to the collection
-              final c = CollectionsService.instance
-                  .getCollectionByID(widget.c.collection.id);
-              logger.info("Joining collection ${widget.c.collection.id}");
-              await dialog.hide();
-              Navigator.of(context).pop();
-              await routeToPage(
-                  context, CollectionPage(CollectionWithThumbnail(c!, null)));
-            } catch (e, s) {
-              logger.severe("Failed to join collection", e, s);
-              showGenericErrorDialog(context: context, error: e).ignore();
-            } finally {
-              await dialog.hide();
-            }
-          },
+          onTap: () async {},
         ),
       ),
       sortAsyncFn: () => widget.c.collection.pubMagicMetadata.asc ?? false,
@@ -160,5 +144,32 @@ class _SharedPublicCollectionPageState
         ),
       ),
     );
+  }
+
+  Future<void> _joinAlbum() async {
+    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
+    await dialog.show();
+    try {
+      logger.info("Joining collection ${widget.c.collection.id}");
+      await RemoteSyncService.instance
+          .joinAndSyncCollection(context, widget.c.collection.id);
+      logger.info("Syncing collections");
+
+      // route to the collection
+      final c =
+          CollectionsService.instance.getCollectionByID(widget.c.collection.id);
+      logger.info("Joining collection ${widget.c.collection.id}");
+      await dialog.hide();
+      Navigator.of(context).pop();
+      await routeToPage(
+        context,
+        CollectionPage(CollectionWithThumbnail(c!, null)),
+      );
+    } catch (e, s) {
+      logger.severe("Failed to join collection", e, s);
+      showGenericErrorDialog(context: context, error: e).ignore();
+    } finally {
+      await dialog.hide();
+    }
   }
 }
