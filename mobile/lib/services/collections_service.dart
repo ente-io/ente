@@ -1143,36 +1143,31 @@ class CollectionsService {
     BuildContext context,
     int collectionID,
   ) async {
-    try {
-      final authToken = await getSharedPublicAlbumToken(collectionID);
-      final jwtToken = await getSharedPublicAlbumTokenJWT(collectionID);
-      final key = await getSharedPublicAlbumKey(collectionID);
-      if (key.isEmpty) {
-        throw Exception("Collection key not found");
-      }
-      final encryptedKey = CryptoUtil.sealSync(
-        getCollectionKey(collectionID),
-        CryptoUtil.base642bin(
-          Configuration.instance.getKeyAttributes()!.publicKey,
-        ),
-      );
-      await _enteDio.post(
-        "/collections/join-link",
-        data: {
-          "collectionID": collectionID,
-          "encryptedKey": CryptoUtil.bin2base64(encryptedKey),
-        },
-        options: Options(
-          headers: {
-            "X-Auth-Access-Token": authToken,
-            "X-Auth-JWT-Token": jwtToken,
-          },
-        ),
-      );
-    } catch (e) {
-      _logger.warning("Failed to join public collection $e");
-      await showGenericErrorDialog(context: context, error: e);
+    final authToken = await getSharedPublicAlbumToken(collectionID);
+    final jwtToken = await getSharedPublicAlbumTokenJWT(collectionID);
+    final key = await getSharedPublicAlbumKey(collectionID);
+    if (key.isEmpty) {
+      throw Exception("Collection key not found");
     }
+    final encryptedKey = CryptoUtil.sealSync(
+      getCollectionKey(collectionID),
+      CryptoUtil.base642bin(
+        Configuration.instance.getKeyAttributes()!.publicKey,
+      ),
+    );
+    await _enteDio.post(
+      "/collections/join-link",
+      data: {
+        "collectionID": collectionID,
+        "encryptedKey": CryptoUtil.bin2base64(encryptedKey),
+      },
+      options: Options(
+        headers: {
+          "X-Auth-Access-Token": authToken,
+          "X-Auth-JWT-Token": jwtToken,
+        },
+      ),
+    );
   }
 
   Future<String> getSharedPublicAlbumKey(int collectionID) async {

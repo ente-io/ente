@@ -4,16 +4,24 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/collection_meta_event.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
+import "package:photos/services/collections_service.dart";
+import "package:photos/services/remote_sync_service.dart";
+import "package:photos/ui/components/notification_widget.dart";
+import "package:photos/ui/sharing/share_collection_page.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
+import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
+import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class SharedPublicCollectionPage extends StatefulWidget {
   final CollectionWithThumbnail c;
@@ -39,6 +47,12 @@ class _SharedPublicCollectionPageState
     extends State<SharedPublicCollectionPage> {
   final _selectedFiles = SelectedFiles();
   final galleryType = GalleryType.sharedPublicCollection;
+  final logger = Logger("SharedPublicCollectionPage");
+  @override
+  void initState() {
+    super.initState();
+    logger.info("Init SharedPublicCollectionPage");
+  }
 
   @override
   void dispose() {
@@ -48,7 +62,6 @@ class _SharedPublicCollectionPageState
 
   @override
   Widget build(BuildContext context) {
-    final logger = Logger("SharedPublicCollectionPage");
     logger.info("Building SharedPublicCollectionPage");
     final List<EnteFile>? initialFiles =
         widget.c.thumbnail != null ? [widget.c.thumbnail!] : null;
@@ -79,6 +92,43 @@ class _SharedPublicCollectionPageState
       selectedFiles: _selectedFiles,
       initialFiles: initialFiles,
       albumName: widget.c.collection.displayName,
+      header: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: NotificationWidget(
+          actionIcon: Icons.join_right,
+          startIcon: Icons.people_alt_outlined,
+          text: 'Join album',
+          subText: widget.c.collection.isCollectEnabledForPublicLink()
+              ? "to view and add your photos"
+              : 'to add this to shared albums',
+          type: NotificationType.notice,
+          onTap: () async {
+            final dialog =
+                createProgressDialog(context, S.of(context).pleaseWait);
+            await dialog.show();
+            try {
+              logger.info("Joining collection ${widget.c.collection.id}");
+              await RemoteSyncService.instance
+                  .joinAndSyncCollection(context, widget.c.collection.id);
+              logger.info("Syncing collections");
+
+              // route to the collection
+              final c = CollectionsService.instance
+                  .getCollectionByID(widget.c.collection.id);
+              logger.info("Joining collection ${widget.c.collection.id}");
+              await dialog.hide();
+              Navigator.of(context).pop();
+              await routeToPage(
+                  context, CollectionPage(CollectionWithThumbnail(c!, null)));
+            } catch (e, s) {
+              logger.severe("Failed to join collection", e, s);
+              showGenericErrorDialog(context: context, error: e).ignore();
+            } finally {
+              await dialog.hide();
+            }
+          },
+        ),
+      ),
       sortAsyncFn: () => widget.c.collection.pubMagicMetadata.asc ?? false,
     );
 
