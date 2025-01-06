@@ -64,7 +64,9 @@ class _SharedPublicCollectionPageState
 
   @override
   Widget build(BuildContext context) {
-    logger.info("Building SharedPublicCollectionPage");
+    logger.info(
+      "Building SharedPublicCollectionPage ${widget.c.collection.isJoinEnabled}",
+    );
     final List<EnteFile>? initialFiles =
         widget.c.thumbnail != null ? [widget.c.thumbnail!] : null;
     final gallery = Gallery(
@@ -94,25 +96,27 @@ class _SharedPublicCollectionPageState
       selectedFiles: _selectedFiles,
       initialFiles: initialFiles,
       albumName: widget.c.collection.displayName,
-      header: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: NotificationWidget(
-          startIcon: Icons.people_alt_outlined,
-          actionIcon: null,
-          actionWidget: ButtonWidget(
-            buttonType: ButtonType.primary,
-            labelText: "Join",
-            buttonSize: ButtonSize.small,
-            onTap: _joinAlbum,
-          ),
-          text: 'Join album',
-          subText: widget.c.collection.isCollectEnabledForPublicLink()
-              ? "to view and add your photos"
-              : 'to add this to shared albums',
-          type: NotificationType.notice,
-          onTap: () async {},
-        ),
-      ),
+      header: widget.c.collection.isJoinEnabled
+          ? Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: NotificationWidget(
+                startIcon: Icons.people_alt_outlined,
+                actionIcon: null,
+                actionWidget: ButtonWidget(
+                  buttonType: ButtonType.primary,
+                  labelText: "Join",
+                  buttonSize: ButtonSize.small,
+                  onTap: _joinAlbum,
+                ),
+                text: 'Join album',
+                subText: widget.c.collection.isCollectEnabledForPublicLink()
+                    ? "to view and add your photos"
+                    : 'to add this to shared albums',
+                type: NotificationType.notice,
+                onTap: () async {},
+              ),
+            )
+          : null,
       sortAsyncFn: () => widget.c.collection.pubMagicMetadata.asc ?? false,
     );
 
