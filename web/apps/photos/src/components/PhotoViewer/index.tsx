@@ -140,7 +140,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
         PublicCollectionGalleryContext,
     );
 
-    const pswpElement = useRef<HTMLDivElement>();
+    const pswpElement = useRef<HTMLDivElement | undefined>(undefined);
     const [photoSwipe, setPhotoSwipe] =
         useState<Photoswipe<Photoswipe.Options>>();
     const [showInfo, setShowInfo] = useState(false);
@@ -184,7 +184,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
     );
 
     useEffect(() => {
-        if (!pswpElement) return;
+        if (!pswpElement.current) return;
         if (isOpen) {
             openPhotoSwipe();
         }
