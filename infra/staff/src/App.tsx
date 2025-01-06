@@ -234,6 +234,7 @@ const App: React.FC = () => {
 
     return (
         <div className="container">
+        <div>
             <form className="input-form" onKeyPress={handleKeyPress}>
                 <div className="horizontal-group">
                     <a
@@ -254,7 +255,7 @@ const App: React.FC = () => {
                         }}
                         size="medium"
                         className="text-field-token"
-                        style={{ width: "350px" }}
+                        style={{ maxWidth: "parent"  }} 
                     />
                     <TextField
                         label="Email"
@@ -265,7 +266,7 @@ const App: React.FC = () => {
                         }}
                         size="medium"
                         className="text-field-email"
-                        style={{ width: "350px" }}
+                        style={{ width: "parent" }}
                     />
                     <div className="fetch-button-container">
                         <Button
@@ -285,10 +286,15 @@ const App: React.FC = () => {
                     </div>
                 </div>
             </form>
+            </div>
             <div className="content-container">
                 {loading ? (
                     <CircularProgress
-                        sx={{ color: "black", marginTop: "200px" }}
+                        sx={{ 
+                          color: "black", 
+                          top: "200px",
+                          position: "fixed"
+                        }}
                     />
                 ) : error ? (
                     <div className="error-message">{error}</div>
