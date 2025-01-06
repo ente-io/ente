@@ -24,12 +24,17 @@ export const ActivityIndicator: React.FC<
     children ? (
         <Stack sx={{ gap: 2, alignItems: "center" }}>
             <CircularProgress color="accent" size={24} {...rest} />
-            <Typography color="text.muted">{children}</Typography>
+            <Typography
+                sx={{
+                    color: "text.muted",
+                }}
+            >
+                {children}
+            </Typography>
         </Stack>
     ) : (
         <CircularProgress color="accent" size={32} {...rest} />
     );
-
 /**
  * An error message indicator, styled to complement {@link ActivityIndicator}.
  *
@@ -42,7 +47,11 @@ export const ErrorIndicator: React.FC<React.PropsWithChildren> = ({
 }) => (
     <Stack sx={{ gap: 2, alignItems: "center" }}>
         <ErrorOutlineIcon color="secondary" sx={{ color: "critical" }} />
-        <Typography color="text.muted">
+        <Typography
+            sx={{
+                color: "text.muted",
+            }}
+        >
             {children ?? t("generic_error")}
         </Typography>
     </Stack>

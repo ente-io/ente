@@ -259,7 +259,7 @@ export const AttributedMiniDialog: React.FC<
     );
 
     return (
-        <Dialog
+        (<Dialog
             open={open}
             fullWidth
             PaperProps={{
@@ -274,19 +274,19 @@ export const AttributedMiniDialog: React.FC<
         >
             {(attributes.icon ?? attributes.title) ? (
                 <Box
-                    sx={{
+                    sx={(theme) => ({
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
                         "& > svg": {
                             fontSize: "32px",
-                            color: (theme) => theme.colors.stroke.faint,
+                            color: theme.colors.stroke.faint,
                         },
                         padding:
                             attributes.icon && attributes.title
                                 ? "20px 16px 0px 16px"
                                 : "24px 16px 4px 16px",
-                    }}
+                    })}
                 >
                     {attributes.title && (
                         <DialogTitle
@@ -303,7 +303,7 @@ export const AttributedMiniDialog: React.FC<
                     {attributes.icon}
                 </Box>
             ) : (
-                <Box sx={{ height: "8px" }} /> /* Spacer */
+                (<Box sx={{ height: "8px" }} />) /* Spacer */
             )}
             <DialogContent>
                 {attributes.message && (
@@ -311,7 +311,9 @@ export const AttributedMiniDialog: React.FC<
                         component={
                             typeof attributes.message == "string" ? "p" : "div"
                         }
-                        color="text.muted"
+                        sx={{
+                            color: "text.muted",
+                        }}
                     >
                         {attributes.message}
                     </Typography>
@@ -336,7 +338,7 @@ export const AttributedMiniDialog: React.FC<
                     )}
                 </Stack>
             </DialogContent>
-        </Dialog>
+        </Dialog>)
     );
 };
 

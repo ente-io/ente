@@ -15,12 +15,11 @@ export const ActivityErrorIndicator: React.FC<React.PropsWithChildren> = ({
 }) => (
     <Stack sx={{ gap: 2, alignItems: "center" }}>
         <ErrorOutlineIcon color="secondary" sx={{ color: "critical" }} />
-        <Typography color="text.muted">
+        <Typography sx={{ color: "text.muted" }}>
             {children ?? t("generic_error")}
         </Typography>
     </Stack>
 );
-
 /**
  * An smaller error message indicator suitable for being shown above or below
  * text fields.
@@ -34,7 +33,7 @@ export const InlineErrorIndicator: React.FC<React.PropsWithChildren> = ({
 }) => (
     <Box sx={{ display: "flex", gap: "5px", alignItems: "center" }}>
         <ErrorOutlineIcon sx={{ fontSize: "16px", color: "critical.main" }} />
-        <Typography variant="small" color="critical.main">
+        <Typography variant="small" sx={{ color: "critical.main" }}>
             {children ?? t("generic_error")}
         </Typography>
     </Box>
