@@ -949,6 +949,7 @@ class CollectionsService {
         data: {
           "collectionID": collection.id,
           "enableCollect": enableCollect,
+          "enableJoin": flagService.internalUser,
         },
       );
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
@@ -1114,7 +1115,7 @@ class CollectionsService {
     final authToken = await getSharedPublicAlbumToken(collectionID);
     try {
       final response = await _enteDio.post(
-        "https://api.ente.io/public-collection/verify-password",
+        "/public-collection/verify-password",
         data: {"passHash": passwordHash},
         options: Options(
           headers: {
@@ -1137,6 +1138,37 @@ class CollectionsService {
       );
       return false;
     }
+  }
+
+  Future<void> joinPublicCollection(
+    BuildContext context,
+    int collectionID,
+  ) async {
+    final authToken = await getSharedPublicAlbumToken(collectionID);
+    final jwtToken = await getSharedPublicAlbumTokenJWT(collectionID);
+    final key = await getSharedPublicAlbumKey(collectionID);
+    if (key.isEmpty) {
+      throw Exception("Collection key not found");
+    }
+    final encryptedKey = CryptoUtil.sealSync(
+      getCollectionKey(collectionID),
+      CryptoUtil.base642bin(
+        Configuration.instance.getKeyAttributes()!.publicKey,
+      ),
+    );
+    await _enteDio.post(
+      "/collections/join-link",
+      data: {
+        "collectionID": collectionID,
+        "encryptedKey": CryptoUtil.bin2base64(encryptedKey),
+      },
+      options: Options(
+        headers: {
+          "X-Auth-Access-Token": authToken,
+          "X-Auth-Access-Token-JWT": jwtToken,
+        },
+      ),
+    );
   }
 
   Future<String> getSharedPublicAlbumKey(int collectionID) async {

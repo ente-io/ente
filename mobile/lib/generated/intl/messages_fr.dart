@@ -995,7 +995,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "freeUpSpace":
             MessageLookupByLibrary.simpleMessage("Libérer de l\'espace"),
         "freeUpSpaceSaving": m39,
-        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Jusqu\'à 1000 souvenirs affichés dans la galerie"),
         "general": MessageLookupByLibrary.simpleMessage("Général"),
@@ -1028,8 +1027,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Masque le contenu de l\'application dans le sélecteur d\'applications et désactive les captures d\'écran"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Masque le contenu de l\'application dans le sélecteur d\'application"),
-        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
-            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Masquage en cours..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Hébergé chez OSM France"),

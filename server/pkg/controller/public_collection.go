@@ -61,7 +61,8 @@ type PublicCollectionController struct {
 
 func (c *PublicCollectionController) CreateAccessToken(ctx context.Context, req ente.CreatePublicAccessTokenRequest) (ente.PublicURL, error) {
 	accessToken := shortuuid.New()[0:AccessTokenLength]
-	err := c.PublicCollectionRepo.Insert(ctx, req.CollectionID, accessToken, req.ValidTill, req.DeviceLimit, req.EnableCollect)
+	err := c.PublicCollectionRepo.
+		Insert(ctx, req.CollectionID, accessToken, req.ValidTill, req.DeviceLimit, req.EnableCollect, req.EnableJoin)
 	if err != nil {
 		if errors.Is(err, ente.ErrActiveLinkAlreadyExists) {
 			collectionToPubUrlMap, err2 := c.PublicCollectionRepo.GetCollectionToActivePublicURLMap(ctx, []int64{req.CollectionID})
@@ -88,6 +89,10 @@ func (c *PublicCollectionController) CreateAccessToken(ctx context.Context, req 
 		PasswordEnabled: false,
 	}
 	return response, nil
+}
+
+func (c *PublicCollectionController) GetActivePublicCollectionToken(ctx context.Context, collectionID int64) (ente.PublicCollectionToken, error) {
+	return c.PublicCollectionRepo.GetActivePublicCollectionToken(ctx, collectionID)
 }
 
 func (c *PublicCollectionController) CreateFile(ctx *gin.Context, file ente.File, app ente.App) (ente.File, error) {
@@ -146,6 +151,9 @@ func (c *PublicCollectionController) UpdateSharedUrl(ctx context.Context, req en
 	if req.EnableCollect != nil {
 		publicCollectionToken.EnableCollect = *req.EnableCollect
 	}
+	if req.EnableJoin != nil {
+		publicCollectionToken.EnableJoin = *req.EnableJoin
+	}
 	err = c.PublicCollectionRepo.UpdatePublicCollectionToken(ctx, publicCollectionToken)
 	if err != nil {
 		return ente.PublicURL{}, stacktrace.Propagate(err, "")
@@ -156,6 +164,7 @@ func (c *PublicCollectionController) UpdateSharedUrl(ctx context.Context, req en
 		ValidTill:       publicCollectionToken.ValidTill,
 		EnableDownload:  publicCollectionToken.EnableDownload,
 		EnableCollect:   publicCollectionToken.EnableCollect,
+		EnableJoin:      publicCollectionToken.EnableJoin,
 		PasswordEnabled: publicCollectionToken.PassHash != nil && *publicCollectionToken.PassHash != "",
 		Nonce:           publicCollectionToken.Nonce,
 		MemLimit:        publicCollectionToken.MemLimit,
@@ -322,6 +331,7 @@ func (c *PublicCollectionController) GetPublicCollection(ctx *gin.Context, mustA
 			Nonce:           publicUrl.Nonce,
 			MemLimit:        publicUrl.MemLimit,
 			OpsLimit:        publicUrl.OpsLimit,
+			EnableJoin:      publicUrl.EnableJoin,
 		})
 	}
 	collection.PublicURLs = publicURLsWithLimitedInfo

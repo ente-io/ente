@@ -185,6 +185,8 @@
   },
   "allowAddPhotosDescription": "Allow people with the link to also add photos to the shared album.",
   "passwordLock": "Password lock",
+  "canNotOpenTitle": "Cannot open this album",
+  "canNotOpenBody": "Sorry, this album cannot be opened in the app.",
   "disableDownloadWarningTitle": "Please note",
   "disableDownloadWarningBody": "Viewers can still take screenshots or save a copy of your photos using external tools",
   "allowDownloads": "Allow downloads",
@@ -1580,5 +1582,10 @@
   "authToManageLegacy": "Please authenticate to manage your trusted contacts",
   "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player.",
   "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
-  "gallery": "Gallery"
+  "gallery": "Gallery",
+  "joinAlbum": "Join album",
+  "joinAlbumSubtext": "to view and add your photos",
+  "joinAlbumSubtextViewer": "to add this to shared albums",
+  "join": "Join"
+  
 }

@@ -115,7 +115,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("Tagasiside"),
         "flip": MessageLookupByLibrary.simpleMessage("Pööra ümber"),
         "freeTrial": MessageLookupByLibrary.simpleMessage("Tasuta prooviaeg"),
-        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "general": MessageLookupByLibrary.simpleMessage("Üldine"),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("Google Play ID"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage(
@@ -123,8 +122,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("Abiinfo"),
         "hidden": MessageLookupByLibrary.simpleMessage("Peidetud"),
         "hide": MessageLookupByLibrary.simpleMessage("Peida"),
-        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
-            "Hide shared items from home gallery"),
         "importing": MessageLookupByLibrary.simpleMessage("Importimine...."),
         "incorrectPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Vale parool"),

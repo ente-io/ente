@@ -438,6 +438,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Por favor, autentícate para administrar tus contactos de confianza"),
         "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
             "Por favor, autentícate para ver tu clave de acceso"),
+        "authToViewTrashedFiles": MessageLookupByLibrary.simpleMessage(
+            "Por favor, autentícate para ver los archivos enviados a la papelera"),
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
             "Por favor, autentícate para ver tus sesiones activas"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
@@ -984,7 +986,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ahorra espacio en tu dispositivo limpiando archivos que tienen copia de seguridad."),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Liberar espacio"),
         "freeUpSpaceSaving": m39,
-        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Galería"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Hasta 1000 memorias mostradas en la galería"),
         "general": MessageLookupByLibrary.simpleMessage("General"),
@@ -1017,7 +1019,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Ocultar el contenido de la aplicación en el selector de aplicaciones"),
         "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
-            "Hide shared items from home gallery"),
+            "Ocultar elementos compartidos de la galería de inicio"),
         "hiding": MessageLookupByLibrary.simpleMessage("Ocultando..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Alojado en OSM France"),

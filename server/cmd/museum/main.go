@@ -5,11 +5,6 @@ import (
 	"database/sql"
 	b64 "encoding/base64"
 	"fmt"
-	"github.com/ente-io/museum/ente/base"
-	"github.com/ente-io/museum/pkg/controller/emergency"
-	"github.com/ente-io/museum/pkg/controller/file_copy"
-	"github.com/ente-io/museum/pkg/controller/filedata"
-	emergencyRepo "github.com/ente-io/museum/pkg/repo/emergency"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,6 +13,12 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/ente-io/museum/ente/base"
+	"github.com/ente-io/museum/pkg/controller/emergency"
+	"github.com/ente-io/museum/pkg/controller/file_copy"
+	"github.com/ente-io/museum/pkg/controller/filedata"
+	emergencyRepo "github.com/ente-io/museum/pkg/repo/emergency"
 
 	"github.com/ente-io/museum/pkg/repo/two_factor_recovery"
 
@@ -305,6 +306,7 @@ func main() {
 
 	collectionController := &controller.CollectionController{
 		CollectionRepo:       collectionRepo,
+		EmailCtrl:            emailNotificationCtrl,
 		AccessCtrl:           accessCtrl,
 		PublicCollectionCtrl: publicCollectionCtrl,
 		UserRepo:             userRepo,
@@ -535,6 +537,7 @@ func main() {
 	privateAPI.GET("/collections", collectionHandler.Get)
 	privateAPI.GET("/collections/v2", collectionHandler.GetV2)
 	privateAPI.POST("/collections/share", collectionHandler.Share)
+	privateAPI.POST("/collections/join-link", collectionHandler.JoinLink)
 	privateAPI.POST("/collections/share-url", collectionHandler.ShareURL)
 	privateAPI.PUT("/collections/share-url", collectionHandler.UpdateShareURL)
 	privateAPI.DELETE("/collections/share-url/:collectionID", collectionHandler.UnShareURL)

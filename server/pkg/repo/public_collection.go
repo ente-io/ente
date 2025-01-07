@@ -36,10 +36,15 @@ func (pcr *PublicCollectionRepository) GetAlbumUrl(token string) string {
 }
 
 func (pcr *PublicCollectionRepository) Insert(ctx context.Context,
-	cID int64, token string, validTill int64, deviceLimit int, enableCollect bool) error {
+	cID int64, token string, validTill int64, deviceLimit int, enableCollect bool, enableJoin *bool) error {
+	// default value for enableJoin is true
+	join := false
+	if enableJoin != nil {
+		join = *enableJoin
+	}
 	_, err := pcr.DB.ExecContext(ctx, `INSERT INTO public_collection_tokens 
-    (collection_id, access_token, valid_till, device_limit, enable_collect) VALUES ($1, $2, $3, $4, $5)`,
-		cID, token, validTill, deviceLimit, enableCollect)
+    (collection_id, access_token, valid_till, device_limit, enable_collect, enable_join) VALUES ($1, $2, $3, $4, $5, $6)`,
+		cID, token, validTill, deviceLimit, enableCollect, join)
 	if err != nil && err.Error() == "pq: duplicate key value violates unique constraint \"public_active_collection_unique_idx\"" {
 		return ente.ErrActiveLinkAlreadyExists
 	}
@@ -55,7 +60,7 @@ func (pcr *PublicCollectionRepository) DisableSharing(ctx context.Context, cID i
 // GetCollectionToActivePublicURLMap will return map of collectionID to PublicURLs which are not disabled yet.
 // Note: The url could be expired or deviceLimit is already reached
 func (pcr *PublicCollectionRepository) GetCollectionToActivePublicURLMap(ctx context.Context, collectionIDs []int64) (map[int64][]ente.PublicURL, error) {
-	rows, err := pcr.DB.QueryContext(ctx, `SELECT collection_id, access_token, valid_till, device_limit, enable_download, enable_collect, pw_nonce, mem_limit, ops_limit FROM 
+	rows, err := pcr.DB.QueryContext(ctx, `SELECT collection_id, access_token, valid_till, device_limit, enable_download, enable_collect, enable_join, pw_nonce, mem_limit, ops_limit FROM 
                                                    public_collection_tokens WHERE collection_id = ANY($1) and is_disabled = FALSE`,
 		pq.Array(collectionIDs))
 	if err != nil {
@@ -72,7 +77,7 @@ func (pcr *PublicCollectionRepository) GetCollectionToActivePublicURLMap(ctx con
 		var accessToken string
 		var nonce *string
 		var opsLimit, memLimit *int64
-		if err = rows.Scan(&collectionID, &accessToken, &publicUrl.ValidTill, &publicUrl.DeviceLimit, &publicUrl.EnableDownload, &publicUrl.EnableCollect, &nonce, &memLimit, &opsLimit); err != nil {
+		if err = rows.Scan(&collectionID, &accessToken, &publicUrl.ValidTill, &publicUrl.DeviceLimit, &publicUrl.EnableDownload, &publicUrl.EnableCollect, &publicUrl.EnableJoin, &nonce, &memLimit, &opsLimit); err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
 		publicUrl.URL = pcr.GetAlbumUrl(accessToken)
@@ -91,14 +96,14 @@ func (pcr *PublicCollectionRepository) GetCollectionToActivePublicURLMap(ctx con
 // Note: The token could be expired or deviceLimit is already reached
 func (pcr *PublicCollectionRepository) GetActivePublicCollectionToken(ctx context.Context, collectionID int64) (ente.PublicCollectionToken, error) {
 	row := pcr.DB.QueryRowContext(ctx, `SELECT id, collection_id, access_token, valid_till, device_limit, 
-       is_disabled, pw_hash, pw_nonce, mem_limit, ops_limit, enable_download, enable_collect FROM 
+       is_disabled, pw_hash, pw_nonce, mem_limit, ops_limit, enable_download, enable_collect, enable_join FROM 
                                                    public_collection_tokens WHERE collection_id = $1 and is_disabled = FALSE`,
 		collectionID)
 
 	//defer rows.Close()
 	ret := ente.PublicCollectionToken{}
 	err := row.Scan(&ret.ID, &ret.CollectionID, &ret.Token, &ret.ValidTill, &ret.DeviceLimit,
-		&ret.IsDisabled, &ret.PassHash, &ret.Nonce, &ret.MemLimit, &ret.OpsLimit, &ret.EnableDownload, &ret.EnableCollect)
+		&ret.IsDisabled, &ret.PassHash, &ret.Nonce, &ret.MemLimit, &ret.OpsLimit, &ret.EnableDownload, &ret.EnableCollect, &ret.EnableJoin)
 	if err != nil {
 		return ente.PublicCollectionToken{}, stacktrace.Propagate(err, "")
 	}
@@ -108,9 +113,9 @@ func (pcr *PublicCollectionRepository) GetActivePublicCollectionToken(ctx contex
 // UpdatePublicCollectionToken will update the row for corresponding public collection token
 func (pcr *PublicCollectionRepository) UpdatePublicCollectionToken(ctx context.Context, pct ente.PublicCollectionToken) error {
 	_, err := pcr.DB.ExecContext(ctx, `UPDATE public_collection_tokens SET valid_till = $1, device_limit = $2, 
-                                    pw_hash = $3, pw_nonce = $4, mem_limit = $5, ops_limit = $6, enable_download = $7, enable_collect = $8 
-                                where id = $9`,
-		pct.ValidTill, pct.DeviceLimit, pct.PassHash, pct.Nonce, pct.MemLimit, pct.OpsLimit, pct.EnableDownload, pct.EnableCollect, pct.ID)
+                                    pw_hash = $3, pw_nonce = $4, mem_limit = $5, ops_limit = $6, enable_download = $7, enable_collect = $8, enable_join = $9 
+                                where id = $10`,
+		pct.ValidTill, pct.DeviceLimit, pct.PassHash, pct.Nonce, pct.MemLimit, pct.OpsLimit, pct.EnableDownload, pct.EnableCollect, pct.EnableJoin, pct.ID)
 	return stacktrace.Propagate(err, "failed to update public collection token")
 }
 

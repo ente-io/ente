@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/avct/uasurfer"
+	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller/lock"
 	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/utils/email"
@@ -13,31 +14,31 @@ import (
 )
 
 const (
-	WebAppFirstUploadTemplate           = "web_app_first_upload.html"
-	MobileAppFirstUploadTemplate        = "mobile_app_first_upload.html"
-	FirstUploadEmailSubject             = "Congratulations! 🎉"
-	
-  StorageLimitExceededMailLock        = "storage_limit_exceeded_mail_lock"
-	StorageLimitExceededTemplateID      = "storage_limit_exceeded"
-	StorageLimitExceededTemplate        = "storage_limit_exceeded.html"
-	
-  FilesCollectedTemplate              = "files_collected.html"
-	FilesCollectedTemplateID            = "files_collected"
-	FilesCollectedSubject               = "You've got photos!"
+	WebAppFirstUploadTemplate    = "web_app_first_upload.html"
+	MobileAppFirstUploadTemplate = "mobile_app_first_upload.html"
+	FirstUploadEmailSubject      = "Congratulations! 🎉"
 
-	SubscriptionUpgradedTemplate        = "subscription_upgraded.html"
-	SubscriptionUpgradedSubject         = "Thank you for choosing Ente!"
-  
+	StorageLimitExceededMailLock   = "storage_limit_exceeded_mail_lock"
+	StorageLimitExceededTemplateID = "storage_limit_exceeded"
+	StorageLimitExceededTemplate   = "storage_limit_exceeded.html"
+
+	FilesCollectedTemplate   = "files_collected.html"
+	FilesCollectedTemplateID = "files_collected"
+	FilesCollectedSubject    = "You've got photos!"
+
+	SubscriptionUpgradedTemplate = "subscription_upgraded.html"
+	SubscriptionUpgradedSubject  = "Thank you for choosing Ente!"
+
 	SubscriptionCancelledSubject        = "Good bye (?) from Ente"
 	SubscriptionCancelledTemplate       = "subscription_cancelled.html"
 	FilesCollectedMuteDurationInMinutes = 10
 
-  StorageLimitExceededSubject         = "[Alert] You have exceeded your storage limit"
-	ReferralSuccessfulTemplate          = "successful_referral.html"
-	ReferralSuccessfulSubject           = "You've earned 10 GB on Ente! 🎁"
+	StorageLimitExceededSubject = "[Alert] You have exceeded your storage limit"
+	ReferralSuccessfulTemplate  = "successful_referral.html"
+	ReferralSuccessfulSubject   = "You've earned 10 GB on Ente! 🎁"
 
-  LoginSuccessSubject                 = "New login to your Ente account"
-  LoginSuccessTemplate                = "on_login.html"
+	LoginSuccessSubject  = "New login to your Ente account"
+	LoginSuccessTemplate = "on_login.html"
 )
 
 type EmailNotificationController struct {
@@ -75,6 +76,27 @@ func (c *EmailNotificationController) OnSuccessfulReferral(userID int64) {
 	err = email.SendTemplatedEmail([]string{user.Email}, "team@ente.io", "team@ente.io", ReferralSuccessfulSubject, ReferralSuccessfulTemplate, nil, nil)
 	if err != nil {
 		log.Error("Error sending first upload email ", err)
+	}
+}
+
+func (c *EmailNotificationController) OnLinkJoined(ownerID int64, otherUserID int64, role ente.CollectionParticipantRole) {
+	user, err := c.UserRepo.Get(ownerID)
+	if err != nil {
+		return
+	}
+	otherUser, err := c.UserRepo.Get(otherUserID)
+	if err != nil {
+		return
+	}
+	data := map[string]interface{}{
+		"OtherUserEmail": otherUser.Email,
+		"Role":           role,
+	}
+	err = email.SendTemplatedEmailV2(
+		[]string{user.Email}, "Ente", "team@ente.io",
+		fmt.Sprintf("%s has joined your album", otherUser.Email), "base.html", "on_link_joined.html", data, nil)
+	if err != nil {
+		log.Error("Error sending link joined email ", err)
 	}
 }
 

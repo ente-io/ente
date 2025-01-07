@@ -26,6 +26,7 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/file/file.dart";
@@ -264,8 +265,11 @@ class _HomeWidgetState extends State<HomeWidget> {
     try {
       final Collection collection = await CollectionsService.instance
           .getCollectionFromPublicLink(context, uri);
+      final existingCollection =
+          CollectionsService.instance.getCollectionByID(collection.id);
 
-      if (collection.owner!.id! == Configuration.instance.getUserID()) {
+      if (collection.owner!.id! == Configuration.instance.getUserID() ||
+          (existingCollection != null && !existingCollection.isDeleted)) {
         await routeToPage(
           context,
           CollectionPage(
@@ -276,7 +280,15 @@ class _HomeWidgetState extends State<HomeWidget> {
       }
       final dialog = createProgressDialog(context, "Loading...");
       final publicUrl = collection.publicURLs![0];
-      if (publicUrl!.passwordEnabled) {
+      if (!publicUrl!.enableDownload) {
+        await showErrorDialog(
+          context,
+          context.l10n.canNotOpenTitle,
+          context.l10n.canNotOpenBody,
+        );
+        return;
+      }
+      if (publicUrl.passwordEnabled) {
         await showTextInputDialog(
           context,
           title: S.of(context).enterPassword,

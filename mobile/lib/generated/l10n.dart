@@ -1480,6 +1480,26 @@ class S {
     );
   }
 
+  /// `Cannot open this album`
+  String get canNotOpenTitle {
+    return Intl.message(
+      'Cannot open this album',
+      name: 'canNotOpenTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, this album cannot be opened in the app.`
+  String get canNotOpenBody {
+    return Intl.message(
+      'Sorry, this album cannot be opened in the app.',
+      name: 'canNotOpenBody',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Please note`
   String get disableDownloadWarningTitle {
     return Intl.message(
@@ -10834,6 +10854,46 @@ class S {
     return Intl.message(
       'Gallery',
       name: 'gallery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Join album`
+  String get joinAlbum {
+    return Intl.message(
+      'Join album',
+      name: 'joinAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `to view and add your photos`
+  String get joinAlbumSubtext {
+    return Intl.message(
+      'to view and add your photos',
+      name: 'joinAlbumSubtext',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `to add this to shared albums`
+  String get joinAlbumSubtextViewer {
+    return Intl.message(
+      'to add this to shared albums',
+      name: 'joinAlbumSubtextViewer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Join`
+  String get join {
+    return Intl.message(
+      'Join',
+      name: 'join',
       desc: '',
       args: [],
     );

@@ -85,9 +85,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Find folk hurtigt ved navn"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Glemt adgangskode"),
-        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
-        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
-            "Hide shared items from home gallery"),
         "incorrectPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Forkert adgangskode"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(
