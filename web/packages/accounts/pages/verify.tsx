@@ -256,8 +256,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                                 {t("resend_code")}
                             </LinkButton>
                         )}
-                        {resend === 1 && <span>{t("SENDING")}</span>}
-                        {resend === 2 && <span>{t("SENT")}</span>}
+                        {resend === 1 && <span>{t("status_sending")}</span>}
+                        {resend === 2 && <span>{t("status_sent")}</span>}
                         <LinkButton onClick={logout}>
                             {t("CHANGE_EMAIL")}
                         </LinkButton>
