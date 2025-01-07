@@ -273,20 +273,20 @@ export const AttributedMiniDialog: React.FC<
             {...rest}
         >
             {(attributes.icon ?? attributes.title) ? (
-                <Box
-                    sx={{
-                        display: "flex",
+                <Stack
+                    direction="row"
+                    sx={(theme) => ({
                         justifyContent: "space-between",
                         alignItems: "center",
                         "& > svg": {
                             fontSize: "32px",
-                            color: (theme) => theme.colors.stroke.faint,
+                            color: theme.colors.stroke.faint,
                         },
                         padding:
                             attributes.icon && attributes.title
                                 ? "20px 16px 0px 16px"
                                 : "24px 16px 4px 16px",
-                    }}
+                    })}
                 >
                     {attributes.title && (
                         <DialogTitle
@@ -301,7 +301,7 @@ export const AttributedMiniDialog: React.FC<
                         </DialogTitle>
                     )}
                     {attributes.icon}
-                </Box>
+                </Stack>
             ) : (
                 <Box sx={{ height: "8px" }} /> /* Spacer */
             )}
@@ -311,7 +311,9 @@ export const AttributedMiniDialog: React.FC<
                         component={
                             typeof attributes.message == "string" ? "p" : "div"
                         }
-                        color="text.muted"
+                        sx={{
+                            color: "text.muted",
+                        }}
                     >
                         {attributes.message}
                     </Typography>

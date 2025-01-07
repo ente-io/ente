@@ -229,7 +229,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
     );
 
     return (
-        <Stack spacing={3} p={1.5}>
+        <Stack sx={{ gap: 3, p: 1.5 }}>
             {subscription && isSubscriptionActivePaid(subscription) ? (
                 <PaidSubscriptionPlanSelectorCard
                     {...commonCardData}
@@ -308,7 +308,7 @@ const FreeSubscriptionPlanSelectorCard: React.FC<
     children,
 }) => (
     <>
-        <Typography variant="h3" fontWeight={"bold"}>
+        <Typography variant="h3" sx={{ fontWeight: "bold" }}>
             {t("choose_plan")}
         </Typography>
         <Box>
@@ -318,7 +318,10 @@ const FreeSubscriptionPlanSelectorCard: React.FC<
                         planPeriod={planPeriod}
                         togglePeriod={togglePeriod}
                     />
-                    <Typography variant="small" mt={0.5} color="text.muted">
+                    <Typography
+                        variant="small"
+                        sx={{ mt: 0.5, color: "text.muted" }}
+                    >
                         {t("two_months_free")}
                     </Typography>
                 </Box>
@@ -358,13 +361,13 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
     children,
 }) => (
     <>
-        <Box pl={1.5} py={0.5}>
+        <Box sx={{ pl: 1.5, py: 0.5 }}>
             <SpaceBetweenFlex>
                 <Box>
-                    <Typography variant="h3" fontWeight={"bold"}>
+                    <Typography variant="h3" sx={{ fontWeight: "bold" }}>
                         {t("subscription")}
                     </Typography>
-                    <Typography variant="small" color={"text.muted"}>
+                    <Typography variant="small" sx={{ color: "text.muted" }}>
                         {bytesInGB(subscription.storage, 2)}{" "}
                         {t("storage_unit.gb")}
                     </Typography>
@@ -375,8 +378,8 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
             </SpaceBetweenFlex>
         </Box>
 
-        <Box px={1.5}>
-            <Typography color={"text.muted"} fontWeight={"bold"}>
+        <Box sx={{ px: 1.5 }}>
+            <Typography sx={{ color: "text.muted", fontWeight: "bold" }}>
                 <Trans
                     i18nKey="current_usage"
                     values={{
@@ -388,25 +391,30 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
 
         <Box>
             <Stack
-                spacing={3}
-                border={(theme) => `1px solid ${theme.palette.divider}`}
-                p={1.5}
-                borderRadius={(theme) => `${theme.shape.borderRadius}px`}
+                sx={(theme) => ({
+                    border: `1px solid ${theme.palette.divider}`,
+                    borderRadius: `${theme.shape.borderRadius}px`,
+                    gap: 3,
+                    p: 1.5,
+                })}
             >
                 <Box>
                     <PeriodToggler
                         planPeriod={planPeriod}
                         togglePeriod={togglePeriod}
                     />
-                    <Typography variant="small" mt={0.5} color="text.muted">
+                    <Typography
+                        variant="small"
+                        sx={{ mt: 0.5, color: "text.muted" }}
+                    >
                         {t("two_months_free")}
                     </Typography>
                 </Box>
                 {children}
             </Stack>
 
-            <Box py={1} px={1.5}>
-                <Typography color={"text.muted"}>
+            <Box sx={{ py: 1, px: 1.5 }}>
+                <Typography sx={{ color: "text.muted" }}>
                     {!isSubscriptionCancelled(subscription)
                         ? t("subscription_status_renewal_active", {
                               date: subscription.expiryTime,
@@ -543,7 +551,7 @@ const PlanRow: React.FC<PlanRowProps> = ({
             <TopAlignedFluidContainer>
                 <Typography variant="h1">{bytesInGB(plan.storage)}</Typography>
                 <FlexWrapper flexWrap={"wrap"} gap={1}>
-                    <Typography variant="h3" color="text.muted">
+                    <Typography variant="h3" sx={{ color: "text.muted" }}>
                         {t("storage_unit.gb")}
                     </Typography>
                     {popular &&
@@ -553,7 +561,7 @@ const PlanRow: React.FC<PlanRowProps> = ({
                         ) && <Badge>{t("POPULAR")}</Badge>}
                 </FlexWrapper>
             </TopAlignedFluidContainer>
-            <Box width="136px">
+            <Box sx={{ width: "136px" }}>
                 <PlanButton
                     sx={{
                         justifyContent: "flex-end",
@@ -563,11 +571,14 @@ const PlanRow: React.FC<PlanRowProps> = ({
                     size="large"
                     onClick={handleClick}
                 >
-                    <Box textAlign={"right"}>
-                        <Typography fontWeight={"bold"} variant="large">
+                    <Box sx={{ textAlign: "right" }}>
+                        <Typography variant="large" sx={{ fontWeight: "bold" }}>
                             {plan.price}{" "}
                         </Typography>{" "}
-                        <Typography color="text.muted" variant="small">
+                        <Typography
+                            variant="small"
+                            sx={{ color: "text.muted" }}
+                        >
                             {`/ ${
                                 plan.period === "month"
                                     ? t("month_short")
@@ -610,7 +621,7 @@ const ActivePlanButton = styled((props: ButtonProps) => (
     },
 }));
 
-const Badge = styled(Box)(({ theme }) => ({
+const Badge = styled("div")(({ theme }) => ({
     borderRadius: theme.shape.borderRadius,
     padding: "2px 4px",
     backgroundColor: theme.colors.black.muted,
@@ -629,7 +640,7 @@ const FreePlanRow: React.FC<FreePlanRowProps> = ({ onClose, storage }) => (
     <FreePlanRow_ onClick={onClose}>
         <Box>
             <Typography>{t("free_plan_option")}</Typography>
-            <Typography variant="small" color="text.muted">
+            <Typography variant="small" sx={{ color: "text.muted" }}>
                 {t("free_plan_description", {
                     storage: formattedStorageByteSize(storage),
                 })}
@@ -657,7 +668,7 @@ interface AddOnBonusRowsProps {
 const AddOnBonusRows: React.FC<AddOnBonusRowsProps> = ({ addOnBonuses }) => (
     <>
         {addOnBonuses.map((bonus, i) => (
-            <Typography color="text.muted" key={i} sx={{ pt: 1 }}>
+            <Typography key={i} sx={{ color: "text.muted", pt: 1 }}>
                 <Trans
                     i18nKey={"add_on_valid_till"}
                     values={{

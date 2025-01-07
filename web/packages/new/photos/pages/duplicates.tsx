@@ -535,6 +535,11 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
     return (
         <VariableSizeList
             key={key}
+            style={
+                {
+                    "--paddingInline": `${layoutParams.paddingInline}px`,
+                } as React.CSSProperties
+            }
             {...{ height, width, itemData, itemCount, itemSize, itemKey }}
         >
             {ListItem}
@@ -561,7 +566,10 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
         return (
             <Stack
                 {...{ style }}
-                sx={{ paddingBlockEnd: "16px", opacity: checked ? 1 : 0.8 }}
+                sx={[
+                    { paddingBlockEnd: "16px" },
+                    checked ? { opacity: 1 } : { opacity: 0.8 },
+                ]}
             >
                 <Stack
                     direction="row"
@@ -569,7 +577,7 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                         justifyContent: "space-between",
                         alignItems: "center",
                         marginInline: 1,
-                        paddingInline: `${layoutParams.paddingInline}px`,
+                        paddingInline: "var(--paddingInline)",
                         paddingBlock: "24px 0px",
                     }}
                 >
@@ -581,10 +589,10 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                 </Stack>
                 <Divider
                     variant="middle"
-                    sx={{
-                        opacity: hideDivider ? 0 : 0.8,
-                        marginBlock: "4px 20px",
-                    }}
+                    sx={[
+                        { marginBlock: "4px 20px" },
+                        hideDivider ? { opacity: 0 } : { opacity: 0.8 },
+                    ]}
                 />
                 <ItemGrid {...{ layoutParams }}>
                     {items.map((item, j) => (

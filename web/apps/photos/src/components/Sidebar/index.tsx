@@ -106,7 +106,7 @@ export default function Sidebar({
             <HeaderSection closeSidebar={closeSidebar} />
             <Divider />
             <UserDetailsSection sidebarView={sidebarView} />
-            <Stack spacing={0.5} mb={3}>
+            <Stack sx={{ gap: 0.5, mb: 3 }}>
                 <ShortcutSection
                     closeSidebar={closeSidebar}
                     collectionSummaries={collectionSummaries}
@@ -197,8 +197,8 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
 
     return (
         <>
-            <Box px={0.5} mt={2} pb={1.5} mb={1}>
-                <Typography px={1} pb={1} color="text.muted">
+            <Box sx={{ px: 0.5, mt: 2, pb: 1.5, mb: 1 }}>
+                <Typography sx={{ px: 1, pb: 1, color: "text.muted" }}>
                     {userDetails ? (
                         userDetails.email
                     ) : (
@@ -311,12 +311,14 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     if (!message) return <></>;
 
     return (
-        <Box px={1} pt={0.5}>
+        <Box sx={{ px: 1, pt: 0.5 }}>
             <Typography
                 variant="small"
-                color={"text.muted"}
                 onClick={handleClick && handleClick}
-                sx={{ cursor: handleClick && "pointer" }}
+                sx={{
+                    color: "text.muted",
+                    cursor: handleClick && "pointer",
+                }}
             >
                 {message}
             </Typography>
@@ -347,10 +349,15 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
         <Dialog {...{ open, onClose, fullScreen }} maxWidth="xs" fullWidth>
             <SpaceBetweenFlex sx={{ p: "20px 8px 12px 16px" }}>
                 <Stack>
-                    <Typography variant="h3" fontWeight={"bold"}>
+                    <Typography
+                        variant="h3"
+                        sx={{
+                            fontWeight: "bold",
+                        }}
+                    >
                         {t("subscription")}
                     </Typography>
-                    <Typography color={"text.muted"}>
+                    <Typography sx={{ color: "text.muted" }}>
                         {t("family_plan")}
                     </Typography>
                 </Stack>
@@ -358,8 +365,8 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
             </SpaceBetweenFlex>
             <DialogContent>
                 <VerticallyCentered>
-                    <Box mb={4}>
-                        <Typography color="text.muted">
+                    <Box sx={{ mb: 4 }}>
+                        <Typography sx={{ color: "text.muted" }}>
                             {t("subscription_info_family")}
                         </Typography>
                         <Typography>
@@ -370,8 +377,7 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
                     <img
                         height={256}
                         src="/images/family-plan/1x.png"
-                        srcSet="/images/family-plan/2x.png 2x,
-                                /images/family-plan/3x.png 3x"
+                        srcSet="/images/family-plan/2x.png 2x, /images/family-plan/3x.png 3x"
                     />
                     <FlexWrapper px={2}>
                         <Button
@@ -569,7 +575,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             <EnteMenuItem
                 variant="secondary"
                 onClick={redirectToChangeEmailPage}
-                label={t("CHANGE_EMAIL")}
+                label={t("change_email")}
             />
             <EnteMenuItem
                 variant="secondary"
@@ -752,7 +758,14 @@ const DebugSection: React.FC = () => {
                 variant="mini"
                 label={t("debug_logs")}
             />
-            <Stack py={"14px"} px={"16px"} gap={"24px"} color="text.muted">
+            <Stack
+                sx={{
+                    py: "14px",
+                    px: "16px",
+                    gap: "24px",
+                    color: "text.muted",
+                }}
+            >
                 {appVersion && (
                     <Typography variant="mini">{appVersion}</Typography>
                 )}

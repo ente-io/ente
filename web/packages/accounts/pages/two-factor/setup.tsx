@@ -63,7 +63,7 @@ const Page: React.FC<PageProps> = () => {
             <Card>
                 <CardContent>
                     <VerticallyCentered sx={{ p: 3 }}>
-                        <Box mb={4}>
+                        <Box sx={{ mb: 4 }}>
                             <Typography variant="h2">
                                 {t("two_factor")}
                             </Typography>

@@ -218,7 +218,10 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 
     const controls1 = isSmallWidth && (
-        <Box display="flex" alignItems={"center"} gap={1} minHeight={"64px"}>
+        <Stack
+            direction="row"
+            sx={{ alignItems: "center", gap: 1, minHeight: "64px" }}
+        >
             {mode != "people" && (
                 <>
                     <CollectionsSortOptions
@@ -231,11 +234,14 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     </IconButton>
                 </>
             )}
-        </Box>
+        </Stack>
     );
 
     const controls2 = !isSmallWidth && mode != "people" && (
-        <Box display="flex" alignItems={"center"} gap={1} height={"64px"}>
+        <Stack
+            direction="row"
+            sx={{ alignItems: "center", gap: 1, height: "64px" }}
+        >
             <CollectionsSortOptions
                 activeSortBy={collectionsSortBy}
                 onChangeSortBy={onChangeCollectionsSortBy}
@@ -243,7 +249,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             <FilledIconButton onClick={onShowAllCollections}>
                 <ExpandMoreIcon />
             </FilledIconButton>
-        </Box>
+        </Stack>
     );
 
     return (
@@ -285,7 +291,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 };
 
-const BarWrapper = styled(Box)`
+const BarWrapper = styled("div")`
     padding-inline: 24px;
     @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
         padding-inline: 4px;
@@ -294,7 +300,7 @@ const BarWrapper = styled(Box)`
     border-block-end: 1px solid ${({ theme }) => theme.palette.divider};
 `;
 
-export const Row1 = styled(Box)`
+export const Row1 = styled("div")`
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -302,7 +308,7 @@ export const Row1 = styled(Box)`
     margin-block-end: 12px;
 `;
 
-export const Row2 = styled(Box)`
+export const Row2 = styled("div")`
     display: flex;
     align-items: flex-start;
     gap: 16px;
@@ -344,7 +350,7 @@ const ModeIndicator: React.FC<
 const ModeButton = styled(UnstyledButton, {
     shouldForwardProp: (propName) => propName != "active",
 })<{ active: boolean }>(
-    ({ active, theme }) => `
+    ({ theme, active }) => `
     p { color: ${active ? theme.colors.text.base : theme.colors.text.muted} }
     p:hover { color: ${theme.colors.text.base} }
 `,
@@ -367,11 +373,9 @@ const ScrollButtonBase_ = styled("button")`
     border: none;
     padding: 0;
     margin: 0;
-
     border-radius: 50%;
     background-color: ${({ theme }) => theme.colors.backdrop.muted};
     color: ${({ theme }) => theme.colors.stroke.base};
-
     & > svg {
         border-radius: 50%;
         height: 30px;
@@ -383,7 +387,6 @@ const ScrollButtonLeft = styled(ScrollButtonBase)`
     left: 0;
     text-align: right;
     transform: translate(-50%, 0%);
-
     & > svg {
         transform: rotate(180deg);
     }
@@ -395,7 +398,7 @@ const ScrollButtonRight = styled(ScrollButtonBase)`
     transform: translate(50%, 0%);
 `;
 
-const ListWrapper = styled(Box)`
+const ListWrapper = styled("div")`
     position: relative;
     overflow: hidden;
     height: 86px;
@@ -508,7 +511,7 @@ const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
 
 const CardText: React.FC<React.PropsWithChildren> = ({ children }) => (
     <TileTextOverlay>
-        <Box height={"2.1em"}>
+        <Box sx={{ height: "2.1em" }}>
             <Ellipsized2LineTypography variant="small">
                 {children}
             </Ellipsized2LineTypography>
@@ -527,9 +530,7 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
         {type == "favorites" && <FavoriteRoundedIcon />}
         {type == "archived" && (
             <ArchiveIcon
-                sx={(theme) => ({
-                    color: theme.colors.white.muted,
-                })}
+                sx={(theme) => ({ color: theme.colors.white.muted })}
             />
         )}
         {type == "outgoingShare" && <PeopleIcon />}

@@ -97,7 +97,7 @@ export default function SingleInputForm(props: SingleInputFormProps) {
             case "email":
                 return Yup.object().shape({
                     inputValue: Yup.string()
-                        .email(t("EMAIL_ERROR"))
+                        .email(t("invalid_email_error"))
                         .required(t("required")),
                 });
         }
@@ -136,23 +136,26 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                         disabled={loading}
                         autoFocus={!props.disableAutoFocus}
                         autoComplete={props.autoComplete}
-                        InputProps={{
-                            autoComplete:
-                                props.disableAutoComplete ||
-                                props.fieldType === "password"
-                                    ? "off"
-                                    : "on",
-                            endAdornment: props.fieldType === "password" && (
-                                <ShowHidePassword
-                                    showPassword={showPassword}
-                                    handleClickShowPassword={
-                                        handleClickShowPassword
-                                    }
-                                    handleMouseDownPassword={
-                                        handleMouseDownPassword
-                                    }
-                                />
-                            ),
+                        slotProps={{
+                            input: {
+                                autoComplete:
+                                    props.disableAutoComplete ||
+                                    props.fieldType === "password"
+                                        ? "off"
+                                        : "on",
+                                endAdornment: props.fieldType ===
+                                    "password" && (
+                                    <ShowHidePassword
+                                        showPassword={showPassword}
+                                        handleClickShowPassword={
+                                            handleClickShowPassword
+                                        }
+                                        handleMouseDownPassword={
+                                            handleMouseDownPassword
+                                        }
+                                    />
+                                ),
+                            },
                         }}
                     />
                     <FormHelperText

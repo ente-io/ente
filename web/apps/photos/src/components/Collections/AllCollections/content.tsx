@@ -15,7 +15,7 @@ import {
     ListChildComponentProps,
     areEqual,
 } from "react-window";
-import { AllCollectionMobileBreakpoint } from "./dialog";
+import { AllCollectionMobileBreakpoint } from ".";
 
 const MobileColumns = 2;
 const DesktopColumns = 3;
@@ -173,7 +173,7 @@ const CollectionButton: React.FC<AllCollectionCardProps> = ({
     >
         <LargeTileTextOverlay>
             <Typography>{collectionSummary.name}</Typography>
-            <Typography variant="small" color="text.muted">
+            <Typography variant="small" sx={{ color: "text.muted" }}>
                 {t("photos_count", { count: collectionSummary.fileCount })}
             </Typography>
         </LargeTileTextOverlay>

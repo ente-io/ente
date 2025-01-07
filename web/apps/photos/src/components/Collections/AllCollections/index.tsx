@@ -7,13 +7,14 @@ import { FlexWrapper, FluidContainer } from "@ente/shared/components/Container";
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
+    Dialog,
     DialogTitle,
     Divider,
     Stack,
+    styled,
     Typography,
     useMediaQuery,
 } from "@mui/material";
-import { AllCollectionDialog } from "components/Collections/AllCollections/dialog";
 import { t } from "i18next";
 import AllCollectionContent from "./content";
 
@@ -46,12 +47,11 @@ export default function AllCollections(props: AllCollectionsProps) {
 
     return (
         <AllCollectionDialog
-            position="flex-end"
-            TransitionComponent={SlideUpTransition}
-            onClose={onClose}
             open={open}
+            onClose={onClose}
+            TransitionComponent={SlideUpTransition}
             fullScreen={isMobile}
-            fullWidth={true}
+            fullWidth
         >
             <AllCollectionsHeader
                 {...{
@@ -71,6 +71,32 @@ export default function AllCollections(props: AllCollectionsProps) {
     );
 }
 
+export const AllCollectionMobileBreakpoint = 559;
+
+const AllCollectionDialog = styled(Dialog)(({ theme }) => ({
+    "& .MuiDialog-container": {
+        justifyContent: "flex-end",
+    },
+    "& .MuiPaper-root": {
+        maxWidth: "494px",
+    },
+    "& .MuiDialogTitle-root": {
+        padding: theme.spacing(2),
+        paddingRight: theme.spacing(1),
+    },
+    "& .MuiDialogContent-root": {
+        padding: theme.spacing(2),
+    },
+    [theme.breakpoints.down(AllCollectionMobileBreakpoint)]: {
+        "& .MuiPaper-root": {
+            width: "324px",
+        },
+        "& .MuiDialogContent-root": {
+            padding: 6,
+        },
+    },
+}));
+
 const AllCollectionsHeader = ({
     onClose,
     collectionCount,
@@ -89,8 +115,7 @@ const AllCollectionsHeader = ({
                     </Typography>
                     <Typography
                         variant="small"
-                        fontWeight={"normal"}
-                        color={"text.muted"}
+                        sx={{ fontWeight: "normal", color: "text.muted" }}
                     >
                         {t("albums_count", { count: collectionCount })}
                     </Typography>

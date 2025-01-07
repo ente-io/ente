@@ -149,24 +149,26 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
                             ? form.errors.apiOrigin
                             : " " /* always show an empty string to prevent a layout shift */
                     }
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <Link
-                                    href="https://help.ente.io/self-hosting/guides/custom-server/"
-                                    target="_blank"
-                                    rel="noopener"
-                                >
-                                    <IconButton
-                                        aria-label={t("more_information")}
-                                        color="secondary"
-                                        edge="end"
+                    slotProps={{
+                        input: {
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <Link
+                                        href="https://help.ente.io/self-hosting/guides/custom-server/"
+                                        target="_blank"
+                                        rel="noopener"
                                     >
-                                        <InfoOutlinedIcon />
-                                    </IconButton>
-                                </Link>
-                            </InputAdornment>
-                        ),
+                                        <IconButton
+                                            aria-label={t("more_information")}
+                                            color="secondary"
+                                            edge="end"
+                                        >
+                                            <InfoOutlinedIcon />
+                                        </IconButton>
+                                    </Link>
+                                </InputAdornment>
+                            ),
+                        },
                     }}
                 />
             </DialogContent>

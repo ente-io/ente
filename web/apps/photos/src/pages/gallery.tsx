@@ -61,11 +61,7 @@ import {
 } from "@/new/photos/services/user-details";
 import { useAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
-import {
-    CenteredFlex,
-    FlexWrapper,
-    HorizontalFlex,
-} from "@ente/shared/components/Container";
+import { CenteredFlex, FlexWrapper } from "@ente/shared/components/Container";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
@@ -87,7 +83,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import type { ButtonProps, IconButtonProps } from "@mui/material";
-import { Box, Button, IconButton, Typography } from "@mui/material";
+import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import CollectionNamer, {
     CollectionNamerAttributes,
@@ -111,7 +107,14 @@ import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
-import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import {
+    createContext,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { useDropzone } from "react-dropzone";
 import { Trans } from "react-i18next";
 import {
@@ -194,7 +197,7 @@ export default function Gallery() {
         // ... the props we should apply to the <input> element,
         getInputProps: getDragAndDropInputProps,
         // ... and the files that we got.
-        acceptedFiles: dragAndDropFiles,
+        acceptedFiles: dragAndDropFilesReadOnly,
     } = useDropzone({
         noClick: true,
         noKeyboard: true,
@@ -224,8 +227,12 @@ export default function Gallery() {
     });
 
     const syncInProgress = useRef(false);
-    const syncInterval = useRef<NodeJS.Timeout>();
-    const resync = useRef<{ force: boolean; silent: boolean }>();
+    const syncInterval = useRef<ReturnType<typeof setInterval> | undefined>(
+        undefined,
+    );
+    const resync = useRef<{ force: boolean; silent: boolean } | undefined>(
+        undefined,
+    );
 
     const {
         showLoadingBar,
@@ -251,7 +258,7 @@ export default function Gallery() {
     const [authenticateUserModalView, setAuthenticateUserModalView] =
         useState(false);
 
-    const onAuthenticateCallback = useRef<() => void>();
+    const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
 
     const authenticateUser = (callback: () => void) => {
         onAuthenticateCallback.current = callback;
@@ -548,6 +555,12 @@ export default function Gallery() {
         };
     }, [selectAll, clearSelection]);
 
+    // Create a regular array from the readonly array returned by dropzone.
+    const dragAndDropFiles = useMemo(
+        () => [...dragAndDropFilesReadOnly],
+        [dragAndDropFilesReadOnly],
+    );
+
     const showSessionExpiredDialog = () =>
         showMiniDialog(sessionExpiredDialogAttributes(logout));
 
@@ -627,7 +640,7 @@ export default function Gallery() {
         if (resync.current) {
             const { force, silent } = resync.current;
             setTimeout(() => syncWithRemote(force, silent), 0);
-            resync.current = null;
+            resync.current = undefined;
         }
     };
 
@@ -885,7 +898,10 @@ export default function Gallery() {
                 )}
                 {isFirstLoad && (
                     <CenteredFlex>
-                        <Typography color="text.muted" variant="small">
+                        <Typography
+                            variant="small"
+                            sx={{ color: "text.muted" }}
+                        >
                             {t("INITIAL_LOAD_DELAY_WARNING")}
                         </Typography>
                     </CenteredFlex>
@@ -1181,12 +1197,13 @@ interface HiddenSectionNavbarContentsProps {
 const HiddenSectionNavbarContents: React.FC<
     HiddenSectionNavbarContentsProps
 > = ({ onBack }) => (
-    <HorizontalFlex
-        gap={"24px"}
-        sx={{
+    <Stack
+        direction="row"
+        sx={(theme) => ({
+            gap: "24px",
             width: "100%",
-            background: (theme) => theme.palette.background.default,
-        }}
+            background: theme.palette.background.default,
+        })}
     >
         <IconButton onClick={onBack}>
             <ArrowBackIcon />
@@ -1194,7 +1211,7 @@ const HiddenSectionNavbarContents: React.FC<
         <FlexWrapper>
             <Typography>{t("section_hidden")}</Typography>
         </FlexWrapper>
-    </HorizontalFlex>
+    </Stack>
 );
 
 /**

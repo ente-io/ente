@@ -13,7 +13,6 @@ import { FileType } from "@/media/file-type";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import { extractExifDates } from "@/new/photos/services/exif";
 import {
-    Box,
     Dialog,
     DialogContent,
     DialogTitle,
@@ -136,12 +135,12 @@ const messageForStatus = (step?: Step) => {
 
 const Progress: React.FC<FixProgress> = ({ completed, total }) => (
     <Stack sx={{ width: "100%", gap: "2rem", marginBlockEnd: "20px" }}>
-        <Box sx={{ display: "flex", justifyContent: "center", gap: "2rem" }}>
+        <Stack direction="row" sx={{ justifyContent: "center", gap: "2rem" }}>
             <Typography sx={{ wordSpacing: "1rem" }}>
                 {completed} / {total}
             </Typography>
             <Typography>{t("fix_creation_time_file_updated")}</Typography>
-        </Box>
+        </Stack>
 
         <LinearProgress
             variant="determinate"
@@ -231,10 +230,10 @@ interface FooterProps {
 
 const Footer: React.FC<FooterProps> = ({ step, onSubmit, onClose }) =>
     step != "running" && (
-        <div
-            style={{
+        <Stack
+            direction="row"
+            sx={{
                 width: "100%",
-                display: "flex",
                 marginTop: "24px",
                 justifyContent: "space-around",
             }}
@@ -266,7 +265,7 @@ const Footer: React.FC<FooterProps> = ({ step, onSubmit, onClose }) =>
                     </FocusVisibleButton>
                 </>
             )}
-        </div>
+        </Stack>
     );
 
 const updateFiles = async (

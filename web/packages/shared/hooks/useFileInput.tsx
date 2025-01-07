@@ -52,7 +52,7 @@ export const useFileInput = ({
     accept,
 }: UseFileInputParams): UseFileInputResult => {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-    const inputRef = useRef<HTMLInputElement>();
+    const inputRef = useRef<HTMLInputElement | undefined>(undefined);
 
     const openSelector = useCallback(() => {
         if (inputRef.current) {

@@ -10,16 +10,14 @@ import {
 import { isHTTP401Error } from "@/base/http";
 import log from "@/base/log";
 import { masterKeyFromSessionIfLoggedIn } from "@/base/session-store";
-import {
-    HorizontalFlex,
-    VerticallyCentered,
-} from "@ente/shared/components/Container";
+import { VerticallyCentered } from "@ente/shared/components/Container";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import {
     Button,
     ButtonBase,
     Snackbar,
+    Stack,
     TextField,
     Typography,
     styled,
@@ -126,7 +124,7 @@ const Page: React.FC = () => {
                             {searchTerm.length > 0 ? (
                                 <Typography>{t("no_results")}</Typography>
                             ) : (
-                                <Typography color="text.muted">
+                                <Typography sx={{ color: "text.muted" }}>
                                     {t("no_codes_added_yet")}
                                 </Typography>
                             )}
@@ -150,10 +148,10 @@ const AuthNavbar: React.FC = () => {
 
     return (
         <NavbarBase>
-            <HorizontalFlex flex={1} justifyContent={"center"}>
+            <Stack direction="row" sx={{ flex: 1, justifyContent: "center" }}>
                 <EnteLogo />
-            </HorizontalFlex>
-            <HorizontalFlex position={"absolute"} right="24px">
+            </Stack>
+            <Stack direction="row" sx={{ position: "absolute", right: "24px" }}>
                 <OverflowMenu ariaID="auth-options">
                     <OverflowMenuOption
                         color="critical"
@@ -163,7 +161,7 @@ const AuthNavbar: React.FC = () => {
                         {t("logout")}
                     </OverflowMenuOption>
                 </OverflowMenu>
-            </HorizontalFlex>
+            </Stack>
         </NavbarBase>
     );
 };

@@ -153,7 +153,9 @@ const FooterContainer = styled(ListItemContainer)`
     margin-top: calc(2rem + 20px);
 `;
 
-const AlbumFooterContainer = styled(ListItemContainer)<{
+const AlbumFooterContainer = styled(ListItemContainer, {
+    shouldForwardProp: (propName) => propName != "hasReferral",
+})<{
     hasReferral: boolean;
 }>`
     margin-top: 48px;
@@ -162,7 +164,7 @@ const AlbumFooterContainer = styled(ListItemContainer)<{
     justify-content: center;
 `;
 
-const FullStretchContainer = styled(Box)`
+const FullStretchContainer = styled("div")`
     margin: 0 -24px;
     width: calc(100% + 46px);
     left: -24px;
@@ -586,30 +588,39 @@ export function PhotoList({
                 >
                     {/* Make the entire area tappable, otherwise it is hard to
                         get at on mobile devices. */}
-                    <Box width={"100%"}>
+                    <Box sx={{ width: "100%" }}>
                         <Link
                             color="text.base"
                             sx={{ "&:hover": { color: "inherit" } }}
                             target="_blank"
                             href={"https://ente.io"}
                         >
-                            <Typography variant="small" display={"block"}>
-                                {t("SHARED_USING")}{" "}
-                                <Link target="_blank" href={"https://ente.io"}>
-                                    ente.io
-                                </Link>
+                            <Typography variant="small">
+                                <Trans
+                                    i18nKey="shared_using"
+                                    components={{
+                                        a: (
+                                            <Typography
+                                                variant="small"
+                                                component="span"
+                                                sx={(theme) => ({
+                                                    color: theme.colors.accent
+                                                        .A500,
+                                                })}
+                                            />
+                                        ),
+                                    }}
+                                    values={{ url: "ente.io" }}
+                                />
                             </Typography>
                         </Link>
                         {publicCollectionGalleryContext.referralCode ? (
                             <FullStretchContainer>
                                 <Typography
-                                    sx={{
-                                        marginTop: "12px",
-                                        padding: "8px",
-                                    }}
+                                    sx={{ marginTop: "12px", padding: "8px" }}
                                 >
                                     <Trans
-                                        i18nKey={"SHARING_REFERRAL_CODE"}
+                                        i18nKey={"sharing_referral_code"}
                                         values={{
                                             referralCode:
                                                 publicCollectionGalleryContext.referralCode,
