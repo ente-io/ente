@@ -36,7 +36,6 @@ import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { openURL } from "@/new/photos/utils/web";
 import {
     FlexWrapper,
-    FluidContainer,
     SpaceBetweenFlex,
 } from "@ente/shared/components/Container";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -537,12 +536,12 @@ const PlanRow: React.FC<PlanRowProps> = ({ plan, onPlanSelect, disabled }) => {
 
     return (
         <PlanRowContainer>
-            <TopAlignedFluidContainer>
+            <PlanStorage>
                 <Typography variant="h1">{bytesInGB(plan.storage)}</Typography>
                 <Typography variant="h3" sx={{ color: "text.muted" }}>
                     {t("storage_unit.gb")}
                 </Typography>
-            </TopAlignedFluidContainer>
+            </PlanStorage>
             <Box sx={{ width: "136px" }}>
                 <PlanButton
                     sx={{
@@ -577,7 +576,9 @@ const PlanRowContainer = styled(FlexWrapper)(() => ({
         "linear-gradient(268.22deg, rgba(256, 256, 256, 0.08) -3.72%, rgba(256, 256, 256, 0) 85.73%)",
 }));
 
-const TopAlignedFluidContainer = styled(FluidContainer)`
+const PlanStorage = styled("div")`
+    flex: 1;
+    display: flex;
     align-items: flex-start;
 `;
 
