@@ -2,6 +2,7 @@ import { Login } from "@/accounts/components/Login";
 import { SignUp } from "@/accounts/components/SignUp";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import log from "@/base/log";
 import { albumsAppOrigin, customAPIHost } from "@/base/origins";
 import { DevSettings } from "@/new/photos/components/DevSettings";
@@ -12,7 +13,7 @@ import localForage from "@ente/shared/storage/localForage";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
-import { Box, Button, Stack, Typography, styled } from "@mui/material";
+import { Box, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 
@@ -123,16 +124,15 @@ export default function LandingPage() {
                         <Slideshow />
                     </SlideshowPanel>
                     <MobileBox>
-                        <Button
+                        <FocusVisibleButton
                             color="accent"
-                            size="large"
                             onClick={redirectToSignupPage}
                         >
                             {t("new_to_ente")}
-                        </Button>
-                        <Button size="large" onClick={redirectToLoginPage}>
+                        </FocusVisibleButton>
+                        <FocusVisibleButton onClick={redirectToLoginPage}>
                             {t("existing_user")}
-                        </Button>
+                        </FocusVisibleButton>
                         <MobileBoxFooter {...{ host }} />
                     </MobileBox>
                     <DesktopBox>

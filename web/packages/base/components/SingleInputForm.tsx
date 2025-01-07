@@ -99,14 +99,14 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
             />
             <Stack direction="row" sx={{ gap: "12px" }}>
                 <FocusVisibleButton
-                    size="large"
+                    fullWidth
                     color="secondary"
                     onClick={onCancel}
                 >
                     {t("cancel")}
                 </FocusVisibleButton>
                 <LoadingButton
-                    size="large"
+                    fullWidth
                     color="accent"
                     type="submit"
                     loading={formik.isSubmitting}

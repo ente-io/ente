@@ -186,7 +186,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                             <Stack spacing={"8px"}>
                                 <LoadingButton
                                     type="submit"
-                                    size="large"
+                                    fullWidth
                                     color="critical"
                                     disabled={!acceptDataDeletion}
                                     loading={loading}
@@ -194,8 +194,8 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                     {t("delete_account_confirm")}
                                 </LoadingButton>
                                 <FocusVisibleButton
-                                    size="large"
-                                    color={"secondary"}
+                                    fullWidth
+                                    color="secondary"
                                     onClick={onClose}
                                 >
                                     {t("cancel")}

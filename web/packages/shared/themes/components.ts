@@ -144,9 +144,6 @@ export const getComponents = (
                     fontSize: "20px",
                 },
             },
-            sizeLarge: {
-                width: "100%",
-            },
         },
     },
     MuiInputBase: {

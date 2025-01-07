@@ -99,7 +99,7 @@ const SetupDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
             >
                 {t("two_factor_info")}
             </Typography>
-            <FocusVisibleButton color="accent" size="large" onClick={configure}>
+            <FocusVisibleButton color="accent" fullWidth onClick={configure}>
                 {t("enable_two_factor")}
             </FocusVisibleButton>
         </Stack>

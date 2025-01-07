@@ -381,7 +381,7 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
                     />
                     <FlexWrapper px={2}>
                         <Button
-                            size="large"
+                            fullWidth
                             variant="outlined"
                             color="critical"
                             onClick={confirmLeaveFamily}
