@@ -353,24 +353,27 @@ class __VideoWidgetState extends State<_VideoWidget> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  16,
-                                  12,
-                                  16,
-                                  8,
-                                ),
-                                child: Text(
-                                  widget.file.caption!,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                  style:
-                                      getEnteTextTheme(context).mini.copyWith(
-                                            color: textBaseDark,
-                                          ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
+                              widget.file.caption != null
+                                  ? Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        16,
+                                        12,
+                                        16,
+                                        8,
+                                      ),
+                                      child: Text(
+                                        widget.file.caption!,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                        style: getEnteTextTheme(context)
+                                            .mini
+                                            .copyWith(
+                                              color: textBaseDark,
+                                            ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(),
                               _SeekBarAndDuration(
                                 controller: widget.controller,
                                 isSeekingNotifier: _isSeekingNotifier,
