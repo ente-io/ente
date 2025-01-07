@@ -49,12 +49,6 @@ const commonFixedColors: Partial<Pick<ThemeColorsOptions, keyof FixedColors>> =
             A500: "#FF6565",
             A400: "#FF6F6F",
         },
-        blur: {
-            base: 96,
-            muted: 48,
-            faint: 24,
-        },
-
         white: { base: "#fff", muted: "rgba(255, 255, 255, 0.48)" },
         black: { base: "#000", muted: "rgba(0, 0, 0, 0.65)" },
     };

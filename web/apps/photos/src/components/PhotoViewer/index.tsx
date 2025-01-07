@@ -990,7 +990,7 @@ const CaptionContainer = styled("div")(({ theme }) => ({
     fontSize: "14px",
     lineHeight: "17px",
     backgroundColor: theme.colors.backdrop.faint,
-    backdropFilter: `blur(${theme.colors.blur.base})`,
+    backdropFilter: "blur(96px)",
 }));
 
 const CircularProgressWithLabel: React.FC<

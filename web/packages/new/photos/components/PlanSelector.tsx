@@ -625,7 +625,7 @@ const Badge = styled("div")(({ theme }) => ({
     borderRadius: theme.shape.borderRadius,
     padding: "2px 4px",
     backgroundColor: theme.colors.black.muted,
-    backdropFilter: `blur(${theme.colors.blur.muted})`,
+    backdropFilter: "blur(48px)",
     color: theme.colors.white.base,
     textTransform: "uppercase",
     ...theme.typography.mini,
