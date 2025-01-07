@@ -6,10 +6,12 @@ import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/base/id.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
+import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -95,6 +97,24 @@ class _FaceWidgetState extends State<FaceWidget> {
                       ),
                     ),
                   );
+                  return;
+                }
+                if (widget.face.score <= kMinimumQualityFaceScore) {
+                  // The face score is too low for automatic clustering,
+                  // assigning a manual new clusterID so that the user can cluster it manually
+                  final String clusterID = newClusterID();
+                  await MLDataDB.instance.updateFaceIdToClusterId(
+                    {widget.face.faceID: clusterID},
+                  );
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => ClusterPage(
+                        [widget.file],
+                        clusterID: clusterID,
+                      ),
+                    ),
+                  );
+                  return;
                 }
 
                 showShortToast(
