@@ -275,7 +275,7 @@
     "enable": "تفعيل",
     "enabled": "مفعل",
     "LOST_DEVICE": "",
-    "INCORRECT_CODE": "رمز غير صحيح",
+    "incorrect_code": "رمز غير صحيح",
     "two_factor_info": "",
     "disable": "تعطيل",
     "reconfigure": "إعادة التهيئة",

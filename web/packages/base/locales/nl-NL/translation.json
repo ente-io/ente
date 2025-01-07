@@ -275,7 +275,7 @@
     "enable": "Inschakelen",
     "enabled": "Ingeschakeld",
     "LOST_DEVICE": "Tweestapsverificatie apparaat verloren",
-    "INCORRECT_CODE": "Onjuiste code",
+    "incorrect_code": "Onjuiste code",
     "two_factor_info": "Voeg een extra beveiligingslaag toe door meer dan uw e-mailadres en wachtwoord te vereisen om in te loggen op uw account",
     "disable": "Uitschakelen",
     "reconfigure": "Herconfigureren",

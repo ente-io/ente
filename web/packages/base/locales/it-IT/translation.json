@@ -275,7 +275,7 @@
     "enable": "Attiva",
     "enabled": "Abilitato",
     "LOST_DEVICE": "Non ho più l'accesso al dispositivo a due fattori",
-    "INCORRECT_CODE": "Codice errato",
+    "incorrect_code": "Codice errato",
     "two_factor_info": "Aggiungi un ulteriore livello di sicurezza richiedendo più informazioni rispetto a email e password per eseguire l'accesso al tuo account",
     "disable": "Disabilita",
     "reconfigure": "Riconfigura",

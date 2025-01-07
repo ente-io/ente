@@ -275,7 +275,7 @@
     "enable": "Aktifkan",
     "enabled": "",
     "LOST_DEVICE": "",
-    "INCORRECT_CODE": "Kode salah",
+    "incorrect_code": "Kode salah",
     "two_factor_info": "",
     "disable": "Nonaktifkan",
     "reconfigure": "",

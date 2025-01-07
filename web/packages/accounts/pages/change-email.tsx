@@ -95,7 +95,7 @@ const ChangeEmailForm: React.FC = () => {
         } catch (e) {
             log.error(e);
             setLoading(false);
-            setFieldError("ott", t("INCORRECT_CODE"));
+            setFieldError("ott", t("incorrect_code"));
         }
     };
 

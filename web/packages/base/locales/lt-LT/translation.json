@@ -275,7 +275,7 @@
     "enable": "Įjungti",
     "enabled": "Įjungta",
     "LOST_DEVICE": "Praradau dvigubą tapatybės nustatymo įrenginį",
-    "INCORRECT_CODE": "Neteisingas kodas.",
+    "incorrect_code": "Neteisingas kodas.",
     "two_factor_info": "Pridėkite papildomą saugumo lygį, reikalaudami daugiau nei tik el. pašto ir slaptažodžio, kad prisijungtumėte prie savo paskyros",
     "disable": "Išjungti",
     "reconfigure": "Perkonfigūruoti",

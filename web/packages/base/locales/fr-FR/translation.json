@@ -275,7 +275,7 @@
     "enable": "Activer",
     "enabled": "Activé",
     "LOST_DEVICE": "Perte de l'appareil identificateur",
-    "INCORRECT_CODE": "Code non valide",
+    "incorrect_code": "Code non valide",
     "two_factor_info": "Rajoutez une couche de sécurité supplémentaire afin de pas utiliser simplement votre e-mail et mot de passe pour vous connecter à votre compte",
     "disable": "Désactiver",
     "reconfigure": "Reconfigurer",

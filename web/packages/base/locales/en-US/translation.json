@@ -275,7 +275,7 @@
     "enable": "Enable",
     "enabled": "Enabled",
     "LOST_DEVICE": "Lost two-factor device",
-    "INCORRECT_CODE": "Incorrect code",
+    "incorrect_code": "Incorrect code",
     "two_factor_info": "Add an additional layer of security by requiring more than your email and password to log in to your account",
     "disable": "Disable",
     "reconfigure": "Reconfigure",

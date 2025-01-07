@@ -275,7 +275,7 @@
     "enable": "Activar",
     "enabled": "Activado",
     "LOST_DEVICE": "Perdido el dispositivo de doble factor",
-    "INCORRECT_CODE": "Código incorrecto",
+    "incorrect_code": "Código incorrecto",
     "two_factor_info": "Añade una capa adicional de seguridad al requerir más que tu correo electrónico y contraseña para iniciar sesión en tu cuenta",
     "disable": "Desactivar",
     "reconfigure": "Reconfigurar",

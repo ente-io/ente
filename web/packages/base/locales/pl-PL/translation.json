@@ -275,7 +275,7 @@
     "enable": "Włącz",
     "enabled": "Włączone",
     "LOST_DEVICE": "Utracono urządzenie dwustopniowe",
-    "INCORRECT_CODE": "Nieprawidłowy kod",
+    "incorrect_code": "Nieprawidłowy kod",
     "two_factor_info": "Dodaj dodatkową warstwę bezpieczeństwa, wymagając więcej niż Twojego adresu e-mail i hasła, aby zalogować się na swoje konto",
     "disable": "Wyłącz",
     "reconfigure": "Konfiguruj ponownie",

@@ -275,7 +275,7 @@
     "enable": "Bật",
     "enabled": "Đã bật",
     "LOST_DEVICE": "Thiết bị xác thực hai yếu tố bị mất",
-    "INCORRECT_CODE": "Mã không chính xác",
+    "incorrect_code": "Mã không chính xác",
     "two_factor_info": "Thêm một lớp bảo mật bổ sung bằng cách yêu cầu nhiều hơn email và mật khẩu của bạn để đăng nhập vào tài khoản của bạn",
     "disable": "Tắt",
     "reconfigure": "Cấu hình lại",

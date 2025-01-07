@@ -275,7 +275,7 @@
     "enable": "启用",
     "enabled": "已启用",
     "LOST_DEVICE": "丢失了双重认证设备",
-    "INCORRECT_CODE": "代码错误",
+    "incorrect_code": "代码错误",
     "two_factor_info": "登录账户时需要的不仅仅是电子邮件和密码，这增加了额外的安全层",
     "disable": "禁用",
     "reconfigure": "重新配置",

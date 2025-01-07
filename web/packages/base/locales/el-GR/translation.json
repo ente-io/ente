@@ -275,7 +275,7 @@
     "enable": "Ενεργοποίηση",
     "enabled": "",
     "LOST_DEVICE": "",
-    "INCORRECT_CODE": "Εσφαλμένος κωδικός",
+    "incorrect_code": "Εσφαλμένος κωδικός",
     "two_factor_info": "",
     "disable": "Απενεργοποίηση",
     "reconfigure": "",
