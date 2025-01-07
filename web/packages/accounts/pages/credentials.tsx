@@ -398,7 +398,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                             {t("FORGOT_PASSWORD")}
                         </LinkButton>
                         <LinkButton onClick={logout}>
-                            {t("CHANGE_EMAIL")}
+                            {t("change_email")}
                         </LinkButton>
                     </Stack>
                 </LoginFlowFormFooter>

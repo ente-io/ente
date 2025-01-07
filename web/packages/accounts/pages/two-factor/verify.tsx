@@ -82,10 +82,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     <LinkButton
                         onClick={() => router.push(PAGES.TWO_FACTOR_RECOVER)}
                     >
-                        {t("LOST_DEVICE")}
+                        {t("lost_2fa_device")}
                     </LinkButton>
                     <LinkButton onClick={logout}>
-                        {t("CHANGE_EMAIL")}
+                        {t("change_email")}
                     </LinkButton>
                 </FormPaperFooter>
             </FormPaper>

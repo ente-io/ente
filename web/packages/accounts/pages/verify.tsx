@@ -259,7 +259,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         {resend === 1 && <span>{t("status_sending")}</span>}
                         {resend === 2 && <span>{t("status_sent")}</span>}
                         <LinkButton onClick={logout}>
-                            {t("CHANGE_EMAIL")}
+                            {t("change_email")}
                         </LinkButton>
                     </Stack>
                 </LoginFlowFormFooter>

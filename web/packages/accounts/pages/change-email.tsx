@@ -33,7 +33,7 @@ const Page: React.FC<PageProps> = () => {
     return (
         <VerticallyCentered>
             <FormPaper>
-                <FormPaperTitle>{t("CHANGE_EMAIL")}</FormPaperTitle>
+                <FormPaperTitle>{t("change_email")}</FormPaperTitle>
                 <ChangeEmailForm />
             </FormPaper>
         </VerticallyCentered>
@@ -196,7 +196,7 @@ const ChangeEmailForm: React.FC = () => {
                             <LinkButton
                                 onClick={() => setShowOttInputVisibility(false)}
                             >
-                                {t("CHANGE_EMAIL")}?
+                                {t("change_email")}?
                             </LinkButton>
                         )}
                         <LinkButton onClick={goToApp}>
