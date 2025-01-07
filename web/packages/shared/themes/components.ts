@@ -108,6 +108,7 @@ export const getComponents = (
 
     MuiButton: {
         defaultProps: {
+            // Change the default button variant from "text" to "contained".
             variant: "contained",
         },
         styleOverrides: {
