@@ -407,7 +407,7 @@
     "disable_file_download": "Disable download",
     "disable_file_download_message": "<p>Are you sure that you want to disable the download button for files?</p><p>Viewers can still take screenshots or save a copy of your photos using external tools.</p>",
     "SHARED_USING": "Shared using ",
-    "SHARING_REFERRAL_CODE": "Use code <strong>{{referralCode}}</strong> to get 10 GB free",
+    "sharing_referral_code": "Use code <strong>{{referralCode}}</strong> to get 10 GB free",
     "live_photo_indicator": "LIVE",
     "disable_password": "Disable password lock",
     "disable_password_message": "Are you sure that you want to disable the password lock?",

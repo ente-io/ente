@@ -407,7 +407,7 @@
     "disable_file_download": "Desativar transferência",
     "disable_file_download_message": "<p>Você tem certeza que quer desativar o botão de transferência para os arquivos?</p><p>Os visualizadores podem tirar capturas de tela ou salvar uma cópia da sua foto usando ferramentas externas.</p>",
     "SHARED_USING": "Compartilhar usando ",
-    "SHARING_REFERRAL_CODE": "Use o código <strong>{{referralCode}}</strong> para obter 10 GB de graça",
+    "sharing_referral_code": "Use o código <strong>{{referralCode}}</strong> para obter 10 GB de graça",
     "live_photo_indicator": "AO VIVO",
     "disable_password": "Desativar bloqueio por senha",
     "disable_password_message": "Deseja desativar o bloqueio por senha?",

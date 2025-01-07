@@ -407,7 +407,7 @@
     "disable_file_download": "Download uitschakelen",
     "disable_file_download_message": "<p>Weet u zeker dat u de downloadknop voor bestanden wilt uitschakelen?</p><p>Kijkers kunnen nog steeds screenshots maken of een kopie van uw foto's opslaan met behulp van externe hulpmiddelen.</p>",
     "SHARED_USING": "Gedeeld via ",
-    "SHARING_REFERRAL_CODE": "Gebruik code <strong>{{referralCode}}</strong> om 10 GB gratis te krijgen",
+    "sharing_referral_code": "Gebruik code <strong>{{referralCode}}</strong> om 10 GB gratis te krijgen",
     "live_photo_indicator": "LIVE",
     "disable_password": "Schakel cijfercode vergrendeling uit",
     "disable_password_message": "Weet u zeker dat u de cijfercode vergrendeling wilt uitschakelen?",

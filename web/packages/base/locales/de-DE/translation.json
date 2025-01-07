@@ -407,7 +407,7 @@
     "disable_file_download": "Download deaktivieren",
     "disable_file_download_message": "<p>Bist du sicher, dass du den Downloadbutton für Dateien deaktivieren möchtest?</p><p>Betrachter können weiterhin Screenshots machen oder die Bilder mithilfe externer Werkzeuge speichern</p>",
     "SHARED_USING": "Freigegeben über ",
-    "SHARING_REFERRAL_CODE": "Benutze den code <strong>{{referralCode}}</strong> für 10GB extra",
+    "sharing_referral_code": "Benutze den code <strong>{{referralCode}}</strong> für 10GB extra",
     "live_photo_indicator": "LIVE",
     "disable_password": "Passwort-Sperre deaktivieren",
     "disable_password_message": "Sind Sie sicher, dass Sie die Passwort-Sperre deaktivieren möchten?",

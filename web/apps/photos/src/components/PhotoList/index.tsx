@@ -614,7 +614,7 @@ export function PhotoList({
                                     sx={{ marginTop: "12px", padding: "8px" }}
                                 >
                                     <Trans
-                                        i18nKey={"SHARING_REFERRAL_CODE"}
+                                        i18nKey={"sharing_referral_code"}
                                         values={{
                                             referralCode:
                                                 publicCollectionGalleryContext.referralCode,
