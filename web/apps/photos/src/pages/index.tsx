@@ -128,10 +128,10 @@ export default function LandingPage() {
                             size="large"
                             onClick={redirectToSignupPage}
                         >
-                            {t("NEW_USER")}
+                            {t("new_to_ente")}
                         </Button>
                         <Button size="large" onClick={redirectToLoginPage}>
-                            {t("EXISTING_USER")}
+                            {t("existing_user")}
                         </Button>
                         <MobileBoxFooter {...{ host }} />
                     </MobileBox>
