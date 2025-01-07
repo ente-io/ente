@@ -675,7 +675,8 @@ Future<List<String>> _iosDeleteLocalFilesInBatchesFallback(
     maximumBatchSize = max((maximumBatchSize ~/ 2), 10);
   } while (deletedIDs.isEmpty && maximumBatchSize > 10);
 
-  _logger.severe("iOS free-space fallback, deleted ${deletedIDs.length} files "
+  _logger.severe(
+      "iOS free-space fallback, deleted ${deletedIDs.length} files with distinct localIDs"
       "in batches}");
 
   return deletedIDs;
