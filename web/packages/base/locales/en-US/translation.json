@@ -157,7 +157,6 @@
     "manage_plan": "Manage your subscription",
     "current_usage": "Current usage is <strong>{{usage}}</strong>",
     "two_months_free": "Get 2 months free on yearly plans",
-    "POPULAR": "Popular",
     "free_plan_option": "Continue with free plan",
     "free_plan_description": "{{storage}} free forever",
     "active": "Active",

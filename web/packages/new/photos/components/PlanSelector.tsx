@@ -506,10 +506,8 @@ const Plans: React.FC<PlansProps> = ({
                             isSubscriptionForPlan(subscription, plan)
                         )
                     }
-                    popular={isPopularPlan(plan)}
                     key={plan.stripeID}
                     plan={plan}
-                    subscription={subscription}
                     onPlanSelect={onPlanSelect}
                 />
             ))}
@@ -524,24 +522,13 @@ const Plans: React.FC<PlansProps> = ({
     </Stack>
 );
 
-const isPopularPlan = (plan: Plan) =>
-    plan.storage === 100 * 1024 * 1024 * 1024; /* 100 GB */
-
 interface PlanRowProps {
     plan: Plan;
-    subscription: Subscription | undefined;
     onPlanSelect: (plan: Plan) => void;
     disabled: boolean;
-    popular: boolean;
 }
 
-const PlanRow: React.FC<PlanRowProps> = ({
-    plan,
-    subscription,
-    onPlanSelect,
-    disabled,
-    popular,
-}) => {
+const PlanRow: React.FC<PlanRowProps> = ({ plan, onPlanSelect, disabled }) => {
     const handleClick = () => !disabled && onPlanSelect(plan);
 
     const PlanButton = disabled ? DisabledPlanButton : ActivePlanButton;
@@ -550,16 +537,9 @@ const PlanRow: React.FC<PlanRowProps> = ({
         <PlanRowContainer>
             <TopAlignedFluidContainer>
                 <Typography variant="h1">{bytesInGB(plan.storage)}</Typography>
-                <FlexWrapper flexWrap={"wrap"} gap={1}>
-                    <Typography variant="h3" sx={{ color: "text.muted" }}>
-                        {t("storage_unit.gb")}
-                    </Typography>
-                    {popular &&
-                        !(
-                            subscription &&
-                            isSubscriptionActivePaid(subscription)
-                        ) && <Badge>{t("POPULAR")}</Badge>}
-                </FlexWrapper>
+                <Typography variant="h3" sx={{ color: "text.muted" }}>
+                    {t("storage_unit.gb")}
+                </Typography>
             </TopAlignedFluidContainer>
             <Box sx={{ width: "136px" }}>
                 <PlanButton
@@ -619,16 +599,6 @@ const ActivePlanButton = styled((props: ButtonProps) => (
     "&:hover .MuiButton-endIcon": {
         transform: "translateX(4px)",
     },
-}));
-
-const Badge = styled("div")(({ theme }) => ({
-    borderRadius: theme.shape.borderRadius,
-    padding: "2px 4px",
-    backgroundColor: theme.colors.black.muted,
-    backdropFilter: "blur(48px)",
-    color: theme.colors.white.base,
-    textTransform: "uppercase",
-    ...theme.typography.mini,
 }));
 
 interface FreePlanRowProps {
