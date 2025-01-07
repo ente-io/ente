@@ -11,6 +11,7 @@ import {
     OverflowMenu,
     OverflowMenuOption,
 } from "@/base/components/OverflowMenu";
+import { SingleInputDialog } from "@/base/components/SingleInputDialog";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import {
     useModalVisibility,
@@ -64,7 +65,6 @@ import type { FaceCluster } from "../../services/ml/cluster";
 import { useAppContext } from "../../types/context";
 import { DialogCloseIconButton } from "../mui/Dialog";
 import { SuggestionFaceList } from "../PeopleList";
-import { SingleInputDialog } from "../SingleInputForm";
 import {
     ItemCard,
     LargeTileButton,

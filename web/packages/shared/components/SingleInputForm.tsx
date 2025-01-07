@@ -54,6 +54,9 @@ export interface SingleInputFormProps {
     disableAutoComplete?: boolean;
 }
 
+/**
+ * Deprecated version, gradually migrate to use the one from @/base.
+ */
 export default function SingleInputForm(props: SingleInputFormProps) {
     const { submitButtonProps } = props;
     const { sx: buttonSx, ...restSubmitButtonProps } = submitButtonProps ?? {};

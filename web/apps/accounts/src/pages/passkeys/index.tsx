@@ -1,11 +1,11 @@
 import { FormPaper } from "@/base/components/FormPaper";
 import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
+import { SingleInputDialog } from "@/base/components/SingleInputDialog";
 import { Titlebar } from "@/base/components/Titlebar";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
-import { SingleInputDialog } from "@/new/photos/components/SingleInputForm";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
