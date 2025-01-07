@@ -66,9 +66,7 @@ class _SharedPublicCollectionPageState
 
   @override
   Widget build(BuildContext context) {
-    logger.info(
-      "Building SharedPublicCollectionPage ${widget.c.collection.isJoinEnabled}",
-    );
+    logger.info("Building SharedPublicCollectionPage");
     final List<EnteFile>? initialFiles =
         widget.c.thumbnail != null ? [widget.c.thumbnail!] : null;
     final gallery = Gallery(
@@ -161,15 +159,10 @@ class _SharedPublicCollectionPageState
     );
     await dialog.show();
     try {
-      logger.info("Joining collection ${widget.c.collection.id}");
       await RemoteSyncService.instance
           .joinAndSyncCollection(context, widget.c.collection.id);
-      logger.info("Syncing collections");
-
-      // route to the collection
       final c =
           CollectionsService.instance.getCollectionByID(widget.c.collection.id);
-      logger.info("Joining collection ${widget.c.collection.id}");
       await dialog.hide();
       Navigator.of(context).pop();
       await routeToPage(
@@ -180,8 +173,6 @@ class _SharedPublicCollectionPageState
       logger.severe("Failed to join collection", e, s);
       await dialog.hide();
       showToast(context, S.of(context).somethingWentWrong);
-      // wait for 400ms to show the error dialog
-      await Future.delayed(const Duration(milliseconds: 400));
     }
   }
 }

@@ -1165,7 +1165,7 @@ class CollectionsService {
       options: Options(
         headers: {
           "X-Auth-Access-Token": authToken,
-          "X-Auth-JWT-Token": jwtToken,
+          "X-Auth-Access-Token-JWT": jwtToken,
         },
       ),
     );

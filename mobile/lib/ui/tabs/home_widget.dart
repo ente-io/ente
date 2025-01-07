@@ -279,6 +279,14 @@ class _HomeWidgetState extends State<HomeWidget> {
       }
       final dialog = createProgressDialog(context, "Loading...");
       final publicUrl = collection.publicURLs![0];
+      if (!publicUrl!.enableDownload) {
+        await showErrorDialog(
+          context,
+            "Cannot open this album",
+            "Sorry, this album cannot be opened in the app.",
+        );
+        return;
+      }
       if (publicUrl!.passwordEnabled) {
         await showTextInputDialog(
           context,
