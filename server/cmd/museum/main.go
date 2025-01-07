@@ -5,11 +5,6 @@ import (
 	"database/sql"
 	b64 "encoding/base64"
 	"fmt"
-	"github.com/ente-io/museum/ente/base"
-	"github.com/ente-io/museum/pkg/controller/emergency"
-	"github.com/ente-io/museum/pkg/controller/file_copy"
-	"github.com/ente-io/museum/pkg/controller/filedata"
-	emergencyRepo "github.com/ente-io/museum/pkg/repo/emergency"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,6 +13,12 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/ente-io/museum/ente/base"
+	"github.com/ente-io/museum/pkg/controller/emergency"
+	"github.com/ente-io/museum/pkg/controller/file_copy"
+	"github.com/ente-io/museum/pkg/controller/filedata"
+	emergencyRepo "github.com/ente-io/museum/pkg/repo/emergency"
 
 	"github.com/ente-io/museum/pkg/repo/two_factor_recovery"
 
@@ -305,6 +306,7 @@ func main() {
 
 	collectionController := &controller.CollectionController{
 		CollectionRepo:       collectionRepo,
+		EmailCtrl:            emailNotificationCtrl,
 		AccessCtrl:           accessCtrl,
 		PublicCollectionCtrl: publicCollectionCtrl,
 		UserRepo:             userRepo,

@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/ente-io/museum/pkg/repo/cast"
 	"runtime/debug"
 	"strings"
 
+	"github.com/ente-io/museum/pkg/repo/cast"
+
 	"github.com/ente-io/museum/pkg/controller/access"
+	"github.com/ente-io/museum/pkg/controller/email"
 	"github.com/gin-contrib/requestid"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -31,6 +33,7 @@ const (
 // CollectionController encapsulates logic that deals with collections
 type CollectionController struct {
 	PublicCollectionCtrl *PublicCollectionController
+	EmailCtrl            *email.EmailNotificationController
 	AccessCtrl           access.Controller
 	BillingCtrl          *BillingController
 	CollectionRepo       *repo.CollectionRepository
@@ -219,7 +222,12 @@ func (c *CollectionController) JoinViaLink(ctx *gin.Context, req ente.JoinCollec
 	if publicCollectionToken.EnableCollect {
 		role = ente.COLLABORATOR
 	}
-	return c.CollectionRepo.Share(req.CollectionID, collection.Owner.ID, userID, req.EncryptedKey, role, time.Microseconds())
+	joinErr := c.CollectionRepo.Share(req.CollectionID, collection.Owner.ID, userID, req.EncryptedKey, role, time.Microseconds())
+	if joinErr != nil {
+		return stacktrace.Propagate(joinErr, "")
+	}
+	go c.EmailCtrl.OnLinkJoined(collection.Owner.ID, userID, role)
+	return nil
 }
 
 // UnShare unshares a collection with a user
