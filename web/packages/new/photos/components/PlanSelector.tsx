@@ -1,3 +1,5 @@
+import type { ButtonishProps } from "@/base/components/mui";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     errorDialogAttributes,
     genericRetriableErrorDialogAttributes,
@@ -34,7 +36,6 @@ import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { openURL } from "@/new/photos/utils/web";
 import {
     FlexWrapper,
-    FluidContainer,
     SpaceBetweenFlex,
 } from "@ente/shared/components/Container";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -506,10 +507,8 @@ const Plans: React.FC<PlansProps> = ({
                             isSubscriptionForPlan(subscription, plan)
                         )
                     }
-                    popular={isPopularPlan(plan)}
                     key={plan.stripeID}
                     plan={plan}
-                    subscription={subscription}
                     onPlanSelect={onPlanSelect}
                 />
             ))}
@@ -524,43 +523,25 @@ const Plans: React.FC<PlansProps> = ({
     </Stack>
 );
 
-const isPopularPlan = (plan: Plan) =>
-    plan.storage === 100 * 1024 * 1024 * 1024; /* 100 GB */
-
 interface PlanRowProps {
     plan: Plan;
-    subscription: Subscription | undefined;
     onPlanSelect: (plan: Plan) => void;
     disabled: boolean;
-    popular: boolean;
 }
 
-const PlanRow: React.FC<PlanRowProps> = ({
-    plan,
-    subscription,
-    onPlanSelect,
-    disabled,
-    popular,
-}) => {
+const PlanRow: React.FC<PlanRowProps> = ({ plan, onPlanSelect, disabled }) => {
     const handleClick = () => !disabled && onPlanSelect(plan);
 
     const PlanButton = disabled ? DisabledPlanButton : ActivePlanButton;
 
     return (
         <PlanRowContainer>
-            <TopAlignedFluidContainer>
+            <PlanStorage>
                 <Typography variant="h1">{bytesInGB(plan.storage)}</Typography>
-                <FlexWrapper flexWrap={"wrap"} gap={1}>
-                    <Typography variant="h3" sx={{ color: "text.muted" }}>
-                        {t("storage_unit.gb")}
-                    </Typography>
-                    {popular &&
-                        !(
-                            subscription &&
-                            isSubscriptionActivePaid(subscription)
-                        ) && <Badge>{t("POPULAR")}</Badge>}
-                </FlexWrapper>
-            </TopAlignedFluidContainer>
+                <Typography variant="h3" sx={{ color: "text.muted" }}>
+                    {t("storage_unit.gb")}
+                </Typography>
+            </PlanStorage>
             <Box sx={{ width: "136px" }}>
                 <PlanButton
                     sx={{
@@ -568,13 +549,11 @@ const PlanRow: React.FC<PlanRowProps> = ({
                         borderTopLeftRadius: 0,
                         borderBottomLeftRadius: 0,
                     }}
-                    size="large"
+                    fullWidth
                     onClick={handleClick}
                 >
                     <Box sx={{ textAlign: "right" }}>
-                        <Typography variant="large" sx={{ fontWeight: "bold" }}>
-                            {plan.price}{" "}
-                        </Typography>{" "}
+                        <Typography variant="h6">{plan.price}</Typography>
                         <Typography
                             variant="small"
                             sx={{ color: "text.muted" }}
@@ -597,7 +576,9 @@ const PlanRowContainer = styled(FlexWrapper)(() => ({
         "linear-gradient(268.22deg, rgba(256, 256, 256, 0.08) -3.72%, rgba(256, 256, 256, 0) 85.73%)",
 }));
 
-const TopAlignedFluidContainer = styled(FluidContainer)`
+const PlanStorage = styled("div")`
+    flex: 1;
+    display: flex;
     align-items: flex-start;
 `;
 
@@ -619,16 +600,6 @@ const ActivePlanButton = styled((props: ButtonProps) => (
     "&:hover .MuiButton-endIcon": {
         transform: "translateX(4px)",
     },
-}));
-
-const Badge = styled("div")(({ theme }) => ({
-    borderRadius: theme.shape.borderRadius,
-    padding: "2px 4px",
-    backgroundColor: theme.colors.black.muted,
-    backdropFilter: `blur(${theme.colors.blur.muted})`,
-    color: theme.colors.white.base,
-    textTransform: "uppercase",
-    ...theme.typography.mini,
 }));
 
 interface FreePlanRowProps {
@@ -714,10 +685,7 @@ function ManageSubscription({
                     {...{ onClose, subscription, hasAddOnBonus }}
                 />
             )}
-            <ManageSubscriptionButton
-                color="secondary"
-                onClick={openFamilyPortal}
-            >
+            <ManageSubscriptionButton onClick={openFamilyPortal}>
                 {t("manage_family")}
             </ManageSubscriptionButton>
         </Stack>
@@ -795,35 +763,30 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
     return (
         <>
             {isSubscriptionCancelled(subscription) ? (
-                <ManageSubscriptionButton
-                    color="secondary"
-                    onClick={confirmReactivation}
-                >
+                <ManageSubscriptionButton onClick={confirmReactivation}>
                     {t("reactivate_subscription")}
                 </ManageSubscriptionButton>
             ) : (
-                <ManageSubscriptionButton
-                    color="secondary"
-                    onClick={confirmCancel}
-                >
+                <ManageSubscriptionButton onClick={confirmCancel}>
                     {t("cancel_subscription")}
                 </ManageSubscriptionButton>
             )}
-            <ManageSubscriptionButton
-                color="secondary"
-                onClick={handleManageClick}
-            >
+            <ManageSubscriptionButton onClick={handleManageClick}>
                 {t("manage_payment_method")}
             </ManageSubscriptionButton>
         </>
     );
 };
 
-const ManageSubscriptionButton: React.FC<ButtonProps> = ({
-    children,
-    ...props
-}) => (
-    <Button size="large" endIcon={<ChevronRightIcon />} {...props}>
-        <FluidContainer>{children}</FluidContainer>
-    </Button>
+const ManageSubscriptionButton: React.FC<
+    React.PropsWithChildren<ButtonishProps>
+> = ({ onClick, children }) => (
+    <FocusVisibleButton
+        fullWidth
+        color="secondary"
+        endIcon={<ChevronRightIcon />}
+        {...{ onClick }}
+    >
+        <Box sx={{ flex: 1, textAlign: "left" }}>{children}</Box>
+    </FocusVisibleButton>
 );

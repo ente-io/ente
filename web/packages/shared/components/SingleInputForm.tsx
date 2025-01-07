@@ -54,6 +54,9 @@ export interface SingleInputFormProps {
     disableAutoComplete?: boolean;
 }
 
+/**
+ * Deprecated version, gradually migrate to use the one from @/base.
+ */
 export default function SingleInputForm(props: SingleInputFormProps) {
     const { submitButtonProps } = props;
     const { sx: buttonSx, ...restSubmitButtonProps } = submitButtonProps ?? {};
@@ -176,7 +179,7 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                         {props.secondaryButtonAction && (
                             <FocusVisibleButton
                                 onClick={props.secondaryButtonAction}
-                                size="large"
+                                fullWidth
                                 color="secondary"
                                 sx={{
                                     "&&&": {
@@ -198,7 +201,7 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                                     ...buttonSx,
                                 },
                             }}
-                            size="large"
+                            fullWidth
                             variant="contained"
                             color="accent"
                             type="submit"

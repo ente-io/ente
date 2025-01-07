@@ -770,7 +770,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                             {props.secondaryButtonAction && (
                                 <FocusVisibleButton
                                     onClick={props.secondaryButtonAction}
-                                    size="large"
+                                    fullWidth
                                     color="secondary"
                                     sx={{
                                         "&&&": {
