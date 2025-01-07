@@ -264,8 +264,11 @@ class _HomeWidgetState extends State<HomeWidget> {
     try {
       final Collection collection = await CollectionsService.instance
           .getCollectionFromPublicLink(context, uri);
+      final existingCollection =
+          CollectionsService.instance.getCollectionByID(collection.id);
 
-      if (collection.owner!.id! == Configuration.instance.getUserID()) {
+      if (collection.owner!.id! == Configuration.instance.getUserID() ||
+          (existingCollection != null && !existingCollection.isDeleted)) {
         await routeToPage(
           context,
           CollectionPage(
