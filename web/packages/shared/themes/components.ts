@@ -121,6 +121,9 @@ export const getComponents = (
             variant: "contained",
         },
         styleOverrides: {
+            // We don't use the size prop for the MUI button, or rather it
+            // cannot be used, since we have fixed the paddings and font sizes
+            // unconditionally here (which are all that the size prop changes).
             root: {
                 padding: "12px 16px",
                 borderRadius: "4px",

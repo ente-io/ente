@@ -1,3 +1,5 @@
+import type { ButtonishProps } from "@/base/components/mui";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     errorDialogAttributes,
     genericRetriableErrorDialogAttributes,
@@ -548,7 +550,7 @@ const PlanRow: React.FC<PlanRowProps> = ({ plan, onPlanSelect, disabled }) => {
                         borderTopLeftRadius: 0,
                         borderBottomLeftRadius: 0,
                     }}
-                    size="large"
+                    fullWidth
                     onClick={handleClick}
                 >
                     <Box sx={{ textAlign: "right" }}>
@@ -682,10 +684,7 @@ function ManageSubscription({
                     {...{ onClose, subscription, hasAddOnBonus }}
                 />
             )}
-            <ManageSubscriptionButton
-                color="secondary"
-                onClick={openFamilyPortal}
-            >
+            <ManageSubscriptionButton onClick={openFamilyPortal}>
                 {t("manage_family")}
             </ManageSubscriptionButton>
         </Stack>
@@ -763,35 +762,30 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
     return (
         <>
             {isSubscriptionCancelled(subscription) ? (
-                <ManageSubscriptionButton
-                    color="secondary"
-                    onClick={confirmReactivation}
-                >
+                <ManageSubscriptionButton onClick={confirmReactivation}>
                     {t("reactivate_subscription")}
                 </ManageSubscriptionButton>
             ) : (
-                <ManageSubscriptionButton
-                    color="secondary"
-                    onClick={confirmCancel}
-                >
+                <ManageSubscriptionButton onClick={confirmCancel}>
                     {t("cancel_subscription")}
                 </ManageSubscriptionButton>
             )}
-            <ManageSubscriptionButton
-                color="secondary"
-                onClick={handleManageClick}
-            >
+            <ManageSubscriptionButton onClick={handleManageClick}>
                 {t("manage_payment_method")}
             </ManageSubscriptionButton>
         </>
     );
 };
 
-const ManageSubscriptionButton: React.FC<ButtonProps> = ({
-    children,
-    ...props
-}) => (
-    <Button size="large" endIcon={<ChevronRightIcon />} {...props}>
-        <FluidContainer>{children}</FluidContainer>
-    </Button>
+const ManageSubscriptionButton: React.FC<
+    React.PropsWithChildren<ButtonishProps>
+> = ({ onClick, children }) => (
+    <FocusVisibleButton
+        fullWidth
+        color="secondary"
+        endIcon={<ChevronRightIcon />}
+        {...{ onClick }}
+    >
+        <Box sx={{ flex: 1, textAlign: "left" }}>{children}</Box>
+    </FocusVisibleButton>
 );
