@@ -783,6 +783,8 @@ class MLDataDB {
     return maps.length;
   }
 
+  /// WARNING: Only use this method if the person has just been created.
+  /// Otherwise, use [ClusterFeedbackService.instance.addClusterToExistingPerson] instead.
   Future<void> assignClusterToPerson({
     required String personID,
     required String clusterID,
