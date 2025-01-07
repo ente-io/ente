@@ -241,7 +241,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 <SingleInputForm
                     fieldType="text"
                     autoComplete="one-time-code"
-                    placeholder={t("ENTER_OTT")}
+                    placeholder={t("verification_code")}
                     buttonText={t("VERIFY")}
                     callback={onSubmit}
                 />

@@ -148,7 +148,7 @@ const ChangeEmailForm: React.FC = () => {
                             <TextField
                                 fullWidth
                                 type="email"
-                                label={t("ENTER_EMAIL")}
+                                label={t("enter_email")}
                                 value={values.email}
                                 onChange={handleChange("email")}
                                 error={Boolean(errors.email)}
@@ -165,7 +165,7 @@ const ChangeEmailForm: React.FC = () => {
                                 <TextField
                                     fullWidth
                                     type="text"
-                                    label={t("ENTER_OTT")}
+                                    label={t("verification_code")}
                                     value={values.ott}
                                     onChange={handleChange("ott")}
                                     error={Boolean(errors.ott)}
@@ -180,7 +180,7 @@ const ChangeEmailForm: React.FC = () => {
                                 sx={{ mt: 2, mb: 4 }}
                                 loading={loading}
                             >
-                                {!ottInputVisible ? t("SEND_OTT") : t("VERIFY")}
+                                {!ottInputVisible ? t("send_otp") : t("VERIFY")}
                             </LoadingButton>
                         </VerticallyCentered>
                     </form>

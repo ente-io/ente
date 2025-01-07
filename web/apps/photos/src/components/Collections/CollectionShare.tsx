@@ -560,7 +560,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                     onClose={onClose}
                     callback={collectionShare}
                     optionsList={nonSharedEmails}
-                    placeholder={t("ENTER_EMAIL")}
+                    placeholder={t("enter_email")}
                     fieldType="email"
                     buttonText={
                         type === COLLECTION_ROLE.VIEWER

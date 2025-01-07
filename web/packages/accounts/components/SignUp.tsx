@@ -159,7 +159,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                 name="email"
                                 autoComplete="username"
                                 type="email"
-                                label={t("ENTER_EMAIL")}
+                                label={t("enter_email")}
                                 value={values.email}
                                 onChange={handleChange("email")}
                                 error={Boolean(errors.email)}
