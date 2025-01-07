@@ -157,7 +157,6 @@
     "manage_plan": "管理您的订阅",
     "current_usage": "当前使用量是 <strong>{{usage}}</strong>",
     "two_months_free": "在年度计划上免费获得 2 个月",
-    "POPULAR": "流行的",
     "free_plan_option": "继续使用免费计划",
     "free_plan_description": "{{storage}} 永久免费",
     "active": "已激活",

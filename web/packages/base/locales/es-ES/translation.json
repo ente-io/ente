@@ -157,7 +157,6 @@
     "manage_plan": "Administra tu suscripción",
     "current_usage": "El uso actual es <strong>{{usage}}</strong>",
     "two_months_free": "Obtén 2 meses gratis en planes anuales",
-    "POPULAR": "Popular",
     "free_plan_option": "Continuar con el plan gratuito",
     "free_plan_description": "{{storage}} gratis para siempre",
     "active": "Activo",

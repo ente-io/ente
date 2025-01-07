@@ -157,7 +157,6 @@
     "manage_plan": "Tvarkyti prenumeratą",
     "current_usage": "Dabartinis naudojimas – <strong>{{usage}}</strong>",
     "two_months_free": "Gaukite 2 mėnesius nemokamai metiniuose planuose",
-    "POPULAR": "Populiari",
     "free_plan_option": "Tęsti su nemokamu planu",
     "free_plan_description": "{{storage}} nemokamai amžinai",
     "active": "Aktyvi",
