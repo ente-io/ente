@@ -71,7 +71,7 @@ class _FaceWidgetState extends State<FaceWidget> {
                 name: "FaceWidget",
               );
               if (widget.person == null && widget.clusterID == null) {
-                // Get faceID and double check that it doesn't belong to an existing clusterID. If it does, push that cluster page
+                // Double check that it doesn't belong to an existing clusterID.
                 final existingClusterID = await MLDataDB.instance
                     .getClusterIDForFaceID(widget.face.faceID);
                 if (existingClusterID != null) {
