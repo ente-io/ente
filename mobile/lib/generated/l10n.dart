@@ -1480,6 +1480,26 @@ class S {
     );
   }
 
+  /// `Cannot open this album`
+  String get canNotOpenTitle {
+    return Intl.message(
+      'Cannot open this album',
+      name: 'canNotOpenTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, this album cannot be opened in the app.`
+  String get canNotOpenBody {
+    return Intl.message(
+      'Sorry, this album cannot be opened in the app.',
+      name: 'canNotOpenBody',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Please note`
   String get disableDownloadWarningTitle {
     return Intl.message(

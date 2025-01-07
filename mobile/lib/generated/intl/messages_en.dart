@@ -474,6 +474,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
         "cachedData": MessageLookupByLibrary.simpleMessage("Cached data"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculating..."),
+        "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
+            "Sorry, this album cannot be opened in the app."),
+        "canNotOpenTitle":
+            MessageLookupByLibrary.simpleMessage("Cannot open this album"),
         "canNotUploadToAlbumsOwnedByOthers":
             MessageLookupByLibrary.simpleMessage(
                 "Can not upload to albums owned by others"),

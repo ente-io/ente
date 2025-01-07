@@ -185,6 +185,8 @@
   },
   "allowAddPhotosDescription": "Allow people with the link to also add photos to the shared album.",
   "passwordLock": "Password lock",
+  "canNotOpenTitle": "Cannot open this album",
+  "canNotOpenBody": "Sorry, this album cannot be opened in the app.",
   "disableDownloadWarningTitle": "Please note",
   "disableDownloadWarningBody": "Viewers can still take screenshots or save a copy of your photos using external tools",
   "allowDownloads": "Allow downloads",

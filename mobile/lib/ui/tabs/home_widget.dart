@@ -26,6 +26,7 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/file/file.dart";
@@ -54,6 +55,7 @@ import "package:photos/ui/home/loading_photos_widget.dart";
 import 'package:photos/ui/home/start_backup_hook_widget.dart';
 import 'package:photos/ui/notification/update/change_log_page.dart';
 import "package:photos/ui/settings/app_update_dialog.dart";
+import "package:photos/ui/settings/general_section_widget.dart";
 import "package:photos/ui/settings_page.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
 import "package:photos/ui/tabs/user_collections_tab.dart";
@@ -282,12 +284,12 @@ class _HomeWidgetState extends State<HomeWidget> {
       if (!publicUrl!.enableDownload) {
         await showErrorDialog(
           context,
-            "Cannot open this album",
-            "Sorry, this album cannot be opened in the app.",
+          context.l10n.canNotOpenTitle,
+          context.l10n.canNotOpenBody,
         );
         return;
       }
-      if (publicUrl!.passwordEnabled) {
+      if (publicUrl.passwordEnabled) {
         await showTextInputDialog(
           context,
           title: S.of(context).enterPassword,
