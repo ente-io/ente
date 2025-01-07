@@ -689,6 +689,8 @@
   "noPhotosAreBeingBackedUpRightNow": "W tej chwili nie wykonuje się kopii zapasowej zdjęć",
   "preserveMore": "Zachowaj więcej",
   "grantFullAccessPrompt": "Zezwól na dostęp do wszystkich zdjęć w aplikacji Ustawienia",
+  "allowPermTitle": "Zezwól na dostęp do zdjęć",
+  "allowPermBody": "Prosimy zezwolić na dostęp do swoich zdjęć w Ustawieniach, aby Ente mogło wyświetlać i tworzyć kopię zapasową Twojej biblioteki.",
   "openSettings": "Otwórz Ustawienia",
   "selectMorePhotos": "Wybierz więcej zdjęć",
   "existingUser": "Istniejący użytkownik",
@@ -1270,7 +1272,7 @@
   "editPerson": "Edytuj osobę",
   "mergedPhotos": "Scalone zdjęcia",
   "orMergeWithExistingPerson": "Lub złącz z istniejącymi",
-  "enterDateOfBirth": "Data urodzenia (nieobowiązkowo)",
+  "enterDateOfBirth": "Urodziny (nieobowiązkowo)",
   "birthday": "Urodziny",
   "removePersonLabel": "Usuń etykietę osoby",
   "autoPairDesc": "Automatyczne parowanie działa tylko z urządzeniami obsługującymi Chromecast.",
@@ -1382,8 +1384,8 @@
   "onlyThem": "Tylko te",
   "checkingModels": "Sprawdzanie modeli...",
   "enableMachineLearningBanner": "Włącz nauczanie maszynowe dla magicznego wyszukiwania i rozpoznawania twarzy",
-  "searchDiscoverEmptySection": "Obrazy będą wyświetlane tutaj po zakończeniu przetwarzania",
-  "searchPersonsEmptySection": "Osoby będą wyświetlane tutaj po zakończeniu przetwarzania",
+  "searchDiscoverEmptySection": "Obrazy będą wyświetlane tutaj po zakończeniu przetwarzania i synchronizacji",
+  "searchPersonsEmptySection": "Osoby będą wyświetlane tutaj po zakończeniu przetwarzania i synchronizacji",
   "viewersSuccessfullyAdded": "{count, plural, =0 {Dodano 0 widzów} =1 {Dodano 1 widza}  other {Dodano {count} widzów}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1449,6 +1451,7 @@
   },
   "info": "Informacje",
   "addFiles": "Dodaj Pliki",
+  "castAlbum": "Odtwórz album",
   "imageNotAnalyzed": "Obraz nie został przeanalizowany",
   "noFacesFound": "Nie znaleziono twarzy",
   "fileNotUploadedYet": "Plik nie został jeszcze przesłany",
@@ -1478,15 +1481,15 @@
     }
   },
   "file": "Plik",
-  "searchSectionsLengthMismatch": "Niezgodność długości sekcji: {snapshotLenght} != {searchLenght}",
+  "searchSectionsLengthMismatch": "Niezgodność długości sekcji: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
     "description": "Appears in search tab page",
     "placeholders": {
-      "snapshotLenght": {
+      "snapshotLength": {
         "type": "int",
         "example": "1"
       },
-      "searchLenght": {
+      "searchLength": {
         "type": "int",
         "example": "2"
       }
@@ -1521,6 +1524,7 @@
   "legacy": "Dziedzictwo",
   "legacyPageDesc": "Dziedzictwo pozwala zaufanym kontaktom na dostęp do Twojego konta w razie Twojej nieobecności.",
   "legacyPageDesc2": "Zaufane kontakty mogą rozpocząć odzyskiwanie konta, a jeśli nie zostaną zablokowane w ciągu 30 dni, zresetować Twoje hasło i uzyskać dostęp do Twojego konta.",
+  "legacyAccounts": "Odziedziczone konta",
   "trustedContacts": "Zaufane kontakty",
   "addTrustedContact": "Dodaj Zaufany Kontakt",
   "removeInvite": "Usuń zaproszenie",
@@ -1573,5 +1577,5 @@
   },
   "legacyInvite": "{email} zaprosił Cię do zostania zaufanym kontaktem",
   "authToManageLegacy": "Prosimy uwierzytelnić się, aby zarządzać zaufanymi kontaktami",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "useDifferentPlayerInfo": "Masz problem z odtwarzaniem tego wideo? Przytrzymaj tutaj, aby spróbować innego odtwarzacza."
 }

@@ -27,22 +27,20 @@ import SingleInputForm, {
 } from "@ente/shared/components/SingleInputForm";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import { formatDateTime } from "@ente/shared/time/format";
-import { default as Add, default as AddIcon } from "@mui/icons-material/Add";
+import AddIcon from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import BlockIcon from "@mui/icons-material/Block";
-import ChevronRightIcon, {
-    default as ChevronRight,
-} from "@mui/icons-material/ChevronRight";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ContentCopyIcon from "@mui/icons-material/ContentCopyOutlined";
 import DoneIcon from "@mui/icons-material/Done";
-import DownloadSharp from "@mui/icons-material/DownloadSharp";
+import DownloadSharpIcon from "@mui/icons-material/DownloadSharp";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import LinkIcon from "@mui/icons-material/Link";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import Photo, { default as PhotoIcon } from "@mui/icons-material/Photo";
 import PublicIcon from "@mui/icons-material/Public";
-import RemoveCircleOutline from "@mui/icons-material/RemoveCircleOutline";
-import Workspaces from "@mui/icons-material/Workspaces";
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import WorkspacesIcon from "@mui/icons-material/Workspaces";
 import {
     Dialog,
     DialogProps,
@@ -106,7 +104,7 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
                 },
             }}
         >
-            <Stack spacing={"4px"} py={"12px"}>
+            <Stack sx={{ gap: "4px", py: "12px" }}>
                 <Titlebar
                     onClose={props.onClose}
                     title={
@@ -118,7 +116,7 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
                     onRootClose={handleRootClose}
                     caption={props.collection.name}
                 />
-                <Stack py={"20px"} px={"8px"} gap={"24px"}>
+                <Stack sx={{ py: "20px", px: "8px", gap: "24px" }}>
                     {type == "incomingShareCollaborator" ||
                     type == "incomingShareViewer" ? (
                         <SharingDetails
@@ -297,18 +295,18 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
                 <MenuItemDivider hasIcon />
                 <EnteMenuItem
                     label={t("COLLECT_PHOTOS")}
-                    startIcon={<DownloadSharp />}
+                    startIcon={<DownloadSharpIcon />}
                     onClick={createCollectPhotoShareableURLHelper}
                 />
             </MenuItemGroup>
             {sharableLinkError && (
                 <Typography
-                    textAlign={"center"}
                     variant="small"
-                    sx={{
-                        color: (theme) => theme.colors.danger.A700,
+                    sx={(theme) => ({
+                        color: theme.colors.danger.A700,
                         mt: 0.5,
-                    }}
+                        textAlign: "center",
+                    })}
                 >
                     {sharableLinkError}
                 </Typography>
@@ -353,7 +351,7 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
 
     const participantType = useRef<
         COLLECTION_ROLE.COLLABORATOR | COLLECTION_ROLE.VIEWER
-    >();
+    >(undefined);
 
     const openAddCollab = () => {
         participantType.current = COLLECTION_ROLE.COLLABORATOR;
@@ -372,7 +370,7 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
                     title={t("shared_with_people_count", {
                         count: collection.sharees?.length ?? 0,
                     })}
-                    icon={<Workspaces />}
+                    icon={<WorkspacesIcon />}
                 />
                 <MenuItemGroup>
                     {collection.sharees.length > 0 ? (
@@ -388,7 +386,7 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
                                         ? collection.sharees[0]?.email
                                         : null
                                 }
-                                endIcon={<ChevronRight />}
+                                endIcon={<ChevronRightIcon />}
                             />
                             <MenuItemDivider hasIcon />
                         </>
@@ -437,6 +435,7 @@ const AvatarContainerOuter = styled("div")({
     alignItems: "center",
     marginLeft: 8,
 });
+
 const AvatarCounter = styled(NumberAvatar)({
     height: 20,
     width: 20,
@@ -546,7 +545,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
 
     return (
         <SidebarDrawer anchor="right" open={open} onClose={handleDrawerClose}>
-            <Stack spacing={"4px"} py={"12px"}>
+            <Stack sx={{ gap: "4px", py: "12px" }}>
                 <Titlebar
                     onClose={onClose}
                     title={
@@ -561,7 +560,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                     onClose={onClose}
                     callback={collectionShare}
                     optionsList={nonSharedEmails}
-                    placeholder={t("ENTER_EMAIL")}
+                    placeholder={t("enter_email")}
                     fieldType="email"
                     buttonText={
                         type === COLLECTION_ROLE.VIEWER
@@ -637,7 +636,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                 });
             case "email":
                 return Yup.object().shape({
-                    inputValue: Yup.string().email(t("EMAIL_ERROR")),
+                    inputValue: Yup.string().email(t("invalid_email_error")),
                 });
         }
     }, [props.fieldType]);
@@ -665,7 +664,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                 setFieldValue,
             }) => (
                 <form noValidate onSubmit={handleSubmit}>
-                    <Stack spacing={"24px"} py={"20px"} px={"12px"}>
+                    <Stack sx={{ gap: "24px", py: "20px", px: "12px" }}>
                         {props.hiddenPreInput}
                         <Stack>
                             <MenuSectionTitle title={t("ADD_NEW_EMAIL")} />
@@ -767,11 +766,11 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                         justifyContent={"center"}
                         flexWrap={props.blockButton ? "wrap-reverse" : "nowrap"}
                     >
-                        <Stack direction={"column"} px={"8px"} width={"100%"}>
+                        <Stack sx={{ px: "8px", width: "100%" }}>
                             {props.secondaryButtonAction && (
                                 <FocusVisibleButton
                                     onClick={props.secondaryButtonAction}
-                                    size="large"
+                                    fullWidth
                                     color="secondary"
                                     sx={{
                                         "&&&": {
@@ -832,9 +831,9 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
 
     const participantType = useRef<
         COLLECTION_ROLE.COLLABORATOR | COLLECTION_ROLE.VIEWER
-    >();
+    >(null);
 
-    const selectedParticipant = useRef<CollectionUser>();
+    const selectedParticipant = useRef<CollectionUser>(null);
 
     const openAddCollab = () => {
         participantType.current = COLLECTION_ROLE.COLLABORATOR;
@@ -901,7 +900,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                 open={open}
                 onClose={handleDrawerClose}
             >
-                <Stack spacing={"4px"} py={"12px"}>
+                <Stack sx={{ gap: "4px", py: "12px" }}>
                     <Titlebar
                         onClose={onClose}
                         title={collection.name}
@@ -910,7 +909,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                             count: peopleCount,
                         })}
                     />
-                    <Stack py={"20px"} px={"12px"} spacing={"24px"}>
+                    <Stack sx={{ gap: "24px", py: "20px", px: "12px" }}>
                         <Stack>
                             <MenuSectionTitle
                                 title={t("OWNER")}
@@ -948,7 +947,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                 ))}
 
                                 <EnteMenuItem
-                                    startIcon={<Add />}
+                                    startIcon={<AddIcon />}
                                     onClick={openAddCollab}
                                     label={
                                         collaborators?.length
@@ -981,7 +980,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                     </>
                                 ))}
                                 <EnteMenuItem
-                                    startIcon={<Add />}
+                                    startIcon={<AddIcon />}
                                     fontWeight={"bold"}
                                     onClick={openAddViewer}
                                     label={
@@ -1121,7 +1120,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
 
     return (
         <SidebarDrawer anchor="right" open={open} onClose={handleDrawerClose}>
-            <Stack spacing={"4px"} py={"12px"}>
+            <Stack sx={{ gap: "4px", py: "12px" }}>
                 <Titlebar
                     onClose={onClose}
                     title={t("MANAGE")}
@@ -1129,12 +1128,11 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                     caption={selectedParticipant.email}
                 />
 
-                <Stack py={"20px"} px={"8px"} spacing={"32px"}>
+                <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                     <Stack>
                         <Typography
-                            color="text.muted"
                             variant="small"
-                            padding={1}
+                            sx={{ color: "text.muted", padding: 1 }}
                         >
                             {t("ADDED_AS")}
                         </Typography>
@@ -1166,18 +1164,16 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                         </MenuItemGroup>
 
                         <Typography
-                            color="text.muted"
                             variant="small"
-                            padding={1}
+                            sx={{ color: "text.muted", padding: 1 }}
                         >
                             {t("COLLABORATOR_RIGHTS")}
                         </Typography>
 
-                        <Stack py={"30px"}>
+                        <Stack sx={{ py: "30px" }}>
                             <Typography
-                                color="text.muted"
                                 variant="small"
-                                padding={1}
+                                sx={{ color: "text.muted", padding: 1 }}
                             >
                                 {t("REMOVE_PARTICIPANT_HEAD")}
                             </Typography>
@@ -1285,7 +1281,10 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     return (
         <>
             <Stack>
-                <Typography color="text.muted" variant="small" padding={1}>
+                <Typography
+                    variant="small"
+                    sx={{ color: "text.muted", padding: 1 }}
+                >
                     <PublicIcon style={{ fontSize: 17, marginRight: 8 }} />
                     {t("PUBLIC_LINK_ENABLED")}
                 </Typography>
@@ -1395,13 +1394,13 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     };
     return (
         <SidebarDrawer anchor="right" open={open} onClose={handleDrawerClose}>
-            <Stack spacing={"4px"} py={"12px"}>
+            <Stack sx={{ gap: "4px", py: "12px" }}>
                 <Titlebar
                     onClose={onClose}
                     title={t("share_album")}
                     onRootClose={onRootClose}
                 />
-                <Stack py={"20px"} px={"8px"} spacing={"32px"}>
+                <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                     <Stack spacing={3}>
                         <ManagePublicCollect
                             collection={collection}
@@ -1454,7 +1453,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                         <MenuItemGroup>
                             <EnteMenuItem
                                 color="critical"
-                                startIcon={<RemoveCircleOutline />}
+                                startIcon={<RemoveCircleOutlineIcon />}
                                 onClick={disablePublicSharing}
                                 label={t("REMOVE_LINK")}
                             />
@@ -1462,12 +1461,12 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                     </Stack>
                     {sharableLinkError && (
                         <Typography
-                            textAlign={"center"}
                             variant="small"
-                            sx={{
-                                color: (theme) => theme.colors.danger.A700,
+                            sx={(theme) => ({
+                                color: theme.colors.danger.A700,
                                 mt: 0.5,
-                            }}
+                                textAlign: "center",
+                            })}
                         >
                             {sharableLinkError}
                         </Typography>
@@ -1585,13 +1584,13 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                 open={shareExpiryOptionsModalView}
                 onClose={handleDrawerClose}
             >
-                <Stack spacing={"4px"} py={"12px"}>
+                <Stack sx={{ gap: "4px", py: "12px" }}>
                     <Titlebar
                         onClose={closeShareExpiryOptionsModalView}
                         title={t("LINK_EXPIRY")}
                         onRootClose={onRootClose}
                     />
-                    <Stack py={"20px"} px={"8px"} spacing={"32px"}>
+                    <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                         <MenuItemGroup>
                             {shareExpireOption.map((item, index) => (
                                 <>
@@ -1701,19 +1700,18 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
                 onClick={openDeviceLimitChangeModalView}
                 endIcon={<ChevronRightIcon />}
             />
-
             <SidebarDrawer
                 anchor="right"
                 open={isChangeDeviceLimitVisible}
                 onClose={handleDrawerClose}
             >
-                <Stack spacing={"4px"} py={"12px"}>
+                <Stack sx={{ gap: "4px", py: "12px" }}>
                     <Titlebar
                         onClose={closeDeviceLimitChangeModal}
                         title={t("LINK_DEVICE_LIMIT")}
                         onRootClose={onRootClose}
                     />
-                    <Stack py={"20px"} px={"8px"} spacing={"32px"}>
+                    <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                         <MenuItemGroup>
                             {deviceLimitOptions.map((item, index) => (
                                 <>
@@ -1887,14 +1885,17 @@ function PublicLinkSetPassword({
             open={open}
             onClose={onClose}
             disablePortal
-            BackdropProps={{ sx: { position: "absolute" } }}
+            slotProps={{ backdrop: { sx: { position: "absolute" } } }}
             sx={{ position: "absolute" }}
             PaperProps={{ sx: { p: 1 } }}
             maxWidth={"sm"}
             fullWidth
         >
-            <Stack spacing={3} p={1.5}>
-                <Typography variant="h3" fontWeight={"bold"} px={1} py={0.5}>
+            <Stack sx={{ gap: 3, p: 1.5 }}>
+                <Typography
+                    variant="h3"
+                    sx={{ fontWeight: "bold", px: 1, py: 0.5 }}
+                >
                     {t("password_lock")}
                 </Typography>
                 <SingleInputForm

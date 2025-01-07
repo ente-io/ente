@@ -18,6 +18,7 @@ import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
+import 'package:ente_auth/theme/text_style.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/code_error_widget.dart';
 import 'package:ente_auth/ui/code_widget.dart';
@@ -82,6 +83,7 @@ class _HomePageState extends State<HomePage> {
   bool isCompactMode = false;
 
   late CodeSortKey _codeSortKey;
+  final Set<LogicalKeyboardKey> _pressedKeys = <LogicalKeyboardKey>{};
 
   @override
   void initState() {
@@ -108,6 +110,40 @@ class _HomePageState extends State<HomePage> {
     _showSearchBox = _autoFocusSearch;
 
     searchBoxFocusNode = FocusNode();
+    ServicesBinding.instance.keyboard.addHandler(_handleKeyEvent);
+  }
+
+  bool _handleKeyEvent(KeyEvent event) {
+    if (event is KeyDownEvent) {
+      _pressedKeys.add(event.logicalKey);
+      bool isMetaKeyPressed = Platform.isMacOS || Platform.isIOS
+          ? (_pressedKeys.contains(LogicalKeyboardKey.metaLeft) ||
+              _pressedKeys.contains(LogicalKeyboardKey.meta) ||
+              _pressedKeys.contains(LogicalKeyboardKey.metaRight))
+          : (_pressedKeys.contains(LogicalKeyboardKey.controlLeft) ||
+              _pressedKeys.contains(LogicalKeyboardKey.control) ||
+              _pressedKeys.contains(LogicalKeyboardKey.controlRight));
+
+      if (isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyF) {
+        setState(() {
+          _showSearchBox = true;
+          searchBoxFocusNode.requestFocus();
+        });
+        return true;
+      }
+      if (event.logicalKey == LogicalKeyboardKey.escape) {
+        setState(() {
+          _textController.clear();
+          _searchText = "";
+          _showSearchBox = false;
+          _applyFilteringAndRefresh();
+        });
+        return true;
+      }
+    } else if (event is KeyUpEvent) {
+      _pressedKeys.remove(event.logicalKey);
+    }
+    return false;
   }
 
   void _loadCodes() {
@@ -207,8 +243,9 @@ class _HomePageState extends State<HomePage> {
     _streamSubscription?.cancel();
     _triggerLogoutEvent?.cancel();
     _iconsChangedEvent?.cancel();
+    _textController.dispose();
     _textController.removeListener(_applyFilteringAndRefresh);
-
+    ServicesBinding.instance.keyboard.removeHandler(_handleKeyEvent);
     searchBoxFocusNode.dispose();
 
     super.dispose();
@@ -354,7 +391,7 @@ class _HomePageState extends State<HomePage> {
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: !_showSearchBox
-              ? const Text('Ente Auth')
+              ? const Text('Ente Auth', style: brandStyleMedium)
               : TextField(
                   autocorrect: false,
                   enableSuggestions: false,

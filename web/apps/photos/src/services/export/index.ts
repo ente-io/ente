@@ -16,6 +16,7 @@ import {
     createCollectionNameByID,
     getCollectionUserFacingName,
 } from "@/new/photos/services/collection";
+import { getAllLocalCollections } from "@/new/photos/services/collections";
 import {
     exportMetadataDirectoryName,
     exportTrashDirectoryName,
@@ -26,7 +27,6 @@ import { PromiseQueue } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import i18n from "i18next";
-import { getAllLocalCollections } from "../collectionService";
 import { migrateExport, type ExportRecord } from "./migration";
 
 /** Name of the JSON file in which we keep the state of the export. */
@@ -750,19 +750,19 @@ class ExportService {
                         const { image, video } =
                             parseLivePhotoExportName(fileExportName);
 
-                        await moveToTrash(
+                        await moveToFSTrash(
                             exportDir,
                             collectionExportName,
                             image,
                         );
 
-                        await moveToTrash(
+                        await moveToFSTrash(
                             exportDir,
                             collectionExportName,
                             video,
                         );
                     } else {
-                        await moveToTrash(
+                        await moveToFSTrash(
                             exportDir,
                             collectionExportName,
                             fileExportName,
@@ -1270,11 +1270,11 @@ const readOnDiskFileExportRecordIDs = async (
     // Both the paths involved are guaranteed to use POSIX separators and thus
     // can directly be compared.
     //
-    // -   `exportDir` traces its origin to `electron.selectDirectory()`, which
-    //     returns POSIX paths. Down below we use it as the base directory when
-    //     constructing paths for the items to export.
+    // - `exportDir` traces its origin to `electron.selectDirectory()`, which
+    //   returns POSIX paths. Down below we use it as the base directory when
+    //   constructing paths for the items to export.
     //
-    // -   `findFiles` is also guaranteed to return POSIX paths.
+    // - `findFiles` is also guaranteed to return POSIX paths.
     //
     const ls = new Set(await ensureElectron().fs.findFiles(exportDir));
 
@@ -1459,14 +1459,15 @@ const isExportInProgress = (exportStage: ExportStage) =>
     exportStage > ExportStage.INIT && exportStage < ExportStage.FINISHED;
 
 /**
- * Move {@link fileName} in {@link collectionName} to Trash.
+ * Move {@link fileName} in {@link collectionName} to the special per-collection
+ * file system "Trash" folder we created under the export directory.
  *
  * Also move its associated metadata JSON to Trash.
  *
  * @param exportDir The root directory on the user's file system where we are
  * exporting to.
  * */
-const moveToTrash = async (
+const moveToFSTrash = async (
     exportDir: string,
     collectionName: string,
     fileName: string,

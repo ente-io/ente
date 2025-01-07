@@ -185,8 +185,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m62(count) =>
       "${Intl.plural(count, one: '${count} Ergebnis gefunden', other: '${count} Ergebnisse gefunden')}";
 
-  static String m63(snapshotLenght, searchLenght) =>
-      "Abschnittslänge stimmt nicht überein: ${snapshotLenght} != ${searchLenght}";
+  static String m63(snapshotLength, searchLength) =>
+      "Abschnittslänge stimmt nicht überein: ${snapshotLength} != ${searchLength}";
 
   static String m4(count) => "${count} ausgewählt";
 
@@ -357,6 +357,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Downloads erlauben"),
         "allowPeopleToAddPhotos": MessageLookupByLibrary.simpleMessage(
             "Erlaube anderen das Hinzufügen von Fotos"),
+        "allowPermBody": MessageLookupByLibrary.simpleMessage(
+            "Bitte erlaube den Zugriff auf Deine Fotos in den Einstellungen, damit Ente sie anzeigen und sichern kann."),
+        "allowPermTitle":
+            MessageLookupByLibrary.simpleMessage("Zugriff auf Fotos erlauben"),
         "androidBiometricHint":
             MessageLookupByLibrary.simpleMessage("Identität verifizieren"),
         "androidBiometricNotRecognized": MessageLookupByLibrary.simpleMessage(
@@ -435,6 +439,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bitte authentifiziere dich, um deine vertrauenswürdigen Kontakte zu verwalten"),
         "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
             "Bitte authentifizieren, um deinen Passkey zu sehen"),
+        "authToViewTrashedFiles": MessageLookupByLibrary.simpleMessage(
+            "Bitte authentifizieren, um die gelöschten Dateien anzuzeigen"),
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
             "Bitte authentifizieren, um die aktiven Sitzungen anzusehen"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
@@ -976,6 +982,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "freeUpSpace":
             MessageLookupByLibrary.simpleMessage("Speicherplatz freigeben"),
         "freeUpSpaceSaving": m39,
+        "gallery": MessageLookupByLibrary.simpleMessage("Galerie"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Bis zu 1000 Erinnerungsstücke angezeigt in der Galerie"),
         "general": MessageLookupByLibrary.simpleMessage("Allgemein"),
@@ -1007,6 +1014,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Versteckt Inhalte der App beim Wechseln zwischen Apps und deaktiviert Screenshots"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Versteckt Inhalte der App beim Wechseln zwischen Apps"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Geteilte Elemente in der Home-Galerie ausblenden"),
         "hiding": MessageLookupByLibrary.simpleMessage("Verstecken..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Gehostet bei OSM France"),
@@ -1586,7 +1595,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Suche nach Datum, Monat oder Jahr"),
         "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Bilder werden hier angezeigt, sobald die Verarbeitung abgeschlossen ist"),
+            "Bilder werden hier angezeigt, sobald Verarbeitung und Synchronisation abgeschlossen sind"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "Personen werden hier angezeigt, sobald die Indizierung abgeschlossen ist"),
         "searchFileTypesAndNamesEmptySection":
@@ -1605,7 +1614,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Laden Sie Personen ein, damit Sie geteilte Fotos hier einsehen können"),
         "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Personen werden hier angezeigt, sobald die Verarbeitung abgeschlossen ist"),
+            "Personen werden hier angezeigt, sobald Verarbeitung und Synchronisierung abgeschlossen sind"),
         "searchResultCount": m62,
         "searchSectionsLengthMismatch": m63,
         "security": MessageLookupByLibrary.simpleMessage("Sicherheit"),
@@ -1922,7 +1931,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "useAsCover":
             MessageLookupByLibrary.simpleMessage("Als Titelbild festlegen"),
         "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
+            "Hast du Probleme beim Abspielen dieses Videos? Halte hier gedrückt, um einen anderen Player auszuprobieren."),
         "usePublicLinksForPeopleNotOnEnte": MessageLookupByLibrary.simpleMessage(
             "Verwende öffentliche Links für Personen, die kein Ente-Konto haben"),
         "useRecoveryKey": MessageLookupByLibrary.simpleMessage(

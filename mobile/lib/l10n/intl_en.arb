@@ -185,6 +185,8 @@
   },
   "allowAddPhotosDescription": "Allow people with the link to also add photos to the shared album.",
   "passwordLock": "Password lock",
+  "canNotOpenTitle": "Cannot open this album",
+  "canNotOpenBody": "Sorry, this album cannot be opened in the app.",
   "disableDownloadWarningTitle": "Please note",
   "disableDownloadWarningBody": "Viewers can still take screenshots or save a copy of your photos using external tools",
   "allowDownloads": "Allow downloads",
@@ -351,6 +353,7 @@
   "failedToLoadAlbums": "Failed to load albums",
   "hidden": "Hidden",
   "authToViewYourHiddenFiles": "Please authenticate to view your hidden files",
+  "authToViewTrashedFiles": "Please authenticate to view your trashed files",
   "trash": "Trash",
   "uncategorized": "Uncategorized",
   "videoSmallCase": "video",
@@ -412,7 +415,7 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Photo grid size",
-  "manageDeviceStorage": "Manage device Cache",
+  "manageDeviceStorage": "Manage device cache",
   "manageDeviceStorageDesc": "Review and clear local cache storage.",
   "machineLearning": "Machine learning",
   "mlConsent": "Enable machine learning",
@@ -689,6 +692,8 @@
   "noPhotosAreBeingBackedUpRightNow": "No photos are being backed up right now",
   "preserveMore": "Preserve more",
   "grantFullAccessPrompt": "Please allow access to all photos in the Settings app",
+  "allowPermTitle": "Allow access to photos",
+  "allowPermBody": "Please allow access to your photos from Settings so Ente can display and backup your library.",
   "openSettings": "Open Settings",
   "selectMorePhotos": "Select more photos",
   "existingUser": "Existing user",
@@ -1382,8 +1387,8 @@
   "onlyThem": "Only them",
   "checkingModels": "Checking models...",
   "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
-  "searchDiscoverEmptySection": "Images will be shown here once processing is complete",
-  "searchPersonsEmptySection": "People will be shown here once processing is complete",
+  "searchDiscoverEmptySection": "Images will be shown here once processing and syncing is complete",
+  "searchPersonsEmptySection": "People will be shown here once processing and syncing is complete",
   "viewersSuccessfullyAdded": "{count, plural, =0 {Added 0 viewer} =1 {Added 1 viewer} other {Added {count} viewers}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1479,15 +1484,15 @@
     }
   },
   "file": "File",
-  "searchSectionsLengthMismatch": "Sections length mismatch: {snapshotLenght} != {searchLenght}",
+  "searchSectionsLengthMismatch": "Sections length mismatch: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
     "description": "Appears in search tab page",
     "placeholders": {
-      "snapshotLenght": {
+      "snapshotLength": {
         "type": "int",
         "example": "1"
       },
-      "searchLenght": {
+      "searchLength": {
         "type": "int",
         "example": "2"
       }
@@ -1575,5 +1580,12 @@
   },
   "legacyInvite": "{email} has invited you to be a trusted contact",
   "authToManageLegacy": "Please authenticate to manage your trusted contacts",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player.",
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery",
+  "joinAlbum": "Join album",
+  "joinAlbumSubtext": "to view and add your photos",
+  "joinAlbumSubtextViewer": "to add this to shared albums",
+  "join": "Join"
+  
 }

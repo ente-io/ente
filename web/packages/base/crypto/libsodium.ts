@@ -57,14 +57,13 @@ export const toB64URLSafe = async (input: Uint8Array) => {
  * trailing padding character(s) "=" to make the resultant string's length be an
  * integer multiple of 4.
  *
- * -   In some contexts, for example when serializing WebAuthn binary for
- *     transmission over the network, this is the required / recommended
- *     approach.
+ * - In some contexts, for example when serializing WebAuthn binary for
+ *   transmission over the network, this is the required / recommended approach.
  *
- * -   In other cases, for example when trying to pass an arbitrary JSON string
- *     via a URL parameter, this is also convenient so that we do not have to
- *     deal with any ambiguity surrounding the "=" which is also the query
- *     parameter key value separator.
+ * - In other cases, for example when trying to pass an arbitrary JSON string
+ *   via a URL parameter, this is also convenient so that we do not have to deal
+ *   with any ambiguity surrounding the "=" which is also the query parameter
+ *   key value separator.
  */
 export const toB64URLSafeNoPadding = async (input: Uint8Array) => {
     await sodium.ready;
@@ -170,19 +169,19 @@ export const generateBlobOrStreamKey = async () => {
  *
  * libsodium provides two "high level" encryption patterns:
  *
- * 1.  Authenticated encryption ("secretbox")
- *     https://doc.libsodium.org/secret-key_cryptography/secretbox
+ * 1. Authenticated encryption ("secretbox")
+ *    https://doc.libsodium.org/secret-key_cryptography/secretbox
  *
- * 2.  Encrypted streams and file encryption ("secretstream")
- *     https://doc.libsodium.org/secret-key_cryptography/secretstream
+ * 2. Encrypted streams and file encryption ("secretstream")
+ *    https://doc.libsodium.org/secret-key_cryptography/secretstream
  *
  * In terms of the underlying algorithm, they are essentially the same.
  *
- * 1.  The secretbox APIs use XSalsa20 with Poly1305 (where XSalsa20 is the
- *     stream cipher used for encryption, which Poly1305 is the MAC used for
- *     authentication).
+ * 1. The secretbox APIs use XSalsa20 with Poly1305 (where XSalsa20 is the
+ *    stream cipher used for encryption, which Poly1305 is the MAC used for
+ *    authentication).
  *
- * 2.  The secretstream APIs use XChaCha20 with Poly1305.
+ * 2. The secretstream APIs use XChaCha20 with Poly1305.
  *
  * XSalsa20 is a minor variant (predecessor in fact) of XChaCha20. I am not
  * aware why libsodium uses both the variants, but they seem to have similar
@@ -190,12 +189,12 @@ export const generateBlobOrStreamKey = async () => {
  *
  * These two sets of APIs map functionally map to two different use cases.
  *
- * 1.  If there is a single independent bit of data to encrypt, the secretbox
- *     APIs fit the bill.
+ * 1. If there is a single independent bit of data to encrypt, the secretbox
+ *    APIs fit the bill.
  *
- * 2.  If there is a set of related data to encrypt, e.g. the contents of a file
- *     where the file is too big to fit into a single message, then the
- *     secretstream APIs are more appropriate.
+ * 2. If there is a set of related data to encrypt, e.g. the contents of a file
+ *    where the file is too big to fit into a single message, then the
+ *    secretstream APIs are more appropriate.
  *
  * However, in our code we have evolved two different use cases for the 2nd
  * option. The data to encrypt might be smaller than our streaming encryption
@@ -207,15 +206,15 @@ export const generateBlobOrStreamKey = async () => {
  *
  * Thus, we have three scenarios:
  *
- * 1.  Box: Using secretbox APIs to encrypt some independent blob of data.
+ * 1. Box: Using secretbox APIs to encrypt some independent blob of data.
  *
- * 2.  Blob: Using secretstream APIs without chunking. This is used to encrypt
- *     data associated to an Ente object (file, collection, entity, etc), when
- *     the data is small-ish (less than a few MBs).
+ * 2. Blob: Using secretstream APIs without chunking. This is used to encrypt
+ *    data associated to an Ente object (file, collection, entity, etc), when
+ *    the data is small-ish (less than a few MBs).
  *
- * 3.  Stream/Chunks: Using secretstream APIs for encrypting chunks. This is
- *     used to encrypt the actual content of the files associated with an
- *     EnteFile object. This itself happens in two ways:
+ * 3. Stream/Chunks: Using secretstream APIs for encrypting chunks. This is used
+ *    to encrypt the actual content of the files associated with an EnteFile
+ *    object. This itself happens in two ways:
  *
  *     3a. One shot mode - where we do break the data into chunks, but a single
  *         function processes all the chunks in one go.
@@ -229,22 +228,22 @@ export const generateBlobOrStreamKey = async () => {
  * underlying algorithm differ, but also the terminology that libsodium use for
  * the nonce.
  *
- * 1.  When using the secretbox APIs, the nonce is called the "nonce", and needs
- *     to be provided by us (the caller).
+ * 1. When using the secretbox APIs, the nonce is called the "nonce", and needs
+ *    to be provided by us (the caller).
  *
- * 2.  When using the secretstream APIs, the nonce is internally generated by
- *     libsodium and provided by libsodium to us (the caller) as a "header".
+ * 2. When using the secretstream APIs, the nonce is internally generated by
+ *    libsodium and provided by libsodium to us (the caller) as a "header".
  *
  * However, even for case 1, the functions we expose from libsodium.ts generate
  * the nonce for the caller. So for higher level functions, the difference
  * between Box and Blob encryption is:
  *
- * 1.  Box uses secretbox APIs (Salsa), Blob uses secretstream APIs (ChaCha).
+ * 1. Box uses secretbox APIs (Salsa), Blob uses secretstream APIs (ChaCha).
  *
- * 2.  Blob should generally be used for data associated with an Ente object,
- *     and Box for the other cases.
+ * 2. Blob should generally be used for data associated with an Ente object, and
+ *    Box for the other cases.
  *
- * 3.  Box returns a "nonce", while Blob returns a "header".
+ * 3. Box returns a "nonce", while Blob returns a "header".
  *
  * The difference between case 2 and 3 (Blob vs Stream) is that while both use
  * the same algorithms, in case of Blob the entire data is encrypted / decrypted
@@ -279,9 +278,9 @@ export const encryptBoxB64 = async (
  *
  * @returns The encrypted data and the decryption header as {@link Uint8Array}s.
  *
- * -   See: [Note: 3 forms of encryption (Box | Blob | Stream)].
+ * - See: [Note: 3 forms of encryption (Box | Blob | Stream)].
  *
- * -   See: https://doc.libsodium.org/secret-key_cryptography/secretstream
+ * - See: https://doc.libsodium.org/secret-key_cryptography/secretstream
  */
 export const encryptBlob = async (
     data: BytesOrB64,
@@ -348,9 +347,9 @@ export const streamEncryptionChunkSize = 4 * 1024 * 1024;
  * @returns The encrypted bytes ({@link Uint8Array}) and the decryption header
  * (as a base64 string).
  *
- * -   See: [Note: 3 forms of encryption (Box | Blob | Stream)].
+ * - See: [Note: 3 forms of encryption (Box | Blob | Stream)].
  *
- * -   See: https://doc.libsodium.org/secret-key_cryptography/secretstream
+ * - See: https://doc.libsodium.org/secret-key_cryptography/secretstream
  */
 export const encryptStreamBytes = async (
     data: Uint8Array,

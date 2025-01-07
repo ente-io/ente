@@ -1,14 +1,9 @@
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { formattedNumber } from "@/base/i18n";
 import { EnteFile } from "@/media/file";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { formatDateTime } from "@ente/shared/time/format";
-import {
-    Button,
-    DialogActions,
-    DialogContent,
-    Stack,
-    Typography,
-} from "@mui/material";
+import { DialogActions, DialogContent, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";
 import ExportPendingList from "./ExportPendingList";
@@ -37,9 +32,9 @@ export default function ExportFinished(props: Props) {
     return (
         <>
             <DialogContent>
-                <Stack pr={2}>
+                <Stack sx={{ pr: 2 }}>
                     <SpaceBetweenFlex minHeight={"48px"}>
-                        <Typography color={"text.muted"}>
+                        <Typography sx={{ color: "text.muted" }}>
                             {t("PENDING_ITEMS")}
                         </Typography>
                         {props.pendingExports.length ? (
@@ -53,7 +48,7 @@ export default function ExportFinished(props: Props) {
                         )}
                     </SpaceBetweenFlex>
                     <SpaceBetweenFlex minHeight={"48px"}>
-                        <Typography color="text.muted">
+                        <Typography sx={{ color: "text.muted" }}>
                             {t("last_export_time")}
                         </Typography>
                         <Typography>
@@ -65,12 +60,20 @@ export default function ExportFinished(props: Props) {
                 </Stack>
             </DialogContent>
             <DialogActions>
-                <Button color="secondary" size="large" onClick={props.onHide}>
+                <FocusVisibleButton
+                    fullWidth
+                    color="secondary"
+                    onClick={props.onHide}
+                >
                     {t("close")}
-                </Button>
-                <Button size="large" color="primary" onClick={props.onResync}>
+                </FocusVisibleButton>
+                <FocusVisibleButton
+                    fullWidth
+                    color="primary"
+                    onClick={props.onResync}
+                >
                     {t("export_again")}
-                </Button>
+                </FocusVisibleButton>
             </DialogActions>
             <ExportPendingList
                 pendingExports={props.pendingExports}

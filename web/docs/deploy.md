@@ -3,17 +3,17 @@
 The various web apps and static sites in this repository are deployed on
 Cloudflare Pages using GitHub workflows.
 
--   Automated production deployments of `main` daily 8:00 AM IST.
+- Automated production deployments of `main` daily 8:00 AM IST.
 
--   Automated staging deployments `*.ente.sh` of `main` daily 3:00 PM IST.
+- Automated staging deployments `*.ente.sh` of `main` daily 3:00 PM IST.
 
--   [help.ente.io](https://help.ente.io) gets deployed whenever a PR that
-    changes anything inside `docs/` gets merged to `main`.
+- [help.ente.io](https://help.ente.io) gets deployed whenever a PR that changes
+  anything inside `docs/` gets merged to `main`.
 
--   Production or staging deployments can made manually by triggering the
-    corresponding workflow. There is variant to deploy a single app to
-    production using the `web-deploy-one.yml` workflow, and a variant to deploy
-    any one of the apps to `preview.ente.sh` (see below).
+- Production or staging deployments can made manually by triggering the
+  corresponding workflow. There is variant to deploy a single app to production
+  using the `web-deploy-one.yml` workflow, and a variant to deploy any one of
+  the apps to `preview.ente.sh` (see below).
 
 These GitHub workflows use the various `yarn deploy:*` commands. For example,
 `yarn deploy:photos` will open a PR to merge the current `main` onto
@@ -46,13 +46,13 @@ deployments, and the action that triggers them:
 
 Apart from this, there are also some other deployments:
 
--   `albums.ente.io` is a CNAME alias to the production deployment
-    (`web.ente.io`). However, when the code detects that it is being served from
-    `albums.ente.io`, it redirects to the `/shared-albums` page (Enhancement:
-    serve it as a separate app with a smaller bundle size).
+- `albums.ente.io` is a CNAME alias to the production deployment
+  (`web.ente.io`). However, when the code detects that it is being served from
+  `albums.ente.io`, it redirects to the `/shared-albums` page (Enhancement:
+  serve it as a separate app with a smaller bundle size).
 
--   `family.ente.io` is currently in a separate repository (Enhancement: bring
-    it in here).
+- `family.ente.io` is currently in a separate repository (Enhancement: bring it
+  in here).
 
 ### Preview deployments
 
@@ -101,9 +101,9 @@ The remaining steps are documented in
 [Cloudflare's guide for using Direct Upload with CI](https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/).
 As a checklist,
 
--   Generate `CLOUDFLARE_API_TOKEN`
--   Add `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` to the GitHub secrets
--   Add your workflow. e.g. see `docs-deploy.yml`.
+- Generate `CLOUDFLARE_API_TOKEN`
+- Add `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` to the GitHub secrets
+- Add your workflow. e.g. see `docs-deploy.yml`.
 
 This is the basic setup, and should already work.
 

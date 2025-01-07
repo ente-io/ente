@@ -2,29 +2,26 @@ import log from "@/base/log";
 import {
     downloadManager,
     type LivePhotoSourceURL,
-    type SourceURLs,
+    type LoadedLivePhotoSourceURL,
+    type RenderableSourceURLs,
 } from "@/gallery/services/download";
 import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
-import { PHOTOS_PAGES } from "@ente/shared/constants/pages";
-import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { styled } from "@mui/material";
-import PhotoViewer, { type PhotoViewerProps } from "components/PhotoViewer";
+import { PhotoViewer, type PhotoViewerProps } from "components/PhotoViewer";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import PhotoSwipe from "photoswipe";
 import { useContext, useEffect, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { Duplicate } from "services/deduplicationService";
 import {
     SelectedState,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 import { handleSelectCreator } from "utils/photoFrame";
 import { PhotoList } from "./PhotoList";
-import { DedupePhotoList } from "./PhotoList/dedupe";
 import PreviewCard from "./pages/gallery/PreviewCard";
 
 const Container = styled("div")`
@@ -48,7 +45,17 @@ const PHOTOSWIPE_HASH_SUFFIX = "&opened";
  */
 export type DisplayFile = EnteFile & {
     src?: string;
-    srcURLs?: SourceURLs;
+    srcURLs?: RenderableSourceURLs;
+    /**
+     * An object URL corresponding to the image portion, if any, associated with
+     * the {@link DisplayFile}.
+     *
+     * - For images, this will be the object URL of the renderable image itself.
+     * - For live photos, this will be the object URL of the image portion of
+     *   the live photo.
+     * - For videos, this will not be defined.
+     */
+    associatedImageURL?: string | undefined;
     msrc?: string;
     html?: string;
     w?: number;
@@ -60,10 +67,6 @@ export type DisplayFile = EnteFile & {
 };
 
 export interface PhotoFrameProps {
-    page:
-        | PHOTOS_PAGES.GALLERY
-        | PHOTOS_PAGES.DEDUPLICATE
-        | PHOTOS_PAGES.SHARED_ALBUMS;
     mode?: GalleryBarMode;
     /**
      * This is an experimental prop, to see if we can merge the separate
@@ -72,14 +75,37 @@ export interface PhotoFrameProps {
      */
     modePlus?: GalleryBarMode | "search";
     files: EnteFile[];
-    duplicates?: Duplicate[];
     syncWithRemote: () => Promise<void>;
-    favItemIds?: Set<number>;
     setSelected: (
         selected: SelectedState | ((selected: SelectedState) => SelectedState),
     ) => void;
     selected: SelectedState;
-    markTempDeleted?: (tempDeletedFiles: EnteFile[]) => void;
+    /**
+     * File IDs of all the files that the user has marked as a favorite.
+     *
+     * Not set in the context of the shared albums app.
+     */
+    favoriteFileIDs?: Set<number>;
+    /**
+     * Called when the component wants to update the in-memory, unsynced,
+     * favorite status of a file.
+     *
+     * For more details, see {@link unsyncedFavoriteUpdates} in the gallery
+     * reducer's documentation.
+     *
+     * Not set in the context of the shared albums app.
+     */
+    markUnsyncedFavoriteUpdate?: (fileID: number, isFavorite: boolean) => void;
+    /**
+     * Called when the component wants to mark the given files as deleted in the
+     * the in-memory, unsynced, state maintained by the top level gallery.
+     *
+     * For more details, see {@link unsyncedFavoriteUpdates} in the gallery
+     * reducer's documentation.
+     *
+     * Not set in the context of the shared albums app.
+     */
+    markTempDeleted?: (files: EnteFile[]) => void;
     /** This will be set if mode is not "people". */
     activeCollectionID: number;
     /** This will be set if mode is "people". */
@@ -95,16 +121,18 @@ export interface PhotoFrameProps {
     onSelectPerson?: PhotoViewerProps["onSelectPerson"];
 }
 
+/**
+ * TODO: Rename me to FileListWithViewer
+ */
 const PhotoFrame = ({
-    page,
-    duplicates,
     mode,
     modePlus,
     files,
     syncWithRemote,
-    favItemIds,
     setSelected,
     selected,
+    favoriteFileIDs,
+    markUnsyncedFavoriteUpdate,
     markTempDeleted,
     activeCollectionID,
     activePersonID,
@@ -130,22 +158,21 @@ const PhotoFrame = ({
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
     const router = useRouter();
 
-    const displayFiles = useMemoSingleThreaded(() => {
-        return files.map((item) => {
-            const filteredItem = {
-                ...item,
-                w: window.innerWidth,
-                h: window.innerHeight,
-                title: item.pubMagicMetadata?.data.caption,
-            };
-            return filteredItem as DisplayFile;
-        });
-    }, [files]);
+    const [displayFiles, setDisplayFiles] = useState<DisplayFile[] | undefined>(
+        undefined,
+    );
 
     useEffect(() => {
+        const result = files.map((file) => ({
+            ...file,
+            w: window.innerWidth,
+            h: window.innerHeight,
+            title: file.pubMagicMetadata?.data.caption,
+        }));
+        setDisplayFiles(result);
         setFetching({});
         setThumbFetching({});
-    }, [displayFiles]);
+    }, [files]);
 
     useEffect(() => {
         const currentURL = new URL(window.location.href);
@@ -315,7 +342,7 @@ const PhotoFrame = ({
             }
             activeCollectionID={activeCollectionID}
             showPlaceholder={isScrolling}
-            isFav={favItemIds?.has(item.id)}
+            isFav={favoriteFileIDs?.has(item.id)}
         />
     );
 
@@ -363,12 +390,12 @@ const PhotoFrame = ({
         try {
             log.info(`[${item.id}] new file src request`);
             fetching[item.id] = true;
-            const srcURLs = await downloadManager.getFileForPreview(item);
+            const srcURLs = await downloadManager.renderableSourceURLs(item);
             if (item.metadata.fileType === FileType.livePhoto) {
                 const srcImgURL = srcURLs.url as LivePhotoSourceURL;
                 const imageURL = await srcImgURL.image();
 
-                const dummyImgSrcUrl: SourceURLs = {
+                const dummyImgSrcUrl: RenderableSourceURLs = {
                     url: imageURL,
                     type: "normal",
                 };
@@ -379,7 +406,7 @@ const PhotoFrame = ({
                 }
 
                 const videoURL = await srcImgURL.video();
-                const loadedLivePhotoSrcURL: SourceURLs = {
+                const loadedLivePhotoSrcURL: RenderableSourceURLs = {
                     url: { video: videoURL, image: imageURL },
                     type: "livePhoto",
                 };
@@ -427,7 +454,7 @@ const PhotoFrame = ({
         instance: PhotoSwipe<PhotoSwipe.Options>,
         index: number,
         item: DisplayFile,
-        srcURL: SourceURLs,
+        srcURL: RenderableSourceURLs,
         overwrite: boolean,
     ) => {
         const file = displayFiles[index];
@@ -461,7 +488,7 @@ const PhotoFrame = ({
             );
             fetching[item.id] = true;
 
-            const srcURL = await downloadManager.getFileForPreview(item, {
+            const srcURL = await downloadManager.renderableSourceURLs(item, {
                 forceConvert: true,
             });
 
@@ -476,30 +503,19 @@ const PhotoFrame = ({
     return (
         <Container>
             <AutoSizer>
-                {({ height, width }) =>
-                    page === PHOTOS_PAGES.DEDUPLICATE ? (
-                        <DedupePhotoList
-                            width={width}
-                            height={height}
-                            getThumbnail={getThumbnail}
-                            duplicates={duplicates}
-                            activeCollectionID={activeCollectionID}
-                            showAppDownloadBanner={showAppDownloadBanner}
-                        />
-                    ) : (
-                        <PhotoList
-                            width={width}
-                            height={height}
-                            getThumbnail={getThumbnail}
-                            mode={mode}
-                            modePlus={modePlus}
-                            displayFiles={displayFiles}
-                            activeCollectionID={activeCollectionID}
-                            activePersonID={activePersonID}
-                            showAppDownloadBanner={showAppDownloadBanner}
-                        />
-                    )
-                }
+                {({ height, width }) => (
+                    <PhotoList
+                        width={width}
+                        height={height}
+                        getThumbnail={getThumbnail}
+                        mode={mode}
+                        modePlus={modePlus}
+                        displayFiles={displayFiles}
+                        activeCollectionID={activeCollectionID}
+                        activePersonID={activePersonID}
+                        showAppDownloadBanner={showAppDownloadBanner}
+                    />
+                )}
             </AutoSizer>
             <PhotoViewer
                 isOpen={open}
@@ -508,17 +524,18 @@ const PhotoFrame = ({
                 onClose={handleClose}
                 gettingData={getSlideData}
                 forceConvertItem={forceConvertItem}
-                favItemIds={favItemIds}
-                markTempDeleted={markTempDeleted}
                 isTrashCollection={activeCollectionID === TRASH_SECTION}
                 isInHiddenSection={isInHiddenSection}
                 enableDownload={enableDownload}
-                fileToCollectionsMap={fileToCollectionsMap}
-                collectionNameMap={collectionNameMap}
-                setFilesDownloadProgressAttributesCreator={
-                    setFilesDownloadProgressAttributesCreator
-                }
-                onSelectPerson={onSelectPerson}
+                {...{
+                    favoriteFileIDs,
+                    markUnsyncedFavoriteUpdate,
+                    markTempDeleted,
+                    collectionNameMap,
+                    fileToCollectionsMap,
+                    setFilesDownloadProgressAttributesCreator,
+                    onSelectPerson,
+                }}
             />
         </Container>
     );
@@ -546,7 +563,7 @@ const updateDisplayFileThumbnail = (file: DisplayFile, url: string) => {
 
 const updateDisplayFileSource = (
     file: DisplayFile,
-    srcURLs: SourceURLs,
+    srcURLs: RenderableSourceURLs,
     enableDownload: boolean,
 ) => {
     const { url } = srcURLs;
@@ -559,7 +576,16 @@ const updateDisplayFileSource = (
             : true;
     file.canForceConvert = srcURLs.canForceConvert;
     file.conversionFailed = !isRenderable;
-    file.srcURLs = srcURLs;
+    file.associatedImageURL = (() => {
+        switch (file.metadata.fileType) {
+            case FileType.image:
+                return srcURLs.url as string;
+            case FileType.livePhoto:
+                return (srcURLs.url as LoadedLivePhotoSourceURL).image;
+            default:
+                return undefined;
+        }
+    })();
     if (!isRenderable) {
         file.isSourceLoaded = true;
         return;
@@ -583,7 +609,7 @@ const updateDisplayFileSource = (
                 `;
         } else {
             const { image: imageURL, video: videoURL } =
-                url as LivePhotoSourceURL;
+                url as LoadedLivePhotoSourceURL;
 
             file.html = `
             <div class = 'pswp-item-container'>

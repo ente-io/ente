@@ -8,8 +8,8 @@ import log from "./log";
  * Return headers that should be passed alongwith (almost) all authenticated
  * `fetch` calls that we make to our API servers.
  *
- * -   The auth token
- * -   The client package name.
+ * - The auth token
+ * - The client package name.
  */
 export const authenticatedRequestHeaders = async () => ({
     "X-Auth-Token": await ensureAuthToken(),
@@ -20,7 +20,7 @@ export const authenticatedRequestHeaders = async () => ({
  * Return headers that should be passed alongwith (almost) all unauthenticated
  * `fetch` calls that we make to our API servers.
  *
- * -   The client package name.
+ * - The client package name.
  */
 export const publicRequestHeaders = () => ({
     "X-Client-Package": clientPackageName,
@@ -52,9 +52,9 @@ export interface PublicAlbumsCredentials {
  * Return headers that should be passed alongwith public collection related
  * authenticated `fetch` calls that we make to our API servers.
  *
- * -   The auth token.
- * -   The password protected auth token (if provided).
- * -   The client package name.
+ * - The auth token.
+ * - The password protected auth token (if provided).
+ * - The client package name.
  */
 export const authenticatedPublicAlbumsRequestHeaders = ({
     accessToken,

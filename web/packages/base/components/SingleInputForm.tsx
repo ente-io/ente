@@ -1,20 +1,12 @@
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import log from "@/base/log";
-import {
-    Box,
-    Dialog,
-    DialogContent,
-    DialogTitle,
-    TextField,
-    type TextFieldProps,
-} from "@mui/material";
+import { Stack, TextField, type TextFieldProps } from "@mui/material";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React from "react";
 
-type SingleInputFormProps = Pick<
+export type SingleInputFormProps = Pick<
     TextFieldProps,
     "label" | "placeholder" | "autoComplete" | "autoFocus"
 > & {
@@ -105,70 +97,23 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                 helperText={formik.errors.value ?? " "}
                 {...rest}
             />
-            <Box sx={{ display: "flex", gap: "12px" }}>
+            <Stack direction="row" sx={{ gap: "12px" }}>
                 <FocusVisibleButton
-                    size="large"
+                    fullWidth
                     color="secondary"
                     onClick={onCancel}
                 >
                     {t("cancel")}
                 </FocusVisibleButton>
                 <LoadingButton
-                    size="large"
+                    fullWidth
                     color="accent"
                     type="submit"
                     loading={formik.isSubmitting}
                 >
                     {submitButtonTitle}
                 </LoadingButton>
-            </Box>
+            </Stack>
         </form>
-    );
-};
-
-type SingleInputDialogProps = ModalVisibilityProps &
-    Omit<SingleInputFormProps, "onCancel"> & {
-        /** Title of the dialog. */
-        title: string;
-    };
-
-/**
- * A dialog that can be used to ask for a single text input using a
- * {@link SingleInputForm}.
- *
- * If the submission handler provided to this component resolves successfully,
- * then the dialog is closed.
- *
- * See also: {@link CollectionNamer}, its older sibling.
- */
-export const SingleInputDialog: React.FC<SingleInputDialogProps> = ({
-    open,
-    onClose,
-    onSubmit,
-    title,
-    ...rest
-}) => {
-    const handleSubmit = async (value: string) => {
-        await onSubmit(value);
-        onClose();
-    };
-
-    return (
-        <Dialog
-            open={open}
-            onClose={onClose}
-            maxWidth="xs"
-            fullWidth
-            PaperProps={{ sx: { padding: "8px 4px 4px 4px" } }}
-        >
-            <DialogTitle>{title}</DialogTitle>
-            <DialogContent sx={{ "&&&": { paddingBlockStart: 0 } }}>
-                <SingleInputForm
-                    onCancel={onClose}
-                    onSubmit={handleSubmit}
-                    {...rest}
-                />
-            </DialogContent>
-        </Dialog>
     );
 };

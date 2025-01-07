@@ -1,1 +1,1 @@
-Stockage de photos chiffré
+Stockage chiffré des photos

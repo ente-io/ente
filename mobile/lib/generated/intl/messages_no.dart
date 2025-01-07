@@ -425,8 +425,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "unselectAll": MessageLookupByLibrary.simpleMessage("Velg bort alle"),
         "updatingFolderSelection":
             MessageLookupByLibrary.simpleMessage("Oppdaterer mappevalg..."),
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
         "useRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Bruk gjenopprettingsnøkkel"),
         "verificationId":

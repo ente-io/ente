@@ -1,9 +1,11 @@
+import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { haveWindow } from "@/base/env";
 import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import type { Location } from "@/base/types";
@@ -24,7 +26,10 @@ import {
     confirmEnableMapsDialogAttributes,
 } from "@/new/photos/components/utils/dialog";
 import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
-import { fileInfoDrawerZIndex } from "@/new/photos/components/utils/z-index";
+import {
+    fileInfoDrawerZIndex,
+    photosDialogZIndex,
+} from "@/new/photos/components/utils/z-index";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import {
     getAnnotatedFacesForFile,
@@ -36,10 +41,15 @@ import { AppContext } from "@/new/photos/types/context";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import CopyButton from "@ente/shared/components/CopyButton";
+import SingleInputForm, {
+    type SingleInputFormProps,
+} from "@ente/shared/components/SingleInputForm";
 import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlinedIcon from "@mui/icons-material/CameraOutlined";
+import CloseIcon from "@mui/icons-material/Close";
+import DoneIcon from "@mui/icons-material/Done";
 import EditIcon from "@mui/icons-material/Edit";
 import FaceRetouchingNaturalIcon from "@mui/icons-material/FaceRetouchingNatural";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
@@ -55,17 +65,32 @@ import {
     Link,
     Stack,
     styled,
+    TextField,
     Typography,
 } from "@mui/material";
 import LinkButton from "components/pages/gallery/LinkButton";
+import type { DisplayFile } from "components/PhotoFrame";
+import { Formik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import React, { useContext, useEffect, useMemo, useState } from "react";
-import { changeFileName, updateExistingFilePubMetadata } from "utils/file";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+    changeCaption,
+    changeFileName,
+    updateExistingFilePubMetadata,
+} from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import { FileNameEditDialog } from "./FileNameEditDialog";
-import MapBox from "./MapBox";
-import { RenderCaption } from "./RenderCaption";
+import * as Yup from "yup";
+
+// Re-uses images from ~leaflet package.
+import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css";
+import "leaflet/dist/leaflet.css";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+haveWindow() && require("leaflet-defaulticon-compatibility");
+const leaflet = haveWindow()
+    ? // eslint-disable-next-line @typescript-eslint/no-require-imports
+      (require("leaflet") as typeof import("leaflet"))
+    : null;
 
 export interface FileInfoExif {
     tags: RawExifTags | undefined;
@@ -173,7 +198,13 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
             <Titlebar onClose={handleCloseInfo} title={t("info")} backIsClose />
-            <Stack pt={1} pb={3} spacing={"20px"}>
+            <Stack
+                spacing={"20px"}
+                sx={{
+                    pt: 1,
+                    pb: 3,
+                }}
+            >
                 <RenderCaption
                     {...{
                         file,
@@ -289,12 +320,14 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 )}
                 {showCollectionChips && (
                     <InfoItem icon={<FolderOutlinedIcon />}>
-                        <Box
-                            display={"flex"}
-                            gap={1}
-                            flexWrap="wrap"
-                            justifyContent={"flex-start"}
-                            alignItems={"flex-start"}
+                        <Stack
+                            direction="row"
+                            sx={{
+                                gap: 1,
+                                flexWrap: "wrap",
+                                justifyContent: "flex-start",
+                                alignItems: "flex-start",
+                            }}
                         >
                             {fileToCollectionsMap
                                 ?.get(file.id)
@@ -311,11 +344,10 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                         {collectionNameMap.get(collectionID)}
                                     </ChipButton>
                                 ))}
-                        </Box>
+                        </Stack>
                     </InfoItem>
                 )}
             </Stack>
-
             <RawExif
                 {...rawExifVisibilityProps}
                 onInfoClose={handleCloseInfo}
@@ -416,13 +448,9 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
     trailingButton,
     children,
 }) => (
-    <Box
-        sx={{
-            display: "flex",
-            alignItems: "flex-start",
-            flex: 1,
-            gap: "12px",
-        }}
+    <Stack
+        direction="row"
+        sx={{ alignItems: "flex-start", flex: 1, gap: "12px" }}
     >
         <InfoItemIconContainer>{icon}</InfoItemIconContainer>
         <Box sx={{ flex: 1, mt: "4px" }}>
@@ -435,10 +463,10 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
                     </Typography>
                     <Typography
                         variant="small"
-                        color="text.muted"
                         {...(typeof caption == "string"
                             ? {}
                             : { component: "div" })}
+                        sx={{ color: "text.muted" }}
                     >
                         {caption}
                     </Typography>
@@ -446,7 +474,7 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
             )}
         </Box>
         {trailingButton}
-    </Box>
+    </Stack>
 );
 
 const InfoItemIconContainer = styled("div")(
@@ -477,13 +505,131 @@ const EditButton: React.FC<EditButtonProps> = ({ onClick, loading }) => (
     </IconButton>
 );
 
+interface RenderCaptionFormValues {
+    caption: string;
+}
+
+function RenderCaption({
+    file,
+    scheduleUpdate,
+    refreshPhotoswipe,
+    shouldDisableEdits,
+}: {
+    shouldDisableEdits: boolean;
+    file: DisplayFile;
+    scheduleUpdate: () => void;
+    refreshPhotoswipe: () => void;
+}) {
+    const [caption, setCaption] = useState(
+        file?.pubMagicMetadata?.data.caption,
+    );
+
+    const [loading, setLoading] = useState(false);
+
+    const saveEdits = async (newCaption: string) => {
+        try {
+            if (file) {
+                if (caption === newCaption) {
+                    return;
+                }
+                setCaption(newCaption);
+
+                const updatedFile = await changeCaption(file, newCaption);
+                updateExistingFilePubMetadata(file, updatedFile);
+                file.title = file.pubMagicMetadata.data.caption;
+                refreshPhotoswipe();
+                scheduleUpdate();
+            }
+        } catch (e) {
+            log.error("failed to update caption", e);
+        }
+    };
+
+    const onSubmit = async (values: RenderCaptionFormValues) => {
+        try {
+            setLoading(true);
+            await saveEdits(values.caption);
+        } finally {
+            setLoading(false);
+        }
+    };
+    if (!caption?.length && shouldDisableEdits) {
+        return <></>;
+    }
+    return (
+        <Box sx={{ p: 1 }}>
+            <Formik<RenderCaptionFormValues>
+                initialValues={{ caption }}
+                validationSchema={Yup.object().shape({
+                    caption: Yup.string().max(
+                        5000,
+                        t("caption_character_limit"),
+                    ),
+                })}
+                validateOnBlur={false}
+                onSubmit={onSubmit}
+            >
+                {({
+                    values,
+                    errors,
+                    handleChange,
+                    handleSubmit,
+                    resetForm,
+                }) => (
+                    <form noValidate onSubmit={handleSubmit}>
+                        <TextField
+                            hiddenLabel
+                            fullWidth
+                            id="caption"
+                            name="caption"
+                            type="text"
+                            multiline
+                            placeholder={t("caption_placeholder")}
+                            value={values.caption}
+                            onChange={handleChange("caption")}
+                            error={Boolean(errors.caption)}
+                            helperText={errors.caption}
+                            disabled={loading || shouldDisableEdits}
+                        />
+                        {values.caption !== caption && (
+                            <FlexWrapper justifyContent={"flex-end"}>
+                                <IconButton type="submit" disabled={loading}>
+                                    {loading ? (
+                                        <CircularProgress
+                                            size={"18px"}
+                                            color="inherit"
+                                        />
+                                    ) : (
+                                        <DoneIcon />
+                                    )}
+                                </IconButton>
+                                <IconButton
+                                    onClick={() =>
+                                        resetForm({
+                                            values: { caption: caption ?? "" },
+                                            touched: { caption: false },
+                                        })
+                                    }
+                                    disabled={loading}
+                                >
+                                    <CloseIcon />
+                                </IconButton>
+                            </FlexWrapper>
+                        )}
+                    </form>
+                )}
+            </Formik>
+        </Box>
+    );
+}
+
 interface CreationTimeProps {
     file: EnteFile;
     shouldDisableEdits: boolean;
     scheduleUpdate: () => void;
 }
 
-export const CreationTime: React.FC<CreationTimeProps> = ({
+const CreationTime: React.FC<CreationTimeProps> = ({
     file,
     shouldDisableEdits,
     scheduleUpdate,
@@ -653,6 +799,46 @@ const getCaption = (file: EnteFile, exifInfo: ExifInfo | undefined) => {
     );
 };
 
+const FileNameEditDialog = ({
+    isInEditMode,
+    closeEditMode,
+    filename,
+    extension,
+    saveEdits,
+}) => {
+    const onSubmit: SingleInputFormProps["callback"] = async (
+        filename,
+        setFieldError,
+    ) => {
+        try {
+            await saveEdits(filename);
+            closeEditMode();
+        } catch (e) {
+            log.error(e);
+            setFieldError(t("generic_error_retry"));
+        }
+    };
+    return (
+        <TitledMiniDialog
+            sx={{ zIndex: photosDialogZIndex }}
+            open={isInEditMode}
+            onClose={closeEditMode}
+            title={t("rename_file")}
+        >
+            <SingleInputForm
+                initialValue={filename}
+                callback={onSubmit}
+                placeholder={t("enter_file_name")}
+                buttonText={t("rename")}
+                fieldType="text"
+                caption={extension}
+                secondaryButtonAction={closeEditMode}
+                submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
+            />
+        </TitledMiniDialog>
+    );
+};
+
 const BasicDeviceCamera: React.FC<{ parsedExif: ExifInfo }> = ({
     parsedExif,
 }) => {
@@ -667,6 +853,73 @@ const BasicDeviceCamera: React.FC<{ parsedExif: ExifInfo }> = ({
 
 const openStreetMapLink = ({ latitude, longitude }: Location) =>
     `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=15/${latitude}/${longitude}`;
+
+interface MapBoxProps {
+    location: Location;
+    mapEnabled: boolean;
+    openUpdateMapConfirmationDialog: () => void;
+}
+
+const MapBox: React.FC<MapBoxProps> = ({
+    location,
+    mapEnabled,
+    openUpdateMapConfirmationDialog,
+}) => {
+    const urlTemplate = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+    const attribution =
+        '&copy; <a target="_blank" rel="noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+    const zoom = 16;
+
+    const mapBoxContainerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const mapContainer = mapBoxContainerRef.current;
+        if (mapEnabled) {
+            const position: L.LatLngTuple = [
+                location.latitude,
+                location.longitude,
+            ];
+            if (mapContainer && !mapContainer.hasChildNodes()) {
+                const map = leaflet.map(mapContainer).setView(position, zoom);
+                leaflet
+                    .tileLayer(urlTemplate, {
+                        attribution,
+                    })
+                    .addTo(map);
+                leaflet.marker(position).addTo(map).openPopup();
+            }
+        } else {
+            if (mapContainer?.hasChildNodes()) {
+                if (mapContainer.firstChild) {
+                    mapContainer.removeChild(mapContainer.firstChild);
+                }
+            }
+        }
+    }, [mapEnabled]);
+
+    return mapEnabled ? (
+        <MapBoxContainer ref={mapBoxContainerRef} />
+    ) : (
+        <MapBoxEnableContainer>
+            <ChipButton onClick={openUpdateMapConfirmationDialog}>
+                {t("enable_map")}
+            </ChipButton>
+        </MapBoxEnableContainer>
+    );
+};
+
+const MapBoxContainer = styled("div")`
+    height: 200px;
+    width: 100%;
+`;
+
+const MapBoxEnableContainer = styled(MapBoxContainer)`
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.09);
+`;
 
 interface RawExifProps {
     open: boolean;
@@ -731,22 +984,24 @@ const RawExif: React.FC<RawExifProps> = ({
                     />
                 }
             />
-            <Stack py={3} px={1} spacing={2}>
+            <Stack sx={{ gap: 2, py: 3, px: 1 }}>
                 {items.map(([key, namespace, tagName, description]) => (
                     <ExifItem key={key}>
-                        <Stack direction={"row"} gap={1}>
-                            <Typography variant="small" color={"text.muted"}>
+                        <Stack direction="row" sx={{ gap: 1 }}>
+                            <Typography
+                                variant="small"
+                                sx={{ color: "text.muted" }}
+                            >
                                 {tagName}
                             </Typography>
-                            <Typography variant="tiny" color={"text.faint"}>
+                            <Typography
+                                variant="tiny"
+                                sx={{ color: "text.faint" }}
+                            >
                                 {namespace}
                             </Typography>
                         </Stack>
-                        <EllipsizedTypography
-                            sx={{
-                                width: "100%",
-                            }}
-                        >
+                        <EllipsizedTypography sx={{ width: "100%" }}>
                             {description}
                         </EllipsizedTypography>
                     </ExifItem>
@@ -756,7 +1011,7 @@ const RawExif: React.FC<RawExifProps> = ({
     );
 };
 
-const ExifItem = styled(Box)`
+const ExifItem = styled("div")`
     padding-left: 8px;
     padding-right: 8px;
     display: flex;

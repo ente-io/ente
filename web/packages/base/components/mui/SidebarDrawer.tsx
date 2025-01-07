@@ -1,5 +1,5 @@
-import ArrowBack from "@mui/icons-material/ArrowBack";
-import Close from "@mui/icons-material/Close";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
     Drawer,
@@ -116,23 +116,26 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
     <Stack sx={{ gap: "4px" }}>
         <SpaceBetweenFlex sx={{ minHeight: "48px" }}>
             <IconButton onClick={onClose} color={"primary"}>
-                <ArrowBack />
+                <ArrowBackIcon />
             </IconButton>
-            <Box display={"flex"} gap="4px">
+            <Stack direction="row" sx={{ gap: "4px" }}>
                 {actionButton && actionButton}
                 <IconButton onClick={onRootClose} color={"secondary"}>
-                    <Close />
+                    <CloseIcon />
                 </IconButton>
-            </Box>
+            </Stack>
         </SpaceBetweenFlex>
         <Box sx={{ px: "16px", py: "4px" }}>
-            <Typography variant="h3" fontWeight={"bold"}>
+            <Typography variant="h3" sx={{ fontWeight: "bold" }}>
                 {title}
             </Typography>
             <Typography
                 variant="small"
-                color="text.muted"
-                sx={{ wordBreak: "break-all", minHeight: "17px" }}
+                sx={{
+                    color: "text.muted",
+                    wordBreak: "break-all",
+                    minHeight: "17px",
+                }}
             >
                 {caption}
             </Typography>

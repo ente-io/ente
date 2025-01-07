@@ -1,3 +1,5 @@
+import type { ButtonishProps } from "@/base/components/mui";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     errorDialogAttributes,
     genericRetriableErrorDialogAttributes,
@@ -34,13 +36,12 @@ import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { openURL } from "@/new/photos/utils/web";
 import {
     FlexWrapper,
-    FluidContainer,
     SpaceBetweenFlex,
 } from "@ente/shared/components/Container";
-import ArrowForward from "@mui/icons-material/ArrowForward";
-import ChevronRight from "@mui/icons-material/ChevronRight";
-import Close from "@mui/icons-material/Close";
-import Done from "@mui/icons-material/Done";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CloseIcon from "@mui/icons-material/Close";
+import DoneIcon from "@mui/icons-material/Done";
 import {
     Button,
     type ButtonProps,
@@ -229,7 +230,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
     );
 
     return (
-        <Stack spacing={3} p={1.5}>
+        <Stack sx={{ gap: 3, p: 1.5 }}>
             {subscription && isSubscriptionActivePaid(subscription) ? (
                 <PaidSubscriptionPlanSelectorCard
                     {...commonCardData}
@@ -308,7 +309,7 @@ const FreeSubscriptionPlanSelectorCard: React.FC<
     children,
 }) => (
     <>
-        <Typography variant="h3" fontWeight={"bold"}>
+        <Typography variant="h3" sx={{ fontWeight: "bold" }}>
             {t("choose_plan")}
         </Typography>
         <Box>
@@ -318,7 +319,10 @@ const FreeSubscriptionPlanSelectorCard: React.FC<
                         planPeriod={planPeriod}
                         togglePeriod={togglePeriod}
                     />
-                    <Typography variant="small" mt={0.5} color="text.muted">
+                    <Typography
+                        variant="small"
+                        sx={{ mt: 0.5, color: "text.muted" }}
+                    >
                         {t("two_months_free")}
                     </Typography>
                 </Box>
@@ -358,25 +362,25 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
     children,
 }) => (
     <>
-        <Box pl={1.5} py={0.5}>
+        <Box sx={{ pl: 1.5, py: 0.5 }}>
             <SpaceBetweenFlex>
                 <Box>
-                    <Typography variant="h3" fontWeight={"bold"}>
+                    <Typography variant="h3" sx={{ fontWeight: "bold" }}>
                         {t("subscription")}
                     </Typography>
-                    <Typography variant="small" color={"text.muted"}>
+                    <Typography variant="small" sx={{ color: "text.muted" }}>
                         {bytesInGB(subscription.storage, 2)}{" "}
                         {t("storage_unit.gb")}
                     </Typography>
                 </Box>
                 <IconButton onClick={onClose} color="secondary">
-                    <Close />
+                    <CloseIcon />
                 </IconButton>
             </SpaceBetweenFlex>
         </Box>
 
-        <Box px={1.5}>
-            <Typography color={"text.muted"} fontWeight={"bold"}>
+        <Box sx={{ px: 1.5 }}>
+            <Typography sx={{ color: "text.muted", fontWeight: "bold" }}>
                 <Trans
                     i18nKey="current_usage"
                     values={{
@@ -388,25 +392,30 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
 
         <Box>
             <Stack
-                spacing={3}
-                border={(theme) => `1px solid ${theme.palette.divider}`}
-                p={1.5}
-                borderRadius={(theme) => `${theme.shape.borderRadius}px`}
+                sx={(theme) => ({
+                    border: `1px solid ${theme.palette.divider}`,
+                    borderRadius: `${theme.shape.borderRadius}px`,
+                    gap: 3,
+                    p: 1.5,
+                })}
             >
                 <Box>
                     <PeriodToggler
                         planPeriod={planPeriod}
                         togglePeriod={togglePeriod}
                     />
-                    <Typography variant="small" mt={0.5} color="text.muted">
+                    <Typography
+                        variant="small"
+                        sx={{ mt: 0.5, color: "text.muted" }}
+                    >
                         {t("two_months_free")}
                     </Typography>
                 </Box>
                 {children}
             </Stack>
 
-            <Box py={1} px={1.5}>
-                <Typography color={"text.muted"}>
+            <Box sx={{ py: 1, px: 1.5 }}>
+                <Typography sx={{ color: "text.muted" }}>
                     {!isSubscriptionCancelled(subscription)
                         ? t("subscription_status_renewal_active", {
                               date: subscription.expiryTime,
@@ -498,10 +507,8 @@ const Plans: React.FC<PlansProps> = ({
                             isSubscriptionForPlan(subscription, plan)
                         )
                     }
-                    popular={isPopularPlan(plan)}
                     key={plan.stripeID}
                     plan={plan}
-                    subscription={subscription}
                     onPlanSelect={onPlanSelect}
                 />
             ))}
@@ -516,58 +523,41 @@ const Plans: React.FC<PlansProps> = ({
     </Stack>
 );
 
-const isPopularPlan = (plan: Plan) =>
-    plan.storage === 100 * 1024 * 1024 * 1024; /* 100 GB */
-
 interface PlanRowProps {
     plan: Plan;
-    subscription: Subscription | undefined;
     onPlanSelect: (plan: Plan) => void;
     disabled: boolean;
-    popular: boolean;
 }
 
-const PlanRow: React.FC<PlanRowProps> = ({
-    plan,
-    subscription,
-    onPlanSelect,
-    disabled,
-    popular,
-}) => {
+const PlanRow: React.FC<PlanRowProps> = ({ plan, onPlanSelect, disabled }) => {
     const handleClick = () => !disabled && onPlanSelect(plan);
 
     const PlanButton = disabled ? DisabledPlanButton : ActivePlanButton;
 
     return (
         <PlanRowContainer>
-            <TopAlignedFluidContainer>
+            <PlanStorage>
                 <Typography variant="h1">{bytesInGB(plan.storage)}</Typography>
-                <FlexWrapper flexWrap={"wrap"} gap={1}>
-                    <Typography variant="h3" color="text.muted">
-                        {t("storage_unit.gb")}
-                    </Typography>
-                    {popular &&
-                        !(
-                            subscription &&
-                            isSubscriptionActivePaid(subscription)
-                        ) && <Badge>{t("POPULAR")}</Badge>}
-                </FlexWrapper>
-            </TopAlignedFluidContainer>
-            <Box width="136px">
+                <Typography variant="h3" sx={{ color: "text.muted" }}>
+                    {t("storage_unit.gb")}
+                </Typography>
+            </PlanStorage>
+            <Box sx={{ width: "136px" }}>
                 <PlanButton
                     sx={{
                         justifyContent: "flex-end",
                         borderTopLeftRadius: 0,
                         borderBottomLeftRadius: 0,
                     }}
-                    size="large"
+                    fullWidth
                     onClick={handleClick}
                 >
-                    <Box textAlign={"right"}>
-                        <Typography fontWeight={"bold"} variant="large">
-                            {plan.price}{" "}
-                        </Typography>{" "}
-                        <Typography color="text.muted" variant="small">
+                    <Box sx={{ textAlign: "right" }}>
+                        <Typography variant="h6">{plan.price}</Typography>
+                        <Typography
+                            variant="small"
+                            sx={{ color: "text.muted" }}
+                        >
                             {`/ ${
                                 plan.period === "month"
                                     ? t("month_short")
@@ -586,12 +576,14 @@ const PlanRowContainer = styled(FlexWrapper)(() => ({
         "linear-gradient(268.22deg, rgba(256, 256, 256, 0.08) -3.72%, rgba(256, 256, 256, 0) 85.73%)",
 }));
 
-const TopAlignedFluidContainer = styled(FluidContainer)`
+const PlanStorage = styled("div")`
+    flex: 1;
+    display: flex;
     align-items: flex-start;
 `;
 
 const DisabledPlanButton = styled((props: ButtonProps) => (
-    <Button disabled endIcon={<Done />} {...props} />
+    <Button disabled endIcon={<DoneIcon />} {...props} />
 ))(({ theme }) => ({
     "&.Mui-disabled": {
         backgroundColor: "transparent",
@@ -600,7 +592,7 @@ const DisabledPlanButton = styled((props: ButtonProps) => (
 }));
 
 const ActivePlanButton = styled((props: ButtonProps) => (
-    <Button color="accent" {...props} endIcon={<ArrowForward />} />
+    <Button color="accent" {...props} endIcon={<ArrowForwardIcon />} />
 ))(() => ({
     ".MuiButton-endIcon": {
         transition: "transform .2s ease-in-out",
@@ -608,16 +600,6 @@ const ActivePlanButton = styled((props: ButtonProps) => (
     "&:hover .MuiButton-endIcon": {
         transform: "translateX(4px)",
     },
-}));
-
-const Badge = styled(Box)(({ theme }) => ({
-    borderRadius: theme.shape.borderRadius,
-    padding: "2px 4px",
-    backgroundColor: theme.colors.black.muted,
-    backdropFilter: `blur(${theme.colors.blur.muted})`,
-    color: theme.colors.white.base,
-    textTransform: "uppercase",
-    ...theme.typography.mini,
 }));
 
 interface FreePlanRowProps {
@@ -629,14 +611,14 @@ const FreePlanRow: React.FC<FreePlanRowProps> = ({ onClose, storage }) => (
     <FreePlanRow_ onClick={onClose}>
         <Box>
             <Typography>{t("free_plan_option")}</Typography>
-            <Typography variant="small" color="text.muted">
+            <Typography variant="small" sx={{ color: "text.muted" }}>
                 {t("free_plan_description", {
                     storage: formattedStorageByteSize(storage),
                 })}
             </Typography>
         </Box>
         <IconButton className={"endIcon"}>
-            <ArrowForward />
+            <ArrowForwardIcon />
         </IconButton>
     </FreePlanRow_>
 );
@@ -657,7 +639,7 @@ interface AddOnBonusRowsProps {
 const AddOnBonusRows: React.FC<AddOnBonusRowsProps> = ({ addOnBonuses }) => (
     <>
         {addOnBonuses.map((bonus, i) => (
-            <Typography color="text.muted" key={i} sx={{ pt: 1 }}>
+            <Typography key={i} sx={{ color: "text.muted", pt: 1 }}>
                 <Trans
                     i18nKey={"add_on_valid_till"}
                     values={{
@@ -703,10 +685,7 @@ function ManageSubscription({
                     {...{ onClose, subscription, hasAddOnBonus }}
                 />
             )}
-            <ManageSubscriptionButton
-                color="secondary"
-                onClick={openFamilyPortal}
-            >
+            <ManageSubscriptionButton onClick={openFamilyPortal}>
                 {t("manage_family")}
             </ManageSubscriptionButton>
         </Stack>
@@ -784,35 +763,30 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
     return (
         <>
             {isSubscriptionCancelled(subscription) ? (
-                <ManageSubscriptionButton
-                    color="secondary"
-                    onClick={confirmReactivation}
-                >
+                <ManageSubscriptionButton onClick={confirmReactivation}>
                     {t("reactivate_subscription")}
                 </ManageSubscriptionButton>
             ) : (
-                <ManageSubscriptionButton
-                    color="secondary"
-                    onClick={confirmCancel}
-                >
+                <ManageSubscriptionButton onClick={confirmCancel}>
                     {t("cancel_subscription")}
                 </ManageSubscriptionButton>
             )}
-            <ManageSubscriptionButton
-                color="secondary"
-                onClick={handleManageClick}
-            >
+            <ManageSubscriptionButton onClick={handleManageClick}>
                 {t("manage_payment_method")}
             </ManageSubscriptionButton>
         </>
     );
 };
 
-const ManageSubscriptionButton: React.FC<ButtonProps> = ({
-    children,
-    ...props
-}) => (
-    <Button size="large" endIcon={<ChevronRight />} {...props}>
-        <FluidContainer>{children}</FluidContainer>
-    </Button>
+const ManageSubscriptionButton: React.FC<
+    React.PropsWithChildren<ButtonishProps>
+> = ({ onClick, children }) => (
+    <FocusVisibleButton
+        fullWidth
+        color="secondary"
+        endIcon={<ChevronRightIcon />}
+        {...{ onClick }}
+    >
+        <Box sx={{ flex: 1, textAlign: "left" }}>{children}</Box>
+    </FocusVisibleButton>
 );

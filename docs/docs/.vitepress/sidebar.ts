@@ -231,11 +231,14 @@ export const sidebar = [
         collapsed: true,
         items: [
             { text: "Getting started", link: "/self-hosting/" },
-            { text: "System requirements", link: "/self-hosting/guides/system-requirements", },
+            {
+                text: "System requirements",
+                link: "/self-hosting/guides/system-requirements",
+            },
             {
                 text: "Guides",
                 items: [
-                    { text: "Introduction", link: "/self-hosting/guides/" },  
+                    { text: "Introduction", link: "/self-hosting/guides/" },
                     {
                         text: "Connect to custom server",
                         link: "/self-hosting/guides/custom-server/",
@@ -271,8 +274,8 @@ export const sidebar = [
                     },
                     {
                         text: "Configure CLI for Self Hosted Instance",
-                        link: "/self-hosting/guides/selfhost-cli"
-                    }
+                        link: "/self-hosting/guides/selfhost-cli",
+                    },
                 ],
             },
             {

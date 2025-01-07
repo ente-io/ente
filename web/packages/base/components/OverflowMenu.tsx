@@ -1,22 +1,22 @@
-import { FluidContainer } from "@ente/shared/components/Container";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import {
-    Box,
     IconButton,
     MenuItem,
-    styled,
+    Stack,
     Typography,
-    type ButtonProps,
     type IconButtonProps,
     type PaperProps,
 } from "@mui/material";
 import Menu, { type MenuProps } from "@mui/material/Menu";
 import React, { createContext, useContext, useMemo, useState } from "react";
 
-const OverflowMenuContext = createContext({
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    close: () => {},
-});
+interface OverflowMenuContextT {
+    close: () => void;
+}
+
+const OverflowMenuContext = createContext<OverflowMenuContextT | undefined>(
+    undefined,
+);
 
 interface OverflowMenuProps {
     /**
@@ -39,22 +39,6 @@ interface OverflowMenuProps {
      */
     menuPaperProps?: Partial<PaperProps>;
 }
-
-/**
- * A custom MUI {@link Menu} with some Ente specific styling applied to it.
- */
-export const StyledMenu = styled(Menu)`
-    & .MuiPaper-root {
-        margin: 16px auto;
-        box-shadow:
-            0px 0px 6px rgba(0, 0, 0, 0.16),
-            0px 3px 6px rgba(0, 0, 0, 0.12);
-    }
-    & .MuiList-root {
-        padding: 0;
-        border: none;
-    }
-`;
 
 /**
  * An overflow menu showing {@link OverflowMenuOptions}, alongwith a button to
@@ -85,54 +69,54 @@ export const OverflowMenu: React.FC<
             >
                 {triggerButtonIcon ?? <MoreHorizIcon />}
             </IconButton>
-            <StyledMenu
+            <Menu
                 id={ariaID}
                 {...(anchorEl ? { anchorEl } : {})}
                 open={!!anchorEl}
                 onClose={() => setAnchorEl(undefined)}
                 MenuListProps={{
+                    // Disable padding at the top and bottom of the menu list.
                     disablePadding: true,
                     "aria-labelledby": ariaID,
                 }}
-                slotProps={{
-                    paper: menuPaperProps,
-                }}
-                anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "right",
-                }}
-                transformOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                }}
+                slotProps={{ paper: menuPaperProps }}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
             >
                 {children}
-            </StyledMenu>
+            </Menu>
         </OverflowMenuContext.Provider>
     );
 };
 
 interface OverflowMenuOptionProps {
+    /**
+     * Called when the menu option is clicked.
+     */
     onClick: () => void;
-    color?: ButtonProps["color"];
+    /**
+     * The color of the text and icons.
+     *
+     * Default: "primary".
+     */
+    color?: "primary" | "critical";
+    /**
+     * An optional icon to show at the leading edge of the menu option.
+     */
     startIcon?: React.ReactNode;
+    /**
+     * An optional icon to show at the trailing edge of the menu option.
+     */
     endIcon?: React.ReactNode;
-    children?: any;
-    // To avoid changing old places without an audit, new code should use this
-    // option explicitly to fix/tweak the alignment of the button label and
-    // icon. Once all existing uses have migrated, can change the default.
-    centerAlign?: boolean;
 }
 
-export const OverflowMenuOption: React.FC<OverflowMenuOptionProps> = ({
-    onClick,
-    color = "primary",
-    startIcon,
-    endIcon,
-    centerAlign,
-    children,
-}) => {
-    const menuContext = useContext(OverflowMenuContext);
+/**
+ * Individual options meant to be shown inside an {@link OverflowMenu}.
+ */
+export const OverflowMenuOption: React.FC<
+    React.PropsWithChildren<OverflowMenuOptionProps>
+> = ({ onClick, color = "primary", startIcon, endIcon, children }) => {
+    const menuContext = useContext(OverflowMenuContext)!;
 
     const handleClick = () => {
         onClick();
@@ -142,39 +126,33 @@ export const OverflowMenuOption: React.FC<OverflowMenuOptionProps> = ({
     return (
         <MenuItem
             onClick={handleClick}
-            sx={{
+            sx={(theme) => ({
                 minWidth: 220,
-                color: (theme) => theme.palette[color].main,
-                padding: 1.5,
+                color: theme.palette[color].main,
+                // Reduce the size of the icons a bit to make it fit better with
+                // the text.
                 "& .MuiSvgIcon-root": {
                     fontSize: "20px",
                 },
-            }}
+            })}
         >
-            <FluidContainer>
-                {startIcon && (
-                    <Box
-                        sx={{
-                            padding: 0,
-                            marginBlockStart: centerAlign ? "6px" : 0,
-                            marginRight: 1.5,
-                        }}
-                    >
-                        {startIcon}
-                    </Box>
-                )}
-                <Typography fontWeight="bold">{children}</Typography>
-            </FluidContainer>
-            {endIcon && (
-                <Box
-                    sx={{
-                        padding: 0,
-                        marginLeft: 1,
-                    }}
-                >
-                    {endIcon}
-                </Box>
-            )}
+            <Stack
+                direction="row"
+                sx={{
+                    gap: 1.5,
+                    alignItems: "center",
+                    // Fill our container.
+                    width: "100%",
+                    // MUI has responsive padding, use a static value instead.
+                    paddingBlock: 1,
+                }}
+            >
+                {startIcon}
+                <Typography sx={{ flex: 1, fontWeight: "bold" }}>
+                    {children}
+                </Typography>
+                {endIcon}
+            </Stack>
         </MenuItem>
     );
 };

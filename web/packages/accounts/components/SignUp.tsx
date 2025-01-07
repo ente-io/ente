@@ -16,7 +16,7 @@ import {
     setLocalReferralSource,
 } from "@ente/shared/storage/localStorage/helpers";
 import { SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Box,
     Checkbox,
@@ -136,7 +136,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                 }}
                 validationSchema={Yup.object().shape({
                     email: Yup.string()
-                        .email(t("EMAIL_ERROR"))
+                        .email(t("invalid_email_error"))
                         .required(t("required")),
                     passphrase: Yup.string().required(t("required")),
                     confirm: Yup.string().required(t("required")),
@@ -159,7 +159,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                 name="email"
                                 autoComplete="username"
                                 type="email"
-                                label={t("ENTER_EMAIL")}
+                                label={t("enter_email")}
                                 value={values.email}
                                 onChange={handleChange("email")}
                                 error={Boolean(errors.email)}
@@ -180,18 +180,20 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                 error={Boolean(errors.passphrase)}
                                 helperText={errors.passphrase}
                                 disabled={loading}
-                                InputProps={{
-                                    endAdornment: (
-                                        <ShowHidePassword
-                                            showPassword={showPassword}
-                                            handleClickShowPassword={
-                                                handleClickShowPassword
-                                            }
-                                            handleMouseDownPassword={
-                                                handleMouseDownPassword
-                                            }
-                                        />
-                                    ),
+                                slotProps={{
+                                    input: {
+                                        endAdornment: (
+                                            <ShowHidePassword
+                                                showPassword={showPassword}
+                                                handleClickShowPassword={
+                                                    handleClickShowPassword
+                                                }
+                                                handleMouseDownPassword={
+                                                    handleMouseDownPassword
+                                                }
+                                            />
+                                        ),
+                                    },
                                 }}
                             />
 
@@ -214,31 +216,16 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
 
                             <Box sx={{ width: "100%" }}>
                                 <Typography
-                                    textAlign={"left"}
-                                    color="text.secondary"
-                                    mt={"24px"}
+                                    sx={{
+                                        textAlign: "left",
+                                        color: "text.secondary",
+                                        mt: "24px",
+                                    }}
                                 >
                                     {t("REFERRAL_CODE_HINT")}
                                 </Typography>
                                 <TextField
                                     hiddenLabel
-                                    InputProps={{
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                <Tooltip
-                                                    title={t("REFERRAL_INFO")}
-                                                >
-                                                    <IconButton
-                                                        tabIndex={-1}
-                                                        color="secondary"
-                                                        edge={"end"}
-                                                    >
-                                                        <InfoOutlined />
-                                                    </IconButton>
-                                                </Tooltip>
-                                            </InputAdornment>
-                                        ),
-                                    }}
                                     fullWidth
                                     name="referral"
                                     type="text"
@@ -246,6 +233,27 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                     onChange={handleChange("referral")}
                                     error={Boolean(errors.referral)}
                                     disabled={loading}
+                                    slotProps={{
+                                        input: {
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <Tooltip
+                                                        title={t(
+                                                            "REFERRAL_INFO",
+                                                        )}
+                                                    >
+                                                        <IconButton
+                                                            tabIndex={-1}
+                                                            color="secondary"
+                                                            edge={"end"}
+                                                        >
+                                                            <InfoOutlinedIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </InputAdornment>
+                                            ),
+                                        },
+                                    }}
                                 />
                             </Box>
                             <FormGroup sx={{ width: "100%" }}>
@@ -291,7 +299,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                 />
                             </FormGroup>
                         </VerticallyCentered>
-                        <Box mb={4}>
+                        <Box sx={{ mb: 4 }}>
                             <LoadingButton
                                 fullWidth
                                 color="accent"
@@ -306,10 +314,12 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                             </LoadingButton>
                             {loading && (
                                 <Typography
-                                    mt={1}
-                                    textAlign={"center"}
-                                    color="text.muted"
                                     variant="small"
+                                    sx={{
+                                        mt: 1,
+                                        textAlign: "center",
+                                        color: "text.muted",
+                                    }}
                                 >
                                     {t("key_generation_in_progress")}
                                 </Typography>
@@ -318,17 +328,15 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                     </form>
                 )}
             </Formik>
-
             <FormPaperFooter>
-                <Stack gap={4}>
+                <Stack sx={{ gap: 4 }}>
                     <LinkButton onClick={login}>
                         {t("ACCOUNT_EXISTS")}
                     </LinkButton>
 
                     <Typography
                         variant="mini"
-                        color="text.faint"
-                        minHeight={"32px"}
+                        sx={{ color: "text.faint", minHeight: "32px" }}
                     >
                         {host ?? "" /* prevent layout shift with a minHeight */}
                     </Typography>

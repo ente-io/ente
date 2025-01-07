@@ -5,11 +5,6 @@ import (
 	"database/sql"
 	b64 "encoding/base64"
 	"fmt"
-	"github.com/ente-io/museum/ente/base"
-	"github.com/ente-io/museum/pkg/controller/emergency"
-	"github.com/ente-io/museum/pkg/controller/file_copy"
-	"github.com/ente-io/museum/pkg/controller/filedata"
-	emergencyRepo "github.com/ente-io/museum/pkg/repo/emergency"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,6 +13,12 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/ente-io/museum/ente/base"
+	"github.com/ente-io/museum/pkg/controller/emergency"
+	"github.com/ente-io/museum/pkg/controller/file_copy"
+	"github.com/ente-io/museum/pkg/controller/filedata"
+	emergencyRepo "github.com/ente-io/museum/pkg/repo/emergency"
 
 	"github.com/ente-io/museum/pkg/repo/two_factor_recovery"
 
@@ -92,6 +93,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	viper.SetDefault("apps.public-albums", "https://albums.ente.io")
+	viper.SetDefault("apps.accounts", "https://accounts.ente.io")
+	viper.SetDefault("apps.cast", "https://cast.ente.io")
+	viper.SetDefault("apps.family", "https://family.ente.io")
 
 	setupLogger(environment)
 	log.Infof("Booting up %s server with commit #%s", environment, os.Getenv("GIT_COMMIT"))
@@ -198,7 +204,7 @@ func main() {
 	plans := billing.GetPlans()
 	defaultPlan := billing.GetDefaultPlans(plans)
 	stripeClients := billing.GetStripeClients()
-	commonBillController := commonbilling.NewController(storagBonusRepo, userRepo, usageRepo)
+	commonBillController := commonbilling.NewController(emailNotificationCtrl, storagBonusRepo, userRepo, usageRepo, billingRepo)
 	appStoreController := controller.NewAppStoreController(defaultPlan,
 		billingRepo, fileRepo, userRepo, commonBillController)
 	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository}
@@ -300,6 +306,7 @@ func main() {
 
 	collectionController := &controller.CollectionController{
 		CollectionRepo:       collectionRepo,
+		EmailCtrl:            emailNotificationCtrl,
 		AccessCtrl:           accessCtrl,
 		PublicCollectionCtrl: publicCollectionCtrl,
 		UserRepo:             userRepo,
@@ -463,9 +470,10 @@ func main() {
 	privateAPI.POST("/trash/empty", trashHandler.Empty)
 
 	emergencyCtrl := &emergency.Controller{
-		Repo:     &emergencyRepo.Repository{DB: db},
-		UserRepo: userRepo,
-		UserCtrl: userController,
+		Repo:              &emergencyRepo.Repository{DB: db},
+		UserRepo:          userRepo,
+		UserCtrl:          userController,
+		PasskeyController: passkeyCtrl,
 	}
 	userHandler := &api.UserHandler{
 		UserController:      userController,
@@ -529,6 +537,7 @@ func main() {
 	privateAPI.GET("/collections", collectionHandler.Get)
 	privateAPI.GET("/collections/v2", collectionHandler.GetV2)
 	privateAPI.POST("/collections/share", collectionHandler.Share)
+	privateAPI.POST("/collections/join-link", collectionHandler.JoinLink)
 	privateAPI.POST("/collections/share-url", collectionHandler.ShareURL)
 	privateAPI.PUT("/collections/share-url", collectionHandler.UpdateShareURL)
 	privateAPI.DELETE("/collections/share-url/:collectionID", collectionHandler.UnShareURL)
@@ -1001,7 +1010,9 @@ func cors() gin.HandlerFunc {
 		c.Writer.Header().Set("Access-Control-Max-Age", "1728000")
 
 		if c.Request.Method == http.MethodOptions {
-			c.AbortWithStatus(http.StatusNoContent)
+			// While 204 No Content is more appropriate, Safari intermittently
+			// (intermittently!) fails CORS if we return 204 instead of 200 OK.
+			c.Status(http.StatusOK)
 			return
 		}
 		c.Next()

@@ -121,8 +121,9 @@ class IconUtils {
           context,
         );
       } else if (_simpleIcons.containsKey(title)) {
+        final simpleIconPath = normalizeSimpleIconName(title);
         return getSVGIcon(
-          "assets/simple-icons/icons/$title.svg",
+          "assets/simple-icons/icons/$simpleIconPath.svg",
           title,
           _simpleIcons[title],
           width,
@@ -199,7 +200,7 @@ class IconUtils {
       final simpleIconData = await rootBundle
           .loadString('assets/simple-icons/_data/simple-icons.json');
       final simpleIcons = json.decode(simpleIconData);
-      for (final icon in simpleIcons["icons"]) {
+      for (final icon in simpleIcons) {
         _simpleIcons[icon["title"]
             .toString()
             .replaceAll(' ', '')
@@ -220,14 +221,14 @@ class IconUtils {
           for (final name in icon["altNames"]) {
             _customIcons[name.toString().replaceAll(' ', '').toLowerCase()] =
                 CustomIconData(
-              icon["slug"],
+              icon["slug"] ?? ((icon["title"] as String).toLowerCase()),
               icon["hex"],
             );
           }
         }
       }
-    } catch (e) {
-      Logger("IconUtils").severe("Error loading icons", e);
+    } catch (e, s) {
+      Logger("IconUtils").severe("Error loading icons", e, s);
       if (kDebugMode) {
         rethrow;
       }
@@ -244,4 +245,44 @@ class CustomIconData {
   final String? color;
 
   CustomIconData(this.slug, this.color);
+}
+
+final charMap = {
+  'á': 'a',
+  'à': 'a',
+  'â': 'a',
+  'ä': 'a',
+  'é': 'e',
+  'è': 'e',
+  'ê': 'e',
+  'ë': 'e',
+  'í': 'i',
+  'ì': 'i',
+  'î': 'i',
+  'ï': 'i',
+  'ó': 'o',
+  'ò': 'o',
+  'ô': 'o',
+  'ö': 'o',
+  'ú': 'u',
+  'ù': 'u',
+  'û': 'u',
+  'ü': 'u',
+  'ç': 'c',
+  'ñ': 'n',
+  '.': 'dot',
+  '-': '',
+  '&': 'and',
+  '+': 'plus',
+  ':': '',
+  "'": '',
+  '/': '',
+  '!': '',
+};
+String normalizeSimpleIconName(String input) {
+  final buffer = StringBuffer();
+  for (var char in input.characters) {
+    buffer.write(charMap[char] ?? char);
+  }
+  return buffer.toString().trim();
 }

@@ -402,8 +402,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("به‌رورزرسانی در دسترس است"),
         "updatingFolderSelection": MessageLookupByLibrary.simpleMessage(
             "در حال به‌روزرسانی گزینش پوشه..."),
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
         "usePublicLinksForPeopleNotOnEnte":
             MessageLookupByLibrary.simpleMessage(
                 "استفاده از پیوندهای عمومی برای افرادی که در Ente نیستند"),

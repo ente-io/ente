@@ -55,13 +55,13 @@ export const GalleryItemsSummary: React.FC<GalleryItemsSummaryProps> = ({
 
         <Stack
             direction="row"
-            gap={1.5}
             sx={{
+                gap: 1.5,
                 // Keep height the same even when there is no endIcon
                 minHeight: "24px",
             }}
         >
-            <Typography variant="small" color="text.muted">
+            <Typography variant="small" sx={{ color: "text.muted" }}>
                 {t("photos_count", { count: fileCount })}
             </Typography>
             {endIcon && (
@@ -82,7 +82,7 @@ export const GalleryItemsSummary: React.FC<GalleryItemsSummaryProps> = ({
  * the gallery items list itself so that it scrolls alongwith the items. This
  * wrapper makes it take the full width of the "row" that it occupies.
  */
-export const GalleryItemsHeaderAdapter = styled(Box)`
+export const GalleryItemsHeaderAdapter = styled("div")`
     width: 100%;
     margin-bottom: 12px;
 `;

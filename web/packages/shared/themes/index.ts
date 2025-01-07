@@ -18,9 +18,11 @@ export const getTheme = (
         typography,
         components,
         shape: {
+            // Increase the default border radius mulitplier from 4 to 8.
             borderRadius: 8,
         },
         transitions: {
+            // Increase the default transition out duration from 195 to 300.
             duration: { leavingScreen: 300 },
         },
     });

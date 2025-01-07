@@ -76,16 +76,16 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         <VerticallyCentered>
             <FormPaper sx={{ maxWidth: "410px" }}>
                 <FormPaperTitle>{t("two_factor")}</FormPaperTitle>
-                <VerifyTwoFactor onSubmit={onSubmit} buttonText={t("VERIFY")} />
+                <VerifyTwoFactor onSubmit={onSubmit} buttonText={t("verify")} />
 
                 <FormPaperFooter style={{ justifyContent: "space-between" }}>
                     <LinkButton
                         onClick={() => router.push(PAGES.TWO_FACTOR_RECOVER)}
                     >
-                        {t("LOST_DEVICE")}
+                        {t("lost_2fa_device")}
                     </LinkButton>
                     <LinkButton onClick={logout}>
-                        {t("CHANGE_EMAIL")}
+                        {t("change_email")}
                     </LinkButton>
                 </FormPaperFooter>
             </FormPaper>

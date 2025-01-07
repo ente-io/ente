@@ -40,8 +40,8 @@ class AlbumVerticalListWidget extends StatelessWidget {
     this.sharedFiles,
     this.searchQuery,
     this.shouldShowCreateAlbum, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final _logger = Logger("CollectionsListWidgetState");
   final CollectionActions _collectionActions =
@@ -102,11 +102,12 @@ class AlbumVerticalListWidget extends StatelessWidget {
         title: S.of(context).albumTitle,
         submitButtonLabel: S.of(context).ok,
         hintText: S.of(context).enterAlbumName,
-        onSubmit: (name) {
-          return _nameAlbum(context, name);
+        onSubmit: (name) async {
+          return await _nameAlbum(context, name);
         },
         showOnlyLoadingState: true,
         textCapitalization: TextCapitalization.words,
+        popnavAfterSubmission: false,
       );
       if (result is Exception) {
         await showGenericErrorDialog(
@@ -164,7 +165,11 @@ class AlbumVerticalListWidget extends StatelessWidget {
               "Album '" + albumName + "' created.",
             );
           }
-          _navigateToCollection(
+
+          Navigator.pop(context);
+          Navigator.pop(context);
+
+          await _navigateToCollection(
             context,
             collection,
             hasVerifiedLock: hasVerifiedLock,
@@ -220,7 +225,9 @@ class AlbumVerticalListWidget extends StatelessWidget {
         );
       }
       if (shouldNavigateToCollection) {
-        _navigateToCollection(
+        Navigator.pop(context);
+
+        await _navigateToCollection(
           context,
           item,
           hasVerifiedLock: hasVerifiedLock,
@@ -258,13 +265,12 @@ class AlbumVerticalListWidget extends StatelessWidget {
     }
   }
 
-  void _navigateToCollection(
+  Future<void> _navigateToCollection(
     BuildContext context,
     Collection collection, {
     bool hasVerifiedLock = false,
-  }) {
-    Navigator.pop(context);
-    routeToPage(
+  }) async {
+    await routeToPage(
       context,
       CollectionPage(
         CollectionWithThumbnail(collection, null),

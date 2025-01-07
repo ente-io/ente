@@ -118,7 +118,7 @@
   "recoveryKeyCopiedToClipboard": "Clave de recuperación copiada al portapapeles",
   "recoverAccount": "Recuperar cuenta",
   "recover": "Recuperar",
-  "dropSupportEmail": "Por favor, envía un correo electrónico a {supportEmail} desde tu dirección de correo electrónico registrada",
+  "dropSupportEmail": "Por favor, envía un correo electrónico a {supportEmail} desde tu dirección de correo electrónico que usó para registrarse",
   "@dropSupportEmail": {
     "placeholders": {
       "supportEmail": {
@@ -248,7 +248,7 @@
   },
   "thisIsYourVerificationId": "Esta es tu ID de verificación",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Alguien que comparta álbumes contigo debería ver el mismo ID en su dispositivo.",
-  "howToViewShareeVerificationID": "Por favor, pídeles que mantengan presionada su dirección de correo electrónico en la pantalla de ajustes, y verifica que los IDs de ambos dispositivos coincidan.",
+  "howToViewShareeVerificationID": "Por favor, pídeles que mantengan presionada su dirección de correo electrónico en la pantalla de ajustes, y verifica que los identificadores de ambos dispositivos coincidan.",
   "thisIsPersonVerificationId": "Este es el ID de verificación de {email}",
   "@thisIsPersonVerificationId": {
     "placeholders": {
@@ -351,6 +351,7 @@
   "failedToLoadAlbums": "Error al cargar álbumes",
   "hidden": "Oculto",
   "authToViewYourHiddenFiles": "Por favor, autentícate para ver tus archivos ocultos",
+  "authToViewTrashedFiles": "Por favor, autentícate para ver los archivos enviados a la papelera",
   "trash": "Papelera",
   "uncategorized": "Sin categorizar",
   "videoSmallCase": "vídeo",
@@ -689,6 +690,8 @@
   "noPhotosAreBeingBackedUpRightNow": "No se están realizando copias de seguridad de ninguna foto en este momento",
   "preserveMore": "Preservar más",
   "grantFullAccessPrompt": "Por favor, permite el acceso a todas las fotos en Ajustes",
+  "allowPermTitle": "Permitir el acceso a las fotos",
+  "allowPermBody": "Por favor, permite el acceso a tus fotos desde Ajustes para que Ente pueda mostrar y hacer una copia de seguridad de tu biblioteca.",
   "openSettings": "Abrir Ajustes",
   "selectMorePhotos": "Seleccionar más fotos",
   "existingUser": "Usuario existente",
@@ -1335,7 +1338,7 @@
   "hideContent": "Ocultar contenido",
   "hideContentDescriptionAndroid": "Oculta el contenido de la aplicación en el selector de aplicaciones y desactivar capturas de pantalla",
   "hideContentDescriptionIos": "Ocultar el contenido de la aplicación en el selector de aplicaciones",
-  "passwordStrengthInfo": "La intensidad de la contraseña se calcula teniendo en cuenta la longitud de la contraseña, los caracteres utilizados, y si la contraseña aparece o no en el top 10,000 de contraseñas más usadas",
+  "passwordStrengthInfo": "La fortaleza de la contraseña se calcula teniendo en cuenta la longitud de la contraseña, los caracteres utilizados, y si la contraseña aparece o no en el top 10.000 de contraseñas más usadas",
   "noQuickLinksSelected": "No se han seleccionado enlaces rápidos",
   "pleaseSelectQuickLinksToRemove": "Por favor, selecciona enlaces rápidos para eliminar",
   "removePublicLinks": "Eliminar enlaces públicos",
@@ -1382,8 +1385,8 @@
   "onlyThem": "Solo ellos",
   "checkingModels": "Comprobando modelos...",
   "enableMachineLearningBanner": "Activar aprendizaje automático para búsqueda mágica y reconocimiento facial",
-  "searchDiscoverEmptySection": "Las imágenes se mostrarán aquí cuando se complete el procesamiento",
-  "searchPersonsEmptySection": "Las personas se mostrarán aquí cuando se complete el procesamiento",
+  "searchDiscoverEmptySection": "Las imágenes se mostrarán aquí cuando se complete el procesado y la sincronización",
+  "searchPersonsEmptySection": "Las personas se mostrarán aquí cuando se complete el procesado y la sincronización",
   "viewersSuccessfullyAdded": "{count, plural, =0 {0 espectadores añadidos} =1 {1 espectador añadido} other {{count} espectadores añadidos}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1479,15 +1482,15 @@
     }
   },
   "file": "Archivo",
-  "searchSectionsLengthMismatch": "La longitud de las secciones no coincide: {snapshotLenght} != {searchLenght}",
+  "searchSectionsLengthMismatch": "La longitud de las secciones no coincide: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
     "description": "Appears in search tab page",
     "placeholders": {
-      "snapshotLenght": {
+      "snapshotLength": {
         "type": "int",
         "example": "1"
       },
-      "searchLenght": {
+      "searchLength": {
         "type": "int",
         "example": "2"
       }
@@ -1575,5 +1578,7 @@
   },
   "legacyInvite": "{email} te ha invitado a ser un contacto de confianza",
   "authToManageLegacy": "Por favor, autentícate para administrar tus contactos de confianza",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "useDifferentPlayerInfo": "¿Tienes problemas para reproducir este video? Mantén pulsado aquí para probar un reproductor diferente.",
+  "hideSharedItemsFromHomeGallery": "Ocultar elementos compartidos de la galería de inicio",
+  "gallery": "Galería"
 }

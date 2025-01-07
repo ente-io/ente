@@ -30,7 +30,7 @@ export const typography: TypographyOptions = {
     },
     // h6 is the default variant used by MUI's DialogTitle.
     h6: {
-        // The font size and line height belows is the same as large.
+        // The font size and line height below is the same as large.
         fontSize: "18px",
         lineHeight: "22px",
         // See: [Note: Bold headings]

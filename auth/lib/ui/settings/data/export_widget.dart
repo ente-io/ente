@@ -39,9 +39,9 @@ Future<void> handleExportClick(BuildContext context) async {
         isInAlert: true,
         buttonAction: ButtonAction.second,
       ),
-      const ButtonWidget(
+      ButtonWidget(
         buttonType: ButtonType.secondary,
-        labelText: "HTML",
+        labelText: context.l10n.plainHTML,
         buttonSize: ButtonSize.large,
         isInAlert: true,
         buttonAction: ButtonAction.third,

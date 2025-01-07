@@ -5,7 +5,6 @@ import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/errors.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/account/two_factor.dart';
-import 'package:ente_auth/services/passkey_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
@@ -20,10 +19,12 @@ import 'package:url_launcher/url_launcher_string.dart';
 class PasskeyPage extends StatefulWidget {
   final String sessionID;
   final String totp2FASessionID;
+  final String accountsUrl;
 
   const PasskeyPage(
     this.sessionID, {
     required this.totp2FASessionID,
+    required this.accountsUrl,
     super.key,
   });
 
@@ -47,9 +48,8 @@ class _PasskeyPageState extends State<PasskeyPage> {
   }
 
   Future<void> launchPasskey() async {
-    final String accountsUrl = PasskeyService.instance.accountsUrl;
     await launchUrlString(
-      "$accountsUrl/passkeys/verify?"
+      "${widget.accountsUrl}/passkeys/verify?"
       "passkeySessionID=${widget.sessionID}"
       "&redirect=enteauth://passkey"
       "&clientPackage=io.ente.auth",

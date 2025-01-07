@@ -1480,8 +1480,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
             "使用可能なストレージは現在のプランによって制限されています。プランをアップグレードすると、あなたが手に入れたストレージが自動的に使用可能になります。"),
         "useAsCover": MessageLookupByLibrary.simpleMessage("カバー写真として使用"),
-        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
         "usePublicLinksForPeopleNotOnEnte":
             MessageLookupByLibrary.simpleMessage(
                 "公開リンクを使用する(Enteを利用しない人と共有できます)"),

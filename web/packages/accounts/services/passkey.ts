@@ -1,10 +1,15 @@
+import { TwoFactorAuthorizationResponse } from "@/accounts/services/user";
 import { clientPackageName, isDesktop } from "@/base/app";
 import { sharedCryptoWorker } from "@/base/crypto";
 import { encryptToB64, generateEncryptionKey } from "@/base/crypto/libsodium";
-import { HTTPError, publicRequestHeaders } from "@/base/http";
+import {
+    authenticatedRequestHeaders,
+    ensureOk,
+    HTTPError,
+    publicRequestHeaders,
+} from "@/base/http";
 import log from "@/base/log";
-import { accountsAppOrigin, apiURL } from "@/base/origins";
-import { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
+import { apiURL } from "@/base/origins";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
@@ -14,6 +19,7 @@ import {
     setLSUser,
 } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { z } from "zod";
 import { unstashRedirect } from "./redirect";
 
 /**
@@ -23,10 +29,16 @@ import { unstashRedirect } from "./redirect";
  * On successful verification, the accounts app will redirect back to our
  * `/passkeys/finish` page.
  *
+ * @param accountsURL The URL for the accounts app (provided to us by remote in
+ * the email or SRP verification response).
+ *
  * @param passkeySessionID An identifier provided by museum for this passkey
  * verification session.
  */
-export const passkeyVerificationRedirectURL = (passkeySessionID: string) => {
+export const passkeyVerificationRedirectURL = (
+    accountsURL: string,
+    passkeySessionID: string,
+) => {
     const clientPackage = clientPackageName;
     // Using `window.location.origin` will work both when we're running in a web
     // browser, and in our desktop app. See: [Note: Using deeplinks to navigate
@@ -42,7 +54,7 @@ export const passkeyVerificationRedirectURL = (passkeySessionID: string) => {
         redirect,
         ...recoverOption,
     });
-    return `${accountsAppOrigin()}/passkeys/verify?${params.toString()}`;
+    return `${accountsURL}/passkeys/verify?${params.toString()}`;
 };
 
 interface OpenPasskeyVerificationURLOptions {
@@ -73,13 +85,13 @@ interface OpenPasskeyVerificationURLOptions {
  * way it works in the mobile app - the system browser is invoked to open
  * accounts.ente.io.
  *
- * -   For passkey creation, this is a one-way open. Passkeys get created at
- *     accounts.ente.io, and that's it.
+ * - For passkey creation, this is a one-way open. Passkeys get created at
+ *   accounts.ente.io, and that's it.
  *
- * -   For passkey verification, the flow is two-way. We register a custom
- *     protocol and provide that as a return path redirect. Passkey
- *     authentication happens at accounts.ente.io, and on success there is
- *     redirected back to the desktop app.
+ * - For passkey verification, the flow is two-way. We register a custom
+ *   protocol and provide that as a return path redirect. Passkey authentication
+ *   happens at accounts.ente.io, and on success there is redirected back to the
+ *   desktop app.
  */
 export const openPasskeyVerificationURL = ({
     passkeySessionID,
@@ -120,10 +132,11 @@ export const openAccountsManagePasskeysPage = async () => {
 
     // Redirect to the Ente Accounts app where they can view and add and manage
     // their passkeys.
-    const token = await getAccountsToken();
+    const { accountsToken: token, accountsUrl: accountsURL } =
+        await getAccountsTokenAndURL();
     const params = new URLSearchParams({ token });
 
-    window.open(`${accountsAppOrigin()}/passkeys?${params.toString()}`);
+    window.open(`${accountsURL}/passkeys?${params.toString()}`);
 };
 
 export const isPasskeyRecoveryEnabled = async () => {
@@ -182,19 +195,22 @@ const configurePasskeyRecovery = async (
 /**
  * Fetch an Ente Accounts specific JWT token.
  *
- * This token can be used to authenticate with the Ente accounts app.
+ * This token can be used to authenticate with the Ente accounts app running at
+ * accountsURL (the result contains both pieces of information).
  */
-const getAccountsToken = async () => {
-    const token = getToken();
-
-    const resp = await HTTPService.get(
-        await apiURL("/users/accounts-token"),
-        undefined,
-        {
-            "X-Auth-Token": token,
-        },
-    );
-    return resp.data.accountsToken;
+const getAccountsTokenAndURL = async () => {
+    const res = await fetch(await apiURL("/users/accounts-token"), {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return z
+        .object({
+            // The origin that serves the accounts app.
+            accountsUrl: z.string(),
+            // A token that can be used to autheticate with the accounts app.
+            accountsToken: z.string(),
+        })
+        .parse(await res.json());
 };
 
 /**

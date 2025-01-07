@@ -8,19 +8,19 @@
   "invalidEmailAddress": "Неверный адрес электронной почты",
   "enterValidEmail": "Пожалуйста, введите действительный адрес электронной почты.",
   "deleteAccount": "Удалить аккаунт",
-  "askDeleteReason": "Какая основная причина удаления Вашего аккаунта?",
-  "deleteAccountFeedbackPrompt": "Мы сожалеем, что вы уходите. Пожалуйста, объясните, почему вы уходите, чтобы помочь нам развиваться.",
-  "feedback": "Отзыв",
+  "askDeleteReason": "Какова основная причина, по которой вы удаляете свой аккаунт?",
+  "deleteAccountFeedbackPrompt": "Сожалеем, что вы уходите. Пожалуйста, поделитесь своим отзывом, чтобы помочь нам улучшиться.",
+  "feedback": "Обратная связь",
   "kindlyHelpUsWithThisInformation": "Пожалуйста, помогите нам с этой информацией",
   "confirmDeletePrompt": "Да, я хочу навсегда удалить эту учётную запись и все её данные во всех приложениях Ente.",
-  "confirmAccountDeletion": "Подтвердить удаление учётной записи",
+  "confirmAccountDeletion": "Подтвердить удаление аккаунта",
   "deleteAccountPermanentlyButton": "Удалить аккаунт навсегда",
-  "yourAccountHasBeenDeleted": "Ваша учетная запись была удалена",
+  "yourAccountHasBeenDeleted": "Ваш аккаунт был удален",
   "selectReason": "Выберите причину",
   "deleteReason1": "У вас отсутствует важная функция, которая мне нужна",
   "deleteReason2": "Приложение или его некоторые функции не ведут себя так, как я думаю",
   "deleteReason3": "Я нашел другой сервис, который мне нравится больше",
-  "deleteReason4": "Моя проблема не указана",
+  "deleteReason4": "Моя причина не указана в списке",
   "sendEmail": "Отправить электронное письмо",
   "deleteRequestSLAText": "Ваш запрос будет обработан в течение 72 часов.",
   "deleteEmailRequest": "Пожалуйста, отправьте письмо на <warning>account-deletion@ente.io</warning> с вашего зарегистрированного адреса электронной почты.",
@@ -1349,8 +1349,6 @@
   "onlyThem": "Только их",
   "checkingModels": "Проверка моделей...",
   "enableMachineLearningBanner": "Включить автоматическое обучение для Магического Поиска и распознавания лица",
-  "searchDiscoverEmptySection": "Изображения будут показаны здесь после завершения обработки",
-  "searchPersonsEmptySection": "Люди будут показаны здесь после выполнения обработки",
   "viewersSuccessfullyAdded": "{count, plural, =0 {Добавлено 0 зрителей}=1 {Добавлен 1 зритель} other {Добавлено {count} зрителей}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1432,20 +1430,6 @@
     }
   },
   "file": "Файл",
-  "searchSectionsLengthMismatch": "Длина разделов не совпадает: {snapshotLenght} != {searchLenght}",
-  "@searchSectionsLengthMismatch": {
-    "description": "Appears in search tab page",
-    "placeholders": {
-      "snapshotLenght": {
-        "type": "int",
-        "example": "1"
-      },
-      "searchLenght": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "selectMailApp": "Выберите приложение почты",
   "selectAllShort": "Все",
   "@selectAllShort": {
@@ -1478,6 +1462,5 @@
   "removeInvite": "Удалить приглашение",
   "recoveryWarning": "Доверенный контакт пытается получить доступ к вашей учетной записи",
   "rejectRecovery": "Отклонить восстановление",
-  "recoveryInitiated": "Восстановление запущено",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "recoveryInitiated": "Восстановление запущено"
 }

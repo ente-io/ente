@@ -6,12 +6,11 @@ import type {
     CollectionPublicMagicMetadata,
 } from "@/media/collection";
 import type { EncryptedEnteFile, EnteFile } from "@/media/file";
-import { mergeMetadata } from "@/media/file";
+import { decryptFile, mergeMetadata } from "@/media/file";
 import { sortFiles } from "@/new/photos/services/files";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
-import { decryptFile } from "utils/file";
 
 const PUBLIC_COLLECTION_FILES_TABLE = "public-collection-files";
 const PUBLIC_COLLECTIONS_TABLE = "public-collections";

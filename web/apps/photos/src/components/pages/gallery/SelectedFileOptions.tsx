@@ -20,8 +20,8 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorderRounded";
 import RemoveIcon from "@mui/icons-material/RemoveCircleOutline";
 import RestoreIcon from "@mui/icons-material/Restore";
 import UnArchiveIcon from "@mui/icons-material/Unarchive";
-import VisibilityOffOutlined from "@mui/icons-material/VisibilityOffOutlined";
-import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
+import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { t } from "i18next";
 import { COLLECTION_OPS_TYPE } from "utils/collection";
@@ -179,7 +179,7 @@ const SelectedFileOptions = ({
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />
                 </IconButton>
-                <Box ml={1.5}>
+                <Box sx={{ ml: 1.5 }}>
                     {ownCount === count
                         ? t("selected_count", { selected: count })
                         : t("selected_and_yours_count", {
@@ -188,7 +188,7 @@ const SelectedFileOptions = ({
                           })}
                 </Box>
             </FluidContainer>
-            <Stack spacing={2} direction="row" mr={2}>
+            <Stack direction="row" sx={{ gap: 2, mr: 2 }}>
                 {isInSearchMode ? (
                     <>
                         <Tooltip title={t("fix_creation_time")}>
@@ -221,7 +221,7 @@ const SelectedFileOptions = ({
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.HIDE)}
                             >
-                                <VisibilityOffOutlined />
+                                <VisibilityOffOutlinedIcon />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title={t("delete")}>
@@ -255,7 +255,7 @@ const SelectedFileOptions = ({
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.HIDE)}
                             >
-                                <VisibilityOffOutlined />
+                                <VisibilityOffOutlinedIcon />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title={t("delete")}>
@@ -309,7 +309,7 @@ const SelectedFileOptions = ({
                     <>
                         <Tooltip title={t("UNHIDE")}>
                             <IconButton onClick={unhideToCollection}>
-                                <VisibilityOutlined />
+                                <VisibilityOutlinedIcon />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title={t("download")}>
@@ -406,7 +406,7 @@ const SelectedFileOptions = ({
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.HIDE)}
                             >
-                                <VisibilityOffOutlined />
+                                <VisibilityOffOutlinedIcon />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title={t("delete")}>

@@ -7,6 +7,11 @@ import {
 } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@/base/components/OverflowMenu";
+import { SingleInputDialog } from "@/base/components/SingleInputDialog";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import {
     useModalVisibility,
@@ -30,10 +35,6 @@ import {
     type PersonSuggestionUpdates,
     type PreviewableCluster,
 } from "@/new/photos/services/ml/people";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "@ente/shared/components/OverflowMenu";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -64,7 +65,6 @@ import type { FaceCluster } from "../../services/ml/cluster";
 import { useAppContext } from "../../types/context";
 import { DialogCloseIconButton } from "../mui/Dialog";
 import { SuggestionFaceList } from "../PeopleList";
-import { SingleInputDialog } from "../SingleInputForm";
 import {
     ItemCard,
     LargeTileButton,
@@ -145,24 +145,21 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
                 name={name}
                 fileCount={person.fileIDs.length}
             />
-            <OverflowMenu ariaID={"person-options"}>
+            <OverflowMenu ariaID="person-options">
                 <OverflowMenuOption
                     startIcon={<ListAltOutlinedIcon />}
-                    centerAlign
                     onClick={showSuggestions}
                 >
                     {t("review_suggestions")}
                 </OverflowMenuOption>
                 <OverflowMenuOption
                     startIcon={<EditIcon />}
-                    centerAlign
                     onClick={showNameInput}
                 >
                     {t("rename")}
                 </OverflowMenuOption>
                 <OverflowMenuOption
                     startIcon={<ClearIcon />}
-                    centerAlign
                     onClick={handleReset}
                 >
                     {t("reset")}
@@ -206,10 +203,9 @@ const IgnoredPersonHeader: React.FC<IgnoredPersonHeaderProps> = ({
                 nameProps={{ color: "text.muted" }}
                 fileCount={person.fileIDs.length}
             />
-            <OverflowMenu ariaID={"person-options"}>
+            <OverflowMenu ariaID="person-options">
                 <OverflowMenuOption
                     startIcon={<VisibilityOutlinedIcon />}
-                    centerAlign
                     onClick={handleUndoIgnore}
                 >
                     {t("show_person")}
@@ -264,17 +260,15 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
                     </IconButton>
                 </Tooltip>
 
-                <OverflowMenu ariaID={"person-options"}>
+                <OverflowMenu ariaID="person-options">
                     <OverflowMenuOption
                         startIcon={<AddIcon />}
-                        centerAlign
                         onClick={showAddPerson}
                     >
                         {t("add_a_name")}
                     </OverflowMenuOption>
                     <OverflowMenuOption
                         startIcon={<HideImageOutlinedIcon />}
-                        centerAlign
                         onClick={confirmIgnore}
                     >
                         {t("ignore")}
@@ -657,7 +651,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                             ? t("saved_choices")
                             : t("review_suggestions")}
                     </DialogTitle>
-                    <Typography color="text.muted">
+                    <Typography sx={{ color: "text.muted" }}>
                         {person.name ?? " "}
                     </Typography>
                 </Stack>
@@ -704,8 +698,10 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 ) : state.suggestions.length == 0 ? (
                     <CenteredFill>
                         <Typography
-                            color="text.muted"
-                            sx={{ textAlign: "center" }}
+                            sx={{
+                                color: "text.muted",
+                                textAlign: "center",
+                            }}
                         >
                             {t("people_suggestions_empty")}
                         </Typography>
@@ -766,7 +762,7 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
                 }}
             >
                 <Stack sx={{ gap: "10px" }}>
-                    <Typography variant="small" color="text.muted">
+                    <Typography variant="small" sx={{ color: "text.muted" }}>
                         {/* Use the face count as as stand-in for the photo count */}
                         {t("photos_count", { count: item.faces.length })}
                     </Typography>

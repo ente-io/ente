@@ -7,9 +7,9 @@ Stripe's API for payments.
 
 There are three pieces that need to be connected to have a working local setup:
 
--   A client app
--   This web app
--   Museum
+- A client app
+- This web app
+- Museum
 
 ### Client app
 
@@ -20,8 +20,9 @@ Add the following to `web/apps/photos/.env.local`:
 
 ```env
 NEXT_PUBLIC_ENTE_ENDPOINT = http://localhost:8080
-NEXT_PUBLIC_ENTE_PAYMENTS_URL = http://localhost:3001
 ```
+
+Modify "https://payments.ente.io" to "http://localhost:3001".
 
 Then start it locally
 

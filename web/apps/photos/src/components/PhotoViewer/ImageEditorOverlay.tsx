@@ -11,11 +11,9 @@ import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { downloadManager } from "@/gallery/services/download";
 import { EnteFile } from "@/media/file";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
+import { getLocalCollections } from "@/new/photos/services/collections";
 import { AppContext } from "@/new/photos/types/context";
-import {
-    CenteredFlex,
-    HorizontalFlex,
-} from "@ente/shared/components/Container";
+import { CenteredFlex } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
@@ -37,6 +35,7 @@ import {
     CircularProgress,
     IconButton,
     Slider,
+    Stack,
     Tab,
     Tabs,
     Typography,
@@ -49,10 +48,9 @@ import React, {
     useEffect,
     useRef,
     useState,
-    type MutableRefObject,
     type Ref,
+    type RefObject,
 } from "react";
-import { getLocalCollections } from "services/collectionService";
 import uploadManager from "services/upload/uploadManager";
 
 interface ImageEditorOverlayProps {
@@ -370,7 +368,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
             const ctx = canvasRef.current.getContext("2d");
             ctx.imageSmoothingEnabled = false;
             if (!fileURL) {
-                const srcURLs = await downloadManager.getFileForPreview(
+                const srcURLs = await downloadManager.renderableSourceURLs(
                     props.file,
                 );
                 img.src = srcURLs.url as string;
@@ -531,12 +529,21 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                 }}
                 open
             >
-                <Box padding="1rem" width="100%" height="100%">
-                    <HorizontalFlex
-                        justifyContent={"space-between"}
-                        alignItems={"center"}
+                <Box
+                    sx={{
+                        padding: "1rem",
+                        width: "100%",
+                        height: "100%",
+                    }}
+                >
+                    <Stack
+                        direction="row"
+                        sx={{
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                        }}
                     >
-                        <Typography variant="h2" fontWeight="bold">
+                        <Typography variant="h2" sx={{ fontWeight: "bold" }}>
                             {t("photo_editor")}
                         </Typography>
                         <IconButton
@@ -546,19 +553,21 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         >
                             <MenuIcon />
                         </IconButton>
-                    </HorizontalFlex>
-                    <Box
-                        width="100%"
-                        height="100%"
-                        overflow="hidden"
-                        boxSizing={"border-box"}
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
-                        position="relative"
+                    </Stack>
+                    <Stack
+                        direction="row"
                         onMouseUp={handleDragEnd}
                         onMouseMove={isDragging ? handleDrag : null}
                         onMouseDown={handleDragStart}
+                        sx={{
+                            width: "100%",
+                            height: "100%",
+                            overflow: "hidden",
+                            boxSizing: "border-box",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            position: "relative",
+                        }}
                     >
                         <Box
                             style={{
@@ -567,14 +576,16 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                 height: "100%",
                             }}
                         >
-                            <Box
-                                height="88%"
-                                width="100%"
+                            <Stack
                                 ref={parentRef}
-                                display="flex"
-                                alignItems="center"
-                                justifyContent="center"
-                                position="relative"
+                                direction="row"
+                                sx={{
+                                    height: "88%",
+                                    width: "100%",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    position: "relative",
+                                }}
                             >
                                 {(fileURL === null || canvasLoading) && (
                                     <CircularProgress />
@@ -605,7 +616,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                         setIsDragging={setIsDragging}
                                     />
                                 )}
-                            </Box>
+                            </Stack>
                             {currentTab === "crop" && (
                                 <CenteredFlex marginTop="1rem">
                                     <Button
@@ -618,7 +629,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                 </CenteredFlex>
                             )}
                         </Box>
-                    </Box>
+                    </Stack>
                 </Box>
                 <SidebarDrawer
                     variant="persistent"
@@ -626,7 +637,10 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                     open={showControlsDrawer}
                     onClose={handleCloseWithConfirmation}
                 >
-                    <HorizontalFlex justifyContent={"space-between"}>
+                    <Stack
+                        direction="row"
+                        sx={{ justifyContent: "space-between" }}
+                    >
                         <IconButton
                             onClick={() => {
                                 setShowControlsDrawer(false);
@@ -637,8 +651,14 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         <IconButton onClick={handleCloseWithConfirmation}>
                             <CloseIcon />
                         </IconButton>
-                    </HorizontalFlex>
-                    <HorizontalFlex gap="0.5rem" marginBottom="1rem">
+                    </Stack>
+                    <Stack
+                        direction="row"
+                        sx={{
+                            gap: "0.5rem",
+                            marginBottom: "1rem",
+                        }}
+                    >
                         <Tabs
                             value={currentTab}
                             onChange={(_, value) => {
@@ -653,7 +673,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                 disabled={transformationPerformed}
                             />
                         </Tabs>
-                    </HorizontalFlex>
+                    </Stack>
                     <MenuSectionTitle title={t("reset")} />
                     <MenuItemGroup
                         style={{
@@ -695,7 +715,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                             setInvert={setInvert}
                         />
                     )}
-                    <MenuSectionTitle title={t("EXPORT")} />
+                    <MenuSectionTitle title={t("export_data")} />
                     <MenuItemGroup>
                         <EnteMenuItem
                             startIcon={<DownloadIcon />}
@@ -791,8 +811,8 @@ const canvasToFile = async (
 };
 
 interface CommonMenuProps {
-    canvasRef: MutableRefObject<HTMLCanvasElement>;
-    originalSizeCanvasRef: MutableRefObject<HTMLCanvasElement>;
+    canvasRef: RefObject<HTMLCanvasElement>;
+    originalSizeCanvasRef: RefObject<HTMLCanvasElement>;
     setTransformationPerformed: (v: boolean) => void;
     canvasLoading: boolean;
     setCanvasLoading: (v: boolean) => void;
@@ -802,7 +822,7 @@ interface CommonMenuProps {
 type CropMenuProps = CommonMenuProps & {
     previewScale: number;
     cropBoxProps: CropBoxProps;
-    cropBoxRef: MutableRefObject<HTMLDivElement>;
+    cropBoxRef: RefObject<HTMLDivElement>;
     resetCropBox: () => void;
 };
 
@@ -1350,7 +1370,7 @@ interface ColoursMenuProps {
 
 const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
     <>
-        <Box px={"8px"}>
+        <Box sx={{ px: "8px" }}>
             <MenuSectionTitle title={t("brightness")} />
             <Slider
                 min={0}

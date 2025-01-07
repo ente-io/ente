@@ -1,5 +1,6 @@
 import { MenuItemGroup } from "@/base/components/Menu";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     NestedSidebarDrawer,
     SidebarDrawerTitlebar,
@@ -89,7 +90,7 @@ export const MLSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
 
 const Loading: React.FC = () => {
     return (
-        <Box textAlign="center" pt={4}>
+        <Box sx={{ textAlign: "center", pt: 4 }}>
             <ActivityIndicator />
         </Box>
     );
@@ -112,21 +113,20 @@ export const EnableML: React.FC<EnableMLProps> = ({
         openURL("https://help.ente.io/photos/features/machine-learning");
 
     return (
-        <Stack py={"20px"} px={"16px"} spacing={"32px"}>
-            <Typography color="text.muted">
+        <Stack sx={{ gap: "32px", py: "20px", px: "16px" }}>
+            <Typography sx={{ color: "text.muted" }}>
                 {t("ml_search_description")}
             </Typography>
-            <Stack spacing={"8px"}>
-                <Button color={"accent"} size="large" onClick={onEnable}>
+            <Stack sx={{ gap: "8px" }}>
+                <Button fullWidth color="accent" onClick={onEnable}>
                     {t("enable")}
                 </Button>
-
-                <Button color="secondary" size="large" onClick={moreDetails}>
+                <Button fullWidth color="secondary" onClick={moreDetails}>
                     {t("more_details")}
                 </Button>
             </Stack>
             {showMagicSearchHint && (
-                <Typography color="text.faint" variant="small">
+                <Typography variant="small" sx={{ color: "text.faint" }}>
                     {t("ml_search_footnote")}
                 </Typography>
             )}
@@ -153,7 +153,7 @@ const FaceConsentDrawer: React.FC<FaceConsentDrawerProps> = ({
             {...{ open, onClose }}
             onRootClose={handleRootClose}
         >
-            <Stack spacing={"4px"} py={"12px"}>
+            <Stack sx={{ gap: "4px", py: "12px" }}>
                 <SidebarDrawerTitlebar
                     onClose={onClose}
                     onRootClose={handleRootClose}
@@ -187,16 +187,13 @@ export const FaceConsent: React.FC<FaceConsentProps> = ({
             target="_blank"
             href="https://ente.io/privacy#8-biometric-information-privacy-policy"
             underline="always"
-            sx={{
-                color: "inherit",
-                textDecorationColor: "inherit",
-            }}
+            sx={{ color: "inherit", textDecorationColor: "inherit" }}
         />
     );
 
     return (
-        <Stack py={"20px"} px={"8px"} spacing={"32px"}>
-            <Typography component="div" color="text.muted" px={"8px"}>
+        <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
+            <Typography component="div" sx={{ color: "text.muted", px: "8px" }}>
                 <Trans
                     i18nKey={"ml_consent_description"}
                     components={{ a: privacyPolicyLink }}
@@ -204,11 +201,7 @@ export const FaceConsent: React.FC<FaceConsentProps> = ({
             </Typography>
             <FormGroup sx={{ width: "100%" }}>
                 <FormControlLabel
-                    sx={{
-                        color: "text.muted",
-                        ml: 0,
-                        mt: 2,
-                    }}
+                    sx={{ color: "text.muted", ml: 0, mt: 2 }}
                     control={
                         <Checkbox
                             size="small"
@@ -219,18 +212,22 @@ export const FaceConsent: React.FC<FaceConsentProps> = ({
                     label={t("ml_consent_confirmation")}
                 />
             </FormGroup>
-            <Stack px={"8px"} spacing={"8px"}>
-                <Button
-                    color={"accent"}
-                    size="large"
+            <Stack sx={{ gap: "8px", px: "8px" }}>
+                <FocusVisibleButton
+                    fullWidth
+                    color="accent"
                     disabled={!acceptTerms}
                     onClick={onConsent}
                 >
                     {t("ml_consent")}
-                </Button>
-                <Button color={"secondary"} size="large" onClick={onCancel}>
+                </FocusVisibleButton>
+                <FocusVisibleButton
+                    fullWidth
+                    color="secondary"
+                    onClick={onCancel}
+                >
                     {t("cancel")}
-                </Button>
+                </FocusVisibleButton>
             </Stack>
         </Stack>
     );
@@ -286,8 +283,8 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
         });
 
     return (
-        <Stack px={"16px"} py={"20px"} gap={4}>
-            <Stack gap={3}>
+        <Stack sx={{ px: "16px", py: "20px", gap: 4 }}>
+            <Stack sx={{ gap: 3 }}>
                 <MenuItemGroup>
                     <EnteMenuItem
                         label={t("enabled")}
@@ -301,13 +298,15 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
                 <Stack>
                     <Stack
                         direction="row"
-                        gap={2}
-                        px={2}
-                        pt={1}
-                        pb={2}
-                        justifyContent={"space-between"}
+                        sx={{
+                            gap: 2,
+                            px: 2,
+                            pt: 1,
+                            pb: 2,
+                            justifyContent: "space-between",
+                        }}
                     >
-                        <Typography color="text.faint">
+                        <Typography sx={{ color: "text.faint" }}>
                             {t("indexing")}
                         </Typography>
                         <Typography>{status}</Typography>
@@ -315,16 +314,20 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
                     <Divider sx={{ marginInlineStart: 2 }} />
                     <Stack
                         direction="row"
-                        gap={2}
-                        px={2}
-                        pt={2}
-                        pb={1}
-                        justifyContent={"space-between"}
+                        sx={{
+                            gap: 2,
+                            px: 2,
+                            pt: 2,
+                            pb: 1,
+                            justifyContent: "space-between",
+                        }}
                     >
-                        <Typography color="text.faint">
+                        <Typography sx={{ color: "text.faint" }}>
                             {t("processed")}
                         </Typography>
-                        <Typography textAlign="right">{processed}</Typography>
+                        <Typography sx={{ textAlign: "right" }}>
+                            {processed}
+                        </Typography>
                     </Stack>
                 </Stack>
             </Paper>

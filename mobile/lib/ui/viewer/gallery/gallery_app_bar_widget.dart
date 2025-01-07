@@ -970,7 +970,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     await showTextInputDialog(
       context,
       title: context.l10n.playOnTv,
-      body: S.of(context).castInstruction,
+      body: S.of(context).castInstruction.replaceFirst(
+            'cast.ente.io',
+            flagService.castUrl,
+          ),
       submitButtonLabel: S.of(context).pair,
       textInputType: TextInputType.streetAddress,
       hintText: context.l10n.deviceCodeHint,

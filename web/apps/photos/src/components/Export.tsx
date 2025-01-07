@@ -1,5 +1,9 @@
 import { isDesktop } from "@/base/app";
 import { EnteSwitch } from "@/base/components/EnteSwitch";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@/base/components/OverflowMenu";
 import type { ButtonishProps } from "@/base/components/mui";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { ensureElectron } from "@/base/electron";
@@ -12,10 +16,6 @@ import {
     VerticallyCenteredFlex,
 } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "@ente/shared/components/OverflowMenu";
 import { CustomError } from "@ente/shared/error";
 import FolderIcon from "@mui/icons-material/Folder";
 import {
@@ -213,7 +213,7 @@ export const Export: React.FC<ExportProps> = ({
 function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
     return (
         <SpaceBetweenFlex minHeight={"48px"}>
-            <Typography color="text.muted" mr={"16px"}>
+            <Typography sx={{ color: "text.muted", mr: "16px" }}>
                 {t("destination")}
             </Typography>
             <>
@@ -279,7 +279,9 @@ const ChangeDirectoryOption: React.FC<ButtonishProps> = ({ onClick }) => (
 function ContinuousExport({ continuousExport, toggleContinuousExport }) {
     return (
         <SpaceBetweenFlex minHeight={"48px"}>
-            <Typography color="text.muted">{t("CONTINUOUS_EXPORT")}</Typography>
+            <Typography sx={{ color: "text.muted" }}>
+                {t("CONTINUOUS_EXPORT")}
+            </Typography>
             <Box>
                 <EnteSwitch
                     color="accent"

@@ -47,11 +47,11 @@ import type { CLIPMatches, MLWorkerDelegate } from "./worker-types";
 /**
  * A rough hint at what the worker is up to.
  *
- * -   "init": Worker has been created but hasn't done anything yet.
- * -   "idle": Not doing anything
- * -   "tick": Transitioning to a new state
- * -   "indexing": Indexing
- * -   "fetching": A subset of indexing
+ * - "init": Worker has been created but hasn't done anything yet.
+ * - "idle": Not doing anything
+ * - "tick": Transitioning to a new state
+ * - "indexing": Indexing
+ * - "fetching": A subset of indexing
  *
  * During indexing, the state is set to "fetching" whenever remote provided us
  * data for more than 50% of the files that we requested from it in the last
@@ -88,9 +88,9 @@ interface IndexableItem {
  *
  * where:
  *
- * -   "liveq": indexing items that are being uploaded,
- * -   "backfillq": index unindexed items otherwise.
- * -   "idle": in between state transitions.
+ * - "liveq": indexing items that are being uploaded,
+ * - "backfillq": index unindexed items otherwise.
+ * - "idle": in between state transitions.
  *
  * In addition, MLWorker can also be invoked for interactive tasks: in
  * particular, for finding the closest CLIP match when the user does a search.

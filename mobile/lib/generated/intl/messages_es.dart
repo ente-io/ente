@@ -86,7 +86,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Esto eliminará el enlace público para acceder a \"${albumName}\".";
 
   static String m27(supportEmail) =>
-      "Por favor, envía un correo electrónico a ${supportEmail} desde tu dirección de correo electrónico registrada";
+      "Por favor, envía un correo electrónico a ${supportEmail} desde tu dirección de correo electrónico que usó para registrarse";
 
   static String m28(count, storageSaved) =>
       "¡Has limpiado ${Intl.plural(count, one: '${count} archivo duplicado', other: '${count} archivos duplicados')}, ahorrando (${storageSaved}!)";
@@ -186,8 +186,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m62(count) =>
       "${Intl.plural(count, one: '${count} resultado encontrado', other: '${count} resultados encontrados')}";
 
-  static String m63(snapshotLenght, searchLenght) =>
-      "La longitud de las secciones no coincide: ${snapshotLenght} != ${searchLenght}";
+  static String m63(snapshotLength, searchLength) =>
+      "La longitud de las secciones no coincide: ${snapshotLength} != ${searchLength}";
 
   static String m4(count) => "${count} seleccionados";
 
@@ -357,6 +357,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Permitir descargas"),
         "allowPeopleToAddPhotos": MessageLookupByLibrary.simpleMessage(
             "Permitir que la gente añada fotos"),
+        "allowPermBody": MessageLookupByLibrary.simpleMessage(
+            "Por favor, permite el acceso a tus fotos desde Ajustes para que Ente pueda mostrar y hacer una copia de seguridad de tu biblioteca."),
+        "allowPermTitle": MessageLookupByLibrary.simpleMessage(
+            "Permitir el acceso a las fotos"),
         "androidBiometricHint":
             MessageLookupByLibrary.simpleMessage("Verificar identidad"),
         "androidBiometricNotRecognized": MessageLookupByLibrary.simpleMessage(
@@ -434,6 +438,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Por favor, autentícate para administrar tus contactos de confianza"),
         "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
             "Por favor, autentícate para ver tu clave de acceso"),
+        "authToViewTrashedFiles": MessageLookupByLibrary.simpleMessage(
+            "Por favor, autentícate para ver los archivos enviados a la papelera"),
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
             "Por favor, autentícate para ver tus sesiones activas"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
@@ -980,6 +986,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ahorra espacio en tu dispositivo limpiando archivos que tienen copia de seguridad."),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Liberar espacio"),
         "freeUpSpaceSaving": m39,
+        "gallery": MessageLookupByLibrary.simpleMessage("Galería"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Hasta 1000 memorias mostradas en la galería"),
         "general": MessageLookupByLibrary.simpleMessage("General"),
@@ -1011,12 +1018,14 @@ class MessageLookup extends MessageLookupByLibrary {
             "Oculta el contenido de la aplicación en el selector de aplicaciones y desactivar capturas de pantalla"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Ocultar el contenido de la aplicación en el selector de aplicaciones"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Ocultar elementos compartidos de la galería de inicio"),
         "hiding": MessageLookupByLibrary.simpleMessage("Ocultando..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Alojado en OSM France"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Cómo funciona"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
-            "Por favor, pídeles que mantengan presionada su dirección de correo electrónico en la pantalla de ajustes, y verifica que los IDs de ambos dispositivos coincidan."),
+            "Por favor, pídeles que mantengan presionada su dirección de correo electrónico en la pantalla de ajustes, y verifica que los identificadores de ambos dispositivos coincidan."),
         "iOSGoToSettingsDescription": MessageLookupByLibrary.simpleMessage(
             "La autenticación biométrica no está configurada en tu dispositivo. Por favor, activa Touch ID o Face ID en tu teléfono."),
         "iOSLockOut": MessageLookupByLibrary.simpleMessage(
@@ -1341,7 +1350,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Bloqueo con contraseña"),
         "passwordStrength": m0,
         "passwordStrengthInfo": MessageLookupByLibrary.simpleMessage(
-            "La intensidad de la contraseña se calcula teniendo en cuenta la longitud de la contraseña, los caracteres utilizados, y si la contraseña aparece o no en el top 10,000 de contraseñas más usadas"),
+            "La fortaleza de la contraseña se calcula teniendo en cuenta la longitud de la contraseña, los caracteres utilizados, y si la contraseña aparece o no en el top 10.000 de contraseñas más usadas"),
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "No almacenamos esta contraseña, así que si la olvidas, <underline>no podremos descifrar tus datos</underline>"),
         "paymentDetails":
@@ -1594,7 +1603,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchDatesEmptySection":
             MessageLookupByLibrary.simpleMessage("Buscar por fecha, mes o año"),
         "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Las imágenes se mostrarán aquí cuando se complete el procesamiento"),
+            "Las imágenes se mostrarán aquí cuando se complete el procesado y la sincronización"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "Las personas se mostrarán aquí una vez que se haya hecho la indexación"),
         "searchFileTypesAndNamesEmptySection":
@@ -1613,7 +1622,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Invita a gente y verás todas las fotos compartidas aquí"),
         "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Las personas se mostrarán aquí cuando se complete el procesamiento"),
+            "Las personas se mostrarán aquí cuando se complete el procesado y la sincronización"),
         "searchResultCount": m62,
         "searchSectionsLengthMismatch": m63,
         "security": MessageLookupByLibrary.simpleMessage("Seguridad"),
@@ -1934,7 +1943,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "useAsCover":
             MessageLookupByLibrary.simpleMessage("Usar como cubierta"),
         "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
-            "Having trouble playing this video? Long press here to try a different player."),
+            "¿Tienes problemas para reproducir este video? Mantén pulsado aquí para probar un reproductor diferente."),
         "usePublicLinksForPeopleNotOnEnte":
             MessageLookupByLibrary.simpleMessage(
                 "Usar enlaces públicos para personas que no están en Ente"),

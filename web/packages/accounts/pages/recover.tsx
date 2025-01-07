@@ -84,8 +84,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             const cryptoWorker = await sharedCryptoWorker();
             const keyAttr = keyAttributes!;
             const masterKey = await cryptoWorker.decryptB64(
-                keyAttr.masterKeyEncryptedWithRecoveryKey,
-                keyAttr.masterKeyDecryptionNonce,
+                keyAttr.masterKeyEncryptedWithRecoveryKey!,
+                keyAttr.masterKeyDecryptionNonce!,
                 await cryptoWorker.fromHex(recoveryKey),
             );
             await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);

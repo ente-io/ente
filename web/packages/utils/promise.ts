@@ -30,40 +30,40 @@ export const wait = (ms: number) =>
  * just use one of them instead of reinventing such a basic and finicky wheel.
  * Then why write a bespoke one?
  *
- * -   "debounce" means that the underlying function will only be called when a
- *     particular wait time has elapsed since the last call to the _debounced_
- *     function.
+ * - "debounce" means that the underlying function will only be called when a
+ *   particular wait time has elapsed since the last call to the _debounced_
+ *   function.
  *
- * -   This behaviour, while useful sometimes, is not what we want always. If
- *     the debounced function is continuously being called, then the underlying
- *     function might never get called (since the wait time does not elapse).
+ * - This behaviour, while useful sometimes, is not what we want always. If the
+ *   debounced function is continuously being called, then the underlying
+ *   function might never get called (since the wait time does not elapse).
  *
- * -   To avoid this starvation, some debounce implementations like lodash
- *     provide a "maxWait" option, which tells the debounced function to always
- *     call the underlying function if maxWait has elapsed.
+ * - To avoid this starvation, some debounce implementations like lodash provide
+ *   a "maxWait" option, which tells the debounced function to always call the
+ *   underlying function if maxWait has elapsed.
  *
- * -   The debounced functions can trigger the underlying in two ways: leading
- *     (aka immediate) and trailing which control if the underlying should be
- *     called at the leading or the trailing edge of the time period.
+ * - The debounced functions can trigger the underlying in two ways: leading
+ *   (aka immediate) and trailing which control if the underlying should be
+ *   called at the leading or the trailing edge of the time period.
  *
- * -   "throttle" can be conceptually thought of as just maxWait + leading. In
- *     fact, this is how lodash actually implements it too. So we could've used
- *     lodash, except that is a big dependency to pull for a small function.
+ * - "throttle" can be conceptually thought of as just maxWait + leading. In
+ *   fact, this is how lodash actually implements it too. So we could've used
+ *   lodash, except that is a big dependency to pull for a small function.
  *
- * -   Alternatively, pThrottle is a micro-library that provide such a
- *     "throttle" primitive. However, its implementation enqueues all incoming
- *     requests to the throttled function: it still calls the underlying once
- *     per period, but eventually underlying will get called once for each call
- *     to the throttled function.
+ * - Alternatively, pThrottle is a micro-library that provide such a "throttle"
+ *   primitive. However, its implementation enqueues all incoming requests to
+ *   the throttled function: it still calls the underlying once per period, but
+ *   eventually underlying will get called once for each call to the throttled
+ *   function.
  *
- * -   There are circumstances where that would be the appropriate behaviour,
- *     but that's not what we want. We wish to trigger an async action,
- *     coalescing multiple triggers into a single one, one per period.
+ * - There are circumstances where that would be the appropriate behaviour, but
+ *   that's not what we want. We wish to trigger an async action, coalescing
+ *   multiple triggers into a single one, one per period.
  *
- * -   Perhaps there are other focused and standard library that'd have what we
- *     want, but instead of spending more time searching I just wrote it from
- *     scratch for now. Indeed, I've spent more time writing about the function
- *     than the function itself.
+ * - Perhaps there are other focused and standard library that'd have what we
+ *   want, but instead of spending more time searching I just wrote it from
+ *   scratch for now. Indeed, I've spent more time writing about the function
+ *   than the function itself.
  */
 export const throttled = (underlying: () => Promise<void>, period: number) => {
     let pending = 0;

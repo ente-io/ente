@@ -79,6 +79,14 @@ apps:
     # If you're running a self hosted instance and wish to serve public links,
     # set this to the URL where your albums web app is running.
     public-albums:
+    # Default is https://cast.ente.io
+    cast:
+    # Default is https://accounts.ente.io
+    # Set this to the URL where your accounts web app is running, primarily used for
+    # passkey based 2FA.
+    accounts:
+    # Default is https://family.ente.io
+    family:
 
 # Database connection parameters
 db:
@@ -323,10 +331,8 @@ internal:
     admin:
     # If set to true, users will not be able to register a new account.
     #
-    # Account creation will fail when entering the email ott. This doesn't
-    # affect the clients, users can still go through the registration flow, but
-    # when entering the ott they received via mail, they will get an
-    # unauthorized error and thus cannot create new accounts.
+    # During sign up, the client will get an unauthorized error and
+    # thus cannot create new accounts.
     disable-registration: false
 
 # Replication config

@@ -12,13 +12,12 @@ import {
 } from "@/new/photos/components/PlaceholderThumbnails";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
 import useLongPress from "@ente/shared/hooks/useLongPress";
-import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
-import Favorite from "@mui/icons-material/FavoriteRounded";
+import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
+import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
-import { Tooltip, styled } from "@mui/material";
+import { styled } from "@mui/material";
 import type { DisplayFile } from "components/PhotoFrame";
 import i18n from "i18next";
-import { DeduplicateContext } from "pages/deduplicate";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { shouldShowAvatar } from "utils/file";
@@ -235,7 +234,6 @@ const Cont = styled("div")<{ disabled: boolean }>`
 
 export default function PreviewCard(props: IProps) {
     const galleryContext = useContext(GalleryContext);
-    const deduplicateContext = useContext(DeduplicateContext);
 
     const longPressCallback = () => {
         onSelect(!selected);
@@ -318,7 +316,7 @@ export default function PreviewCard(props: IProps) {
         }
     };
 
-    const renderFn = () => (
+    return (
         <Cont
             key={`thumb-${file.id}}`}
             onClick={handleClick}
@@ -344,7 +342,7 @@ export default function PreviewCard(props: IProps) {
             )}
             {file.metadata.fileType === FileType.livePhoto ? (
                 <FileTypeIndicatorOverlay>
-                    <AlbumOutlined />
+                    <AlbumOutlinedIcon />
                 </FileTypeIndicatorOverlay>
             ) : (
                 file.metadata.fileType === FileType.video && (
@@ -361,7 +359,7 @@ export default function PreviewCard(props: IProps) {
             )}
             {props.isFav && (
                 <FavOverlay>
-                    <Favorite />
+                    <FavoriteRoundedIcon />
                 </FavOverlay>
             )}
 
@@ -372,16 +370,6 @@ export default function PreviewCard(props: IProps) {
             <InSelectRangeOverLay
                 $active={isRangeSelectActive && isInsSelectRange}
             />
-            {deduplicateContext.isOnDeduplicatePage && (
-                <FileAndCollectionNameOverlay>
-                    <p>{file.metadata.title}</p>
-                    <p>
-                        {deduplicateContext.collectionNameMap.get(
-                            file.collectionID,
-                        )}
-                    </p>
-                </FileAndCollectionNameOverlay>
-            )}
             {props?.activeCollectionID === TRASH_SECTION && file.isTrashed && (
                 <FileAndCollectionNameOverlay>
                     <p>{formatDateRelative(file.deleteBy / 1000)}</p>
@@ -389,25 +377,6 @@ export default function PreviewCard(props: IProps) {
             )}
         </Cont>
     );
-
-    if (deduplicateContext.isOnDeduplicatePage) {
-        return (
-            <Tooltip
-                placement="bottom-start"
-                enterDelay={300}
-                enterNextDelay={100}
-                title={`${
-                    file.metadata.title
-                } - ${deduplicateContext.collectionNameMap.get(
-                    file.collectionID,
-                )}`}
-            >
-                {renderFn()}
-            </Tooltip>
-        );
-    } else {
-        return renderFn();
-    }
 }
 
 function formatDateRelative(date: number) {

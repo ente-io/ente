@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/ente-io/museum/pkg/repo/cast"
 	"runtime/debug"
 	"strings"
 
+	"github.com/ente-io/museum/pkg/repo/cast"
+
 	"github.com/ente-io/museum/pkg/controller/access"
+	"github.com/ente-io/museum/pkg/controller/email"
 	"github.com/gin-contrib/requestid"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -31,6 +33,7 @@ const (
 // CollectionController encapsulates logic that deals with collections
 type CollectionController struct {
 	PublicCollectionCtrl *PublicCollectionController
+	EmailCtrl            *email.EmailNotificationController
 	AccessCtrl           access.Controller
 	BillingCtrl          *BillingController
 	CollectionRepo       *repo.CollectionRepository
@@ -179,6 +182,52 @@ func (c *CollectionController) Share(ctx *gin.Context, req ente.AlterShareReques
 		return nil, stacktrace.Propagate(err, "")
 	}
 	return sharees, nil
+}
+
+func (c *CollectionController) JoinViaLink(ctx *gin.Context, req ente.JoinCollectionViaLinkRequest) error {
+	userID := auth.GetUserID(ctx.Request.Header)
+	collection, err := c.CollectionRepo.Get(req.CollectionID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if collection.Owner.ID == userID {
+		return stacktrace.Propagate(ente.ErrBadRequest, "owner can not join via link")
+	}
+	if !collection.AllowSharing() {
+		return stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("joining %s is not allowed", collection.Type))
+	}
+	publicCollectionToken, err := c.PublicCollectionCtrl.GetActivePublicCollectionToken(ctx, req.CollectionID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+
+	if canJoin := publicCollectionToken.CanJoin(); canJoin != nil {
+		return stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("can not join collection: %s", canJoin.Error()))
+	}
+	accessToken := auth.GetAccessToken(ctx)
+	if publicCollectionToken.Token != accessToken {
+		return stacktrace.Propagate(ente.ErrPermissionDenied, "token doesn't match collection")
+	}
+	if publicCollectionToken.PassHash != nil && *publicCollectionToken.PassHash != "" {
+		accessTokenJWT := auth.GetAccessTokenJWT(ctx)
+		if passCheckErr := c.PublicCollectionCtrl.ValidateJWTToken(ctx, accessTokenJWT, *publicCollectionToken.PassHash); passCheckErr != nil {
+			return stacktrace.Propagate(passCheckErr, "")
+		}
+	}
+	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(collection.Owner.ID, true)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	role := ente.VIEWER
+	if publicCollectionToken.EnableCollect {
+		role = ente.COLLABORATOR
+	}
+	joinErr := c.CollectionRepo.Share(req.CollectionID, collection.Owner.ID, userID, req.EncryptedKey, role, time.Microseconds())
+	if joinErr != nil {
+		return stacktrace.Propagate(joinErr, "")
+	}
+	go c.EmailCtrl.OnLinkJoined(collection.Owner.ID, userID, role)
+	return nil
 }
 
 // UnShare unshares a collection with a user

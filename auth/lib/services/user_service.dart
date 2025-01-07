@@ -379,6 +379,7 @@ class UserService {
       if (response.statusCode == 200) {
         Widget page;
         final String passkeySessionID = response.data["passkeySessionID"];
+        final String accountsUrl = response.data["accountsUrl"] ?? kAccountsUrl;
         String twoFASessionID = response.data["twoFactorSessionID"];
         if (twoFASessionID.isEmpty &&
             response.data["twoFactorSessionIDV2"] != null) {
@@ -388,6 +389,7 @@ class UserService {
           page = PasskeyPage(
             passkeySessionID,
             totp2FASessionID: twoFASessionID,
+            accountsUrl: accountsUrl,
           );
         } else if (twoFASessionID.isNotEmpty) {
           page = TwoFactorAuthenticationPage(twoFASessionID);
@@ -692,6 +694,7 @@ class UserService {
     if (response.statusCode == 200) {
       Widget? page;
       final String passkeySessionID = response.data["passkeySessionID"];
+      final String accountsUrl = response.data["accountsUrl"] ?? kAccountsUrl;
       String twoFASessionID = response.data["twoFactorSessionID"];
       if (twoFASessionID.isEmpty &&
           response.data["twoFactorSessionIDV2"] != null) {
@@ -702,6 +705,7 @@ class UserService {
         page = PasskeyPage(
           passkeySessionID,
           totp2FASessionID: twoFASessionID,
+          accountsUrl: accountsUrl,
         );
       } else if (twoFASessionID.isNotEmpty) {
         page = TwoFactorAuthenticationPage(twoFASessionID);

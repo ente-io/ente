@@ -23,7 +23,7 @@ export const PasswordHeader: React.FC<React.PropsWithChildren> = ({
     return (
         <Header_>
             <Typography variant="h2">{t("password")}</Typography>
-            <Typography color="text.faint">{children}</Typography>
+            <Typography sx={{ color: "text.faint" }}>{children}</Typography>
         </Header_>
     );
 };
@@ -32,7 +32,7 @@ const PasskeyHeader: React.FC<React.PropsWithChildren> = ({ children }) => {
     return (
         <Header_>
             <Typography variant="h3">{"Passkey"}</Typography>
-            <Typography color="text.faint">{children}</Typography>
+            <Typography sx={{ color: "text.faint" }}>{children}</Typography>
         </Header_>
     );
 };
@@ -53,11 +53,17 @@ export const LoginFlowFormFooter: React.FC<React.PropsWithChildren> = ({
 
     return (
         <FormPaperFooter>
-            <Stack gap="16px" width="100%" textAlign="start">
+            <Stack
+                sx={{
+                    gap: "16px",
+                    width: "100%",
+                    textAlign: "start",
+                }}
+            >
                 {children}
 
                 {host && (
-                    <Typography variant="small" color="text.faint">
+                    <Typography variant="small" sx={{ color: "text.faint" }}>
                         {host}
                     </Typography>
                 )}
@@ -131,7 +137,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
                                 <CircularProgress color="accent" size="1.5em" />
                             </Typography>
                         ) : (
-                            <Typography color="text.muted">
+                            <Typography sx={{ color: "text.muted" }}>
                                 {verificationStatus == "waiting"
                                     ? t("waiting_for_verification")
                                     : t("verification_still_pending")}
@@ -159,12 +165,15 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
                 </VerifyingPasskeyMiddle>
 
                 <LoginFlowFormFooter>
-                    <Stack direction="row" justifyContent="space-between">
+                    <Stack
+                        direction="row"
+                        sx={{ justifyContent: "space-between" }}
+                    >
                         <LinkButton onClick={handleRecover}>
                             {t("RECOVER_ACCOUNT")}
                         </LinkButton>
                         <LinkButton onClick={logout}>
-                            {t("CHANGE_EMAIL")}
+                            {t("change_email")}
                         </LinkButton>
                     </Stack>
                 </LoginFlowFormFooter>

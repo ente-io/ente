@@ -351,6 +351,7 @@
   "failedToLoadAlbums": "Laden der Alben fehlgeschlagen",
   "hidden": "Versteckt",
   "authToViewYourHiddenFiles": "Bitte authentifizieren, um die versteckten Dateien anzusehen",
+  "authToViewTrashedFiles": "Bitte authentifizieren, um die gelöschten Dateien anzuzeigen",
   "trash": "Papierkorb",
   "uncategorized": "Unkategorisiert",
   "videoSmallCase": "Video",
@@ -689,6 +690,8 @@
   "noPhotosAreBeingBackedUpRightNow": "Momentan werden keine Fotos gesichert",
   "preserveMore": "Mehr Daten sichern",
   "grantFullAccessPrompt": "Bitte gewähre Zugang zu allen Fotos in der Einstellungen App",
+  "allowPermTitle": "Zugriff auf Fotos erlauben",
+  "allowPermBody": "Bitte erlaube den Zugriff auf Deine Fotos in den Einstellungen, damit Ente sie anzeigen und sichern kann.",
   "openSettings": "Öffne Einstellungen",
   "selectMorePhotos": "Mehr Fotos auswählen",
   "existingUser": "Existierender Benutzer",
@@ -1382,9 +1385,9 @@
   "onlyThem": "Nur diese",
   "checkingModels": "Prüfe Modelle...",
   "enableMachineLearningBanner": "Aktiviere maschinelles Lernen für die magische Suche und Gesichtserkennung",
-  "searchDiscoverEmptySection": "Bilder werden hier angezeigt, sobald die Verarbeitung abgeschlossen ist",
-  "searchPersonsEmptySection": "Personen werden hier angezeigt, sobald die Verarbeitung abgeschlossen ist",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {0 Betrachter hinzugefügt} one {1 Betrachter hinzugefügt} other {{count} Betrachter hinzugefügt}}",
+  "searchDiscoverEmptySection": "Bilder werden hier angezeigt, sobald Verarbeitung und Synchronisation abgeschlossen sind",
+  "searchPersonsEmptySection": "Personen werden hier angezeigt, sobald Verarbeitung und Synchronisierung abgeschlossen sind",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {0 Betrachter hinzugefügt} =1 {1 Betrachter hinzugefügt} other {{count} Betrachter hinzugefügt}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1479,15 +1482,15 @@
     }
   },
   "file": "Datei",
-  "searchSectionsLengthMismatch": "Abschnittslänge stimmt nicht überein: {snapshotLenght} != {searchLenght}",
+  "searchSectionsLengthMismatch": "Abschnittslänge stimmt nicht überein: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
     "description": "Appears in search tab page",
     "placeholders": {
-      "snapshotLenght": {
+      "snapshotLength": {
         "type": "int",
         "example": "1"
       },
-      "searchLenght": {
+      "searchLength": {
         "type": "int",
         "example": "2"
       }
@@ -1575,5 +1578,7 @@
   },
   "legacyInvite": "{email} hat dich eingeladen, ein vertrauenswürdiger Kontakt zu werden",
   "authToManageLegacy": "Bitte authentifiziere dich, um deine vertrauenswürdigen Kontakte zu verwalten",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player."
+  "useDifferentPlayerInfo": "Hast du Probleme beim Abspielen dieses Videos? Halte hier gedrückt, um einen anderen Player auszuprobieren.",
+  "hideSharedItemsFromHomeGallery": "Geteilte Elemente in der Home-Galerie ausblenden",
+  "gallery": "Galerie"
 }
