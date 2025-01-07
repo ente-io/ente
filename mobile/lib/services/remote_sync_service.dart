@@ -307,7 +307,10 @@ class RemoteSyncService {
   }
 
   Future<void> joinAndSyncCollection(
-      BuildContext context, int collectionID) async {
+    BuildContext context,
+    int collectionID,
+  
+  ) async {
     await _collectionsService.joinPublicCollection(context, collectionID);
     await _collectionsService.sync();
     await _syncCollectionDiff(collectionID, 0);
