@@ -406,7 +406,7 @@
     "never": "Tidak pernah",
     "disable_file_download": "",
     "disable_file_download_message": "",
-    "SHARED_USING": "",
+    "shared_using": "",
     "sharing_referral_code": "Gunakan kode <strong>{{referralCode}}</strong> untuk memperoleh 10 GB gratis",
     "live_photo_indicator": "",
     "disable_password": "",

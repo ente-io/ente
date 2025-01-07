@@ -406,7 +406,7 @@
     "never": "Ποτέ",
     "disable_file_download": "Απενεργοποίηση λήψεων",
     "disable_file_download_message": "",
-    "SHARED_USING": "Κοινοποίηση μέσω ",
+    "shared_using": "Κοινοποίηση μέσω <a>{{url}}</a>",
     "sharing_referral_code": "Χρησιμοποιήστε τον κωδικό <strong>{{referralCode}}</strong> για να αποκτήσετε 10 GB δωρεάν",
     "live_photo_indicator": "ΖΩΝΤΑΝΑ",
     "disable_password": "Απενεργοποίηση κλειδώματος κωδικού πρόσβασης",

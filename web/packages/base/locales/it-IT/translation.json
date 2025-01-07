@@ -406,7 +406,7 @@
     "never": "Mai",
     "disable_file_download": "Disabilita download",
     "disable_file_download_message": "<p>Sei sicuro di voler disattivare il pulsante di download per i file?</p><p>I visualizzatori possono ancora fare screenshot o salvare una copia delle foto utilizzando strumenti esterni.</p>",
-    "SHARED_USING": "Condiviso utilizzando",
+    "shared_using": "Condiviso utilizzando <a>{{url}}</a>",
     "sharing_referral_code": "Usa il codice <strong>{{referralCode}}</strong> per ottenere 10 GB gratuiti",
     "live_photo_indicator": "IN DIRETTA",
     "disable_password": "Disabilita blocco password",

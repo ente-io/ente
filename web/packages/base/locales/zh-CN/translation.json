@@ -406,7 +406,7 @@
     "never": "永不",
     "disable_file_download": "禁止下载",
     "disable_file_download_message": "<p>您确定要禁用文件下载按钮吗？</p><p>观看者仍然可以使用外部工具进行屏幕截图或保存您的照片副本。</p>",
-    "SHARED_USING": "分享方式 ",
+    "shared_using": "分享方式 <a>{{url}}</a>",
     "sharing_referral_code": "使用代码 <strong>{{referralCode}}</strong> 获得 10 GB 免费空间",
     "live_photo_indicator": "实况",
     "disable_password": "禁用密码锁",

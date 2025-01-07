@@ -406,7 +406,7 @@
     "never": "Jamais",
     "disable_file_download": "Désactiver le téléchargement",
     "disable_file_download_message": "<p>Êtes-vous certains de vouloir désactiver le bouton de téléchargement pour les fichiers?</p><p>Ceux qui les visualisent pourront tout de même faire des captures d'écrans ou sauvegarder une copie de vos photos en utilisant des outils externes.</p>",
-    "SHARED_USING": "Partagé en utilisant ",
+    "shared_using": "Partagé en utilisant <a>{{url}}</a>",
     "sharing_referral_code": "Utilisez le code <strong>{{referralCode}}</strong> pour obtenir 10 Go gratuits",
     "live_photo_indicator": "LIVE",
     "disable_password": "Désactiver le verrouillage par mot de passe",

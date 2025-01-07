@@ -406,7 +406,7 @@
     "never": "Không bao giờ",
     "disable_file_download": "Vô hiệu hóa tải xuống",
     "disable_file_download_message": "<p>Bạn có chắc chắn muốn vô hiệu hóa nút tải xuống cho các tệp không?</p><p>Người xem vẫn có thể chụp ảnh màn hình hoặc lưu bản sao của ảnh của bạn bằng các công cụ bên ngoài.</p>",
-    "SHARED_USING": "Chia sẻ bằng ",
+    "shared_using": "Chia sẻ bằng <a>{{url}}</a>",
     "sharing_referral_code": "Sử dụng mã <strong>{{referralCode}}</strong> để nhận 10 GB miễn phí",
     "live_photo_indicator": "TRỰC TIẾP",
     "disable_password": "Vô hiệu hóa khóa mật khẩu",
