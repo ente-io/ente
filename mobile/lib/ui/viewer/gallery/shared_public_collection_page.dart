@@ -11,6 +11,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/remote_sync_service.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
@@ -97,7 +98,7 @@ class _SharedPublicCollectionPageState
       selectedFiles: _selectedFiles,
       initialFiles: initialFiles,
       albumName: widget.c.collection.displayName,
-      header: widget.c.collection.isJoinEnabled
+      header: widget.c.collection.isJoinEnabled && flagService.internalUser
           ? Padding(
               padding: const EdgeInsets.all(8.0),
               child: NotificationWidget(

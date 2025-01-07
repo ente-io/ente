@@ -949,6 +949,7 @@ class CollectionsService {
         data: {
           "collectionID": collection.id,
           "enableCollect": enableCollect,
+          "enableJoin": flagService.internalUser,
         },
       );
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
