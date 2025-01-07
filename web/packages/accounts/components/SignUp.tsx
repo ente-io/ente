@@ -136,7 +136,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                 }}
                 validationSchema={Yup.object().shape({
                     email: Yup.string()
-                        .email(t("EMAIL_ERROR"))
+                        .email(t("invalid_email_error"))
                         .required(t("required")),
                     passphrase: Yup.string().required(t("required")),
                     confirm: Yup.string().required(t("required")),
@@ -159,7 +159,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                 name="email"
                                 autoComplete="username"
                                 type="email"
-                                label={t("ENTER_EMAIL")}
+                                label={t("enter_email")}
                                 value={values.email}
                                 onChange={handleChange("email")}
                                 error={Boolean(errors.email)}

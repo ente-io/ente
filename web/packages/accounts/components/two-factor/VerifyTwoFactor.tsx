@@ -89,7 +89,7 @@ export function VerifyTwoFactor(props: Props) {
                             {errors.otp && (
                                 <CenteredFlex sx={{ mt: 1 }}>
                                     <InvalidInputMessage>
-                                        {t("INCORRECT_CODE")}
+                                        {t("incorrect_code")}
                                     </InvalidInputMessage>
                                 </CenteredFlex>
                             )}

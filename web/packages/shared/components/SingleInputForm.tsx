@@ -97,7 +97,7 @@ export default function SingleInputForm(props: SingleInputFormProps) {
             case "email":
                 return Yup.object().shape({
                     inputValue: Yup.string()
-                        .email(t("EMAIL_ERROR"))
+                        .email(t("invalid_email_error"))
                         .required(t("required")),
                 });
         }

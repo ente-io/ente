@@ -575,7 +575,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             <EnteMenuItem
                 variant="secondary"
                 onClick={redirectToChangeEmailPage}
-                label={t("CHANGE_EMAIL")}
+                label={t("change_email")}
             />
             <EnteMenuItem
                 variant="secondary"

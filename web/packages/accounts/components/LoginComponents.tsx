@@ -173,7 +173,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
                             {t("RECOVER_ACCOUNT")}
                         </LinkButton>
                         <LinkButton onClick={logout}>
-                            {t("CHANGE_EMAIL")}
+                            {t("change_email")}
                         </LinkButton>
                     </Stack>
                 </LoginFlowFormFooter>

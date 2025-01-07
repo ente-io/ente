@@ -560,7 +560,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                     onClose={onClose}
                     callback={collectionShare}
                     optionsList={nonSharedEmails}
-                    placeholder={t("ENTER_EMAIL")}
+                    placeholder={t("enter_email")}
                     fieldType="email"
                     buttonText={
                         type === COLLECTION_ROLE.VIEWER
@@ -636,7 +636,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                 });
             case "email":
                 return Yup.object().shape({
-                    inputValue: Yup.string().email(t("EMAIL_ERROR")),
+                    inputValue: Yup.string().email(t("invalid_email_error")),
                 });
         }
     }, [props.fieldType]);

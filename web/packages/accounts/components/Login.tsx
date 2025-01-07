@@ -60,7 +60,7 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
             <SingleInputForm
                 callback={loginUser}
                 fieldType="email"
-                placeholder={t("ENTER_EMAIL")}
+                placeholder={t("enter_email")}
                 buttonText={t("login")}
                 autoComplete="username"
                 hiddenPostInput={

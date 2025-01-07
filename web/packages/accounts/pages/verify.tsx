@@ -161,10 +161,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             if (e instanceof ApiError) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                 if (e?.httpStatusCode === HttpStatusCode.Unauthorized) {
-                    setFieldError(t("INVALID_CODE"));
+                    setFieldError(t("invalid_code_error"));
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                 } else if (e?.httpStatusCode === HttpStatusCode.Gone) {
-                    setFieldError(t("EXPIRED_CODE"));
+                    setFieldError(t("expired_code_error"));
                 }
             } else {
                 log.error("OTT verification failed", e);
@@ -223,7 +223,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             <FormPaper>
                 <FormPaperTitle sx={{ mb: 14, wordBreak: "break-word" }}>
                     <Trans
-                        i18nKey="EMAIL_SENT"
+                        i18nKey="email_sent"
                         components={{
                             a: (
                                 <Box
@@ -236,13 +236,13 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     />
                 </FormPaperTitle>
                 <Typography variant="small" sx={{ color: "text.muted", mb: 2 }}>
-                    {t("CHECK_INBOX")}
+                    {t("check_inbox_hint")}
                 </Typography>
                 <SingleInputForm
                     fieldType="text"
                     autoComplete="one-time-code"
-                    placeholder={t("ENTER_OTT")}
-                    buttonText={t("VERIFY")}
+                    placeholder={t("verification_code")}
+                    buttonText={t("verify")}
                     callback={onSubmit}
                 />
 
@@ -253,13 +253,13 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     >
                         {resend === 0 && (
                             <LinkButton onClick={resendEmail}>
-                                {t("RESEND_MAIL")}
+                                {t("resend_code")}
                             </LinkButton>
                         )}
-                        {resend === 1 && <span>{t("SENDING")}</span>}
-                        {resend === 2 && <span>{t("SENT")}</span>}
+                        {resend === 1 && <span>{t("status_sending")}</span>}
+                        {resend === 2 && <span>{t("status_sent")}</span>}
                         <LinkButton onClick={logout}>
-                            {t("CHANGE_EMAIL")}
+                            {t("change_email")}
                         </LinkButton>
                     </Stack>
                 </LoginFlowFormFooter>
