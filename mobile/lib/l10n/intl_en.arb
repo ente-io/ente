@@ -1580,5 +1580,10 @@
   "authToManageLegacy": "Please authenticate to manage your trusted contacts",
   "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player.",
   "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
-  "gallery": "Gallery"
+  "gallery": "Gallery",
+  "joinAlbum": "Join album",
+  "joinAlbumSubtext": "to view and add your photos",
+  "joinAlbumSubtextViewer": "to add this to shared albums",
+  "join": "Join"
+  
 }

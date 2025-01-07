@@ -5,6 +5,7 @@ import "package:photos/events/collection_meta_event.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file_load_result.dart";
@@ -15,7 +16,6 @@ import "package:photos/services/remote_sync_service.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/notification_widget.dart";
-import "package:photos/ui/sharing/share_collection_page.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
@@ -24,6 +24,7 @@ import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.da
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/toast_util.dart";
 
 class SharedPublicCollectionPage extends StatefulWidget {
   final CollectionWithThumbnail c;
@@ -100,18 +101,19 @@ class _SharedPublicCollectionPageState
           ? Padding(
               padding: const EdgeInsets.all(8.0),
               child: NotificationWidget(
-                startIcon: Icons.people_alt_outlined,
+                startIcon: Icons.people_outline,
                 actionIcon: null,
                 actionWidget: ButtonWidget(
                   buttonType: ButtonType.primary,
-                  labelText: "Join",
+                  labelText: context.l10n.join,
                   buttonSize: ButtonSize.small,
+                  shouldSurfaceExecutionStates: false,
                   onTap: _joinAlbum,
                 ),
-                text: 'Join album',
+                text: context.l10n.joinAlbum,
                 subText: widget.c.collection.isCollectEnabledForPublicLink()
-                    ? "to view and add your photos"
-                    : 'to add this to shared albums',
+                    ? context.l10n.joinAlbumSubtext
+                    : context.l10n.joinAlbumSubtextViewer,
                 type: NotificationType.notice,
                 onTap: () async {},
               ),
@@ -151,7 +153,11 @@ class _SharedPublicCollectionPageState
   }
 
   Future<void> _joinAlbum() async {
-    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
+    final dialog = createProgressDialog(
+      context,
+      S.of(context).pleaseWait,
+      isDismissible: true,
+    );
     await dialog.show();
     try {
       logger.info("Joining collection ${widget.c.collection.id}");
@@ -171,9 +177,10 @@ class _SharedPublicCollectionPageState
       );
     } catch (e, s) {
       logger.severe("Failed to join collection", e, s);
-      showGenericErrorDialog(context: context, error: e).ignore();
-    } finally {
       await dialog.hide();
+      showToast(context, S.of(context).somethingWentWrong);
+      // wait for 400ms to show the error dialog
+      await Future.delayed(const Duration(milliseconds: 400));
     }
   }
 }

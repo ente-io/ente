@@ -1037,6 +1037,12 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Items show the number of days remaining before permanent deletion"),
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "Selected items will be removed from this album"),
+        "join": MessageLookupByLibrary.simpleMessage("Join"),
+        "joinAlbum": MessageLookupByLibrary.simpleMessage("Join album"),
+        "joinAlbumSubtext":
+            MessageLookupByLibrary.simpleMessage("to view and add your photos"),
+        "joinAlbumSubtextViewer": MessageLookupByLibrary.simpleMessage(
+            "to add this to shared albums"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
         "keepPhotos": MessageLookupByLibrary.simpleMessage("Keep Photos"),
         "kiloMeterUnit": MessageLookupByLibrary.simpleMessage("km"),

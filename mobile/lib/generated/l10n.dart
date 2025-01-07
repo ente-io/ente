@@ -10838,6 +10838,46 @@ class S {
       args: [],
     );
   }
+
+  /// `Join album`
+  String get joinAlbum {
+    return Intl.message(
+      'Join album',
+      name: 'joinAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `to view and add your photos`
+  String get joinAlbumSubtext {
+    return Intl.message(
+      'to view and add your photos',
+      name: 'joinAlbumSubtext',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `to add this to shared albums`
+  String get joinAlbumSubtextViewer {
+    return Intl.message(
+      'to add this to shared albums',
+      name: 'joinAlbumSubtextViewer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Join`
+  String get join {
+    return Intl.message(
+      'Join',
+      name: 'join',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
