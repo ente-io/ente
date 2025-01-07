@@ -552,9 +552,7 @@ const PlanRow: React.FC<PlanRowProps> = ({ plan, onPlanSelect, disabled }) => {
                     onClick={handleClick}
                 >
                     <Box sx={{ textAlign: "right" }}>
-                        <Typography variant="large" sx={{ fontWeight: "bold" }}>
-                            {plan.price}{" "}
-                        </Typography>{" "}
+                        <Typography variant="h6">{plan.price}</Typography>
                         <Typography
                             variant="small"
                             sx={{ color: "text.muted" }}
