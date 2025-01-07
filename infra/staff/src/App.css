@@ -15,7 +15,6 @@
     border: none;
     width: 199px;
     height: 56px;
-    margin-left: 20px;
 }
 
 .fetch-button-container button:hover {
@@ -30,15 +29,9 @@
     color: inherit; /* Inherit color from parent */
     font-weight: bold; /* Make the text bold */
     font-size: 40px;
+    margin-bottom: 25px;
 }
 
-.text-field-token {
-    margin-left: 70px !important; /* Adjust margin for Token field */
-}
-
-.text-field-email {
-    margin-left: 20px !important; /* Adjust margin for Email field */
-}
 .duckie-container {
     position: absolute;
     top: 50%;
@@ -69,6 +62,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: space-around;
+    marign: 20px;
 }
 
 .horizontal-group {
@@ -79,9 +73,14 @@
     border-radius: 10px;
     margin-top: 90px;
     width: 1200px;
-    justify-content: center;
+    justify-content: space-around;
 }
 
+.text-fields {
+  display: flex;
+  justify-content: row;
+  gap: 20px;
+}
 .fetch-button-container button {
     background-color: #00b33c;
     color: white;
@@ -92,13 +91,6 @@
 
 .fetch-button-container button:hover {
     background-color: #007c6c;
-}
-
-.link-text {
-    text-decoration: none; /* Remove underline */
-    color: inherit; /* Inherit color from parent */
-    font-weight: bold; /* Make the text bold */
-    font-size: 30px;
 }
 
 .center-content {
@@ -115,30 +107,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-/* Example CSS to maintain tabs fixed position */
-.tabs-container {
-    position: sticky;
-    top: 20px; /* Adjust as needed */
-    z-index: 1000; /* Ensure tabs are above other content */
-}
-.container {
-    position: relative; /* Ensure the parent is relatively positioned */
-    height: 100vh; /* Full viewport height */
-    width: 100vw; /* Full viewport width */
-    display: flex;
-    flex-direction: column; /* Ensure children stack vertically */
-    justify-content: center; /* Center vertically */
-    align-items: center; /* Center horizontally */
-}
-
-.input-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    z-index: 1; /* Ensure form is on top */
-    margin-bottom: 20px; /* Add space between form and tabs */
 }
 
 .fetch-button-container button {
@@ -153,24 +121,6 @@
     background-color: #007c6c;
 }
 
-.link-text {
-    display: flex;
-    align-items: center;
-    padding: 0 16px; /* Add padding for better appearance */
-    text-decoration: none; /* Remove underline */
-    color: inherit; /* Inherit color from parent */
-    font-weight: bold; /* Make the text bold */
-    font-size: 40px;
-}
-
-.text-field-token {
-    margin-left: 70px !important; /* Adjust margin for Token field */
-}
-
-.text-field-email {
-    margin-left: 50px !important; /* Adjust margin for Email field */
-}
-
 .center-content {
     display: flex;
     justify-content: center;
@@ -187,14 +137,6 @@
     align-items: center;
 }
 
-.tabs-container {
-    position: sticky; /* Make the tabs sticky */
-    top: 0; /* Stick to the top of the viewport */
-    z-index: 1000; /* Ensure tabs are above other content */
-    background-color: #fafafa; /* Optional: Add background color to tabs */
-    padding: 10px 20px; /* Optional: Add padding for better appearance */
-    border-bottom: 1px solid #ccc; /* Optional: Add bottom border */
-}
 .dialog-popup-container {
     /* Styles for the overlay/background */
     position: fixed;
@@ -268,18 +210,13 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 25px;
     width: 100%;
-    margin-top: 150px;
 }
 
 .fetch-button-container {
     margin-right: 10px;
     margin-left: 10px;
-}
-
-.text-field-token,
-.text-field-email {
-    margin: 0 8px;
 }
 
 .error-message {
@@ -288,10 +225,16 @@
     margin-top: 16px;
 }
 
+/* MUi Component Custom CSS */ 
+css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input {
+  padding: none;
+  margin: none;
+}
+
 /* Mobile */
 @media screen and (max-width: 475px) {
     .link-text {
-        font-size: 25px;
+        font-size: 30px;
         text-align: center;
     }
     .input-form {
@@ -300,11 +243,20 @@
         gap: 20px;
         flex-direction: row;
     }
-    .text-field-token {
-    }
     .horizontal-group {
         width: 500px;
         flex-direction: column;
+        gap: 25px;
+    }
+    .text-fields {
+    width: fit-content;
+        flex-direction: column;
+        gap: 20px;
+        justify-content: center;
+    }
+    .text-fields label {
+        padding: 0;
+        margin: none;
     }
 }
 

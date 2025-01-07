@@ -227,7 +227,8 @@ const App: React.FC = () => {
 
     const handleTabChange = (
         _event: React.SyntheticEvent,
-        newValue: number,
+
+    newValue: number,
     ) => {
         setTabValue(newValue);
     };
@@ -243,32 +244,35 @@ const App: React.FC = () => {
                             rel="noopener noreferrer"
                             className="link-text"
                         >
-                            staff.ente.sh
+                            Ente Dashboard
                         </a>
-
-                        <TextField
-                            label="Token"
-                            value={localToken}
-                            onChange={(e) => {
-                                setLocalToken(e.target.value);
-                                setToken(e.target.value);
-                            }}
-                            size="medium"
-                            className="text-field-token"
-                            style={{ maxWidth: "parent" }}
-                        />
-                        <TextField
-                            label="Email"
-                            value={localEmail}
-                            onChange={(e) => {
-                                setLocalEmail(e.target.value);
-                                setEmail(e.target.value);
-                            }}
-                            size="medium"
-                            className="text-field-email"
-                            style={{ width: "parent" }}
-                        />
+                        <div class="text-fields">
+                            <TextField  
+                                
+                                label="Token"
+                                value={localToken}
+                                onChange={(e) => {
+                                    setLocalToken(e.target.value);
+                                    setToken(e.target.value);
+                                }}
+                                size="medium"
+                                className="text-field-token"
+                                style={{ maxWidth: "parent" }}
+                            />
+                            <TextField
+                                label="Email"
+                                value={localEmail}
+                                onChange={(e) => {
+                                    setLocalEmail(e.target.value);
+                                    setEmail(e.target.value);
+                                }}
+                                size="medium"
+                                className="text-field-email"
+                                style={{ width: "parent" }}
+                            />
+                        </div>
                         <div className="fetch-button-container">
+
                             <Button
                                 variant="contained"
                                 onClick={() => {
