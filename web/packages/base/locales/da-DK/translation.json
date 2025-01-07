@@ -10,7 +10,7 @@
     "new_to_ente": "Ny bruger",
     "existing_user": "",
     "ENTER_EMAIL": "",
-    "EMAIL_ERROR": "",
+    "invalid_email_error": "",
     "required": "",
     "email_not_registered": "",
     "email_already_registered": "",

@@ -10,7 +10,7 @@
     "new_to_ente": "Νέος/α στο Ente",
     "existing_user": "Υπάρχων χρήστης",
     "ENTER_EMAIL": "Εισάγετε διεύθυνση ηλ. ταχυδρομείου",
-    "EMAIL_ERROR": "Εισάγετε μία έγκυρη διεύθυνση ηλ. ταχυδρομείου",
+    "invalid_email_error": "Εισάγετε μία έγκυρη διεύθυνση ηλ. ταχυδρομείου",
     "required": "Υποχρεωτικό",
     "email_not_registered": "",
     "email_already_registered": "",

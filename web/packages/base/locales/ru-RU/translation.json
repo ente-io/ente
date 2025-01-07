@@ -10,7 +10,7 @@
     "new_to_ente": "Новенький в Ente",
     "existing_user": "Существующий пользователь",
     "ENTER_EMAIL": "Введите ваш email адрес",
-    "EMAIL_ERROR": "Введите действительный email адрес",
+    "invalid_email_error": "Введите действительный email адрес",
     "required": "Обязательное поле",
     "email_not_registered": "Email не зарегистрирован",
     "email_already_registered": "Такой email уже зарегистрирован",

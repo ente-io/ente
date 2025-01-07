@@ -10,7 +10,7 @@
     "new_to_ente": "Baru di Ente",
     "existing_user": "Pengguna yang sudah ada",
     "ENTER_EMAIL": "Masukkan alamat email",
-    "EMAIL_ERROR": "Masukkan email yang sah",
+    "invalid_email_error": "Masukkan email yang sah",
     "required": "Wajib",
     "email_not_registered": "",
     "email_already_registered": "",

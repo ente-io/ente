@@ -10,7 +10,7 @@
     "new_to_ente": "Ente 의 새소식",
     "existing_user": "기존 회원 로그인",
     "ENTER_EMAIL": "이메일 주소를 입력하세요",
-    "EMAIL_ERROR": "올바른 이메일을 입력하세요",
+    "invalid_email_error": "올바른 이메일을 입력하세요",
     "required": "필수",
     "email_not_registered": "",
     "email_already_registered": "",

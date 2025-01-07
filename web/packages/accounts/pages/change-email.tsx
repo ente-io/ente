@@ -108,13 +108,13 @@ const ChangeEmailForm: React.FC = () => {
                 ottInputVisible
                     ? Yup.object().shape({
                           email: Yup.string()
-                              .email(t("EMAIL_ERROR"))
+                              .email(t("invalid_email_error"))
                               .required(t("required")),
                           ott: Yup.string().required(t("required")),
                       })
                     : Yup.object().shape({
                           email: Yup.string()
-                              .email(t("EMAIL_ERROR"))
+                              .email(t("invalid_email_error"))
                               .required(t("required")),
                       })
             }

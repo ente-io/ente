@@ -10,7 +10,7 @@
     "new_to_ente": "Naujas sistemoje „Ente“",
     "existing_user": "Esamas naudotojas",
     "ENTER_EMAIL": "Įveskite el. pašto adresą",
-    "EMAIL_ERROR": "Įveskite tinkamą el. paštą.",
+    "invalid_email_error": "Įveskite tinkamą el. paštą.",
     "required": "privaloma.",
     "email_not_registered": "El. paštas neregistruotas.",
     "email_already_registered": "El. paštas jau užregistruotas.",

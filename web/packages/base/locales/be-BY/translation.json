@@ -10,7 +10,7 @@
     "new_to_ente": "Новы ў Ente",
     "existing_user": "Існуючы карыстальнік",
     "ENTER_EMAIL": "Увядзіце адрас электроннай пошты",
-    "EMAIL_ERROR": "Увядзіце сапраўдны адрас электроннай пошты",
+    "invalid_email_error": "Увядзіце сапраўдны адрас электроннай пошты",
     "required": "патрабуецца",
     "email_not_registered": "",
     "email_already_registered": "",

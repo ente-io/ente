@@ -10,7 +10,7 @@
     "new_to_ente": "جديد في Ente",
     "existing_user": "مستخدم موجود",
     "ENTER_EMAIL": "أدخل عنوان البريد الإلكتروني",
-    "EMAIL_ERROR": "أدخل بريد إلكتروني صالح",
+    "invalid_email_error": "أدخل بريد إلكتروني صالح",
     "required": "مطلوب",
     "email_not_registered": "",
     "email_already_registered": "",

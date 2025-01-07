@@ -10,7 +10,7 @@
     "new_to_ente": "Nieuw bij Ente",
     "existing_user": "Bestaande gebruiker",
     "ENTER_EMAIL": "Vul e-mailadres in",
-    "EMAIL_ERROR": "Vul een geldig e-mailadres in",
+    "invalid_email_error": "Vul een geldig e-mailadres in",
     "required": "Vereist",
     "email_not_registered": "E-mail niet geregistreerd",
     "email_already_registered": "E-mail is al geregistreerd",

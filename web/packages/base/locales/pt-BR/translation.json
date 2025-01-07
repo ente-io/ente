@@ -10,7 +10,7 @@
     "new_to_ente": "Novo no Ente",
     "existing_user": "Usuário existente",
     "ENTER_EMAIL": "Insira o endereço de e-mail",
-    "EMAIL_ERROR": "Inserir um endereço de e-mail válido",
+    "invalid_email_error": "Inserir um endereço de e-mail válido",
     "required": "requerido",
     "email_not_registered": "E-mail não registrado",
     "email_already_registered": "E-mail já registrado",

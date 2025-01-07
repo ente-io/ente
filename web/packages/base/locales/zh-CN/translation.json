@@ -10,7 +10,7 @@
     "new_to_ente": "初来 Ente",
     "existing_user": "现有用户",
     "ENTER_EMAIL": "请输入电子邮件地址",
-    "EMAIL_ERROR": "请输入有效的电子邮件",
+    "invalid_email_error": "请输入有效的电子邮件",
     "required": "必需的",
     "email_not_registered": "电子邮件地址未注册",
     "email_already_registered": "电子邮件地址已被注册",

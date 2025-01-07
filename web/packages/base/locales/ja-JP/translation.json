@@ -10,7 +10,7 @@
     "new_to_ente": "新しいユーザー",
     "existing_user": "存在するユーザー",
     "ENTER_EMAIL": "メールアドレスを入力してください",
-    "EMAIL_ERROR": "有効なメールアドレスを入力してください",
+    "invalid_email_error": "有効なメールアドレスを入力してください",
     "required": "必須",
     "email_not_registered": "",
     "email_already_registered": "",

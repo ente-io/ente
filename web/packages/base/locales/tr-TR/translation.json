@@ -10,7 +10,7 @@
     "new_to_ente": "Yeni ente kullanıcısı",
     "existing_user": "Mevcut kullanıcı",
     "ENTER_EMAIL": "E-posta adresini girin",
-    "EMAIL_ERROR": "Geçerli bir e-posta gir",
+    "invalid_email_error": "Geçerli bir e-posta gir",
     "required": "Gerekli",
     "email_not_registered": "",
     "email_already_registered": "",

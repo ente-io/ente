@@ -10,7 +10,7 @@
     "new_to_ente": "Prima volta con Ente",
     "existing_user": "Accedi",
     "ENTER_EMAIL": "Inserisci l'indirizzo email",
-    "EMAIL_ERROR": "Inserisci un indirizzo email valido",
+    "invalid_email_error": "Inserisci un indirizzo email valido",
     "required": "Campo obbligatorio",
     "email_not_registered": "",
     "email_already_registered": "",

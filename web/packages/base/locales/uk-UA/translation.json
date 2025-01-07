@@ -10,7 +10,7 @@
     "new_to_ente": "Уперше на Ente",
     "existing_user": "Існуючий користувач",
     "ENTER_EMAIL": "Введіть поштову адресу",
-    "EMAIL_ERROR": "Введіть дійсну поштову адресу",
+    "invalid_email_error": "Введіть дійсну поштову адресу",
     "required": "обов'язково",
     "email_not_registered": "Пошту не зареєстровано",
     "email_already_registered": "Пошту вже зареєстровано",

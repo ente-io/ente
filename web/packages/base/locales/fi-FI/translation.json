@@ -10,7 +10,7 @@
     "new_to_ente": "Uusi Ente-käyttäjä",
     "existing_user": "Jo valmiiksi olemassaoleva käyttäjä",
     "ENTER_EMAIL": "Syötä sähköpostiosoite",
-    "EMAIL_ERROR": "Syötä voimassa oleva sähköpostiosoite",
+    "invalid_email_error": "Syötä voimassa oleva sähköpostiosoite",
     "required": "Pakollinen",
     "email_not_registered": "",
     "email_already_registered": "",

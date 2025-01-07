@@ -10,7 +10,7 @@
     "new_to_ente": "Neu bei Ente",
     "existing_user": "Existierender Benutzer",
     "ENTER_EMAIL": "E-Mail-Adresse eingeben",
-    "EMAIL_ERROR": "Geben Sie eine gültige E-Mail-Adresse ein",
+    "invalid_email_error": "Geben Sie eine gültige E-Mail-Adresse ein",
     "required": "Erforderlich",
     "email_not_registered": "",
     "email_already_registered": "",
