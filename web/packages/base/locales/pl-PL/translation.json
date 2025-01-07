@@ -129,7 +129,7 @@
     "no_recovery_key_message": "Ze względu na charakter naszego protokołu szyfrowania end-to-end, Twoje dane nie mogą być odszyfrowane bez hasła lub klucza odzyskiwania",
     "no_two_factor_recovery_key_message": "Wyślij wiadomość e-mail na <a>{{emailID}}</a> z zarejestrowanego adresu e-mail",
     "contact_support": "Skontaktuj się z pomocą techniczną",
-    "request_feature": "Zaproponuj Funkcję",
+    "request_feature": "Zaproponuj funkcję",
     "support": "Wsparcie Techniczne",
     "cancel": "Anuluj",
     "logout": "Wyloguj się",

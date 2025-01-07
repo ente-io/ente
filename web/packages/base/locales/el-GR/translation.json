@@ -129,7 +129,7 @@
     "no_recovery_key_message": "",
     "no_two_factor_recovery_key_message": "Παρακαλώ αφήστε ένα μήνυμα ηλ. ταχυδρομείου στο <a>{{emailID}}</a> από την καταχωρημένη διεύθυνση σας",
     "contact_support": "Επικοινωνήστε με την υποστήριξη",
-    "request_feature": "Αίτηση Λειτουργίας",
+    "request_feature": "Αίτηση λειτουργίας",
     "support": "Υποστήριξη",
     "cancel": "Ακύρωση",
     "logout": "Αποσυνδέση",
