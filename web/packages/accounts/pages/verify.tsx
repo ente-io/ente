@@ -161,10 +161,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             if (e instanceof ApiError) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                 if (e?.httpStatusCode === HttpStatusCode.Unauthorized) {
-                    setFieldError(t("INVALID_CODE"));
+                    setFieldError(t("invalid_code_error"));
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                 } else if (e?.httpStatusCode === HttpStatusCode.Gone) {
-                    setFieldError(t("EXPIRED_CODE"));
+                    setFieldError(t("expired_code_error"));
                 }
             } else {
                 log.error("OTT verification failed", e);
