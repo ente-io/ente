@@ -82,7 +82,9 @@ class PreviewVideoStore {
     _logger.info('Compressing video ${enteFile.displayName}');
     final mediaInfo = await VideoCompress.compressVideo(
       file.path,
-      quality: VideoQuality.MediumQuality,
+      quality: VideoQuality.Res1280x720Quality,
+      bitRate: 2000000,
+      frameRate: 30,
     );
     if (mediaInfo?.path == null) return;
     _logger.info('CompressionDone ${enteFile.displayName}');

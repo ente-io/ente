@@ -186,7 +186,7 @@ dependencies:
   uuid: ^4.5.0
   video_compress:
     git:
-      url: https://github.com/RmanAkbarzadeh/VideoCompress.git
+      url: https://github.com/prateekmedia/VideoCompress-forked.git
   video_editor:
     git:
       url: https://github.com/prateekmedia/video_editor.git
