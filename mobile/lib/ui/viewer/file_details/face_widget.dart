@@ -5,7 +5,6 @@ import "package:flutter/cupertino.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
 import "package:photos/db/ml/db.dart";
-import "package:photos/extensions/stop_watch.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/ml/face/face.dart";
@@ -73,11 +72,8 @@ class _FaceWidgetState extends State<FaceWidget> {
               );
               if (widget.person == null && widget.clusterID == null) {
                 // Get faceID and double check that it doesn't belong to an existing clusterID. If it does, push that cluster page
-                final w = (kDebugMode ? EnteWatch('FaceWidget') : null)
-                  ?..start();
                 final existingClusterID = await MLDataDB.instance
                     .getClusterIDForFaceID(widget.face.faceID);
-                w?.log('getting existing clusterID for faceID');
                 if (existingClusterID != null) {
                   final fileIdsToClusterIds =
                       await MLDataDB.instance.getFileIdToClusterIds();
