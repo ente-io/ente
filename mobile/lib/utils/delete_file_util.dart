@@ -653,31 +653,67 @@ Future<List<String>> _iosDeleteLocalFilesInBatchesFallback(
   BuildContext context,
   List<String> localAssetIDs,
 ) async {
-  int maximumBatchSize = 1000;
   final List<String> deletedIDs = [];
-  do {
-    _logger.info(
-      "Trying to delete local files in batches with maximumBatchSize: $maximumBatchSize",
+
+  _logger.info(
+    "Trying to delete local files in batches",
+  );
+  deletedIDs.addAll(
+    await _deleteLocalFilesInBatchesRecursively(localAssetIDs),
+  );
+  if (deletedIDs.isEmpty) {
+    _logger.warning(
+      "Failed to delete local files in recursively batches",
     );
-    deletedIDs.addAll(
-      await deleteLocalFilesInBatches(
-        context,
-        localAssetIDs,
-        maximumBatchSize: maximumBatchSize,
-        minimumBatchSize: 10,
-      ),
-    );
-    if (deletedIDs.isEmpty) {
-      _logger.warning(
-        "Failed to delete local files in batchs with maximumBatchSize: $maximumBatchSize",
-      );
-    }
-    maximumBatchSize = max((maximumBatchSize ~/ 2), 10);
-  } while (deletedIDs.isEmpty && maximumBatchSize > 10);
+  }
 
   _logger.severe(
       "iOS free-space fallback, deleted ${deletedIDs.length} files with distinct localIDs"
       "in batches}");
+
+  return deletedIDs;
+}
+
+Future<List<String>> _deleteLocalFilesInBatchesRecursively(
+  List<String> localAssetIDs,
+) async {
+  if (localAssetIDs.isEmpty) return [];
+
+  final deletedIDs = await _deleteLocalFiles(localAssetIDs);
+  if (deletedIDs.isNotEmpty) {
+    return deletedIDs;
+  }
+
+  if (localAssetIDs.length == 1) {
+    _logger.warning("Failed to delete file " + localAssetIDs.first);
+    return [];
+  }
+
+  final midIndex = localAssetIDs.length ~/ 2;
+  final left = localAssetIDs.sublist(0, midIndex);
+  final right = localAssetIDs.sublist(midIndex);
+
+  final leftDeleted = await _deleteLocalFilesInBatchesRecursively(left);
+  final rightDeleted = await _deleteLocalFilesInBatchesRecursively(right);
+
+  return [...leftDeleted, ...rightDeleted];
+}
+
+Future<List<String>> _deleteLocalFiles(List<String> localIDs) async {
+  _logger.info(
+    "Trying to delete batch of size " +
+        localIDs.length.toString() +
+        "  :  " +
+        localIDs.toString(),
+  );
+
+  final List<String> deletedIDs = [];
+  try {
+    deletedIDs.addAll(await PhotoManager.editor.deleteWithIds(localIDs));
+    _logger.info("Deleted " + localIDs.toString());
+  } catch (e, s) {
+    _logger.severe("Could not delete batch " + localIDs.toString(), e, s);
+  }
 
   return deletedIDs;
 }
