@@ -130,7 +130,7 @@ const ChangeEmailForm: React.FC = () => {
                             onClose={() => setShowMessage(false)}
                         >
                             <Trans
-                                i18nKey="EMAIL_SENT"
+                                i18nKey="email_sent"
                                 components={{
                                     a: (
                                         <Box
@@ -180,7 +180,7 @@ const ChangeEmailForm: React.FC = () => {
                                 sx={{ mt: 2, mb: 4 }}
                                 loading={loading}
                             >
-                                {!ottInputVisible ? t("send_otp") : t("VERIFY")}
+                                {!ottInputVisible ? t("send_otp") : t("verify")}
                             </LoadingButton>
                         </VerticallyCentered>
                     </form>

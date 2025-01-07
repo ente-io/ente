@@ -76,7 +76,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         <VerticallyCentered>
             <FormPaper sx={{ maxWidth: "410px" }}>
                 <FormPaperTitle>{t("two_factor")}</FormPaperTitle>
-                <VerifyTwoFactor onSubmit={onSubmit} buttonText={t("VERIFY")} />
+                <VerifyTwoFactor onSubmit={onSubmit} buttonText={t("verify")} />
 
                 <FormPaperFooter style={{ justifyContent: "space-between" }}>
                     <LinkButton

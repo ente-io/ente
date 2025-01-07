@@ -223,7 +223,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             <FormPaper>
                 <FormPaperTitle sx={{ mb: 14, wordBreak: "break-word" }}>
                     <Trans
-                        i18nKey="EMAIL_SENT"
+                        i18nKey="email_sent"
                         components={{
                             a: (
                                 <Box
@@ -236,13 +236,13 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     />
                 </FormPaperTitle>
                 <Typography variant="small" sx={{ color: "text.muted", mb: 2 }}>
-                    {t("CHECK_INBOX")}
+                    {t("check_inbox_hint")}
                 </Typography>
                 <SingleInputForm
                     fieldType="text"
                     autoComplete="one-time-code"
                     placeholder={t("verification_code")}
-                    buttonText={t("VERIFY")}
+                    buttonText={t("verify")}
                     callback={onSubmit}
                 />
 
@@ -253,7 +253,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     >
                         {resend === 0 && (
                             <LinkButton onClick={resendEmail}>
-                                {t("RESEND_MAIL")}
+                                {t("resend_code")}
                             </LinkButton>
                         )}
                         {resend === 1 && <span>{t("SENDING")}</span>}

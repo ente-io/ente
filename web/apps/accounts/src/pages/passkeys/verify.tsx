@@ -366,7 +366,7 @@ const Verify: React.FC<VerifyProps> = ({ onVerify }) => {
             </Typography>
             <ButtonStack>
                 <FocusVisibleButton onClick={onVerify} fullWidth color="accent">
-                    {t("VERIFY")}
+                    {t("verify")}
                 </FocusVisibleButton>
             </ButtonStack>
         </Content>
