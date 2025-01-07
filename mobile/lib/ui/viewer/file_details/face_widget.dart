@@ -68,7 +68,7 @@ class _FaceWidgetState extends State<FaceWidget> {
               if (widget.editMode) return;
 
               log(
-                "FaceWidget is tapped, with person ${widget.person} and clusterID ${widget.clusterID}",
+                "FaceWidget is tapped, with person ${widget.person?.data.name} and clusterID ${widget.clusterID}",
                 name: "FaceWidget",
               );
               if (widget.person == null && widget.clusterID == null) {
