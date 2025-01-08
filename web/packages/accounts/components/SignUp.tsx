@@ -115,7 +115,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                 setJustSignedUp(true);
                 void router.push(PAGES.VERIFY);
             } catch (e) {
-                setFieldError("confirm", t("PASSWORD_GENERATION_FAILED"));
+                setFieldError("confirm", t("password_generation_failed"));
                 throw e;
             }
         } catch (e) {

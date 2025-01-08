@@ -570,7 +570,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             <EnteMenuItem
                 variant="secondary"
                 onClick={redirectToChangePasswordPage}
-                label={t("CHANGE_PASSWORD")}
+                label={t("change_password")}
             />
             <EnteMenuItem
                 variant="secondary"

@@ -66,7 +66,7 @@ const Page: React.FC<PageProps> = () => {
         try {
             kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
         } catch {
-            setFieldError("confirm", t("PASSWORD_GENERATION_FAILED"));
+            setFieldError("confirm", t("password_generation_failed"));
             return;
         }
         const encryptedKeyAttributes = await cryptoWorker.encryptToB64(
@@ -140,11 +140,11 @@ const Page: React.FC<PageProps> = () => {
     return (
         <VerticallyCentered>
             <FormPaper>
-                <FormPaperTitle>{t("CHANGE_PASSWORD")}</FormPaperTitle>
+                <FormPaperTitle>{t("change_password")}</FormPaperTitle>
                 <SetPasswordForm
                     userEmail={user?.email ?? ""}
                     callback={onSubmit}
-                    buttonText={t("CHANGE_PASSWORD")}
+                    buttonText={t("change_password")}
                 />
                 {(getData(LS_KEYS.SHOW_BACK_BUTTON)?.value ?? true) && (
                     <FormPaperFooter>
