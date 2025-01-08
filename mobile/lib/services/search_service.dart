@@ -908,6 +908,7 @@ class SearchService {
             // This should not be possible since it should be handled in the above loop, logging just in case
             _logger.severe(
               "`getAllFace`: Something unexpected happened, Cluster $clusterId should not have person id $personID",
+              Exception('Some unexpected error occurred in getAllFace wrt cluster to person mapping'),
             );
           } else {
             // This should not happen, means a clusterID is still assigned to a personID of a person that no longer exists
