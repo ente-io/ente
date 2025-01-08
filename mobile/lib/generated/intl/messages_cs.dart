@@ -26,9 +26,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Jaký je váš hlavní důvod, proč mažete svůj účet?"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Zkontrolujte prosím svou doručenou poštu (a spam) pro dokončení ověření"),
-        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
-        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
-            "Hide shared items from home gallery"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage("")
       };
 }

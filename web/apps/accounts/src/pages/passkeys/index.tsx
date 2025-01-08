@@ -1,8 +1,10 @@
 import { FormPaper } from "@/base/components/FormPaper";
 import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
+import { SingleInputDialog } from "@/base/components/SingleInputDialog";
 import { Titlebar } from "@/base/components/Titlebar";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
+import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
@@ -13,15 +15,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyIcon from "@mui/icons-material/Key";
-import {
-    Box,
-    Dialog,
-    Stack,
-    Typography,
-    styled,
-    useMediaQuery,
-    useTheme,
-} from "@mui/material";
+import { Box, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -123,8 +117,8 @@ const Page: React.FC = () => {
     return (
         <>
             <CenteredFlex>
-                <Box maxWidth="20rem">
-                    <Box marginBottom="1rem">
+                <Box sx={{ maxWidth: "20rem" }}>
+                    <Box sx={{ marginBottom: "1rem" }}>
                         <Typography>{t("passkeys_description")}</Typography>
                     </Box>
                     <FormPaper style={{ padding: "1rem" }}>
@@ -137,7 +131,7 @@ const Page: React.FC = () => {
                             submitButtonProps={{ sx: { marginBottom: 1 } }}
                         />
                     </FormPaper>
-                    <Box marginTop="1rem">
+                    <Box sx={{ marginTop: "1rem" }}>
                         <PasskeysList
                             passkeys={passkeys}
                             onSelectPasskey={handleSelectPasskey}
@@ -206,7 +200,9 @@ const PasskeyListItem: React.FC<PasskeyListItemProps> = ({
 }) => {
     const labelComponent = (
         <PasskeyLabel>
-            <Typography fontWeight="bold">{passkey.friendlyName}</Typography>
+            <Typography sx={{ fontWeight: "bold" }}>
+                {passkey.friendlyName}
+            </Typography>
         </PasskeyLabel>
     );
     return (
@@ -261,7 +257,16 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
 }) => {
     const { showMiniDialog } = useAppContext();
 
-    const [showRenameDialog, setShowRenameDialog] = useState(false);
+    const { show: showRenameDialog, props: renameDialogVisibilityProps } =
+        useModalVisibility();
+
+    const handleRenamePasskeySubmit = useCallback(
+        async (inputValue: string) => {
+            await renamePasskey(token!, passkey!.id, inputValue);
+            onUpdateOrDeletePasskey();
+        },
+        [token, passkey, onUpdateOrDeletePasskey],
+    );
 
     const showDeleteConfirmationDialog = useCallback(
         () =>
@@ -284,7 +289,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
         <>
             <SidebarDrawer anchor="right" {...{ open, onClose }}>
                 {token && passkey && (
-                    <Stack spacing={"4px"} py={"12px"}>
+                    <Stack sx={{ gap: "4px", py: "12px" }}>
                         <Titlebar
                             onClose={onClose}
                             title={t("manage_passkey")}
@@ -295,9 +300,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                         </CreatedAtEntry>
                         <MenuItemGroup>
                             <EnteMenuItem
-                                onClick={() => {
-                                    setShowRenameDialog(true);
-                                }}
+                                onClick={showRenameDialog}
                                 startIcon={<EditIcon />}
                                 label={t("rename_passkey")}
                             />
@@ -312,17 +315,16 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                     </Stack>
                 )}
             </SidebarDrawer>
-
             {token && passkey && (
-                <RenamePasskeyDialog
-                    open={showRenameDialog}
-                    onClose={() => setShowRenameDialog(false)}
-                    token={token}
-                    passkey={passkey}
-                    onRenamePasskey={() => {
-                        setShowRenameDialog(false);
-                        onUpdateOrDeletePasskey();
-                    }}
+                <SingleInputDialog
+                    {...renameDialogVisibilityProps}
+                    title={t("rename_passkey")}
+                    label={t("name")}
+                    placeholder={t("enter_passkey_name")}
+                    autoFocus
+                    initialValue={passkey.friendlyName}
+                    submitButtonTitle={t("rename")}
+                    onSubmit={handleRenamePasskeySubmit}
                 />
             )}
         </>
@@ -330,67 +332,13 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
 };
 
 const CreatedAtEntry: React.FC<React.PropsWithChildren> = ({ children }) => (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, pb: 1 }}>
+    <Stack direction="row" sx={{ alignItems: "center", gap: 0.5, pb: 1 }}>
         <CalendarTodayIcon color="secondary" sx={{ m: "16px" }} />
-        <Box py={0.5}>
+        <Box sx={{ py: 0.5 }}>
             <Typography>{t("created_at")}</Typography>
-            <Typography variant="small" color="text.muted">
+            <Typography variant="small" sx={{ color: "text.muted" }}>
                 {children}
             </Typography>
         </Box>
-    </Box>
+    </Stack>
 );
-
-interface RenamePasskeyDialogProps {
-    /** If `true`, then the dialog is shown. */
-    open: boolean;
-    /** Callback to invoke when the dialog wants to be closed. */
-    onClose: () => void;
-    /** Auth token for API requests. */
-    token: string;
-    /** The {@link Passkey} to rename. */
-    passkey: Passkey;
-    /** Callback to invoke when the passkey is renamed. */
-    onRenamePasskey: () => void;
-}
-
-const RenamePasskeyDialog: React.FC<RenamePasskeyDialogProps> = ({
-    open,
-    onClose,
-    token,
-    passkey,
-    onRenamePasskey,
-}) => {
-    const fullScreen = useMediaQuery(useTheme().breakpoints.down("sm"));
-
-    const handleSubmit = async (inputValue: string) => {
-        try {
-            await renamePasskey(token, passkey.id, inputValue);
-            onRenamePasskey();
-        } catch (e) {
-            log.error("Failed to rename passkey", e);
-        }
-    };
-
-    return (
-        <Dialog
-            {...{ open, onClose, fullScreen }}
-            PaperProps={{ sx: { width: { sm: "360px" } } }}
-        >
-            <Stack gap={3} p={3}>
-                <Typography variant="large" fontWeight={"bold"}>
-                    {t("rename_passkey")}
-                </Typography>
-                <SingleInputForm
-                    initialValue={passkey.friendlyName}
-                    callback={handleSubmit}
-                    placeholder={t("enter_passkey_name")}
-                    buttonText={t("rename")}
-                    fieldType="text"
-                    secondaryButtonAction={onClose}
-                    submitButtonProps={{ sx: { mt: 1, mb: 0 } }}
-                />
-            </Stack>
-        </Dialog>
-    );
-};

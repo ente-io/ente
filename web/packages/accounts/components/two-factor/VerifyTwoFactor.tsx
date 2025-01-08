@@ -3,7 +3,7 @@ import {
     CenteredFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import { Box, Typography, styled, type TypographyProps } from "@mui/material";
+import { Box, Typography, styled } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import React, { useState } from "react";
@@ -66,10 +66,13 @@ export function VerifyTwoFactor(props: Props) {
             {({ values, errors, handleChange, handleSubmit, submitForm }) => (
                 <VerticallyCentered>
                     <form noValidate onSubmit={handleSubmit}>
-                        <Typography mb={2} variant="small" color="text.muted">
+                        <Typography
+                            variant="small"
+                            sx={{ mb: 2, color: "text.muted" }}
+                        >
                             {t("ENTER_TWO_FACTOR_OTP")}
                         </Typography>
-                        <Box my={2}>
+                        <Box sx={{ my: 2 }}>
                             <OtpInput
                                 shouldAutoFocus={shouldAutoFocus}
                                 value={values.otp}
@@ -86,7 +89,7 @@ export function VerifyTwoFactor(props: Props) {
                             {errors.otp && (
                                 <CenteredFlex sx={{ mt: 1 }}>
                                     <InvalidInputMessage>
-                                        {t("INCORRECT_CODE")}
+                                        {t("incorrect_code")}
                                     </InvalidInputMessage>
                                 </CenteredFlex>
                             )}
@@ -119,7 +122,6 @@ const IndividualInput = styled("input")(
     border-radius: 1px;
     outline-color: ${theme.colors.accent.A300};
     transition: 0.5s;
-
     ${theme.breakpoints.down("sm")} {
         font-size: 1rem;
         padding: 4px;
@@ -128,16 +130,13 @@ const IndividualInput = styled("input")(
 `,
 );
 
-const InvalidInputMessage: React.FC<TypographyProps> = (props) => {
-    return (
-        <Typography
-            variant="mini"
-            sx={{
-                color: (theme) => theme.colors.danger.A700,
-            }}
-            {...props}
-        >
-            {props.children}
-        </Typography>
-    );
-};
+const InvalidInputMessage: React.FC<React.PropsWithChildren> = ({
+    children,
+}) => (
+    <Typography
+        variant="mini"
+        sx={(theme) => ({ color: theme.colors.danger.A700 })}
+    >
+        {children}
+    </Typography>
+);

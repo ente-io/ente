@@ -173,7 +173,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
       };
 
       encryptedThumbnail = (await NetworkClient.instance.getDio().get(
-                "https://public-albums.ente.io/preview/?fileID=${file.uploadedFileID}",
+                file.pubPreviewUrl,
                 options: Options(
                   headers: headers,
                   responseType: ResponseType.bytes,

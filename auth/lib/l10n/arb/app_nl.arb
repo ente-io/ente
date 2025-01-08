@@ -501,5 +501,6 @@
   "deduplicateCodes": "Dubbele codes",
   "deselectAll": "Alles deselecteren",
   "selectAll": "Alles selecteren",
-  "deleteDuplicates": "Dubbelen verwijderen"
+  "deleteDuplicates": "Dubbelen verwijderen",
+  "plainHTML": "Alleen HTML"
 }

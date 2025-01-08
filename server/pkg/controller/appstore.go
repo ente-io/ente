@@ -3,10 +3,11 @@ package controller
 import (
 	"context"
 	"fmt"
-	"github.com/ente-io/museum/pkg/controller/commonbilling"
-	"github.com/prometheus/common/log"
 	"strconv"
 	"strings"
+
+	"github.com/ente-io/museum/pkg/controller/commonbilling"
+	"github.com/prometheus/common/log"
 
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-contrib/requestid"
@@ -124,7 +125,7 @@ func (c *AppStoreController) HandleNotification(ctx *gin.Context, notification a
 					return stacktrace.Propagate(err, "")
 				}
 			} else if notification.NotificationType == appstore.NotificationTypeCancel || notification.NotificationType == appstore.NotificationTypeDidRevoke {
-				err := c.BillingRepo.UpdateSubscriptionCancellationStatus(subscription.UserID, true)
+				err := c.CommonBillCtrl.OnSubscriptionCancelled(subscription.UserID)
 				if err != nil {
 					return stacktrace.Propagate(err, "")
 				}

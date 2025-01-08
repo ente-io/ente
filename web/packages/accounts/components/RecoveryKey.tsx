@@ -10,7 +10,6 @@ import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import CodeBlock from "@ente/shared/components/CodeBlock";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import {
-    Box,
     Dialog,
     DialogActions,
     DialogContent,
@@ -81,12 +80,15 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
                 </DialogTitle>
                 <DialogCloseIconButton {...{ onClose }} />
             </SpaceBetweenFlex>
-
             <DialogContent>
-                <Typography mb={3}>{t("recovery_key_description")}</Typography>
+                <Typography sx={{ mb: 3 }}>
+                    {t("recovery_key_description")}
+                </Typography>
                 <DashedBorderWrapper>
                     <CodeBlock code={recoveryKey} />
-                    <Typography m={2}>{t("key_not_stored_note")}</Typography>
+                    <Typography sx={{ m: 2 }}>
+                        {t("key_not_stored_note")}
+                    </Typography>
                 </DashedBorderWrapper>
             </DialogContent>
             <DialogActions>
@@ -109,7 +111,7 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
     );
 };
 
-const DashedBorderWrapper = styled(Box)(({ theme }) => ({
+const DashedBorderWrapper = styled("div")(({ theme }) => ({
     border: `1px dashed ${theme.palette.grey.A400}`,
     borderRadius: theme.spacing(1),
 }));

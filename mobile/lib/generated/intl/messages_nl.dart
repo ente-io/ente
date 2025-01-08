@@ -185,6 +185,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m62(count) =>
       "${Intl.plural(count, one: '${count} resultaat gevonden', other: '${count} resultaten gevonden')}";
 
+  static String m63(snapshotLength, searchLength) =>
+      "Lengte van secties komt niet overeen: ${snapshotLength} != ${searchLength}";
+
   static String m4(count) => "${count} geselecteerd";
 
   static String m64(count, yourCount) =>
@@ -354,6 +357,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Downloads toestaan"),
         "allowPeopleToAddPhotos": MessageLookupByLibrary.simpleMessage(
             "Mensen toestaan foto\'s toe te voegen"),
+        "allowPermBody": MessageLookupByLibrary.simpleMessage(
+            "Geef toegang tot je foto\'s vanuit Instellingen zodat Ente je bibliotheek kan weergeven en back-uppen."),
+        "allowPermTitle": MessageLookupByLibrary.simpleMessage(
+            "Toegang tot foto\'s toestaan"),
         "androidBiometricHint":
             MessageLookupByLibrary.simpleMessage("Identiteit verifiëren"),
         "androidBiometricNotRecognized": MessageLookupByLibrary.simpleMessage(
@@ -431,6 +438,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Verifieer om je vertrouwde contacten te beheren"),
         "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
             "Verifieer uzelf om uw toegangssleutel te bekijken"),
+        "authToViewTrashedFiles": MessageLookupByLibrary.simpleMessage(
+            "Graag verifiëren om je verwijderde bestanden te bekijken"),
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
             "Graag verifiëren om uw actieve sessies te bekijken"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
@@ -972,7 +981,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bespaar ruimte op je apparaat door bestanden die al geback-upt zijn te wissen."),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Ruimte vrijmaken"),
         "freeUpSpaceSaving": m39,
-        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Tot 1000 herinneringen getoond in de galerij"),
         "general": MessageLookupByLibrary.simpleMessage("Algemeen"),
@@ -1003,8 +1011,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Verbergt app-inhoud in de app-schakelaar en schakelt schermopnamen uit"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Verbergt de inhoud van de app in de app-schakelaar"),
-        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
-            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Verbergen..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Gehost bij OSM France"),
@@ -1174,6 +1180,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "magicSearchHint": MessageLookupByLibrary.simpleMessage(
             "Magisch zoeken maakt het mogelijk om foto\'s op hun inhoud worden gezocht, bijvoorbeeld \"bloem\", \"rode auto\", \"identiteitsdocumenten\""),
         "manage": MessageLookupByLibrary.simpleMessage("Beheren"),
+        "manageDeviceStorage":
+            MessageLookupByLibrary.simpleMessage("Apparaatcache beheren"),
         "manageDeviceStorageDesc": MessageLookupByLibrary.simpleMessage(
             "Bekijk en wis lokale cache opslag."),
         "manageFamily":
@@ -1579,6 +1587,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Voeg beschrijvingen zoals \"#weekendje weg\" toe in foto-info om ze snel hier te vinden"),
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Zoeken op een datum, maand of jaar"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Afbeeldingen worden hier getoond zodra verwerking en synchroniseren voltooid is"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "Mensen worden hier getoond als het indexeren klaar is"),
         "searchFileTypesAndNamesEmptySection":
@@ -1596,7 +1606,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Foto\'s groeperen die in een bepaalde straal van een foto worden genomen"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Nodig mensen uit, en je ziet alle foto\'s die door hen worden gedeeld hier"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Personen worden hier getoond zodra verwerking en synchroniseren voltooid is"),
         "searchResultCount": m62,
+        "searchSectionsLengthMismatch": m63,
         "security": MessageLookupByLibrary.simpleMessage("Beveiliging"),
         "seePublicAlbumLinksInApp": MessageLookupByLibrary.simpleMessage(
             "Bekijk publieke album links in de app"),

@@ -87,6 +87,12 @@ is our core framework. We also import its a sibling
 [react-dom](https://github.com/facebook/react) package that renders JSX to the
 DOM.
 
+> [!NOTE]
+>
+> We need to repeat the dependency on react and its siblings in multiple
+> package.jsons to avoid the unmet peer dependency warnings printed by yarn.
+> Ideally, the react dependencies can be specified just in the _@/base_ package.
+
 ### MUI and Material Icons
 
 We use [MUI](https://mui.com)'s
@@ -97,14 +103,18 @@ MUI uses [Emotion](https://emotion.sh/) as its preferred CSS-in-JS library, for
 which we need to install install two Emotion packages (`@emotion/react` and
 `@emotion/styled`) as peer dependencies.
 
-We need to pin the emotion version (using the "resolutions" field in
-`package.json`) to those used by MUI since react-select (another package we use)
-specify a different emotion version directly instead of as a peer dependency,
-and we end up with two emotions at runtime otherwise.
-
 We also use MUI's
 [@mui/material-icons](https://mui.com/material-ui/material-icons/) package,
 which provides Material icons exported as React components (a `SvgIcon`).
+
+> [!NOTE]
+>
+> For a similar reason as with react,
+>
+> - the `@mui/material` dependency is also repeated at more places - the one in
+>   _@/base_ is the canonical one.
+> - we need to add an explicit dependency to `mui/system` in _@/new_ even though
+>   we don't directly depend on it.
 
 ### Date pickers
 
@@ -132,7 +142,14 @@ with Next.js.
 
 For more details, see [translations.md](translations.md).
 
-### Other UI components
+### UI components
+
+- [react-window](https://github.com/bvaughn/react-window) is used for lazy-ily
+  rendering large lists of dynamically created content, each item being of a
+  variable height. It is usually used in tandem with its sibling package,
+  [react-virtualized-auto-sizer](https://github.com/bvaughn/react-virtualized-auto-sizer)
+  which allows the lazy list to resize itself automatically to fill the entire
+  remaining space available in the container.
 
 - [formik](https://github.com/jaredpalmer/formik) provides an easier to use
   abstraction for dealing with form state, validation and submission states when
@@ -195,7 +212,10 @@ For more details, see [translations.md](translations.md).
 ## Photos app specific
 
 - [react-dropzone](https://github.com/react-dropzone/react-dropzone/) is a React
-  hook to create a drag-and-drop input zone.
+  hook to create a drag-and-drop input zone. Note that we pin to the last
+  version in the 14.2 series, since if we use 14.3 onwards (I tested till
+  14.3.5) then we are unable to get back a path from the file by using the
+  `webUtils.getPathForFile` function provided by Electron.
 
 - [sanitize-filename](https://github.com/parshap/node-sanitize-filename) is for
   converting arbitrary strings into strings that are suitable for being used as
@@ -209,15 +229,10 @@ For more details, see [translations.md](translations.md).
   [similarity-transformation](https://github.com/shaileshpandit/similarity-transformation-js)
   during face alignment.
 
-### UI
-
 - [react-top-loading-bar](https://github.com/klendi/react-top-loading-bar) is
   used for showing a progress indicator for global actions (This shouldn't be
   used always, it is only meant as a fallback when there isn't an otherwise
   suitable place for showing a local activity indicator).
-
-- [pure-react-carousel](https://github.com/express-labs/pure-react-carousel) is
-  used for the feature carousel on the welcome (login / signup) screen.
 
 ## Auth app specific
 

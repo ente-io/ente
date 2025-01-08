@@ -315,6 +315,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nustatykite tapatybę, kad tvarkytumėte patikimus kontaktus"),
         "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
             "Nustatykite tapatybę, kad peržiūrėtumėte savo slaptaraktį"),
+        "authToViewTrashedFiles": MessageLookupByLibrary.simpleMessage(
+            "Nustatykite tapatybę, kad peržiūrėtumėte išmestus failus"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
             "Nustatykite tapatybę, kad peržiūrėtumėte paslėptus failus"),
         "authToViewYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -730,7 +732,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nemokamas bandomasis laikotarpis"),
         "freeTrialValidTill": m36,
         "freeUpAmount": m38,
-        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Galerija"),
         "general": MessageLookupByLibrary.simpleMessage("Bendrieji"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Generuojami šifravimo raktai..."),
@@ -756,7 +758,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Paslepia programos turinį programos perjungiklyje"),
         "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
-            "Hide shared items from home gallery"),
+            "Slėpti bendrinamus elementus iš pagrindinės galerijos"),
         "hiding": MessageLookupByLibrary.simpleMessage("Slepiama..."),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Kaip tai veikia"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(

@@ -179,7 +179,7 @@ const SelectedFileOptions = ({
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />
                 </IconButton>
-                <Box ml={1.5}>
+                <Box sx={{ ml: 1.5 }}>
                     {ownCount === count
                         ? t("selected_count", { selected: count })
                         : t("selected_and_yours_count", {
@@ -188,7 +188,7 @@ const SelectedFileOptions = ({
                           })}
                 </Box>
             </FluidContainer>
-            <Stack spacing={2} direction="row" mr={2}>
+            <Stack direction="row" sx={{ gap: 2, mr: 2 }}>
                 {isInSearchMode ? (
                     <>
                         <Tooltip title={t("fix_creation_time")}>

@@ -198,7 +198,13 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
             <Titlebar onClose={handleCloseInfo} title={t("info")} backIsClose />
-            <Stack pt={1} pb={3} spacing={"20px"}>
+            <Stack
+                spacing={"20px"}
+                sx={{
+                    pt: 1,
+                    pb: 3,
+                }}
+            >
                 <RenderCaption
                     {...{
                         file,
@@ -314,12 +320,14 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 )}
                 {showCollectionChips && (
                     <InfoItem icon={<FolderOutlinedIcon />}>
-                        <Box
-                            display={"flex"}
-                            gap={1}
-                            flexWrap="wrap"
-                            justifyContent={"flex-start"}
-                            alignItems={"flex-start"}
+                        <Stack
+                            direction="row"
+                            sx={{
+                                gap: 1,
+                                flexWrap: "wrap",
+                                justifyContent: "flex-start",
+                                alignItems: "flex-start",
+                            }}
                         >
                             {fileToCollectionsMap
                                 ?.get(file.id)
@@ -336,11 +344,10 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                         {collectionNameMap.get(collectionID)}
                                     </ChipButton>
                                 ))}
-                        </Box>
+                        </Stack>
                     </InfoItem>
                 )}
             </Stack>
-
             <RawExif
                 {...rawExifVisibilityProps}
                 onInfoClose={handleCloseInfo}
@@ -441,13 +448,9 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
     trailingButton,
     children,
 }) => (
-    <Box
-        sx={{
-            display: "flex",
-            alignItems: "flex-start",
-            flex: 1,
-            gap: "12px",
-        }}
+    <Stack
+        direction="row"
+        sx={{ alignItems: "flex-start", flex: 1, gap: "12px" }}
     >
         <InfoItemIconContainer>{icon}</InfoItemIconContainer>
         <Box sx={{ flex: 1, mt: "4px" }}>
@@ -460,10 +463,10 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
                     </Typography>
                     <Typography
                         variant="small"
-                        color="text.muted"
                         {...(typeof caption == "string"
                             ? {}
                             : { component: "div" })}
+                        sx={{ color: "text.muted" }}
                     >
                         {caption}
                     </Typography>
@@ -471,7 +474,7 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
             )}
         </Box>
         {trailingButton}
-    </Box>
+    </Stack>
 );
 
 const InfoItemIconContainer = styled("div")(
@@ -554,7 +557,7 @@ function RenderCaption({
         return <></>;
     }
     return (
-        <Box p={1}>
+        <Box sx={{ p: 1 }}>
             <Formik<RenderCaptionFormValues>
                 initialValues={{ caption }}
                 validationSchema={Yup.object().shape({
@@ -981,22 +984,24 @@ const RawExif: React.FC<RawExifProps> = ({
                     />
                 }
             />
-            <Stack py={3} px={1} spacing={2}>
+            <Stack sx={{ gap: 2, py: 3, px: 1 }}>
                 {items.map(([key, namespace, tagName, description]) => (
                     <ExifItem key={key}>
-                        <Stack direction={"row"} gap={1}>
-                            <Typography variant="small" color={"text.muted"}>
+                        <Stack direction="row" sx={{ gap: 1 }}>
+                            <Typography
+                                variant="small"
+                                sx={{ color: "text.muted" }}
+                            >
                                 {tagName}
                             </Typography>
-                            <Typography variant="tiny" color={"text.faint"}>
+                            <Typography
+                                variant="tiny"
+                                sx={{ color: "text.faint" }}
+                            >
                                 {namespace}
                             </Typography>
                         </Stack>
-                        <EllipsizedTypography
-                            sx={{
-                                width: "100%",
-                            }}
-                        >
+                        <EllipsizedTypography sx={{ width: "100%" }}>
                             {description}
                         </EllipsizedTypography>
                     </ExifItem>
@@ -1006,7 +1011,7 @@ const RawExif: React.FC<RawExifProps> = ({
     );
 };
 
-const ExifItem = styled(Box)`
+const ExifItem = styled("div")`
     padding-left: 8px;
     padding-right: 8px;
     display: flex;

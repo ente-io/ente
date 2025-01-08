@@ -140,7 +140,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
         PublicCollectionGalleryContext,
     );
 
-    const pswpElement = useRef<HTMLDivElement>();
+    const pswpElement = useRef<HTMLDivElement | undefined>(undefined);
     const [photoSwipe, setPhotoSwipe] =
         useState<Photoswipe<Photoswipe.Options>>();
     const [showInfo, setShowInfo] = useState(false);
@@ -184,7 +184,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
     );
 
     useEffect(() => {
-        if (!pswpElement) return;
+        if (!pswpElement.current) return;
         if (isOpen) {
             openPhotoSwipe();
         }
@@ -990,7 +990,7 @@ const CaptionContainer = styled("div")(({ theme }) => ({
     fontSize: "14px",
     lineHeight: "17px",
     backgroundColor: theme.colors.backdrop.faint,
-    backdropFilter: `blur(${theme.colors.blur.base})`,
+    backdropFilter: "blur(96px)",
 }));
 
 const CircularProgressWithLabel: React.FC<
@@ -1009,7 +1009,7 @@ const CircularProgressWithLabel: React.FC<
             <Typography
                 variant="mini"
                 component="div"
-                color="text.secondary"
+                sx={{ color: "text.secondary" }}
             >{`${Math.round(value)}%`}</Typography>
         </Overlay>
     </>

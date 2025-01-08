@@ -445,7 +445,5 @@
   "sort": "Sortera",
   "newPerson": "Ny person",
   "addName": "Lägg till namn",
-  "add": "Lägg till",
-  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
-  "gallery": "Gallery"
+  "add": "Lägg till"
 }

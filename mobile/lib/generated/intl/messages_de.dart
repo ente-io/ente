@@ -439,6 +439,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bitte authentifiziere dich, um deine vertrauenswürdigen Kontakte zu verwalten"),
         "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
             "Bitte authentifizieren, um deinen Passkey zu sehen"),
+        "authToViewTrashedFiles": MessageLookupByLibrary.simpleMessage(
+            "Bitte authentifizieren, um die gelöschten Dateien anzuzeigen"),
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
             "Bitte authentifizieren, um die aktiven Sitzungen anzusehen"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
@@ -980,7 +982,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "freeUpSpace":
             MessageLookupByLibrary.simpleMessage("Speicherplatz freigeben"),
         "freeUpSpaceSaving": m39,
-        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Galerie"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Bis zu 1000 Erinnerungsstücke angezeigt in der Galerie"),
         "general": MessageLookupByLibrary.simpleMessage("Allgemein"),
@@ -1013,7 +1015,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Versteckt Inhalte der App beim Wechseln zwischen Apps"),
         "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
-            "Hide shared items from home gallery"),
+            "Geteilte Elemente in der Home-Galerie ausblenden"),
         "hiding": MessageLookupByLibrary.simpleMessage("Verstecken..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Gehostet bei OSM France"),

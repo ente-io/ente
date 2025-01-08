@@ -60,6 +60,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m18(albumName) =>
       "Створено спільне посилання для «${albumName}»";
 
+  static String m19(count) =>
+      "${Intl.plural(count, zero: 'Додано 0 співавторів', one: 'Додано 1 співавтор', few: 'Додано ${count} співаторів', many: 'Додано ${count} співаторів', other: 'Додано ${count} співавторів')}";
+
   static String m20(email, numOfDays) =>
       "Ви збираєтеся додати ${email} як довірений контакт. Вони зможуть відновити ваш обліковий запис, якщо ви будете відсутні протягом ${numOfDays} днів.";
 
@@ -146,6 +149,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m49(providerName) =>
       "Зверніться до ${providerName}, якщо було знято платіж";
 
+  static String m50(count) =>
+      "${Intl.plural(count, zero: '0 фото', one: '1 фото', few: '${count} фото', many: '${count} фото', other: '${count} фото')}";
+
   static String m51(endDate) =>
       "Безплатна пробна версія діє до ${endDate}.\nПісля цього ви можете обрати платний план.";
 
@@ -176,6 +182,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m62(count) =>
       "${Intl.plural(count, one: 'Знайдено ${count} результат', few: 'Знайдено ${count} результати', many: 'Знайдено ${count} результатів', other: 'Знайдено ${count} результати')}";
+
+  static String m63(snapshotLength, searchLength) =>
+      "Невідповідність довжини розділів: ${snapshotLength} != ${searchLength}";
 
   static String m4(count) => "${count} вибрано";
 
@@ -241,6 +250,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m84(endDate) => "Діє до ${endDate}";
 
   static String m85(email) => "Підтвердити ${email}";
+
+  static String m86(count) =>
+      "${Intl.plural(count, zero: 'Додано 0 користувачів', one: 'Додано 1 користувач', few: 'Додано ${count} користувача', many: 'Додано ${count} користувачів', other: 'Додано ${count} користувачів')}";
 
   static String m2(email) => "Ми надіслали листа на <green>${email}</green>";
 
@@ -572,6 +584,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Співавтори можуть додавати фотографії та відео до спільного альбому."),
+        "collaboratorsSuccessfullyAdded": m19,
         "collageLayout": MessageLookupByLibrary.simpleMessage("Макет"),
         "collageSaved":
             MessageLookupByLibrary.simpleMessage("Колаж збережено до галереї"),
@@ -956,7 +969,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Збережіть місце на вашому пристрої, очистивши файли, які вже збережено."),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Звільнити місце"),
         "freeUpSpaceSaving": m39,
-        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "До 1000 спогадів, показаних у галереї"),
         "general": MessageLookupByLibrary.simpleMessage("Загальні"),
@@ -987,8 +999,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Приховує вміст застосунку у перемикачі застосунків і вимикає знімки екрана"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Приховує вміст застосунку у перемикачі застосунків"),
-        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
-            "Hide shared items from home gallery"),
         "hiding": MessageLookupByLibrary.simpleMessage("Приховуємо..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Розміщення на OSM Франція"),
@@ -1162,6 +1172,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "magicSearchHint": MessageLookupByLibrary.simpleMessage(
             "Магічний пошук дозволяє шукати фотографії за їхнім вмістом, наприклад «квітка», «червоне авто» «паспорт»"),
         "manage": MessageLookupByLibrary.simpleMessage("Керування"),
+        "manageDeviceStorage":
+            MessageLookupByLibrary.simpleMessage("Керування кешем пристрою"),
         "manageDeviceStorageDesc": MessageLookupByLibrary.simpleMessage(
             "Переглянути та очистити локальне сховище кешу."),
         "manageFamily":
@@ -1352,6 +1364,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "photosAddedByYouWillBeRemovedFromTheAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Додані вами фотографії будуть видалені з альбому"),
+        "photosCount": m50,
         "pickCenterPoint":
             MessageLookupByLibrary.simpleMessage("Вкажіть центральну точку"),
         "pinAlbum": MessageLookupByLibrary.simpleMessage("Закріпити альбом"),
@@ -1594,6 +1607,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
             "Люди будуть показані тут після завершення оброблення та синхронізації"),
         "searchResultCount": m62,
+        "searchSectionsLengthMismatch": m63,
         "security": MessageLookupByLibrary.simpleMessage("Безпека"),
         "seePublicAlbumLinksInApp": MessageLookupByLibrary.simpleMessage(
             "Посилання на публічні альбоми в застосунку"),
@@ -1955,6 +1969,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Переглянути ключ відновлення"),
         "viewer": MessageLookupByLibrary.simpleMessage("Глядач"),
+        "viewersSuccessfullyAdded": m86,
         "visitWebToManage": MessageLookupByLibrary.simpleMessage(
             "Відвідайте web.ente.io, щоб керувати передплатою"),
         "waitingForVerification":

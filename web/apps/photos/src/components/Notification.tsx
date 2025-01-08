@@ -59,19 +59,17 @@ export default function Notification({
             <Button
                 color={attributes.variant}
                 onClick={handleClick}
-                sx={{
+                sx={(theme) => ({
                     textAlign: "left",
                     flex: "1",
-                    padding: (theme) => theme.spacing(1.5, 2),
+                    padding: theme.spacing(1.5, 2),
                     borderRadius: "8px",
-                }}
+                })}
             >
                 <Stack
-                    flex={"1"}
                     spacing={2}
                     direction="row"
-                    alignItems={"center"}
-                    width={"100%"}
+                    sx={{ flex: "1", alignItems: "center", width: "100%" }}
                 >
                     <Box sx={{ svg: { fontSize: "36px" } }}>
                         {attributes.startIcon ?? <InfoIcon />}
@@ -80,11 +78,13 @@ export default function Notification({
                     <Stack
                         direction={"column"}
                         spacing={0.5}
-                        flex={1}
-                        textAlign="left"
-                        // This is necessary to trigger the ellipsizing of the
-                        // text in children.
-                        overflow="hidden"
+                        sx={{
+                            flex: 1,
+                            textAlign: "left",
+                            // This is necessary to trigger the ellipsizing of the
+                            // text in children.
+                            overflow: "hidden",
+                        }}
                     >
                         {attributes.subtext && (
                             <EllipsizedTypography variant="small">

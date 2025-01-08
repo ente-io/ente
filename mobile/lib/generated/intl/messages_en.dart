@@ -474,6 +474,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
         "cachedData": MessageLookupByLibrary.simpleMessage("Cached data"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculating..."),
+        "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
+            "Sorry, this album cannot be opened in the app."),
+        "canNotOpenTitle":
+            MessageLookupByLibrary.simpleMessage("Cannot open this album"),
         "canNotUploadToAlbumsOwnedByOthers":
             MessageLookupByLibrary.simpleMessage(
                 "Can not upload to albums owned by others"),
@@ -1037,6 +1041,12 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Items show the number of days remaining before permanent deletion"),
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "Selected items will be removed from this album"),
+        "join": MessageLookupByLibrary.simpleMessage("Join"),
+        "joinAlbum": MessageLookupByLibrary.simpleMessage("Join album"),
+        "joinAlbumSubtext":
+            MessageLookupByLibrary.simpleMessage("to view and add your photos"),
+        "joinAlbumSubtextViewer": MessageLookupByLibrary.simpleMessage(
+            "to add this to shared albums"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
         "keepPhotos": MessageLookupByLibrary.simpleMessage("Keep Photos"),
         "kiloMeterUnit": MessageLookupByLibrary.simpleMessage("km"),

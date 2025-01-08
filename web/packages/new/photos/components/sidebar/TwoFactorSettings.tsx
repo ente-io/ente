@@ -85,18 +85,21 @@ const SetupDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
     return (
         <Stack sx={{ px: "16px", py: "20px", alignItems: "center" }}>
             <LockIcon
-                sx={{
+                sx={(theme) => ({
                     fontSize: "40px",
-                    color: (theme) => theme.colors.text.muted,
-                }}
+                    color: theme.colors.text.muted,
+                })}
             />
             <Typography
-                sx={{ textAlign: "center", marginBlock: "32px 36px" }}
-                color="text.muted"
+                sx={{
+                    color: "text.muted",
+                    textAlign: "center",
+                    marginBlock: "32px 36px",
+                }}
             >
                 {t("two_factor_info")}
             </Typography>
-            <FocusVisibleButton color="accent" size="large" onClick={configure}>
+            <FocusVisibleButton color="accent" fullWidth onClick={configure}>
                 {t("enable_two_factor")}
             </FocusVisibleButton>
         </Stack>

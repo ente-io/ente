@@ -282,15 +282,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Glömt lösenord"),
         "freeTrial": MessageLookupByLibrary.simpleMessage("Gratis provperiod"),
-        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Skapar krypteringsnycklar..."),
         "goToSettings":
             MessageLookupByLibrary.simpleMessage("Gå till inställningar"),
         "guestView": MessageLookupByLibrary.simpleMessage("Gästvy"),
         "help": MessageLookupByLibrary.simpleMessage("Hjälp"),
-        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
-            "Hide shared items from home gallery"),
         "howItWorks":
             MessageLookupByLibrary.simpleMessage("Så här fungerar det"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
