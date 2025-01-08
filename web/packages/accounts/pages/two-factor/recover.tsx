@@ -138,7 +138,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
             void router.push(PAGES.CREDENTIALS);
         } catch (e) {
             log.error("two factor recovery failed", e);
-            setFieldError(t("INCORRECT_RECOVERY_KEY"));
+            setFieldError(t("incorrect_recovery_key"));
         }
     };
 
@@ -173,12 +173,12 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                     callback={recover}
                     fieldType="text"
                     placeholder={t("recovery_key")}
-                    buttonText={t("RECOVER")}
+                    buttonText={t("recover")}
                     disableAutoComplete
                 />
                 <FormPaperFooter style={{ justifyContent: "space-between" }}>
                     <LinkButton onClick={() => showContactSupportDialog()}>
-                        {t("NO_RECOVERY_KEY")}
+                        {t("no_recovery_key_title")}
                     </LinkButton>
                     <LinkButton onClick={router.back}>
                         {t("go_back")}
