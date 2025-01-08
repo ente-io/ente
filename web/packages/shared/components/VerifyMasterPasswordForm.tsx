@@ -94,7 +94,7 @@ export default function VerifyMasterPasswordForm({
                 log.error("failed to verify passphrase", e);
                 switch (e.message) {
                     case CustomError.WEAK_DEVICE:
-                        setFieldError(t("WEAK_DEVICE"));
+                        setFieldError(t("weak_device_hint"));
                         break;
                     case CustomError.INCORRECT_PASSWORD:
                         setFieldError(t("incorrect_password"));

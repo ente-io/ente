@@ -135,7 +135,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
                                     marginLeft: "8px",
                                 }}
                             ></span>
-                            {t("ADD_FOLDER")}
+                            {t("add_folder")}
                         </Button>
                     </Stack>
                 </DialogContent>
@@ -241,7 +241,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
             title: t("stop_watching_folder_title"),
             message: t("stop_watching_folder_message"),
             continue: {
-                text: t("YES_STOP"),
+                text: t("yes_stop"),
                 color: "critical",
                 action: () => removeWatch(watch),
             },
@@ -252,11 +252,11 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
         <SpaceBetweenFlex>
             <Stack direction="row" sx={{ overflow: "hidden" }}>
                 {watch.collectionMapping === "root" ? (
-                    <Tooltip title={t("UPLOADED_TO_SINGLE_COLLECTION")}>
+                    <Tooltip title={t("uploaded_to_single_collection")}>
                         <FolderOpenIcon />
                     </Tooltip>
                 ) : (
-                    <Tooltip title={t("UPLOADED_TO_SEPARATE_COLLECTIONS")}>
+                    <Tooltip title={t("uploaded_to_separate_collections")}>
                         <FolderCopyOutlinedIcon />
                     </Tooltip>
                 )}
