@@ -81,14 +81,20 @@ func (c *Controller) InsertOrUpdateMetadata(ctx *gin.Context, req *fileData.PutF
 		return stacktrace.Propagate(err, "validation failed")
 	}
 	userID := auth.GetUserID(ctx.Request.Header)
-	err := c._validateWritePermission(ctx, req.FileID, userID)
+	fileOwnerID, err := c.FileRepo.GetOwnerID(req.FileID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
+	}
+	if fileOwnerID != userID {
+		permErr := c._checkMetadataReadOrWritePerm(ctx, userID, []int64{req.FileID})
+		if permErr != nil {
+			return stacktrace.Propagate(permErr, "")
+		}
 	}
 	if req.Type != ente.MlData {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage("unsupported object type "+string(req.Type)), "")
 	}
-	fileOwnerID := userID
+
 	bucketID := c.S3Config.GetBucketID(req.Type)
 	objectKey := fileData.ObjectMetadataKey(req.FileID, fileOwnerID, req.Type, nil)
 	obj := fileData.S3FileMetadata{
@@ -127,7 +133,7 @@ func (c *Controller) GetFileData(ctx *gin.Context, req fileData.GetFileData) (*f
 	if err := req.Validate(); err != nil {
 		return nil, stacktrace.Propagate(err, "validation failed")
 	}
-	if err := c._validateReadPermission(ctx, userID, []int64{req.FileID}); err != nil {
+	if err := c._checkMetadataReadOrWritePerm(ctx, userID, []int64{req.FileID}); err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
 	doRows, err := c.Repo.GetFilesData(ctx, req.Type, []int64{req.FileID})
@@ -154,7 +160,7 @@ func (c *Controller) GetFilesData(ctx *gin.Context, req fileData.GetFilesData) (
 	if err := req.Validate(); err != nil {
 		return nil, stacktrace.Propagate(err, "req validation failed")
 	}
-	if err := c._validateReadPermission(ctx, userID, req.FileIDs); err != nil {
+	if err := c._checkMetadataReadOrWritePerm(ctx, userID, req.FileIDs); err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
 
@@ -277,7 +283,7 @@ func (c *Controller) fetchS3FileMetadata(ctx context.Context, row fileData.Row, 
 	return nil, stacktrace.Propagate(errors.New("failed to fetch object"), "")
 }
 
-func (c *Controller) _validateReadPermission(ctx *gin.Context, userID int64, fileIDs []int64) error {
+func (c *Controller) _checkMetadataReadOrWritePerm(ctx *gin.Context, userID int64, fileIDs []int64) error {
 	if err := c.AccessCtrl.CanAccessFile(ctx, &access.CanAccessFileParams{
 		ActorUserID: userID,
 		FileIDs:     fileIDs,
@@ -287,7 +293,8 @@ func (c *Controller) _validateReadPermission(ctx *gin.Context, userID int64, fil
 	return nil
 }
 
-func (c *Controller) _validateWritePermission(ctx *gin.Context, fileID int64, actorID int64) error {
+// _checkPreviewWritePerm is
+func (c *Controller) _checkPreviewWritePerm(ctx *gin.Context, fileID int64, actorID int64) error {
 	err := c.AccessCtrl.VerifyFileOwnership(ctx, &access.VerifyFileOwnershipParams{
 		ActorUserId: actorID,
 		FileIDs:     []int64{fileID},
