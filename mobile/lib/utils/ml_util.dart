@@ -3,7 +3,6 @@ import "dart:math" as math show sqrt, min, max;
 
 import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/clip_db.dart";
 import "package:photos/db/ml/db.dart";
@@ -100,7 +99,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   final List<FileMLInstruction> filesWithoutLocalID = [];
   final List<FileMLInstruction> hiddenFilesToIndex = [];
   for (final EnteFile enteFile in enteFiles) {
-    if (_skipAnalysisEnteFile(enteFile)) {
+    if (enteFile.skipIndex) {
       continue;
     }
     if (queuedFiledIDs.contains(enteFile.uploadedFileID)) {
@@ -127,7 +126,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
     }
   }
   for (final EnteFile enteFile in hiddenFiles) {
-    if (_skipAnalysisEnteFile(enteFile)) {
+    if (enteFile.skipIndex) {
       continue;
     }
     if (queuedFiledIDs.contains(enteFile.uploadedFileID)) {
@@ -158,7 +157,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   );
 
   _logger.info(
-    "Getting list of files to index for ML took ${DateTime.now().difference(time).inMilliseconds} ms",
+    "Getting list of  ${sortedBylocalID.length} files to index for ML took ${DateTime.now().difference(time).inMilliseconds} ms",
   );
   if (!localSettings.isMLLocalIndexingEnabled) {
     return splitResult.matched;
@@ -304,8 +303,7 @@ bool _shouldDiscardRemoteEmbedding(FileDataEntity fileML) {
 }
 
 Future<Set<int>> getIndexableFileIDs() async {
-  final fileIDs = await FilesDB.instance
-      .getOwnedFileIDs(Configuration.instance.getUserID()!);
+  final fileIDs = await FilesDB.instance.getAllFileIDs();
   return fileIDs.toSet();
 }
 
@@ -357,18 +355,6 @@ Future<String> getImagePathForML(EnteFile enteFile) async {
   }
 
   return imagePath;
-}
-
-bool _skipAnalysisEnteFile(EnteFile enteFile) {
-  // Skip if the file is not uploaded or not owned by the user
-  if (!enteFile.isUploaded || enteFile.isOwner == false) {
-    return true;
-  }
-  // I don't know how motionPhotos and livePhotos work, so I'm also just skipping them for now
-  if (enteFile.fileType == FileType.other) {
-    return true;
-  }
-  return false;
 }
 
 bool _shouldRunIndexing(

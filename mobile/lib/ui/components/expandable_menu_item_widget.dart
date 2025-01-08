@@ -10,12 +10,16 @@ class ExpandableMenuItemWidget extends StatefulWidget {
   final String title;
   final Widget selectionOptionsWidget;
   final IconData leadingIcon;
+  // Expand callback that takes bool as argument
+  final void Function(bool)? onExpand;
+
   const ExpandableMenuItemWidget({
     required this.title,
     required this.selectionOptionsWidget,
     required this.leadingIcon,
-    Key? key,
-  }) : super(key: key);
+    this.onExpand,
+    super.key,
+  });
 
   @override
   State<ExpandableMenuItemWidget> createState() =>
@@ -102,5 +106,8 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
         InheritedSettingsState.maybeOf(context)?.decrement();
       }
     });
+    if (widget.onExpand != null) {
+      widget.onExpand!(expandableController.expanded);
+    }
   }
 }

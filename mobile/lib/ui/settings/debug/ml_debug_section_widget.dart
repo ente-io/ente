@@ -31,13 +31,17 @@ class MLDebugSectionWidget extends StatefulWidget {
 
 class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
   Timer? _timer;
+  bool isExpanded = false;
+  final Logger logger = Logger("MLDebugSectionWidget");
   @override
   void initState() {
     super.initState();
     _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      setState(() {
-        // Your state update logic here
-      });
+      if (isExpanded) {
+        setState(() {
+          // Your state update logic here
+        });
+      }
     });
   }
 
@@ -53,11 +57,12 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
       title: "ML Debug",
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.bug_report_outlined,
+      onExpand: (p0) => isExpanded = p0,
     );
   }
 
   Widget _getSectionOptions(BuildContext context) {
-    final Logger logger = Logger("MLDebugSectionWidget");
+    logger.info("Building ML Debug section options");
     return Column(
       children: [
         sectionOptionSpacing,
