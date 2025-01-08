@@ -174,7 +174,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                 name="password"
                                 autoComplete="new-password"
                                 type={showPassword ? "text" : "password"}
-                                label={t("PASSPHRASE_HINT")}
+                                label={t("password")}
                                 value={values.passphrase}
                                 onChange={handleChange("passphrase")}
                                 error={Boolean(errors.passphrase)}
