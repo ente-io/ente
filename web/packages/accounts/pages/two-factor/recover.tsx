@@ -168,7 +168,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
     return (
         <VerticallyCentered>
             <FormPaper>
-                <FormPaperTitle>{t("RECOVER_TWO_FACTOR")}</FormPaperTitle>
+                <FormPaperTitle>{t("recover_two_factor")}</FormPaperTitle>
                 <SingleInputForm
                     callback={recover}
                     fieldType="text"
