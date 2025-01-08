@@ -426,11 +426,16 @@ class PersonService {
   }
 
   Future<void> updatePerson(PersonEntity updatePerson) async {
-    await entityService.addOrUpdate(
-      EntityType.cgroup,
-      updatePerson.data.toJson(),
-      id: updatePerson.remoteID,
-    );
-    updatePerson.data.logStats();
+    try {
+      await entityService.addOrUpdate(
+        EntityType.cgroup,
+        updatePerson.data.toJson(),
+        id: updatePerson.remoteID,
+      );
+      updatePerson.data.logStats();
+    } catch (e, s) {
+      logger.severe("Failed to update person", e, s);
+      rethrow;
+    }
   }
 }

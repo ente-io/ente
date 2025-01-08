@@ -100,7 +100,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   final List<FileMLInstruction> filesWithoutLocalID = [];
   final List<FileMLInstruction> hiddenFilesToIndex = [];
   for (final EnteFile enteFile in enteFiles) {
-    if (_skipAnalysisEnteFile(enteFile)) {
+    if (_skipAnalysisEnteFile(enteFile, allowFetch: false)) {
       continue;
     }
     if (queuedFiledIDs.contains(enteFile.uploadedFileID)) {
@@ -158,7 +158,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   );
 
   _logger.info(
-    "Getting list of files to index for ML took ${DateTime.now().difference(time).inMilliseconds} ms",
+    "Getting list of  ${sortedBylocalID.length} files to index for ML took ${DateTime.now().difference(time).inMilliseconds} ms",
   );
   if (!localSettings.isMLLocalIndexingEnabled) {
     return splitResult.matched;
@@ -359,9 +359,9 @@ Future<String> getImagePathForML(EnteFile enteFile) async {
   return imagePath;
 }
 
-bool _skipAnalysisEnteFile(EnteFile enteFile) {
+bool _skipAnalysisEnteFile(EnteFile enteFile, {bool allowFetch = false}) {
   // Skip if the file is not uploaded or not owned by the user
-  if (!enteFile.isUploaded || enteFile.isOwner == false) {
+  if (!enteFile.isUploaded || (enteFile.isOwner == false && !allowFetch)) {
     return true;
   }
   // I don't know how motionPhotos and livePhotos work, so I'm also just skipping them for now
