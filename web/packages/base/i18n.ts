@@ -114,7 +114,6 @@ export const setupI18n = async () => {
             react: {
                 useSuspense: false,
                 transKeepBasicHtmlNodesFor: [
-                    "div",
                     "strong",
                     "h2",
                     "span",
