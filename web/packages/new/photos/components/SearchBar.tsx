@@ -375,7 +375,8 @@ const shouldShowEmptyState = (inputValue: string) => {
     if (!isMLSupported) return false;
 
     const status = mlStatusSnapshot();
-    if (!status || status.phase == "disabled") return false;
+    if (!status || status.phase == "disabled" || status.phase == "done")
+        return false;
 
     // Show it otherwise.
     return true;
@@ -391,7 +392,7 @@ const EmptyState: React.FC<
     const mlStatus = useMLStatusSnapshot();
     const people = usePeopleStateSnapshot()?.visiblePeople;
 
-    if (!mlStatus || mlStatus.phase == "disabled") {
+    if (!mlStatus || mlStatus.phase == "disabled" || mlStatus.phase == "done") {
         // The preflight check should've prevented us from coming here.
         assertionFailed();
         return <></>;
@@ -403,16 +404,13 @@ const EmptyState: React.FC<
             label = t("indexing_scheduled");
             break;
         case "indexing":
-            label = t("indexing_photos", mlStatus);
+            label = t("indexing_photos");
             break;
         case "fetching":
-            label = t("indexing_fetching", mlStatus);
+            label = t("indexing_fetching");
             break;
         case "clustering":
-            label = t("indexing_people", mlStatus);
-            break;
-        case "done":
-            label = t("indexing_done", mlStatus);
+            label = t("indexing_people");
             break;
     }
 
