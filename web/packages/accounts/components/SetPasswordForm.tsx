@@ -84,7 +84,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         variant="small"
                         sx={{ mb: 2, color: "text.muted" }}
                     >
-                        {t("ENTER_ENC_PASSPHRASE")}
+                        {t("pick_password_hint")}
                     </Typography>
 
                     <Input
@@ -140,7 +140,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                     <PasswordStrengthHint password={values.passphrase} />
 
                     <Typography variant="small" sx={{ my: 2 }}>
-                        <Trans i18nKey={"PASSPHRASE_DISCLAIMER"} />
+                        <Trans i18nKey={"pick_password_caution"} />
                     </Typography>
 
                     <Box sx={{ my: 4 }}>

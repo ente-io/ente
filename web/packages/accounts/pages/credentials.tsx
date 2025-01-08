@@ -381,7 +381,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 <PasswordHeader>{user?.email ?? ""}</PasswordHeader>
 
                 <VerifyMasterPasswordForm
-                    buttonText={t("VERIFY_PASSPHRASE")}
+                    buttonText={t("sign_in")}
                     callback={useMasterPassword}
                     user={user}
                     keyAttributes={keyAttributes}

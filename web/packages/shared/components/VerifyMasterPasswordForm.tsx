@@ -97,7 +97,7 @@ export default function VerifyMasterPasswordForm({
                         setFieldError(t("WEAK_DEVICE"));
                         break;
                     case CustomError.INCORRECT_PASSWORD:
-                        setFieldError(t("INCORRECT_PASSPHRASE"));
+                        setFieldError(t("incorrect_password"));
                         break;
                     default:
                         setFieldError(
