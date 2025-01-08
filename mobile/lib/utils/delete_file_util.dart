@@ -659,7 +659,7 @@ Future<List<String>> _iosDeleteLocalFilesInBatchesFallback(
     "Trying to delete local files in batches",
   );
   deletedIDs.addAll(
-    await _deleteLocalFilesInBatchesRecursively(localAssetIDs),
+    await _deleteLocalFilesInBatchesRecursively(localAssetIDs, context),
   );
   if (deletedIDs.isEmpty) {
     _logger.warning(
@@ -676,10 +676,11 @@ Future<List<String>> _iosDeleteLocalFilesInBatchesFallback(
 
 Future<List<String>> _deleteLocalFilesInBatchesRecursively(
   List<String> localAssetIDs,
+  BuildContext context,
 ) async {
   if (localAssetIDs.isEmpty) return [];
 
-  final deletedIDs = await _deleteLocalFiles(localAssetIDs);
+  final deletedIDs = await _deleteLocalFiles(localAssetIDs, context);
   if (deletedIDs.isNotEmpty) {
     return deletedIDs;
   }
@@ -693,13 +694,18 @@ Future<List<String>> _deleteLocalFilesInBatchesRecursively(
   final left = localAssetIDs.sublist(0, midIndex);
   final right = localAssetIDs.sublist(midIndex);
 
-  final leftDeleted = await _deleteLocalFilesInBatchesRecursively(left);
-  final rightDeleted = await _deleteLocalFilesInBatchesRecursively(right);
+  final leftDeleted =
+      await _deleteLocalFilesInBatchesRecursively(left, context);
+  final rightDeleted =
+      await _deleteLocalFilesInBatchesRecursively(right, context);
 
   return [...leftDeleted, ...rightDeleted];
 }
 
-Future<List<String>> _deleteLocalFiles(List<String> localIDs) async {
+Future<List<String>> _deleteLocalFiles(
+  List<String> localIDs,
+  BuildContext context,
+) async {
   _logger.info(
     "Trying to delete batch of size " +
         localIDs.length.toString() +
@@ -707,13 +713,22 @@ Future<List<String>> _deleteLocalFiles(List<String> localIDs) async {
         localIDs.toString(),
   );
 
+  final dialog = createProgressDialog(
+    context,
+    "Deleting " + localIDs.length.toString() + " backed up files...",
+  );
+  await dialog.show();
+
   final List<String> deletedIDs = [];
   try {
     deletedIDs.addAll(await PhotoManager.editor.deleteWithIds(localIDs));
     _logger.info("Deleted " + localIDs.toString());
   } catch (e, s) {
     _logger.severe("Could not delete batch " + localIDs.toString(), e, s);
+    await showGenericErrorDialog(context: context, error: e);
   }
+
+  await dialog.hide();
 
   return deletedIDs;
 }
