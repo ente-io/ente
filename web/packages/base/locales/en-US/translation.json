@@ -121,7 +121,6 @@
     "recovery_key_generation_failed": "Recovery code could not be generated, please try again",
     "forgot_password": "Forgot password",
     "recover_account": "Recover account",
-    "RECOVERY_KEY_HINT": "Recovery key",
     "RECOVER": "Recover",
     "NO_RECOVERY_KEY": "No recovery key?",
     "INCORRECT_RECOVERY_KEY": "Incorrect recovery key",

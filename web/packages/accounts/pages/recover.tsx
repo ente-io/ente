@@ -114,7 +114,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 <SingleInputForm
                     callback={recover}
                     fieldType="text"
-                    placeholder={t("RECOVERY_KEY_HINT")}
+                    placeholder={t("recovery_key")}
                     buttonText={t("RECOVER")}
                     disableAutoComplete
                 />
