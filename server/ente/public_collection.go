@@ -12,8 +12,8 @@ import (
 type CreatePublicAccessTokenRequest struct {
 	CollectionID  int64 `json:"collectionID" binding:"required"`
 	EnableCollect bool  `json:"enableCollect"`
-	// defaults to true
-	EnableJoin  *bool `json:"joinViaLink"`
+	// defaults to false
+	EnableJoin  *bool `json:"enableJoin"`
 	ValidTill   int64 `json:"validTill"`
 	DeviceLimit int   `json:"deviceLimit"`
 }
