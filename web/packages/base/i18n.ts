@@ -115,8 +115,6 @@ export const setupI18n = async () => {
                 useSuspense: false,
                 transKeepBasicHtmlNodesFor: [
                     "strong",
-                    "h2",
-                    "span",
                     "code",
                     "p",
                     "br",
