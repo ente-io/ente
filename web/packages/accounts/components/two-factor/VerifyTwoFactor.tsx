@@ -70,7 +70,7 @@ export function VerifyTwoFactor(props: Props) {
                             variant="small"
                             sx={{ mb: 2, color: "text.muted" }}
                         >
-                            {t("ENTER_TWO_FACTOR_OTP")}
+                            {t("enter_two_factor_otp")}
                         </Typography>
                         <Box sx={{ my: 2 }}>
                             <OtpInput

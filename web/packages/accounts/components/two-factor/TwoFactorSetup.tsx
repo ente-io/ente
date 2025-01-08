@@ -46,10 +46,10 @@ function SetupManualMode({
 }: SetupManualModeProps) {
     return (
         <>
-            <Typography>{t("TWO_FACTOR_MANUAL_CODE_INSTRUCTION")}</Typography>
+            <Typography>{t("two_factor_manual_entry_message")}</Typography>
             <CodeBlock code={twoFactorSecret?.secretCode ?? ""} my={2} />
             <LinkButton onClick={changeToQRMode}>
-                {t("SCAN_QR_CODE")}
+                {t("scan_qr_title")}
             </LinkButton>
         </>
     );
@@ -66,7 +66,7 @@ function SetupQRMode({
 }: SetupQRModeProps) {
     return (
         <>
-            <Typography>{t("TWO_FACTOR_QR_INSTRUCTION")}</Typography>
+            <Typography>{t("two_factor_qr_help")}</Typography>
             {!twoFactorSecret ? (
                 <LoadingQRCode>
                     <ActivityIndicator />
@@ -77,7 +77,7 @@ function SetupQRMode({
                 />
             )}
             <LinkButton onClick={changeToManualMode}>
-                {t("ENTER_CODE_MANUALLY")}
+                {t("two_factor_manual_entry_title")}
             </LinkButton>
         </>
     );

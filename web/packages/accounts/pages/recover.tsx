@@ -95,7 +95,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             void router.push(PAGES.CHANGE_PASSWORD);
         } catch (e) {
             log.error("password recovery failed", e);
-            setFieldError(t("INCORRECT_RECOVERY_KEY"));
+            setFieldError(t("incorrect_recovery_key"));
         }
     };
 
@@ -110,17 +110,17 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     return (
         <VerticallyCentered>
             <FormPaper>
-                <FormPaperTitle>{t("RECOVER_ACCOUNT")}</FormPaperTitle>
+                <FormPaperTitle>{t("recover_account")}</FormPaperTitle>
                 <SingleInputForm
                     callback={recover}
                     fieldType="text"
-                    placeholder={t("RECOVERY_KEY_HINT")}
-                    buttonText={t("RECOVER")}
+                    placeholder={t("recovery_key")}
+                    buttonText={t("recover")}
                     disableAutoComplete
                 />
                 <FormPaperFooter style={{ justifyContent: "space-between" }}>
                     <LinkButton onClick={showNoRecoveryKeyMessage}>
-                        {t("NO_RECOVERY_KEY")}
+                        {t("no_recovery_key_title")}
                     </LinkButton>
                     <LinkButton onClick={router.back}>
                         {t("go_back")}

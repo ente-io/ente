@@ -423,7 +423,7 @@ const RetriableFailed: React.FC<RetriableFailedProps> = ({
                         color="primary"
                         variant="text"
                     >
-                        {t("RECOVER_TWO_FACTOR")}
+                        {t("recover_two_factor")}
                     </FocusVisibleButton>
                 )}
             </ButtonStack>
