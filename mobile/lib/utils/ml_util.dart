@@ -304,8 +304,7 @@ bool _shouldDiscardRemoteEmbedding(FileDataEntity fileML) {
 }
 
 Future<Set<int>> getIndexableFileIDs() async {
-  final fileIDs = await FilesDB.instance
-      .getOwnedFileIDs(Configuration.instance.getUserID()!);
+  final fileIDs = await FilesDB.instance.getAllFileIDs();
   return fileIDs.toSet();
 }
 
