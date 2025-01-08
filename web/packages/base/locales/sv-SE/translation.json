@@ -36,7 +36,7 @@
     "pick_password_caution": "Vi lagrar inte ditt lösenord, så om du glömmer det, <strong>vi kommer inte att kunna hjälpa dig </strong>återställa dina data utan en återställningsnyckel.",
     "key_generation_in_progress": "Genererar krypteringsnycklar...",
     "PASSPHRASE_HINT": "Lösenord",
-    "CONFIRM_PASSPHRASE": "Bekräfta lösenord",
+    "confirm_password": "Bekräfta lösenord",
     "REFERRAL_CODE_HINT": "Hur hörde du talas om Ente? (valfritt)",
     "REFERRAL_INFO": "Vi spårar inte appinstallationer, Det skulle hjälpa oss om du berättade var du hittade oss!",
     "PASSPHRASE_MATCH_ERROR": "Lösenorden matchar inte",

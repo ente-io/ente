@@ -36,7 +36,7 @@
     "pick_password_caution": "我们不会存储您的密码，因此如果您忘记密码， <strong>我们将无法帮助您</strong>在没有恢复密钥的情况下恢复您的数据。",
     "key_generation_in_progress": "正在生成加密密钥...",
     "PASSPHRASE_HINT": "密码",
-    "CONFIRM_PASSPHRASE": "请确认密码",
+    "confirm_password": "请确认密码",
     "REFERRAL_CODE_HINT": "您是如何知道Ente的？ （可选的）",
     "REFERRAL_INFO": "我们不跟踪应用程序安装情况，如果您告诉我们您是在哪里找到我们的，将会有所帮助！",
     "PASSPHRASE_MATCH_ERROR": "两次输入的密码不一致",

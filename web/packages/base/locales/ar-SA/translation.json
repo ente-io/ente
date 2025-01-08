@@ -36,7 +36,7 @@
     "pick_password_caution": "نحن لا نخزن كلمة مرورك، لذا إذا نسيتها، <strong>لن نتمكن من مساعدتك </strong>في استرداد بياناتك دون مفتاح الاسترداد.",
     "key_generation_in_progress": "جار توليد مفاتيح التشفير...",
     "PASSPHRASE_HINT": "كلمة المرور",
-    "CONFIRM_PASSPHRASE": "تأكيد كلمة المرور",
+    "confirm_password": "تأكيد كلمة المرور",
     "REFERRAL_CODE_HINT": "كيف سمعت عن Ente؟ (اختياري)",
     "REFERRAL_INFO": "نحن لا نتتبع عمليات تثبيت التطبيق، سيكون من المفيد لنا أن تخبرنا أين وجدتنا!",
     "PASSPHRASE_MATCH_ERROR": "كلمات المرور غير متطابقة",

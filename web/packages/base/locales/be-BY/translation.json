@@ -36,7 +36,7 @@
     "pick_password_caution": "",
     "key_generation_in_progress": "",
     "PASSPHRASE_HINT": "Пароль",
-    "CONFIRM_PASSPHRASE": "Пацвердзіць пароль",
+    "confirm_password": "Пацвердзіць пароль",
     "REFERRAL_CODE_HINT": "",
     "REFERRAL_INFO": "",
     "PASSPHRASE_MATCH_ERROR": "",

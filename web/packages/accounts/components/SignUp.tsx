@@ -203,7 +203,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                 name="confirm-password"
                                 autoComplete="new-password"
                                 type="password"
-                                label={t("CONFIRM_PASSPHRASE")}
+                                label={t("confirm_password")}
                                 value={values.confirm}
                                 onChange={handleChange("confirm")}
                                 error={Boolean(errors.confirm)}

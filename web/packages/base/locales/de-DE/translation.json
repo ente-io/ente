@@ -36,7 +36,7 @@
     "pick_password_caution": "Wir speichern dein Passwort nicht. Wenn du es vergisst, <strong>können wir dir nicht helfen</strong>, deine Daten ohne einen Wiederherstellungsschlüssel wiederherzustellen.",
     "key_generation_in_progress": "Generierung von Verschlüsselungsschlüsseln...",
     "PASSPHRASE_HINT": "Passwort",
-    "CONFIRM_PASSPHRASE": "Passwort bestätigen",
+    "confirm_password": "Passwort bestätigen",
     "REFERRAL_CODE_HINT": "Wie hast du von Ente erfahren? (optional)",
     "REFERRAL_INFO": "Wir tracken keine App-Installationen. Es würde uns jedoch helfen, wenn du uns mitteilst, wie du von uns erfahren hast!",
     "PASSPHRASE_MATCH_ERROR": "Die Passwörter stimmen nicht überein",

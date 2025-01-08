@@ -130,7 +130,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         id="confirm-password"
                         autoComplete="new-password"
                         type="password"
-                        label={t("CONFIRM_PASSPHRASE")}
+                        label={t("confirm_password")}
                         value={values.confirm}
                         onChange={handleChange("confirm")}
                         disabled={loading}

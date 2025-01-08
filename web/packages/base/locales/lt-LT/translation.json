@@ -36,7 +36,7 @@
     "pick_password_caution": "Jūsų slaptažodžio nesaugome, todėl jei jį pamiršite, be atkūrimo rakto <strong>negalėsime padėti </strong>atkurti duomenų.",
     "key_generation_in_progress": "Generuojami šifravimo raktai...",
     "PASSPHRASE_HINT": "Slaptažodis",
-    "CONFIRM_PASSPHRASE": "Patvirtinkite slaptažodį",
+    "confirm_password": "Patvirtinkite slaptažodį",
     "REFERRAL_CODE_HINT": "Kaip išgirdote apie „Ente“? (nebūtina)",
     "REFERRAL_INFO": "Mes nesekame programų diegimų. Mums padėtų, jei pasakytumėte, kur mus radote.",
     "PASSPHRASE_MATCH_ERROR": "Slaptažodžiai nesutampa.",

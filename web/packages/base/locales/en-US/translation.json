@@ -35,7 +35,7 @@
     "pick_password_hint": "Please enter a password that we can use to encrypt your data",
     "pick_password_caution": "We don't store your password, so if you forget it, <strong>we will not be able to help you </strong>recover your data without a recovery key.",
     "key_generation_in_progress": "Generating encryption keys...",
-    "CONFIRM_PASSPHRASE": "Confirm password",
+    "confirm_password": "Confirm password",
     "REFERRAL_CODE_HINT": "How did you hear about Ente? (optional)",
     "REFERRAL_INFO": "We don't track app installs, It'd help us if you told us where you found us!",
     "PASSPHRASE_MATCH_ERROR": "Passwords don't match",

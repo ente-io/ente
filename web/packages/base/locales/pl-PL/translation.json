@@ -36,7 +36,7 @@
     "pick_password_caution": "Nie przechowujemy Twojego hasła, więc jeśli je zapomnisz, <strong>nie będziemy w stanie Ci pomóc </strong>odzyskać Twoich danych bez klucza odzyskiwania.",
     "key_generation_in_progress": "Generowanie kluczy szyfrujących...",
     "PASSPHRASE_HINT": "Hasło",
-    "CONFIRM_PASSPHRASE": "Potwierdź hasło",
+    "confirm_password": "Potwierdź hasło",
     "REFERRAL_CODE_HINT": "Jak usłyszałeś/aś o Ente? (opcjonalnie)",
     "REFERRAL_INFO": "Nie śledzimy instalacji aplikacji. Pomogłyby nam, gdybyś powiedział/a nam, gdzie nas znalazłeś/aś!",
     "PASSPHRASE_MATCH_ERROR": "Hasła nie pasują do siebie",

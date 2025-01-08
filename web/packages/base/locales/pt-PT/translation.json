@@ -36,7 +36,7 @@
     "pick_password_caution": "Não guardamos a sua palavra-passe, por isso, se se esquecer dela, não poderemos ajudá-lo a recuperar os seus dados sem uma chave de recuperação.",
     "key_generation_in_progress": "Gerar chaves de criptografia...",
     "PASSPHRASE_HINT": "Palavra-passe",
-    "CONFIRM_PASSPHRASE": "Confirmar palavra-passe",
+    "confirm_password": "Confirmar palavra-passe",
     "REFERRAL_CODE_HINT": "Como é que soube do Ente? (opcional)",
     "REFERRAL_INFO": "Não monitorizamos as instalações de aplicações. Seria útil se nos dissesse onde nos encontrou!",
     "PASSPHRASE_MATCH_ERROR": "As palavras-passe não correspondem",

@@ -36,7 +36,7 @@
     "pick_password_caution": "Parolanı saklamıyoruz, dolayısıyla unutursan kurtarma anahtarın olmadan verilerini kurtarmana <strong>yardım edemeyiz</strong>.",
     "key_generation_in_progress": "Şifreleme anahtarları oluşturuluyor...",
     "PASSPHRASE_HINT": "Parola",
-    "CONFIRM_PASSPHRASE": "Parolayı onayla",
+    "confirm_password": "Parolayı onayla",
     "REFERRAL_CODE_HINT": "Ente'yi nereden duydun? (opsiyonel)",
     "REFERRAL_INFO": "Biz uygulama kurulumlarını takip etmiyoruz. Bizi nereden duyduğundan bahsetmen bize çok yardımcı olacak!",
     "PASSPHRASE_MATCH_ERROR": "Parolalar eşleşmiyor",

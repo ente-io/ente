@@ -36,7 +36,7 @@
     "pick_password_caution": "Emme säilytä salasanaasi, joten jos unohdat sen, <strong>emme voi auttaa sinua </strong>palauttamaan tietojasi ilman palautusavainta.",
     "key_generation_in_progress": "",
     "PASSPHRASE_HINT": "",
-    "CONFIRM_PASSPHRASE": "",
+    "confirm_password": "",
     "REFERRAL_CODE_HINT": "Miten kuulit Entestä? (valinnainen)",
     "REFERRAL_INFO": "Emme seuraa sovelluksen asennuksia. Se auttaisi meitä, jos kertoisit mistä löysit meidät!",
     "PASSPHRASE_MATCH_ERROR": "Salasanat eivät täsmää",

@@ -36,7 +36,7 @@
     "pick_password_caution": "Nous ne stockons pas votre mot de passe, donc si vous le perdez, <strong>nous ne pourrons pas vous aider</strong> à récupérer vos données sans une clé de récupération.",
     "key_generation_in_progress": "Génération des clés de chiffrement...",
     "PASSPHRASE_HINT": "Mot de passe",
-    "CONFIRM_PASSPHRASE": "Confirmer le mot de passe",
+    "confirm_password": "Confirmer le mot de passe",
     "REFERRAL_CODE_HINT": "Comment avez-vous entendu parler de Ente? (facultatif)",
     "REFERRAL_INFO": "Nous ne suivons pas les installations d'applications. Il serait utile que vous nous disiez comment vous nous avez trouvés !",
     "PASSPHRASE_MATCH_ERROR": "Les mots de passe ne correspondent pas",
