@@ -415,7 +415,7 @@ export default function PublicCollectionGallery() {
         } catch (e) {
             log.error("Failed to verifyLinkPassword", e);
             if (isHTTP401Error(e)) {
-                setFieldError(t("INCORRECT_PASSPHRASE"));
+                setFieldError(t("incorrect_password"));
             } else {
                 setFieldError(t("generic_error_retry"));
             }

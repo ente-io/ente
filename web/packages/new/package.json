@@ -12,8 +12,8 @@
         "@mui/x-date-pickers": "^7.23.3",
         "dayjs": "^1.11.13",
         "formik": "^2.4.6",
-        "react": "19.0.0",
-        "react-dom": "19.0.0"
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
     },
     "devDependencies": {
         "@/build-config": "*"

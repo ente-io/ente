@@ -81,14 +81,20 @@ func (c *Controller) InsertOrUpdateMetadata(ctx *gin.Context, req *fileData.PutF
 		return stacktrace.Propagate(err, "validation failed")
 	}
 	userID := auth.GetUserID(ctx.Request.Header)
-	err := c._validatePermission(ctx, req.FileID, userID)
+	fileOwnerID, err := c.FileRepo.GetOwnerID(req.FileID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
+	}
+	if fileOwnerID != userID {
+		permErr := c._checkMetadataReadOrWritePerm(ctx, userID, []int64{req.FileID})
+		if permErr != nil {
+			return stacktrace.Propagate(permErr, "")
+		}
 	}
 	if req.Type != ente.MlData {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage("unsupported object type "+string(req.Type)), "")
 	}
-	fileOwnerID := userID
+
 	bucketID := c.S3Config.GetBucketID(req.Type)
 	objectKey := fileData.ObjectMetadataKey(req.FileID, fileOwnerID, req.Type, nil)
 	obj := fileData.S3FileMetadata{
@@ -123,10 +129,11 @@ func (c *Controller) InsertOrUpdateMetadata(ctx *gin.Context, req *fileData.PutF
 }
 
 func (c *Controller) GetFileData(ctx *gin.Context, req fileData.GetFileData) (*fileData.Entity, error) {
+	userID := auth.GetUserID(ctx.Request.Header)
 	if err := req.Validate(); err != nil {
 		return nil, stacktrace.Propagate(err, "validation failed")
 	}
-	if err := c._validatePermission(ctx, req.FileID, auth.GetUserID(ctx.Request.Header)); err != nil {
+	if err := c._checkMetadataReadOrWritePerm(ctx, userID, []int64{req.FileID}); err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
 	doRows, err := c.Repo.GetFilesData(ctx, req.Type, []int64{req.FileID})
@@ -150,7 +157,10 @@ func (c *Controller) GetFileData(ctx *gin.Context, req fileData.GetFileData) (*f
 
 func (c *Controller) GetFilesData(ctx *gin.Context, req fileData.GetFilesData) (*fileData.GetFilesDataResponse, error) {
 	userID := auth.GetUserID(ctx.Request.Header)
-	if err := c._validateGetFilesData(ctx, userID, req); err != nil {
+	if err := req.Validate(); err != nil {
+		return nil, stacktrace.Propagate(err, "req validation failed")
+	}
+	if err := c._checkMetadataReadOrWritePerm(ctx, userID, req.FileIDs); err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
 
@@ -273,21 +283,18 @@ func (c *Controller) fetchS3FileMetadata(ctx context.Context, row fileData.Row, 
 	return nil, stacktrace.Propagate(errors.New("failed to fetch object"), "")
 }
 
-func (c *Controller) _validateGetFilesData(ctx *gin.Context, userID int64, req fileData.GetFilesData) error {
-	if err := req.Validate(); err != nil {
-		return stacktrace.Propagate(err, "validation failed")
-	}
-	if err := c.AccessCtrl.VerifyFileOwnership(ctx, &access.VerifyFileOwnershipParams{
-		ActorUserId: userID,
-		FileIDs:     req.FileIDs,
+func (c *Controller) _checkMetadataReadOrWritePerm(ctx *gin.Context, userID int64, fileIDs []int64) error {
+	if err := c.AccessCtrl.CanAccessFile(ctx, &access.CanAccessFileParams{
+		ActorUserID: userID,
+		FileIDs:     fileIDs,
 	}); err != nil {
 		return stacktrace.Propagate(err, "User does not own some file(s)")
 	}
-
 	return nil
 }
 
-func (c *Controller) _validatePermission(ctx *gin.Context, fileID int64, actorID int64) error {
+// _checkPreviewWritePerm is
+func (c *Controller) _checkPreviewWritePerm(ctx *gin.Context, fileID int64, actorID int64) error {
 	err := c.AccessCtrl.VerifyFileOwnership(ctx, &access.VerifyFileOwnershipParams{
 		ActorUserId: actorID,
 		FileIDs:     []int64{fileID},

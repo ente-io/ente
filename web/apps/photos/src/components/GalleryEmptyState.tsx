@@ -64,7 +64,7 @@ export default function GalleryEmptyState({ openUploader }) {
                 >
                     <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
                         <AddPhotoAlternateIcon />
-                        {t("UPLOAD_FIRST_PHOTO")}
+                        {t("upload_first_photo")}
                     </FlexWrapper>
                 </Button>
                 <Button
@@ -84,7 +84,7 @@ export default function GalleryEmptyState({ openUploader }) {
                 >
                     <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
                         <FolderIcon />
-                        {t("IMPORT_YOUR_FOLDERS")}
+                        {t("import_your_folders")}
                     </FlexWrapper>
                 </Button>
             </VerticallyCentered>

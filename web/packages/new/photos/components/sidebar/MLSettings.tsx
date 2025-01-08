@@ -1,5 +1,6 @@
 import { MenuItemGroup } from "@/base/components/Menu";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     NestedSidebarDrawer,
     SidebarDrawerTitlebar,
@@ -117,10 +118,10 @@ export const EnableML: React.FC<EnableMLProps> = ({
                 {t("ml_search_description")}
             </Typography>
             <Stack sx={{ gap: "8px" }}>
-                <Button color={"accent"} size="large" onClick={onEnable}>
+                <Button fullWidth color="accent" onClick={onEnable}>
                     {t("enable")}
                 </Button>
-                <Button color="secondary" size="large" onClick={moreDetails}>
+                <Button fullWidth color="secondary" onClick={moreDetails}>
                     {t("more_details")}
                 </Button>
             </Stack>
@@ -212,17 +213,21 @@ export const FaceConsent: React.FC<FaceConsentProps> = ({
                 />
             </FormGroup>
             <Stack sx={{ gap: "8px", px: "8px" }}>
-                <Button
-                    color={"accent"}
-                    size="large"
+                <FocusVisibleButton
+                    fullWidth
+                    color="accent"
                     disabled={!acceptTerms}
                     onClick={onConsent}
                 >
                     {t("ml_consent")}
-                </Button>
-                <Button color={"secondary"} size="large" onClick={onCancel}>
+                </FocusVisibleButton>
+                <FocusVisibleButton
+                    fullWidth
+                    color="secondary"
+                    onClick={onCancel}
+                >
                     {t("cancel")}
-                </Button>
+                </FocusVisibleButton>
             </Stack>
         </Stack>
     );
@@ -259,12 +264,8 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
             break;
     }
 
-    // When clustering, show the progress as a percentage instead of the
-    // potentially confusing total counts during incremental updates.
-    const processed =
-        phase == "clustering"
-            ? `${Math.round((100 * nSyncedFiles) / nTotalFiles)}%`
-            : `${nSyncedFiles} / ${nTotalFiles}`;
+    // Show processed as percentages instead of potentially confusing counts.
+    const processed = `${Math.round((100 * nSyncedFiles) / nTotalFiles)}%`;
 
     const confirmDisableML = () =>
         showMiniDialog({

@@ -13,7 +13,7 @@ func (c *Controller) GetPreviewUrl(ctx *gin.Context, request filedata.GetPreview
 		return nil, err
 	}
 	actorUser := auth.GetUserID(ctx.Request.Header)
-	if err := c._validatePermission(ctx, request.FileID, actorUser); err != nil {
+	if err := c._checkMetadataReadOrWritePerm(ctx, actorUser, []int64{request.FileID}); err != nil {
 		return nil, err
 	}
 	data, err := c.Repo.GetFilesData(ctx, request.Type, []int64{request.FileID})
@@ -35,7 +35,7 @@ func (c *Controller) PreviewUploadURL(ctx *gin.Context, request filedata.Preview
 		return nil, err
 	}
 	actorUser := auth.GetUserID(ctx.Request.Header)
-	if err := c._validatePermission(ctx, request.FileID, actorUser); err != nil {
+	if err := c._checkPreviewWritePerm(ctx, request.FileID, actorUser); err != nil {
 		return nil, err
 	}
 	fileOwnerID, err := c.FileRepo.GetOwnerID(request.FileID)

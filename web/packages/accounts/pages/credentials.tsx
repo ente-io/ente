@@ -381,7 +381,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 <PasswordHeader>{user?.email ?? ""}</PasswordHeader>
 
                 <VerifyMasterPasswordForm
-                    buttonText={t("VERIFY_PASSPHRASE")}
+                    buttonText={t("sign_in")}
                     callback={useMasterPassword}
                     user={user}
                     keyAttributes={keyAttributes}
@@ -395,7 +395,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         sx={{ justifyContent: "space-between" }}
                     >
                         <LinkButton onClick={() => router.push(PAGES.RECOVER)}>
-                            {t("FORGOT_PASSWORD")}
+                            {t("forgot_password")}
                         </LinkButton>
                         <LinkButton onClick={logout}>
                             {t("change_email")}

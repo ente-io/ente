@@ -90,7 +90,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             setOpenRecoveryKey(true);
         } catch (e) {
             log.error("failed to generate password", e);
-            setFieldError("passphrase", t("PASSWORD_GENERATION_FAILED"));
+            setFieldError("passphrase", t("password_generation_failed"));
         }
     };
 
@@ -112,11 +112,11 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             ) : (
                 <VerticallyCentered>
                     <FormPaper>
-                        <FormPaperTitle>{t("SET_PASSPHRASE")}</FormPaperTitle>
+                        <FormPaperTitle>{t("set_password")}</FormPaperTitle>
                         <SetPasswordForm
                             userEmail={user.email}
                             callback={onSubmit}
-                            buttonText={t("SET_PASSPHRASE")}
+                            buttonText={t("set_password")}
                         />
                         <FormPaperFooter>
                             <LinkButton onClick={logout}>

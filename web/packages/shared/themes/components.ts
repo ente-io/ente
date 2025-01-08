@@ -10,6 +10,10 @@ export const getComponents = (
         styleOverrides: {
             body: {
                 fontFamily: typography.fontFamily,
+                // MUI has different letter spacing for each variant, but those
+                // are values arrived at for the default Material font, and
+                // don't work for the font that we're using, so reset it to a
+                // reasonable value that works for our font.
                 letterSpacing: "-0.011em",
             },
             strong: { fontWeight: 700 },
@@ -18,7 +22,12 @@ export const getComponents = (
 
     MuiTypography: {
         defaultProps: {
+            // MUI has body1 as the default variant for Typography, but our
+            // variant scheme is different, instead of body1/2, we have
+            // large/body/small etc. So reset the default to our equivalent of
+            // body1, which is "body".
             variant: "body",
+            // Map all our custom variants to <p>.
             variantMapping: {
                 large: "p",
                 body: "p",
@@ -108,9 +117,13 @@ export const getComponents = (
 
     MuiButton: {
         defaultProps: {
+            // Change the default button variant from "text" to "contained".
             variant: "contained",
         },
         styleOverrides: {
+            // We don't use the size prop for the MUI button, or rather it
+            // cannot be used, since we have fixed the paddings and font sizes
+            // unconditionally here (which are all that the size prop changes).
             root: {
                 padding: "12px 16px",
                 borderRadius: "4px",
@@ -130,9 +143,6 @@ export const getComponents = (
                 "&& >svg": {
                     fontSize: "20px",
                 },
-            },
-            sizeLarge: {
-                width: "100%",
             },
         },
     },

@@ -217,7 +217,7 @@ const SelectedFileOptions = ({
                                 <ArchiveIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("HIDE")}>
+                        <Tooltip title={t("hide")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.HIDE)}
                             >
@@ -251,7 +251,7 @@ const SelectedFileOptions = ({
                                 <ArchiveIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("HIDE")}>
+                        <Tooltip title={t("hide")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.HIDE)}
                             >
@@ -307,7 +307,7 @@ const SelectedFileOptions = ({
                     </Tooltip>
                 ) : isInHiddenSection ? (
                     <>
-                        <Tooltip title={t("UNHIDE")}>
+                        <Tooltip title={t("unhide")}>
                             <IconButton onClick={unhideToCollection}>
                                 <VisibilityOutlinedIcon />
                             </IconButton>
@@ -402,7 +402,7 @@ const SelectedFileOptions = ({
                                     </Tooltip>
                                 </>
                             )}
-                        <Tooltip title={t("HIDE")}>
+                        <Tooltip title={t("hide")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.HIDE)}
                             >

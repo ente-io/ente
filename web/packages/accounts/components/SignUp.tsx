@@ -77,7 +77,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
     ) => {
         try {
             if (passphrase !== confirm) {
-                setFieldError("confirm", t("PASSPHRASE_MATCH_ERROR"));
+                setFieldError("confirm", t("password_mismatch_error"));
                 return;
             }
             setLoading(true);
@@ -115,7 +115,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                 setJustSignedUp(true);
                 void router.push(PAGES.VERIFY);
             } catch (e) {
-                setFieldError("confirm", t("PASSWORD_GENERATION_FAILED"));
+                setFieldError("confirm", t("password_generation_failed"));
                 throw e;
             }
         } catch (e) {
@@ -174,7 +174,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                 name="password"
                                 autoComplete="new-password"
                                 type={showPassword ? "text" : "password"}
-                                label={t("PASSPHRASE_HINT")}
+                                label={t("password")}
                                 value={values.passphrase}
                                 onChange={handleChange("passphrase")}
                                 error={Boolean(errors.passphrase)}
@@ -203,7 +203,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                 name="confirm-password"
                                 autoComplete="new-password"
                                 type="password"
-                                label={t("CONFIRM_PASSPHRASE")}
+                                label={t("confirm_password")}
                                 value={values.confirm}
                                 onChange={handleChange("confirm")}
                                 error={Boolean(errors.confirm)}
@@ -222,7 +222,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                         mt: "24px",
                                     }}
                                 >
-                                    {t("REFERRAL_CODE_HINT")}
+                                    {t("referral_source_hint")}
                                 </Typography>
                                 <TextField
                                     hiddenLabel
@@ -239,7 +239,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                                 <InputAdornment position="end">
                                                     <Tooltip
                                                         title={t(
-                                                            "REFERRAL_INFO",
+                                                            "referral_source_info",
                                                         )}
                                                     >
                                                         <IconButton
@@ -331,7 +331,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
             <FormPaperFooter>
                 <Stack sx={{ gap: 4 }}>
                     <LinkButton onClick={login}>
-                        {t("ACCOUNT_EXISTS")}
+                        {t("existing_account")}
                     </LinkButton>
 
                     <Typography

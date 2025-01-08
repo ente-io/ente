@@ -219,7 +219,7 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
             ) : (
                 <ButtonBase component="div" onClick={copyCode}>
                     <OTPDisplay {...{ code, otp, nextOTP }} />
-                    <Snackbar open={hasCopied} message={t("COPIED")} />
+                    <Snackbar open={hasCopied} message={t("copied")} />
                 </ButtonBase>
             )}
         </div>

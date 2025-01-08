@@ -1073,7 +1073,8 @@ const extractImageOrVideoMetadata = async (
         if (h) publicMagicMetadata.h = ensureInteger(h);
     }
 
-    const caption = parsedMetadataJSON?.description;
+    const caption =
+        parsedMetadataJSON?.description ?? parsedMetadata.description;
     if (caption) {
         publicMagicMetadata.caption = caption;
     }
