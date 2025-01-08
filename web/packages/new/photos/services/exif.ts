@@ -40,10 +40,12 @@ export const parseExif = (tags: RawExifTags) => {
     const location = parseLocation(tags);
     const creationDate = parseCreationDate(tags);
     const dimensions = parseDimensions(tags);
+    const description = parseDescription(tags);
 
     const metadata: ParsedMetadata = dimensions ?? {};
     if (creationDate) metadata.creationDate = creationDate;
     if (location) metadata.location = location;
+    if (description) metadata.description = description;
     return metadata;
 };
 
@@ -536,3 +538,25 @@ export const tagNumericValue = (
     const v = tag.value;
     return Array.isArray(v) ? (v[0] ?? 0) / (v[1] ?? 1) : v;
 };
+
+/**
+ * Parse the description for an image from the metadata embedded in the file.
+ *
+ * This function will read the description from the following fields, in order:
+ *
+ * 1. XMP-dc:description
+ * 2. IPTC | Caption/Abstract (120)
+ * 3. EXIF IFD0 | 0x010e | ImageDescription
+ *
+ * For an overview of why this ordering was chosen, see
+ * https://github.com/ente-io/ente/discussions/3857#discussioncomment-11764990
+ */
+const parseDescription = (tags: RawExifTags) =>
+    // While the TypeScript tags for these three fields are varying (The XMP one
+    // doesn't have a static type, the IPTC one is marked as a number array, and
+    // the Exif one is a string array), for all three of these, the ExifReader
+    // description property (not related to the image "description" in the sense
+    // of this function) holds the singular string we're interested in.
+    tags.xmp?.description?.description ??
+    tags.iptc?.["Caption/Abstract"]?.description ??
+    tags.exif?.ImageDescription?.description;

@@ -604,6 +604,10 @@ export interface ParsedMetadata {
     creationDate?: ParsedMetadataDate;
     /** The GPS coordinates where the photo was taken. */
     location?: Location;
+    /**
+     * A caption / description attached by the user to the photo.
+     */
+    description?: string;
 }
 
 /**
