@@ -776,7 +776,7 @@ export default function Gallery() {
         return () =>
             setCollectionNamerAttributes({
                 title: t("new_album"),
-                buttonText: t("CREATE"),
+                buttonText: t("create"),
                 autoFilledName: "",
                 callback,
             });

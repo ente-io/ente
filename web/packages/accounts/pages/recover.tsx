@@ -110,7 +110,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     return (
         <VerticallyCentered>
             <FormPaper>
-                <FormPaperTitle>{t("RECOVER_ACCOUNT")}</FormPaperTitle>
+                <FormPaperTitle>{t("recover_account")}</FormPaperTitle>
                 <SingleInputForm
                     callback={recover}
                     fieldType="text"

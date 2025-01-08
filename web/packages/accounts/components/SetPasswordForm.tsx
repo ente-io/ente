@@ -57,7 +57,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
             if (passphrase === confirm) {
                 await props.callback(passphrase, setFieldError);
             } else {
-                setFieldError("confirm", t("PASSPHRASE_MATCH_ERROR"));
+                setFieldError("confirm", t("password_mismatch_error"));
             }
         } catch (e) {
             const message = e instanceof Error ? e.message : "";

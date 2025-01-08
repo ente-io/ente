@@ -686,7 +686,7 @@ export default function Uploader({
     const showCollectionCreateModal = (suggestedName: string) => {
         props.setCollectionNamerAttributes({
             title: t("new_album"),
-            buttonText: t("CREATE"),
+            buttonText: t("create"),
             autoFilledName: suggestedName,
             callback: uploadToSingleNewCollection,
         });

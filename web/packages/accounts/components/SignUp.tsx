@@ -77,7 +77,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
     ) => {
         try {
             if (passphrase !== confirm) {
-                setFieldError("confirm", t("PASSPHRASE_MATCH_ERROR"));
+                setFieldError("confirm", t("password_mismatch_error"));
                 return;
             }
             setLoading(true);
@@ -222,7 +222,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                         mt: "24px",
                                     }}
                                 >
-                                    {t("REFERRAL_CODE_HINT")}
+                                    {t("referral_source_hint")}
                                 </Typography>
                                 <TextField
                                     hiddenLabel
@@ -239,7 +239,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                                 <InputAdornment position="end">
                                                     <Tooltip
                                                         title={t(
-                                                            "REFERRAL_INFO",
+                                                            "referral_source_info",
                                                         )}
                                                     >
                                                         <IconButton
@@ -331,7 +331,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
             <FormPaperFooter>
                 <Stack sx={{ gap: 4 }}>
                     <LinkButton onClick={login}>
-                        {t("ACCOUNT_EXISTS")}
+                        {t("existing_account")}
                     </LinkButton>
 
                     <Typography

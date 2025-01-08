@@ -170,7 +170,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
                         sx={{ justifyContent: "space-between" }}
                     >
                         <LinkButton onClick={handleRecover}>
-                            {t("RECOVER_ACCOUNT")}
+                            {t("recover_account")}
                         </LinkButton>
                         <LinkButton onClick={logout}>
                             {t("change_email")}

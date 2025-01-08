@@ -69,7 +69,7 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
             />
             <FormPaperFooter>
                 <Stack sx={{ gap: 4 }}>
-                    <LinkButton onClick={signUp}>{t("NO_ACCOUNT")}</LinkButton>
+                    <LinkButton onClick={signUp}>{t("no_account")}</LinkButton>
 
                     <Typography
                         variant="mini"
