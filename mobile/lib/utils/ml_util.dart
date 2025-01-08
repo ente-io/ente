@@ -3,7 +3,6 @@ import "dart:math" as math show sqrt, min, max;
 
 import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/clip_db.dart";
 import "package:photos/db/ml/db.dart";
