@@ -2,6 +2,7 @@
 
 ## v1.7.8 (Unreleased)
 
+- Parse description from image metadata.
 - .
 
 ## v1.7.7

@@ -17,7 +17,6 @@ import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart';
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
-import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
@@ -238,10 +237,7 @@ class MLService {
     }
   }
 
-  Future<void> clusterAllImages({
-    double minFaceScore = kMinimumQualityFaceScore,
-    bool clusterInBuckets = true,
-  }) async {
+  Future<void> clusterAllImages({bool clusterInBuckets = true}) async {
     if (_cannotRunMLFunction()) return;
 
     _logger.info("`clusterAllImages()` called");
@@ -269,13 +265,12 @@ class MLService {
 
       // Get a sense of the total number of faces in the database
       final int totalFaces =
-          await MLDataDB.instance.getTotalFaceCount(minFaceScore: minFaceScore);
+          await MLDataDB.instance.getTotalFaceCount();
       final fileIDToCreationTime =
           await FilesDB.instance.getFileIDToCreationTime();
       final startEmbeddingFetch = DateTime.now();
       // read all embeddings
       final result = await MLDataDB.instance.getFaceInfoForClustering(
-        minScore: minFaceScore,
         maxFaces: totalFaces,
       );
       final Set<int> missingFileIDs = {};

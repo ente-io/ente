@@ -604,8 +604,6 @@ class MLDataDB {
   }
 
   Future<List<FaceDbInfoForClustering>> getFaceInfoForClustering({
-    double minScore = kMinimumQualityFaceScore,
-    int minClarity = kLaplacianHardThreshold,
     int maxFaces = 20000,
     int offset = 0,
     int batchSize = 10000,
@@ -622,7 +620,7 @@ class MLDataDB {
         // Query a batch of rows
         final List<Map<String, dynamic>> maps = await db.getAll(
           'SELECT $faceIDColumn, $embeddingColumn, $faceScore, $faceBlur, $isSideways FROM $facesTable'
-          ' WHERE $faceScore > $minScore AND $faceBlur > $minClarity'
+          ' WHERE $faceScore > $kMinimumQualityFaceScore AND $faceBlur > $kLaplacianHardThreshold'
           ' ORDER BY $faceIDColumn'
           ' DESC LIMIT $batchSize OFFSET $offset',
         );
@@ -698,12 +696,10 @@ class MLDataDB {
     return result;
   }
 
-  Future<int> getTotalFaceCount({
-    double minFaceScore = kMinimumQualityFaceScore,
-  }) async {
+  Future<int> getTotalFaceCount() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
-      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceScore > $minFaceScore AND $faceBlur > $kLaplacianHardThreshold',
+      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceScore > $kMinimumQualityFaceScore AND $faceBlur > $kLaplacianHardThreshold',
     );
     return maps.first['count'] as int;
   }
@@ -783,6 +779,8 @@ class MLDataDB {
     return maps.length;
   }
 
+  /// WARNING: Only use this method if the person has just been created.
+  /// Otherwise, use [ClusterFeedbackService.instance.addClusterToExistingPerson] instead.
   Future<void> assignClusterToPerson({
     required String personID,
     required String clusterID,
