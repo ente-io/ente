@@ -914,6 +914,7 @@ class SearchService {
             // Logging the error and deleting the clusterID to personID mapping
             _logger.severe(
               "`getAllFace`: Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}, deleting the mapping",
+              Exception('ClusterID assigned to a person that no longer exists'),
             );
             await MLDataDB.instance.removeClusterToPerson(
               personID: personID,
