@@ -402,7 +402,7 @@ const RetriableFailed: React.FC<RetriableFailedProps> = ({
     return (
         <Content>
             <InfoIcon color="secondary" fontSize="large" />
-            <Typography variant="h4">{t("passkey_login_failed")}</Typography>
+            <Typography variant="h5">{t("passkey_login_failed")}</Typography>
             <Typography sx={{ color: "text.muted" }}>
                 {duringSignChallenge
                     ? t("passkey_login_credential_hint")
@@ -441,7 +441,7 @@ const ButtonStack = styled("div")`
 const WaitingForUser: React.FC = () => {
     return (
         <Content>
-            <Typography variant="h2" sx={{ fontWeight: "bold" }}>
+            <Typography variant="h3" sx={{ mt: 1 }}>
                 {t("passkey_login")}
             </Typography>
             <Typography sx={{ color: "text.muted" }}>

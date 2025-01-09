@@ -200,7 +200,7 @@ const PasskeyListItem: React.FC<PasskeyListItemProps> = ({
 }) => {
     const labelComponent = (
         <PasskeyLabel>
-            <Typography sx={{ fontWeight: "bold" }}>
+            <Typography sx={{ fontWeight: "medium" }}>
                 {passkey.friendlyName}
             </Typography>
         </PasskeyLabel>
