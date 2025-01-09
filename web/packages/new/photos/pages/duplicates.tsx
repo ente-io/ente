@@ -359,7 +359,7 @@ const Navbar: React.FC<NavbarProps> = ({
                     <ArrowBackIcon />
                 </IconButton>
             </Box>
-            <Typography variant="large">{t("remove_duplicates")}</Typography>
+            <Typography variant="h6">{t("remove_duplicates")}</Typography>
             <Stack direction="row" sx={{ gap: "4px" }}>
                 <SortMenu {...{ sortOrder, onChangeSortOrder }} />
                 <OptionsMenu {...{ onDeselectAll }} />

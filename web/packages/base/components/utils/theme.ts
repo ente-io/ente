@@ -364,10 +364,6 @@ const typography: TypographyOptions = {
         lineHeight: "22px",
         fontWeight: 600 /* medium */,
     },
-    large: {
-        fontSize: "18px",
-        lineHeight: "22px",
-    },
     body: {
         fontSize: "16px",
         lineHeight: "20px",
@@ -413,7 +409,6 @@ const getComponents = (
             variant: "body",
             // Map all our custom variants to <p>.
             variantMapping: {
-                large: "p",
                 body: "p",
                 small: "p",
                 mini: "p",
