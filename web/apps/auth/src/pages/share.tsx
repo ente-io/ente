@@ -126,8 +126,8 @@ const Page: React.FC = () => {
                 )}
                 {timeStatus === 1 && <Message>The code has expired.</Message>}
                 {timeStatus === 0 && (
-                    <div
-                        style={{
+                    <Box
+                        sx={{
                             backgroundColor: "#1C1C1E",
                             borderRadius: "10px",
                             paddingBottom: "20px",
@@ -165,22 +165,26 @@ const Page: React.FC = () => {
                                 position: "absolute",
                                 right: "20px",
                                 bottom: "20px",
-                                fontSize: "12px",
-                                opacity: 0.6,
                             }}
                         >
-                            <p style={{ margin: 0 }}>
+                            <Typography
+                                variant="mini"
+                                sx={{ color: "text.faint" }}
+                            >
                                 {codeDisplay.nextCode === ""
                                     ? "Last code"
                                     : "next"}
-                            </p>
+                            </Typography>
                             {codeDisplay.nextCode !== "" && (
-                                <p style={{ margin: 0 }}>
+                                <Typography
+                                    variant="mini"
+                                    sx={{ color: "text.faint" }}
+                                >
                                     {codeDisplay.nextCode}
-                                </p>
+                                </Typography>
                             )}
                         </div>
-                    </div>
+                    </Box>
                 )}
             </Box>
 
