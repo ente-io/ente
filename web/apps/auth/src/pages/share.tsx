@@ -8,13 +8,7 @@ interface SharedCode {
     codes: string;
 }
 
-interface CodeDisplay {
-    currentCode: string;
-    nextCode: string;
-    progress: number;
-}
-
-const Share: React.FC = () => {
+const Page: React.FC = () => {
     const [sharedCode, setSharedCode] = useState<SharedCode | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [timeStatus, setTimeStatus] = useState<number>(-10);
@@ -51,10 +45,10 @@ const Share: React.FC = () => {
             try {
                 const decryptedCode = (await decryptMetadataJSON_New(
                     {
-                        encryptedData: base64UrlToByteArray(data),
-                        decryptionHeader: base64UrlToByteArray(header),
+                        encryptedData: base64UrlToBytes(data),
+                        decryptionHeader: base64UrlToBytes(header),
                     },
-                    base64UrlToByteArray(key),
+                    base64UrlToBytes(key),
                 )) as SharedCode;
                 setSharedCode(decryptedCode);
             } catch (error) {
@@ -83,7 +77,7 @@ const Share: React.FC = () => {
 
             if (status === 0) {
                 setCodeDisplay(
-                    getCodeDisplay(
+                    parseCodeDisplay(
                         codes,
                         sharedCode.startTime,
                         sharedCode.step,
@@ -215,17 +209,20 @@ const Share: React.FC = () => {
     );
 };
 
-export default Share;
+export default Page;
 
-const base64UrlToByteArray = (base64Url: string): Uint8Array => {
+const base64UrlToBytes = (base64Url: string): Uint8Array => {
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
     return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
 };
 
-const formatCode = (code: string): string =>
-    code.replace(/(.{3})/g, "$1 ").trim();
+interface CodeDisplay {
+    currentCode: string;
+    nextCode: string;
+    progress: number;
+}
 
-const getCodeDisplay = (
+const parseCodeDisplay = (
     codes: string[],
     startTime: number,
     stepDuration: number,
@@ -241,3 +238,5 @@ const getCodeDisplay = (
         progress,
     };
 };
+
+const formatCode = (code: string) => code.replace(/(.{3})/g, "$1 ").trim();
