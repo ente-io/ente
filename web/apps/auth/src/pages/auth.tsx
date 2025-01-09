@@ -2,6 +2,7 @@ import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dial
 import { stashRedirect } from "@/accounts/services/redirect";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { NavbarBase } from "@/base/components/Navbar";
 import {
     OverflowMenu,
@@ -165,7 +166,7 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
     const [otp, setOTP] = useState("");
     const [nextOTP, setNextOTP] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
-    const [hasCopied, setHasCopied] = useState(false);
+    const [openCopied, setOpenCopied] = useState(false);
 
     const regen = useCallback(() => {
         try {
@@ -179,8 +180,8 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
 
     const copyCode = () =>
         void navigator.clipboard.writeText(otp).then(() => {
-            setHasCopied(true);
-            setTimeout(() => setHasCopied(false), 2000);
+            setOpenCopied(true);
+            setTimeout(() => setOpenCopied(false), 2000);
         });
 
     useEffect(() => {
@@ -210,7 +211,7 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
             ) : (
                 <ButtonBase component="div" onClick={copyCode}>
                     <OTPDisplay {...{ code, otp, nextOTP }} />
-                    <Snackbar open={hasCopied} message={t("copied")} />
+                    <Snackbar open={openCopied} message={t("copied")} />
                 </ButtonBase>
             )}
         </Box>
@@ -320,22 +321,44 @@ const UnparseableCode: React.FC<UnparseableCodeProps> = ({
     code,
     errorMessage,
 }) => {
-    const [showRawData, setShowRawData] = useState(false);
+    const [openCopied, setOpenCopied] = useState(false);
+
+    const copyRawData = () =>
+        void navigator.clipboard.writeText(code.uriString).then(() => {
+            setOpenCopied(true);
+            setTimeout(() => setOpenCopied(false), 2000);
+        });
 
     return (
-        <div className="code-info">
-            <div>{code.issuer}</div>
-            <div>{errorMessage}</div>
-            <div>
-                {showRawData ? (
-                    <div onClick={() => setShowRawData(false)}>
-                        {code.uriString}
-                    </div>
-                ) : (
-                    <div onClick={() => setShowRawData(true)}>Show rawData</div>
-                )}
-            </div>
-        </div>
+        <Stack
+            sx={(theme) => ({
+                backgroundColor: theme.palette.background.paper,
+                borderRadius: "4px",
+                overflow: "hidden",
+                p: "16px 20px",
+                minWidth: "min(360px, 80svw)",
+                maxWidth: "360px",
+                minHeight: "120px",
+                gap: "4px",
+            })}
+        >
+            <Typography variant="small">{code.issuer}</Typography>
+            <Typography
+                variant="small"
+                sx={(theme) => ({
+                    color: theme.palette.critical.main,
+                    flex: 1,
+                    minHeight: "16px",
+                    mb: 2,
+                })}
+            >
+                {errorMessage}
+            </Typography>
+            <FocusVisibleButton color="secondary" onClick={copyRawData}>
+                Copy raw data
+            </FocusVisibleButton>
+            <Snackbar open={openCopied} message={t("copied")} />
+        </Stack>
     );
 };
 
