@@ -1,13 +1,12 @@
 import { accountLogout } from "@/accounts/services/logout";
 import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
+import { LoadingOverlay } from "@/base/components/LoadingOverlay";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { Overlay } from "@/base/components/mui/Container";
 import { AppNavbar } from "@/base/components/Navbar";
 import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
+import { useSetupI18n } from "@/base/components/utils/hooks-i18n";
 import { THEME_COLOR, getTheme } from "@/base/components/utils/theme";
-import { setupI18n } from "@/base/i18n";
 import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
@@ -33,10 +32,10 @@ import "styles/global.css";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const router = useRouter();
-    const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
     const [showNavbar, setShowNavBar] = useState(false);
 
+    const isI18nReady = useSetupI18n();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
@@ -44,7 +43,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     );
 
     useEffect(() => {
-        void setupI18n().finally(() => setIsI18nReady(true));
         const user = getData(LS_KEYS.USER) as User | undefined | null;
         void migrateKVToken(user);
         logStartupBanner(user?.id);
@@ -94,22 +92,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <AttributedMiniDialog {...miniDialogProps} />
 
                 <AppContext.Provider value={appContext}>
-                    {(loading || !isI18nReady) && (
-                        <Overlay
-                            sx={(theme) => ({
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                zIndex: 2000,
-                                backgroundColor: theme.colors.background.base,
-                            })}
-                        >
-                            <ActivityIndicator />
-                        </Overlay>
-                    )}
-                    {isI18nReady && (
-                        <Component setLoading={setLoading} {...pageProps} />
-                    )}
+                    {(loading || !isI18nReady) && <LoadingOverlay />}
+                    {isI18nReady && <Component {...pageProps} />}
                 </AppContext.Provider>
             </ThemeProvider>
         </>

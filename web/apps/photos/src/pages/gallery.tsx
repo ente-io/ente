@@ -97,7 +97,7 @@ import {
 import { FixCreationTime } from "components/FixCreationTime";
 import FullScreenDropZone from "components/FullScreenDropZone";
 import GalleryEmptyState from "components/GalleryEmptyState";
-import { LoadingOverlay } from "components/LoadingOverlay";
+import { GalleryLoadingOverlay } from "components/GalleryLoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import Sidebar from "components/Sidebar";
@@ -892,9 +892,9 @@ export default function Gallery() {
                     }}
                 />
                 {blockingLoad && (
-                    <LoadingOverlay>
+                    <GalleryLoadingOverlay>
                         <ActivityIndicator />
-                    </LoadingOverlay>
+                    </GalleryLoadingOverlay>
                 )}
                 {isFirstLoad && (
                     <CenteredFlex>

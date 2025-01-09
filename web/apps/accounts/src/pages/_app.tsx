@@ -1,12 +1,11 @@
 import { staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
+import { LoadingOverlay } from "@/base/components/LoadingOverlay";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { Overlay } from "@/base/components/mui/Container";
 import { AppNavbar } from "@/base/components/Navbar";
 import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
+import { useSetupI18n } from "@/base/components/utils/hooks-i18n";
 import { getTheme, THEME_COLOR } from "@/base/components/utils/theme";
-import { setupI18n } from "@/base/i18n";
 import { disableDiskLogs } from "@/base/log";
 import { logUnhandledErrorsAndRejections } from "@/base/log-web";
 import { CssBaseline } from "@mui/material";
@@ -20,13 +19,13 @@ import "@fontsource-variable/inter";
 import "styles/global.css";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
-    const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [showNavbar, setShowNavbar] = useState(false);
+
+    const isI18nReady = useSetupI18n();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
 
     useEffect(() => {
         disableDiskLogs();
-        void setupI18n().finally(() => setIsI18nReady(true));
         logUnhandledErrorsAndRejections(true);
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
@@ -50,19 +49,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <AttributedMiniDialog {...miniDialogProps} />
 
                 <AppContext.Provider value={appContext}>
-                    {!isI18nReady && (
-                        <Overlay
-                            sx={(theme) => ({
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                zIndex: 2000,
-                                backgroundColor: theme.colors.background.base,
-                            })}
-                        >
-                            <ActivityIndicator />
-                        </Overlay>
-                    )}
+                    {!isI18nReady && <LoadingOverlay />}
                     {showNavbar && <AppNavbar />}
                     {isI18nReady && <Component {...pageProps} />}
                 </AppContext.Provider>

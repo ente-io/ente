@@ -52,7 +52,7 @@ import {
     FilesDownloadProgressAttributes,
 } from "components/FilesDownloadProgress";
 import FullScreenDropZone from "components/FullScreenDropZone";
-import { LoadingOverlay } from "components/LoadingOverlay";
+import { GalleryLoadingOverlay } from "components/GalleryLoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import Uploader from "components/Upload/Uploader";
@@ -520,9 +520,9 @@ export default function PublicCollectionGallery() {
                     selectable={downloadEnabled}
                 />
                 {blockingLoad && (
-                    <LoadingOverlay>
+                    <GalleryLoadingOverlay>
                         <ActivityIndicator />
-                    </LoadingOverlay>
+                    </GalleryLoadingOverlay>
                 )}
                 <Uploader
                     syncWithRemote={syncWithRemote}
