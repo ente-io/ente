@@ -78,7 +78,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 <FormPaperTitle>{t("two_factor")}</FormPaperTitle>
                 <VerifyTwoFactor onSubmit={onSubmit} buttonText={t("verify")} />
 
-                <FormPaperFooter style={{ justifyContent: "space-between" }}>
+                <FormPaperFooter sx={{ justifyContent: "space-between" }}>
                     <LinkButton
                         onClick={() => router.push(PAGES.TWO_FACTOR_RECOVER)}
                     >

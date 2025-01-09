@@ -21,9 +21,9 @@
         "**/*.ts",
         "**/*.tsx",
         "**/*.js",
-        "themes/mui-theme.d.ts",
         "../base/log-web.ts",
-        "../base/global-electron.d.ts"
+        "../base/global-electron.d.ts",
+        "../base/components/utils/mui-theme.d.ts"
     ],
     "exclude": ["**/node_modules", "**/.*/"]
 }

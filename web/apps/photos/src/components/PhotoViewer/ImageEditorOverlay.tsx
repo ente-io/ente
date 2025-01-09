@@ -543,7 +543,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                             alignItems: "center",
                         }}
                     >
-                        <Typography variant="h2" sx={{ fontWeight: "bold" }}>
+                        <Typography variant="h2" sx={{ fontWeight: "medium" }}>
                             {t("photo_editor")}
                         </Typography>
                         <IconButton
@@ -570,7 +570,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         }}
                     >
                         <Box
-                            style={{
+                            sx={{
                                 position: "relative",
                                 width: "100%",
                                 height: "100%",
@@ -675,11 +675,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         </Tabs>
                     </Stack>
                     <MenuSectionTitle title={t("reset")} />
-                    <MenuItemGroup
-                        style={{
-                            marginBottom: "0.5rem",
-                        }}
-                    >
+                    <MenuItemGroup sx={{ mb: "0.5rem" }}>
                         <EnteMenuItem
                             disabled={canvasLoading}
                             startIcon={<CropOriginalIcon />}
@@ -839,11 +835,7 @@ const CropMenu: React.FC<CropMenuProps> = (props) => {
     return (
         <>
             <MenuSectionTitle title={t("freehand")} />
-            <MenuItemGroup
-                style={{
-                    marginBottom: "0.5rem",
-                }}
-            >
+            <MenuItemGroup sx={{ mb: "0.5rem" }}>
                 <EnteMenuItem
                     disabled={canvasLoading}
                     startIcon={<CropIcon />}
@@ -1252,11 +1244,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
     return (
         <>
             <MenuSectionTitle title={t("aspect_ratio")} />
-            <MenuItemGroup
-                style={{
-                    marginBottom: "0.5rem",
-                }}
-            >
+            <MenuItemGroup sx={{ mb: "0.5rem" }}>
                 <EnteMenuItem
                     disabled={canvasLoading}
                     startIcon={<CropSquareIcon />}
@@ -1264,11 +1252,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                     label={t("square") + " (1:1)"}
                 />
             </MenuItemGroup>
-            <MenuItemGroup
-                style={{
-                    marginBottom: "1rem",
-                }}
-            >
+            <MenuItemGroup sx={{ mb: "1rem" }}>
                 {PRESET_ASPECT_RATIOS.map((ratio, index) => (
                     <Fragment key={index}>
                         <EnteMenuItem
@@ -1286,11 +1270,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                     </Fragment>
                 ))}
             </MenuItemGroup>
-            <MenuItemGroup
-                style={{
-                    marginBottom: "1rem",
-                }}
-            >
+            <MenuItemGroup sx={{ mb: "1rem" }}>
                 {PRESET_ASPECT_RATIOS.map((ratio, index) => (
                     <Fragment key={index}>
                         <EnteMenuItem
@@ -1310,11 +1290,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                 ))}
             </MenuItemGroup>
             <MenuSectionTitle title={t("rotation")} />
-            <MenuItemGroup
-                style={{
-                    marginBottom: "1rem",
-                }}
-            >
+            <MenuItemGroup sx={{ mb: "1rem" }}>
                 <EnteMenuItem
                     disabled={canvasLoading}
                     startIcon={<RotateLeftIcon />}
@@ -1330,11 +1306,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                 />
             </MenuItemGroup>
             <MenuSectionTitle title={t("flip")} />
-            <MenuItemGroup
-                style={{
-                    marginBottom: "1rem",
-                }}
-            >
+            <MenuItemGroup sx={{ mb: "1rem" }}>
                 <EnteMenuItem
                     disabled={canvasLoading}
                     startIcon={
@@ -1438,11 +1410,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                 ]}
             />
         </Box>
-        <MenuItemGroup
-            style={{
-                marginBottom: "0.5rem",
-            }}
-        >
+        <MenuItemGroup sx={{ mb: "0.5rem" }}>
             <EnteMenuItem
                 variant="toggle"
                 checked={props.invert}

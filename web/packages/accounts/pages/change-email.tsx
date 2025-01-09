@@ -186,11 +186,11 @@ const ChangeEmailForm: React.FC = () => {
                     </form>
 
                     <FormPaperFooter
-                        style={{
-                            justifyContent: ottInputVisible
-                                ? "space-between"
-                                : "normal",
-                        }}
+                        sx={[
+                            ottInputVisible
+                                ? { justifyContent: "space-between" }
+                                : { justifyContent: "center" },
+                        ]}
                     >
                         {ottInputVisible && (
                             <LinkButton

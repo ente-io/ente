@@ -38,7 +38,10 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
     fileCount,
 }) => (
     <GalleryItemsHeaderAdapter>
-        <Typography variant="large" sx={{ color: "text.muted" }}>
+        <Typography
+            variant="h6"
+            sx={{ fontWeight: "regular", color: "text.muted" }}
+        >
             {t("search_results")}
         </Typography>
         <GalleryItemsSummary

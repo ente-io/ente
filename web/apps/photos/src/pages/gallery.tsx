@@ -320,7 +320,7 @@ export default function Gallery() {
     const isInSearchMode = state.isInSearchMode;
     const filteredFiles = state.filteredFiles;
 
-    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) console.log("render", state);
+    if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("render", state);
 
     const router = useRouter();
 

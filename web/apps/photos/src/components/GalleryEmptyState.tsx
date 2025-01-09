@@ -21,7 +21,6 @@ export default function GalleryEmptyState({ openUploader }) {
                             color: "text.muted",
                             userSelect: "none",
                             marginBlockEnd: 1,
-
                             svg: {
                                 color: "text.base",
                                 verticalAlign: "middle",

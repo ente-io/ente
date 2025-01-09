@@ -10,6 +10,6 @@
         "src",
         "next-env.d.ts",
         "../../packages/base/global-electron.d.ts",
-        "../../packages/shared/themes/mui-theme.d.ts"
+        "../../packages/base/components/utils/mui-theme.d.ts"
     ]
 }

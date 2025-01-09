@@ -8,6 +8,7 @@ import {
     genericErrorDialogAttributes,
     useAttributedMiniDialog,
 } from "@/base/components/utils/dialog";
+import { THEME_COLOR, getTheme } from "@/base/components/utils/theme";
 import { setupI18n } from "@/base/i18n";
 import log from "@/base/log";
 import {
@@ -33,8 +34,6 @@ import {
     getData,
     migrateKVToken,
 } from "@ente/shared/storage/localStorage";
-import { getTheme } from "@ente/shared/themes";
-import { THEME_COLOR } from "@ente/shared/themes/constants";
 import type { User } from "@ente/shared/user/types";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { CssBaseline, styled } from "@mui/material";
@@ -48,8 +47,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
-import "styles/global.css";
 import { NotificationAttributes } from "types/Notification";
+
+import "@fontsource-variable/inter"; /* Inter Variable, supports weights 100-900 */
+import "styles/global.css";
 
 export default function App({ Component, pageProps }: AppProps) {
     const router = useRouter();
@@ -132,7 +133,10 @@ export default function App({ Component, pageProps }: AppProps) {
         if (needsFamilyRedirect && getData(LS_KEYS.USER)?.token)
             redirectToFamilyPortal();
 
+        // TODO: Remove me after instrumenting for a bit.
+        let t = Date.now();
         router.events.on("routeChangeStart", (url: string) => {
+            t = Date.now();
             const newPathname = url.split("?")[0];
             if (window.location.pathname !== newPathname) {
                 setLoading(true);
@@ -148,6 +152,7 @@ export default function App({ Component, pageProps }: AppProps) {
         });
 
         router.events.on("routeChangeComplete", () => {
+            log.debug(() => `Route change took ${Date.now() - t}} ms`);
             setLoading(false);
         });
     }, []);

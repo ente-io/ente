@@ -6,6 +6,7 @@ import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Overlay } from "@/base/components/mui/Container";
 import { AppNavbar } from "@/base/components/Navbar";
 import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
+import { THEME_COLOR, getTheme } from "@/base/components/utils/theme";
 import { setupI18n } from "@/base/i18n";
 import {
     logStartupBanner,
@@ -18,8 +19,6 @@ import {
     getData,
     migrateKVToken,
 } from "@ente/shared/storage/localStorage";
-import { getTheme } from "@ente/shared/themes";
-import { THEME_COLOR } from "@ente/shared/themes/constants";
 import type { User } from "@ente/shared/user/types";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
@@ -29,7 +28,8 @@ import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AppContext } from "types/context";
 
-import "../../public/css/global.css";
+import "@fontsource-variable/inter";
+import "styles/global.css";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const router = useRouter();

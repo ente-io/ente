@@ -1,11 +1,3 @@
-body {
-    height: 100vh;
-    width: 100%;
-    margin: 0;
-    background-color: black;
-    color: white;
-}
-
 #__next {
-    height: 100%;
+    height: 100vh; /* Make the Next.js root div fill the viewport height */
 }

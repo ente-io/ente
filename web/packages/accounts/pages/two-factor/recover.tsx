@@ -176,7 +176,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                     buttonText={t("recover")}
                     disableAutoComplete
                 />
-                <FormPaperFooter style={{ justifyContent: "space-between" }}>
+                <FormPaperFooter sx={{ justifyContent: "space-between" }}>
                     <LinkButton onClick={() => showContactSupportDialog()}>
                         {t("no_recovery_key_title")}
                     </LinkButton>
