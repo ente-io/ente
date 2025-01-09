@@ -4,10 +4,10 @@ import {
     Paper,
     styled,
     Typography,
-    type BoxProps,
     type TypographyProps,
 } from "@mui/material";
 import React from "react";
+import { isSxArray } from "./utils/sx";
 
 export const FormPaper = styled(Paper)(({ theme }) => ({
     padding: theme.spacing(4, 2),
@@ -24,24 +24,18 @@ export const FormPaperTitle: React.FC<TypographyProps> = ({ sx, ...props }) => {
     );
 };
 
-export const FormPaperFooter: React.FC<BoxProps> = ({
-    sx,
-    style,
-    ...props
-}) => {
-    return (
-        <>
-            <Divider />
-            <VerticallyCentered
-                style={{ flexDirection: "row", ...style }}
-                sx={{
-                    mt: 3,
-                    ...sx,
-                }}
-                {...props}
-            >
-                {props.children}
-            </VerticallyCentered>
-        </>
-    );
-};
+export const FormPaperFooter: React.FC<
+    React.PropsWithChildren<{ sx?: TypographyProps["sx"] }>
+> = ({ sx, children }) => (
+    <>
+        <Divider />
+        <VerticallyCentered
+            sx={[
+                { mt: 3, flexDirection: "row" },
+                ...(sx ? (isSxArray(sx) ? sx : [sx]) : []),
+            ]}
+        >
+            {children}
+        </VerticallyCentered>
+    </>
+);
