@@ -14,22 +14,3 @@ body {
     min-height: 100vh;
     height: 100vh;
 }
-
-div.otp-input input {
-    width: 36px !important;
-    height: 36px;
-    margin: 0 10px;
-}
-
-div.otp-input input::placeholder {
-    opacity: 0;
-}
-
-div.otp-input input:not(:placeholder-shown),
-div.otp-input input:focus {
-    border: 2px solid #51cd7c;
-    border-radius: 1px;
-    -webkit-transition: 0.5s;
-    transition: 0.5s;
-    outline: none;
-}
