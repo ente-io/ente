@@ -249,7 +249,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                         href={openStreetMapLink(location)}
                                         target="_blank"
                                         rel="noopener"
-                                        sx={{ fontWeight: "bold" }}
+                                        sx={{ fontWeight: "medium" }}
                                     >
                                         {t("view_on_map")}
                                     </Link>
@@ -261,7 +261,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                         sx={{
                                             textDecoration: "none",
                                             color: "text.muted",
-                                            fontWeight: "bold",
+                                            fontWeight: "medium",
                                         }}
                                     >
                                         {t("disable_map")}
@@ -301,7 +301,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                 sx={{
                                     textDecoration: "none",
                                     color: "text.muted",
-                                    fontWeight: "bold",
+                                    fontWeight: "medium",
                                 }}
                             >
                                 {t("view_exif")}

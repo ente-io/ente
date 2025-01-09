@@ -115,7 +115,11 @@ const AllCollectionsHeader = ({
                     </Typography>
                     <Typography
                         variant="small"
-                        sx={{ fontWeight: "normal", color: "text.muted" }}
+                        sx={{
+                            color: "text.muted",
+                            // Undo the effects of DialogTitle.
+                            fontWeight: "normal",
+                        }}
                     >
                         {t("albums_count", { count: collectionCount })}
                     </Typography>

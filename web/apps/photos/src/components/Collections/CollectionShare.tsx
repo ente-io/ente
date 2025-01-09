@@ -981,7 +981,6 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                 ))}
                                 <EnteMenuItem
                                     startIcon={<AddIcon />}
-                                    fontWeight={"bold"}
                                     onClick={openAddViewer}
                                     label={
                                         viewers?.length
@@ -1894,7 +1893,7 @@ function PublicLinkSetPassword({
             <Stack sx={{ gap: 3, p: 1.5 }}>
                 <Typography
                     variant="h3"
-                    sx={{ fontWeight: "bold", px: 1, py: 0.5 }}
+                    sx={{ fontWeight: "medium", px: 1, py: 0.5 }}
                 >
                     {t("password_lock")}
                 </Typography>

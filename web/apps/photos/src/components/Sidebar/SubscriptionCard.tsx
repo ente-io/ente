@@ -151,9 +151,9 @@ const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
             <DefaultBox>
                 <Typography
                     sx={{
-                        fontWeight: "bold",
                         fontSize: "24px",
                         lineHeight: "30px",
+                        fontWeight: "medium",
                     }}
                 >
                     {`${formattedStorageByteSize(usage, { round: true })} ${t(
@@ -164,9 +164,9 @@ const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
             <MobileSmallBox>
                 <Typography
                     sx={{
-                        fontWeight: "bold",
                         fontSize: "24px",
                         lineHeight: "30px",
+                        fontWeight: "medium",
                     }}
                 >
                     {`${bytesInGB(usage)} /  ${bytesInGB(storage)} ${t("storage_unit.gb")} ${t("used")}`}
@@ -205,7 +205,7 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
                 <Typography variant="mini">{`${formattedStorageByteSize(
                     storage - usage,
                 )} ${t("free")}`}</Typography>
-                <Typography variant="mini" sx={{ fontWeight: "bold" }}>
+                <Typography variant="mini" sx={{ fontWeight: "medium" }}>
                     {t("photos_count", { count: fileCount ?? 0 })}
                 </Typography>
             </SpaceBetweenFlex>
@@ -262,7 +262,7 @@ const FamilyUsageSection: React.FC<FamilyUsageSectionProps> = ({
                     <Legend label={t("you")} color="text.base" />
                     <Legend label={t("family")} color="text.muted" />
                 </Stack>
-                <Typography variant="mini" sx={{ fontWeight: "bold" }}>
+                <Typography variant="mini" sx={{ fontWeight: "medium" }}>
                     {t("photos_count", { count: fileCount ?? 0 })}
                 </Typography>
             </SpaceBetweenFlex>
@@ -332,7 +332,7 @@ interface LegendProps {
 const Legend: React.FC<LegendProps> = ({ label, color }) => (
     <Stack direction="row" sx={{ alignItems: "center" }}>
         <LegendDot sx={{ color }} />
-        <Typography variant="mini" sx={{ fontWeight: "bold" }}>
+        <Typography variant="mini" sx={{ fontWeight: "medium" }}>
             {label}
         </Typography>
     </Stack>

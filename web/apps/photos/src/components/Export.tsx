@@ -178,7 +178,7 @@ export const Export: React.FC<ExportProps> = ({
     return (
         <Dialog {...{ open, onClose }} maxWidth="xs" fullWidth>
             <SpaceBetweenFlex sx={{ p: "12px 4px 0px 0px" }}>
-                <DialogTitle variant="h3" fontWeight={"bold"}>
+                <DialogTitle variant="h3" sx={{ fontWeight: "medium" }}>
                     {t("export_data")}
                 </DialogTitle>
                 <DialogCloseIconButton {...{ onClose }} />

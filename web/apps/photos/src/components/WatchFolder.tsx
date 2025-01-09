@@ -120,7 +120,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
                 PaperProps={{ sx: { height: "448px", maxWidth: "414px" } }}
             >
                 <SpaceBetweenFlex sx={{ p: "16px 8px 8px 8px" }}>
-                    <DialogTitle variant="h3" fontWeight={"bold"}>
+                    <DialogTitle variant="h3" sx={{ fontWeight: "medium" }}>
                         {t("watched_folders")}
                     </DialogTitle>
                     <DialogCloseIconButton {...{ onClose }} />
@@ -183,7 +183,7 @@ const NoWatches: React.FC = () => {
     return (
         <NoWatchesContainer>
             <Stack spacing={1}>
-                <Typography variant="large" sx={{ fontWeight: "bold" }}>
+                <Typography variant="h6">
                     {t("no_folders_added")}
                 </Typography>
                 <Typography

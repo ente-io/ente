@@ -92,12 +92,12 @@ export default function Notification({
                             </EllipsizedTypography>
                         )}
                         {attributes.message && (
-                            <EllipsizedTypography fontWeight="bold">
+                            <EllipsizedTypography sx={{ fontWeight: "medium" }}>
                                 {attributes.message}
                             </EllipsizedTypography>
                         )}
                         {attributes.title && (
-                            <EllipsizedTypography fontWeight="bold">
+                            <EllipsizedTypography sx={{ fontWeight: "medium" }}>
                                 {attributes.title}
                             </EllipsizedTypography>
                         )}

@@ -309,7 +309,7 @@ const FreeSubscriptionPlanSelectorCard: React.FC<
     children,
 }) => (
     <>
-        <Typography variant="h3" sx={{ fontWeight: "bold" }}>
+        <Typography variant="h3" sx={{ fontWeight: "medium" }}>
             {t("choose_plan")}
         </Typography>
         <Box>
@@ -365,7 +365,7 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
         <Box sx={{ pl: 1.5, py: 0.5 }}>
             <SpaceBetweenFlex>
                 <Box>
-                    <Typography variant="h3" sx={{ fontWeight: "bold" }}>
+                    <Typography variant="h3" sx={{ fontWeight: "medium" }}>
                         {t("subscription")}
                     </Typography>
                     <Typography variant="small" sx={{ color: "text.muted" }}>
@@ -380,7 +380,7 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
         </Box>
 
         <Box sx={{ px: 1.5 }}>
-            <Typography sx={{ color: "text.muted", fontWeight: "bold" }}>
+            <Typography sx={{ color: "text.muted", fontWeight: "medium" }}>
                 <Trans
                     i18nKey="current_usage"
                     values={{

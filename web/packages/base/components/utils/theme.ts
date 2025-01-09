@@ -296,87 +296,73 @@ const typography: TypographyOptions = {
     //
     // We only use three font weights:
     //
-    // - 500 regular
-    // - 600 bold
-    // - 700 strong
+    // - 500 (sx "regular", CSS "normal")
+    // - 600 (sx "medium")
+    // - 700 (sx "bold", CSS "bold")
     //
-    // Regular and bold are specified as typography overrides, while 700 for
-    // strong is specified in the CSS baseline reset below.
-    //
-    // While the sx prop allows us to use keywords "regular" and "bold",
-    // which we do elsewhere in the code, within this file those keywords
-    // cannot be used in all contexts because they instead map to the CSS
-    // keywords (which MUI can't and doesn't remap). To avoid any confusion,
+    // While the sx prop allows us to use keywords "regular", "medium" and
+    // "bold", which we do elsewhere in the code, within this file those
+    // keywords cannot be used in all contexts because they instead map to the
+    // CSS keywords (which MUI can't and doesn't remap). To avoid any confusion,
     // within this file we only use the numeric values.
     //
     // ---
     //
-    // Details:
-    //
-    // (This was true as of MUI v6)
-    //
-    // MUI uses the following font weights by default:
+    // MUI (as of v6) uses the following font weights by default:
     // - fontWeightLight 300
     // - fontWeightRegular 400
     // - fontWeightMedium 500
     // - fontWeightBold 700
     //
-    // fontWeightLight is only used as the default font weight for the h1
-    // and h2 variants, but we override their font weight in our theme. Thus
-    // we don't need to bother with the light variant (though for
-    // consistency of specifying every value, we alias it the same weight as
-    // regular, 500).
+    // The browser default (CSS keyword "normal"), is also 400.
     //
-    // For Inter (the font we're using), 400 is too light, and to improve
+    // However for Inter, the font that we use, 400 is too light, and to improve
     // legibility we change fontWeightRegular to 500.
     //
-    // We also change fontWeightBold to 600 (and load inter-600).
+    // Correspondingly, we shift fontWeightMedium to 600. fontWeightBold then
+    // ends up mapping back to 700, which also nicely coincides with the CSS
+    // keyword "bold".
     //
-    // That leaves fontWeightMedium. We don't use it anywhere in our own
-    // code. MUI uses it for:
-    // - h6, but we already specify our custom font weight in our theme.
-    // - Tooltip
-    // - A handful other places in components we don't use.
-    //
-    // Since we don't anyways have a need for a medium font in our current
-    // design, we just alias it to the same font weight as our bold, i.e. we
-    // set fontWeightMedium to 600 (same as fontWeightBold).
+    // MUI uses fontWeightLight only as the default font weight for the h1 and
+    // h2 variants, but we override their font weight in our theme. Thus we
+    // don't need to bother with the light variant (though for consistency of
+    // specifying every value, we alias it the same weight as regular, 500).
     fontFamily: "Inter Variable, sans-serif",
     fontWeightLight: 500,
-    fontWeightRegular: 500,
+    fontWeightRegular: 500 /* CSS baseline reset sets this as the default */,
     fontWeightMedium: 600,
-    fontWeightBold: 600,
+    fontWeightBold: 700,
     h1: {
         fontSize: "48px",
         lineHeight: "58px",
-        fontWeight: 600,
+        fontWeight: 600 /* medium */,
     },
     h2: {
         fontSize: "32px",
         lineHeight: "39px",
-        fontWeight: 500,
+        fontWeight: 500 /* Reset to regular to override MUI's default theme */,
     },
     h3: {
         fontSize: "24px",
         lineHeight: "29px",
-        fontWeight: 500,
+        fontWeight: 500 /* Reset to regular to override MUI's default theme */,
     },
     h4: {
         fontSize: "22px",
         lineHeight: "27px",
-        fontWeight: 500,
+        fontWeight: 500 /* Reset to regular to override MUI's default theme */,
     },
     h5: {
         fontSize: "20px",
         lineHeight: "25px",
-        fontWeight: 600,
+        fontWeight: 600 /* medium */,
     },
     // h6 is the default variant used by MUI's DialogTitle.
     h6: {
         // The font size and line height below is the same as large.
         fontSize: "18px",
         lineHeight: "22px",
-        fontWeight: 600,
+        fontWeight: 600 /* medium */,
     },
     large: {
         fontSize: "18px",
@@ -415,8 +401,6 @@ const getComponents = (
                 // reasonable value that works for our font.
                 letterSpacing: "-0.011em",
             },
-            // See: [Note: Font weights].
-            strong: { fontWeight: 700 },
         },
     },
 
@@ -523,12 +507,12 @@ const getComponents = (
         styleOverrides: {
             // We don't use the size prop for the MUI button, or rather it
             // cannot be used, since we have fixed the paddings and font sizes
-            // unconditionally here (which are all that the size prop changes).
+            // unconditionally here (which is all that the size prop changes).
             root: {
                 padding: "12px 16px",
                 borderRadius: "4px",
                 textTransform: "none",
-                // Body, but bold.
+                // Body, but medium.
                 fontSize: typography.body?.fontSize,
                 lineHeight: typography.body?.lineHeight,
                 fontWeight: 600,

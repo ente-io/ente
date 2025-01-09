@@ -75,7 +75,7 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
             fullWidth
         >
             <SpaceBetweenFlex sx={{ p: "8px 4px 8px 0" }}>
-                <DialogTitle variant="h3" fontWeight={"bold"}>
+                <DialogTitle variant="h3" sx={{ fontWeight: "medium" }}>
                     {t("recovery_key")}
                 </DialogTitle>
                 <DialogCloseIconButton {...{ onClose }} />
