@@ -8,7 +8,7 @@ import { readCastData, storeCastData } from "services/cast-data";
 import { getCastPayload, register } from "services/pair";
 import { advertiseOnChromecast } from "../services/chromecast-receiver";
 
-export default function Index() {
+const Page: React.FC = () => {
     const [publicKey, setPublicKey] = useState<string | undefined>();
     const [privateKey, setPrivateKey] = useState<string | undefined>();
     const [pairingCode, setPairingCode] = useState<string | undefined>();
@@ -77,7 +77,9 @@ export default function Index() {
             </Typography>
         </Container>
     );
-}
+};
+
+export default Page;
 
 const Container = styled(Stack)`
     height: 100%;

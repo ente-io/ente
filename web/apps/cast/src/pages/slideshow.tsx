@@ -7,7 +7,7 @@ import { readCastData } from "services/cast-data";
 import { isChromecast } from "services/chromecast-receiver";
 import { imageURLGenerator } from "services/render";
 
-export default function Slideshow() {
+const Page: React.FC = () => {
     const [isEmpty, setIsEmpty] = useState(false);
     const [imageURL, setImageURL] = useState<string | undefined>();
 
@@ -55,7 +55,9 @@ export default function Slideshow() {
     ) : (
         <SlideView url={imageURL} />
     );
-}
+};
+
+export default Page;
 
 const PairingComplete: React.FC = () => {
     return (
