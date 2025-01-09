@@ -480,8 +480,8 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
               return Column(
                 children: [
                   MenuItemWidget(
-                    captionedTextWidget: const CaptionedTextWidget(
-                      title: 'Processed',
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: S.of(context).processed,
                     ),
                     trailingWidget: Text(
                       total < 1
