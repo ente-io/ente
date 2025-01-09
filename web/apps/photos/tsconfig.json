@@ -22,7 +22,7 @@
         "**/*.ts",
         "**/*.tsx",
         "**/*.js",
-        "../../packages/shared/themes/mui-theme.d.ts",
+        "../../packages/base/components/utils/mui-theme.d.ts",
         "../../packages/base/global-electron.d.ts"
     ],
     "exclude": ["node_modules", "out", ".next", "thirdparty"]

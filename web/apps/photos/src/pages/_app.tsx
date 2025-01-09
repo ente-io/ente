@@ -8,6 +8,7 @@ import {
     genericErrorDialogAttributes,
     useAttributedMiniDialog,
 } from "@/base/components/utils/dialog";
+import { THEME_COLOR, getTheme } from "@/base/components/utils/theme";
 import { setupI18n } from "@/base/i18n";
 import log from "@/base/log";
 import {
@@ -33,7 +34,6 @@ import {
     getData,
     migrateKVToken,
 } from "@ente/shared/storage/localStorage";
-import { THEME_COLOR, getTheme } from "@ente/shared/themes";
 import type { User } from "@ente/shared/user/types";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { CssBaseline, styled } from "@mui/material";
