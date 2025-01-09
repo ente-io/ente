@@ -486,7 +486,7 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
                     trailingWidget: Text(
                       total < 1
                           ? 'NA'
-                          : indexedFiles * 100 ~/ total > 100
+                          : pendingFiles == 0
                               ? '100%'
                               : '${(indexedFiles * 100.0 / total * 1.0).toStringAsFixed(2)}%',
                       style: Theme.of(context).textTheme.bodySmall,

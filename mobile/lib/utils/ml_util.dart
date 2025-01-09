@@ -76,6 +76,11 @@ Future<IndexStatus> getIndexStatus() async {
   }
 }
 
+// _lastFetchTimeForOthersIndexed indicates the last time we tried to
+// fetch embeddings for files that are owned by others. This is only used
+// when local indexing is disabled.
+int _lastFetchTimeForOthersIndexed = 0;
+
 /// Return a list of file instructions for files that should be indexed for ML
 Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   _logger.info('getFilesForMlIndexing called');
@@ -160,6 +165,18 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
     "Getting list of  ${sortedBylocalID.length} files to index for ML took ${DateTime.now().difference(time).inMilliseconds} ms",
   );
   if (!localSettings.isMLLocalIndexingEnabled) {
+    final time = DateTime.now().millisecondsSinceEpoch;
+    if ((time - _lastFetchTimeForOthersIndexed) > 1000 * 60 * 60 * 24) {
+      final filesOwnedByOthers = [];
+      for (final instruction in splitResult.unmatched) {
+        if (instruction.file.isUploaded && !instruction.file.isOwner) {
+          filesOwnedByOthers.add(instruction);
+        }
+      }
+      _logger.info(
+          'Chececking index for ${filesOwnedByOthers.length} owned by others');
+      return [...splitResult.matched, ...filesOwnedByOthers];
+    }
     return splitResult.matched;
   }
   return [...splitResult.matched, ...splitResult.unmatched];
