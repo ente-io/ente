@@ -272,17 +272,16 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                     >
                         {code.account ?? ""}
                     </Typography>
-                    <p
-                        style={{
-                            margin: "0px",
-                            marginBottom: "1rem",
-                            fontSize: "24px",
-                            fontWeight: "bold",
-                            textAlign: "left",
+                    <Typography
+                        variant="h3"
+                        sx={{
+                            fontWeight: "medium",
+                            pt: "12px",
+                            mb: "1rem",
                         }}
                     >
                         {otp}
-                    </p>
+                    </Typography>
                 </div>
                 <div style={{ flex: 1 }} />
                 <div
@@ -296,30 +295,15 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                         marginBottom: "1rem",
                     }}
                 >
-                    <p
-                        style={{
-                            fontWeight: "bold",
-                            marginBottom: "0px",
-                            fontSize: "10px",
-                            marginTop: "auto",
-                            textAlign: "right",
-                            color: "grey",
-                        }}
-                    >
+                    <Typography variant="mini" sx={{ color: "text.faint" }}>
                         {t("auth_next")}
-                    </p>
-                    <p
-                        style={{
-                            fontSize: "14px",
-                            fontWeight: "bold",
-                            marginBottom: "0px",
-                            marginTop: "auto",
-                            textAlign: "right",
-                            color: "grey",
-                        }}
+                    </Typography>
+                    <Typography
+                        variant="small"
+                        sx={{ fontWeight: "medium", color: "text.muted" }}
                     >
                         {nextOTP}
-                    </p>
+                    </Typography>
                 </div>
             </div>
         </div>
