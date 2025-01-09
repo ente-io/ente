@@ -421,7 +421,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
     state,
     action,
 ) => {
-    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) console.log("dispatch", action);
+    if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("dispatch", action);
     switch (action.type) {
         case "mount": {
             const [hiddenCollections, collections] = splitByPredicate(
