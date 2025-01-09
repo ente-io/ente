@@ -187,6 +187,7 @@ dependencies:
   video_compress:
     git:
       url: https://github.com/prateekmedia/VideoCompress-forked.git
+      ref: prateekmedia-patch-1
   video_editor:
     git:
       url: https://github.com/prateekmedia/video_editor.git
