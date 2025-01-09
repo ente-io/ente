@@ -1,8 +1,7 @@
 import { clientPackageName, isDesktop, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
+import { LoadingOverlay } from "@/base/components/LoadingOverlay";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { Overlay } from "@/base/components/mui/Container";
 import { AppNavbar } from "@/base/components/Navbar";
 import {
     genericErrorDialogAttributes,
@@ -152,7 +151,7 @@ export default function App({ Component, pageProps }: AppProps) {
         });
 
         router.events.on("routeChangeComplete", () => {
-            log.debug(() => `Route change took ${Date.now() - t}} ms`);
+            log.debug(() => `Route change took ${Date.now() - t} ms`);
             setLoading(false);
         });
     }, []);
@@ -229,22 +228,8 @@ export default function App({ Component, pageProps }: AppProps) {
                 />
 
                 <AppContext.Provider value={appContext}>
-                    {(loading || !isI18nReady) && (
-                        <Overlay
-                            sx={(theme) => ({
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                zIndex: 2000,
-                                backgroundColor: theme.colors.background.base,
-                            })}
-                        >
-                            <ActivityIndicator />
-                        </Overlay>
-                    )}
-                    {isI18nReady && (
-                        <Component setLoading={setLoading} {...pageProps} />
-                    )}
+                    {(loading || !isI18nReady) && <LoadingOverlay />}
+                    {isI18nReady && <Component {...pageProps} />}
                 </AppContext.Provider>
             </ThemeProvider>
         </>

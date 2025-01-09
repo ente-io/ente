@@ -1,5 +1,5 @@
 import { styled } from "@mui/material";
-export const LoadingOverlay = styled("div")`
+export const GalleryLoadingOverlay = styled("div")`
     left: 0;
     top: 0;
     outline: none;
