@@ -16,6 +16,7 @@ import type { AppProps } from "next/app";
 import React, { useEffect, useMemo, useState } from "react";
 import { AppContext } from "../types/context";
 
+import "@fontsource-variable/inter";
 import "styles/global.css";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
