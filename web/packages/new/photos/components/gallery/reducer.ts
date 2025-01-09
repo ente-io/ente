@@ -1042,6 +1042,18 @@ const deriveCollectionSummaries = (
         files,
     );
 
+    const uncategorizedCollection = collections.find(
+        ({ type }) => type === CollectionType.uncategorized,
+    );
+    if (!uncategorizedCollection) {
+        collectionSummaries.set(DUMMY_UNCATEGORIZED_COLLECTION, {
+            ...pseudoCollectionOptionsForFiles([]),
+            id: DUMMY_UNCATEGORIZED_COLLECTION,
+            type: "uncategorized",
+            name: t("section_uncategorized"),
+        });
+    }
+
     const allSectionFiles = findAllSectionVisibleFiles(
         files,
         archivedCollectionIDs,
@@ -1118,12 +1130,7 @@ const createCollectionSummaries = (
     const filesByCollection = groupFilesByCollectionID(files);
     const coverFiles = findCoverFiles(collections, filesByCollection);
 
-    let hasUncategorizedCollection = false;
     for (const collection of collections) {
-        if (collection.type === CollectionType.uncategorized) {
-            hasUncategorizedCollection = true;
-        }
-
         let type: CollectionSummaryType;
         if (isIncomingShare(collection, user)) {
             if (isIncomingCollabShare(collection, user)) {
@@ -1181,15 +1188,6 @@ const createCollectionSummaries = (
             updationTime: collection.updationTime,
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             order: collection.magicMetadata?.data?.order ?? 0,
-        });
-    }
-
-    if (!hasUncategorizedCollection) {
-        collectionSummaries.set(DUMMY_UNCATEGORIZED_COLLECTION, {
-            ...pseudoCollectionOptionsForFiles([]),
-            id: DUMMY_UNCATEGORIZED_COLLECTION,
-            type: "uncategorized",
-            name: t("section_uncategorized"),
         });
     }
 
