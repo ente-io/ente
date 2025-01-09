@@ -242,31 +242,22 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
             }}
         >
             <CodeValidityBar code={code} />
-            <div
-                style={{
+            <Stack
+                direction="row"
+                sx={{
                     padding: "12px 20px 0px 20px",
-                    display: "flex",
-                    alignItems: "flex-start",
-                    minWidth: "320px",
+                    minWidth: "min(360px, 80svw)",
                     minHeight: "120px",
                     justifyContent: "space-between",
                 }}
             >
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "4px",
-                        alignItems: "flex-start",
-                        minWidth: "200px",
-                    }}
-                >
+                <Stack style={{ gap: "4px", alignItems: "flex-start" }}>
                     <Typography variant="small">{code.issuer}</Typography>
                     <Typography
                         variant="mini"
                         sx={{
                             color: "text.faint",
-                            maxWidth: "200px",
+                            flex: 1,
                             minHeight: "16px",
                         }}
                     >
@@ -276,23 +267,19 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                         variant="h3"
                         sx={{
                             fontWeight: "medium",
-                            pt: "12px",
-                            mb: "1rem",
+                            mb: "20px",
                         }}
                     >
                         {otp}
                     </Typography>
-                </div>
-                <div style={{ flex: 1 }} />
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "column",
+                </Stack>
+                <Stack
+                    sx={{
+                        justifyContent: "flex-end",
                         alignItems: "flex-end",
-                        minWidth: "120px",
                         textAlign: "right",
-                        marginTop: "auto",
-                        marginBottom: "1rem",
+                        mb: "1rem",
+                        gap: "2px",
                     }}
                 >
                     <Typography variant="mini" sx={{ color: "text.faint" }}>
@@ -304,8 +291,8 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                     >
                         {nextOTP}
                     </Typography>
-                </div>
-            </div>
+                </Stack>
+            </Stack>
         </div>
     );
 };
