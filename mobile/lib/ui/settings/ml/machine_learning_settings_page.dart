@@ -468,6 +468,7 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
                   machineLearningController.isDeviceHealthy;
               final int indexedFiles = snapshot.data!.indexedItems;
               final int pendingFiles = snapshot.data!.pendingItems;
+              final int total = indexedFiles + pendingFiles;
               final bool hasWifi = snapshot.data!.hasWifiEnabled!;
 
               if (!isDeviceHealthy && pendingFiles > 0) {
@@ -479,24 +480,15 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
               return Column(
                 children: [
                   MenuItemWidget(
-                    captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).indexedItems,
+                    captionedTextWidget: const CaptionedTextWidget(
+                      title: 'Processed',
                     ),
                     trailingWidget: Text(
-                      NumberFormat().format(indexedFiles),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    singleBorderRadius: 8,
-                    alignCaptionedTextToLeft: true,
-                    isGestureDetectorDisabled: true,
-                    key: ValueKey("indexed_items_" + indexedFiles.toString()),
-                  ),
-                  MenuItemWidget(
-                    captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).pendingItems,
-                    ),
-                    trailingWidget: Text(
-                      NumberFormat().format(pendingFiles),
+                      total < 1
+                          ? 'NA'
+                          : indexedFiles * 100 ~/ total > 100
+                              ? '100%'
+                              : '${(indexedFiles * 100.0 / total * 1.0).toStringAsFixed(2)}%',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     singleBorderRadius: 8,
