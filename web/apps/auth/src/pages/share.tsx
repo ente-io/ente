@@ -1,5 +1,6 @@
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { decryptMetadataJSON_New } from "@/base/crypto";
+import { Box, Stack, Typography } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 
 interface SharedCode {
@@ -95,34 +96,29 @@ const Page: React.FC = () => {
         [codeDisplay.progress],
     );
 
-    const Message: React.FC<{ text: string }> = ({ text }) => (
-        <p style={{ textAlign: "center", fontSize: "24px" }}>{text}</p>
-    );
-
     return (
-        <div
-            style={{
-                display: "flex",
-                flexDirection: "column",
+        <Stack
+            sx={{
                 justifyContent: "space-between",
                 alignItems: "center",
                 height: "100vh",
-                backgroundColor: "#000000",
-                color: "#FFFFFF",
                 padding: "20px",
             }}
         >
             <EnteLogo />
 
-            <div style={{ width: "100%", maxWidth: "300px" }}>
+            <Box style={{ width: "100%", maxWidth: "300px" }}>
                 {error && <p style={{ color: "red" }}>{error}</p>}
                 {timeStatus === -10 && !error && (
-                    <Message text="Decrypting..." />
+                    <Message>{"Decrypting..."}</Message>
                 )}
                 {timeStatus === -1 && (
-                    <Message text="Your or the person who shared the code has out of sync time." />
+                    <Message>
+                        Your or the person who shared the code has out of sync
+                        time.
+                    </Message>
                 )}
-                {timeStatus === 1 && <Message text="The code has expired." />}
+                {timeStatus === 1 && <Message>The code has expired.</Message>}
                 {timeStatus === 0 && (
                     <div
                         style={{
@@ -180,7 +176,7 @@ const Page: React.FC = () => {
                         </div>
                     </div>
                 )}
-            </div>
+            </Box>
 
             <a
                 href="https://ente.io/auth"
@@ -205,7 +201,7 @@ const Page: React.FC = () => {
                     Try Ente Auth
                 </button>
             </a>
-        </div>
+        </Stack>
     );
 };
 
@@ -240,3 +236,9 @@ const parseCodeDisplay = (
 };
 
 const formatCode = (code: string) => code.replace(/(.{3})/g, "$1 ").trim();
+
+const Message: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <Typography variant="h4" style={{ textAlign: "center" }}>
+        {children}
+    </Typography>
+);
