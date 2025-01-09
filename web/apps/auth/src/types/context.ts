@@ -1,5 +1,5 @@
 import type { AccountsContextT } from "@/accounts/types/context";
-import { THEME_COLOR } from "@ente/shared/themes";
+import { THEME_COLOR } from "@/base/components/utils/theme";
 import { createContext, useContext } from "react";
 
 /**
