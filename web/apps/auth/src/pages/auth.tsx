@@ -256,33 +256,22 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                     style={{
                         display: "flex",
                         flexDirection: "column",
+                        gap: "4px",
                         alignItems: "flex-start",
                         minWidth: "200px",
                     }}
                 >
-                    <p
-                        style={{
-                            fontWeight: "bold",
-                            margin: "0px",
-                            fontSize: "14px",
-                            textAlign: "left",
-                        }}
-                    >
-                        {code.issuer}
-                    </p>
-                    <p
-                        style={{
-                            marginTop: "0px",
-                            marginBottom: "8px",
-                            textAlign: "left",
-                            fontSize: "12px",
+                    <Typography variant="small">{code.issuer}</Typography>
+                    <Typography
+                        variant="mini"
+                        sx={{
+                            color: "text.faint",
                             maxWidth: "200px",
                             minHeight: "16px",
-                            color: "grey",
                         }}
                     >
                         {code.account ?? ""}
-                    </p>
+                    </Typography>
                     <p
                         style={{
                             margin: "0px",
