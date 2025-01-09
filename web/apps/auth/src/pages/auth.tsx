@@ -226,11 +226,11 @@ interface OTPDisplayProps {
 const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
     return (
         <Box
-            sx={{
-                backgroundColor: "rgba(40, 40, 40, 0.6)",
+            sx={(theme) => ({
+                backgroundColor: theme.palette.background.paper,
                 borderRadius: "4px",
                 overflow: "hidden",
-            }}
+            })}
         >
             <CodeValidityBar code={code} />
             <Stack
