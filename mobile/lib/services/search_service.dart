@@ -902,10 +902,26 @@ class SearchService {
         final String clusterName = clusterId;
 
         if (clusterIDToPersonID[clusterId] != null) {
-          // This should not happen, means a clusterID is assigned to a personID of a person that no longer exists
-          _logger.severe(
-            "`getAllFace`: Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}",
-          );
+          final String personID = clusterIDToPersonID[clusterId]!;
+          final PersonEntity? p = personIdToPerson[personID];
+          if (p != null) {
+            // This should not be possible since it should be handled in the above loop, logging just in case
+            _logger.severe(
+              "`getAllFace`: Something unexpected happened, Cluster $clusterId should not have person id $personID",
+              Exception('Some unexpected error occurred in getAllFace wrt cluster to person mapping'),
+            );
+          } else {
+            // This should not happen, means a clusterID is still assigned to a personID of a person that no longer exists
+            // Logging the error and deleting the clusterID to personID mapping
+            _logger.severe(
+              "`getAllFace`: Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}, deleting the mapping",
+              Exception('ClusterID assigned to a person that no longer exists'),
+            );
+            await MLDataDB.instance.removeClusterToPerson(
+              personID: personID,
+              clusterID: clusterId,
+            );
+          }
         }
         if (files.length < minClusterSize) continue;
         facesResult.add(

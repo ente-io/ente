@@ -84,7 +84,7 @@ class PersonService {
     for (var personID in dbPersonClusterInfo.keys) {
       final person = persons[personID];
       if (person == null) {
-        logger.warning("Person $personID not found");
+        logger.severe("Person $personID not found");
         continue;
       }
       final personData = person.data;

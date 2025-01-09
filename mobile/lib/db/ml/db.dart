@@ -592,14 +592,24 @@ class MLDataDB {
     final db = await instance.asyncDB;
 
     await db.writeTransaction((tx) async {
-      await tx.execute(
-        'DELETE FROM $clusterPersonTable WHERE $personIdColumn = ?',
-        [personID],
-      );
-      await tx.execute(
-        'DELETE FROM $notPersonFeedback WHERE $personIdColumn = ?',
-        [personID],
-      );
+      try {
+        await tx.execute(
+          'DELETE FROM $clusterPersonTable WHERE $personIdColumn = ?',
+          [personID],
+        );
+      } catch (e) {
+        _logger.severe('Error in the first write of removePerson', e);
+        rethrow;
+      }
+      try {
+        await tx.execute(
+          'DELETE FROM $notPersonFeedback WHERE $personIdColumn = ?',
+          [personID],
+        );
+      } catch (e) {
+        _logger.severe('Error in the second write of removePerson', e);
+        rethrow;
+      }
     });
   }
 
