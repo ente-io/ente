@@ -47,7 +47,7 @@ import {
 } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { THEME_COLOR } from "@ente/shared/themes/constants";
+import { THEME_COLOR } from "@ente/shared/themes";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
 import CloseIcon from "@mui/icons-material/Close";

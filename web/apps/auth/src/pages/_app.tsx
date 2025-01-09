@@ -18,8 +18,7 @@ import {
     getData,
     migrateKVToken,
 } from "@ente/shared/storage/localStorage";
-import { getTheme } from "@ente/shared/themes";
-import { THEME_COLOR } from "@ente/shared/themes/constants";
+import { THEME_COLOR, getTheme } from "@ente/shared/themes";
 import type { User } from "@ente/shared/user/types";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
