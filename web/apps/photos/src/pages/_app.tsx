@@ -48,8 +48,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
-import "styles/global.css";
 import { NotificationAttributes } from "types/Notification";
+
+import "@fontsource-variable/inter"; /* Inter Variable, supports weights 100-900 */
+import "styles/global.css";
 
 export default function App({ Component, pageProps }: AppProps) {
     const router = useRouter();
