@@ -121,7 +121,7 @@ const Page: React.FC = () => {
                     <Box sx={{ marginBottom: "1rem" }}>
                         <Typography>{t("passkeys_description")}</Typography>
                     </Box>
-                    <FormPaper style={{ padding: "1rem" }}>
+                    <FormPaper sx={{ p: "1rem" }}>
                         <SingleInputForm
                             fieldType="text"
                             placeholder={t("enter_passkey_name")}
