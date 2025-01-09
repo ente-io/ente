@@ -132,7 +132,10 @@ export default function App({ Component, pageProps }: AppProps) {
         if (needsFamilyRedirect && getData(LS_KEYS.USER)?.token)
             redirectToFamilyPortal();
 
+        // TODO: Remove me after instrumenting for a bit.
+        let t = Date.now();
         router.events.on("routeChangeStart", (url: string) => {
+            t = Date.now();
             const newPathname = url.split("?")[0];
             if (window.location.pathname !== newPathname) {
                 setLoading(true);
@@ -148,6 +151,7 @@ export default function App({ Component, pageProps }: AppProps) {
         });
 
         router.events.on("routeChangeComplete", () => {
+            log.debug(() => `Route change took ${Date.now() - t}} ms`);
             setLoading(false);
         });
     }, []);
