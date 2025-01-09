@@ -7,8 +7,8 @@ import {
     genericErrorDialogAttributes,
     useAttributedMiniDialog,
 } from "@/base/components/utils/dialog";
+import { useSetupI18n } from "@/base/components/utils/hooks-i18n";
 import { THEME_COLOR, getTheme } from "@/base/components/utils/theme";
-import { setupI18n } from "@/base/i18n";
 import log from "@/base/log";
 import {
     logStartupBanner,
@@ -53,7 +53,6 @@ import "styles/global.css";
 
 export default function App({ Component, pageProps }: AppProps) {
     const router = useRouter();
-    const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
     const [showNavbar, setShowNavBar] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
@@ -64,6 +63,7 @@ export default function App({ Component, pageProps }: AppProps) {
         useState<NotificationAttributes>(null);
 
     const isOffline = useIsOffline();
+    const isI18nReady = useSetupI18n();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
     const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
     const [themeColor, setThemeColor] = useLocalState(
@@ -72,7 +72,6 @@ export default function App({ Component, pageProps }: AppProps) {
     );
 
     useEffect(() => {
-        void setupI18n().finally(() => setIsI18nReady(true));
         const user = getData(LS_KEYS.USER) as User | undefined | null;
         void migrateKVToken(user);
         logStartupBanner(user?.id);
