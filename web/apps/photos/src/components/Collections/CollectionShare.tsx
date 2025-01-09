@@ -1891,10 +1891,7 @@ function PublicLinkSetPassword({
             fullWidth
         >
             <Stack sx={{ gap: 3, p: 1.5 }}>
-                <Typography
-                    variant="h3"
-                    sx={{ fontWeight: "medium", px: 1, py: 0.5 }}
-                >
+                <Typography variant="h3" sx={{ px: 1, py: 0.5 }}>
                     {t("password_lock")}
                 </Typography>
                 <SingleInputForm

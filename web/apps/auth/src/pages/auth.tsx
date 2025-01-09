@@ -255,21 +255,11 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                     <Typography variant="small">{code.issuer}</Typography>
                     <Typography
                         variant="mini"
-                        sx={{
-                            color: "text.faint",
-                            flex: 1,
-                            minHeight: "16px",
-                        }}
+                        sx={{ color: "text.faint", flex: 1, minHeight: "16px" }}
                     >
                         {code.account ?? ""}
                     </Typography>
-                    <Typography
-                        variant="h3"
-                        sx={{
-                            fontWeight: "medium",
-                            mb: "20px",
-                        }}
-                    >
+                    <Typography variant="h3" sx={{ mb: "20px" }}>
                         {otp}
                     </Typography>
                 </Stack>

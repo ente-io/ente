@@ -349,9 +349,7 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
         <Dialog {...{ open, onClose, fullScreen }} maxWidth="xs" fullWidth>
             <SpaceBetweenFlex sx={{ p: "20px 8px 12px 16px" }}>
                 <Stack>
-                    <Typography variant="h3" sx={{ fontWeight: "medium" }}>
-                        {t("subscription")}
-                    </Typography>
+                    <Typography variant="h3">{t("subscription")}</Typography>
                     <Typography sx={{ color: "text.muted" }}>
                         {t("family_plan")}
                     </Typography>

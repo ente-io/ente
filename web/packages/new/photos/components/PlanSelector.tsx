@@ -309,9 +309,7 @@ const FreeSubscriptionPlanSelectorCard: React.FC<
     children,
 }) => (
     <>
-        <Typography variant="h3" sx={{ fontWeight: "medium" }}>
-            {t("choose_plan")}
-        </Typography>
+        <Typography variant="h3">{t("choose_plan")}</Typography>
         <Box>
             <Stack spacing={3}>
                 <Box>
@@ -365,7 +363,7 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
         <Box sx={{ pl: 1.5, py: 0.5 }}>
             <SpaceBetweenFlex>
                 <Box>
-                    <Typography variant="h3" sx={{ fontWeight: "medium" }}>
+                    <Typography variant="h5" sx={{ fontWeight: "medium" }}>
                         {t("subscription")}
                     </Typography>
                     <Typography variant="small" sx={{ color: "text.muted" }}>
@@ -538,7 +536,10 @@ const PlanRow: React.FC<PlanRowProps> = ({ plan, onPlanSelect, disabled }) => {
         <PlanRowContainer>
             <PlanStorage>
                 <Typography variant="h1">{bytesInGB(plan.storage)}</Typography>
-                <Typography variant="h3" sx={{ color: "text.muted" }}>
+                <Typography
+                    variant="h3"
+                    sx={{ fontWeight: "regular", color: "text.muted" }}
+                >
                     {t("storage_unit.gb")}
                 </Typography>
             </PlanStorage>

@@ -168,9 +168,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             PaperProps={{ sx: { maxWidth: "490px" } }}
         >
             <SpaceBetweenFlex sx={{ padding: "10px 8px 6px 0" }}>
-                <DialogTitle variant="h3" fontWeight={"medium"}>
-                    {titleForAction(action)}
-                </DialogTitle>
+                <DialogTitle variant="h3">{titleForAction(action)}</DialogTitle>
                 <DialogCloseIconButton onClose={handleClose} />
             </SpaceBetweenFlex>
 

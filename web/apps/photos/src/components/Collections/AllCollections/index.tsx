@@ -108,7 +108,7 @@ const AllCollectionsHeader = ({
         <FlexWrapper>
             <FluidContainer mr={1.5}>
                 <Box>
-                    <Typography variant="h3">
+                    <Typography variant="h5">
                         {isInHiddenSection
                             ? t("all_hidden_albums")
                             : t("all_albums")}

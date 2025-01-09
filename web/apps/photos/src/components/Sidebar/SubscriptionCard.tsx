@@ -149,28 +149,20 @@ const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
                 {t("storage")}
             </Typography>
             <DefaultBox>
-                <StorageSectionSpan>
+                <Typography variant="h3">
                     {`${formattedStorageByteSize(usage, { round: true })} ${t(
                         "of",
                     )} ${formattedStorageByteSize(storage)} ${t("used")}`}
-                </StorageSectionSpan>
+                </Typography>
             </DefaultBox>
             <MobileSmallBox>
-                <StorageSectionSpan>
+                <Typography variant="h3">
                     {`${bytesInGB(usage)} /  ${bytesInGB(storage)} ${t("storage_unit.gb")} ${t("used")}`}
-                </StorageSectionSpan>
+                </Typography>
             </MobileSmallBox>
         </Box>
     );
 };
-
-const StorageSectionSpan: React.FC<React.PropsWithChildren> = ({
-    children,
-}) => (
-    <Typography variant="h3" component="span" sx={{ fontWeight: "medium" }}>
-        {children}
-    </Typography>
-);
 
 interface IndividualUsageSectionProps {
     usage: number;

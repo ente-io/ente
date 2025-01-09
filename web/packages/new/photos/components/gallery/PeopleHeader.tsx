@@ -356,9 +356,7 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
                 PaperProps={{ sx: { maxWidth: "490px" } }}
             >
                 <SpaceBetweenFlex sx={{ padding: "10px 8px 6px 0" }}>
-                    <DialogTitle variant="h3" fontWeight={"medium"}>
-                        {t("add_name")}
-                    </DialogTitle>
+                    <DialogTitle variant="h3">{t("add_name")}</DialogTitle>
                     <DialogCloseIconButton {...{ onClose }} />
                 </SpaceBetweenFlex>
                 <DialogContent_>

@@ -345,7 +345,7 @@ const typography: TypographyOptions = {
     h3: {
         fontSize: "24px",
         lineHeight: "29px",
-        fontWeight: 500 /* Reset to regular to override MUI's default theme */,
+        fontWeight: 600 /* medium */,
     },
     h4: {
         fontSize: "22px",
