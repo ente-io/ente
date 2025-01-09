@@ -14,13 +14,13 @@ import { VerticallyCentered } from "@ente/shared/components/Container";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import {
+    Box,
     Button,
     ButtonBase,
     Snackbar,
     Stack,
     TextField,
     Typography,
-    styled,
 } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -75,19 +75,17 @@ const Page: React.FC = () => {
     }
 
     return (
-        <>
+        <Stack>
             <AuthNavbar />
-            <div
-                style={{
+            <Stack
+                sx={{
                     maxWidth: "800px",
-                    display: "flex",
-                    flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
                     margin: "0 auto",
+                    mt: 1,
                 }}
             >
-                <div style={{ marginBottom: "1rem" }} />
                 {filteredCodes.length == 0 && searchTerm.length == 0 ? (
                     <></>
                 ) : (
@@ -97,30 +95,23 @@ const Page: React.FC = () => {
                         label={t("search")}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         variant="filled"
-                        style={{ width: "350px" }}
+                        sx={{ minWidth: "min(340px, 80svw)" }}
                         value={searchTerm}
                         autoFocus
                     />
                 )}
 
-                <div style={{ marginBottom: "1rem" }} />
-                <div
-                    style={{
+                <Box
+                    sx={{
                         display: "flex",
                         flexDirection: "row",
                         flexWrap: "wrap",
                         justifyContent: "center",
+                        mt: 3,
                     }}
                 >
                     {filteredCodes.length == 0 ? (
-                        <div
-                            style={{
-                                alignItems: "center",
-                                display: "flex",
-                                textAlign: "center",
-                                marginTop: "32px",
-                            }}
-                        >
+                        <Box sx={{ textAlign: "center", mt: 4 }}>
                             {searchTerm.length > 0 ? (
                                 <Typography>{t("no_results")}</Typography>
                             ) : (
@@ -128,16 +119,16 @@ const Page: React.FC = () => {
                                     {t("no_codes_added_yet")}
                                 </Typography>
                             )}
-                        </div>
+                        </Box>
                     ) : (
                         filteredCodes.map((code) => (
                             <CodeDisplay key={code.id} code={code} />
                         ))
                     )}
-                </div>
+                </Box>
                 <Footer />
-            </div>
-        </>
+            </Stack>
+        </Stack>
     );
 };
 
@@ -213,7 +204,7 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
     }, [code, regen]);
 
     return (
-        <div style={{ padding: "8px" }}>
+        <Box sx={{ p: 1 }}>
             {errorMessage ? (
                 <UnparseableCode {...{ code, errorMessage }} />
             ) : (
@@ -222,7 +213,7 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
                     <Snackbar open={hasCopied} message={t("copied")} />
                 </ButtonBase>
             )}
-        </div>
+        </Box>
     );
 };
 
@@ -234,8 +225,8 @@ interface OTPDisplayProps {
 
 const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
     return (
-        <div
-            style={{
+        <Box
+            sx={{
                 backgroundColor: "rgba(40, 40, 40, 0.6)",
                 borderRadius: "4px",
                 overflow: "hidden",
@@ -283,7 +274,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                     </Typography>
                 </Stack>
             </Stack>
-        </div>
+        </Box>
     );
 };
 
@@ -312,7 +303,6 @@ const CodeValidityBar: React.FC<CodeValidityBarProps> = ({ code }) => {
     return (
         <div
             style={{
-                borderTopLeftRadius: "3px",
                 width: `${progress * 100}%`,
                 height: "3px",
                 backgroundColor: color,
@@ -351,7 +341,7 @@ const UnparseableCode: React.FC<UnparseableCodeProps> = ({
 
 const Footer: React.FC = () => {
     return (
-        <Footer_>
+        <Stack sx={{ my: "4rem", gap: 2, alignItems: "center" }}>
             <Typography>{t("auth_download_mobile_app")}</Typography>
             <a
                 href="https://github.com/ente-io/ente/tree/main/auth#-download"
@@ -359,15 +349,6 @@ const Footer: React.FC = () => {
             >
                 <Button color="accent">{t("download")}</Button>
             </a>
-        </Footer_>
+        </Stack>
     );
 };
-
-const Footer_ = styled("div")`
-    margin-block: 4rem;
-    display: flex;
-    gap: 1rem;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-`;
