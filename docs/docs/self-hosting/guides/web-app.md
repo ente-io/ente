@@ -212,10 +212,10 @@ pm2 logs all
 > and etc. Please check the below documentation to update your setup configurations
 
 You can configure the web endpoints for the other apps including Accounts, Albums
-Family and Cast in your `museum.yaml`` configuration file. Checkout 
+Family and Cast in your `museum.yaml` configuration file. Checkout 
 [`local.yaml`](https://github.com/ente-io/ente/blob/543411254b2bb55bd00a0e515dcafa12d12d3b35/server/configurations/local.yaml#L76-L89)
 to configure the endpoints. Make sure to setup up your DNS Records accordingly to the 
-similar URL's you set up in `museum.yaml``
+similar URL's you set up in `museum.yaml`.
 
 Next part is to configure the web server.
 
