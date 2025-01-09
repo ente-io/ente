@@ -174,7 +174,8 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
         }
       }
       _logger.info(
-          'Chececking index for ${filesOwnedByOthers.length} owned by others');
+        'Chececking index for ${filesOwnedByOthers.length} owned by others',
+      );
       return [...splitResult.matched, ...filesOwnedByOthers];
     }
     return splitResult.matched;
