@@ -142,6 +142,11 @@ with Next.js.
 
 For more details, see [translations.md](translations.md).
 
+### Font
+
+The app uses Inter as its primary font, via
+[@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
+
 ### UI components
 
 - [react-window](https://github.com/bvaughn/react-window) is used for lazy-ily
