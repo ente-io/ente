@@ -345,12 +345,12 @@ const UnparseableCode: React.FC<UnparseableCodeProps> = ({
             <Typography variant="small">{code.issuer}</Typography>
             <Typography
                 variant="small"
-                sx={(theme) => ({
-                    color: theme.palette.critical.main,
+                sx={{
+                    color: "critical.main",
                     flex: 1,
                     minHeight: "16px",
                     mb: 2,
-                })}
+                }}
             >
                 {errorMessage}
             </Typography>

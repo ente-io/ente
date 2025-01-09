@@ -1,6 +1,6 @@
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { decryptMetadataJSON_New } from "@/base/crypto";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 
 interface SharedCode {
@@ -107,8 +107,14 @@ const Page: React.FC = () => {
         >
             <EnteLogo />
 
-            <Box style={{ width: "100%", maxWidth: "300px" }}>
-                {error && <p style={{ color: "red" }}>{error}</p>}
+            <Box sx={{ width: "min(100%, 300px)" }}>
+                {error && (
+                    <Typography
+                        sx={{ textAlign: "center", color: "critical.main" }}
+                    >
+                        {error}
+                    </Typography>
+                )}
                 {timeStatus === -10 && !error && (
                     <Message>{"Decrypting..."}</Message>
                 )}
@@ -178,29 +184,19 @@ const Page: React.FC = () => {
                 )}
             </Box>
 
-            <a
+            <Button
+                color="accent"
+                sx={{
+                    backgroundColor: "#8E2DE2",
+                    borderRadius: "25px",
+                    padding: "15px 30px",
+                    marginBottom: "42px",
+                }}
                 href="https://ente.io/auth"
                 target="_blank"
-                rel="noopener noreferrer"
             >
-                <button
-                    style={{
-                        backgroundColor: "#8E2DE2",
-                        color: "#FFFFFF",
-                        border: "none",
-                        borderRadius: "25px",
-                        padding: "15px 30px",
-                        fontSize: "16px",
-                        fontWeight: "bold",
-                        cursor: "pointer",
-                        width: "100%",
-                        maxWidth: "300px",
-                        marginBottom: "42px",
-                    }}
-                >
-                    Try Ente Auth
-                </button>
-            </a>
+                Try Ente Auth
+            </Button>
         </Stack>
     );
 };
