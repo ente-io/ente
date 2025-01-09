@@ -189,7 +189,7 @@ const ChangeEmailForm: React.FC = () => {
                         sx={[
                             ottInputVisible
                                 ? { justifyContent: "space-between" }
-                                : { justifyContent: "normal" },
+                                : { justifyContent: "center" },
                         ]}
                     >
                         {ottInputVisible && (
