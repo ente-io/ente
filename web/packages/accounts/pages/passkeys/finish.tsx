@@ -1,6 +1,5 @@
 import { PAGES } from "@/accounts/constants/pages";
 import { unstashRedirect } from "@/accounts/services/redirect";
-import type { PageProps } from "@/accounts/types/page";
 import { LoadingIndicator } from "@/base/components/loaders";
 import { fromB64URLSafeNoPaddingString } from "@/base/crypto/libsodium";
 import log from "@/base/log";
@@ -21,7 +20,7 @@ import React, { useEffect } from "react";
  * invoked the passkey flow since it needs to save the obtained credentials
  * in local storage (which is tied to the current origin).
  */
-const Page: React.FC<PageProps> = () => {
+const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {

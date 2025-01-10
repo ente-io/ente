@@ -18,9 +18,8 @@ import { Trans } from "react-i18next";
 import * as Yup from "yup";
 import { appHomeRoute } from "../services/redirect";
 import { changeEmail, sendOTT } from "../services/user";
-import type { PageProps } from "../types/page";
 
-const Page: React.FC<PageProps> = () => {
+const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {

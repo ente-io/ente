@@ -5,7 +5,6 @@ import {
 import { appHomeRoute } from "@/accounts/services/redirect";
 import type { TwoFactorSecret } from "@/accounts/services/user";
 import { enableTwoFactor, setupTwoFactor } from "@/accounts/services/user";
-import type { PageProps } from "@/accounts/types/page";
 import { CenteredFill } from "@/base/components/containers";
 import log from "@/base/log";
 import LinkButton from "@ente/shared/components/LinkButton";
@@ -19,7 +18,7 @@ import { TwoFactorSetup } from "../../components/two-factor/TwoFactorSetup";
 
 export type SetupMode = "qrCode" | "manualCode";
 
-const Page: React.FC<PageProps> = () => {
+const Page: React.FC = () => {
     const [twoFactorSecret, setTwoFactorSecret] = useState<
         TwoFactorSecret | undefined
     >();
