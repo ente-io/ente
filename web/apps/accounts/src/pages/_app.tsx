@@ -2,7 +2,6 @@ import { staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
 import { LoadingOverlay } from "@/base/components/LoadingOverlay";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
-import { AppNavbar } from "@/base/components/Navbar";
 import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
 import { useSetupI18n } from "@/base/components/utils/hooks-i18n";
 import { getTheme, THEME_COLOR } from "@/base/components/utils/theme";
@@ -13,14 +12,12 @@ import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { AppContext } from "../types/context";
 
 import "styles/global.css";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
-    const [showNavbar, setShowNavbar] = useState(false);
-
     const isI18nReady = useSetupI18n();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
 
@@ -32,7 +29,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     const appContext = useMemo(
         () => ({
-            showNavBar: setShowNavbar,
             showMiniDialog,
         }),
         [showMiniDialog],
@@ -50,7 +46,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
                 <AppContext.Provider value={appContext}>
                     {!isI18nReady && <LoadingOverlay />}
-                    {showNavbar && <AppNavbar />}
                     {isI18nReady && <Component {...pageProps} />}
                 </AppContext.Provider>
             </ThemeProvider>

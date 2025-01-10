@@ -1,6 +1,7 @@
 import { FormPaper } from "@/base/components/FormPaper";
 import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
+import { AppNavbar } from "@/base/components/Navbar";
 import { SingleInputDialog } from "@/base/components/SingleInputDialog";
 import { Titlebar } from "@/base/components/Titlebar";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
@@ -28,7 +29,7 @@ import {
 import { useAppContext } from "../../types/context";
 
 const Page: React.FC = () => {
-    const { showNavBar, showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useAppContext();
 
     const [token, setToken] = useState<string | undefined>();
     const [passkeys, setPasskeys] = useState<Passkey[]>([]);
@@ -42,8 +43,6 @@ const Page: React.FC = () => {
     }, [showMiniDialog]);
 
     useEffect(() => {
-        showNavBar(true);
-
         const urlParams = new URLSearchParams(window.location.search);
 
         const token = urlParams.get("token");
@@ -53,7 +52,7 @@ const Page: React.FC = () => {
             log.error("Missing accounts token");
             showPasskeyFetchFailedErrorDialog();
         }
-    }, [showNavBar, showPasskeyFetchFailedErrorDialog]);
+    }, [showPasskeyFetchFailedErrorDialog]);
 
     const refreshPasskeys = useCallback(async () => {
         try {
@@ -116,6 +115,7 @@ const Page: React.FC = () => {
 
     return (
         <>
+            <AppNavbar />
             <CenteredFlex>
                 <Box sx={{ maxWidth: "20rem" }}>
                     <Box sx={{ marginBottom: "1rem" }}>

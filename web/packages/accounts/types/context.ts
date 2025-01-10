@@ -10,10 +10,6 @@ export interface AccountsContextT {
      */
     logout: () => void;
     /**
-     * Show or hide the app's navigation bar.
-     */
-    showNavBar: (show: boolean) => void;
-    /**
      * Show a "mini dialog" with the given attributes.
      *
      * Mini dialogs (see {@link AttributedMiniDialog}) are meant for simple
