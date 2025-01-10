@@ -5,12 +5,9 @@ import { LoadingOverlay } from "@/base/components/LoadingOverlay";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { AppNavbar } from "@/base/components/Navbar";
 import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
-import { useSetupI18n } from "@/base/components/utils/hooks-i18n";
+import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
 import { THEME_COLOR, getTheme } from "@/base/components/utils/theme";
-import {
-    logStartupBanner,
-    logUnhandledErrorsAndRejections,
-} from "@/base/log-web";
+import { logStartupBanner } from "@/base/log-web";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
@@ -31,6 +28,8 @@ import { AppContext } from "types/context";
 import "styles/global.css";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
+    useSetupLogs();
+
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [showNavbar, setShowNavBar] = useState(false);
@@ -47,8 +46,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         void migrateKVToken(user);
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
-        logUnhandledErrorsAndRejections(true);
-        return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
     useEffect(() => {

@@ -7,13 +7,10 @@ import {
     genericErrorDialogAttributes,
     useAttributedMiniDialog,
 } from "@/base/components/utils/dialog";
-import { useSetupI18n } from "@/base/components/utils/hooks-i18n";
+import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
 import { THEME_COLOR, getTheme } from "@/base/components/utils/theme";
 import log from "@/base/log";
-import {
-    logStartupBanner,
-    logUnhandledErrorsAndRejections,
-} from "@/base/log-web";
+import { logStartupBanner } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
 import {
     updateAvailableForDownloadDialogAttributes,
@@ -52,6 +49,8 @@ import { NotificationAttributes } from "types/Notification";
 import "styles/global.css";
 
 export default function App({ Component, pageProps }: AppProps) {
+    useSetupLogs();
+
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [showNavbar, setShowNavBar] = useState(false);
@@ -76,9 +75,7 @@ export default function App({ Component, pageProps }: AppProps) {
         void migrateKVToken(user);
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
-        logUnhandledErrorsAndRejections(true);
         void runMigrations();
-        return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
     useEffect(() => {
