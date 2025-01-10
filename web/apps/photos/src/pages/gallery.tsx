@@ -27,6 +27,7 @@ import {
     useGalleryReducer,
     type GalleryBarMode,
 } from "@/new/photos/components/gallery/reducer";
+import { useIsOffline } from "@/new/photos/components/utils/use-is-offline";
 import { usePeopleStateSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import {
@@ -183,6 +184,7 @@ const Page: React.FC = () => {
         logout,
     } = useAppContext();
 
+    const isOffline = useIsOffline();
     const [state, dispatch] = useGalleryReducer();
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
@@ -965,6 +967,7 @@ const Page: React.FC = () => {
                         />
                     )}
                 </NavbarBase>
+                {isOffline && <OfflineMessage />}
 
                 <GalleryBarAndListHeader
                     {...{
@@ -1133,6 +1136,15 @@ const Page: React.FC = () => {
 };
 
 export default Page;
+
+const OfflineMessage: React.FC = () => (
+    <Typography
+        variant="small"
+        sx={{ bgcolor: "background.paper", p: 2, mb: 1, textAlign: "center" }}
+    >
+        {t("offline_message")}
+    </Typography>
+);
 
 /**
  * Preload all three variants of a responsive image.

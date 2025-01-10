@@ -5,13 +5,13 @@ import type { MiniDialogAttributes } from "../MiniDialog";
 
 /**
  * A React hook for simplifying the provisioning of a {@link showMiniDialog}
- * function to inject in app contexts, and the other props that are needed for
- * to pass on to the {@link AttributedMiniDialog}.
+ * function to inject in app contexts, and of the other props that are needed to
+ * be passed to the {@link AttributedMiniDialog}.
  */
 export const useAttributedMiniDialog = () => {
     const [attributes, setAttributes] = useState<
         MiniDialogAttributes | undefined
-    >();
+    >(undefined);
 
     const [open, setOpen] = useState(false);
 
@@ -20,15 +20,11 @@ export const useAttributedMiniDialog = () => {
         setOpen(true);
     }, []);
 
-    const onCloseMiniDialog = useCallback(() => setOpen(false), []);
+    const handleClose = useCallback(() => setOpen(false), []);
 
     return {
         showMiniDialog,
-        miniDialogProps: {
-            open: open,
-            onClose: onCloseMiniDialog,
-            attributes: attributes,
-        },
+        miniDialogProps: { open, onClose: handleClose, attributes },
     };
 };
 

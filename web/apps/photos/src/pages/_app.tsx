@@ -11,11 +11,11 @@ import { THEME_COLOR, getTheme } from "@/base/components/utils/theme";
 import log from "@/base/log";
 import { logStartupBanner } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
+import { Notification } from "@/new/photos/components/Notification";
 import {
     updateAvailableForDownloadDialogAttributes,
     updateReadyToInstallDialogAttributes,
 } from "@/new/photos/components/utils/download";
-import { useIsOffline } from "@/new/photos/components/utils/use-is-offline";
 import { useLoadingBar } from "@/new/photos/components/utils/use-loading-bar";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import { runMigrations } from "@/new/photos/services/migration";
@@ -32,9 +32,9 @@ import {
 import type { User } from "@ente/shared/user/types";
 import "@fontsource-variable/inter";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { CssBaseline, styled } from "@mui/material";
+import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import Notification from "components/Notification";
+import { useNotification } from "components/utils/hooks-app";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
@@ -43,30 +43,25 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
-import { NotificationAttributes } from "types/Notification";
 
 import "styles/global.css";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
 
-    const router = useRouter();
-    const [loading, setLoading] = useState(false);
-    const [watchFolderView, setWatchFolderView] = useState(false);
-    const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
-    const [notificationView, setNotificationView] = useState(false);
-    const closeNotification = () => setNotificationView(false);
-    const [notificationAttributes, setNotificationAttributes] =
-        useState<NotificationAttributes>(null);
-
-    const isOffline = useIsOffline();
     const isI18nReady = useSetupI18n();
+    const router = useRouter();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
+    const { showNotification, notificationProps } = useNotification();
     const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
         THEME_COLOR.DARK,
     );
+
+    const [loading, setLoading] = useState(false);
+    const [watchFolderView, setWatchFolderView] = useState(false);
+    const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER) as User | undefined | null;
@@ -93,10 +88,10 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             if (update.autoUpdatable) {
                 showMiniDialog(updateReadyToInstallDialogAttributes(update));
             } else {
-                setNotificationAttributes({
+                showNotification({
+                    color: "secondary",
+                    title: t("update_available"),
                     endIcon: <ArrowForwardIcon />,
-                    variant: "secondary",
-                    message: t("update_available"),
                     onClick: () =>
                         showMiniDialog(
                             updateAvailableForDownloadDialogAttributes(update),
@@ -150,10 +145,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         });
     }, []);
 
-    useEffect(() => {
-        setNotificationView(true);
-    }, [notificationAttributes]);
-
     const onGenericError = useCallback((e: unknown) => {
         log.error(e);
         // The generic error handler is sometimes called in the context of
@@ -176,10 +167,10 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             setWatchFolderView,
             watchFolderFiles,
             setWatchFolderFiles,
-            setNotificationAttributes,
             themeColor,
             setThemeColor,
             showMiniDialog,
+            showNotification,
             onGenericError,
             logout,
         }),
@@ -190,6 +181,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             watchFolderFiles,
             themeColor,
             showMiniDialog,
+            showNotification,
             onGenericError,
             logout,
         ],
@@ -203,9 +195,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
             <ThemeProvider theme={getTheme(themeColor, "photos")}>
                 <CssBaseline enableColorScheme />
-                <OfflineMessageContainer>
-                    {isI18nReady && isOffline && t("offline_message")}
-                </OfflineMessageContainer>
                 <LoadingBar color="#51cd7c" ref={loadingBarRef} />
 
                 <AttributedMiniDialog
@@ -213,11 +202,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                     {...miniDialogProps}
                 />
 
-                <Notification
-                    open={notificationView}
-                    onClose={closeNotification}
-                    attributes={notificationAttributes}
-                />
+                <Notification {...notificationProps} />
 
                 <AppContext.Provider value={appContext}>
                     {(loading || !isI18nReady) && <LoadingOverlay />}
@@ -229,14 +214,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 };
 
 export default App;
-
-const OfflineMessageContainer = styled("div")`
-    background-color: #111;
-    padding: 0;
-    font-size: 14px;
-    text-align: center;
-    line-height: 32px;
-`;
 
 const redirectToFamilyPortal = () =>
     void getFamilyPortalRedirectURL().then((url) => {
