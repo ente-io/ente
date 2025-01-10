@@ -1,7 +1,7 @@
 import { useRedirectIfNeedsCredentials } from "@/accounts/components/utils/use-redirect";
+import { CenteredFill } from "@/base/components/containers";
 import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { CenteredFill } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     OverflowMenu,

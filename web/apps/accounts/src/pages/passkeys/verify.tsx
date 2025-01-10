@@ -1,6 +1,6 @@
 import { TwoFactorAuthorizationResponse } from "@/accounts/services/user";
+import { Stack100vhCenter } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { Center100VH } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import log from "@/base/log";
 import { nullToUndefined } from "@/utils/transform";
@@ -255,7 +255,7 @@ const Page = () => {
         redirectingApp: <RedirectingApp onRetry={handleRedirectAgain} />,
     };
 
-    return <Center100VH>{components[status]}</Center100VH>;
+    return <Stack100vhCenter>{components[status]}</Stack100vhCenter>;
 };
 
 export default Page;

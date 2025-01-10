@@ -1,7 +1,7 @@
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import { EnteLogoSVG } from "@/base/components/EnteLogo";
 import { FormPaper, FormPaperTitle } from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import {
     OverflowMenu,

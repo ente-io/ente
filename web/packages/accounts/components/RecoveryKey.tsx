@@ -1,5 +1,5 @@
 import { type MiniDialogAttributes } from "@/base/components/MiniDialog";
-import { SpaceBetweenFlex } from "@/base/components/mui/Container";
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";

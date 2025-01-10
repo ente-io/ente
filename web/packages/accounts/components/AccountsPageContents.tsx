@@ -1,5 +1,5 @@
+import { CenteredFill, Stack100vhCenter } from "@/base/components/containers";
 import { FormPaper } from "@/base/components/FormPaper";
-import { Center100VH } from "@/base/components/mui/Container";
 import { AppNavbar } from "@/base/components/Navbar";
 
 /**
@@ -15,8 +15,10 @@ import { AppNavbar } from "@/base/components/Navbar";
 export const AccountsPageContents: React.FC<React.PropsWithChildren> = ({
     children,
 }) => (
-    <Center100VH>
+    <Stack100vhCenter>
         <AppNavbar />
-        <FormPaper>{children}</FormPaper>
-    </Center100VH>
+        <CenteredFill>
+            <FormPaper>{children}</FormPaper>
+        </CenteredFill>
+    </Stack100vhCenter>
 );

@@ -1,16 +1,11 @@
-import { styled } from "@mui/material";
+import { Stack, styled } from "@mui/material";
 
 /**
- * A flex that takes up the height of the entire viewport, and centers (both
- * vertically and horizontally) its child.
- *
- * This in designed to be used as the root component of a page, and only really
- * expects a single child. If further customization is needed, consider creating
- * a bespoke variant.
+ * A {@link Stack} that takes up the height of the entire viewport, and both
+ * vertically and horizontally centers its children.
  */
-export const Center100VH = styled("div")`
+export const Stack100vhCenter = styled(Stack)`
     height: 100vh;
-    display: flex;
     justify-content: center;
     align-items: center;
 `;

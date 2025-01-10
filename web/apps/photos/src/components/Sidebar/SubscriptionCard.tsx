@@ -1,5 +1,5 @@
+import { Overlay } from "@/base/components/containers";
 import type { ButtonishProps } from "@/base/components/mui";
-import { Overlay } from "@/base/components/mui/Container";
 import type { UserDetails } from "@/new/photos/services/user-details";
 import {
     familyUsage,

@@ -1,5 +1,5 @@
+import { Stack100vhCenter } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { Center100VH } from "@/base/components/mui/Container";
 import { fromB64URLSafeNoPaddingString } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import { nullToUndefined } from "@/utils/transform";
@@ -38,9 +38,9 @@ const Page: React.FC<PageProps> = () => {
     }, []);
 
     return (
-        <Center100VH>
+        <Stack100vhCenter>
             <ActivityIndicator />
-        </Center100VH>
+        </Stack100vhCenter>
     );
 };
 
