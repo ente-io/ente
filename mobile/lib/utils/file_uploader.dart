@@ -113,14 +113,20 @@ class FileUploader {
         .releaseAllLocksAcquiredBefore(currentTime - kSafeBufferForLockExpiry);
     if (!isBackground) {
       await _prefs.reload();
-      final isBGTaskDead = (_prefs.getInt(kLastBGTaskHeartBeatTime) ?? 0) <
-          (currentTime - kBGTaskDeathTimeout);
+      final lastBGTaskHeartBeatTime =
+          _prefs.getInt(kLastBGTaskHeartBeatTime) ?? 0;
+      final isBGTaskDead =
+          lastBGTaskHeartBeatTime < (currentTime - kBGTaskDeathTimeout);
       if (isBGTaskDead) {
         await _uploadLocks.releaseLocksAcquiredByOwnerBefore(
           ProcessType.background.toString(),
           currentTime,
         );
         _logger.info("BG task was found dead, cleared all locks");
+      } else {
+        _logger.info(
+          "BG task is alive, not clearing locks ${DateTime.fromMicrosecondsSinceEpoch(lastBGTaskHeartBeatTime)}",
+        );
       }
       // ignore: unawaited_futures
       _pollBackgroundUploadStatus();
