@@ -1,3 +1,4 @@
+import { isSxArray } from "@/base/components/utils/sx";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
     Box,
@@ -119,7 +120,7 @@ export default function DropdownInput<T extends string>({
                     variant="small"
                     sx={[
                         { px: "8px", color: "text.muted" },
-                        ...(Array.isArray(messageSxProps)
+                        ...(isSxArray(messageSxProps)
                             ? messageSxProps
                             : [messageSxProps]),
                     ]}

@@ -1,7 +1,6 @@
-import { VerticallyCentered } from "@ente/shared/components/Container";
 import {
-    Divider,
     Paper,
+    Stack,
     styled,
     Typography,
     type TypographyProps,
@@ -16,26 +15,31 @@ export const FormPaper = styled(Paper)(({ theme }) => ({
     textAlign: "left",
 }));
 
-export const FormPaperTitle: React.FC<TypographyProps> = ({ sx, ...props }) => {
-    return (
-        <Typography variant="h2" sx={{ mb: 8, ...sx }} {...props}>
-            {props.children}
-        </Typography>
-    );
-};
+export const FormPaperTitle: React.FC<TypographyProps> = ({
+    sx,
+    children,
+    ...rest
+}) => (
+    <Typography
+        variant="h2"
+        sx={{ mb: 8, ...(sx ? (isSxArray(sx) ? sx : [sx]) : []) }}
+        {...rest}
+    >
+        {children}
+    </Typography>
+);
 
-export const FormPaperFooter: React.FC<
-    React.PropsWithChildren<{ sx?: TypographyProps["sx"] }>
-> = ({ sx, children }) => (
-    <>
-        <Divider />
-        <VerticallyCentered
-            sx={[
-                { mt: 3, flexDirection: "row" },
-                ...(sx ? (isSxArray(sx) ? sx : [sx]) : []),
-            ]}
-        >
-            {children}
-        </VerticallyCentered>
-    </>
+export const FormPaperFooter: React.FC<React.PropsWithChildren> = ({
+    children,
+}) => (
+    <Stack
+        direction="row"
+        sx={{
+            mt: 5,
+            textAlign: "center",
+            justifyContent: "space-evenly",
+        }}
+    >
+        {children}
+    </Stack>
 );

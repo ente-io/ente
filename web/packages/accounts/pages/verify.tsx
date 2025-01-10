@@ -221,7 +221,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     return (
         <VerticallyCentered>
             <FormPaper>
-                <FormPaperTitle sx={{ mb: 14, wordBreak: "break-word" }}>
+                <FormPaperTitle sx={{ wordBreak: "break-word" }}>
                     <Trans
                         i18nKey="email_sent"
                         components={{
