@@ -57,14 +57,13 @@ import {
 import { useAppContext } from "../types/context";
 
 const Page: React.FC = () => {
-    const { showNavBar, onGenericError } = useAppContext();
+    const { onGenericError } = useAppContext();
 
     const [state, dispatch] = useReducer(dedupReducer, initialDedupState);
 
     useRedirectIfNeedsCredentials("/duplicates");
 
     useEffect(() => {
-        showNavBar(false);
         dispatch({ type: "analyze" });
         void deduceDuplicates()
             .then((duplicateGroups) =>
@@ -74,7 +73,7 @@ const Page: React.FC = () => {
                 log.error("Failed to detect duplicates", e);
                 dispatch({ type: "analysisFailed" });
             });
-    }, [showNavBar]);
+    }, []);
 
     const handleRemoveDuplicates = useCallback(() => {
         dispatch({ type: "dedupe" });
@@ -122,7 +121,7 @@ const Page: React.FC = () => {
     })();
 
     return (
-        <Stack sx={{ flex: 1 }}>
+        <Stack sx={{ height: "100vh" }}>
             <Navbar
                 sortOrder={state.sortOrder}
                 onChangeSortOrder={(sortOrder) =>
