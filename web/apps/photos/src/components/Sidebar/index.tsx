@@ -503,10 +503,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
         router.push(PAGES.CHANGE_PASSWORD);
     };
 
-    const redirectToChangeEmailPage = () => {
-        closeSidebar();
-        router.push(PAGES.CHANGE_EMAIL);
-    };
+    const handleChangeEmail = () => router.push("/change-email");
 
     const redirectToAccountsPage = async () => {
         closeSidebar();
@@ -567,7 +564,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             />
             <EnteMenuItem
                 variant="secondary"
-                onClick={redirectToChangeEmailPage}
+                onClick={handleChangeEmail}
                 label={t("change_email")}
             />
             <EnteMenuItem
