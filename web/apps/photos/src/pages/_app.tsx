@@ -48,7 +48,7 @@ import { NotificationAttributes } from "types/Notification";
 
 import "styles/global.css";
 
-export default function App({ Component, pageProps }: AppProps) {
+const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
 
     const router = useRouter();
@@ -230,7 +230,9 @@ export default function App({ Component, pageProps }: AppProps) {
             </ThemeProvider>
         </>
     );
-}
+};
+
+export default App;
 
 const OfflineMessageContainer = styled("div")`
     background-color: #111;
