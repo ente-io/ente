@@ -67,7 +67,7 @@ export const AccountsPageFooter: React.FC<React.PropsWithChildren> = ({
             // Put the items to the side,
             justifyContent: "space-between",
             // Unless there is just one, in which case center it.
-            "& :only-child": { "margin-inline": "auto" },
+            "& :only-child": { "marginInline": "auto" },
         }}
     >
         {children}
