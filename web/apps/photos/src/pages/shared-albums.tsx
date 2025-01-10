@@ -1,4 +1,7 @@
-import { SpaceBetweenFlex } from "@/base/components/containers";
+import {
+    SpaceBetweenFlex,
+    Stack100vhCenter,
+} from "@/base/components/containers";
 import { EnteLogoSVG } from "@/base/components/EnteLogo";
 import { FormPaper, FormPaperTitle } from "@/base/components/FormPaper";
 import { LoadingIndicator } from "@/base/components/loaders";
@@ -458,7 +461,13 @@ export default function PublicCollectionGallery() {
     if (loading && (!publicFiles || !credentials.current)) {
         return <LoadingIndicator />;
     } else if (errorMessage) {
-        return <VerticallyCentered>{errorMessage}</VerticallyCentered>;
+        return (
+            <Stack100vhCenter>
+                <Typography sx={{ color: "critical.main" }}>
+                    {errorMessage}
+                </Typography>
+            </Stack100vhCenter>
+        );
     } else if (isPasswordProtected && !credentials.current.accessTokenJWT) {
         return (
             <VerticallyCentered>
