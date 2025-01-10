@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { EllipsizedTypography } from "@/base/components/Typography";
-import { FilledIconButton } from "@/base/components/mui";
+import { RippleDisabledButton } from "@/base/components/mui/FocusVisibleButton";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { isSxArray } from "@/base/components/utils/sx";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoIcon from "@mui/icons-material/InfoOutlined";
 import {
     Box,
-    Button,
+    IconButton,
     Snackbar,
     Stack,
     type ButtonProps,
@@ -19,29 +19,32 @@ import React from "react";
 /**
  * Customize the contents of an {@link Notification}.
  */
-export type NotificationAttributes =
-    | MessageSubTextNotificationAttributes
-    | TitleCaptionNotificationAttributes;
-
-interface MessageSubTextNotificationAttributes {
+export interface NotificationAttributes {
+    type: "messageSubText" | "titleCaption";
+    /**
+     * The color of the notification.
+     */
+    color: ButtonProps["color"];
+    /**
+     * Optional icon to show at the leading edge of the notification.
+     */
     startIcon?: React.ReactNode;
-    variant: ButtonProps["color"];
-    message?: React.JSX.Element | string;
-    subtext?: React.JSX.Element | string;
-    title?: never;
-    caption?: never;
+    /**
+     * The primary textual content of the notification.
+     */
+    title: React.ReactNode;
+    /**
+     * The secondary textual content of the notification.
+     */
+    caption?: React.ReactNode;
+    /**
+     * Callback invoked when the user clicks on the notification (anywhere
+     * except the close button).
+     */
     onClick: () => void;
-    endIcon?: React.ReactNode;
-}
-
-interface TitleCaptionNotificationAttributes {
-    startIcon?: React.ReactNode;
-    variant: ButtonProps["color"];
-    title?: React.JSX.Element | string;
-    caption?: React.JSX.Element | string;
-    message?: never;
-    subtext?: never;
-    onClick: () => void;
+    /**
+     * Optional icon to show at the trailing edge of the notification.
+     */
     endIcon?: React.ReactNode;
 }
 
@@ -122,8 +125,8 @@ export const Notification: React.FC<NotificationProps> = ({
                 ...(sx ? (isSxArray(sx) ? sx : [sx]) : []),
             ]}
         >
-            <Button
-                color={attributes.variant}
+            <RippleDisabledButton
+                color={attributes.color}
                 onClick={handleClick}
                 sx={(theme) => ({
                     textAlign: "left",
@@ -152,42 +155,54 @@ export const Notification: React.FC<NotificationProps> = ({
                             overflow: "hidden",
                         }}
                     >
-                        {attributes.subtext && (
-                            <EllipsizedTypography variant="small">
-                                {attributes.subtext}
-                            </EllipsizedTypography>
-                        )}
-                        {attributes.message && (
-                            <EllipsizedTypography sx={{ fontWeight: "medium" }}>
-                                {attributes.message}
-                            </EllipsizedTypography>
-                        )}
-                        {attributes.title && (
-                            <EllipsizedTypography sx={{ fontWeight: "medium" }}>
-                                {attributes.title}
-                            </EllipsizedTypography>
-                        )}
-                        {attributes.caption && (
-                            <EllipsizedTypography variant="small">
-                                {attributes.caption}
-                            </EllipsizedTypography>
+                        {attributes.type == "messageSubText" ? (
+                            <>
+                                {attributes.caption && (
+                                    <EllipsizedTypography variant="small">
+                                        {attributes.caption}
+                                    </EllipsizedTypography>
+                                )}
+                                <EllipsizedTypography
+                                    sx={{ fontWeight: "medium" }}
+                                >
+                                    {attributes.title}
+                                </EllipsizedTypography>
+                            </>
+                        ) : (
+                            <>
+                                <EllipsizedTypography
+                                    sx={{ fontWeight: "medium" }}
+                                >
+                                    {attributes.title}
+                                </EllipsizedTypography>
+                                {attributes.caption && (
+                                    <EllipsizedTypography variant="small">
+                                        {attributes.caption}
+                                    </EllipsizedTypography>
+                                )}
+                            </>
                         )}
                     </Stack>
 
                     {attributes.endIcon ? (
-                        <FilledIconButton
+                        <IconButton
+                            component="div"
                             onClick={attributes.onClick}
-                            sx={{ fontSize: "36px" }}
+                            sx={{ fontSize: "36px", bgcolor: "fill.faint" }}
                         >
                             {attributes?.endIcon}
-                        </FilledIconButton>
+                        </IconButton>
                     ) : (
-                        <FilledIconButton onClick={handleClose}>
+                        <IconButton
+                            component="div"
+                            onClick={handleClose}
+                            sx={{ bgcolor: "fill.faint" }}
+                        >
                             <CloseIcon />
-                        </FilledIconButton>
+                        </IconButton>
                     )}
                 </Stack>
-            </Button>
+            </RippleDisabledButton>
         </Snackbar>
     );
 };
