@@ -15,7 +15,6 @@ import {
     updateAvailableForDownloadDialogAttributes,
     updateReadyToInstallDialogAttributes,
 } from "@/new/photos/components/utils/download";
-import { useIsOffline } from "@/new/photos/components/utils/use-is-offline";
 import { useLoadingBar } from "@/new/photos/components/utils/use-loading-bar";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import { runMigrations } from "@/new/photos/services/migration";
@@ -59,7 +58,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
 
-    const isOffline = useIsOffline();
     const isI18nReady = useSetupI18n();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
     const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
@@ -203,9 +201,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
             <ThemeProvider theme={getTheme(themeColor, "photos")}>
                 <CssBaseline enableColorScheme />
-                <OfflineMessageContainer>
-                    {isI18nReady && isOffline && t("offline_message")}
-                </OfflineMessageContainer>
                 <LoadingBar color="#51cd7c" ref={loadingBarRef} />
 
                 <AttributedMiniDialog
@@ -229,14 +224,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 };
 
 export default App;
-
-const OfflineMessageContainer = styled("div")`
-    background-color: #111;
-    padding: 0;
-    font-size: 14px;
-    text-align: center;
-    line-height: 32px;
-`;
 
 const redirectToFamilyPortal = () =>
     void getFamilyPortalRedirectURL().then((url) => {
