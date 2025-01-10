@@ -20,7 +20,6 @@ import {
     updateSRPAndKeys,
 } from "@/accounts/services/srp-remote";
 import type { UpdatedKey } from "@/accounts/services/user";
-import type { PageProps } from "@/accounts/types/page";
 import { sharedCryptoWorker } from "@/base/crypto";
 import LinkButton from "@ente/shared/components/LinkButton";
 import {
@@ -36,7 +35,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
-const Page: React.FC<PageProps> = () => {
+const Page: React.FC = () => {
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
 
