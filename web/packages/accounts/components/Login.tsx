@@ -1,3 +1,10 @@
+import {
+    AccountsPageFooter,
+    AccountsPageTitle,
+} from "@/accounts/components/layouts/centered-paper";
+import { PAGES } from "@/accounts/constants/pages";
+import { getSRPAttributes } from "@/accounts/services/srp-remote";
+import { sendOTT } from "@/accounts/services/user";
 import { FormPaperFooter, FormPaperTitle } from "@/base/components/FormPaper";
 import { isMuseumHTTPError } from "@/base/http";
 import log from "@/base/log";
@@ -9,13 +16,6 @@ import { LS_KEYS, setData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Input, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { PAGES } from "../constants/pages";
-import { getSRPAttributes } from "../services/srp-remote";
-import { sendOTT } from "../services/user";
-import {
-    AccountsPageFooter,
-    AccountsPageTitle,
-} from "./layouts/centered-paper";
 
 interface LoginProps {
     signUp: () => void;
