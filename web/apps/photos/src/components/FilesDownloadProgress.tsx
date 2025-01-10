@@ -1,6 +1,6 @@
+import { Notification } from "@/new/photos/components/Notification";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import { useAppContext } from "@/new/photos/types/context";
-import { Notification } from "components/Notification";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import { useContext } from "react";

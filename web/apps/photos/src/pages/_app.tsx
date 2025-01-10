@@ -7,11 +7,11 @@ import {
     useAttributedMiniDialog,
 } from "@/base/components/utils/dialog";
 import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
-import { useModalVisibility } from "@/base/components/utils/modal";
 import { THEME_COLOR, getTheme } from "@/base/components/utils/theme";
 import log from "@/base/log";
 import { logStartupBanner } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
+import { Notification } from "@/new/photos/components/Notification";
 import {
     updateAvailableForDownloadDialogAttributes,
     updateReadyToInstallDialogAttributes,
@@ -34,10 +34,7 @@ import "@fontsource-variable/inter";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import {
-    Notification,
-    type NotificationAttributes,
-} from "components/Notification";
+import { useNotification } from "components/utils/hooks-app";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
@@ -55,17 +52,12 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const isI18nReady = useSetupI18n();
     const router = useRouter();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
+    const { showNotification, notificationProps } = useNotification();
     const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
         THEME_COLOR.DARK,
     );
-
-    const { show: showNotification, props: notificationVisibilityProps } =
-        useModalVisibility();
-    const [notificationAttributes, setNotificationAttributes] = useState<
-        NotificationAttributes | undefined
-    >(undefined);
 
     const [loading, setLoading] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
@@ -96,7 +88,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             if (update.autoUpdatable) {
                 showMiniDialog(updateReadyToInstallDialogAttributes(update));
             } else {
-                setNotificationAttributes({
+                showNotification({
                     endIcon: <ArrowForwardIcon />,
                     variant: "secondary",
                     message: t("update_available"),
@@ -153,11 +145,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         });
     }, []);
 
-    useEffect(
-        () => notificationAttributes && showNotification(),
-        [notificationAttributes],
-    );
-
     const onGenericError = useCallback((e: unknown) => {
         log.error(e);
         // The generic error handler is sometimes called in the context of
@@ -180,10 +167,10 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             setWatchFolderView,
             watchFolderFiles,
             setWatchFolderFiles,
-            setNotificationAttributes,
             themeColor,
             setThemeColor,
             showMiniDialog,
+            showNotification,
             onGenericError,
             logout,
         }),
@@ -194,6 +181,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             watchFolderFiles,
             themeColor,
             showMiniDialog,
+            showNotification,
             onGenericError,
             logout,
         ],
@@ -214,10 +202,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                     {...miniDialogProps}
                 />
 
-                <Notification
-                    {...notificationVisibilityProps}
-                    attributes={notificationAttributes}
-                />
+                <Notification {...notificationProps} />
 
                 <AppContext.Provider value={appContext}>
                     {(loading || !isI18nReady) && <LoadingOverlay />}

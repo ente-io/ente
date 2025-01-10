@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { FilledIconButton } from "@/base/components/mui";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
@@ -9,11 +10,11 @@ import {
     Button,
     Snackbar,
     Stack,
-    SxProps,
-    Theme,
     type ButtonProps,
+    type SxProps,
+    type Theme,
 } from "@mui/material";
-import React, { ReactNode } from "react";
+import React from "react";
 
 /**
  * Customize the contents of an {@link Notification}.
@@ -23,25 +24,25 @@ export type NotificationAttributes =
     | TitleCaptionNotificationAttributes;
 
 interface MessageSubTextNotificationAttributes {
-    startIcon?: ReactNode;
+    startIcon?: React.ReactNode;
     variant: ButtonProps["color"];
     message?: React.JSX.Element | string;
     subtext?: React.JSX.Element | string;
     title?: never;
     caption?: never;
     onClick: () => void;
-    endIcon?: ReactNode;
+    endIcon?: React.ReactNode;
 }
 
 interface TitleCaptionNotificationAttributes {
-    startIcon?: ReactNode;
+    startIcon?: React.ReactNode;
     variant: ButtonProps["color"];
     title?: React.JSX.Element | string;
     caption?: React.JSX.Element | string;
     message?: never;
     subtext?: never;
     onClick: () => void;
-    endIcon?: ReactNode;
+    endIcon?: React.ReactNode;
 }
 
 type NotificationProps = ModalVisibilityProps & {
