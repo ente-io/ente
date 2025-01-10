@@ -126,7 +126,7 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
                     onClose={handleClose(attributes)}
                     keepOpenOnClick
                     attributes={{
-                        variant: isFilesDownloadCompletedWithErrors(attributes)
+                        color: isFilesDownloadCompletedWithErrors(attributes)
                             ? "critical"
                             : "secondary",
                         title: isFilesDownloadCompletedWithErrors(attributes)
