@@ -82,7 +82,7 @@ const Page: React.FC = () => {
 export default Page;
 
 const Container = styled(Stack)`
-    height: 100%;
+    height: 100svh;
     justify-content: center;
     align-items: center;
     text-align: center;
