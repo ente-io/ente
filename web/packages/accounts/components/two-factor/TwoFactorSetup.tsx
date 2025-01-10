@@ -20,7 +20,7 @@ export function TwoFactorSetup({ twoFactorSecret }: TwoFactorSetupProps) {
     const changeToQRMode = () => setSetupMode("qrCode");
 
     return (
-        <VerticallyCentered sx={{ mb: 3 }}>
+        <VerticallyCentered sx={{ mb: 3, gap: 1 }}>
             {setupMode == "qrCode" ? (
                 <SetupQRMode
                     twoFactorSecret={twoFactorSecret}
@@ -46,7 +46,9 @@ function SetupManualMode({
 }: SetupManualModeProps) {
     return (
         <>
-            <Typography>{t("two_factor_manual_entry_message")}</Typography>
+            <Typography sx={{ color: "text.muted" }}>
+                {t("two_factor_manual_entry_message")}
+            </Typography>
             <CodeBlock code={twoFactorSecret?.secretCode ?? ""} my={2} />
             <LinkButton onClick={changeToQRMode}>
                 {t("scan_qr_title")}
@@ -66,7 +68,9 @@ function SetupQRMode({
 }: SetupQRModeProps) {
     return (
         <>
-            <Typography>{t("two_factor_qr_help")}</Typography>
+            <Typography sx={{ color: "text.muted" }}>
+                {t("two_factor_qr_help")}
+            </Typography>
             {!twoFactorSecret ? (
                 <LoadingQRCode>
                     <ActivityIndicator />

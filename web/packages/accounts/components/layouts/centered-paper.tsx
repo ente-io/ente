@@ -38,7 +38,6 @@ const AccountsPagePaper = styled(Paper)(({ theme }) => ({
     display: "flex",
     flexDirection: "column",
     gap: theme.spacing(4),
-    overflowY: "scroll",
 }));
 
 export const AccountsPageTitle: React.FC<TypographyProps> = ({
