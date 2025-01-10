@@ -305,7 +305,7 @@ interface FailedProps {
 const Failed: React.FC<FailedProps> = ({ message }) => (
     <ContentPaper>
         <InfoIcon color="secondary" />
-        <Typography variant="h4">{t("passkey_login_failed")}</Typography>
+        <Typography variant="h6">{t("passkey_login_failed")}</Typography>
         <Typography sx={{ color: "text.muted" }}>{message}</Typography>
     </ContentPaper>
 );
