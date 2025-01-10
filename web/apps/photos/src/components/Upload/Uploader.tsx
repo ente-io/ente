@@ -653,18 +653,20 @@ export default function Uploader({
                 break;
             case CustomError.SUBSCRIPTION_EXPIRED:
                 showNotification({
-                    variant: "critical",
-                    subtext: t("subscription_expired"),
-                    message: t("renew_now"),
+                    type: "messageSubText",
+                    color: "critical",
+                    caption: t("subscription_expired"),
+                    title: t("renew_now"),
                     onClick: redirectToCustomerPortal,
                 });
                 break;
             case CustomError.STORAGE_QUOTA_EXCEEDED:
                 showNotification({
-                    variant: "critical",
-                    subtext: t("storage_quota_exceeded"),
-                    message: t("upgrade_now"),
-                    onClick: () => galleryContext.showPlanSelectorModal(),
+                    type: "messageSubText",
+                    color: "critical",
+                    caption: t("storage_quota_exceeded"),
+                    title: t("upgrade_now"),
+                    onClick: galleryContext.showPlanSelectorModal,
                     startIcon: <DiscFullIcon />,
                 });
                 break;

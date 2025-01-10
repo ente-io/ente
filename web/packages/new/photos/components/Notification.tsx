@@ -26,7 +26,10 @@ export interface NotificationAttributes {
      */
     color: ButtonProps["color"];
     /**
-     * Optional icon to show at the leading edge of the notification.
+     * Optional override to the default InfoIcon shown at the leading edge of
+     * the notification.
+     *
+     * Default: InfoIcon
      */
     startIcon?: React.ReactNode;
     /**
@@ -43,7 +46,14 @@ export interface NotificationAttributes {
      */
     onClick: () => void;
     /**
-     * Optional icon to show at the trailing edge of the notification.
+     * Optional override to the default CloseIcon shown at the trailing edge of
+     * the notification.
+     *
+     * Unlike {@link startIcon} which is not interactable, setting this replaces
+     * the close button with a icon button showing the given {@link endIcon},
+     * and on clicking that icon {@link onClick} would be called instead of
+     * {@link onClose} (which would've been called on clicking the default close
+     * button in this position).
      */
     endIcon?: React.ReactNode;
 }
@@ -101,13 +111,17 @@ export const Notification: React.FC<NotificationProps> = ({
 }) => {
     if (!attributes) return <></>;
 
-    const handleClose: ButtonProps["onClick"] = (event) => {
+    console.log(attributes);
+    const { type, color, startIcon, title, caption, endIcon, onClick } =
+        attributes;
+
+    const handleClose: React.MouseEventHandler = (event) => {
         onClose();
         event.stopPropagation();
     };
 
     const handleClick = () => {
-        attributes.onClick();
+        onClick();
         if (!keepOpenOnClick) {
             onClose();
         }
@@ -126,14 +140,13 @@ export const Notification: React.FC<NotificationProps> = ({
             ]}
         >
             <RippleDisabledButton
-                color={attributes.color}
+                color={color}
                 onClick={handleClick}
-                sx={(theme) => ({
-                    textAlign: "left",
+                sx={{
                     flex: "1",
-                    padding: theme.spacing(1.5, 2),
+                    padding: "12px 16px 8px 16px",
                     borderRadius: "8px",
-                })}
+                }}
             >
                 <Stack
                     spacing={2}
@@ -141,7 +154,7 @@ export const Notification: React.FC<NotificationProps> = ({
                     sx={{ flex: "1", alignItems: "center", width: "100%" }}
                 >
                     <Box sx={{ svg: { fontSize: "36px" } }}>
-                        {attributes.startIcon ?? <InfoIcon />}
+                        {startIcon ?? <InfoIcon />}
                     </Box>
 
                     <Stack
@@ -155,17 +168,17 @@ export const Notification: React.FC<NotificationProps> = ({
                             overflow: "hidden",
                         }}
                     >
-                        {attributes.type == "messageSubText" ? (
+                        {type == "messageSubText" ? (
                             <>
-                                {attributes.caption && (
+                                {caption && (
                                     <EllipsizedTypography variant="small">
-                                        {attributes.caption}
+                                        {caption}
                                     </EllipsizedTypography>
                                 )}
                                 <EllipsizedTypography
                                     sx={{ fontWeight: "medium" }}
                                 >
-                                    {attributes.title}
+                                    {title}
                                 </EllipsizedTypography>
                             </>
                         ) : (
@@ -173,24 +186,24 @@ export const Notification: React.FC<NotificationProps> = ({
                                 <EllipsizedTypography
                                     sx={{ fontWeight: "medium" }}
                                 >
-                                    {attributes.title}
+                                    {title}
                                 </EllipsizedTypography>
-                                {attributes.caption && (
+                                {caption && (
                                     <EllipsizedTypography variant="small">
-                                        {attributes.caption}
+                                        {caption}
                                     </EllipsizedTypography>
                                 )}
                             </>
                         )}
                     </Stack>
 
-                    {attributes.endIcon ? (
+                    {endIcon ? (
                         <IconButton
                             component="div"
-                            onClick={attributes.onClick}
+                            onClick={onClick}
                             sx={{ fontSize: "36px", bgcolor: "fill.faint" }}
                         >
-                            {attributes?.endIcon}
+                            {endIcon}
                         </IconButton>
                     ) : (
                         <IconButton
