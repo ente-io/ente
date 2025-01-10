@@ -1,4 +1,25 @@
-import { FormPaper, FormPaperTitle } from "@/base/components/FormPaper";
+import {
+    AccountsPageContents,
+    AccountsPageFooter,
+    AccountsPageTitle,
+} from "@/accounts/components/layouts/centered-paper";
+import { VerifyingPasskey } from "@/accounts/components/LoginComponents";
+import { SecondFactorChoice } from "@/accounts/components/SecondFactorChoice";
+import { useSecondFactorChoiceIfNeeded } from "@/accounts/components/utils/second-factor-choice";
+import { PAGES } from "@/accounts/constants/pages";
+import {
+    openPasskeyVerificationURL,
+    passkeyVerificationRedirectURL,
+} from "@/accounts/services/passkey";
+import { stashedRedirect, unstashRedirect } from "@/accounts/services/redirect";
+import { configureSRP } from "@/accounts/services/srp";
+import type {
+    SRPAttributes,
+    SRPSetupAttributes,
+} from "@/accounts/services/srp-remote";
+import { getSRPAttributes } from "@/accounts/services/srp-remote";
+import { putAttributes, sendOTT, verifyEmail } from "@/accounts/services/user";
+import type { PageProps } from "@/accounts/types/page";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -20,32 +41,15 @@ import {
 } from "@ente/shared/storage/localStorage/helpers";
 import { clearKeys } from "@ente/shared/storage/sessionStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { HttpStatusCode } from "axios";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import {
-    LoginFlowFormFooter,
-    VerifyingPasskey,
-} from "../components/LoginComponents";
-import { SecondFactorChoice } from "../components/SecondFactorChoice";
-import { useSecondFactorChoiceIfNeeded } from "../components/utils/second-factor-choice";
-import { PAGES } from "../constants/pages";
-import {
-    openPasskeyVerificationURL,
-    passkeyVerificationRedirectURL,
-} from "../services/passkey";
-import { stashedRedirect, unstashRedirect } from "../services/redirect";
-import { configureSRP } from "../services/srp";
-import type { SRPAttributes, SRPSetupAttributes } from "../services/srp-remote";
-import { getSRPAttributes } from "../services/srp-remote";
-import { putAttributes, sendOTT, verifyEmail } from "../services/user";
-import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { logout, showNavBar, showMiniDialog } = appContext;
+    const { logout, showMiniDialog } = appContext;
 
     const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
@@ -71,7 +75,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
         };
         void main();
-        showNavBar(true);
     }, []);
 
     const onSubmit: SingleInputFormProps["callback"] = async (
@@ -219,53 +222,46 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     }
 
     return (
-        <VerticallyCentered>
-            <FormPaper>
-                <FormPaperTitle sx={{ wordBreak: "break-word" }}>
-                    <Trans
-                        i18nKey="email_sent"
-                        components={{
-                            a: (
-                                <Box
-                                    component={"span"}
-                                    sx={{ color: "text.muted" }}
-                                />
-                            ),
-                        }}
-                        values={{ email }}
-                    />
-                </FormPaperTitle>
-                <Typography variant="small" sx={{ color: "text.muted", mb: 2 }}>
-                    {t("check_inbox_hint")}
-                </Typography>
-                <SingleInputForm
-                    fieldType="text"
-                    autoComplete="one-time-code"
-                    placeholder={t("verification_code")}
-                    buttonText={t("verify")}
-                    callback={onSubmit}
+        <AccountsPageContents>
+            <AccountsPageTitle sx={{ wordBreak: "break-word" }}>
+                <Trans
+                    i18nKey="email_sent"
+                    components={{
+                        a: (
+                            <Box
+                                component={"span"}
+                                sx={{ color: "text.muted" }}
+                            />
+                        ),
+                    }}
+                    values={{ email }}
                 />
+            </AccountsPageTitle>
 
-                <LoginFlowFormFooter>
-                    <Stack
-                        direction="row"
-                        sx={{ justifyContent: "space-between" }}
-                    >
-                        {resend === 0 && (
-                            <LinkButton onClick={resendEmail}>
-                                {t("resend_code")}
-                            </LinkButton>
-                        )}
-                        {resend === 1 && <span>{t("status_sending")}</span>}
-                        {resend === 2 && <span>{t("status_sent")}</span>}
-                        <LinkButton onClick={logout}>
-                            {t("change_email")}
-                        </LinkButton>
-                    </Stack>
-                </LoginFlowFormFooter>
-            </FormPaper>
+            <Typography variant="small" sx={{ color: "text.muted", mb: 2 }}>
+                {t("check_inbox_hint")}
+            </Typography>
+            <SingleInputForm
+                fieldType="text"
+                autoComplete="one-time-code"
+                placeholder={t("verification_code")}
+                buttonText={t("verify")}
+                callback={onSubmit}
+            />
+
+            <AccountsPageFooter>
+                {resend === 0 && (
+                    <LinkButton onClick={resendEmail}>
+                        {t("resend_code")}
+                    </LinkButton>
+                )}
+                {resend === 1 && <span>{t("status_sending")}</span>}
+                {resend === 2 && <span>{t("status_sent")}</span>}
+                <LinkButton onClick={logout}>{t("change_email")}</LinkButton>
+            </AccountsPageFooter>
+
             <SecondFactorChoice {...secondFactorChoiceProps} />
-        </VerticallyCentered>
+        </AccountsPageContents>
     );
 };
 
