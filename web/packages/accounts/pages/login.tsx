@@ -1,5 +1,5 @@
 import { AccountsPageContents } from "@/accounts/components/layouts/centered-paper";
-import { Login } from "@/accounts/components/Login";
+import { LoginContents } from "@/accounts/components/LoginContents";
 import { PAGES } from "@/accounts/constants/pages";
 import { LoadingIndicator } from "@/base/components/loaders";
 import { customAPIHost } from "@/base/origins";
@@ -22,15 +22,13 @@ const Page: React.FC = () => {
         setLoading(false);
     }, []);
 
-    const signUp = () => {
-        void router.push(PAGES.SIGNUP);
-    };
+    const onSignUp = () => void router.push(PAGES.SIGNUP);
 
     return loading ? (
         <LoadingIndicator />
     ) : (
         <AccountsPageContents>
-            <Login {...{ signUp, host }} useV2Layout />
+            <LoginContents {...{ onSignUp, host }} />
         </AccountsPageContents>
     );
 };

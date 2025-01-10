@@ -5,7 +5,6 @@ import {
 import { PAGES } from "@/accounts/constants/pages";
 import { getSRPAttributes } from "@/accounts/services/srp-remote";
 import { sendOTT } from "@/accounts/services/user";
-import { FormPaperFooter, FormPaperTitle } from "@/base/components/FormPaper";
 import { isMuseumHTTPError } from "@/base/http";
 import log from "@/base/log";
 import LinkButton from "@ente/shared/components/LinkButton";
@@ -17,19 +16,22 @@ import { Input, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 
-interface LoginProps {
-    signUp: () => void;
+interface LoginContentsProps {
+    /** Called when the user clicks the signup option instead.  */
+    onSignUp: () => void;
     /** Reactive value of {@link customAPIHost}. */
     host: string | undefined;
-    /**
-     * If true, return the "newer" variant.
-     *
-     * TODO: Remove the branching.
-     */
-    useV2Layout?: boolean;
 }
 
-export const Login: React.FC<LoginProps> = ({ signUp, host, useV2Layout }) => {
+/**
+ * Contents of the "login form", maintained as a separate component so that the
+ * same code can be used both in the standalone /login page, and also within the
+ * embedded login form shown on the photos index page.
+ */
+export const LoginContents: React.FC<LoginContentsProps> = ({
+    onSignUp,
+    host,
+}) => {
     const router = useRouter();
 
     const loginUser: SingleInputFormProps["callback"] = async (
@@ -64,46 +66,32 @@ export const Login: React.FC<LoginProps> = ({ signUp, host, useV2Layout }) => {
         }
     };
 
-    const form = (
-        <SingleInputForm
-            callback={loginUser}
-            fieldType="email"
-            placeholder={t("enter_email")}
-            buttonText={t("login")}
-            autoComplete="username"
-            hiddenPostInput={
-                <Input sx={{ display: "none" }} type="password" value="" />
-            }
-        />
-    );
-
-    const footerContents = (
-        <Stack sx={{ gap: 4, textAlign: "center" }}>
-            <LinkButton onClick={signUp}>{t("no_account")}</LinkButton>
-            <Typography
-                variant="mini"
-                sx={{ color: "text.faint", minHeight: "16px" }}
-            >
-                {host ?? "" /* prevent layout shift with a minHeight */}
-            </Typography>
-        </Stack>
-    );
-
-    if (useV2Layout) {
-        return (
-            <>
-                <AccountsPageTitle>{t("login")}</AccountsPageTitle>
-                {form}
-                <AccountsPageFooter>{footerContents}</AccountsPageFooter>
-            </>
-        );
-    }
-
     return (
         <>
-            <FormPaperTitle>{t("login")}</FormPaperTitle>
-            {form}
-            <FormPaperFooter>{footerContents}</FormPaperFooter>
+            <AccountsPageTitle>{t("login")}</AccountsPageTitle>
+            <SingleInputForm
+                callback={loginUser}
+                fieldType="email"
+                placeholder={t("enter_email")}
+                buttonText={t("login")}
+                autoComplete="username"
+                hiddenPostInput={
+                    <Input sx={{ display: "none" }} type="password" value="" />
+                }
+            />
+            <AccountsPageFooter>
+                <Stack sx={{ gap: 4, textAlign: "center" }}>
+                    <LinkButton onClick={onSignUp}>
+                        {t("no_account")}
+                    </LinkButton>
+                    <Typography
+                        variant="mini"
+                        sx={{ color: "text.faint", minHeight: "16px" }}
+                    >
+                        {host ?? "" /* prevent layout shift with a minHeight */}
+                    </Typography>
+                </Stack>
+            </AccountsPageFooter>
         </>
     );
 };

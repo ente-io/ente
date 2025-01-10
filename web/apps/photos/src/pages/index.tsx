@@ -1,5 +1,5 @@
-import { Login } from "@/accounts/components/Login";
-import { SignUp } from "@/accounts/components/SignUp";
+import { LoginContents } from "@/accounts/components/LoginContents";
+import { SignUpContents } from "@/accounts/components/SignUpContents";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
@@ -134,13 +134,17 @@ const Page: React.FC = () => {
                         <MobileBoxFooter {...{ host }} />
                     </MobileBox>
                     <DesktopBox>
-                        <Box sx={{ width: "320px" }}>
+                        <Stack sx={{ width: "320px", py: 4, gap: 4 }}>
                             {showLogin ? (
-                                <Login {...{ signUp, host }} />
+                                <LoginContents
+                                    {...{ onSignUp: signUp, host }}
+                                />
                             ) : (
-                                <SignUp {...{ router, login, host }} />
+                                <SignUpContents
+                                    {...{ router, onLogin: login, host }}
+                                />
                             )}
-                        </Box>
+                        </Stack>
                     </DesktopBox>
                 </>
             )}

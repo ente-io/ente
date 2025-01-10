@@ -2,7 +2,6 @@ import { PAGES } from "@/accounts/constants/pages";
 import { generateKeyAndSRPAttributes } from "@/accounts/services/srp";
 import { sendOTT } from "@/accounts/services/user";
 import { isWeakPassword } from "@/accounts/utils/password";
-import { FormPaperFooter, FormPaperTitle } from "@/base/components/FormPaper";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { isMuseumHTTPError } from "@/base/http";
 import log from "@/base/log";
@@ -53,24 +52,18 @@ interface FormValues {
     referral: string;
 }
 
-interface SignUpProps {
+interface SignUpContentsProps {
     router: NextRouter;
-    login: () => void;
+    /** Called when the user clicks the login option instead.  */
+    onLogin: () => void;
     /** Reactive value of {@link customAPIHost}. */
     host: string | undefined;
-    /**
-     * If true, return the "newer" variant.
-     *
-     * TODO: Remove the branching.
-     */
-    useV2Layout?: boolean;
 }
 
-export const SignUp: React.FC<SignUpProps> = ({
+export const SignUpContents: React.FC<SignUpContentsProps> = ({
     router,
-    login,
+    onLogin,
     host,
-    useV2Layout,
 }) => {
     const [acceptTerms, setAcceptTerms] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -341,34 +334,23 @@ export const SignUp: React.FC<SignUpProps> = ({
         </Formik>
     );
 
-    const footerContents = (
-        <Stack sx={{ gap: 3, textAlign: "center" }}>
-            <LinkButton onClick={login}>{t("existing_account")}</LinkButton>
-
-            <Typography
-                variant="mini"
-                sx={{ color: "text.faint", minHeight: "16px" }}
-            >
-                {host ?? "" /* prevent layout shift with a minHeight */}
-            </Typography>
-        </Stack>
-    );
-
-    if (useV2Layout) {
-        return (
-            <>
-                <AccountsPageTitle>{t("sign_up")}</AccountsPageTitle>
-                {form}
-                <AccountsPageFooter>{footerContents}</AccountsPageFooter>
-            </>
-        );
-    }
-
     return (
         <>
-            <FormPaperTitle>{t("sign_up")}</FormPaperTitle>
+            <AccountsPageTitle>{t("sign_up")}</AccountsPageTitle>
             {form}
-            <FormPaperFooter>{footerContents}</FormPaperFooter>
+            <AccountsPageFooter>
+                <Stack sx={{ gap: 3, textAlign: "center" }}>
+                    <LinkButton onClick={onLogin}>
+                        {t("existing_account")}
+                    </LinkButton>
+                    <Typography
+                        variant="mini"
+                        sx={{ color: "text.faint", minHeight: "16px" }}
+                    >
+                        {host ?? "" /* prevent layout shift with a minHeight */}
+                    </Typography>
+                </Stack>
+            </AccountsPageFooter>
         </>
     );
 };
