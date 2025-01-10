@@ -653,8 +653,8 @@ export default function Uploader({
                 break;
             case CustomError.SUBSCRIPTION_EXPIRED:
                 showNotification({
-                    textOrder: "captionTitle",
                     color: "critical",
+                    captionFirst: true,
                     caption: t("subscription_expired"),
                     title: t("renew_now"),
                     onClick: redirectToCustomerPortal,
@@ -662,8 +662,8 @@ export default function Uploader({
                 break;
             case CustomError.STORAGE_QUOTA_EXCEEDED:
                 showNotification({
-                    textOrder: "captionTitle",
                     color: "critical",
+                    captionFirst: true,
                     caption: t("storage_quota_exceeded"),
                     title: t("upgrade_now"),
                     onClick: galleryContext.showPlanSelectorModal,
@@ -672,7 +672,6 @@ export default function Uploader({
                 break;
             default:
                 showNotification({
-                    textOrder: "captionTitle",
                     color: "critical",
                     title: t("generic_error_retry"),
                 });

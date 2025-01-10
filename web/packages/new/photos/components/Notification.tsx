@@ -21,10 +21,11 @@ import React from "react";
  */
 export interface NotificationAttributes {
     /**
-     * Set the order in which the title and caption components of the
-     * notification should be shown.
+     * If set, then the caption is shown first, then the title.
+     *
+     * Default is to show the title first, then the caption.
      */
-    textOrder: "titleCaption" | "captionTitle";
+    captionFirst?: boolean;
     /**
      * The color of the notification.
      */
@@ -121,7 +122,7 @@ export const Notification: React.FC<NotificationProps> = ({
     if (!attributes) return <></>;
 
     console.log(attributes);
-    const { textOrder, color, startIcon, title, caption, endIcon, onClick } =
+    const { captionFirst, color, startIcon, title, caption, endIcon, onClick } =
         attributes;
 
     const handleClose: React.MouseEventHandler = (event) => {
@@ -142,7 +143,14 @@ export const Notification: React.FC<NotificationProps> = ({
                 vertical: vertical ?? "bottom",
             }}
             sx={[
-                { width: "min(320px, 100vw)", bgcolor: "background.base" },
+                {
+                    width: "min(320px, 100vw)",
+                    // If the `color` of the button is a translucent one, e.g.
+                    // "secondary", then the notification becomes opaque, which
+                    // is not what we want. So give the entire snackbar a solid
+                    // background color.
+                    backgroundColor: "#000",
+                },
                 ...(sx ? (isSxArray(sx) ? sx : [sx]) : []),
             ]}
         >
@@ -151,7 +159,7 @@ export const Notification: React.FC<NotificationProps> = ({
                 onClick={handleClick}
                 sx={{
                     flex: "1",
-                    padding: "12px 8px 12px 12px",
+                    padding: "12px 8px 12px 14px",
                     borderRadius: "8px",
                 }}
             >
@@ -179,27 +187,27 @@ export const Notification: React.FC<NotificationProps> = ({
                             overflow: "hidden",
                         }}
                     >
-                        {textOrder == "titleCaption" ? (
+                        {captionFirst ? (
                             <>
-                                <Typography sx={{ fontWeight: "medium" }}>
-                                    {title}
-                                </Typography>
                                 {caption && (
                                     <EllipsizedTypography variant="small">
                                         {caption}
                                     </EllipsizedTypography>
                                 )}
+                                <Typography sx={{ fontWeight: "medium" }}>
+                                    {title}
+                                </Typography>
                             </>
                         ) : (
                             <>
+                                <Typography sx={{ fontWeight: "medium" }}>
+                                    {title}
+                                </Typography>
                                 {caption && (
                                     <EllipsizedTypography variant="small">
                                         {caption}
                                     </EllipsizedTypography>
                                 )}
-                                <Typography sx={{ fontWeight: "medium" }}>
-                                    {title}
-                                </Typography>
                             </>
                         )}
                     </Stack>

@@ -89,9 +89,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 showMiniDialog(updateReadyToInstallDialogAttributes(update));
             } else {
                 showNotification({
+                    color: "secondary",
+                    title: t("update_available"),
                     endIcon: <ArrowForwardIcon />,
-                    variant: "secondary",
-                    message: t("update_available"),
                     onClick: () =>
                         showMiniDialog(
                             updateAvailableForDownloadDialogAttributes(update),
