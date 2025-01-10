@@ -1,11 +1,11 @@
 import { Stack, styled } from "@mui/material";
 
 /**
- * A {@link Stack} that takes up the height of the entire viewport, and both
- * vertically and horizontally centers its children.
+ * A {@link Stack} that takes up at least the height of the entire viewport, and
+ * centers its children both vertically and horizontally.
  */
 export const Stack100vhCenter = styled(Stack)`
-    height: 100vh;
+    min-height: 100vh;
     justify-content: center;
     align-items: center;
 `;

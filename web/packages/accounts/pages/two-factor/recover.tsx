@@ -1,4 +1,8 @@
-import { AccountsPageContents } from "@/accounts/components/AccountsPageContents";
+import {
+    AccountsPageContents,
+    AccountsPageFooter,
+    AccountsPageTitle,
+} from "@/accounts/components/layouts/centered-paper";
 import { PAGES } from "@/accounts/constants/pages";
 import {
     recoverTwoFactor,
@@ -6,7 +10,6 @@ import {
     type TwoFactorType,
 } from "@/accounts/services/user";
 import type { AccountsContextT } from "@/accounts/types/context";
-import { FormPaperFooter, FormPaperTitle } from "@/base/components/FormPaper";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
@@ -163,7 +166,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
 
     return (
         <AccountsPageContents>
-            <FormPaperTitle>{t("recover_two_factor")}</FormPaperTitle>
+            <AccountsPageTitle>{t("recover_two_factor")}</AccountsPageTitle>
             <SingleInputForm
                 callback={recover}
                 fieldType="text"
@@ -171,12 +174,12 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                 buttonText={t("recover")}
                 disableAutoComplete
             />
-            <FormPaperFooter>
+            <AccountsPageFooter>
                 <LinkButton onClick={() => showContactSupportDialog()}>
                     {t("no_recovery_key_title")}
                 </LinkButton>
                 <LinkButton onClick={router.back}>{t("go_back")}</LinkButton>
-            </FormPaperFooter>
+            </AccountsPageFooter>
         </AccountsPageContents>
     );
 };
