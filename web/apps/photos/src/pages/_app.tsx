@@ -2,7 +2,6 @@ import { clientPackageName, isDesktop, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
 import { LoadingOverlay } from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
-import { AppNavbar } from "@/base/components/Navbar";
 import {
     genericErrorDialogAttributes,
     useAttributedMiniDialog,
@@ -53,7 +52,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [showNavbar, setShowNavBar] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
     const [notificationView, setNotificationView] = useState(false);
@@ -172,7 +170,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     const appContext = useMemo(
         () => ({
-            showNavBar: (show: boolean) => setShowNavBar(show),
             showLoadingBar,
             hideLoadingBar,
             watchFolderView,
@@ -206,7 +203,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
             <ThemeProvider theme={getTheme(themeColor, "photos")}>
                 <CssBaseline enableColorScheme />
-                {showNavbar && <AppNavbar />}
                 <OfflineMessageContainer>
                     {isI18nReady && isOffline && t("offline_message")}
                 </OfflineMessageContainer>

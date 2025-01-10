@@ -3,7 +3,6 @@ import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
 import { LoadingOverlay } from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
-import { AppNavbar } from "@/base/components/Navbar";
 import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
 import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
 import { THEME_COLOR, getTheme } from "@/base/components/utils/theme";
@@ -32,7 +31,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [showNavbar, setShowNavBar] = useState(false);
 
     const isI18nReady = useSetupI18n();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
@@ -68,7 +66,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const appContext = useMemo(
         () => ({
             logout,
-            showNavBar: (show: boolean) => setShowNavBar(show),
             showMiniDialog,
             themeColor,
             setThemeColor,
@@ -84,7 +81,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
             <ThemeProvider theme={getTheme(themeColor, "auth")}>
                 <CssBaseline enableColorScheme />
-                {showNavbar && <AppNavbar />}
 
                 <AttributedMiniDialog {...miniDialogProps} />
 

@@ -1,7 +1,7 @@
 import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { stashRedirect } from "@/accounts/services/redirect";
 import { EnteLogo } from "@/base/components/EnteLogo";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { LoadingIndicator } from "@/base/components/loaders";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { NavbarBase } from "@/base/components/Navbar";
 import {
@@ -11,7 +11,6 @@ import {
 import { isHTTP401Error } from "@/base/http";
 import log from "@/base/log";
 import { masterKeyFromSessionIfLoggedIn } from "@/base/session-store";
-import { VerticallyCentered } from "@ente/shared/components/Container";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import {
@@ -31,7 +30,7 @@ import { getAuthCodes } from "services/remote";
 import { useAppContext } from "types/context";
 
 const Page: React.FC = () => {
-    const { logout, showNavBar, showMiniDialog } = useAppContext();
+    const { logout, showMiniDialog } = useAppContext();
 
     const router = useRouter();
     const [codes, setCodes] = useState<Code[]>([]);
@@ -57,8 +56,7 @@ const Page: React.FC = () => {
             setHasFetched(true);
         };
         void fetchCodes();
-        showNavBar(false);
-    }, [router, showNavBar, showMiniDialog, logout]);
+    }, [router, showMiniDialog, logout]);
 
     const lcSearch = searchTerm.toLowerCase();
     const filteredCodes = codes.filter(
@@ -68,11 +66,7 @@ const Page: React.FC = () => {
     );
 
     if (!hasFetched) {
-        return (
-            <VerticallyCentered>
-                <ActivityIndicator />
-            </VerticallyCentered>
-        );
+        return <LoadingIndicator />;
     }
 
     return (

@@ -24,6 +24,7 @@ export const NavbarBase = styled(FlexWrapper)`
     }
 `;
 
+// TODO: Prune
 export const AppNavbar: React.FC = () => {
     return (
         <NavbarBase>

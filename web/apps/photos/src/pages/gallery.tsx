@@ -1,7 +1,7 @@
 import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { stashRedirect } from "@/accounts/services/redirect";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
-import { NavbarBase } from "@/base/components/Navbar";
+import { AppNavbar, NavbarBase } from "@/base/components/Navbar";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
@@ -174,7 +174,15 @@ export const GalleryContext = createContext<GalleryContextType>(
  *     ---------------------      |
  *           Photo List           v
  */
-export default function Gallery() {
+const Page: React.FC = () => {
+    const {
+        showLoadingBar,
+        hideLoadingBar,
+        showMiniDialog,
+        onGenericError,
+        logout,
+    } = useAppContext();
+
     const [state, dispatch] = useGalleryReducer();
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
@@ -234,14 +242,6 @@ export default function Gallery() {
         undefined,
     );
 
-    const {
-        showLoadingBar,
-        hideLoadingBar,
-        showMiniDialog,
-        onGenericError,
-        logout,
-        ...appContext
-    } = useAppContext();
     const [userIDToEmailMap, setUserIDToEmailMap] =
         useState<Map<number, string>>(null);
     const [emailList, setEmailList] = useState<string[]>(null);
@@ -338,7 +338,6 @@ export default function Gallery() {
     };
 
     useEffect(() => {
-        appContext.showNavBar(true);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         const token = getToken();
         if (!key || !token) {
@@ -891,6 +890,7 @@ export default function Gallery() {
                         getZipFileSelectorInputProps,
                     }}
                 />
+                <AppNavbar />
                 {blockingLoad && (
                     <GalleryLoadingOverlay>
                         <ActivityIndicator />
@@ -1130,7 +1130,9 @@ export default function Gallery() {
             </FullScreenDropZone>
         </GalleryContext.Provider>
     );
-}
+};
+
+export default Page;
 
 /**
  * Preload all three variants of a responsive image.
