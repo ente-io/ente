@@ -143,7 +143,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         <Trans i18nKey={"pick_password_caution"} />
                     </Typography>
 
-                    <Box sx={{ my: 4 }}>
+                    <Box sx={{ mt: 4, mb: 2 }}>
                         <LoadingButton
                             fullWidth
                             color="accent"
