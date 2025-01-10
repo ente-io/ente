@@ -35,10 +35,10 @@
     },
     "devDependencies": {
         "@/build-config": "*",
-        "@types/leaflet": "^1.9.15",
+        "@types/leaflet": "^1.9.16",
         "@types/node": "^20",
         "@types/photoswipe": "^4.1.1",
-        "@types/react": "^19.0.2",
+        "@types/react": "^19.0.4",
         "@types/react-dom": "^19.0.2",
         "@types/react-virtualized-auto-sizer": "^1.0.4",
         "@types/react-window": "^1.8.8"
