@@ -320,6 +320,9 @@ const ContentPaper = styled(Paper)`
     width: 100%;
     max-width: 24rem;
     padding: 1rem;
+    /* Slight asymmetry, look visually better since the bottom half of the paper
+       is usually muted text that carries less visual weight. */
+    padding-block-end: 1.15rem;
 
     display: flex;
     flex-direction: column;
@@ -460,12 +463,7 @@ const RedirectingApp: React.FC<RedirectingAppProps> = ({ onRetry }) => (
             {t("redirect_close_instructions")}
         </Typography>
         <ButtonStack>
-            <FocusVisibleButton
-                onClick={onRetry}
-                fullWidth
-                color="primary"
-                variant="text"
-            >
+            <FocusVisibleButton fullWidth color="secondary" onClick={onRetry}>
                 {t("redirect_again")}
             </FocusVisibleButton>
         </ButtonStack>
