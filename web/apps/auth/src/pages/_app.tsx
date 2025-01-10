@@ -24,8 +24,6 @@ import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AppContext } from "types/context";
 
-import "styles/global.css";
-
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
 
