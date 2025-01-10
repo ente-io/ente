@@ -1,8 +1,7 @@
 import { AccountsPageContents } from "@/accounts/components/layouts/centered-paper";
 import { SignUp } from "@/accounts/components/SignUp";
 import { PAGES } from "@/accounts/constants/pages";
-import { Stack100vhCenter } from "@/base/components/containers";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { LoadingIndicator } from "@/base/components/loaders";
 import { customAPIHost } from "@/base/origins";
 import { LS_KEYS, getData } from "@ente/shared//storage/localStorage";
 import { useRouter } from "next/router";
@@ -28,9 +27,7 @@ const Page: React.FC = () => {
     };
 
     return loading ? (
-        <Stack100vhCenter>
-            <ActivityIndicator />
-        </Stack100vhCenter>
+        <LoadingIndicator />
     ) : (
         <AccountsPageContents>
             <SignUp {...{ login, router, host }} useV2Layout />

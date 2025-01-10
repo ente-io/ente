@@ -13,7 +13,7 @@ import {
     FormPaperFooter,
     FormPaperTitle,
 } from "@/base/components/FormPaper";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { LoadingIndicator } from "@/base/components/loaders";
 import log from "@/base/log";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
@@ -97,9 +97,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     return (
         <>
             {loading || !user ? (
-                <VerticallyCentered>
-                    <ActivityIndicator />
-                </VerticallyCentered>
+                <LoadingIndicator />
             ) : openRecoveryKey ? (
                 <RecoveryKey
                     open={openRecoveryKey}

@@ -1,5 +1,7 @@
-import { Stack100vhCenter } from "@/base/components/containers";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { PAGES } from "@/accounts/constants/pages";
+import { unstashRedirect } from "@/accounts/services/redirect";
+import type { PageProps } from "@/accounts/types/page";
+import { LoadingIndicator } from "@/base/components/loaders";
 import { fromB64URLSafeNoPaddingString } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import { nullToUndefined } from "@/utils/transform";
@@ -11,9 +13,6 @@ import {
 } from "@ente/shared/storage/localStorage";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
-import { PAGES } from "../../constants/pages";
-import { unstashRedirect } from "../../services/redirect";
-import type { PageProps } from "../../types/page";
 
 /**
  * [Note: Finish passkey flow in the requesting app]
@@ -37,11 +36,7 @@ const Page: React.FC<PageProps> = () => {
         );
     }, []);
 
-    return (
-        <Stack100vhCenter>
-            <ActivityIndicator />
-        </Stack100vhCenter>
-    );
+    return <LoadingIndicator />;
 };
 
 export default Page;
