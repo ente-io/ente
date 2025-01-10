@@ -1,8 +1,10 @@
 import {
-    FormPaper,
-    FormPaperFooter,
-    FormPaperTitle,
-} from "@/base/components/FormPaper";
+    AccountsPageContents,
+    AccountsPageFooter,
+    AccountsPageTitle,
+} from "@/accounts/components/layouts/centered-paper";
+import { appHomeRoute } from "@/accounts/services/redirect";
+import { changeEmail, sendOTT } from "@/accounts/services/user";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { isHTTPErrorWithStatus } from "@/base/http";
 import log from "@/base/log";
@@ -16,8 +18,6 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";
-import { appHomeRoute } from "../services/redirect";
-import { changeEmail, sendOTT } from "../services/user";
 
 const Page: React.FC = () => {
     const router = useRouter();
@@ -30,12 +30,10 @@ const Page: React.FC = () => {
     }, []);
 
     return (
-        <VerticallyCentered>
-            <FormPaper>
-                <FormPaperTitle>{t("change_email")}</FormPaperTitle>
-                <ChangeEmailForm />
-            </FormPaper>
-        </VerticallyCentered>
+        <AccountsPageContents>
+            <AccountsPageTitle>{t("change_email")}</AccountsPageTitle>
+            <ChangeEmailForm />
+        </AccountsPageContents>
     );
 };
 
@@ -184,7 +182,7 @@ const ChangeEmailForm: React.FC = () => {
                         </VerticallyCentered>
                     </form>
 
-                    <FormPaperFooter>
+                    <AccountsPageFooter>
                         {ottInputVisible && (
                             <LinkButton
                                 onClick={() => setShowOttInputVisibility(false)}
@@ -195,7 +193,7 @@ const ChangeEmailForm: React.FC = () => {
                         <LinkButton onClick={goToApp}>
                             {t("go_back")}
                         </LinkButton>
-                    </FormPaperFooter>
+                    </AccountsPageFooter>
                 </>
             )}
         </Formik>
