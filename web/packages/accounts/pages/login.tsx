@@ -33,7 +33,7 @@ const Page: React.FC = () => {
         </Stack100vhCenter>
     ) : (
         <AccountsPageContents>
-            <Login {...{ signUp, host }} useV2 />
+            <Login {...{ signUp, host }} useV2Layout />
         </AccountsPageContents>
     );
 };

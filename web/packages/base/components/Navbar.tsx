@@ -35,7 +35,7 @@ export const AppNavbar: React.FC = () => {
 };
 
 const NavbarBaseNormalFlow = styled("div")`
-    height: 64px;
+    flex: 0 0 64px;
     display: flex;
     justify-content: center;
     align-items: center;

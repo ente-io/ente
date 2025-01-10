@@ -26,10 +26,10 @@ interface LoginProps {
      *
      * TODO: Remove the branching.
      */
-    useV2?: boolean;
+    useV2Layout?: boolean;
 }
 
-export const Login: React.FC<LoginProps> = ({ signUp, host, useV2 }) => {
+export const Login: React.FC<LoginProps> = ({ signUp, host, useV2Layout }) => {
     const router = useRouter();
 
     const loginUser: SingleInputFormProps["callback"] = async (
@@ -89,7 +89,7 @@ export const Login: React.FC<LoginProps> = ({ signUp, host, useV2 }) => {
         </Stack>
     );
 
-    if (useV2) {
+    if (useV2Layout) {
         return (
             <>
                 <AccountsPageTitle>{t("login")}</AccountsPageTitle>

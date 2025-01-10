@@ -16,12 +16,11 @@ import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
 import { Box, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 
-export default function LandingPage() {
-    const { showNavBar, showMiniDialog } = useAppContext();
+const Page: React.FC = () => {
+    const { showMiniDialog } = useAppContext();
 
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(true);
@@ -36,7 +35,6 @@ export default function LandingPage() {
 
     useEffect(() => {
         refreshHost();
-        showNavBar(false);
         const currentURL = new URL(window.location.href);
         const albumsURL = new URL(albumsAppOrigin());
         currentURL.pathname = router.pathname;
@@ -148,7 +146,9 @@ export default function LandingPage() {
             )}
         </TappableContainer>
     );
-}
+};
+
+export default Page;
 
 interface TappableContainerProps {
     /**
