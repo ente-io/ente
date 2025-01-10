@@ -1,8 +1,8 @@
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { Center100VH } from "@/base/components/mui/Container";
 import { fromB64URLSafeNoPaddingString } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import { nullToUndefined } from "@/utils/transform";
-import { VerticallyCentered } from "@ente/shared/components/Container";
 import {
     LS_KEYS,
     getData,
@@ -38,9 +38,9 @@ const Page: React.FC<PageProps> = () => {
     }, []);
 
     return (
-        <VerticallyCentered>
+        <Center100VH>
             <ActivityIndicator />
-        </VerticallyCentered>
+        </Center100VH>
     );
 };
 

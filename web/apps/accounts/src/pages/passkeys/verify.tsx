@@ -1,5 +1,6 @@
 import { TwoFactorAuthorizationResponse } from "@/accounts/services/user";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { Center100VH } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import log from "@/base/log";
 import { nullToUndefined } from "@/utils/transform";
@@ -254,7 +255,7 @@ const Page = () => {
         redirectingApp: <RedirectingApp onRetry={handleRedirectAgain} />,
     };
 
-    return <Container>{components[status]}</Container>;
+    return <Center100VH>{components[status]}</Center100VH>;
 };
 
 export default Page;
@@ -308,13 +309,6 @@ const Failed: React.FC<FailedProps> = ({ message }) => (
         <Typography sx={{ color: "text.muted" }}>{message}</Typography>
     </ContentPaper>
 );
-
-const Container = styled("div")`
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`;
 
 const ContentPaper = styled(Paper)`
     width: 100%;

@@ -1,6 +1,21 @@
 import { styled } from "@mui/material";
 
 /**
+ * A flex that takes up the height of the entire viewport, and centers (both
+ * vertically and horizontally) its child.
+ *
+ * This in designed to be used as the root component of a page, and only really
+ * expects a single child. If further customization is needed, consider creating
+ * a bespoke variant.
+ */
+export const Center100VH = styled("div")`
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`;
+
+/**
  * A flexbox with justify content set to space-between and center alignment.
  *
  * There is also another SpaceBetweenFlex in the old shared package, but that
