@@ -1,6 +1,7 @@
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { FilledIconButton } from "@/base/components/mui";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
+import { isSxArray } from "@/base/components/utils/sx";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoIcon from "@mui/icons-material/InfoOutlined";
 import {
@@ -44,10 +45,32 @@ interface TitleCaptionNotificationAttributes {
 }
 
 type NotificationProps = ModalVisibilityProps & {
-    keepOpenOnClick?: boolean;
+    /**
+     * Attributes that customize the contents of the notification, and the
+     * actions that happen on clicking it.
+     */
     attributes: NotificationAttributes;
+    /**
+     * If `true`, then the notification is not closed when it is clicked, and
+     * should be closed by pressing the close icon button it contains.
+     */
+    keepOpenOnClick?: boolean;
+    /**
+     * Horizontal positioning of the notification.
+     *
+     * Default: "right".
+     */
     horizontal?: "left" | "right";
+    /**
+     * Vertical positioning of the notification.
+     *
+     * Default: "bottom".
+     */
     vertical?: "top" | "bottom";
+    /**
+     * sx props to customize the appearance of the underlying MUI
+     * {@link Snackbar}.
+     */
     sx?: SxProps<Theme>;
 };
 
@@ -72,10 +95,6 @@ export const Notification: React.FC<NotificationProps> = ({
     attributes,
     keepOpenOnClick,
 }) => {
-    if (!attributes) {
-        return <></>;
-    }
-
     const handleClose: ButtonProps["onClick"] = (event) => {
         onClose();
         event.stopPropagation();
@@ -87,6 +106,7 @@ export const Notification: React.FC<NotificationProps> = ({
             onClose();
         }
     };
+
     return (
         <Snackbar
             open={open}
@@ -94,7 +114,10 @@ export const Notification: React.FC<NotificationProps> = ({
                 horizontal: horizontal ?? "right",
                 vertical: vertical ?? "bottom",
             }}
-            sx={{ width: "320px", backgroundColor: "#000", ...sx }}
+            sx={[
+                { width: "min(320px, 100vw)", bgcolor: "background.base" },
+                ...(sx ? (isSxArray(sx) ? sx : [sx]) : []),
+            ]}
         >
             <Button
                 color={attributes.variant}
