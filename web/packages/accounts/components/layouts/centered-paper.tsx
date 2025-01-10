@@ -18,7 +18,7 @@ import { Paper, Stack, styled, Typography } from "@mui/material";
 export const AccountsPageContents: React.FC<React.PropsWithChildren> = ({
     children,
 }) => (
-    <Stack sx={{ minHeight: "100vh" }}>
+    <Stack sx={{ minHeight: "100svh" }}>
         <AppNavbarNormalFlow />
         <CenteredFill>
             <AccountsPagePaper>{children}</AccountsPagePaper>

@@ -1,12 +1,11 @@
 import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
-import { AppNavbar } from "@/base/components/Navbar";
+import { AppNavbarNormalFlow } from "@/base/components/Navbar";
 import { SingleInputDialog } from "@/base/components/SingleInputDialog";
 import { Titlebar } from "@/base/components/Titlebar";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
-import { CenteredFlex } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
 import { formatDateTimeFull } from "@ente/shared/time/format";
@@ -113,31 +112,27 @@ const Page: React.FC = () => {
     };
 
     return (
-        <>
-            <AppNavbar />
-            <CenteredFlex>
-                <Box sx={{ maxWidth: "20rem" }}>
-                    <Box sx={{ marginBottom: "1rem" }}>
-                        <Typography>{t("passkeys_description")}</Typography>
-                    </Box>
-                    <Paper sx={{ p: "1rem" }}>
-                        <SingleInputForm
-                            fieldType="text"
-                            placeholder={t("enter_passkey_name")}
-                            buttonText={t("add_passkey")}
-                            initialValue={""}
-                            callback={handleSubmit}
-                            submitButtonProps={{ sx: { marginBottom: 1 } }}
-                        />
-                    </Paper>
-                    <Box sx={{ marginTop: "1rem" }}>
-                        <PasskeysList
-                            passkeys={passkeys}
-                            onSelectPasskey={handleSelectPasskey}
-                        />
-                    </Box>
-                </Box>
-            </CenteredFlex>
+        <Stack sx={{ minHeight: "100svh" }}>
+            <AppNavbarNormalFlow />
+            <Stack
+                sx={{ alignSelf: "center", m: 3, maxWidth: "375px", gap: 3 }}
+            >
+                <Typography>{t("passkeys_description")}</Typography>
+                <Paper sx={{ p: "1rem" }}>
+                    <SingleInputForm
+                        fieldType="text"
+                        placeholder={t("enter_passkey_name")}
+                        buttonText={t("add_passkey")}
+                        initialValue={""}
+                        callback={handleSubmit}
+                        submitButtonProps={{ sx: { marginBottom: 1 } }}
+                    />
+                </Paper>
+                <PasskeysList
+                    passkeys={passkeys}
+                    onSelectPasskey={handleSelectPasskey}
+                />
+            </Stack>
 
             <ManagePasskeyDrawer
                 open={showPasskeyDrawer}
@@ -146,7 +141,7 @@ const Page: React.FC = () => {
                 token={token}
                 onUpdateOrDeletePasskey={handleUpdateOrDeletePasskey}
             />
-        </>
+        </Stack>
     );
 };
 

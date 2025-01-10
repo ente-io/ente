@@ -57,7 +57,7 @@ const Page: React.FC = () => {
     };
 
     return (
-        <Stack sx={{ minHeight: "100vh" }}>
+        <Stack sx={{ minHeight: "100svh" }}>
             <CenteredFill>
                 <ContentsPaper>
                     <Typography variant="h5" sx={{ textAlign: "center" }}>
