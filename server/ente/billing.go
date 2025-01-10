@@ -11,7 +11,7 @@ import (
 
 const (
 	// FreePlanStorage is the amount of storage in free plan
-	FreePlanStorage = 5 * 1024 * 1024 * 1024
+	FreePlanStorage int64 = 5 * 1024 * 1024 * 1024
 	// FreePlanProductID is the product ID of free plan
 	FreePlanProductID = "free"
 	// FreePlanTransactionID is the dummy transaction ID for the free plan
@@ -112,7 +112,7 @@ type BillingPlan struct {
 }
 
 type FreePlan struct {
-	Storage  int    `json:"storage"`
+	Storage  int64  `json:"storage"`
 	Duration int    `json:"duration"`
 	Period   string `json:"period"`
 }
