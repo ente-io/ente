@@ -1,6 +1,6 @@
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { FilledIconButton } from "@/base/components/mui";
-import { NotificationAttributes } from "@/new/photos/types/notification";
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoIcon from "@mui/icons-material/InfoOutlined";
 import {
@@ -12,18 +12,58 @@ import {
     Theme,
     type ButtonProps,
 } from "@mui/material";
+import React, { ReactNode } from "react";
 
-interface Iprops {
-    open: boolean;
-    onClose: () => void;
+/**
+ * Customize the contents of an {@link Notification}.
+ */
+export type NotificationAttributes =
+    | MessageSubTextNotificationAttributes
+    | TitleCaptionNotificationAttributes;
+
+interface MessageSubTextNotificationAttributes {
+    startIcon?: ReactNode;
+    variant: ButtonProps["color"];
+    message?: React.JSX.Element | string;
+    subtext?: React.JSX.Element | string;
+    title?: never;
+    caption?: never;
+    onClick: () => void;
+    endIcon?: ReactNode;
+}
+
+interface TitleCaptionNotificationAttributes {
+    startIcon?: ReactNode;
+    variant: ButtonProps["color"];
+    title?: React.JSX.Element | string;
+    caption?: React.JSX.Element | string;
+    message?: never;
+    subtext?: never;
+    onClick: () => void;
+    endIcon?: ReactNode;
+}
+
+type NotificationProps = ModalVisibilityProps & {
     keepOpenOnClick?: boolean;
     attributes: NotificationAttributes;
     horizontal?: "left" | "right";
     vertical?: "top" | "bottom";
     sx?: SxProps<Theme>;
-}
+};
 
-export default function Notification({
+/**
+ * A small notification popup shown on some edge of the screen to notify the
+ * user of some asynchronous update or error.
+ *
+ * In Material UI terms, this is a custom "Snackbar".
+ *
+ * A single Notification component can be shared by multiple sources of
+ * notifications (which means that there can't be multiple of them outstanding
+ * at the same time from the same source). The source can customize the actual
+ * contents and appearance of this notification by providing appropriate
+ * {@link NotificationAttributes}.
+ */
+export const Notification: React.FC<NotificationProps> = ({
     open,
     onClose,
     horizontal,
@@ -31,7 +71,7 @@ export default function Notification({
     sx,
     attributes,
     keepOpenOnClick,
-}: Iprops) {
+}) => {
     if (!attributes) {
         return <></>;
     }
@@ -124,4 +164,4 @@ export default function Notification({
             </Button>
         </Snackbar>
     );
-}
+};

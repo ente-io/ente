@@ -7,6 +7,7 @@ import {
     useAttributedMiniDialog,
 } from "@/base/components/utils/dialog";
 import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
+import { useModalVisibility } from "@/base/components/utils/modal";
 import { THEME_COLOR, getTheme } from "@/base/components/utils/theme";
 import log from "@/base/log";
 import { logStartupBanner } from "@/base/log-web";
@@ -31,9 +32,12 @@ import {
 import type { User } from "@ente/shared/user/types";
 import "@fontsource-variable/inter";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { CssBaseline, styled } from "@mui/material";
+import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import Notification from "components/Notification";
+import {
+    Notification,
+    type NotificationAttributes,
+} from "components/Notification";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
@@ -42,29 +46,30 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
-import { NotificationAttributes } from "types/Notification";
 
 import "styles/global.css";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
 
-    const router = useRouter();
-    const [loading, setLoading] = useState(false);
-    const [watchFolderView, setWatchFolderView] = useState(false);
-    const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
-    const [notificationView, setNotificationView] = useState(false);
-    const closeNotification = () => setNotificationView(false);
-    const [notificationAttributes, setNotificationAttributes] =
-        useState<NotificationAttributes>(null);
-
     const isI18nReady = useSetupI18n();
+    const router = useRouter();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
     const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
         THEME_COLOR.DARK,
     );
+
+    const { show: showNotification, props: notificationVisibilityProps } =
+        useModalVisibility();
+    const [notificationAttributes, setNotificationAttributes] = useState<
+        NotificationAttributes | undefined
+    >(undefined);
+
+    const [loading, setLoading] = useState(false);
+    const [watchFolderView, setWatchFolderView] = useState(false);
+    const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER) as User | undefined | null;
@@ -148,9 +153,10 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         });
     }, []);
 
-    useEffect(() => {
-        setNotificationView(true);
-    }, [notificationAttributes]);
+    useEffect(
+        () => notificationAttributes && showNotification(),
+        [notificationAttributes],
+    );
 
     const onGenericError = useCallback((e: unknown) => {
         log.error(e);
@@ -209,8 +215,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 />
 
                 <Notification
-                    open={notificationView}
-                    onClose={closeNotification}
+                    {...notificationVisibilityProps}
                     attributes={notificationAttributes}
                 />
 
