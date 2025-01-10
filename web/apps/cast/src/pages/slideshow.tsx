@@ -75,7 +75,7 @@ const PairingComplete: React.FC = () => {
 };
 
 const Message = styled(Stack)`
-    height: 100%;
+    height: 100vh;
     justify-content: center;
     align-items: center;
     text-align: center;
@@ -110,8 +110,7 @@ const SlideView: React.FC<SlideViewProps> = ({ url }) => {
 };
 
 const SlideView_ = styled("div")`
-    width: 100%;
-    height: 100%;
+    height: 100vh;
 
     background-size: cover;
     background-position: center;
@@ -162,8 +161,7 @@ const SlideViewChromecast: React.FC<SlideViewProps> = ({ url }) => {
 };
 
 const SlideViewChromecast_ = styled("div")`
-    width: 100%;
-    height: 100%;
+    height: 100vh;
 
     /* We can't set opacity of background-image, so use a wrapper */
     position: relative;

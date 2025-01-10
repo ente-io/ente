@@ -1,19 +1,15 @@
 import { clientPackageName, isDesktop, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
-import { LoadingOverlay } from "@/base/components/LoadingOverlay";
+import { LoadingOverlay } from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
-import { AppNavbar } from "@/base/components/Navbar";
 import {
     genericErrorDialogAttributes,
     useAttributedMiniDialog,
 } from "@/base/components/utils/dialog";
-import { useSetupI18n } from "@/base/components/utils/hooks-i18n";
+import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
 import { THEME_COLOR, getTheme } from "@/base/components/utils/theme";
 import log from "@/base/log";
-import {
-    logStartupBanner,
-    logUnhandledErrorsAndRejections,
-} from "@/base/log-web";
+import { logStartupBanner } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
 import {
     updateAvailableForDownloadDialogAttributes,
@@ -34,6 +30,7 @@ import {
     migrateKVToken,
 } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
+import "@fontsource-variable/inter";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { CssBaseline, styled } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
@@ -48,13 +45,13 @@ import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
 import { NotificationAttributes } from "types/Notification";
 
-import "@fontsource-variable/inter"; /* Inter Variable, supports weights 100-900 */
 import "styles/global.css";
 
-export default function App({ Component, pageProps }: AppProps) {
+const App: React.FC<AppProps> = ({ Component, pageProps }) => {
+    useSetupLogs();
+
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [showNavbar, setShowNavBar] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
     const [notificationView, setNotificationView] = useState(false);
@@ -76,9 +73,7 @@ export default function App({ Component, pageProps }: AppProps) {
         void migrateKVToken(user);
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
-        logUnhandledErrorsAndRejections(true);
         void runMigrations();
-        return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
     useEffect(() => {
@@ -175,7 +170,6 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const appContext = useMemo(
         () => ({
-            showNavBar: (show: boolean) => setShowNavBar(show),
             showLoadingBar,
             hideLoadingBar,
             watchFolderView,
@@ -209,7 +203,6 @@ export default function App({ Component, pageProps }: AppProps) {
 
             <ThemeProvider theme={getTheme(themeColor, "photos")}>
                 <CssBaseline enableColorScheme />
-                {showNavbar && <AppNavbar />}
                 <OfflineMessageContainer>
                     {isI18nReady && isOffline && t("offline_message")}
                 </OfflineMessageContainer>
@@ -233,7 +226,9 @@ export default function App({ Component, pageProps }: AppProps) {
             </ThemeProvider>
         </>
     );
-}
+};
+
+export default App;
 
 const OfflineMessageContainer = styled("div")`
     background-color: #111;

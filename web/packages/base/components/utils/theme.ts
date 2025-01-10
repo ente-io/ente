@@ -477,6 +477,8 @@ const getComponents = (
         },
     },
     MuiPaper: {
+        // MUI applies a semi-transparent background image for elevation in dark
+        // mode. Remove it to use the elevated Paper background from our design.
         styleOverrides: { root: { backgroundImage: "none" } },
     },
     MuiLink: {

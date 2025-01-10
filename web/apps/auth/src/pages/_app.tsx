@@ -1,16 +1,12 @@
 import { accountLogout } from "@/accounts/services/logout";
 import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
-import { LoadingOverlay } from "@/base/components/LoadingOverlay";
+import { LoadingOverlay } from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
-import { AppNavbar } from "@/base/components/Navbar";
 import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
-import { useSetupI18n } from "@/base/components/utils/hooks-i18n";
+import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
 import { THEME_COLOR, getTheme } from "@/base/components/utils/theme";
-import {
-    logStartupBanner,
-    logUnhandledErrorsAndRejections,
-} from "@/base/log-web";
+import { logStartupBanner } from "@/base/log-web";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
@@ -19,6 +15,7 @@ import {
     migrateKVToken,
 } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
+import "@fontsource-variable/inter";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
@@ -27,13 +24,11 @@ import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AppContext } from "types/context";
 
-import "@fontsource-variable/inter";
-import "styles/global.css";
-
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
+    useSetupLogs();
+
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [showNavbar, setShowNavBar] = useState(false);
 
     const isI18nReady = useSetupI18n();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
@@ -47,8 +42,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         void migrateKVToken(user);
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
-        logUnhandledErrorsAndRejections(true);
-        return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
     useEffect(() => {
@@ -71,7 +64,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const appContext = useMemo(
         () => ({
             logout,
-            showNavBar: (show: boolean) => setShowNavBar(show),
             showMiniDialog,
             themeColor,
             setThemeColor,
@@ -87,7 +79,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
             <ThemeProvider theme={getTheme(themeColor, "auth")}>
                 <CssBaseline enableColorScheme />
-                {showNavbar && <AppNavbar />}
 
                 <AttributedMiniDialog {...miniDialogProps} />
 

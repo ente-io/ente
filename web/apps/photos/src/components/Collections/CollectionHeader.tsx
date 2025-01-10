@@ -1,6 +1,6 @@
 import { assertionFailed } from "@/base/assert";
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import {
     OverflowMenu,
     OverflowMenuOption,

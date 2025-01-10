@@ -1,5 +1,5 @@
+import { Overlay } from "@/base/components/containers";
 import { FilledIconButton } from "@/base/components/mui";
-import { Overlay } from "@/base/components/mui/Container";
 import { Ellipsized2LineTypography } from "@/base/components/Typography";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";

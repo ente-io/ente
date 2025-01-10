@@ -1,4 +1,4 @@
-import { SpaceBetweenFlex } from "@/base/components/mui/Container";
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { useIsTouchscreen } from "@/base/components/utils/hooks";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";

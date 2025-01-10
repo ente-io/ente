@@ -10,8 +10,8 @@ import {
     type DrawerProps,
 } from "@mui/material";
 import React from "react";
+import { SpaceBetweenFlex } from "../containers";
 import type { ModalVisibilityProps } from "../utils/modal";
-import { SpaceBetweenFlex } from "./Container";
 
 /**
  * A MUI {@link Drawer} with a standard set of styling that we use for our left

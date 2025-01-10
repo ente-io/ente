@@ -1,6 +1,18 @@
+import { Overlay, Stack100vhCenter } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { Overlay } from "@/base/components/mui/Container";
 import React from "react";
+
+/**
+ * A centered activity indicator shown in a container that fills up the entire
+ * width and height of the viewport.
+ *
+ * This is meant as a root component of a page, e.g., during initial load.
+ */
+export const LoadingIndicator: React.FC = () => (
+    <Stack100vhCenter>
+        <ActivityIndicator />
+    </Stack100vhCenter>
+);
 
 /**
  * An opaque overlay that covers the entire viewport and shows an activity

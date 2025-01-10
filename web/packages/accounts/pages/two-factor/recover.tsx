@@ -1,3 +1,8 @@
+import {
+    AccountsPageContents,
+    AccountsPageFooter,
+    AccountsPageTitle,
+} from "@/accounts/components/layouts/centered-paper";
 import { PAGES } from "@/accounts/constants/pages";
 import {
     recoverTwoFactor,
@@ -5,16 +10,10 @@ import {
     type TwoFactorType,
 } from "@/accounts/services/user";
 import type { AccountsContextT } from "@/accounts/types/context";
-import {
-    FormPaper,
-    FormPaperFooter,
-    FormPaperTitle,
-} from "@/base/components/FormPaper";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import log from "@/base/log";
-import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
     type SingleInputFormProps,
@@ -166,26 +165,22 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
     }
 
     return (
-        <VerticallyCentered>
-            <FormPaper>
-                <FormPaperTitle>{t("recover_two_factor")}</FormPaperTitle>
-                <SingleInputForm
-                    callback={recover}
-                    fieldType="text"
-                    placeholder={t("recovery_key")}
-                    buttonText={t("recover")}
-                    disableAutoComplete
-                />
-                <FormPaperFooter sx={{ justifyContent: "space-between" }}>
-                    <LinkButton onClick={() => showContactSupportDialog()}>
-                        {t("no_recovery_key_title")}
-                    </LinkButton>
-                    <LinkButton onClick={router.back}>
-                        {t("go_back")}
-                    </LinkButton>
-                </FormPaperFooter>
-            </FormPaper>
-        </VerticallyCentered>
+        <AccountsPageContents>
+            <AccountsPageTitle>{t("recover_two_factor")}</AccountsPageTitle>
+            <SingleInputForm
+                callback={recover}
+                fieldType="text"
+                placeholder={t("recovery_key")}
+                buttonText={t("recover")}
+                disableAutoComplete
+            />
+            <AccountsPageFooter>
+                <LinkButton onClick={() => showContactSupportDialog()}>
+                    {t("no_recovery_key_title")}
+                </LinkButton>
+                <LinkButton onClick={router.back}>{t("go_back")}</LinkButton>
+            </AccountsPageFooter>
+        </AccountsPageContents>
     );
 };
 

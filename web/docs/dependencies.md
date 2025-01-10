@@ -144,8 +144,8 @@ For more details, see [translations.md](translations.md).
 
 ### Font
 
-The app uses Inter as its primary font, via
-[@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
+Inter Variable (with support for weights 100 - 90) is used as the primary font,
+via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 
 ### UI components
 

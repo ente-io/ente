@@ -1,7 +1,14 @@
+import {
+    AccountsPageContents,
+    AccountsPageTitle,
+} from "@/accounts/components/layouts/centered-paper";
+import {
+    SpaceBetweenFlex,
+    Stack100vhCenter,
+} from "@/base/components/containers";
 import { EnteLogoSVG } from "@/base/components/EnteLogo";
-import { FormPaper, FormPaperTitle } from "@/base/components/FormPaper";
+import { LoadingIndicator } from "@/base/components/loaders";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import {
     OverflowMenu,
@@ -32,7 +39,6 @@ import { useAppContext } from "@/new/photos/types/context";
 import {
     CenteredFlex,
     FluidContainer,
-    VerticallyCentered,
 } from "@ente/shared/components/Container";
 import SingleInputForm, {
     type SingleInputFormProps,
@@ -455,18 +461,20 @@ export default function PublicCollectionGallery() {
     };
 
     if (loading && (!publicFiles || !credentials.current)) {
-        return (
-            <VerticallyCentered>
-                <ActivityIndicator />
-            </VerticallyCentered>
-        );
+        return <LoadingIndicator />;
     } else if (errorMessage) {
-        return <VerticallyCentered>{errorMessage}</VerticallyCentered>;
+        return (
+            <Stack100vhCenter>
+                <Typography sx={{ color: "critical.main" }}>
+                    {errorMessage}
+                </Typography>
+            </Stack100vhCenter>
+        );
     } else if (isPasswordProtected && !credentials.current.accessTokenJWT) {
         return (
-            <VerticallyCentered>
-                <FormPaper>
-                    <FormPaperTitle>{t("password")}</FormPaperTitle>
+            <AccountsPageContents>
+                <AccountsPageTitle>{t("password")}</AccountsPageTitle>
+                <Stack>
                     <Typography
                         variant="small"
                         sx={{ color: "text.muted", mb: 2 }}
@@ -479,11 +487,15 @@ export default function PublicCollectionGallery() {
                         buttonText={t("unlock")}
                         fieldType="password"
                     />
-                </FormPaper>
-            </VerticallyCentered>
+                </Stack>
+            </AccountsPageContents>
         );
     } else if (!publicFiles || !credentials.current) {
-        return <VerticallyCentered>{t("NOT_FOUND")}</VerticallyCentered>;
+        return (
+            <Stack100vhCenter>
+                <Typography>{t("NOT_FOUND")}</Typography>
+            </Stack100vhCenter>
+        );
     }
 
     // TODO: memo this (after the dependencies are traceable).

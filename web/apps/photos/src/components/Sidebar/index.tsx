@@ -2,8 +2,8 @@ import { RecoveryKey } from "@/accounts/components/RecoveryKey";
 import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import { isDesktop } from "@/base/app";
 import { EnteLogo } from "@/base/components/EnteLogo";
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
@@ -503,10 +503,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
         router.push(PAGES.CHANGE_PASSWORD);
     };
 
-    const redirectToChangeEmailPage = () => {
-        closeSidebar();
-        router.push(PAGES.CHANGE_EMAIL);
-    };
+    const handleChangeEmail = () => router.push("/change-email");
 
     const redirectToAccountsPage = async () => {
         closeSidebar();
@@ -567,7 +564,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             />
             <EnteMenuItem
                 variant="secondary"
-                onClick={redirectToChangeEmailPage}
+                onClick={handleChangeEmail}
                 label={t("change_email")}
             />
             <EnteMenuItem

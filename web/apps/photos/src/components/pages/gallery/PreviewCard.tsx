@@ -1,4 +1,4 @@
-import { Overlay } from "@/base/components/mui/Container";
+import { Overlay } from "@/base/components/containers";
 import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
 import { FileType } from "@/media/file-type";

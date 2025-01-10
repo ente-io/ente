@@ -1,4 +1,4 @@
-import { Overlay } from "@/base/components/mui/Container";
+import { Overlay } from "@/base/components/containers";
 import { FileType } from "@/media/file-type";
 import PhotoOutlinedIcon from "@mui/icons-material/PhotoOutlined";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";

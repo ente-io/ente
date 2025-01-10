@@ -1,11 +1,36 @@
+import { AccountsPageContents } from "@/accounts/components/layouts/centered-paper";
+import {
+    AccountsPageFooterWithHost,
+    PasswordHeader,
+    VerifyingPasskey,
+} from "@/accounts/components/LoginComponents";
+import { SecondFactorChoice } from "@/accounts/components/SecondFactorChoice";
 import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
-import { FormPaper } from "@/base/components/FormPaper";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { useSecondFactorChoiceIfNeeded } from "@/accounts/components/utils/second-factor-choice";
+import { PAGES } from "@/accounts/constants/pages";
+import {
+    openPasskeyVerificationURL,
+    passkeyVerificationRedirectURL,
+} from "@/accounts/services/passkey";
+import {
+    appHomeRoute,
+    stashRedirect,
+    unstashRedirect,
+} from "@/accounts/services/redirect";
+import { checkSessionValidity } from "@/accounts/services/session";
+import {
+    configureSRP,
+    generateSRPSetupAttributes,
+    loginViaSRP,
+} from "@/accounts/services/srp";
+import type { SRPAttributes } from "@/accounts/services/srp-remote";
+import { getSRPAttributes } from "@/accounts/services/srp-remote";
+import type { PageProps } from "@/accounts/types/page";
+import { LoadingIndicator } from "@/base/components/loaders";
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import { clearLocalStorage } from "@/base/local-storage";
 import log from "@/base/log";
-import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
@@ -35,39 +60,12 @@ import {
     setKey,
 } from "@ente/shared/storage/sessionStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
-import { Stack } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
-import {
-    LoginFlowFormFooter,
-    PasswordHeader,
-    VerifyingPasskey,
-} from "../components/LoginComponents";
-import { SecondFactorChoice } from "../components/SecondFactorChoice";
-import { useSecondFactorChoiceIfNeeded } from "../components/utils/second-factor-choice";
-import { PAGES } from "../constants/pages";
-import {
-    openPasskeyVerificationURL,
-    passkeyVerificationRedirectURL,
-} from "../services/passkey";
-import {
-    appHomeRoute,
-    stashRedirect,
-    unstashRedirect,
-} from "../services/redirect";
-import { checkSessionValidity } from "../services/session";
-import {
-    configureSRP,
-    generateSRPSetupAttributes,
-    loginViaSRP,
-} from "../services/srp";
-import type { SRPAttributes } from "../services/srp-remote";
-import { getSRPAttributes } from "../services/srp-remote";
-import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { logout, showNavBar, showMiniDialog } = appContext;
+    const { logout, showMiniDialog } = appContext;
 
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
@@ -201,7 +199,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
         };
         void main();
-        showNavBar(true);
     }, []);
     // TODO: ^ validateSession is a dependency, but add that only after we've
     // wrapped items from the callback (like logout) in useCallback too.
@@ -336,11 +333,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     };
 
     if (!keyAttributes && !srpAttributes) {
-        return (
-            <VerticallyCentered>
-                <ActivityIndicator />
-            </VerticallyCentered>
-        );
+        return <LoadingIndicator />;
     }
 
     if (passkeyVerificationData) {
@@ -354,11 +347,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         // See: [Note: Passkey verification in the desktop app]
 
         if (!globalThis.electron) {
-            return (
-                <VerticallyCentered>
-                    <ActivityIndicator />
-                </VerticallyCentered>
-            );
+            return <LoadingIndicator />;
         }
 
         return (
@@ -376,35 +365,26 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     // TODO: Handle the case when user is not present, or exclude that
     // possibility using types.
     return (
-        <VerticallyCentered>
-            <FormPaper style={{ minWidth: "320px" }}>
-                <PasswordHeader>{user?.email ?? ""}</PasswordHeader>
+        <AccountsPageContents>
+            <PasswordHeader>{user?.email ?? ""}</PasswordHeader>
 
-                <VerifyMasterPasswordForm
-                    buttonText={t("sign_in")}
-                    callback={useMasterPassword}
-                    user={user}
-                    keyAttributes={keyAttributes}
-                    getKeyAttributes={getKeyAttributes}
-                    srpAttributes={srpAttributes}
-                />
+            <VerifyMasterPasswordForm
+                buttonText={t("sign_in")}
+                callback={useMasterPassword}
+                user={user}
+                keyAttributes={keyAttributes}
+                getKeyAttributes={getKeyAttributes}
+                srpAttributes={srpAttributes}
+            />
 
-                <LoginFlowFormFooter>
-                    <Stack
-                        direction="row"
-                        sx={{ justifyContent: "space-between" }}
-                    >
-                        <LinkButton onClick={() => router.push(PAGES.RECOVER)}>
-                            {t("forgot_password")}
-                        </LinkButton>
-                        <LinkButton onClick={logout}>
-                            {t("change_email")}
-                        </LinkButton>
-                    </Stack>
-                </LoginFlowFormFooter>
-            </FormPaper>
+            <AccountsPageFooterWithHost>
+                <LinkButton onClick={() => router.push(PAGES.RECOVER)}>
+                    {t("forgot_password")}
+                </LinkButton>
+                <LinkButton onClick={logout}>{t("change_email")}</LinkButton>
+            </AccountsPageFooterWithHost>
             <SecondFactorChoice {...secondFactorChoiceProps} />
-        </VerticallyCentered>
+        </AccountsPageContents>
     );
 };
 

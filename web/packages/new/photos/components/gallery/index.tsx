@@ -7,7 +7,7 @@
  * there.
  */
 
-import { CenteredFill } from "@/base/components/mui/Container";
+import { CenteredFill } from "@/base/components/containers";
 import type { SearchSuggestion } from "@/new/photos/services/search/types";
 import { Paper, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
