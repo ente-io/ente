@@ -19,6 +19,7 @@ import {
     migrateKVToken,
 } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
+import "@fontsource-variable/inter";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
@@ -27,7 +28,6 @@ import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AppContext } from "types/context";
 
-import "@fontsource-variable/inter";
 import "styles/global.css";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {

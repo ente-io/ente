@@ -34,6 +34,7 @@ import {
     migrateKVToken,
 } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
+import "@fontsource-variable/inter";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { CssBaseline, styled } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
@@ -48,7 +49,6 @@ import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
 import { NotificationAttributes } from "types/Notification";
 
-import "@fontsource-variable/inter"; /* Inter Variable, supports weights 100-900 */
 import "styles/global.css";
 
 export default function App({ Component, pageProps }: AppProps) {
