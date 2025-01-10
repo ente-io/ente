@@ -24,7 +24,7 @@ export const PasswordHeader: React.FC<React.PropsWithChildren> = ({
 }) => {
     return (
         <Header_>
-            <Typography variant="h2">{t("password")}</Typography>
+            <Typography variant="h3">{t("password")}</Typography>
             <Typography sx={{ color: "text.faint" }}>{children}</Typography>
         </Header_>
     );
@@ -33,14 +33,14 @@ export const PasswordHeader: React.FC<React.PropsWithChildren> = ({
 const PasskeyHeader: React.FC<React.PropsWithChildren> = ({ children }) => {
     return (
         <Header_>
-            <Typography variant="h3">{"Passkey"}</Typography>
+            <Typography variant="h3">{t("passkey")}</Typography>
             <Typography sx={{ color: "text.faint" }}>{children}</Typography>
         </Header_>
     );
 };
 
 const Header_ = styled("div")`
-    margin-block-end: 4rem;
+    margin-block-end: 24px;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -57,7 +57,10 @@ export const AccountsPageFooterWithHost: React.FC<React.PropsWithChildren> = ({
         <Stack sx={{ gap: 2 }}>
             <AccountsPageFooter>{children}</AccountsPageFooter>
             {host && (
-                <Typography variant="small" sx={{ color: "text.faint" }}>
+                <Typography
+                    variant="small"
+                    sx={{ mx: "4px", color: "text.faint" }}
+                >
                     {host}
                 </Typography>
             )}
