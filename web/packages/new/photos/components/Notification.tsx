@@ -6,10 +6,10 @@ import { isSxArray } from "@/base/components/utils/sx";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoIcon from "@mui/icons-material/InfoOutlined";
 import {
-    Box,
     IconButton,
     Snackbar,
     Stack,
+    Typography,
     type ButtonProps,
     type SxProps,
     type Theme,
@@ -20,7 +20,11 @@ import React from "react";
  * Customize the contents of an {@link Notification}.
  */
 export interface NotificationAttributes {
-    type: "messageSubText" | "titleCaption";
+    /**
+     * Set the order in which the title and caption components of the
+     * notification should be shown.
+     */
+    textOrder: "titleCaption" | "captionTitle";
     /**
      * The color of the notification.
      */
@@ -38,13 +42,18 @@ export interface NotificationAttributes {
     title: React.ReactNode;
     /**
      * The secondary textual content of the notification.
+     *
+     * It will be ellipsized if it does not fit into a single line.
      */
     caption?: React.ReactNode;
     /**
-     * Callback invoked when the user clicks on the notification (anywhere
-     * except the close button).
+     * Callback invoked (if provided) when the user clicks on the notification
+     * (anywhere except the close button).
+     *
+     * The notification is closed when this happens, unless the
+     * {@link keepOpenOnClick} property is set on the notification instance.
      */
-    onClick: () => void;
+    onClick?: () => void;
     /**
      * Optional override to the default CloseIcon shown at the trailing edge of
      * the notification.
@@ -112,7 +121,7 @@ export const Notification: React.FC<NotificationProps> = ({
     if (!attributes) return <></>;
 
     console.log(attributes);
-    const { type, color, startIcon, title, caption, endIcon, onClick } =
+    const { textOrder, color, startIcon, title, caption, endIcon, onClick } =
         attributes;
 
     const handleClose: React.MouseEventHandler = (event) => {
@@ -121,10 +130,8 @@ export const Notification: React.FC<NotificationProps> = ({
     };
 
     const handleClick = () => {
-        onClick();
-        if (!keepOpenOnClick) {
-            onClose();
-        }
+        onClick?.();
+        if (!keepOpenOnClick) onClose();
     };
 
     return (
@@ -144,55 +151,55 @@ export const Notification: React.FC<NotificationProps> = ({
                 onClick={handleClick}
                 sx={{
                     flex: "1",
-                    padding: "12px 16px 8px 16px",
+                    padding: "12px 8px 12px 12px",
                     borderRadius: "8px",
                 }}
             >
                 <Stack
-                    spacing={2}
                     direction="row"
-                    sx={{ flex: "1", alignItems: "center", width: "100%" }}
+                    sx={{
+                        gap: 2,
+                        alignItems: "center",
+                        // Necessary to get the ellipsizing to work.
+                        width: "100%",
+                    }}
                 >
-                    <Box sx={{ svg: { fontSize: "36px" } }}>
+                    <Stack sx={{ svg: { fontSize: "36px" } }}>
                         {startIcon ?? <InfoIcon />}
-                    </Box>
+                    </Stack>
 
                     <Stack
-                        direction={"column"}
-                        spacing={0.5}
                         sx={{
                             flex: 1,
+                            gap: 0.5,
+                            // Undo the center alignment done by the button.
                             textAlign: "left",
                             // This is necessary to trigger the ellipsizing of the
                             // text in children.
                             overflow: "hidden",
                         }}
                     >
-                        {type == "messageSubText" ? (
+                        {textOrder == "titleCaption" ? (
                             <>
+                                <Typography sx={{ fontWeight: "medium" }}>
+                                    {title}
+                                </Typography>
                                 {caption && (
                                     <EllipsizedTypography variant="small">
                                         {caption}
                                     </EllipsizedTypography>
                                 )}
-                                <EllipsizedTypography
-                                    sx={{ fontWeight: "medium" }}
-                                >
-                                    {title}
-                                </EllipsizedTypography>
                             </>
                         ) : (
                             <>
-                                <EllipsizedTypography
-                                    sx={{ fontWeight: "medium" }}
-                                >
-                                    {title}
-                                </EllipsizedTypography>
                                 {caption && (
                                     <EllipsizedTypography variant="small">
                                         {caption}
                                     </EllipsizedTypography>
                                 )}
+                                <Typography sx={{ fontWeight: "medium" }}>
+                                    {title}
+                                </Typography>
                             </>
                         )}
                     </Stack>
@@ -200,13 +207,14 @@ export const Notification: React.FC<NotificationProps> = ({
                     {endIcon ? (
                         <IconButton
                             component="div"
-                            onClick={onClick}
                             sx={{ fontSize: "36px", bgcolor: "fill.faint" }}
                         >
                             {endIcon}
                         </IconButton>
                     ) : (
                         <IconButton
+                            // Buttons cannot be nested in buttons, so we use a div
+                            // here instead.
                             component="div"
                             onClick={handleClose}
                             sx={{ bgcolor: "fill.faint" }}

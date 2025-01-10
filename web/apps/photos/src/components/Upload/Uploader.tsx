@@ -653,7 +653,7 @@ export default function Uploader({
                 break;
             case CustomError.SUBSCRIPTION_EXPIRED:
                 showNotification({
-                    type: "messageSubText",
+                    textOrder: "captionTitle",
                     color: "critical",
                     caption: t("subscription_expired"),
                     title: t("renew_now"),
@@ -662,7 +662,7 @@ export default function Uploader({
                 break;
             case CustomError.STORAGE_QUOTA_EXCEEDED:
                 showNotification({
-                    type: "messageSubText",
+                    textOrder: "captionTitle",
                     color: "critical",
                     caption: t("storage_quota_exceeded"),
                     title: t("upgrade_now"),
@@ -672,9 +672,9 @@ export default function Uploader({
                 break;
             default:
                 showNotification({
-                    variant: "critical",
-                    message: t("generic_error_retry"),
-                    onClick: () => null,
+                    textOrder: "captionTitle",
+                    color: "critical",
+                    title: t("generic_error_retry"),
                 });
         }
     }
