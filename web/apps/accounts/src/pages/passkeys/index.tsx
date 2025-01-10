@@ -1,4 +1,3 @@
-import { FormPaper } from "@/base/components/FormPaper";
 import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { AppNavbar } from "@/base/components/Navbar";
@@ -16,7 +15,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyIcon from "@mui/icons-material/Key";
-import { Box, Stack, Typography, styled } from "@mui/material";
+import { Box, Paper, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -121,7 +120,7 @@ const Page: React.FC = () => {
                     <Box sx={{ marginBottom: "1rem" }}>
                         <Typography>{t("passkeys_description")}</Typography>
                     </Box>
-                    <FormPaper sx={{ p: "1rem" }}>
+                    <Paper sx={{ p: "1rem" }}>
                         <SingleInputForm
                             fieldType="text"
                             placeholder={t("enter_passkey_name")}
@@ -130,7 +129,7 @@ const Page: React.FC = () => {
                             callback={handleSubmit}
                             submitButtonProps={{ sx: { marginBottom: 1 } }}
                         />
-                    </FormPaper>
+                    </Paper>
                     <Box sx={{ marginTop: "1rem" }}>
                         <PasskeysList
                             passkeys={passkeys}

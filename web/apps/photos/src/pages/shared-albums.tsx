@@ -1,6 +1,7 @@
 import { SpaceBetweenFlex } from "@/base/components/containers";
 import { EnteLogoSVG } from "@/base/components/EnteLogo";
 import { FormPaper, FormPaperTitle } from "@/base/components/FormPaper";
+import { LoadingIndicator } from "@/base/components/loaders";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import {
@@ -455,11 +456,7 @@ export default function PublicCollectionGallery() {
     };
 
     if (loading && (!publicFiles || !credentials.current)) {
-        return (
-            <VerticallyCentered>
-                <ActivityIndicator />
-            </VerticallyCentered>
-        );
+        return <LoadingIndicator />;
     } else if (errorMessage) {
         return <VerticallyCentered>{errorMessage}</VerticallyCentered>;
     } else if (isPasswordProtected && !credentials.current.accessTokenJWT) {
