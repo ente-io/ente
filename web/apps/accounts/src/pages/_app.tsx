@@ -15,8 +15,6 @@ import type { AppProps } from "next/app";
 import React, { useEffect, useMemo } from "react";
 import { AppContext } from "../types/context";
 
-import "styles/global.css";
-
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const isI18nReady = useSetupI18n();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
@@ -27,12 +25,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
-    const appContext = useMemo(
-        () => ({
-            showMiniDialog,
-        }),
-        [showMiniDialog],
-    );
+    const appContext = useMemo(() => ({ showMiniDialog }), [showMiniDialog]);
 
     const title = isI18nReady ? t("title_accounts") : staticAppTitle;
 
