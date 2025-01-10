@@ -1,13 +1,6 @@
 import { CenteredFill } from "@/base/components/containers";
 import { AppNavbarNormalFlow } from "@/base/components/Navbar";
-import { isSxArray } from "@/base/components/utils/sx";
-import {
-    Paper,
-    Stack,
-    styled,
-    Typography,
-    type TypographyProps,
-} from "@mui/material";
+import { Paper, Stack, styled, Typography } from "@mui/material";
 
 /**
  * An ad-hoc component that abstracts the layout common to many of the pages
@@ -43,16 +36,10 @@ const AccountsPagePaper = styled(Paper)(({ theme }) => ({
     gap: theme.spacing(4),
 }));
 
-export const AccountsPageTitle: React.FC<TypographyProps> = ({
-    sx,
+export const AccountsPageTitle: React.FC<React.PropsWithChildren> = ({
     children,
-    ...rest
 }) => (
-    <Typography
-        variant="h3"
-        sx={[{ flex: 1 }, ...(sx ? (isSxArray(sx) ? sx : [sx]) : [])]}
-        {...rest}
-    >
+    <Typography variant="h3" sx={{ flex: 1 }}>
         {children}
     </Typography>
 );

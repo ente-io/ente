@@ -214,14 +214,17 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
     return (
         <AccountsPageContents>
-            <AccountsPageTitle sx={{ wordBreak: "break-word" }}>
+            <AccountsPageTitle>
                 <Trans
                     i18nKey="email_sent"
                     components={{
                         a: (
                             <Box
                                 component={"span"}
-                                sx={{ color: "text.muted" }}
+                                sx={{
+                                    color: "text.muted",
+                                    wordBreak: "break-word",
+                                }}
                             />
                         ),
                     }}
