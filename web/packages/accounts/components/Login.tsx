@@ -12,14 +12,24 @@ import { useRouter } from "next/router";
 import { PAGES } from "../constants/pages";
 import { getSRPAttributes } from "../services/srp-remote";
 import { sendOTT } from "../services/user";
+import {
+    AccountsPageFooter,
+    AccountsPageTitle,
+} from "./layouts/centered-paper";
 
 interface LoginProps {
     signUp: () => void;
     /** Reactive value of {@link customAPIHost}. */
     host: string | undefined;
+    /**
+     * If true, return the "newer" variant.
+     *
+     * TODO: Remove the branching.
+     */
+    useV2?: boolean;
 }
 
-export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
+export const Login: React.FC<LoginProps> = ({ signUp, host, useV2 }) => {
     const router = useRouter();
 
     const loginUser: SingleInputFormProps["callback"] = async (
@@ -54,31 +64,46 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
         }
     };
 
+    const form = (
+        <SingleInputForm
+            callback={loginUser}
+            fieldType="email"
+            placeholder={t("enter_email")}
+            buttonText={t("login")}
+            autoComplete="username"
+            hiddenPostInput={
+                <Input sx={{ display: "none" }} type="password" value="" />
+            }
+        />
+    );
+
+    const footerContents = (
+        <Stack sx={{ gap: 4, textAlign: "center" }}>
+            <LinkButton onClick={signUp}>{t("no_account")}</LinkButton>
+            <Typography
+                variant="mini"
+                sx={{ color: "text.faint", minHeight: "16px" }}
+            >
+                {host ?? "" /* prevent layout shift with a minHeight */}
+            </Typography>
+        </Stack>
+    );
+
+    if (useV2) {
+        return (
+            <>
+                <AccountsPageTitle>{t("login")}</AccountsPageTitle>
+                {form}
+                <AccountsPageFooter>{footerContents}</AccountsPageFooter>
+            </>
+        );
+    }
+
     return (
         <>
             <FormPaperTitle>{t("login")}</FormPaperTitle>
-            <SingleInputForm
-                callback={loginUser}
-                fieldType="email"
-                placeholder={t("enter_email")}
-                buttonText={t("login")}
-                autoComplete="username"
-                hiddenPostInput={
-                    <Input sx={{ display: "none" }} type="password" value="" />
-                }
-            />
-            <FormPaperFooter>
-                <Stack sx={{ gap: 4 }}>
-                    <LinkButton onClick={signUp}>{t("no_account")}</LinkButton>
-
-                    <Typography
-                        variant="mini"
-                        sx={{ color: "text.faint", minHeight: "32px" }}
-                    >
-                        {host ?? "" /* prevent layout shift with a minHeight */}
-                    </Typography>
-                </Stack>
-            </FormPaperFooter>
+            {form}
+            <FormPaperFooter>{footerContents}</FormPaperFooter>
         </>
     );
 };
