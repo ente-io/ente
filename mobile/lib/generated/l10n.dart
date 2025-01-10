@@ -10007,6 +10007,16 @@ class S {
     );
   }
 
+  /// `Processed`
+  String get processed {
+    return Intl.message(
+      'Processed',
+      name: 'processed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Remove`
   String get resetPerson {
     return Intl.message(
