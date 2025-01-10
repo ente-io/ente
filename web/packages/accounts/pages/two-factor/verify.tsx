@@ -1,11 +1,5 @@
 import { PAGES } from "@/accounts/constants/pages";
 import { verifyTwoFactor } from "@/accounts/services/user";
-import {
-    FormPaper,
-    FormPaperFooter,
-    FormPaperTitle,
-} from "@/base/components/FormPaper";
-import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { ApiError } from "@ente/shared/error";
 import {
@@ -19,6 +13,11 @@ import { HttpStatusCode } from "axios";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import {
+    AccountsPageContents,
+    AccountsPageFooter,
+    AccountsPageTitle,
+} from "../../components/layouts/centered-paper";
 import {
     VerifyTwoFactor,
     type VerifyTwoFactorCallback,
@@ -73,23 +72,18 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     };
 
     return (
-        <VerticallyCentered>
-            <FormPaper sx={{ maxWidth: "410px" }}>
-                <FormPaperTitle>{t("two_factor")}</FormPaperTitle>
-                <VerifyTwoFactor onSubmit={onSubmit} buttonText={t("verify")} />
-
-                <FormPaperFooter>
-                    <LinkButton
-                        onClick={() => router.push(PAGES.TWO_FACTOR_RECOVER)}
-                    >
-                        {t("lost_2fa_device")}
-                    </LinkButton>
-                    <LinkButton onClick={logout}>
-                        {t("change_email")}
-                    </LinkButton>
-                </FormPaperFooter>
-            </FormPaper>
-        </VerticallyCentered>
+        <AccountsPageContents>
+            <AccountsPageTitle>{t("two_factor")}</AccountsPageTitle>
+            <VerifyTwoFactor onSubmit={onSubmit} buttonText={t("verify")} />
+            <AccountsPageFooter>
+                <LinkButton
+                    onClick={() => router.push(PAGES.TWO_FACTOR_RECOVER)}
+                >
+                    {t("lost_2fa_device")}
+                </LinkButton>
+                <LinkButton onClick={logout}>{t("change_email")}</LinkButton>
+            </AccountsPageFooter>
+        </AccountsPageContents>
     );
 };
 

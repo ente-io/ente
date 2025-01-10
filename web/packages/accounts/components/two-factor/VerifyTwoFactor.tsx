@@ -74,6 +74,7 @@ export function VerifyTwoFactor(props: Props) {
                         </Typography>
                         <Box sx={{ my: 2 }}>
                             <OtpInput
+                                containerStyle={{ justifyContent: "center" }}
                                 shouldAutoFocus={shouldAutoFocus}
                                 value={values.otp}
                                 onChange={onChange(
@@ -117,7 +118,7 @@ const IndividualInput = styled("input")(
     padding: 4px;
     width: 40px !important;
     aspect-ratio: 1;
-    margin-inline: 8px;
+    margin-inline: 6px;
     border: 1px solid ${theme.colors.accent.A700};
     border-radius: 1px;
     outline-color: ${theme.colors.accent.A300};
