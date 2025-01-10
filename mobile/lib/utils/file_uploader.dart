@@ -525,9 +525,20 @@ class FileUploader {
       throw LockAlreadyAcquiredError();
     }
 
-    final tempDirectory = Configuration.instance.getTempDirectory();
     MediaUploadData? mediaUploadData;
-    mediaUploadData = await getUploadDataFromEnteFile(file);
+    try {
+      mediaUploadData = await getUploadDataFromEnteFile(file);
+    } catch (e) {
+      // This additional try catch block is added because for resumable upload,
+      // we need to compute the hash before the next step. Previously, this
+      // was done in during the upload itself.
+      if (e is InvalidFileError) {
+        _logger.severe("File upload ignored for " + file.toString(), e);
+        await _onInvalidFileError(file, e);
+      }
+      await _uploadLocks.releaseLock(lockKey, _processType.toString());
+      rethrow;
+    }
 
     final String? existingMultipartEncFileName =
         mediaUploadData.hashData?.fileHash != null
@@ -538,7 +549,7 @@ class FileUploader {
               )
             : null;
     bool multipartEntryExists = existingMultipartEncFileName != null;
-
+    final tempDirectory = Configuration.instance.getTempDirectory();
     final String uniqueID =
         '${const Uuid().v4().toString()}_${file.generatedID}';
 
