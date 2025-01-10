@@ -16,8 +16,11 @@ import {
  * The layout is roughly:
  * - Set height to 100vh
  * - An app bar at the top
- * - Center a {@link FormPaper} in the rest of the space.
- * - The children passed to this component go within this {@link FormPaper}.
+ * - Center a {@link Paper} in the rest of the space.
+ * - The children passed to this component go within this {@link Paper}.
+ *
+ * {@link AccountsPageTitle} and {@link AccountsPageFooter} are meant to be used
+ * in tandem with, as children of, {@link AccountsPageContents}.
  */
 export const AccountsPageContents: React.FC<React.PropsWithChildren> = ({
     children,
