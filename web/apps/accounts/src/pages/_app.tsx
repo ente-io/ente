@@ -1,6 +1,6 @@
 import { staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
-import { LoadingOverlay } from "@/base/components/LoadingOverlay";
+import { LoadingOverlay } from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
 import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";

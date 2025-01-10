@@ -4,18 +4,20 @@ import {
     passkeySessionExpiredErrorMessage,
     saveCredentialsAndNavigateTo,
 } from "@/accounts/services/passkey";
-import { FormPaper, FormPaperFooter } from "@/base/components/FormPaper";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { genericErrorDialogAttributes } from "@/base/components/utils/dialog";
 import log from "@/base/log";
 import { customAPIHost } from "@/base/origins";
-import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { CircularProgress, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import {
+    AccountsPageContents,
+    AccountsPageFooter,
+} from "./layouts/centered-paper";
 
 export const PasswordHeader: React.FC<React.PropsWithChildren> = ({
     children,
@@ -44,7 +46,7 @@ const Header_ = styled("div")`
     gap: 8px;
 `;
 
-export const LoginFlowFormFooter: React.FC<React.PropsWithChildren> = ({
+export const AccountsPageFooterWithHost: React.FC<React.PropsWithChildren> = ({
     children,
 }) => {
     const [host, setHost] = useState<string | undefined>();
@@ -52,16 +54,14 @@ export const LoginFlowFormFooter: React.FC<React.PropsWithChildren> = ({
     useEffect(() => void customAPIHost().then(setHost), []);
 
     return (
-        <FormPaperFooter>
-            <Stack sx={{ gap: "16px", width: "100%", textAlign: "start" }}>
-                {children}
-                {host && (
-                    <Typography variant="small" sx={{ color: "text.faint" }}>
-                        {host}
-                    </Typography>
-                )}
-            </Stack>
-        </FormPaperFooter>
+        <Stack sx={{ gap: 2 }}>
+            <AccountsPageFooter>{children}</AccountsPageFooter>
+            {host && (
+                <Typography variant="small" sx={{ color: "text.faint" }}>
+                    {host}
+                </Typography>
+            )}
+        </Stack>
     );
 };
 
@@ -119,59 +119,50 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
     };
 
     return (
-        <VerticallyCentered>
-            <FormPaper style={{ minWidth: "320px" }}>
-                <PasskeyHeader>{email ?? ""}</PasskeyHeader>
+        <AccountsPageContents>
+            <PasskeyHeader>{email ?? ""}</PasskeyHeader>
 
-                <VerifyingPasskeyMiddle>
-                    <VerifyingPasskeyStatus>
-                        {verificationStatus == "checking" ? (
-                            <Typography>
-                                <CircularProgress color="accent" size="1.5em" />
-                            </Typography>
-                        ) : (
-                            <Typography sx={{ color: "text.muted" }}>
-                                {verificationStatus == "waiting"
-                                    ? t("waiting_for_verification")
-                                    : t("verification_still_pending")}
-                            </Typography>
-                        )}
-                    </VerifyingPasskeyStatus>
+            <VerifyingPasskeyMiddle>
+                <VerifyingPasskeyStatus>
+                    {verificationStatus == "checking" ? (
+                        <Typography>
+                            <CircularProgress color="accent" size="1.5em" />
+                        </Typography>
+                    ) : (
+                        <Typography sx={{ color: "text.muted" }}>
+                            {verificationStatus == "waiting"
+                                ? t("waiting_for_verification")
+                                : t("verification_still_pending")}
+                        </Typography>
+                    )}
+                </VerifyingPasskeyStatus>
 
-                    <ButtonStack>
-                        <FocusVisibleButton
-                            onClick={handleRetry}
-                            fullWidth
-                            color="secondary"
-                        >
-                            {t("try_again")}
-                        </FocusVisibleButton>
-
-                        <FocusVisibleButton
-                            onClick={handleCheckStatus}
-                            fullWidth
-                            color="accent"
-                        >
-                            {t("check_status")}
-                        </FocusVisibleButton>
-                    </ButtonStack>
-                </VerifyingPasskeyMiddle>
-
-                <LoginFlowFormFooter>
-                    <Stack
-                        direction="row"
-                        sx={{ justifyContent: "space-between" }}
+                <ButtonStack>
+                    <FocusVisibleButton
+                        onClick={handleRetry}
+                        fullWidth
+                        color="secondary"
                     >
-                        <LinkButton onClick={handleRecover}>
-                            {t("recover_account")}
-                        </LinkButton>
-                        <LinkButton onClick={logout}>
-                            {t("change_email")}
-                        </LinkButton>
-                    </Stack>
-                </LoginFlowFormFooter>
-            </FormPaper>
-        </VerticallyCentered>
+                        {t("try_again")}
+                    </FocusVisibleButton>
+
+                    <FocusVisibleButton
+                        onClick={handleCheckStatus}
+                        fullWidth
+                        color="accent"
+                    >
+                        {t("check_status")}
+                    </FocusVisibleButton>
+                </ButtonStack>
+            </VerifyingPasskeyMiddle>
+
+            <AccountsPageFooterWithHost>
+                <LinkButton onClick={handleRecover}>
+                    {t("recover_account")}
+                </LinkButton>
+                <LinkButton onClick={logout}>{t("change_email")}</LinkButton>
+            </AccountsPageFooterWithHost>
+        </AccountsPageContents>
     );
 };
 

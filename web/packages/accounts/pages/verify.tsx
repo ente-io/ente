@@ -20,9 +20,8 @@ import type {
 import { getSRPAttributes } from "@/accounts/services/srp-remote";
 import { putAttributes, sendOTT, verifyEmail } from "@/accounts/services/user";
 import type { PageProps } from "@/accounts/types/page";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { LoadingIndicator } from "@/base/components/loaders";
 import log from "@/base/log";
-import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
     type SingleInputFormProps,
@@ -184,11 +183,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     };
 
     if (!email) {
-        return (
-            <VerticallyCentered>
-                <ActivityIndicator />
-            </VerticallyCentered>
-        );
+        return <LoadingIndicator />;
     }
 
     if (passkeyVerificationData) {
@@ -202,11 +197,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         // See: [Note: Passkey verification in the desktop app]
 
         if (!globalThis.electron) {
-            return (
-                <VerticallyCentered>
-                    <ActivityIndicator />
-                </VerticallyCentered>
-            );
+            return <LoadingIndicator />;
         }
 
         return (

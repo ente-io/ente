@@ -1,7 +1,7 @@
 import { accountLogout } from "@/accounts/services/logout";
 import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
-import { LoadingOverlay } from "@/base/components/LoadingOverlay";
+import { LoadingOverlay } from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { AppNavbar } from "@/base/components/Navbar";
 import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
