@@ -96,6 +96,8 @@ export const Notification: React.FC<NotificationProps> = ({
     attributes,
     keepOpenOnClick,
 }) => {
+    if (!attributes) return <></>;
+
     const handleClose: ButtonProps["onClick"] = (event) => {
         onClose();
         event.stopPropagation();

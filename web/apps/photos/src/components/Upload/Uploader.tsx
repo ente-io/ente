@@ -18,7 +18,6 @@ import type {
 } from "@/new/photos/services/upload/types";
 import { redirectToCustomerPortal } from "@/new/photos/services/user-details";
 import { useAppContext } from "@/new/photos/types/context";
-import { NotificationAttributes } from "@/new/photos/types/notification";
 import { firstNonEmpty } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
@@ -106,13 +105,14 @@ export default function Uploader({
     openZipFileSelector,
     fileSelectorZipFiles,
     onUploadFile,
+    showSessionExpiredMessage,
     ...props
 }: Props) {
     const {
         showMiniDialog,
+        showNotification,
         onGenericError,
         watchFolderView,
-        setNotificationAttributes,
     } = useAppContext();
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
@@ -647,36 +647,34 @@ export default function Uploader({
     };
 
     function showUserFacingError(err: string) {
-        let notification: NotificationAttributes;
         switch (err) {
             case CustomError.SESSION_EXPIRED:
-                props.showSessionExpiredMessage();
-                return;
+                showSessionExpiredMessage();
+                break;
             case CustomError.SUBSCRIPTION_EXPIRED:
-                notification = {
+                showNotification({
                     variant: "critical",
                     subtext: t("subscription_expired"),
                     message: t("renew_now"),
                     onClick: redirectToCustomerPortal,
-                };
+                });
                 break;
             case CustomError.STORAGE_QUOTA_EXCEEDED:
-                notification = {
+                showNotification({
                     variant: "critical",
                     subtext: t("storage_quota_exceeded"),
                     message: t("upgrade_now"),
                     onClick: () => galleryContext.showPlanSelectorModal(),
                     startIcon: <DiscFullIcon />,
-                };
+                });
                 break;
             default:
-                notification = {
+                showNotification({
                     variant: "critical",
                     message: t("generic_error_retry"),
                     onClick: () => null,
-                };
+                });
         }
-        setNotificationAttributes(notification);
     }
 
     const uploadToSingleNewCollection = (collectionName: string) => {
