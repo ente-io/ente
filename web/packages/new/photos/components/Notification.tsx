@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { RippleDisabledButton } from "@/base/components/mui/FocusVisibleButton";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
@@ -73,7 +72,7 @@ type NotificationProps = ModalVisibilityProps & {
      * Attributes that customize the contents of the notification, and the
      * actions that happen on clicking it.
      */
-    attributes: NotificationAttributes;
+    attributes: NotificationAttributes | undefined;
     /**
      * If `true`, then the notification is not closed when it is clicked, and
      * should be closed by pressing the close icon button it contains.
