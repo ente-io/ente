@@ -1355,6 +1355,8 @@ class FileUploader {
     }
   }
 
+  // _pollBackgroundUploadStatus polls the background uploads to check if the
+  // upload is completed or failed.
   Future<void> _pollBackgroundUploadStatus() async {
     final blockedUploads = _queue.entries
         .where((e) => e.value.status == UploadStatus.inBackground)
@@ -1370,18 +1372,29 @@ class FileUploader {
         final dbFile =
             await FilesDB.instance.getFile(upload.value.file.generatedID!);
         if (dbFile?.uploadedFileID != null) {
-          _logger.info("Background upload success detected");
+          _logger.info(
+              "Background upload success detected ${upload.value.file.tag}");
           completer?.complete(dbFile);
           _allBackups[upload.key] = _allBackups[upload.key]!
               .copyWith(status: BackupItemStatus.uploaded);
         } else {
-          _logger.info("Background upload failure detected");
+          _logger.info(
+            "Background upload failure detected ${upload.value.file.tag}",
+          );
+          // The upload status is marked as in background, but the file is not locked
+          // by the background process. Release any lock taken by the foreground process
+          // and complete the completer with error.
+          await _uploadLocks.releaseLock(
+            file.localID!,
+            ProcessType.foreground.toString(),
+          );
           completer?.completeError(SilentlyCancelUploadsError());
           _allBackups[upload.key] = _allBackups[upload.key]!.copyWith(
             status: BackupItemStatus.retry,
             error: SilentlyCancelUploadsError(),
           );
         }
+
         Bus.instance.fire(BackupUpdatedEvent(_allBackups));
       }
     }
@@ -1405,12 +1418,7 @@ class FileUploadItem {
   });
 }
 
-enum UploadStatus {
-  notStarted,
-  inProgress,
-  inBackground,
-  completed,
-}
+enum UploadStatus { notStarted, inProgress, inBackground, completed }
 
 enum ProcessType {
   background,
