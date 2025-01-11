@@ -451,10 +451,10 @@ packages:
     dependency: "direct main"
     description:
       name: file_picker
-      sha256: "167bb619cdddaa10ef2907609feb8a79c16dfa479d3afaf960f8e223f754bf12"
+      sha256: c904b4ab56d53385563c7c39d8e9fa9af086f91495dfc48717ad84a42c3cf204
       url: "https://pub.dev"
     source: hosted
-    version: "8.1.2"
+    version: "8.1.7"
   file_saver:
     dependency: "direct main"
     description:

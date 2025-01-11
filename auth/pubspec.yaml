@@ -1,3 +1,4 @@
+
 name: ente_auth
 description: ente two-factor authenticator
 version: 4.2.3+423
@@ -32,7 +33,7 @@ dependencies:
   expansion_tile_card: ^3.0.0
   ffi: ^2.1.0
   figma_squircle: ^0.5.3
-  file_picker: ^8.1.2
+  file_picker: ^8.1.7
   # https://github.com/incrediblezayed/file_saver/issues/86
   file_saver: ^0.2.11
   fixnum: ^1.1.0
