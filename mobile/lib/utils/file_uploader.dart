@@ -65,7 +65,7 @@ class FileUploader {
   final LinkedHashMap<String, BackupItem> _allBackups =
       LinkedHashMap<String, BackupItem>();
   final _uploadLocks = UploadLocksDB.instance;
-  final kSafeBufferForLockExpiry = const Duration(days: 1).inMicroseconds;
+  final kSafeBufferForLockExpiry = const Duration(hours: 4).inMicroseconds;
   final kBGTaskDeathTimeout = const Duration(seconds: 5).inMicroseconds;
   final _uploadURLs = Queue<UploadURL>();
 
@@ -111,14 +111,20 @@ class FileUploader {
         .releaseAllLocksAcquiredBefore(currentTime - kSafeBufferForLockExpiry);
     if (!isBackground) {
       await _prefs.reload();
-      final isBGTaskDead = (_prefs.getInt(kLastBGTaskHeartBeatTime) ?? 0) <
-          (currentTime - kBGTaskDeathTimeout);
+      final lastBGTaskHeartBeatTime =
+          _prefs.getInt(kLastBGTaskHeartBeatTime) ?? 0;
+      final isBGTaskDead =
+          lastBGTaskHeartBeatTime < (currentTime - kBGTaskDeathTimeout);
       if (isBGTaskDead) {
         await _uploadLocks.releaseLocksAcquiredByOwnerBefore(
           ProcessType.background.toString(),
           currentTime,
         );
         _logger.info("BG task was found dead, cleared all locks");
+      } else {
+        _logger.info(
+          "BG task is alive, not clearing locks ${DateTime.fromMicrosecondsSinceEpoch(lastBGTaskHeartBeatTime)}",
+        );
       }
       // ignore: unawaited_futures
       _pollBackgroundUploadStatus();
@@ -517,9 +523,20 @@ class FileUploader {
       throw LockAlreadyAcquiredError();
     }
 
-    final tempDirectory = Configuration.instance.getTempDirectory();
     MediaUploadData? mediaUploadData;
-    mediaUploadData = await getUploadDataFromEnteFile(file);
+    try {
+      mediaUploadData = await getUploadDataFromEnteFile(file);
+    } catch (e) {
+      // This additional try catch block is added because for resumable upload,
+      // we need to compute the hash before the next step. Previously, this
+      // was done in during the upload itself.
+      if (e is InvalidFileError) {
+        _logger.severe("File upload ignored for " + file.toString(), e);
+        await _onInvalidFileError(file, e);
+      }
+      await _uploadLocks.releaseLock(lockKey, _processType.toString());
+      rethrow;
+    }
 
     final String? existingMultipartEncFileName =
         mediaUploadData.hashData?.fileHash != null
@@ -530,7 +547,7 @@ class FileUploader {
               )
             : null;
     bool multipartEntryExists = existingMultipartEncFileName != null;
-
+    final tempDirectory = Configuration.instance.getTempDirectory();
     final String uniqueID =
         '${const Uuid().v4().toString()}_${file.generatedID}';
 
@@ -1338,6 +1355,8 @@ class FileUploader {
     }
   }
 
+  // _pollBackgroundUploadStatus polls the background uploads to check if the
+  // upload is completed or failed.
   Future<void> _pollBackgroundUploadStatus() async {
     final blockedUploads = _queue.entries
         .where((e) => e.value.status == UploadStatus.inBackground)
@@ -1353,18 +1372,30 @@ class FileUploader {
         final dbFile =
             await FilesDB.instance.getFile(upload.value.file.generatedID!);
         if (dbFile?.uploadedFileID != null) {
-          _logger.info("Background upload success detected");
+          _logger.info(
+            "Background upload success detected ${upload.value.file.tag}",
+          );
           completer?.complete(dbFile);
           _allBackups[upload.key] = _allBackups[upload.key]!
               .copyWith(status: BackupItemStatus.uploaded);
         } else {
-          _logger.info("Background upload failure detected");
+          _logger.info(
+            "Background upload failure detected ${upload.value.file.tag}",
+          );
+          // The upload status is marked as in background, but the file is not locked
+          // by the background process. Release any lock taken by the foreground process
+          // and complete the completer with error.
+          await _uploadLocks.releaseLock(
+            file.localID!,
+            ProcessType.foreground.toString(),
+          );
           completer?.completeError(SilentlyCancelUploadsError());
           _allBackups[upload.key] = _allBackups[upload.key]!.copyWith(
             status: BackupItemStatus.retry,
             error: SilentlyCancelUploadsError(),
           );
         }
+
         Bus.instance.fire(BackupUpdatedEvent(_allBackups));
       }
     }
@@ -1388,12 +1419,7 @@ class FileUploadItem {
   });
 }
 
-enum UploadStatus {
-  notStarted,
-  inProgress,
-  inBackground,
-  completed,
-}
+enum UploadStatus { notStarted, inProgress, inBackground, completed }
 
 enum ProcessType {
   background,
