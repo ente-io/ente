@@ -45,6 +45,17 @@
       "hex": "fd4b2d"
     },
     {
+      "title": "AzurHosts",
+      "slug": "azurhosts",
+      "altNames": [
+        "minenode"
+      ]
+    },
+    {
+      "title": "AzurWare",
+      "slug": "azuware",
+    },
+    {
       "title": "BaiduCloud",
       "slug": "baidu_cloud",
       "altNames": [
