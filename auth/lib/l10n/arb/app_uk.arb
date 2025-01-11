@@ -495,7 +495,7 @@
   "appLockNotEnabledDescription": "Увімкніть блокування програм від безпеки > Блокування програм",
   "authToViewPasskey": "Будь ласка, авторизуйтеся для перегляду ключа доступу",
   "appLockOfflineModeWarning": "Ви обрали продовжити без резервних копій. Якщо ви забудете свій пароль, доступ до ваших даних буде заблоковано.",
-  "duplicateCodes": "Дублювати коди",
+  "duplicateCodes": "Дублікати кодів",
   "noDuplicates": "✨ Немає дублікатів",
   "youveNoDuplicateCodesThatCanBeCleared": "У вас немає дублікатів кодів, які можна очистити",
   "deduplicateCodes": "Дедуплікувати коди",
