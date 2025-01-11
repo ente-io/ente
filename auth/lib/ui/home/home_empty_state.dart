@@ -1,4 +1,5 @@
 import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/services/auth_feature_flag.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/settings/data/import_page.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
@@ -52,7 +53,9 @@ class HomeEmptyStateWidget extends StatelessWidget {
                         ),
                       ),
                     const SizedBox(height: 18),
-                    if (PlatformUtil.isMobile())
+                    if (PlatformUtil.isMobile() &&
+                        FeatureFlagService.instance
+                            .isInternalUserOrDebugBuild())
                       SizedBox(
                         width: 400,
                         child: OutlinedButton(
