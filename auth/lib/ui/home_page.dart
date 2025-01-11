@@ -14,6 +14,7 @@ import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/model/tag_enums.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
+import 'package:ente_auth/services/auth_feature_flag.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
@@ -750,7 +751,8 @@ class _HomePageState extends State<HomePage> {
           labelWidget: SpeedDialLabelWidget(context.l10n.scanAQrCode),
           onTap: _redirectToScannerPage,
         ),
-        if (PlatformUtil.isMobile())
+        if (PlatformUtil.isMobile() &&
+            FeatureFlagService.instance.isInternalUserOrDebugBuild())
           SpeedDialChild(
             child: const Icon(Icons.image),
             foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
