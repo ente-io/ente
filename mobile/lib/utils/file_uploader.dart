@@ -65,9 +65,7 @@ class FileUploader {
   final LinkedHashMap<String, BackupItem> _allBackups =
       LinkedHashMap<String, BackupItem>();
   final _uploadLocks = UploadLocksDB.instance;
-  final kSafeBufferForLockExpiry = Platform.isIOS
-      ? const Duration(minutes: 5).inMicroseconds
-      : const Duration(hours: 1).inMicroseconds;
+  final kSafeBufferForLockExpiry = const Duration(hours: 4).inMicroseconds;
   final kBGTaskDeathTimeout = const Duration(seconds: 5).inMicroseconds;
   final _uploadURLs = Queue<UploadURL>();
 
