@@ -1373,7 +1373,8 @@ class FileUploader {
             await FilesDB.instance.getFile(upload.value.file.generatedID!);
         if (dbFile?.uploadedFileID != null) {
           _logger.info(
-              "Background upload success detected ${upload.value.file.tag}");
+            "Background upload success detected ${upload.value.file.tag}",
+          );
           completer?.complete(dbFile);
           _allBackups[upload.key] = _allBackups[upload.key]!
               .copyWith(status: BackupItemStatus.uploaded);
