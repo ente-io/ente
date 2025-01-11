@@ -228,6 +228,9 @@ smtp:
     # The email address from which to send the email. Set this to an email
     # address whose credentials you're providing.
     email:
+    # Optional override for the sender name in the emails. If specified, it will
+    # be used for all emails sent by the instance (default is email specific).
+    sender-name:
 
 # Zoho Zeptomail config (optional)
 #
