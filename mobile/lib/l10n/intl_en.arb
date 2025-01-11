@@ -2,6 +2,8 @@
   "@@locale ": "en",
   "enterYourEmailAddress": "Enter your email address",
   "accountWelcomeBack": "Welcome back!",
+  "emailAlreadyRegistered": "Email already registered.",
+  "emailNotRegistered": "Email not registered.",
   "email": "Email",
   "cancel": "Cancel",
   "verify": "Verify",

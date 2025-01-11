@@ -70,6 +70,26 @@ class S {
     );
   }
 
+  /// `Email already registered.`
+  String get emailAlreadyRegistered {
+    return Intl.message(
+      'Email already registered.',
+      name: 'emailAlreadyRegistered',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Email not registered.`
+  String get emailNotRegistered {
+    return Intl.message(
+      'Email not registered.',
+      name: 'emailNotRegistered',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Email`
   String get email {
     return Intl.message(
