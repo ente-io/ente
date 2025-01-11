@@ -109,7 +109,24 @@ class UserService {
     } on DioException catch (e) {
       await dialog.hide();
       _logger.info(e);
-      if (e.response != null && e.response!.statusCode == 403) {
+      final String? enteErrCode = e.response?.data["code"];
+      if (enteErrCode != null && enteErrCode == "USER_ALREADY_REGISTERED") {
+        unawaited(
+          showErrorDialog(
+            context,
+            context.l10n.oops,
+            context.l10n.emailAlreadyRegistered,
+          ),
+        );
+      } else if (enteErrCode != null && enteErrCode == "USER_NOT_REGISTERED") {
+        unawaited(
+          showErrorDialog(
+            context,
+            context.l10n.oops,
+            context.l10n.emailNotRegistered,
+          ),
+        );
+      } else if (e.response != null && e.response!.statusCode == 403) {
         unawaited(
           showErrorDialog(
             context,
