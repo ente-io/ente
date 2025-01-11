@@ -22,7 +22,7 @@
   "secret": "Titkos kód",
   "all": "Minden",
   "notes": "Megjegyzések",
-  "notesLengthLimit": "A megjegyzés [count} karakter hosszú lehet",
+  "notesLengthLimit": "A megjegyzés {count} karakter hosszú lehet",
   "@notesLengthLimit": {
     "description": "Text to indicate the maximum number of characters allowed for notes",
     "placeholders": {
@@ -77,7 +77,7 @@
     }
   },
   "contactSupport": "Lépj kapcsolatba az Ügyfélszolgálattal",
-  "rateUsOnStore": "Értékelj minket a következőn: {StoreName}",
+  "rateUsOnStore": "Értékelj minket a következőn: {storeName}",
   "blog": "Blog",
   "merchandise": "Áru",
   "verifyPassword": "Jelszó megerősítése",
