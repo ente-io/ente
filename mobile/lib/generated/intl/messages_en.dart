@@ -790,8 +790,12 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Edits to location will only be seen within Ente"),
         "eligible": MessageLookupByLibrary.simpleMessage("eligible"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
+        "emailAlreadyRegistered":
+            MessageLookupByLibrary.simpleMessage("Email already registered."),
         "emailChangedTo": m30,
         "emailNoEnteAccount": m31,
+        "emailNotRegistered":
+            MessageLookupByLibrary.simpleMessage("Email not registered."),
         "emailVerificationToggle":
             MessageLookupByLibrary.simpleMessage("Email verification"),
         "emailYourLogs":
