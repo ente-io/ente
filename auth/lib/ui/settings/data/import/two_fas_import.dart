@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/models/code_display.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/common/progress_dialog.dart';
@@ -58,7 +59,7 @@ Future<void> _pick2FasFile(BuildContext context) async {
   }
   final ProgressDialog progressDialog =
       createProgressDialog(context, l10n.pleaseWait);
-  await progressDialog.show();
+
   try {
     String path = result.files.single.path!;
     int? count = await _process2FasExportFile(context, path, progressDialog);
@@ -100,6 +101,13 @@ Future<int?> _process2FasExportFile(
     );
     return null;
   }
+  final groupIdToName = {};
+  var groups = decodedJson['groups'];
+  if (groups != null) {
+    for (var group in groups) {
+      groupIdToName[group['id']] = group['name'];
+    }
+  }
 
   var decodedServices = decodedJson['services'];
   // https://github.com/twofas/2fas-android/blob/e97f1a1040eafaed6d5284d54d33403dff215886/data/services/src/main/java/com/twofasapp/data/services/domain/BackupContent.kt#L39
@@ -120,6 +128,7 @@ Future<int?> _process2FasExportFile(
         await dialog.hide();
         return null;
       }
+      await dialog.show();
       final content = decrypt2FasVault(decodedJson, password: password!);
       decodedServices = jsonDecode(content);
     } catch (e, s) {
@@ -134,6 +143,8 @@ Future<int?> _process2FasExportFile(
       }
       return null;
     }
+  } else {
+    await dialog.show();
   }
   final parsedCodes = [];
   for (var item in decodedServices) {
@@ -143,6 +154,7 @@ Future<int?> _process2FasExportFile(
     if (issuer == null || (issuer as String).isEmpty) {
       issuer = item['name'] ?? '';
     }
+    final String? groupID = item['groupId'];
     var algorithm = item['otp']['algorithm'];
     var secret = item['secret'];
     var timer = item['otp']['period'];
@@ -161,7 +173,13 @@ Future<int?> _process2FasExportFile(
     } else {
       throw Exception('Invalid OTP type ${kind.toLowerCase()}');
     }
-    parsedCodes.add(Code.fromOTPAuthUrl(otpUrl));
+    Code code = Code.fromOTPAuthUrl(otpUrl);
+    if (groupID != null && groupIdToName.containsKey(groupID)) {
+      code = code.copyWith(
+        display: CodeDisplay(tags: [groupIdToName[groupID]]),
+      );
+    }
+    parsedCodes.add(code);
   }
 
   for (final code in parsedCodes) {
