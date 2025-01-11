@@ -33,14 +33,21 @@ func (r RecoverRow) CanRecover() error {
 	return nil
 }
 
-func (repo *Repository) InsertIntoRecovery(ctx *gin.Context, req ente.ContactIdentifier, row ContactRow) (bool, error) {
-	waitTime := time.MicrosecondsAfterHours(row.NoticePeriodInHrs)
-	nextReminder := time.MicrosecondsAfterHours(row.NoticePeriodInHrs - 24)
-	if row.NoticePeriodInHrs < 25 {
-		nextReminder = time.Microseconds()
+func (repo *Repository) InsertIntoRecovery(ctx *gin.Context, contact ente.ContactIdentifier, contactRow ContactRow) (bool, error) {
+	if contactRow.NoticePeriodInHrs <= 24 {
+		logrus.Warn("notice period is less than 24 hours")
+		return false, ente.NewBadRequestWithMessage("notice period should be greater than 24 hours")
+	}
+	waitTime := time.MicrosecondsAfterHours(contactRow.NoticePeriodInHrs)
+	// remind after 7 days.
+	nextReminder := time.MicrosecondsAfterHours(24 * 7)
+	if nextReminder >= waitTime {
+		logrus.Warn("initial reminder is greater than wait time")
+		// remind in 1 day if notice period is less than 7 days.
+		nextReminder = time.MicrosecondsAfterHours(24 * 1)
 	}
 	result, err := repo.DB.ExecContext(ctx, `INSERT INTO emergency_recovery (id,user_id, emergency_contact_id, status, wait_till, next_reminder_at) VALUES ($1, $2, $3, $4, $5, $6) on conflict DO NOTHING`,
-		uuid.New(), req.UserID, req.EmergencyContactID, ente.RecoveryStatusWaiting, waitTime, nextReminder)
+		uuid.New(), contact.UserID, contact.EmergencyContactID, ente.RecoveryStatusWaiting, waitTime, nextReminder)
 	if err != nil {
 		return false, stacktrace.Propagate(err, "")
 	}
