@@ -413,55 +413,52 @@ class _HomePageState extends State<HomePage> {
                 ),
           centerTitle: PlatformUtil.isDesktop() ? false : true,
           actions: <Widget>[
-            SortCodeMenuWidget(
-              currentKey: PreferenceService.instance.codeSortKey(),
-              onSelected: (newOrder) async {
-                await PreferenceService.instance.setCodeSortKey(newOrder);
-                if (newOrder == CodeSortKey.manual &&
-                    newOrder == _codeSortKey) {
-                  await navigateToReorderPage(_allCodes!);
-                }
-                setState(() {
-                  _codeSortKey = newOrder;
-                });
-                if (mounted) {
-                  _applyFilteringAndRefresh();
-                }
-              },
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SortCodeMenuWidget(
+                currentKey: PreferenceService.instance.codeSortKey(),
+                onSelected: (newOrder) async {
+                  await PreferenceService.instance.setCodeSortKey(newOrder);
+                  if (newOrder == CodeSortKey.manual &&
+                      newOrder == _codeSortKey) {
+                    await navigateToReorderPage(_allCodes!);
+                  }
+                  setState(() {
+                    _codeSortKey = newOrder;
+                  });
+                  if (mounted) {
+                    _applyFilteringAndRefresh();
+                  }
+                },
+              ),
             ),
-            PlatformUtil.isDesktop()
-                ? IconButton(
-                    icon: const Icon(Icons.lock),
-                    tooltip: l10n.appLock,
-                    onPressed: () async {
-                      await navigateToLockScreen();
-                    },
-                  )
-                : const SizedBox.shrink(),
-            const SizedBox(
-              width: 4,
-            ),
+            if (PlatformUtil.isDesktop())
+              IconButton(
+                icon: const Icon(Icons.lock),
+                tooltip: l10n.appLock,
+                padding: const EdgeInsets.all(8.0),
+                onPressed: () async {
+                  await navigateToLockScreen();
+                },
+              ),
             IconButton(
               icon: _showSearchBox
                   ? const Icon(Icons.clear)
                   : const Icon(Icons.search),
               tooltip: l10n.search,
+              padding: const EdgeInsets.all(8.0),
               onPressed: () {
-                setState(
-                  () {
-                    _showSearchBox = !_showSearchBox;
-                    if (!_showSearchBox) {
-                      _textController.clear();
-                      _searchText = "";
-                    } else {
-                      _searchText = _textController.text;
-
-                      // Request focus on the search box
-                      searchBoxFocusNode.requestFocus();
-                    }
-                    _applyFilteringAndRefresh();
-                  },
-                );
+                setState(() {
+                  _showSearchBox = !_showSearchBox;
+                  if (!_showSearchBox) {
+                    _textController.clear();
+                    _searchText = "";
+                  } else {
+                    _searchText = _textController.text;
+                    searchBoxFocusNode.requestFocus();
+                  }
+                  _applyFilteringAndRefresh();
+                });
               },
             ),
           ],
