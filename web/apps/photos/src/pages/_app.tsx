@@ -61,7 +61,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     const [loading, setLoading] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
-    const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER) as User | undefined | null;
@@ -165,8 +164,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             hideLoadingBar,
             watchFolderView,
             setWatchFolderView,
-            watchFolderFiles,
-            setWatchFolderFiles,
             themeColor,
             setThemeColor,
             showMiniDialog,
@@ -178,7 +175,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             showLoadingBar,
             hideLoadingBar,
             watchFolderView,
-            watchFolderFiles,
             themeColor,
             showMiniDialog,
             showNotification,

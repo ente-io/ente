@@ -57,26 +57,6 @@ export default function FullScreenDropZone(props: Props) {
         });
     }, []);
 
-    useEffect(() => {
-        const handleWatchFolderDrop = (e: DragEvent) => {
-            if (!appContext.watchFolderView) {
-                return;
-            }
-
-            e.preventDefault();
-            e.stopPropagation();
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                appContext.setWatchFolderFiles(files);
-            }
-        };
-
-        addEventListener("drop", handleWatchFolderDrop);
-        return () => {
-            removeEventListener("drop", handleWatchFolderDrop);
-        };
-    }, [appContext.watchFolderView]);
-
     return (
         <DropDiv
             {...props.getDragAndDropRootProps({
