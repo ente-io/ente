@@ -46,9 +46,7 @@ export const Titlebar: React.FC<TitlebarProps> = ({
                 </Stack>
             </FlexWrapper>
             <Box sx={{ py: 0.5, px: 2 }}>
-                <Typography variant="h3" sx={{ fontWeight: "bold" }}>
-                    {title}
-                </Typography>
+                <Typography variant="h3">{title}</Typography>
                 <Typography
                     variant="small"
                     sx={{

@@ -1,9 +1,9 @@
 import { TwoFactorAuthorizationResponse } from "@/accounts/services/user";
+import { Stack100vhCenter } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import log from "@/base/log";
 import { nullToUndefined } from "@/utils/transform";
-import { VerticallyCentered } from "@ente/shared/components/Container";
 import InfoIcon from "@mui/icons-material/Info";
 import KeyIcon from "@mui/icons-material/Key";
 import { Paper, Typography, styled } from "@mui/material";
@@ -234,7 +234,7 @@ const Page = () => {
     const handleRedirectAgain = () => redirectToURL(successRedirectURL!);
 
     const components: Record<Status, React.ReactNode> = {
-        loading: <Loading />,
+        loading: <ActivityIndicator />,
         unknownRedirect: <UnknownRedirect />,
         webAuthnNotSupported: <WebAuthnNotSupported />,
         sessionAlreadyClaimed: <SessionAlreadyClaimed />,
@@ -255,7 +255,7 @@ const Page = () => {
         redirectingApp: <RedirectingApp onRetry={handleRedirectAgain} />,
     };
 
-    return components[status];
+    return <Stack100vhCenter>{components[status]}</Stack100vhCenter>;
 };
 
 export default Page;
@@ -268,34 +268,24 @@ const redirectToURL = (url: URL) => {
     window.location.href = url.href;
 };
 
-const Loading: React.FC = () => {
-    return (
-        <VerticallyCentered>
-            <ActivityIndicator />
-        </VerticallyCentered>
-    );
-};
+const UnknownRedirect: React.FC = () => (
+    <Failed message={t("passkey_login_invalid_url")} />
+);
 
-const UnknownRedirect: React.FC = () => {
-    return <Failed message={t("passkey_login_invalid_url")} />;
-};
+const WebAuthnNotSupported: React.FC = () => (
+    <Failed message={t("passkeys_not_supported")} />
+);
 
-const WebAuthnNotSupported: React.FC = () => {
-    return <Failed message={t("passkeys_not_supported")} />;
-};
-
-const SessionAlreadyClaimed: React.FC = () => {
-    return (
-        <Content>
-            <SessionAlreadyClaimed_>
-                <InfoIcon color="secondary" />
-                <Typography>
-                    {t("passkey_login_already_claimed_session")}
-                </Typography>
-            </SessionAlreadyClaimed_>
-        </Content>
-    );
-};
+const SessionAlreadyClaimed: React.FC = () => (
+    <ContentPaper>
+        <SessionAlreadyClaimed_>
+            <InfoIcon color="secondary" />
+            <Typography>
+                {t("passkey_login_already_claimed_session")}
+            </Typography>
+        </SessionAlreadyClaimed_>
+    </ContentPaper>
+);
 
 const SessionAlreadyClaimed_ = styled("div")`
     display: flex;
@@ -304,43 +294,29 @@ const SessionAlreadyClaimed_ = styled("div")`
     gap: 2rem;
 `;
 
-const UnrecoverableFailure: React.FC = () => {
-    return <Failed message={t("passkey_login_generic_error")} />;
-};
+const UnrecoverableFailure: React.FC = () => (
+    <Failed message={t("passkey_login_generic_error")} />
+);
 
 interface FailedProps {
     message: string;
 }
 
-const Failed: React.FC<FailedProps> = ({ message }) => {
-    return (
-        <Content>
-            <InfoIcon color="secondary" />
-            <Typography variant="h3">{t("passkey_login_failed")}</Typography>
-            <Typography sx={{ color: "text.muted" }}>{message}</Typography>
-        </Content>
-    );
-};
-
-const Content: React.FC<React.PropsWithChildren> = ({ children }) => {
-    return (
-        <Content_>
-            <ContentPaper>{children}</ContentPaper>
-        </Content_>
-    );
-};
-
-const Content_ = styled("div")`
-    display: flex;
-    height: 100%;
-    justify-content: center;
-    align-items: center;
-`;
+const Failed: React.FC<FailedProps> = ({ message }) => (
+    <ContentPaper>
+        <InfoIcon color="secondary" />
+        <Typography variant="h6">{t("passkey_login_failed")}</Typography>
+        <Typography sx={{ color: "text.muted" }}>{message}</Typography>
+    </ContentPaper>
+);
 
 const ContentPaper = styled(Paper)`
     width: 100%;
     max-width: 24rem;
     padding: 1rem;
+    /* Slight asymmetry, look visually better since the bottom half of the paper
+       is usually muted text that carries less visual weight. */
+    padding-block-end: 1.15rem;
 
     display: flex;
     flex-direction: column;
@@ -356,22 +332,20 @@ interface VerifyProps {
  * Gain focus for the current page by requesting the user to explicitly click a
  * button. For more details, see the documentation for `Continuation`.
  */
-const Verify: React.FC<VerifyProps> = ({ onVerify }) => {
-    return (
-        <Content>
-            <KeyIcon color="secondary" fontSize="large" />
-            <Typography variant="h3">{t("passkey")}</Typography>
-            <Typography sx={{ color: "text.muted" }}>
-                {t("passkey_verify_description")}
-            </Typography>
-            <ButtonStack>
-                <FocusVisibleButton onClick={onVerify} fullWidth color="accent">
-                    {t("verify")}
-                </FocusVisibleButton>
-            </ButtonStack>
-        </Content>
-    );
-};
+const Verify: React.FC<VerifyProps> = ({ onVerify }) => (
+    <ContentPaper>
+        <KeyIcon color="secondary" fontSize="large" />
+        <Typography variant="h3">{t("passkey")}</Typography>
+        <Typography sx={{ color: "text.muted" }}>
+            {t("passkey_verify_description")}
+        </Typography>
+        <ButtonStack>
+            <FocusVisibleButton onClick={onVerify} fullWidth color="accent">
+                {t("verify")}
+            </FocusVisibleButton>
+        </ButtonStack>
+    </ContentPaper>
+);
 
 interface RetriableFailedProps {
     /**
@@ -398,38 +372,32 @@ const RetriableFailed: React.FC<RetriableFailedProps> = ({
     duringSignChallenge,
     onRetry,
     onRecover,
-}) => {
-    return (
-        <Content>
-            <InfoIcon color="secondary" fontSize="large" />
-            <Typography variant="h3">{t("passkey_login_failed")}</Typography>
-            <Typography sx={{ color: "text.muted" }}>
-                {duringSignChallenge
-                    ? t("passkey_login_credential_hint")
-                    : t("passkey_login_generic_error")}
-            </Typography>
-            <ButtonStack>
+}) => (
+    <ContentPaper>
+        <InfoIcon color="secondary" fontSize="large" />
+        <Typography variant="h5">{t("passkey_login_failed")}</Typography>
+        <Typography sx={{ color: "text.muted" }}>
+            {duringSignChallenge
+                ? t("passkey_login_credential_hint")
+                : t("passkey_login_generic_error")}
+        </Typography>
+        <ButtonStack>
+            <FocusVisibleButton onClick={onRetry} fullWidth color="secondary">
+                {t("try_again")}
+            </FocusVisibleButton>
+            {onRecover && (
                 <FocusVisibleButton
-                    onClick={onRetry}
+                    onClick={onRecover}
                     fullWidth
-                    color="secondary"
+                    color="primary"
+                    variant="text"
                 >
-                    {t("try_again")}
+                    {t("recover_two_factor")}
                 </FocusVisibleButton>
-                {onRecover && (
-                    <FocusVisibleButton
-                        onClick={onRecover}
-                        fullWidth
-                        color="primary"
-                        variant="text"
-                    >
-                        {t("RECOVER_TWO_FACTOR")}
-                    </FocusVisibleButton>
-                )}
-            </ButtonStack>
-        </Content>
-    );
-};
+            )}
+        </ButtonStack>
+    </ContentPaper>
+);
 
 const ButtonStack = styled("div")`
     display: flex;
@@ -438,26 +406,24 @@ const ButtonStack = styled("div")`
     gap: 1rem;
 `;
 
-const WaitingForUser: React.FC = () => {
-    return (
-        <Content>
-            <Typography variant="h2" sx={{ fontWeight: "bold" }}>
-                {t("passkey_login")}
-            </Typography>
-            <Typography sx={{ color: "text.muted" }}>
-                {t("passkey_login_instructions")}
-            </Typography>
-            <WaitingImgContainer>
-                <img
-                    alt=""
-                    height={150}
-                    width={150}
-                    src="/images/ente-circular.png"
-                />
-            </WaitingImgContainer>
-        </Content>
-    );
-};
+const WaitingForUser: React.FC = () => (
+    <ContentPaper>
+        <Typography variant="h3" sx={{ mt: 1 }}>
+            {t("passkey_login")}
+        </Typography>
+        <Typography sx={{ color: "text.muted" }}>
+            {t("passkey_login_instructions")}
+        </Typography>
+        <WaitingImgContainer>
+            <img
+                alt=""
+                height={150}
+                width={150}
+                src="/images/ente-circular.png"
+            />
+        </WaitingImgContainer>
+    </ContentPaper>
+);
 
 const WaitingImgContainer = styled("div")`
     display: flex;
@@ -465,44 +431,35 @@ const WaitingImgContainer = styled("div")`
     margin-block-start: 1rem;
 `;
 
-const RedirectingWeb: React.FC = () => {
-    return (
-        <Content>
-            <InfoIcon color="accent" fontSize="large" />
-            <Typography variant="h3">{t("passkey_verified")}</Typography>
-            <Typography sx={{ color: "text.muted" }}>
-                {t("redirecting_back_to_app")}
-            </Typography>
-        </Content>
-    );
-};
+const RedirectingWeb: React.FC = () => (
+    <ContentPaper>
+        <InfoIcon color="accent" fontSize="large" />
+        <Typography variant="h5">{t("passkey_verified")}</Typography>
+        <Typography sx={{ color: "text.muted" }}>
+            {t("redirecting_back_to_app")}
+        </Typography>
+    </ContentPaper>
+);
 
 interface RedirectingAppProps {
     /** Called when the user presses the button to redirect again */
     onRetry: () => void;
 }
 
-const RedirectingApp: React.FC<RedirectingAppProps> = ({ onRetry }) => {
-    return (
-        <Content>
-            <InfoIcon color="accent" fontSize="large" />
-            <Typography variant="h3">{t("passkey_verified")}</Typography>
-            <Typography sx={{ color: "text.muted" }}>
-                {t("redirecting_back_to_app")}
-            </Typography>
-            <Typography sx={{ color: "text.muted" }}>
-                {t("redirect_close_instructions")}
-            </Typography>
-            <ButtonStack>
-                <FocusVisibleButton
-                    onClick={onRetry}
-                    fullWidth
-                    color="primary"
-                    variant="text"
-                >
-                    {t("redirect_again")}
-                </FocusVisibleButton>
-            </ButtonStack>
-        </Content>
-    );
-};
+const RedirectingApp: React.FC<RedirectingAppProps> = ({ onRetry }) => (
+    <ContentPaper>
+        <InfoIcon color="accent" fontSize="large" />
+        <Typography variant="h5">{t("passkey_verified")}</Typography>
+        <Typography sx={{ color: "text.muted" }}>
+            {t("redirecting_back_to_app")}
+        </Typography>
+        <Typography sx={{ color: "text.muted" }}>
+            {t("redirect_close_instructions")}
+        </Typography>
+        <ButtonStack>
+            <FocusVisibleButton fullWidth color="secondary" onClick={onRetry}>
+                {t("redirect_again")}
+            </FocusVisibleButton>
+        </ButtonStack>
+    </ContentPaper>
+);

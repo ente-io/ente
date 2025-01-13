@@ -7,7 +7,7 @@
  * there.
  */
 
-import { CenteredFill } from "@/base/components/mui/Container";
+import { CenteredFill } from "@/base/components/containers";
 import type { SearchSuggestion } from "@/new/photos/services/search/types";
 import { Paper, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
@@ -38,7 +38,10 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
     fileCount,
 }) => (
     <GalleryItemsHeaderAdapter>
-        <Typography variant="large" sx={{ color: "text.muted" }}>
+        <Typography
+            variant="h6"
+            sx={{ fontWeight: "regular", color: "text.muted" }}
+        >
             {t("search_results")}
         </Typography>
         <GalleryItemsSummary

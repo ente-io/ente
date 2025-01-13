@@ -1,17 +1,13 @@
-import { FormPaper } from "@/base/components/FormPaper";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { AccountsPageContents } from "@/accounts/components/layouts/centered-paper";
+import { LoginContents } from "@/accounts/components/LoginContents";
+import { PAGES } from "@/accounts/constants/pages";
+import { LoadingIndicator } from "@/base/components/loaders";
 import { customAPIHost } from "@/base/origins";
-import { VerticallyCentered } from "@ente/shared/components/Container";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { Login } from "../components/Login";
-import { PAGES } from "../constants/pages";
-import type { PageProps } from "../types/page";
 
-const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { showNavBar } = appContext;
-
+const Page: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [host, setHost] = useState<string | undefined>();
 
@@ -24,23 +20,16 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             void router.push(PAGES.VERIFY);
         }
         setLoading(false);
-        showNavBar(true);
     }, []);
 
-    const signUp = () => {
-        void router.push(PAGES.SIGNUP);
-    };
+    const onSignUp = () => void router.push(PAGES.SIGNUP);
 
     return loading ? (
-        <VerticallyCentered>
-            <ActivityIndicator />
-        </VerticallyCentered>
+        <LoadingIndicator />
     ) : (
-        <VerticallyCentered>
-            <FormPaper>
-                <Login {...{ signUp, host }} />
-            </FormPaper>
-        </VerticallyCentered>
+        <AccountsPageContents>
+            <LoginContents {...{ onSignUp, host }} />
+        </AccountsPageContents>
     );
 };
 

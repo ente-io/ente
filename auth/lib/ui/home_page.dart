@@ -14,6 +14,7 @@ import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/model/tag_enums.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
+import 'package:ente_auth/services/auth_feature_flag.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
@@ -37,6 +38,7 @@ import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -44,6 +46,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
+import 'package:scan/scan.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -410,55 +413,52 @@ class _HomePageState extends State<HomePage> {
                 ),
           centerTitle: PlatformUtil.isDesktop() ? false : true,
           actions: <Widget>[
-            SortCodeMenuWidget(
-              currentKey: PreferenceService.instance.codeSortKey(),
-              onSelected: (newOrder) async {
-                await PreferenceService.instance.setCodeSortKey(newOrder);
-                if (newOrder == CodeSortKey.manual &&
-                    newOrder == _codeSortKey) {
-                  await navigateToReorderPage(_allCodes!);
-                }
-                setState(() {
-                  _codeSortKey = newOrder;
-                });
-                if (mounted) {
-                  _applyFilteringAndRefresh();
-                }
-              },
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SortCodeMenuWidget(
+                currentKey: PreferenceService.instance.codeSortKey(),
+                onSelected: (newOrder) async {
+                  await PreferenceService.instance.setCodeSortKey(newOrder);
+                  if (newOrder == CodeSortKey.manual &&
+                      newOrder == _codeSortKey) {
+                    await navigateToReorderPage(_allCodes!);
+                  }
+                  setState(() {
+                    _codeSortKey = newOrder;
+                  });
+                  if (mounted) {
+                    _applyFilteringAndRefresh();
+                  }
+                },
+              ),
             ),
-            PlatformUtil.isDesktop()
-                ? IconButton(
-                    icon: const Icon(Icons.lock),
-                    tooltip: l10n.appLock,
-                    onPressed: () async {
-                      await navigateToLockScreen();
-                    },
-                  )
-                : const SizedBox.shrink(),
-            const SizedBox(
-              width: 4,
-            ),
+            if (PlatformUtil.isDesktop())
+              IconButton(
+                icon: const Icon(Icons.lock),
+                tooltip: l10n.appLock,
+                padding: const EdgeInsets.all(8.0),
+                onPressed: () async {
+                  await navigateToLockScreen();
+                },
+              ),
             IconButton(
               icon: _showSearchBox
                   ? const Icon(Icons.clear)
                   : const Icon(Icons.search),
               tooltip: l10n.search,
+              padding: const EdgeInsets.all(8.0),
               onPressed: () {
-                setState(
-                  () {
-                    _showSearchBox = !_showSearchBox;
-                    if (!_showSearchBox) {
-                      _textController.clear();
-                      _searchText = "";
-                    } else {
-                      _searchText = _textController.text;
-
-                      // Request focus on the search box
-                      searchBoxFocusNode.requestFocus();
-                    }
-                    _applyFilteringAndRefresh();
-                  },
-                );
+                setState(() {
+                  _showSearchBox = !_showSearchBox;
+                  if (!_showSearchBox) {
+                    _textController.clear();
+                    _searchText = "";
+                  } else {
+                    _searchText = _textController.text;
+                    searchBoxFocusNode.requestFocus();
+                  }
+                  _applyFilteringAndRefresh();
+                });
               },
             ),
           ],
@@ -479,6 +479,7 @@ class _HomePageState extends State<HomePage> {
         return HomeEmptyStateWidget(
           onScanTap: _redirectToScannerPage,
           onManuallySetupTap: _redirectToManualEntryPage,
+          onImportFromGallery: _importFromGallery,
         );
       } else {
         final anyCodeHasError =
@@ -694,6 +695,29 @@ class _HomePageState extends State<HomePage> {
     _applyFilteringAndRefresh();
   }
 
+  Future<void> _importFromGallery() async {
+    try {
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        allowMultiple: false,
+      );
+      if (result != null) {
+        final path = result.files.single.path!;
+        String? res = await Scan.parse(path);
+        final Code? code = res != null ? Code.fromOTPAuthUrl(res) : null;
+        if (code != null) {
+          await CodeStore.instance.addCode(code);
+          if ((_allCodes?.where((e) => !e.hasError).length ?? 0) > 2) {
+            _focusNewCode(code);
+          }
+        }
+      }
+    } catch (e, s) {
+      await showGenericErrorDialog(context: context, error: e);
+      _logger.severe("Error while importing from gallery", e, s);
+    }
+  }
+
   Widget _getFab() {
     if (PlatformUtil.isDesktop()) {
       return FloatingActionButton(
@@ -724,6 +748,15 @@ class _HomePageState extends State<HomePage> {
           labelWidget: SpeedDialLabelWidget(context.l10n.scanAQrCode),
           onTap: _redirectToScannerPage,
         ),
+        if (PlatformUtil.isMobile() &&
+            FeatureFlagService.instance.isInternalUserOrDebugBuild())
+          SpeedDialChild(
+            child: const Icon(Icons.image),
+            foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
+            backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
+            labelWidget: const SpeedDialLabelWidget("Import from gallery"),
+            onTap: _importFromGallery,
+          ),
         SpeedDialChild(
           child: const Icon(Icons.keyboard),
           foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,

@@ -41,4 +41,4 @@ jobs:
 
             - name: Update branch server/ghcr to point to source commit
               run: |
-                  git push -f origin HEAD:server/ghcr
+                  git push -f origin HEAD:refs/heads/server/ghcr

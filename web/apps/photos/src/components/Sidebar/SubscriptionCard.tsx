@@ -1,5 +1,5 @@
+import { Overlay } from "@/base/components/containers";
 import type { ButtonishProps } from "@/base/components/mui";
-import { Overlay } from "@/base/components/mui/Container";
 import type { UserDetails } from "@/new/photos/services/user-details";
 import {
     familyUsage,
@@ -149,26 +149,14 @@ const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
                 {t("storage")}
             </Typography>
             <DefaultBox>
-                <Typography
-                    sx={{
-                        fontWeight: "bold",
-                        fontSize: "24px",
-                        lineHeight: "30px",
-                    }}
-                >
+                <Typography variant="h3">
                     {`${formattedStorageByteSize(usage, { round: true })} ${t(
                         "of",
                     )} ${formattedStorageByteSize(storage)} ${t("used")}`}
                 </Typography>
             </DefaultBox>
             <MobileSmallBox>
-                <Typography
-                    sx={{
-                        fontWeight: "bold",
-                        fontSize: "24px",
-                        lineHeight: "30px",
-                    }}
-                >
+                <Typography variant="h3">
                     {`${bytesInGB(usage)} /  ${bytesInGB(storage)} ${t("storage_unit.gb")} ${t("used")}`}
                 </Typography>
             </MobileSmallBox>
@@ -205,7 +193,7 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
                 <Typography variant="mini">{`${formattedStorageByteSize(
                     storage - usage,
                 )} ${t("free")}`}</Typography>
-                <Typography variant="mini" sx={{ fontWeight: "bold" }}>
+                <Typography variant="mini" sx={{ fontWeight: "medium" }}>
                     {t("photos_count", { count: fileCount ?? 0 })}
                 </Typography>
             </SpaceBetweenFlex>
@@ -262,7 +250,7 @@ const FamilyUsageSection: React.FC<FamilyUsageSectionProps> = ({
                     <Legend label={t("you")} color="text.base" />
                     <Legend label={t("family")} color="text.muted" />
                 </Stack>
-                <Typography variant="mini" sx={{ fontWeight: "bold" }}>
+                <Typography variant="mini" sx={{ fontWeight: "medium" }}>
                     {t("photos_count", { count: fileCount ?? 0 })}
                 </Typography>
             </SpaceBetweenFlex>
@@ -332,7 +320,7 @@ interface LegendProps {
 const Legend: React.FC<LegendProps> = ({ label, color }) => (
     <Stack direction="row" sx={{ alignItems: "center" }}>
         <LegendDot sx={{ color }} />
-        <Typography variant="mini" sx={{ fontWeight: "bold" }}>
+        <Typography variant="mini" sx={{ fontWeight: "medium" }}>
             {label}
         </Typography>
     </Stack>

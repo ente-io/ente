@@ -185,6 +185,8 @@
   },
   "allowAddPhotosDescription": "Autorisez les personnes ayant le lien à ajouter des photos dans l'album partagé.",
   "passwordLock": "Mot de passe verrou",
+  "canNotOpenTitle": "Impossible d'ouvrir cet album",
+  "canNotOpenBody": "Désolé, cet album ne peut pas être ouvert dans l'application.",
   "disableDownloadWarningTitle": "Veuillez remarquer",
   "disableDownloadWarningBody": "Les observateurs peuvent toujours prendre des captures d'écran ou enregistrer une copie de vos photos en utilisant des outils externes",
   "allowDownloads": "Autoriser les téléchargements",
@@ -345,7 +347,7 @@
   "disableLinkMessage": "Cela supprimera le lien public pour accéder à \"{albumName}\".",
   "sharing": "Partage...",
   "youCannotShareWithYourself": "Vous ne pouvez pas partager avec vous-même",
-  "archive": "Archiver",
+  "archive": "Archivée",
   "createAlbumActionHint": "Appuyez longuement pour sélectionner des photos et cliquez sur + pour créer un album",
   "importing": "Importation en cours...",
   "failedToLoadAlbums": "Impossible de charger les albums",
@@ -732,12 +734,12 @@
     "description": "The text displayed above folders/albums stored on device",
     "type": "text"
   },
-  "onDevice": "Sur l'appareil",
+  "onDevice": "Sur votre appareil",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
   },
-  "onEnte": "Sur <branding>ente</branding>",
+  "onEnte": "Sur <branding>Ente</branding>",
   "name": "Nom",
   "newest": "Le plus récent",
   "lastUpdated": "Dernière mise à jour",
@@ -849,8 +851,8 @@
   "resetIgnoredFiles": "Réinitialiser les fichiers ignorés",
   "deviceFilesAutoUploading": "Les fichiers ajoutés à cet album seront automatiquement téléchargés sur Ente.",
   "turnOnBackupForAutoUpload": "Activez la sauvegarde pour charger automatiquement sur Ente les fichiers ajoutés à ce dossier de l'appareil.",
-  "noHiddenPhotosOrVideos": "Aucune photo ou vidéo cachée",
-  "toHideAPhotoOrVideo": "Cacher une photo ou une vidéo",
+  "noHiddenPhotosOrVideos": "Aucune photo ou vidéo masquée",
+  "toHideAPhotoOrVideo": "Pour masquer une photo ou une vidéo:",
   "openTheItem": "• Ouvrir l'élément",
   "clickOnTheOverflowMenu": "• Cliquez sur le menu de débordement",
   "click": "• Cliquez sur",
@@ -1377,6 +1379,7 @@
   "extraPhotosFound": "Photos supplémentaires trouvées",
   "configuration": "Paramètres",
   "localIndexing": "Indexation locale",
+  "processed": "Traité",
   "resetPerson": "Réinitialiser",
   "areYouSureYouWantToResetThisPerson": "Êtes-vous certain de vouloir réinitialiser cette personne ?",
   "allPersonGroupingWillReset": "Tous les groupements pour cette personne seront réinitialisés, et vous perdrez toutes les suggestions faites pour cette personne",
@@ -1577,5 +1580,9 @@
   },
   "legacyInvite": "{email} vous a invité à être un contact de confiance",
   "authToManageLegacy": "Veuillez vous authentifier pour gérer vos contacts de confiance",
-  "useDifferentPlayerInfo": "Vous avez des difficultés pour lire cette vidéo ? Appuyez longuement ici pour essayer un autre lecteur."
+  "useDifferentPlayerInfo": "Vous avez des difficultés pour lire cette vidéo ? Appuyez longuement ici pour essayer un autre lecteur.",
+  "joinAlbum": "Rejoindre l'album",
+  "joinAlbumSubtext": "pour afficher et ajouter vos photos",
+  "joinAlbumSubtextViewer": "pour ajouter ceci aux albums partagés",
+  "join": "Rejoindre"
 }

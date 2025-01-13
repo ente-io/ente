@@ -70,10 +70,11 @@ export function VerifyTwoFactor(props: Props) {
                             variant="small"
                             sx={{ mb: 2, color: "text.muted" }}
                         >
-                            {t("ENTER_TWO_FACTOR_OTP")}
+                            {t("enter_two_factor_otp")}
                         </Typography>
                         <Box sx={{ my: 2 }}>
                             <OtpInput
+                                containerStyle={{ justifyContent: "center" }}
                                 shouldAutoFocus={shouldAutoFocus}
                                 value={values.otp}
                                 onChange={onChange(
@@ -117,7 +118,7 @@ const IndividualInput = styled("input")(
     padding: 4px;
     width: 40px !important;
     aspect-ratio: 1;
-    margin-inline: 8px;
+    margin-inline: 6px;
     border: 1px solid ${theme.colors.accent.A700};
     border-radius: 1px;
     outline-color: ${theme.colors.accent.A300};

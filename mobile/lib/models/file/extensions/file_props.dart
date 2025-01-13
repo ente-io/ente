@@ -49,6 +49,8 @@ extension FilePropsExtn on EnteFile {
 
   String? get uploaderName => pubMagicMetadata?.uploaderName;
 
+  bool get skipIndex => !isUploaded || fileType == FileType.other;
+
   bool canReUpload(int userID) =>
       localID != null &&
       localID!.isNotEmpty &&

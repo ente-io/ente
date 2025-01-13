@@ -148,7 +148,7 @@ export const OverflowMenuOption: React.FC<
                 }}
             >
                 {startIcon}
-                <Typography sx={{ flex: 1, fontWeight: "bold" }}>
+                <Typography sx={{ flex: 1, fontWeight: "medium" }}>
                     {children}
                 </Typography>
                 {endIcon}

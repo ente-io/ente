@@ -7,6 +7,6 @@
     "include": [
         ".",
         "../base/global-electron.d.ts",
-        "../shared/themes/mui-theme.d.ts"
+        "../base/components/utils/mui-theme.d.ts"
     ]
 }

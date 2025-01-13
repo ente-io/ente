@@ -1,5 +1,5 @@
 import { type MiniDialogAttributes } from "@/base/components/MiniDialog";
-import { SpaceBetweenFlex } from "@/base/components/mui/Container";
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
@@ -75,9 +75,7 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
             fullWidth
         >
             <SpaceBetweenFlex sx={{ p: "8px 4px 8px 0" }}>
-                <DialogTitle variant="h3" fontWeight={"bold"}>
-                    {t("recovery_key")}
-                </DialogTitle>
+                <DialogTitle variant="h3">{t("recovery_key")}</DialogTitle>
                 <DialogCloseIconButton {...{ onClose }} />
             </SpaceBetweenFlex>
             <DialogContent>

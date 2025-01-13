@@ -88,6 +88,8 @@
   "useRecoveryKey": "Użyj kodu odzyskiwania",
   "incorrectPasswordTitle": "Nieprawidłowe hasło",
   "welcomeBack": "Witaj ponownie!",
+  "emailAlreadyRegistered": "Adres e-mail jest już zarejestrowany.",
+  "emailNotRegistered": "Adres e-mail nie jest zarejestrowany.",
   "madeWithLoveAtPrefix": "zrobione z ❤️ w ",
   "supportDevs": "Subskrybuj <bold-green>ente</bold-green> aby wesprzeć ten projekt.",
   "supportDiscount": "Użyj kodu rabatowego \"AUTH\", aby otrzymać 10% rabatu na pierwszy rok",

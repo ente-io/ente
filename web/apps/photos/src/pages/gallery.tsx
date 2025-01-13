@@ -1,7 +1,7 @@
 import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { stashRedirect } from "@/accounts/services/redirect";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
-import { NavbarBase } from "@/base/components/Navbar";
+import { AppNavbar, NavbarBase } from "@/base/components/Navbar";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
@@ -27,6 +27,7 @@ import {
     useGalleryReducer,
     type GalleryBarMode,
 } from "@/new/photos/components/gallery/reducer";
+import { useIsOffline } from "@/new/photos/components/utils/use-is-offline";
 import { usePeopleStateSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import {
@@ -97,7 +98,7 @@ import {
 import { FixCreationTime } from "components/FixCreationTime";
 import FullScreenDropZone from "components/FullScreenDropZone";
 import GalleryEmptyState from "components/GalleryEmptyState";
-import { LoadingOverlay } from "components/LoadingOverlay";
+import { GalleryLoadingOverlay } from "components/GalleryLoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import Sidebar from "components/Sidebar";
@@ -174,7 +175,16 @@ export const GalleryContext = createContext<GalleryContextType>(
  *     ---------------------      |
  *           Photo List           v
  */
-export default function Gallery() {
+const Page: React.FC = () => {
+    const {
+        showLoadingBar,
+        hideLoadingBar,
+        showMiniDialog,
+        onGenericError,
+        logout,
+    } = useAppContext();
+
+    const isOffline = useIsOffline();
     const [state, dispatch] = useGalleryReducer();
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
@@ -234,14 +244,6 @@ export default function Gallery() {
         undefined,
     );
 
-    const {
-        showLoadingBar,
-        hideLoadingBar,
-        showMiniDialog,
-        onGenericError,
-        logout,
-        ...appContext
-    } = useAppContext();
     const [userIDToEmailMap, setUserIDToEmailMap] =
         useState<Map<number, string>>(null);
     const [emailList, setEmailList] = useState<string[]>(null);
@@ -320,7 +322,7 @@ export default function Gallery() {
     const isInSearchMode = state.isInSearchMode;
     const filteredFiles = state.filteredFiles;
 
-    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) console.log("render", state);
+    if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("render", state);
 
     const router = useRouter();
 
@@ -338,7 +340,6 @@ export default function Gallery() {
     };
 
     useEffect(() => {
-        appContext.showNavBar(true);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         const token = getToken();
         if (!key || !token) {
@@ -776,7 +777,7 @@ export default function Gallery() {
         return () =>
             setCollectionNamerAttributes({
                 title: t("new_album"),
-                buttonText: t("CREATE"),
+                buttonText: t("create"),
                 autoFilledName: "",
                 callback,
             });
@@ -891,10 +892,11 @@ export default function Gallery() {
                         getZipFileSelectorInputProps,
                     }}
                 />
+                <AppNavbar />
                 {blockingLoad && (
-                    <LoadingOverlay>
+                    <GalleryLoadingOverlay>
                         <ActivityIndicator />
-                    </LoadingOverlay>
+                    </GalleryLoadingOverlay>
                 )}
                 {isFirstLoad && (
                     <CenteredFlex>
@@ -965,6 +967,7 @@ export default function Gallery() {
                         />
                     )}
                 </NavbarBase>
+                {isOffline && <OfflineMessage />}
 
                 <GalleryBarAndListHeader
                     {...{
@@ -1130,7 +1133,18 @@ export default function Gallery() {
             </FullScreenDropZone>
         </GalleryContext.Provider>
     );
-}
+};
+
+export default Page;
+
+const OfflineMessage: React.FC = () => (
+    <Typography
+        variant="small"
+        sx={{ bgcolor: "background.paper", p: 2, mb: 1, textAlign: "center" }}
+    >
+        {t("offline_message")}
+    </Typography>
+);
 
 /**
  * Preload all three variants of a responsive image.

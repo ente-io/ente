@@ -120,7 +120,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
                 PaperProps={{ sx: { height: "448px", maxWidth: "414px" } }}
             >
                 <SpaceBetweenFlex sx={{ p: "16px 8px 8px 8px" }}>
-                    <DialogTitle variant="h3" fontWeight={"bold"}>
+                    <DialogTitle variant="h3">
                         {t("watched_folders")}
                     </DialogTitle>
                     <DialogCloseIconButton {...{ onClose }} />
@@ -135,7 +135,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
                                     marginLeft: "8px",
                                 }}
                             ></span>
-                            {t("ADD_FOLDER")}
+                            {t("add_folder")}
                         </Button>
                     </Stack>
                 </DialogContent>
@@ -183,9 +183,7 @@ const NoWatches: React.FC = () => {
     return (
         <NoWatchesContainer>
             <Stack spacing={1}>
-                <Typography variant="large" sx={{ fontWeight: "bold" }}>
-                    {t("no_folders_added")}
-                </Typography>
+                <Typography variant="h6">{t("no_folders_added")}</Typography>
                 <Typography
                     variant={"small"}
                     sx={{ py: 0.5, color: "text.muted" }}
@@ -241,7 +239,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
             title: t("stop_watching_folder_title"),
             message: t("stop_watching_folder_message"),
             continue: {
-                text: t("YES_STOP"),
+                text: t("yes_stop"),
                 color: "critical",
                 action: () => removeWatch(watch),
             },
@@ -252,11 +250,11 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
         <SpaceBetweenFlex>
             <Stack direction="row" sx={{ overflow: "hidden" }}>
                 {watch.collectionMapping === "root" ? (
-                    <Tooltip title={t("UPLOADED_TO_SINGLE_COLLECTION")}>
+                    <Tooltip title={t("uploaded_to_single_collection")}>
                         <FolderOpenIcon />
                     </Tooltip>
                 ) : (
-                    <Tooltip title={t("UPLOADED_TO_SEPARATE_COLLECTIONS")}>
+                    <Tooltip title={t("uploaded_to_separate_collections")}>
                         <FolderCopyOutlinedIcon />
                     </Tooltip>
                 )}

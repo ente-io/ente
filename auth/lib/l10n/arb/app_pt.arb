@@ -88,6 +88,8 @@
   "useRecoveryKey": "Usar chave de recuperação",
   "incorrectPasswordTitle": "Senha incorreta",
   "welcomeBack": "Bem-vindo(a) de volta!",
+  "emailAlreadyRegistered": "E-mail já registrado.",
+  "emailNotRegistered": "E-mail não registrado.",
   "madeWithLoveAtPrefix": "feito com ❤️ em ",
   "supportDevs": "Inscreva-se no <bold-green>Ente</bold-green> para apoiar-nos",
   "supportDiscount": "Use o cupom \"AUTH\" para obter 10% de desconto no primeiro ano",

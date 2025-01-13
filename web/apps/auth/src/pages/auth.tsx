@@ -1,7 +1,8 @@
 import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { stashRedirect } from "@/accounts/services/redirect";
 import { EnteLogo } from "@/base/components/EnteLogo";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { LoadingIndicator } from "@/base/components/loaders";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { NavbarBase } from "@/base/components/Navbar";
 import {
     OverflowMenu,
@@ -10,17 +11,16 @@ import {
 import { isHTTP401Error } from "@/base/http";
 import log from "@/base/log";
 import { masterKeyFromSessionIfLoggedIn } from "@/base/session-store";
-import { VerticallyCentered } from "@ente/shared/components/Container";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import {
+    Box,
     Button,
     ButtonBase,
     Snackbar,
     Stack,
     TextField,
     Typography,
-    styled,
 } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -30,7 +30,7 @@ import { getAuthCodes } from "services/remote";
 import { useAppContext } from "types/context";
 
 const Page: React.FC = () => {
-    const { logout, showNavBar, showMiniDialog } = useAppContext();
+    const { logout, showMiniDialog } = useAppContext();
 
     const router = useRouter();
     const [codes, setCodes] = useState<Code[]>([]);
@@ -56,8 +56,7 @@ const Page: React.FC = () => {
             setHasFetched(true);
         };
         void fetchCodes();
-        showNavBar(false);
-    }, [router, showNavBar, showMiniDialog, logout]);
+    }, [router, showMiniDialog, logout]);
 
     const lcSearch = searchTerm.toLowerCase();
     const filteredCodes = codes.filter(
@@ -67,27 +66,21 @@ const Page: React.FC = () => {
     );
 
     if (!hasFetched) {
-        return (
-            <VerticallyCentered>
-                <ActivityIndicator />
-            </VerticallyCentered>
-        );
+        return <LoadingIndicator />;
     }
 
     return (
-        <>
+        <Stack>
             <AuthNavbar />
-            <div
-                style={{
+            <Stack
+                sx={{
                     maxWidth: "800px",
-                    display: "flex",
-                    flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
                     margin: "0 auto",
+                    mt: 1,
                 }}
             >
-                <div style={{ marginBottom: "1rem" }} />
                 {filteredCodes.length == 0 && searchTerm.length == 0 ? (
                     <></>
                 ) : (
@@ -97,30 +90,23 @@ const Page: React.FC = () => {
                         label={t("search")}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         variant="filled"
-                        style={{ width: "350px" }}
+                        sx={{ minWidth: "min(340px, 80svw)" }}
                         value={searchTerm}
                         autoFocus
                     />
                 )}
 
-                <div style={{ marginBottom: "1rem" }} />
-                <div
-                    style={{
+                <Box
+                    sx={{
                         display: "flex",
                         flexDirection: "row",
                         flexWrap: "wrap",
                         justifyContent: "center",
+                        mt: 3,
                     }}
                 >
                     {filteredCodes.length == 0 ? (
-                        <div
-                            style={{
-                                alignItems: "center",
-                                display: "flex",
-                                textAlign: "center",
-                                marginTop: "32px",
-                            }}
-                        >
+                        <Box sx={{ textAlign: "center", mt: 4 }}>
                             {searchTerm.length > 0 ? (
                                 <Typography>{t("no_results")}</Typography>
                             ) : (
@@ -128,16 +114,16 @@ const Page: React.FC = () => {
                                     {t("no_codes_added_yet")}
                                 </Typography>
                             )}
-                        </div>
+                        </Box>
                     ) : (
                         filteredCodes.map((code) => (
                             <CodeDisplay key={code.id} code={code} />
                         ))
                     )}
-                </div>
+                </Box>
                 <Footer />
-            </div>
-        </>
+            </Stack>
+        </Stack>
     );
 };
 
@@ -174,7 +160,7 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
     const [otp, setOTP] = useState("");
     const [nextOTP, setNextOTP] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
-    const [hasCopied, setHasCopied] = useState(false);
+    const [openCopied, setOpenCopied] = useState(false);
 
     const regen = useCallback(() => {
         try {
@@ -188,8 +174,8 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
 
     const copyCode = () =>
         void navigator.clipboard.writeText(otp).then(() => {
-            setHasCopied(true);
-            setTimeout(() => setHasCopied(false), 2000);
+            setOpenCopied(true);
+            setTimeout(() => setOpenCopied(false), 2000);
         });
 
     useEffect(() => {
@@ -213,16 +199,16 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
     }, [code, regen]);
 
     return (
-        <div style={{ padding: "8px" }}>
+        <Box sx={{ p: 1 }}>
             {errorMessage ? (
                 <UnparseableCode {...{ code, errorMessage }} />
             ) : (
                 <ButtonBase component="div" onClick={copyCode}>
                     <OTPDisplay {...{ code, otp, nextOTP }} />
-                    <Snackbar open={hasCopied} message={t("COPIED")} />
+                    <Snackbar open={openCopied} message={t("copied")} />
                 </ButtonBase>
             )}
-        </div>
+        </Box>
     );
 };
 
@@ -234,106 +220,56 @@ interface OTPDisplayProps {
 
 const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
     return (
-        <div
-            style={{
-                backgroundColor: "rgba(40, 40, 40, 0.6)",
+        <Box
+            sx={(theme) => ({
+                backgroundColor: theme.palette.background.paper,
                 borderRadius: "4px",
                 overflow: "hidden",
-            }}
+            })}
         >
             <CodeValidityBar code={code} />
-            <div
-                style={{
+            <Stack
+                direction="row"
+                sx={{
                     padding: "12px 20px 0px 20px",
-                    display: "flex",
-                    alignItems: "flex-start",
-                    minWidth: "320px",
+                    minWidth: "min(360px, 80svw)",
                     minHeight: "120px",
                     justifyContent: "space-between",
                 }}
             >
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "flex-start",
-                        minWidth: "200px",
-                    }}
-                >
-                    <p
-                        style={{
-                            fontWeight: "bold",
-                            margin: "0px",
-                            fontSize: "14px",
-                            textAlign: "left",
-                        }}
-                    >
-                        {code.issuer}
-                    </p>
-                    <p
-                        style={{
-                            marginTop: "0px",
-                            marginBottom: "8px",
-                            textAlign: "left",
-                            fontSize: "12px",
-                            maxWidth: "200px",
-                            minHeight: "16px",
-                            color: "grey",
-                        }}
+                <Stack style={{ gap: "4px", alignItems: "flex-start" }}>
+                    <Typography variant="small">{code.issuer}</Typography>
+                    <Typography
+                        variant="mini"
+                        sx={{ color: "text.faint", flex: 1, minHeight: "16px" }}
                     >
                         {code.account ?? ""}
-                    </p>
-                    <p
-                        style={{
-                            margin: "0px",
-                            marginBottom: "1rem",
-                            fontSize: "24px",
-                            fontWeight: "bold",
-                            textAlign: "left",
-                        }}
-                    >
+                    </Typography>
+                    <Typography variant="h3" sx={{ mb: "20px" }}>
                         {otp}
-                    </p>
-                </div>
-                <div style={{ flex: 1 }} />
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "column",
+                    </Typography>
+                </Stack>
+                <Stack
+                    sx={{
+                        justifyContent: "flex-end",
                         alignItems: "flex-end",
-                        minWidth: "120px",
                         textAlign: "right",
-                        marginTop: "auto",
-                        marginBottom: "1rem",
+                        mb: "1rem",
+                        gap: "2px",
                     }}
                 >
-                    <p
-                        style={{
-                            fontWeight: "bold",
-                            marginBottom: "0px",
-                            fontSize: "10px",
-                            marginTop: "auto",
-                            textAlign: "right",
-                            color: "grey",
-                        }}
-                    >
+                    <Typography variant="mini" sx={{ color: "text.faint" }}>
                         {t("auth_next")}
-                    </p>
-                    <p
-                        style={{
-                            fontSize: "14px",
-                            fontWeight: "bold",
-                            marginBottom: "0px",
-                            marginTop: "auto",
-                            textAlign: "right",
-                            color: "grey",
-                        }}
+                    </Typography>
+                    <Typography
+                        variant="small"
+                        sx={{ fontWeight: "medium", color: "text.muted" }}
                     >
                         {nextOTP}
-                    </p>
-                </div>
-            </div>
-        </div>
+                    </Typography>
+                </Stack>
+            </Stack>
+        </Box>
     );
 };
 
@@ -362,7 +298,6 @@ const CodeValidityBar: React.FC<CodeValidityBarProps> = ({ code }) => {
     return (
         <div
             style={{
-                borderTopLeftRadius: "3px",
                 width: `${progress * 100}%`,
                 height: "3px",
                 backgroundColor: color,
@@ -380,28 +315,50 @@ const UnparseableCode: React.FC<UnparseableCodeProps> = ({
     code,
     errorMessage,
 }) => {
-    const [showRawData, setShowRawData] = useState(false);
+    const [openCopied, setOpenCopied] = useState(false);
+
+    const copyRawData = () =>
+        void navigator.clipboard.writeText(code.uriString).then(() => {
+            setOpenCopied(true);
+            setTimeout(() => setOpenCopied(false), 2000);
+        });
 
     return (
-        <div className="code-info">
-            <div>{code.issuer}</div>
-            <div>{errorMessage}</div>
-            <div>
-                {showRawData ? (
-                    <div onClick={() => setShowRawData(false)}>
-                        {code.uriString}
-                    </div>
-                ) : (
-                    <div onClick={() => setShowRawData(true)}>Show rawData</div>
-                )}
-            </div>
-        </div>
+        <Stack
+            sx={(theme) => ({
+                backgroundColor: theme.palette.background.paper,
+                borderRadius: "4px",
+                overflow: "hidden",
+                p: "16px 20px",
+                minWidth: "min(360px, 80svw)",
+                maxWidth: "360px",
+                minHeight: "120px",
+                gap: "4px",
+            })}
+        >
+            <Typography variant="small">{code.issuer}</Typography>
+            <Typography
+                variant="small"
+                sx={{
+                    color: "critical.main",
+                    flex: 1,
+                    minHeight: "16px",
+                    mb: 2,
+                }}
+            >
+                {errorMessage}
+            </Typography>
+            <FocusVisibleButton color="secondary" onClick={copyRawData}>
+                Copy raw data
+            </FocusVisibleButton>
+            <Snackbar open={openCopied} message={t("copied")} />
+        </Stack>
     );
 };
 
 const Footer: React.FC = () => {
     return (
-        <Footer_>
+        <Stack sx={{ my: "4rem", gap: 2, alignItems: "center" }}>
             <Typography>{t("auth_download_mobile_app")}</Typography>
             <a
                 href="https://github.com/ente-io/ente/tree/main/auth#-download"
@@ -409,15 +366,6 @@ const Footer: React.FC = () => {
             >
                 <Button color="accent">{t("download")}</Button>
             </a>
-        </Footer_>
+        </Stack>
     );
 };
-
-const Footer_ = styled("div")`
-    margin-block: 4rem;
-    display: flex;
-    gap: 1rem;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-`;

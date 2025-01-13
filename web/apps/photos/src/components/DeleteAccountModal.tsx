@@ -2,6 +2,7 @@ import { assertionFailed } from "@/base/assert";
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
+import { isSxArray } from "@/base/components/utils/sx";
 import { sharedCryptoWorker } from "@/base/crypto";
 import { AppContext } from "@/new/photos/types/context";
 import { initiateEmail } from "@/new/photos/utils/web";
@@ -276,7 +277,7 @@ function MultilineInput({
                 variant="small"
                 sx={[
                     { px: "8px", color: "text.secondary" },
-                    ...(Array.isArray(messageSxProps)
+                    ...(isSxArray(messageSxProps)
                         ? messageSxProps
                         : [messageSxProps]),
                 ]}

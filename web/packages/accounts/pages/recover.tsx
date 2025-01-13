@@ -1,13 +1,14 @@
-import { PAGES } from "@/accounts/constants/pages";
-import { sendOTT } from "@/accounts/services/user";
 import {
-    FormPaper,
-    FormPaperFooter,
-    FormPaperTitle,
-} from "@/base/components/FormPaper";
+    AccountsPageContents,
+    AccountsPageFooter,
+    AccountsPageTitle,
+} from "@/accounts/components/layouts/centered-paper";
+import { PAGES } from "@/accounts/constants/pages";
+import { appHomeRoute, stashRedirect } from "@/accounts/services/redirect";
+import { sendOTT } from "@/accounts/services/user";
+import type { PageProps } from "@/accounts/types/page";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
-import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
     type SingleInputFormProps,
@@ -22,8 +23,6 @@ import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { appHomeRoute, stashRedirect } from "../services/redirect";
-import type { PageProps } from "../types/page";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const bip39 = require("bip39");
@@ -31,7 +30,7 @@ const bip39 = require("bip39");
 bip39.setDefaultWordlist("english");
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { showNavBar, showMiniDialog } = appContext;
+    const { showMiniDialog } = appContext;
 
     const [keyAttributes, setKeyAttributes] = useState<
         KeyAttributes | undefined
@@ -60,7 +59,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         } else {
             setKeyAttributes(keyAttributes);
         }
-        showNavBar(true);
     }, []);
 
     const recover: SingleInputFormProps["callback"] = async (
@@ -95,7 +93,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             void router.push(PAGES.CHANGE_PASSWORD);
         } catch (e) {
             log.error("password recovery failed", e);
-            setFieldError(t("INCORRECT_RECOVERY_KEY"));
+            setFieldError(t("incorrect_recovery_key"));
         }
     };
 
@@ -108,26 +106,22 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         });
 
     return (
-        <VerticallyCentered>
-            <FormPaper>
-                <FormPaperTitle>{t("RECOVER_ACCOUNT")}</FormPaperTitle>
-                <SingleInputForm
-                    callback={recover}
-                    fieldType="text"
-                    placeholder={t("RECOVERY_KEY_HINT")}
-                    buttonText={t("RECOVER")}
-                    disableAutoComplete
-                />
-                <FormPaperFooter style={{ justifyContent: "space-between" }}>
-                    <LinkButton onClick={showNoRecoveryKeyMessage}>
-                        {t("NO_RECOVERY_KEY")}
-                    </LinkButton>
-                    <LinkButton onClick={router.back}>
-                        {t("go_back")}
-                    </LinkButton>
-                </FormPaperFooter>
-            </FormPaper>
-        </VerticallyCentered>
+        <AccountsPageContents>
+            <AccountsPageTitle>{t("recover_account")}</AccountsPageTitle>
+            <SingleInputForm
+                callback={recover}
+                fieldType="text"
+                placeholder={t("recovery_key")}
+                buttonText={t("recover")}
+                disableAutoComplete
+            />
+            <AccountsPageFooter>
+                <LinkButton onClick={showNoRecoveryKeyMessage}>
+                    {t("no_recovery_key_title")}
+                </LinkButton>
+                <LinkButton onClick={router.back}>{t("go_back")}</LinkButton>
+            </AccountsPageFooter>
+        </AccountsPageContents>
     );
 };
 

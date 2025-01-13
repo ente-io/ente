@@ -318,6 +318,29 @@ func (repo *CollectionRepository) GetCollectionIDsSharedWithUser(userID int64) (
 	return cIDs, nil
 }
 
+func (repo *CollectionRepository) GetCollectionsSharedWithOrByUser(userID int64) ([]int64, error) {
+	rows, err := repo.DB.Query(`
+		SELECT collection_id
+		FROM collection_shares
+		WHERE (to_user_id = $1 OR from_user_id = $1)
+		AND is_deleted = $2`, userID, false)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+
+	cIDs := make([]int64, 0)
+	for rows.Next() {
+		var cID int64
+		if err := rows.Scan(&cID); err != nil {
+			return cIDs, stacktrace.Propagate(err, "")
+		}
+		cIDs = append(cIDs, cID)
+	}
+	return cIDs, nil
+
+}
+
 // GetCollectionIDsOwnedByUser returns the map of collectionID (owned by user) to collection deletion status
 func (repo *CollectionRepository) GetCollectionIDsOwnedByUser(userID int64) (map[int64]bool, error) {
 	rows, err := repo.DB.Query(`
@@ -373,6 +396,52 @@ func (repo *CollectionRepository) DoesFileExistInCollections(fileID int64, cIDs 
 	err := repo.DB.QueryRow(`SELECT EXISTS (SELECT 1 FROM collection_files WHERE file_id = $1 AND is_deleted = $2 AND collection_id = ANY ($3))`,
 		fileID, false, pq.Array(cIDs)).Scan(&exists)
 	return exists, stacktrace.Propagate(err, "")
+}
+
+func (repo *CollectionRepository) DoAllFilesExistInGivenCollections(fileIDs []int64, cIDs []int64) error {
+	// Query to get all distinct file_ids that exist in the collections
+	rows, err := repo.DB.Query(`
+        SELECT DISTINCT file_id 
+        FROM collection_files 
+        WHERE file_id = ANY ($1) 
+        AND is_deleted = false 
+        AND collection_id = ANY ($2)`,
+		pq.Array(fileIDs), pq.Array(cIDs))
+
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+
+	// Create a map of input fileIDs for easy lookup
+	fileIDMap := make(map[int64]bool)
+	for _, id := range fileIDs {
+		fileIDMap[id] = false // false means not found yet
+	}
+	// Mark files that were found
+	for rows.Next() {
+		var fileID int64
+		if err := rows.Scan(&fileID); err != nil {
+			return stacktrace.Propagate(err, "")
+		}
+		fileIDMap[fileID] = true // mark as found
+	}
+
+	if err = rows.Err(); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+
+	// Collect missing files
+	var missingFiles []int64
+	for id, found := range fileIDMap {
+		if !found {
+			missingFiles = append(missingFiles, id)
+		}
+	}
+	if len(missingFiles) > 0 {
+		return stacktrace.Propagate(fmt.Errorf("missing files %v", missingFiles), "")
+	}
+	return nil
 }
 
 // VerifyAllFileIDsExistsInCollection returns error if the fileIDs don't exist in the collection

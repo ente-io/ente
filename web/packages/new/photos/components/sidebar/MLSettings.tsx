@@ -264,12 +264,8 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
             break;
     }
 
-    // When clustering, show the progress as a percentage instead of the
-    // potentially confusing total counts during incremental updates.
-    const processed =
-        phase == "clustering"
-            ? `${Math.round((100 * nSyncedFiles) / nTotalFiles)}%`
-            : `${nSyncedFiles} / ${nTotalFiles}`;
+    // Show processed as percentages instead of potentially confusing counts.
+    const processed = `${Math.round((100 * nSyncedFiles) / nTotalFiles)}%`;
 
     const confirmDisableML = () =>
         showMiniDialog({

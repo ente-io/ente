@@ -1,7 +1,6 @@
 import { clientPackageName } from "@/base/app";
 import { assertionFailed } from "@/base/assert";
 import { isHTTP4xxError } from "@/base/http";
-import { getKVN } from "@/base/kv";
 import log from "@/base/log";
 import type { ElectronMLWorker } from "@/base/types/ipc";
 import { fileLogID, type EnteFile } from "@/media/file";
@@ -286,12 +285,8 @@ export class MLWorker {
 
     /** Return the next batch of items to backfill (if any). */
     private async backfillQ() {
-        const userID = (await getKVN("userID"))!;
         // Find files that our local DB thinks need syncing.
-        const fileByID = await syncWithLocalFilesAndGetFilesToIndex(
-            userID,
-            200,
-        );
+        const fileByID = await syncWithLocalFilesAndGetFilesToIndex(200);
         if (!fileByID.size) return [];
 
         // Fetch their existing ML data (if any).
@@ -429,20 +424,13 @@ const indexNextBatch = async (
  *
  * For specifics of what a "sync" entails, see {@link updateAssumingLocalFiles}.
  *
- * @param userID Sync only files owned by a {@link userID} with the face DB.
- *
  * @param count Limit the resulting list of indexable files to {@link count}.
  */
 const syncWithLocalFilesAndGetFilesToIndex = async (
-    userID: number,
     count: number,
 ): Promise<Map<number, EnteFile>> => {
-    const isIndexable = (f: EnteFile) => f.ownerID == userID;
-
     const localFiles = await getAllLocalFiles();
-    const localFileByID = new Map(
-        localFiles.filter(isIndexable).map((f) => [f.id, f]),
-    );
+    const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
 
     const localTrashFileIDs = (await getLocalTrashedFiles()).map((f) => f.id);
 

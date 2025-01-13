@@ -1,25 +1,21 @@
 import { clientPackageName, isDesktop, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
+import { LoadingOverlay } from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { Overlay } from "@/base/components/mui/Container";
-import { AppNavbar } from "@/base/components/Navbar";
 import {
     genericErrorDialogAttributes,
     useAttributedMiniDialog,
 } from "@/base/components/utils/dialog";
-import { setupI18n } from "@/base/i18n";
+import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
+import { THEME_COLOR, getTheme } from "@/base/components/utils/theme";
 import log from "@/base/log";
-import {
-    logStartupBanner,
-    logUnhandledErrorsAndRejections,
-} from "@/base/log-web";
+import { logStartupBanner } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
+import { Notification } from "@/new/photos/components/Notification";
 import {
     updateAvailableForDownloadDialogAttributes,
     updateReadyToInstallDialogAttributes,
 } from "@/new/photos/components/utils/download";
-import { useIsOffline } from "@/new/photos/components/utils/use-is-offline";
 import { useLoadingBar } from "@/new/photos/components/utils/use-loading-bar";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import { runMigrations } from "@/new/photos/services/migration";
@@ -33,13 +29,12 @@ import {
     getData,
     migrateKVToken,
 } from "@ente/shared/storage/localStorage";
-import { getTheme } from "@ente/shared/themes";
-import { THEME_COLOR } from "@ente/shared/themes/constants";
 import type { User } from "@ente/shared/user/types";
+import "@fontsource-variable/inter";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { CssBaseline, styled } from "@mui/material";
+import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import Notification from "components/Notification";
+import { useNotification } from "components/utils/hooks-app";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
@@ -48,38 +43,32 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
+
 import "styles/global.css";
-import { NotificationAttributes } from "types/Notification";
 
-export default function App({ Component, pageProps }: AppProps) {
+const App: React.FC<AppProps> = ({ Component, pageProps }) => {
+    useSetupLogs();
+
+    const isI18nReady = useSetupI18n();
     const router = useRouter();
-    const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
-    const [loading, setLoading] = useState(false);
-    const [showNavbar, setShowNavBar] = useState(false);
-    const [watchFolderView, setWatchFolderView] = useState(false);
-    const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
-    const [notificationView, setNotificationView] = useState(false);
-    const closeNotification = () => setNotificationView(false);
-    const [notificationAttributes, setNotificationAttributes] =
-        useState<NotificationAttributes>(null);
-
-    const isOffline = useIsOffline();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
+    const { showNotification, notificationProps } = useNotification();
     const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
         THEME_COLOR.DARK,
     );
 
+    const [loading, setLoading] = useState(false);
+    const [watchFolderView, setWatchFolderView] = useState(false);
+    const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
+
     useEffect(() => {
-        void setupI18n().finally(() => setIsI18nReady(true));
         const user = getData(LS_KEYS.USER) as User | undefined | null;
         void migrateKVToken(user);
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
-        logUnhandledErrorsAndRejections(true);
         void runMigrations();
-        return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
     useEffect(() => {
@@ -99,10 +88,10 @@ export default function App({ Component, pageProps }: AppProps) {
             if (update.autoUpdatable) {
                 showMiniDialog(updateReadyToInstallDialogAttributes(update));
             } else {
-                setNotificationAttributes({
+                showNotification({
+                    color: "secondary",
+                    title: t("update_available"),
                     endIcon: <ArrowForwardIcon />,
-                    variant: "secondary",
-                    message: t("update_available"),
                     onClick: () =>
                         showMiniDialog(
                             updateAvailableForDownloadDialogAttributes(update),
@@ -132,7 +121,10 @@ export default function App({ Component, pageProps }: AppProps) {
         if (needsFamilyRedirect && getData(LS_KEYS.USER)?.token)
             redirectToFamilyPortal();
 
+        // TODO: Remove me after instrumenting for a bit.
+        let t = Date.now();
         router.events.on("routeChangeStart", (url: string) => {
+            t = Date.now();
             const newPathname = url.split("?")[0];
             if (window.location.pathname !== newPathname) {
                 setLoading(true);
@@ -148,13 +140,10 @@ export default function App({ Component, pageProps }: AppProps) {
         });
 
         router.events.on("routeChangeComplete", () => {
+            log.debug(() => `Route change took ${Date.now() - t} ms`);
             setLoading(false);
         });
     }, []);
-
-    useEffect(() => {
-        setNotificationView(true);
-    }, [notificationAttributes]);
 
     const onGenericError = useCallback((e: unknown) => {
         log.error(e);
@@ -172,17 +161,16 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const appContext = useMemo(
         () => ({
-            showNavBar: (show: boolean) => setShowNavBar(show),
             showLoadingBar,
             hideLoadingBar,
             watchFolderView,
             setWatchFolderView,
             watchFolderFiles,
             setWatchFolderFiles,
-            setNotificationAttributes,
             themeColor,
             setThemeColor,
             showMiniDialog,
+            showNotification,
             onGenericError,
             logout,
         }),
@@ -193,6 +181,7 @@ export default function App({ Component, pageProps }: AppProps) {
             watchFolderFiles,
             themeColor,
             showMiniDialog,
+            showNotification,
             onGenericError,
             logout,
         ],
@@ -206,10 +195,6 @@ export default function App({ Component, pageProps }: AppProps) {
 
             <ThemeProvider theme={getTheme(themeColor, "photos")}>
                 <CssBaseline enableColorScheme />
-                {showNavbar && <AppNavbar />}
-                <OfflineMessageContainer>
-                    {isI18nReady && isOffline && t("offline_message")}
-                </OfflineMessageContainer>
                 <LoadingBar color="#51cd7c" ref={loadingBarRef} />
 
                 <AttributedMiniDialog
@@ -217,42 +202,18 @@ export default function App({ Component, pageProps }: AppProps) {
                     {...miniDialogProps}
                 />
 
-                <Notification
-                    open={notificationView}
-                    onClose={closeNotification}
-                    attributes={notificationAttributes}
-                />
+                <Notification {...notificationProps} />
 
                 <AppContext.Provider value={appContext}>
-                    {(loading || !isI18nReady) && (
-                        <Overlay
-                            sx={(theme) => ({
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                zIndex: 2000,
-                                backgroundColor: theme.colors.background.base,
-                            })}
-                        >
-                            <ActivityIndicator />
-                        </Overlay>
-                    )}
-                    {isI18nReady && (
-                        <Component setLoading={setLoading} {...pageProps} />
-                    )}
+                    {(loading || !isI18nReady) && <LoadingOverlay />}
+                    {isI18nReady && <Component {...pageProps} />}
                 </AppContext.Provider>
             </ThemeProvider>
         </>
     );
-}
+};
 
-const OfflineMessageContainer = styled("div")`
-    background-color: #111;
-    padding: 0;
-    font-size: 14px;
-    text-align: center;
-    line-height: 32px;
-`;
+export default App;
 
 const redirectToFamilyPortal = () =>
     void getFamilyPortalRedirectURL().then((url) => {

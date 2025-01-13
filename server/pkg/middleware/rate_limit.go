@@ -19,13 +19,13 @@ import (
 )
 
 type RateLimitMiddleware struct {
-	limit10ReqPerMin  *limiter.Limiter
-	limit200ReqPerSec *limiter.Limiter
-	discordCtrl       *discord.DiscordController
 	count             int64 // Use int64 for atomic operations
 	limit             int64
 	reset             time.Duration
 	ticker            *time.Ticker
+	limit10ReqPerMin  *limiter.Limiter
+	limit200ReqPerSec *limiter.Limiter
+	discordCtrl       *discord.DiscordController
 }
 
 func NewRateLimitMiddleware(discordCtrl *discord.DiscordController, limit int64, reset time.Duration) *RateLimitMiddleware {

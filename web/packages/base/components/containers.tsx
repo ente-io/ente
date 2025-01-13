@@ -1,4 +1,14 @@
-import { styled } from "@mui/material";
+import { Stack, styled } from "@mui/material";
+
+/**
+ * A {@link Stack} that takes up at least the height of the entire viewport, and
+ * centers its children both vertically and horizontally.
+ */
+export const Stack100vhCenter = styled(Stack)`
+    min-height: 100vh;
+    justify-content: center;
+    align-items: center;
+`;
 
 /**
  * A flexbox with justify content set to space-between and center alignment.

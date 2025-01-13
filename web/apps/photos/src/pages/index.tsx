@@ -1,5 +1,5 @@
-import { Login } from "@/accounts/components/Login";
-import { SignUp } from "@/accounts/components/SignUp";
+import { LoginContents } from "@/accounts/components/LoginContents";
+import { SignUpContents } from "@/accounts/components/SignUpContents";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
@@ -16,12 +16,11 @@ import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
 import { Box, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 
-export default function LandingPage() {
-    const { showNavBar, showMiniDialog } = useAppContext();
+const Page: React.FC = () => {
+    const { showMiniDialog } = useAppContext();
 
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(true);
@@ -36,7 +35,6 @@ export default function LandingPage() {
 
     useEffect(() => {
         refreshHost();
-        showNavBar(false);
         const currentURL = new URL(window.location.href);
         const albumsURL = new URL(albumsAppOrigin());
         currentURL.pathname = router.pathname;
@@ -136,19 +134,25 @@ export default function LandingPage() {
                         <MobileBoxFooter {...{ host }} />
                     </MobileBox>
                     <DesktopBox>
-                        <Box sx={{ width: "320px" }}>
+                        <Stack sx={{ width: "320px", py: 4, gap: 4 }}>
                             {showLogin ? (
-                                <Login {...{ signUp, host }} />
+                                <LoginContents
+                                    {...{ onSignUp: signUp, host }}
+                                />
                             ) : (
-                                <SignUp {...{ router, login, host }} />
+                                <SignUpContents
+                                    {...{ router, onLogin: login, host }}
+                                />
                             )}
-                        </Box>
+                        </Stack>
                     </DesktopBox>
                 </>
             )}
         </TappableContainer>
     );
-}
+};
+
+export default Page;
 
 interface TappableContainerProps {
     /**

@@ -27,14 +27,13 @@ declare module "@mui/material/styles" {
     }
 
     interface TypographyVariants {
-        large: React.CSSProperties;
         body: React.CSSProperties;
         small: React.CSSProperties;
         mini: React.CSSProperties;
         tiny: React.CSSProperties;
     }
+
     interface TypographyVariantsOptions {
-        large?: React.CSSProperties;
         body?: React.CSSProperties;
         small?: React.CSSProperties;
         mini?: React.CSSProperties;
@@ -44,14 +43,7 @@ declare module "@mui/material/styles" {
 
 declare module "@mui/material/Typography" {
     interface TypographyPropsVariantOverrides {
-        large: true;
-        body: true;
-        small: true;
-        mini: true;
-        tiny: true;
-        h4: true;
-        h5: true;
-        h6: true;
+        // Turn off MUI provided variants we don't use.
         subtitle1: false;
         subtitle2: false;
         body1: false;
@@ -59,6 +51,11 @@ declare module "@mui/material/Typography" {
         caption: false;
         button: false;
         overline: false;
+        // Add our custom variants.
+        body: true;
+        small: true;
+        mini: true;
+        tiny: true;
     }
 }
 

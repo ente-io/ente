@@ -70,6 +70,26 @@ class S {
     );
   }
 
+  /// `Email already registered.`
+  String get emailAlreadyRegistered {
+    return Intl.message(
+      'Email already registered.',
+      name: 'emailAlreadyRegistered',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Email not registered.`
+  String get emailNotRegistered {
+    return Intl.message(
+      'Email not registered.',
+      name: 'emailNotRegistered',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Email`
   String get email {
     return Intl.message(
@@ -10002,6 +10022,16 @@ class S {
     return Intl.message(
       'Local indexing',
       name: 'localIndexing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Processed`
+  String get processed {
+    return Intl.message(
+      'Processed',
+      name: 'processed',
       desc: '',
       args: [],
     );

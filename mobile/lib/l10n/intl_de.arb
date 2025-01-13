@@ -2,6 +2,8 @@
   "@@locale ": "en",
   "enterYourEmailAddress": "Gib deine E-Mail-Adresse ein",
   "accountWelcomeBack": "Willkommen zurück!",
+  "emailAlreadyRegistered": "E-Mail ist bereits registriert.",
+  "emailNotRegistered": "E-Mail nicht registriert.",
   "email": "E-Mail",
   "cancel": "Abbrechen",
   "verify": "Überprüfen",
@@ -185,6 +187,8 @@
   },
   "allowAddPhotosDescription": "Erlaube Nutzern, mit diesem Link ebenfalls Fotos zu diesem geteilten Album hinzuzufügen.",
   "passwordLock": "Passwort Sperre",
+  "canNotOpenTitle": "Album kann nicht geöffnet werden",
+  "canNotOpenBody": "Leider kann dieses Album nicht in der App geöffnet werden.",
   "disableDownloadWarningTitle": "Bitte beachten Sie:",
   "disableDownloadWarningBody": "Zuschauer können weiterhin Screenshots oder mit anderen externen Programmen Kopien der Bilder machen.",
   "allowDownloads": "Downloads erlauben",
@@ -1378,6 +1382,7 @@
   "extraPhotosFound": "Zusätzliche Fotos gefunden",
   "configuration": "Konfiguration",
   "localIndexing": "Lokale Indizierung",
+  "processed": "Verarbeitet",
   "resetPerson": "Entfernen",
   "areYouSureYouWantToResetThisPerson": "Bist du sicher, dass du diese Person zurücksetzen möchtest?",
   "allPersonGroupingWillReset": "Alle Gruppierungen für diese Person werden zurückgesetzt und du wirst alle Vorschläge für diese Person verlieren",
@@ -1580,5 +1585,9 @@
   "authToManageLegacy": "Bitte authentifiziere dich, um deine vertrauenswürdigen Kontakte zu verwalten",
   "useDifferentPlayerInfo": "Hast du Probleme beim Abspielen dieses Videos? Halte hier gedrückt, um einen anderen Player auszuprobieren.",
   "hideSharedItemsFromHomeGallery": "Geteilte Elemente in der Home-Galerie ausblenden",
-  "gallery": "Galerie"
+  "gallery": "Galerie",
+  "joinAlbum": "Album beitreten",
+  "joinAlbumSubtext": "um deine Fotos anzuzeigen und hinzuzufügen",
+  "joinAlbumSubtextViewer": "um dies zu geteilten Alben hinzuzufügen",
+  "join": "Beitreten"
 }

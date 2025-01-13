@@ -1,6 +1,3 @@
-import Page_ from "@/accounts/pages/signup";
-import { useAppContext } from "types/context";
-
-const Page = () => <Page_ appContext={useAppContext()} />;
+import Page from "@/accounts/pages/signup";
 
 export default Page;

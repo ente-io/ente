@@ -1,6 +1,6 @@
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
-import { styled, Typography } from "@mui/material";
+import { Box, Stack, styled, Typography } from "@mui/material";
 import { PairingCode } from "components/PairingCode";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -8,7 +8,7 @@ import { readCastData, storeCastData } from "services/cast-data";
 import { getCastPayload, register } from "services/pair";
 import { advertiseOnChromecast } from "../services/chromecast-receiver";
 
-export default function Index() {
+const Page: React.FC = () => {
     const [publicKey, setPublicKey] = useState<string | undefined>();
     const [privateKey, setPrivateKey] = useState<string | undefined>();
     const [pairingCode, setPairingCode] = useState<string | undefined>();
@@ -64,35 +64,29 @@ export default function Index() {
     return (
         <Container>
             <img width={150} src="/images/ente.svg" />
-            <Typography
-                variant="h2"
-                sx={{ fontWeight: "500", marginBlock: "2rem" }}
-            >
+            <Typography variant="h2" sx={{ marginBlock: "2rem" }}>
                 Enter this code on <b>Ente Photos</b> to pair this screen
             </Typography>
             {pairingCode ? <PairingCode code={pairingCode} /> : <Spinner />}
-            <p>
+            <Typography variant="h6" sx={{ fontWeight: "regular", mt: 3 }}>
                 Visit{" "}
                 <a href="https://ente.io/cast" target="_blank" rel="noopener">
                     ente.io/cast
                 </a>{" "}
                 for help
-            </p>
+            </Typography>
         </Container>
     );
-}
+};
 
-const Container = styled("div")`
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+export default Page;
+
+const Container = styled(Stack)`
+    height: 100svh;
     justify-content: center;
     align-items: center;
     text-align: center;
 
-    p {
-        font-size: 1.2rem;
-    }
     a {
         text-decoration: none;
         color: #87cefa;
@@ -101,12 +95,10 @@ const Container = styled("div")`
 `;
 
 const Spinner: React.FC = () => (
-    <Spinner_>
+    <Box
+        // Roughly same height as pairing code section to reduce layout shift.
+        sx={{ my: "1.7rem" }}
+    >
         <ActivityIndicator />
-    </Spinner_>
+    </Box>
 );
-
-const Spinner_ = styled("div")`
-    /* Roughly same height as the pairing code section to roduce layout shift */
-    margin-block: 1.7rem;
-`;

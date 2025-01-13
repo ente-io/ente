@@ -142,6 +142,11 @@ with Next.js.
 
 For more details, see [translations.md](translations.md).
 
+### Font
+
+Inter Variable (with support for weights 100 - 90) is used as the primary font,
+via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
+
 ### UI components
 
 - [react-window](https://github.com/bvaughn/react-window) is used for lazy-ily
@@ -212,7 +217,10 @@ For more details, see [translations.md](translations.md).
 ## Photos app specific
 
 - [react-dropzone](https://github.com/react-dropzone/react-dropzone/) is a React
-  hook to create a drag-and-drop input zone.
+  hook to create a drag-and-drop input zone. Note that we pin to the last
+  version in the 14.2 series, since if we use 14.3 onwards (I tested till
+  14.3.5) then we are unable to get back a path from the file by using the
+  `webUtils.getPathForFile` function provided by Electron.
 
 - [sanitize-filename](https://github.com/parshap/node-sanitize-filename) is for
   converting arbitrary strings into strings that are suitable for being used as

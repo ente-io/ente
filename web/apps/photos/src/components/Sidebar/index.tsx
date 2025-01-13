@@ -2,11 +2,12 @@ import { RecoveryKey } from "@/accounts/components/RecoveryKey";
 import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import { isDesktop } from "@/base/app";
 import { EnteLogo } from "@/base/components/EnteLogo";
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { THEME_COLOR } from "@/base/components/utils/theme";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
@@ -47,7 +48,6 @@ import {
 } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { THEME_COLOR } from "@ente/shared/themes/constants";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
 import CloseIcon from "@mui/icons-material/Close";
@@ -349,14 +349,7 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
         <Dialog {...{ open, onClose, fullScreen }} maxWidth="xs" fullWidth>
             <SpaceBetweenFlex sx={{ p: "20px 8px 12px 16px" }}>
                 <Stack>
-                    <Typography
-                        variant="h3"
-                        sx={{
-                            fontWeight: "bold",
-                        }}
-                    >
-                        {t("subscription")}
-                    </Typography>
+                    <Typography variant="h3">{t("subscription")}</Typography>
                     <Typography sx={{ color: "text.muted" }}>
                         {t("family_plan")}
                     </Typography>
@@ -510,10 +503,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
         router.push(PAGES.CHANGE_PASSWORD);
     };
 
-    const redirectToChangeEmailPage = () => {
-        closeSidebar();
-        router.push(PAGES.CHANGE_EMAIL);
-    };
+    const handleChangeEmail = () => router.push("/change-email");
 
     const redirectToAccountsPage = async () => {
         closeSidebar();
@@ -570,11 +560,11 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             <EnteMenuItem
                 variant="secondary"
                 onClick={redirectToChangePasswordPage}
-                label={t("CHANGE_PASSWORD")}
+                label={t("change_password")}
             />
             <EnteMenuItem
                 variant="secondary"
-                onClick={redirectToChangeEmailPage}
+                onClick={handleChangeEmail}
                 label={t("change_email")}
             />
             <EnteMenuItem
