@@ -90,8 +90,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
           child: SingleChildScrollView(
             child: Center(
               child: ConstrainedBox(
-                constraints:
-                    const BoxConstraints.tightFor(height: 800, width: 450),
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height,
+                  maxWidth: 450,
+                ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     vertical: 40.0,
@@ -197,6 +199,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           child: Center(
                             child: Text(
                               l10n.useOffline,
+                              textAlign: TextAlign.center,
                               style: body.copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
