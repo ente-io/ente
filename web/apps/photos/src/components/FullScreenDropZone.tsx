@@ -3,46 +3,21 @@ import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material";
 import { t } from "i18next";
 import React, { useContext, useEffect, useState } from "react";
-
-const CloseButtonWrapper = styled("div")`
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    cursor: pointer;
-`;
-const DropDiv = styled("div")`
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-`;
-const Overlay = styled("div")`
-    border-width: 8px;
-    left: 0;
-    top: 0;
-    outline: none;
-    transition: border 0.24s ease-in-out;
-    height: 100%;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #fff;
-    font-size: 24px;
-    font-weight: 900;
-    text-align: center;
-    position: absolute;
-    border-color: #51cd7c;
-    border-style: solid;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 3000;
-`;
+import type { DropzoneState } from "react-dropzone";
 
 type Props = React.PropsWithChildren<{
-    getDragAndDropRootProps: any;
+    getDragAndDropRootProps: DropzoneState["getRootProps"];
 }>;
 
-export default function FullScreenDropZone(props: Props) {
+/**
+ * A full screen overlay that accepts drag and drop of files, showing a visual
+ * indicator to the user while a drag is in progress.
+ *
+ * It is meant to be used in tandem with "react-dropzone"; specifically, it
+ * requires the `getRootProps` function returned by a call to
+ * {@link useDropzone}.
+ */
+export const FullScreenDropZone = (props: Props) => {
     const appContext = useContext(AppContext);
 
     const [isDragActive, setIsDragActive] = useState(false);
@@ -77,3 +52,39 @@ export default function FullScreenDropZone(props: Props) {
         </DropDiv>
     );
 }
+
+const DropDiv = styled("div")`
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+`;
+
+const Overlay = styled("div")`
+    border-width: 8px;
+    left: 0;
+    top: 0;
+    outline: none;
+    transition: border 0.24s ease-in-out;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 900;
+    text-align: center;
+    position: absolute;
+    border-color: #51cd7c;
+    border-style: solid;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 3000;
+`;
+
+const CloseButtonWrapper = styled("div")`
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+`;
