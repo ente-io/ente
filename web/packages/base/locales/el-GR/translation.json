@@ -206,7 +206,7 @@
     "ALREADY_SHARED": "",
     "SHARING_BAD_REQUEST_ERROR": "Δεν επιτρέπεται η κοινοποίηση άλμπουμ",
     "SHARING_DISABLED_FOR_FREE_ACCOUNTS": "Η κοινοποίηση είναι απενεργοποιημένη στους δωρεάν λογαριασμούς",
-    "search": "Αναζήτηση",
+    "search": "",
     "search_results": "Αποτελέσματα αναζήτησης",
     "no_results": "Δε βρέθηκαν αποτελέσματα",
     "search_hint": "",

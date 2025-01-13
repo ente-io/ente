@@ -206,7 +206,7 @@
     "ALREADY_SHARED": "Ôi, bạn đã chia sẻ điều này với {{email}}",
     "SHARING_BAD_REQUEST_ERROR": "Chia sẻ album không được phép",
     "SHARING_DISABLED_FOR_FREE_ACCOUNTS": "Chia sẻ bị vô hiệu hóa cho các tài khoản miễn phí",
-    "search": "tìm kiếm",
+    "search": "",
     "search_results": "Kết quả tìm kiếm",
     "no_results": "Không tìm thấy kết quả",
     "search_hint": "Tìm kiếm album, ngày tháng, mô tả, ...",

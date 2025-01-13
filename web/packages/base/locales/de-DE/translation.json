@@ -206,7 +206,7 @@
     "ALREADY_SHARED": "Hoppla, Sie teilen dies bereits mit {{email}}",
     "SHARING_BAD_REQUEST_ERROR": "Albumfreigabe nicht erlaubt",
     "SHARING_DISABLED_FOR_FREE_ACCOUNTS": "Freigabe ist für kostenlose Konten deaktiviert",
-    "search": "Suchen",
+    "search": "",
     "search_results": "Ergebnisse durchsuchen",
     "no_results": "Keine Ergebnisse gefunden",
     "search_hint": "Suche nach Alben, Datum, Beschreibungen, ...",
