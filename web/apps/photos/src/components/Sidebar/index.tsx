@@ -89,6 +89,7 @@ import exportService from "services/export";
 import { testUpload } from "../../../tests/upload.test";
 import { Preferences } from "./Preferences";
 import { SubscriptionCard } from "./SubscriptionCard";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
 
 interface Iprops {
     collectionSummaries: CollectionSummaries;
@@ -512,13 +513,26 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
     const redirectToAccountsPage = async () => {
         closeSidebar();
         await openAccountsManagePasskeysPage();
-    };
+  };
 
-    const handleDeduplicate = () => router.push("/duplicates");
+  const redirectToDashboard = () => {
+    const token = getToken()
+    console.log(token)
+    if (!token) {
+      console.error("Invalid Token")
+      return;
+    }
 
-    const toggleTheme = () =>
-        setThemeColor(
-            themeColor === THEME_COLOR.DARK
+    // To be replaced with the Staff app origin in future.
+    const baseURL = `http://localhost:5173`
+    window.location.href= `${baseURL}/?token=${token}`;
+  }
+
+  const handleDeduplicate = () => router.push("/duplicates");
+
+  const toggleTheme = () =>
+    setThemeColor(
+      themeColor === THEME_COLOR.DARK
                 ? THEME_COLOR.LIGHT
                 : THEME_COLOR.DARK,
         );
@@ -581,7 +595,11 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 onClick={showPreferences}
                 label={t("preferences")}
             />
-
+            <EnteMenuItem
+                variant="secondary"
+                onClick={redirectToDashboard}
+                label={t("Dashboard")}
+            />
             <RecoveryKey
                 {...recoveryKeyVisibilityProps}
                 {...{ showMiniDialog }}
