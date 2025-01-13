@@ -35,6 +35,8 @@ class PreviewVideoStore {
   final videoCacheManager = VideoCacheManager.instance;
   double _progress = 0;
 
+  final files = <EnteFile>{};
+
   final _dio = NetworkClient.instance.enteDio;
   void init() {
     VideoCompress.compressProgress$.subscribe((progress) {
@@ -68,11 +70,14 @@ class PreviewVideoStore {
         rethrow;
       }
     }
-    if (VideoCompress.isCompressing && ctx != null) {
-      showShortToast(
-        ctx,
-        "Another is being compressed ($_progress %), please wait",
-      );
+    if (VideoCompress.isCompressing) {
+      files.add(enteFile);
+      if (ctx != null) {
+        showShortToast(
+          ctx,
+          "Another is being compressed ($_progress %), please wait",
+        );
+      }
       return;
     }
     final String tempDir = Configuration.instance.getTempDirectory();
@@ -151,6 +156,12 @@ class PreviewVideoStore {
         final output = await session.getOutput();
         _logger.severe(output);
       }
+    }
+
+    if (files.isNotEmpty) {
+      final file = files.first;
+      files.remove(file);
+      await chunkAndUploadVideo(ctx, file);
     }
   }
 
