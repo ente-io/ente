@@ -206,7 +206,7 @@
     "ALREADY_SHARED": "",
     "SHARING_BAD_REQUEST_ERROR": "لا يسمح بمشاركة الألبوم",
     "SHARING_DISABLED_FOR_FREE_ACCOUNTS": "المشاركة معطلة للحسابات المجانية",
-    "search": "بحث",
+    "search": "",
     "search_results": "نتائج البحث",
     "no_results": "لا توجد نتائج",
     "search_hint": "البحث عن الألبومات، التواريخ، والأوصاف...",
