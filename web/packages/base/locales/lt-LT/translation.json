@@ -206,7 +206,7 @@
     "ALREADY_SHARED": "Ups, jūs jau bendrinate tai su {{email}}.",
     "SHARING_BAD_REQUEST_ERROR": "Neleidžiama bendrinti albumo.",
     "SHARING_DISABLED_FOR_FREE_ACCOUNTS": "Bendrinimas išjungtas nemokamoms paskyroms.",
-    "search": "",
+    "search": "Ieškoti",
     "search_results": "Paieškos rezultatai",
     "no_results": "Rezultatų nerasta.",
     "search_hint": "Ieškokite albumų, datų ir aprašymų...",

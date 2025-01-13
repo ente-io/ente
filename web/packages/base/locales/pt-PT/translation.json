@@ -206,7 +206,7 @@
     "ALREADY_SHARED": "Já está a partilhar isto com o {{email}}",
     "SHARING_BAD_REQUEST_ERROR": "Álbum compartilhado não permitido",
     "SHARING_DISABLED_FOR_FREE_ACCOUNTS": "A partilha está desactivada para contas gratuitas",
-    "search": "",
+    "search": "Pesquisar",
     "search_results": "Resultados de pesquisa",
     "no_results": "Nenhum resultado encontrado",
     "search_hint": "Procurar por álbuns, datas, descrições, ...",

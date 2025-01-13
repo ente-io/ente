@@ -206,7 +206,7 @@
     "ALREADY_SHARED": "Ups, już to udostępniasz z {{email}}",
     "SHARING_BAD_REQUEST_ERROR": "Udostępnianie albumu nie jest dozwolone",
     "SHARING_DISABLED_FOR_FREE_ACCOUNTS": "Udostępnianie jest wyłączone dla darmowych kont",
-    "search": "",
+    "search": "Szukaj",
     "search_results": "Wyniki wyszukiwania",
     "no_results": "Nie znaleziono wyników",
     "search_hint": "Szukaj albumów, dat, opisów, ...",

@@ -206,7 +206,7 @@
     "ALREADY_SHARED": "Oeps, je deelt dit al met {{email}}",
     "SHARING_BAD_REQUEST_ERROR": "Album delen niet toegestaan",
     "SHARING_DISABLED_FOR_FREE_ACCOUNTS": "Delen is uitgeschakeld voor gratis accounts",
-    "search": "",
+    "search": "Zoeken",
     "search_results": "Zoekresultaten",
     "no_results": "Geen resultaten gevonden",
     "search_hint": "Zoeken naar albums, datums ...",

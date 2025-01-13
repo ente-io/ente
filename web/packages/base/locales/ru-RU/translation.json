@@ -206,7 +206,7 @@
     "ALREADY_SHARED": "Упс, Вы уже делились этим с {{email}}",
     "SHARING_BAD_REQUEST_ERROR": "Делиться альбомом запрещено",
     "SHARING_DISABLED_FOR_FREE_ACCOUNTS": "Совместное использование отключено для бесплатных аккаунтов",
-    "search": "",
+    "search": "Поиск",
     "search_results": "Результаты поиска",
     "no_results": "Ничего не найдено",
     "search_hint": "Поиск альбомов, дат, описаний, ...",
