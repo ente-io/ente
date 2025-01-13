@@ -4,6 +4,7 @@ import "dart:typed_data";
 import "package:ente_auth/core/configuration.dart";
 import "package:ente_auth/utils/platform_util.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import "package:flutter/material.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:privacy_screen/privacy_screen.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -24,6 +25,7 @@ class LockScreenSettings {
   static const keyHasMigratedLockScreenChanges =
       "ls_has_migrated_lock_screen_changes";
   static const keyShowOfflineModeWarning = "ls_show_offline_mode_warning";
+  static const String kIsLightMode = "is_light_mode";
 
   final List<Duration> autoLockDurations = const [
     Duration(milliseconds: 650),
@@ -74,18 +76,30 @@ class LockScreenSettings {
     await _preferences.setBool(keyHasMigratedLockScreenChanges, true);
   }
 
+  Future<void> setLightMode(bool isLightMode) async {
+    if (isLightMode != (_preferences.getBool(kIsLightMode) ?? true)) {
+      await _preferences.setBool(kIsLightMode, isLightMode);
+    }
+  }
+
   Future<void> setHideAppContent(bool hideContent) async {
     if (PlatformUtil.isDesktop()) return;
+    final bool isLightMode = _preferences.getBool(kIsLightMode) ?? true;
     !hideContent
         ? PrivacyScreen.instance.disable()
         : await PrivacyScreen.instance.enable(
             iosOptions: const PrivacyIosOptions(
               enablePrivacy: true,
+              privacyImageName: 'LaunchImage',
             ),
             androidOptions: const PrivacyAndroidOptions(
               enableSecure: true,
             ),
-            blurEffect: PrivacyBlurEffect.extraLight,
+            backgroundColor:
+                isLightMode ? const Color(0xffffffff) : const Color(0xff000000),
+            blurEffect: isLightMode
+                ? PrivacyBlurEffect.extraLight
+                : PrivacyBlurEffect.extraLight,
           );
     await _preferences.setBool(keyHideAppContent, hideContent);
   }
