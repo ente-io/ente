@@ -5,9 +5,19 @@ import { t } from "i18next";
 import React, { useContext, useEffect, useState } from "react";
 import type { DropzoneState } from "react-dropzone";
 
-type Props = React.PropsWithChildren<{
+interface FullScreenDropZoneProps {
+    /**
+     * The `getRootProps` function returned by a call to {@link useDropzone}.
+     */
     getDragAndDropRootProps: DropzoneState["getRootProps"];
-}>;
+    /**
+     * Optional override to the message show to the user when a drag is in
+     * progress.
+     *
+     * Default: t("upload_dropzone_hint")
+     */
+    message?: string;
+}
 
 /**
  * A full screen overlay that accepts drag and drop of files, showing a visual
@@ -17,7 +27,9 @@ type Props = React.PropsWithChildren<{
  * requires the `getRootProps` function returned by a call to
  * {@link useDropzone}.
  */
-export const FullScreenDropZone = (props: Props) => {
+export const FullScreenDropZone: React.FC<
+    React.PropsWithChildren<FullScreenDropZoneProps>
+> = ({ getDragAndDropRootProps, children }) => {
     const appContext = useContext(AppContext);
 
     const [isDragActive, setIsDragActive] = useState(false);
@@ -33,25 +45,21 @@ export const FullScreenDropZone = (props: Props) => {
     }, []);
 
     return (
-        <DropDiv
-            {...props.getDragAndDropRootProps({
-                onDragEnter,
-            })}
-        >
+        <DropDiv {...getDragAndDropRootProps({ onDragEnter })}>
             {isDragActive && (
                 <Overlay onDrop={onDragLeave} onDragLeave={onDragLeave}>
                     <CloseButtonWrapper onClick={onDragLeave}>
                         <CloseIcon />
                     </CloseButtonWrapper>
-                    {appContext.watchFolderView
+                    {appContext!.watchFolderView
                         ? t("watch_folder_dropzone_hint")
                         : t("upload_dropzone_hint")}
                 </Overlay>
             )}
-            {props.children}
+            {children}
         </DropDiv>
     );
-}
+};
 
 const DropDiv = styled("div")`
     flex: 1;
