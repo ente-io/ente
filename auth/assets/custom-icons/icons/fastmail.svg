@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   viewBox="0 0 203.55556 203.55501"
+   version="1.1"
+   id="svg14"
+   sodipodi:docname="Fastmail_logo_2019.svg"
+   width="203.55556"
+   height="203.55501"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)">
+  <metadata
+     id="metadata20">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs18" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1136"
+     id="namedview16"
+     showgrid="false"
+     inkscape:zoom="0.55887135"
+     inkscape:cx="495.8288"
+     inkscape:cy="103.69084"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg14"
+     inkscape:document-rotation="0" />
+  <desc
+     id="desc2">Fastmail</desc>
+  <path
+     d="M 168.6788,57.190848 A 80.391313,80.391313 0 0 1 34.908803,146.39084 l -17.81,11.86 A 101.78194,101.78194 0 0 0 186.4788,45.340848 Z"
+     fill="#69b3e7"
+     id="path6" />
+  <path
+     d="M 21.158803,101.42084 A 80.39,80.39 0 0 1 168.6788,57.190848 l 17.8,-11.86 A 101.78471,101.78471 0 1 0 17.098803,158.25084 l 17.81,-11.86 a 80,80 0 0 1 -13.75,-44.97 z"
+     fill="#0067b9"
+     id="path8" />
+  <path
+     d="M 53.158803,133.68084 H 146.5288 a 3.41,3.41 0 0 0 3.41,-3.41 V 69.190848 Z"
+     fill="#333e48"
+     id="path10" />
+  <path
+     class="opacity"
+     d="M 101.5488,101.42084 53.158803,69.190848 v 64.519992 z"
+     fill="#ffc107"
+     id="path12" />
+</svg>
