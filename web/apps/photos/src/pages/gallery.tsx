@@ -181,6 +181,7 @@ const Page: React.FC = () => {
         hideLoadingBar,
         showMiniDialog,
         onGenericError,
+        watchFolderView,
         logout,
     } = useAppContext();
 
@@ -883,7 +884,14 @@ const Page: React.FC = () => {
                 setSelectedFiles: setSelected,
             }}
         >
-            <FullScreenDropZone {...{ getDragAndDropRootProps }}>
+            <FullScreenDropZone
+                {...{ getDragAndDropRootProps }}
+                message={
+                    watchFolderView
+                        ? t("watch_folder_dropzone_hint")
+                        : undefined
+                }
+            >
                 <UploadSelectorInputs
                     {...{
                         getDragAndDropInputProps,

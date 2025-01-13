@@ -1,8 +1,7 @@
-import { AppContext } from "@/new/photos/types/context";
 import CloseIcon from "@mui/icons-material/Close";
-import { styled } from "@mui/material";
+import { Stack, styled } from "@mui/material";
 import { t } from "i18next";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import type { DropzoneState } from "react-dropzone";
 
 interface FullScreenDropZoneProps {
@@ -29,20 +28,22 @@ interface FullScreenDropZoneProps {
  */
 export const FullScreenDropZone: React.FC<
     React.PropsWithChildren<FullScreenDropZoneProps>
-> = ({ getDragAndDropRootProps, children }) => {
-    const appContext = useContext(AppContext);
-
+> = ({ getDragAndDropRootProps, message, children }) => {
     const [isDragActive, setIsDragActive] = useState(false);
-    const onDragEnter = () => setIsDragActive(true);
-    const onDragLeave = () => setIsDragActive(false);
+
+    const onDragEnter = useCallback(() => setIsDragActive(true), []);
+    const onDragLeave = useCallback(() => setIsDragActive(false), []);
 
     useEffect(() => {
-        window.addEventListener("keydown", (event) => {
+        const handleKeydown = (event: KeyboardEvent) => {
             if (event.code === "Escape") {
                 onDragLeave();
             }
-        });
-    }, []);
+        };
+
+        window.addEventListener("keydown", handleKeydown);
+        return () => window.removeEventListener("keydown", handleKeydown);
+    }, [onDragLeave]);
 
     return (
         <DropDiv {...getDragAndDropRootProps({ onDragEnter })}>
@@ -51,9 +52,7 @@ export const FullScreenDropZone: React.FC<
                     <CloseButtonWrapper onClick={onDragLeave}>
                         <CloseIcon />
                     </CloseButtonWrapper>
-                    {appContext!.watchFolderView
-                        ? t("watch_folder_dropzone_hint")
-                        : t("upload_dropzone_hint")}
+                    {message ?? t("upload_dropzone_hint")}
                 </Overlay>
             )}
             {children}
@@ -61,10 +60,8 @@ export const FullScreenDropZone: React.FC<
     );
 };
 
-const DropDiv = styled("div")`
+const DropDiv = styled(Stack)`
     flex: 1;
-    display: flex;
-    flex-direction: column;
     height: 100%;
 `;
 
