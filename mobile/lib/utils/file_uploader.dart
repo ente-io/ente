@@ -35,6 +35,7 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/file_magic_service.dart";
 import 'package:photos/services/local_sync_service.dart';
+import "package:photos/services/preview_video_store.dart";
 import 'package:photos/services/sync_service.dart';
 import "package:photos/services/user_service.dart";
 import 'package:photos/utils/crypto_util.dart';
@@ -96,6 +97,8 @@ class FileUploader {
   }
 
   static FileUploader instance = FileUploader._privateConstructor();
+
+  static final _previewVideoStore = PreviewVideoStore.instance;
 
   Future<void> init(SharedPreferences preferences, bool isBackground) async {
     _prefs = preferences;
@@ -463,6 +466,16 @@ class FileUploader {
     }
   }
 
+  void _uploadPreview(EnteFile file) {
+    final collection =
+        CollectionsService.instance.getCollectionByID(file.collectionID!);
+    if (collection?.displayName == "Camera") {
+      unawaited(
+        _previewVideoStore.chunkAndUploadVideo(null, file),
+      );
+    }
+  }
+
   Future<EnteFile> _tryToUpload(
     EnteFile file,
     int collectionID,
@@ -718,6 +731,8 @@ class FileUploader {
       if (SyncService.instance.shouldStopSync()) {
         throw SyncStopRequestedError();
       }
+
+      _uploadPreview(file);
       EnteFile remoteFile;
       if (isUpdatedFile) {
         remoteFile = await _updateFile(

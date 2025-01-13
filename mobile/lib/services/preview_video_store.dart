@@ -47,7 +47,7 @@ class PreviewVideoStore {
 
   List<VideoQuality> get qualities => VideoQuality.values;
 
-  Future<void> chunkAndUploadVideo(BuildContext ctx, EnteFile enteFile) async {
+  Future<void> chunkAndUploadVideo(BuildContext? ctx, EnteFile enteFile) async {
     if (!enteFile.isUploaded) return;
     final file = await getFile(enteFile, isOrigin: true);
     if (file == null) return;
@@ -55,7 +55,7 @@ class PreviewVideoStore {
       // check if playlist already exist
       await getPlaylist(enteFile);
       final resultUrl = await getPreviewUrl(enteFile);
-      if (ctx.mounted) {
+      if (ctx != null && ctx.mounted) {
         showShortToast(ctx, 'Video preview already exists');
       }
       debugPrint("previewUrl $resultUrl");
@@ -68,7 +68,7 @@ class PreviewVideoStore {
         rethrow;
       }
     }
-    if (VideoCompress.isCompressing) {
+    if (VideoCompress.isCompressing && ctx != null) {
       showShortToast(
         ctx,
         "Another is being compressed ($_progress %), please wait",
