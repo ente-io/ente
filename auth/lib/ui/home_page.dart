@@ -19,6 +19,7 @@ import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
+import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/theme/text_style.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/code_error_widget.dart';
@@ -36,6 +37,7 @@ import 'package:ente_auth/ui/settings_page.dart';
 import 'package:ente_auth/ui/sort_option_menu.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/lock_screen_settings.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:file_picker/file_picker.dart';
@@ -360,6 +362,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    LockScreenSettings.instance
+        .setLightMode(getEnteColorScheme(context).isLightTheme);
     final l10n = context.l10n;
     isCompactMode = PreferenceService.instance.isCompactMode();
 
