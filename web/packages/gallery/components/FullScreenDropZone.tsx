@@ -1,5 +1,5 @@
 import CloseIcon from "@mui/icons-material/Close";
-import { IconButton, Stack, styled } from "@mui/material";
+import { IconButton, Stack, styled, Typography } from "@mui/material";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import type { DropzoneState } from "react-dropzone";
@@ -41,9 +41,7 @@ export const FullScreenDropZone: React.FC<
 
     useEffect(() => {
         const handleKeydown = (event: KeyboardEvent) => {
-            if (event.code === "Escape") {
-                onDragLeave();
-            }
+            if (event.code == "Escape") onDragLeave();
         };
 
         window.addEventListener("keydown", handleKeydown);
@@ -57,7 +55,9 @@ export const FullScreenDropZone: React.FC<
                     <CloseButton onClick={onDragLeave}>
                         <CloseIcon />
                     </CloseButton>
-                    {message ?? t("upload_dropzone_hint")}
+                    <Typography variant="h3">
+                        {message ?? t("upload_dropzone_hint")}
+                    </Typography>
                 </Overlay>
             )}
             {children}
@@ -65,24 +65,19 @@ export const FullScreenDropZone: React.FC<
     );
 };
 
-const Overlay = styled("div")`
-    border-width: 8px;
+const Overlay = styled(Stack)`
+    position: absolute;
     left: 0;
     top: 0;
-    outline: none;
-    transition: border 0.24s ease-in-out;
     height: 100%;
     width: 100%;
-    display: flex;
+    outline: none;
     justify-content: center;
     align-items: center;
-    color: #fff;
-    font-size: 24px;
-    font-weight: 900;
-    text-align: center;
-    position: absolute;
-    border-color: #51cd7c;
+    transition: border 0.24s ease-in-out;
+    border-width: 8px;
     border-style: solid;
+    border-color: #51cd7c;
     background: rgba(0, 0, 0, 0.9);
     z-index: 3000;
 `;
