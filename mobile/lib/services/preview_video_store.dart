@@ -17,6 +17,7 @@ import "package:photos/core/network/network.dart";
 import "package:photos/models/base/id.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
@@ -36,6 +37,7 @@ class PreviewVideoStore {
   double _progress = 0;
 
   final files = <EnteFile>{};
+  bool isUploading = false;
 
   final _dio = NetworkClient.instance.enteDio;
   void init() {
@@ -50,7 +52,7 @@ class PreviewVideoStore {
   List<VideoQuality> get qualities => VideoQuality.values;
 
   Future<void> chunkAndUploadVideo(BuildContext? ctx, EnteFile enteFile) async {
-    if (!enteFile.isUploaded) return;
+    if (!enteFile.isUploaded || !flagService.internalUser) return;
     final file = await getFile(enteFile, isOrigin: true);
     if (file == null) return;
     try {
@@ -70,9 +72,9 @@ class PreviewVideoStore {
         rethrow;
       }
     }
-    if (VideoCompress.isCompressing) {
+    if (isUploading || VideoCompress.isCompressing) {
       files.add(enteFile);
-      if (ctx != null) {
+      if (ctx != null && VideoCompress.isCompressing) {
         showShortToast(
           ctx,
           "Another is being compressed ($_progress %), please wait",
@@ -158,6 +160,7 @@ class PreviewVideoStore {
       }
     }
 
+    isUploading = false;
     if (files.isNotEmpty) {
       final file = files.first;
       files.remove(file);
