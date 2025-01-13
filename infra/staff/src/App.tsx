@@ -234,13 +234,14 @@ const App: React.FC = () => {
     };
 
     useEffect(() => {
-        const searchParam = new URLSearchParams(window.location.search) 
-        const userToken = searchParam.get('token')
+        const searchParam = new URLSearchParams(window.location.search);
+        const userToken = searchParam.get("token");
 
         if (userToken) {
             setLocalToken(userToken);
             setToken(userToken);
-    }, [])
+        }
+    }, []);
 
     return (
         <div className="container">
