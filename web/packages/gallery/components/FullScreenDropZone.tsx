@@ -1,5 +1,5 @@
 import CloseIcon from "@mui/icons-material/Close";
-import { Stack, styled } from "@mui/material";
+import { IconButton, Stack, styled } from "@mui/material";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import type { DropzoneState } from "react-dropzone";
@@ -19,8 +19,13 @@ interface FullScreenDropZoneProps {
 }
 
 /**
- * A full screen overlay that accepts drag and drop of files, showing a visual
- * indicator to the user while a drag is in progress.
+ * A full screen container that accepts drag and drop of files, and also shows a
+ * visual overlay to the user while a drag is in progress.
+ *
+ * It can serves as the root component of the gallery pages as the container
+ * itself is a stack with flex 1, and so will fill all the height (and width)
+ * available to it. The other contents of the screen can then be placed as its
+ * children.
  *
  * It is meant to be used in tandem with "react-dropzone"; specifically, it
  * requires the `getRootProps` function returned by a call to
@@ -46,24 +51,19 @@ export const FullScreenDropZone: React.FC<
     }, [onDragLeave]);
 
     return (
-        <DropDiv {...getDragAndDropRootProps({ onDragEnter })}>
+        <Stack sx={{ flex: 1 }} {...getDragAndDropRootProps({ onDragEnter })}>
             {isDragActive && (
                 <Overlay onDrop={onDragLeave} onDragLeave={onDragLeave}>
-                    <CloseButtonWrapper onClick={onDragLeave}>
+                    <CloseButton onClick={onDragLeave}>
                         <CloseIcon />
-                    </CloseButtonWrapper>
+                    </CloseButton>
                     {message ?? t("upload_dropzone_hint")}
                 </Overlay>
             )}
             {children}
-        </DropDiv>
+        </Stack>
     );
 };
-
-const DropDiv = styled(Stack)`
-    flex: 1;
-    height: 100%;
-`;
 
 const Overlay = styled("div")`
     border-width: 8px;
@@ -87,9 +87,8 @@ const Overlay = styled("div")`
     z-index: 3000;
 `;
 
-const CloseButtonWrapper = styled("div")`
+const CloseButton = styled(IconButton)`
     position: absolute;
     top: 10px;
     right: 10px;
-    cursor: pointer;
 `;
