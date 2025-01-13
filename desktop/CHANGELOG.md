@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v1.7.9 (Unreleased)
+
+- .
+
 ## v1.7.8
 
 - Parse description from image metadata.
