@@ -255,7 +255,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         person: widget.person,
         clusterID: clusterID,
       );
-      Bus.instance.fire(PeopleChangedEvent());
       // Increment the suggestion index
       if (mounted) {
         setState(() => currentSuggestionIndex++);
