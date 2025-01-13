@@ -228,10 +228,19 @@ const App: React.FC = () => {
     const handleTabChange = (
         _event: React.SyntheticEvent,
 
-    newValue: number,
+        newValue: number,
     ) => {
         setTabValue(newValue);
     };
+
+    useEffect(() => {
+        const searchParam = new URLSearchParams(window.location.search) 
+        const userToken = searchParam.get('token')
+
+        if (userToken) {
+            setLocalToken(userToken);
+            setToken(userToken);
+    }, [])
 
     return (
         <div className="container">
@@ -244,11 +253,10 @@ const App: React.FC = () => {
                             rel="noopener noreferrer"
                             className="link-text"
                         >
-                            Ente Dashboard
+                            staff.ente.io
                         </a>
-                        <div class="text-fields">
-                            <TextField  
-                                
+                        <div className="text-fields">
+                            <TextField
                                 label="Token"
                                 value={localToken}
                                 onChange={(e) => {
@@ -272,7 +280,6 @@ const App: React.FC = () => {
                             />
                         </div>
                         <div className="fetch-button-container">
-
                             <Button
                                 variant="contained"
                                 onClick={() => {

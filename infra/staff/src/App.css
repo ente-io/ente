@@ -77,9 +77,9 @@
 }
 
 .text-fields {
-  display: flex;
-  justify-content: row;
-  gap: 20px;
+    display: flex;
+    justify-content: row;
+    gap: 20px;
 }
 .fetch-button-container button {
     background-color: #00b33c;
@@ -225,10 +225,10 @@
     margin-top: 16px;
 }
 
-/* MUi Component Custom CSS */ 
+/* MUi Component Custom CSS */
 css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input {
-  padding: none;
-  margin: none;
+    padding: none;
+    margin: none;
 }
 
 /* Mobile */
@@ -249,7 +249,7 @@ css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input {
         gap: 25px;
     }
     .text-fields {
-    width: fit-content;
+        width: fit-content;
         flex-direction: column;
         gap: 20px;
         justify-content: center;
