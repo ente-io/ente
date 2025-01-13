@@ -185,6 +185,8 @@
   },
   "allowAddPhotosDescription": "Permetti anche alle persone con il link di aggiungere foto all'album condiviso.",
   "passwordLock": "Blocco con password",
+  "canNotOpenTitle": "Impossibile aprire questo album",
+  "canNotOpenBody": "Spiacente, questo album non può essere aperto nell'app.",
   "disableDownloadWarningTitle": "Nota bene",
   "disableDownloadWarningBody": "I visualizzatori possono scattare screenshot o salvare una copia delle foto utilizzando strumenti esterni",
   "allowDownloads": "Consenti download",
@@ -413,6 +415,8 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Dimensione griglia foto",
+  "manageDeviceStorage": "Gestisci cache dispositivo",
+  "manageDeviceStorageDesc": "Verifica e svuota la memoria cache locale.",
   "machineLearning": "Apprendimento automatico (ML)",
   "mlConsent": "Abilita l'apprendimento automatico",
   "mlConsentTitle": "Abilita l'apprendimento automatico?",
@@ -688,6 +692,7 @@
   "noPhotosAreBeingBackedUpRightNow": "Il backup delle foto attualmente non viene eseguito",
   "preserveMore": "Salva più foto",
   "grantFullAccessPrompt": "Consenti l'accesso a tutte le foto nelle Impostazioni",
+  "allowPermTitle": "Consenti l'accesso alle foto",
   "openSettings": "Apri Impostazioni",
   "selectMorePhotos": "Seleziona più foto",
   "existingUser": "Accedi",
@@ -1264,6 +1269,9 @@
   "search": "Cerca",
   "enterPersonName": "Inserisci il nome della persona",
   "enterName": "Aggiungi nome",
+  "savePerson": "Salva persona",
+  "editPerson": "Modifica persona",
+  "orMergeWithExistingPerson": "O unisci con esistente",
   "enterDateOfBirth": "Compleanno (Opzionale)",
   "birthday": "Compleanno",
   "removePersonLabel": "Rimuovi etichetta persona",
@@ -1292,6 +1300,7 @@
   "right": "Destra",
   "whatsNew": "Novità",
   "reviewSuggestions": "Esamina i suggerimenti",
+  "review": "Revisiona",
   "useAsCover": "Usa come copertina",
   "notPersonLabel": "Non è {name}?",
   "@notPersonLabel": {
@@ -1374,6 +1383,29 @@
   "yesResetPerson": "Sì, resetta persona",
   "onlyThem": "Solo loro",
   "checkingModels": "Verifica dei modelli...",
+  "enableMachineLearningBanner": "Abilita l'apprendimento automatico per la ricerca magica e il riconoscimento facciale",
+  "searchDiscoverEmptySection": "Le immagini saranno mostrate qui una volta che l'elaborazione e la sincronizzazione saranno completate",
+  "searchPersonsEmptySection": "Le persone saranno mostrate qui una volta che l'elaborazione e la sincronizzazione saranno completate",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Aggiunti 0 visualizzatori} =1 {Aggiunto 1 visualizzatore} other {Aggiunti {count} visualizzatori}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Aggiunti 0 collaboratori} =1 {Aggiunto 1 collaboratore} other {Aggiunti {count} collaboratori}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  },
   "accountIsAlreadyConfigured": "L'account è già configurato.",
   "sessionIdMismatch": "ID sessione non corrispondente",
   "@sessionIdMismatch": {
@@ -1385,12 +1417,32 @@
   },
   "failedToRefreshStripeSubscription": "Impossibile aggiornare l'abbonamento",
   "failedToPlayVideo": "Impossibile riprodurre il video",
+  "uploadIsIgnoredDueToIgnorereason": "Il caricamento è ignorato a causa di {ignoreReason}",
+  "@uploadIsIgnoredDueToIgnorereason": {
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUploadIsIgnoredDue": "Tocca per caricare, il caricamento è attualmente ignorato a causa di {ignoreReason}",
+  "@tapToUploadIsIgnoredDue": {
+    "description": "Shown in upload icon widet, inside a tooltip.",
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
   "tapToUpload": "Premi per caricare",
   "@tapToUpload": {
     "description": "Shown in upload icon widet, inside a tooltip."
   },
   "info": "Info",
   "addFiles": "Aggiungi File",
+  "castAlbum": "Trasmetti album",
   "imageNotAnalyzed": "Immagine non analizzata",
   "noFacesFound": "Nessun volto trovato",
   "fileNotUploadedYet": "File non ancora caricato",
@@ -1410,7 +1462,18 @@
   },
   "currentlyRunning": "attualmente in esecuzione",
   "ignored": "ignorato",
+  "photosCount": "{count, plural, =0 {0 foto} =1 {1 foto} other {{count} foto}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "file": "File",
+  "changeLogMagicSearchImprovementTitle": "Miglioramento della Ricerca Magica",
+  "changeLogMagicSearchImprovementContent": "Abbiamo migliorato la ricerca magica per renderla molto più veloce, così non devi aspettare per trovare quello che cerchi.",
   "changeLogBackupStatusTitle": "Stato Backup",
   "changeLogDiscoverTitle": "Esplora",
   "selectCoverPhoto": "Seleziona foto di copertina",
