@@ -27,7 +27,7 @@ export const LoadingOverlay: React.FC = () => (
             justifyContent: "center",
             alignItems: "center",
             zIndex: 2000,
-            backgroundColor: theme.colors.background.base,
+            backgroundColor: theme.palette.background.default,
         })}
     >
         <ActivityIndicator />

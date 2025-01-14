@@ -30,7 +30,7 @@ export default function CodeBlock({ code, ...props }: BoxProps<"div", Iprops>) {
 
 const Wrapper = styled(CenteredFlex)`
     position: relative;
-    background: ${({ theme }) => theme.colors.accent.A700};
+    background-color: ${({ theme }) => theme.palette.accent.dark};
     border-radius: ${({ theme }) => theme.shape.borderRadius}px;
     min-height: 80px;
 `;

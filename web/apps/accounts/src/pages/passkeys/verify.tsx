@@ -389,7 +389,6 @@ const RetriableFailed: React.FC<RetriableFailedProps> = ({
                 <FocusVisibleButton
                     onClick={onRecover}
                     fullWidth
-                    color="primary"
                     variant="text"
                 >
                     {t("recover_two_factor")}

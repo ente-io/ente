@@ -222,7 +222,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                             <Typography
                                 sx={{
                                     textAlign: "left",
-                                    color: "text.secondary",
+                                    color: "text.muted",
                                     mt: "24px",
                                 }}
                             >

@@ -989,7 +989,7 @@ const CaptionContainer = styled("div")(({ theme }) => ({
     maxWidth: "375px",
     fontSize: "14px",
     lineHeight: "17px",
-    backgroundColor: theme.colors.backdrop.faint,
+    backgroundColor: theme.palette.backdrop.faint,
     backdropFilter: "blur(96px)",
 }));
 
@@ -1009,7 +1009,7 @@ const CircularProgressWithLabel: React.FC<
             <Typography
                 variant="mini"
                 component="div"
-                sx={{ color: "text.secondary" }}
+                sx={{ color: "text.muted" }}
             >{`${Math.round(value)}%`}</Typography>
         </Overlay>
     </>
