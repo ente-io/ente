@@ -13,6 +13,7 @@ import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/typedefs.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
@@ -240,6 +241,9 @@ extension SectionTypeExtensions on SectionType {
         return SearchService.instance.getMagicSectionResults(context);
 
       case SectionType.moment:
+        if (flagService.internalUser) {
+          return SearchService.instance.onThisDayOrWeekResults(context, limit);
+        }
         return SearchService.instance.getRandomMomentsSearchResults(context);
 
       case SectionType.location:
