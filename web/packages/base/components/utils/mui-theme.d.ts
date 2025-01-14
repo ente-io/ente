@@ -9,12 +9,6 @@ declare module "@mui/material/styles" {
     interface ThemeOptions {
         colors?: ThemeColorsOptions;
     }
-
-    interface TypeText {
-        base: string;
-        muted: string;
-        faint: string;
-    }
 }
 
 declare module "@mui/material/Button" {
@@ -123,6 +117,31 @@ declare module "@mui/material/styles" {
          * A second level elevation, indicating a paper within a paper.
          */
         paper2: string;
+    }
+
+    /**
+     * Define a new set of tokens for the "text" color in the palette which
+     * matches the base / muted / faint triads we use for stroke and fill.
+     *
+     * Since there is no way to override or replace the existing tokens, we can
+     * only augment the interface with our new tokens. However, our code should
+     * NOT use the default tokens provided by MUI:
+     *
+     * - text.primary   <- Don't use
+     * - text.secondary <- Don't use
+     * - text.disabled  <- Don't use
+     *
+     * Instead, use these three:
+     *
+     * - text.base
+     * - text.muted
+     * - text.faint
+     *
+     */
+    interface TypeText {
+        base: string;
+        muted: string;
+        faint: string;
     }
 
     interface Palette {
