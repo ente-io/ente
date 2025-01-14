@@ -313,6 +313,8 @@ const getPalletteOptions = (
             dark: colors.fill?.faintPressed,
             contrastText: colors.text?.base,
         },
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         accent: {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
@@ -320,6 +322,8 @@ const getPalletteOptions = (
             dark: colors.accent!.A700!,
             contrastText: _color.fixed.white,
         },
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         critical: {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
