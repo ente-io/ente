@@ -105,8 +105,11 @@ export type ColorAccentType = "auth" | "photos";
  * - Our "primary" and "secondary" are neutral grays instead of the two-tone
  *   primary and secondary in MD. Our "accent" is corresponds to the MD primary.
  *
- * - Our "critical" is similar to the MD error. The other semantic PaletteColors
- *   exported from MUI (error, warning, info, success) are not used.
+ * - Our "critical" is similar to and the alternative for the MD error (which is
+ *   not used).
+ *
+ * - Two of the other semantic default MD PaletteColors - warning, success - are
+ *   used rarely, while info is not used at all.
  *
  * [Note: Theme and palette custom variables]
  *
@@ -287,6 +290,9 @@ const _color = {
     fixed: {
         white: "#fff",
         black: "#000",
+        success: "#1DB954",
+        warning: "#FFC247",
+        danger: "#EA3F3F",
         overlayIndicatorMuted: "rgba(255, 255, 255, 0.48)",
     },
 };
@@ -313,6 +319,8 @@ const getPalletteOptions = (
             dark: colors.fill?.faintPressed,
             contrastText: colors.text?.base,
         },
+        success: { main: _color.fixed.success },
+        warning: { main: _color.fixed.warning },
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         accent: {
