@@ -19,7 +19,7 @@ import {
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import { useContext, useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import { deleteAccount, getAccountDeleteChallenge } from "services/userService";
 import * as Yup from "yup";
@@ -169,12 +169,9 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                 onChange={handleChange("feedback")}
                                 errorMessage={errors.feedback}
                             />
-                            <CheckboxInput
+                            <ConfirmationCheckboxInput
                                 checked={acceptDataDeletion}
                                 onChange={setAcceptDataDeletion}
-                                label={t(
-                                    "delete_account_confirm_checkbox_label",
-                                )}
                             />
                             <Stack spacing={"8px"}>
                                 <LoadingButton
@@ -261,40 +258,33 @@ const FeedbackInput: React.FC<FeedbackInputProps> = ({
     </Stack>
 );
 
-interface CheckboxInputProps {
-    disabled?: boolean;
+interface ConfirmationCheckboxInputProps {
     checked: boolean;
     onChange: (value: boolean) => void;
-    label: string;
 }
 
-function CheckboxInput({
-    disabled,
+const ConfirmationCheckboxInput: React.FC<ConfirmationCheckboxInputProps> = ({
     checked,
     onChange,
-    label,
-}: CheckboxInputProps) {
-    return (
-        <FormGroup sx={{ width: "100%" }}>
-            <FormControlLabel
-                control={
-                    <Checkbox
-                        size="small"
-                        disabled={disabled}
-                        checked={checked}
-                        onChange={(e) => onChange(e.target.checked)}
-                        color="accent"
-                    />
-                }
-                label={
-                    <Typography sx={{ color: "text.secondary" }}>
-                        {label}
-                    </Typography>
-                }
-            />
-        </FormGroup>
-    );
-}
+}) => (
+    <FormGroup>
+        <FormControlLabel
+            control={
+                <Checkbox
+                    size="small"
+                    disableRipple
+                    checked={checked}
+                    onChange={(e) => onChange(e.target.checked)}
+                />
+            }
+            label={
+                <Typography sx={{ color: "text.secondary" }}>
+                    {t("delete_account_confirm_checkbox_label")}
+                </Typography>
+            }
+        />
+    </FormGroup>
+);
 
 async function decryptDeleteAccountChallenge(encryptedChallenge: string) {
     const cryptoWorker = await sharedCryptoWorker();

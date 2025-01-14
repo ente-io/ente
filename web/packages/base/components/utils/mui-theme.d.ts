@@ -25,7 +25,6 @@ declare module "@mui/material/Button" {
 declare module "@mui/material/Checkbox" {
     interface CheckboxPropsColorOverrides {
         accent: true;
-        critical: true;
     }
 }
 
