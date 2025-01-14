@@ -128,11 +128,26 @@ declare module "@mui/material/styles" {
     }
 
     interface Palette {
+        /**
+         * The main brand color. e.g. the "Ente green", the "Auth purple".
+         *
+         * This does not vary with the color scheme.
+         */
         accent: PaletteColor;
+        /**
+         * The color for potentially dangerous actions, errors, or other things
+         * we would like to call the user's attention out to.
+         *
+         * MUI has an "error" palette color, but that seems to semantically not
+         * gel with all uses. e.g. it feels weird to create a button with
+         * color="error".
+         *
+         * This does not vary with the color scheme.
+         */
         critical: PaletteColor;
         /**
-         * Various fixed colors used by our designs that do not change with the
-         * color scheme.
+         * Various ad-hoc fixed colors used by our designs that do not change
+         * with the color scheme.
          */
         fixed: {
             white: string;
