@@ -362,7 +362,13 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
               CodeDisplay(tags: selectedTags);
       display.note = notes;
 
-      display.iconID = _customIconID.toLowerCase();
+      if (widget.code!.issuer != issuer) {
+        display.iconID = issuer.toLowerCase();
+      }
+      if (widget.code!.display.iconID != _customIconID.toLowerCase()) {
+        display.iconID = _customIconID.toLowerCase();
+      }
+
       display.iconSrc =
           _iconSrc == IconType.simpleIcon ? 'simpleIcon' : 'customIcon';
 
