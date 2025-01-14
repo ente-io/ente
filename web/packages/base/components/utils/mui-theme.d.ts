@@ -157,24 +157,6 @@ declare module "@mui/material/styles" {
         basePressed: string;
         faintPressed: string;
     };
-
-    /**
-     * MUI as of v6 does not allow customizing the shadows easily. This is due
-     * for change: https://github.com/mui/material-ui/issues/44291.
-     *
-     * Meanwhile use a custom variable. Since it is specific to the color
-     * scheme, keep it inside the palette.
-     */
-    interface BoxShadow {
-        /**
-         * Drop shadow for "big" floating elements like {@link Dialog}.
-         */
-        float: string;
-        /** Currently unused. */
-        menu: string;
-        /** Currently unused. */
-        button: string;
-    }
 }
 
 // Add new tokens to the Palette.
@@ -185,13 +167,29 @@ declare module "@mui/material/styles" {
     interface Palette {
         accent: PaletteColor;
         critical: PaletteColor;
-        boxShadow: BoxShadow;
+        /**
+         * MUI as of v6 does not allow customizing the shadows easily. This is
+         * due for change: https://github.com/mui/material-ui/issues/44291.
+         *
+         * Meanwhile use a custom variable. Since it is specific to the color
+         * scheme, keep it inside the palette.
+         */
+        boxShadow: {
+            /**
+             * Drop shadow for "big" floating elements like {@link Dialog}.
+             */
+            float: string;
+            /** Currently unused. */
+            menu: string;
+            /** Currently unused. */
+            button: string;
+        };
     }
 
     interface PaletteOptions {
         accent?: PaletteColorOptions;
         critical?: PaletteColorOptions;
-        boxShadow?: BoxShadow;
+        boxShadow?: Palette["boxShadow"];
     }
 }
 
