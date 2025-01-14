@@ -493,6 +493,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "cachedData": MessageLookupByLibrary.simpleMessage("Daten im Cache"),
         "calculating":
             MessageLookupByLibrary.simpleMessage("Wird berechnet..."),
+        "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
+            "Leider kann dieses Album nicht in der App geöffnet werden."),
+        "canNotOpenTitle": MessageLookupByLibrary.simpleMessage(
+            "Album kann nicht geöffnet werden"),
         "canNotUploadToAlbumsOwnedByOthers":
             MessageLookupByLibrary.simpleMessage(
                 "Kann nicht auf Alben anderer Personen hochladen"),
@@ -814,8 +818,12 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Edits to location will only be seen within Ente"),
         "eligible": MessageLookupByLibrary.simpleMessage("zulässig"),
         "email": MessageLookupByLibrary.simpleMessage("E-Mail"),
+        "emailAlreadyRegistered": MessageLookupByLibrary.simpleMessage(
+            "E-Mail ist bereits registriert."),
         "emailChangedTo": m30,
         "emailNoEnteAccount": m31,
+        "emailNotRegistered":
+            MessageLookupByLibrary.simpleMessage("E-Mail nicht registriert."),
         "emailVerificationToggle":
             MessageLookupByLibrary.simpleMessage("E-Mail-Verifizierung"),
         "emailYourLogs": MessageLookupByLibrary.simpleMessage(
@@ -1080,6 +1088,12 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Elemente zeigen die Anzahl der Tage bis zum dauerhaften Löschen an"),
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "Ausgewählte Elemente werden aus diesem Album entfernt"),
+        "join": MessageLookupByLibrary.simpleMessage("Beitreten"),
+        "joinAlbum": MessageLookupByLibrary.simpleMessage("Album beitreten"),
+        "joinAlbumSubtext": MessageLookupByLibrary.simpleMessage(
+            "um deine Fotos anzuzeigen und hinzuzufügen"),
+        "joinAlbumSubtextViewer": MessageLookupByLibrary.simpleMessage(
+            "um dies zu geteilten Alben hinzuzufügen"),
         "joinDiscord":
             MessageLookupByLibrary.simpleMessage("Discord beitreten"),
         "keepPhotos": MessageLookupByLibrary.simpleMessage("Fotos behalten"),
@@ -1428,6 +1442,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "privateSharing":
             MessageLookupByLibrary.simpleMessage("Privates Teilen"),
         "proceed": MessageLookupByLibrary.simpleMessage("Fortfahren"),
+        "processed": MessageLookupByLibrary.simpleMessage("Verarbeitet"),
         "processingImport": m54,
         "publicLinkCreated":
             MessageLookupByLibrary.simpleMessage("Öffentlicher Link erstellt"),

@@ -813,7 +813,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Відправте ваші журнали поштою"),
         "emergencyContacts":
             MessageLookupByLibrary.simpleMessage("Екстрені контакти"),
-        "empty": MessageLookupByLibrary.simpleMessage("Пусто"),
+        "empty": MessageLookupByLibrary.simpleMessage("Спорожнити"),
         "emptyTrash": MessageLookupByLibrary.simpleMessage("Очистити смітник?"),
         "enable": MessageLookupByLibrary.simpleMessage("Увімкнути"),
         "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(

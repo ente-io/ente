@@ -42,7 +42,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m13(versionValue) => "Phiên bản: ${versionValue}";
 
   static String m14(freeAmount, storageUnit) =>
-      "${freeAmount} ${storageUnit} miễn phí";
+      "${freeAmount} ${storageUnit} còn trống";
 
   static String m15(paymentProvider) =>
       "Vui lòng hủy đăng ký hiện tại của bạn từ ${paymentProvider} trước";
@@ -432,6 +432,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Vui lòng xác thực để quản lý các liên hệ tin cậy của bạn"),
         "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
             "Vui lòng xác thực để xem khóa truy cập của bạn"),
+        "authToViewTrashedFiles": MessageLookupByLibrary.simpleMessage(
+            "Vui lòng xác thực để xem các tệp đã xóa của bạn"),
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
             "Vui lòng xác thực để xem các phiên hoạt động của bạn"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
@@ -483,6 +485,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "cachedData": MessageLookupByLibrary.simpleMessage("Dữ liệu đã lưu"),
         "calculating":
             MessageLookupByLibrary.simpleMessage("Đang tính toán..."),
+        "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
+            "Xin lỗi, album này không thể mở trong ứng dụng."),
+        "canNotOpenTitle":
+            MessageLookupByLibrary.simpleMessage("Không thể mở album này"),
         "canNotUploadToAlbumsOwnedByOthers":
             MessageLookupByLibrary.simpleMessage(
                 "Không thể tải lên album thuộc sở hữu của người khác"),
@@ -953,6 +959,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "freeUpSpace":
             MessageLookupByLibrary.simpleMessage("Giải phóng không gian"),
         "freeUpSpaceSaving": m39,
+        "gallery": MessageLookupByLibrary.simpleMessage("Thư viện"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Tối đa 1000 kỷ niệm được hiển thị trong thư viện"),
         "general": MessageLookupByLibrary.simpleMessage("Chung"),
@@ -981,6 +988,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ẩn nội dung ứng dụng trong trình chuyển đổi ứng dụng và vô hiệu hóa chụp màn hình"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Ẩn nội dung ứng dụng trong trình chuyển đổi ứng dụng"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Ẩn các mục được chia sẻ khỏi thư viện chính"),
         "hiding": MessageLookupByLibrary.simpleMessage("Đang ẩn..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Được lưu trữ tại OSM Pháp"),
@@ -1043,6 +1052,12 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Các mục cho biết số ngày còn lại trước khi xóa vĩnh viễn"),
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "Các mục đã chọn sẽ bị xóa khỏi album này"),
+        "join": MessageLookupByLibrary.simpleMessage("Tham gia"),
+        "joinAlbum": MessageLookupByLibrary.simpleMessage("Tham gia album"),
+        "joinAlbumSubtext":
+            MessageLookupByLibrary.simpleMessage("để xem và thêm ảnh của bạn"),
+        "joinAlbumSubtextViewer":
+            MessageLookupByLibrary.simpleMessage("thêm vào album được chia sẻ"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Tham gia Discord"),
         "keepPhotos": MessageLookupByLibrary.simpleMessage("Giữ ảnh"),
         "kiloMeterUnit": MessageLookupByLibrary.simpleMessage("km"),
