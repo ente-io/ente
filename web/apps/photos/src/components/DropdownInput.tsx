@@ -53,17 +53,20 @@ export default function DropdownInput<T extends string>({
                         },
                     },
                     MenuListProps: {
-                        sx: (theme) => ({
-                            backgroundColor: theme.colors.background.elevated2,
+                        sx: {
+                            backgroundColor: "background.paper2",
                             ".MuiMenuItem-root ": {
-                                color: theme.colors.text.faint,
+                                color: "text.faint",
                                 whiteSpace: "normal",
                             },
+                            // Make the selected item pop out by giving it a
+                            // different color instead of giving it a different
+                            // background color.
                             "&&& > .Mui-selected": {
-                                background: theme.colors.background.elevated2,
-                                color: theme.colors.text.base,
+                                backgroundColor: "background.paper2",
+                                color: "text.base",
                             },
-                        }),
+                        },
                     },
                 }}
                 sx={(theme) => ({

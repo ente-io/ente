@@ -190,8 +190,8 @@ const photosAccentColor = {
 const lightThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
     background: {
         base: "#fff",
-        elevated: "#fff",
-        elevated2: "rgba(153, 153, 153, 0.04)",
+        paper: "#fff",
+        paper2: "rgba(153, 153, 153, 0.04)",
     },
     backdrop: {
         base: "rgba(255, 255, 255, 0.92)",
@@ -228,8 +228,8 @@ const lightThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
 const darkThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
     background: {
         base: "#000000",
-        elevated: "#1b1b1b",
-        elevated2: "#252525",
+        paper: "#1b1b1b",
+        paper2: "#252525",
     },
     backdrop: {
         base: "rgba(0, 0, 0, 0.90)",
@@ -329,7 +329,8 @@ const getPalletteOptions = (
         },
         background: {
             default: colors.background?.base,
-            paper: colors.background?.elevated,
+            paper: colors.background?.paper,
+            paper2: colors.background?.paper2,
         },
         text: {
             primary: colors.text?.base,
@@ -535,7 +536,7 @@ const getComponents = (
     },
     MuiPaper: {
         // MUI applies a semi-transparent background image for elevation in dark
-        // mode. Remove it to use the elevated Paper background from our design.
+        // mode. Remove it to match the Paper background from our design.
         styleOverrides: { root: { backgroundImage: "none" } },
     },
     MuiLink: {

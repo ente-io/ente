@@ -251,7 +251,7 @@ const SearchInputWrapper = styled("div")`
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: ${({ theme }) => theme.colors.background.base};
+    background: transparent;
     max-width: 484px;
     margin: auto;
 `;
@@ -260,11 +260,12 @@ const loadOptions = pDebounce(searchOptionsForString, 250);
 
 const createSelectStyles = ({
     colors,
+    palette,
 }: Theme): StylesConfig<SearchOption, false> => ({
     container: (style) => ({ ...style, flex: 1 }),
     control: (style, { isFocused }) => ({
         ...style,
-        backgroundColor: colors.background.elevated,
+        backgroundColor: palette.background.paper,
         borderColor: isFocused ? colors.accent.A500 : "transparent",
         boxShadow: "none",
         ":hover": {
@@ -281,7 +282,9 @@ const createSelectStyles = ({
         ...style,
         // Suppress the default margin at the top.
         marginTop: "1px",
-        backgroundColor: colors.background.elevated,
+        // Give an opaque and elevated surface color to the menu to override the
+        // default (transparent).
+        backgroundColor: palette.background.paper,
     }),
     option: (style, { isFocused }) => ({
         ...style,

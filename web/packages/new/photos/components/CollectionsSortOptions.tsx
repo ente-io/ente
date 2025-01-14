@@ -50,9 +50,7 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
                 // trigger button.
                 marginBlock: 1,
                 backgroundColor: (theme) =>
-                    nestedInDialog
-                        ? theme.colors.background.elevated2
-                        : undefined,
+                    nestedInDialog ? "background.paper2" : undefined,
             },
         }}
         triggerButtonProps={{

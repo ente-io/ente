@@ -96,12 +96,6 @@ declare module "@mui/material/styles" {
         danger: string;
     }
 
-    interface BackgroundType {
-        base: string;
-        elevated: string;
-        elevated2: string;
-    }
-
     interface Strength {
         base: string;
         muted: string;
@@ -119,6 +113,20 @@ declare module "@mui/material/styles" {
 // https://mui.com/material-ui/customization/css-theme-variables/usage/#adding-new-theme-tokens
 
 declare module "@mui/material/styles" {
+    /**
+     * Add "paper2" the "background" color tokens, giving us:
+     *
+     * - background.default
+     * - background.paper
+     * - background.paper2
+     */
+    interface TypeBackground {
+        /**
+         * A second level elevation, indicating a paper within a paper.
+         */
+        paper2: string;
+    }
+
     interface Palette {
         accent: PaletteColor;
         critical: PaletteColor;
