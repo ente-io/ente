@@ -272,7 +272,6 @@ const ConfirmationCheckboxInput: React.FC<ConfirmationCheckboxInputProps> = ({
             control={
                 <Checkbox
                     size="small"
-                    disableRipple
                     checked={checked}
                     onChange={(e) => onChange(e.target.checked)}
                 />

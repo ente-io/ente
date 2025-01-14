@@ -634,6 +634,25 @@ const getComponents = (
             },
         },
     },
+
+    MuiCheckbox: {
+        defaultProps: {
+            // Disable the ripple effect for all checkboxes.
+            disableRipple: true,
+        },
+        styleOverrides: {
+            // Since we've disabled the ripple, add other affordances to it (a
+            // background and outline) to clearly indicate whenever it gains
+            // keyboard focus.
+            root: {
+                "&.Mui-focusVisible": {
+                    backgroundColor: colors.fill?.faint,
+                    outline: `1px solid ${colors.stroke.faint}`,
+                },
+            },
+        },
+    },
+
     MuiSvgIcon: {
         styleOverrides: {
             root: ({ ownerState }) => ({
