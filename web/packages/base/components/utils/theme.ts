@@ -49,15 +49,14 @@ export type ColorAccentType = "auth" | "photos";
  * The word "color" in MUI stands for different things. In particular, the color
  * prop for (e.g.) a Button is not the same as the color prop for the sx prop.
  *
- * There are three layers.
+ * There are three layers (only the first is necessary, rest are semantic):
  *
  * 1. Consider some color, say a shade of red. This will be represented by its
  *    exact CSS color value, say "#ee0000".
  *
- * 2. In UI contexts a color doesn't go alone, and needs a few shades to act as
- *    variations. These all have roughly the same hue, but different levels of
- *    saturation. These hues are arranged together into a full "Color" exported
- *    by "@/mui/material":
+ * 2. These can be groups of color values that have roughly the same hue, but
+ *    different levels of saturation. Such hue groups are arranged together into
+ *    a "Colors" exported by "@/mui/material":
  *
  *        export interface Color {
  *            50: string;
@@ -70,8 +69,8 @@ export type ColorAccentType = "auth" | "photos";
  *            A700: string;
  *        }
  *
- *  3. Finally, there are the so called "PaletteColors" (though the naming and
- *     documentation otherwise omits the palette qualifier).
+ *  3. Finally, there are "PaletteColors" (the naming of props and documentation
+ *     within MUI (as of v6) omits the palette qualifier).
  *
  *         export interface PaletteColor {
  *             light: string;
@@ -81,9 +80,34 @@ export type ColorAccentType = "auth" | "photos";
  *         }
  *
  * The PaletteColors are what we use in the MUI component props (e.g. Button).
- * The PaletteColors are themselves defined in terms of the specific Color
- * values (e.g. red[500]), but they can also be defined by providing color
- * values directly for the four "tokens" that make them up.
+ * The PaletteColors are defined by providing color values for the four "tokens"
+ * that make them up, either directly ("#aa000") or via Colors ("red[500]").
+ *
+ * Within the sx prop we need to specify a color value, which can come from the
+ * palette. The "palette", as defined by the palette property we provide when
+ * creating the theme, can consist of arbitrary and nested key value pairs.
+ * Within sx prop, the "color" and "backgroundColor" props can refer to paths
+ * inside this palette object. That is,
+ *
+ *         sx={{ color: "foo.bar" }}
+ *
+ * resolves to theme.vars.palette.foo.bar.
+ *
+ * [Note: Color names]
+ *
+ * When definining color names, there is some attempt at trying to use MUI v6
+ * (which uses MD (Material Design) v2) nomenclature when feasible (just to keep
+ * the number of concepts low), but as such, the color names should not be
+ * thought of as following Material Design, and should be treated as arbitrary
+ * tokens reflecting our own design system.
+ *
+ * Some callouts:
+ *
+ * - Our "primary" and "secondary" are neutral grays instead of the two-tone
+ *   primary and secondary in MD. Our "accent" is corresponds to the MD primary.
+ *
+ * - Our "critical" is similar to the MD error. The other semantic PaletteColors
+ *   exported from MUI (error, warning, info, success) are not used.
  */
 const getColors = (
     themeColor: THEME_COLOR,
