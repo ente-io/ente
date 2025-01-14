@@ -351,6 +351,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "blog": MessageLookupByLibrary.simpleMessage("Tinklaraštis"),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Podėliuoti duomenis"),
+        "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
+            "Atsiprašome, šio albumo negalima atverti programoje."),
+        "canNotOpenTitle":
+            MessageLookupByLibrary.simpleMessage("Negalima atverti šio albumo"),
         "canOnlyRemoveFilesOwnedByYou": MessageLookupByLibrary.simpleMessage(
             "Galima pašalinti tik jums priklausančius failus"),
         "cancel": MessageLookupByLibrary.simpleMessage("Atšaukti"),
@@ -608,7 +612,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Vietovės pakeitimai bus matomi tik per „Ente“"),
         "email": MessageLookupByLibrary.simpleMessage("El. paštas"),
+        "emailAlreadyRegistered": MessageLookupByLibrary.simpleMessage(
+            "El. paštas jau užregistruotas."),
         "emailNoEnteAccount": m31,
+        "emailNotRegistered":
+            MessageLookupByLibrary.simpleMessage("El. paštas neregistruotas."),
         "emailVerificationToggle":
             MessageLookupByLibrary.simpleMessage("El. pašto patvirtinimas"),
         "emailYourLogs": MessageLookupByLibrary.simpleMessage(
@@ -810,6 +818,13 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Elementai rodo likusių dienų skaičių iki visiško ištrynimo."),
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "Pasirinkti elementai bus pašalinti iš šio albumo"),
+        "join": MessageLookupByLibrary.simpleMessage("Jungtis"),
+        "joinAlbum":
+            MessageLookupByLibrary.simpleMessage("Junkitės prie albumo"),
+        "joinAlbumSubtext": MessageLookupByLibrary.simpleMessage(
+            "kad peržiūrėtumėte ir pridėtumėte savo nuotraukas"),
+        "joinAlbumSubtextViewer": MessageLookupByLibrary.simpleMessage(
+            "kad pridėtumėte tai prie bendrinamų albumų"),
         "joinDiscord":
             MessageLookupByLibrary.simpleMessage("Jungtis prie „Discord“"),
         "keepPhotos":
@@ -1094,6 +1109,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "privateSharing":
             MessageLookupByLibrary.simpleMessage("Privatus bendrinimas"),
         "proceed": MessageLookupByLibrary.simpleMessage("Tęsti"),
+        "processed": MessageLookupByLibrary.simpleMessage("Apdorota"),
         "processingImport": m54,
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Įjungta viešoji nuoroda"),

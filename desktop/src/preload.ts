@@ -98,6 +98,14 @@ const openLogDirectory = () => ipcRenderer.invoke("openLogDirectory");
 
 const selectDirectory = () => ipcRenderer.invoke("selectDirectory");
 
+// The path that we get back from `webUtils.getPathForFile` on Windows uses "\"
+// as the path separator. Convert them to POSIX separators.
+
+const pathForFile =
+    process.platform == "win32"
+        ? (file: File) => webUtils.getPathForFile(file).replace(/\\/g, "/")
+        : (file: File) => webUtils.getPathForFile(file);
+
 const logout = () => {
     watchRemoveListeners();
     return ipcRenderer.invoke("logout");
@@ -263,14 +271,6 @@ const watchRemoveListeners = () => {
 
 // - Upload
 
-// The path that we get back from `webUtils.getPathForFile` on Windows uses "\"
-// as the path separator. Convert them to POSIX separators.
-
-const pathForFile =
-    process.platform == "win32"
-        ? (file: File) => webUtils.getPathForFile(file).replace(/\\/g, "/")
-        : (file: File) => webUtils.getPathForFile(file);
-
 const listZipItems = (zipPath: string) =>
     ipcRenderer.invoke("listZipItems", zipPath);
 
@@ -341,6 +341,7 @@ contextBridge.exposeInMainWorld("electron", {
     openDirectory,
     openLogDirectory,
     selectDirectory,
+    pathForFile,
     logout,
     masterKeyB64,
     saveMasterKeyB64,
@@ -395,7 +396,6 @@ contextBridge.exposeInMainWorld("electron", {
 
     // - Upload
 
-    pathForFile,
     listZipItems,
     pathOrZipItemSize,
     pendingUploads,

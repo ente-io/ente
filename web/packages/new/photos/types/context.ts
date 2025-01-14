@@ -27,8 +27,6 @@ export type AppContextT = AccountsContextT & {
     onGenericError: (error: unknown) => void;
     watchFolderView: boolean;
     setWatchFolderView: (isOpen: boolean) => void;
-    watchFolderFiles: FileList;
-    setWatchFolderFiles: (files: FileList) => void;
     themeColor: THEME_COLOR;
     setThemeColor: (themeColor: THEME_COLOR) => void;
 };

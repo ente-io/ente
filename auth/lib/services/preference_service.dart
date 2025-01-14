@@ -38,7 +38,7 @@ class PreferenceService {
 
   CodeSortKey codeSortKey() {
     return CodeSortKey
-        .values[_prefs.getInt("codeSortKey") ?? CodeSortKey.manual.index];
+        .values[_prefs.getInt("codeSortKey") ?? CodeSortKey.issuerName.index];
   }
 
   Future<void> setCodeSortKey(CodeSortKey key) async {

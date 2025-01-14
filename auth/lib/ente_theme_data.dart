@@ -496,7 +496,7 @@ ElevatedButtonThemeData buildElevatedButtonThemeData({
         fontFamily: 'Inter-SemiBold',
         fontSize: 18,
       ),
-      padding: const EdgeInsets.symmetric(vertical: 18),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(4)),
       ),

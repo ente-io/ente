@@ -106,10 +106,26 @@ export const setupAutoUpdater = (mainWindow: BrowserWindow) => {
 export const forceCheckForAppUpdates = (mainWindow: BrowserWindow) => {
     userPreferences.delete("skipAppVersion");
     userPreferences.delete("muteUpdateNotificationVersion");
-    void checkForUpdatesAndNotify(mainWindow);
+    void checkForUpdatesAndNotify(mainWindow, { notifyImmediately: true });
 };
 
-const checkForUpdatesAndNotify = async (mainWindow: BrowserWindow) => {
+interface CheckForUpdatesAndNotifyOpts {
+    /**
+     * By default, the updater waits for 5 minutes after an update has been
+     * downloaded before notifying the user. This is so as to not get in their
+     * way during an app launch.
+     *
+     * However, when the user clicks the "Check for updates..." menu action,
+     * they would prefer more immediate feedback, so this flag allows us to
+     * bypass this delay.
+     */
+    notifyImmediately?: boolean;
+}
+
+const checkForUpdatesAndNotify = async (
+    mainWindow: BrowserWindow,
+    opts?: CheckForUpdatesAndNotifyOpts,
+) => {
     const updateCheckResult = await autoUpdater.checkForUpdates();
     if (!updateCheckResult) {
         log.error("Failed to check for updates");
@@ -148,7 +164,7 @@ const checkForUpdatesAndNotify = async (mainWindow: BrowserWindow) => {
         log.info(`Update downloaded ${version}`);
         timeout = setTimeout(
             () => showUpdateDialog({ autoUpdatable: true, version }),
-            fiveMinutes,
+            opts?.notifyImmediately ? 0 : fiveMinutes,
         );
     });
 

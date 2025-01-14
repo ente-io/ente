@@ -196,7 +196,7 @@ class PersonService {
     }
     personData.rejectedFaceIDs ??= [];
     personData.rejectedFaceIDs!.addAll(clusterInfo.faces);
-    personData.assigned!.removeWhere((element) => element.id != clusterID);
+    personData.assigned!.removeWhere((element) => element.id == clusterID);
     await entityService.addOrUpdate(
       EntityType.cgroup,
       personData.toJson(),

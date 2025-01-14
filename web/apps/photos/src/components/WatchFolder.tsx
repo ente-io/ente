@@ -12,7 +12,7 @@ import { basename, dirname } from "@/base/file-name";
 import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
 import { CollectionMappingChoice } from "@/new/photos/components/CollectionMappingChoice";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
-import { AppContext, useAppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import {
     FlexWrapper,
     SpaceBetweenFlex,
@@ -34,7 +34,7 @@ import {
     styled,
 } from "@mui/material";
 import { t } from "i18next";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import watcher from "services/watch";
 
 /**
@@ -56,30 +56,35 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
     const { show: showMappingChoice, props: mappingChoiceVisibilityProps } =
         useModalVisibility();
 
-    const appContext = useContext(AppContext);
-
     useEffect(() => {
         watcher.getWatches().then((ws) => setWatches(ws));
     }, []);
 
     useEffect(() => {
-        if (
-            appContext.watchFolderFiles &&
-            appContext.watchFolderFiles.length > 0
-        ) {
-            handleFolderDrop(appContext.watchFolderFiles);
-            appContext.setWatchFolderFiles(null);
-        }
-    }, [appContext.watchFolderFiles]);
+        const handleWatchFolderDrop = (e: DragEvent) => {
+            if (!open) return;
 
-    const handleFolderDrop = async (folders: FileList) => {
-        // eslint-disable-next-line @typescript-eslint/prefer-for-of
-        for (let i = 0; i < folders.length; i++) {
-            const folder: any = folders[i];
-            const path = (folder.path as string).replace(/\\/g, "/");
-            if (await ensureElectron().fs.isDir(path)) {
-                await selectCollectionMappingAndAddWatch(path);
+            e.preventDefault();
+            e.stopPropagation();
+
+            for (const file of e.dataTransfer.files) {
+                void selectCollectionMappingAndAddWatchIfDirectory(file);
             }
+        };
+
+        addEventListener("drop", handleWatchFolderDrop);
+        return () => {
+            removeEventListener("drop", handleWatchFolderDrop);
+        };
+    }, [open]);
+
+    const selectCollectionMappingAndAddWatchIfDirectory = async (
+        file: File,
+    ) => {
+        const electron = ensureElectron();
+        const path = electron.pathForFile(file);
+        if (await electron.fs.isDir(path)) {
+            await selectCollectionMappingAndAddWatch(path);
         }
     };
 

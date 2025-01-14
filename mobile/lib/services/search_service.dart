@@ -908,7 +908,9 @@ class SearchService {
             // This should not be possible since it should be handled in the above loop, logging just in case
             _logger.severe(
               "`getAllFace`: Something unexpected happened, Cluster $clusterId should not have person id $personID",
-              Exception('Some unexpected error occurred in getAllFace wrt cluster to person mapping'),
+              Exception(
+                'Some unexpected error occurred in getAllFace wrt cluster to person mapping',
+              ),
             );
           } else {
             // This should not happen, means a clusterID is still assigned to a personID of a person that no longer exists
@@ -1180,6 +1182,103 @@ class SearchService {
         ),
       );
     }
+    return searchResults;
+  }
+
+  Future<List<GenericSearchResult>> onThisDayOrWeekResults(
+    BuildContext context,
+    int? limit,
+  ) async {
+    final List<GenericSearchResult> searchResults = [];
+    final allFiles = await getAllFilesForSearch();
+    if (allFiles.isEmpty) return [];
+
+    final currentTime = DateTime.now().toLocal();
+    final currentDayMonth = currentTime.month * 100 + currentTime.day;
+    final cutOffTime = currentTime.subtract(const Duration(days: 365));
+    final averageDailyPhotos = allFiles.length / 365;
+    final significanceThreshold = averageDailyPhotos * 0.25;
+
+    // Group files by day-month and year
+    final dayMonthYearGroups = <int, Map<int, List<EnteFile>>>{};
+
+    for (final file in allFiles) {
+      if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
+
+      final creationTime =
+          DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+      final dayMonth = creationTime.month * 100 + creationTime.day;
+      final year = creationTime.year;
+
+      dayMonthYearGroups
+          .putIfAbsent(dayMonth, () => {})
+          .putIfAbsent(year, () => [])
+          .add(file);
+    }
+
+    // Process each day-month
+    for (final dayMonth in dayMonthYearGroups.keys) {
+      final dayDiff = dayMonth - currentDayMonth;
+      if (dayDiff < 0 || dayDiff > 2) continue;
+
+      final yearGroups = dayMonthYearGroups[dayMonth]!;
+      final significantYears = yearGroups.entries
+          .where((e) => e.value.length > significanceThreshold)
+          .map((e) => e.key)
+          .toList();
+
+      if (significantYears.length >= 3) {
+        // Combine all years for this day-month
+        final date =
+            DateTime(currentTime.year, dayMonth ~/ 100, dayMonth % 100);
+        final allPhotos = yearGroups.values.expand((x) => x).toList();
+
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.event,
+            'Memories of ${DateFormat('MMMM d').format(date)}',
+            allPhotos,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: DateFormat('MMMM d').format(date),
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.event,
+              matchedUploadedIDs: filesToUploadedFileIDs(allPhotos),
+              filterIcon: Icons.event_outlined,
+            ),
+          ),
+        );
+      } else {
+        // Individual entries for significant years
+        for (final year in significantYears) {
+          final date = DateTime(year, dayMonth ~/ 100, dayMonth % 100);
+          final files = yearGroups[year]!;
+          String name =
+              DateFormat.yMMMd(Localizations.localeOf(context).languageCode)
+                  .format(date);
+          if (date.day == currentTime.day && date.month == currentTime.month) {
+            name = 'This day, ${currentTime.year - date.year} years back';
+          }
+
+          searchResults.add(
+            GenericSearchResult(
+              ResultType.event,
+              name,
+              files,
+              hierarchicalSearchFilter: TopLevelGenericFilter(
+                filterName: name,
+                occurrence: kMostRelevantFilter,
+                filterResultType: ResultType.event,
+                matchedUploadedIDs: filesToUploadedFileIDs(files),
+                filterIcon: Icons.event_outlined,
+              ),
+            ),
+          );
+        }
+      }
+
+      if (limit != null && searchResults.length >= limit) break;
+    }
+
     return searchResults;
   }
 
