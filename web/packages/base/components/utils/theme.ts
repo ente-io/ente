@@ -24,7 +24,7 @@ export const getTheme = (
 ) => {
     const colors = getColors(themeColor, colorAccentType);
     const palette = getPallette(themeColor, colors);
-    const components = getComponents(colors, typography);
+    const components = getComponents(colors, palette, typography);
     return createTheme({
         colors,
         palette,
@@ -121,6 +121,9 @@ export type ColorAccentType = "auth" | "photos";
  *
  * - Custom colors (even if they're not PaletteColors) go within the palette.
  *
+ * - Non-color tokens that depend on the color scheme (e.g. drop shadows) also
+ *   go within the palette so that they can be made color scheme specific.
+ *
  * - All other custom variables remain within the top level theme.
  */
 const getColors = (
@@ -216,21 +219,13 @@ const lightThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
         faint: "rgba(0, 0, 0, 0.12)",
     },
 
-    /*
-    // Light
-    shadows2L: {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    boxShadow: {
         float: "0px 0px 10px rgba(0, 0, 0, 0.25)",
         menu: "0px 0px 6px rgba(0, 0, 0, 0.16), 0px 3px 6px rgba(0, 0, 0, 0.12)",
         button: "0px 4px 4px rgba(0, 0, 0, 0.25)",
     },
-
-    // Dark
-    shadows2D: {
-        float: "0px 2px 12px rgba(0, 0, 0, 0.75)",
-        menu: "0px 0px 6px rgba(0, 0, 0, 0.50), 0px 3px 6px rgba(0, 0, 0, 0.25)",
-        button: "0px 4px 4px rgba(0, 0, 0, 0.75)",
-    },
-    */
 
     shadows: {
         float: [{ x: 0, y: 0, blur: 10, color: "rgba(0, 0, 0, 0.25)" }],
@@ -286,6 +281,14 @@ const darkThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
         base: "#ffffff",
         muted: "rgba(255,255,255,0.24)",
         faint: "rgba(255,255,255,0.16)",
+    },
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    boxShadow: {
+        float: "0px 2px 12px rgba(0, 0, 0, 0.75)",
+        menu: "0px 0px 6px rgba(0, 0, 0, 0.50), 0px 3px 6px rgba(0, 0, 0, 0.25)",
+        button: "0px 4px 4px rgba(0, 0, 0, 0.75)",
     },
 
     shadows: {
@@ -384,6 +387,9 @@ const getPalletteOptions = (
             faint: colors.text?.faint,
         },
         divider: colors.stroke?.faint,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        boxShadow: colors.boxShadow,
     };
 };
 
@@ -480,6 +486,7 @@ const typography: TypographyOptions = {
 
 const getComponents = (
     colors: ThemeColorsOptions,
+    palette: PaletteOptions,
     typography: TypographyOptions,
 ): Components => ({
     MuiCssBaseline: {
@@ -536,7 +543,8 @@ const getComponents = (
                     backgroundColor: colors.backdrop?.faint,
                 },
                 "& .MuiDialog-paper": {
-                    filter: getDropShadowStyle(colors.shadows?.float),
+                    boxShadow: palette.boxShadow?.float,
+                    // filter: getDropShadowStyle(colors.shadows?.float),
                 },
                 // Reset the MUI default paddings to 16px everywhere.
                 //
