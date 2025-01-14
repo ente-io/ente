@@ -47,27 +47,35 @@ const Disable2FA: React.FC<Disable2FAProps> = ({
             }
 
             const encodedEmail = encodeURIComponent(email);
-            const encodedToken = encodeURIComponent(token);
 
             // Fetch user data
-            const userUrl = `${apiOrigin}/admin/user?email=${encodedEmail}&token=${encodedToken}`;
-            const userResponse = await fetch(userUrl);
+            const userUrl = `${apiOrigin}/admin/user?email=${encodedEmail}`;
+            const userResponse = await fetch(userUrl, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Auth-Token": token,
+                },
+            });
             if (!userResponse.ok) {
                 throw new Error("Failed to fetch user data");
             }
             const userData = (await userResponse.json()) as UserData;
-            const userId = userData.subscription?.userID;
+            const userID = userData.subscription?.userID;
 
-            if (!userId) {
+            if (!userID) {
                 throw new Error("User ID not found");
             }
 
             // Disable 2FA
-            const disableUrl = `${apiOrigin}/admin/user/disable-2fa?token=${encodedToken}`;
-            const body = JSON.stringify({ userId });
+            const disableUrl = `${apiOrigin}/admin/user/disable-2fa`;
+            const body = JSON.stringify({ userID });
             const disableResponse = await fetch(disableUrl, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Auth-Token": token,
+                },
                 body: body,
             });
 
@@ -75,12 +83,15 @@ const Disable2FA: React.FC<Disable2FAProps> = ({
                 const errorResponse = await disableResponse.text();
                 throw new Error(`Failed to disable 2FA: ${errorResponse}`);
             }
-
             handleDisable2FA(); // Notify parent component of successful disable
             handleClose(); // Close dialog on successful disable
             console.log("2FA disabled successfully");
         } catch (error) {
-            console.error("Error disabling 2FA:", error);
+            if (error instanceof Error) {
+                alert(error.message);
+            } else {
+                alert("Failed to disable 2FA");
+            }
         } finally {
             setLoading(false);
         }

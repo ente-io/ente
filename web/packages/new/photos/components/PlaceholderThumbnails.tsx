@@ -1,7 +1,7 @@
+import { Overlay } from "@/base/components/containers";
 import { FileType } from "@/media/file-type";
-import { Overlay } from "@ente/shared/components/Container";
-import PhotoOutlined from "@mui/icons-material/PhotoOutlined";
-import PlayCircleOutlineOutlined from "@mui/icons-material/PlayCircleOutlineOutlined";
+import PhotoOutlinedIcon from "@mui/icons-material/PhotoOutlined";
+import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { styled } from "@mui/material";
 import React from "react";
 
@@ -31,9 +31,9 @@ export const StaticThumbnail: React.FC<Iprops> = (props) => {
             })}
         >
             {props.fileType !== FileType.video ? (
-                <PhotoOutlined />
+                <PhotoOutlinedIcon />
             ) : (
-                <PlayCircleOutlineOutlined />
+                <PlayCircleOutlineOutlinedIcon />
             )}
         </CenteredOverlay>
     );

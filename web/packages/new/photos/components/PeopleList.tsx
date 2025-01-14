@@ -1,4 +1,4 @@
-import { useIsSmallWidth } from "@/base/hooks";
+import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import type { EnteFile } from "@/media/file";
 import { faceCrop, type AnnotatedFaceID } from "@/new/photos/services/ml";
 import type { Person, PreviewableFace } from "@/new/photos/services/ml/people";
@@ -21,7 +21,11 @@ export const SearchPeopleList: React.FC<SearchPeopleListProps> = ({
     const isSmallWidth = useIsSmallWidth();
     return (
         <SearchPeopleContainer
-            sx={{ justifyContent: people.length > 3 ? "center" : "start" }}
+            sx={[
+                people.length > 3
+                    ? { justifyContent: "center" }
+                    : { justifyContent: "start" },
+            ]}
         >
             {people.slice(0, isSmallWidth ? 6 : 7).map((person) => (
                 <SearchPersonButton
@@ -212,9 +216,9 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
         <Skeleton
             variant="circular"
             animation="wave"
-            sx={{
-                backgroundColor: (theme) => theme.colors.background.elevated2,
-            }}
+            sx={(theme) => ({
+                backgroundColor: theme.colors.background.elevated2,
+            })}
             width={placeholderDimension}
             height={placeholderDimension}
         />

@@ -1,8 +1,7 @@
-import { estimatePasswordStrength } from "@/accounts/utils";
-import { FlexWrapper } from "@ente/shared/components/Container";
-import { Typography } from "@mui/material";
+import { Typography, useTheme } from "@mui/material";
 import { t } from "i18next";
 import React, { useMemo } from "react";
+import { estimatePasswordStrength } from "../utils/password";
 
 interface PasswordStrengthHintProps {
     password: string;
@@ -16,25 +15,29 @@ export const PasswordStrengthHint: React.FC<PasswordStrengthHintProps> = ({
         [password],
     );
 
+    const theme = useTheme();
+    const color =
+        passwordStrength == "weak"
+            ? theme.colors.danger.A700
+            : passwordStrength == "moderate"
+              ? theme.colors.warning.A500
+              : theme.colors.accent.A500;
+
     return (
-        <FlexWrapper mt={"8px"} mb={"4px"}>
-            <Typography
-                variant="small"
-                sx={(theme) => ({
-                    color:
-                        passwordStrength == "weak"
-                            ? theme.colors.danger.A700
-                            : passwordStrength == "moderate"
-                              ? theme.colors.warning.A500
-                              : theme.colors.accent.A500,
-                })}
-                textAlign={"left"}
-                flex={1}
-            >
-                {password
-                    ? t("passphrase_strength", { context: passwordStrength })
-                    : ""}
-            </Typography>
-        </FlexWrapper>
+        <Typography
+            variant="small"
+            sx={{
+                mt: "8px",
+                alignSelf: "flex-start",
+                whiteSpace: "pre",
+                color: "var(--color)",
+            }}
+            style={{ "--color": color } as React.CSSProperties}
+        >
+            {password
+                ? t("passphrase_strength", { context: passwordStrength })
+                : /* empty space + white-space: pre to prevent layout shift. */
+                  " "}
+        </Typography>
     );
 };

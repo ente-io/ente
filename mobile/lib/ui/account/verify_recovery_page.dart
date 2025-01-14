@@ -46,8 +46,8 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           if (e is DioError && e.type == DioErrorType.other) {
             await showErrorDialog(
               context,
-              "No internet connection",
-              "Please check your internet connection and try again.",
+              S.of(context).noInternetConnection,
+              S.of(context).pleaseCheckYourInternetConnectionAndTryAgain,
             );
           } else {
             await showGenericErrorDialog(context: context, error: e);

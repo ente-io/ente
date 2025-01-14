@@ -43,10 +43,10 @@ import { type RemoteFaceIndex } from "./face";
  *
  * Thus we return two separate results from {@link fetchMLData}:
  *
- * -   {@link RawRemoteMLData}: The original, unmodified JSON.
+ * - {@link RawRemoteMLData}: The original, unmodified JSON.
  *
- * -   {@link ParsedRemoteMLData}: The particular fields that the current client
- *     knows about, parsed according to their expected structure.
+ * - {@link ParsedRemoteMLData}: The particular fields that the current client
+ *   knows about, parsed according to their expected structure.
  *
  * When integrating this information into our local state, we use the parsed
  * version. And if we need to update the state on remote (e.g. if the current

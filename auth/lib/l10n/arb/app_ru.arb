@@ -446,8 +446,6 @@
   "customEndpoint": "Подключено к {endpoint}",
   "pinText": "Прикрепить",
   "unpinText": "Открепить",
-  "pinnedCodeMessage": "{code} прикреплен",
-  "unpinnedCodeMessage": "{code} откреплен",
   "tags": "Метки",
   "createNewTag": "Создать новую метку",
   "tag": "Метка",

@@ -20,7 +20,6 @@ var ctrl *pkg.ClICtrl
 var rootCmd = &cobra.Command{
 	Use:   "ente",
 	Short: "CLI tool for exporting your photos from ente.io",
-	Long:  `Start by creating a config file in your home directory:`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {

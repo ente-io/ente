@@ -58,14 +58,12 @@ export const toDataOrPathOrZipEntry = (desktopUploadItem: DesktopUploadItem) =>
 
 export const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
 
-export enum UPLOAD_STAGES {
-    START,
-    READING_GOOGLE_METADATA_FILES,
-    EXTRACTING_METADATA,
-    UPLOADING,
-    CANCELLING,
-    FINISH,
-}
+export type UploadPhase =
+    | "preparing"
+    | "readingMetadata"
+    | "uploading"
+    | "cancelling"
+    | "done";
 
 export enum UPLOAD_RESULT {
     FAILED,

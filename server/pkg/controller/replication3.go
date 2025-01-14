@@ -27,8 +27,9 @@ import (
 )
 
 const (
-	slowUploadThreshold = 2 * time.Second
-	slowSpeedThreshold  = 0.5 // MB/s
+	slowUploadThreshold             = 2 * time.Second
+	slowSpeedThreshold              = 0.5 // MB/s
+	replicationDelayForStaleObjects = 30
 )
 
 // ReplicationController3 oversees version 3 of our object replication.
@@ -248,6 +249,12 @@ func (c *ReplicationController3) tryReplicate() error {
 	done := func(err error) error {
 		if err != nil {
 			logger.Error(err)
+			if strings.Contains(err.Error(), "size of the uploaded file") {
+				delayErr := c.ObjectCopiesRepo.DelayNextAttemptByDays(context.Background(), objectKey, replicationDelayForStaleObjects)
+				if delayErr != nil {
+					logger.WithError(delayErr).Error("Failed to delay next attempt")
+				}
+			}
 		}
 
 		if err == nil {
@@ -591,8 +598,8 @@ func (c *ReplicationController3) verifyUploadedFileSize(in *UploadInput, dest *U
 	}
 
 	if *res.ContentLength != in.ExpectedSize {
-		err = fmt.Errorf("size of the uploaded file (%d) does not match the expected size (%d) in bucket %s",
-			*res.ContentLength, in.ExpectedSize, *dest.Bucket)
+		err = fmt.Errorf("size of the uploaded file (%d) does not match the expected size (%d) in bucket %s for object %s",
+			*res.ContentLength, in.ExpectedSize, *dest.Bucket, in.ObjectKey)
 		c.notifyDiscord(fmt.Sprint(err))
 		return stacktrace.Propagate(err, "")
 	}

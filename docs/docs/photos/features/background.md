@@ -52,6 +52,6 @@ app, though the [way that works](watch-folders) is a bit different.
 
 ## Troubleshooting
 
--   On iOS, make sure that you're not killing the Ente app.
--   On Android, make sure that "Optimize battery usage" is not turned on in
-    system settings for the Ente app.
+- On iOS, make sure that you're not killing the Ente app.
+- On Android, make sure that "Optimize battery usage" is not turned on in system
+  settings for the Ente app.

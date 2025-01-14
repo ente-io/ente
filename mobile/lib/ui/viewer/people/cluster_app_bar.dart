@@ -95,6 +95,9 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
         overflow: TextOverflow.ellipsis,
       ),
       actions: _getDefaultActions(context),
+      scrolledUnderElevation: 4,
+      shadowColor: Colors.black.withOpacity(0.15),
+      surfaceTintColor: Colors.transparent,
     );
   }
 
@@ -216,7 +219,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
               .map((e) => getFileIdFromFaceId(e))
               .toList();
           biggestClusterFiles = await FilesDB.instance
-              .getFilesFromIDs(
+              .getFileIDToFileFromIDs(
                 biggestClusterFileIDs,
               )
               .then((mapping) => mapping.values.toList());
@@ -260,7 +263,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
         .map((e) => getFileIdFromFaceId(e))
         .toList();
 
-    final fileIDtoFile = await FilesDB.instance.getFilesFromIDs(
+    final fileIDtoFile = await FilesDB.instance.getFileIDToFileFromIDs(
       allFileIDs,
     );
 

@@ -30,14 +30,14 @@ device.
 
 ## Tips
 
--   The app will automatically cluster photos falling within a radius under a
-    specified location.
+- The app will automatically cluster photos falling within a radius under a
+  specified location.
 
--   Location Tags provide a seamless way to filter photos without compromising
-    your privacy.
+- Location Tags provide a seamless way to filter photos without compromising
+  your privacy.
 
--   Location tags are stored end-to-end encrypted, ensuring the security of your
-    data.
+- Location tags are stored end-to-end encrypted, ensuring the security of your
+  data.
 
--   Enjoy a more organized photo library by tagging important places like home,
-    office, and vacation spots.
+- Enjoy a more organized photo library by tagging important places like home,
+  office, and vacation spots.

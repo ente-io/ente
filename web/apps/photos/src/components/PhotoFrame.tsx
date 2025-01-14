@@ -1,32 +1,27 @@
 import log from "@/base/log";
-import type { LivePhotoSourceURL, SourceURLs } from "@/media/file";
+import {
+    downloadManager,
+    type LivePhotoSourceURL,
+    type LoadedLivePhotoSourceURL,
+    type RenderableSourceURLs,
+} from "@/gallery/services/download";
 import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
-import DownloadManager from "@/new/photos/services/download";
-import { PHOTOS_PAGES } from "@ente/shared/constants/pages";
-import { CustomError } from "@ente/shared/error";
-import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { styled } from "@mui/material";
-import PhotoViewer, { type PhotoViewerProps } from "components/PhotoViewer";
+import { PhotoViewer, type PhotoViewerProps } from "components/PhotoViewer";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import PhotoSwipe from "photoswipe";
 import { useContext, useEffect, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { Duplicate } from "services/deduplicationService";
 import {
     SelectedState,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import {
-    handleSelectCreator,
-    updateFileMsrcProps,
-    updateFileSrcProps,
-} from "utils/photoFrame";
+import { handleSelectCreator } from "utils/photoFrame";
 import { PhotoList } from "./PhotoList";
-import { DedupePhotoList } from "./PhotoList/dedupe";
 import PreviewCard from "./pages/gallery/PreviewCard";
 
 const Container = styled("div")`
@@ -44,11 +39,34 @@ const Container = styled("div")`
 
 const PHOTOSWIPE_HASH_SUFFIX = "&opened";
 
+/**
+ * An {@link EnteFile} augmented with various in-memory state used for
+ * displaying it in the photo viewer.
+ */
+export type DisplayFile = EnteFile & {
+    src?: string;
+    srcURLs?: RenderableSourceURLs;
+    /**
+     * An object URL corresponding to the image portion, if any, associated with
+     * the {@link DisplayFile}.
+     *
+     * - For images, this will be the object URL of the renderable image itself.
+     * - For live photos, this will be the object URL of the image portion of
+     *   the live photo.
+     * - For videos, this will not be defined.
+     */
+    associatedImageURL?: string | undefined;
+    msrc?: string;
+    html?: string;
+    w?: number;
+    h?: number;
+    title?: string;
+    isSourceLoaded?: boolean;
+    conversionFailed?: boolean;
+    canForceConvert?: boolean;
+};
+
 export interface PhotoFrameProps {
-    page:
-        | PHOTOS_PAGES.GALLERY
-        | PHOTOS_PAGES.DEDUPLICATE
-        | PHOTOS_PAGES.SHARED_ALBUMS;
     mode?: GalleryBarMode;
     /**
      * This is an experimental prop, to see if we can merge the separate
@@ -57,14 +75,37 @@ export interface PhotoFrameProps {
      */
     modePlus?: GalleryBarMode | "search";
     files: EnteFile[];
-    duplicates?: Duplicate[];
     syncWithRemote: () => Promise<void>;
-    favItemIds?: Set<number>;
     setSelected: (
         selected: SelectedState | ((selected: SelectedState) => SelectedState),
     ) => void;
     selected: SelectedState;
-    markTempDeleted?: (tempDeletedFiles: EnteFile[]) => void;
+    /**
+     * File IDs of all the files that the user has marked as a favorite.
+     *
+     * Not set in the context of the shared albums app.
+     */
+    favoriteFileIDs?: Set<number>;
+    /**
+     * Called when the component wants to update the in-memory, unsynced,
+     * favorite status of a file.
+     *
+     * For more details, see {@link unsyncedFavoriteUpdates} in the gallery
+     * reducer's documentation.
+     *
+     * Not set in the context of the shared albums app.
+     */
+    markUnsyncedFavoriteUpdate?: (fileID: number, isFavorite: boolean) => void;
+    /**
+     * Called when the component wants to mark the given files as deleted in the
+     * the in-memory, unsynced, state maintained by the top level gallery.
+     *
+     * For more details, see {@link unsyncedFavoriteUpdates} in the gallery
+     * reducer's documentation.
+     *
+     * Not set in the context of the shared albums app.
+     */
+    markTempDeleted?: (files: EnteFile[]) => void;
     /** This will be set if mode is not "people". */
     activeCollectionID: number;
     /** This will be set if mode is "people". */
@@ -80,16 +121,18 @@ export interface PhotoFrameProps {
     onSelectPerson?: PhotoViewerProps["onSelectPerson"];
 }
 
+/**
+ * TODO: Rename me to FileListWithViewer
+ */
 const PhotoFrame = ({
-    page,
-    duplicates,
     mode,
     modePlus,
     files,
     syncWithRemote,
-    favItemIds,
     setSelected,
     selected,
+    favoriteFileIDs,
+    markUnsyncedFavoriteUpdate,
     markTempDeleted,
     activeCollectionID,
     activePersonID,
@@ -105,32 +148,31 @@ const PhotoFrame = ({
 }: PhotoFrameProps) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
-    const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
-    const [thumbFetching, setThumbFetching] = useState<{
-        [k: number]: boolean;
-    }>({});
+    const [fetching, setFetching] = useState<Record<number, boolean>>({});
+    const [thumbFetching, setThumbFetching] = useState<Record<number, boolean>>(
+        {},
+    );
     const galleryContext = useContext(GalleryContext);
     const [rangeStart, setRangeStart] = useState(null);
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
     const router = useRouter();
 
-    const displayFiles = useMemoSingleThreaded(() => {
-        return files.map((item) => {
-            const filteredItem = {
-                ...item,
-                w: window.innerWidth,
-                h: window.innerHeight,
-                title: item.pubMagicMetadata?.data.caption,
-            };
-            return filteredItem;
-        });
-    }, [files]);
+    const [displayFiles, setDisplayFiles] = useState<DisplayFile[] | undefined>(
+        undefined,
+    );
 
     useEffect(() => {
+        const result = files.map((file) => ({
+            ...file,
+            w: window.innerWidth,
+            h: window.innerHeight,
+            title: file.pubMagicMetadata?.data.caption,
+        }));
+        setDisplayFiles(result);
         setFetching({});
         setThumbFetching({});
-    }, [displayFiles]);
+    }, [files]);
 
     useEffect(() => {
         const currentURL = new URL(window.location.href);
@@ -192,45 +234,24 @@ const PhotoFrame = ({
         return <div />;
     }
 
-    const updateURL =
+    // Return a (curried) function which will return true if the URL was updated
+    // (for the given params), and false otherwise.
+    const updateThumbURL =
         (index: number) => (id: number, url: string, forceUpdate?: boolean) => {
             const file = displayFiles[index];
-            // this is to prevent outdated updateURL call from updating the wrong file
+            // This is to prevent outdated call from updating the wrong file.
             if (file.id !== id) {
                 log.info(
-                    `[${id}]PhotoSwipe: updateURL: file id mismatch: ${file.id} !== ${id}`,
+                    `Ignoring stale updateThumbURL for display file at index ${index} (file ID ${file.id}, expected ${id})`,
                 );
-                throw Error(CustomError.UPDATE_URL_FILE_ID_MISMATCH);
+                throw Error("Update URL file id mismatch");
             }
             if (file.msrc && !forceUpdate) {
-                throw Error(CustomError.URL_ALREADY_SET);
+                return false;
             }
-            updateFileMsrcProps(file, url);
+            updateDisplayFileThumbnail(file, url);
+            return true;
         };
-
-    const updateSrcURL = async (
-        index: number,
-        id: number,
-        srcURLs: SourceURLs,
-        forceUpdate?: boolean,
-    ) => {
-        const file = displayFiles[index];
-        // this is to prevent outdate updateSrcURL call from updating the wrong file
-        if (file.id !== id) {
-            log.info(
-                `[${id}]PhotoSwipe: updateSrcURL: file id mismatch: ${file.id}`,
-            );
-            throw Error(CustomError.UPDATE_URL_FILE_ID_MISMATCH);
-        }
-        if (file.isSourceLoaded && !forceUpdate) {
-            throw Error(CustomError.URL_ALREADY_SET);
-        } else if (file.conversionFailed) {
-            log.info(`[${id}]PhotoSwipe: updateSrcURL: conversion failed`);
-            throw Error(CustomError.FILE_CONVERSION_FAILED);
-        }
-
-        await updateFileSrcProps(file, srcURLs, enableDownload);
-    };
 
     const handleClose = (needUpdate) => {
         setOpen(false);
@@ -287,14 +308,14 @@ const PhotoFrame = ({
     };
 
     const getThumbnail = (
-        item: EnteFile,
+        item: DisplayFile,
         index: number,
         isScrolling: boolean,
     ) => (
         <PreviewCard
             key={`tile-${item.id}-selected-${selected[item.id] ?? false}`}
             file={item}
-            updateURL={updateURL(index)}
+            updateURL={updateThumbURL(index)}
             onClick={onThumbnailClick(index)}
             selectable={selectable}
             onSelect={handleSelect(
@@ -321,14 +342,14 @@ const PhotoFrame = ({
             }
             activeCollectionID={activeCollectionID}
             showPlaceholder={isScrolling}
-            isFav={favItemIds?.has(item.id)}
+            isFav={favoriteFileIDs?.has(item.id)}
         />
     );
 
     const getSlideData = async (
         instance: PhotoSwipe<PhotoSwipe.Options>,
         index: number,
-        item: EnteFile,
+        item: DisplayFile,
     ) => {
         log.info(
             `[${item.id}] getSlideData called for thumbnail: ${!!item.msrc} sourceLoaded: ${!!item.isSourceLoaded} fetching: ${!!fetching[item.id]}`,
@@ -342,25 +363,10 @@ const PhotoFrame = ({
                 }
                 log.info(`[${item.id}] doesn't have thumbnail`);
                 thumbFetching[item.id] = true;
-                const url = await DownloadManager.getThumbnailForPreview(item);
-                try {
-                    updateURL(index)(item.id, url);
-                    log.info(
-                        `[${item.id}] calling invalidateCurrItems for thumbnail msrc: ${!!item.msrc}`,
-                    );
-                    instance.invalidateCurrItems();
-                    if ((instance as any).isOpen()) {
-                        instance.updateSize(true);
-                    }
-                } catch (e) {
-                    if (e.message !== CustomError.URL_ALREADY_SET) {
-                        log.error(
-                            "updating photoswipe after msrc url update failed",
-                            e,
-                        );
-                    }
-                    // ignore
-                }
+                // URL will always be defined (unless an error is thrown) since
+                // we are not passing the `cachedOnly` option.
+                const url = await downloadManager.renderableThumbnailURL(item)!;
+                updateThumbnail(instance, index, item, url, false);
             } catch (e) {
                 log.error("getSlideData failed get msrc url failed", e);
                 thumbFetching[item.id] = false;
@@ -384,86 +390,35 @@ const PhotoFrame = ({
         try {
             log.info(`[${item.id}] new file src request`);
             fetching[item.id] = true;
-            const srcURLs = await DownloadManager.getFileForPreview(item);
+            const srcURLs = await downloadManager.renderableSourceURLs(item);
             if (item.metadata.fileType === FileType.livePhoto) {
                 const srcImgURL = srcURLs.url as LivePhotoSourceURL;
                 const imageURL = await srcImgURL.image();
 
-                const dummyImgSrcUrl: SourceURLs = {
+                const dummyImgSrcUrl: RenderableSourceURLs = {
                     url: imageURL,
-                    isOriginal: false,
-                    isRenderable: !!imageURL,
                     type: "normal",
                 };
-                try {
-                    await updateSrcURL(index, item.id, dummyImgSrcUrl);
-                    log.info(
-                        `[${item.id}] calling invalidateCurrItems for live photo imgSrc, source loaded: ${item.isSourceLoaded}`,
-                    );
-                    instance.invalidateCurrItems();
-                    if ((instance as any).isOpen()) {
-                        instance.updateSize(true);
-                    }
-                } catch (e) {
-                    if (e.message !== CustomError.URL_ALREADY_SET) {
-                        log.error(
-                            "updating photoswipe after for live photo imgSrc update failed",
-                            e,
-                        );
-                    }
-                }
+                updateSource(instance, index, item, dummyImgSrcUrl, false);
                 if (!imageURL) {
                     // no image url, no need to load video
                     return;
                 }
 
                 const videoURL = await srcImgURL.video();
-                const loadedLivePhotoSrcURL: SourceURLs = {
+                const loadedLivePhotoSrcURL: RenderableSourceURLs = {
                     url: { video: videoURL, image: imageURL },
-                    isOriginal: false,
-                    isRenderable: !!videoURL,
                     type: "livePhoto",
                 };
-                try {
-                    await updateSrcURL(
-                        index,
-                        item.id,
-                        loadedLivePhotoSrcURL,
-                        true,
-                    );
-                    log.info(
-                        `[${item.id}] calling invalidateCurrItems for live photo complete, source loaded: ${item.isSourceLoaded}`,
-                    );
-                    instance.invalidateCurrItems();
-                    if ((instance as any).isOpen()) {
-                        instance.updateSize(true);
-                    }
-                } catch (e) {
-                    if (e.message !== CustomError.URL_ALREADY_SET) {
-                        log.error(
-                            "updating photoswipe for live photo complete update failed",
-                            e,
-                        );
-                    }
-                }
+                updateSource(
+                    instance,
+                    index,
+                    item,
+                    loadedLivePhotoSrcURL,
+                    true,
+                );
             } else {
-                try {
-                    await updateSrcURL(index, item.id, srcURLs);
-                    log.info(
-                        `[${item.id}] calling invalidateCurrItems for src, source loaded: ${item.isSourceLoaded}`,
-                    );
-                    instance.invalidateCurrItems();
-                    if ((instance as any).isOpen()) {
-                        instance.updateSize(true);
-                    }
-                } catch (e) {
-                    if (e.message !== CustomError.URL_ALREADY_SET) {
-                        log.error(
-                            "updating photoswipe after src url update failed",
-                            e,
-                        );
-                    }
-                }
+                updateSource(instance, index, item, srcURLs, false);
             }
         } catch (e) {
             log.error("getSlideData failed get src url failed", e);
@@ -472,70 +427,72 @@ const PhotoFrame = ({
         }
     };
 
-    const getConvertedItem = async (
+    const updateThumbnail = (
         instance: PhotoSwipe<PhotoSwipe.Options>,
         index: number,
-        item: EnteFile,
+        item: DisplayFile,
+        url: string,
+        forceUpdate?: boolean,
     ) => {
-        if (
-            item.metadata.fileType !== FileType.video &&
-            item.metadata.fileType !== FileType.livePhoto
-        ) {
-            log.error("getConvertedVideo called for non video file");
-            return;
-        }
-        if (item.conversionFailed) {
-            log.error(
-                "getConvertedVideo called for file that conversion failed",
-            );
-            return;
-        }
         try {
-            updateURL(index)(item.id, item.msrc, true);
-            log.info(
-                `[${item.id}] calling invalidateCurrItems for thumbnail msrc: ${!!item.msrc}`,
-            );
-            instance.invalidateCurrItems();
-            if ((instance as any).isOpen()) {
-                instance.updateSize(true);
+            if (updateThumbURL(index)(item.id, url, forceUpdate)) {
+                log.info(
+                    `[${item.id}] calling invalidateCurrItems for thumbnail msrc: ${!!item.msrc}`,
+                );
+                instance.invalidateCurrItems();
+                if ((instance as any).isOpen()) {
+                    instance.updateSize(true);
+                }
             }
         } catch (e) {
-            if (e.message !== CustomError.URL_ALREADY_SET) {
-                log.error(
-                    "updating photoswipe after msrc url update failed",
-                    e,
-                );
-            }
+            log.error("updating photoswipe after msrc url update failed", e);
             // ignore
         }
+    };
+
+    const updateSource = (
+        instance: PhotoSwipe<PhotoSwipe.Options>,
+        index: number,
+        item: DisplayFile,
+        srcURL: RenderableSourceURLs,
+        overwrite: boolean,
+    ) => {
+        const file = displayFiles[index];
+        // This is to prevent outdated call from updating the wrong file.
+        if (file.id !== item.id) {
+            log.info(
+                `Ignoring stale updateSourceURL for display file at index ${index} (file ID ${file.id}, expected ${item.id})`,
+            );
+            throw new Error("Update URL file id mismatch");
+        }
+        if (file.isSourceLoaded && !overwrite) return;
+        if (file.conversionFailed) throw new Error("File conversion failed");
+
+        updateDisplayFileSource(file, srcURL, enableDownload);
+        instance.invalidateCurrItems();
+        if ((instance as any).isOpen()) {
+            instance.updateSize(true);
+        }
+    };
+
+    const forceConvertItem = async (
+        instance: PhotoSwipe<PhotoSwipe.Options>,
+        index: number,
+        item: DisplayFile,
+    ) => {
+        updateThumbnail(instance, index, item, item.msrc, true);
+
         try {
             log.info(
                 `[${item.id}] new file getConvertedVideo request ${item.metadata.title}}`,
             );
             fetching[item.id] = true;
 
-            const srcURL = await DownloadManager.getFileForPreview(item, {
-                forceConvertVideos: true,
+            const srcURL = await downloadManager.renderableSourceURLs(item, {
+                forceConvert: true,
             });
 
-            try {
-                await updateSrcURL(index, item.id, srcURL, true);
-                log.info(
-                    `[${item.id}] calling invalidateCurrItems for src, source loaded: ${item.isSourceLoaded}`,
-                );
-                instance.invalidateCurrItems();
-                if ((instance as any).isOpen()) {
-                    instance.updateSize(true);
-                }
-            } catch (e) {
-                if (e.message !== CustomError.URL_ALREADY_SET) {
-                    log.error(
-                        "updating photoswipe after src url update failed",
-                        e,
-                    );
-                }
-                throw e;
-            }
+            updateSource(instance, index, item, srcURL, true);
         } catch (e) {
             log.error("getConvertedVideo failed get src url failed", e);
             fetching[item.id] = false;
@@ -546,30 +503,19 @@ const PhotoFrame = ({
     return (
         <Container>
             <AutoSizer>
-                {({ height, width }) =>
-                    page === PHOTOS_PAGES.DEDUPLICATE ? (
-                        <DedupePhotoList
-                            width={width}
-                            height={height}
-                            getThumbnail={getThumbnail}
-                            duplicates={duplicates}
-                            activeCollectionID={activeCollectionID}
-                            showAppDownloadBanner={showAppDownloadBanner}
-                        />
-                    ) : (
-                        <PhotoList
-                            width={width}
-                            height={height}
-                            getThumbnail={getThumbnail}
-                            mode={mode}
-                            modePlus={modePlus}
-                            displayFiles={displayFiles}
-                            activeCollectionID={activeCollectionID}
-                            activePersonID={activePersonID}
-                            showAppDownloadBanner={showAppDownloadBanner}
-                        />
-                    )
-                }
+                {({ height, width }) => (
+                    <PhotoList
+                        width={width}
+                        height={height}
+                        getThumbnail={getThumbnail}
+                        mode={mode}
+                        modePlus={modePlus}
+                        displayFiles={displayFiles}
+                        activeCollectionID={activeCollectionID}
+                        activePersonID={activePersonID}
+                        showAppDownloadBanner={showAppDownloadBanner}
+                    />
+                )}
             </AutoSizer>
             <PhotoViewer
                 isOpen={open}
@@ -577,21 +523,108 @@ const PhotoFrame = ({
                 currentIndex={currentIndex}
                 onClose={handleClose}
                 gettingData={getSlideData}
-                getConvertedItem={getConvertedItem}
-                favItemIds={favItemIds}
-                markTempDeleted={markTempDeleted}
+                forceConvertItem={forceConvertItem}
                 isTrashCollection={activeCollectionID === TRASH_SECTION}
                 isInHiddenSection={isInHiddenSection}
                 enableDownload={enableDownload}
-                fileToCollectionsMap={fileToCollectionsMap}
-                collectionNameMap={collectionNameMap}
-                setFilesDownloadProgressAttributesCreator={
-                    setFilesDownloadProgressAttributesCreator
-                }
-                onSelectPerson={onSelectPerson}
+                {...{
+                    favoriteFileIDs,
+                    markUnsyncedFavoriteUpdate,
+                    markTempDeleted,
+                    collectionNameMap,
+                    fileToCollectionsMap,
+                    setFilesDownloadProgressAttributesCreator,
+                    onSelectPerson,
+                }}
             />
         </Container>
     );
 };
 
 export default PhotoFrame;
+
+const updateDisplayFileThumbnail = (file: DisplayFile, url: string) => {
+    file.w = window.innerWidth;
+    file.h = window.innerHeight;
+    file.msrc = url;
+    file.canForceConvert = false;
+    file.isSourceLoaded = false;
+    file.conversionFailed = false;
+    if (file.metadata.fileType === FileType.image) {
+        file.src = url;
+    } else {
+        file.html = `
+            <div class = 'pswp-item-container'>
+                <img src="${url}"/>
+            </div>
+            `;
+    }
+};
+
+const updateDisplayFileSource = (
+    file: DisplayFile,
+    srcURLs: RenderableSourceURLs,
+    enableDownload: boolean,
+) => {
+    const { url } = srcURLs;
+    const isRenderable = !!url;
+    file.w = window.innerWidth;
+    file.h = window.innerHeight;
+    file.isSourceLoaded =
+        file.metadata.fileType === FileType.livePhoto
+            ? srcURLs.type === "livePhoto"
+            : true;
+    file.canForceConvert = srcURLs.canForceConvert;
+    file.conversionFailed = !isRenderable;
+    file.associatedImageURL = (() => {
+        switch (file.metadata.fileType) {
+            case FileType.image:
+                return srcURLs.url as string;
+            case FileType.livePhoto:
+                return (srcURLs.url as LoadedLivePhotoSourceURL).image;
+            default:
+                return undefined;
+        }
+    })();
+    if (!isRenderable) {
+        file.isSourceLoaded = true;
+        return;
+    }
+
+    if (file.metadata.fileType === FileType.video) {
+        file.html = `
+                <video controls ${
+                    !enableDownload && 'controlsList="nodownload"'
+                } onContextMenu="return false;">
+                    <source src="${url}" />
+                    Your browser does not support the video tag.
+                </video>
+                `;
+    } else if (file.metadata.fileType === FileType.livePhoto) {
+        if (srcURLs.type === "normal") {
+            file.html = `
+                <div class = 'pswp-item-container'>
+                    <img id = "live-photo-image-${file.id}" src="${url}" onContextMenu="return false;"/>
+                </div>
+                `;
+        } else {
+            const { image: imageURL, video: videoURL } =
+                url as LoadedLivePhotoSourceURL;
+
+            file.html = `
+            <div class = 'pswp-item-container'>
+                <img id = "live-photo-image-${file.id}" src="${imageURL}" onContextMenu="return false;"/>
+                <video id = "live-photo-video-${file.id}" loop muted onContextMenu="return false;">
+                    <source src="${videoURL}" />
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            `;
+        }
+    } else if (file.metadata.fileType === FileType.image) {
+        file.src = url as string;
+    } else {
+        log.error(`unknown file type - ${file.metadata.fileType}`);
+        file.src = url as string;
+    }
+};

@@ -75,13 +75,17 @@ class UserService {
     bool isChangeEmail = false,
     bool isCreateAccountScreen = false,
     bool isResetPasswordScreen = false,
+    String? purpose,
   }) async {
     final dialog = createProgressDialog(context, context.l10n.pleaseWait);
     await dialog.show();
     try {
       final response = await _dio.post(
         "${_config.getHttpEndpoint()}/users/ott",
-        data: {"email": email, "purpose": isChangeEmail ? "change" : ""},
+        data: {
+          "email": email,
+          "purpose": isChangeEmail ? "change" : purpose ?? "",
+        },
       );
       await dialog.hide();
       if (response.statusCode == 200) {
@@ -105,7 +109,24 @@ class UserService {
     } on DioException catch (e) {
       await dialog.hide();
       _logger.info(e);
-      if (e.response != null && e.response!.statusCode == 403) {
+      final String? enteErrCode = e.response?.data["code"];
+      if (enteErrCode != null && enteErrCode == "USER_ALREADY_REGISTERED") {
+        unawaited(
+          showErrorDialog(
+            context,
+            context.l10n.oops,
+            context.l10n.emailAlreadyRegistered,
+          ),
+        );
+      } else if (enteErrCode != null && enteErrCode == "USER_NOT_REGISTERED") {
+        unawaited(
+          showErrorDialog(
+            context,
+            context.l10n.oops,
+            context.l10n.emailNotRegistered,
+          ),
+        );
+      } else if (e.response != null && e.response!.statusCode == 403) {
         unawaited(
           showErrorDialog(
             context,
@@ -375,11 +396,20 @@ class UserService {
       if (response.statusCode == 200) {
         Widget page;
         final String passkeySessionID = response.data["passkeySessionID"];
-        final String twoFASessionID = response.data["twoFactorSessionID"];
-        if (twoFASessionID.isNotEmpty) {
+        final String accountsUrl = response.data["accountsUrl"] ?? kAccountsUrl;
+        String twoFASessionID = response.data["twoFactorSessionID"];
+        if (twoFASessionID.isEmpty &&
+            response.data["twoFactorSessionIDV2"] != null) {
+          twoFASessionID = response.data["twoFactorSessionIDV2"];
+        }
+        if (passkeySessionID.isNotEmpty) {
+          page = PasskeyPage(
+            passkeySessionID,
+            totp2FASessionID: twoFASessionID,
+            accountsUrl: accountsUrl,
+          );
+        } else if (twoFASessionID.isNotEmpty) {
           page = TwoFactorAuthenticationPage(twoFASessionID);
-        } else if (passkeySessionID.isNotEmpty) {
-          page = PasskeyPage(passkeySessionID);
         } else {
           await _saveConfiguration(response);
           if (Configuration.instance.getEncryptedToken() != null) {
@@ -681,13 +711,21 @@ class UserService {
     if (response.statusCode == 200) {
       Widget? page;
       final String passkeySessionID = response.data["passkeySessionID"];
-      final String twoFASessionID = response.data["twoFactorSessionID"];
+      final String accountsUrl = response.data["accountsUrl"] ?? kAccountsUrl;
+      String twoFASessionID = response.data["twoFactorSessionID"];
+      if (twoFASessionID.isEmpty &&
+          response.data["twoFactorSessionIDV2"] != null) {
+        twoFASessionID = response.data["twoFactorSessionIDV2"];
+      }
       Configuration.instance.setVolatilePassword(userPassword);
-
-      if (twoFASessionID.isNotEmpty) {
+      if (passkeySessionID.isNotEmpty) {
+        page = PasskeyPage(
+          passkeySessionID,
+          totp2FASessionID: twoFASessionID,
+          accountsUrl: accountsUrl,
+        );
+      } else if (twoFASessionID.isNotEmpty) {
         page = TwoFactorAuthenticationPage(twoFASessionID);
-      } else if (passkeySessionID.isNotEmpty) {
-        page = PasskeyPage(passkeySessionID);
       } else {
         await _saveConfiguration(response);
         if (Configuration.instance.getEncryptedToken() != null) {

@@ -64,6 +64,20 @@ export interface Electron {
     selectDirectory: () => Promise<string | undefined>;
 
     /**
+     * Return the file system path that this File object points to.
+     *
+     * The returned path will use POSIX separators (even on Windows).
+     *
+     * This method is a bit different from the other methods on the Electron
+     * object in the sense that there is no actual IPC happening - the
+     * implementation of this method is completely in the preload script. Thus
+     * we can pass it an otherwise unserializable File object.
+     *
+     * Consequently, it is also _not_ async.
+     */
+    pathForFile: (file: File) => string;
+
+    /**
      * Perform any logout related cleanup of native side state.
      */
     logout: () => Promise<void>;
@@ -462,18 +476,6 @@ export interface Electron {
     };
 
     // - Upload
-
-    /**
-     * Return the file system path that this File object points to.
-     *
-     * This method is a bit different from the other methods on the Electron
-     * object in the sense that there is no actual IPC happening - the
-     * implementation of this method is completely in the preload script. Thus
-     * we can pass it an otherwise unserializable File object.
-     *
-     * Consequently, it is also _not_ async.
-     */
-    pathForFile: (file: File) => string;
 
     /**
      * Get the list of files that are present in the given zip file.

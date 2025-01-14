@@ -12,19 +12,19 @@ export interface ItemListProps<T> {
     items: T[];
     generateItemKey: (item: T) => string | number;
     getItemTitle: (item: T) => string;
-    renderListItem: (item: T) => JSX.Element;
+    renderListItem: (item: T) => React.JSX.Element;
     maxHeight?: number;
     itemSize?: number;
 }
 
 interface ItemData<T> {
-    renderListItem: (item: T) => JSX.Element;
+    renderListItem: (item: T) => React.JSX.Element;
     getItemTitle: (item: T) => string;
     items: T[];
 }
 
 const createItemData: <T>(
-    renderListItem: (item: T) => JSX.Element,
+    renderListItem: (item: T) => React.JSX.Element,
     getItemTitle: (item: T) => string,
     items: T[],
 ) => ItemData<T> = memoize((renderListItem, getItemTitle, items) => ({
@@ -43,12 +43,16 @@ const Row: <T>({
         const { renderListItem, items, getItemTitle } = data;
         return (
             <Tooltip
-                PopperProps={{
-                    sx: {
-                        ".MuiTooltip-tooltip.MuiTooltip-tooltip.MuiTooltip-tooltip":
+                slotProps={{
+                    // Reduce the vertical offset of the tooltip "popper" from
+                    // the element on which the tooltip appears.
+                    popper: {
+                        modifiers: [
                             {
-                                marginTop: 0,
+                                name: "offset",
+                                options: { offset: [0, -14] },
                             },
+                        ],
                     },
                 }}
                 title={getItemTitle(items[index])}
@@ -76,7 +80,7 @@ export default function ItemList<T>(props: ItemListProps<T>) {
     };
 
     return (
-        <Box pl={2}>
+        <Box sx={{ pl: 2 }}>
             <List
                 itemData={itemData}
                 height={Math.min(

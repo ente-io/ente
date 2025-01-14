@@ -1,4 +1,5 @@
-import ExpandMore from "@mui/icons-material/ExpandMore";
+import { isSxArray } from "@/base/components/utils/sx";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
     Box,
     MenuItem,
@@ -16,10 +17,10 @@ export interface DropdownOption<T> {
 
 interface Iprops<T> {
     label: string;
-    labelProps?: TypographyProps;
+    labelSxProps?: TypographyProps["sx"];
     options: DropdownOption<T>[];
     message?: string;
-    messageProps?: TypographyProps;
+    messageSxProps?: TypographyProps["sx"];
     selected: T;
     setSelected: (selectedValue: T) => void;
     placeholder?: string;
@@ -27,19 +28,19 @@ interface Iprops<T> {
 
 export default function DropdownInput<T extends string>({
     label,
-    labelProps,
+    labelSxProps,
     options,
     message,
     selected,
     placeholder,
     setSelected,
-    messageProps,
+    messageSxProps,
 }: Iprops<T>) {
     return (
         <Stack spacing={"4px"}>
-            <Typography {...labelProps}>{label}</Typography>
+            <Typography sx={labelSxProps ?? {}}>{label}</Typography>
             <Select
-                IconComponent={ExpandMore}
+                IconComponent={ExpandMoreIcon}
                 displayEmpty
                 variant="standard"
                 MenuProps={{
@@ -87,7 +88,9 @@ export default function DropdownInput<T extends string>({
                 })}
                 renderValue={(selected) => {
                     return !selected?.length ? (
-                        <Box color={"text.muted"}>{placeholder ?? ""}</Box>
+                        <Box sx={{ color: "text.muted" }}>
+                            {placeholder ?? ""}
+                        </Box>
                     ) : (
                         options.find((o) => o.value === selected).label
                     );
@@ -102,11 +105,11 @@ export default function DropdownInput<T extends string>({
                         key={option.value}
                         divider={index !== options.length - 1}
                         value={option.value}
-                        sx={{
+                        sx={(theme) => ({
                             px: "16px",
                             py: "14px",
-                            color: (theme) => theme.palette.primary.main,
-                        }}
+                            color: theme.palette.primary.main,
+                        })}
                     >
                         {option.label}
                     </MenuItem>
@@ -115,9 +118,12 @@ export default function DropdownInput<T extends string>({
             {message && (
                 <Typography
                     variant="small"
-                    px={"8px"}
-                    color={"text.muted"}
-                    {...messageProps}
+                    sx={[
+                        { px: "8px", color: "text.muted" },
+                        ...(isSxArray(messageSxProps)
+                            ? messageSxProps
+                            : [messageSxProps]),
+                    ]}
                 >
                     {message}
                 </Typography>

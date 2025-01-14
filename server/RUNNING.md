@@ -12,7 +12,7 @@ This document describes these approaches, and also outlines configuration.
 
 -   [Run using Docker using a pre-built Docker image](docs/docker.md)
 -   [Run using Docker but build an image from source](#build-and-run-using-docker)
--   [Running without Docker](#run-without-docker)
+-   [Running without Docker](#running-without-docker)
 -   [Configuration](#configuration)
 
 If your mobile app is able to connect to your self hosted instance but is not

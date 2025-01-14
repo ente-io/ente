@@ -1,4 +1,4 @@
-import { isWeakPassword } from "@/accounts/utils";
+import { isWeakPassword } from "@/accounts/utils/password";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
 import { Box, Input, TextField, Typography } from "@mui/material";
@@ -20,10 +20,12 @@ export interface SetPasswordFormProps {
     ) => Promise<void>;
     buttonText: string;
 }
+
 export interface SetPasswordFormValues {
     passphrase: string;
     confirm: string;
 }
+
 function SetPasswordForm(props: SetPasswordFormProps) {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -55,7 +57,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
             if (passphrase === confirm) {
                 await props.callback(passphrase, setFieldError);
             } else {
-                setFieldError("confirm", t("PASSPHRASE_MATCH_ERROR"));
+                setFieldError("confirm", t("password_mismatch_error"));
             }
         } catch (e) {
             const message = e instanceof Error ? e.message : "";
@@ -78,8 +80,11 @@ function SetPasswordForm(props: SetPasswordFormProps) {
         >
             {({ values, errors, handleChange, handleSubmit }) => (
                 <form noValidate onSubmit={handleSubmit}>
-                    <Typography mb={2} color="text.muted" variant="small">
-                        {t("ENTER_ENC_PASSPHRASE")}
+                    <Typography
+                        variant="small"
+                        sx={{ mb: 2, color: "text.muted" }}
+                    >
+                        {t("pick_password_hint")}
                     </Typography>
 
                     <Input
@@ -96,25 +101,27 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         id="password"
                         autoComplete="new-password"
                         type={showPassword ? "text" : "password"}
-                        label={t("PASSPHRASE_HINT")}
+                        label={t("password")}
                         value={values.passphrase}
                         onChange={handleChange("passphrase")}
                         error={Boolean(errors.passphrase)}
                         helperText={errors.passphrase}
                         autoFocus
                         disabled={loading}
-                        InputProps={{
-                            endAdornment: (
-                                <ShowHidePassword
-                                    showPassword={showPassword}
-                                    handleClickShowPassword={
-                                        handleClickShowPassword
-                                    }
-                                    handleMouseDownPassword={
-                                        handleMouseDownPassword
-                                    }
-                                />
-                            ),
+                        slotProps={{
+                            input: {
+                                endAdornment: (
+                                    <ShowHidePassword
+                                        showPassword={showPassword}
+                                        handleClickShowPassword={
+                                            handleClickShowPassword
+                                        }
+                                        handleMouseDownPassword={
+                                            handleMouseDownPassword
+                                        }
+                                    />
+                                ),
+                            },
                         }}
                     />
                     <TextField
@@ -123,7 +130,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         id="confirm-password"
                         autoComplete="new-password"
                         type="password"
-                        label={t("CONFIRM_PASSPHRASE")}
+                        label={t("confirm_password")}
                         value={values.confirm}
                         onChange={handleChange("confirm")}
                         disabled={loading}
@@ -132,11 +139,11 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                     />
                     <PasswordStrengthHint password={values.passphrase} />
 
-                    <Typography my={2} variant="small">
-                        <Trans i18nKey={"PASSPHRASE_DISCLAIMER"} />
+                    <Typography variant="small" sx={{ my: 2 }}>
+                        <Trans i18nKey={"pick_password_caution"} />
                     </Typography>
 
-                    <Box my={4}>
+                    <Box sx={{ mt: 4, mb: 2 }}>
                         <LoadingButton
                             fullWidth
                             color="accent"
@@ -148,10 +155,12 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         </LoadingButton>
                         {loading && (
                             <Typography
-                                textAlign="center"
-                                mt={1}
-                                color="text.muted"
                                 variant="small"
+                                sx={{
+                                    textAlign: "center",
+                                    mt: 1,
+                                    color: "text.muted",
+                                }}
                             >
                                 {t("key_generation_in_progress")}
                             </Typography>

@@ -354,16 +354,6 @@
   "enterAlbumName": "Ange albumnamn",
   "movingFilesToAlbum": "Flyttar filer till album...",
   "shareYourFirstAlbum": "Dela ditt första album",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1 dag} other {{count} dagar}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "Radera alla",
   "sortAlbumsBy": "Sortera efter",
   "noResultsFound": "Inga resultat hittades",

@@ -1,33 +1,27 @@
-import { clientPackageName, staticAppTitle } from "@/base/app";
+import { clientPackageName, isDesktop, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
+import { LoadingOverlay } from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { AppNavbar } from "@/base/components/Navbar";
 import {
     genericErrorDialogAttributes,
     useAttributedMiniDialog,
 } from "@/base/components/utils/dialog";
-import { setupI18n } from "@/base/i18n";
+import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
+import { THEME_COLOR, getTheme } from "@/base/components/utils/theme";
 import log from "@/base/log";
-import {
-    logStartupBanner,
-    logUnhandledErrorsAndRejections,
-} from "@/base/log-web";
+import { logStartupBanner } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
+import { Notification } from "@/new/photos/components/Notification";
 import {
     updateAvailableForDownloadDialogAttributes,
     updateReadyToInstallDialogAttributes,
 } from "@/new/photos/components/utils/download";
 import { useLoadingBar } from "@/new/photos/components/utils/use-loading-bar";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
-import DownloadManager from "@/new/photos/services/download";
-import { runMigrations } from "@/new/photos/services/migrations";
+import { runMigrations } from "@/new/photos/services/migration";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
+import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
 import { AppContext } from "@/new/photos/types/context";
-import { Overlay } from "@ente/shared/components/Container";
-import DialogBox from "@ente/shared/components/DialogBox";
-import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
-import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
@@ -35,72 +29,45 @@ import {
     getData,
     migrateKVToken,
 } from "@ente/shared/storage/localStorage";
-import {
-    getLocalMapEnabled,
-    getToken,
-    setLocalMapEnabled,
-} from "@ente/shared/storage/localStorage/helpers";
-import { getTheme } from "@ente/shared/themes";
-import { THEME_COLOR } from "@ente/shared/themes/constants";
 import type { User } from "@ente/shared/user/types";
-import ArrowForward from "@mui/icons-material/ArrowForward";
+import "@fontsource-variable/inter";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import Notification from "components/Notification";
+import { useNotification } from "components/utils/hooks-app";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
-import {
-    getFamilyPortalRedirectURL,
-    updateMapEnabledStatus,
-} from "services/userService";
+
 import "styles/global.css";
-import { NotificationAttributes } from "types/Notification";
 
-export default function App({ Component, pageProps }: AppProps) {
+const App: React.FC<AppProps> = ({ Component, pageProps }) => {
+    useSetupLogs();
+
+    const isI18nReady = useSetupI18n();
     const router = useRouter();
-    const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
-    const [loading, setLoading] = useState(false);
-    const [offline, setOffline] = useState(
-        typeof window !== "undefined" && !window.navigator.onLine,
-    );
-    const [showNavbar, setShowNavBar] = useState(false);
-    const [mapEnabled, setMapEnabled] = useState(false);
-    const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
-    const [messageDialogView, setMessageDialogView] = useState(false);
-    const [watchFolderView, setWatchFolderView] = useState(false);
-    const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
-    const [notificationView, setNotificationView] = useState(false);
-    const closeNotification = () => setNotificationView(false);
-    const [notificationAttributes, setNotificationAttributes] =
-        useState<NotificationAttributes>(null);
-
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
+    const { showNotification, notificationProps } = useNotification();
     const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
         THEME_COLOR.DARK,
     );
-    const [isCFProxyDisabled, setIsCFProxyDisabled] = useLocalState(
-        LS_KEYS.CF_PROXY_DISABLED,
-        false,
-    );
+
+    const [loading, setLoading] = useState(false);
+    const [watchFolderView, setWatchFolderView] = useState(false);
 
     useEffect(() => {
-        void setupI18n().finally(() => setIsI18nReady(true));
         const user = getData(LS_KEYS.USER) as User | undefined | null;
-        migrateKVToken(user);
+        void migrateKVToken(user);
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
-        logUnhandledErrorsAndRejections(true);
         void runMigrations();
-        return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
     useEffect(() => {
@@ -120,10 +87,10 @@ export default function App({ Component, pageProps }: AppProps) {
             if (update.autoUpdatable) {
                 showMiniDialog(updateReadyToInstallDialogAttributes(update));
             } else {
-                setNotificationAttributes({
-                    endIcon: <ArrowForward />,
-                    variant: "secondary",
-                    message: t("update_available"),
+                showNotification({
+                    color: "secondary",
+                    title: t("update_available"),
+                    endIcon: <ArrowForwardIcon />,
                     onClick: () =>
                         showMiniDialog(
                             updateAvailableForDownloadDialogAttributes(update),
@@ -144,24 +111,8 @@ export default function App({ Component, pageProps }: AppProps) {
     }, []);
 
     useEffect(() => {
-        setMapEnabled(getLocalMapEnabled());
+        if (isDesktop) void resumeExportsIfNeeded();
     }, []);
-
-    useEffect(() => {
-        if (!isElectron()) {
-            return;
-        }
-        const initExport = async () => {
-            const token = getToken();
-            if (!token) return;
-            await DownloadManager.init(token);
-            await resumeExportsIfNeeded();
-        };
-        initExport();
-    }, []);
-
-    const setUserOnline = () => setOffline(false);
-    const setUserOffline = () => setOffline(true);
 
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
@@ -169,7 +120,10 @@ export default function App({ Component, pageProps }: AppProps) {
         if (needsFamilyRedirect && getData(LS_KEYS.USER)?.token)
             redirectToFamilyPortal();
 
+        // TODO: Remove me after instrumenting for a bit.
+        let t = Date.now();
         router.events.on("routeChangeStart", (url: string) => {
+            t = Date.now();
             const newPathname = url.split("?")[0];
             if (window.location.pathname !== newPathname) {
                 setLoading(true);
@@ -179,81 +133,55 @@ export default function App({ Component, pageProps }: AppProps) {
                 redirectToFamilyPortal();
 
                 // https://github.com/vercel/next.js/issues/2476#issuecomment-573460710
-                // eslint-disable-next-line no-throw-literal
+                // eslint-disable-next-line @typescript-eslint/only-throw-error
                 throw "Aborting route change, redirection in process....";
             }
         });
 
         router.events.on("routeChangeComplete", () => {
+            log.debug(() => `Route change took ${Date.now() - t} ms`);
             setLoading(false);
         });
-
-        window.addEventListener("online", setUserOnline);
-        window.addEventListener("offline", setUserOffline);
-
-        return () => {
-            window.removeEventListener("online", setUserOnline);
-            window.removeEventListener("offline", setUserOffline);
-        };
     }, []);
-
-    useEffect(() => {
-        setMessageDialogView(true);
-    }, [dialogMessage]);
-
-    useEffect(() => {
-        setNotificationView(true);
-    }, [notificationAttributes]);
-
-    const showNavBar = (show: boolean) => setShowNavBar(show);
-
-    const updateMapEnabled = async (enabled: boolean) => {
-        await updateMapEnabledStatus(enabled);
-        setLocalMapEnabled(enabled);
-        setMapEnabled(enabled);
-    };
-
-    // Use `onGenericError` instead.
-    const somethingWentWrong = useCallback(
-        () =>
-            setDialogMessage({
-                title: t("error"),
-                close: { variant: "critical" },
-                content: t("generic_error_retry"),
-            }),
-        [],
-    );
 
     const onGenericError = useCallback((e: unknown) => {
-        log.error("Error", e);
-        showMiniDialog(genericErrorDialogAttributes());
+        log.error(e);
+        // The generic error handler is sometimes called in the context of
+        // actions that were initiated by a confirmation dialog action handler
+        // themselves, then we need to let the current one close.
+        //
+        // See: [Note: Chained MiniDialogs]
+        setTimeout(() => {
+            showMiniDialog(genericErrorDialogAttributes());
+        }, 0);
     }, []);
 
-    const logout = useCallback(() => {
-        void photosLogout().then(() => router.push("/"));
-    }, [router]);
+    const logout = useCallback(() => void photosLogout(), []);
 
-    const appContext = {
-        showNavBar,
-        showLoadingBar,
-        hideLoadingBar,
-        setDialogMessage,
-        watchFolderView,
-        setWatchFolderView,
-        watchFolderFiles,
-        setWatchFolderFiles,
-        setNotificationAttributes,
-        themeColor,
-        setThemeColor,
-        showMiniDialog,
-        somethingWentWrong,
-        onGenericError,
-        mapEnabled,
-        updateMapEnabled, // <- changes on each render
-        isCFProxyDisabled,
-        setIsCFProxyDisabled,
-        logout,
-    };
+    const appContext = useMemo(
+        () => ({
+            showLoadingBar,
+            hideLoadingBar,
+            watchFolderView,
+            setWatchFolderView,
+            themeColor,
+            setThemeColor,
+            showMiniDialog,
+            showNotification,
+            onGenericError,
+            logout,
+        }),
+        [
+            showLoadingBar,
+            hideLoadingBar,
+            watchFolderView,
+            themeColor,
+            showMiniDialog,
+            showNotification,
+            onGenericError,
+            logout,
+        ],
+    );
 
     const title = isI18nReady ? t("title_photos") : staticAppTitle;
 
@@ -263,52 +191,25 @@ export default function App({ Component, pageProps }: AppProps) {
 
             <ThemeProvider theme={getTheme(themeColor, "photos")}>
                 <CssBaseline enableColorScheme />
-                {showNavbar && <AppNavbar />}
-                <MessageContainer>
-                    {isI18nReady && offline && t("OFFLINE_MSG")}
-                </MessageContainer>
                 <LoadingBar color="#51cd7c" ref={loadingBarRef} />
 
-                <DialogBox
-                    sx={{ zIndex: photosDialogZIndex }}
-                    size="xs"
-                    open={messageDialogView}
-                    onClose={() => setMessageDialogView(false)}
-                    attributes={dialogMessage}
-                />
                 <AttributedMiniDialog
                     sx={{ zIndex: photosDialogZIndex }}
                     {...miniDialogProps}
                 />
 
-                <Notification
-                    open={notificationView}
-                    onClose={closeNotification}
-                    attributes={notificationAttributes}
-                />
+                <Notification {...notificationProps} />
 
                 <AppContext.Provider value={appContext}>
-                    {(loading || !isI18nReady) && (
-                        <Overlay
-                            sx={(theme) => ({
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                zIndex: 2000,
-                                backgroundColor: theme.colors.background.base,
-                            })}
-                        >
-                            <ActivityIndicator />
-                        </Overlay>
-                    )}
-                    {isI18nReady && (
-                        <Component setLoading={setLoading} {...pageProps} />
-                    )}
+                    {(loading || !isI18nReady) && <LoadingOverlay />}
+                    {isI18nReady && <Component {...pageProps} />}
                 </AppContext.Provider>
             </ThemeProvider>
         </>
     );
-}
+};
+
+export default App;
 
 const redirectToFamilyPortal = () =>
     void getFamilyPortalRedirectURL().then((url) => {

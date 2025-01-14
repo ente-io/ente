@@ -1,10 +1,16 @@
-import { accountLogout } from "@/accounts/services/logout";
+import {
+    accountLogout,
+    logoutClearStateAgain,
+} from "@/accounts/services/logout";
 import log from "@/base/log";
-import DownloadManager from "@/new/photos/services/download";
-import { clearFeatureFlagSessionState } from "@/new/photos/services/feature-flags";
+import { downloadManager } from "@/gallery/services/download";
+import { resetUploadState } from "@/gallery/services/upload";
 import { logoutML, terminateMLWorker } from "@/new/photos/services/ml";
 import { logoutSearch } from "@/new/photos/services/search";
+import { logoutSettings } from "@/new/photos/services/settings";
+import { logoutUserDetails } from "@/new/photos/services/user-details";
 import exportService from "./export";
+import uploadManager from "./upload/uploadManager";
 
 /**
  * Logout sequence for the photos app.
@@ -25,7 +31,7 @@ export const photosLogout = async () => {
     try {
         await terminateMLWorker();
     } catch (e) {
-        ignoreError("ml/worker", e);
+        ignoreError("ML/worker", e);
     }
 
     // - Remote logout and clear state
@@ -37,21 +43,39 @@ export const photosLogout = async () => {
     log.info("logout (photos)");
 
     try {
-        clearFeatureFlagSessionState();
+        logoutSettings();
     } catch (e) {
-        ignoreError("feature-flag", e);
+        ignoreError("Settings", e);
     }
 
     try {
-        DownloadManager.logout();
+        logoutUserDetails();
     } catch (e) {
-        ignoreError("download", e);
+        ignoreError("User details", e);
+    }
+
+    try {
+        resetUploadState();
+    } catch (e) {
+        ignoreError("Upload", e);
+    }
+
+    try {
+        uploadManager.logout();
+    } catch (e) {
+        ignoreError("Upload", e);
+    }
+
+    try {
+        downloadManager.logout();
+    } catch (e) {
+        ignoreError("Download", e);
     }
 
     try {
         logoutSearch();
     } catch (e) {
-        ignoreError("search", e);
+        ignoreError("Search", e);
     }
 
     // - Desktop
@@ -67,13 +91,23 @@ export const photosLogout = async () => {
         try {
             exportService.disableContinuousExport();
         } catch (e) {
-            ignoreError("export", e);
+            ignoreError("Export", e);
         }
 
         try {
             await electron.logout();
         } catch (e) {
-            ignoreError("electron", e);
+            ignoreError("Electron", e);
         }
     }
+
+    // Clear the DB again to discard any in-flight completions that might've
+    // happened since we started.
+
+    await logoutClearStateAgain();
+
+    // Do a full reload to discard any in-flight requests that might still
+    // remain.
+
+    window.location.replace("/");
 };

@@ -40,8 +40,8 @@ explicit whitelist of admins.
 
 > [!NOTE]
 >
-> The first user is only treated as the admin if there are the list of admins in
-> the configuration is empty.
+> The first user is only treated as the admin if the list of admins in the
+> configuration is empty.
 >
 > Also, if at some point you delete the first user, then you will need to define
 > a whitelist to make some other user as the admin if you wish (since the first
@@ -50,16 +50,15 @@ explicit whitelist of admins.
 To whitelist the user IDs that can perform admin actions on the server, use the
 following steps:
 
--   Create a `museum.yaml` in the directory where you're starting museum from.
-    For example, if you're running using `docker compose up`, then this file
-    should be in the same directory as `compose.yaml` (generally,
-    `server/museum.yaml`).
+- Create a `museum.yaml` in the directory where you're starting museum from. For
+  example, if you're running using `docker compose up`, then this file should be
+  in the same directory as `compose.yaml` (generally, `server/museum.yaml`).
 
     > Docker might've created an empty `museum.yaml` _directory_ on your machine
     > previously. If so, delete that empty directory and create a new file named
     > `museum.yaml`.
 
--   In this `museum.yaml` we can add overrides over the default configuration.
+- In this `museum.yaml` we can add overrides over the default configuration.
 
 For whitelisting the admin userIDs we need to define an `internal.admins`. See
 the "internal" section in

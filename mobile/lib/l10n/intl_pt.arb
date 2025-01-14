@@ -2,6 +2,8 @@
   "@@locale ": "en",
   "enterYourEmailAddress": "Insira seu endereço de e-mail",
   "accountWelcomeBack": "Bem-vindo(a) de volta!",
+  "emailAlreadyRegistered": "E-mail já registrado.",
+  "emailNotRegistered": "E-mail não registrado.",
   "email": "E-mail",
   "cancel": "Cancelar",
   "verify": "Verificar",
@@ -185,6 +187,8 @@
   },
   "allowAddPhotosDescription": "Permitir que as pessoas com link também adicionem fotos ao álbum compartilhado.",
   "passwordLock": "Bloqueio por senha",
+  "canNotOpenTitle": "Não pôde abrir este álbum",
+  "canNotOpenBody": "Desculpe, este álbum não pode ser aberto no aplicativo.",
   "disableDownloadWarningTitle": "Por favor, saiba que",
   "disableDownloadWarningBody": "Os visualizadores podem fazer capturas de tela ou salvar uma cópia de suas fotos usando ferramentas externas",
   "allowDownloads": "Permitir downloads",
@@ -351,6 +355,7 @@
   "failedToLoadAlbums": "Falhou ao carregar álbuns",
   "hidden": "Oculto",
   "authToViewYourHiddenFiles": "Autentique-se para visualizar seus arquivos ocultos",
+  "authToViewTrashedFiles": "Autentique-se para ver seus arquivos excluídos",
   "trash": "Lixeira",
   "uncategorized": "Sem categoria",
   "videoSmallCase": "vídeo",
@@ -412,7 +417,8 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Tamanho da grade de fotos",
-  "manageDeviceStorage": "Gerenciar armazenamento do dispositivo",
+  "manageDeviceStorage": "Gerenciar cache do dispositivo",
+  "manageDeviceStorageDesc": "Reveja e limpe o armazenamento de cache local.",
   "machineLearning": "Aprendizagem automática",
   "mlConsent": "Ativar aprendizagem automática",
   "mlConsentTitle": "Ativar aprendizagem automática?",
@@ -571,7 +577,7 @@
   "no": "Não",
   "yes": "Sim",
   "social": "Redes sociais",
-  "rateUsOnStore": "Avalie-nos em {storeName}",
+  "rateUsOnStore": "Avalie-nos no {storeName}",
   "blog": "Blog",
   "merchandise": "Produtos",
   "twitter": "Twitter/X",
@@ -688,6 +694,8 @@
   "noPhotosAreBeingBackedUpRightNow": "No momento não há fotos sendo copiadas com segurança",
   "preserveMore": "Preservar mais",
   "grantFullAccessPrompt": "Permita o acesso a todas as fotos nas opções do aplicativo",
+  "allowPermTitle": "Permita acesso às Fotos",
+  "allowPermBody": "Permita o acesso a suas fotos das Configurações para que Ente possa exibir e copiar com segurança sua biblioteca.",
   "openSettings": "Abrir opções",
   "selectMorePhotos": "Selecionar mais fotos",
   "existingUser": "Usuário existente",
@@ -816,7 +824,7 @@
   "referFriendsAnd2xYourPlan": "Recomende seus amigos e duplique seu plano",
   "shareAlbumHint": "Abra um álbum e toque no botão compartilhar no canto superior direito para compartilhar.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Os itens exibem o número de dias restantes antes da exclusão permanente",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1 dia} other {{count} dias}}",
+  "trashDaysLeft": "{count, plural, =0 {Em breve} =1 {1 dia} other {{count} dias}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1031,38 +1039,38 @@
   "searchPeopleEmptySection": "Convide pessoas e você verá todas as fotos compartilhadas por elas aqui",
   "searchAlbumsEmptySection": "Álbuns",
   "searchFileTypesAndNamesEmptySection": "Tipos de arquivo e nomes",
-  "searchCaptionEmptySection": "Adicione descrições como \"#trip\" nas informações das fotos para encontrá-las aqui rapidamente",
+  "searchCaptionEmptySection": "Adicione marcações como \"#viagem\" nas informações das fotos para encontrá-las aqui com facilidade",
   "language": "Idioma",
-  "selectLanguage": "Selecionar Idioma",
-  "locationName": "Nome do Local",
-  "addLocation": "Adicionar local",
+  "selectLanguage": "Selecionar idioma",
+  "locationName": "Nome da localização",
+  "addLocation": "Adicionar localização",
   "groupNearbyPhotos": "Agrupar fotos próximas",
   "kiloMeterUnit": "km",
   "addLocationButton": "Adicionar",
   "radius": "Raio",
-  "locationTagFeatureDescription": "Uma tag em grupo de todas as fotos que foram tiradas dentro de algum raio de uma foto",
-  "galleryMemoryLimitInfo": "Até 1000 memórias mostradas na galeria",
+  "locationTagFeatureDescription": "Uma etiqueta de localização agrupa todas as fotos fotografadas em algum raio de uma foto",
+  "galleryMemoryLimitInfo": "Até 1.000 memórias exibidas na galeria",
   "save": "Salvar",
   "centerPoint": "Ponto central",
   "pickCenterPoint": "Escolha o ponto central",
-  "useSelectedPhoto": "Utilizar foto selecionada",
+  "useSelectedPhoto": "Usar foto selecionada",
   "resetToDefault": "Redefinir para o padrão",
   "@resetToDefault": {
     "description": "Button text to reset cover photo to default"
   },
   "edit": "Editar",
-  "deleteLocation": "Excluir Local",
+  "deleteLocation": "Excluir localização",
   "rotateLeft": "Girar para a esquerda",
   "flip": "Inverter",
   "rotateRight": "Girar para a direita",
   "saveCopy": "Salvar cópia",
-  "light": "Claro",
+  "light": "Brilho",
   "color": "Cor",
   "yesDiscardChanges": "Sim, descartar alterações",
   "doYouWantToDiscardTheEditsYouHaveMade": "Você quer descartar as edições que você fez?",
   "saving": "Salvando...",
   "editsSaved": "Edições salvas",
-  "oopsCouldNotSaveEdits": "Ops, não foi possível salvar edições",
+  "oopsCouldNotSaveEdits": "Opa! Não foi possível salvar as edições",
   "distanceInKMUnit": "km",
   "@distanceInKMUnit": {
     "description": "Unit for distance in km"
@@ -1070,7 +1078,7 @@
   "dayToday": "Hoje",
   "dayYesterday": "Ontem",
   "storage": "Armazenamento",
-  "usedSpace": "Espaço em uso",
+  "usedSpace": "Espaço usado",
   "storageBreakupFamily": "Família",
   "storageBreakupYou": "Você",
   "@storageBreakupYou": {
@@ -1084,14 +1092,14 @@
   "appVersion": "Versão: {versionValue}",
   "verifyIDLabel": "Verificar",
   "fileInfoAddDescHint": "Adicionar descrição...",
-  "editLocationTagTitle": "Editar local",
+  "editLocationTagTitle": "Editar localização",
   "setLabel": "Definir",
   "@setLabel": {
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Definir raio",
   "familyPlanPortalTitle": "Família",
-  "familyPlanOverview": "Adicione 5 membros da família ao seu plano existente sem pagar a mais.\n\nCada membro recebe seu próprio espaço privado, e nenhum membro pode ver os arquivos uns dos outros a menos que sejam compartilhados.\n\nPlanos de família estão disponíveis para os clientes que têm uma assinatura do Ente paga.\n\nAssine agora para começar!",
+  "familyPlanOverview": "Adicione 5 familiares para seu plano existente sem pagar nenhum custo adicional.\n\nCada membro ganha seu espaço privado, significando que eles não podem ver os arquivos dos outros a menos que eles sejam compartilhados.\n\nOs planos familiares estão disponíveis para clientes que já tem uma assinatura paga do Ente.\n\nAssine agora para iniciar!",
   "androidBiometricHint": "Verificar identidade",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -1116,27 +1124,27 @@
   "@androidBiometricRequiredTitle": {
     "description": "Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters."
   },
-  "androidDeviceCredentialsRequiredTitle": "Credenciais do dispositivo necessárias",
+  "androidDeviceCredentialsRequiredTitle": "Credenciais necessários",
   "@androidDeviceCredentialsRequiredTitle": {
     "description": "Message showed as a title in a dialog which indicates the user has not set up credentials authentication on their device. It is used on Android side. Maximum 60 characters."
   },
-  "androidDeviceCredentialsSetupDescription": "Credenciais do dispositivo necessárias",
+  "androidDeviceCredentialsSetupDescription": "Credenciais necessários",
   "@androidDeviceCredentialsSetupDescription": {
     "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
   },
-  "goToSettings": "Ir para Configurações",
+  "goToSettings": "Ir às opções",
   "@goToSettings": {
     "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
   },
-  "androidGoToSettingsDescription": "A autenticação biométrica não está configurada no seu dispositivo. Vá em 'Configurações > Segurança' para adicionar autenticação biométrica.",
+  "androidGoToSettingsDescription": "A autenticação biométrica não está definida no dispositivo. Vá em 'Opções > Segurança' para adicionar a autenticação biométrica.",
   "@androidGoToSettingsDescription": {
     "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
   },
-  "iOSLockOut": "A Autenticação Biométrica está desativada. Por favor, bloqueie e desbloqueie sua tela para ativá-la.",
+  "iOSLockOut": "A autenticação biométrica está desativada. Bloqueie e desbloqueie sua tela para ativá-la.",
   "@iOSLockOut": {
     "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
   },
-  "iOSGoToSettingsDescription": "A autenticação biométrica não está configurada no seu dispositivo. Por favor, ative o Touch ID ou o Face ID no seu telefone.",
+  "iOSGoToSettingsDescription": "A autenticação biométrica não está definida no dispositivo. Ative o Touch ID ou Face ID no dispositivo.",
   "@iOSGoToSettingsDescription": {
     "description": "Message advising the user to go to the settings and configure Biometrics for their device. It shows in a dialog on iOS side."
   },
@@ -1145,22 +1153,22 @@
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
   },
   "openstreetmapContributors": "Contribuidores do OpenStreetMap",
-  "hostedAtOsmFrance": "Hospedado na OSM France",
+  "hostedAtOsmFrance": "Hospedado em OSM France",
   "map": "Mapa",
   "@map": {
     "description": "Label for the map view"
   },
   "maps": "Mapas",
-  "enableMaps": "Habilitar Mapa",
-  "enableMapsDesc": "Isto mostrará suas fotos em um mapa do mundo.\n\nEste mapa é hospedado pelo OpenStreetMap, e os exatos locais de suas fotos nunca são compartilhados.\n\nVocê pode desativar esse recurso a qualquer momento nas Configurações.",
+  "enableMaps": "Ativar mapas",
+  "enableMapsDesc": "Isso exibirá suas fotos em um mapa mundial.\n\nEste mapa é hospedado por Open Street Map, e as exatas localizações das fotos nunca serão compartilhadas.\n\nVocê pode desativar esta função a qualquer momento em Opções.",
   "quickLinks": "Links rápidos",
   "selectItemsToAdd": "Selecionar itens para adicionar",
   "addSelected": "Adicionar selecionado",
-  "addFromDevice": "Adicionar a partir do dispositivo",
+  "addFromDevice": "Adicionar do dispositivo",
   "addPhotos": "Adicionar fotos",
   "noPhotosFoundHere": "Nenhuma foto encontrada aqui",
-  "zoomOutToSeePhotos": "Diminuir o zoom para ver fotos",
-  "noImagesWithLocation": "Nenhuma imagem com local",
+  "zoomOutToSeePhotos": "Reduzir ampliação para ver as fotos",
+  "noImagesWithLocation": "Nenhuma imagem com localização",
   "unpinAlbum": "Desafixar álbum",
   "pinAlbum": "Fixar álbum",
   "create": "Criar",
@@ -1170,36 +1178,36 @@
   "sharedWithYou": "Compartilhado com você",
   "sharedByYou": "Compartilhado por você",
   "inviteYourFriendsToEnte": "Convide seus amigos ao Ente",
-  "failedToDownloadVideo": "Falha ao fazer download do vídeo",
+  "failedToDownloadVideo": "Falhou ao baixar vídeo",
   "hiding": "Ocultando...",
   "unhiding": "Reexibindo...",
   "successfullyHid": "Ocultado com sucesso",
-  "successfullyUnhid": "Reexibido com sucesso",
-  "crashReporting": "Relatório de falhas",
+  "successfullyUnhid": "Desocultado com sucesso",
+  "crashReporting": "Relatório de erros",
   "resumableUploads": "Envios retomáveis",
-  "addToHiddenAlbum": "Adicionar a álbum oculto",
-  "moveToHiddenAlbum": "Mover para álbum oculto",
+  "addToHiddenAlbum": "Adicionar ao álbum oculto",
+  "moveToHiddenAlbum": "Mover ao álbum oculto",
   "fileTypes": "Tipos de arquivo",
-  "deleteConfirmDialogBody": "Esta conta está vinculada a outros aplicativos Ente, se você usar algum. Seus dados enviados, em todos os aplicativos Ente, serão agendados para exclusão, e sua conta será excluída permanentemente.",
-  "hearUsWhereTitle": "Como você ouviu sobre o Ente? (opcional)",
-  "hearUsExplanation": "Não rastreamos instalações do aplicativo. Seria útil se você nos contasse onde nos encontrou!",
+  "deleteConfirmDialogBody": "Esta conta está vinculada aos outros aplicativos do Ente, se você usar algum. Seus dados baixados, entre todos os aplicativos do Ente, serão programados para exclusão, e sua conta será permanentemente excluída.",
+  "hearUsWhereTitle": "Como você soube do Ente? (opcional)",
+  "hearUsExplanation": "Não rastreamos instalações de aplicativo. Seria útil se você contasse onde nos encontrou!",
   "viewAddOnButton": "Ver complementos",
   "addOns": "Complementos",
   "addOnPageSubtitle": "Detalhes dos complementos",
   "yourMap": "Seu mapa",
-  "modifyYourQueryOrTrySearchingFor": "Modifique sua consulta ou tente procurar por",
-  "blackFridaySale": "Promoção da Black Friday",
-  "upto50OffUntil4thDec": "Até 50% de desconto, até 4 de dezembro.",
+  "modifyYourQueryOrTrySearchingFor": "Altere o termo de busca ou tente consultar",
+  "blackFridaySale": "Promoção Black Friday",
+  "upto50OffUntil4thDec": "Com 50% de desconto, até 4 de dezembro",
   "photos": "Fotos",
   "videos": "Vídeos",
-  "livePhotos": "Fotos em movimento",
-  "searchHint1": "Rápido, pesquisa no dispositivo",
-  "searchHint2": "Datas das fotos, descrições",
+  "livePhotos": "Fotos animadas",
+  "searchHint1": "busca rápida no dispositivo",
+  "searchHint2": "Descrições e data das fotos",
   "searchHint3": "Álbuns, nomes de arquivos e tipos",
-  "searchHint4": "Local",
-  "searchHint5": "Em breve: Rostos e busca mágica ✨",
+  "searchHint4": "Localização",
+  "searchHint5": "Em breve: Busca mágica e rostos ✨",
   "addYourPhotosNow": "Adicione suas fotos agora",
-  "searchResultCount": "{count, plural, one{{count} resultado encontrado} other{{count} resultado encontrado}}",
+  "searchResultCount": "{count, plural, one{{count} resultado encontrado} other{{count} resultados encontrados}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
     "placeholders": {
@@ -1219,58 +1227,69 @@
   "contacts": "Contatos",
   "noInternetConnection": "Sem conexão à internet",
   "pleaseCheckYourInternetConnectionAndTryAgain": "Verifique sua conexão com a internet e tente novamente.",
-  "signOutFromOtherDevices": "Encerrar sessão em outros dispositivos",
-  "signOutOtherBody": "Se você acha que alguém pode saber sua senha, você pode forçar todos os outros dispositivos que estão com sua conta a desconectar.",
-  "signOutOtherDevices": "Encerrar sessão em outros dispositivos",
-  "doNotSignOut": "Não encerrar sessão",
-  "editLocation": "Editar local",
-  "selectALocation": "Selecionar um local",
-  "selectALocationFirst": "Selecione um local primeiro",
-  "changeLocationOfSelectedItems": "Alterar o local dos itens selecionados?",
-  "editsToLocationWillOnlyBeSeenWithinEnte": "Edições para local só serão vistas dentro do Ente",
-  "cleanUncategorized": "Limpar Sem Categoria",
-  "cleanUncategorizedDescription": "Remover todos os arquivos de Não Categorizados que estão presentes em outros álbuns",
-  "waitingForVerification": "Esperando por verificação...",
+  "signOutFromOtherDevices": "Sair da conta em outros dispositivos",
+  "signOutOtherBody": "Se você acha que alguém possa saber da sua senha, você pode forçar desconectar sua conta de outros dispositivos.",
+  "signOutOtherDevices": "Sair em outros dispositivos",
+  "doNotSignOut": "Não sair",
+  "editLocation": "Editar localização",
+  "selectALocation": "Selecionar localização",
+  "selectALocationFirst": "Primeiramente selecione uma localização",
+  "changeLocationOfSelectedItems": "Alterar a localização dos itens selecionados?",
+  "editsToLocationWillOnlyBeSeenWithinEnte": "Edições à localização serão apenas vistos no Ente",
+  "cleanUncategorized": "Limpar não categorizado",
+  "cleanUncategorizedDescription": "Remover todos os arquivos não categorizados que estão presentes em outros álbuns",
+  "waitingForVerification": "Esperando verificação...",
   "passkey": "Chave de acesso",
-  "passkeyAuthTitle": "Autenticação via Chave de acesso",
-  "passKeyPendingVerification": "A verificação ainda está pendente",
+  "passkeyAuthTitle": "Verificação de chave de acesso",
+  "loginWithTOTP": "Registrar com TOTP",
+  "passKeyPendingVerification": "Verificação pendente",
   "loginSessionExpired": "Sessão expirada",
-  "loginSessionExpiredDetails": "Sua sessão expirou. Por favor, entre novamente.",
+  "loginSessionExpiredDetails": "Sua sessão expirou. Registre-se novamente.",
   "verifyPasskey": "Verificar chave de acesso",
   "playOnTv": "Reproduzir álbum na TV",
   "pair": "Parear",
   "deviceNotFound": "Dispositivo não encontrado",
-  "castInstruction": "Visite cast.ente.io no dispositivo que você deseja parear.\n\ndigite o código abaixo para reproduzir o álbum em sua TV.",
+  "castInstruction": "Acesse cast.ente.io no dispositivo desejado para parear.\n\nInsira o código abaixo para reproduzir o álbum na sua TV.",
   "deviceCodeHint": "Insira o código",
   "joinDiscord": "Junte-se ao Discord",
-  "locations": "Locais",
-  "descriptions": "Descrições",
+  "locations": "Localizações",
   "addAName": "Adicione um nome",
-  "findPeopleByName": "Encontre pessoas rapidamente por nome",
-  "addViewers": "{count, plural, zero {Adicionar visualizador} one {Adicionar visualizador} other {Adicionar Visualizadores}}",
-  "addCollaborators": "{count, plural, zero {Adicionar colaborador} one {Adicionar colaborador} other {Adicionar colaboradores}}",
-  "longPressAnEmailToVerifyEndToEndEncryption": "Pressione e segure um e-mail para verificar a criptografia de ponta a ponta.",
-  "developerSettingsWarning": "Tem certeza de que deseja modificar as configurações de Desenvolvedor?",
-  "developerSettings": "Configurações de desenvolvedor",
-  "serverEndpoint": "Endpoint do servidor",
-  "invalidEndpoint": "Endpoint inválido",
-  "invalidEndpointMessage": "Desculpe, o endpoint que você inseriu é inválido. Por favor, insira um endpoint válido e tente novamente.",
-  "endpointUpdatedMessage": "Endpoint atualizado com sucesso",
-  "customEndpoint": "Conectado a {endpoint}",
+  "findThemQuickly": "Busque-os rapidamente",
+  "@findThemQuickly": {
+    "description": "Subtitle to indicate that the user can find people quickly by name"
+  },
+  "findPeopleByName": "Busque pessoas facilmente pelo nome",
+  "addViewers": "{count, plural, one {Adicionar visualizador} one {Adicionar visualizador} other {Adicionar visualizadores}}",
+  "addCollaborators": "{count, plural, one {Adicionar colaborador} one {Adicionar colaborador} other {Adicionar colaboradores}}",
+  "longPressAnEmailToVerifyEndToEndEncryption": "Pressione um e-mail para verificar a criptografia ponta a ponta.",
+  "developerSettingsWarning": "Deseja modificar as Opções de Desenvolvedor?",
+  "developerSettings": "Opções de desenvolvedor",
+  "serverEndpoint": "Ponto final do servidor",
+  "invalidEndpoint": "Ponto final inválido",
+  "invalidEndpointMessage": "Desculpe, o ponto final inserido é inválido. Insira um ponto final válido e tente novamente.",
+  "endpointUpdatedMessage": "Ponto final atualizado com sucesso",
+  "customEndpoint": "Conectado à {endpoint}",
   "createCollaborativeLink": "Criar link colaborativo",
-  "search": "Pesquisar",
+  "search": "Buscar",
   "enterPersonName": "Inserir nome da pessoa",
+  "enterName": "Inserir nome",
+  "savePerson": "Salvar pessoa",
+  "editPerson": "Editar pessoa",
+  "mergedPhotos": "Fotos mescladas",
+  "orMergeWithExistingPerson": "Ou mesclar com existente",
+  "enterDateOfBirth": "Aniversário (opcional)",
+  "birthday": "Aniversário",
   "removePersonLabel": "Remover etiqueta da pessoa",
-  "autoPairDesc": "O pareamento automático funciona apenas com dispositivos que suportam o Chromecast.",
-  "manualPairDesc": "Parear com o PIN funciona com qualquer tela que você deseja ver o seu álbum ativado.",
+  "autoPairDesc": "O pareamento automático só funciona com dispositivos que suportam o Chromecast.",
+  "manualPairDesc": "Parear com PIN funciona com qualquer tela que queira visualizar seu álbum.",
   "connectToDevice": "Conectar ao dispositivo",
-  "autoCastDialogBody": "Você verá dispositivos disponíveis para transmitir aqui.",
-  "autoCastiOSPermission": "Certifique-se de que as permissões de Rede local estão ativadas para o aplicativo de Fotos Ente, em Configurações.",
+  "autoCastDialogBody": "Você verá dispositivos de transmissão disponível aqui.",
+  "autoCastiOSPermission": "Certifique-se que as permissões da internet local estejam ligadas para o Ente Photos App, em opções.",
   "noDeviceFound": "Nenhum dispositivo encontrado",
   "stopCastingTitle": "Parar transmissão",
-  "stopCastingBody": "Você quer parar a transmissão?",
-  "castIPMismatchTitle": "Falha ao transmitir álbum",
-  "castIPMismatchBody": "Certifique-se de estar na mesma rede que a TV.",
+  "stopCastingBody": "Deseja parar a transmissão?",
+  "castIPMismatchTitle": "Falhou ao transmitir álbum",
+  "castIPMismatchBody": "Certifique-se de estar na mesma internet que a TV.",
   "pairingComplete": "Pareamento concluído",
   "savingEdits": "Salvando edições...",
   "autoPair": "Pareamento automático",
@@ -1278,14 +1297,15 @@
   "faceRecognition": "Reconhecimento facial",
   "foundFaces": "Rostos encontrados",
   "clusteringProgress": "Progresso de agrupamento",
-  "indexingIsPaused": "A indexação está pausada, será retomada automaticamente quando o dispositivo estiver pronto.",
-  "trim": "Cortar",
-  "crop": "Recortar",
+  "indexingIsPaused": "A indexação parou, ela será retomada automaticamente quando o dispositivo estiver pronto.",
+  "trim": "Recortar",
+  "crop": "Cortar",
   "rotate": "Girar",
   "left": "Esquerda",
   "right": "Direita",
   "whatsNew": "O que há de novo",
   "reviewSuggestions": "Revisar sugestões",
+  "review": "Revisar",
   "useAsCover": "Usar como capa",
   "notPersonLabel": "Não é {name}?",
   "@notPersonLabel": {
@@ -1297,47 +1317,47 @@
       }
     }
   },
-  "enable": "Habilitar",
-  "enabled": "Habilitado",
+  "enable": "Ativar",
+  "enabled": "Ativado",
   "moreDetails": "Mais detalhes",
-  "enableMLIndexingDesc": "Ente suporta aprendizado de máquina no dispositivo para reconhecimento facial, busca mágica e outros recursos avançados de busca",
-  "magicSearchHint": "A busca mágica permite pesquisar fotos por seu conteúdo, por exemplo, 'carro', 'carro vermelho', 'Ferrari'",
+  "enableMLIndexingDesc": "Ente suporta aprendizagem de máquina para reconhecimento facial, busca mágica e outros recursos de busca avançados",
+  "magicSearchHint": "A busca mágica permite buscar fotos pelo conteúdo, p. e.x. 'flor', 'carro vermelho', 'identidade'",
   "panorama": "Panorama",
   "reenterPassword": "Reinserir senha",
   "reenterPin": "Reinserir PIN",
   "deviceLock": "Bloqueio do dispositivo",
-  "pinLock": "Bloqueio PIN",
+  "pinLock": "Bloqueio por PIN",
   "next": "Próximo",
-  "setNewPassword": "Defina nova senha",
-  "enterPin": "Insira o PIN",
-  "setNewPin": "Definir novo PIN",
-  "appLock": "Bloqueio de app",
-  "noSystemLockFound": "Nenhum bloqueio de sistema encontrado",
+  "setNewPassword": "Definir nova senha",
+  "enterPin": "Inserir PIN",
+  "setNewPin": "Definir PIN novo",
+  "appLock": "Bloqueio do aplicativo",
+  "noSystemLockFound": "Nenhum bloqueio do sistema encontrado",
   "tapToUnlock": "Toque para desbloquear",
   "tooManyIncorrectAttempts": "Muitas tentativas incorretas",
-  "videoInfo": "Informação de Vídeo",
+  "videoInfo": "Informações do vídeo",
   "autoLock": "Bloqueio automático",
   "immediately": "Imediatamente",
-  "autoLockFeatureDescription": "Tempo após o qual o app bloqueia depois de ser colocado em segundo plano",
+  "autoLockFeatureDescription": "Tempo após o qual o aplicativo bloqueia após ser colocado em segundo plano",
   "hideContent": "Ocultar conteúdo",
-  "hideContentDescriptionAndroid": "Oculta o conteúdo do app no seletor de apps e desativa as capturas de tela",
-  "hideContentDescriptionIos": "Oculta o conteúdo do seletor de apps",
-  "passwordStrengthInfo": "Força da senha é calculada considerando o comprimento da senha, caracteres usados, e se a senha aparece ou não nas 10.000 senhas mais usadas",
+  "hideContentDescriptionAndroid": "Oculta os conteúdos do aplicativo no seletor de aplicativos e desativa capturas de tela",
+  "hideContentDescriptionIos": "Oculta o conteúdo no seletor de aplicativos",
+  "passwordStrengthInfo": "A força da senha é calculada considerando o comprimento dos dígitos, carácteres usados, e se ou não a senha aparece nas 10.000 senhas usadas.",
   "noQuickLinksSelected": "Nenhum link rápido selecionado",
   "pleaseSelectQuickLinksToRemove": "Selecione links rápidos para remover",
   "removePublicLinks": "Remover link público",
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Isto removerá links públicos de todos os links rápidos selecionados.",
-  "guestView": "Visão de convidado",
-  "guestViewEnablePreSteps": "Para ativar a visão de convidado, por favor ative um método de autenticação nas configurações do sistema do seu dispositivo.",
-  "nameTheAlbum": "Nomear o álbum",
+  "guestView": "Vista do convidado",
+  "guestViewEnablePreSteps": "Para ativar a vista do convidado, defina uma senha de acesso no dispositivo ou bloqueie sua tela nas opções do sistema.",
+  "nameTheAlbum": "Nomear álbum",
   "collectPhotosDescription": "Crie um link onde seus amigos podem enviar fotos na qualidade original.",
   "collect": "Coletar",
   "appLockDescriptions": "Escolha entre a tela de bloqueio padrão do seu dispositivo e uma tela de bloqueio personalizada com PIN ou senha.",
-  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Para ativar o bloqueio do app, configure uma senha no dispositivo ou tela de bloqueio nas configurações do sistema.",
-  "authToViewPasskey": "Por favor, autentique-se para ver sua chave de acesso",
-  "loopVideoOn": "Repetir vídeo ligado",
-  "loopVideoOff": "Repetir vídeo desligado",
-  "localSyncErrorMessage": "Parece que algo deu errado, já que as fotos locais estão sincronizando mais tempo do que o esperado. Por favor, entre em contato com a nossa equipe de suporte",
+  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Para ativar o bloqueio do aplicativo, defina uma senha de acesso no dispositivo ou bloqueie sua tela nas opções do sistema.",
+  "authToViewPasskey": "Autentique-se para ver sua chave de acesso",
+  "loopVideoOn": "Repetir vídeo ativado",
+  "loopVideoOff": "Repetir vídeo desativado",
+  "localSyncErrorMessage": "Ocorreu um erro devido à sincronização de localização das fotos estar levando mais tempo que o esperado. Entre em contato conosco.",
   "showPerson": "Mostrar pessoa",
   "sort": "Ordenar",
   "mostRecent": "Mais recente",
@@ -1351,8 +1371,223 @@
   "newPerson": "Nova pessoa",
   "addName": "Adicionar pessoa",
   "add": "Adicionar",
-  "extraPhotosFoundFor": "Fotos adicionais encontradas para $text",
+  "extraPhotosFoundFor": "Fotos adicionais encontradas para {text}",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "extraPhotosFound": "Fotos adicionais encontradas",
   "configuration": "Configuração",
-  "localIndexing": "Indexação local"
+  "localIndexing": "Indexação local",
+  "processed": "Processado",
+  "resetPerson": "Remover",
+  "areYouSureYouWantToResetThisPerson": "Deseja redefinir esta pessoa?",
+  "allPersonGroupingWillReset": "Todos os agrupamentos dessa pessoa serão redefinidos, e você perderá todas as sugestões feitas por essa pessoa.",
+  "yesResetPerson": "Sim, redefinir pessoa",
+  "onlyThem": "Apenas eles",
+  "checkingModels": "Verificando modelos...",
+  "enableMachineLearningBanner": "Ativar aprendizagem de máquina para busca mágica e reconhecimento facial",
+  "searchDiscoverEmptySection": "As imagens serão exibidas aqui quando o processamento e sincronização for concluído",
+  "searchPersonsEmptySection": "As pessoas serão exibidas aqui quando o processamento e sincronização for concluído",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Adicionado 0 visualizadores} =1 {Adicionado 1 visualizador} other {Adicionado {count} visualizadores}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Adicionado 0 colaboradores} =1 {Adicionado 1 colaborador} other {Adicionado {count} colaboradores}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  },
+  "accountIsAlreadyConfigured": "A conta já está configurada.",
+  "sessionIdMismatch": "Incompatibilidade de ID de sessão",
+  "@sessionIdMismatch": {
+    "description": "In passkey page, deeplink is ignored because of session ID mismatch."
+  },
+  "failedToFetchActiveSessions": "Falhou ao obter sessões ativas",
+  "@failedToFetchActiveSessions": {
+    "description": "In session page, warn user (in toast) that active sessions could not be fetched."
+  },
+  "failedToRefreshStripeSubscription": "Falhou ao atualizar assinatura",
+  "failedToPlayVideo": "Falhou ao reproduzir vídeo",
+  "uploadIsIgnoredDueToIgnorereason": "O envio é ignorado devido a {ignoreReason}",
+  "@uploadIsIgnoredDueToIgnorereason": {
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "typeOfGallerGallerytypeIsNotSupportedForRename": "O tipo de galeria {galleryType} não é suportado para renomear",
+  "@typeOfGallerGallerytypeIsNotSupportedForRename": {
+    "placeholders": {
+      "galleryType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUploadIsIgnoredDue": "Toque para enviar, atualmente o envio é ignorado devido a {ignoreReason}",
+  "@tapToUploadIsIgnoredDue": {
+    "description": "Shown in upload icon widet, inside a tooltip.",
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUpload": "Toque para enviar",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
+  "info": "Info",
+  "addFiles": "Adicionar arquivos",
+  "castAlbum": "Transferir álbum",
+  "imageNotAnalyzed": "Imagem não analisada",
+  "noFacesFound": "Nenhum rosto encontrado",
+  "fileNotUploadedYet": "Arquivo ainda não enviado",
+  "noSuggestionsForPerson": "Sem sugestões para {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "mês",
+  "yearShort": "ano",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "Atualmente executando",
+  "ignored": "ignorado",
+  "photosCount": "{count, plural, =0 {0 fotos} =1 {1 foto} other {{count} fotos}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "file": "Arquivo",
+  "searchSectionsLengthMismatch": "Incompatibilidade de comprimento de seções: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "selectMailApp": "Selecionar aplicativo de e-mail",
+  "selectAllShort": "Tudo",
+  "@selectAllShort": {
+    "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
+  },
+  "changeLogMagicSearchImprovementTitle": "Melhoria na busca mágica",
+  "changeLogMagicSearchImprovementContent": "Nós melhoramos a busca mágica para torná-la mais rápida, para que você não precise esperar pelo que você busca.",
+  "changeLogBackupStatusTitle": "Estado da cópia de segurança",
+  "changeLogBackupStatusContent": "Nós adicionamos um registro de todos os arquivos enviados ao Ente, incluindo falhas e adicionados à fila.",
+  "changeLogDiscoverTitle": "Descobrir",
+  "changeLogDiscoverContent": "Procurando por fotos dos seus cartões de identidade, notas, ou até memes? Vá à aba de busca e confira o Descobrir. Baseado na busca semântica, é um local para encontrar fotos importantes para você.\\nApenas disponível se a Aprendizagem automática estiver ativa.",
+  "selectCoverPhoto": "Selecionar foto da capa",
+  "newLocation": "Nova localização",
+  "faceNotClusteredYet": "Rosto não agrupado ainda, volte aqui mais tarde",
+  "theLinkYouAreTryingToAccessHasExpired": "O link que você está tentando acessar já expirou.",
+  "openFile": "Abrir arquivo",
+  "backupFile": "Copiar arquivo com segurança",
+  "openAlbumInBrowser": "Abrir álbum no navegador",
+  "openAlbumInBrowserTitle": "Use o aplicativo da web para adicionar fotos a este álbum",
+  "allow": "Permitir",
+  "allowAppToOpenSharedAlbumLinks": "Permitir aplicativo abrir links de álbum compartilhado",
+  "seePublicAlbumLinksInApp": "Ver links de álbum compartilhado no aplicativo",
+  "emergencyContacts": "Contatos de emergência",
+  "acceptTrustInvite": "Aceitar convite",
+  "declineTrustInvite": "Recusar convite",
+  "removeYourselfAsTrustedContact": "Remover si mesmo dos contatos confiáveis",
+  "legacy": "Legado",
+  "legacyPageDesc": "O legado permite que contatos confiáveis acessem sua conta em sua ausência.",
+  "legacyPageDesc2": "Contatos confiáveis podem iniciar recuperação de conta, e se não for cancelado dentro de 30 dias, redefina sua senha e acesse sua conta.",
+  "legacyAccounts": "Contas legado",
+  "trustedContacts": "Contatos confiáveis",
+  "addTrustedContact": "Adicionar contato confiável",
+  "removeInvite": "Remover convite",
+  "recoveryWarning": "Um contato confiável está tentando acessar sua conta",
+  "rejectRecovery": "Rejeitar recuperação",
+  "recoveryInitiated": "A recuperação iniciou",
+  "recoveryInitiatedDesc": "Você poderá acessar a conta após {days} dias.  Uma notificação será enviada para {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Cancelar recuperação",
+  "recoveryAccount": "Recuperar conta",
+  "cancelAccountRecoveryBody": "Deseja mesmo cancelar a recuperação de conta?",
+  "startAccountRecoveryTitle": "Iniciar recuperação",
+  "whyAddTrustContact": "Um contato confiável pode ajudá-lo em recuperar seus dados.",
+  "recoveryReady": "Você pode recuperar a conta com e-mail {email} por definir uma nova senha.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} está tentando recuperar sua conta.",
+  "trustedInviteBody": "Você foi convidado para ser um contato legado por {email}.",
+  "warning": "Aviso",
+  "proceed": "Continuar",
+  "confirmAddingTrustedContact": "Você está prestes a adicionar {email} como contato confiável. Eles poderão recuperar sua conta se você estiver ausente por {numOfDays} dias.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} convidou você para ser um contato confiável",
+  "authToManageLegacy": "Autentique-se para gerenciar seus contatos confiáveis",
+  "useDifferentPlayerInfo": "Enfrentando problemas ao reproduzir este vídeo? Mantenha pressionado aqui ou tente outro reprodutor de vídeo",
+  "hideSharedItemsFromHomeGallery": "Ocultar itens compartilhados da galeria inicial",
+  "gallery": "Galeria",
+  "joinAlbum": "Unir-se ao álbum",
+  "joinAlbumSubtext": "para visualizar e adicionar suas fotos",
+  "joinAlbumSubtextViewer": "para adicionar isso aos álbuns compartilhados",
+  "join": "Unir-se"
 }

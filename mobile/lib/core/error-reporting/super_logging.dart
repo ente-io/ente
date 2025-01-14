@@ -17,6 +17,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/error-reporting/tunneled_transport.dart';
 import "package:photos/core/errors.dart";
 import 'package:photos/models/typedefs.dart';
+import "package:photos/utils/device_info.dart";
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -197,6 +198,12 @@ class SuperLogging {
     if (sentryIsEnabled) {
       $.info("sentry uploader started");
     }
+
+    unawaited(
+      getDeviceName().then((name) {
+        $.info("Device name: $name");
+      }),
+    );
 
     if (appConfig.body == null) return;
 

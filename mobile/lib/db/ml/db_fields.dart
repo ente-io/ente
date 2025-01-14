@@ -106,3 +106,19 @@ CREATE TABLE IF NOT EXISTS $clipTable (
 ''';
 
 const deleteClipEmbeddingsTable = 'DELETE FROM $clipTable';
+
+const fileDataTable = 'filedata';
+const createFileDataTable = '''
+CREATE TABLE IF NOT EXISTS $fileDataTable ( 
+  $fileIDColumn INTEGER NOT NULL,
+  user_id INTEGER NOT NULL,
+  type TEXT NOT NULL,
+  size INTEGER NOT NULL,
+  obj_id TEXT,
+  obj_nonce TEXT,
+  updated_at INTEGER NOT NULL,
+  PRIMARY KEY ($fileIDColumn, type)
+  );
+''';
+
+const deleteFileDataTable = 'DELETE FROM $fileDataTable';

@@ -20,8 +20,8 @@ or event. Everything they add also remains end-to-end encrypted.
 
 In addition to this, links support the following features:
 
--   Link expiry (so the links go poof after a duration you define)
--   Device limits (in case you don't want someone to forwarding your link)
--   Password lock (to add an additional level of protection to your photos)
--   Prevent downloads (while we can't prevent screenshots, we can disable the
-    option to download your original photos)
+- Link expiry (so the links go poof after a duration you define)
+- Device limits (in case you don't want someone to forwarding your link)
+- Password lock (to add an additional level of protection to your photos)
+- Prevent downloads (while we can't prevent screenshots, we can disable the
+  option to download your original photos)

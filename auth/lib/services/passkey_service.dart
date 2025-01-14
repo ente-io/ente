@@ -1,3 +1,4 @@
+import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:flutter/widgets.dart';
@@ -10,11 +11,13 @@ class PasskeyService {
 
   final _enteDio = Network.instance.enteDio;
 
-  Future<String> getJwtToken() async {
+  Future<String> getAccountsUrl() async {
     final response = await _enteDio.get(
       "/users/accounts-token",
     );
-    return response.data!["accountsToken"] as String;
+    final accountsUrl = response.data!["accountsUrl"] ?? kAccountsUrl;
+    final jwtToken = response.data!["accountsToken"] as String;
+    return "$accountsUrl/passkeys?token=$jwtToken";
   }
 
   Future<bool> isPasskeyRecoveryEnabled() async {
@@ -41,8 +44,7 @@ class PasskeyService {
 
   Future<void> openPasskeyPage(BuildContext context) async {
     try {
-      final jwtToken = await getJwtToken();
-      final url = "https://accounts.ente.io/passkeys?token=$jwtToken";
+      final url = await getAccountsUrl();
       await launchUrlString(
         url,
         mode: LaunchMode.externalApplication,

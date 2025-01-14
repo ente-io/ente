@@ -88,6 +88,8 @@
   "useRecoveryKey": "使用恢复密钥",
   "incorrectPasswordTitle": "密码错误",
   "welcomeBack": "欢迎回来！",
+  "emailAlreadyRegistered": "电子邮件地址已被注册。",
+  "emailNotRegistered": "电子邮件地址未注册。",
   "madeWithLoveAtPrefix": "用❤️制作 ",
   "supportDevs": "订阅 <bold-green>ente</bold-green> 以支持我们",
   "supportDiscount": "使用优惠码“AUTH”可享受首年 10% 折扣",
@@ -156,6 +158,7 @@
   "twoFactorAuthTitle": "两步验证",
   "passkeyAuthTitle": "通行密钥验证",
   "verifyPasskey": "验证通行密钥",
+  "loginWithTOTP": "使用 TOTP 登录",
   "recoverAccount": "恢复账户",
   "enterRecoveryKeyHint": "输入您的恢复密钥",
   "recover": "恢复",
@@ -181,7 +184,7 @@
   "createNewAccount": "创建新账号",
   "weakStrength": "弱",
   "strongStrength": "强",
-  "moderateStrength": "中等",
+  "moderateStrength": "中",
   "confirmPassword": "请确认密码",
   "close": "关闭",
   "oopsSomethingWentWrong": "哎呀，出了点问题。",
@@ -257,13 +260,17 @@
   "areYouSureYouWantToLogout": "您确定要登出吗？",
   "yesLogout": "是的，登出",
   "exit": "退出",
+  "theme": "主题",
+  "lightTheme": "浅色",
+  "darkTheme": "深色",
+  "systemTheme": "系统",
   "verifyingRecoveryKey": "正在验证恢复密钥...",
   "recoveryKeyVerified": "恢复密钥已验证",
   "recoveryKeySuccessBody": "太棒了！ 您的恢复密钥是有效的。 感谢您的验证。\n\n请记住要安全备份您的恢复密钥。",
   "invalidRecoveryKey": "您输入的恢复密钥无效。请确保它包含24个单词，并检查每个单词的拼写。\n\n如果您输入了旧的恢复码，请确保它长度为64个字符，并检查其中每个字符。",
   "recreatePasswordTitle": "重新创建密码",
   "recreatePasswordBody": "当前设备的功能不足以验证您的密码，但我们可以以适用于所有设备的方式重新生成。\n\n请使用您的恢复密钥登录并重新生成您的密码（如果您愿意，可以再次使用相同的密码）。",
-  "invalidKey": "无效的密钥",
+  "invalidKey": "密钥无效",
   "tryAgain": "请再试一次",
   "viewRecoveryKey": "查看恢复密钥",
   "confirmRecoveryKey": "确认恢复密钥",
@@ -293,7 +300,7 @@
   "youAreOnTheLatestVersion": "当前为最新版本",
   "warning": "警告",
   "exportWarningDesc": "导出的文件包含敏感信息。请安全存储。",
-  "iUnderStand": "我明白了",
+  "iUnderStand": "了解",
   "@iUnderStand": {
     "description": "Text for the button to confirm the user understands the warning"
   },
@@ -327,6 +334,10 @@
       }
     }
   },
+  "manualSort": "自定义",
+  "editOrder": "编辑顺序",
+  "mostFrequentlyUsed": "经常使用",
+  "mostRecentlyUsed": "最近使用",
   "activeSessions": "已登录的设备",
   "somethingWentWrongPleaseTryAgain": "出了点问题，请重试",
   "thisWillLogYouOutOfThisDevice": "这将使您登出该设备！",
@@ -374,7 +385,7 @@
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
   },
-  "androidBiometricNotRecognized": "未能识别。再试一次。",
+  "androidBiometricNotRecognized": "未能识别，请重试。",
   "@androidBiometricNotRecognized": {
     "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
   },
@@ -418,7 +429,7 @@
   "@iOSGoToSettingsDescription": {
     "description": "Message advising the user to go to the settings and configure Biometrics for their device. It shows in a dialog on iOS side."
   },
-  "iOSOkButton": "好的",
+  "iOSOkButton": "好",
   "@iOSOkButton": {
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
   },
@@ -434,7 +445,7 @@
   "waitingForBrowserRequest": "正在等待浏览器请求...",
   "waitingForVerification": "等待验证...",
   "passkey": "通行密钥",
-  "passKeyPendingVerification": "仍需进行验证",
+  "passKeyPendingVerification": "仍需验证",
   "loginSessionExpired": "会话已过期",
   "loginSessionExpiredDetails": "您的会话已过期。请重新登录。",
   "developerSettingsWarning": "您确定要修改开发者设置吗？",
@@ -448,6 +459,7 @@
   "unpinText": "取消置顶",
   "pinnedCodeMessage": "{code} 已被置顶",
   "unpinnedCodeMessage": "{code} 已被取消置顶",
+  "pinned": "已置顶",
   "tags": "标签",
   "createNewTag": "创建新标签",
   "tag": "标签",
@@ -484,5 +496,13 @@
   "appLockNotEnabled": "应用锁未启用",
   "appLockNotEnabledDescription": "请从“安全”>“应用锁”启用应用锁",
   "authToViewPasskey": "请验证身份以查看通行密钥",
-  "appLockOfflineModeWarning": "您已选择继续而不备份。如果您忘记了应用锁，您将无法访问数据。"
+  "appLockOfflineModeWarning": "您已选择继续而不备份。如果您忘记了应用锁，您将无法访问数据。",
+  "duplicateCodes": "重复代码",
+  "noDuplicates": "✨ 没有重复",
+  "youveNoDuplicateCodesThatCanBeCleared": "您没有可清除的重复代码",
+  "deduplicateCodes": "删除重复代码",
+  "deselectAll": "取消全选",
+  "selectAll": "全选",
+  "deleteDuplicates": "删除重复项",
+  "plainHTML": "Plain HTML"
 }

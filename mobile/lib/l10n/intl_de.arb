@@ -2,6 +2,8 @@
   "@@locale ": "en",
   "enterYourEmailAddress": "Gib deine E-Mail-Adresse ein",
   "accountWelcomeBack": "Willkommen zurück!",
+  "emailAlreadyRegistered": "E-Mail ist bereits registriert.",
+  "emailNotRegistered": "E-Mail nicht registriert.",
   "email": "E-Mail",
   "cancel": "Abbrechen",
   "verify": "Überprüfen",
@@ -12,7 +14,7 @@
   "deleteAccountFeedbackPrompt": "Wir bedauern sehr, dass du dein Konto löschen möchtest. Du würdest uns sehr helfen, wenn du uns kurz einige Gründe hierfür nennen könntest.",
   "feedback": "Rückmeldung",
   "kindlyHelpUsWithThisInformation": "Bitte gib diese Daten ein",
-  "confirmDeletePrompt": "Ja, ich möchte dieses Konto und alle enthaltenen Daten über alle Apps endgültig und unwiderruflich löschen.",
+  "confirmDeletePrompt": "Ja, ich möchte dieses Konto und alle enthaltenen Daten über alle Apps hinweg endgültig löschen.",
   "confirmAccountDeletion": "Kontolöschung bestätigen",
   "deleteAccountPermanentlyButton": "Konto unwiderruflich löschen",
   "yourAccountHasBeenDeleted": "Dein Benutzerkonto wurde gelöscht",
@@ -23,8 +25,8 @@
   "deleteReason4": "Mein Grund ist nicht aufgeführt",
   "sendEmail": "E-Mail senden",
   "deleteRequestSLAText": "Deine Anfrage wird innerhalb von 72 Stunden bearbeitet.",
-  "deleteEmailRequest": "Bitte sende eine E-Mail an <warning>account-deletion@ente.io</warning> von Deiner bei uns hinterlegten E-Mail-Adresse.",
-  "entePhotosPerm": "",
+  "deleteEmailRequest": "Bitte sende eine E-Mail an <warning>account-deletion@ente.io</warning> von Ihrer bei uns hinterlegten E-Mail-Adresse.",
+  "entePhotosPerm": "Ente <i> benötigt Berechtigung, um <i> Ihre Fotos zu sichern",
   "ok": "Ok",
   "createAccount": "Konto erstellen",
   "createNewAccount": "Neues Konto erstellen",
@@ -185,6 +187,8 @@
   },
   "allowAddPhotosDescription": "Erlaube Nutzern, mit diesem Link ebenfalls Fotos zu diesem geteilten Album hinzuzufügen.",
   "passwordLock": "Passwort Sperre",
+  "canNotOpenTitle": "Album kann nicht geöffnet werden",
+  "canNotOpenBody": "Leider kann dieses Album nicht in der App geöffnet werden.",
   "disableDownloadWarningTitle": "Bitte beachten Sie:",
   "disableDownloadWarningBody": "Zuschauer können weiterhin Screenshots oder mit anderen externen Programmen Kopien der Bilder machen.",
   "allowDownloads": "Downloads erlauben",
@@ -351,6 +355,7 @@
   "failedToLoadAlbums": "Laden der Alben fehlgeschlagen",
   "hidden": "Versteckt",
   "authToViewYourHiddenFiles": "Bitte authentifizieren, um die versteckten Dateien anzusehen",
+  "authToViewTrashedFiles": "Bitte authentifizieren, um die gelöschten Dateien anzuzeigen",
   "trash": "Papierkorb",
   "uncategorized": "Unkategorisiert",
   "videoSmallCase": "Video",
@@ -412,7 +417,8 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Fotorastergröße",
-  "manageDeviceStorage": "Gerätespeicher verwalten",
+  "manageDeviceStorage": "Geräte-Cache verwalten",
+  "manageDeviceStorageDesc": "Lokalen Cache-Speicher überprüfen und löschen.",
   "machineLearning": "Maschinelles Lernen",
   "mlConsent": "Maschinelles Lernen aktivieren",
   "mlConsentTitle": "Maschinelles Lernen aktivieren?",
@@ -688,6 +694,8 @@
   "noPhotosAreBeingBackedUpRightNow": "Momentan werden keine Fotos gesichert",
   "preserveMore": "Mehr Daten sichern",
   "grantFullAccessPrompt": "Bitte gewähre Zugang zu allen Fotos in der Einstellungen App",
+  "allowPermTitle": "Zugriff auf Fotos erlauben",
+  "allowPermBody": "Bitte erlaube den Zugriff auf Deine Fotos in den Einstellungen, damit Ente sie anzeigen und sichern kann.",
   "openSettings": "Öffne Einstellungen",
   "selectMorePhotos": "Mehr Fotos auswählen",
   "existingUser": "Existierender Benutzer",
@@ -816,7 +824,7 @@
   "referFriendsAnd2xYourPlan": "Begeistere Freunde für uns und verdopple deinen Speicher",
   "shareAlbumHint": "Öffne ein Album und tippe auf den Teilen-Button oben rechts, um zu teilen.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Elemente zeigen die Anzahl der Tage bis zum dauerhaften Löschen an",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1 Tag} other {{count} Tage}}",
+  "trashDaysLeft": "{count, plural, =0 {Demnächst} =1 {1 Tag} other {{count} Tage}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1233,6 +1241,7 @@
   "waitingForVerification": "Warte auf Bestätigung...",
   "passkey": "Passkey",
   "passkeyAuthTitle": "Passkey-Verifizierung",
+  "loginWithTOTP": "Mit TOTP anmelden",
   "passKeyPendingVerification": "Verifizierung steht noch aus",
   "loginSessionExpired": "Sitzung abgelaufen",
   "loginSessionExpiredDetails": "Deine Sitzung ist abgelaufen. Bitte melde Dich erneut an.",
@@ -1244,8 +1253,11 @@
   "deviceCodeHint": "Code eingeben",
   "joinDiscord": "Discord beitreten",
   "locations": "Orte",
-  "descriptions": "Beschreibungen",
   "addAName": "Füge einen Namen hinzu",
+  "findThemQuickly": "Finde sie schnell",
+  "@findThemQuickly": {
+    "description": "Subtitle to indicate that the user can find people quickly by name"
+  },
   "findPeopleByName": "Finde Personen schnell nach Namen",
   "addViewers": "{count, plural, one {Betrachter} other {Betrachter}} hinzufügen",
   "addCollaborators": "{count, plural, one {Teilnehmer} other {Teilnehmer}} hinzufügen",
@@ -1260,6 +1272,13 @@
   "createCollaborativeLink": "Gemeinschaftlichen Link erstellen",
   "search": "Suche",
   "enterPersonName": "Namen der Person eingeben",
+  "enterName": "Name eingeben",
+  "savePerson": "Person speichern",
+  "editPerson": "Person bearbeiten",
+  "mergedPhotos": "Zusammengeführte Fotos",
+  "orMergeWithExistingPerson": "Oder mit existierenden zusammenführen",
+  "enterDateOfBirth": "Geburtstag (optional)",
+  "birthday": "Geburtstag",
   "removePersonLabel": "Personenetikett entfernen",
   "autoPairDesc": "Automatisches Verbinden funktioniert nur mit Geräten, die Chromecast unterstützen.",
   "manualPairDesc": "\"Mit PIN verbinden\" funktioniert mit jedem Bildschirm, auf dem du dein Album sehen möchtest.",
@@ -1286,6 +1305,7 @@
   "right": "Rechts",
   "whatsNew": "Neue Funktionen",
   "reviewSuggestions": "Vorschläge überprüfen",
+  "review": "Überprüfen",
   "useAsCover": "Als Titelbild festlegen",
   "notPersonLabel": "Nicht {name}?",
   "@notPersonLabel": {
@@ -1351,8 +1371,223 @@
   "newPerson": "Neue Person",
   "addName": "Name hinzufügen",
   "add": "Hinzufügen",
-  "extraPhotosFoundFor": "Zusätzliche Fotos gefunden für $text",
+  "extraPhotosFoundFor": "Zusätzliche Fotos für {text} gefunden",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "extraPhotosFound": "Zusätzliche Fotos gefunden",
   "configuration": "Konfiguration",
-  "localIndexing": "Lokale Indizierung"
+  "localIndexing": "Lokale Indizierung",
+  "processed": "Verarbeitet",
+  "resetPerson": "Entfernen",
+  "areYouSureYouWantToResetThisPerson": "Bist du sicher, dass du diese Person zurücksetzen möchtest?",
+  "allPersonGroupingWillReset": "Alle Gruppierungen für diese Person werden zurückgesetzt und du wirst alle Vorschläge für diese Person verlieren",
+  "yesResetPerson": "Ja, Person zurücksetzen",
+  "onlyThem": "Nur diese",
+  "checkingModels": "Prüfe Modelle...",
+  "enableMachineLearningBanner": "Aktiviere maschinelles Lernen für die magische Suche und Gesichtserkennung",
+  "searchDiscoverEmptySection": "Bilder werden hier angezeigt, sobald Verarbeitung und Synchronisation abgeschlossen sind",
+  "searchPersonsEmptySection": "Personen werden hier angezeigt, sobald Verarbeitung und Synchronisierung abgeschlossen sind",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {0 Betrachter hinzugefügt} =1 {1 Betrachter hinzugefügt} other {{count} Betrachter hinzugefügt}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, one {}=0 {0 Mitarbeiter hinzugefügt} =1 {1 Mitarbeiter hinzugefügt} other {{count} Mitarbeiter hinzugefügt}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  },
+  "accountIsAlreadyConfigured": "Das Konto ist bereits konfiguriert.",
+  "sessionIdMismatch": "Sitzungs-ID stimmt nicht überein",
+  "@sessionIdMismatch": {
+    "description": "In passkey page, deeplink is ignored because of session ID mismatch."
+  },
+  "failedToFetchActiveSessions": "Fehler beim Abrufen der aktiven Sitzungen",
+  "@failedToFetchActiveSessions": {
+    "description": "In session page, warn user (in toast) that active sessions could not be fetched."
+  },
+  "failedToRefreshStripeSubscription": "Abonnement konnte nicht erneuert werden",
+  "failedToPlayVideo": "Fehler beim Abspielen des Videos",
+  "uploadIsIgnoredDueToIgnorereason": "Upload wird aufgrund von {ignoreReason} ignoriert",
+  "@uploadIsIgnoredDueToIgnorereason": {
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "typeOfGallerGallerytypeIsNotSupportedForRename": "Der Galerie-Typ {galleryType} unterstützt kein Umbenennen",
+  "@typeOfGallerGallerytypeIsNotSupportedForRename": {
+    "placeholders": {
+      "galleryType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUploadIsIgnoredDue": "Zum Hochladen tippen, Hochladen wird derzeit ignoriert, da {ignoreReason}",
+  "@tapToUploadIsIgnoredDue": {
+    "description": "Shown in upload icon widet, inside a tooltip.",
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUpload": "Zum Hochladen antippen",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
+  "info": "Info",
+  "addFiles": "Dateien hinzufügen",
+  "castAlbum": "Album übertragen",
+  "imageNotAnalyzed": "Bild nicht analysiert",
+  "noFacesFound": "Keine Gesichter gefunden",
+  "fileNotUploadedYet": "Datei wurde noch nicht hochgeladen",
+  "noSuggestionsForPerson": "Keine Vorschläge für {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "Monat",
+  "yearShort": "Jahr",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "läuft gerade",
+  "ignored": "ignoriert",
+  "photosCount": "{count, plural, one {}=0 {0 Fotos} =1 {1 Foto} other {{count} Fotos}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "file": "Datei",
+  "searchSectionsLengthMismatch": "Abschnittslänge stimmt nicht überein: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "selectMailApp": "E-Mail-App auswählen",
+  "selectAllShort": "Alle",
+  "@selectAllShort": {
+    "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
+  },
+  "changeLogMagicSearchImprovementTitle": "Verbesserung der magischen Suche",
+  "changeLogMagicSearchImprovementContent": "Wir haben die magische Suche verbessert, sodass du nicht warten musst, um zu finden, was du suchst.",
+  "changeLogBackupStatusTitle": "Status der Sicherung",
+  "changeLogBackupStatusContent": "Wir haben ein Protokoll aller Dateien hinzugefügt, die in Ente hochgeladen wurden, einschließlich fehlgeschlagenen und solchen in der Warteschlange.",
+  "changeLogDiscoverTitle": "Entdecken",
+  "changeLogDiscoverContent": "Suchst du nach Fotos deiner Ausweise, Notizen oder gar Memes? Öffne das Such-Tab und schau dir \"Entdecken\" an. An diesem Ort findest du, basierend auf unserer semantischen Suche, Fotos die wichtig für dich sein könnten.\\n\\nNur verfügbar, wenn du das maschinelle Lernen aktiviert hast.",
+  "selectCoverPhoto": "Titelbild auswählen",
+  "newLocation": "Neuer Ort",
+  "faceNotClusteredYet": "Gesicht ist noch nicht gruppiert, bitte komm später zurück",
+  "theLinkYouAreTryingToAccessHasExpired": "Der Link, den du aufrufen möchtest, ist abgelaufen.",
+  "openFile": "Datei öffnen",
+  "backupFile": "Datei sichern",
+  "openAlbumInBrowser": "Album im Browser öffnen",
+  "openAlbumInBrowserTitle": "Bitte nutze die Web-App, um Fotos zu diesem Album hinzuzufügen",
+  "allow": "Erlauben",
+  "allowAppToOpenSharedAlbumLinks": "Erlaube der App, geteilte Album-Links zu öffnen",
+  "seePublicAlbumLinksInApp": "Öffentliche Album-Links in der App ansehen",
+  "emergencyContacts": "Notfallkontakte",
+  "acceptTrustInvite": "Einladung annehmen",
+  "declineTrustInvite": "Einladung ablehnen",
+  "removeYourselfAsTrustedContact": "Entferne dich als vertrauenswürdigen Kontakt",
+  "legacy": "Digitales Erbe",
+  "legacyPageDesc": "Das digitale Erbe erlaubt vertrauenswürdigen Kontakten den Zugriff auf dein Konto in deiner Abwesenheit.",
+  "legacyPageDesc2": "Vertrauenswürdige Kontakte können eine Kontowiederherstellung einleiten und, wenn dies nicht innerhalb von 30 Tagen blockiert wird, dein Passwort und den Kontozugriff zurücksetzen.",
+  "legacyAccounts": "Digital geerbte Konten",
+  "trustedContacts": "Vertrauenswürdige Kontakte",
+  "addTrustedContact": "Vertrauenswürdigen Kontakt hinzufügen",
+  "removeInvite": "Einladung entfernen",
+  "recoveryWarning": "Ein vertrauenswürdiger Kontakt versucht, auf dein Konto zuzugreifen",
+  "rejectRecovery": "Wiederherstellung ablehnen",
+  "recoveryInitiated": "Wiederherstellung gestartet",
+  "recoveryInitiatedDesc": "Du kannst nach {days} Tagen auf das Konto zugreifen. Eine Benachrichtigung wird an {email} versendet.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Wiederherstellung abbrechen",
+  "recoveryAccount": "Konto wiederherstellen",
+  "cancelAccountRecoveryBody": "Bist du sicher, dass du die Wiederherstellung abbrechen möchtest?",
+  "startAccountRecoveryTitle": "Wiederherstellung starten",
+  "whyAddTrustContact": "Ein vertrauenswürdiger Kontakt kann helfen, deine Daten wiederherzustellen.",
+  "recoveryReady": "Du kannst jetzt das Konto von {email} wiederherstellen, indem du ein neues Passwort setzt.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} versucht, dein Konto wiederherzustellen.",
+  "trustedInviteBody": "Du wurdest von {email} eingeladen, ein Kontakt für das digitale Erbe zu werden.",
+  "warning": "Warnung",
+  "proceed": "Fortfahren",
+  "confirmAddingTrustedContact": "Du bist dabei, {email} als vertrauenswürdigen Kontakt hinzuzufügen. Die Person wird in der Lage sein, dein Konto wiederherzustellen, wenn du für {numOfDays} Tage abwesend bist.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} hat dich eingeladen, ein vertrauenswürdiger Kontakt zu werden",
+  "authToManageLegacy": "Bitte authentifiziere dich, um deine vertrauenswürdigen Kontakte zu verwalten",
+  "useDifferentPlayerInfo": "Hast du Probleme beim Abspielen dieses Videos? Halte hier gedrückt, um einen anderen Player auszuprobieren.",
+  "hideSharedItemsFromHomeGallery": "Geteilte Elemente in der Home-Galerie ausblenden",
+  "gallery": "Galerie",
+  "joinAlbum": "Album beitreten",
+  "joinAlbumSubtext": "um deine Fotos anzuzeigen und hinzuzufügen",
+  "joinAlbumSubtextViewer": "um dies zu geteilten Alben hinzuzufügen",
+  "join": "Beitreten"
 }

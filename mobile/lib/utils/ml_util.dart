@@ -4,10 +4,10 @@ import "dart:typed_data" show Uint8List;
 
 import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/clip_db.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/ml/filedata.dart";
 import "package:photos/extensions/list.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -79,6 +79,11 @@ Future<IndexStatus> getIndexStatus() async {
   }
 }
 
+// _lastFetchTimeForOthersIndexed indicates the last time we tried to
+// fetch embeddings for files that are owned by others. This is only used
+// when local indexing is disabled.
+int _lastFetchTimeForOthersIndexed = 0;
+
 /// Return a list of file instructions for files that should be indexed for ML
 Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   _logger.info('getFilesForMlIndexing called');
@@ -90,8 +95,11 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
       await MLDataDB.instance.clipIndexedFileWithVersion();
   final Set<int> queuedFiledIDs = {};
 
+  final Set<int> filesWithFDStatus =
+      await MLDataDB.instance.getFileIDsWithFDData();
+
   // Get all regular files and all hidden files
-  final enteFiles = await SearchService.instance.getAllFiles();
+  final enteFiles = await SearchService.instance.getAllFilesForSearch();
   final hiddenFiles = await SearchService.instance.getHiddenFiles();
 
   // Sort out what should be indexed and in what order
@@ -99,7 +107,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   final List<FileMLInstruction> filesWithoutLocalID = [];
   final List<FileMLInstruction> hiddenFilesToIndex = [];
   for (final EnteFile enteFile in enteFiles) {
-    if (_skipAnalysisEnteFile(enteFile)) {
+    if (enteFile.skipIndex) {
       continue;
     }
     if (queuedFiledIDs.contains(enteFile.uploadedFileID)) {
@@ -126,7 +134,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
     }
   }
   for (final EnteFile enteFile in hiddenFiles) {
-    if (_skipAnalysisEnteFile(enteFile)) {
+    if (enteFile.skipIndex) {
       continue;
     }
     if (queuedFiledIDs.contains(enteFile.uploadedFileID)) {
@@ -152,10 +160,30 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
     ...filesWithoutLocalID,
     ...hiddenFilesToIndex,
   ];
-  _logger.info(
-    "Getting list of files to index for ML took ${DateTime.now().difference(time).inMilliseconds} ms",
+  final splitResult = sortedBylocalID.splitMatch(
+    (i) => filesWithFDStatus.contains(i.file.uploadedFileID!),
   );
-  return sortedBylocalID;
+
+  _logger.info(
+    "Getting list of  ${sortedBylocalID.length} files to index for ML took ${DateTime.now().difference(time).inMilliseconds} ms",
+  );
+  if (!localSettings.isMLLocalIndexingEnabled) {
+    final time = DateTime.now().millisecondsSinceEpoch;
+    if ((time - _lastFetchTimeForOthersIndexed) > 1000 * 60 * 60 * 24) {
+      final filesOwnedByOthers = [];
+      for (final instruction in splitResult.unmatched) {
+        if (instruction.file.isUploaded && !instruction.file.isOwner) {
+          filesOwnedByOthers.add(instruction);
+        }
+      }
+      _logger.info(
+        'Chececking index for ${filesOwnedByOthers.length} owned by others',
+      );
+      return [...splitResult.matched, ...filesOwnedByOthers];
+    }
+    return splitResult.matched;
+  }
+  return [...splitResult.matched, ...splitResult.unmatched];
 }
 
 Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
@@ -296,8 +324,7 @@ bool _shouldDiscardRemoteEmbedding(FileDataEntity fileML) {
 }
 
 Future<Set<int>> getIndexableFileIDs() async {
-  final fileIDs = await FilesDB.instance
-      .getOwnedFileIDs(Configuration.instance.getUserID()!);
+  final fileIDs = await FilesDB.instance.getAllFileIDs();
   return fileIDs.toSet();
 }
 
@@ -349,18 +376,6 @@ Future<String> getImagePathForML(EnteFile enteFile) async {
   }
 
   return imagePath;
-}
-
-bool _skipAnalysisEnteFile(EnteFile enteFile) {
-  // Skip if the file is not uploaded or not owned by the user
-  if (!enteFile.isUploaded || enteFile.isOwner == false) {
-    return true;
-  }
-  // I don't know how motionPhotos and livePhotos work, so I'm also just skipping them for now
-  if (enteFile.fileType == FileType.other) {
-    return true;
-  }
-  return false;
 }
 
 bool _shouldRunIndexing(

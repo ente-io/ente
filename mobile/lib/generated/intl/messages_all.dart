@@ -32,12 +32,14 @@ import 'messages_fr.dart' as messages_fr;
 import 'messages_gu.dart' as messages_gu;
 import 'messages_he.dart' as messages_he;
 import 'messages_hi.dart' as messages_hi;
+import 'messages_hu.dart' as messages_hu;
 import 'messages_id.dart' as messages_id;
 import 'messages_it.dart' as messages_it;
 import 'messages_ja.dart' as messages_ja;
 import 'messages_km.dart' as messages_km;
 import 'messages_ko.dart' as messages_ko;
 import 'messages_lt.dart' as messages_lt;
+import 'messages_ml.dart' as messages_ml;
 import 'messages_nl.dart' as messages_nl;
 import 'messages_no.dart' as messages_no;
 import 'messages_pl.dart' as messages_pl;
@@ -52,6 +54,7 @@ import 'messages_th.dart' as messages_th;
 import 'messages_ti.dart' as messages_ti;
 import 'messages_tr.dart' as messages_tr;
 import 'messages_uk.dart' as messages_uk;
+import 'messages_vi.dart' as messages_vi;
 import 'messages_zh.dart' as messages_zh;
 
 typedef Future<dynamic> LibraryLoader();
@@ -72,12 +75,14 @@ Map<String, LibraryLoader> _deferredLibraries = {
   'gu': () => new SynchronousFuture(null),
   'he': () => new SynchronousFuture(null),
   'hi': () => new SynchronousFuture(null),
+  'hu': () => new SynchronousFuture(null),
   'id': () => new SynchronousFuture(null),
   'it': () => new SynchronousFuture(null),
   'ja': () => new SynchronousFuture(null),
   'km': () => new SynchronousFuture(null),
   'ko': () => new SynchronousFuture(null),
   'lt': () => new SynchronousFuture(null),
+  'ml': () => new SynchronousFuture(null),
   'nl': () => new SynchronousFuture(null),
   'no': () => new SynchronousFuture(null),
   'pl': () => new SynchronousFuture(null),
@@ -92,6 +97,7 @@ Map<String, LibraryLoader> _deferredLibraries = {
   'ti': () => new SynchronousFuture(null),
   'tr': () => new SynchronousFuture(null),
   'uk': () => new SynchronousFuture(null),
+  'vi': () => new SynchronousFuture(null),
   'zh': () => new SynchronousFuture(null),
 };
 
@@ -129,6 +135,8 @@ MessageLookupByLibrary? _findExact(String localeName) {
       return messages_he.messages;
     case 'hi':
       return messages_hi.messages;
+    case 'hu':
+      return messages_hu.messages;
     case 'id':
       return messages_id.messages;
     case 'it':
@@ -141,6 +149,8 @@ MessageLookupByLibrary? _findExact(String localeName) {
       return messages_ko.messages;
     case 'lt':
       return messages_lt.messages;
+    case 'ml':
+      return messages_ml.messages;
     case 'nl':
       return messages_nl.messages;
     case 'no':
@@ -169,6 +179,8 @@ MessageLookupByLibrary? _findExact(String localeName) {
       return messages_tr.messages;
     case 'uk':
       return messages_uk.messages;
+    case 'vi':
+      return messages_vi.messages;
     case 'zh':
       return messages_zh.messages;
     default:

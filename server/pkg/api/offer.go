@@ -14,7 +14,6 @@ type OfferHandler struct {
 
 // Deprecated for now
 func (h *OfferHandler) GetBlackFridayOffers(c *gin.Context) {
-	// Return an empty list until the next sale
 	c.JSON(http.StatusOK, gin.H{
 		"offers": []interface{}{},
 	})

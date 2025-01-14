@@ -331,7 +331,6 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Bilderutenettstørrelse",
-  "manageDeviceStorage": "Behandle enhetslagring",
   "machineLearning": "Maskinlæring",
   "magicSearch": "Magisk søk",
   "status": "Status",

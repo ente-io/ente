@@ -7,13 +7,15 @@
  * there.
  */
 
-import { pt } from "@/base/i18n";
-import type { SearchOption } from "@/new/photos/services/search/types";
-import { VerticallyCentered } from "@ente/shared/components/Container";
-import { Typography } from "@mui/material";
+import { CenteredFill } from "@/base/components/containers";
+import type { SearchSuggestion } from "@/new/photos/services/search/types";
+import { Paper, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
-import React from "react";
-import { useMLStatusSnapshot } from "../utils/ml";
+import React, { useState } from "react";
+import { enableML } from "../../services/ml";
+import { EnableML, FaceConsent } from "../sidebar/MLSettings";
+import { useMLStatusSnapshot } from "../utils/use-snapshot";
+import { useWrapAsyncOperation } from "../utils/use-wrap-async";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
 /**
@@ -27,19 +29,24 @@ export type SelectionContext =
     | { mode: "people"; personID: string };
 
 interface SearchResultsHeaderProps {
-    selectedOption: SearchOption;
+    searchSuggestion: SearchSuggestion;
+    fileCount: number;
 }
 
 export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
-    selectedOption,
+    searchSuggestion,
+    fileCount,
 }) => (
     <GalleryItemsHeaderAdapter>
-        <Typography color="text.muted" variant="large">
+        <Typography
+            variant="h6"
+            sx={{ fontWeight: "regular", color: "text.muted" }}
+        >
             {t("search_results")}
         </Typography>
         <GalleryItemsSummary
-            name={selectedOption.suggestion.label}
-            fileCount={selectedOption.fileCount}
+            name={searchSuggestion.label}
+            fileCount={fileCount}
         />
     </GalleryItemsHeaderAdapter>
 );
@@ -47,27 +54,62 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
 export const PeopleEmptyState: React.FC = () => {
     const mlStatus = useMLStatusSnapshot();
 
-    const message =
-        mlStatus?.phase == "done"
-            ? pt(
-                  "People will be shown here when there are sufficient photos of a person",
-              )
-            : pt("Syncing...");
+    switch (mlStatus?.phase) {
+        case "disabled":
+            return <PeopleEmptyStateDisabled />;
+        case "done":
+            return (
+                <PeopleEmptyStateMessage>
+                    {t("people_empty_too_few")}
+                </PeopleEmptyStateMessage>
+            );
+        default:
+            return (
+                <PeopleEmptyStateMessage>
+                    {t("syncing_wait")}
+                </PeopleEmptyStateMessage>
+            );
+    }
+};
+
+export const PeopleEmptyStateMessage: React.FC<React.PropsWithChildren> = ({
+    children,
+}) => (
+    <CenteredFill>
+        <Typography
+            sx={{
+                color: "text.muted",
+                mx: 1,
+                // Approximately compensate for the hidden section bar (86px),
+                // and then add a bit extra padding so that the message appears
+                // visually off the center, towards the top.
+                paddingBlockEnd: "126px",
+            }}
+        >
+            {children}
+        </Typography>
+    </CenteredFill>
+);
+
+export const PeopleEmptyStateDisabled: React.FC = () => {
+    const [showConsent, setShowConsent] = useState(false);
+
+    const handleConsent = useWrapAsyncOperation(async () => {
+        await enableML();
+    });
 
     return (
-        <VerticallyCentered>
-            <Typography
-                color="text.muted"
-                sx={{
-                    mx: 1,
-                    // Approximately compensate for the hidden section bar (86px),
-                    // and then add a bit extra padding so that the message appears
-                    // visually off the center, towards the top.
-                    paddingBlockEnd: "126px",
-                }}
-            >
-                {message}
-            </Typography>
-        </VerticallyCentered>
+        <Stack sx={{ alignItems: "center", flex: 1, overflow: "auto" }}>
+            <Paper sx={{ maxWidth: "390px", padding: "4px", mb: "2rem" }}>
+                {!showConsent ? (
+                    <EnableML onEnable={() => setShowConsent(true)} />
+                ) : (
+                    <FaceConsent
+                        onConsent={handleConsent}
+                        onCancel={() => setShowConsent(false)}
+                    />
+                )}
+            </Paper>
+        </Stack>
     );
 };

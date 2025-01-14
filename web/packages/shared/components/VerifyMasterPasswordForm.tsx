@@ -1,4 +1,4 @@
-import type { SRPAttributes } from "@/accounts/types/srp";
+import type { SRPAttributes } from "@/accounts/services/srp-remote";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { Input, type ButtonProps } from "@mui/material";
@@ -94,10 +94,10 @@ export default function VerifyMasterPasswordForm({
                 log.error("failed to verify passphrase", e);
                 switch (e.message) {
                     case CustomError.WEAK_DEVICE:
-                        setFieldError(t("WEAK_DEVICE"));
+                        setFieldError(t("weak_device_hint"));
                         break;
                     case CustomError.INCORRECT_PASSWORD:
-                        setFieldError(t("INCORRECT_PASSPHRASE"));
+                        setFieldError(t("incorrect_password"));
                         break;
                     default:
                         setFieldError(

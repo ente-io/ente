@@ -1,41 +1,40 @@
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@/base/components/OverflowMenu";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import {
     useModalVisibility,
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
 import { ensureElectron } from "@/base/electron";
-import { basename, dirname } from "@/base/file";
+import { basename, dirname } from "@/base/file-name";
 import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
-import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
-import { AppContext } from "@/new/photos/types/context";
-import { ensure } from "@/utils/ensure";
+import { CollectionMappingChoice } from "@/new/photos/components/CollectionMappingChoice";
+import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
+import { useAppContext } from "@/new/photos/types/context";
 import {
     FlexWrapper,
-    HorizontalFlex,
     SpaceBetweenFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
-import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
-import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import CheckIcon from "@mui/icons-material/Check";
 import DoNotDisturbOutlinedIcon from "@mui/icons-material/DoNotDisturbOutlined";
 import FolderCopyOutlinedIcon from "@mui/icons-material/FolderCopyOutlined";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import {
-    Box,
     Button,
     CircularProgress,
     Dialog,
     DialogContent,
+    DialogTitle,
     Stack,
     Tooltip,
     Typography,
     styled,
 } from "@mui/material";
 import { t } from "i18next";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import watcher from "services/watch";
 
 /**
@@ -57,29 +56,35 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
     const { show: showMappingChoice, props: mappingChoiceVisibilityProps } =
         useModalVisibility();
 
-    const appContext = useContext(AppContext);
-
     useEffect(() => {
         watcher.getWatches().then((ws) => setWatches(ws));
     }, []);
 
     useEffect(() => {
-        if (
-            appContext.watchFolderFiles &&
-            appContext.watchFolderFiles.length > 0
-        ) {
-            handleFolderDrop(appContext.watchFolderFiles);
-            appContext.setWatchFolderFiles(null);
-        }
-    }, [appContext.watchFolderFiles]);
+        const handleWatchFolderDrop = (e: DragEvent) => {
+            if (!open) return;
 
-    const handleFolderDrop = async (folders: FileList) => {
-        for (let i = 0; i < folders.length; i++) {
-            const folder: any = folders[i];
-            const path = (folder.path as string).replace(/\\/g, "/");
-            if (await ensureElectron().fs.isDir(path)) {
-                await selectCollectionMappingAndAddWatch(path);
+            e.preventDefault();
+            e.stopPropagation();
+
+            for (const file of e.dataTransfer.files) {
+                void selectCollectionMappingAndAddWatchIfDirectory(file);
             }
+        };
+
+        addEventListener("drop", handleWatchFolderDrop);
+        return () => {
+            removeEventListener("drop", handleWatchFolderDrop);
+        };
+    }, [open]);
+
+    const selectCollectionMappingAndAddWatchIfDirectory = async (
+        file: File,
+    ) => {
+        const electron = ensureElectron();
+        const path = electron.pathForFile(file);
+        if (await electron.fs.isDir(path)) {
+            await selectCollectionMappingAndAddWatch(path);
         }
     };
 
@@ -108,7 +113,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
 
     const handleCollectionMappingSelect = (mapping: CollectionMapping) => {
         setSavedFolderPath(undefined);
-        addWatch(ensure(savedFolderPath), mapping);
+        addWatch(savedFolderPath!, mapping);
     };
 
     return (
@@ -119,13 +124,14 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
                 fullWidth
                 PaperProps={{ sx: { height: "448px", maxWidth: "414px" } }}
             >
-                <Title_>
-                    <DialogTitleWithCloseButton onClose={onClose}>
-                        {t("WATCHED_FOLDERS")}
-                    </DialogTitleWithCloseButton>
-                </Title_>
+                <SpaceBetweenFlex sx={{ p: "16px 8px 8px 8px" }}>
+                    <DialogTitle variant="h3">
+                        {t("watched_folders")}
+                    </DialogTitle>
+                    <DialogCloseIconButton {...{ onClose }} />
+                </SpaceBetweenFlex>
                 <DialogContent sx={{ flex: 1 }}>
-                    <Stack spacing={1} p={1.5} height={"100%"}>
+                    <Stack sx={{ gap: 1, p: 1.5, height: "100%" }}>
                         <WatchList {...{ watches, removeWatch }} />
                         <Button fullWidth color="accent" onClick={addNewWatch}>
                             <span>+</span>
@@ -134,22 +140,18 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
                                     marginLeft: "8px",
                                 }}
                             ></span>
-                            {t("ADD_FOLDER")}
+                            {t("add_folder")}
                         </Button>
                     </Stack>
                 </DialogContent>
             </Dialog>
-            <CollectionMappingChoiceDialog
+            <CollectionMappingChoice
                 {...mappingChoiceVisibilityProps}
-                didSelect={handleCollectionMappingSelect}
+                onSelect={handleCollectionMappingSelect}
             />
         </>
     );
 };
-
-const Title_ = styled("div")`
-    padding: 16px 12px 16px 16px;
-`;
 
 interface WatchList {
     watches: FolderWatch[] | undefined;
@@ -174,7 +176,7 @@ const WatchList: React.FC<WatchList> = ({ watches, removeWatch }) => {
     );
 };
 
-const WatchesContainer = styled(Box)(() => ({
+const WatchesContainer = styled("div")(() => ({
     height: "278px",
     overflow: "auto",
     "&::-webkit-scrollbar": {
@@ -186,22 +188,23 @@ const NoWatches: React.FC = () => {
     return (
         <NoWatchesContainer>
             <Stack spacing={1}>
-                <Typography variant="large" fontWeight={"bold"}>
-                    {t("NO_FOLDERS_ADDED")}
+                <Typography variant="h6">{t("no_folders_added")}</Typography>
+                <Typography
+                    variant={"small"}
+                    sx={{ py: 0.5, color: "text.muted" }}
+                >
+                    {t("watch_folders_hint_1")}
                 </Typography>
-                <Typography py={0.5} variant={"small"} color="text.muted">
-                    {t("FOLDERS_AUTOMATICALLY_MONITORED")}
-                </Typography>
-                <Typography variant={"small"} color="text.muted">
+                <Typography variant={"small"} sx={{ color: "text.muted" }}>
                     <FlexWrapper gap={1}>
                         <CheckmarkIcon />
-                        {t("UPLOAD_NEW_FILES_TO_ENTE")}
+                        {t("watch_folders_hint_2")}
                     </FlexWrapper>
                 </Typography>
-                <Typography variant={"small"} color="text.muted">
+                <Typography variant={"small"} sx={{ color: "text.muted" }}>
                     <FlexWrapper gap={1}>
                         <CheckmarkIcon />
-                        {t("REMOVE_DELETED_FILES_FROM_ENTE")}
+                        {t("watch_folders_hint_3")}
                     </FlexWrapper>
                 </Typography>
             </Stack>
@@ -219,11 +222,11 @@ const CheckmarkIcon: React.FC = () => {
     return (
         <CheckIcon
             fontSize="small"
-            sx={{
+            sx={(theme) => ({
                 display: "inline",
                 fontSize: "15px",
-                color: (theme) => theme.palette.secondary.main,
-            }}
+                color: theme.palette.secondary.main,
+            })}
         />
     );
 };
@@ -234,37 +237,29 @@ interface WatchEntryProps {
 }
 
 const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
-    const appContext = React.useContext(AppContext);
+    const { showMiniDialog } = useAppContext();
 
     const confirmStopWatching = () => {
-        appContext.setDialogMessage({
-            title: t("STOP_WATCHING_FOLDER"),
-            content: t("STOP_WATCHING_DIALOG_MESSAGE"),
-            close: {
-                text: t("cancel"),
-                variant: "secondary",
-            },
-            proceed: {
+        showMiniDialog({
+            title: t("stop_watching_folder_title"),
+            message: t("stop_watching_folder_message"),
+            continue: {
+                text: t("yes_stop"),
+                color: "critical",
                 action: () => removeWatch(watch),
-                text: t("YES_STOP"),
-                variant: "critical",
             },
         });
     };
 
     return (
         <SpaceBetweenFlex>
-            <HorizontalFlex
-                sx={{
-                    overflow: "hidden",
-                }}
-            >
+            <Stack direction="row" sx={{ overflow: "hidden" }}>
                 {watch.collectionMapping === "root" ? (
-                    <Tooltip title={t("UPLOADED_TO_SINGLE_COLLECTION")}>
+                    <Tooltip title={t("uploaded_to_single_collection")}>
                         <FolderOpenIcon />
                     </Tooltip>
                 ) : (
-                    <Tooltip title={t("UPLOADED_TO_SEPARATE_COLLECTIONS")}>
+                    <Tooltip title={t("uploaded_to_separate_collections")}>
                         <FolderCopyOutlinedIcon />
                     </Tooltip>
                 )}
@@ -272,13 +267,13 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
                     <EntryHeading watch={watch} />
                     <FolderPath>{watch.folderPath}</FolderPath>
                 </EntryContainer>
-            </HorizontalFlex>
+            </Stack>
             <EntryOptions {...{ confirmStopWatching }} />
         </SpaceBetweenFlex>
     );
 };
 
-const EntryContainer = styled(Box)({
+const EntryContainer = styled("div")({
     overflow: "hidden",
     marginLeft: "12px",
     marginRight: "6px",
@@ -315,21 +310,20 @@ interface EntryOptionsProps {
 const EntryOptions: React.FC<EntryOptionsProps> = ({ confirmStopWatching }) => {
     return (
         <OverflowMenu
+            ariaID={"watch-mapping-option"}
             menuPaperProps={{
                 sx: {
                     backgroundColor: (theme) =>
                         theme.colors.background.elevated2,
                 },
             }}
-            ariaControls={"watch-mapping-option"}
-            triggerButtonIcon={<MoreHorizIcon />}
         >
             <OverflowMenuOption
                 color="critical"
                 onClick={confirmStopWatching}
                 startIcon={<DoNotDisturbOutlinedIcon />}
             >
-                {t("STOP_WATCHING")}
+                {t("stop_watching")}
             </OverflowMenuOption>
         </OverflowMenu>
     );

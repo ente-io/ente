@@ -19,13 +19,13 @@ import (
 )
 
 type RateLimitMiddleware struct {
-	limit10ReqPerMin  *limiter.Limiter
-	limit200ReqPerSec *limiter.Limiter
-	discordCtrl       *discord.DiscordController
 	count             int64 // Use int64 for atomic operations
 	limit             int64
 	reset             time.Duration
 	ticker            *time.Ticker
+	limit10ReqPerMin  *limiter.Limiter
+	limit200ReqPerSec *limiter.Limiter
+	discordCtrl       *discord.DiscordController
 }
 
 func NewRateLimitMiddleware(discordCtrl *discord.DiscordController, limit int64, reset time.Duration) *RateLimitMiddleware {
@@ -150,7 +150,9 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 		reqPath == "/public-collection/verify-password" ||
 		reqPath == "/family/accept-invite" ||
 		reqPath == "/users/srp/attributes" ||
+		(reqPath == "/cast/device-info" && reqMethod == "POST") ||
 		(reqPath == "/cast/device-info/" && reqMethod == "POST") ||
+		reqPath == "/users/srp/create-session" ||
 		reqPath == "/users/srp/verify-session" ||
 		reqPath == "/family/invite-info/:token" ||
 		reqPath == "/family/add-member" ||

@@ -8,6 +8,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
@@ -19,6 +20,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/person_clusters_page.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
+import "package:photos/utils/face/face_box_crop.dart";
 
 class SuggestionUserFeedback {
   final bool accepted;
@@ -41,7 +43,6 @@ class PersonReviewClusterSuggestion extends StatefulWidget {
 
 class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   int currentSuggestionIndex = 0;
-  bool fetch = true;
   Key futureBuilderKeySuggestions = UniqueKey();
   Key futureBuilderKeyFaceThumbnails = UniqueKey();
   bool canGiveFeedback = true;
@@ -57,8 +58,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   void initState() {
     super.initState();
     // Initialize the future in initState
-    if (fetch) _fetchClusterSuggestions();
-    fetch = true;
+    _fetchClusterSuggestions();
   }
 
   @override
@@ -100,7 +100,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             if (snapshot.data!.isEmpty) {
               return Center(
                 child: Text(
-                  "No suggestions for ${widget.person.data.name}",
+                  S.of(context).noSuggestionsForPerson(widget.person.data.name),
                   style: getEnteTextTheme(context).largeMuted,
                 ),
               );
@@ -116,7 +116,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
             final Future<Map<int, Uint8List?>> generateFacedThumbnails =
                 _generateFaceThumbnails(
-              files.sublist(0, min(files.length, 8)),
+              files.sublist(0, min(files.length, 6)),
               clusterID,
             );
 
@@ -127,44 +127,96 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                 for (var updatedFile in event.relevantFiles!) {
                   files.remove(updatedFile);
                 }
-                fetch = false;
                 setState(() {});
               }
             });
-            return GestureDetector(
-              onTap: () {
-                final List<EnteFile> sortedFiles =
-                    List<EnteFile>.from(currentSuggestion.filesInCluster);
-                sortedFiles.sort(
-                  (a, b) => b.creationTime!.compareTo(a.creationTime!),
-                );
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => ClusterPage(
-                      sortedFiles,
-                      personID: widget.person,
-                      clusterID: clusterID,
-                      showNamingBanner: false,
+
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: GestureDetector(
+                      onTap: () {
+                        final List<EnteFile> sortedFiles = List<EnteFile>.from(
+                          currentSuggestion.filesInCluster,
+                        );
+                        sortedFiles.sort(
+                          (a, b) => b.creationTime!.compareTo(a.creationTime!),
+                        );
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => ClusterPage(
+                              sortedFiles,
+                              personID: widget.person,
+                              clusterID: clusterID,
+                              showNamingBanner: false,
+                            ),
+                          ),
+                        );
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                          vertical: 20,
+                        ),
+                        child: _buildSuggestionView(
+                          clusterID,
+                          distance,
+                          usingMean,
+                          files,
+                          numberOfDifferentSuggestions,
+                          generateFacedThumbnails,
+                        ),
+                      ),
                     ),
                   ),
-                );
-              },
-              behavior: HitTestBehavior.opaque,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8.0,
-                  vertical: 20,
                 ),
-                child: _buildSuggestionView(
-                  clusterID,
-                  distance,
-                  usingMean,
-                  files,
-                  numberOfDifferentSuggestions,
-                  allSuggestions,
-                  generateFacedThumbnails,
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      left: 12.0,
+                      right: 12.0,
+                      bottom: 48,
+                    ),
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: ButtonWidget(
+                            buttonType: ButtonType.tertiaryCritical,
+                            icon: Icons.close,
+                            labelText: context.l10n.no,
+                            buttonSize: ButtonSize.large,
+                            onTap: () async => {
+                              await _handleUserClusterChoice(
+                                clusterID,
+                                false,
+                                numberOfDifferentSuggestions,
+                              ),
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12.0),
+                        Expanded(
+                          child: ButtonWidget(
+                            buttonType: ButtonType.primary,
+                            labelText: context.l10n.yes,
+                            buttonSize: ButtonSize.large,
+                            onTap: () async => {
+                              await _handleUserClusterChoice(
+                                clusterID,
+                                true,
+                                numberOfDifferentSuggestions,
+                              ),
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             );
           } else if (snapshot.hasError) {
             _logger.severe(
@@ -199,11 +251,10 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     );
     if (yesOrNo) {
       canGiveFeedback = false;
-      await MLDataDB.instance.assignClusterToPerson(
-        personID: widget.person.remoteID,
+      await ClusterFeedbackService.instance.addClusterToExistingPerson(
+        person: widget.person,
         clusterID: clusterID,
       );
-      Bus.instance.fire(PeopleChangedEvent());
       // Increment the suggestion index
       if (mounted) {
         setState(() => currentSuggestionIndex++);
@@ -220,7 +271,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         });
       } else {
         futureBuilderKeyFaceThumbnails = UniqueKey();
-        fetch = false;
         setState(() {});
       }
     } else {
@@ -249,6 +299,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   // Method to fetch cluster suggestions
   void _fetchClusterSuggestions() {
+    debugPrint("Fetching suggestions for ${widget.person.data.name}");
     futureClusterSuggestions =
         ClusterFeedbackService.instance.getSuggestionForPerson(widget.person);
   }
@@ -259,7 +310,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     bool usingMean,
     List<EnteFile> files,
     int numberOfSuggestions,
-    List<ClusterSuggestion> allSuggestions,
     Future<Map<int, Uint8List?>> generateFaceThumbnails,
   ) {
     final widgetToReturn = Column(
@@ -283,97 +333,10 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         const SizedBox(
           height: 24.0,
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: ButtonWidget(
-                  buttonType: ButtonType.critical,
-                  labelText: 'No',
-                  buttonSize: ButtonSize.large,
-                  onTap: () async => {
-                    await _handleUserClusterChoice(
-                      clusterID,
-                      false,
-                      numberOfSuggestions,
-                    ),
-                  },
-                ),
-              ),
-              const SizedBox(width: 12.0),
-              Expanded(
-                child: ButtonWidget(
-                  buttonType: ButtonType.primary,
-                  labelText: context.l10n.yes,
-                  buttonSize: ButtonSize.large,
-                  onTap: () async => {
-                    await _handleUserClusterChoice(
-                      clusterID,
-                      true,
-                      numberOfSuggestions,
-                    ),
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-        // const SizedBox(
-        //   height: 24.0,
-        // ),
-        // ButtonWidget(
-        //   shouldSurfaceExecutionStates: false,
-        //   buttonType: ButtonType.neutral,
-        //   labelText: 'Assign different person',
-        //   buttonSize: ButtonSize.small,
-        //   onTap: () async {
-        //     final result = await showAssignPersonAction(
-        //       context,
-        //       clusterID: clusterID,
-        //     );
-        //     if (result != null &&
-        //         (result is (PersonEntity, EnteFile) ||
-        //             result is PersonEntity)) {
-        //       await _rejectSuggestion(clusterID, numberOfSuggestions);
-        //     }
-        //   },
-        // ),
       ],
     );
     // Precompute face thumbnails for next suggestions, in case there are
-    const precomputeSuggestions = 8;
-    const maxPrecomputations = 8;
-    int compCount = 0;
-    if (allSuggestions.length > currentSuggestionIndex + 1) {
-      outerLoop:
-      for (final suggestion in allSuggestions.sublist(
-        currentSuggestionIndex + 1,
-        min(
-          allSuggestions.length,
-          currentSuggestionIndex + precomputeSuggestions,
-        ),
-      )) {
-        final files = suggestion.filesInCluster;
-        final clusterID = suggestion.clusterIDToMerge;
-        for (final file in files.sublist(0, min(files.length, 8))) {
-          unawaited(
-            PersonFaceWidget.precomputeNextFaceCrops(
-              file,
-              clusterID,
-              useFullFile: false,
-            ),
-          );
-          compCount++;
-          if (compCount >= maxPrecomputations) {
-            debugPrint(
-              'Prefetching $compCount face thumbnails for suggestions',
-            );
-            break outerLoop;
-          }
-        }
-      }
-    }
+    precomputeFaceCrops();
     return widgetToReturn;
   }
 
@@ -382,52 +345,44 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     String clusterID,
     Future<Map<int, Uint8List?>> generateFaceThumbnails,
   ) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.4,
-      child: FutureBuilder<Map<int, Uint8List?>>(
-        key: futureBuilderKeyFaceThumbnails,
-        future: generateFaceThumbnails,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final faceThumbnails = snapshot.data!;
-            canGiveFeedback = true;
-            return Column(
-              children: <Widget>[
+    return FutureBuilder<Map<int, Uint8List?>>(
+      key: futureBuilderKeyFaceThumbnails,
+      future: generateFaceThumbnails,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final faceThumbnails = snapshot.data!;
+          canGiveFeedback = true;
+          return Column(
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: _buildThumbnailWidgetsRow(
+                  files,
+                  clusterID,
+                  faceThumbnails,
+                ),
+              ),
+              if (files.length > 3) const SizedBox(height: 12),
+              if (files.length > 3)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: _buildThumbnailWidgetsRow(
                     files,
                     clusterID,
                     faceThumbnails,
+                    start: 3,
                   ),
                 ),
-                if (files.length > 4) const SizedBox(height: 24),
-                if (files.length > 4)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: _buildThumbnailWidgetsRow(
-                      files,
-                      clusterID,
-                      faceThumbnails,
-                      start: 4,
-                    ),
-                  ),
-                const SizedBox(height: 24.0),
-                Text(
-                  "${files.length} photos",
-                  style: getEnteTextTheme(context).body,
-                ),
-              ],
-            );
-          } else if (snapshot.hasError) {
-            // log the error
-            return const Center(child: Text("Error"));
-          } else {
-            canGiveFeedback = false;
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
+            ],
+          );
+        } else if (snapshot.hasError) {
+          // log the error
+          return Center(child: Text(S.of(context).error));
+        } else {
+          canGiveFeedback = false;
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
     );
   }
 
@@ -438,20 +393,49 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     int start = 0,
   }) {
     return List<Widget>.generate(
-      min(4, max(0, files.length - start)),
+      min(3, max(0, files.length - start)),
       (index) => Padding(
         padding: const EdgeInsets.all(8.0),
         child: SizedBox(
-          width: 72,
-          height: 72,
-          child: ClipOval(
-            child: PersonFaceWidget(
-              files[start + index],
-              clusterID: cluserId,
-              useFullFile: false,
-              thumbnailFallback: false,
-              faceCrop: faceThumbnails[files[start + index].uploadedFileID!],
-            ),
+          width: 100,
+          height: 100,
+          child: Stack(
+            children: [
+              ClipPath(
+                clipper: ShapeBorderClipper(
+                  shape: ContinuousRectangleBorder(
+                    borderRadius: BorderRadius.circular(75),
+                  ),
+                ),
+                child: PersonFaceWidget(
+                  files[start + index],
+                  clusterID: cluserId,
+                  useFullFile: true,
+                  thumbnailFallback: false,
+                  faceCrop:
+                      faceThumbnails[files[start + index].uploadedFileID!],
+                ),
+              ),
+              if (start + index == 5 && files.length > 6)
+                ClipPath(
+                  clipper: ShapeBorderClipper(
+                    shape: ContinuousRectangleBorder(
+                      borderRadius: BorderRadius.circular(72),
+                    ),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '+${files.length - 5}',
+                        style: darkTheme.textTheme.h3Bold,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -465,10 +449,10 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     final futures = <Future<Uint8List?>>[];
     for (final file in files) {
       futures.add(
-        PersonFaceWidget.precomputeNextFaceCrops(
+        precomputeClusterFaceCrop(
           file,
           clusterID,
-          useFullFile: false,
+          useFullFile: true,
         ),
       );
     }
@@ -478,6 +462,37 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
       faceCrops[files[i].uploadedFileID!] = faceCropsList[i];
     }
     return faceCrops;
+  }
+
+  void precomputeFaceCrops() {
+    const precomputeSuggestions = 6;
+    const maxPrecomputations = 8;
+    int compCount = 0;
+    if (allSuggestions.length > currentSuggestionIndex + 1) {
+      outerLoop:
+      for (final suggestion in allSuggestions.sublist(
+        currentSuggestionIndex + 1,
+        min(
+          allSuggestions.length,
+          currentSuggestionIndex + precomputeSuggestions,
+        ),
+      )) {
+        final files = suggestion.filesInCluster;
+        final clusterID = suggestion.clusterIDToMerge;
+        final preComputesLeft = maxPrecomputations - compCount;
+        final computeHere = min(files.length, min(preComputesLeft, 6));
+        unawaited(
+          _generateFaceThumbnails(files.sublist(0, computeHere), clusterID),
+        );
+        compCount += computeHere;
+        if (compCount >= maxPrecomputations) {
+          debugPrint(
+            'Prefetching $compCount face thumbnails for suggestions',
+          );
+          break outerLoop;
+        }
+      }
+    }
   }
 
   Future<void> _undoLastFeedback() async {
@@ -495,11 +510,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         );
       }
 
-      // futureClusterSuggestions =
-      //     pastUserFeedback.map((element) => element.suggestion)
-      //         as Future<List<ClusterSuggestion>>;
-
-      fetch = false;
       futureClusterSuggestions = futureClusterSuggestions.then((list) {
         return list.sublist(currentSuggestionIndex)
           ..insert(0, lastFeedback.suggestion);

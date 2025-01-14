@@ -1,4 +1,5 @@
 import { ensureElectron } from "@/base/electron";
+import { joinPath } from "@/base/file-name";
 import log from "@/base/log";
 import {
     COLLECTION_ROLE,
@@ -12,27 +13,26 @@ import { EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
 import {
     DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
+    addToCollection,
     findDefaultHiddenCollectionIDs,
     isHiddenCollection,
     isIncomingShare,
+    moveToCollection,
+    restoreToCollection,
 } from "@/new/photos/services/collection";
+import {
+    getAllLocalCollections,
+    getLocalCollections,
+} from "@/new/photos/services/collections";
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
 import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import { safeDirectoryName } from "@/new/photos/utils/native-fs";
-import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { getUnixTimeInMicroSecondsWithDelta } from "@ente/shared/time";
 import type { User } from "@ente/shared/user/types";
-import bs58 from "bs58";
 import { t } from "i18next";
 import {
-    addToCollection,
     createAlbum,
-    getAllLocalCollections,
-    getLocalCollections,
-    moveToCollection,
     removeFromCollection,
-    restoreToCollection,
     unhideToCollection,
     updateCollectionMagicMetadata,
     updatePublicCollectionMagicMetadata,
@@ -75,7 +75,7 @@ export async function handleCollectionOps(
             await unhideToCollection(collection, selectedFiles);
             break;
         default:
-            throw Error(CustomError.INVALID_COLLECTION_OPERATION);
+            throw Error("Invalid collection operation");
     }
 }
 
@@ -170,24 +170,12 @@ async function createCollectionDownloadFolder(
         collectionName,
         fs.exists,
     );
-    const collectionDownloadPath = `${downloadDirPath}/${collectionDownloadName}`;
+    const collectionDownloadPath = joinPath(
+        downloadDirPath,
+        collectionDownloadName,
+    );
     await fs.mkdirIfNeeded(collectionDownloadPath);
     return collectionDownloadPath;
-}
-
-export function appendCollectionKeyToShareURL(
-    url: string,
-    collectionKey: string,
-) {
-    if (!url) {
-        return null;
-    }
-
-    const sharableURL = new URL(url);
-
-    const bytes = Buffer.from(collectionKey, "base64");
-    sharableURL.hash = bs58.encode(bytes);
-    return sharableURL.href;
 }
 
 const _intSelectOption = (i: number) => {
@@ -198,30 +186,6 @@ const _intSelectOption = (i: number) => {
 export function getDeviceLimitOptions() {
     return [0, 2, 5, 10, 25, 50].map((i) => _intSelectOption(i));
 }
-
-export const shareExpiryOptions = () => [
-    { label: t("NEVER"), value: () => 0 },
-    {
-        label: t("AFTER_TIME.HOUR"),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ hours: 1 }),
-    },
-    {
-        label: t("AFTER_TIME.DAY"),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ days: 1 }),
-    },
-    {
-        label: t("AFTER_TIME.WEEK"),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ days: 7 }),
-    },
-    {
-        label: t("AFTER_TIME.MONTH"),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ months: 1 }),
-    },
-    {
-        label: t("AFTER_TIME.YEAR"),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ years: 1 }),
-    },
-];
 
 export const changeCollectionVisibility = async (
     collection: Collection,
@@ -379,16 +343,6 @@ export function getCollectionNameMap(
     return new Map<number, string>(
         collections.map((collection) => [collection.id, collection.name]),
     );
-}
-
-export function getNonHiddenCollections(
-    collections: Collection[],
-): Collection[] {
-    return collections.filter((collection) => !isHiddenCollection(collection));
-}
-
-export function getHiddenCollections(collections: Collection[]): Collection[] {
-    return collections.filter((collection) => isHiddenCollection(collection));
 }
 
 export const getOrCreateAlbum = async (

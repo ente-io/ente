@@ -2,6 +2,7 @@ import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/scheduler.dart";
 import "package:flutter_animate/flutter_animate.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -150,7 +151,7 @@ class _Price extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            price + ' / ' + 'month',
+            price + ' / ' + S.of(context).month,
             style: textTheme.largeBold.copyWith(color: textBaseLight),
           )
               .animate(delay: const Duration(milliseconds: 100))
@@ -162,29 +163,35 @@ class _Price extends StatelessWidget {
       final priceWithoutCurrency = price.substring(1);
       final priceDouble = double.parse(priceWithoutCurrency);
       final pricePerMonth = priceDouble / 12;
-      final pricePerMonthString = pricePerMonth.toStringAsFixed(2);
+      String pricePerMonthString = pricePerMonth.toStringAsFixed(2);
+
+      if (pricePerMonthString.endsWith(".00")) {
+        pricePerMonthString =
+            pricePerMonthString.substring(0, pricePerMonthString.length - 3);
+      }
+
       final bool isPlayStore = updateService.isPlayStoreFlavor();
       return Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (isPlayStore)
             Text(
-              price + " / " + "yr",
+              currencySymbol + pricePerMonthString + ' / ' + S.of(context).month,
               style: textTheme.largeBold.copyWith(color: textBaseLight),
             ),
           if (isPlayStore)
             Text(
-              currencySymbol + pricePerMonthString + ' / ' + 'month',
+              price + " / " + S.of(context).yearShort,
               style: textTheme.small.copyWith(color: textFaintLight),
             ),
           if (!isPlayStore)
             Text(
-              currencySymbol + pricePerMonthString + ' / ' + 'month',
+              currencySymbol + pricePerMonthString + ' / ' + S.of(context).month,
               style: textTheme.largeBold.copyWith(color: textBaseLight),
             ),
           if (!isPlayStore)
             Text(
-              price + " / " + "yr",
+              price + " / " + S.of(context).yearShort,
               style: textTheme.small.copyWith(color: textFaintLight),
             ),
         ],

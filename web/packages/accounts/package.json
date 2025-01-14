@@ -4,8 +4,13 @@
     "private": true,
     "dependencies": {
         "@/base": "*",
-        "@ente/eslint-config": "*",
         "@ente/shared": "*",
-        "react-otp-input": "^3.1.1"
+        "@types/zxcvbn": "^4.4.5",
+        "react-otp-input": "^3.1.1",
+        "uuid": "^11.0.5",
+        "zxcvbn": "^4.4.2"
+    },
+    "devDependencies": {
+        "@/build-config": "*"
     }
 }

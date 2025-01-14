@@ -1,6 +1,5 @@
 import log from "@/base/log";
-import { ensure } from "@/utils/ensure";
-import { styled } from "@mui/material";
+import { Stack, styled, Typography } from "@mui/material";
 import { FilledCircleCheck } from "components/FilledCircleCheck";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -8,7 +7,7 @@ import { readCastData } from "services/cast-data";
 import { isChromecast } from "services/chromecast-receiver";
 import { imageURLGenerator } from "services/render";
 
-export default function Slideshow() {
+const Page: React.FC = () => {
     const [isEmpty, setIsEmpty] = useState(false);
     const [imageURL, setImageURL] = useState<string | undefined>();
 
@@ -22,7 +21,7 @@ export default function Slideshow() {
 
         const loop = async () => {
             try {
-                const urlGenerator = imageURLGenerator(ensure(readCastData()));
+                const urlGenerator = imageURLGenerator(readCastData()!);
                 while (!stop) {
                     const { value: url, done } = await urlGenerator.next();
                     if (done == true || !url) {
@@ -56,44 +55,43 @@ export default function Slideshow() {
     ) : (
         <SlideView url={imageURL} />
     );
-}
+};
+
+export default Page;
 
 const PairingComplete: React.FC = () => {
     return (
         <Message>
             <FilledCircleCheck />
-            <h2>Pairing Complete</h2>
-            <p>
-                {"We're preparing your album"}.
-                <br /> This should only take a few seconds.
-            </p>
+            <Typography variant="h3" sx={{ mt: 2, mb: 2 }}>
+                Pairing Complete
+            </Typography>
+            <Stack sx={{ gap: "4px" }}>
+                <Typography>{"We're preparing your album"}</Typography>
+                <Typography>This should only take a few seconds.</Typography>
+            </Stack>
         </Message>
     );
 };
 
-const Message = styled("div")`
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+const Message = styled(Stack)`
+    height: 100vh;
     justify-content: center;
     align-items: center;
     text-align: center;
-
-    line-height: 1.5rem;
-
-    h2 {
-        margin-block-end: 0;
-    }
+    gap: 1rem;
 `;
 
 const NoItems: React.FC = () => {
     return (
         <Message>
-            <h2>Try another album</h2>
-            <p>
-                This album has no photos that can be shown here
-                <br /> Please try another album
-            </p>
+            <Typography variant="h3">Try another album</Typography>
+            <Stack sx={{ gap: "4px" }}>
+                <Typography>
+                    This album has no photos that can be shown here
+                </Typography>
+                <Typography>Please try another album</Typography>
+            </Stack>
         </Message>
     );
 };
@@ -112,8 +110,7 @@ const SlideView: React.FC<SlideViewProps> = ({ url }) => {
 };
 
 const SlideView_ = styled("div")`
-    width: 100%;
-    height: 100%;
+    height: 100vh;
 
     background-size: cover;
     background-position: center;
@@ -164,8 +161,7 @@ const SlideViewChromecast: React.FC<SlideViewProps> = ({ url }) => {
 };
 
 const SlideViewChromecast_ = styled("div")`
-    width: 100%;
-    height: 100%;
+    height: 100vh;
 
     /* We can't set opacity of background-image, so use a wrapper */
     position: relative;

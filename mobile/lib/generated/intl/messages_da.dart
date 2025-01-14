@@ -20,12 +20,12 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'da';
 
-  static String m2(count, formattedCount) =>
+  static String m3(count, formattedCount) =>
       "${Intl.plural(count, zero: 'ingen minder', one: '${formattedCount} minde', other: '${formattedCount} minder')}";
 
-  static String m3(count) => "${count} valgt";
+  static String m4(count) => "${count} valgt";
 
-  static String m4(verificationID) =>
+  static String m5(verificationID) =>
       "Hey, kan du bekræfte, at dette er dit ente.io verifikation ID: ${verificationID}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -99,7 +99,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Langt tryk på en e-mail for at bekræfte slutningen af krypteringen."),
         "manage": MessageLookupByLibrary.simpleMessage("Administrér"),
-        "memoryCount": m2,
+        "memoryCount": m3,
         "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
             "Bemærk venligst, at maskinindlæring vil resultere i en højere båndbredde og batteriforbrug, indtil alle elementer er indekseret. Overvej at bruge desktop app til hurtigere indeksering, vil alle resultater blive synkroniseret automatisk."),
         "moments": MessageLookupByLibrary.simpleMessage("Øjeblikke"),
@@ -117,9 +117,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchHint1":
             MessageLookupByLibrary.simpleMessage("Hurtig, søgning på enheden"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Vælg årsag"),
-        "selectedPhotos": m3,
+        "selectedPhotos": m4,
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),
-        "shareTextConfirmOthersVerificationID": m4,
+        "shareTextConfirmOthersVerificationID": m5,
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Noget gik galt, prøv venligst igen"),

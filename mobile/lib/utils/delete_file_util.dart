@@ -355,18 +355,10 @@ Future<bool> deleteLocalFiles(
     // batches. Similar in Android, for large number of files, we have observed
     // that the library fails to delete any file. So, we initiate deletion in
     // batches.
-    if (deletedIDs.isEmpty) {
+    if (deletedIDs.isEmpty && Platform.isIOS) {
       deletedIDs.addAll(
-        await deleteLocalFilesInBatches(
-          context,
-          localAssetIDs,
-          maximumBatchSize: 1000,
-          minimumBatchSize: 10,
-        ),
+        await _iosDeleteLocalFilesInBatchesFallback(context, localAssetIDs),
       );
-      _logger
-          .severe("iOS free-space fallback, deleted ${deletedIDs.length} files "
-              "in batches}");
     }
 
     if (deletedIDs.isNotEmpty) {
@@ -468,7 +460,7 @@ Future<List<String>> deleteLocalFilesInBatches(
       }
     }
   }
-  Navigator.of(dialogKey.currentContext!, rootNavigator: true).pop('dialog');
+  Navigator.of(dialogKey.currentContext!).pop('dialog');
   return deletedIDs;
 }
 
@@ -655,4 +647,88 @@ Future<void> showDeleteSheet(
   } else {
     selectedFiles.clearAll();
   }
+}
+
+Future<List<String>> _iosDeleteLocalFilesInBatchesFallback(
+  BuildContext context,
+  List<String> localAssetIDs,
+) async {
+  final List<String> deletedIDs = [];
+
+  _logger.info(
+    "Trying to delete local files in batches",
+  );
+  deletedIDs.addAll(
+    await _deleteLocalFilesInBatchesRecursively(localAssetIDs, context),
+  );
+  if (deletedIDs.isEmpty) {
+    _logger.warning(
+      "Failed to delete local files in recursively batches",
+    );
+  }
+
+  _logger.severe(
+      "iOS free-space fallback, deleted ${deletedIDs.length} files with distinct localIDs"
+      "in batches}");
+
+  return deletedIDs;
+}
+
+Future<List<String>> _deleteLocalFilesInBatchesRecursively(
+  List<String> localAssetIDs,
+  BuildContext context,
+) async {
+  if (localAssetIDs.isEmpty) return [];
+
+  final deletedIDs = await _deleteLocalFiles(localAssetIDs, context);
+  if (deletedIDs.isNotEmpty) {
+    return deletedIDs;
+  }
+
+  if (localAssetIDs.length == 1) {
+    _logger.warning("Failed to delete file " + localAssetIDs.first);
+    return [];
+  }
+
+  final midIndex = localAssetIDs.length ~/ 2;
+  final left = localAssetIDs.sublist(0, midIndex);
+  final right = localAssetIDs.sublist(midIndex);
+
+  final leftDeleted =
+      await _deleteLocalFilesInBatchesRecursively(left, context);
+  final rightDeleted =
+      await _deleteLocalFilesInBatchesRecursively(right, context);
+
+  return [...leftDeleted, ...rightDeleted];
+}
+
+Future<List<String>> _deleteLocalFiles(
+  List<String> localIDs,
+  BuildContext context,
+) async {
+  _logger.info(
+    "Trying to delete batch of size " +
+        localIDs.length.toString() +
+        "  :  " +
+        localIDs.toString(),
+  );
+
+  final dialog = createProgressDialog(
+    context,
+    "Deleting " + localIDs.length.toString() + " backed up files...",
+  );
+  await dialog.show();
+
+  final List<String> deletedIDs = [];
+  try {
+    deletedIDs.addAll(await PhotoManager.editor.deleteWithIds(localIDs));
+    _logger.info("Deleted " + localIDs.toString());
+  } catch (e, s) {
+    _logger.severe("Could not delete batch " + localIDs.toString(), e, s);
+    await showGenericErrorDialog(context: context, error: e);
+  }
+
+  await dialog.hide();
+
+  return deletedIDs;
 }

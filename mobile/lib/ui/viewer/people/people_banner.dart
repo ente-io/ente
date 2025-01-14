@@ -1,6 +1,4 @@
 import "package:flutter/material.dart";
-import "package:flutter_animate/flutter_animate.dart";
-import "package:photos/ente_theme_data.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
@@ -56,14 +54,19 @@ class PeopleBanner extends StatelessWidget {
       case PeopleBannerType.addName:
         assert(faceWidget != null);
         backgroundColor = colorScheme.backgroundElevated;
-        startWidget = SizedBox(
-          width: 56,
-          height: 56,
-          child: ClipRRect(
-            borderRadius: const BorderRadius.all(
-              Radius.circular(4),
+        startWidget = Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: SizedBox(
+            width: 56,
+            height: 56,
+            child: ClipPath(
+              clipper: ShapeBorderClipper(
+                shape: ContinuousRectangleBorder(
+                  borderRadius: BorderRadius.circular(40),
+                ),
+              ),
+              child: faceWidget!,
             ),
-            child: faceWidget!,
           ),
         );
         roundedActionIcon = false;
@@ -72,13 +75,19 @@ class PeopleBanner extends StatelessWidget {
     final Widget banner = Center(
       child: GestureDetector(
         onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            boxShadow: Theme.of(context).colorScheme.enteTheme.shadowMenu,
-            color: backgroundColor,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Container(
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              border: Border.all(
+                color: colorScheme.strokeFaint,
+                width: 1,
+              ),
+              borderRadius: const BorderRadius.all(
+                Radius.circular(5),
+              ),
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -122,11 +131,7 @@ class PeopleBanner extends StatelessWidget {
           ),
         ),
       ),
-    ).animate(onPlay: (controller) => controller.repeat()).shimmer(
-          duration: 1000.ms,
-          delay: 3200.ms,
-          size: 0.6,
-        );
+    );
 
     if (type == PeopleBannerType.suggestion) {
       return SafeArea(

@@ -135,11 +135,27 @@ class MultiPartUploader {
 
     if (multipartInfo.status != MultipartStatus.completed) {
       // complete the multipart upload
-      await _completeMultipartUpload(
-        multipartInfo.urls.objectKey,
-        etags,
-        multipartInfo.urls.completeURL,
-      );
+      try {
+        await _completeMultipartUpload(
+          multipartInfo.urls.objectKey,
+          etags,
+          multipartInfo.urls.completeURL,
+        );
+      } on DioError catch (e) {
+        if (e.response?.statusCode == 404) {
+          _logger.severe(
+            "Multipart upload not found for key ${multipartInfo.urls.objectKey}",
+          );
+          await _db.deleteMultipartTrack(localId);
+        }
+        if (e.response?.statusCode == 401) {
+          _logger.severe(
+            "Multipart upload not authorized ${multipartInfo.urls.objectKey}",
+          );
+          await _db.deleteMultipartTrack(localId);
+        }
+        rethrow;
+      }
     }
 
     return multipartInfo.urls.objectKey;
@@ -263,7 +279,7 @@ class MultiPartUploader {
         MultipartStatus.completed,
       );
     } catch (e) {
-      Logger("MultipartUpload").severe(e);
+      Logger("MultipartUpload").severe("upload failed for key $objectKey}", e);
       rethrow;
     }
   }

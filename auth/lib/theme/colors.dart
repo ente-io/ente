@@ -70,6 +70,8 @@ class EnteColorScheme {
   final Color gradientButtonBgColor;
   final List<Color> gradientButtonBgColors;
 
+  bool get isLightTheme => backgroundBase == backgroundBaseLight;
+
   const EnteColorScheme(
     this.backgroundBase,
     this.backgroundElevated,

@@ -1,8 +1,9 @@
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { PAGES } from "@/accounts/constants/pages";
+import { unstashRedirect } from "@/accounts/services/redirect";
+import { LoadingIndicator } from "@/base/components/loaders";
 import { fromB64URLSafeNoPaddingString } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import { nullToUndefined } from "@/utils/transform";
-import { VerticallyCentered } from "@ente/shared/components/Container";
 import {
     LS_KEYS,
     getData,
@@ -11,9 +12,6 @@ import {
 } from "@ente/shared/storage/localStorage";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
-import { PAGES } from "../../constants/pages";
-import { unstashRedirect } from "../../services/redirect";
-import type { PageProps } from "../../types/page";
 
 /**
  * [Note: Finish passkey flow in the requesting app]
@@ -22,7 +20,7 @@ import type { PageProps } from "../../types/page";
  * invoked the passkey flow since it needs to save the obtained credentials
  * in local storage (which is tied to the current origin).
  */
-const Page: React.FC<PageProps> = () => {
+const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
@@ -32,18 +30,12 @@ const Page: React.FC<PageProps> = () => {
         const response = searchParams.get("response");
         if (!passkeySessionID || !response) return;
 
-        saveCredentialsAndNavigateTo(passkeySessionID, response).then(
-            (slug: string) => {
-                router.push(slug);
-            },
+        void saveCredentialsAndNavigateTo(passkeySessionID, response).then(
+            (slug: string) => router.push(slug),
         );
     }, []);
 
-    return (
-        <VerticallyCentered>
-            <ActivityIndicator />
-        </VerticallyCentered>
-    );
+    return <LoadingIndicator />;
 };
 
 export default Page;

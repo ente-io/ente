@@ -1,19 +1,20 @@
+import { FilledIconButton } from "@/base/components/mui";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
-import { FilledIconButton } from "@/new/photos/components/mui";
 import { SlideUpTransition } from "@/new/photos/components/mui/SlideUpTransition";
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
 import { CollectionsSortBy } from "@/new/photos/services/collection/ui";
 import { FlexWrapper, FluidContainer } from "@ente/shared/components/Container";
-import Close from "@mui/icons-material/Close";
+import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
+    Dialog,
     DialogTitle,
     Divider,
     Stack,
+    styled,
     Typography,
     useMediaQuery,
 } from "@mui/material";
-import { AllCollectionDialog } from "components/Collections/AllCollections/dialog";
 import { t } from "i18next";
 import AllCollectionContent from "./content";
 
@@ -46,12 +47,11 @@ export default function AllCollections(props: AllCollectionsProps) {
 
     return (
         <AllCollectionDialog
-            position="flex-end"
-            TransitionComponent={SlideUpTransition}
-            onClose={onClose}
             open={open}
+            onClose={onClose}
+            TransitionComponent={SlideUpTransition}
             fullScreen={isMobile}
-            fullWidth={true}
+            fullWidth
         >
             <AllCollectionsHeader
                 {...{
@@ -71,6 +71,32 @@ export default function AllCollections(props: AllCollectionsProps) {
     );
 }
 
+export const AllCollectionMobileBreakpoint = 559;
+
+const AllCollectionDialog = styled(Dialog)(({ theme }) => ({
+    "& .MuiDialog-container": {
+        justifyContent: "flex-end",
+    },
+    "& .MuiPaper-root": {
+        maxWidth: "494px",
+    },
+    "& .MuiDialogTitle-root": {
+        padding: theme.spacing(2),
+        paddingRight: theme.spacing(1),
+    },
+    "& .MuiDialogContent-root": {
+        padding: theme.spacing(2),
+    },
+    [theme.breakpoints.down(AllCollectionMobileBreakpoint)]: {
+        "& .MuiPaper-root": {
+            width: "324px",
+        },
+        "& .MuiDialogContent-root": {
+            padding: 6,
+        },
+    },
+}));
+
 const AllCollectionsHeader = ({
     onClose,
     collectionCount,
@@ -82,15 +108,18 @@ const AllCollectionsHeader = ({
         <FlexWrapper>
             <FluidContainer mr={1.5}>
                 <Box>
-                    <Typography variant="h3">
+                    <Typography variant="h5">
                         {isInHiddenSection
                             ? t("all_hidden_albums")
                             : t("all_albums")}
                     </Typography>
                     <Typography
                         variant="small"
-                        fontWeight={"normal"}
-                        color={"text.muted"}
+                        sx={{
+                            color: "text.muted",
+                            // Undo the effects of DialogTitle.
+                            fontWeight: "normal",
+                        }}
                     >
                         {t("albums_count", { count: collectionCount })}
                     </Typography>
@@ -103,7 +132,7 @@ const AllCollectionsHeader = ({
                     nestedInDialog
                 />
                 <FilledIconButton onClick={onClose}>
-                    <Close />
+                    <CloseIcon />
                 </FilledIconButton>
             </Stack>
         </FlexWrapper>

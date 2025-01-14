@@ -4,7 +4,7 @@ import React from "react";
 
 interface MenuSectionTitleProps {
     title: string;
-    icon?: JSX.Element;
+    icon?: React.JSX.Element;
 }
 
 export const MenuSectionTitle: React.FC<MenuSectionTitleProps> = ({
@@ -16,15 +16,15 @@ export const MenuSectionTitle: React.FC<MenuSectionTitleProps> = ({
             px="8px"
             py={"6px"}
             gap={"8px"}
-            sx={{
+            sx={(theme) => ({
                 "& > svg": {
                     fontSize: "17px",
-                    color: (theme) => theme.colors.stroke.muted,
+                    color: theme.colors.stroke.muted,
                 },
-            }}
+            })}
         >
             {icon && icon}
-            <Typography variant="small" color="text.muted">
+            <Typography variant="small" sx={{ color: "text.muted" }}>
                 {title}
             </Typography>
         </VerticallyCenteredFlex>
@@ -40,12 +40,10 @@ export const MenuItemDivider: React.FC<MenuItemDividerProps> = ({
 }) => {
     return (
         <Divider
-            sx={{
-                "&&&": {
-                    my: 0,
-                    ml: hasIcon ? "48px" : "16px",
-                },
-            }}
+            sx={[
+                { "&&&": { my: 0 } },
+                hasIcon ? { "&&&": { ml: "48px" } } : { "&&&": { ml: "16px" } },
+            ]}
         />
     );
 };

@@ -261,7 +261,7 @@ Future<void> sendEmail(
         await showCupertinoModalPopup(
           context: context,
           builder: (_) => CupertinoActionSheet(
-            title: Text("Select mail app \n $to"),
+            title: Text(S.of(context).selectMailApp + " \n $to"),
             actions: [
               for (var app in result.options)
                 CupertinoActionSheetAction(

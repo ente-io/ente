@@ -46,7 +46,6 @@ enum SectionType {
   moment,
   album,
   // People section shows the files shared by other persons
-  fileCaption,
   contacts,
   fileTypesAndExtension,
 }
@@ -69,17 +68,15 @@ extension SectionTypeExtensions on SectionType {
         return S.of(context).albums;
       case SectionType.fileTypesAndExtension:
         return S.of(context).fileTypes;
-      case SectionType.fileCaption:
-        return S.of(context).descriptions;
     }
   }
 
   String getEmptyStateText(BuildContext context) {
     switch (this) {
       case SectionType.face:
-        return S.of(context).searchFaceEmptySection;
+        return S.of(context).searchPersonsEmptySection;
       case SectionType.magic:
-        return "Discover";
+        return S.of(context).searchDiscoverEmptySection;
       case SectionType.moment:
         return S.of(context).searchDatesEmptySection;
       case SectionType.location:
@@ -90,8 +87,6 @@ extension SectionTypeExtensions on SectionType {
         return S.of(context).searchAlbumsEmptySection;
       case SectionType.fileTypesAndExtension:
         return S.of(context).searchFileTypesAndNamesEmptySection;
-      case SectionType.fileCaption:
-        return S.of(context).searchCaptionEmptySection;
     }
   }
 
@@ -112,8 +107,6 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.album:
         return true;
       case SectionType.fileTypesAndExtension:
-        return false;
-      case SectionType.fileCaption:
         return false;
     }
   }
@@ -136,8 +129,6 @@ extension SectionTypeExtensions on SectionType {
         return true;
       case SectionType.fileTypesAndExtension:
         return false;
-      case SectionType.fileCaption:
-        return false;
     }
   }
 
@@ -159,8 +150,6 @@ extension SectionTypeExtensions on SectionType {
         return S.of(context).addNew;
       case SectionType.fileTypesAndExtension:
         return "";
-      case SectionType.fileCaption:
-        return S.of(context).addNew;
     }
   }
 
@@ -179,8 +168,6 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.album:
         return Icons.add;
       case SectionType.fileTypesAndExtension:
-        return null;
-      case SectionType.fileCaption:
         return null;
     }
   }
@@ -267,9 +254,6 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.fileTypesAndExtension:
         return SearchService.instance
             .getAllFileTypesAndExtensionsResults(context, limit);
-
-      case SectionType.fileCaption:
-        return SearchService.instance.getAllDescriptionSearchResults(limit);
     }
   }
 

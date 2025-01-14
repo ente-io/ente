@@ -503,7 +503,7 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 	return ente.SubscriptionUpdateResponse{Status: "success"}, nil
 }
 
-func (c *StripeController) UpdateSubscriptionCancellationStatus(userID int64, status bool) (ente.Subscription, error) {
+func (c *StripeController) UpdateSubscriptionCancellationStatus(userID int64, shouldCancel bool) (ente.Subscription, error) {
 	subscription, err := c.BillingRepo.GetUserSubscription(userID)
 	if err != nil {
 		// error sql.ErrNoRows not possible as user must at least have a free subscription
@@ -513,24 +513,28 @@ func (c *StripeController) UpdateSubscriptionCancellationStatus(userID int64, st
 		return ente.Subscription{}, stacktrace.Propagate(ente.ErrBadRequest, "")
 	}
 
-	if subscription.Attributes.IsCancelled == status {
+	if subscription.Attributes.IsCancelled == shouldCancel {
 		// no-op
 		return subscription, nil
 	}
 
 	client := c.StripeClients[subscription.Attributes.StripeAccountCountry]
 	params := &stripe.SubscriptionParams{
-		CancelAtPeriodEnd: stripe.Bool(status),
+		CancelAtPeriodEnd: stripe.Bool(shouldCancel),
 	}
 	_, err = client.Subscriptions.Update(subscription.OriginalTransactionID, params)
 	if err != nil {
 		return ente.Subscription{}, stacktrace.Propagate(err, "")
 	}
-	err = c.BillingRepo.UpdateSubscriptionCancellationStatus(userID, status)
+	if shouldCancel {
+		err = c.CommonBillCtrl.OnSubscriptionCancelled(userID)
+	} else {
+		err = c.BillingRepo.UpdateSubscriptionCancellationStatus(userID, false)
+	}
 	if err != nil {
 		return ente.Subscription{}, stacktrace.Propagate(err, "")
 	}
-	subscription.Attributes.IsCancelled = status
+	subscription.Attributes.IsCancelled = shouldCancel
 	return subscription, nil
 }
 
@@ -703,7 +707,7 @@ func (c *StripeController) CancelSubAndDeleteCustomer(subscription ente.Subscrip
 				return stacktrace.Propagate(err, "")
 			}
 		}
-		err = c.BillingRepo.UpdateSubscriptionCancellationStatus(subscription.UserID, true)
+		err = c.CommonBillCtrl.OnSubscriptionCancelled(subscription.UserID)
 		if err != nil {
 			return stacktrace.Propagate(err, "")
 		}

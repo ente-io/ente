@@ -185,6 +185,8 @@
   },
   "allowAddPhotosDescription": "Permetti anche alle persone con il link di aggiungere foto all'album condiviso.",
   "passwordLock": "Blocco con password",
+  "canNotOpenTitle": "Impossibile aprire questo album",
+  "canNotOpenBody": "Spiacente, questo album non può essere aperto nell'app.",
   "disableDownloadWarningTitle": "Nota bene",
   "disableDownloadWarningBody": "I visualizzatori possono scattare screenshot o salvare una copia delle foto utilizzando strumenti esterni",
   "allowDownloads": "Consenti download",
@@ -351,6 +353,7 @@
   "failedToLoadAlbums": "Impossibile caricare gli album",
   "hidden": "Nascosti",
   "authToViewYourHiddenFiles": "Autenticati per visualizzare i file nascosti",
+  "authToViewTrashedFiles": "Autenticati per visualizzare i file cancellati",
   "trash": "Cestino",
   "uncategorized": "Senza categoria",
   "videoSmallCase": "video",
@@ -412,7 +415,8 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Dimensione griglia foto",
-  "manageDeviceStorage": "Gestisci memoria dispositivo",
+  "manageDeviceStorage": "Gestisci cache dispositivo",
+  "manageDeviceStorageDesc": "Verifica e svuota la memoria cache locale.",
   "machineLearning": "Apprendimento automatico (ML)",
   "mlConsent": "Abilita l'apprendimento automatico",
   "mlConsentTitle": "Abilita l'apprendimento automatico?",
@@ -688,6 +692,7 @@
   "noPhotosAreBeingBackedUpRightNow": "Il backup delle foto attualmente non viene eseguito",
   "preserveMore": "Salva più foto",
   "grantFullAccessPrompt": "Consenti l'accesso a tutte le foto nelle Impostazioni",
+  "allowPermTitle": "Consenti l'accesso alle foto",
   "openSettings": "Apri Impostazioni",
   "selectMorePhotos": "Seleziona più foto",
   "existingUser": "Accedi",
@@ -816,7 +821,7 @@
   "referFriendsAnd2xYourPlan": "Invita un amico e raddoppia il tuo spazio",
   "shareAlbumHint": "Apri un album e tocca il pulsante di condivisione in alto a destra per condividerlo.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Gli elementi mostrano il numero di giorni rimanenti prima della cancellazione permanente",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1 giorno} other {{count} giorni}}",
+  "trashDaysLeft": "{count, plural, =0 {Presto} =1 {1 giorno} other {{count} giorni}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -980,7 +985,7 @@
   "thisActionCannotBeUndone": "Questa azione non può essere annullata",
   "emptyTrash": "Vuoi svuotare il cestino?",
   "permDeleteWarning": "Tutti gli elementi nel cestino verranno eliminati definitivamente\n\nQuesta azione non può essere annullata",
-  "empty": "Vuoto",
+  "empty": "Svuota",
   "couldNotFreeUpSpace": "Impossibile liberare lo spazio",
   "permanentlyDeleteFromDevice": "Eliminare definitivamente dal dispositivo?",
   "someOfTheFilesYouAreTryingToDeleteAre": "Alcuni dei file che si sta tentando di eliminare sono disponibili solo sul dispositivo e non possono essere recuperati se cancellati",
@@ -1187,7 +1192,7 @@
   "addOns": "Componenti aggiuntivi",
   "addOnPageSubtitle": "Dettagli dei componenti aggiuntivi",
   "yourMap": "La tua mappa",
-  "modifyYourQueryOrTrySearchingFor": "Modifica la tua interrogazione o prova a cercare",
+  "modifyYourQueryOrTrySearchingFor": "Modifica la tua ricerca o prova con",
   "blackFridaySale": "Offerta del Black Friday",
   "upto50OffUntil4thDec": "Sconto del 50%, fino al 4 dicembre.",
   "photos": "Foto",
@@ -1244,8 +1249,11 @@
   "deviceCodeHint": "Inserisci il codice",
   "joinDiscord": "Unisciti a Discord",
   "locations": "Luoghi",
-  "descriptions": "Descrizioni",
   "addAName": "Aggiungi un nome",
+  "findThemQuickly": "Trovali rapidamente",
+  "@findThemQuickly": {
+    "description": "Subtitle to indicate that the user can find people quickly by name"
+  },
   "findPeopleByName": "Trova rapidamente le persone per nome",
   "addViewers": "{count, plural, zero {Aggiungi visualizzatore} one {Aggiungi visualizzatore} other {Aggiungi visualizzatori}}",
   "addCollaborators": "{count, plural, zero {Aggiungi collaboratore} one {Aggiungi collaboratore} other {Aggiungi collaboratori}}",
@@ -1260,6 +1268,12 @@
   "createCollaborativeLink": "Crea link collaborativo",
   "search": "Cerca",
   "enterPersonName": "Inserisci il nome della persona",
+  "enterName": "Aggiungi nome",
+  "savePerson": "Salva persona",
+  "editPerson": "Modifica persona",
+  "orMergeWithExistingPerson": "O unisci con esistente",
+  "enterDateOfBirth": "Compleanno (Opzionale)",
+  "birthday": "Compleanno",
   "removePersonLabel": "Rimuovi etichetta persona",
   "autoPairDesc": "L'associazione automatica funziona solo con i dispositivi che supportano Chromecast.",
   "manualPairDesc": "L'associazione con PIN funziona con qualsiasi schermo dove desideri visualizzare il tuo album.",
@@ -1286,6 +1300,7 @@
   "right": "Destra",
   "whatsNew": "Novità",
   "reviewSuggestions": "Esamina i suggerimenti",
+  "review": "Revisiona",
   "useAsCover": "Usa come copertina",
   "notPersonLabel": "Non è {name}?",
   "@notPersonLabel": {
@@ -1343,5 +1358,190 @@
   "mostRecent": "Più recenti",
   "mostRelevant": "Più rilevanti",
   "loadingYourPhotos": "Caricando le tue foto...",
-  "processingImport": "Elaborando {folderName}..."
+  "processingImport": "Elaborando {folderName}...",
+  "personName": "Nome della persona",
+  "addNewPerson": "Aggiungi nuova persona",
+  "addNameOrMerge": "Aggiungi nome o unisci",
+  "mergeWithExisting": "Unisci con esistente",
+  "newPerson": "Nuova persona",
+  "addName": "Aggiungi nome",
+  "add": "Aggiungi",
+  "extraPhotosFoundFor": "Trovate foto aggiuntive per {text}",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "extraPhotosFound": "Trovate foto aggiuntive",
+  "configuration": "Configurazione",
+  "localIndexing": "Indicizzazione locale",
+  "resetPerson": "Rimuovi",
+  "areYouSureYouWantToResetThisPerson": "Sei sicuro di voler resettare questa persona?",
+  "allPersonGroupingWillReset": "Tutti i raggruppamenti per questa persona saranno resettati e perderai tutti i suggerimenti fatti per questa persona",
+  "yesResetPerson": "Sì, resetta persona",
+  "onlyThem": "Solo loro",
+  "checkingModels": "Verifica dei modelli...",
+  "enableMachineLearningBanner": "Abilita l'apprendimento automatico per la ricerca magica e il riconoscimento facciale",
+  "searchDiscoverEmptySection": "Le immagini saranno mostrate qui una volta che l'elaborazione e la sincronizzazione saranno completate",
+  "searchPersonsEmptySection": "Le persone saranno mostrate qui una volta che l'elaborazione e la sincronizzazione saranno completate",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Aggiunti 0 visualizzatori} =1 {Aggiunto 1 visualizzatore} other {Aggiunti {count} visualizzatori}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Aggiunti 0 collaboratori} =1 {Aggiunto 1 collaboratore} other {Aggiunti {count} collaboratori}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  },
+  "accountIsAlreadyConfigured": "L'account è già configurato.",
+  "sessionIdMismatch": "ID sessione non corrispondente",
+  "@sessionIdMismatch": {
+    "description": "In passkey page, deeplink is ignored because of session ID mismatch."
+  },
+  "failedToFetchActiveSessions": "Recupero delle sessioni attive non riuscito",
+  "@failedToFetchActiveSessions": {
+    "description": "In session page, warn user (in toast) that active sessions could not be fetched."
+  },
+  "failedToRefreshStripeSubscription": "Impossibile aggiornare l'abbonamento",
+  "failedToPlayVideo": "Impossibile riprodurre il video",
+  "uploadIsIgnoredDueToIgnorereason": "Il caricamento è ignorato a causa di {ignoreReason}",
+  "@uploadIsIgnoredDueToIgnorereason": {
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUploadIsIgnoredDue": "Tocca per caricare, il caricamento è attualmente ignorato a causa di {ignoreReason}",
+  "@tapToUploadIsIgnoredDue": {
+    "description": "Shown in upload icon widet, inside a tooltip.",
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUpload": "Premi per caricare",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
+  "info": "Info",
+  "addFiles": "Aggiungi File",
+  "castAlbum": "Trasmetti album",
+  "imageNotAnalyzed": "Immagine non analizzata",
+  "noFacesFound": "Nessun volto trovato",
+  "fileNotUploadedYet": "File non ancora caricato",
+  "noSuggestionsForPerson": "Nessun suggerimento per {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "mese",
+  "yearShort": "anno",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "attualmente in esecuzione",
+  "ignored": "ignorato",
+  "photosCount": "{count, plural, =0 {0 foto} =1 {1 foto} other {{count} foto}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "file": "File",
+  "changeLogMagicSearchImprovementTitle": "Miglioramento della Ricerca Magica",
+  "changeLogMagicSearchImprovementContent": "Abbiamo migliorato la ricerca magica per renderla molto più veloce, così non devi aspettare per trovare quello che cerchi.",
+  "changeLogBackupStatusTitle": "Stato Backup",
+  "changeLogDiscoverTitle": "Esplora",
+  "selectCoverPhoto": "Seleziona foto di copertina",
+  "newLocation": "Nuova posizione",
+  "faceNotClusteredYet": "Faccia non ancora raggruppata, per favore torna più tardi",
+  "openFile": "Apri file",
+  "allow": "Consenti",
+  "emergencyContacts": "Contatti di emergenza",
+  "acceptTrustInvite": "Accetta l'invito",
+  "declineTrustInvite": "Rifiuta l'invito",
+  "removeYourselfAsTrustedContact": "Rimuovi te stesso come contatto fidato",
+  "legacy": "Legacy",
+  "legacyPageDesc": "Legacy consente ai contatti fidati di accedere al tuo account in tua assenza.",
+  "legacyPageDesc2": "I contatti fidati possono avviare il recupero dell'account e, se non sono bloccati entro 30 giorni, reimpostare la password e accedere al tuo account.",
+  "legacyAccounts": "Account Legacy",
+  "trustedContacts": "Contatti fidati",
+  "addTrustedContact": "Aggiungi contatto fidato",
+  "removeInvite": "Rimuovi invito",
+  "recoveryWarning": "Un contatto fidato sta tentando di accedere al tuo account",
+  "rejectRecovery": "Rifiuta il recupero",
+  "recoveryInitiated": "Recupero avviato",
+  "recoveryInitiatedDesc": "Puoi accedere all'account dopo {days} giorni. Una notifica verrà inviata a {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Annulla il recupero",
+  "recoveryAccount": "Recupera l'account",
+  "cancelAccountRecoveryBody": "Sei sicuro di voler annullare il recupero?",
+  "startAccountRecoveryTitle": "Avvia il recupero",
+  "whyAddTrustContact": "Un contatto fidato può aiutare a recuperare i tuoi dati.",
+  "recoveryReady": "Ora puoi recuperare l'account di {email} impostando una nuova password.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} sta cercando di recuperare il tuo account.",
+  "trustedInviteBody": "Sei stato invitato a essere un contatto Legacy da {email}.",
+  "warning": "Attenzione",
+  "proceed": "Prosegui",
+  "confirmAddingTrustedContact": "Stai per aggiungere {email} come contatto fidato. Potranno recuperare il tuo account se sei assente per {numOfDays} giorni.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} ti ha invitato a essere un contatto fidato",
+  "authToManageLegacy": "Autenticati per gestire i tuoi contatti fidati",
+  "useDifferentPlayerInfo": "Hai problemi a riprodurre questo video? Premi a lungo qui per provare un altro lettore.",
+  "hideSharedItemsFromHomeGallery": "Nascondi gli elementi condivisi dalla galleria principale",
+  "gallery": "Galleria"
 }

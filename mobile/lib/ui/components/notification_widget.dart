@@ -17,12 +17,14 @@ enum NotificationType {
 
 class NotificationWidget extends StatelessWidget {
   final IconData startIcon;
-  final IconData actionIcon;
+  final IconData? actionIcon;
+  final Widget? actionWidget;
   final String text;
   final String? subText;
   final GestureTapCallback onTap;
   final NotificationType type;
   final bool isBlackFriday;
+  final TextStyle? mainTextStyle;
 
   const NotificationWidget({
     super.key,
@@ -30,8 +32,10 @@ class NotificationWidget extends StatelessWidget {
     required this.actionIcon,
     required this.text,
     required this.onTap,
+    this.mainTextStyle,
     this.isBlackFriday = false,
     this.subText,
+    this.actionWidget,
     this.type = NotificationType.warning,
   });
 
@@ -39,7 +43,7 @@ class NotificationWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     EnteTextTheme textTheme = getEnteTextTheme(context);
-    TextStyle mainTextStyle = darkTextTheme.bodyBold;
+    TextStyle _mainTextStyle = mainTextStyle ?? darkTextTheme.bodyBold;
     TextStyle subTextStyle = darkTextTheme.miniMuted;
     LinearGradient? backgroundGradient;
     Color? backgroundColor;
@@ -52,7 +56,7 @@ class NotificationWidget extends StatelessWidget {
       case NotificationType.banner:
         textTheme = getEnteTextTheme(context);
         backgroundColor = colorScheme.backgroundElevated2;
-        mainTextStyle = textTheme.bodyBold;
+        _mainTextStyle = textTheme.bodyBold;
         subTextStyle = textTheme.miniMuted;
         strokeColorScheme = colorScheme;
         boxShadow = [
@@ -82,7 +86,7 @@ class NotificationWidget extends StatelessWidget {
         break;
       case NotificationType.notice:
         backgroundColor = colorScheme.backgroundElevated2;
-        mainTextStyle = textTheme.bodyBold;
+        _mainTextStyle = textTheme.bodyBold;
         subTextStyle = textTheme.miniMuted;
         strokeColorScheme = colorScheme;
         boxShadow = Theme.of(context).colorScheme.enteTheme.shadowMenu;
@@ -101,7 +105,10 @@ class NotificationWidget extends StatelessWidget {
             gradient: backgroundGradient,
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: actionWidget != null ? 12 : 8,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -140,7 +147,7 @@ class NotificationWidget extends StatelessWidget {
                     children: [
                       Text(
                         text,
-                        style: mainTextStyle,
+                        style: _mainTextStyle,
                         textAlign: TextAlign.left,
                       ),
                       subText != null
@@ -153,14 +160,17 @@ class NotificationWidget extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                IconButtonWidget(
-                  icon: actionIcon,
-                  iconButtonType: IconButtonType.rounded,
-                  iconColor: strokeColorScheme.strokeBase,
-                  defaultColor: strokeColorScheme.fillFaint,
-                  pressedColor: strokeColorScheme.fillMuted,
-                  onTap: onTap,
-                ),
+                if (actionWidget != null)
+                  actionWidget!
+                else if (actionIcon != null)
+                  IconButtonWidget(
+                    icon: actionIcon!,
+                    iconButtonType: IconButtonType.rounded,
+                    iconColor: strokeColorScheme.strokeBase,
+                    defaultColor: strokeColorScheme.fillFaint,
+                    pressedColor: strokeColorScheme.fillMuted,
+                    onTap: onTap,
+                  ),
               ],
             ),
           ),
@@ -216,7 +226,7 @@ class NotificationNoteWidget extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         border: Border.all(color: colorScheme.strokeMuted),
         color: colorScheme.backgroundBase,

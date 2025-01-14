@@ -1,29 +1,24 @@
-import { enableTwoFactor, setupTwoFactor } from "@/accounts/api/user";
-import VerifyTwoFactor, {
+import {
+    VerifyTwoFactor,
     type VerifyTwoFactorCallback,
-} from "@/accounts/components/two-factor/VerifyForm";
-import { TwoFactorSetup } from "@/accounts/components/two-factor/setup";
-import type { TwoFactorSecret } from "@/accounts/types/user";
+} from "@/accounts/components/two-factor/VerifyTwoFactor";
+import { appHomeRoute } from "@/accounts/services/redirect";
+import type { TwoFactorSecret } from "@/accounts/services/user";
+import { enableTwoFactor, setupTwoFactor } from "@/accounts/services/user";
+import { CenteredFill } from "@/base/components/containers";
 import log from "@/base/log";
-import { ensure } from "@/utils/ensure";
-import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { encryptWithRecoveryKey } from "@ente/shared/crypto/helpers";
-import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
-import { Box, CardContent, Typography } from "@mui/material";
-import Card from "@mui/material/Card";
+import { getData, LS_KEYS, setLSUser } from "@ente/shared/storage/localStorage";
+import { Paper, Stack, styled, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { appHomeRoute } from "../../services/redirect";
-import type { PageProps } from "../../types/page";
+import { TwoFactorSetup } from "../../components/two-factor/TwoFactorSetup";
 
-export enum SetupMode {
-    QR_CODE,
-    MANUAL_CODE,
-}
+export type SetupMode = "qrCode" | "manualCode";
 
-const Page: React.FC<PageProps> = () => {
+const Page: React.FC = () => {
     const [twoFactorSecret, setTwoFactorSecret] = useState<
         TwoFactorSecret | undefined
     >();
@@ -42,7 +37,7 @@ const Page: React.FC<PageProps> = () => {
                 log.error("failed to get two factor setup code", e);
             }
         };
-        main();
+        void main();
     }, []);
 
     const onSubmit: VerifyTwoFactorCallback = async (
@@ -50,40 +45,47 @@ const Page: React.FC<PageProps> = () => {
         markSuccessful,
     ) => {
         const recoveryEncryptedTwoFactorSecret = await encryptWithRecoveryKey(
-            ensure(twoFactorSecret).secretCode,
+            twoFactorSecret!.secretCode,
         );
         await enableTwoFactor(otp, recoveryEncryptedTwoFactorSecret);
-        await markSuccessful();
+        markSuccessful();
         await setLSUser({
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: true,
         });
-        router.push(appHomeRoute);
+        void router.push(appHomeRoute);
     };
 
     return (
-        <VerticallyCentered>
-            <Card>
-                <CardContent>
-                    <VerticallyCentered sx={{ p: 3 }}>
-                        <Box mb={4}>
-                            <Typography variant="h2">
-                                {t("TWO_FACTOR")}
-                            </Typography>
-                        </Box>
+        <Stack sx={{ minHeight: "100svh" }}>
+            <CenteredFill>
+                <ContentsPaper>
+                    <Typography variant="h5" sx={{ textAlign: "center" }}>
+                        {t("two_factor")}
+                    </Typography>
+                    <Stack>
                         <TwoFactorSetup twoFactorSecret={twoFactorSecret} />
                         <VerifyTwoFactor
                             onSubmit={onSubmit}
                             buttonText={t("enable")}
                         />
-                        <LinkButton sx={{ mt: 2 }} onClick={router.back}>
-                            {t("GO_BACK")}
+                        <LinkButton sx={{ mt: 1 }} onClick={router.back}>
+                            {t("go_back")}
                         </LinkButton>
-                    </VerticallyCentered>
-                </CardContent>
-            </Card>
-        </VerticallyCentered>
+                    </Stack>
+                </ContentsPaper>
+            </CenteredFill>
+        </Stack>
     );
 };
+
+const ContentsPaper = styled(Paper)(({ theme }) => ({
+    marginBlock: theme.spacing(2),
+    padding: theme.spacing(4, 2),
+    width: "min(420px, 95vw)",
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(4),
+}));
 
 export default Page;

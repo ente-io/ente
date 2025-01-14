@@ -2,6 +2,14 @@ import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/icons_changed_event.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+enum CodeSortKey {
+  issuerName,
+  accountName,
+  mostFrequentlyUsed,
+  recentlyUsed,
+  manual,
+}
+
 class PreferenceService {
   PreferenceService._privateConstructor();
   static final PreferenceService instance =
@@ -26,6 +34,15 @@ class PreferenceService {
     } else {
       return false;
     }
+  }
+
+  CodeSortKey codeSortKey() {
+    return CodeSortKey
+        .values[_prefs.getInt("codeSortKey") ?? CodeSortKey.issuerName.index];
+  }
+
+  Future<void> setCodeSortKey(CodeSortKey key) async {
+    await _prefs.setInt("codeSortKey", key.index);
   }
 
   Future<void> setHasShownCoachMark(bool value) {

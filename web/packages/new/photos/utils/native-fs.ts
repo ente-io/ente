@@ -5,7 +5,7 @@
  * written for use by the code that runs in our desktop app.
  */
 
-import { nameAndExtension } from "@/base/file";
+import { joinPath, nameAndExtension } from "@/base/file-name";
 import {
     exportMetadataDirectoryName,
     exportTrashDirectoryName,
@@ -47,7 +47,7 @@ export const safeDirectoryName = async (
     let result = sanitizeFilename(name);
     let count = 1;
     while (
-        (await exists(`${directoryPath}/${result}`)) ||
+        (await exists(joinPath(directoryPath, result))) ||
         specialDirectoryNames.includes(result)
     ) {
         result = `${sanitizeFilename(name)}(${count})`;
@@ -69,7 +69,7 @@ export const safeFileName = async (
 ) => {
     let result = sanitizeFilename(name);
     let count = 1;
-    while (await exists(`${directoryPath}/${result}`)) {
+    while (await exists(joinPath(directoryPath, result))) {
         const [fn, ext] = nameAndExtension(sanitizeFilename(name));
         if (ext) result = `${fn}(${count}).${ext}`;
         else result = `${fn}(${count})`;

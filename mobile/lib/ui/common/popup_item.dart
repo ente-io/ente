@@ -4,12 +4,16 @@ class EntePopupMenuItem<T> extends PopupMenuItem<T> {
   final String label;
   final IconData? icon;
   final Widget? iconWidget;
+  final Color? iconColor;
+  final Color? labelColor;
 
   EntePopupMenuItem(
     this.label, {
     required T super.value,
     this.icon,
     this.iconWidget,
+    this.iconColor,
+    this.labelColor,
     super.key,
   })  : assert(
           icon != null || iconWidget != null,
@@ -25,11 +29,14 @@ class EntePopupMenuItem<T> extends PopupMenuItem<T> {
               if (iconWidget != null)
                 iconWidget
               else if (icon != null)
-                Icon(icon),
+                Icon(icon, color: iconColor),
               const Padding(
                 padding: EdgeInsets.all(8),
               ),
-              Text(label),
+              Text(
+                label,
+                style: TextStyle(color: labelColor),
+              ),
             ],
           ), // Initially empty, will be populated in build
         );

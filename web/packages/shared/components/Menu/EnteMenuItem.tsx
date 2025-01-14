@@ -1,6 +1,4 @@
 import { EnteSwitch } from "@/base/components/EnteSwitch";
-import { CaptionedText } from "@ente/shared/components/CaptionedText";
-import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
 import {
     SpaceBetweenFlex,
     VerticallyCenteredFlex,
@@ -17,13 +15,7 @@ import React from "react";
 interface EnteMenuItemProps {
     onClick: () => void;
     color?: ButtonProps["color"];
-    variant?:
-        | "primary"
-        | "captioned"
-        | "toggle"
-        | "secondary"
-        | "mini"
-        | "path";
+    variant?: "primary" | "captioned" | "toggle" | "secondary" | "mini";
     fontWeight?: TypographyProps["fontWeight"];
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
@@ -49,19 +41,19 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
     subIcon,
     checked,
     variant = "primary",
-    fontWeight = "bold",
+    fontWeight = "medium",
     labelComponent,
     disabled = false,
 }) => {
     const handleButtonClick = () => {
-        if (variant === "path" || variant === "toggle") {
+        if (variant === "toggle") {
             return;
         }
         onClick();
     };
 
     const handleIconClick = () => {
-        if (variant !== "path" && variant !== "toggle") {
+        if (variant !== "toggle") {
             return;
         }
         onClick();
@@ -74,25 +66,28 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
             disabled={disabled}
             onClick={handleButtonClick}
             disableRipple={variant == "toggle"}
-            sx={{
-                width: "100%",
-                color: (theme) =>
-                    variant !== "captioned"
-                        ? theme.palette[color].main
-                        : "inherit",
-                backgroundColor: (theme) =>
-                    variant !== "secondary" && variant !== "mini"
-                        ? theme.colors.fill.faint
-                        : "inherit",
-                "&:hover": {
-                    backgroundColor: (theme) => theme.colors.fill.faintPressed,
-                },
-                "& .MuiSvgIcon-root": {
-                    fontSize: "20px",
-                },
-                p: 0,
-                borderRadius: "4px",
-            }}
+            sx={[
+                (theme) => ({
+                    width: "100%",
+                    "&:hover": {
+                        backgroundColor: theme.colors.fill.faintPressed,
+                    },
+                    "& .MuiSvgIcon-root": {
+                        fontSize: "20px",
+                    },
+                    p: 0,
+                    borderRadius: "4px",
+                }),
+                variant !== "captioned" &&
+                    ((theme) => ({
+                        color: theme.palette[color].main,
+                    })),
+                variant !== "secondary" &&
+                    variant !== "mini" &&
+                    ((theme) => ({
+                        backgroundColor: theme.colors.fill.faint,
+                    })),
+            ]}
         >
             <SpaceBetweenFlex sx={{ pl: "16px", pr: "12px" }}>
                 <VerticallyCenteredFlex sx={{ py: "14px" }} gap={"10px"}>
@@ -126,11 +121,41 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
                             onClick={handleIconClick}
                         />
                     )}
-                    {variant === "path" && (
-                        <ChangeDirectoryOption onClick={handleIconClick} />
-                    )}
                 </VerticallyCenteredFlex>
             </SpaceBetweenFlex>
         </MenuItem>
+    );
+};
+
+interface CaptionedTextProps {
+    mainText: string;
+    subText?: string;
+    subIcon?: React.ReactNode;
+    color?: ButtonProps["color"];
+}
+
+const CaptionedText: React.FC<CaptionedTextProps> = ({
+    mainText,
+    subText,
+    subIcon,
+    color,
+}) => {
+    const subTextColor = color == "critical" ? "critical.main" : "text.faint";
+    return (
+        <VerticallyCenteredFlex gap={"4px"}>
+            <Typography>{mainText}</Typography>
+            <Typography variant="small" sx={{ color: subTextColor }}>
+                {"•"}
+            </Typography>
+            {subText ? (
+                <Typography variant="small" sx={{ color: subTextColor }}>
+                    {subText}
+                </Typography>
+            ) : (
+                <Typography variant="small" sx={{ color: subTextColor }}>
+                    {subIcon}
+                </Typography>
+            )}
+        </VerticallyCenteredFlex>
     );
 };

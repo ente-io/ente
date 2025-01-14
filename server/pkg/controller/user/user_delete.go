@@ -49,9 +49,15 @@ func (c *UserController) GetDeleteChallengeToken(ctx *gin.Context) (*ente.Delete
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
+
+	apps, err := c.UserAuthRepo.GetAppsForUser(userID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
 	return &ente.DeleteChallengeResponse{
 		EncryptedChallenge: &encryptedToken,
 		AllowDelete:        true,
+		Apps:               apps,
 	}, nil
 }
 

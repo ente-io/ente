@@ -306,13 +306,23 @@ class RemoteSyncService {
     _logger.info("[Collection-$collectionID] synced");
   }
 
+  Future<void> joinAndSyncCollection(
+    BuildContext context,
+    int collectionID,
+  
+  ) async {
+    await _collectionsService.joinPublicCollection(context, collectionID);
+    await _collectionsService.sync();
+    await _syncCollectionDiff(collectionID, 0);
+  }
+
   Future<void> _syncCollectionDiffDelete(Diff diff, int collectionID) async {
     final fileIDs = diff.deletedFiles.map((f) => f.uploadedFileID!).toList();
     final localDeleteCount =
         await _db.deleteFilesFromCollection(collectionID, fileIDs);
     if (localDeleteCount > 0) {
       final collectionFiles =
-          (await _db.getFilesFromIDs(fileIDs)).values.toList();
+          (await _db.getFileIDToFileFromIDs(fileIDs)).values.toList();
       collectionFiles.removeWhere((f) => f.collectionID != collectionID);
       Bus.instance.fire(
         CollectionUpdatedEvent(

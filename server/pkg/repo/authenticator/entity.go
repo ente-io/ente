@@ -89,6 +89,16 @@ func (r *Repository) Update(ctx context.Context, userID int64, req model.UpdateE
 	return nil
 }
 
+// GetAuthCodeCount returns the count of the authenticator entries for the given user
+func (r *Repository) GetAuthCodeCount(ctx context.Context, userID int64) (int64, error) {
+	var count int64
+	err := r.DB.QueryRowContext(ctx, `SELECT count(*) FROM authenticator_entity WHERE user_id = $1 and is_deleted = FALSE`, userID).Scan(&count)
+	if err != nil {
+		return 0, stacktrace.Propagate(err, "failed to get auth code count")
+	}
+	return count, nil
+}
+
 // GetDiff returns the &{[]ente.TotpEntity} which have been added or
 // modified after the given sinceTime
 func (r *Repository) GetDiff(ctx context.Context, userID int64, sinceTime int64, limit int16) ([]model.Entity, error) {

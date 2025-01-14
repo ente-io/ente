@@ -398,7 +398,6 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "גודל לוח של התמונה",
-  "manageDeviceStorage": "נהל את מקום אחסון המכשיר",
   "selectFoldersForBackup": "בחר תיקיות לגיבוי",
   "selectedFoldersWillBeEncryptedAndBackedUp": "התיקיות שנבחרו יוצפנו ויגובו",
   "unselectAll": "בטל בחירה של הכל",

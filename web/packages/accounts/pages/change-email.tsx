@@ -1,10 +1,14 @@
-import { changeEmail, sendOTTForEmailChange } from "@/accounts/api/user";
+import {
+    AccountsPageContents,
+    AccountsPageFooter,
+    AccountsPageTitle,
+} from "@/accounts/components/layouts/centered-paper";
+import { appHomeRoute } from "@/accounts/services/redirect";
+import { changeEmail, sendOTT } from "@/accounts/services/user";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import { ensure } from "@/utils/ensure";
+import { isHTTPErrorWithStatus } from "@/base/http";
+import log from "@/base/log";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
-import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Alert, Box, TextField } from "@mui/material";
@@ -14,26 +18,22 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";
-import { appHomeRoute } from "../services/redirect";
-import type { PageProps } from "../types/page";
 
-const Page: React.FC<PageProps> = () => {
+const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
         if (!user?.token) {
-            router.push("/");
+            void router.push("/");
         }
     }, []);
 
     return (
-        <VerticallyCentered>
-            <FormPaper>
-                <FormPaperTitle>{t("CHANGE_EMAIL")}</FormPaperTitle>
-                <ChangeEmailForm />
-            </FormPaper>
-        </VerticallyCentered>
+        <AccountsPageContents>
+            <AccountsPageTitle>{t("change_email")}</AccountsPageTitle>
+            <ChangeEmailForm />
+        </AccountsPageContents>
     );
 };
 
@@ -58,7 +58,7 @@ const ChangeEmailForm: React.FC = () => {
     ) => {
         try {
             setLoading(true);
-            await sendOTTForEmailChange(email);
+            await sendOTT(email, "change");
             setEmail(email);
             setShowOttInputVisibility(true);
             setShowMessage(true);
@@ -68,7 +68,13 @@ const ChangeEmailForm: React.FC = () => {
             //     ottInputRef.current?.focus();
             // }, 250);
         } catch (e) {
-            setFieldError("email", t("EMAIl_ALREADY_OWNED"));
+            log.error(e);
+            setFieldError(
+                "email",
+                isHTTPErrorWithStatus(e, 403)
+                    ? t("email_already_taken")
+                    : t("generic_error"),
+            );
         }
         setLoading(false);
     };
@@ -79,13 +85,14 @@ const ChangeEmailForm: React.FC = () => {
     ) => {
         try {
             setLoading(true);
-            await changeEmail(email, ensure(ott));
+            await changeEmail(email, ott!);
             await setLSUser({ ...getData(LS_KEYS.USER), email });
             setLoading(false);
-            goToApp();
+            void goToApp();
         } catch (e) {
+            log.error(e);
             setLoading(false);
-            setFieldError("ott", t("INCORRECT_CODE"));
+            setFieldError("ott", t("incorrect_code"));
         }
     };
 
@@ -98,13 +105,13 @@ const ChangeEmailForm: React.FC = () => {
                 ottInputVisible
                     ? Yup.object().shape({
                           email: Yup.string()
-                              .email(t("EMAIL_ERROR"))
+                              .email(t("invalid_email_error"))
                               .required(t("required")),
                           ott: Yup.string().required(t("required")),
                       })
                     : Yup.object().shape({
                           email: Yup.string()
-                              .email(t("EMAIL_ERROR"))
+                              .email(t("invalid_email_error"))
                               .required(t("required")),
                       })
             }
@@ -120,12 +127,12 @@ const ChangeEmailForm: React.FC = () => {
                             onClose={() => setShowMessage(false)}
                         >
                             <Trans
-                                i18nKey="EMAIL_SENT"
+                                i18nKey="email_sent"
                                 components={{
                                     a: (
                                         <Box
-                                            color="text.muted"
                                             component={"span"}
+                                            sx={{ color: "text.muted" }}
                                         />
                                     ),
                                 }}
@@ -137,23 +144,25 @@ const ChangeEmailForm: React.FC = () => {
                         <VerticallyCentered>
                             <TextField
                                 fullWidth
-                                InputProps={{
-                                    readOnly: ottInputVisible,
-                                }}
                                 type="email"
-                                label={t("ENTER_EMAIL")}
+                                label={t("enter_email")}
                                 value={values.email}
                                 onChange={handleChange("email")}
                                 error={Boolean(errors.email)}
                                 helperText={errors.email}
                                 autoFocus
                                 disabled={loading}
+                                slotProps={{
+                                    input: {
+                                        readOnly: ottInputVisible,
+                                    },
+                                }}
                             />
                             {ottInputVisible && (
                                 <TextField
                                     fullWidth
                                     type="text"
-                                    label={t("ENTER_OTT")}
+                                    label={t("verification_code")}
                                     value={values.ott}
                                     onChange={handleChange("ott")}
                                     error={Boolean(errors.ott)}
@@ -168,29 +177,23 @@ const ChangeEmailForm: React.FC = () => {
                                 sx={{ mt: 2, mb: 4 }}
                                 loading={loading}
                             >
-                                {!ottInputVisible ? t("SEND_OTT") : t("VERIFY")}
+                                {!ottInputVisible ? t("send_otp") : t("verify")}
                             </LoadingButton>
                         </VerticallyCentered>
                     </form>
 
-                    <FormPaperFooter
-                        style={{
-                            justifyContent: ottInputVisible
-                                ? "space-between"
-                                : "normal",
-                        }}
-                    >
+                    <AccountsPageFooter>
                         {ottInputVisible && (
                             <LinkButton
                                 onClick={() => setShowOttInputVisibility(false)}
                             >
-                                {t("CHANGE_EMAIL")}?
+                                {t("change_email")}?
                             </LinkButton>
                         )}
                         <LinkButton onClick={goToApp}>
-                            {t("GO_BACK")}
+                            {t("go_back")}
                         </LinkButton>
-                    </FormPaperFooter>
+                    </AccountsPageFooter>
                 </>
             )}
         </Formik>

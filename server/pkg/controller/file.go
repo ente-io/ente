@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller/discord"
+	"github.com/ente-io/museum/pkg/utils/network"
 	"runtime/debug"
 	"strconv"
 	"strings"
@@ -43,6 +45,7 @@ type FileController struct {
 	ObjectCleanupCtrl     *ObjectCleanupController
 	LockController        *lock.LockController
 	EmailNotificationCtrl *email.EmailNotificationController
+	DiscordController     *discord.DiscordController
 	HostName              string
 	cleanupCronRunning    bool
 }
@@ -63,6 +66,9 @@ func (c *FileController) validateFileCreateOrUpdateReq(userID int64, file ente.F
 	objectPathPrefix := strconv.FormatInt(userID, 10) + "/"
 	if !strings.HasPrefix(file.File.ObjectKey, objectPathPrefix) || !strings.HasPrefix(file.Thumbnail.ObjectKey, objectPathPrefix) {
 		return stacktrace.Propagate(ente.ErrBadRequest, "Incorrect object key reported")
+	}
+	if file.File.ObjectKey == file.Thumbnail.ObjectKey {
+		return stacktrace.Propagate(ente.ErrBadRequest, "file and thumbnail object keys are same")
 	}
 	isCreateFileReq := file.ID == 0
 	// Check for attributes for fileCreation. We don't send key details on update
@@ -99,7 +105,7 @@ func (c *FileController) validateFileCreateOrUpdateReq(userID int64, file ente.F
 }
 
 // Create adds an entry for a file in the respective tables
-func (c *FileController) Create(ctx context.Context, userID int64, file ente.File, userAgent string, app ente.App) (ente.File, error) {
+func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, userAgent string, app ente.App) (ente.File, error) {
 	err := c.validateFileCreateOrUpdateReq(userID, file)
 	if err != nil {
 		return file, stacktrace.Propagate(err, "")
@@ -153,7 +159,7 @@ func (c *FileController) Create(ctx context.Context, userID int64, file ente.Fil
 			if err != nil {
 				return file, stacktrace.Propagate(err, "")
 			}
-			file, err = c.onDuplicateObjectDetected(file, existing, hotDC)
+			file, err = c.onDuplicateObjectDetected(ctx, file, existing, hotDC)
 			if err != nil {
 				return file, stacktrace.Propagate(err, "")
 			}
@@ -689,7 +695,7 @@ func (c *FileController) CleanupDeletedFiles() {
 	defer func() {
 		c.LockController.ReleaseLock(DeletedObjectQueueLock)
 	}()
-	items, err := c.QueueRepo.GetItemsReadyForDeletion(repo.DeleteObjectQueue, 1000)
+	items, err := c.QueueRepo.GetItemsReadyForDeletion(repo.DeleteObjectQueue, 1500)
 	if err != nil {
 		log.WithError(err).Error("Failed to fetch items from queue")
 		return
@@ -784,7 +790,7 @@ func (c *FileController) sizeOf(objectKey string) (int64, error) {
 	return *head.ContentLength, nil
 }
 
-func (c *FileController) onDuplicateObjectDetected(file ente.File, existing ente.File, hotDC string) (ente.File, error) {
+func (c *FileController) onDuplicateObjectDetected(ctx *gin.Context, file ente.File, existing ente.File, hotDC string) (ente.File, error) {
 	newJSON, _ := json.Marshal(file)
 	existingJSON, _ := json.Marshal(existing)
 	log.Info("Comparing " + string(newJSON) + " against " + string(existingJSON))
@@ -802,27 +808,60 @@ func (c *FileController) onDuplicateObjectDetected(file ente.File, existing ente
 		return file, nil
 	} else {
 		// Overwrote an existing file or thumbnail
-		go c.onExistingObjectsReplaced(file, hotDC)
+		go c.onExistingObjectsReplaced(ctx, file, hotDC)
 		return ente.File{}, ente.ErrBadRequest
 	}
 }
 
-func (c *FileController) onExistingObjectsReplaced(file ente.File, hotDC string) {
+func (c *FileController) safeAlert(msg string) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Errorf("Panic caught: %s, stack: %s", r, string(debug.Stack()))
 		}
 	}()
+	c.DiscordController.Notify(msg)
+}
+
+func (c *FileController) onExistingObjectsReplaced(ctx *gin.Context, file ente.File, hotDC string) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorf("Panic caught: %s, stack: %s", r, string(debug.Stack()))
+		}
+	}()
+	client := network.GetClientInfo(ctx)
+	reqId := requestid.Get(ctx)
+	revertErr := false
+	go c.safeAlert(fmt.Sprintf(`Client %s replaced an existing object req_id %s for (file: %s, thum %s)`, client, reqId, file.File.ObjectKey, file.Thumbnail.ObjectKey))
 	log.Error("Replaced existing object, reverting", file)
+	logger := log.WithFields(log.Fields{
+		"req_id":    reqId,
+		"owner_id":  file.OwnerID,
+		"file_obj":  file.File.ObjectKey,
+		"fileSize":  file.File.Size,
+		"thumb_obj": file.Thumbnail.ObjectKey,
+		"thumbSize": file.Thumbnail.Size,
+	})
+
 	err := c.rollbackObject(file.File.ObjectKey)
 	if err != nil {
-		log.Error("Error rolling back latest file from hot storage", err)
+		logger.Error("Error rolling back latest file from hot storage", err)
+		revertErr = true
 	}
 	err = c.rollbackObject(file.Thumbnail.ObjectKey)
 	if err != nil {
 		log.Error("Error rolling back latest thumbnail from hot storage", err)
+		revertErr = true
 	}
-	c.FileRepo.ResetNeedsReplication(file, hotDC)
+	resetErr := c.FileRepo.ResetNeedsReplication(file, hotDC)
+	if resetErr != nil {
+		log.Error("Error resetting needs replication", resetErr)
+		revertErr = true
+	}
+	if revertErr {
+		go c.safeAlert(fmt.Sprintf(`☠️ Client %s replaced an existing object req_id %s for user %d, failed to revert`, client, reqId, file.OwnerID))
+	} else {
+		go c.safeAlert(fmt.Sprintf(`🔄 Client %s replaced an existing object req_id %s for user %d, reverted`, client, reqId, file.OwnerID))
+	}
 }
 
 func (c *FileController) rollbackObject(objectKey string) error {

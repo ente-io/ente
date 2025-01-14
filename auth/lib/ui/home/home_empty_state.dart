@@ -1,4 +1,5 @@
 import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/services/auth_feature_flag.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/settings/data/import_page.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
@@ -9,11 +10,13 @@ import 'package:logging/logging.dart';
 class HomeEmptyStateWidget extends StatelessWidget {
   final VoidCallback? onScanTap;
   final VoidCallback? onManuallySetupTap;
+  final VoidCallback? onImportFromGallery;
 
   const HomeEmptyStateWidget({
     super.key,
     required this.onScanTap,
     required this.onManuallySetupTap,
+    this.onImportFromGallery,
   });
 
   @override
@@ -22,7 +25,10 @@ class HomeEmptyStateWidget extends StatelessWidget {
     return SingleChildScrollView(
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints.tightFor(height: 800, width: 450),
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.of(context).size.height,
+            minWidth: 450,
+          ),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 40),
             child: Column(
@@ -46,7 +52,30 @@ class HomeEmptyStateWidget extends StatelessWidget {
                         width: 400,
                         child: OutlinedButton(
                           onPressed: onScanTap,
-                          child: Text(l10n.importScanQrCode),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                          ),
+                          child: Text(
+                            l10n.importScanQrCode,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 18),
+                    if (PlatformUtil.isMobile() &&
+                        FeatureFlagService.instance
+                            .isInternalUserOrDebugBuild())
+                      SizedBox(
+                        width: 400,
+                        child: OutlinedButton(
+                          onPressed: onImportFromGallery,
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                          ),
+                          child: const Text(
+                            "Import from gallery",
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
                     const SizedBox(height: 18),
@@ -54,7 +83,13 @@ class HomeEmptyStateWidget extends StatelessWidget {
                       width: 400,
                       child: OutlinedButton(
                         onPressed: onManuallySetupTap,
-                        child: Text(l10n.importEnterSetupKey),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                        ),
+                        child: Text(
+                          l10n.importEnterSetupKey,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 54),

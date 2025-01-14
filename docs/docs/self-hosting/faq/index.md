@@ -41,3 +41,7 @@ The first user you create on your instance is treated as an admin.
 
 If you want, you can modify this behaviour by providing an explicit list of
 admins in the [configuration](/self-hosting/guides/admin#becoming-an-admin).
+
+### Can I disable registration of new accounts on my self hosted instance?
+
+Yes. See `internal.disable-registration` in local.yaml.

@@ -1,4 +1,7 @@
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import log from "@/base/log";
+import { downloadManager } from "@/gallery/services/download";
 import { fileLogID, type EnteFile } from "@/media/file";
 import {
     decryptPublicMagicMetadata,
@@ -8,29 +11,99 @@ import {
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
-import downloadManager from "@/new/photos/services/download";
 import { extractExifDates } from "@/new/photos/services/exif";
-import { ensure } from "@/utils/ensure";
-import DialogBox from "@ente/shared/components/DialogBox/";
 import {
-    Button,
+    Dialog,
+    DialogContent,
+    DialogTitle,
     FormControl,
     FormControlLabel,
     FormLabel,
     LinearProgress,
     Radio,
     RadioGroup,
+    Stack,
+    Typography,
 } from "@mui/material";
-import { ComfySpan } from "components/ExportInProgress";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useState } from "react";
 
-/** The current state of the fixing process. */
-type Status = "running" | "completed" | "completed-with-errors";
+type FixCreationTimeProps = ModalVisibilityProps & {
+    /**
+     * The {@link EnteFile}s whose creation time the user wishes to modify.
+     */
+    files: EnteFile[];
+};
 
-export type FixOption =
+/**
+ * A dialog allowing the user to modify the creation time of selected files.
+ */
+export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
+    open,
+    onClose,
+    files,
+}) => {
+    const [step, setStep] = useState<Step | undefined>();
+    const [progress, setProgress] = useState({ completed: 0, total: 0 });
+
+    const galleryContext = useContext(GalleryContext);
+
+    useEffect(() => {
+        // Reset the step whenever the dialog is reopened.
+        if (open) setStep(undefined);
+    }, [open]);
+
+    const onSubmit = async (values: FormValues) => {
+        setStep("running");
+        const completedWithErrors = await updateFiles(
+            files,
+            values.option,
+            values.customDate,
+            setProgress,
+        );
+        setStep(completedWithErrors ? "completed-with-errors" : "completed");
+        await galleryContext.syncWithRemote();
+    };
+
+    const title =
+        step == "running"
+            ? t("fix_creation_time_in_progress")
+            : t("fix_creation_time");
+
+    const message = messageForStatus(step);
+
+    return (
+        <Dialog
+            open={open}
+            onClose={(_, reason) => {
+                if (reason == "backdropClick") return;
+                onClose();
+            }}
+        >
+            <DialogTitle sx={{ marginBlockStart: "4px" }}>{title}</DialogTitle>
+            <DialogContent
+                style={{
+                    minWidth: "310px",
+                    paddingBlockStart: "6px",
+                    display: "flex",
+                    flexDirection: "column",
+                    ...(step == "running" ? { alignItems: "center" } : {}),
+                }}
+            >
+                {message && <Typography>{message}</Typography>}
+                {step === "running" && <Progress {...progress} />}
+                <OptionsForm {...{ step: step, onSubmit, onClose }} />
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+/** The current state of the fixing process. */
+type Step = "running" | "completed" | "completed-with-errors";
+
+type FixOption =
     | "date-time-original"
     | "date-time-digitized"
     | "metadata-date"
@@ -42,130 +115,51 @@ interface FormValues {
     customDate: ParsedMetadataDate | undefined;
 }
 
-export interface FixCreationTimeAttributes {
-    files: EnteFile[];
+interface FixProgress {
+    completed: number;
+    total: number;
 }
 
-interface FixCreationTimeProps {
-    isOpen: boolean;
-    hide: () => void;
-    attributes: FixCreationTimeAttributes;
-}
-
-const FixCreationTime: React.FC<FixCreationTimeProps> = ({
-    isOpen,
-    hide,
-    attributes,
-}) => {
-    const [status, setStatus] = useState<Status | undefined>();
-    const [progressTracker, setProgressTracker] = useState({
-        current: 0,
-        total: 0,
-    });
-
-    const galleryContext = useContext(GalleryContext);
-
-    useEffect(() => {
-        // TODO (MR): Not sure why this is needed
-        if (attributes && isOpen && status !== "running") setStatus(undefined);
-    }, [isOpen]);
-
-    const onSubmit = async (values: FormValues) => {
-        setStatus("running");
-        const completedWithErrors = await updateFiles(
-            attributes.files,
-            values.option,
-            values.customDate,
-            setProgressTracker,
-        );
-        setStatus(completedWithErrors ? "completed-with-errors" : "completed");
-        await galleryContext.syncWithRemote();
-    };
-
-    const title =
-        status == "running"
-            ? t("FIX_CREATION_TIME_IN_PROGRESS")
-            : t("FIX_CREATION_TIME");
-
-    const message = messageForStatus(status);
-
-    if (!attributes) {
-        return <></>;
-    }
-
-    return (
-        <DialogBox
-            open={isOpen}
-            onClose={hide}
-            attributes={{ title, nonClosable: true }}
-        >
-            <div
-                style={{
-                    marginBottom: "10px",
-                    display: "flex",
-                    flexDirection: "column",
-                    ...(status == "running" ? { alignItems: "center" } : {}),
-                }}
-            >
-                {message && <div>{message}</div>}
-                {status === "running" && <Progress {...{ progressTracker }} />}
-                <OptionsForm {...{ step: status, onSubmit }} hide={hide} />
-            </div>
-        </DialogBox>
-    );
-};
-
-export default FixCreationTime;
-
-const messageForStatus = (step?: Status) => {
+const messageForStatus = (step?: Step) => {
     switch (step) {
         case undefined:
             return undefined;
         case "running":
             return undefined;
         case "completed":
-            return t("UPDATE_CREATION_TIME_COMPLETED");
+            return t("fix_creation_time_completed");
         case "completed-with-errors":
-            return t("UPDATE_CREATION_TIME_COMPLETED_WITH_ERROR");
+            return t("fix_creation_time_completed_with_errors");
     }
 };
 
-const Progress = ({ progressTracker }) => {
-    const progress = Math.round(
-        (progressTracker.current * 100) / progressTracker.total,
-    );
-    return (
-        <>
-            <div style={{ marginBottom: "10px" }}>
-                <ComfySpan>
-                    {" "}
-                    {progressTracker.current} / {progressTracker.total}{" "}
-                </ComfySpan>{" "}
-                <span style={{ marginLeft: "10px" }}>
-                    {" "}
-                    {t("CREATION_TIME_UPDATED")}
-                </span>
-            </div>
-            <div
-                style={{
-                    width: "100%",
-                    marginTop: "10px",
-                    marginBottom: "20px",
-                }}
-            >
-                <LinearProgress variant="determinate" value={progress} />
-            </div>
-        </>
-    );
-};
+const Progress: React.FC<FixProgress> = ({ completed, total }) => (
+    <Stack sx={{ width: "100%", gap: "2rem", marginBlockEnd: "20px" }}>
+        <Stack direction="row" sx={{ justifyContent: "center", gap: "2rem" }}>
+            <Typography sx={{ wordSpacing: "1rem" }}>
+                {completed} / {total}
+            </Typography>
+            <Typography>{t("fix_creation_time_file_updated")}</Typography>
+        </Stack>
+
+        <LinearProgress
+            variant="determinate"
+            value={Math.round((completed * 100) / total)}
+        />
+    </Stack>
+);
 
 interface OptionsFormProps {
-    step?: Status;
+    step: Step;
     onSubmit: (values: FormValues) => Promise<void>;
-    hide: () => void;
+    onClose: () => void;
 }
 
-const OptionsForm: React.FC<OptionsFormProps> = ({ step, onSubmit, hide }) => {
+const OptionsForm: React.FC<OptionsFormProps> = ({
+    step,
+    onSubmit,
+    onClose,
+}) => {
     const { values, handleChange, setValues, handleSubmit } =
         useFormik<FormValues>({
             initialValues: {
@@ -179,109 +173,108 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ step, onSubmit, hide }) => {
     return (
         <>
             {(step === undefined || step === "completed-with-errors") && (
-                <div style={{ marginTop: "10px" }}>
-                    <form onSubmit={handleSubmit}>
-                        <FormControl>
-                            <FormLabel>
-                                {t("UPDATE_CREATION_TIME_NOT_STARTED")}
-                            </FormLabel>
-                        </FormControl>
-                        <RadioGroup
-                            name={"option"}
-                            value={values.option}
-                            onChange={handleChange}
-                        >
-                            <FormControlLabel
-                                value={"date-time-original"}
-                                control={<Radio size="small" />}
-                                label={t("DATE_TIME_ORIGINAL")}
-                            />
-                            <FormControlLabel
-                                value={"date-time-digitized"}
-                                control={<Radio size="small" />}
-                                label={t("DATE_TIME_DIGITIZED")}
-                            />
-                            <FormControlLabel
-                                value={"metadata-date"}
-                                control={<Radio size="small" />}
-                                label={t("METADATA_DATE")}
-                            />
-                            <FormControlLabel
-                                value={"custom"}
-                                control={<Radio size="small" />}
-                                label={t("CUSTOM_TIME")}
-                            />
-                        </RadioGroup>
-                        {values.option == "custom" && (
-                            <PhotoDateTimePicker
-                                onAccept={(customDate) =>
-                                    setValues({ option: "custom", customDate })
-                                }
-                            />
-                        )}
-                    </form>
-                </div>
+                <form onSubmit={handleSubmit}>
+                    <FormControl>
+                        <FormLabel>{t("fix_creation_time_options")}</FormLabel>
+                    </FormControl>
+                    <RadioGroup
+                        name={"option"}
+                        value={values.option}
+                        onChange={handleChange}
+                        sx={{ paddingBlockStart: 1 }}
+                    >
+                        <FormControlLabel
+                            value={"date-time-original"}
+                            control={<Radio size="small" />}
+                            label={t("exif_date_time_original")}
+                        />
+                        <FormControlLabel
+                            value={"date-time-digitized"}
+                            control={<Radio size="small" />}
+                            label={t("exif_date_time_digitized")}
+                        />
+                        <FormControlLabel
+                            value={"metadata-date"}
+                            control={<Radio size="small" />}
+                            label={t("exif_metadata_date")}
+                        />
+                        <FormControlLabel
+                            value={"custom"}
+                            control={<Radio size="small" />}
+                            label={t("custom_time")}
+                        />
+                    </RadioGroup>
+                    {values.option == "custom" && (
+                        <PhotoDateTimePicker
+                            onAccept={(customDate) =>
+                                setValues({ option: "custom", customDate })
+                            }
+                        />
+                    )}
+                </form>
             )}
-            <Footer step={step} startFix={handleSubmit} hide={hide} />
+            <Footer
+                step={step}
+                onSubmit={() => handleSubmit()}
+                onClose={onClose}
+            />
         </>
     );
 };
 
-const Footer = ({ step, startFix, ...props }) => {
-    return (
-        step != "running" && (
-            <div
-                style={{
-                    width: "100%",
-                    display: "flex",
-                    marginTop: "30px",
-                    justifyContent: "space-around",
-                }}
-            >
-                {(!step || step == "completed-with-errors") && (
-                    <Button
-                        color="secondary"
-                        size="large"
-                        onClick={() => {
-                            props.hide();
-                        }}
+interface FooterProps {
+    step: Step;
+    onSubmit: () => void;
+    onClose: () => void;
+}
+
+const Footer: React.FC<FooterProps> = ({ step, onSubmit, onClose }) =>
+    step != "running" && (
+        <Stack
+            direction="row"
+            sx={{
+                width: "100%",
+                marginTop: "24px",
+                justifyContent: "space-around",
+            }}
+        >
+            {(!step || step == "completed-with-errors") && (
+                <FocusVisibleButton
+                    color="secondary"
+                    fullWidth
+                    onClick={onClose}
+                >
+                    {t("cancel")}
+                </FocusVisibleButton>
+            )}
+            {step == "completed" && (
+                <FocusVisibleButton color="primary" fullWidth onClick={onClose}>
+                    {t("close")}
+                </FocusVisibleButton>
+            )}
+            {(!step || step == "completed-with-errors") && (
+                <>
+                    <div style={{ width: "30px" }} />
+
+                    <FocusVisibleButton
+                        color="accent"
+                        fullWidth
+                        onClick={onSubmit}
                     >
-                        {t("cancel")}
-                    </Button>
-                )}
-                {step == "completed" && (
-                    <Button color="primary" size="large" onClick={props.hide}>
-                        {t("close")}
-                    </Button>
-                )}
-                {(!step || step == "completed-with-errors") && (
-                    <>
-                        <div style={{ width: "30px" }} />
-
-                        <Button color="accent" size="large" onClick={startFix}>
-                            {t("FIX_CREATION_TIME")}
-                        </Button>
-                    </>
-                )}
-            </div>
-        )
+                        {t("fix_creation_time")}
+                    </FocusVisibleButton>
+                </>
+            )}
+        </Stack>
     );
-};
-
-type SetProgressTracker = React.Dispatch<
-    React.SetStateAction<{
-        current: number;
-        total: number;
-    }>
->;
 
 const updateFiles = async (
     files: EnteFile[],
     fixOption: FixOption,
     customDate: ParsedMetadataDate | undefined,
-    setProgressTracker: SetProgressTracker,
+    setProgress: (progress: FixProgress) => void,
 ) => {
-    setProgressTracker({ current: 0, total: files.length });
+    setProgress({ completed: 0, total: files.length });
     let hadErrors = false;
     for (const [i, file] of files.entries()) {
         try {
@@ -290,7 +283,7 @@ const updateFiles = async (
             log.error(`Failed to update date of ${fileLogID(file)}`, e);
             hadErrors = true;
         } finally {
-            setProgressTracker({ current: i + 1, total: files.length });
+            setProgress({ completed: i + 1, total: files.length });
         }
     }
     return hadErrors;
@@ -302,11 +295,11 @@ const updateFiles = async (
  * This is generally treated as the creation date of the underlying asset
  * (photo, video, live photo) that this file stores.
  *
- * -   For images, this function allows us to update this date from the Exif and
- *     other metadata embedded in the file.
+ * - For images, this function allows us to update this date from the Exif and
+ *   other metadata embedded in the file.
  *
- * -   For all types of files (including images), this function allows us to
- *     update this date to an explicitly provided value.
+ * - For all types of files (including images), this function allows us to
+ *   update this date to an explicitly provided value.
  *
  * If an Exif-involving {@link fixOption} is passed for an non-image file, then
  * that file is just skipped over. Similarly, if an Exif-involving
@@ -323,15 +316,14 @@ const updateEnteFileDate = async (
 
     if (fixOption == "custom") {
         newDate = {
-            dateTime: ensure(customDate).dateTime,
+            dateTime: customDate!.dateTime,
             // See [Note: Don't modify offsetTime when editing date via picker]
             // for why we don't also set the offset here.
             offset: undefined,
-            timestamp: ensure(customDate).timestamp,
+            timestamp: customDate!.timestamp,
         };
     } else if (enteFile.metadata.fileType == FileType.image) {
-        const stream = await downloadManager.getFile(enteFile);
-        const blob = await new Response(stream).blob();
+        const blob = await downloadManager.fileBlob(enteFile);
         const file = new File([blob], enteFile.metadata.title);
         const { DateTimeOriginal, DateTimeDigitized, MetadataDate, DateTime } =
             await extractExifDates(file);

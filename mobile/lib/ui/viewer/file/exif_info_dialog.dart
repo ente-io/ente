@@ -52,10 +52,9 @@ class ExifInfoDialog extends StatelessWidget {
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
           final exif = snapshot.data;
-          String data = "";
-          for (String key in exif.keys) {
-            data += "$key: ${exif[key]}\n";
-          }
+          String data = exif.entries
+              .map((entry) => "${entry.key}: ${entry.value}")
+              .join("\n");
           if (data.isEmpty) {
             data = "no exif data found";
           }

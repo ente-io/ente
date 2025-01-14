@@ -2,9 +2,11 @@ import "dart:async";
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+import 'dart:ui' as ui show Image;
 
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart' show decodeImageFromList;
 import "package:flutter_image_compress/flutter_image_compress.dart";
 import 'package:image_editor/image_editor.dart';
 import 'package:logging/logging.dart';
@@ -103,7 +105,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               ],
             ),
             const Padding(padding: EdgeInsets.all(8)),
-            _buildBottomBar(),
+            SafeArea(child: _buildBottomBar()),
             Padding(padding: EdgeInsets.all(Platform.isIOS ? 16 : 6)),
           ],
         ),
@@ -337,7 +339,13 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       return;
     }
     _logger.info('Size before compression = ${result.length}');
-    result = await FlutterImageCompress.compressWithList(result);
+
+    final ui.Image decodedResult = await decodeImageFromList(result);
+    result = await FlutterImageCompress.compressWithList(
+      result,
+      minWidth: decodedResult.width,
+      minHeight: decodedResult.height,
+    );
     _logger.info('Size after compression = ${result.length}');
     final Duration diff = DateTime.now().difference(start);
     _logger.info('image_editor time : $diff');
@@ -387,6 +395,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         files.add(newFile);
         selectionIndex = files.length - 1;
       }
+      await dialog.hide();
       replacePage(
         context,
         DetailPage(
@@ -397,12 +406,12 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         ),
       );
     } catch (e, s) {
+      await dialog.hide();
       showToast(context, S.of(context).oopsCouldNotSaveEdits);
       _logger.severe(e, s);
     } finally {
       await PhotoManager.startChangeNotify();
     }
-    await dialog.hide();
   }
 
   void flip() {

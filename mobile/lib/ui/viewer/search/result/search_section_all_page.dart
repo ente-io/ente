@@ -7,6 +7,7 @@ import "package:photos/events/event.dart";
 import "package:photos/extensions/list.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
+import "package:photos/models/search/hierarchical/magic_filter.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
@@ -177,6 +178,9 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                                       as Map<int, int>,
                                   heroTag: "searchable_item" +
                                       magicSectionResult.heroTag(),
+                                  magicFilter: magicSectionResult
+                                          .getHierarchicalSearchFilter()
+                                      as MagicFilter,
                                 ),
                               );
                             },

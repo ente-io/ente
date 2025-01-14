@@ -268,7 +268,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   backgroundDecoration: const BoxDecoration(
                     color: Colors.transparent,
                   ),
-                  isFromMemories: true,
                 ),
               );
             },

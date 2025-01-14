@@ -7,7 +7,7 @@ import {
     ARCHIVE_SECTION,
     TRASH_SECTION,
 } from "@/new/photos/services/collection";
-import { AppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import { FluidContainer } from "@ente/shared/components/Container";
 import ClockIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
@@ -20,15 +20,12 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorderRounded";
 import RemoveIcon from "@mui/icons-material/RemoveCircleOutline";
 import RestoreIcon from "@mui/icons-material/Restore";
 import UnArchiveIcon from "@mui/icons-material/Unarchive";
-import VisibilityOffOutlined from "@mui/icons-material/VisibilityOffOutlined";
-import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
+import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { t } from "i18next";
-import { useContext } from "react";
 import { COLLECTION_OPS_TYPE } from "utils/collection";
 import { FILE_OPS_TYPE } from "utils/file";
-import { formatNumber } from "utils/number/format";
-import { getTrashFilesMessage } from "utils/ui";
 
 interface Props {
     handleCollectionOps: (
@@ -75,7 +72,7 @@ const SelectedFileOptions = ({
     isInSearchMode,
     isInHiddenSection,
 }: Props) => {
-    const { setDialogMessage } = useContext(AppContext);
+    const { showMiniDialog } = useAppContext();
 
     const peopleMode = barMode == "people";
 
@@ -91,20 +88,25 @@ const SelectedFileOptions = ({
         });
 
     const trashHandler = () =>
-        setDialogMessage(
-            getTrashFilesMessage(handleFileOps(FILE_OPS_TYPE.TRASH)),
-        );
+        showMiniDialog({
+            title: t("trash_files_title"),
+            message: t("trash_files_message"),
+            continue: {
+                text: t("move_to_trash"),
+                color: "critical",
+                action: handleFileOps(FILE_OPS_TYPE.TRASH),
+            },
+        });
 
     const permanentlyDeleteHandler = () =>
-        setDialogMessage({
-            title: t("DELETE_FILES_TITLE"),
-            content: t("DELETE_FILES_MESSAGE"),
-            proceed: {
-                action: handleFileOps(FILE_OPS_TYPE.DELETE_PERMANENTLY),
+        showMiniDialog({
+            title: t("delete_files_title"),
+            message: t("delete_files_message"),
+            continue: {
                 text: t("delete"),
-                variant: "critical",
+                color: "critical",
+                action: handleFileOps(FILE_OPS_TYPE.DELETE_PERMANENTLY),
             },
-            close: { text: t("cancel") },
         });
 
     const restoreHandler = () =>
@@ -120,34 +122,31 @@ const SelectedFileOptions = ({
 
     const removeFromCollectionHandler = () => {
         if (ownCount === count) {
-            setDialogMessage({
-                title: t("REMOVE_FROM_COLLECTION"),
-                content: t("CONFIRM_SELF_REMOVE_MESSAGE"),
+            showMiniDialog({
+                title: t("remove_from_album"),
+                message: t("confirm_remove_message"),
+                continue: {
+                    text: t("yes_remove"),
+                    color: "primary",
 
-                proceed: {
                     action: () =>
                         handleCollectionOps(COLLECTION_OPS_TYPE.REMOVE)(
                             selectedCollection,
                         ),
-                    text: t("YES_REMOVE"),
-                    variant: "primary",
                 },
-                close: { text: t("cancel") },
             });
         } else {
-            setDialogMessage({
-                title: t("REMOVE_FROM_COLLECTION"),
-                content: t("CONFIRM_SELF_AND_OTHER_REMOVE_MESSAGE"),
-
-                proceed: {
+            showMiniDialog({
+                title: t("remove_from_album"),
+                message: t("confirm_remove_incl_others_message"),
+                continue: {
+                    text: t("yes_remove"),
+                    color: "critical",
                     action: () =>
                         handleCollectionOps(COLLECTION_OPS_TYPE.REMOVE)(
                             selectedCollection,
                         ),
-                    text: t("YES_REMOVE"),
-                    variant: "critical",
                 },
-                close: { text: t("cancel") },
             });
         }
     };
@@ -180,16 +179,19 @@ const SelectedFileOptions = ({
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />
                 </IconButton>
-                <Box ml={1.5}>
-                    {formatNumber(count)} {t("SELECTED")}{" "}
-                    {ownCount !== count &&
-                        `(${formatNumber(ownCount)} ${t("YOURS")})`}
+                <Box sx={{ ml: 1.5 }}>
+                    {ownCount === count
+                        ? t("selected_count", { selected: count })
+                        : t("selected_and_yours_count", {
+                              selected: count,
+                              yours: ownCount,
+                          })}
                 </Box>
             </FluidContainer>
-            <Stack spacing={2} direction="row" mr={2}>
+            <Stack direction="row" sx={{ gap: 2, mr: 2 }}>
                 {isInSearchMode ? (
                     <>
-                        <Tooltip title={t("FIX_CREATION_TIME")}>
+                        <Tooltip title={t("fix_creation_time")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.FIX_TIME)}
                             >
@@ -215,11 +217,11 @@ const SelectedFileOptions = ({
                                 <ArchiveIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("HIDE")}>
+                        <Tooltip title={t("hide")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.HIDE)}
                             >
-                                <VisibilityOffOutlined />
+                                <VisibilityOffOutlinedIcon />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title={t("delete")}>
@@ -249,11 +251,11 @@ const SelectedFileOptions = ({
                                 <ArchiveIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("HIDE")}>
+                        <Tooltip title={t("hide")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.HIDE)}
                             >
-                                <VisibilityOffOutlined />
+                                <VisibilityOffOutlinedIcon />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title={t("delete")}>
@@ -264,12 +266,12 @@ const SelectedFileOptions = ({
                     </>
                 ) : activeCollectionID === TRASH_SECTION ? (
                     <>
-                        <Tooltip title={t("RESTORE")}>
+                        <Tooltip title={t("restore")}>
                             <IconButton onClick={restoreHandler}>
                                 <RestoreIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DELETE_PERMANENTLY")}>
+                        <Tooltip title={t("delete_permanently")}>
                             <IconButton onClick={permanentlyDeleteHandler}>
                                 <DeleteIcon />
                             </IconButton>
@@ -284,7 +286,7 @@ const SelectedFileOptions = ({
                                 <DownloadIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("MOVE")}>
+                        <Tooltip title={t("move")}>
                             <IconButton onClick={moveToCollection}>
                                 <MoveIcon />
                             </IconButton>
@@ -305,9 +307,9 @@ const SelectedFileOptions = ({
                     </Tooltip>
                 ) : isInHiddenSection ? (
                     <>
-                        <Tooltip title={t("UNHIDE")}>
+                        <Tooltip title={t("unhide")}>
                             <IconButton onClick={unhideToCollection}>
-                                <VisibilityOutlined />
+                                <VisibilityOutlinedIcon />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title={t("download")}>
@@ -326,7 +328,7 @@ const SelectedFileOptions = ({
                     </>
                 ) : (
                     <>
-                        <Tooltip title={t("FIX_CREATION_TIME")}>
+                        <Tooltip title={t("fix_creation_time")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.FIX_TIME)}
                             >
@@ -383,13 +385,13 @@ const SelectedFileOptions = ({
                             activeCollectionID !== ARCHIVE_SECTION &&
                             !isFavoriteCollection && (
                                 <>
-                                    <Tooltip title={t("MOVE")}>
+                                    <Tooltip title={t("move")}>
                                         <IconButton onClick={moveToCollection}>
                                             <MoveIcon />
                                         </IconButton>
                                     </Tooltip>
 
-                                    <Tooltip title={t("REMOVE")}>
+                                    <Tooltip title={t("remove")}>
                                         <IconButton
                                             onClick={
                                                 removeFromCollectionHandler
@@ -400,11 +402,11 @@ const SelectedFileOptions = ({
                                     </Tooltip>
                                 </>
                             )}
-                        <Tooltip title={t("HIDE")}>
+                        <Tooltip title={t("hide")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.HIDE)}
                             >
-                                <VisibilityOffOutlined />
+                                <VisibilityOffOutlinedIcon />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title={t("delete")}>

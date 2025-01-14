@@ -24,6 +24,7 @@ export const NavbarBase = styled(FlexWrapper)`
     }
 `;
 
+// TODO: Prune
 export const AppNavbar: React.FC = () => {
     return (
         <NavbarBase>
@@ -33,6 +34,24 @@ export const AppNavbar: React.FC = () => {
         </NavbarBase>
     );
 };
+
+const NavbarBaseNormalFlow = styled("div")`
+    flex: 0 0 64px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
+`;
+
+/**
+ * A variant of AppNavbar that places itself normally in the document flow
+ * instead of using a fixed positioning.
+ */
+export const AppNavbarNormalFlow: React.FC = () => (
+    <NavbarBaseNormalFlow>
+        <EnteLogo />
+    </NavbarBaseNormalFlow>
+);
 
 export const SelectionBar = styled(NavbarBase)`
     position: fixed;

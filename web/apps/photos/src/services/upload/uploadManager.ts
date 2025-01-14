@@ -1,11 +1,19 @@
+import { isDesktop } from "@/base/app";
 import { createComlinkCryptoWorker } from "@/base/crypto";
 import { type CryptoWorker } from "@/base/crypto/worker";
-import { lowercaseExtension, nameAndExtension } from "@/base/file";
+import { lowercaseExtension, nameAndExtension } from "@/base/file-name";
+import type { PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import { shouldDisableCFUploadProxy } from "@/gallery/services/upload";
 import type { Collection } from "@/media/collection";
-import { EncryptedEnteFile, EnteFile } from "@/media/file";
+import {
+    decryptFile,
+    type EncryptedEnteFile,
+    type EnteFile,
+} from "@/media/file";
+import type { ParsedMetadata } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { getLocalFiles } from "@/new/photos/services/files";
@@ -14,20 +22,17 @@ import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_RESULT,
-    UPLOAD_STAGES,
+    type UploadPhase,
 } from "@/new/photos/services/upload/types";
-import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { Canceler } from "axios";
-import isElectron from "is-electron";
 import {
     getLocalPublicFiles,
     getPublicCollectionUID,
 } from "services/publicCollectionService";
-import { getDisableCFUploadProxyFlag } from "services/userService";
 import watcher from "services/watch";
-import { decryptFile, getUserOwnedFiles } from "utils/file";
+import { getUserOwnedFiles } from "utils/file";
 import {
     getMetadataJSONMapKeyForJSON,
     tryParseTakeoutMetadataJSON,
@@ -38,6 +43,7 @@ import UploadService, {
     uploadItemFileName,
     uploader,
     type PotentialLivePhotoAsset,
+    type UploadAsset,
 } from "./upload-service";
 
 export type FileID = number;
@@ -70,7 +76,7 @@ export type SegregatedFinishedUploads = Map<UPLOAD_RESULT, FileID[]>;
 export interface ProgressUpdater {
     setPercentComplete: React.Dispatch<React.SetStateAction<number>>;
     setUploadCounter: React.Dispatch<React.SetStateAction<UploadCounter>>;
-    setUploadStage: React.Dispatch<React.SetStateAction<UPLOAD_STAGES>>;
+    setUploadPhase: (phase: UploadPhase) => void;
     setInProgressUploads: React.Dispatch<
         React.SetStateAction<InProgressUpload[]>
     >;
@@ -85,23 +91,14 @@ export interface ProgressUpdater {
 /** The number of uploads to process in parallel. */
 const maxConcurrentUploads = 4;
 
-export interface UploadItemWithCollection {
+export type UploadItemWithCollection = UploadAsset & {
     localID: number;
     collectionID: number;
-    isLivePhoto?: boolean;
-    uploadItem?: UploadItem;
-    livePhotoAssets?: LivePhotoAssets;
-}
+};
 
 export interface LivePhotoAssets {
     image: UploadItem;
     video: UploadItem;
-}
-
-export interface PublicUploadProps {
-    token: string;
-    passwordToken: string;
-    accessedThroughSharedURL: boolean;
 }
 
 interface UploadCancelStatus {
@@ -132,8 +129,8 @@ class UIService {
     private progressUpdater: ProgressUpdater;
 
     // UPLOAD LEVEL STATES
-    private uploadStage: UPLOAD_STAGES = UPLOAD_STAGES.START;
-    private filenames: Map<number, string> = new Map();
+    private uploadPhase: UploadPhase = "preparing";
+    private filenames = new Map<number, string>();
     private hasLivePhoto: boolean = false;
     private uploadProgressView: boolean = false;
 
@@ -146,7 +143,7 @@ class UIService {
 
     init(progressUpdater: ProgressUpdater) {
         this.progressUpdater = progressUpdater;
-        this.progressUpdater.setUploadStage(this.uploadStage);
+        this.progressUpdater.setUploadPhase(this.uploadPhase);
         this.progressUpdater.setUploadFilenames(this.filenames);
         this.progressUpdater.setHasLivePhotos(this.hasLivePhoto);
         this.progressUpdater.setUploadProgressView(this.uploadProgressView);
@@ -184,9 +181,9 @@ class UIService {
         this.updateProgressBarUI();
     }
 
-    setUploadStage(stage: UPLOAD_STAGES) {
-        this.uploadStage = stage;
-        this.progressUpdater.setUploadStage(stage);
+    setUploadPhase(phase: UploadPhase) {
+        this.uploadPhase = phase;
+        this.progressUpdater.setUploadPhase(phase);
     }
 
     setFiles(files: { localID: number; fileName: string }[]) {
@@ -258,8 +255,7 @@ class UIService {
         index = 0,
     ) {
         const cancel: { exec: Canceler } = { exec: () => {} };
-        const cancelTimedOutRequest = () =>
-            cancel.exec(CustomError.REQUEST_TIMEOUT);
+        const cancelTimedOutRequest = () => cancel.exec("Request timed out");
 
         const cancelCancelledUploadRequest = () =>
             cancel.exec(CustomError.UPLOAD_CANCELLED);
@@ -328,10 +324,9 @@ class UploadManager {
     private onUploadFile: (file: EnteFile) => void;
     private collections: Map<number, Collection>;
     private uploadInProgress: boolean;
-    private publicUploadProps: PublicUploadProps;
+    private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
     private uploaderName: string;
     private uiService: UIService;
-    private isCFUploadProxyDisabled: boolean = false;
 
     constructor() {
         this.uiService = new UIService();
@@ -340,19 +335,17 @@ class UploadManager {
     public async init(
         progressUpdater: ProgressUpdater,
         onUploadFile: (file: EnteFile) => void,
-        publicCollectProps: PublicUploadProps,
-        isCFUploadProxyDisabled: boolean,
+        publicAlbumsCredentials: PublicAlbumsCredentials | undefined,
     ) {
         this.uiService.init(progressUpdater);
-        const remoteIsCFUploadProxyDisabled =
-            await getDisableCFUploadProxyFlag();
-        if (remoteIsCFUploadProxyDisabled) {
-            isCFUploadProxyDisabled = remoteIsCFUploadProxyDisabled;
-        }
-        this.isCFUploadProxyDisabled = isCFUploadProxyDisabled;
-        UploadService.init(publicCollectProps);
+        UploadService.init(publicAlbumsCredentials);
         this.onUploadFile = onUploadFile;
-        this.publicUploadProps = publicCollectProps;
+        this.publicAlbumsCredentials = publicAlbumsCredentials;
+    }
+
+    logout() {
+        // TODO: Consolidate state in one place instead of spreading it.
+        UploadService.logout();
     }
 
     public isUploadRunning() {
@@ -371,7 +364,7 @@ class UploadManager {
         this.resetState();
         this.uiService.reset();
         uploadCancelService.reset();
-        this.uiService.setUploadStage(UPLOAD_STAGES.START);
+        this.uiService.setUploadPhase("preparing");
     }
 
     showUploadProgressDialog() {
@@ -419,10 +412,7 @@ class UploadManager {
                 splitMetadataAndMediaItems(namedItems);
 
             if (metadataItems.length) {
-                this.uiService.setUploadStage(
-                    UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
-                );
-
+                this.uiService.setUploadPhase("readingMetadata");
                 await this.parseMetadataJSONFiles(metadataItems);
             }
 
@@ -450,7 +440,7 @@ class UploadManager {
                 throw e;
             }
         } finally {
-            this.uiService.setUploadStage(UPLOAD_STAGES.FINISH);
+            this.uiService.setUploadPhase("done");
             void globalThis.electron?.clearPendingUploads();
             for (let i = 0; i < maxConcurrentUploads; i++) {
                 this.comlinkCryptoWorkers[i]?.terminate();
@@ -462,6 +452,43 @@ class UploadManager {
         return this.uiService.hasFilesInResultList();
     }
 
+    /**
+     * Upload a single file to the given collection.
+     *
+     * @param file A web {@link File} object representing the file to upload.
+     *
+     * @param collection The {@link Collection} in which the file should be
+     * added.
+     *
+     * @param sourceEnteFile The {@link EnteFile} from which the file being
+     * uploaded has been derived. This is used to extract and reassociated
+     * relevant metadata to the newly uploaded file.
+     */
+    public async uploadFile(
+        file: File,
+        collection: Collection,
+        sourceEnteFile: EnteFile,
+    ) {
+        const timestamp = sourceEnteFile.metadata.creationTime;
+        const dateTime = sourceEnteFile.pubMagicMetadata.data.dateTime;
+        const offset = sourceEnteFile.pubMagicMetadata.data.offsetTime;
+
+        const creationDate: ParsedMetadata["creationDate"] = {
+            timestamp,
+            dateTime,
+            offset,
+        };
+
+        const item = {
+            uploadItem: file,
+            localID: 1,
+            collectionID: collection.id,
+            externalParsedMetadata: { creationDate },
+        };
+
+        return this.uploadItems([item], [collection]);
+    }
+
     private abortIfCancelled = () => {
         if (uploadCancelService.isUploadCancelationRequested()) {
             throw Error(CustomError.UPLOAD_CANCELLED);
@@ -469,9 +496,11 @@ class UploadManager {
     };
 
     private async updateExistingFilesAndCollections(collections: Collection[]) {
-        if (this.publicUploadProps.accessedThroughSharedURL) {
+        if (this.publicAlbumsCredentials) {
             this.existingFiles = await getLocalPublicFiles(
-                getPublicCollectionUID(this.publicUploadProps.token),
+                getPublicCollectionUID(
+                    this.publicAlbumsCredentials.accessToken,
+                ),
             );
         } else {
             this.existingFiles = getUserOwnedFiles(await getLocalFiles());
@@ -490,9 +519,7 @@ class UploadManager {
             this.abortIfCancelled();
 
             log.info(`Parsing metadata JSON ${fileName}`);
-            const metadataJSON = await tryParseTakeoutMetadataJSON(
-                ensure(uploadItem),
-            );
+            const metadataJSON = await tryParseTakeoutMetadataJSON(uploadItem!);
             if (metadataJSON) {
                 this.parsedMetadataJSONMap.set(
                     getMetadataJSONMapKeyForJSON(collectionID, fileName),
@@ -507,7 +534,7 @@ class UploadManager {
         this.itemsToBeUploaded = [...this.itemsToBeUploaded, ...mediaItems];
         this.uiService.reset(mediaItems.length);
         await UploadService.setFileCount(mediaItems.length);
-        this.uiService.setUploadStage(UPLOAD_STAGES.UPLOADING);
+        this.uiService.setUploadPhase("uploading");
 
         const uploadProcesses = [];
         for (
@@ -543,7 +570,7 @@ class UploadManager {
                 this.existingFiles,
                 this.parsedMetadataJSONMap,
                 worker,
-                this.isCFUploadProxyDisabled,
+                shouldDisableCFUploadProxy(),
                 () => {
                     this.abortIfCancelled();
                 },
@@ -648,7 +675,7 @@ class UploadManager {
         fileWithCollection: ClusteredUploadItem,
         uploadedFile: EncryptedEnteFile,
     ) {
-        if (isElectron()) {
+        if (isDesktop) {
             if (watcher.isUploadRunning()) {
                 await watcher.onFileUpload(
                     fileUploadResult,
@@ -661,7 +688,7 @@ class UploadManager {
 
     public cancelRunningUpload() {
         log.info("User cancelled running upload");
-        this.uiService.setUploadStage(UPLOAD_STAGES.CANCELLING);
+        this.uiService.setUploadPhase("cancelling");
         uploadCancelService.requestUploadCancelation();
     }
 
@@ -717,7 +744,7 @@ export default new UploadManager();
  *   {@link collection}, giving us {@link UploadableUploadItem}. This is what
  *   gets queued and then passed to the {@link uploader}.
  */
-type UploadItemWithCollectionIDAndName = {
+type UploadItemWithCollectionIDAndName = UploadAsset & {
     /** A unique ID for the duration of the upload */
     localID: number;
     /** The ID of the collection to which this file should be uploaded. */
@@ -728,27 +755,20 @@ type UploadItemWithCollectionIDAndName = {
      * In case of live photos, this'll be the name of the image part.
      */
     fileName: string;
-    /** `true` if this is a live photo. */
-    isLivePhoto?: boolean;
-    /* Valid for non-live photos */
-    uploadItem?: UploadItem;
-    /* Valid for live photos */
-    livePhotoAssets?: LivePhotoAssets;
 };
 
 const makeUploadItemWithCollectionIDAndName = (
     f: UploadItemWithCollection,
 ): UploadItemWithCollectionIDAndName => ({
-    localID: ensure(f.localID),
-    collectionID: ensure(f.collectionID),
-    fileName: ensure(
-        f.isLivePhoto
-            ? uploadItemFileName(f.livePhotoAssets.image)
-            : uploadItemFileName(f.uploadItem),
-    ),
+    localID: f.localID!,
+    collectionID: f.collectionID!,
+    fileName: (f.isLivePhoto
+        ? uploadItemFileName(f.livePhotoAssets.image)
+        : uploadItemFileName(f.uploadItem))!,
     isLivePhoto: f.isLivePhoto,
     uploadItem: f.uploadItem,
     livePhotoAssets: f.livePhotoAssets,
+    externalParsedMetadata: f.externalParsedMetadata,
 });
 
 /**
@@ -756,14 +776,14 @@ const makeUploadItemWithCollectionIDAndName = (
  *
  * See: [Note: Intermediate file types during upload].
  */
-type ClusteredUploadItem = {
+interface ClusteredUploadItem {
     localID: number;
     collectionID: number;
     fileName: string;
     isLivePhoto: boolean;
     uploadItem?: UploadItem;
     livePhotoAssets?: LivePhotoAssets;
-};
+}
 
 /**
  * The file that we hand off to the uploader. Essentially
@@ -816,7 +836,7 @@ const markUploaded = async (electron: Electron, item: ClusteredUploadItem) => {
             );
         }
     } else {
-        const p = ensure(item.uploadItem);
+        const p = item.uploadItem!;
         if (Array.isArray(p)) {
             electron.markUploadedZipItems([p]);
         } else if (typeof p == "string") {
@@ -897,25 +917,8 @@ const clusterLivePhotos = async (
 };
 
 /**
- * [Note: Memory pressure when uploading video files]
- *
- * A user (Fedora 39 VM on Qubes OS with 32 GB RAM, both AppImage and RPM) has
- * reported that their app runs out of memory when the app tries to upload
- * multiple large videos simultaneously. For example, 4 parallel uploads of 4
- * 700 MB videos.
- *
- * I am unable to reproduce this: tested on macOS and Linux, with videos up to
- * 3.8 G x 1 + 3 x 700 M uploaded in parallel. The memory usage remains constant
- * as expected (hovering around 2 G), since we don't pull the entire videos in
- * memory and instead do a streaming disk read + encryption + upload.
- *
- * The JavaScript heap for the renderer process (when we're running in the
- * context of our desktop app) is limited to 4 GB. See
- * https://www.electronjs.org/blog/v8-memory-cage.
- *
- * For now, add logs if our usage increases some high water mark. This is solely
- * so we can better understand the issue if it arises again (and can deal with
- * it in an informed manner).
+ * Add logs if our usage increases some high water mark. This is solely so that
+ * we have some indication in the logs if we get a user report of OOM crashes.
  */
 const logAboutMemoryPressureIfNeeded = () => {
     if (!globalThis.electron) return;

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/export/ente.dart';
@@ -9,16 +8,15 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
+import 'package:ente_auth/ui/settings/data/html_export.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/share_utils.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:file_saver/file_saver.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:logging/logging.dart';
 import 'package:share_plus/share_plus.dart';
 
 Future<void> handleExportClick(BuildContext context) async {
@@ -41,13 +39,22 @@ Future<void> handleExportClick(BuildContext context) async {
         isInAlert: true,
         buttonAction: ButtonAction.second,
       ),
+      ButtonWidget(
+        buttonType: ButtonType.secondary,
+        labelText: context.l10n.plainHTML,
+        buttonSize: ButtonSize.large,
+        isInAlert: true,
+        buttonAction: ButtonAction.third,
+      ),
     ],
   );
   if (result?.action != null && result!.action != ButtonAction.cancel) {
     if (result.action == ButtonAction.first) {
       await _requestForEncryptionPassword(context);
-    } else {
-      await _showExportWarningDialog(context);
+    } else if (result.action == ButtonAction.second) {
+      await _showExportWarningDialog(context, "txt");
+    } else if (result.action == ButtonAction.third) {
+      await _showExportWarningDialog(context, "html");
     }
   }
 }
@@ -98,9 +105,8 @@ Future<void> _requestForEncryptionPassword(
             ),
           );
           // get json value of data
-          await _exportCodes(context, jsonEncode(data.toJson()));
-        } catch (e, s) {
-          Logger("ExportWidget").severe(e, s);
+          await _exportCodes(context, jsonEncode(data.toJson()), "txt");
+        } catch (e) {
           showToast(context, "Error while exporting codes.");
         }
       }
@@ -108,26 +114,34 @@ Future<void> _requestForEncryptionPassword(
   );
 }
 
-Future<void> _showExportWarningDialog(BuildContext context) async {
+Future<void> _showExportWarningDialog(BuildContext context, String type) async {
   await showChoiceActionSheet(
     context,
     title: context.l10n.warning,
     body: context.l10n.exportWarningDesc,
     isCritical: true,
     firstButtonOnTap: () async {
-      final data = await _getAuthDataForExport();
-      await _exportCodes(context, data);
+      if (type == "html") {
+        final data = await generateHtml(context);
+        await _exportCodes(context, data, type);
+      } else {
+        final data = await _getAuthDataForExport();
+        await _exportCodes(context, data, type);
+      }
     },
     secondButtonLabel: context.l10n.cancel,
     firstButtonLabel: context.l10n.iUnderStand,
   );
 }
 
-Future<void> _exportCodes(BuildContext context, String fileContent) async {
+Future<void> _exportCodes(
+  BuildContext context,
+  String fileContent,
+  String extension,
+) async {
   DateTime now = DateTime.now().toUtc();
   String formattedDate = DateFormat('yyyy-MM-dd').format(now);
   String exportFileName = 'ente-auth-codes-$formattedDate';
-  String exportFileExtension = 'txt';
   final hasAuthenticated = await LocalAuthenticationService.instance
       .requestLocalAuthentication(context, context.l10n.authToExportCodes);
   await PlatformUtil.refocusWindows();
@@ -142,14 +156,14 @@ Future<void> _exportCodes(BuildContext context, String fileContent) async {
       saveAction: () async {
         await PlatformUtil.shareFile(
           exportFileName,
-          exportFileExtension,
+          extension,
           CryptoUtil.strToBin(fileContent),
           MimeType.text,
         );
       },
       sendAction: () async {
         final codeFile = File(
-          "${Configuration.instance.getTempDirectory()}$exportFileName.$exportFileExtension",
+          "${Configuration.instance.getTempDirectory()}$exportFileName.$extension",
         );
         if (codeFile.existsSync()) {
           await codeFile.delete();
@@ -175,7 +189,8 @@ Future<String> _getAuthDataForExport() async {
   String data = "";
   for (final code in allCodes) {
     if (code.hasError) continue;
-    data += "${code.rawData.replaceAll(',', '%2C')}\n";
+    data +=
+        "${code.rawData.replaceAll('algorithm=Algorithm.', 'algorithm=').replaceAll(',', '%2C')}\n";
   }
 
   return data;

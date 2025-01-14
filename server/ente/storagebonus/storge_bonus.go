@@ -11,21 +11,22 @@ const (
 
 	// AddOnSupport is the bonus for users added by the support team
 	AddOnSupport = "ADD_ON_SUPPORT"
-	// AddOnBf2023 is the bonus for users who have opted for the Black Friday 2023 offer
+	// AddOnBf is the bonus for users who have opted for the Black Friday offers
 	AddOnBf2023 = "ADD_ON_BF_2023"
+	AddOnBf2024 = "ADD_ON_BF_2024"
 	// In the future, we can add various types of bonuses based on different events like Anniversary,
 	// or finishing tasks like ML indexing, enabling sharing etc etc
 )
 
 // PaidAddOnTypes : These add-ons can be purchased by the users and help in the expiry of an account
 // as long as the add-on is active.
-var PaidAddOnTypes = []BonusType{AddOnSupport, AddOnBf2023}
+var PaidAddOnTypes = []BonusType{AddOnSupport, AddOnBf2023, AddOnBf2024}
 
 // ExtendsExpiry returns true if the bonus type extends the expiry of the account.
 // By default, all bonuses don't extend expiry.
 func (t BonusType) ExtendsExpiry() bool {
 	switch t {
-	case AddOnSupport, AddOnBf2023:
+	case AddOnSupport, AddOnBf2023, AddOnBf2024:
 		return true
 	case Referral, SignUp:
 		return false
@@ -44,6 +45,8 @@ func BonusFromType(bonusType string) BonusType {
 		return AddOnSupport
 	case "ADD_ON_BF_2023":
 		return AddOnBf2023
+	case "ADD_ON_BF_2024":
+		return AddOnBf2024
 	default:
 		return ""
 	}
@@ -56,7 +59,7 @@ func (t BonusType) RestrictToDoublingStorage() bool {
 	switch t {
 	case Referral, SignUp:
 		return true
-	case AddOnSupport, AddOnBf2023:
+	case AddOnSupport, AddOnBf2023, AddOnBf2024:
 		return false
 	default:
 		return true
@@ -130,6 +133,8 @@ func (a *ActiveStorageBonus) GetAddonStorage() int64 {
 	return addonStorage
 }
 
+// GetUsableBonus Returns the add_on_bonus + referral_bonus for a given user. The referral bonus is restricted
+// to max of addonStorage + subStorage
 func (a *ActiveStorageBonus) GetUsableBonus(subStorage int64) int64 {
 	refBonus := a.GetReferralBonus()
 	totalSubAndAddOnStorage := a.GetAddonStorage() + subStorage

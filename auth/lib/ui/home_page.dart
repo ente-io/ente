@@ -14,10 +14,13 @@ import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/model/tag_enums.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
+import 'package:ente_auth/services/auth_feature_flag.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
+import 'package:ente_auth/theme/ente_theme.dart';
+import 'package:ente_auth/theme/text_style.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/code_error_widget.dart';
 import 'package:ente_auth/ui/code_widget.dart';
@@ -28,12 +31,16 @@ import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/home/coach_mark_widget.dart';
 import 'package:ente_auth/ui/home/home_empty_state.dart';
 import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
+import 'package:ente_auth/ui/reorder_codes_page.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
+import 'package:ente_auth/ui/sort_option_menu.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/lock_screen_settings.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -41,6 +48,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
+import 'package:scan/scan.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -79,10 +87,14 @@ class _HomePageState extends State<HomePage> {
   bool hasNonTrashedCodes = false;
   bool isCompactMode = false;
 
+  late CodeSortKey _codeSortKey;
+  final Set<LogicalKeyboardKey> _pressedKeys = <LogicalKeyboardKey>{};
+
   @override
   void initState() {
     super.initState();
     _textController.addListener(_applyFilteringAndRefresh);
+    _codeSortKey = PreferenceService.instance.codeSortKey();
     _loadCodes();
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
       _loadCodes();
@@ -91,6 +103,7 @@ class _HomePageState extends State<HomePage> {
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
       await autoLogoutAlert(context);
     });
+
     _initDeepLinks();
     Future.delayed(
       const Duration(seconds: 1),
@@ -102,6 +115,40 @@ class _HomePageState extends State<HomePage> {
     _showSearchBox = _autoFocusSearch;
 
     searchBoxFocusNode = FocusNode();
+    ServicesBinding.instance.keyboard.addHandler(_handleKeyEvent);
+  }
+
+  bool _handleKeyEvent(KeyEvent event) {
+    if (event is KeyDownEvent) {
+      _pressedKeys.add(event.logicalKey);
+      bool isMetaKeyPressed = Platform.isMacOS || Platform.isIOS
+          ? (_pressedKeys.contains(LogicalKeyboardKey.metaLeft) ||
+              _pressedKeys.contains(LogicalKeyboardKey.meta) ||
+              _pressedKeys.contains(LogicalKeyboardKey.metaRight))
+          : (_pressedKeys.contains(LogicalKeyboardKey.controlLeft) ||
+              _pressedKeys.contains(LogicalKeyboardKey.control) ||
+              _pressedKeys.contains(LogicalKeyboardKey.controlRight));
+
+      if (isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyF) {
+        setState(() {
+          _showSearchBox = true;
+          searchBoxFocusNode.requestFocus();
+        });
+        return true;
+      }
+      if (event.logicalKey == LogicalKeyboardKey.escape) {
+        setState(() {
+          _textController.clear();
+          _searchText = "";
+          _showSearchBox = false;
+          _applyFilteringAndRefresh();
+        });
+        return true;
+      }
+    } else if (event is KeyUpEvent) {
+      _pressedKeys.remove(event.logicalKey);
+    }
+    return false;
   }
 
   void _loadCodes() {
@@ -109,13 +156,15 @@ class _HomePageState extends State<HomePage> {
       _allCodes = codes;
       hasTrashedCodes = false;
       hasNonTrashedCodes = false;
+
       for (final c in _allCodes ?? []) {
         if (c.isTrashed) {
           hasTrashedCodes = true;
         } else {
           hasNonTrashedCodes = true;
         }
-        if (hasNonTrashedCodes && hasTrashedCodes) {
+
+        if (hasTrashedCodes && hasNonTrashedCodes) {
           break;
         }
       }
@@ -186,6 +235,9 @@ class _HomePageState extends State<HomePage> {
               .toList() ??
           [];
     }
+
+    sortFilteredCodes(_filteredCodes, _codeSortKey);
+
     if (mounted) {
       setState(() {});
     }
@@ -196,11 +248,47 @@ class _HomePageState extends State<HomePage> {
     _streamSubscription?.cancel();
     _triggerLogoutEvent?.cancel();
     _iconsChangedEvent?.cancel();
+    _textController.dispose();
     _textController.removeListener(_applyFilteringAndRefresh);
-
+    ServicesBinding.instance.keyboard.removeHandler(_handleKeyEvent);
     searchBoxFocusNode.dispose();
 
     super.dispose();
+  }
+
+  void sortFilteredCodes(List<Code> codes, CodeSortKey sortKey) {
+    switch (sortKey) {
+      case CodeSortKey.issuerName:
+        codes.sort((a, b) => compareAsciiLowerCaseNatural(a.issuer, b.issuer));
+        break;
+      case CodeSortKey.accountName:
+        codes
+            .sort((a, b) => compareAsciiLowerCaseNatural(a.account, b.account));
+        break;
+      case CodeSortKey.mostFrequentlyUsed:
+        codes.sort((a, b) => b.display.tapCount.compareTo(a.display.tapCount));
+        break;
+      case CodeSortKey.recentlyUsed:
+        codes.sort(
+          (a, b) => b.display.lastUsedAt.compareTo(a.display.lastUsedAt),
+        );
+        break;
+      case CodeSortKey.manual:
+      default:
+        codes.sort((a, b) => a.display.position.compareTo(b.display.position));
+        break;
+    }
+    if (sortKey != CodeSortKey.manual) {
+      // move pinned codes to the using
+      int insertIndex = 0;
+      for (int i = 0; i < codes.length; i++) {
+        if (codes[i].isPinned) {
+          final code = codes.removeAt(i);
+          codes.insert(insertIndex, code);
+          insertIndex++;
+        }
+      }
+    }
   }
 
   Future<void> _redirectToScannerPage() async {
@@ -255,8 +343,27 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> navigateToReorderPage(List<Code> allCodes) async {
+    List<Code> sortCandidate = allCodes
+        .where((element) => !element.hasError && !element.isTrashed)
+        .toList();
+    sortCandidate
+        .sort((a, b) => a.display.position.compareTo(b.display.position));
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return ReorderCodesPage(codes: sortCandidate);
+        },
+      ),
+    ).then((value) {
+      setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    LockScreenSettings.instance
+        .setLightMode(getEnteColorScheme(context).isLightTheme);
     final l10n = context.l10n;
     isCompactMode = PreferenceService.instance.isCompactMode();
 
@@ -291,7 +398,7 @@ class _HomePageState extends State<HomePage> {
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: !_showSearchBox
-              ? const Text('Ente Auth')
+              ? const Text('Ente Auth', style: brandStyleMedium)
               : TextField(
                   autocorrect: false,
                   enableSuggestions: false,
@@ -310,42 +417,52 @@ class _HomePageState extends State<HomePage> {
                 ),
           centerTitle: PlatformUtil.isDesktop() ? false : true,
           actions: <Widget>[
-            PlatformUtil.isDesktop()
-                ? IconButton(
-                    icon: const Icon(Icons.lock),
-                    tooltip: l10n.appLock,
-                    onPressed: () async {
-                      await navigateToLockScreen();
-                    },
-                  )
-                : const SizedBox.shrink(),
-            const SizedBox(
-              width: 4,
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SortCodeMenuWidget(
+                currentKey: PreferenceService.instance.codeSortKey(),
+                onSelected: (newOrder) async {
+                  await PreferenceService.instance.setCodeSortKey(newOrder);
+                  if (newOrder == CodeSortKey.manual &&
+                      newOrder == _codeSortKey) {
+                    await navigateToReorderPage(_allCodes!);
+                  }
+                  setState(() {
+                    _codeSortKey = newOrder;
+                  });
+                  if (mounted) {
+                    _applyFilteringAndRefresh();
+                  }
+                },
+              ),
             ),
+            if (PlatformUtil.isDesktop())
+              IconButton(
+                icon: const Icon(Icons.lock),
+                tooltip: l10n.appLock,
+                padding: const EdgeInsets.all(8.0),
+                onPressed: () async {
+                  await navigateToLockScreen();
+                },
+              ),
             IconButton(
               icon: _showSearchBox
                   ? const Icon(Icons.clear)
                   : const Icon(Icons.search),
               tooltip: l10n.search,
+              padding: const EdgeInsets.all(8.0),
               onPressed: () {
-                setState(
-                  () {
-                    _showSearchBox = !_showSearchBox;
-                    if (!_showSearchBox) {
-                      _textController.clear();
-                      _searchText = "";
-                    } else {
-                      _searchText = _textController.text;
-
-                      // Request focus on the search box
-                      // For Windows and macOS only for now. This if statement can be removed if other platforms has been tested.
-                      if (Platform.isWindows || Platform.isMacOS) {
-                        searchBoxFocusNode.requestFocus();
-                      }
-                    }
-                    _applyFilteringAndRefresh();
-                  },
-                );
+                setState(() {
+                  _showSearchBox = !_showSearchBox;
+                  if (!_showSearchBox) {
+                    _textController.clear();
+                    _searchText = "";
+                  } else {
+                    _searchText = _textController.text;
+                    searchBoxFocusNode.requestFocus();
+                  }
+                  _applyFilteringAndRefresh();
+                });
               },
             ),
           ],
@@ -366,6 +483,7 @@ class _HomePageState extends State<HomePage> {
         return HomeEmptyStateWidget(
           onScanTap: _redirectToScannerPage,
           onManuallySetupTap: _redirectToManualEntryPage,
+          onImportFromGallery: _importFromGallery,
         );
       } else {
         final anyCodeHasError =
@@ -397,11 +515,13 @@ class _HomePageState extends State<HomePage> {
                         onTap: () {
                           selectedTag = "";
                           _isTrashOpen = false;
+
                           setState(() {});
                           _applyFilteringAndRefresh();
                         },
                       );
                     }
+
                     if (index == itemCount - 1 && hasTrashedCodes) {
                       return TagChip(
                         label: l10n.trash,
@@ -417,25 +537,29 @@ class _HomePageState extends State<HomePage> {
                         iconData: Icons.delete,
                       );
                     }
-                    return TagChip(
-                      label: tags[index - 1],
-                      action: TagChipAction.menu,
-                      state: selectedTag == tags[index - 1]
-                          ? TagChipState.selected
-                          : TagChipState.unselected,
-                      onTap: () {
-                        _isTrashOpen = false;
-                        if (selectedTag == tags[index - 1]) {
-                          selectedTag = "";
+                    final customTagIndex = index - 1;
+                    if (customTagIndex >= 0 && customTagIndex < tags.length) {
+                      return TagChip(
+                        label: tags[customTagIndex],
+                        action: TagChipAction.menu,
+                        state: selectedTag == tags[customTagIndex]
+                            ? TagChipState.selected
+                            : TagChipState.unselected,
+                        onTap: () {
+                          _isTrashOpen = false;
+                          if (selectedTag == tags[customTagIndex]) {
+                            selectedTag = "";
+                            setState(() {});
+                            _applyFilteringAndRefresh();
+                            return;
+                          }
+                          selectedTag = tags[customTagIndex];
                           setState(() {});
                           _applyFilteringAndRefresh();
-                          return;
-                        }
-                        selectedTag = tags[index - 1];
-                        setState(() {});
-                        _applyFilteringAndRefresh();
-                      },
-                    );
+                        },
+                      );
+                    }
+                    return const SizedBox.shrink();
                   },
                 ),
               ),
@@ -464,6 +588,7 @@ class _HomePageState extends State<HomePage> {
                       key: ValueKey('${code.hashCode}_$newIndex'),
                       code,
                       isCompactMode: isCompactMode,
+                      sortKey: _codeSortKey,
                     ),
                   );
                 }),
@@ -574,6 +699,29 @@ class _HomePageState extends State<HomePage> {
     _applyFilteringAndRefresh();
   }
 
+  Future<void> _importFromGallery() async {
+    try {
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        allowMultiple: false,
+      );
+      if (result != null) {
+        final path = result.files.single.path!;
+        String? res = await Scan.parse(path);
+        final Code? code = res != null ? Code.fromOTPAuthUrl(res) : null;
+        if (code != null) {
+          await CodeStore.instance.addCode(code);
+          if ((_allCodes?.where((e) => !e.hasError).length ?? 0) > 2) {
+            _focusNewCode(code);
+          }
+        }
+      }
+    } catch (e, s) {
+      await showGenericErrorDialog(context: context, error: e);
+      _logger.severe("Error while importing from gallery", e, s);
+    }
+  }
+
   Widget _getFab() {
     if (PlatformUtil.isDesktop()) {
       return FloatingActionButton(
@@ -604,6 +752,15 @@ class _HomePageState extends State<HomePage> {
           labelWidget: SpeedDialLabelWidget(context.l10n.scanAQrCode),
           onTap: _redirectToScannerPage,
         ),
+        if (PlatformUtil.isMobile() &&
+            FeatureFlagService.instance.isInternalUserOrDebugBuild())
+          SpeedDialChild(
+            child: const Icon(Icons.image),
+            foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
+            backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
+            labelWidget: const SpeedDialLabelWidget("Import from gallery"),
+            onTap: _importFromGallery,
+          ),
         SpeedDialChild(
           child: const Icon(Icons.keyboard),
           foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,

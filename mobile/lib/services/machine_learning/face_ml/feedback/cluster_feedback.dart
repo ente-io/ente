@@ -84,7 +84,7 @@ class ClusterFeedbackService {
       final clusterIdToFaceIDs =
           await MLDataDB.instance.getClusterToFaceIDs(suggestionClusterIDs);
       final Map<String, List<EnteFile>> clusterIDToFiles = {};
-      final allFiles = await SearchService.instance.getAllFiles();
+      final allFiles = await SearchService.instance.getAllFilesForSearch();
       for (final f in allFiles) {
         if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
           continue;
@@ -334,6 +334,32 @@ class ClusterFeedbackService {
     return true;
   }
 
+  Future<void> addClusterToExistingPerson({
+    required PersonEntity person,
+    required String clusterID,
+  }) async {
+    if (person.data.rejectedFaceIDs != null &&
+        person.data.rejectedFaceIDs!.isNotEmpty) {
+      final clusterFaceIDs =
+          await MLDataDB.instance.getFaceIDsForCluster(clusterID);
+      final rejectedLengthBefore = person.data.rejectedFaceIDs!.length;
+      person.data.rejectedFaceIDs!
+          .removeWhere((faceID) => clusterFaceIDs.contains(faceID));
+      final rejectedLengthAfter = person.data.rejectedFaceIDs!.length;
+      if (rejectedLengthBefore != rejectedLengthAfter) {
+        _logger.info(
+          'Removed ${rejectedLengthBefore - rejectedLengthAfter} rejected faces from person ${person.data.name} due to adding cluster $clusterID',
+        );
+        await PersonService.instance.updatePerson(person);
+      }
+    }
+    await MLDataDB.instance.assignClusterToPerson(
+      personID: person.remoteID,
+      clusterID: clusterID,
+    );
+    Bus.instance.fire(PeopleChangedEvent());
+  }
+
   Future<void> ignoreCluster(String clusterID) async {
     await PersonService.instance.addPerson('', clusterID, isHidden: true);
     Bus.instance.fire(PeopleChangedEvent());
@@ -520,7 +546,7 @@ class ClusterFeedbackService {
     final smallestPersonClusterSize = personClusters
         .map((clusterID) => allClusterIdsToCountMap[clusterID] ?? 0)
         .reduce((value, element) => min(value, element));
-    final checkSizes = [100, 20, kMinimumClusterSizeSearchResult, 10, 5, 1];
+    final checkSizes = [20, kMinimumClusterSizeSearchResult, 10, 5, 1];
     Map<String, Vector> clusterAvgBigClusters = <String, Vector>{};
     final List<(String, double)> suggestionsMean = [];
     for (final minimumSize in checkSizes.toSet()) {

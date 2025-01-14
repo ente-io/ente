@@ -1,14 +1,17 @@
 import { assertionFailed } from "@/base/assert";
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@/base/components/OverflowMenu";
 import { useModalVisibility } from "@/base/components/utils/modal";
-import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "@/new/photos/components/gallery/ListHeader";
-import { SpaceBetweenFlex } from "@/new/photos/components/mui";
 import {
     ALL_SECTION,
     HIDDEN_ITEMS_SECTION,
@@ -18,40 +21,35 @@ import type {
     CollectionSummary,
     CollectionSummaryType,
 } from "@/new/photos/services/collection/ui";
+import { clearLocalTrash, emptyTrash } from "@/new/photos/services/collections";
 import {
     isArchivedCollection,
     isPinnedCollection,
 } from "@/new/photos/services/magic-metadata";
-import { AppContext } from "@/new/photos/types/context";
-import { HorizontalFlex } from "@ente/shared/components/Container";
-import OverflowMenu, {
-    StyledMenu,
-} from "@ente/shared/components/OverflowMenu/menu";
-import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
-import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
+import { useAppContext } from "@/new/photos/types/context";
+import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
-import Favorite from "@mui/icons-material/FavoriteRounded";
+import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import LinkIcon from "@mui/icons-material/Link";
 import LogoutIcon from "@mui/icons-material/Logout";
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import PeopleIcon from "@mui/icons-material/People";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import SortIcon from "@mui/icons-material/Sort";
 import TvIcon from "@mui/icons-material/Tv";
-import Unarchive from "@mui/icons-material/Unarchive";
-import VisibilityOffOutlined from "@mui/icons-material/VisibilityOffOutlined";
-import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
-import { Box, IconButton, Stack, Tooltip } from "@mui/material";
+import UnarchiveIcon from "@mui/icons-material/Unarchive";
+import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import { Box, IconButton, Menu, Stack, Tooltip } from "@mui/material";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useCallback, useContext, useRef } from "react";
 import { Trans } from "react-i18next";
 import * as CollectionAPI from "services/collectionService";
-import * as TrashService from "services/trashService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     changeCollectionOrder,
@@ -90,9 +88,9 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = ({
     const EndIcon = ({ type }: { type: CollectionSummaryType }) => {
         switch (type) {
             case "favorites":
-                return <Favorite />;
+                return <FavoriteRoundedIcon />;
             case "archived":
-                return <ArchiveOutlined />;
+                return <ArchiveOutlinedIcon />;
             case "incomingShareViewer":
             case "incomingShareCollaborator":
                 return <PeopleIcon />;
@@ -141,25 +139,13 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     setFilesDownloadProgressAttributesCreator,
     isActiveCollectionDownloadInProgress,
 }) => {
-    const { showLoadingBar, hideLoadingBar, setDialogMessage } =
-        useContext(AppContext);
+    const { showLoadingBar, hideLoadingBar, onGenericError, showMiniDialog } =
+        useAppContext();
     const { syncWithRemote } = useContext(GalleryContext);
     const overFlowMenuIconRef = useRef<SVGSVGElement>(null);
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
         useModalVisibility();
-
-    const handleError = useCallback(
-        (e: unknown) => {
-            log.error("Collection action failed", e);
-            setDialogMessage({
-                title: t("error"),
-                content: t("generic_error_retry"),
-                close: { variant: "critical" },
-            });
-        },
-        [setDialogMessage],
-    );
 
     /**
      * Return a new function by wrapping an async function in an error handler,
@@ -173,7 +159,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                 try {
                     await f();
                 } catch (e) {
-                    handleError(e);
+                    onGenericError(e);
                 } finally {
                     void syncWithRemote(false, true);
                     hideLoadingBar();
@@ -181,7 +167,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
             };
             return (): void => void wrapped();
         },
-        [handleError, syncWithRemote, showLoadingBar, hideLoadingBar],
+        [showLoadingBar, hideLoadingBar, onGenericError, syncWithRemote],
     );
 
     const showRenameCollectionModal = () => {
@@ -203,28 +189,29 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
         wrap(() => _renameCollection(newName))();
 
     const confirmDeleteCollection = () => {
-        setDialogMessage({
+        showMiniDialog({
             title: t("delete_album_title"),
-            content: (
+            message: (
                 <Trans
                     i18nKey={"delete_album_message"}
                     components={{
-                        a: <Box component={"span"} color="text.base" />,
+                        a: (
+                            <Box
+                                component={"span"}
+                                sx={{ color: "text.base" }}
+                            />
+                        ),
                     }}
                 />
             ),
-            proceed: {
+            continue: {
                 text: t("delete_photos"),
+                color: "critical",
                 action: deleteCollectionAlongWithFiles,
-                variant: "critical",
             },
             secondary: {
                 text: t("keep_photos"),
                 action: deleteCollectionButKeepFiles,
-                variant: "primary",
-            },
-            close: {
-                text: t("cancel"),
             },
         });
     };
@@ -240,20 +227,19 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     });
 
     const confirmEmptyTrash = () =>
-        setDialogMessage({
+        showMiniDialog({
             title: t("empty_trash_title"),
-            content: t("empty_trash_message"),
-            proceed: {
-                action: emptyTrash,
+            message: t("empty_trash_message"),
+            continue: {
                 text: t("empty_trash"),
-                variant: "critical",
+                color: "critical",
+                action: doEmptyTrash,
             },
-            close: { text: t("cancel") },
         });
 
-    const emptyTrash = wrap(async () => {
-        await TrashService.emptyTrash();
-        await TrashService.clearLocalTrash();
+    const doEmptyTrash = wrap(async () => {
+        await emptyTrash();
+        await clearLocalTrash();
         setActiveCollectionID(ALL_SECTION);
     });
 
@@ -281,7 +267,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     };
 
     const downloadCollection = () =>
-        void _downloadCollection().catch(handleError);
+        void _downloadCollection().catch(onGenericError);
 
     const archiveAlbum = wrap(() =>
         changeCollectionVisibility(activeCollection, ItemVisibility.archived),
@@ -292,16 +278,13 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     );
 
     const confirmLeaveSharedAlbum = () => {
-        setDialogMessage({
+        showMiniDialog({
             title: t("leave_shared_album_title"),
-            content: t("leave_shared_album_message"),
-            proceed: {
+            message: t("leave_shared_album_message"),
+            continue: {
                 text: t("leave_shared_album"),
+                color: "critical",
                 action: leaveSharedAlbum,
-                variant: "critical",
-            },
-            close: {
-                text: t("cancel"),
             },
         });
     };
@@ -340,7 +323,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     );
 
     return (
-        <HorizontalFlex sx={{ display: "inline-flex", gap: "16px" }}>
+        <Box sx={{ display: "inline-flex", gap: "16px" }}>
             <QuickOptions
                 collectionSummaryType={collectionSummaryType}
                 isDownloadInProgress={isActiveCollectionDownloadInProgress}
@@ -350,8 +333,8 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
             />
 
             <OverflowMenu
-                ariaControls={"collection-options"}
-                triggerButtonIcon={<MoreHoriz ref={overFlowMenuIconRef} />}
+                ariaID="collection-options"
+                triggerButtonIcon={<MoreHorizIcon ref={overFlowMenuIconRef} />}
             >
                 {collectionSummaryType == "trash" ? (
                     <EmptyTrashOption onClick={confirmEmptyTrash} />
@@ -406,7 +389,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                 onAscClick={changeSortOrderAsc}
                 onDescClick={changeSortOrderDesc}
             />
-        </HorizontalFlex>
+        </Box>
     );
 };
 
@@ -556,7 +539,7 @@ const DownloadOption: React.FC<
 > = ({ isDownloadInProgress, onClick, children }) => (
     <OverflowMenuOption
         startIcon={
-            isDownloadInProgress && isDownloadInProgress() ? (
+            isDownloadInProgress?.() ? (
                 <ActivityIndicator size="20px" sx={{ cursor: "not-allowed" }} />
             ) : (
                 <FileDownloadOutlinedIcon />
@@ -587,14 +570,14 @@ const SharedCollectionOptions: React.FC<SharedCollectionOptionProps> = ({
         {isArchived ? (
             <OverflowMenuOption
                 onClick={onUnarchiveClick}
-                startIcon={<Unarchive />}
+                startIcon={<UnarchiveIcon />}
             >
                 {t("unarchive_album")}
             </OverflowMenuOption>
         ) : (
             <OverflowMenuOption
                 onClick={onArchiveClick}
-                startIcon={<ArchiveOutlined />}
+                startIcon={<ArchiveOutlinedIcon />}
             >
                 {t("archive_album")}
             </OverflowMenuOption>
@@ -671,14 +654,14 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
                 {isArchived ? (
                     <OverflowMenuOption
                         onClick={onUnarchiveClick}
-                        startIcon={<Unarchive />}
+                        startIcon={<UnarchiveIcon />}
                     >
                         {t("unarchive_album")}
                     </OverflowMenuOption>
                 ) : (
                     <OverflowMenuOption
                         onClick={onArchiveClick}
-                        startIcon={<ArchiveOutlined />}
+                        startIcon={<ArchiveOutlinedIcon />}
                     >
                         {t("archive_album")}
                     </OverflowMenuOption>
@@ -688,14 +671,14 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
         {isHidden ? (
             <OverflowMenuOption
                 onClick={onUnhideClick}
-                startIcon={<VisibilityOutlined />}
+                startIcon={<VisibilityOutlinedIcon />}
             >
                 {t("unhide_collection")}
             </OverflowMenuOption>
         ) : (
             <OverflowMenuOption
                 onClick={onHideClick}
-                startIcon={<VisibilityOffOutlined />}
+                startIcon={<VisibilityOffOutlinedIcon />}
             >
                 {t("hide_collection")}
             </OverflowMenuOption>
@@ -718,7 +701,7 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
 interface CollectionSortOrderMenuProps {
     open: boolean;
     onClose: () => void;
-    overFlowMenuIconRef: React.MutableRefObject<SVGSVGElement>;
+    overFlowMenuIconRef: React.RefObject<SVGSVGElement>;
     onAscClick: () => void;
     onDescClick: () => void;
 }
@@ -741,8 +724,8 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
     };
 
     return (
-        <StyledMenu
-            id={"collection-files-sort"}
+        <Menu
+            id="collection-files-sort"
             anchorEl={overFlowMenuIconRef.current}
             open={open}
             onClose={onClose}
@@ -765,6 +748,6 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
             <OverflowMenuOption onClick={handleAscClick}>
                 {t("oldest_first")}
             </OverflowMenuOption>
-        </StyledMenu>
+        </Menu>
     );
 };

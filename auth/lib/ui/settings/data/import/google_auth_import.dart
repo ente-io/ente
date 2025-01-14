@@ -118,10 +118,10 @@ List<Code> parseGoogleAuth(String qrCodeData) {
       if (otpParameter.type == MigrationPayload_OtpType.OTP_TYPE_TOTP ||
           otpParameter.type == MigrationPayload_OtpType.OTP_TYPE_UNSPECIFIED) {
         otpUrl =
-            'otpauth://totp/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&period=$timer';
+            'otpauth://totp/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=${algorithm.name}&digits=$digits&period=$timer';
       } else if (otpParameter.type == MigrationPayload_OtpType.OTP_TYPE_HOTP) {
         otpUrl =
-            'otpauth://hotp/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&counter=$counter';
+            'otpauth://hotp/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=${algorithm.name}&digits=$digits&counter=$counter';
       } else {
         throw Exception('Invalid OTP type');
       }

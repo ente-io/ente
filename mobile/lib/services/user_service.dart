@@ -89,13 +89,17 @@ class UserService {
     bool isChangeEmail = false,
     bool isCreateAccountScreen = false,
     bool isResetPasswordScreen = false,
+    String? purpose,
   }) async {
     final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     try {
       final response = await _dio.post(
         _config.getHttpEndpoint() + "/users/ott",
-        data: {"email": email, "purpose": isChangeEmail ? "change" : ""},
+        data: {
+          "email": email,
+          "purpose": isChangeEmail ? "change" : purpose ?? "",
+        },
       );
       await dialog.hide();
       if (response.statusCode == 200) {
@@ -120,7 +124,24 @@ class UserService {
     } on DioError catch (e) {
       await dialog.hide();
       _logger.info(e);
-      if (e.response != null && e.response!.statusCode == 403) {
+      final String? enteErrCode = e.response?.data["code"];
+      if (enteErrCode != null && enteErrCode == "USER_ALREADY_REGISTERED") {
+        unawaited(
+          showErrorDialog(
+            context,
+            context.l10n.oops,
+            context.l10n.emailAlreadyRegistered,
+          ),
+        );
+      } else if (enteErrCode != null && enteErrCode == "USER_NOT_REGISTERED") {
+        unawaited(
+          showErrorDialog(
+            context,
+            context.l10n.oops,
+            context.l10n.emailNotRegistered,
+          ),
+        );
+      } else if (e.response != null && e.response!.statusCode == 403) {
         unawaited(
           showErrorDialog(
             context,
@@ -395,13 +416,21 @@ class UserService {
       if (response.statusCode == 200) {
         Widget page;
         final String passkeySessionID = response.data["passkeySessionID"];
-        final String twoFASessionID = response.data["twoFactorSessionID"];
-
-        if (twoFASessionID.isNotEmpty) {
+        final String accountsUrl = response.data["accountsUrl"] ?? kAccountsUrl;
+        String twoFASessionID = response.data["twoFactorSessionID"];
+        if (twoFASessionID.isEmpty &&
+            response.data["twoFactorSessionIDV2"] != null) {
+          twoFASessionID = response.data["twoFactorSessionIDV2"];
+        }
+        if (passkeySessionID.isNotEmpty) {
+          page = PasskeyPage(
+            passkeySessionID,
+            totp2FASessionID: twoFASessionID,
+            accountsUrl: accountsUrl,
+          );
+        } else if (twoFASessionID.isNotEmpty) {
           await setTwoFactor(value: true);
           page = TwoFactorAuthenticationPage(twoFASessionID);
-        } else if (passkeySessionID.isNotEmpty) {
-          page = PasskeyPage(passkeySessionID);
         } else {
           await _saveConfiguration(response);
           if (Configuration.instance.getEncryptedToken() != null) {
@@ -610,7 +639,7 @@ class UserService {
             SetupSRPResponse.fromJson(response.data);
         final serverB =
             SRP6Util.decodeBigInt(base64Decode(setupSRPResponse.srpB));
-        // ignore: unused_local_variable, need to calculate secret to get M1 
+        // ignore: unused_local_variable, need to calculate secret to get M1
         final clientS = client.calculateSecret(serverB);
         final clientM = client.calculateClientEvidenceMessage();
         // ignore: unused_local_variable
@@ -709,15 +738,24 @@ class UserService {
     );
     if (response.statusCode == 200) {
       Widget page;
-      final String twoFASessionID = response.data["twoFactorSessionID"];
+      String twoFASessionID = response.data["twoFactorSessionID"];
+      if (twoFASessionID.isEmpty &&
+          response.data["twoFactorSessionIDV2"] != null) {
+        twoFASessionID = response.data["twoFactorSessionIDV2"];
+      }
       final String passkeySessionID = response.data["passkeySessionID"];
+      final String accountsUrl = response.data["accountsUrl"] ?? kAccountsUrl;
 
       Configuration.instance.setVolatilePassword(userPassword);
-      if (twoFASessionID.isNotEmpty) {
+      if (passkeySessionID.isNotEmpty) {
+        page = PasskeyPage(
+          passkeySessionID,
+          totp2FASessionID: twoFASessionID,
+          accountsUrl: accountsUrl,
+        );
+      } else if (twoFASessionID.isNotEmpty) {
         await setTwoFactor(value: true);
         page = TwoFactorAuthenticationPage(twoFASessionID);
-      } else if (passkeySessionID.isNotEmpty) {
-        page = PasskeyPage(passkeySessionID);
       } else {
         await _saveConfiguration(response);
         if (Configuration.instance.getEncryptedToken() != null) {
@@ -828,7 +866,7 @@ class UserService {
       await dialog.hide();
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
-        showToast(context, "Session expired");
+        showToast(context, S.of(context).sessionExpired);
         await Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -989,7 +1027,7 @@ class UserService {
       await dialog.hide();
       _logger.severe("error during recovery", e);
       if (e.response != null && e.response!.statusCode == 404) {
-        showToast(context, "Session expired");
+        showToast(context, S.of(context).sessionExpired);
         // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
@@ -1173,11 +1211,13 @@ class UserService {
     }
   }
 
-  Future<String> getFamiliesToken() async {
+  Future<String> getFamilyPortalUrl(bool familyExist) async {
     try {
       final response = await _enteDio.get("/users/families-token");
       if (response.statusCode == 200) {
-        return response.data["familiesToken"];
+        final String url = response.data["familyUrl"] ?? kFamilyUrl;
+        final String jwtToken = response.data["familiesToken"];
+        return '$url?token=$jwtToken&isFamilyCreated=$familyExist';
       } else {
         throw Exception("non 200 ok response");
       }

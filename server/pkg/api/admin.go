@@ -3,7 +3,9 @@ package api
 import (
 	"errors"
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller/emergency"
 	"github.com/ente-io/museum/pkg/controller/remotestore"
+	"github.com/ente-io/museum/pkg/repo/authenticator"
 	"net/http"
 	"strconv"
 	"strings"
@@ -39,12 +41,14 @@ type AdminHandler struct {
 	QueueRepo               *repo.QueueRepository
 	UserRepo                *repo.UserRepository
 	CollectionRepo          *repo.CollectionRepository
+	AuthenticatorRepo       *authenticator.Repository
 	UserAuthRepo            *repo.UserAuthRepository
 	FileRepo                *repo.FileRepository
 	BillingRepo             *repo.BillingRepository
 	StorageBonusRepo        *storagebonus.Repository
 	BillingController       *controller.BillingController
 	UserController          *user.UserController
+	EmergencyController     *emergency.Controller
 	FamilyController        *family.Controller
 	RemoteStoreController   *remotestore.Controller
 	ObjectCleanupController *controller.ObjectCleanupController
@@ -113,7 +117,7 @@ func (h *AdminHandler) GetUsers(c *gin.Context) {
 }
 
 func (h *AdminHandler) GetUser(c *gin.Context) {
-	e := c.Query("email")
+	e := strings.ToLower(strings.TrimSpace(c.Query("email")))
 	if e == "" {
 		id, err := strconv.ParseInt(c.Query("id"), 10, 64)
 		if err != nil {
@@ -180,6 +184,13 @@ func (h *AdminHandler) DeleteUser(c *gin.Context) {
 		"req_id":     requestid.Get(c),
 		"req_ctx":    "account_deletion",
 	})
+
+	// todo: (neeraj) refactor this part, currently there's a circular dependency between user and emergency controllers
+	removeLegacyErr := h.EmergencyController.HandleAccountDeletion(c, user.ID, logger)
+	if removeLegacyErr != nil {
+		handler.Error(c, stacktrace.Propagate(removeLegacyErr, ""))
+		return
+	}
 	response, err := h.UserController.HandleAccountDeletion(c, user.ID, logger)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
@@ -294,7 +305,7 @@ func (h *AdminHandler) UpdateEmailMFA(c *gin.Context) {
 	}
 
 	go h.DiscordController.NotifyAdminAction(
-		fmt.Sprintf("Admin (%d) updating email mfa (%v) for account %d", auth.GetUserID(c.Request.Header), request.EmailMFA, request.UserID))
+		fmt.Sprintf("Admin (%d) updating email mfa (%v) for account %d", auth.GetUserID(c.Request.Header), *request.EmailMFA, request.UserID))
 	logger := logrus.WithFields(logrus.Fields{
 		"user_id":  request.UserID,
 		"admin_id": auth.GetUserID(c.Request.Header),
@@ -570,6 +581,14 @@ func (h *AdminHandler) attachSubscription(ctx *gin.Context, userID int64, respon
 	details, err := h.UserController.GetDetailsV2(ctx, userID, false, ente.Photos)
 	if err == nil {
 		response["details"] = details
+	}
+	tokenInfos, err := h.UserAuthRepo.GetUserTokenInfo(userID)
+	if err == nil {
+		response["tokens"] = tokenInfos
+	}
+	authEntryCount, err := h.AuthenticatorRepo.GetAuthCodeCount(ctx, userID)
+	if err == nil {
+		response["authCodes"] = authEntryCount
 	}
 }
 

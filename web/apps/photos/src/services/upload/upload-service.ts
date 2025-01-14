@@ -1,31 +1,36 @@
-import {
-    ENCRYPTION_CHUNK_SIZE,
-    type B64EncryptionResult,
-} from "@/base/crypto/libsodium";
+import { streamEncryptionChunkSize } from "@/base/crypto/libsodium";
+import type { BytesOrB64 } from "@/base/crypto/types";
 import { type CryptoWorker } from "@/base/crypto/worker";
 import { ensureElectron } from "@/base/electron";
-import { basename, nameAndExtension } from "@/base/file";
+import { basename, nameAndExtension } from "@/base/file-name";
+import type { PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
+import { extractVideoMetadata } from "@/gallery/services/ffmpeg";
+import {
+    detectFileTypeInfoFromChunk,
+    isFileTypeNotSupportedError,
+} from "@/gallery/utils/detect-type";
+import { readStream } from "@/gallery/utils/native-stream";
 import {
     EncryptedMagicMetadata,
     EnteFile,
-    hasFileHash,
     MetadataFileAttributes,
     S3FileAttributes,
     type EncryptedEnteFile,
     type FilePublicMagicMetadata,
     type FilePublicMagicMetadataProps,
 } from "@/media/file";
-import type {
-    Metadata,
-    ParsedMetadata,
-    PublicMagicMetadata,
+import {
+    metadataHash,
+    type Metadata,
+    type ParsedMetadata,
+    type PublicMagicMetadata,
 } from "@/media/file-metadata";
 import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
+import { addToCollection } from "@/new/photos/services/collection";
 import { extractExif } from "@/new/photos/services/exif";
-import * as ffmpeg from "@/new/photos/services/ffmpeg";
 import {
     getNonEmptyMagicMetadataProps,
     updateMagicMetadata,
@@ -35,19 +40,17 @@ import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_RESULT,
 } from "@/new/photos/services/upload/types";
-import { detectFileTypeInfoFromChunk } from "@/new/photos/utils/detect-type";
-import { readStream } from "@/new/photos/utils/native-stream";
 import { mergeUint8Arrays } from "@/utils/array";
-import { ensure, ensureInteger, ensureNumber } from "@/utils/ensure";
+import { ensureInteger, ensureNumber } from "@/utils/ensure";
 import { CustomError, handleUploadError } from "@ente/shared/error";
-import { addToCollection } from "services/collectionService";
-import {
-    PublicUploadProps,
-    type LivePhotoAssets,
-} from "services/upload/uploadManager";
+import { type LivePhotoAssets } from "services/upload/uploadManager";
 import * as convert from "xml-js";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
-import publicUploadHttpClient from "./publicUploadHttpClient";
+import {
+    PhotosUploadHttpClient,
+    PublicUploadHttpClient,
+    type ObjectUploadURL,
+} from "./remote";
 import type { ParsedMetadataJSON } from "./takeout";
 import { matchTakeoutMetadata } from "./takeout";
 import {
@@ -55,8 +58,10 @@ import {
     generateThumbnailNative,
     generateThumbnailWeb,
 } from "./thumbnail";
-import UploadHttpClient from "./uploadHttpClient";
 import type { UploadableUploadItem } from "./uploadManager";
+
+const publicUploadHttpClient = new PublicUploadHttpClient();
+const UploadHttpClient = new PhotosUploadHttpClient();
 
 /**
  * A readable stream for a file, and its associated size and last modified time.
@@ -68,16 +73,17 @@ interface FileStream {
     /**
      * A stream of the file's contents
      *
-     * This stream is guaranteed to emit data in ENCRYPTION_CHUNK_SIZE chunks
-     * (except the last chunk which can be smaller since a file would rarely
-     * align exactly to a ENCRYPTION_CHUNK_SIZE multiple).
+     * This stream is guaranteed to emit data in
+     * {@link streamEncryptionChunkSize} sized chunks (except the last chunk
+     * which can be smaller since a file would rarely align exactly to a
+     * {@link streamEncryptionChunkSize} multiple).
      *
      * Note: A stream can only be read once!
      */
     stream: ReadableStream<Uint8Array>;
     /**
-     * Number of chunks {@link stream} will emit, each ENCRYPTION_CHUNK_SIZE
-     * sized (except the last one).
+     * Number of chunks {@link stream} will emit, each
+     * {@link streamEncryptionChunkSize} sized (except the last one).
      */
     chunkCount: number;
     /**
@@ -95,22 +101,31 @@ interface FileStream {
 }
 
 /**
- * If the stream we have is more than 5 ENCRYPTION_CHUNK_SIZE chunks, then use
- * multipart uploads for it, with each multipart-part containing 5 chunks.
+ * If the stream we have is more than 5 {@link streamEncryptionChunkSize}
+ * chunks, then use multipart uploads for it, with each multipart-part
+ * containing 5 chunks.
  *
- * ENCRYPTION_CHUNK_SIZE is 4 MB, and the number of chunks in a single upload
- * part is 5, so each part is (up to) 20 MB.
+ * {@link streamEncryptionChunkSize} is 4 MB, and the number of chunks in a
+ * single upload part is 5, so each part is (up to) 20 MB.
  */
 const multipartChunksPerPart = 5;
 
 /** Upload files to cloud storage */
 class UploadService {
-    private uploadURLs: UploadURL[] = [];
+    private uploadURLs: ObjectUploadURL[] = [];
     private pendingUploadCount: number = 0;
-    private publicUploadProps: PublicUploadProps = undefined;
+    private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
+    private activeUploadURLRefill: Promise<void> | undefined;
 
-    init(publicUploadProps: PublicUploadProps) {
-        this.publicUploadProps = publicUploadProps;
+    init(publicAlbumsCredentials: PublicAlbumsCredentials | undefined) {
+        this.publicAlbumsCredentials = publicAlbumsCredentials;
+    }
+
+    logout() {
+        this.uploadURLs = [];
+        this.pendingUploadCount = 0;
+        this.publicAlbumsCredentials = undefined;
+        this.activeUploadURLRefill = undefined;
     }
 
     async setFileCount(fileCount: number) {
@@ -124,55 +139,80 @@ class UploadService {
 
     async getUploadURL() {
         if (this.uploadURLs.length === 0 && this.pendingUploadCount) {
-            await this.fetchUploadURLs();
+            await this.refillUploadURLs();
+            this.ensureUniqueUploadURLs();
         }
         return this.uploadURLs.pop();
     }
 
     private async preFetchUploadURLs() {
         try {
-            await this.fetchUploadURLs();
+            await this.refillUploadURLs();
             // checking for any subscription related errors
         } catch (e) {
             log.error("prefetch uploadURL failed", e);
             handleUploadError(e);
         }
+        this.ensureUniqueUploadURLs();
     }
 
     async uploadFile(uploadFile: UploadFile) {
-        if (this.publicUploadProps.accessedThroughSharedURL) {
+        if (this.publicAlbumsCredentials) {
             return publicUploadHttpClient.uploadFile(
                 uploadFile,
-                this.publicUploadProps.token,
-                this.publicUploadProps.passwordToken,
+                // TODO: publicAlbumsCredentials
+                this.publicAlbumsCredentials.accessToken,
+                this.publicAlbumsCredentials.accessTokenJWT,
             );
         } else {
             return UploadHttpClient.uploadFile(uploadFile);
         }
     }
 
-    private async fetchUploadURLs() {
-        if (this.publicUploadProps.accessedThroughSharedURL) {
-            await publicUploadHttpClient.fetchUploadURLs(
-                this.pendingUploadCount,
-                this.uploadURLs,
-                this.publicUploadProps.token,
-                this.publicUploadProps.passwordToken,
-            );
-        } else {
-            await UploadHttpClient.fetchUploadURLs(
-                this.pendingUploadCount,
-                this.uploadURLs,
-            );
+    private async refillUploadURLs() {
+        try {
+            if (!this.activeUploadURLRefill) {
+                this.activeUploadURLRefill = this._refillUploadURLs();
+            }
+            await this.activeUploadURLRefill;
+        } finally {
+            this.activeUploadURLRefill = undefined;
         }
     }
 
+    private ensureUniqueUploadURLs() {
+        // TODO: Sanity check added on new implementation Nov 2024, remove after
+        // a while (tag: Migration).
+        if (
+            this.uploadURLs.length !=
+            new Set(this.uploadURLs.map((u) => u.url)).size
+        ) {
+            throw new Error("Duplicate upload URLs detected");
+        }
+    }
+
+    private async _refillUploadURLs() {
+        let urls: ObjectUploadURL[];
+        if (this.publicAlbumsCredentials) {
+            urls = await publicUploadHttpClient.fetchUploadURLs(
+                this.pendingUploadCount,
+                this.publicAlbumsCredentials,
+            );
+        } else {
+            urls = await UploadHttpClient.fetchUploadURLs(
+                this.pendingUploadCount,
+            );
+        }
+        urls.forEach((u) => this.uploadURLs.push(u));
+    }
+
     async fetchMultipartUploadURLs(count: number) {
-        if (this.publicUploadProps.accessedThroughSharedURL) {
+        if (this.publicAlbumsCredentials) {
+            // TODO: publicAlbumsCredentials
             return await publicUploadHttpClient.fetchMultipartUploadURLs(
                 count,
-                this.publicUploadProps.token,
-                this.publicUploadProps.passwordToken,
+                this.publicAlbumsCredentials.accessToken,
+                this.publicAlbumsCredentials.accessTokenJWT,
             );
         } else {
             return await UploadHttpClient.fetchMultipartUploadURLs(count);
@@ -197,10 +237,25 @@ export const uploadItemFileName = (uploadItem: UploadItem) => {
 
 /* -- Various intermediate type used during upload -- */
 
-interface UploadAsset {
+export interface UploadAsset {
+    /** `true` if this is a live photo. */
     isLivePhoto?: boolean;
-    uploadItem?: UploadItem;
+    /* Valid for live photos */
     livePhotoAssets?: LivePhotoAssets;
+    /* Valid for non-live photos */
+    uploadItem?: UploadItem;
+    /**
+     * Metadata we know about a file externally. Valid for non-live photos.
+     *
+     * This is metadata that is not present within the file, but we have
+     * available from external sources. There is also a parsed metadata we
+     * obtain from JSON files. So together with the metadata present within the
+     * file itself, there are three places where the file's initial metadata can
+     * be filled in from.
+     *
+     * This will not be present for live photos.
+     */
+    externalParsedMetadata?: ParsedMetadata;
 }
 
 interface ThumbnailedFile {
@@ -220,50 +275,36 @@ interface FileWithMetadata extends Omit<ThumbnailedFile, "hasStaticThumbnail"> {
     pubMagicMetadata: FilePublicMagicMetadata;
 }
 
-interface EncryptedFile {
-    file: ProcessedFile;
-    fileKey: B64EncryptionResult;
-}
-
 interface EncryptedFileStream {
     /**
      * A stream of the file's encrypted contents
      *
-     * This stream is guaranteed to emit data in ENCRYPTION_CHUNK_SIZE chunks
-     * (except the last chunk which can be smaller since a file would rarely
-     * align exactly to a ENCRYPTION_CHUNK_SIZE multiple).
+     * This stream is guaranteed to emit data in
+     * {@link streamEncryptionChunkSize} chunks (except the last chunk which can
+     * be smaller since a file would rarely align exactly to a
+     * {@link streamEncryptionChunkSize} multiple).
      */
     stream: ReadableStream<Uint8Array>;
     /**
-     * Number of chunks {@link stream} will emit, each ENCRYPTION_CHUNK_SIZE
-     * sized (except the last one).
+     * Number of chunks {@link stream} will emit, each
+     * {@link streamEncryptionChunkSize} sized (except the last one).
      */
     chunkCount: number;
 }
 
-interface LocalFileAttributes<
-    T extends string | Uint8Array | EncryptedFileStream,
-> {
-    encryptedData: T;
-    decryptionHeader: string;
-}
-
-interface EncryptedMetadata {
-    encryptedDataB64: string;
-    decryptionHeaderB64: string;
-}
-
-interface EncryptionResult<
-    T extends string | Uint8Array | EncryptedFileStream,
-> {
-    file: LocalFileAttributes<T>;
-    key: string;
-}
-
-interface ProcessedFile {
-    file: LocalFileAttributes<Uint8Array | EncryptedFileStream>;
-    thumbnail: LocalFileAttributes<Uint8Array>;
-    metadata: EncryptedMetadata;
+interface EncryptedFilePieces {
+    file: {
+        encryptedData: Uint8Array | EncryptedFileStream;
+        decryptionHeader: string;
+    };
+    thumbnail: {
+        encryptedData: Uint8Array;
+        decryptionHeader: string;
+    };
+    metadata: {
+        encryptedDataB64: string;
+        decryptionHeaderB64: string;
+    };
     pubMagicMetadata: EncryptedMagicMetadata;
     localID: number;
 }
@@ -285,11 +326,6 @@ export interface MultipartUploadURLs {
     objectKey: string;
     partURLs: string[];
     completeURL: string;
-}
-
-export interface UploadURL {
-    url: string;
-    objectKey: string;
 }
 
 export interface PotentialLivePhotoAsset {
@@ -538,8 +574,19 @@ export const uploader = async (
          * (tee will not work for strictly sequential reads of large streams).
          */
 
-        const { fileTypeInfo, fileSize, lastModifiedMs } =
-            await readAssetDetails(uploadAsset);
+        let assetDetails: ReadAssetDetailsResult;
+
+        try {
+            assetDetails = await readAssetDetails(uploadAsset);
+        } catch (e) {
+            if (isFileTypeNotSupportedError(e)) {
+                log.error(`Not uploading ${fileName}`, e);
+                return { uploadResult: UPLOAD_RESULT.UNSUPPORTED };
+            }
+            throw e;
+        }
+
+        const { fileTypeInfo, fileSize, lastModifiedMs } = assetDetails;
 
         const maxFileSize = 4 * 1024 * 1024 * 1024; /* 4 GB */
         if (fileSize >= maxFileSize)
@@ -605,7 +652,7 @@ export const uploader = async (
             pubMagicMetadata,
         };
 
-        const encryptedFile = await encryptFile(
+        const { encryptedFilePieces, encryptedFileKey } = await encryptFile(
             fileWithMetadata,
             collection.key,
             worker,
@@ -614,7 +661,7 @@ export const uploader = async (
         abortIfCancelled();
 
         const backupedFile = await uploadToBucket(
-            encryptedFile.file,
+            encryptedFilePieces,
             makeProgessTracker,
             isCFUploadProxyDisabled,
             abortIfCancelled,
@@ -622,8 +669,8 @@ export const uploader = async (
 
         const uploadedFile = await uploadService.uploadFile({
             collectionID: collection.id,
-            encryptedKey: encryptedFile.fileKey.encryptedData,
-            keyDecryptionNonce: encryptedFile.fileKey.nonce,
+            encryptedKey: encryptedFileKey.encryptedData,
+            keyDecryptionNonce: encryptedFileKey.nonce,
             ...backupedFile,
         });
 
@@ -636,8 +683,6 @@ export const uploader = async (
     } catch (e) {
         if (e.message == CustomError.UPLOAD_CANCELLED) {
             log.info(`Upload for ${fileName} cancelled`);
-        } else if (e.message == CustomError.UNSUPPORTED_FILE_FORMAT) {
-            log.info(`Not uploading ${fileName}: unsupported file format`);
         } else {
             log.error(`Upload failed for ${fileName}`, e);
         }
@@ -646,8 +691,6 @@ export const uploader = async (
         switch (error.message) {
             case CustomError.ETAG_MISSING:
                 return { uploadResult: UPLOAD_RESULT.BLOCKED };
-            case CustomError.UNSUPPORTED_FILE_FORMAT:
-                return { uploadResult: UPLOAD_RESULT.UNSUPPORTED };
             case CustomError.FILE_TOO_LARGE:
                 return {
                     uploadResult: UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE,
@@ -754,11 +797,11 @@ const readUploadItem = async (uploadItem: UploadItem): Promise<FileStream> => {
         lastModifiedMs = file.lastModified;
     }
 
-    const N = ENCRYPTION_CHUNK_SIZE;
-    const chunkCount = Math.ceil(fileSize / ENCRYPTION_CHUNK_SIZE);
+    const N = streamEncryptionChunkSize;
+    const chunkCount = Math.ceil(fileSize / streamEncryptionChunkSize);
 
     // Pipe the underlying stream through a transformer that emits
-    // ENCRYPTION_CHUNK_SIZE-ed chunks (except the last one, which can be
+    // streamEncryptionChunkSize-ed chunks (except the last one, which can be
     // smaller).
     let pending: Uint8Array | undefined;
     const transformer = new TransformStream<Uint8Array, Uint8Array>({
@@ -842,7 +885,7 @@ const readImageOrVideoDetails = async (uploadItem: UploadItem) => {
 
     const fileTypeInfo = await detectFileTypeInfoFromChunk(async () => {
         const reader = stream.getReader();
-        const chunk = ensure((await reader.read()).value);
+        const chunk = (await reader.read())!.value;
         await reader.cancel();
         return chunk;
     }, uploadItemFileName(uploadItem));
@@ -871,7 +914,12 @@ interface ExtractAssetMetadataResult {
  * {@link parsedMetadataJSONMap} for the assets. Return the resultant metadatum.
  */
 const extractAssetMetadata = async (
-    { isLivePhoto, uploadItem, livePhotoAssets }: UploadAsset,
+    {
+        isLivePhoto,
+        uploadItem,
+        externalParsedMetadata,
+        livePhotoAssets,
+    }: UploadAsset,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
@@ -889,6 +937,7 @@ const extractAssetMetadata = async (
           )
         : await extractImageOrVideoMetadata(
               uploadItem,
+              externalParsedMetadata,
               fileTypeInfo,
               lastModifiedMs,
               collectionID,
@@ -911,6 +960,7 @@ const extractLivePhotoMetadata = async (
     const { metadata: imageMetadata, publicMagicMetadata } =
         await extractImageOrVideoMetadata(
             livePhotoAssets.image,
+            undefined,
             imageFileTypeInfo,
             lastModifiedMs,
             collectionID,
@@ -918,16 +968,17 @@ const extractLivePhotoMetadata = async (
             worker,
         );
 
+    const imageHash = imageMetadata.hash;
     const videoHash = await computeHash(livePhotoAssets.video, worker);
+
+    const hash = `${imageHash}:${videoHash}`;
 
     return {
         metadata: {
             ...imageMetadata,
             title: uploadItemFileName(livePhotoAssets.image),
             fileType: FileType.livePhoto,
-            imageHash: imageMetadata.hash,
-            videoHash: videoHash,
-            hash: undefined,
+            hash,
         },
         publicMagicMetadata,
     };
@@ -935,6 +986,7 @@ const extractLivePhotoMetadata = async (
 
 const extractImageOrVideoMetadata = async (
     uploadItem: UploadItem,
+    externalParsedMetadata: ParsedMetadata | undefined,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
@@ -954,6 +1006,12 @@ const extractImageOrVideoMetadata = async (
         parsedMetadata = await tryExtractVideoMetadata(uploadItem);
     } else {
         throw new Error(`Unexpected file type ${fileType} for ${uploadItem}`);
+    }
+
+    // The `UploadAsset` itself might have metadata associated with a-priori, if
+    // so, merge the data we read from the file's contents into it.
+    if (externalParsedMetadata) {
+        parsedMetadata = { ...externalParsedMetadata, ...parsedMetadata };
     }
 
     const hash = await computeHash(uploadItem, worker);
@@ -1015,7 +1073,8 @@ const extractImageOrVideoMetadata = async (
         if (h) publicMagicMetadata.h = ensureInteger(h);
     }
 
-    const caption = parsedMetadataJSON?.description;
+    const caption =
+        parsedMetadataJSON?.description ?? parsedMetadata?.description;
     if (caption) {
         publicMagicMetadata.caption = caption;
     }
@@ -1043,7 +1102,7 @@ const tryExtractImageMetadata = async (
     }
 
     try {
-        return extractExif(file);
+        return await extractExif(file);
     } catch (e) {
         log.error(`Failed to extract image metadata for ${uploadItem}`, e);
         return undefined;
@@ -1052,7 +1111,7 @@ const tryExtractImageMetadata = async (
 
 const tryExtractVideoMetadata = async (uploadItem: UploadItem) => {
     try {
-        return await ffmpeg.extractVideoMetadata(uploadItem);
+        return await extractVideoMetadata(uploadItem);
     } catch (e) {
         log.error(`Failed to extract video metadata for ${uploadItem}`, e);
         return undefined;
@@ -1082,49 +1141,12 @@ const computeHash = async (uploadItem: UploadItem, worker: CryptoWorker) => {
  * available), so this also in effect compares the contents of the files, not
  * just the "meta" information about them.
  */
-const areFilesSame = (f: Metadata, g: Metadata) =>
-    hasFileHash(f) && hasFileHash(g)
-        ? areFilesSameHash(f, g)
-        : areFilesSameNoHash(f, g);
+const areFilesSame = (f: Metadata, g: Metadata) => {
+    if (f.fileType !== g.fileType || f.title !== g.title) return false;
 
-const areFilesSameHash = (f: Metadata, g: Metadata) => {
-    if (f.fileType !== g.fileType || f.title !== g.title) {
-        return false;
-    }
-    if (f.fileType === FileType.livePhoto) {
-        return f.imageHash === g.imageHash && f.videoHash === g.videoHash;
-    } else {
-        return f.hash === g.hash;
-    }
-};
-
-/**
- * Older files that were uploaded before we introduced hashing will not have
- * hashes, so retain and use the logic we used back then for such files.
- *
- * Deprecation notice April 2024: Note that hashing was introduced very early
- * (years ago), so the chance of us finding files without hashes is rare. And
- * even in these cases, the worst that'll happen is that a duplicate file would
- * get uploaded which can later be deduped. So we can get rid of this case at
- * some point (e.g. the mobile app doesn't do this extra check, just uploads).
- */
-const areFilesSameNoHash = (f: Metadata, g: Metadata) => {
-    /*
-     * The maximum difference in the creation/modification times of two similar
-     * files is set to 1 second. This is because while uploading files in the
-     * web - browsers and users could have set reduced precision of file times
-     * to prevent timing attacks and fingerprinting.
-     *
-     * See:
-     * https://developer.mozilla.org/en-US/docs/Web/API/File/lastModified#reduced_time_precision
-     */
-    const oneSecond = 1e6;
-    return (
-        f.fileType == g.fileType &&
-        f.title == g.title &&
-        Math.abs(f.creationTime - g.creationTime) < oneSecond &&
-        Math.abs(f.modificationTime - g.modificationTime) < oneSecond
-    );
+    const fh = metadataHash(f);
+    const gh = metadataHash(g);
+    return fh && gh && fh == gh;
 };
 
 const readAsset = async (
@@ -1321,35 +1343,36 @@ const encryptFile = async (
     file: FileWithMetadata,
     encryptionKey: string,
     worker: CryptoWorker,
-): Promise<EncryptedFile> => {
-    const { key: fileKey, file: encryptedFiledata } = await encryptFiledata(
-        file.fileStreamOrData,
-        worker,
+) => {
+    const fileKey = await worker.generateBlobOrStreamKey();
+
+    const { fileStreamOrData, thumbnail, metadata, pubMagicMetadata, localID } =
+        file;
+
+    const encryptedFiledata =
+        fileStreamOrData instanceof Uint8Array
+            ? await worker.encryptStreamBytes(fileStreamOrData, fileKey)
+            : await encryptFileStream(fileStreamOrData, fileKey, worker);
+
+    const encryptedThumbnail = await worker.encryptThumbnail(
+        thumbnail,
+        fileKey,
     );
 
-    const {
-        encryptedData: thumbEncryptedData,
-        decryptionHeader: thumbDecryptionHeader,
-    } = await worker.encryptThumbnail(file.thumbnail, fileKey);
-    const encryptedThumbnail = {
-        encryptedData: thumbEncryptedData,
-        decryptionHeader: thumbDecryptionHeader,
-    };
-
     const encryptedMetadata = await worker.encryptMetadataJSON({
-        jsonValue: file.metadata,
+        jsonValue: metadata,
         keyB64: fileKey,
     });
 
     let encryptedPubMagicMetadata: EncryptedMagicMetadata;
-    if (file.pubMagicMetadata) {
+    if (pubMagicMetadata) {
         const encryptedPubMagicMetadataData = await worker.encryptMetadataJSON({
-            jsonValue: file.pubMagicMetadata.data,
+            jsonValue: pubMagicMetadata.data,
             keyB64: fileKey,
         });
         encryptedPubMagicMetadata = {
-            version: file.pubMagicMetadata.version,
-            count: file.pubMagicMetadata.count,
+            version: pubMagicMetadata.version,
+            count: pubMagicMetadata.count,
             data: encryptedPubMagicMetadataData.encryptedDataB64,
             header: encryptedPubMagicMetadataData.decryptionHeaderB64,
         };
@@ -1357,40 +1380,34 @@ const encryptFile = async (
 
     const encryptedKey = await worker.encryptToB64(fileKey, encryptionKey);
 
-    const result: EncryptedFile = {
-        file: {
+    return {
+        encryptedFilePieces: {
             file: encryptedFiledata,
             thumbnail: encryptedThumbnail,
             metadata: encryptedMetadata,
             pubMagicMetadata: encryptedPubMagicMetadata,
-            localID: file.localID,
+            localID: localID,
         },
-        fileKey: encryptedKey,
+        encryptedFileKey: {
+            encryptedData: encryptedKey.encryptedData,
+            nonce: encryptedKey.nonce,
+        },
     };
-    return result;
 };
 
-const encryptFiledata = async (
-    fileStreamOrData: FileStream | Uint8Array,
-    worker: CryptoWorker,
-): Promise<EncryptionResult<Uint8Array | EncryptedFileStream>> =>
-    fileStreamOrData instanceof Uint8Array
-        ? await worker.encryptFile(fileStreamOrData)
-        : await encryptFileStream(fileStreamOrData, worker);
-
 const encryptFileStream = async (
-    fileData: FileStream,
+    { stream, chunkCount }: FileStream,
+    fileKey: BytesOrB64,
     worker: CryptoWorker,
 ) => {
-    const { stream, chunkCount } = fileData;
     const fileStreamReader = stream.getReader();
-    const { key, decryptionHeader, pushState } =
-        await worker.initChunkEncryption();
+    const { decryptionHeader, pushState } =
+        await worker.initChunkEncryption(fileKey);
     const ref = { pullCount: 1 };
     const encryptedFileStream = new ReadableStream({
         async pull(controller) {
             const { value } = await fileStreamReader.read();
-            const encryptedFileChunk = await worker.encryptFileChunk(
+            const encryptedFileChunk = await worker.encryptStreamChunk(
                 value,
                 pushState,
                 ref.pullCount === chunkCount,
@@ -1403,44 +1420,46 @@ const encryptFileStream = async (
         },
     });
     return {
-        key,
-        file: {
-            decryptionHeader,
-            encryptedData: { stream: encryptedFileStream, chunkCount },
-        },
+        decryptionHeader,
+        encryptedData: { stream: encryptedFileStream, chunkCount },
     };
 };
 
 const uploadToBucket = async (
-    file: ProcessedFile,
+    encryptedFilePieces: EncryptedFilePieces,
     makeProgessTracker: MakeProgressTracker,
     isCFUploadProxyDisabled: boolean,
     abortIfCancelled: () => void,
 ): Promise<BackupedFile> => {
+    const { localID, file, thumbnail, metadata, pubMagicMetadata } =
+        encryptedFilePieces;
     try {
         let fileObjectKey: string = null;
+        let fileSize: number;
 
-        const encryptedData = file.file.encryptedData;
+        const encryptedData = file.encryptedData;
         if (
             !(encryptedData instanceof Uint8Array) &&
             encryptedData.chunkCount >= multipartChunksPerPart
         ) {
             // We have a stream, and it is more than multipartChunksPerPart
             // chunks long, so use a multipart upload to upload it.
-            fileObjectKey = await uploadStreamUsingMultipart(
-                file.localID,
-                encryptedData,
-                makeProgessTracker,
-                isCFUploadProxyDisabled,
-                abortIfCancelled,
-            );
+            ({ objectKey: fileObjectKey, fileSize } =
+                await uploadStreamUsingMultipart(
+                    localID,
+                    encryptedData,
+                    makeProgessTracker,
+                    isCFUploadProxyDisabled,
+                    abortIfCancelled,
+                ));
         } else {
             const data =
                 encryptedData instanceof Uint8Array
                     ? encryptedData
                     : await readEntireStream(encryptedData.stream);
+            fileSize = data.length;
 
-            const progressTracker = makeProgessTracker(file.localID);
+            const progressTracker = makeProgessTracker(localID);
             const fileUploadURL = await uploadService.getUploadURL();
             if (!isCFUploadProxyDisabled) {
                 fileObjectKey = await UploadHttpClient.putFileV2(
@@ -1461,31 +1480,33 @@ const uploadToBucket = async (
         if (!isCFUploadProxyDisabled) {
             thumbnailObjectKey = await UploadHttpClient.putFileV2(
                 thumbnailUploadURL,
-                file.thumbnail.encryptedData,
+                thumbnail.encryptedData,
                 null,
             );
         } else {
             thumbnailObjectKey = await UploadHttpClient.putFile(
                 thumbnailUploadURL,
-                file.thumbnail.encryptedData,
+                thumbnail.encryptedData,
                 null,
             );
         }
 
         const backupedFile: BackupedFile = {
             file: {
-                decryptionHeader: file.file.decryptionHeader,
+                decryptionHeader: file.decryptionHeader,
                 objectKey: fileObjectKey,
+                size: fileSize,
             },
             thumbnail: {
-                decryptionHeader: file.thumbnail.decryptionHeader,
+                decryptionHeader: thumbnail.decryptionHeader,
                 objectKey: thumbnailObjectKey,
+                size: thumbnail.encryptedData.length,
             },
             metadata: {
-                encryptedData: file.metadata.encryptedDataB64,
-                decryptionHeader: file.metadata.decryptionHeaderB64,
+                encryptedData: metadata.encryptedDataB64,
+                decryptionHeader: metadata.decryptionHeaderB64,
             },
-            pubMagicMetadata: file.pubMagicMetadata,
+            pubMagicMetadata: pubMagicMetadata,
         };
         return backupedFile;
     } catch (e) {
@@ -1520,6 +1541,7 @@ async function uploadStreamUsingMultipart(
     const percentPerPart =
         RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount;
     const partEtags: PartEtag[] = [];
+    let fileSize = 0;
     for (const [
         index,
         fileUploadURL,
@@ -1527,6 +1549,7 @@ async function uploadStreamUsingMultipart(
         abortIfCancelled();
 
         const uploadChunk = await combineChunksToFormUploadPart(streamReader);
+        fileSize += uploadChunk.length;
         const progressTracker = makeProgessTracker(
             fileLocalID,
             percentPerPart,
@@ -1562,7 +1585,7 @@ async function uploadStreamUsingMultipart(
         await UploadHttpClient.completeMultipartUpload(completeURL, cBody);
     }
 
-    return multipartUploadURLs.objectKey;
+    return { objectKey: multipartUploadURLs.objectKey, fileSize };
 }
 
 async function combineChunksToFormUploadPart(

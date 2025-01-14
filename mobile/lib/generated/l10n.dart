@@ -70,6 +70,26 @@ class S {
     );
   }
 
+  /// `Email already registered.`
+  String get emailAlreadyRegistered {
+    return Intl.message(
+      'Email already registered.',
+      name: 'emailAlreadyRegistered',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Email not registered.`
+  String get emailNotRegistered {
+    return Intl.message(
+      'Email not registered.',
+      name: 'emailNotRegistered',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Email`
   String get email {
     return Intl.message(
@@ -1480,6 +1500,26 @@ class S {
     );
   }
 
+  /// `Cannot open this album`
+  String get canNotOpenTitle {
+    return Intl.message(
+      'Cannot open this album',
+      name: 'canNotOpenTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, this album cannot be opened in the app.`
+  String get canNotOpenBody {
+    return Intl.message(
+      'Sorry, this album cannot be opened in the app.',
+      name: 'canNotOpenBody',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Please note`
   String get disableDownloadWarningTitle {
     return Intl.message(
@@ -2692,6 +2732,16 @@ class S {
     );
   }
 
+  /// `Please authenticate to view your trashed files`
+  String get authToViewTrashedFiles {
+    return Intl.message(
+      'Please authenticate to view your trashed files',
+      name: 'authToViewTrashedFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Trash`
   String get trash {
     return Intl.message(
@@ -2896,11 +2946,21 @@ class S {
     );
   }
 
-  /// `Manage device storage`
+  /// `Manage device cache`
   String get manageDeviceStorage {
     return Intl.message(
-      'Manage device storage',
+      'Manage device cache',
       name: 'manageDeviceStorage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review and clear local cache storage.`
+  String get manageDeviceStorageDesc {
+    return Intl.message(
+      'Review and clear local cache storage.',
+      name: 'manageDeviceStorageDesc',
       desc: '',
       args: [],
     );
@@ -4906,6 +4966,26 @@ class S {
     );
   }
 
+  /// `Allow access to photos`
+  String get allowPermTitle {
+    return Intl.message(
+      'Allow access to photos',
+      name: 'allowPermTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please allow access to your photos from Settings so Ente can display and backup your library.`
+  String get allowPermBody {
+    return Intl.message(
+      'Please allow access to your photos from Settings so Ente can display and backup your library.',
+      name: 'allowPermBody',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Open Settings`
   String get openSettings {
     return Intl.message(
@@ -5832,11 +5912,11 @@ class S {
     );
   }
 
-  /// `{count, plural, =0 {} =1 {1 day} other {{count} days}}`
+  /// `{count, plural, =0 {Soon} =1 {1 day} other {{count} days}}`
   String trashDaysLeft(int count) {
     return Intl.plural(
       count,
-      zero: '',
+      zero: 'Soon',
       one: '1 day',
       other: '$count days',
       name: 'trashDaysLeft',
@@ -8719,6 +8799,16 @@ class S {
     );
   }
 
+  /// `Login with TOTP`
+  String get loginWithTOTP {
+    return Intl.message(
+      'Login with TOTP',
+      name: 'loginWithTOTP',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Verification is still pending`
   String get passKeyPendingVerification {
     return Intl.message(
@@ -8829,22 +8919,23 @@ class S {
     );
   }
 
-  /// `Descriptions`
-  String get descriptions {
-    return Intl.message(
-      'Descriptions',
-      name: 'descriptions',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Add a name`
   String get addAName {
     return Intl.message(
       'Add a name',
       name: 'addAName',
       desc: '',
+      args: [],
+    );
+  }
+
+  /// `Find them quickly`
+  String get findThemQuickly {
+    return Intl.message(
+      'Find them quickly',
+      name: 'findThemQuickly',
+      desc:
+          'Subtitle to indicate that the user can find people quickly by name',
       args: [],
     );
   }
@@ -8990,6 +9081,76 @@ class S {
     return Intl.message(
       'Enter person name',
       name: 'enterPersonName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter name`
+  String get enterName {
+    return Intl.message(
+      'Enter name',
+      name: 'enterName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save person`
+  String get savePerson {
+    return Intl.message(
+      'Save person',
+      name: 'savePerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit person`
+  String get editPerson {
+    return Intl.message(
+      'Edit person',
+      name: 'editPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Merged photos`
+  String get mergedPhotos {
+    return Intl.message(
+      'Merged photos',
+      name: 'mergedPhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Or merge with existing`
+  String get orMergeWithExistingPerson {
+    return Intl.message(
+      'Or merge with existing',
+      name: 'orMergeWithExistingPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Birthday (optional)`
+  String get enterDateOfBirth {
+    return Intl.message(
+      'Birthday (optional)',
+      name: 'enterDateOfBirth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Birthday`
+  String get birthday {
+    return Intl.message(
+      'Birthday',
+      name: 'birthday',
       desc: '',
       args: [],
     );
@@ -9250,6 +9411,16 @@ class S {
     return Intl.message(
       'Review suggestions',
       name: 'reviewSuggestions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review`
+  String get review {
+    return Intl.message(
+      'Review',
+      name: 'review',
       desc: '',
       args: [],
     );
@@ -9816,13 +9987,13 @@ class S {
     );
   }
 
-  /// `Extra photos found for $text`
-  String get extraPhotosFoundFor {
+  /// `Extra photos found for {text}`
+  String extraPhotosFoundFor(String text) {
     return Intl.message(
-      'Extra photos found for \$text',
+      'Extra photos found for $text',
       name: 'extraPhotosFoundFor',
       desc: '',
-      args: [],
+      args: [text],
     );
   }
 
@@ -9855,6 +10026,908 @@ class S {
       args: [],
     );
   }
+
+  /// `Processed`
+  String get processed {
+    return Intl.message(
+      'Processed',
+      name: 'processed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove`
+  String get resetPerson {
+    return Intl.message(
+      'Remove',
+      name: 'resetPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to reset this person?`
+  String get areYouSureYouWantToResetThisPerson {
+    return Intl.message(
+      'Are you sure you want to reset this person?',
+      name: 'areYouSureYouWantToResetThisPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All groupings for this person will be reset, and you will lose all suggestions made for this person`
+  String get allPersonGroupingWillReset {
+    return Intl.message(
+      'All groupings for this person will be reset, and you will lose all suggestions made for this person',
+      name: 'allPersonGroupingWillReset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, reset person`
+  String get yesResetPerson {
+    return Intl.message(
+      'Yes, reset person',
+      name: 'yesResetPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Only them`
+  String get onlyThem {
+    return Intl.message(
+      'Only them',
+      name: 'onlyThem',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking models...`
+  String get checkingModels {
+    return Intl.message(
+      'Checking models...',
+      name: 'checkingModels',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable machine learning for magic search and face recognition`
+  String get enableMachineLearningBanner {
+    return Intl.message(
+      'Enable machine learning for magic search and face recognition',
+      name: 'enableMachineLearningBanner',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Images will be shown here once processing and syncing is complete`
+  String get searchDiscoverEmptySection {
+    return Intl.message(
+      'Images will be shown here once processing and syncing is complete',
+      name: 'searchDiscoverEmptySection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `People will be shown here once processing and syncing is complete`
+  String get searchPersonsEmptySection {
+    return Intl.message(
+      'People will be shown here once processing and syncing is complete',
+      name: 'searchPersonsEmptySection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =0 {Added 0 viewer} =1 {Added 1 viewer} other {Added {count} viewers}}`
+  String viewersSuccessfullyAdded(int count) {
+    return Intl.plural(
+      count,
+      zero: 'Added 0 viewer',
+      one: 'Added 1 viewer',
+      other: 'Added $count viewers',
+      name: 'viewersSuccessfullyAdded',
+      desc: 'Number of viewers that were successfully added to an album.',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, =0 {Added 0 collaborator} =1 {Added 1 collaborator} other {Added {count} collaborators}}`
+  String collaboratorsSuccessfullyAdded(int count) {
+    return Intl.plural(
+      count,
+      zero: 'Added 0 collaborator',
+      one: 'Added 1 collaborator',
+      other: 'Added $count collaborators',
+      name: 'collaboratorsSuccessfullyAdded',
+      desc: 'Number of collaborators that were successfully added to an album.',
+      args: [count],
+    );
+  }
+
+  /// `Account is already configured.`
+  String get accountIsAlreadyConfigured {
+    return Intl.message(
+      'Account is already configured.',
+      name: 'accountIsAlreadyConfigured',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Session ID mismatch`
+  String get sessionIdMismatch {
+    return Intl.message(
+      'Session ID mismatch',
+      name: 'sessionIdMismatch',
+      desc:
+          'In passkey page, deeplink is ignored because of session ID mismatch.',
+      args: [],
+    );
+  }
+
+  /// `Failed to fetch active sessions`
+  String get failedToFetchActiveSessions {
+    return Intl.message(
+      'Failed to fetch active sessions',
+      name: 'failedToFetchActiveSessions',
+      desc:
+          'In session page, warn user (in toast) that active sessions could not be fetched.',
+      args: [],
+    );
+  }
+
+  /// `Failed to refresh subscription`
+  String get failedToRefreshStripeSubscription {
+    return Intl.message(
+      'Failed to refresh subscription',
+      name: 'failedToRefreshStripeSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to play video`
+  String get failedToPlayVideo {
+    return Intl.message(
+      'Failed to play video',
+      name: 'failedToPlayVideo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Upload is ignored due to {ignoreReason}`
+  String uploadIsIgnoredDueToIgnorereason(String ignoreReason) {
+    return Intl.message(
+      'Upload is ignored due to $ignoreReason',
+      name: 'uploadIsIgnoredDueToIgnorereason',
+      desc: '',
+      args: [ignoreReason],
+    );
+  }
+
+  /// `Type of gallery {galleryType} is not supported for rename`
+  String typeOfGallerGallerytypeIsNotSupportedForRename(String galleryType) {
+    return Intl.message(
+      'Type of gallery $galleryType is not supported for rename',
+      name: 'typeOfGallerGallerytypeIsNotSupportedForRename',
+      desc: '',
+      args: [galleryType],
+    );
+  }
+
+  /// `Tap to upload, upload is currently ignored due to {ignoreReason}`
+  String tapToUploadIsIgnoredDue(String ignoreReason) {
+    return Intl.message(
+      'Tap to upload, upload is currently ignored due to $ignoreReason',
+      name: 'tapToUploadIsIgnoredDue',
+      desc: 'Shown in upload icon widet, inside a tooltip.',
+      args: [ignoreReason],
+    );
+  }
+
+  /// `Tap to upload`
+  String get tapToUpload {
+    return Intl.message(
+      'Tap to upload',
+      name: 'tapToUpload',
+      desc: 'Shown in upload icon widet, inside a tooltip.',
+      args: [],
+    );
+  }
+
+  /// `Info`
+  String get info {
+    return Intl.message(
+      'Info',
+      name: 'info',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Files`
+  String get addFiles {
+    return Intl.message(
+      'Add Files',
+      name: 'addFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cast album`
+  String get castAlbum {
+    return Intl.message(
+      'Cast album',
+      name: 'castAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Image not analyzed`
+  String get imageNotAnalyzed {
+    return Intl.message(
+      'Image not analyzed',
+      name: 'imageNotAnalyzed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No faces found`
+  String get noFacesFound {
+    return Intl.message(
+      'No faces found',
+      name: 'noFacesFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `File not uploaded yet`
+  String get fileNotUploadedYet {
+    return Intl.message(
+      'File not uploaded yet',
+      name: 'fileNotUploadedYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No suggestions for {personName}`
+  String noSuggestionsForPerson(String personName) {
+    return Intl.message(
+      'No suggestions for $personName',
+      name: 'noSuggestionsForPerson',
+      desc: '',
+      args: [personName],
+    );
+  }
+
+  /// `month`
+  String get month {
+    return Intl.message(
+      'month',
+      name: 'month',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `yr`
+  String get yearShort {
+    return Intl.message(
+      'yr',
+      name: 'yearShort',
+      desc: 'Appears in pricing page (/yr)',
+      args: [],
+    );
+  }
+
+  /// `currently running`
+  String get currentlyRunning {
+    return Intl.message(
+      'currently running',
+      name: 'currentlyRunning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ignored`
+  String get ignored {
+    return Intl.message(
+      'ignored',
+      name: 'ignored',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =0 {0 photo} =1 {1 photo} other {{count} photos}}`
+  String photosCount(int count) {
+    return Intl.plural(
+      count,
+      zero: '0 photo',
+      one: '1 photo',
+      other: '$count photos',
+      name: 'photosCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `File`
+  String get file {
+    return Intl.message(
+      'File',
+      name: 'file',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sections length mismatch: {snapshotLength} != {searchLength}`
+  String searchSectionsLengthMismatch(int snapshotLength, int searchLength) {
+    return Intl.message(
+      'Sections length mismatch: $snapshotLength != $searchLength',
+      name: 'searchSectionsLengthMismatch',
+      desc: 'Appears in search tab page',
+      args: [snapshotLength, searchLength],
+    );
+  }
+
+  /// `Select mail app`
+  String get selectMailApp {
+    return Intl.message(
+      'Select mail app',
+      name: 'selectMailApp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All`
+  String get selectAllShort {
+    return Intl.message(
+      'All',
+      name: 'selectAllShort',
+      desc:
+          'Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos.',
+      args: [],
+    );
+  }
+
+  /// `Magic Search Improvement`
+  String get changeLogMagicSearchImprovementTitle {
+    return Intl.message(
+      'Magic Search Improvement',
+      name: 'changeLogMagicSearchImprovementTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We have improved magic search to become much faster, so you don\'t have to wait to find what you\'re looking for.`
+  String get changeLogMagicSearchImprovementContent {
+    return Intl.message(
+      'We have improved magic search to become much faster, so you don\\\'t have to wait to find what you\\\'re looking for.',
+      name: 'changeLogMagicSearchImprovementContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup Status`
+  String get changeLogBackupStatusTitle {
+    return Intl.message(
+      'Backup Status',
+      name: 'changeLogBackupStatusTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.`
+  String get changeLogBackupStatusContent {
+    return Intl.message(
+      'We\\\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.',
+      name: 'changeLogBackupStatusContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Discover`
+  String get changeLogDiscoverTitle {
+    return Intl.message(
+      'Discover',
+      name: 'changeLogDiscoverTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\'s a place to find photos that might be important for you.\n\nOnly available if you have enabled Machine Learning.`
+  String get changeLogDiscoverContent {
+    return Intl.message(
+      'Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\\\'s a place to find photos that might be important for you.\\n\\nOnly available if you have enabled Machine Learning.',
+      name: 'changeLogDiscoverContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select cover photo`
+  String get selectCoverPhoto {
+    return Intl.message(
+      'Select cover photo',
+      name: 'selectCoverPhoto',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New location`
+  String get newLocation {
+    return Intl.message(
+      'New location',
+      name: 'newLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Face not clustered yet, please come back later`
+  String get faceNotClusteredYet {
+    return Intl.message(
+      'Face not clustered yet, please come back later',
+      name: 'faceNotClusteredYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The link you are trying to access has expired.`
+  String get theLinkYouAreTryingToAccessHasExpired {
+    return Intl.message(
+      'The link you are trying to access has expired.',
+      name: 'theLinkYouAreTryingToAccessHasExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open file`
+  String get openFile {
+    return Intl.message(
+      'Open file',
+      name: 'openFile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup file`
+  String get backupFile {
+    return Intl.message(
+      'Backup file',
+      name: 'backupFile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open album in browser`
+  String get openAlbumInBrowser {
+    return Intl.message(
+      'Open album in browser',
+      name: 'openAlbumInBrowser',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please use the web app to add photos to this album`
+  String get openAlbumInBrowserTitle {
+    return Intl.message(
+      'Please use the web app to add photos to this album',
+      name: 'openAlbumInBrowserTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow`
+  String get allow {
+    return Intl.message(
+      'Allow',
+      name: 'allow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow app to open shared album links`
+  String get allowAppToOpenSharedAlbumLinks {
+    return Intl.message(
+      'Allow app to open shared album links',
+      name: 'allowAppToOpenSharedAlbumLinks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `See public album links in app`
+  String get seePublicAlbumLinksInApp {
+    return Intl.message(
+      'See public album links in app',
+      name: 'seePublicAlbumLinksInApp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Emergency Contacts`
+  String get emergencyContacts {
+    return Intl.message(
+      'Emergency Contacts',
+      name: 'emergencyContacts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Accept Invite`
+  String get acceptTrustInvite {
+    return Intl.message(
+      'Accept Invite',
+      name: 'acceptTrustInvite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Decline Invite`
+  String get declineTrustInvite {
+    return Intl.message(
+      'Decline Invite',
+      name: 'declineTrustInvite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove yourself as trusted contact`
+  String get removeYourselfAsTrustedContact {
+    return Intl.message(
+      'Remove yourself as trusted contact',
+      name: 'removeYourselfAsTrustedContact',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Legacy`
+  String get legacy {
+    return Intl.message(
+      'Legacy',
+      name: 'legacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Legacy allows trusted contacts to access your account in your absence.`
+  String get legacyPageDesc {
+    return Intl.message(
+      'Legacy allows trusted contacts to access your account in your absence.',
+      name: 'legacyPageDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.`
+  String get legacyPageDesc2 {
+    return Intl.message(
+      'Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.',
+      name: 'legacyPageDesc2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Legacy accounts`
+  String get legacyAccounts {
+    return Intl.message(
+      'Legacy accounts',
+      name: 'legacyAccounts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Trusted contacts`
+  String get trustedContacts {
+    return Intl.message(
+      'Trusted contacts',
+      name: 'trustedContacts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Trusted Contact`
+  String get addTrustedContact {
+    return Intl.message(
+      'Add Trusted Contact',
+      name: 'addTrustedContact',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove invite`
+  String get removeInvite {
+    return Intl.message(
+      'Remove invite',
+      name: 'removeInvite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A trusted contact is trying to access your account`
+  String get recoveryWarning {
+    return Intl.message(
+      'A trusted contact is trying to access your account',
+      name: 'recoveryWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reject recovery`
+  String get rejectRecovery {
+    return Intl.message(
+      'Reject recovery',
+      name: 'rejectRecovery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recovery initiated`
+  String get recoveryInitiated {
+    return Intl.message(
+      'Recovery initiated',
+      name: 'recoveryInitiated',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can access the account after {days} days. A notification will be sent to {email}.`
+  String recoveryInitiatedDesc(int days, String email) {
+    return Intl.message(
+      'You can access the account after $days days. A notification will be sent to $email.',
+      name: 'recoveryInitiatedDesc',
+      desc: '',
+      args: [days, email],
+    );
+  }
+
+  /// `Cancel recovery`
+  String get cancelAccountRecovery {
+    return Intl.message(
+      'Cancel recovery',
+      name: 'cancelAccountRecovery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recover account`
+  String get recoveryAccount {
+    return Intl.message(
+      'Recover account',
+      name: 'recoveryAccount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to cancel recovery?`
+  String get cancelAccountRecoveryBody {
+    return Intl.message(
+      'Are you sure you want to cancel recovery?',
+      name: 'cancelAccountRecoveryBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start recovery`
+  String get startAccountRecoveryTitle {
+    return Intl.message(
+      'Start recovery',
+      name: 'startAccountRecoveryTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Trusted contact can help in recovering your data.`
+  String get whyAddTrustContact {
+    return Intl.message(
+      'Trusted contact can help in recovering your data.',
+      name: 'whyAddTrustContact',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can now recover {email}'s account by setting a new password.`
+  String recoveryReady(String email) {
+    return Intl.message(
+      'You can now recover $email\'s account by setting a new password.',
+      name: 'recoveryReady',
+      desc: '',
+      args: [email],
+    );
+  }
+
+  /// `{email} is trying to recover your account.`
+  String recoveryWarningBody(Object email) {
+    return Intl.message(
+      '$email is trying to recover your account.',
+      name: 'recoveryWarningBody',
+      desc: '',
+      args: [email],
+    );
+  }
+
+  /// `You have been invited to be a legacy contact by {email}.`
+  String trustedInviteBody(Object email) {
+    return Intl.message(
+      'You have been invited to be a legacy contact by $email.',
+      name: 'trustedInviteBody',
+      desc: '',
+      args: [email],
+    );
+  }
+
+  /// `Warning`
+  String get warning {
+    return Intl.message(
+      'Warning',
+      name: 'warning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Proceed`
+  String get proceed {
+    return Intl.message(
+      'Proceed',
+      name: 'proceed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You are about to add {email} as a trusted contact. They will be able to recover your account if you are absent for {numOfDays} days.`
+  String confirmAddingTrustedContact(String email, int numOfDays) {
+    return Intl.message(
+      'You are about to add $email as a trusted contact. They will be able to recover your account if you are absent for $numOfDays days.',
+      name: 'confirmAddingTrustedContact',
+      desc: '',
+      args: [email, numOfDays],
+    );
+  }
+
+  /// `{email} has invited you to be a trusted contact`
+  String legacyInvite(Object email) {
+    return Intl.message(
+      '$email has invited you to be a trusted contact',
+      name: 'legacyInvite',
+      desc: '',
+      args: [email],
+    );
+  }
+
+  /// `Please authenticate to manage your trusted contacts`
+  String get authToManageLegacy {
+    return Intl.message(
+      'Please authenticate to manage your trusted contacts',
+      name: 'authToManageLegacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Having trouble playing this video? Long press here to try a different player.`
+  String get useDifferentPlayerInfo {
+    return Intl.message(
+      'Having trouble playing this video? Long press here to try a different player.',
+      name: 'useDifferentPlayerInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide shared items from home gallery`
+  String get hideSharedItemsFromHomeGallery {
+    return Intl.message(
+      'Hide shared items from home gallery',
+      name: 'hideSharedItemsFromHomeGallery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Gallery`
+  String get gallery {
+    return Intl.message(
+      'Gallery',
+      name: 'gallery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Join album`
+  String get joinAlbum {
+    return Intl.message(
+      'Join album',
+      name: 'joinAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `to view and add your photos`
+  String get joinAlbumSubtext {
+    return Intl.message(
+      'to view and add your photos',
+      name: 'joinAlbumSubtext',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `to add this to shared albums`
+  String get joinAlbumSubtextViewer {
+    return Intl.message(
+      'to add this to shared albums',
+      name: 'joinAlbumSubtextViewer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Join`
+  String get join {
+    return Intl.message(
+      'Join',
+      name: 'join',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -9878,12 +10951,14 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'gu'),
       Locale.fromSubtags(languageCode: 'he'),
       Locale.fromSubtags(languageCode: 'hi'),
+      Locale.fromSubtags(languageCode: 'hu'),
       Locale.fromSubtags(languageCode: 'id'),
       Locale.fromSubtags(languageCode: 'it'),
       Locale.fromSubtags(languageCode: 'ja'),
       Locale.fromSubtags(languageCode: 'km'),
       Locale.fromSubtags(languageCode: 'ko'),
       Locale.fromSubtags(languageCode: 'lt'),
+      Locale.fromSubtags(languageCode: 'ml'),
       Locale.fromSubtags(languageCode: 'nl'),
       Locale.fromSubtags(languageCode: 'no'),
       Locale.fromSubtags(languageCode: 'pl'),
@@ -9898,6 +10973,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'ti'),
       Locale.fromSubtags(languageCode: 'tr'),
       Locale.fromSubtags(languageCode: 'uk'),
+      Locale.fromSubtags(languageCode: 'vi'),
       Locale.fromSubtags(languageCode: 'zh'),
     ];
   }

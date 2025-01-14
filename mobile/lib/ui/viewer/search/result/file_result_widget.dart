@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/search/file_search_result.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
@@ -32,7 +33,7 @@ class FileSearchResultWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'File',
+                    S.of(context).file,
                     style: TextStyle(
                       fontSize: 12,
                       color: Theme.of(context).colorScheme.subTextColor,

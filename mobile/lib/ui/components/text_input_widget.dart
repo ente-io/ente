@@ -189,25 +189,17 @@ class _TextInputWidgetState extends State<TextInputWidget> {
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
-              suffixIcon: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 175),
-                  switchInCurve: Curves.easeInExpo,
-                  switchOutCurve: Curves.easeOutExpo,
-                  child: SuffixIconWidget(
-                    key: ValueKey(executionState),
-                    executionState: executionState,
-                    shouldSurfaceExecutionStates:
-                        widget.shouldSurfaceExecutionStates,
-                    obscureTextNotifier: _obscureTextNotifier,
-                    isPasswordInput: widget.isPasswordInput,
-                    textController: _textController,
-                    isClearable: widget.isClearable,
-                    shouldUnfocusOnClearOrSubmit:
-                        widget.shouldUnfocusOnClearOrSubmit,
-                  ),
-                ),
+              suffixIcon: SuffixIconWidget(
+                key: ValueKey(executionState),
+                executionState: executionState,
+                shouldSurfaceExecutionStates:
+                    widget.shouldSurfaceExecutionStates,
+                obscureTextNotifier: _obscureTextNotifier,
+                isPasswordInput: widget.isPasswordInput,
+                textController: _textController,
+                isClearable: widget.isClearable,
+                shouldUnfocusOnClearOrSubmit:
+                    widget.shouldUnfocusOnClearOrSubmit,
               ),
               prefixIconConstraints: const BoxConstraints(
                 maxHeight: 44,
@@ -218,8 +210,8 @@ class _TextInputWidgetState extends State<TextInputWidget> {
               suffixIconConstraints: const BoxConstraints(
                 maxHeight: 24,
                 maxWidth: 48,
-                minHeight: 24,
-                minWidth: 48,
+                minHeight: 0,
+                minWidth: 0,
               ),
               prefixIcon: widget.prefixIcon != null
                   ? Icon(
@@ -442,7 +434,7 @@ class SuffixIconWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget trailingWidget;
+    final Widget? trailingWidget;
     final colorScheme = getEnteColorScheme(context);
     if (executionState == ExecutionState.idle ||
         !shouldSurfaceExecutionStates) {
@@ -473,7 +465,7 @@ class SuffixIconWidget extends StatelessWidget {
           ),
         );
       } else {
-        trailingWidget = const SizedBox.shrink();
+        trailingWidget = null;
       }
     } else if (executionState == ExecutionState.inProgress) {
       trailingWidget = EnteLoadingWidget(
@@ -486,8 +478,19 @@ class SuffixIconWidget extends StatelessWidget {
         color: colorScheme.primary500,
       );
     } else {
-      trailingWidget = const SizedBox.shrink();
+      trailingWidget = null;
     }
-    return trailingWidget;
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 175),
+      switchInCurve: Curves.easeInExpo,
+      switchOutCurve: Curves.easeOutExpo,
+      child: trailingWidget != null
+          ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: trailingWidget,
+            )
+          : const SizedBox.shrink(),
+    );
   }
 }

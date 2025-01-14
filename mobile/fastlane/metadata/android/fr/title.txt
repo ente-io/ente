@@ -1,1 +1,1 @@
-ente - stockage de photos chiffré
+ente - stockage chiffré des photos

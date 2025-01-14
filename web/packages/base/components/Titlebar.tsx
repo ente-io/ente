@@ -1,7 +1,7 @@
 import { FlexWrapper } from "@ente/shared/components/Container";
-import ArrowBack from "@mui/icons-material/ArrowBack";
-import Close from "@mui/icons-material/Close";
-import { Box, IconButton, Typography } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CloseIcon from "@mui/icons-material/Close";
+import { Box, IconButton, Stack, Typography } from "@mui/material";
 import React from "react";
 
 interface TitlebarProps {
@@ -10,9 +10,11 @@ interface TitlebarProps {
     onClose: () => void;
     backIsClose?: boolean;
     onRootClose?: () => void;
-    actionButton?: JSX.Element;
+    actionButton?: React.JSX.Element;
 }
 
+// TODO: Deprecated in favor of SidebarDrawerTitlebarProps where possible (will
+// revisit the remaining use cases once those have migrated).
 export const Titlebar: React.FC<TitlebarProps> = ({
     title,
     caption,
@@ -32,25 +34,26 @@ export const Titlebar: React.FC<TitlebarProps> = ({
                     onClick={onClose}
                     color={backIsClose ? "secondary" : "primary"}
                 >
-                    {backIsClose ? <Close /> : <ArrowBack />}
+                    {backIsClose ? <CloseIcon /> : <ArrowBackIcon />}
                 </IconButton>
-                <Box display={"flex"} gap="4px">
+                <Stack direction="row" sx={{ gap: "4px" }}>
                     {actionButton && actionButton}
                     {!backIsClose && (
                         <IconButton onClick={onRootClose} color={"secondary"}>
-                            <Close />
+                            <CloseIcon />
                         </IconButton>
                     )}
-                </Box>
+                </Stack>
             </FlexWrapper>
-            <Box py={0.5} px={2}>
-                <Typography variant="h3" fontWeight={"bold"}>
-                    {title}
-                </Typography>
+            <Box sx={{ py: 0.5, px: 2 }}>
+                <Typography variant="h3">{title}</Typography>
                 <Typography
                     variant="small"
-                    color="text.muted"
-                    sx={{ wordBreak: "break-all", minHeight: "17px" }}
+                    sx={{
+                        color: "text.muted",
+                        wordBreak: "break-all",
+                        minHeight: "17px",
+                    }}
                 >
                     {caption}
                 </Typography>

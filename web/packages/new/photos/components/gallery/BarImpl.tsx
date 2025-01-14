@@ -1,6 +1,8 @@
-import { useIsSmallWidth } from "@/base/hooks";
+import { Overlay } from "@/base/components/containers";
+import { FilledIconButton } from "@/base/components/mui";
+import { Ellipsized2LineTypography } from "@/base/components/Typography";
+import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
-import { FilledIconButton } from "@/new/photos/components/mui";
 import {
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,
@@ -17,15 +19,13 @@ import type {
     CollectionsSortBy,
 } from "@/new/photos/services/collection/ui";
 import type { Person } from "@/new/photos/services/ml/people";
-import { ensure } from "@/utils/ensure";
-import { Overlay } from "@ente/shared/components/Container";
 import ArchiveIcon from "@mui/icons-material/Archive";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import Favorite from "@mui/icons-material/FavoriteRounded";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import LinkIcon from "@mui/icons-material/Link";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PeopleIcon from "@mui/icons-material/People";
-import PushPin from "@mui/icons-material/PushPin";
+import PushPinIcon from "@mui/icons-material/PushPin";
 import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, {
@@ -42,13 +42,10 @@ import {
     type ListChildComponentProps,
     areEqual,
 } from "react-window";
+import { isMLSupported } from "../../services/ml";
 import type { GalleryBarMode } from "./reducer";
 
 export interface GalleryBarImplProps {
-    /**
-     * When `true`, the bar shows a button to switch to the people section.
-     */
-    showPeopleSectionButton: boolean;
     /**
      * What are we displaying currently.
      */
@@ -101,7 +98,6 @@ export interface GalleryBarImplProps {
 }
 
 export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
-    showPeopleSectionButton,
     mode,
     onChangeMode,
     collectionSummaries,
@@ -201,7 +197,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 ? {
                       type: "collections",
                       collectionSummaries,
-                      activeCollectionID: ensure(activeCollectionID),
+                      activeCollectionID: activeCollectionID!,
                       onSelectCollectionID,
                   }
                 : {
@@ -222,32 +218,38 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 
     const controls1 = isSmallWidth && (
-        <Box display="flex" alignItems={"center"} gap={1} minHeight={"64px"}>
+        <Stack
+            direction="row"
+            sx={{ alignItems: "center", gap: 1, minHeight: "64px" }}
+        >
             {mode != "people" && (
                 <>
                     <CollectionsSortOptions
                         activeSortBy={collectionsSortBy}
                         onChangeSortBy={onChangeCollectionsSortBy}
-                        disableTriggerButtonBackground
+                        transparentTriggerButtonBackground
                     />
                     <IconButton onClick={onShowAllCollections}>
-                        <ExpandMore />
+                        <ExpandMoreIcon />
                     </IconButton>
                 </>
             )}
-        </Box>
+        </Stack>
     );
 
     const controls2 = !isSmallWidth && mode != "people" && (
-        <Box display="flex" alignItems={"center"} gap={1} height={"64px"}>
+        <Stack
+            direction="row"
+            sx={{ alignItems: "center", gap: 1, height: "64px" }}
+        >
             <CollectionsSortOptions
                 activeSortBy={collectionsSortBy}
                 onChangeSortBy={onChangeCollectionsSortBy}
             />
             <FilledIconButton onClick={onShowAllCollections}>
-                <ExpandMore />
+                <ExpandMoreIcon />
             </FilledIconButton>
-        </Box>
+        </Stack>
     );
 
     return (
@@ -256,9 +258,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             sx={people.length ? {} : { borderBlockEndColor: "transparent" }}
         >
             <Row1>
-                <ModeIndicator
-                    {...{ showPeopleSectionButton, mode, onChangeMode }}
-                />
+                <ModeIndicator {...{ mode, onChangeMode }} />
                 {controls1}
             </Row1>
             <Row2>
@@ -291,7 +291,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 };
 
-const BarWrapper = styled(Box)`
+const BarWrapper = styled("div")`
     padding-inline: 24px;
     @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
         padding-inline: 4px;
@@ -300,7 +300,7 @@ const BarWrapper = styled(Box)`
     border-block-end: 1px solid ${({ theme }) => theme.palette.divider};
 `;
 
-export const Row1 = styled(Box)`
+export const Row1 = styled("div")`
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -308,27 +308,24 @@ export const Row1 = styled(Box)`
     margin-block-end: 12px;
 `;
 
-export const Row2 = styled(Box)`
+export const Row2 = styled("div")`
     display: flex;
     align-items: flex-start;
     gap: 16px;
 `;
 
 const ModeIndicator: React.FC<
-    Pick<
-        GalleryBarImplProps,
-        "showPeopleSectionButton" | "mode" | "onChangeMode"
-    >
-> = ({ showPeopleSectionButton, mode, onChangeMode }) => {
+    Pick<GalleryBarImplProps, "mode" | "onChangeMode">
+> = ({ mode, onChangeMode }) => {
     // Mode switcher is not shown in the hidden albums section.
     if (mode == "hidden-albums") {
         return <Typography>{t("hidden_albums")}</Typography>;
     }
 
-    // Show the static mode indicator with only the "Albums" title if we have
-    // not been asked to show the people button (there are no other sections to
-    // switch to in such a case).
-    if (!showPeopleSectionButton) {
+    // Show the static mode indicator with only the "Albums" title if ML is not
+    // supported on this client (web), since there are no other sections to
+    // switch to in such a case.
+    if (!isMLSupported) {
         return <Typography>{t("albums")}</Typography>;
     }
 
@@ -353,7 +350,7 @@ const ModeIndicator: React.FC<
 const ModeButton = styled(UnstyledButton, {
     shouldForwardProp: (propName) => propName != "active",
 })<{ active: boolean }>(
-    ({ active, theme }) => `
+    ({ theme, active }) => `
     p { color: ${active ? theme.colors.text.base : theme.colors.text.muted} }
     p:hover { color: ${theme.colors.text.base} }
 `,
@@ -376,11 +373,9 @@ const ScrollButtonBase_ = styled("button")`
     border: none;
     padding: 0;
     margin: 0;
-
     border-radius: 50%;
     background-color: ${({ theme }) => theme.colors.backdrop.muted};
     color: ${({ theme }) => theme.colors.stroke.base};
-
     & > svg {
         border-radius: 50%;
         height: 30px;
@@ -392,7 +387,6 @@ const ScrollButtonLeft = styled(ScrollButtonBase)`
     left: 0;
     text-align: right;
     transform: translate(-50%, 0%);
-
     & > svg {
         transform: rotate(180deg);
     }
@@ -404,7 +398,7 @@ const ScrollButtonRight = styled(ScrollButtonBase)`
     transform: translate(50%, 0%);
 `;
 
-const ListWrapper = styled(Box)`
+const ListWrapper = styled("div")`
     position: relative;
     overflow: hidden;
     height: 86px;
@@ -439,11 +433,11 @@ const getItemCount = (data: ItemData) => {
 const getItemKey = (index: number, data: ItemData) => {
     switch (data.type) {
         case "collections": {
-            const collectionSummary = ensure(data.collectionSummaries[index]);
+            const collectionSummary = data.collectionSummaries[index]!;
             return `${data.type}-${collectionSummary.id}-${collectionSummary.coverFile?.id}`;
         }
         case "people": {
-            const person = ensure(data.people[index]);
+            const person = data.people[index]!;
             return `${data.type}-${person.id}-${person.displayFaceID}`;
         }
     }
@@ -461,7 +455,7 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
                 activeCollectionID,
                 onSelectCollectionID,
             } = data;
-            const collectionSummary = ensure(collectionSummaries[index]);
+            const collectionSummary = collectionSummaries[index]!;
             card = (
                 <CollectionBarCard
                     key={collectionSummary.id}
@@ -477,7 +471,7 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
 
         case "people": {
             const { people, activePerson, onSelectPerson } = data;
-            const person = ensure(people[index]);
+            const person = people[index]!;
             card = (
                 <PersonCard
                     key={person.id}
@@ -517,21 +511,13 @@ const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
 
 const CardText: React.FC<React.PropsWithChildren> = ({ children }) => (
     <TileTextOverlay>
-        <Box height={"2.1em"}>
-            <Ellipsized variant="small">{children}</Ellipsized>
+        <Box sx={{ height: "2.1em" }}>
+            <Ellipsized2LineTypography variant="small">
+                {children}
+            </Ellipsized2LineTypography>
         </Box>
     </TileTextOverlay>
 );
-
-const Ellipsized = styled(Typography)`
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; // number of lines to show
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    word-break: break-word;
-`;
 
 interface CollectionBarCardIconProps {
     type: CollectionSummaryType;
@@ -541,19 +527,17 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     type,
 }) => (
     <CollectionBarCardIcon_>
-        {type == "favorites" && <Favorite />}
+        {type == "favorites" && <FavoriteRoundedIcon />}
         {type == "archived" && (
             <ArchiveIcon
-                sx={(theme) => ({
-                    color: theme.colors.white.muted,
-                })}
+                sx={(theme) => ({ color: theme.colors.white.muted })}
             />
         )}
         {type == "outgoingShare" && <PeopleIcon />}
         {(type == "incomingShareViewer" ||
             type == "incomingShareCollaborator") && <PeopleIcon />}
         {type == "sharedOnlyViaLink" && <LinkIcon />}
-        {type == "pinned" && <PushPin />}
+        {type == "pinned" && <PushPinIcon />}
     </CollectionBarCardIcon_>
 );
 

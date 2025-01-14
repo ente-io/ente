@@ -13,9 +13,19 @@ import * as libsodium from "./libsodium";
  * Note: Keep these methods logic free. They are meant to be trivial proxies.
  */
 export class CryptoWorker {
+    toB64 = ei._toB64;
+    toB64URLSafe = ei._toB64URLSafe;
+    fromB64 = ei._fromB64;
+    toHex = ei._toHex;
+    fromHex = ei._fromHex;
+    generateBoxKey = ei._generateBoxKey;
+    generateBlobOrStreamKey = ei._generateBlobOrStreamKey;
     encryptBoxB64 = ei._encryptBoxB64;
     encryptThumbnail = ei._encryptThumbnail;
-    _encryptBlobB64 = ei._encryptBlobB64;
+    encryptBlobB64 = ei._encryptBlobB64;
+    encryptStreamBytes = ei._encryptStreamBytes;
+    initChunkEncryption = ei._initChunkEncryption;
+    encryptStreamChunk = ei._encryptStreamChunk;
     encryptMetadataJSON_New = ei._encryptMetadataJSON_New;
     encryptMetadataJSON = ei._encryptMetadataJSON;
     decryptBox = ei._decryptBox;
@@ -23,38 +33,19 @@ export class CryptoWorker {
     decryptBlob = ei._decryptBlob;
     decryptBlobB64 = ei._decryptBlobB64;
     decryptThumbnail = ei._decryptThumbnail;
+    decryptStreamBytes = ei._decryptStreamBytes;
+    initChunkDecryption = ei._initChunkDecryption;
+    decryptStreamChunk = ei._decryptStreamChunk;
     decryptMetadataJSON_New = ei._decryptMetadataJSON_New;
     decryptMetadataJSON = ei._decryptMetadataJSON;
+    generateKeyPair = ei._generateKeyPair;
+    boxSeal = ei._boxSeal;
+    boxSealOpen = ei._boxSealOpen;
+    deriveKey = ei._deriveKey;
+    deriveSensitiveKey = ei._deriveSensitiveKey;
+    deriveInteractiveKey = ei._deriveInteractiveKey;
 
     // TODO: -- AUDIT BELOW --
-
-    async decryptFile(fileData: Uint8Array, header: Uint8Array, key: string) {
-        return libsodium.decryptChaCha(fileData, header, key);
-    }
-
-    async encryptFile(fileData: Uint8Array) {
-        return libsodium.encryptChaCha(fileData);
-    }
-
-    async encryptFileChunk(
-        data: Uint8Array,
-        pushState: StateAddress,
-        isFinalChunk: boolean,
-    ) {
-        return libsodium.encryptFileChunk(data, pushState, isFinalChunk);
-    }
-
-    async initChunkEncryption() {
-        return libsodium.initChunkEncryption();
-    }
-
-    async initChunkDecryption(header: Uint8Array, key: Uint8Array) {
-        return libsodium.initChunkDecryption(header, key);
-    }
-
-    async decryptFileChunk(fileData: Uint8Array, pullState: StateAddress) {
-        return libsodium.decryptFileChunk(fileData, pullState);
-    }
 
     async initChunkHashing() {
         return libsodium.initChunkHashing();
@@ -66,23 +57,6 @@ export class CryptoWorker {
 
     async completeChunkHashing(hashState: StateAddress) {
         return libsodium.completeChunkHashing(hashState);
-    }
-
-    async deriveKey(
-        passphrase: string,
-        salt: string,
-        opsLimit: number,
-        memLimit: number,
-    ) {
-        return libsodium.deriveKey(passphrase, salt, opsLimit, memLimit);
-    }
-
-    async deriveSensitiveKey(passphrase: string, salt: string) {
-        return libsodium.deriveSensitiveKey(passphrase, salt);
-    }
-
-    async deriveInteractiveKey(passphrase: string, salt: string) {
-        return libsodium.deriveInteractiveKey(passphrase, salt);
     }
 
     async decryptB64(data: string, nonce: string, key: string) {
@@ -113,18 +87,6 @@ export class CryptoWorker {
         return libsodium.generateSaltToDeriveKey();
     }
 
-    async generateKeyPair() {
-        return libsodium.generateKeyPair();
-    }
-
-    async boxSealOpen(input: string, publicKey: string, secretKey: string) {
-        return libsodium.boxSealOpen(input, publicKey, secretKey);
-    }
-
-    async boxSeal(input: string, publicKey: string) {
-        return libsodium.boxSeal(input, publicKey);
-    }
-
     async generateSubKey(
         key: string,
         subKeyLength: number,
@@ -132,33 +94,6 @@ export class CryptoWorker {
         context: string,
     ) {
         return libsodium.generateSubKey(key, subKeyLength, subKeyID, context);
-    }
-
-    async fromUTF8(string: string) {
-        return libsodium.fromUTF8(string);
-    }
-    async toUTF8(data: string) {
-        return libsodium.toUTF8(data);
-    }
-
-    async toB64(data: Uint8Array) {
-        return libsodium.toB64(data);
-    }
-
-    async toB64URLSafe(data: Uint8Array) {
-        return libsodium.toB64URLSafe(data);
-    }
-
-    async fromB64(string: string) {
-        return libsodium.fromB64(string);
-    }
-
-    async toHex(string: string) {
-        return libsodium.toHex(string);
-    }
-
-    async fromHex(string: string) {
-        return libsodium.fromHex(string);
     }
 }
 

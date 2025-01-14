@@ -20,26 +20,26 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'fa';
 
-  static String m12(versionValue) => "نسخه: ${versionValue}";
+  static String m13(versionValue) => "نسخه: ${versionValue}";
 
-  static String m13(freeAmount, storageUnit) =>
+  static String m14(freeAmount, storageUnit) =>
       "${freeAmount} ${storageUnit} رایگان";
 
-  static String m24(supportEmail) =>
+  static String m27(supportEmail) =>
       "لطفا یک ایمیل از آدرس ایمیلی که ثبت نام کردید به ${supportEmail} ارسال کنید";
 
   static String m0(passwordStrengthValue) =>
       "قدرت رمز عبور: ${passwordStrengthValue}";
 
-  static String m48(storeName) => "به ما در ${storeName} امتیاز دهید";
+  static String m55(storeName) => "به ما در ${storeName} امتیاز دهید";
 
-  static String m62(
+  static String m72(
           usedAmount, usedStorageUnit, totalAmount, totalStorageUnit) =>
       "${usedAmount} ${usedStorageUnit} از ${totalAmount} ${totalStorageUnit} استفاده شده";
 
-  static String m71(email) => "تایید ${email}";
+  static String m85(email) => "تایید ${email}";
 
-  static String m1(email) =>
+  static String m2(email) =>
       "ما یک ایمیل به <green>${email}</green> ارسال کرده‌ایم";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -75,7 +75,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidCancelButton": MessageLookupByLibrary.simpleMessage("لغو"),
         "androidIosWebDesktop": MessageLookupByLibrary.simpleMessage(
             "اندروید، آی‌اواس، وب، رایانه رومیزی"),
-        "appVersion": m12,
+        "appVersion": m13,
         "archive": MessageLookupByLibrary.simpleMessage("بایگانی"),
         "areYouSureYouWantToLogout": MessageLookupByLibrary.simpleMessage(
             "آیا برای خارج شدن مطمئن هستید؟"),
@@ -86,7 +86,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
             "لطفاً برای مشاهده دستگاه‌های فعال خود احراز هویت کنید"),
         "available": MessageLookupByLibrary.simpleMessage("در دسترس"),
-        "availableStorageSpace": m13,
+        "availableStorageSpace": m14,
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("پوشه‌های پشتیبان گیری شده"),
         "backup": MessageLookupByLibrary.simpleMessage("پشتیبان گیری"),
@@ -113,6 +113,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirm": MessageLookupByLibrary.simpleMessage("تایید"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("تایید حذف حساب کاربری"),
+        "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
+            "بله، می خواهم این حساب و داده های آن را در همه برنامه ها برای همیشه حذف کنم."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("تایید رمز عبور"),
         "confirmRecoveryKey":
@@ -164,7 +166,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "discord": MessageLookupByLibrary.simpleMessage("دیسکورد"),
         "doThisLater": MessageLookupByLibrary.simpleMessage("بعداً انجام شود"),
         "downloading": MessageLookupByLibrary.simpleMessage("در حال دانلود..."),
-        "dropSupportEmail": m24,
+        "dropSupportEmail": m27,
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("ویرایش مکان"),
         "email": MessageLookupByLibrary.simpleMessage("ایمیل"),
@@ -290,7 +292,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("پشتیبان گیری خصوصی"),
         "privateSharing":
             MessageLookupByLibrary.simpleMessage("اشتراک گذاری خصوصی"),
-        "rateUsOnStore": m48,
+        "rateUsOnStore": m55,
         "recover": MessageLookupByLibrary.simpleMessage("بازیابی"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("بازیابی حساب کاربری"),
@@ -366,7 +368,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "storageBreakupFamily":
             MessageLookupByLibrary.simpleMessage("خانوادگی"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("شما"),
-        "storageUsageInfo": m62,
+        "storageUsageInfo": m72,
         "strongStrength": MessageLookupByLibrary.simpleMessage("قوی"),
         "support": MessageLookupByLibrary.simpleMessage("پشتیبانی"),
         "systemTheme": MessageLookupByLibrary.simpleMessage("سیستم"),
@@ -407,7 +409,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "از کلید بازیابی استفاده کنید"),
         "verify": MessageLookupByLibrary.simpleMessage("تایید"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("تایید ایمیل"),
-        "verifyEmailID": m71,
+        "verifyEmailID": m85,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("تایید"),
         "verifyPassword":
             MessageLookupByLibrary.simpleMessage("تایید رمز عبور"),
@@ -420,7 +422,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewer": MessageLookupByLibrary.simpleMessage("بیننده"),
         "weAreOpenSource":
             MessageLookupByLibrary.simpleMessage("ما متن‌باز هستیم!"),
-        "weHaveSendEmailTo": m1,
+        "weHaveSendEmailTo": m2,
         "weakStrength": MessageLookupByLibrary.simpleMessage("ضعیف"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("خوش آمدید!"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("تغییرات جدید"),

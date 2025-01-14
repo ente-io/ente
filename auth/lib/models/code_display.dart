@@ -11,6 +11,9 @@ class CodeDisplay {
   final int tapCount;
   String note;
   final List<String> tags;
+  int position;
+  String iconSrc;
+  String iconID;
 
   CodeDisplay({
     this.pinned = false,
@@ -19,7 +22,12 @@ class CodeDisplay {
     this.tapCount = 0,
     this.tags = const [],
     this.note = '',
+    this.position = 0,
+    this.iconSrc = '',
+    this.iconID = '',
   });
+
+  bool get isCustomIcon => (iconSrc != '' && iconID != '');
 
   // copyWith
   CodeDisplay copyWith({
@@ -29,6 +37,9 @@ class CodeDisplay {
     int? tapCount,
     List<String>? tags,
     String? note,
+    int? position,
+    String? iconSrc,
+    String? iconID,
   }) {
     final bool updatedPinned = pinned ?? this.pinned;
     final bool updatedTrashed = trashed ?? this.trashed;
@@ -36,6 +47,9 @@ class CodeDisplay {
     final int updatedTapCount = tapCount ?? this.tapCount;
     final List<String> updatedTags = tags ?? this.tags;
     final String updatedNote = note ?? this.note;
+    final int updatedPosition = position ?? this.position;
+    final String updatedIconSrc = iconSrc ?? this.iconSrc;
+    final String updatedIconID = iconID ?? this.iconID;
 
     return CodeDisplay(
       pinned: updatedPinned,
@@ -44,6 +58,9 @@ class CodeDisplay {
       tapCount: updatedTapCount,
       tags: updatedTags,
       note: updatedNote,
+      position: updatedPosition,
+      iconSrc: updatedIconSrc,
+      iconID: updatedIconID,
     );
   }
 
@@ -58,6 +75,9 @@ class CodeDisplay {
       tapCount: json['tapCount'] ?? 0,
       tags: List<String>.from(json['tags'] ?? []),
       note: json['note'] ?? '',
+      position: json['position'] ?? 0,
+      iconSrc: json['iconSrc'] ?? 'ente',
+      iconID: json['iconID'] ?? '',
     );
   }
 
@@ -99,6 +119,9 @@ class CodeDisplay {
       'tapCount': tapCount,
       'tags': tags,
       'note': note,
+      'position': position,
+      'iconSrc': iconSrc,
+      'iconID': iconID,
     };
   }
 

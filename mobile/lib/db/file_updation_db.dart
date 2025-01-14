@@ -115,11 +115,7 @@ class FileUpdationDB {
     if (localIDs.isEmpty) {
       return;
     }
-    String inParam = "";
-    for (final localID in localIDs) {
-      inParam += "'" + localID + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
+    final inParam = localIDs.map((id) => "'$id'").join(',');
     final db = await instance.database;
     await db.rawQuery(
       '''
@@ -164,11 +160,7 @@ class FileUpdationDB {
     if (reasons.isEmpty) {
       return;
     }
-    String inParam = "";
-    for (final reason in reasons) {
-      inParam += "'" + reason + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
+    final inParam = reasons.map((reason) => "'$reason'").join(',');
     final db = await instance.database;
     await db.rawQuery(
       '''

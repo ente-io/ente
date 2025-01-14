@@ -411,7 +411,6 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Ukuran kotak foto",
-  "manageDeviceStorage": "Atur penyimpanan perangkat",
   "machineLearning": "Pemelajaran mesin",
   "mlConsent": "Aktifkan pemelajaran mesin",
   "mlConsentTitle": "Aktifkan pemelajaran mesin?",
@@ -774,16 +773,6 @@
   "sharedByMe": "Dibagikan oleh saya",
   "doubleYourStorage": "Gandakan kuota kamu",
   "shareAlbumHint": "Buka album lalu ketuk tombol bagikan di sudut kanan atas untuk berbagi.",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1 hari} other {{count} hari}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "Hapus Semua",
   "renameAlbum": "Ubah nama album",
   "convertToAlbum": "Ubah menjadi album",
@@ -1105,7 +1094,6 @@
   "castInstruction": "Buka cast.ente.io pada perangkat yang ingin kamu tautkan.\n\nMasukkan kode yang ditampilkan untuk memutar album di TV.",
   "deviceCodeHint": "Masukkan kode",
   "joinDiscord": "Bergabung ke Discord",
-  "descriptions": "Keterangan",
   "addAName": "Tambahkan nama",
   "findPeopleByName": "Telusuri orang dengan mudah menggunakan nama",
   "addCollaborators": "{count, plural, other {Tambahkan kolaborator}}",

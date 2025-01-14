@@ -39,7 +39,7 @@ class VideoWidgetMediaKit extends StatefulWidget {
 
 class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     with WidgetsBindingObserver {
-  final Logger _logger = Logger("VideoWidgetNew");
+  final Logger _logger = Logger("VideoWidgetMediaKit");
   static const verticalMargin = 72.0;
   late final player = Player();
   VideoController? controller;
@@ -201,7 +201,11 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
         _setVideoController(file.path);
       }
     }).onError((error, stackTrace) {
-      showErrorDialog(context, "Error", S.of(context).failedToDownloadVideo);
+      showErrorDialog(
+        context,
+        S.of(context).error,
+        S.of(context).failedToDownloadVideo,
+      );
     });
   }
 

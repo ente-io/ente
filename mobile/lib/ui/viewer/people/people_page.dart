@@ -11,13 +11,17 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/models/search/search_result.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/search_service.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
+import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
+import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
+import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/ui/viewer/people/people_app_bar.dart";
 import "package:photos/ui/viewer/people/people_banner.dart";
@@ -26,6 +30,7 @@ import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
 class PeoplePage extends StatefulWidget {
   final String tagPrefix;
   final PersonEntity person;
+  final SearchResult? searchResult;
 
   static const GalleryType appBarType = GalleryType.peopleTag;
   static const GalleryType overlayType = GalleryType.peopleTag;
@@ -33,6 +38,7 @@ class PeoplePage extends StatefulWidget {
   const PeoplePage({
     this.tagPrefix = "",
     required this.person,
+    required this.searchResult,
     super.key,
   });
 
@@ -86,6 +92,12 @@ class _PeoplePageState extends State<PeoplePage> {
     log("loadPersonFiles");
     final result = await SearchService.instance
         .getClusterFilesForPersonID(widget.person.remoteID);
+    if (result.isEmpty) {
+      _logger.severe(
+        "No files found for person with id ${widget.person.remoteID}, can't load files",
+      );
+      return [];
+    }
     smallestClusterSize = result.values.fold<int>(result.values.first.length,
         (previousValue, element) {
       return element.length < previousValue ? element.length : previousValue;
@@ -111,113 +123,169 @@ class _PeoplePageState extends State<PeoplePage> {
   Widget build(BuildContext context) {
     _logger.info("Building for ${widget.person.data.name}");
     return GalleryFilesState(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0),
-          child: PeopleAppBar(
-            GalleryType.peopleTag,
-            widget.person.data.name,
-            _selectedFiles,
-            widget.person,
+      child: InheritedSearchFilterDataWrapper(
+        searchFilterDataProvider: widget.searchResult != null
+            ? SearchFilterDataProvider(
+                initialGalleryFilter:
+                    widget.searchResult!.getHierarchicalSearchFilter(),
+              )
+            : null,
+        child: Scaffold(
+          appBar: PreferredSize(
+            preferredSize:
+                Size.fromHeight(widget.searchResult != null ? 90.0 : 50.0),
+            child: PeopleAppBar(
+              GalleryType.peopleTag,
+              widget.person.data.name,
+              _selectedFiles,
+              widget.person,
+            ),
           ),
-        ),
-        body: FutureBuilder<List<EnteFile>>(
-          future: filesFuture,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final personFiles = snapshot.data as List<EnteFile>;
-              return Column(
-                children: [
-                  Expanded(
-                    child: SelectionState(
-                      selectedFiles: _selectedFiles,
-                      child: Stack(
-                        alignment: Alignment.bottomCenter,
-                        children: [
-                          Gallery(
-                            asyncLoader: (
-                              creationStartTime,
-                              creationEndTime, {
-                              limit,
-                              asc,
-                            }) async {
-                              final result = await loadPersonFiles();
-                              return Future.value(
-                                FileLoadResult(
-                                  result,
-                                  false,
-                                ),
-                              );
-                            },
-                            reloadEvent:
-                                Bus.instance.on<LocalPhotosUpdatedEvent>(),
-                            forceReloadEvents: [
-                              Bus.instance.on<PeopleChangedEvent>(),
-                            ],
-                            removalEventTypes: const {
-                              EventType.deletedFromRemote,
-                              EventType.deletedFromEverywhere,
-                              EventType.hide,
-                            },
-                            tagPrefix: widget.tagPrefix + widget.tagPrefix,
-                            selectedFiles: _selectedFiles,
-                            initialFiles: personFiles.isNotEmpty
-                                ? [personFiles.first]
-                                : [],
-                          ),
-                          FileSelectionOverlayBar(
-                            PeoplePage.overlayType,
-                            _selectedFiles,
-                            person: widget.person,
-                          ),
-                        ],
+          body: FutureBuilder<List<EnteFile>>(
+            future: filesFuture,
+            builder: (context, snapshot) {
+              final inheritedSearchFilterData = InheritedSearchFilterData.of(
+                context,
+              );
+              if (snapshot.hasData) {
+                final personFiles = snapshot.data as List<EnteFile>;
+                return Column(
+                  children: [
+                    Expanded(
+                      child: SelectionState(
+                        selectedFiles: _selectedFiles,
+                        child: Stack(
+                          alignment: Alignment.bottomCenter,
+                          children: [
+                            inheritedSearchFilterData.isHierarchicalSearchable
+                                ? ValueListenableBuilder(
+                                    valueListenable: inheritedSearchFilterData
+                                        .searchFilterDataProvider!
+                                        .isSearchingNotifier,
+                                    builder: (
+                                      context,
+                                      value,
+                                      _,
+                                    ) {
+                                      return value
+                                          ? HierarchicalSearchGallery(
+                                              tagPrefix: widget.tagPrefix,
+                                              selectedFiles: _selectedFiles,
+                                            )
+                                          : _Gallery(
+                                              tagPrefix: widget.tagPrefix,
+                                              selectedFiles: _selectedFiles,
+                                              personFiles: personFiles,
+                                              loadPersonFiles: loadPersonFiles,
+                                            );
+                                    },
+                                  )
+                                : _Gallery(
+                                    tagPrefix: widget.tagPrefix,
+                                    selectedFiles: _selectedFiles,
+                                    personFiles: personFiles,
+                                    loadPersonFiles: loadPersonFiles,
+                                  ),
+                            FileSelectionOverlayBar(
+                              PeoplePage.overlayType,
+                              _selectedFiles,
+                              person: widget.person,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  showSuggestionBanner
-                      ? Dismissible(
-                          key: const Key("suggestionBanner"),
-                          direction: DismissDirection.horizontal,
-                          onDismissed: (direction) {
-                            setState(() {
-                              userDismissedSuggestionBanner = true;
-                            });
-                          },
-                          child: PeopleBanner(
-                            type: PeopleBannerType.suggestion,
-                            startIcon: Icons.face_retouching_natural,
-                            actionIcon: Icons.search_outlined,
-                            text: "Review suggestions",
-                            subText: "Improve the results",
-                            onTap: () async {
-                              unawaited(
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        PersonReviewClusterSuggestion(
-                                      widget.person,
+                    showSuggestionBanner
+                        ? Dismissible(
+                            key: const Key("suggestionBanner"),
+                            direction: DismissDirection.horizontal,
+                            onDismissed: (direction) {
+                              setState(() {
+                                userDismissedSuggestionBanner = true;
+                              });
+                            },
+                            child: PeopleBanner(
+                              type: PeopleBannerType.suggestion,
+                              startIcon: Icons.face_retouching_natural,
+                              actionIcon: Icons.search_outlined,
+                              text: "Review suggestions",
+                              subText: "Improve the results",
+                              onTap: () async {
+                                unawaited(
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          PersonReviewClusterSuggestion(
+                                        widget.person,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
-                        )
-                      : const SizedBox.shrink(),
-                ],
-              );
-            } else if (snapshot.hasError) {
-              log("Error: ${snapshot.error} ${snapshot.stackTrace}}");
-              //Need to show an error on the UI here
-              return const SizedBox.shrink();
-            } else {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-          },
+                                );
+                              },
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                  ],
+                );
+              } else if (snapshot.hasError) {
+                log("Error: ${snapshot.error} ${snapshot.stackTrace}}");
+                //Need to show an error on the UI here
+                return const SizedBox.shrink();
+              } else {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+            },
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _Gallery extends StatelessWidget {
+  final String tagPrefix;
+  final SelectedFiles selectedFiles;
+  final List<EnteFile> personFiles;
+  final Future<List<EnteFile>> Function() loadPersonFiles;
+
+  const _Gallery({
+    required this.tagPrefix,
+    required this.selectedFiles,
+    required this.personFiles,
+    required this.loadPersonFiles,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Gallery(
+      asyncLoader: (
+        creationStartTime,
+        creationEndTime, {
+        limit,
+        asc,
+      }) async {
+        final result = await loadPersonFiles();
+        return Future.value(
+          FileLoadResult(
+            result,
+            false,
+          ),
+        );
+      },
+      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+      forceReloadEvents: [
+        Bus.instance.on<PeopleChangedEvent>(),
+      ],
+      removalEventTypes: const {
+        EventType.deletedFromRemote,
+        EventType.deletedFromEverywhere,
+        EventType.hide,
+      },
+      tagPrefix: tagPrefix + tagPrefix,
+      selectedFiles: selectedFiles,
+      initialFiles: personFiles.isNotEmpty ? [personFiles.first] : [],
     );
   }
 }

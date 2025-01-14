@@ -1,11 +1,12 @@
 import { ensureElectron } from "@/base/electron";
-import { nameAndExtension } from "@/base/file";
+import { joinPath, nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
+import { downloadManager } from "@/gallery/services/download";
 import type { Collection } from "@/media/collection";
-import { type EnteFile, mergeMetadata } from "@/media/file";
+import { mergeMetadata, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import downloadManager from "@/new/photos/services/download";
+import { getLocalCollections } from "@/new/photos/services/collections";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import { getAllLocalFiles } from "@/new/photos/services/files";
 import {
@@ -16,25 +17,56 @@ import {
 import { wait } from "@/utils/promise";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
-import { getLocalCollections } from "services/collectionService";
-import {
-    CollectionExportNames,
-    ExportProgress,
-    ExportRecord,
-    ExportRecordV0,
-    ExportRecordV1,
-    ExportRecordV2,
-    ExportedCollectionPaths,
-    FileExportNames,
-} from "types/export";
 import { getIDBasedSortedFiles, getPersonalFiles } from "utils/file";
 import {
     getCollectionIDFromFileUID,
     getExportRecordFileUID,
     getLivePhotoExportName,
     getMetadataFolderExportPath,
+    type CollectionExportNames,
+    type ExportProgress,
+    type ExportStage,
+    type FileExportNames,
 } from ".";
 import exportService from "./index";
+
+type ExportedCollectionPaths = Record<number, string>;
+
+interface ExportRecordV0 {
+    stage: ExportStage;
+    lastAttemptTimestamp: number;
+    progress: ExportProgress;
+    queuedFiles: string[];
+    exportedFiles: string[];
+    failedFiles: string[];
+}
+
+interface ExportRecordV1 {
+    version: number;
+    stage: ExportStage;
+    lastAttemptTimestamp: number;
+    progress: ExportProgress;
+    queuedFiles: string[];
+    exportedFiles: string[];
+    failedFiles: string[];
+    exportedCollectionPaths: ExportedCollectionPaths;
+}
+
+interface ExportRecordV2 {
+    version: number;
+    stage: ExportStage;
+    lastAttemptTimestamp: number;
+    exportedFiles: string[];
+    exportedCollectionPaths: ExportedCollectionPaths;
+}
+
+export interface ExportRecord {
+    version: number;
+    stage: ExportStage;
+    lastAttemptTimestamp: number;
+    collectionExportNames: CollectionExportNames;
+    fileExportNames: FileExportNames;
+}
 
 export async function migrateExport(
     exportDir: string,
@@ -193,7 +225,10 @@ const migrateCollectionFolders = async (
 ) => {
     const fs = ensureElectron().fs;
     for (const collection of collections) {
-        const oldPath = `${exportDir}/${collection.id}_${oldSanitizeName(collection.name)}`;
+        const oldPath = joinPath(
+            exportDir,
+            `${collection.id}_${oldSanitizeName(collection.name)}`,
+        );
         const newPath = await safeDirectoryName(
             exportDir,
             collection.name,
@@ -217,19 +252,28 @@ async function migrateFiles(
     const fs = ensureElectron().fs;
     for (const file of files) {
         const collectionPath = collectionIDPathMap.get(file.collectionID);
-        const metadataPath = `${collectionPath}/${exportMetadataDirectoryName}`;
+        const metadataPath = joinPath(
+            collectionPath,
+            exportMetadataDirectoryName,
+        );
 
         const oldFileName = `${file.id}_${oldSanitizeName(file.metadata.title)}`;
-        const oldFilePath = `${collectionPath}/${oldFileName}`;
-        const oldFileMetadataPath = `${metadataPath}/${oldFileName}.json`;
+        const oldFilePath = joinPath(collectionPath, oldFileName);
+        const oldFileMetadataPath = joinPath(
+            metadataPath,
+            `${oldFileName}.json`,
+        );
 
         const newFileName = await safeFileName(
             collectionPath,
             file.metadata.title,
             fs.exists,
         );
-        const newFilePath = `${collectionPath}/${newFileName}`;
-        const newFileMetadataPath = `${metadataPath}/${newFileName}.json`;
+        const newFilePath = joinPath(collectionPath, newFileName);
+        const newFileMetadataPath = joinPath(
+            metadataPath,
+            `${newFileName}.json`,
+        );
 
         if (!(await fs.exists(oldFilePath))) continue;
 
@@ -309,8 +353,7 @@ async function getFileExportNamesFromExportedFiles(
             For Live Photos we need to download the file to get the image and video name
         */
         if (file.metadata.fileType === FileType.livePhoto) {
-            const fileStream = await downloadManager.getFile(file);
-            const fileBlob = await new Response(fileStream).blob();
+            const fileBlob = await downloadManager.fileBlob(file);
             const { imageFileName, videoFileName } = await decodeLivePhoto(
                 file.metadata.title,
                 fileBlob,
@@ -413,7 +456,7 @@ async function removeCollectionExportMissingMetadataFolder(
         if (
             await fs.exists(
                 getMetadataFolderExportPath(
-                    `${exportDir}/${collectionExportName}`,
+                    joinPath(exportDir, collectionExportName),
                 ),
             )
         ) {
@@ -480,7 +523,7 @@ const oldSanitizeName = (name: string) =>
     name.replaceAll("/", "_").replaceAll(" ", "_");
 
 const getFileSavePath = (collectionFolderPath: string, fileSaveName: string) =>
-    `${collectionFolderPath}/${fileSaveName}`;
+    joinPath(collectionFolderPath, fileSaveName);
 
 const getUniqueFileExportNameForMigration = (
     collectionPath: string,

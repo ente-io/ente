@@ -412,7 +412,6 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "写真のグリッドサイズ",
-  "manageDeviceStorage": "デバイスのストレージを管理",
   "machineLearning": "機械学習",
   "mlConsent": "機械学習を有効にする",
   "mlConsentTitle": "機械学習を有効にしますか？",
@@ -816,16 +815,6 @@
   "referFriendsAnd2xYourPlan": "友達に紹介して2倍",
   "shareAlbumHint": "アルバムを開いて右上のシェアボタンをタップ",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "完全に削除されるまでの日数が項目に表示されます",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1日} other {{count} 日}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "全て削除",
   "renameAlbum": "アルバムの名前変更",
   "convertToAlbum": "アルバムに変換",
@@ -1244,8 +1233,11 @@
   "deviceCodeHint": "コードを入力する",
   "joinDiscord": "Discordに参加",
   "locations": "場所",
-  "descriptions": "説明文",
   "addAName": "名前を追加",
+  "findThemQuickly": "すばやく見つける",
+  "@findThemQuickly": {
+    "description": "Subtitle to indicate that the user can find people quickly by name"
+  },
   "findPeopleByName": "名前で人を探す",
   "addViewers": "{count, plural, zero {ビューアーを追加} one {ビューアーを追加} other {ビューアーを追加}}",
   "addCollaborators": "{count, plural, zero {共同編集者を追加} one {共同編集者を追加} other {共同編集者を追加}}",
@@ -1260,6 +1252,13 @@
   "createCollaborativeLink": "共同作業用リンクを作成",
   "search": "検索",
   "enterPersonName": "人名を入力してください",
+  "enterName": "名前を入力",
+  "savePerson": "人物を保存",
+  "editPerson": "人物を編集",
+  "mergedPhotos": "統合された写真",
+  "orMergeWithExistingPerson": "既存のものと統合する",
+  "enterDateOfBirth": "誕生日（任意）",
+  "birthday": "誕生日",
   "removePersonLabel": "人名を削除",
   "autoPairDesc": "自動ペアリングは Chromecast に対応しているデバイスでのみ動作します。",
   "manualPairDesc": "PINを使ってペアリングすると、どんなスクリーンで動作します。",
@@ -1286,6 +1285,7 @@
   "right": "右",
   "whatsNew": "最新情報",
   "reviewSuggestions": "提案を確認",
+  "review": "確認",
   "useAsCover": "カバー写真として使用",
   "notPersonLabel": "{name} ではありませんか？",
   "@notPersonLabel": {
@@ -1343,5 +1343,23 @@
   "mostRecent": "新しい順",
   "mostRelevant": "関連度順",
   "loadingYourPhotos": "写真を読み込んでいます...",
-  "processingImport": "{folderName} を処理中..."
+  "processingImport": "{folderName} を処理中...",
+  "personName": "人名名",
+  "addNewPerson": "新しい人物を追加",
+  "addNameOrMerge": "名前をつける、あるいは既存の人物にまとめる",
+  "mergeWithExisting": "既存の人物とまとめる",
+  "newPerson": "新しい人物",
+  "addName": "名前を追加",
+  "add": "追加",
+  "extraPhotosFoundFor": "{text} の写真が見つかりました",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "extraPhotosFound": "追加の写真が見つかりました",
+  "configuration": "設定",
+  "localIndexing": "このデバイス上での実行"
 }

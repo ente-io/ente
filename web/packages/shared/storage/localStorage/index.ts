@@ -5,23 +5,18 @@ export enum LS_KEYS {
     USER = "user",
     KEY_ATTRIBUTES = "keyAttributes",
     ORIGINAL_KEY_ATTRIBUTES = "originalKeyAttributes",
-    SUBSCRIPTION = "subscription",
-    FAMILY_DATA = "familyData",
     IS_FIRST_LOGIN = "isFirstLogin",
     JUST_SIGNED_UP = "justSignedUp",
     SHOW_BACK_BUTTON = "showBackButton",
     EXPORT = "export",
     // LOGS = "logs",
-    USER_DETAILS = "userDetails",
     // Migrated to (and only used by) useCollectionsSortByLocalState.
     COLLECTION_SORT_BY = "collectionSortBy",
     THEME = "theme",
     // Moved to the new wrapper @/base/local-storage
     // LOCALE = 'locale',
-    MAP_ENABLED = "mapEnabled",
     SRP_SETUP_ATTRIBUTES = "srpSetupAttributes",
     SRP_ATTRIBUTES = "srpAttributes",
-    CF_PROXY_DISABLED = "cfProxyDisabled",
     REFERRAL_SOURCE = "referralSource",
 }
 
@@ -80,6 +75,7 @@ export const migrateKVToken = async (user: unknown) => {
         typeof oldLSUser.token == "string" &&
         !(await getKVS("token"));
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     user &&
     typeof user == "object" &&
     "id" in user &&
@@ -87,6 +83,7 @@ export const migrateKVToken = async (user: unknown) => {
         ? await setKV("userID", user.id)
         : await removeKV("userID");
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     user &&
     typeof user == "object" &&
     "token" in user &&

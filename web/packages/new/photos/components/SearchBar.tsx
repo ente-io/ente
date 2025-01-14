@@ -1,5 +1,6 @@
 import { assertionFailed } from "@/base/assert";
-import { useIsSmallWidth } from "@/base/hooks";
+import type { ButtonishProps } from "@/base/components/mui";
+import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { ItemCard, PreviewItemTile } from "@/new/photos/components/Tiles";
 import { isMLSupported, mlStatusSnapshot } from "@/new/photos/services/ml";
 import { searchOptionsForString } from "@/new/photos/services/search";
@@ -35,8 +36,10 @@ import {
 import AsyncSelect from "react-select/async";
 import { SearchPeopleList } from "./PeopleList";
 import { UnstyledButton } from "./UnstyledButton";
-import type { ButtonishProps } from "./mui";
-import { useMLStatusSnapshot, usePeopleStateSnapshot } from "./utils/ml";
+import {
+    useMLStatusSnapshot,
+    usePeopleStateSnapshot,
+} from "./utils/use-snapshot";
 
 export interface SearchBarProps {
     /**
@@ -117,11 +120,11 @@ interface MobileSearchAreaProps {
 }
 
 const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
-    <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+    <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
         <IconButton onClick={onSearch}>
             <SearchIcon />
         </IconButton>
-    </Box>
+    </Stack>
 );
 
 const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
@@ -242,7 +245,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     );
 };
 
-const SearchInputWrapper = styled(Box)`
+const SearchInputWrapper = styled("div")`
     display: flex;
     width: 100%;
     align-items: center;
@@ -317,13 +320,13 @@ const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
             }}
         >
             <Box
-                sx={{
+                sx={(theme) => ({
                     display: "inline-flex",
                     // Match the default padding of the ValueContainer to make
                     // the icon look properly spaced and aligned.
                     pl: "8px",
-                    color: (theme) => theme.colors.stroke.muted,
-                }}
+                    color: theme.colors.stroke.muted,
+                })}
             >
                 {iconForOption(props.getValue()[0])}
             </Box>
@@ -372,7 +375,8 @@ const shouldShowEmptyState = (inputValue: string) => {
     if (!isMLSupported) return false;
 
     const status = mlStatusSnapshot();
-    if (!status || status.phase == "disabled") return false;
+    if (!status || status.phase == "disabled" || status.phase == "done")
+        return false;
 
     // Show it otherwise.
     return true;
@@ -388,7 +392,7 @@ const EmptyState: React.FC<
     const mlStatus = useMLStatusSnapshot();
     const people = usePeopleStateSnapshot()?.visiblePeople;
 
-    if (!mlStatus || mlStatus.phase == "disabled") {
+    if (!mlStatus || mlStatus.phase == "disabled" || mlStatus.phase == "done") {
         // The preflight check should've prevented us from coming here.
         assertionFailed();
         return <></>;
@@ -400,16 +404,13 @@ const EmptyState: React.FC<
             label = t("indexing_scheduled");
             break;
         case "indexing":
-            label = t("indexing_photos", mlStatus);
+            label = t("indexing_photos");
             break;
         case "fetching":
-            label = t("indexing_fetching", mlStatus);
+            label = t("indexing_fetching");
             break;
         case "clustering":
-            label = t("indexing_people", mlStatus);
-            break;
-        case "done":
-            label = t("indexing_done", mlStatus);
+            label = t("indexing_people");
             break;
     }
 
@@ -430,7 +431,7 @@ const EmptyState: React.FC<
 
 const SearchPeopleHeader: React.FC<ButtonishProps> = ({ onClick }) => (
     <SearchPeopleHeaderButton {...{ onClick }}>
-        <Typography color="text.muted">{t("people")}</Typography>
+        <Typography sx={{ color: "text.muted" }}>{t("people")}</Typography>
     </SearchPeopleHeaderButton>
 );
 
@@ -453,27 +454,30 @@ const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
 );
 
 const OptionContents = ({ data: option }: { data: SearchOption }) => (
-    <Stack className="option-contents" gap="4px" px={2} py={1}>
-        <Typography variant="mini" color="text.muted">
+    <Stack className="option-contents" sx={{ gap: "4px", px: 2, py: 1 }}>
+        <Typography variant="mini" sx={{ color: "text.muted" }}>
             {labelForOption(option)}
         </Typography>
         <Stack
             direction="row"
-            gap={1}
-            sx={{ alignItems: "center", justifyContent: "space-between" }}
+            sx={{
+                gap: 1,
+                alignItems: "center",
+                justifyContent: "space-between",
+            }}
         >
             <Box>
                 <Typography
-                    sx={{ fontWeight: "bold", wordBreak: "break-word" }}
+                    sx={{ fontWeight: "medium", wordBreak: "break-word" }}
                 >
                     {option.suggestion.label}
                 </Typography>
-                <Typography color="text.muted">
+                <Typography sx={{ color: "text.muted" }}>
                     {t("photos_count", { count: option.fileCount })}
                 </Typography>
             </Box>
 
-            <Stack direction={"row"} gap={1}>
+            <Stack direction={"row"} sx={{ gap: 1 }}>
                 {option.previewFiles.map((file) => (
                     <ItemCard
                         key={file.id}

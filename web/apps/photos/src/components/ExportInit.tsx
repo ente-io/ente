@@ -1,4 +1,5 @@
-import { Button, DialogActions, DialogContent } from "@mui/material";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { DialogActions, DialogContent } from "@mui/material";
 import { t } from "i18next";
 
 interface Props {
@@ -8,9 +9,13 @@ export default function ExportInit({ startExport }: Props) {
     return (
         <DialogContent>
             <DialogActions>
-                <Button size="large" color="accent" onClick={startExport}>
-                    {t("START")}
-                </Button>
+                <FocusVisibleButton
+                    fullWidth
+                    color="accent"
+                    onClick={startExport}
+                >
+                    {t("start")}
+                </FocusVisibleButton>
             </DialogActions>
         </DialogContent>
     );

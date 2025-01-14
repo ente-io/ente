@@ -8,7 +8,7 @@
   "invalidEmailAddress": "Nieprawidłowy adres e-mail",
   "enterValidEmail": "Prosimy podać prawidłowy adres e-mail.",
   "deleteAccount": "Usuń konto",
-  "askDeleteReason": "Jaka jest przyczyna usunięcia konta?",
+  "askDeleteReason": "Jaka jest główna przyczyna usunięcia Twojego konta?",
   "deleteAccountFeedbackPrompt": "Przykro nam, że odchodzisz. Wyjaśnij nam, dlaczego nas opuszczasz, aby pomóc ulepszać nasze usługi.",
   "feedback": "Opinia",
   "kindlyHelpUsWithThisInformation": "Pomóż nam z tą informacją",
@@ -412,13 +412,14 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Rozmiar siatki zdjęć",
-  "manageDeviceStorage": "Zarządzaj pamięcią urządzenia",
-  "machineLearning": "Uczenie maszynowe",
-  "mlConsent": "Włącz uczenie maszynowe",
-  "mlConsentTitle": "Włączyć uczenie maszynowe?",
-  "mlConsentDescription": "Jeśli włączysz uczenie maszynowe, Ente wyodrębni informacje takie jak geometria twarzy z plików, w tym tych udostępnionych z Tobą.\n\nTo się stanie na Twoim urządzeniu i wygenerowane informacje biometryczne zostaną zaszyfrowane end-to-end.",
+  "manageDeviceStorage": "Zarządzaj pamięcią podręczną urządzenia",
+  "manageDeviceStorageDesc": "Przejrzyj i wyczyść lokalną pamięć podręczną.",
+  "machineLearning": "Nauczanie maszynowe",
+  "mlConsent": "Włącz nauczanie maszynowe",
+  "mlConsentTitle": "Włączyć nauczanie maszynowe?",
+  "mlConsentDescription": "Jeśli włączysz nauczanie maszynowe, Ente wyodrębni informacje takie jak geometria twarzy z plików, w tym tych udostępnionych z Tobą.\n\nTo się stanie na Twoim urządzeniu i wygenerowane informacje biometryczne zostaną zaszyfrowane end-to-end.",
   "mlConsentPrivacy": "Kliknij tutaj, aby uzyskać więcej informacji na temat tej funkcji w naszej polityce prywatności",
-  "mlConsentConfirmation": "Rozumiem i chcę włączyć uczenie maszynowe",
+  "mlConsentConfirmation": "Rozumiem i chcę włączyć nauczanie maszynowe",
   "magicSearch": "Magiczne wyszukiwanie",
   "discover": "Odkryj",
   "@discover": {
@@ -439,7 +440,7 @@
   "discover_sunset": "Zachód słońca",
   "discover_hills": "Wzgórza",
   "discover_greenery": "Zieleń",
-  "mlIndexingDescription": "Pamiętaj, że uczenie maszynowe spowoduje większą przepustowość i zużycie baterii do czasu zindeksowania wszystkich elementów. Rozważ użycie aplikacji komputerowej do szybszego indeksowania, wszystkie wyniki zostaną automatycznie zsynchronizowane.",
+  "mlIndexingDescription": "Pamiętaj, że nauczanie maszynowe spowoduje większą przepustowość i zużycie baterii do czasu zindeksowania wszystkich elementów. Rozważ użycie aplikacji komputerowej do szybszego indeksowania, wszystkie wyniki zostaną automatycznie zsynchronizowane.",
   "loadingModel": "Pobieranie modeli...",
   "waitingForWifi": "Czekanie na WiFi...",
   "status": "Stan",
@@ -688,6 +689,8 @@
   "noPhotosAreBeingBackedUpRightNow": "W tej chwili nie wykonuje się kopii zapasowej zdjęć",
   "preserveMore": "Zachowaj więcej",
   "grantFullAccessPrompt": "Zezwól na dostęp do wszystkich zdjęć w aplikacji Ustawienia",
+  "allowPermTitle": "Zezwól na dostęp do zdjęć",
+  "allowPermBody": "Prosimy zezwolić na dostęp do swoich zdjęć w Ustawieniach, aby Ente mogło wyświetlać i tworzyć kopię zapasową Twojej biblioteki.",
   "openSettings": "Otwórz Ustawienia",
   "selectMorePhotos": "Wybierz więcej zdjęć",
   "existingUser": "Istniejący użytkownik",
@@ -816,7 +819,7 @@
   "referFriendsAnd2xYourPlan": "Poleć znajomym i podwój swój plan",
   "shareAlbumHint": "Otwórz album i dotknij przycisk udostępniania w prawym górnym rogu, aby udostępnić.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Elementy pokazują liczbę dni pozostałych przed trwałym usunięciem",
-  "trashDaysLeft": "{count, plural, =0 {} =1{{count} dzień} few {{count} dni} other{{count} dni}}",
+  "trashDaysLeft": "{count, plural, =0 {Wkrótce} =1{1 dzień} few {{count} dni} other{{count} dni}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1233,6 +1236,7 @@
   "waitingForVerification": "Oczekiwanie na weryfikację...",
   "passkey": "Klucz dostępu",
   "passkeyAuthTitle": "Weryfikacja kluczem dostępu",
+  "loginWithTOTP": "Zaloguj się za pomocą TOTP",
   "passKeyPendingVerification": "Weryfikacja jest nadal w toku",
   "loginSessionExpired": "Sesja wygasła",
   "loginSessionExpiredDetails": "Twoja sesja wygasła. Zaloguj się ponownie.",
@@ -1244,8 +1248,11 @@
   "deviceCodeHint": "Wprowadź kod",
   "joinDiscord": "Dołącz do serwera Discord",
   "locations": "Lokalizacje",
-  "descriptions": "Opisy",
   "addAName": "Dodaj nazwę",
+  "findThemQuickly": "Znajdź ich szybko",
+  "@findThemQuickly": {
+    "description": "Subtitle to indicate that the user can find people quickly by name"
+  },
   "findPeopleByName": "Szybko szukaj osób po imieniu",
   "addViewers": "{count, plural, one {Dodaj widza} few {Dodaj widzów} many {Dodaj widzów} other {Dodaj widzów}}",
   "addCollaborators": "{count, plural, one {Dodaj współuczestnika} few {Dodaj współuczestników} many {Dodaj współuczestników} other {Dodaj współuczestników}}",
@@ -1260,6 +1267,13 @@
   "createCollaborativeLink": "Utwórz link współpracy",
   "search": "Szukaj",
   "enterPersonName": "Wprowadź imię osoby",
+  "enterName": "Wprowadź nazwę",
+  "savePerson": "Zapisz osobę",
+  "editPerson": "Edytuj osobę",
+  "mergedPhotos": "Scalone zdjęcia",
+  "orMergeWithExistingPerson": "Lub złącz z istniejącymi",
+  "enterDateOfBirth": "Urodziny (nieobowiązkowo)",
+  "birthday": "Urodziny",
   "removePersonLabel": "Usuń etykietę osoby",
   "autoPairDesc": "Automatyczne parowanie działa tylko z urządzeniami obsługującymi Chromecast.",
   "manualPairDesc": "Parowanie PIN-em działa z każdym ekranem, na którym chcesz wyświetlić swój album.",
@@ -1286,6 +1300,7 @@
   "right": "W prawo",
   "whatsNew": "Co nowego",
   "reviewSuggestions": "Przeglądaj sugestie",
+  "review": "Przejrzyj",
   "useAsCover": "Użyj jako okładki",
   "notPersonLabel": "Nie {name}?",
   "@notPersonLabel": {
@@ -1300,7 +1315,7 @@
   "enable": "Włącz",
   "enabled": "Włączone",
   "moreDetails": "Więcej szczegółów",
-  "enableMLIndexingDesc": "Ente obsługuje uczenie maszynowe na urządzeniu dla rozpoznawania twarzy, wyszukiwania magicznego i innych zaawansowanych funkcji wyszukiwania",
+  "enableMLIndexingDesc": "Ente obsługuje nauczanie maszynowe na urządzeniu dla rozpoznawania twarzy, wyszukiwania magicznego i innych zaawansowanych funkcji wyszukiwania",
   "magicSearchHint": "Magiczne wyszukiwanie pozwala na wyszukiwanie zdjęć według ich zawartości, np. \"kwiat\", \"czerwony samochód\", \"dokumenty tożsamości\"",
   "panorama": "Panorama",
   "reenterPassword": "Wprowadź ponownie hasło",
@@ -1351,8 +1366,216 @@
   "newPerson": "Nowa osoba",
   "addName": "Dodaj nazwę",
   "add": "Dodaj",
-  "extraPhotosFoundFor": "Znaleziono dodatkowe zdjęcia dla $text",
+  "extraPhotosFoundFor": "Znaleziono dodatkowe zdjęcia dla {text}",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "extraPhotosFound": "Znaleziono dodatkowe zdjęcia",
   "configuration": "Konfiguracja",
-  "localIndexing": "Indeksowanie lokalne"
+  "localIndexing": "Indeksowanie lokalne",
+  "resetPerson": "Usuń",
+  "areYouSureYouWantToResetThisPerson": "Czy na pewno chcesz zresetować tę osobę?",
+  "allPersonGroupingWillReset": "Wszystkie grupy dla tej osoby zostaną zresetowane i stracisz wszystkie sugestie dla tej osoby",
+  "yesResetPerson": "Tak, zresetuj osobę",
+  "onlyThem": "Tylko te",
+  "checkingModels": "Sprawdzanie modeli...",
+  "enableMachineLearningBanner": "Włącz nauczanie maszynowe dla magicznego wyszukiwania i rozpoznawania twarzy",
+  "searchDiscoverEmptySection": "Obrazy będą wyświetlane tutaj po zakończeniu przetwarzania i synchronizacji",
+  "searchPersonsEmptySection": "Osoby będą wyświetlane tutaj po zakończeniu przetwarzania i synchronizacji",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Dodano 0 widzów} =1 {Dodano 1 widza}  other {Dodano {count} widzów}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Dodano 0 współuczestników} =1 {Dodano 1 współuczestnika} other {Dodano {count} współuczestników}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  },
+  "accountIsAlreadyConfigured": "Konto jest już skonfigurowane.",
+  "sessionIdMismatch": "Niezgodność ID sesji",
+  "@sessionIdMismatch": {
+    "description": "In passkey page, deeplink is ignored because of session ID mismatch."
+  },
+  "failedToFetchActiveSessions": "Nie udało się pobrać aktywnych sesji",
+  "@failedToFetchActiveSessions": {
+    "description": "In session page, warn user (in toast) that active sessions could not be fetched."
+  },
+  "failedToRefreshStripeSubscription": "Nie udało się odświeżyć subskrypcji",
+  "failedToPlayVideo": "Nie udało się odtworzyć wideo",
+  "uploadIsIgnoredDueToIgnorereason": "Przesyłanie jest ignorowane z powodu {ignoreReason}",
+  "@uploadIsIgnoredDueToIgnorereason": {
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "typeOfGallerGallerytypeIsNotSupportedForRename": "Typ galerii {galleryType} nie jest obsługiwany dla zmiany nazwy",
+  "@typeOfGallerGallerytypeIsNotSupportedForRename": {
+    "placeholders": {
+      "galleryType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUploadIsIgnoredDue": "Naciśnij, aby przesłać, przesyłanie jest obecnie ignorowane z powodu {ignoreReason}",
+  "@tapToUploadIsIgnoredDue": {
+    "description": "Shown in upload icon widet, inside a tooltip.",
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUpload": "Naciśnij, aby przesłać",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
+  "info": "Informacje",
+  "addFiles": "Dodaj Pliki",
+  "castAlbum": "Odtwórz album",
+  "imageNotAnalyzed": "Obraz nie został przeanalizowany",
+  "noFacesFound": "Nie znaleziono twarzy",
+  "fileNotUploadedYet": "Plik nie został jeszcze przesłany",
+  "noSuggestionsForPerson": "Brak sugestii dla {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "miesiąc",
+  "yearShort": "r",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "aktualnie uruchomiony",
+  "ignored": "ignorowane",
+  "photosCount": "{count, plural, =0 {0 zdjęć} =1{1 zdjęcie} few {{count} zdjęcia} other{{count} zdjęć}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "file": "Plik",
+  "searchSectionsLengthMismatch": "Niezgodność długości sekcji: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "selectMailApp": "Wybierz aplikację pocztową",
+  "selectAllShort": "Wszystko",
+  "@selectAllShort": {
+    "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
+  },
+  "changeLogMagicSearchImprovementTitle": "Poprawa Magicznego Wyszukiwania",
+  "changeLogMagicSearchImprovementContent": "Ulepszyliśmy magiczne wyszukiwanie, aby stało się o wiele szybsze, więc nie musisz czekać na to, czego szukasz.",
+  "changeLogBackupStatusTitle": "Status Kopii Zapasowej",
+  "changeLogBackupStatusContent": "Dodaliśmy dziennik wszystkich plików, które zostały przesłane do Ente, wraz z błędami i kolejką.",
+  "changeLogDiscoverTitle": "Odkryj",
+  "changeLogDiscoverContent": "Szukasz zdjęć Twoich kart identyfikacyjnych, notatek, a nawet memów? Przejdź do zakładki wyszukiwania i sprawdź Odkryj. Na podstawie naszego semantycznego wyszukiwania jest to miejsce, w którym znajdziesz zdjęcia, które mogą być dla Ciebie ważne.\\n\\nDostępne tylko wtedy, gdy jest włączone nauczanie maszynowe.",
+  "selectCoverPhoto": "Wybierz zdjęcie na okładkę",
+  "newLocation": "Nowa lokalizacja",
+  "faceNotClusteredYet": "Twarz jeszcze nie zgrupowana, prosimy wrócić później",
+  "theLinkYouAreTryingToAccessHasExpired": "Link, do którego próbujesz uzyskać dostęp, wygasł.",
+  "openFile": "Otwórz plik",
+  "backupFile": "Zrób kopię zapasową pliku",
+  "openAlbumInBrowser": "Otwórz album w przeglądarce",
+  "openAlbumInBrowserTitle": "Prosimy użyć aplikacji internetowej, aby dodać zdjęcia do tego albumu",
+  "allow": "Zezwól",
+  "allowAppToOpenSharedAlbumLinks": "Zezwalaj aplikacji na otwieranie udostępnianych linków do albumu",
+  "seePublicAlbumLinksInApp": "Zobacz publiczne linki do albumów w aplikacji",
+  "emergencyContacts": "Kontakty Alarmowe",
+  "acceptTrustInvite": "Zaakceptuj Zaproszenie",
+  "declineTrustInvite": "Odrzuć Zaproszenie",
+  "removeYourselfAsTrustedContact": "Usuń siebie z listy zaufanych kontaktów",
+  "legacy": "Dziedzictwo",
+  "legacyPageDesc": "Dziedzictwo pozwala zaufanym kontaktom na dostęp do Twojego konta w razie Twojej nieobecności.",
+  "legacyPageDesc2": "Zaufane kontakty mogą rozpocząć odzyskiwanie konta, a jeśli nie zostaną zablokowane w ciągu 30 dni, zresetować Twoje hasło i uzyskać dostęp do Twojego konta.",
+  "legacyAccounts": "Odziedziczone konta",
+  "trustedContacts": "Zaufane kontakty",
+  "addTrustedContact": "Dodaj Zaufany Kontakt",
+  "removeInvite": "Usuń zaproszenie",
+  "recoveryWarning": "Zaufany kontakt próbuje uzyskać dostęp do Twojego konta",
+  "rejectRecovery": "Odrzuć odzyskiwanie",
+  "recoveryInitiated": "Odzyskiwanie rozpoczęte",
+  "recoveryInitiatedDesc": "Możesz uzyskać dostęp do konta po dniu {days} dni. Powiadomienie zostanie wysłane na {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Anuluj odzyskiwanie",
+  "recoveryAccount": "Odzyskaj konto",
+  "cancelAccountRecoveryBody": "Czy na pewno chcesz anulować odzyskiwanie?",
+  "startAccountRecoveryTitle": "Rozpocznij odzyskiwanie",
+  "whyAddTrustContact": "Zaufany kontakt może pomóc w odzyskaniu Twoich danych.",
+  "recoveryReady": "Możesz teraz odzyskać konto {email} poprzez ustawienie nowego hasła.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} próbuje odzyskać Twoje konto.",
+  "trustedInviteBody": "Zostałeś zaproszony do bycia dziedzicznym kontaktem przez {email}.",
+  "warning": "Uwaga",
+  "proceed": "Kontynuuj",
+  "confirmAddingTrustedContact": "Zamierzasz dodać {email} jako zaufany kontakt. Będą mogli odzyskać Twoje konto, jeśli jesteś nieobecny przez {numOfDays} dni.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} zaprosił Cię do zostania zaufanym kontaktem",
+  "authToManageLegacy": "Prosimy uwierzytelnić się, aby zarządzać zaufanymi kontaktami",
+  "useDifferentPlayerInfo": "Masz problem z odtwarzaniem tego wideo? Przytrzymaj tutaj, aby spróbować innego odtwarzacza."
 }

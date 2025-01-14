@@ -25,12 +25,14 @@ export const supportedLocales = [
     "zh-CN" /* Simplified Chinese */,
     "nl-NL" /* Dutch */,
     "es-ES" /* Spanish */,
+    "pt-PT" /* Portuguese */,
     "pt-BR" /* Portuguese, Brazilian */,
     "ru-RU" /* Russian */,
     "pl-PL" /* Polish */,
     "it-IT" /* Italian */,
     "lt-LT" /* Lithuanian */,
     "uk-UA" /* Ukrainian */,
+    "vi-VN" /* Vietnamese */,
 ] as const;
 
 /** The type of {@link supportedLocales}. */
@@ -57,9 +59,9 @@ const defaultLocale: SupportedLocale = "en-US";
  *
  * Our custom formatters:
  *
- * -   "date": Formats an epoch microsecond value into a string containing the
- *     year, month and day of the the date. For example, under "en-US" it'll
- *     produce a string like "July 19, 2024".
+ * - "date": Formats an epoch microsecond value into a string containing the
+ *   year, month and day of the the date. For example, under "en-US" it'll
+ *   produce a string like "July 19, 2024".
  */
 export const setupI18n = async () => {
     const localeString = localStorage.getItem("locale") ?? undefined;
@@ -111,15 +113,13 @@ export const setupI18n = async () => {
             },
             react: {
                 useSuspense: false,
-                transKeepBasicHtmlNodesFor: [
-                    "div",
-                    "strong",
-                    "h2",
-                    "span",
-                    "code",
-                    "p",
-                    "br",
-                ],
+                // Allow the following tags (without any attributes) to be used
+                // in translations. Such keys can then be rendered using the
+                // Trans component, but without otherwise needing any other
+                // input from our side.
+                //
+                // https://react.i18next.com/latest/trans-component
+                transKeepBasicHtmlNodesFor: ["br", "p", "strong", "code"],
             },
         });
 
@@ -127,8 +127,8 @@ export const setupI18n = async () => {
     i18n.services.formatter?.addCached("date", (locale) => {
         // The "long" dateStyle:
         //
-        // -   Includes: year (y), long-month (MMMM), day (d)
-        // -   English pattern examples: MMMM d, y ("September 14, 1999")
+        // - Includes: year (y), long-month (MMMM), day (d)
+        // - English pattern examples: MMMM d, y ("September 14, 1999")
         //
         const formatter = Intl.DateTimeFormat(locale, { dateStyle: "long" });
         // Value is an epoch microsecond so that we can directly pass the
@@ -176,6 +176,8 @@ const closestSupportedLocale = (
             // We'll never get here (it'd already be an exact match), just kept
             // to keep this list consistent.
             return "pt-BR";
+        } else if (ls.startsWith("pt")) {
+            return "pt-PT";
         } else if (ls.startsWith("ru")) {
             return "ru-RU";
         } else if (ls.startsWith("pl")) {
@@ -186,6 +188,8 @@ const closestSupportedLocale = (
             return "lt-LT";
         } else if (ls.startsWith("uk")) {
             return "uk-UA";
+        } else if (ls.startsWith("vi")) {
+            return "vi-VN";
         }
     }
 
@@ -223,6 +227,18 @@ export const setLocaleInUse = async (locale: SupportedLocale) => {
     localStorage.setItem("locale", locale);
     return i18n.changeLanguage(locale);
 };
+
+const numberFormatter = new Intl.NumberFormat(i18n.language);
+
+/**
+ * Return the given {@link value} formatted for the current language and locale.
+ *
+ * In most cases, when a number needs to be displayed, it can be formatted as
+ * part of the surrounding string using the {{count, number}} interpolation.
+ * However, in some rare cases, we need to format a standalone number. For such
+ * scenarios, this function can be used.
+ */
+export const formattedNumber = (value: number) => numberFormatter.format(value);
 
 /**
  * A no-op marker for strings that, for various reasons, pending addition to the

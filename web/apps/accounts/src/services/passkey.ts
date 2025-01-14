@@ -1,3 +1,4 @@
+import { TwoFactorAuthorizationResponse } from "@/accounts/services/user";
 import { clientPackageName } from "@/base/app";
 import {
     fromB64URLSafeNoPadding,
@@ -5,10 +6,8 @@ import {
     toB64URLSafeNoPaddingString,
 } from "@/base/crypto/libsodium";
 import { isDevBuild } from "@/base/env";
-import { clientPackageHeader, ensureOk, HTTPError } from "@/base/http";
+import { ensureOk, HTTPError, publicRequestHeaders } from "@/base/http";
 import { apiURL } from "@/base/origins";
-import { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
-import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 
@@ -116,7 +115,7 @@ export const registerPasskey = async (token: string, name: string) => {
     const { sessionID, options } = await beginPasskeyRegistration(token);
 
     // Ask the browser to new (public key) credentials using these options.
-    const credential = ensure(await navigator.credentials.create(options));
+    const credential = (await navigator.credentials.create(options))!;
 
     // Finish by letting the backend know about these credentials so that it can
     // save the public key for future authentication.
@@ -185,14 +184,14 @@ const beginPasskeyRegistration = async (token: string) => {
     //
     // So we do the conversion here.
     //
-    // 1.  To avoid inventing an intermediary type and the boilerplate that'd
-    //     come with it, we do a force typecast the options in the response to
-    //     one that has `PublicKeyCredentialCreationOptions`.
+    // 1. To avoid inventing an intermediary type and the boilerplate that'd
+    //    come with it, we do a force typecast the options in the response to
+    //    one that has `PublicKeyCredentialCreationOptions`.
     //
-    // 2.  Convert the two binary data fields that are expected to be in the
-    //     response from URLEncodedBase64 strings to Uint8Arrays. There is a
-    //     third possibility, excludedCredentials[].id, but that we don't
-    //     currently use.
+    // 2. Convert the two binary data fields that are expected to be in the
+    //    response from URLEncodedBase64 strings to Uint8Arrays. There is a
+    //    third possibility, excludedCredentials[].id, but that we don't
+    //    currently use.
     //
     // The web.dev guide calls this out too:
     //
@@ -413,7 +412,7 @@ export const beginPasskeyAuthentication = async (
     const url = await apiURL("/users/two-factor/passkeys/begin");
     const res = await fetch(url, {
         method: "POST",
-        headers: clientPackageHeader(),
+        headers: publicRequestHeaders(),
         body: JSON.stringify({ sessionID: passkeySessionID }),
     });
     if (!res.ok) {

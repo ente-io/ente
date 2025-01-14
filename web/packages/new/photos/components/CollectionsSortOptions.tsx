@@ -1,6 +1,8 @@
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@/base/components/OverflowMenu";
 import type { CollectionsSortBy } from "@/new/photos/services/collection/ui";
-import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
-import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import TickIcon from "@mui/icons-material/Done";
 import SortIcon from "@mui/icons-material/Sort";
 import SvgIcon from "@mui/material/SvgIcon";
@@ -22,10 +24,10 @@ interface CollectionsSortOptionsProps {
      */
     nestedInDialog?: boolean;
     /**
-     * Set this to true to disable the background in the button that triggers
-     * the menu.
+     * Set this to true to disable the background for the icon button that
+     * triggers the menu.
      */
-    disableTriggerButtonBackground?: boolean;
+    transparentTriggerButtonBackground?: boolean;
 }
 
 /**
@@ -35,14 +37,18 @@ interface CollectionsSortOptionsProps {
  */
 export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
     nestedInDialog,
-    disableTriggerButtonBackground,
+    transparentTriggerButtonBackground,
     ...optProps
 }) => (
     <OverflowMenu
-        ariaControls="collection-sort"
+        ariaID="collection-sort"
         triggerButtonIcon={<SortIcon />}
         menuPaperProps={{
             sx: {
+                // The trigger button has a colored background, so add some
+                // vertical margin to avoid showing the menu squat under the
+                // trigger button.
+                marginBlock: 1,
                 backgroundColor: (theme) =>
                     nestedInDialog
                         ? theme.colors.background.elevated2
@@ -52,20 +58,20 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
         triggerButtonProps={{
             sx: {
                 backgroundColor: (theme) =>
-                    disableTriggerButtonBackground
+                    transparentTriggerButtonBackground
                         ? undefined
                         : theme.colors.fill.faint,
             },
         }}
     >
         <SortByOption {...optProps} sortBy="name">
-            {t("sort_by_name")}
+            {t("name")}
         </SortByOption>
         <SortByOption {...optProps} sortBy="creation-time-asc">
-            {t("sort_by_creation_time_ascending")}
+            {t("oldest")}
         </SortByOption>
         <SortByOption {...optProps} sortBy="updation-time-desc">
-            {t("sort_by_updation_time_descending")}
+            {t("last_updated")}
         </SortByOption>
     </OverflowMenu>
 );

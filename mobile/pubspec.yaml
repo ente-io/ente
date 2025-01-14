@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.9.53+953
+version: 0.9.79+979
 publish_to: none
 
 environment:
@@ -20,6 +20,7 @@ environment:
 
 dependencies:
   adaptive_theme: ^3.1.0
+  android_intent_plus: ^5.2.0
   animate_do: ^2.0.0
   animated_list_plus: ^0.5.2
   archive: ^3.6.1
@@ -45,6 +46,7 @@ dependencies:
   dots_indicator: ^2.0.0
   dotted_border: ^2.1.0
   dropdown_button2: ^2.0.0
+  el_tooltip: ^2.2.1
   email_validator: ^2.0.1
   ente_cast:
     path: plugins/ente_cast
@@ -112,7 +114,10 @@ dependencies:
   logging: ^1.0.1
   lottie: ^1.2.2
   maps_launcher: ^2.2.1
-  media_extension: ^1.0.1
+  media_extension:
+    git:
+      url: "https://github.com/ente-io/media_extension.git"
+      ref: deeplink_fixes
   media_kit: ^1.1.10+1
   media_kit_libs_video: ^1.0.4
   media_kit_video: ^1.2.4
@@ -124,7 +129,10 @@ dependencies:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2
   nanoid: ^1.0.0
-  native_video_player: ^1.3.1
+  native_video_player:
+    git:
+      url: https://github.com/ashilkn/native_video_player.git
+      ref: notify_if_video_isnt_playable
   onnx_dart:
     path: plugins/onnx_dart
   onnxruntime:

@@ -1,16 +1,19 @@
-import {
-    ActivityIndicator,
-    ErrorIndicator,
-} from "@/base/components/mui/ActivityIndicator";
-import { CenteredBox } from "@/base/components/mui/Container";
+import { CenteredFill, SpaceBetweenFlex } from "@/base/components/containers";
+import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
+import { type ButtonishProps } from "@/base/components/mui";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@/base/components/OverflowMenu";
+import { SingleInputDialog } from "@/base/components/SingleInputDialog";
+import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import {
     useModalVisibility,
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
-import { useIsSmallWidth } from "@/base/hooks";
-import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import {
     addCGroup,
@@ -29,16 +32,12 @@ import {
     type PersonSuggestionUpdates,
     type PreviewableCluster,
 } from "@/new/photos/services/ml/people";
-import { ensure } from "@/utils/ensure";
-import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
-import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import EditIcon from "@mui/icons-material/Edit";
 import HideImageOutlinedIcon from "@mui/icons-material/HideImageOutlined";
 import ListAltOutlinedIcon from "@mui/icons-material/ListAltOutlined";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import RestoreIcon from "@mui/icons-material/Restore";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import {
@@ -61,10 +60,8 @@ import { t } from "i18next";
 import React, { useEffect, useReducer, useState } from "react";
 import type { FaceCluster } from "../../services/ml/cluster";
 import { useAppContext } from "../../types/context";
-import { SpaceBetweenFlex, type ButtonishProps } from "../mui";
 import { DialogCloseIconButton } from "../mui/Dialog";
 import { SuggestionFaceList } from "../PeopleList";
-import { SingleInputDialog } from "../SingleInputForm";
 import {
     ItemCard,
     LargeTileButton,
@@ -125,10 +122,8 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
 
     const handleReset = () =>
         showMiniDialog({
-            title: pt("Reset person?"),
-            message: pt(
-                "The name, face groupings and suggestions for this person will be reset",
-            ),
+            title: t("reset_person_confirm"),
+            message: t("reset_person_confirm_message"),
             continue: {
                 text: t("reset"),
                 color: "primary",
@@ -147,40 +142,31 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
                 name={name}
                 fileCount={person.fileIDs.length}
             />
-            <OverflowMenu
-                ariaControls={"person-options"}
-                triggerButtonIcon={<MoreHorizIcon />}
-            >
+            <OverflowMenu ariaID="person-options">
                 <OverflowMenuOption
                     startIcon={<ListAltOutlinedIcon />}
-                    centerAlign
                     onClick={showSuggestions}
                 >
-                    {pt("Review suggestions")}
+                    {t("review_suggestions")}
                 </OverflowMenuOption>
                 <OverflowMenuOption
                     startIcon={<EditIcon />}
-                    centerAlign
                     onClick={showNameInput}
                 >
                     {t("rename")}
                 </OverflowMenuOption>
                 <OverflowMenuOption
                     startIcon={<ClearIcon />}
-                    centerAlign
                     onClick={handleReset}
                 >
-                    {pt("Reset")}
+                    {t("reset")}
                 </OverflowMenuOption>
             </OverflowMenu>
 
             <SingleInputDialog
                 {...nameInputVisibilityProps}
-                title={
-                    pt("Rename person") /* TODO-Cluster pt()'s
-                    also remove "UNIDENTIFIED_FACES": "Unidentified faces" */
-                }
-                label={pt("Name")}
+                title={t("rename_person")}
+                label={t("name")}
                 placeholder={t("enter_name")}
                 autoComplete="name"
                 autoFocus
@@ -210,20 +196,16 @@ const IgnoredPersonHeader: React.FC<IgnoredPersonHeaderProps> = ({
     return (
         <>
             <GalleryItemsSummary
-                name={pt("Ignored")}
+                name={t("ignored")}
                 nameProps={{ color: "text.muted" }}
                 fileCount={person.fileIDs.length}
             />
-            <OverflowMenu
-                ariaControls={"person-options"}
-                triggerButtonIcon={<MoreHorizIcon />}
-            >
+            <OverflowMenu ariaID="person-options">
                 <OverflowMenuOption
                     startIcon={<VisibilityOutlinedIcon />}
-                    centerAlign
                     onClick={handleUndoIgnore}
                 >
-                    {pt("Show person")}
+                    {t("show_person")}
                 </OverflowMenuOption>
             </OverflowMenu>
         </>
@@ -251,12 +233,10 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
 
     const confirmIgnore = () =>
         showMiniDialog({
-            title: pt("Ignore person?"),
-            message: pt(
-                "This face grouping will not be shown in the people list",
-            ),
+            title: t("ignore_person_confirm"),
+            message: t("ignore_person_confirm_message"),
             continue: {
-                text: pt("Ignore"),
+                text: t("ignore"),
                 color: "primary",
                 action: () => ignoreCluster(cluster),
             },
@@ -265,35 +245,30 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
     return (
         <>
             <GalleryItemsSummary
-                name={pt("Unnamed person") /* TODO-Cluster */}
+                name={t("unnamed_person")}
                 nameProps={{ color: "text.muted" }}
                 fileCount={person.fileIDs.length}
                 onNameClick={showAddPerson}
             />
             <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
-                <Tooltip title={pt("Add a name")}>
+                <Tooltip title={t("add_a_name")}>
                     <IconButton onClick={showAddPerson}>
                         <AddIcon />
                     </IconButton>
                 </Tooltip>
 
-                <OverflowMenu
-                    ariaControls={"person-options"}
-                    triggerButtonIcon={<MoreHorizIcon />}
-                >
+                <OverflowMenu ariaID="person-options">
                     <OverflowMenuOption
                         startIcon={<AddIcon />}
-                        centerAlign
                         onClick={showAddPerson}
                     >
-                        {pt("Add a name")}
+                        {t("add_a_name")}
                     </OverflowMenuOption>
                     <OverflowMenuOption
                         startIcon={<HideImageOutlinedIcon />}
-                        centerAlign
                         onClick={confirmIgnore}
                     >
-                        {pt("Ignore")}
+                        {t("ignore")}
                     </OverflowMenuOption>
                 </OverflowMenu>
             </Stack>
@@ -339,7 +314,7 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
     const handleAddPersonBySelect = useWrapAsyncOperation(
         async (personID: string) => {
             onClose();
-            const person = ensure(cgroupPeople.find((p) => p.id == personID));
+            const person = cgroupPeople.find((p) => p.id == personID)!;
             await addClusterToCGroup(person.cgroup, cluster);
             onSelectPerson(personID);
         },
@@ -378,9 +353,7 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
                 PaperProps={{ sx: { maxWidth: "490px" } }}
             >
                 <SpaceBetweenFlex sx={{ padding: "10px 8px 6px 0" }}>
-                    <DialogTitle variant="h3" fontWeight={"bold"}>
-                        {pt("Add name")}
-                    </DialogTitle>
+                    <DialogTitle variant="h3">{t("add_name")}</DialogTitle>
                     <DialogCloseIconButton {...{ onClose }} />
                 </SpaceBetweenFlex>
                 <DialogContent_>
@@ -398,8 +371,8 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
             <SingleInputDialog
                 open={openNameInput}
                 onClose={() => setOpenNameInput(false)}
-                title={pt("New person") /* TODO-Cluster */}
-                label={pt("Add name")}
+                title={t("new_person")}
+                label={t("add_name")}
                 placeholder={t("enter_name")}
                 autoComplete="name"
                 autoFocus
@@ -439,7 +412,7 @@ const PersonButton: React.FC<PersonButtonProps> = ({
 
 const AddPerson: React.FC<ButtonishProps> = ({ onClick }) => (
     <ItemCard TileComponent={LargeTileButton} onClick={onClick}>
-        <LargeTileTextOverlay>{pt("New person")}</LargeTileTextOverlay>
+        <LargeTileTextOverlay>{t("new_person")}</LargeTileTextOverlay>
         <LargeTilePlusOverlay>+</LargeTilePlusOverlay>
     </ItemCard>
 );
@@ -538,7 +511,23 @@ const suggestionsDialogReducer: React.Reducer<
                 // original assigned state.
                 updates.delete(item.id);
             } else {
-                updates.set(item.id, value);
+                const update = (() => {
+                    switch (value) {
+                        case true:
+                            // true corresponds to update "assign".
+                            return "assign";
+                        case false:
+                            // false maps to different updates for suggestions
+                            // vs choices.
+                            return item.assigned === undefined
+                                ? "rejectSuggestion"
+                                : "rejectSavedChoice";
+                        case undefined:
+                            // undefined means reset.
+                            return "reset";
+                    }
+                })();
+                updates.set(item.id, update);
             }
             return { ...state, updates };
         }
@@ -606,11 +595,9 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     const handleClose = () => {
         if (hasUnsavedChanges) {
             showMiniDialog({
-                message: pt(
-                    "You have unsaved changes. These will be lost if you close without saving",
-                ),
+                message: t("discard_changes_confirm_message"),
                 continue: {
-                    text: pt("Discard changes"),
+                    text: t("discard_changes"),
                     color: "critical",
                     action: resetPersonAndClose,
                 },
@@ -656,10 +643,10 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 <Stack sx={{ gap: "8px" }}>
                     <DialogTitle sx={{ "&&&": { p: 0 } }}>
                         {state.showChoices
-                            ? pt("Saved choices")
-                            : pt("Review suggestions")}
+                            ? t("saved_choices")
+                            : t("review_suggestions")}
                     </DialogTitle>
-                    <Typography color="text.muted">
+                    <Typography sx={{ color: "text.muted" }}>
                         {person.name ?? " "}
                     </Typography>
                 </Stack>
@@ -669,8 +656,8 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                         onClick={() => dispatch({ type: "toggleHistory" })}
                         aria-label={
                             !state.showChoices
-                                ? pt("Saved suggestions")
-                                : pt("Review suggestions")
+                                ? t("saved_choices")
+                                : t("review_suggestions")
                         }
                         sx={{
                             backgroundColor: state.showChoices
@@ -688,15 +675,15 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 sx={{ display: "flex", "&&&": { pt: 0 } }}
             >
                 {state.activity == "fetching" ? (
-                    <CenteredBox>
+                    <CenteredFill>
                         <ActivityIndicator>
-                            {pt("Finding similar faces...")}
+                            {t("people_suggestions_finding")}
                         </ActivityIndicator>
-                    </CenteredBox>
+                    </CenteredFill>
                 ) : state.fetchFailed ? (
-                    <CenteredBox>
-                        <ErrorIndicator />
-                    </CenteredBox>
+                    <CenteredFill>
+                        <ActivityErrorIndicator />
+                    </CenteredFill>
                 ) : state.showChoices ? (
                     <SuggestionOrChoiceList
                         items={state.choices}
@@ -704,14 +691,16 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                         onUpdateItem={handleUpdateItem}
                     />
                 ) : state.suggestions.length == 0 ? (
-                    <CenteredBox>
+                    <CenteredFill>
                         <Typography
-                            color="text.muted"
-                            sx={{ textAlign: "center" }}
+                            sx={{
+                                color: "text.muted",
+                                textAlign: "center",
+                            }}
                         >
-                            {pt("No more suggestions for now")}
+                            {t("people_suggestions_empty")}
                         </Typography>
-                    </CenteredBox>
+                    </CenteredFill>
                 ) : (
                     <SuggestionOrChoiceList
                         items={state.suggestions}
@@ -768,7 +757,7 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
                 }}
             >
                 <Stack sx={{ gap: "10px" }}>
-                    <Typography variant="small" color="text.muted">
+                    <Typography variant="small" sx={{ color: "text.muted" }}>
                         {/* Use the face count as as stand-in for the photo count */}
                         {t("photos_count", { count: item.faces.length })}
                     </Typography>
@@ -776,14 +765,14 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
                 </Stack>
                 {!item.fixed && (
                     <ToggleButtonGroup
-                        value={fromItemValue(item, updates)}
+                        value={itemValueFromUpdate(item, updates)}
                         exclusive
                         onChange={(_, v) => onUpdateItem(item, toItemValue(v))}
                     >
                         <ToggleButton value="no" aria-label={t("no")}>
                             <ClearIcon />
                         </ToggleButton>
-                        <ToggleButton value="yes" aria-label={pt("Yes")}>
+                        <ToggleButton value="yes" aria-label={t("yes")}>
                             <CheckIcon />
                         </ToggleButton>
                     </ToggleButtonGroup>
@@ -793,12 +782,25 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
     </List>
 );
 
-const fromItemValue = (item: SCItem, updates: PersonSuggestionUpdates) => {
+const itemValueFromUpdate = (
+    item: SCItem,
+    updates: PersonSuggestionUpdates,
+) => {
     // Use the in-memory state if available. For choices, fallback to their
     // original state.
-    const resolved = updates.has(item.id)
-        ? updates.get(item.id)
-        : item.assigned;
+    const resolveUpdate = () => {
+        switch (updates.get(item.id)) {
+            case "assign":
+                return true;
+            case "rejectSavedChoice":
+                return false;
+            case "rejectSuggestion":
+                return false;
+            default:
+                return undefined;
+        }
+    };
+    const resolved = updates.has(item.id) ? resolveUpdate() : item.assigned;
     return resolved ? "yes" : resolved === false ? "no" : undefined;
 };
 

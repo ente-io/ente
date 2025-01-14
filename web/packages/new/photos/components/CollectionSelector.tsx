@@ -1,3 +1,5 @@
+import { SpaceBetweenFlex } from "@/base/components/containers";
+import { type ButtonishProps } from "@/base/components/mui";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import type { Collection } from "@/media/collection";
 import {
@@ -13,7 +15,6 @@ import {
     type CollectionSummaries,
     type CollectionSummary,
 } from "@/new/photos/services/collection/ui";
-import { ensure } from "@/utils/ensure";
 import {
     Dialog,
     DialogContent,
@@ -24,7 +25,6 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import { SpaceBetweenFlex, type ButtonishProps } from "./mui";
 import { DialogCloseIconButton } from "./mui/Dialog";
 
 export type CollectionSelectorAction =
@@ -125,8 +125,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             })
             .sort((a, b) => {
                 return (
-                    ensure(CollectionSummaryOrder.get(a.type)) -
-                    ensure(CollectionSummaryOrder.get(b.type))
+                    CollectionSummaryOrder.get(a.type)! -
+                    CollectionSummaryOrder.get(b.type)!
                 );
             });
 
@@ -168,9 +168,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             PaperProps={{ sx: { maxWidth: "490px" } }}
         >
             <SpaceBetweenFlex sx={{ padding: "10px 8px 6px 0" }}>
-                <DialogTitle variant="h3" fontWeight={"bold"}>
-                    {titleForAction(action)}
-                </DialogTitle>
+                <DialogTitle variant="h3">{titleForAction(action)}</DialogTitle>
                 <DialogCloseIconButton onClose={handleClose} />
             </SpaceBetweenFlex>
 
@@ -231,7 +229,9 @@ const CollectionButton: React.FC<CollectionButtonProps> = ({
 
 const AddCollectionButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <ItemCard TileComponent={LargeTileButton} onClick={onClick}>
-        <LargeTileTextOverlay>{t("create_albums")}</LargeTileTextOverlay>
+        <LargeTileTextOverlay>
+            <Typography>{t("create_albums")}</Typography>
+        </LargeTileTextOverlay>
         <LargeTilePlusOverlay>+</LargeTilePlusOverlay>
     </ItemCard>
 );

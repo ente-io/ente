@@ -11,7 +11,14 @@
 
 import { nativeImage, shell } from "electron/common";
 import type { WebContents } from "electron/main";
-import { BrowserWindow, Menu, Tray, app, protocol } from "electron/main";
+import {
+    BrowserWindow,
+    Menu,
+    Tray,
+    app,
+    dialog,
+    protocol,
+} from "electron/main";
 import serveNextAt from "next-electron-server";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
@@ -131,6 +138,7 @@ const main = () => {
             const webContents = mainWindow.webContents;
             setDownloadPath(webContents);
             allowExternalLinks(webContents);
+            handleBackOnStripeCheckout(mainWindow);
             allowAllCORSOrigins(webContents);
 
             // Start loading the renderer.
@@ -187,13 +195,13 @@ const logStartupBanner = () => {
  *
  * It uses protocol handlers to serve files from the "ente://" protocol.
  *
- * - In development this is proxied to http://localhost:3000
+ * - In development this is proxied to http://localhost:3008
  * - In production it serves files from the `/out` directory
  *
  * For more details, see this comparison:
  * https://github.com/HaNdTriX/next-electron-server/issues/5
  */
-const setupRendererServer = () => serveNextAt(rendererURL);
+const setupRendererServer = () => serveNextAt(rendererURL, { port: 3008 });
 
 /**
  * Register privileged schemes.
@@ -247,10 +255,10 @@ const registerPrivilegedSchemes = () => {
  * See: [Note: Passkey verification in the desktop app].
  *
  * Implementation notes:
- * -   https://www.electronjs.org/docs/latest/tutorial/launch-app-from-url-in-another-app
- * -   This works only when the app is packaged.
- * -   On Windows and Linux, we get the deeplink in the "second-instance" event.
- * -   On macOS, we get the deeplink in the "open-url" event.
+ * - https://www.electronjs.org/docs/latest/tutorial/launch-app-from-url-in-another-app
+ * - This works only when the app is packaged.
+ * - On Windows and Linux, we get the deeplink in the "second-instance" event.
+ * - On macOS, we get the deeplink in the "open-url" event.
  */
 const registerForEnteLinks = () => app.setAsDefaultProtocolClient("ente");
 
@@ -500,6 +508,45 @@ const allowExternalLinks = (webContents: WebContents) =>
         } else {
             return { action: "allow" };
         }
+    });
+
+/**
+ * Handle back button presses on the Stripe checkout page.
+ *
+ * For payments, we show the Stripe checkout page to the user in the app's
+ * window. On this page there is a back button that allows the user to get back
+ * to the app's contents. Since we're not showing the browser controls, this is
+ * the only way to get back to the app.
+ *
+ * If the user enters something in the text fields on this page (e.g. if they
+ * start entering their credit card number), and then press back, then the
+ * browser shows the user a dialog asking them to confirm if they want to
+ * discard their unsaved changes. However, when running in the context of an
+ * Electron app, this dialog is not shown, and instead the app just gets stuck
+ * (the back button stops working, and quitting the app also doesn't work since
+ * there is an invisible modal dialog).
+ *
+ * So we instead intercept these back button presses, and show the same dialog
+ * that the browser would've shown.
+ */
+const handleBackOnStripeCheckout = (window: BrowserWindow) =>
+    window.webContents.on("will-prevent-unload", (event) => {
+        const url = new URL(window.webContents.getURL());
+        // Only intercept on Stripe checkout pages.
+        if (url.host != "checkout.stripe.com") return;
+
+        // The dialog copy is similar to what Chrome would've shown.
+        // https://www.electronjs.org/docs/latest/api/web-contents#event-will-prevent-unload
+        const choice = dialog.showMessageBoxSync(window, {
+            type: "question",
+            buttons: ["Leave", "Stay"],
+            title: "Leave site?",
+            message: "Changes that you made may not be saved.",
+            defaultId: 0,
+            cancelId: 1,
+        });
+        const leave = choice === 0;
+        if (leave) event.preventDefault();
     });
 
 /**

@@ -79,6 +79,14 @@ apps:
     # If you're running a self hosted instance and wish to serve public links,
     # set this to the URL where your albums web app is running.
     public-albums:
+    # Default is https://cast.ente.io
+    cast:
+    # Default is https://accounts.ente.io
+    # Set this to the URL where your accounts web app is running, primarily used for
+    # passkey based 2FA.
+    accounts:
+    # Default is https://family.ente.io
+    family:
 
 # Database connection parameters
 db:
@@ -317,6 +325,15 @@ internal:
     # List of user IDs that can use the admin API endpoints.
     # If this is not set, as a fallback, the first user is considered an admin.
     admins: []
+    # In case there is a single admin, it can be alternatively specified by as
+    # the "admin" instead of "admins". This can be useful e.g. when wishing to
+    # pass the admin as an environment variable.
+    admin:
+    # If set to true, users will not be able to register a new account.
+    #
+    # During sign up, the client will get an unauthorized error and
+    # thus cannot create new accounts.
+    disable-registration: false
 
 # Replication config
 #

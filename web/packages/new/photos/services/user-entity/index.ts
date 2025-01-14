@@ -2,9 +2,9 @@ import {
     decryptBoxB64,
     encryptBlobB64,
     encryptBoxB64,
-    generateNewBlobOrStreamKey,
+    generateBlobOrStreamKey,
 } from "@/base/crypto";
-import { nullToUndefined } from "@/utils/transform";
+import { nullishToEmpty, nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { gunzip, gzip } from "../../utils/gzip";
 import type { CGroupUserEntityData } from "../ml/people";
@@ -85,8 +85,7 @@ const RemoteFaceCluster = z.object({
 const RemoteCGroupData = z.object({
     name: z.string().nullish().transform(nullToUndefined),
     assigned: z.array(RemoteFaceCluster),
-    // The remote cgroup also has a "rejected" property, but that is not
-    // currently used by any of the clients.
+    rejectedFaceIDs: z.array(z.string()).nullish().transform(nullishToEmpty),
     isHidden: z.boolean(),
     avatarFaceID: z.string().nullish().transform(nullToUndefined),
 });
@@ -135,7 +134,6 @@ export const pullUserEntities = async (
     const entityKeyB64 = await getOrCreateEntityKeyB64(type, masterKey);
 
     let sinceTime = (await savedLatestUpdatedAt(type)) ?? 0;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
     while (true) {
         const diff = await userEntityDiff(type, sinceTime, entityKeyB64);
         if (diff.length == 0) break;
@@ -224,16 +222,16 @@ export const updateOrCreateUserEntities = async (
  * Return the entity key that can be used to decrypt the encrypted contents of
  * user entities of the given {@link type}.
  *
- * 1.  See if we have the encrypted entity key present locally. If so, return
- *     the entity key by decrypting it using with the user's master key.
+ * 1. See if we have the encrypted entity key present locally. If so, return the
+ *    entity key by decrypting it using with the user's master key.
  *
- * 2.  Otherwise fetch the encrypted entity key for that type from remote. If we
- *     get one, obtain the entity key by decrypt the encrypted one using the
- *     user's master key, save it locally for future use, and return it.
+ * 2. Otherwise fetch the encrypted entity key for that type from remote. If we
+ *    get one, obtain the entity key by decrypt the encrypted one using the
+ *    user's master key, save it locally for future use, and return it.
  *
- * 3.  Otherwise generate a new entity key, encrypt it using the user's master
- *     key, putting the encrypted one to remote and also saving it locally, and
- *     return it.
+ * 3. Otherwise generate a new entity key, encrypt it using the user's master
+ *    key, putting the encrypted one to remote and also saving it locally, and
+ *    return it.
  *
  * See also, [Note: User entity keys].
  */
@@ -260,16 +258,16 @@ const getOrCreateEntityKeyB64 = async (
     // As a sanity check, genarate the key but immediately encrypt it as if it
     // were fetched from remote and then try to decrypt it before doing anything
     // with it.
-    const generated = await generateNewEncryptedEntityKey(masterKey);
+    const generated = await generateEncryptedEntityKey(masterKey);
     const result = decryptEntityKey(generated, masterKey);
     await postUserEntityKey(type, generated);
     await saveRemoteUserEntityKey(type, generated);
     return result;
 };
 
-const generateNewEncryptedEntityKey = async (masterKey: Uint8Array) => {
+const generateEncryptedEntityKey = async (masterKey: Uint8Array) => {
     const { encryptedData, nonce } = await encryptBoxB64(
-        await generateNewBlobOrStreamKey(),
+        await generateBlobOrStreamKey(),
         masterKey,
     );
     // Remote calls it the header, but it really is the nonce.

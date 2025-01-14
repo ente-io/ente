@@ -4,7 +4,7 @@
  */
 
 import { ensureElectron } from "@/base/electron";
-import { basename, dirname } from "@/base/file";
+import { basename, dirname } from "@/base/file-name";
 import log from "@/base/log";
 import type {
     CollectionMapping,
@@ -13,8 +13,10 @@ import type {
 } from "@/base/types/ipc";
 import type { Collection } from "@/media/collection";
 import { EncryptedEnteFile } from "@/media/file";
-import { groupFilesByCollectionID } from "@/new/photos/services/file";
-import { getLocalFiles } from "@/new/photos/services/files";
+import {
+    getLocalFiles,
+    groupFilesByCollectionID,
+} from "@/new/photos/services/files";
 import { UPLOAD_RESULT } from "@/new/photos/services/upload/types";
 import { ensureString } from "@/utils/ensure";
 import debounce from "debounce";

@@ -1,4 +1,4 @@
-FROM golang:1.20-alpine3.17@sha256:9c2f89db6fda13c3c480749787f62fed5831699bb2c32881b8f327f1cf7bae42 AS builder386
+FROM golang:1.23-alpine3.21@sha256:6c5c9590f169f77c8046e45c611d3b28fe477789acd8d3762d23d4744de69812 AS builder386
 RUN apt-get  update
 RUN apt-get  install -y gcc
 RUN apt-get  install -y git

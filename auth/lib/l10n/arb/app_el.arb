@@ -90,7 +90,7 @@
   "welcomeBack": "Καλωσορίσατε και πάλι!",
   "madeWithLoveAtPrefix": "φτιαγμένη με ❤️ στο ",
   "supportDevs": "Εγγραφείτε στο <bold-green>ente</bold-green> για να μας υποστηρίξετε",
-  "supportDiscount": "Χρησιμοποιήστε τον κωδικό κουπονιού \"AUTH\" για να πάρετε 10% από το πρώτο έτος",
+  "supportDiscount": "Χρησιμοποιήστε τον κωδικό κουπονιού \"AUTH\" για να λάβετε 10% έκπτωση για τον πρώτο χρόνο",
   "changeEmail": "Αλλαγή email",
   "changePassword": "Αλλαγή κωδικού πρόσβασής",
   "data": "Δεδομένα",
@@ -156,6 +156,7 @@
   "twoFactorAuthTitle": "Αυθεντικοποίηση δύο παραγόντων",
   "passkeyAuthTitle": "Επιβεβαίωση κλειδιού πρόσβασης",
   "verifyPasskey": "Επιβεβαίωση κλειδιού πρόσβασης",
+  "loginWithTOTP": "Είσοδος με TOTP",
   "recoverAccount": "Ανάκτηση λογαριασμού",
   "enterRecoveryKeyHint": "Εισάγετε το κλειδί ανάκτησης σας",
   "recover": "Ανάκτηση",
@@ -327,6 +328,10 @@
       }
     }
   },
+  "manualSort": "Προσαρμοσμένο",
+  "editOrder": "Επεξεργασία σειράς",
+  "mostFrequentlyUsed": "Συχνά χρησιμοποιούμενο",
+  "mostRecentlyUsed": "Πρόσφατα χρησιμοποιούμενο",
   "activeSessions": "Ενεργές συνεδρίες",
   "somethingWentWrongPleaseTryAgain": "Κάτι πήγε στραβά, παρακαλώ προσπαθήστε ξανά",
   "thisWillLogYouOutOfThisDevice": "Αυτό θα σας αποσυνδέσει από αυτή τη συσκευή!",
@@ -446,8 +451,9 @@
   "customEndpoint": "Συνδεδεμένο στο {endpoint}",
   "pinText": "Καρφίτσωμα",
   "unpinText": "Ξεκαρφίτσωμα",
-  "pinnedCodeMessage": "Το {code} καρφιτσώθηκε",
-  "unpinnedCodeMessage": "Το {code} ξεκαρφιτσώθηκε",
+  "pinnedCodeMessage": "{code} έχει καρφιτσωθεί",
+  "unpinnedCodeMessage": "Το {code} έχει ξεκαρφιτσωθεί",
+  "pinned": "Καρφιτσωμένο",
   "tags": "Ετικέτες",
   "createNewTag": "Δημιουργία Νέας Ετικέτας",
   "tag": "Ετικέτα",
@@ -483,5 +489,6 @@
   "importFailureDescNew": "Αδυναμία ανάλυσης του επιλεγμένου αρχείου.",
   "appLockNotEnabled": "Το κλείδωμα εφαρμογής δεν είναι ενεργοποιημένο",
   "appLockNotEnabledDescription": "Παρακαλώ ενεργοποιήστε το κλείδωμα εφαρμογής μέσω της επιλογής Ασφάλεια > Κλείδωμα εφαρμογής",
-  "authToViewPasskey": "Παρακαλώ πιστοποιηθείτε για να δείτε το κλειδί πρόσβασης"
+  "authToViewPasskey": "Παρακαλώ πιστοποιηθείτε για να δείτε το κλειδί πρόσβασης",
+  "appLockOfflineModeWarning": "Έχετε επιλέξει να προχωρήσετε χωρίς αντίγραφα ασφαλείας. Αν ξεχάσετε τον κωδικό της εφαρμογής, θα κλειδωθείτε από την πρόσβαση στα δεδομένα σας."
 }

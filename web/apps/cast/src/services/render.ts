@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import { sharedCryptoWorker } from "@/base/crypto";
-import { nameAndExtension } from "@/base/file";
+import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import { apiURL, customAPIOrigin } from "@/base/origins";
 import type {
@@ -21,7 +21,6 @@ import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { shuffled } from "@/utils/array";
-import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -134,7 +133,7 @@ export const imageURLGenerator = async function* (castData: CastData) {
             // The last to last element is the one that was shown prior to that,
             // and now can be safely revoked.
             if (previousURLs.length > 1)
-                URL.revokeObjectURL(ensure(previousURLs.shift()));
+                URL.revokeObjectURL(previousURLs.shift()!);
 
             previousURLs.push(url);
 
@@ -168,7 +167,6 @@ const getEncryptedCollectionFiles = async (
             await apiURL("/cast/diff"),
             { sinceTime },
             {
-                "Cache-Control": "no-cache",
                 "X-Cast-Access-Token": castToken,
             },
         );
@@ -344,13 +342,13 @@ const downloadFile = async (
         );
 
     const cryptoWorker = await sharedCryptoWorker();
-    const decrypted = await cryptoWorker.decryptFile(
-        new Uint8Array(await res.arrayBuffer()),
-        await cryptoWorker.fromB64(
-            shouldUseThumbnail
+    const decrypted = await cryptoWorker.decryptStreamBytes(
+        {
+            encryptedData: new Uint8Array(await res.arrayBuffer()),
+            decryptionHeader: shouldUseThumbnail
                 ? file.thumbnail.decryptionHeader
                 : file.file.decryptionHeader,
-        ),
+        },
         file.key,
     );
     return new Response(decrypted).blob();

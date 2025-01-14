@@ -1,5 +1,4 @@
 import { EnteFile } from "@/media/file";
-import { formattedByteSize } from "@/new/photos/utils/units";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { formatDate } from "@ente/shared/time/format";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
@@ -26,7 +25,6 @@ import {
 import type { PhotoFrameProps } from "components/PhotoFrame";
 
 export const DATE_CONTAINER_HEIGHT = 48;
-export const SIZE_AND_COUNT_CONTAINER_HEIGHT = 72;
 export const SPACE_BTW_DATES = 44;
 
 const SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO = 0.244;
@@ -38,7 +36,6 @@ const ALBUM_FOOTER_HEIGHT_WITH_REFERRAL = 113;
 export enum ITEM_TYPE {
     TIME = "TIME",
     FILE = "FILE",
-    SIZE_AND_COUNT = "SIZE_AND_COUNT",
     HEADER = "HEADER",
     FOOTER = "FOOTER",
     MARKETING_FOOTER = "MARKETING_FOOTER",
@@ -143,11 +140,6 @@ const DateContainer = styled(ListItemContainer)`
     color: ${({ theme }) => theme.colors.text.muted};
 `;
 
-const SizeAndCountContainer = styled(DateContainer)`
-    margin-top: 1rem;
-    height: ${SIZE_AND_COUNT_CONTAINER_HEIGHT}px;
-`;
-
 const FooterContainer = styled(ListItemContainer)`
     margin-bottom: 0.75rem;
     @media (max-width: 540px) {
@@ -161,7 +153,9 @@ const FooterContainer = styled(ListItemContainer)`
     margin-top: calc(2rem + 20px);
 `;
 
-const AlbumFooterContainer = styled(ListItemContainer)<{
+const AlbumFooterContainer = styled(ListItemContainer, {
+    shouldForwardProp: (propName) => propName != "hasReferral",
+})<{
     hasReferral: boolean;
 }>`
     margin-top: 48px;
@@ -170,7 +164,7 @@ const AlbumFooterContainer = styled(ListItemContainer)<{
     justify-content: center;
 `;
 
-const FullStretchContainer = styled(Box)`
+const FullStretchContainer = styled("div")`
     margin: 0 -24px;
     width: calc(100% + 46px);
     left: -24px;
@@ -197,7 +191,7 @@ type Props = Pick<PhotoFrameProps, "mode" | "modePlus"> & {
         file: EnteFile,
         index: number,
         isScrolling?: boolean,
-    ) => JSX.Element;
+    ) => React.JSX.Element;
     activeCollectionID: number;
     activePersonID?: string;
 };
@@ -209,7 +203,7 @@ interface ItemData {
     renderListItem: (
         timeStampListItem: TimeStampListItem,
         isScrolling?: boolean,
-    ) => JSX.Element;
+    ) => React.JSX.Element;
 }
 
 const createItemData = memoize(
@@ -220,7 +214,7 @@ const createItemData = memoize(
         renderListItem: (
             timeStampListItem: TimeStampListItem,
             isScrolling?: boolean,
-        ) => JSX.Element,
+        ) => React.JSX.Element,
     ): ItemData => ({
         timeStampList,
         columns,
@@ -253,6 +247,9 @@ const PhotoListRow = React.memo(
     areEqual,
 );
 
+/**
+ * TODO: Rename me to FileList.
+ */
 export function PhotoList({
     height,
     width,
@@ -325,7 +322,7 @@ export function PhotoList({
                 timeStampList.push(getEmptyListItem());
             }
             timeStampList.push(getVacuumItem(timeStampList));
-            if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+            if (publicCollectionGalleryContext.credentials) {
                 if (publicCollectionGalleryContext.photoListFooter) {
                     timeStampList.push(
                         getPhotoListFooter(
@@ -396,7 +393,7 @@ export function PhotoList({
             if (hasFooter) {
                 return timeStampList;
             }
-            if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+            if (publicCollectionGalleryContext.credentials) {
                 if (publicCollectionGalleryContext.photoListFooter) {
                     return [
                         ...timeStampList,
@@ -413,7 +410,7 @@ export function PhotoList({
             }
         });
     }, [
-        publicCollectionGalleryContext.accessedThroughSharedURL,
+        publicCollectionGalleryContext.credentials,
         showAppDownloadBanner,
         publicCollectionGalleryContext.photoListFooter,
     ]);
@@ -521,7 +518,7 @@ export function PhotoList({
 
     const getVacuumItem = (timeStampList) => {
         let footerHeight;
-        if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+        if (publicCollectionGalleryContext.credentials) {
             footerHeight = publicCollectionGalleryContext.referralCode
                 ? ALBUM_FOOTER_HEIGHT_WITH_REFERRAL
                 : ALBUM_FOOTER_HEIGHT;
@@ -591,30 +588,39 @@ export function PhotoList({
                 >
                     {/* Make the entire area tappable, otherwise it is hard to
                         get at on mobile devices. */}
-                    <Box width={"100%"}>
+                    <Box sx={{ width: "100%" }}>
                         <Link
                             color="text.base"
                             sx={{ "&:hover": { color: "inherit" } }}
                             target="_blank"
                             href={"https://ente.io"}
                         >
-                            <Typography variant="small" display={"block"}>
-                                {t("SHARED_USING")}{" "}
-                                <Link target="_blank" href={"https://ente.io"}>
-                                    ente.io
-                                </Link>
+                            <Typography variant="small">
+                                <Trans
+                                    i18nKey="shared_using"
+                                    components={{
+                                        a: (
+                                            <Typography
+                                                variant="small"
+                                                component="span"
+                                                sx={(theme) => ({
+                                                    color: theme.colors.accent
+                                                        .A500,
+                                                })}
+                                            />
+                                        ),
+                                    }}
+                                    values={{ url: "ente.io" }}
+                                />
                             </Typography>
                         </Link>
                         {publicCollectionGalleryContext.referralCode ? (
                             <FullStretchContainer>
                                 <Typography
-                                    sx={{
-                                        marginTop: "12px",
-                                        padding: "8px",
-                                    }}
+                                    sx={{ marginTop: "12px", padding: "8px" }}
                                 >
                                     <Trans
-                                        i18nKey={"SHARING_REFERRAL_CODE"}
+                                        i18nKey={"sharing_referral_code"}
                                         values={{
                                             referralCode:
                                                 publicCollectionGalleryContext.referralCode,
@@ -631,10 +637,6 @@ export function PhotoList({
 
     /**
      * Checks and merge multiple dates into a single row.
-     *
-     * @param items
-     * @param columns
-     * @returns
      */
     const mergeTimeStampList = (
         items: TimeStampListItem[],
@@ -716,8 +718,6 @@ export function PhotoList({
         switch (timeStampList[index].itemType) {
             case ITEM_TYPE.TIME:
                 return DATE_CONTAINER_HEIGHT;
-            case ITEM_TYPE.SIZE_AND_COUNT:
-                return SIZE_AND_COUNT_CONTAINER_HEIGHT;
             case ITEM_TYPE.FILE:
                 return listItemHeight;
             default:
@@ -845,13 +845,6 @@ export function PhotoList({
                         )}
                         {listItem.date}
                     </DateContainer>
-                );
-            case ITEM_TYPE.SIZE_AND_COUNT:
-                return (
-                    <SizeAndCountContainer span={columns}>
-                        {listItem.fileCount} {t("FILES")},{" "}
-                        {formattedByteSize(listItem.fileSize || 0)} {t("EACH")}
-                    </SizeAndCountContainer>
                 );
             case ITEM_TYPE.FILE: {
                 const ret = listItem.items.map((item, idx) =>

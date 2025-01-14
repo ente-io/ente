@@ -235,7 +235,7 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
                         width: widthOfButton,
                         child: Center(
                           child: Text(
-                            "Monthly",
+                            S.of(context).monthly,
                             style: textTheme.bodyFaint,
                           ),
                         ),
@@ -254,7 +254,7 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
                         width: widthOfButton,
                         child: Center(
                           child: Text(
-                            "Yearly",
+                            S.of(context).yearly,
                             style: textTheme.bodyFaint,
                           ),
                         ),
@@ -281,7 +281,7 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
                       switchOutCurve: Curves.easeInOutExpo,
                       child: Text(
                         key: ValueKey(_isYearly),
-                        _isYearly ? "Yearly" : "Monthly",
+                        _isYearly ? S.of(context).yearly : S.of(context).monthly,
                         style: textTheme.body,
                       ),
                     ),

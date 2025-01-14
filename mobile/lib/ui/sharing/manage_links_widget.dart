@@ -175,7 +175,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           context,
                           {'enableDownload': !isDownloadEnabled},
                         );
-                        if (!isDownloadEnabled) {
+                        if (isDownloadEnabled) {
                           // ignore: unawaited_futures
                           showErrorDialog(
                             context,

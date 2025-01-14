@@ -1,15 +1,11 @@
 import { clientPackageName } from "@/base/app";
 import { assertionFailed } from "@/base/assert";
 import { isHTTP4xxError } from "@/base/http";
-import { getKVN } from "@/base/kv";
-import { ensureAuthToken } from "@/base/local-user";
 import log from "@/base/log";
 import type { ElectronMLWorker } from "@/base/types/ipc";
 import { fileLogID, type EnteFile } from "@/media/file";
-import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { expose, wrap } from "comlink";
-import downloadManager from "../download";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import type { UploadItem } from "../upload/types";
 import {
@@ -50,11 +46,11 @@ import type { CLIPMatches, MLWorkerDelegate } from "./worker-types";
 /**
  * A rough hint at what the worker is up to.
  *
- * -   "init": Worker has been created but hasn't done anything yet.
- * -   "idle": Not doing anything
- * -   "tick": Transitioning to a new state
- * -   "indexing": Indexing
- * -   "fetching": A subset of indexing
+ * - "init": Worker has been created but hasn't done anything yet.
+ * - "idle": Not doing anything
+ * - "tick": Transitioning to a new state
+ * - "indexing": Indexing
+ * - "fetching": A subset of indexing
  *
  * During indexing, the state is set to "fetching" whenever remote provided us
  * data for more than 50% of the files that we requested from it in the last
@@ -91,9 +87,9 @@ interface IndexableItem {
  *
  * where:
  *
- * -   "liveq": indexing items that are being uploaded,
- * -   "backfillq": index unindexed items otherwise.
- * -   "idle": in between state transitions.
+ * - "liveq": indexing items that are being uploaded,
+ * - "backfillq": index unindexed items otherwise.
+ * - "idle": in between state transitions.
  *
  * In addition, MLWorker can also be invoked for interactive tasks: in
  * particular, for finding the closest CLIP match when the user does a search.
@@ -131,12 +127,9 @@ export class MLWorker {
      * @param delegate The {@link MLWorkerDelegate} the worker can use to inform
      * the main thread of interesting events.
      */
-    async init(port: MessagePort, delegate: MLWorkerDelegate) {
+    init(port: MessagePort, delegate: MLWorkerDelegate) {
         this.electron = wrap<ElectronMLWorker>(port);
         this.delegate = delegate;
-        // Initialize the downloadManager running in the web worker with the
-        // user's token. It'll be used to download files to index if needed.
-        await downloadManager.init(await ensureAuthToken());
     }
 
     /**
@@ -207,7 +200,7 @@ export class MLWorker {
      * Find {@link CLIPMatches} for a given normalized {@link searchPhrase}.
      */
     async clipMatches(searchPhrase: string): Promise<CLIPMatches | undefined> {
-        return _clipMatches(searchPhrase, ensure(this.electron));
+        return _clipMatches(searchPhrase, this.electron!);
     }
 
     private async tick() {
@@ -232,7 +225,15 @@ export class MLWorker {
             this.state = "indexing";
 
         // Use the liveQ if present, otherwise get the next batch to backfill.
-        const items = liveQ.length ? liveQ : await this.backfillQ();
+        const items = liveQ.length
+            ? liveQ
+            : await this.backfillQ().catch((e: unknown) => {
+                  // Ignore the error (e.g. a network failure) when determining
+                  // the items to backfill, and return an empty items array so
+                  // that the next retry happens after an exponential backoff.
+                  log.warn("Ignoring error when determining backfillQ", e);
+                  return [];
+              });
 
         this.countSinceLastIdle += items.length;
 
@@ -241,7 +242,7 @@ export class MLWorker {
             // Index them.
             const allSuccess = await indexNextBatch(
                 items,
-                ensure(this.electron),
+                this.electron!,
                 this.delegate,
             );
             if (allSuccess) {
@@ -284,12 +285,8 @@ export class MLWorker {
 
     /** Return the next batch of items to backfill (if any). */
     private async backfillQ() {
-        const userID = ensure(await getKVN("userID"));
         // Find files that our local DB thinks need syncing.
-        const fileByID = await syncWithLocalFilesAndGetFilesToIndex(
-            userID,
-            200,
-        );
+        const fileByID = await syncWithLocalFilesAndGetFilesToIndex(200);
         if (!fileByID.size) return [];
 
         // Fetch their existing ML data (if any).
@@ -326,12 +323,12 @@ export class MLWorker {
      * cgroups if needed.
      */
     async clusterFaces(masterKey: Uint8Array) {
-        const clusters = await _clusterFaces(
+        const { clusters, modifiedClusterIDs } = await _clusterFaces(
             await savedFaceIndexes(),
             await getAllLocalFiles(),
             (progress) => this.updateClusteringProgress(progress),
         );
-        await reconcileClusters(clusters, masterKey);
+        await reconcileClusters(clusters, modifiedClusterIDs, masterKey);
         this.updateClusteringProgress(undefined);
     }
 
@@ -392,7 +389,7 @@ const indexNextBatch = async (
                         .catch(() => {
                             allSuccess = false;
                             tasks[j] = undefined;
-                        }))(ensure(items[i++]), j);
+                        }))(items[i++]!, j);
             }
         }
 
@@ -427,20 +424,13 @@ const indexNextBatch = async (
  *
  * For specifics of what a "sync" entails, see {@link updateAssumingLocalFiles}.
  *
- * @param userID Sync only files owned by a {@link userID} with the face DB.
- *
  * @param count Limit the resulting list of indexable files to {@link count}.
  */
 const syncWithLocalFilesAndGetFilesToIndex = async (
-    userID: number,
     count: number,
 ): Promise<Map<number, EnteFile>> => {
-    const isIndexable = (f: EnteFile) => f.ownerID == userID;
-
     const localFiles = await getAllLocalFiles();
-    const localFileByID = new Map(
-        localFiles.filter(isIndexable).map((f) => [f.id, f]),
-    );
+    const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
 
     const localTrashFileIDs = (await getLocalTrashedFiles()).map((f) => f.id);
 
@@ -450,9 +440,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
     );
 
     const fileIDsToIndex = await getIndexableFileIDs(count);
-    return new Map(
-        fileIDsToIndex.map((id) => [id, ensure(localFileByID.get(id))]),
-    );
+    return new Map(fileIDsToIndex.map((id) => [id, localFileByID.get(id)!]));
 };
 
 /**

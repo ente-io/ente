@@ -61,7 +61,6 @@ export const dotProduct = (v1: Float32Array, v2: Float32Array) => {
     if (v1.length != v2.length)
         throw new Error(`Length mismatch ${v1.length} ${v2.length}`);
     let d = 0;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     for (let i = 0; i < v1.length; i++) d += v1[i]! * v2[i]!;
     return d;
 };

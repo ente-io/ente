@@ -100,17 +100,16 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        'Discover',
-        'Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\'s a place to find photos that might be important for you.\n\nOnly available if you have enabled Machine Learning.',
+        "Advanced Search ✨",
+        "Filter down memories by adding suggested filters on search results, albums etc.",
       ),
       ChangeLogEntry(
-        'Backup Status',
-        'We\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.',
+        "Links in App ✨",
+        "Public links tapped from outside the app now opens in-app.",
       ),
       ChangeLogEntry(
-        'Magic Search Improvement',
-        'We have improved magic search to become much faster, so you don\'t have to wait to find what you\'re looking for.',
-        isFeature: false,
+        "ML out of Beta ✨",
+        "ML feaures are now out of beta.",
       ),
     ]);
 

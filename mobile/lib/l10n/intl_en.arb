@@ -2,6 +2,8 @@
   "@@locale ": "en",
   "enterYourEmailAddress": "Enter your email address",
   "accountWelcomeBack": "Welcome back!",
+  "emailAlreadyRegistered": "Email already registered.",
+  "emailNotRegistered": "Email not registered.",
   "email": "Email",
   "cancel": "Cancel",
   "verify": "Verify",
@@ -185,6 +187,8 @@
   },
   "allowAddPhotosDescription": "Allow people with the link to also add photos to the shared album.",
   "passwordLock": "Password lock",
+  "canNotOpenTitle": "Cannot open this album",
+  "canNotOpenBody": "Sorry, this album cannot be opened in the app.",
   "disableDownloadWarningTitle": "Please note",
   "disableDownloadWarningBody": "Viewers can still take screenshots or save a copy of your photos using external tools",
   "allowDownloads": "Allow downloads",
@@ -351,6 +355,7 @@
   "failedToLoadAlbums": "Failed to load albums",
   "hidden": "Hidden",
   "authToViewYourHiddenFiles": "Please authenticate to view your hidden files",
+  "authToViewTrashedFiles": "Please authenticate to view your trashed files",
   "trash": "Trash",
   "uncategorized": "Uncategorized",
   "videoSmallCase": "video",
@@ -412,7 +417,8 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Photo grid size",
-  "manageDeviceStorage": "Manage device storage",
+  "manageDeviceStorage": "Manage device cache",
+  "manageDeviceStorageDesc": "Review and clear local cache storage.",
   "machineLearning": "Machine learning",
   "mlConsent": "Enable machine learning",
   "mlConsentTitle": "Enable machine learning?",
@@ -688,6 +694,8 @@
   "noPhotosAreBeingBackedUpRightNow": "No photos are being backed up right now",
   "preserveMore": "Preserve more",
   "grantFullAccessPrompt": "Please allow access to all photos in the Settings app",
+  "allowPermTitle": "Allow access to photos",
+  "allowPermBody": "Please allow access to your photos from Settings so Ente can display and backup your library.",
   "openSettings": "Open Settings",
   "selectMorePhotos": "Select more photos",
   "existingUser": "Existing user",
@@ -816,7 +824,7 @@
   "referFriendsAnd2xYourPlan": "Refer friends and 2x your plan",
   "shareAlbumHint": "Open an album and tap the share button on the top right to share.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Items show the number of days remaining before permanent deletion",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1 day} other {{count} days}}",
+  "trashDaysLeft": "{count, plural, =0 {Soon} =1 {1 day} other {{count} days}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1233,6 +1241,7 @@
   "waitingForVerification": "Waiting for verification...",
   "passkey": "Passkey",
   "passkeyAuthTitle": "Passkey verification",
+  "loginWithTOTP": "Login with TOTP",
   "passKeyPendingVerification": "Verification is still pending",
   "loginSessionExpired": "Session expired",
   "loginSessionExpiredDetails": "Your session has expired. Please login again.",
@@ -1244,8 +1253,11 @@
   "deviceCodeHint": "Enter the code",
   "joinDiscord": "Join Discord",
   "locations": "Locations",
-  "descriptions": "Descriptions",
   "addAName": "Add a name",
+  "findThemQuickly": "Find them quickly",
+  "@findThemQuickly": {
+    "description": "Subtitle to indicate that the user can find people quickly by name"
+  },
   "findPeopleByName": "Find people quickly by name",
   "addViewers": "{count, plural, zero {Add viewer} one {Add viewer} other {Add viewers}}",
   "addCollaborators": "{count, plural, zero {Add collaborator} one {Add collaborator} other {Add collaborators}}",
@@ -1260,6 +1272,13 @@
   "createCollaborativeLink": "Create collaborative link",
   "search": "Search",
   "enterPersonName": "Enter person name",
+  "enterName": "Enter name",
+  "savePerson": "Save person",
+  "editPerson": "Edit person",
+  "mergedPhotos": "Merged photos",
+  "orMergeWithExistingPerson": "Or merge with existing",
+  "enterDateOfBirth": "Birthday (optional)",
+  "birthday": "Birthday",
   "removePersonLabel": "Remove person label",
   "autoPairDesc": "Auto pair works only with devices that support Chromecast.",
   "manualPairDesc": "Pair with PIN works with any screen you wish to view your album on.",
@@ -1286,6 +1305,7 @@
   "right": "Right",
   "whatsNew": "What's new",
   "reviewSuggestions": "Review suggestions",
+  "review": "Review",
   "useAsCover": "Use as cover",
   "notPersonLabel": "Not {name}?",
   "@notPersonLabel": {
@@ -1351,8 +1371,224 @@
   "newPerson": "New person",
   "addName": "Add name",
   "add": "Add",
-  "extraPhotosFoundFor": "Extra photos found for $text",
+  "extraPhotosFoundFor": "Extra photos found for {text}",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "extraPhotosFound": "Extra photos found",
   "configuration": "Configuration",
-  "localIndexing": "Local indexing"
+  "localIndexing": "Local indexing",
+  "processed": "Processed",
+  "resetPerson": "Remove",
+  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
+  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
+  "yesResetPerson": "Yes, reset person",
+  "onlyThem": "Only them",
+  "checkingModels": "Checking models...",
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
+  "searchDiscoverEmptySection": "Images will be shown here once processing and syncing is complete",
+  "searchPersonsEmptySection": "People will be shown here once processing and syncing is complete",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Added 0 viewer} =1 {Added 1 viewer} other {Added {count} viewers}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Added 0 collaborator} =1 {Added 1 collaborator} other {Added {count} collaborators}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  },
+  "accountIsAlreadyConfigured": "Account is already configured.",
+  "sessionIdMismatch": "Session ID mismatch",
+  "@sessionIdMismatch": {
+    "description": "In passkey page, deeplink is ignored because of session ID mismatch."
+  },
+  "failedToFetchActiveSessions": "Failed to fetch active sessions",
+  "@failedToFetchActiveSessions": {
+    "description": "In session page, warn user (in toast) that active sessions could not be fetched."
+  },
+  "failedToRefreshStripeSubscription": "Failed to refresh subscription",
+  "failedToPlayVideo": "Failed to play video",
+  "uploadIsIgnoredDueToIgnorereason": "Upload is ignored due to {ignoreReason}",
+  "@uploadIsIgnoredDueToIgnorereason": {
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "typeOfGallerGallerytypeIsNotSupportedForRename": "Type of gallery {galleryType} is not supported for rename",
+  "@typeOfGallerGallerytypeIsNotSupportedForRename": {
+    "placeholders": {
+      "galleryType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUploadIsIgnoredDue": "Tap to upload, upload is currently ignored due to {ignoreReason}",
+  "@tapToUploadIsIgnoredDue": {
+    "description": "Shown in upload icon widet, inside a tooltip.",
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUpload": "Tap to upload",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
+  "info": "Info",
+  "addFiles": "Add Files",
+  "castAlbum": "Cast album",
+  "imageNotAnalyzed": "Image not analyzed",
+  "noFacesFound": "No faces found",
+  "fileNotUploadedYet": "File not uploaded yet",
+  "noSuggestionsForPerson": "No suggestions for {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "month",
+  "yearShort": "yr",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "currently running",
+  "ignored": "ignored",
+  "photosCount": "{count, plural, =0 {0 photo} =1 {1 photo} other {{count} photos}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "file": "File",
+  "searchSectionsLengthMismatch": "Sections length mismatch: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "selectMailApp": "Select mail app",
+  "selectAllShort": "All",
+  "@selectAllShort": {
+    "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
+  },
+  "changeLogMagicSearchImprovementTitle": "Magic Search Improvement",
+  "changeLogMagicSearchImprovementContent": "We have improved magic search to become much faster, so you don\\'t have to wait to find what you\\'re looking for.",
+  "changeLogBackupStatusTitle": "Backup Status",
+  "changeLogBackupStatusContent": "We\\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.",
+  "changeLogDiscoverTitle": "Discover",
+  "changeLogDiscoverContent": "Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\\'s a place to find photos that might be important for you.\\n\\nOnly available if you have enabled Machine Learning.",
+  "selectCoverPhoto": "Select cover photo",
+  "newLocation": "New location",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later",
+  "theLinkYouAreTryingToAccessHasExpired": "The link you are trying to access has expired.",
+  "openFile": "Open file",
+  "backupFile": "Backup file",
+  "openAlbumInBrowser": "Open album in browser",
+  "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
+  "allow": "Allow",
+  "allowAppToOpenSharedAlbumLinks": "Allow app to open shared album links",
+  "seePublicAlbumLinksInApp": "See public album links in app",
+  "emergencyContacts": "Emergency Contacts",
+  "acceptTrustInvite": "Accept Invite",
+  "declineTrustInvite": "Decline Invite",
+  "removeYourselfAsTrustedContact": "Remove yourself as trusted contact",
+  "legacy": "Legacy",
+  "legacyPageDesc": "Legacy allows trusted contacts to access your account in your absence.",
+  "legacyPageDesc2": "Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.",
+  "legacyAccounts": "Legacy accounts",
+  "trustedContacts": "Trusted contacts",
+  "addTrustedContact": "Add Trusted Contact",
+  "removeInvite": "Remove invite",
+  "recoveryWarning": "A trusted contact is trying to access your account",
+  "rejectRecovery": "Reject recovery",
+  "recoveryInitiated": "Recovery initiated",
+  "recoveryInitiatedDesc": "You can access the account after {days} days. A notification will be sent to {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Cancel recovery",
+  "recoveryAccount": "Recover account",
+  "cancelAccountRecoveryBody": "Are you sure you want to cancel recovery?",
+  "startAccountRecoveryTitle": "Start recovery",
+  "whyAddTrustContact": "Trusted contact can help in recovering your data.",
+  "recoveryReady": "You can now recover {email}'s account by setting a new password.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} is trying to recover your account.",
+  "trustedInviteBody": "You have been invited to be a legacy contact by {email}.",
+  "warning": "Warning",
+  "proceed": "Proceed",
+  "confirmAddingTrustedContact": "You are about to add {email} as a trusted contact. They will be able to recover your account if you are absent for {numOfDays} days.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} has invited you to be a trusted contact",
+  "authToManageLegacy": "Please authenticate to manage your trusted contacts",
+  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player.",
+  "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "gallery": "Gallery",
+  "joinAlbum": "Join album",
+  "joinAlbumSubtext": "to view and add your photos",
+  "joinAlbumSubtextViewer": "to add this to shared albums",
+  "join": "Join"
+  
 }
