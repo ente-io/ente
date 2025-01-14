@@ -475,6 +475,18 @@ const getComponents = (
         },
     },
 
+    MuiModal: {
+        styleOverrides: {
+            root: {
+                // A workaround to prevent stuck modals from blocking clicks.
+                // https://github.com/mui/material-ui/issues/32286#issuecomment-1287951109
+                '&:has(> div[style*="opacity: 0"])': {
+                    pointerEvents: "none",
+                },
+            },
+        },
+    },
+
     MuiDrawer: {
         styleOverrides: {
             root: {
@@ -484,6 +496,7 @@ const getComponents = (
             },
         },
     },
+
     MuiDialog: {
         defaultProps: {
             // This is required to prevent console errors about aria-hiding a
@@ -534,6 +547,7 @@ const getComponents = (
             },
         },
     },
+
     MuiPaper: {
         // MUI applies a semi-transparent background image for elevation in dark
         // mode. Remove it to match the Paper background from our design.
@@ -678,15 +692,7 @@ const getComponents = (
             },
         },
     },
-    MuiModal: {
-        styleOverrides: {
-            root: {
-                '&:has(> div[style*="opacity: 0"])': {
-                    pointerEvents: "none",
-                },
-            },
-        },
-    },
+
     MuiMenuItem: {
         styleOverrides: {
             // don't reduce opacity of disabled items
