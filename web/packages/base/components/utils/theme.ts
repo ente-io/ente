@@ -160,19 +160,19 @@ const fixedColors = (
 const commonFixedColors: Partial<Pick<ThemeColorsOptions, keyof FixedColors>> =
     {
         accent: {
-            A700: "#00B33C",
+            A700: "#00B33C" /* prune */,
             A500: "#1DB954",
-            A400: "#26CB5F",
-            A300: "#01DE4D",
+            A400: "#26CB5F" /* prune */,
+            A300: "#01DE4D" /* prune */,
         },
         warning: {
-            A500: "#FFC247",
+            A500: "#FFC247" /* prune */,
         },
         danger: {
-            A800: "#F53434",
-            A700: "#EA3F3F",
+            A800: "#F53434" /* prune */,
+            A700: "#EA3F3F" /* prune */,
             A500: "#FF6565",
-            A400: "#FF6F6F",
+            A400: "#FF6F6F" /* prune */,
         },
     };
 
@@ -184,10 +184,10 @@ const authAccentColor = {
 };
 
 const photosAccentColor = {
-    A700: "#00B33C",
+    A700: "#00B33C" /* prune */,
     A500: "#1DB954",
-    A400: "#26CB5F",
-    A300: "#01DE4D",
+    A400: "#26CB5F" /* prune */,
+    A300: "#01DE4D" /* prune */,
 };
 
 const lightThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {

@@ -456,8 +456,8 @@ const SectionInfo: React.FC<React.PropsWithChildren> = ({ children }) => (
 const NotUploadSectionHeader = styled("div")(
     ({ theme }) => `
     text-align: center;
-    color: ${theme.colors.danger.A700};
-    border-bottom: 1px solid ${theme.colors.danger.A700};
+    color: ${theme.palette.critical.main};
+    border-bottom: 1px solid ${theme.palette.critical.main};
     margin:${theme.spacing(3, 2, 1)}
 `,
 );

@@ -266,10 +266,10 @@ const createSelectStyles = ({
     control: (style, { isFocused }) => ({
         ...style,
         backgroundColor: palette.background.paper,
-        borderColor: isFocused ? colors.accent.A500 : "transparent",
+        borderColor: isFocused ? palette.accent.main : "transparent",
         boxShadow: "none",
         ":hover": {
-            borderColor: colors.accent.A300,
+            borderColor: palette.accent.light,
             cursor: "text",
         },
     }),
