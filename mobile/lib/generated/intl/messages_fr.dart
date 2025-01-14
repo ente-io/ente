@@ -393,7 +393,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Utiliser le code"),
         "appstoreSubscription":
             MessageLookupByLibrary.simpleMessage("Abonnement à l\'AppStore"),
-        "archive": MessageLookupByLibrary.simpleMessage("Archiver"),
+        "archive": MessageLookupByLibrary.simpleMessage("Archivée"),
         "archiveAlbum":
             MessageLookupByLibrary.simpleMessage("Archiver l\'album"),
         "archiving":
@@ -497,6 +497,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Données mises en cache"),
         "calculating":
             MessageLookupByLibrary.simpleMessage("Calcul en cours..."),
+        "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
+            "Désolé, cet album ne peut pas être ouvert dans l\'application."),
+        "canNotOpenTitle": MessageLookupByLibrary.simpleMessage(
+            "Impossible d\'ouvrir cet album"),
         "canNotUploadToAlbumsOwnedByOthers": MessageLookupByLibrary.simpleMessage(
             "Impossible de télécharger dans les albums appartenant à d\'autres personnes"),
         "canOnlyCreateLinkForFilesOwnedByYou":
@@ -1092,6 +1096,12 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Les éléments montrent le nombre de jours restants avant la suppression définitive"),
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "Les éléments sélectionnés seront supprimés de cet album"),
+        "join": MessageLookupByLibrary.simpleMessage("Rejoindre"),
+        "joinAlbum": MessageLookupByLibrary.simpleMessage("Rejoindre l\'album"),
+        "joinAlbumSubtext": MessageLookupByLibrary.simpleMessage(
+            "pour afficher et ajouter vos photos"),
+        "joinAlbumSubtextViewer": MessageLookupByLibrary.simpleMessage(
+            "pour ajouter ceci aux albums partagés"),
         "joinDiscord":
             MessageLookupByLibrary.simpleMessage("Rejoindre Discord"),
         "keepPhotos":
@@ -1288,7 +1298,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "noFacesFound":
             MessageLookupByLibrary.simpleMessage("Aucun visage détecté"),
         "noHiddenPhotosOrVideos": MessageLookupByLibrary.simpleMessage(
-            "Aucune photo ou vidéo cachée"),
+            "Aucune photo ou vidéo masquée"),
         "noImagesWithLocation": MessageLookupByLibrary.simpleMessage(
             "Aucune image avec localisation"),
         "noInternetConnection":
@@ -1317,9 +1327,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Il n\'y a encore rien à voir ici 👀"),
         "notifications": MessageLookupByLibrary.simpleMessage("Notifications"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
-        "onDevice": MessageLookupByLibrary.simpleMessage("Sur l\'appareil"),
+        "onDevice": MessageLookupByLibrary.simpleMessage("Sur votre appareil"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
-            "Sur <branding>ente</branding>"),
+            "Sur <branding>Ente</branding>"),
         "onlyFamilyAdminCanChangeCode": m48,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Seulement eux"),
         "oops": MessageLookupByLibrary.simpleMessage("Oups"),
@@ -1450,6 +1460,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sauvegardes privées"),
         "privateSharing": MessageLookupByLibrary.simpleMessage("Partage privé"),
         "proceed": MessageLookupByLibrary.simpleMessage("Procéder"),
+        "processed": MessageLookupByLibrary.simpleMessage("Traité"),
         "processingImport": m54,
         "publicLinkCreated":
             MessageLookupByLibrary.simpleMessage("Lien public créé"),
@@ -1894,7 +1905,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Pour activer le verrouillage d\'application, veuillez configurer le code d\'accès de l\'appareil ou le verrouillage de l\'écran dans les paramètres de votre système."),
         "toHideAPhotoOrVideo": MessageLookupByLibrary.simpleMessage(
-            "Cacher une photo ou une vidéo"),
+            "Pour masquer une photo ou une vidéo:"),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(
             "Pour réinitialiser votre mot de passe, veuillez d\'abord vérifier votre e-mail."),
         "todaysLogs": MessageLookupByLibrary.simpleMessage("Journaux du jour"),
