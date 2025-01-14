@@ -64,7 +64,6 @@ declare module "@mui/material/styles" {
         text: Strength;
         fill: FillStrength;
         stroke: Strength;
-        shadows: Shadows;
         accent: ColorStrength;
         warning: ColorStrength;
         danger: ColorStrength;
@@ -76,7 +75,6 @@ declare module "@mui/material/styles" {
         text?: Partial<Strength>;
         fill?: Partial<FillStrength>;
         stroke?: Partial<StrokeStrength>;
-        shadows?: Partial<Shadows>;
         accent?: Partial<ColorStrength>;
         warning?: Partial<ColorStrength>;
         danger?: Partial<ColorStrength>;
@@ -158,8 +156,8 @@ declare module "@mui/material/styles" {
             overlayIndicatorMuted: string;
         };
         /**
-         * MUI as of v6 does not allow customizing the shadows easily. This is
-         * due for change: https://github.com/mui/material-ui/issues/44291.
+         * MUI as of v6 does not allow customizing shadows easily. This is due
+         * for change: https://github.com/mui/material-ui/issues/44291.
          *
          * Meanwhile use a custom variable. Since it is specific to the color
          * scheme, keep it inside the palette.

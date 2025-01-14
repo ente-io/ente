@@ -120,8 +120,8 @@ export type ColorAccentType = "auth" | "photos";
  *
  * - Custom colors (even if they're not PaletteColors) go within the palette.
  *
- * - Non-color tokens that depend on the color scheme (e.g. drop shadows) also
- *   go within the palette so that they can be made color scheme specific.
+ * - Non-color tokens that depend on the color scheme (e.g. box shadows) also go
+ *   within the palette so that they can be made color scheme specific.
  *
  * - All other custom variables remain within the top level theme.
  */
