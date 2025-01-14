@@ -1,6 +1,45 @@
 import type { PaletteColor, PaletteColorOptions } from "@mui/material";
 import React from "react";
 
+// Tell TypeScript about our Typography variants
+//
+// https://mui.com/material-ui/customization/typography/#adding-amp-disabling-variants
+
+declare module "@mui/material/styles" {
+    interface TypographyVariants {
+        body: React.CSSProperties;
+        small: React.CSSProperties;
+        mini: React.CSSProperties;
+        tiny: React.CSSProperties;
+    }
+
+    interface TypographyVariantsOptions {
+        body?: React.CSSProperties;
+        small?: React.CSSProperties;
+        mini?: React.CSSProperties;
+        tiny?: React.CSSProperties;
+    }
+}
+
+declare module "@mui/material/Typography" {
+    // Update the Typography's variant prop options.
+    interface TypographyPropsVariantOverrides {
+        // Turn off MUI provided variants we don't use.
+        subtitle1: false;
+        subtitle2: false;
+        body1: false;
+        body2: false;
+        caption: false;
+        button: false;
+        overline: false;
+        // Add our custom variants.
+        body: true;
+        small: true;
+        mini: true;
+        tiny: true;
+    }
+}
+
 declare module "@mui/material/styles" {
     interface Theme {
         colors: ThemeColors;
@@ -24,38 +63,6 @@ declare module "@mui/material/styles" {
         base: string;
         muted: string;
         faint: string;
-    }
-
-    interface TypographyVariants {
-        body: React.CSSProperties;
-        small: React.CSSProperties;
-        mini: React.CSSProperties;
-        tiny: React.CSSProperties;
-    }
-
-    interface TypographyVariantsOptions {
-        body?: React.CSSProperties;
-        small?: React.CSSProperties;
-        mini?: React.CSSProperties;
-        tiny?: React.CSSProperties;
-    }
-}
-
-declare module "@mui/material/Typography" {
-    interface TypographyPropsVariantOverrides {
-        // Turn off MUI provided variants we don't use.
-        subtitle1: false;
-        subtitle2: false;
-        body1: false;
-        body2: false;
-        caption: false;
-        button: false;
-        overline: false;
-        // Add our custom variants.
-        body: true;
-        small: true;
-        mini: true;
-        tiny: true;
     }
 }
 
