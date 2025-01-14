@@ -134,10 +134,7 @@ const IndividualInput = styled("input")(
 const InvalidInputMessage: React.FC<React.PropsWithChildren> = ({
     children,
 }) => (
-    <Typography
-        variant="mini"
-        sx={(theme) => ({ color: theme.colors.danger.A700 })}
-    >
+    <Typography variant="mini" sx={{ color: "critical.main" }}>
         {children}
     </Typography>
 );
