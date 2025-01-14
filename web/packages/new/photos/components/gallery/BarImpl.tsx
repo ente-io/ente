@@ -376,6 +376,7 @@ const ScrollButtonBase_ = styled("button")(({ theme }) => ({
     borderRadius: "50%",
     backgroundColor: theme.palette.backdrop.muted,
     color: theme.colors.stroke.base,
+    cursor: "pointer",
     "& > svg": {
         borderRadius: "50%",
         height: "30px",
