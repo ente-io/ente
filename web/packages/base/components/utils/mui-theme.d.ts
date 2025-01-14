@@ -192,5 +192,3 @@ declare module "@mui/material/Typography" {
         tiny: true;
     }
 }
-
-export {};

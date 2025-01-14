@@ -120,7 +120,6 @@ export const Notification: React.FC<NotificationProps> = ({
 }) => {
     if (!attributes) return <></>;
 
-    console.log(attributes);
     const { captionFirst, color, startIcon, title, caption, endIcon, onClick } =
         attributes;
 
