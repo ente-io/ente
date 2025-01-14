@@ -2,7 +2,6 @@ import { assertionFailed } from "@/base/assert";
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import { isSxArray } from "@/base/components/utils/sx";
 import { sharedCryptoWorker } from "@/base/crypto";
 import { AppContext } from "@/new/photos/types/context";
 import { initiateEmail } from "@/new/photos/utils/web";
@@ -16,7 +15,6 @@ import {
     Stack,
     TextField,
     Typography,
-    type TypographyProps,
 } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
@@ -166,16 +164,10 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                 messageSxProps={{ color: "critical.main" }}
                                 message={errors.reason}
                             />
-                            <MultilineInput
-                                label={t("delete_account_feedback_label")}
-                                placeholder={t(
-                                    "delete_account_feedback_placeholder",
-                                )}
+                            <FeedbackInput
                                 value={values.feedback}
                                 onChange={handleChange("feedback")}
-                                message={errors.feedback}
-                                messageSxProps={{ color: "critical.main" }}
-                                rowCount={3}
+                                errorMessage={errors.feedback}
                             />
                             <CheckboxInput
                                 checked={acceptDataDeletion}
@@ -231,62 +223,43 @@ const deleteReasonOptions = (): DropdownOption<DeleteReason>[] =>
         value: reason,
     }));
 
-interface MultilineInputProps {
-    label: string;
-    labelProps?: TypographyProps;
-    message?: string;
-    messageSxProps?: TypographyProps["sx"];
-    placeholder?: string;
+interface FeedbackInputProps {
     value: string;
-    rowCount: number;
+    errorMessage?: string;
     onChange: (value: string) => void;
 }
 
-function MultilineInput({
-    label,
-    message,
-    messageSxProps,
-    placeholder,
+const FeedbackInput: React.FC<FeedbackInputProps> = ({
     value,
-    rowCount,
     onChange,
-}: MultilineInputProps) {
-    return (
-        <Stack spacing={"4px"}>
-            <Typography>{label}</Typography>
-            <TextField
-                variant="standard"
-                multiline
-                rows={rowCount}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                placeholder={placeholder}
-                sx={(theme) => ({
-                    border: "1px solid",
-                    borderColor: theme.colors.stroke.faint,
-                    borderRadius: "8px",
-                    padding: "12px",
-                    ".MuiInputBase-formControl": {
-                        "::before, ::after": {
-                            borderBottom: "none !important",
-                        },
+    errorMessage,
+}) => (
+    <Stack spacing={"4px"}>
+        <Typography>{t("delete_account_feedback_label")}</Typography>
+        <TextField
+            variant="standard"
+            multiline
+            rows={3}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={t("delete_account_feedback_placeholder")}
+            sx={(theme) => ({
+                border: "1px solid",
+                borderColor: theme.colors.stroke.faint,
+                borderRadius: "8px",
+                padding: "12px",
+                ".MuiInputBase-formControl": {
+                    "::before, ::after": {
+                        borderBottom: "none !important",
                     },
-                })}
-            />
-            <Typography
-                variant="small"
-                sx={[
-                    { px: "8px", color: "text.secondary" },
-                    ...(isSxArray(messageSxProps)
-                        ? messageSxProps
-                        : [messageSxProps]),
-                ]}
-            >
-                {message}
-            </Typography>
-        </Stack>
-    );
-}
+                },
+            })}
+        />
+        <Typography variant="small" sx={{ px: "8px", color: "critical.main" }}>
+            {errorMessage}
+        </Typography>
+    </Stack>
+);
 
 interface CheckboxInputProps {
     disabled?: boolean;
