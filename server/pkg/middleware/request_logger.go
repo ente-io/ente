@@ -47,6 +47,13 @@ func shouldSkipBodyLog(method string, path string) bool {
 	return false
 }
 
+func shouldSkipLog(method string, path string) bool {
+	if method == "GET" && path == "/ping" {
+		return true
+	}
+	return false
+}
+
 // Logger logs the details regarding an incoming request
 func Logger(urlSanitizer func(_ *gin.Context) string) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -80,43 +87,46 @@ func Logger(urlSanitizer func(_ *gin.Context) string) gin.HandlerFunc {
 			"req_uri":        c.Request.URL.Path,
 			"ua":             userAgent,
 		})
-		skipRequestLogUnlessError := shouldSkipBodyLog(reqMethod, c.Request.URL.Path)
-		if skipRequestLogUnlessError {
-			reqContextLogger = reqContextLogger.WithField("req_body", "redacted")
-		} else {
-			body, err := readBody(rdr1)
-			if err != nil {
-				logrus.Error("Error reading body", err)
+		shouldSkipLogUnlessError := shouldSkipLog(reqMethod, c.Request.URL.Path)
+		if !shouldSkipLogUnlessError {
+			skipRequestLogUnlessError := shouldSkipBodyLog(reqMethod, c.Request.URL.Path)
+			if skipRequestLogUnlessError {
+				reqContextLogger = reqContextLogger.WithField("req_body", "redacted")
 			} else {
-				reqContextLogger = reqContextLogger.WithField("req_body", body)
+				body, err := readBody(rdr1)
+				if err != nil {
+					logrus.Error("Error reading body", err)
+				} else {
+					reqContextLogger = reqContextLogger.WithField("req_body", body)
+				}
 			}
-		}
-		reqContextLogger.Info("incoming")
-		c.Request.Body = rdr2
-		// Processing request
-		c.Next()
-		statusCode := c.Writer.Status()
-		latencyTime := time.Since(startTime)
-		reqURI := urlSanitizer(c)
-		if reqMethod != http.MethodOptions {
-			latency.WithLabelValues(strconv.Itoa(statusCode), reqMethod,
-				c.Request.Host, reqURI).
-				Observe(float64(latencyTime.Milliseconds()))
-		}
-		if statusCode >= 400 && !skipRequestLogUnlessError {
-			body, err := readBody(rdr1)
-			if err != nil {
-				logrus.Error("Error reading body", err)
-			} else {
-				reqContextLogger = reqContextLogger.WithField("req_body", body)
+			reqContextLogger.Info("incoming")
+			c.Request.Body = rdr2
+			// Processing request
+			c.Next()
+			statusCode := c.Writer.Status()
+			latencyTime := time.Since(startTime)
+			reqURI := urlSanitizer(c)
+			if reqMethod != http.MethodOptions {
+				latency.WithLabelValues(strconv.Itoa(statusCode), reqMethod,
+					c.Request.Host, reqURI).
+					Observe(float64(latencyTime.Milliseconds()))
 			}
+			if statusCode >= 400 && !skipRequestLogUnlessError {
+				body, err := readBody(rdr1)
+				if err != nil {
+					logrus.Error("Error reading body", err)
+				} else {
+					reqContextLogger = reqContextLogger.WithField("req_body", body)
+				}
+			}
+			reqContextLogger.WithFields(logrus.Fields{
+				"latency_time": latencyTime,
+				"h_latency":    timeUtil.HumanFriendlyDuration(latencyTime),
+				"status_code":  statusCode,
+				"user_id":      auth.GetUserID(c.Request.Header),
+			}).Info("outgoing")
 		}
-		reqContextLogger.WithFields(logrus.Fields{
-			"latency_time": latencyTime,
-			"h_latency":    timeUtil.HumanFriendlyDuration(latencyTime),
-			"status_code":  statusCode,
-			"user_id":      auth.GetUserID(c.Request.Header),
-		}).Info("outgoing")
 	}
 }
 
