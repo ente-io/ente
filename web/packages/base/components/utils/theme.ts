@@ -287,6 +287,11 @@ const getPallette = (
  * relationships between the colors (if there are any).
  */
 const _colors = {
+    accentPhotos: {
+        dark: "#00B33C",
+        main: "#1DB954",
+        light: "#01DE4D",
+    },
     fixed: {
         white: "#fff",
         black: "#000",
@@ -334,6 +339,7 @@ const getPalletteOptions = (
             // @ts-ignore
             main: colors.accent.A500,
             dark: colors.accent!.A700!,
+            light: colors.accent!.A300!,
             contrastText: _colors.fixed.white,
         },
         critical: {
