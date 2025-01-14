@@ -216,6 +216,22 @@ const lightThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
         faint: "rgba(0, 0, 0, 0.12)",
     },
 
+    /*
+    // Light
+    shadows2L: {
+        float: "0px 0px 10px rgba(0, 0, 0, 0.25)",
+        menu: "0px 0px 6px rgba(0, 0, 0, 0.16), 0px 3px 6px rgba(0, 0, 0, 0.12)",
+        button: "0px 4px 4px rgba(0, 0, 0, 0.25)",
+    },
+
+    // Dark
+    shadows2D: {
+        float: "0px 2px 12px rgba(0, 0, 0, 0.75)",
+        menu: "0px 0px 6px rgba(0, 0, 0, 0.50), 0px 3px 6px rgba(0, 0, 0, 0.25)",
+        button: "0px 4px 4px rgba(0, 0, 0, 0.75)",
+    },
+    */
+
     shadows: {
         float: [{ x: 0, y: 0, blur: 10, color: "rgba(0, 0, 0, 0.25)" }],
         menu: [
