@@ -129,6 +129,18 @@ declare module "@mui/material/styles" {
         accent: PaletteColor;
         critical: PaletteColor;
         /**
+         * Various fixed colors used by our designs that do not change with the
+         * color scheme.
+         */
+        fixed: {
+            white: string;
+            black: string;
+            /**
+             * e.g. color of the "archived" indicator shown on top of albums.
+             */
+            overlayIndicatorMuted: string;
+        };
+        /**
          * MUI as of v6 does not allow customizing the shadows easily. This is
          * due for change: https://github.com/mui/material-ui/issues/44291.
          *
@@ -150,6 +162,7 @@ declare module "@mui/material/styles" {
     interface PaletteOptions {
         accent?: PaletteColorOptions;
         critical?: PaletteColorOptions;
+        fixed?: Palette["fixed"];
         boxShadow?: Palette["boxShadow"];
     }
 }

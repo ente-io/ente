@@ -278,6 +278,21 @@ const getPallette = (
     }
 };
 
+/**
+ * The color values.
+ *
+ * Use this arbitrarily shaped object to define the palette. It both prevents
+ * duplication across color schemes, and also us to see the semantic
+ * relationships between the colors (if there are any).
+ */
+const _color = {
+    fixed: {
+        white: "#fff",
+        black: "#000",
+        overlayIndicatorMuted: "rgba(255, 255, 255, 0.48)",
+    },
+};
+
 const getPalletteOptions = (
     themeColor: THEME_COLOR,
     colors: ThemeColorsOptions,
@@ -327,6 +342,7 @@ const getPalletteOptions = (
             faint: colors.text?.faint,
         },
         divider: colors.stroke?.faint,
+        fixed: { ..._color.fixed },
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         boxShadow: colors.boxShadow,

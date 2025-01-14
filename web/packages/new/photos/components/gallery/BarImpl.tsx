@@ -529,9 +529,7 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     <CollectionBarCardIcon_>
         {type == "favorites" && <FavoriteRoundedIcon />}
         {type == "archived" && (
-            <ArchiveIcon
-                sx={(theme) => ({ color: theme.colors.white.muted })}
-            />
+            <ArchiveIcon sx={{ color: "fixed.overlayIndicatorMuted" }} />
         )}
         {type == "outgoingShare" && <PeopleIcon />}
         {(type == "incomingShareViewer" ||
