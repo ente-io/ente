@@ -1,10 +1,10 @@
+import { Link } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
-import { Link } from "@mui/material";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import "./App.css";
@@ -73,7 +73,7 @@ const App: React.FC = () => {
 
     useEffect(() => {
         const storedToken = localStorage.getItem("token");
-        console.log(storedToken)
+        console.log(storedToken);
         if (storedToken) {
             setToken(storedToken);
             setLocalToken(storedToken);
@@ -242,17 +242,17 @@ const App: React.FC = () => {
         if (userToken) {
             setLocalToken(userToken);
             setToken(userToken);
-            
-            document.getElementById(":r1:").readOnly = true 
+
+            document.getElementById(":r1:").readOnly = true;
         }
     }, []);
 
     const updateToken = () => {
-      const editToken = document.getElementById(":r1:");
-      editToken.readOnly = false;
-      
-      // Change focus to Token input form 
-      editToken.focus()
+        const editToken = document.getElementById(":r1:");
+        editToken.readOnly = false;
+
+        // Change focus to Token input form
+        editToken.focus();
     };
 
     return (
@@ -268,25 +268,31 @@ const App: React.FC = () => {
                         >
                             staff.ente.io
                         </a>
-                    <div className="text-fields"> 
-                        <div style={{
-                          display: "flex",
-                          flexDirection: "column",
-                        }}>
-                            <TextField
-                                label="Token"
-                                value={localToken}
-                                onChange={(e) => {
-                                    setLocalToken(e.target.value);
-                                    setToken(e.target.value);
+                        <div className="text-fields">
+                            <div
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
                                 }}
-                                size="medium"
-                                className="text-field-token"
-                                style={{ maxWidth: "parent" }}
-                            />
-                            <Link to="/" style={{ textAlign: "left" }} onClick={updateToken}>
-                                Update Token?
-                            </Link>
+                            >
+                                <TextField
+                                    label="Token"
+                                    value={localToken}
+                                    onChange={(e) => {
+                                        setLocalToken(e.target.value);
+                                        setToken(e.target.value);
+                                    }}
+                                    size="medium"
+                                    className="text-field-token"
+                                    style={{ maxWidth: "parent" }}
+                                />
+                                <Link
+                                    to="/"
+                                    style={{ textAlign: "left" }}
+                                    onClick={updateToken}
+                                >
+                                    Update Token?
+                                </Link>
                             </div>
                             <TextField
                                 label="Email"
