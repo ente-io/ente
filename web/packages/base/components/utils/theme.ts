@@ -43,6 +43,48 @@ export const getTheme = (
 
 export type ColorAccentType = "auth" | "photos";
 
+/**
+ * [Note: Colors]
+ *
+ * The word "color" in MUI stands for different things. In particular, the color
+ * prop for (e.g.) a Button is not the same as the color prop for the sx prop.
+ *
+ * There are three layers.
+ *
+ * 1. Consider some color, say a shade of red. This will be represented by its
+ *    exact CSS color value, say "#ee0000".
+ *
+ * 2. In UI contexts a color doesn't go alone, and needs a few shades to act as
+ *    variations. These all have roughly the same hue, but different levels of
+ *    saturation. These hues are arranged together into a full "Color" exported
+ *    by "@/mui/material":
+ *
+ *        export interface Color {
+ *            50: string;
+ *            100: string;
+ *            ...
+ *            800: string;
+ *            900: string;
+ *            A100: string;
+ *            ...
+ *            A700: string;
+ *        }
+ *
+ *  3. Finally, there are the so called "PaletteColors" (though the naming and
+ *     documentation otherwise omits the palette qualifier).
+ *
+ *         export interface PaletteColor {
+ *             light: string;
+ *             main: string;
+ *             dark: string;
+ *             contrastText: string;
+ *         }
+ *
+ * The PaletteColors are what we use in the MUI component props (e.g. Button).
+ * The PaletteColors are themselves defined in terms of the specific Color
+ * values (e.g. red[500]), but they can also be defined by providing color
+ * values directly for the four "tokens" that make them up.
+ */
 const getColors = (
     themeColor: THEME_COLOR,
     accentType: ColorAccentType,
