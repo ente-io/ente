@@ -9,6 +9,7 @@ import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
@@ -109,11 +110,15 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
             await MLDataDB.instance.getFaceIDsForCluster(widget.clusterID!);
       }
       if (allFaces != null) {
-        final allFileIDs = allFaces.map((e) => getFileIdFromFaceId(e));
+        final allFileIDs = allFaces.map((e) => getFileIdFromFaceId(e)).toSet();
+        final hiddenFileIDs = await SearchService.instance
+            .getHiddenFiles()
+            .then((onValue) => onValue.map((e) => e.uploadedFileID));
+        final acceptableFileIDs = allFileIDs.difference(hiddenFileIDs.toSet());
         final fileIDToCreationTime =
             await FilesDB.instance.getFileIDToCreationTime();
         // Get the file with the most recent creation time
-        final recentFileID = allFileIDs.reduce((a, b) {
+        final recentFileID = acceptableFileIDs.reduce((a, b) {
           final aTime = fileIDToCreationTime[a];
           final bTime = fileIDToCreationTime[b];
           if (aTime == null) {
