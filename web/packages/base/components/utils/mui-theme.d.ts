@@ -1,4 +1,4 @@
-import type { PaletteColor, PaletteColorOptions } from "@mui/material";
+import type { PaletteColor } from "@mui/material";
 import React from "react";
 
 declare module "@mui/material/styles" {
@@ -162,8 +162,9 @@ declare module "@mui/material/styles" {
          */
         critical: PaletteColor;
         /**
-         * Various ad-hoc fixed colors used by our designs that do not change
-         * with the color scheme.
+         * Various ad-hoc fixed colors used by our designs.
+         *
+         * These do not change with the color scheme.
          */
         fixed: {
             white: string;
@@ -172,6 +173,18 @@ declare module "@mui/material/styles" {
              * e.g. color of the "archived" indicator shown on top of albums.
              */
             overlayIndicatorMuted: string;
+        };
+        /**
+         * Various ad-hoc fixed colors used by our designs.
+         *
+         * These change with the color scheme.
+         */
+        misc: {
+            /**
+             * Fill color for the backdrop of various modals, dialogs and
+             * drawers etc.
+             */
+            backdropFaint: string;
         };
         /**
          * MUI as of v6 does not allow customizing shadows easily. This is due
@@ -193,9 +206,10 @@ declare module "@mui/material/styles" {
     }
 
     interface PaletteOptions {
-        accent?: PaletteColorOptions;
-        critical?: PaletteColorOptions;
+        accent?: Palette["accent"];
+        critical?: Palette["critical"];
         fixed?: Palette["fixed"];
+        misc?: Palette["misc"];
         boxShadow?: Palette["boxShadow"];
     }
 }

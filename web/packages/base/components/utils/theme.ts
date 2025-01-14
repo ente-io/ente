@@ -232,8 +232,8 @@ const darkThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
         paper2: "#252525",
     },
     backdrop: {
-        base: "rgba(0, 0, 0, 0.90)",
-        muted: "rgba(0, 0, 0, 0.65)",
+        base: "rgba(0, 0, 0, 0.90)" /* unused */,
+        muted: "rgba(0, 0, 0, 0.65)" /* unused */,
         faint: "rgba(0, 0, 0,0.20)",
     },
     text: {
@@ -317,14 +317,14 @@ const getPalletteOptions = (
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             main: colors.accent.A500,
-            dark: colors.accent?.A700,
+            dark: colors.accent!.A700!,
             contrastText: _color.fixed.white,
         },
         critical: {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             main: colors.danger.A700,
-            dark: colors.danger?.A800,
+            dark: colors.danger!.A800!,
             contrastText: _color.fixed.white,
         },
         background: {
@@ -342,6 +342,9 @@ const getPalletteOptions = (
         },
         divider: colors.stroke?.faint,
         fixed: { ..._color.fixed },
+        misc: {
+            backdropFaint: colors.backdrop!.faint!,
+        },
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         boxShadow: colors.boxShadow,
@@ -491,7 +494,7 @@ const getComponents = (
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
-                    backgroundColor: colors.backdrop?.faint,
+                    backgroundColor: palette.misc?.backdropFaint,
                 },
             },
         },
@@ -508,7 +511,7 @@ const getComponents = (
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
-                    backgroundColor: colors.backdrop?.faint,
+                    backgroundColor: palette.misc?.backdropFaint,
                 },
                 "& .MuiDialog-paper": {
                     boxShadow: palette.boxShadow?.float,

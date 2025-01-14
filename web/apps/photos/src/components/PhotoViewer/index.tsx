@@ -989,7 +989,7 @@ const CaptionContainer = styled("div")(({ theme }) => ({
     maxWidth: "375px",
     fontSize: "14px",
     lineHeight: "17px",
-    backgroundColor: theme.colors.backdrop.faint,
+    backgroundColor: theme.palette.misc.backdropFaint,
     backdropFilter: "blur(96px)",
 }));
 
