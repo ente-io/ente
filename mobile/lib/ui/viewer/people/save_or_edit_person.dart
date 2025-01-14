@@ -377,7 +377,6 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                               person: person.$1,
                               clusterID: widget.clusterID!,
                             );
-                            Bus.instance.fire(PeopleChangedEvent());
 
                             Navigator.pop(context, person);
                           },
