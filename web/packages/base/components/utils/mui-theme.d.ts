@@ -68,8 +68,6 @@ declare module "@mui/material/styles" {
         accent: ColorStrength;
         warning: ColorStrength;
         danger: ColorStrength;
-        white: Omit<Strength, "faint">;
-        black: Omit<Strength, "faint">;
     }
 
     interface ThemeColorsOptions {
@@ -82,8 +80,6 @@ declare module "@mui/material/styles" {
         accent?: Partial<ColorStrength>;
         warning?: Partial<ColorStrength>;
         danger?: Partial<ColorStrength>;
-        white?: Partial<Omit<Strength, "faint">>;
-        black?: Partial<Omit<Strength, "faint">>;
     }
 
     interface ColorStrength {
@@ -98,8 +94,6 @@ declare module "@mui/material/styles" {
         accent: string;
         warning: string;
         danger: string;
-        white: string;
-        black: string;
     }
 
     interface BackgroundType {

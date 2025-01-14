@@ -171,8 +171,6 @@ const commonFixedColors: Partial<Pick<ThemeColorsOptions, keyof FixedColors>> =
             A500: "#FF6565",
             A400: "#FF6F6F",
         },
-        white: { base: "#fff", muted: "rgba(255, 255, 255, 0.48)" },
-        black: { base: "#000", muted: "rgba(0, 0, 0, 0.65)" },
     };
 
 const authAccentColor = {
@@ -306,7 +304,7 @@ const getPalletteOptions = (
             main: colors.fill.base,
             dark: colors.fill?.basePressed,
             contrastText:
-                themeColor === "dark" ? colors.black?.base : colors.white?.base,
+                themeColor === "dark" ? _color.fixed.black : _color.fixed.white,
         },
         secondary: {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -320,14 +318,14 @@ const getPalletteOptions = (
             // @ts-ignore
             main: colors.accent.A500,
             dark: colors.accent?.A700,
-            contrastText: colors.white?.base,
+            contrastText: _color.fixed.white,
         },
         critical: {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             main: colors.danger.A700,
             dark: colors.danger?.A800,
-            contrastText: colors.white?.base,
+            contrastText: _color.fixed.white,
         },
         background: {
             default: colors.background?.base,
