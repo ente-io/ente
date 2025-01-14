@@ -429,11 +429,13 @@ class MLStatusWidget extends StatefulWidget {
 
 class MLStatusWidgetState extends State<MLStatusWidget> {
   Timer? _timer;
+  bool _isDeviceHealthy = machineLearningController.isDeviceHealthy;
   @override
   void initState() {
     super.initState();
     _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
       MLService.instance.triggerML();
+      _isDeviceHealthy = machineLearningController.isDeviceHealthy;
       setState(() {});
     });
   }
@@ -463,14 +465,12 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
           future: _getIndexStatus(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              final bool isDeviceHealthy =
-                  machineLearningController.isDeviceHealthy;
               final int indexedFiles = snapshot.data!.indexedItems;
               final int pendingFiles = snapshot.data!.pendingItems;
               final int total = indexedFiles + pendingFiles;
               final bool hasWifi = snapshot.data!.hasWifiEnabled!;
 
-              if (!isDeviceHealthy && pendingFiles > 0) {
+              if (!_isDeviceHealthy && pendingFiles > 0) {
                 return MenuSectionDescriptionWidget(
                   content: S.of(context).indexingIsPaused,
                 );
