@@ -6,7 +6,6 @@
 import type {
     FixedColors,
     PaletteOptions,
-    Shadow,
     ThemeColorsOptions,
 } from "@mui/material";
 import { createTheme } from "@mui/material";
@@ -226,32 +225,6 @@ const lightThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
         menu: "0px 0px 6px rgba(0, 0, 0, 0.16), 0px 3px 6px rgba(0, 0, 0, 0.12)",
         button: "0px 4px 4px rgba(0, 0, 0, 0.25)",
     },
-
-    shadows: {
-        float: [{ x: 0, y: 0, blur: 10, color: "rgba(0, 0, 0, 0.25)" }],
-        menu: [
-            {
-                x: 0,
-                y: 0,
-                blur: 6,
-                color: "rgba(0, 0, 0, 0.16)",
-            },
-            {
-                x: 0,
-                y: 3,
-                blur: 6,
-                color: "rgba(0, 0, 0, 0.12)",
-            },
-        ],
-        button: [
-            {
-                x: 0,
-                y: 4,
-                blur: 4,
-                color: "rgba(0, 0, 0, 0.25)",
-            },
-        ],
-    },
 };
 
 const darkThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
@@ -289,39 +262,6 @@ const darkThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
         float: "0px 2px 12px rgba(0, 0, 0, 0.75)",
         menu: "0px 0px 6px rgba(0, 0, 0, 0.50), 0px 3px 6px rgba(0, 0, 0, 0.25)",
         button: "0px 4px 4px rgba(0, 0, 0, 0.75)",
-    },
-
-    shadows: {
-        float: [
-            {
-                x: 0,
-                y: 2,
-                blur: 12,
-                color: "rgba(0, 0, 0, 0.75)",
-            },
-        ],
-        menu: [
-            {
-                x: 0,
-                y: 0,
-                blur: 6,
-                color: "rgba(0, 0, 0, 0.50)",
-            },
-            {
-                x: 0,
-                y: 3,
-                blur: 6,
-                color: "rgba(0, 0, 0, 0.25)",
-            },
-        ],
-        button: [
-            {
-                x: 0,
-                y: 4,
-                blur: 4,
-                color: "rgba(0, 0, 0, 0.75)",
-            },
-        ],
     },
 };
 
@@ -544,7 +484,6 @@ const getComponents = (
                 },
                 "& .MuiDialog-paper": {
                     boxShadow: palette.boxShadow?.float,
-                    // filter: getDropShadowStyle(colors.shadows?.float),
                 },
                 // Reset the MUI default paddings to 16px everywhere.
                 //
@@ -725,15 +664,6 @@ const getComponents = (
         },
     },
 });
-
-const getDropShadowStyle = (shadows: Shadow[] | undefined) => {
-    return (shadows ?? [])
-        .map(
-            (shadow) =>
-                `drop-shadow(${shadow.x}px ${shadow.y}px ${shadow.blur}px ${shadow.color})`,
-        )
-        .join(" ");
-};
 
 interface IconColorableOwnerState {
     color?: string;
