@@ -95,7 +95,7 @@ export type ColorAccentType = "auth" | "photos";
  *
  * [Note: Color names]
  *
- * When definining color names, there is some attempt at trying to use MUI v6
+ * When defining color names, there is some attempt at trying to use MUI v6
  * (which uses MD (Material Design) v2) nomenclature when feasible (just to keep
  * the number of concepts low), but as such, the color names should not be
  * thought of as following Material Design, and should be treated as arbitrary
@@ -108,6 +108,20 @@ export type ColorAccentType = "auth" | "photos";
  *
  * - Our "critical" is similar to the MD error. The other semantic PaletteColors
  *   exported from MUI (error, warning, info, success) are not used.
+ *
+ * [Note: Theme and palette custom variables]
+ *
+ * Custom variables can be added to both the top level theme object, and to the
+ * palette object within the theme. One would imagine that within the palette
+ * there would only be colors that follow PaletteColor, but that's not something
+ * MUI itself follows.
+ *
+ * So there is no particular reason to place custom color related variables in
+ * theme vs in the palette. As a convention:
+ *
+ * - Custom colors (even if they're not PaletteColors) go within the palette.
+ *
+ * - All other custom variables remain within the top level theme.
  */
 const getColors = (
     themeColor: THEME_COLOR,
