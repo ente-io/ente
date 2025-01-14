@@ -128,10 +128,12 @@ class PersonData {
 
   // fromJson
   factory PersonData.fromJson(Map<String, dynamic> json) {
-    final assigned = (json['assigned'] == null || json['assigned'].length == 0)
+    final assigned = (json['assigned'] == null || json['assigned'].length == 0 || json['assigned'] != Iterable)
         ? <ClusterInfo>[]
         : List<ClusterInfo>.from(
-            json['assigned'].map((x) => ClusterInfo.fromJson(x)),
+            json['assigned']
+              .where((x) => x is Map<String, dynamic>)
+              .map((x) => ClusterInfo.fromJson(x as Map<String, dynamic>)),
           );
 
     final List<String> rejectedFaceIDs =
