@@ -162,6 +162,17 @@ declare module "@mui/material/styles" {
          */
         critical: PaletteColor;
         /**
+         * Transparent background fills that serve as the backdrop of modals,
+         * dialogs and drawers etc.
+         *
+         * These change with the color scheme.
+         */
+        backdrop: {
+            base: string;
+            muted: string;
+            faint: string;
+        };
+        /**
          * Various ad-hoc fixed colors used by our designs.
          *
          * These do not change with the color scheme.
@@ -173,18 +184,6 @@ declare module "@mui/material/styles" {
              * e.g. color of the "archived" indicator shown on top of albums.
              */
             overlayIndicatorMuted: string;
-        };
-        /**
-         * Various ad-hoc fixed colors used by our designs.
-         *
-         * These change with the color scheme.
-         */
-        misc: {
-            /**
-             * Fill color for the backdrop of various modals, dialogs and
-             * drawers etc.
-             */
-            backdropFaint: string;
         };
         /**
          * MUI as of v6 does not allow customizing shadows easily. This is due
@@ -208,8 +207,8 @@ declare module "@mui/material/styles" {
     interface PaletteOptions {
         accent?: Palette["accent"];
         critical?: Palette["critical"];
+        backdrop?: Palette["backdrop"];
         fixed?: Palette["fixed"];
-        misc?: Palette["misc"];
         boxShadow?: Palette["boxShadow"];
     }
 }

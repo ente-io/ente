@@ -342,8 +342,10 @@ const getPalletteOptions = (
         },
         divider: colors.stroke?.faint,
         fixed: { ..._color.fixed },
-        misc: {
-            backdropFaint: colors.backdrop!.faint!,
+        backdrop: {
+            base: colors.backdrop!.base!,
+            muted: colors.backdrop!.muted!,
+            faint: colors.backdrop!.faint!,
         },
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
@@ -494,7 +496,7 @@ const getComponents = (
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
-                    backgroundColor: palette.misc?.backdropFaint,
+                    backgroundColor: palette.backdrop?.faint,
                 },
             },
         },
@@ -511,7 +513,7 @@ const getComponents = (
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
-                    backgroundColor: palette.misc?.backdropFaint,
+                    backgroundColor: palette.backdrop?.faint,
                 },
                 "& .MuiDialog-paper": {
                     boxShadow: palette.boxShadow?.float,

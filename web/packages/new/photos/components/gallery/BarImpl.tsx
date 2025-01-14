@@ -364,24 +364,24 @@ const ScrollButtonBase: React.FC<
     </ScrollButtonBase_>
 );
 
-const ScrollButtonBase_ = styled("button")`
-    position: absolute;
-    z-index: 2;
-    top: 7px;
-    height: 50px;
-    width: 50px;
-    border: none;
-    padding: 0;
-    margin: 0;
-    border-radius: 50%;
-    background-color: ${({ theme }) => theme.colors.backdrop.muted};
-    color: ${({ theme }) => theme.colors.stroke.base};
-    & > svg {
-        border-radius: 50%;
-        height: 30px;
-        width: 30px;
-    }
-`;
+const ScrollButtonBase_ = styled("button")(({ theme }) => ({
+    position: "absolute",
+    zIndex: 2,
+    top: "7px",
+    height: "50px",
+    width: "50px",
+    border: "none",
+    padding: 0,
+    margin: 0,
+    borderRadius: "50%",
+    backgroundColor: theme.palette.backdrop.muted,
+    color: theme.colors.stroke.base,
+    "& > svg": {
+        borderRadius: "50%",
+        height: "30px",
+        width: "30px",
+    },
+}));
 
 const ScrollButtonLeft = styled(ScrollButtonBase)`
     left: 0;
