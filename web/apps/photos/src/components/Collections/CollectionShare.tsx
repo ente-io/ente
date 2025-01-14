@@ -302,11 +302,11 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
             {sharableLinkError && (
                 <Typography
                     variant="small"
-                    sx={(theme) => ({
-                        color: theme.colors.danger.A700,
+                    sx={{
+                        color: "critical.main",
                         mt: 0.5,
                         textAlign: "center",
-                    })}
+                    }}
                 >
                     {sharableLinkError}
                 </Typography>
@@ -1461,11 +1461,11 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                     {sharableLinkError && (
                         <Typography
                             variant="small"
-                            sx={(theme) => ({
-                                color: theme.colors.danger.A700,
+                            sx={{
+                                color: "critical.main",
                                 mt: 0.5,
                                 textAlign: "center",
-                            })}
+                            }}
                         >
                             {sharableLinkError}
                         </Typography>
