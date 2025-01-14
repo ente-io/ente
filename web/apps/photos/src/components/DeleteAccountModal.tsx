@@ -277,7 +277,7 @@ const ConfirmationCheckboxInput: React.FC<ConfirmationCheckboxInputProps> = ({
                 />
             }
             label={
-                <Typography sx={{ color: "text.secondary" }}>
+                <Typography sx={{ color: "text.muted" }}>
                     {t("delete_account_confirm_checkbox_label")}
                 </Typography>
             }

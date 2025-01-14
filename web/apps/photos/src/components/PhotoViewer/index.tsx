@@ -1009,7 +1009,7 @@ const CircularProgressWithLabel: React.FC<
             <Typography
                 variant="mini"
                 component="div"
-                sx={{ color: "text.secondary" }}
+                sx={{ color: "text.muted" }}
             >{`${Math.round(value)}%`}</Typography>
         </Overlay>
     </>
