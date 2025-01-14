@@ -318,6 +318,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                   SizedBox(
                     width: 400,
                     child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
                       onPressed: () async {
                         if ((_accountController.text.trim().isEmpty &&
                                 _issuerController.text.trim().isEmpty) ||
