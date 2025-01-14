@@ -189,7 +189,8 @@ Future<String> _getAuthDataForExport() async {
   String data = "";
   for (final code in allCodes) {
     if (code.hasError) continue;
-    data += "${code.rawData.replaceAll(',', '%2C')}\n";
+    data +=
+        "${code.rawData.replaceAll('algorithm=Algorithm.', 'algorithm=').replaceAll(',', '%2C')}\n";
   }
 
   return data;

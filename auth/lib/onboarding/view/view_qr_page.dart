@@ -28,7 +28,8 @@ class ViewQrPage extends StatelessWidget {
             child: Column(
               children: [
                 QrImageView(
-                  data: code!.rawData,
+                  data: code!.rawData
+                      .replaceAll('algorithm=Algorithm.', 'algorithm='),
                   eyeStyle: QrEyeStyle(
                     eyeShape: QrEyeShape.square,
                     color: Theme.of(context).colorScheme.onSurface,

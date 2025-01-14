@@ -256,9 +256,9 @@ class Code {
     try {
       final algorithm =
           uri.queryParameters['algorithm'].toString().toLowerCase();
-      if (algorithm == "sha256") {
+      if (algorithm == "sha256" || "algorithm.sha256" == algorithm) {
         return Algorithm.sha256;
-      } else if (algorithm == "sha512") {
+      } else if (algorithm == "sha512" || "algorithm.sha512" == algorithm) {
         return Algorithm.sha512;
       }
     } catch (e) {
