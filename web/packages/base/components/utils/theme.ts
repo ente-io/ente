@@ -286,13 +286,17 @@ const getPallette = (
  * duplication across color schemes, and also us to see the semantic
  * relationships between the colors (if there are any).
  */
-const _color = {
+const _colors = {
     fixed: {
         white: "#fff",
         black: "#000",
         success: "#1DB954",
         warning: "#FFC247",
-        danger: "#EA3F3F",
+        danger: {
+            dark: "#F53434",
+            main: "#EA3F3F",
+            light: "#FF6565",
+        },
         overlayIndicatorMuted: "rgba(255, 255, 255, 0.48)",
     },
 };
@@ -310,7 +314,9 @@ const getPalletteOptions = (
             main: colors.fill.base,
             dark: colors.fill?.basePressed,
             contrastText:
-                themeColor === "dark" ? _color.fixed.black : _color.fixed.white,
+                themeColor === "dark"
+                    ? _colors.fixed.black
+                    : _colors.fixed.white,
         },
         secondary: {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -319,8 +325,8 @@ const getPalletteOptions = (
             dark: colors.fill?.faintPressed,
             contrastText: colors.text?.base,
         },
-        success: { main: _color.fixed.success },
-        warning: { main: _color.fixed.warning },
+        success: { main: _colors.fixed.success },
+        warning: { main: _colors.fixed.warning },
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         accent: {
@@ -328,16 +334,13 @@ const getPalletteOptions = (
             // @ts-ignore
             main: colors.accent.A500,
             dark: colors.accent!.A700!,
-            contrastText: _color.fixed.white,
+            contrastText: _colors.fixed.white,
         },
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         critical: {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            main: colors.danger.A700,
-            dark: colors.danger!.A800!,
-            contrastText: _color.fixed.white,
+            main: _colors.fixed.danger.main,
+            dark: _colors.fixed.danger.dark,
+            light: _colors.fixed.danger.light,
+            contrastText: _colors.fixed.white,
         },
         background: {
             default: colors.background?.base,
@@ -353,7 +356,7 @@ const getPalletteOptions = (
             faint: colors.text?.faint,
         },
         divider: colors.stroke?.faint,
-        fixed: { ..._color.fixed },
+        fixed: { ..._colors.fixed },
         backdrop: {
             base: colors.backdrop!.base!,
             muted: colors.backdrop!.muted!,
