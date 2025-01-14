@@ -293,8 +293,9 @@ const createSelectStyles = ({
         "& :hover": {
             cursor: "pointer",
         },
+        // Elevate the focused option further.
         "& .option-contents": isFocused
-            ? { backgroundColor: colors.background.elevated2 }
+            ? { backgroundColor: palette.background.paper2 }
             : {},
         "&:last-child .MuiDivider-root": {
             display: "none",

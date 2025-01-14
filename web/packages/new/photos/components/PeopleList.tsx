@@ -216,9 +216,7 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
         <Skeleton
             variant="circular"
             animation="wave"
-            sx={(theme) => ({
-                backgroundColor: theme.colors.background.elevated2,
-            })}
+            sx={{ backgroundColor: "background.paper2" }}
             width={placeholderDimension}
             height={placeholderDimension}
         />

@@ -43,16 +43,15 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
     <OverflowMenu
         ariaID="collection-sort"
         triggerButtonIcon={<SortIcon />}
-        menuPaperProps={{
-            sx: {
+        menuPaperSxProps={[
+            {
                 // The trigger button has a colored background, so add some
                 // vertical margin to avoid showing the menu squat under the
                 // trigger button.
                 marginBlock: 1,
-                backgroundColor: (theme) =>
-                    nestedInDialog ? "background.paper2" : undefined,
             },
-        }}
+            nestedInDialog ? { backgroundColor: "background.paper2" } : {},
+        ]}
         triggerButtonProps={{
             sx: {
                 backgroundColor: (theme) =>
