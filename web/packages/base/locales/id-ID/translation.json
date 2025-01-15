@@ -567,7 +567,7 @@
     "download_complete": "Selesai mengunduh",
     "downloading_album": "Mengunduh {{name}}",
     "download_failed": "Gagal mengunduh",
-    "download_progress": "{{progress.current}} / {{progress.total}} file",
+    "download_progress": "{{count, number}} / {{total, number}} file",
     "CHRISTMAS": "Natal",
     "CHRISTMAS_EVE": "Malam Natal",
     "NEW_YEAR": "Tahun Baru",

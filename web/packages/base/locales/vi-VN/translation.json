@@ -567,7 +567,7 @@
     "download_complete": "Tải xuống hoàn tất",
     "downloading_album": "Đang tải xuống {{name}}",
     "download_failed": "Tải xuống thất bại",
-    "download_progress": "{{progress.current}} / {{progress.total}} tệp",
+    "download_progress": "{{count, number}} / {{total, number}} tệp",
     "CHRISTMAS": "Giáng sinh",
     "CHRISTMAS_EVE": "Đêm Giáng sinh",
     "NEW_YEAR": "Năm mới",

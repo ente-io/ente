@@ -567,7 +567,7 @@
     "download_complete": "Download abgeschlossen",
     "downloading_album": "Lade {{name}} herunter",
     "download_failed": "Herunterladen fehlgeschlagen",
-    "download_progress": "{{progress.current}} / {{progress.total}} Dateien",
+    "download_progress": "{{count, number}} / {{total, number}} Dateien",
     "CHRISTMAS": "Weihnachten",
     "CHRISTMAS_EVE": "Heiligabend",
     "NEW_YEAR": "Neujahr",

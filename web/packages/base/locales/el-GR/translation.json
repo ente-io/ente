@@ -567,7 +567,7 @@
     "download_complete": "Η λήψη ολοκληρώθηκε",
     "downloading_album": "Λήψη {{name}}",
     "download_failed": "Η λήψη απέτυχε",
-    "download_progress": "{{progress.current}} / {{progress.total}} αρχεία",
+    "download_progress": "{{count, number}} / {{total, number}} αρχεία",
     "CHRISTMAS": "Χριστούγεννα",
     "CHRISTMAS_EVE": "Παραμονή Χριστουγέννων",
     "NEW_YEAR": "Πρωτοχρονιά",

@@ -567,7 +567,7 @@
     "download_complete": "Atsisiuntimas baigtas",
     "downloading_album": "Atsisiunčiama {{name}}",
     "download_failed": "Atsisiuntimas nepavyko.",
-    "download_progress": "{{progress.current}} / {{progress.total}} failai",
+    "download_progress": "{{count, number}} / {{total, number}} failai",
     "CHRISTMAS": "Kalėdos",
     "CHRISTMAS_EVE": "Kūčios",
     "NEW_YEAR": "Naujieji metai",

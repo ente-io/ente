@@ -139,12 +139,8 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
                         caption: isFilesDownloadCompleted(attributes)
                             ? attributes.folderName
                             : t("download_progress", {
-                                  progress: {
-                                      current:
-                                          attributes.success +
-                                          attributes.failed,
-                                      total: attributes.total,
-                                  },
+                                  count: attributes.success + attributes.failed,
+                                  total: attributes.total,
                               }),
                         onClick: handleOnClick(attributes.id),
                     }}

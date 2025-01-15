@@ -567,7 +567,7 @@
     "download_complete": "Download compleet",
     "downloading_album": "{{name}} downloaden",
     "download_failed": "Download mislukt",
-    "download_progress": "{{progress.current}} / {{progress.total}} bestanden",
+    "download_progress": "{{count, number}} / {{total, number}} bestanden",
     "CHRISTMAS": "Kerst",
     "CHRISTMAS_EVE": "Kerstavond",
     "NEW_YEAR": "Nieuwjaar",

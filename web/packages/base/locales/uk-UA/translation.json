@@ -567,7 +567,7 @@
     "download_complete": "Завантаження завершено",
     "downloading_album": "Завантаження {{name}}",
     "download_failed": "Не вдалося завантажити",
-    "download_progress": "{{progress.current}} / {{progress.total}} файлів",
+    "download_progress": "{{count, number}} / {{total, number}} файлів",
     "CHRISTMAS": "Різдво",
     "CHRISTMAS_EVE": "Святвечір",
     "NEW_YEAR": "Новий рік",

@@ -567,7 +567,7 @@
     "download_complete": "下载完成",
     "downloading_album": "正在下载 {{name}}",
     "download_failed": "下载失败",
-    "download_progress": "{{progress.current}} / {{progress.total}} 个文件",
+    "download_progress": "{{count, number}} / {{total, number}} 个文件",
     "CHRISTMAS": "圣诞",
     "CHRISTMAS_EVE": "平安夜",
     "NEW_YEAR": "新年",

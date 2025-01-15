@@ -567,7 +567,7 @@
     "download_complete": "Загрузка завершена",
     "downloading_album": "Загрузка {{name}}",
     "download_failed": "Загрузка не удалась",
-    "download_progress": "{{progress.current}} / {{progress.total}} файлов",
+    "download_progress": "{{count, number}} / {{total, number}} файлов",
     "CHRISTMAS": "Рождество",
     "CHRISTMAS_EVE": "Канун Рождества",
     "NEW_YEAR": "Новый год",
