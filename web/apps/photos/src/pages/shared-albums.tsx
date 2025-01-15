@@ -46,7 +46,7 @@ import SingleInputForm, {
 } from "@ente/shared/components/SingleInputForm";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
-import { useFileInput } from "@ente/shared/hooks/useFileInput";
+import { useFileInput } from "@/gallery/components/utils/use-file-input"
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";

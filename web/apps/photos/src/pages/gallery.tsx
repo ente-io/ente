@@ -8,6 +8,7 @@ import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
+import { useFileInput } from "@/gallery/components/utils/use-file-input";
 import { type Collection } from "@/media/collection";
 import { mergeMetadata, type EnteFile } from "@/media/file";
 import {
@@ -67,7 +68,6 @@ import { CenteredFlex, FlexWrapper } from "@ente/shared/components/Container";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
-import { useFileInput } from "@ente/shared/hooks/useFileInput";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
     getToken,
