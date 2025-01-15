@@ -1,7 +1,7 @@
+import { CenteredFlex } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { CenteredFlex } from "@ente/shared/components/Container";
 import CopyButton from "@ente/shared/components/CopyButton";
-import { styled } from "@mui/material";
+import { Box } from "@mui/material";
 import React from "react";
 
 interface CodeBlockProps {
@@ -20,46 +20,31 @@ interface CodeBlockProps {
 export const CodeBlock: React.FC<CodeBlockProps> = ({ code }) => {
     if (!code) {
         return (
-            <Wrapper>
+            <CenteredFlex sx={{ minHeight: "80px" }}>
                 <ActivityIndicator />
-            </Wrapper>
+            </CenteredFlex>
         );
     }
 
     return (
-        <Wrapper>
-            <CodeWrapper>{code}</CodeWrapper>
-            <CopyButtonWrapper>
+        <Box
+            sx={{
+                position: "relative",
+                bgcolor: "accent.dark",
+                borderRadius: 1,
+            }}
+        >
+            <Box
+                sx={{
+                    padding: "16px 36px 16px 16px",
+                    wordBreak: "break-word",
+                }}
+            >
+                {code}
+            </Box>
+            <Box sx={{ position: "absolute", top: 0, right: 0, mt: 1 }}>
                 <CopyButton code={code} />
-            </CopyButtonWrapper>
-        </Wrapper>
+            </Box>
+        </Box>
     );
 };
-
-const Wrapper = styled(CenteredFlex)(
-    ({ theme }) => `
-    position: relative;
-    background-color: ${theme.vars.palette.accent.dark};
-    border-radius: ${theme.shape.borderRadius}px;
-    min-height: 80px;
-`,
-);
-
-const CodeWrapper = styled("div")(
-    ({ theme }) => `
-    padding: 16px 36px 16px 16px;
-    border-radius: ${theme.shape.borderRadius}px;
-    word-break: break-word;
-    min-width: 30%;
-    text-align: left;
-`,
-);
-
-const CopyButtonWrapper = styled("div")(
-    ({ theme }) => `
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    margin-top: ${theme.spacing(1)};
-`,
-);

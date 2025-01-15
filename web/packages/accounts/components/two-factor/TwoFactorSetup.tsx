@@ -49,7 +49,7 @@ function SetupManualMode({
             <Typography sx={{ color: "text.muted" }}>
                 {t("two_factor_manual_entry_message")}
             </Typography>
-            <CodeBlock code={twoFactorSecret?.secretCode ?? ""} />
+            <CodeBlock code={twoFactorSecret?.secretCode} />
             <LinkButton onClick={changeToQRMode}>
                 {t("scan_qr_title")}
             </LinkButton>
