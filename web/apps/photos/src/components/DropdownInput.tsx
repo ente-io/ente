@@ -71,7 +71,7 @@ interface DropdownInputProps_<T> {
     placeholder?: string;
 }
 
-const DropdownInput_ = <T extends string>({
+export const DropdownInput_ = <T extends string>({
     options,
     selected,
     setSelected,
