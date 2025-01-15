@@ -74,11 +74,11 @@ export default function DropdownInput<T extends string>({
                         borderBottom: "none !important",
                     },
                     ".MuiInput-root": {
-                        background: "fill.faint",
+                        backgroundColor: "fill.faint",
                         borderRadius: "8px",
                     },
                     ".MuiSelect-select": {
-                        background: "fill.faint",
+                        backgroundColor: "fill.faint",
                         borderRadius: "8px",
                     },
                     "&&& .MuiSelect-select": {
