@@ -32,7 +32,7 @@ interface OverflowMenuProps {
     /**
      * Optional additional properties for the trigger icon button.
      */
-    triggerButtonProps?: Partial<IconButtonProps>;
+    triggerButtonSxProps?: IconButtonProps["sx"];
     /**
      * Optional additional sx props for the MUI {@link Paper} that underlies the
      * {@link Menu}.
@@ -49,7 +49,7 @@ export const OverflowMenu: React.FC<
 > = ({
     ariaID,
     triggerButtonIcon,
-    triggerButtonProps,
+    triggerButtonSxProps,
     menuPaperSxProps,
     children,
 }) => {
@@ -65,7 +65,7 @@ export const OverflowMenu: React.FC<
                 aria-controls={anchorEl ? ariaID : undefined}
                 aria-haspopup="true"
                 aria-expanded={anchorEl ? "true" : undefined}
-                {...triggerButtonProps}
+                sx={triggerButtonSxProps}
             >
                 {triggerButtonIcon ?? <MoreHorizIcon />}
             </IconButton>

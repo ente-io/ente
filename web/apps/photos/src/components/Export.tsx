@@ -267,7 +267,7 @@ const DirectoryPathContainer = styled(LinkButton)(
 );
 
 const ChangeDirectoryOption: React.FC<ButtonishProps> = ({ onClick }) => (
-    <OverflowMenu ariaID="export-option" triggerButtonProps={{ sx: { ml: 1 } }}>
+    <OverflowMenu ariaID="export-option" triggerButtonSxProps={{ ml: 1 }}>
         <OverflowMenuOption onClick={onClick} startIcon={<FolderIcon />}>
             {t("change_folder")}
         </OverflowMenuOption>
