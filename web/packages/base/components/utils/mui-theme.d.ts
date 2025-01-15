@@ -123,7 +123,7 @@ declare module "@mui/material/styles" {
 
     /**
      * Define a new set of tokens for the "text" color in the palette which
-     * matches the base / muted / faint triads we use for stroke and fill.
+     * matches the strength triads we use for stroke and fill.
      *
      * Since there is no way to override or replace the existing tokens, we can
      * only augment the interface with our new tokens. However, our code should
@@ -138,7 +138,6 @@ declare module "@mui/material/styles" {
      * - text.base
      * - text.muted
      * - text.faint
-     *
      */
     interface TypeText {
         base: string;
@@ -167,10 +166,10 @@ declare module "@mui/material/styles" {
         /**
          * Neutral tranparent colors for the stroke of icons and other outlines.
          *
-         * Comes in three strengths which are meant to play nicely with the
-         * corresponding strengths of "text.*" and "fill.*".
-         *
          * These change with the color scheme.
+         *
+         * They come in three strengths which are meant to play nicely with the
+         * corresponding strengths of "text.*" and "fill.*".
          */
         stroke: {
             base: string;
@@ -181,14 +180,18 @@ declare module "@mui/material/styles" {
          * Neutral transparent colors for filling small areas like icon or
          * button backgrounds.
          *
-         * Comes in three strengths which are meant to play nicely with the
+         * These change with the color scheme.
+         *
+         * They come in three strengths which are meant to play nicely with the
          * corresponding strengths of "text.*" and "stroke.*".
          *
-         * These change with the color scheme.
+         * The faint strength also comes with a pressed variant, useful to
+         * indicate the active state of buttons and menu items.
          */
         fill: {
             muted: string;
             faint: string;
+            faintPressed: string;
         };
         /**
          * Transparent background fills that serve as the backdrop of modals,
