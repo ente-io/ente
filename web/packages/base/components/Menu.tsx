@@ -1,35 +1,39 @@
-import { VerticallyCenteredFlex } from "@ente/shared/components/Container";
-import { Divider, styled, Typography } from "@mui/material";
+import { Divider, Stack, styled, Typography } from "@mui/material";
 import React from "react";
 
 interface MenuSectionTitleProps {
+    /**
+     * The title for the menu section.
+     */
     title: string;
-    icon?: React.JSX.Element;
+    /**
+     * An optional leading SvgIcon.
+     */
+    icon?: React.ReactNode;
 }
 
 export const MenuSectionTitle: React.FC<MenuSectionTitleProps> = ({
     title,
     icon,
-}) => {
-    return (
-        <VerticallyCenteredFlex
-            px="8px"
-            py={"6px"}
-            gap={"8px"}
-            sx={(theme) => ({
-                "& > svg": {
-                    fontSize: "17px",
-                    color: theme.colors.stroke.muted,
-                },
-            })}
-        >
-            {icon && icon}
-            <Typography variant="small" sx={{ color: "text.muted" }}>
-                {title}
-            </Typography>
-        </VerticallyCenteredFlex>
-    );
-};
+}) => (
+    <Stack
+        direction="row"
+        sx={{
+            px: "8px",
+            py: "6px",
+            gap: "8px",
+            "& > svg": {
+                fontSize: "17px",
+                color: "stroke.muted",
+            },
+        }}
+    >
+        {icon && icon}
+        <Typography variant="small" sx={{ color: "text.muted" }}>
+            {title}
+        </Typography>
+    </Stack>
+);
 
 interface MenuItemDividerProps {
     hasIcon?: boolean;
