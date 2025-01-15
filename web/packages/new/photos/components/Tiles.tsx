@@ -217,13 +217,15 @@ export const LargeTileTextOverlay = styled(ItemTileOverlay)`
 /**
  * A container for "+", suitable for use with a {@link LargeTileTextOverlay}.
  */
-export const LargeTilePlusOverlay = styled(ItemTileOverlay)`
+export const LargeTilePlusOverlay = styled(ItemTileOverlay)(
+    ({ theme }) => `
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 42px;
-    color: ${({ theme }) => theme.colors.stroke.muted};
-`;
+    color: ${theme.vars.palette.stroke.muted};
+`,
+);
 
 /**
  * An {@link ItemTileOverlay} suitable for holding the collection name shown

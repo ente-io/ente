@@ -633,12 +633,12 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             PaperProps={{ sx: { minHeight: "80svh" } }}
         >
             <SpaceBetweenFlex
-                sx={{
-                    padding: "20px 16px 16px 16px",
-                    backgroundColor: state.showChoices
-                        ? (theme) => theme.colors.fill.faint
-                        : "transparent",
-                }}
+                sx={[
+                    { padding: "20px 16px 16px 16px" },
+                    state.showChoices
+                        ? { backgroundColor: "fill.faint" }
+                        : { backgroundColor: "transparent" },
+                ]}
             >
                 <Stack sx={{ gap: "8px" }}>
                     <DialogTitle sx={{ "&&&": { p: 0 } }}>
@@ -659,11 +659,11 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                                 ? t("saved_choices")
                                 : t("review_suggestions")
                         }
-                        sx={{
-                            backgroundColor: state.showChoices
-                                ? (theme) => theme.colors.fill.muted
-                                : "transparent",
-                        }}
+                        sx={[
+                            state.showChoices
+                                ? { backgroundColor: "fill.muted" }
+                                : { backgroundColor: "transparent" },
+                        ]}
                     >
                         <RestoreIcon />
                     </IconButton>

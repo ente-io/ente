@@ -84,12 +84,7 @@ const SetupDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 
     return (
         <Stack sx={{ px: "16px", py: "20px", alignItems: "center" }}>
-            <LockIcon
-                sx={(theme) => ({
-                    fontSize: "40px",
-                    color: theme.colors.text.muted,
-                })}
-            />
+            <LockIcon sx={{ fontSize: "40px", color: "text.muted" }} />
             <Typography
                 sx={{
                     color: "text.muted",
