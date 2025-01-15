@@ -130,15 +130,15 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
                             ? "critical"
                             : "secondary",
                         title: isFilesDownloadCompletedWithErrors(attributes)
-                            ? t("DOWNLOAD_FAILED")
+                            ? t("download_failed")
                             : isFilesDownloadCompleted(attributes)
-                              ? t("DOWNLOAD_COMPLETE")
-                              : t("DOWNLOADING_COLLECTION", {
+                              ? t("download_complete")
+                              : t("downloading_album", {
                                     name: attributes.folderName,
                                 }),
                         caption: isFilesDownloadCompleted(attributes)
                             ? attributes.folderName
-                            : t("DOWNLOAD_PROGRESS", {
+                            : t("download_progress", {
                                   progress: {
                                       current:
                                           attributes.success +
