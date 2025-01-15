@@ -39,81 +39,14 @@ export default function DropdownInput<T extends string>({
     return (
         <Stack spacing={"4px"}>
             <Typography sx={labelSxProps ?? {}}>{label}</Typography>
-            <Select
-                IconComponent={ExpandMoreIcon}
-                displayEmpty
-                variant="standard"
-                MenuProps={{
-                    PaperProps: {
-                        sx: {
-                            // Select component automatically sets the min width of the element to the width
-                            // of the select input's width, so setting the maxWidth to 0, forces to element
-                            // width to equal to minWidth
-                            maxWidth: 0,
-                        },
-                    },
-                    MenuListProps: {
-                        sx: {
-                            backgroundColor: "background.paper2",
-                            ".MuiMenuItem-root ": {
-                                color: "text.faint",
-                                whiteSpace: "normal",
-                            },
-                            // Make the selected item pop out by giving it a
-                            // different color instead of giving it a different
-                            // background color.
-                            "&&& > .Mui-selected": {
-                                backgroundColor: "background.paper2",
-                                color: "text.base",
-                            },
-                        },
-                    },
+            <DropdownInput_
+                {...{
+                    options,
+                    selected,
+                    setSelected,
+                    placeholder,
                 }}
-                sx={{
-                    "::before , ::after": {
-                        borderBottom: "none !important",
-                    },
-                    ".MuiInput-root": {
-                        backgroundColor: "fill.faint",
-                        borderRadius: "8px",
-                    },
-                    ".MuiSelect-select": {
-                        backgroundColor: "fill.faint",
-                        borderRadius: "8px",
-                    },
-                    "&&& .MuiSelect-select": {
-                        p: "12px 36px 12px 16px",
-                    },
-                    ".MuiSelect-icon": {
-                        mr: "12px",
-                        color: "stroke.muted",
-                    },
-                }}
-                renderValue={(selected) => {
-                    return !selected?.length ? (
-                        <Box sx={{ color: "text.muted" }}>
-                            {placeholder ?? ""}
-                        </Box>
-                    ) : (
-                        options.find((o) => o.value === selected).label
-                    );
-                }}
-                value={selected}
-                onChange={(event: SelectChangeEvent) => {
-                    setSelected(event.target.value as T);
-                }}
-            >
-                {options.map((option, index) => (
-                    <MenuItem
-                        key={option.value}
-                        divider={index !== options.length - 1}
-                        value={option.value}
-                        sx={{ px: "16px", py: "14px" }}
-                    >
-                        <Typography>{option.label}</Typography>
-                    </MenuItem>
-                ))}
-            </Select>
+            />
             {message && (
                 <Typography
                     variant="small"
@@ -130,3 +63,91 @@ export default function DropdownInput<T extends string>({
         </Stack>
     );
 }
+
+interface DropdownInputProps_<T> {
+    options: DropdownOption<T>[];
+    selected: T;
+    setSelected: (selectedValue: T) => void;
+    placeholder?: string;
+}
+
+const DropdownInput_ = <T extends string>({
+    options,
+    selected,
+    setSelected,
+    placeholder,
+}: DropdownInputProps_<T>) => (
+    <Select
+        IconComponent={ExpandMoreIcon}
+        displayEmpty
+        variant="standard"
+        MenuProps={{
+            PaperProps: {
+                sx: {
+                    // Select component automatically sets the min width of the element to the width
+                    // of the select input's width, so setting the maxWidth to 0, forces to element
+                    // width to equal to minWidth
+                    maxWidth: 0,
+                },
+            },
+            MenuListProps: {
+                sx: {
+                    backgroundColor: "background.paper2",
+                    ".MuiMenuItem-root ": {
+                        color: "text.faint",
+                        whiteSpace: "normal",
+                    },
+                    // Make the selected item pop out by giving it a
+                    // different color instead of giving it a different
+                    // background color.
+                    "&&& > .Mui-selected": {
+                        backgroundColor: "background.paper2",
+                        color: "text.base",
+                    },
+                },
+            },
+        }}
+        sx={{
+            "::before , ::after": {
+                borderBottom: "none !important",
+            },
+            ".MuiInput-root": {
+                backgroundColor: "fill.faint",
+                borderRadius: "8px",
+            },
+            ".MuiSelect-select": {
+                backgroundColor: "fill.faint",
+                borderRadius: "8px",
+            },
+            "&&& .MuiSelect-select": {
+                p: "12px 36px 12px 16px",
+            },
+            ".MuiSelect-icon": {
+                mr: "12px",
+                color: "stroke.muted",
+            },
+        }}
+        renderValue={(selected) => {
+            return !selected?.length ? (
+                <Box sx={{ color: "text.muted" }}>{placeholder ?? ""}</Box>
+            ) : (
+                options.find((o) => o.value === selected).label
+            );
+        }}
+        value={selected}
+        onChange={(event: SelectChangeEvent) => {
+            setSelected(event.target.value as T);
+        }}
+    >
+        {options.map((option, index) => (
+            <MenuItem
+                key={option.value}
+                divider={index !== options.length - 1}
+                value={option.value}
+                sx={{ px: "16px", py: "14px" }}
+            >
+                <Typography>{option.label}</Typography>
+            </MenuItem>
+        ))}
+    </Select>
+);
