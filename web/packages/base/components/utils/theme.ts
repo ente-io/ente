@@ -132,31 +132,11 @@ type ColorAccentType = "auth" | "photos";
 const getColors = (
     themeColor: THEME_COLOR,
     accentType: ColorAccentType,
-): ThemeColorsOptions => {
-    switch (themeColor) {
-        case THEME_COLOR.LIGHT:
-            return { ...fixedColors(accentType), ...lightThemeColors };
-        default:
-            return { ...fixedColors(accentType), ...darkThemeColors };
-    }
-};
-
-const fixedColors = (
-    accentType: "auth" | "photos",
-): Pick<ThemeColorsOptions, keyof FixedColors> => {
-    switch (accentType) {
-        case "auth":
-            return {
-                ...commonFixedColors,
-                accent: authAccentColor,
-            };
-        default:
-            return {
-                ...commonFixedColors,
-                accent: photosAccentColor,
-            };
-    }
-};
+): ThemeColorsOptions => ({
+    ...commonFixedColors,
+    ...{ accent: accentType == "auth" ? authAccentColor : photosAccentColor },
+    ...(themeColor === THEME_COLOR.LIGHT ? lightThemeColors : darkThemeColors),
+});
 
 const commonFixedColors: Partial<Pick<ThemeColorsOptions, keyof FixedColors>> =
     {
