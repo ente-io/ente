@@ -9,6 +9,7 @@ import {
 import { EnteLogoSVG } from "@/base/components/EnteLogo";
 import { LoadingIndicator } from "@/base/components/loaders";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import {
     OverflowMenu,
@@ -613,14 +614,14 @@ const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
                     {icon}
                 </IconButton>
             ) : (
-                <Button
+                <FocusVisibleButton
                     {...props}
                     disabled={disabled}
                     color={"secondary"}
                     startIcon={icon}
                 >
                     {t("add_photos")}
-                </Button>
+                </FocusVisibleButton>
             )}
         </Box>
     );
@@ -633,16 +634,14 @@ const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
 const AddMorePhotosButton: React.FC<ButtonProps> = (props) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
     return (
-        <Box>
-            <Button
-                {...props}
-                disabled={disabled}
-                color={"accent"}
-                startIcon={<AddPhotoAlternateOutlinedIcon />}
-            >
-                {t("add_more_photos")}
-            </Button>
-        </Box>
+        <FocusVisibleButton
+            {...props}
+            disabled={disabled}
+            color={"accent"}
+            startIcon={<AddPhotoAlternateOutlinedIcon />}
+        >
+            {t("add_more_photos")}
+        </FocusVisibleButton>
     );
 };
 
