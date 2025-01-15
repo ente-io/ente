@@ -6,6 +6,7 @@ import {
 import {
     Box,
     MenuItem,
+    Stack,
     Typography,
     type ButtonProps,
     type TypographyProps,
@@ -142,7 +143,7 @@ const CaptionedText: React.FC<CaptionedTextProps> = ({
 }) => {
     const subTextColor = color == "critical" ? "critical.main" : "text.faint";
     return (
-        <VerticallyCenteredFlex gap={"4px"}>
+        <Stack direction="row" sx={{ gap: "4px", alignItems: "center" }}>
             <Typography>{mainText}</Typography>
             <Typography variant="small" sx={{ color: subTextColor }}>
                 {"•"}
@@ -150,6 +151,6 @@ const CaptionedText: React.FC<CaptionedTextProps> = ({
             <Typography variant="small" sx={{ color: subTextColor }}>
                 {subText ? subText : subIcon}
             </Typography>
-        </VerticallyCenteredFlex>
+        </Stack>
     );
 };
