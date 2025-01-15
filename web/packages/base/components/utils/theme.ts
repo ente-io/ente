@@ -335,12 +335,15 @@ const getPalletteOptions = (
             paper2: colors.background?.paper2,
         },
         text: {
-            // Alias base so that we don't have to change the default.
+            // Alias the tokens used by MUI to the ones that we use. This way,
+            // we don't need to change the default ("primary"), or update the
+            // MUI internal styling that refers to these tokens.
+            //
+            // Our own code should not use these.
             primary: colors.text?.base,
-            // Don't use.
-            secondary: "blue" /* don't use */, // colors.text?.muted,
-            // Don't use.
-            disabled: "blue" /* don't use */, // colors.text?.faint,
+            secondary: colors.text?.muted,
+            disabled: colors.text?.faint,
+            // Our color tokens.
             base: colors.text?.base,
             muted: colors.text?.muted,
             faint: colors.text?.faint,
