@@ -12,6 +12,7 @@ import {
     supportedLocales,
     type SupportedLocale,
 } from "@/base/i18n";
+import { DropdownInput } from "@/new/photos/components/DropdownInput";
 import { MLSettings } from "@/new/photos/components/sidebar/MLSettings";
 import {
     confirmDisableMapsDialogAttributes,
@@ -29,7 +30,6 @@ import { useAppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { Divider, Stack, Typography, useColorScheme } from "@mui/material";
-import { DropdownInput_ } from "components/DropdownInput";
 import { t } from "i18next";
 import React, { useCallback, useEffect } from "react";
 
@@ -125,10 +125,10 @@ const LanguageSelector = () => {
             <Typography variant="small" sx={{ px: 1, color: "text.muted" }}>
                 {t("language")}
             </Typography>
-            <DropdownInput_
+            <DropdownInput
                 options={options}
                 selected={locale}
-                setSelected={updateCurrentLocale}
+                onSelect={updateCurrentLocale}
             />
         </Stack>
     );
@@ -182,14 +182,14 @@ const ThemeSelector = () => {
             <Typography variant="small" sx={{ px: 1, color: "text.muted" }}>
                 {pt("Theme")}
             </Typography>
-            <DropdownInput_
+            <DropdownInput
                 options={[
                     { label: pt("System"), value: "system" },
                     { label: pt("Light"), value: "light" },
                     { label: pt("Dark"), value: "dark" },
                 ]}
                 selected={mode}
-                setSelected={setMode}
+                onSelect={setMode}
             />
         </Stack>
     );

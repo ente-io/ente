@@ -3,6 +3,10 @@ import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { sharedCryptoWorker } from "@/base/crypto";
+import {
+    DropdownInput,
+    type DropdownOption,
+} from "@/new/photos/components/DropdownInput";
 import { AppContext } from "@/new/photos/types/context";
 import { initiateEmail } from "@/new/photos/utils/web";
 import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
@@ -23,7 +27,6 @@ import React, { useContext, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import { deleteAccount, getAccountDeleteChallenge } from "services/userService";
 import * as Yup from "yup";
-import { DropdownInput_, DropdownOption } from "./DropdownInput";
 
 interface Iprops {
     onClose: () => void;
@@ -157,13 +160,13 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                 <Typography>
                                     {t("delete_account_reason_label")}
                                 </Typography>
-                                <DropdownInput_
+                                <DropdownInput
                                     options={deleteReasonOptions()}
                                     placeholder={t(
                                         "delete_account_reason_placeholder",
                                     )}
                                     selected={values.reason}
-                                    setSelected={handleChange("reason")}
+                                    onSelect={handleChange("reason")}
                                 />
                                 {errors.reason && (
                                     <Typography

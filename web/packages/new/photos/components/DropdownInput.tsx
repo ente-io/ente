@@ -1,82 +1,53 @@
-import { isSxArray } from "@/base/components/utils/sx";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
     Box,
     MenuItem,
     Select,
-    SelectChangeEvent,
-    Stack,
+    type SelectChangeEvent,
     Typography,
-    type TypographyProps,
 } from "@mui/material";
 
+/**
+ * A label, and the associated value, shown in the {@link DropdownInput}.
+ */
 export interface DropdownOption<T> {
     label: string;
     value: T;
 }
 
-interface Iprops<T> {
-    label: string;
-    labelSxProps?: TypographyProps["sx"];
+interface DropdownInputProps<T> {
+    /**
+     * The dropdown options.
+     */
     options: DropdownOption<T>[];
-    message?: string;
-    messageSxProps?: TypographyProps["sx"];
-    selected: T;
-    setSelected: (selectedValue: T) => void;
+    /**
+     * The currently selected value, if any.
+     */
+    selected: T | undefined;
+    /**
+     * Callback invoked when the user changes the selected value.
+     */
+    onSelect: (selectedValue: T) => void;
+    /**
+     * An optional placeholder shown when there is no selected value.
+     */
     placeholder?: string;
 }
 
-export default function DropdownInput<T extends string>({
-    label,
-    labelSxProps,
-    options,
-    message,
-    selected,
-    placeholder,
-    setSelected,
-    messageSxProps,
-}: Iprops<T>) {
-    return (
-        <Stack spacing={"4px"}>
-            <Typography sx={labelSxProps ?? {}}>{label}</Typography>
-            <DropdownInput_
-                {...{
-                    options,
-                    selected,
-                    setSelected,
-                    placeholder,
-                }}
-            />
-            {message && (
-                <Typography
-                    variant="small"
-                    sx={[
-                        { px: "8px", color: "text.muted" },
-                        ...(isSxArray(messageSxProps)
-                            ? messageSxProps
-                            : [messageSxProps]),
-                    ]}
-                >
-                    {message}
-                </Typography>
-            )}
-        </Stack>
-    );
-}
-
-interface DropdownInputProps_<T> {
-    options: DropdownOption<T>[];
-    selected: T;
-    setSelected: (selectedValue: T) => void;
-    placeholder?: string;
-}
-
-export const DropdownInput_ = <T extends string>({
+/**
+ * A custom MUI {@link Select} with a look as per our designs, and with an
+ * narrower interface focused on picking from a static list of options.
+ *
+ * This behaves as a controlled component - the caller is expected to set the
+ * {@link selected} prop. The caller will then be notified of changes by calls
+ * to the {@link onSelect} function.
+ */
+export const DropdownInput = <T extends string>({
     options,
     selected,
-    setSelected,
+    onSelect,
     placeholder,
-}: DropdownInputProps_<T>) => (
+}: DropdownInputProps<T>) => (
     <Select
         IconComponent={ExpandMoreIcon}
         displayEmpty
@@ -128,15 +99,18 @@ export const DropdownInput_ = <T extends string>({
             },
         }}
         renderValue={(selected) => {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             return !selected?.length ? (
                 <Box sx={{ color: "text.muted" }}>{placeholder ?? ""}</Box>
             ) : (
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
                 options.find((o) => o.value === selected).label
             );
         }}
         value={selected}
         onChange={(event: SelectChangeEvent) => {
-            setSelected(event.target.value as T);
+            onSelect(event.target.value as T);
         }}
     >
         {options.map((option, index) => (
