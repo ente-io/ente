@@ -607,10 +607,7 @@ export function PhotoList({
                                             <Typography
                                                 variant="small"
                                                 component="span"
-                                                sx={(theme) => ({
-                                                    color: theme.colors.accent
-                                                        .A500,
-                                                })}
+                                                sx={{ color: "accent.main" }}
                                             />
                                         ),
                                     }}

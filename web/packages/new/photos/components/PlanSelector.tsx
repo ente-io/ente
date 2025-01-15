@@ -462,18 +462,18 @@ const CustomToggleButton = styled(ToggleButton)(({ theme }) => ({
     textTransform: "none",
     padding: "12px 16px",
     borderRadius: "4px",
-    backgroundColor: theme.colors.fill.faint,
+    width: "97.433px",
+    backgroundColor: theme.vars.palette.fill.faint,
     border: `1px solid transparent`,
-    color: theme.colors.text.faint,
+    color: theme.vars.palette.text.faint,
     "&.Mui-selected": {
-        backgroundColor: theme.colors.accent.A500,
-        color: theme.colors.text.base,
+        backgroundColor: theme.vars.palette.accent.main,
+        color: theme.vars.palette.text.base,
     },
     "&.Mui-selected:hover": {
-        backgroundColor: theme.colors.accent.A500,
-        color: theme.colors.text.base,
+        backgroundColor: theme.vars.palette.accent.main,
+        color: theme.vars.palette.text.base,
     },
-    width: "97.433px",
 }));
 
 interface PlansProps {

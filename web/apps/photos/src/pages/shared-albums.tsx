@@ -594,9 +594,9 @@ const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
 const EnteLogoLink = styled("a")(({ theme }) => ({
     // Remove the excess space at the top.
     svg: { verticalAlign: "middle" },
-    color: theme.colors.text.base,
+    color: theme.vars.palette.text.base,
     ":hover": {
-        color: theme.palette.accent.main,
+        color: theme.vars.palette.accent.main,
     },
 }));
 
