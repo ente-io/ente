@@ -436,7 +436,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                 onClick={openUncategorizedSection}
                 variant="captioned"
                 label={t("section_uncategorized")}
-                subText={collectionSummaries
+                caption={collectionSummaries
                     .get(uncategorizedCollectionId)
                     ?.fileCount.toString()}
             />
@@ -445,7 +445,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                 onClick={openArchiveSection}
                 variant="captioned"
                 label={t("section_archive")}
-                subText={collectionSummaries
+                caption={collectionSummaries
                     .get(ARCHIVE_SECTION)
                     ?.fileCount.toString()}
             />
@@ -454,7 +454,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                 onClick={openHiddenSection}
                 variant="captioned"
                 label={t("section_hidden")}
-                subIcon={
+                caption={
                     <LockOutlinedIcon
                         sx={{
                             verticalAlign: "middle",
@@ -468,7 +468,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                 onClick={openTrashSection}
                 variant="captioned"
                 label={t("section_trash")}
-                subText={collectionSummaries
+                caption={collectionSummaries
                     .get(TRASH_SECTION)
                     ?.fileCount.toString()}
             />

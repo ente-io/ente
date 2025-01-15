@@ -16,6 +16,10 @@ import React from "react";
 interface EnteMenuItemProps {
     onClick: () => void;
     color?: ButtonProps["color"];
+    /**
+     * - Variant "captioned": The {@link caption}) is shown alongside the main
+     *   {@link label}, separated from it by a bullet.
+     */
     variant?: "primary" | "captioned" | "toggle" | "secondary" | "mini";
     fontWeight?: TypographyProps["fontWeight"];
     startIcon?: React.ReactNode;
@@ -25,8 +29,16 @@ interface EnteMenuItemProps {
      * TODO: Try and reflect this is the type.
      */
     label?: string;
-    subText?: string;
-    subIcon?: React.ReactNode;
+    /**
+     * The text (or icon) to show alongside the {@link label} when the variant
+     * is "captioned".
+     *
+     * This is usually expected to be a string and is wrapped in a Typography
+     * component before being rendered. However, it can also be an SvgIcon (or
+     * any an arbitrary component, though in terms of styling, only an SvgIcon
+     * usually makes sense).
+     */
+    caption?: React.ReactNode;
     checked?: boolean;
     labelComponent?: React.ReactNode;
     disabled?: boolean;
@@ -38,8 +50,7 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
     startIcon,
     endIcon,
     label,
-    subText,
-    subIcon,
+    caption,
     checked,
     variant = "primary",
     fontWeight = "medium",
@@ -100,8 +111,7 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
                             <CaptionedText
                                 color={color}
                                 mainText={labelOrDefault}
-                                subText={subText}
-                                subIcon={subIcon}
+                                caption={caption}
                             />
                         ) : variant === "mini" ? (
                             <Typography variant="mini" color="text.muted">
@@ -130,15 +140,13 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
 
 interface CaptionedTextProps {
     mainText: string;
-    subText?: string;
-    subIcon?: React.ReactNode;
+    caption?: React.ReactNode;
     color?: ButtonProps["color"];
 }
 
 const CaptionedText: React.FC<CaptionedTextProps> = ({
     mainText,
-    subText,
-    subIcon,
+    caption,
     color,
 }) => {
     const subTextColor = color == "critical" ? "critical.main" : "text.faint";
@@ -149,7 +157,7 @@ const CaptionedText: React.FC<CaptionedTextProps> = ({
                 {"•"}
             </Typography>
             <Typography variant="small" sx={{ color: subTextColor }}>
-                {subText ? subText : subIcon}
+                {caption}
             </Typography>
         </Stack>
     );
