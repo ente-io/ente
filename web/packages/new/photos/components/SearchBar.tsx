@@ -435,20 +435,13 @@ const EmptyState: React.FC<
 };
 
 const SearchPeopleHeader: React.FC<ButtonishProps> = ({ onClick }) => (
-    <SearchPeopleHeaderButton {...{ onClick }}>
-        <Typography sx={{ color: "text.muted" }}>{t("people")}</Typography>
-    </SearchPeopleHeaderButton>
-);
-
-const SearchPeopleHeaderButton = styled(UnstyledButton)(
-    ({ theme }) => `
-    /* The color for the chevron */
-    color: ${theme.colors.stroke.muted};
-    /* Hover indication */
-    && :hover {
-        color: ${theme.colors.stroke.base};
-    }
-`,
+    <UnstyledButton {...{ onClick }}>
+        <Typography
+            sx={{ color: "text.muted", ":hover": { color: "text.base" } }}
+        >
+            {t("people")}
+        </Typography>
+    </UnstyledButton>
 );
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
