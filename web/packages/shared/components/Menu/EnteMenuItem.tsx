@@ -147,15 +147,9 @@ const CaptionedText: React.FC<CaptionedTextProps> = ({
             <Typography variant="small" sx={{ color: subTextColor }}>
                 {"•"}
             </Typography>
-            {subText ? (
-                <Typography variant="small" sx={{ color: subTextColor }}>
-                    {subText}
-                </Typography>
-            ) : (
-                <Typography variant="small" sx={{ color: subTextColor }}>
-                    {subIcon}
-                </Typography>
-            )}
+            <Typography variant="small" sx={{ color: subTextColor }}>
+                {subText ? subText : subIcon}
+            </Typography>
         </VerticallyCenteredFlex>
     );
 };

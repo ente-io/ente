@@ -454,7 +454,14 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                 onClick={openHiddenSection}
                 variant="captioned"
                 label={t("section_hidden")}
-                subIcon={<LockOutlinedIcon />}
+                subIcon={
+                    <LockOutlinedIcon
+                        sx={{
+                            verticalAlign: "middle",
+                            fontSize: "19px !important",
+                        }}
+                    />
+                }
             />
             <EnteMenuItem
                 startIcon={<DeleteOutlineIcon />}
