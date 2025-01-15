@@ -484,7 +484,7 @@ const InfoItemIconContainer = styled("div")(
     display: flex;
     justify-content: center;
     align-items: center;
-    color: ${theme.colors.stroke.muted}
+    color: ${theme.vars.palette.stroke.muted}
 `,
 );
 

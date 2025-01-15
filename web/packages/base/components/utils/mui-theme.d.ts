@@ -1,6 +1,9 @@
 import type { PaletteColor } from "@mui/material";
 import React from "react";
 
+// Import the module augmentation that provides types for `theme.vars.*`.
+import type {} from "@mui/material/themeCssVarsAugmentation";
+
 declare module "@mui/material/styles" {
     interface Theme {
         colors: ThemeColors;
@@ -120,7 +123,7 @@ declare module "@mui/material/styles" {
 
     /**
      * Define a new set of tokens for the "text" color in the palette which
-     * matches the base / muted / faint triads we use for stroke and fill.
+     * matches the strength triads we use for stroke and fill.
      *
      * Since there is no way to override or replace the existing tokens, we can
      * only augment the interface with our new tokens. However, our code should
@@ -135,7 +138,6 @@ declare module "@mui/material/styles" {
      * - text.base
      * - text.muted
      * - text.faint
-     *
      */
     interface TypeText {
         base: string;
@@ -161,6 +163,37 @@ declare module "@mui/material/styles" {
          * This does not vary with the color scheme.
          */
         critical: PaletteColor;
+        /**
+         * Neutral tranparent colors for the stroke of icons and other outlines.
+         *
+         * These change with the color scheme.
+         *
+         * They come in three strengths which are meant to play nicely with the
+         * corresponding strengths of "text.*" and "fill.*".
+         */
+        stroke: {
+            base: string;
+            muted: string;
+            faint: string;
+        };
+        /**
+         * Neutral transparent colors for filling small areas like icon or
+         * button backgrounds.
+         *
+         * These change with the color scheme.
+         *
+         * They come in three strengths which are meant to play nicely with the
+         * corresponding strengths of "text.*" and "stroke.*".
+         *
+         * The faint strength also comes with a hover variant, useful to
+         * indicate the hover state of buttons and menu items. TODO(LM) -
+         * consider moving to others.
+         */
+        fill: {
+            muted: string;
+            faint: string;
+            faintHover: string;
+        };
         /**
          * Transparent background fills that serve as the backdrop of modals,
          * dialogs and drawers etc.
@@ -207,6 +240,8 @@ declare module "@mui/material/styles" {
     interface PaletteOptions {
         accent?: Palette["accent"];
         critical?: Palette["critical"];
+        stroke?: Palette["stroke"];
+        fill?: Palette["fill"];
         backdrop?: Palette["backdrop"];
         fixed?: Palette["fixed"];
         boxShadow?: Palette["boxShadow"];

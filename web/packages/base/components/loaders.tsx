@@ -22,13 +22,13 @@ export const LoadingIndicator: React.FC = () => (
  */
 export const LoadingOverlay: React.FC = () => (
     <Overlay
-        sx={(theme) => ({
+        sx={{
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
             zIndex: 2000,
-            backgroundColor: theme.palette.background.default,
-        })}
+            backgroundColor: "background.default",
+        }}
     >
         <ActivityIndicator />
     </Overlay>

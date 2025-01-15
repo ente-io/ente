@@ -253,9 +253,12 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 
     return (
-        // Hide the bottom border if we're showing the empty state for people.
         <BarWrapper
-            sx={people.length ? {} : { borderBlockEndColor: "transparent" }}
+            sx={[
+                // Hide the bottom border if we're showing the empty state for people.
+                mode == "people" &&
+                    people.length == 0 && { borderColor: "transparent" },
+            ]}
         >
             <Row1>
                 <ModeIndicator {...{ mode, onChangeMode }} />
@@ -291,14 +294,16 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 };
 
-const BarWrapper = styled("div")`
+const BarWrapper = styled("div")(
+    ({ theme }) => `
     padding-inline: 24px;
     @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
         padding-inline: 4px;
     }
     margin-block-end: 16px;
-    border-block-end: 1px solid ${({ theme }) => theme.palette.divider};
-`;
+    border-block-end: 1px solid ${theme.vars.palette.divider};
+`,
+);
 
 export const Row1 = styled("div")`
     display: flex;
@@ -351,8 +356,12 @@ const ModeButton = styled(UnstyledButton, {
     shouldForwardProp: (propName) => propName != "active",
 })<{ active: boolean }>(
     ({ theme, active }) => `
-    p { color: ${active ? theme.colors.text.base : theme.colors.text.muted} }
-    p:hover { color: ${theme.colors.text.base} }
+p {
+    color: ${active ? theme.vars.palette.text.base : theme.vars.palette.text.muted}
+}
+p:hover {
+    color: ${theme.vars.palette.text.base}
+}
 `,
 );
 
@@ -374,8 +383,8 @@ const ScrollButtonBase_ = styled("button")(({ theme }) => ({
     padding: 0,
     margin: 0,
     borderRadius: "50%",
-    backgroundColor: theme.palette.backdrop.muted,
-    color: theme.colors.stroke.base,
+    backgroundColor: theme.vars.palette.backdrop.muted,
+    color: theme.vars.palette.stroke.base,
     cursor: "pointer",
     "& > svg": {
         borderRadius: "50%",
@@ -550,12 +559,14 @@ const CollectionBarCardIcon_ = styled(Overlay)`
     }
 `;
 
-const ActiveIndicator = styled("div")`
+const ActiveIndicator = styled("div")(
+    ({ theme }) => `
     height: 3px;
-    background-color: ${({ theme }) => theme.palette.primary.main};
+    background-color: ${theme.vars.palette.stroke.base};
     margin-top: 18px;
     border-radius: 2px;
-`;
+`,
+);
 
 interface PersonCardProps {
     person: Person;

@@ -324,13 +324,13 @@ const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
             }}
         >
             <Box
-                sx={(theme) => ({
+                sx={{
                     display: "inline-flex",
                     // Match the default padding of the ValueContainer to make
                     // the icon look properly spaced and aligned.
                     pl: "8px",
-                    color: theme.colors.stroke.muted,
-                })}
+                    color: "stroke.muted",
+                }}
             >
                 {iconForOption(props.getValue()[0])}
             </Box>
@@ -435,20 +435,13 @@ const EmptyState: React.FC<
 };
 
 const SearchPeopleHeader: React.FC<ButtonishProps> = ({ onClick }) => (
-    <SearchPeopleHeaderButton {...{ onClick }}>
-        <Typography sx={{ color: "text.muted" }}>{t("people")}</Typography>
-    </SearchPeopleHeaderButton>
-);
-
-const SearchPeopleHeaderButton = styled(UnstyledButton)(
-    ({ theme }) => `
-    /* The color for the chevron */
-    color: ${theme.colors.stroke.muted};
-    /* Hover indication */
-    && :hover {
-        color: ${theme.colors.stroke.base};
-    }
-`,
+    <UnstyledButton {...{ onClick }}>
+        <Typography
+            sx={{ color: "text.muted", ":hover": { color: "text.base" } }}
+        >
+            {t("people")}
+        </Typography>
+    </UnstyledButton>
 );
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (

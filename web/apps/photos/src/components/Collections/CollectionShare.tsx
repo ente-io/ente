@@ -1567,7 +1567,7 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                             ? "critical"
                             : "primary"
                     }
-                    subText={
+                    caption={
                         isLinkExpired(publicShareProp?.validTill)
                             ? t("link_expired")
                             : publicShareProp?.validTill
@@ -1691,7 +1691,7 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
             <EnteMenuItem
                 label={t("LINK_DEVICE_LIMIT")}
                 variant="captioned"
-                subText={
+                caption={
                     publicShareProp.deviceLimit === 0
                         ? t("NO_DEVICE_LIMIT")
                         : publicShareProp.deviceLimit.toString()

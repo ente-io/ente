@@ -222,7 +222,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
     return (
         <Box
             sx={(theme) => ({
-                backgroundColor: theme.palette.background.paper,
+                backgroundColor: theme.vars.palette.background.paper,
                 borderRadius: "4px",
                 overflow: "hidden",
             })}
@@ -326,7 +326,7 @@ const UnparseableCode: React.FC<UnparseableCodeProps> = ({
     return (
         <Stack
             sx={(theme) => ({
-                backgroundColor: theme.palette.background.paper,
+                backgroundColor: theme.vars.palette.background.paper,
                 borderRadius: "4px",
                 overflow: "hidden",
                 p: "16px 20px",

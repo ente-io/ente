@@ -132,13 +132,15 @@ const ListItemContainer = styled(FlexWrapper)<{ span: number }>`
     grid-column: span ${(props) => props.span};
 `;
 
-const DateContainer = styled(ListItemContainer)`
+const DateContainer = styled(ListItemContainer)(
+    ({ theme }) => `
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     height: ${DATE_CONTAINER_HEIGHT}px;
-    color: ${({ theme }) => theme.colors.text.muted};
-`;
+    color: ${theme.vars.palette.text.muted};
+`,
+);
 
 const FooterContainer = styled(ListItemContainer)`
     margin-bottom: 0.75rem;
@@ -164,7 +166,8 @@ const AlbumFooterContainer = styled(ListItemContainer, {
     justify-content: center;
 `;
 
-const FullStretchContainer = styled("div")`
+const FullStretchContainer = styled("div")(
+    ({ theme }) => `
     margin: 0 -24px;
     width: calc(100% + 46px);
     left: -24px;
@@ -173,8 +176,9 @@ const FullStretchContainer = styled("div")`
         width: calc(100% + 6px);
         left: -4px;
     }
-    background-color: ${({ theme }) => theme.colors.accent.A500};
-`;
+    background-color: ${theme.vars.palette.accent.main};
+`,
+);
 
 const NothingContainer = styled(ListItemContainer)`
     color: #979797;
@@ -603,10 +607,7 @@ export function PhotoList({
                                             <Typography
                                                 variant="small"
                                                 component="span"
-                                                sx={(theme) => ({
-                                                    color: theme.colors.accent
-                                                        .A500,
-                                                })}
+                                                sx={{ color: "accent.main" }}
                                             />
                                         ),
                                     }}

@@ -1,4 +1,4 @@
-// TODO:
+// TODO(LM)
 /* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -132,31 +132,11 @@ type ColorAccentType = "auth" | "photos";
 const getColors = (
     themeColor: THEME_COLOR,
     accentType: ColorAccentType,
-): ThemeColorsOptions => {
-    switch (themeColor) {
-        case THEME_COLOR.LIGHT:
-            return { ...fixedColors(accentType), ...lightThemeColors };
-        default:
-            return { ...fixedColors(accentType), ...darkThemeColors };
-    }
-};
-
-const fixedColors = (
-    accentType: "auth" | "photos",
-): Pick<ThemeColorsOptions, keyof FixedColors> => {
-    switch (accentType) {
-        case "auth":
-            return {
-                ...commonFixedColors,
-                accent: authAccentColor,
-            };
-        default:
-            return {
-                ...commonFixedColors,
-                accent: photosAccentColor,
-            };
-    }
-};
+): ThemeColorsOptions => ({
+    ...commonFixedColors,
+    ...{ accent: accentType == "auth" ? authAccentColor : photosAccentColor },
+    ...(themeColor === THEME_COLOR.LIGHT ? lightThemeColors : darkThemeColors),
+});
 
 const commonFixedColors: Partial<Pick<ThemeColorsOptions, keyof FixedColors>> =
     {
@@ -355,12 +335,28 @@ const getPalletteOptions = (
             paper2: colors.background?.paper2,
         },
         text: {
+            // Alias the tokens used by MUI to the ones that we use. This way,
+            // we don't need to change the default ("primary"), or update the
+            // MUI internal styling that refers to these tokens.
+            //
+            // Our own code should not use these.
             primary: colors.text?.base,
             secondary: colors.text?.muted,
             disabled: colors.text?.faint,
+            // Our color tokens.
             base: colors.text?.base,
             muted: colors.text?.muted,
             faint: colors.text?.faint,
+        },
+        fill: {
+            muted: colors.fill!.muted!,
+            faint: colors.fill!.faint!,
+            faintHover: colors.fill!.faintPressed!,
+        },
+        stroke: {
+            base: colors.stroke!.base!,
+            muted: colors.stroke!.muted!,
+            faint: colors.stroke!.faint!,
         },
         divider: colors.stroke?.faint,
         fixed: { ..._colors.fixed },
