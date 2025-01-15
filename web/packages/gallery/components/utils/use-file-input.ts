@@ -56,7 +56,7 @@ export const useFileInput = ({
 
     const openSelector = useCallback(() => {
         if (inputRef.current) {
-            inputRef.current.value = null;
+            inputRef.current.value = "";
             inputRef.current.click();
         }
     }, []);
@@ -64,7 +64,7 @@ export const useFileInput = ({
     const handleChange: React.ChangeEventHandler<HTMLInputElement> = (
         event,
     ) => {
-        const files = event.target?.files;
+        const files = event.target.files;
         if (files) setSelectedFiles([...files]);
     };
 
