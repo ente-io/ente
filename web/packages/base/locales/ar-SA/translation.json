@@ -11,7 +11,7 @@
     "existing_user": "مستخدم موجود",
     "enter_email": "أدخل عنوان البريد الإلكتروني",
     "invalid_email_error": "أدخل بريد إلكتروني صالح",
-    "required": "مطلوب",
+    "required": "",
     "email_not_registered": "",
     "email_already_registered": "",
     "email_sent": "تم إرسال رمز التحقق إلى <a>{{email}}</a>",
