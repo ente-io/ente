@@ -8,6 +8,7 @@ import {
 } from "@/base/components/containers";
 import { EnteLogoSVG } from "@/base/components/EnteLogo";
 import { LoadingIndicator } from "@/base/components/loaders";
+import type { ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
@@ -52,7 +53,6 @@ import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternate
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {
@@ -575,10 +575,12 @@ export default function PublicCollectionGallery() {
 
 interface SharedAlbumNavbarProps {
     /**
-     * If provided, then an "Add Photos" button will be shown in the navbar.
+     * If provided, then an "Add Photos" button will be shown in the navbar, and
+     * this function will be called when it is clicked.
      */
-    onAddPhotos: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onAddPhotos: (() => void) | undefined;
 }
+
 const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
     onAddPhotos,
 }) => (
@@ -601,7 +603,7 @@ const EnteLogoLink = styled("a")(({ theme }) => ({
     },
 }));
 
-const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
+const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
     const isSmallWidth = useIsSmallWidth();
 
@@ -610,15 +612,12 @@ const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
     return (
         <Box>
             {isSmallWidth ? (
-                <IconButton {...props} disabled={disabled}>
-                    {icon}
-                </IconButton>
+                <IconButton {...{ onClick, disabled }}>{icon}</IconButton>
             ) : (
                 <FocusVisibleButton
-                    {...props}
-                    disabled={disabled}
-                    color={"secondary"}
+                    color="secondary"
                     startIcon={icon}
+                    {...{ onClick, disabled }}
                 >
                     {t("add_photos")}
                 </FocusVisibleButton>
@@ -631,14 +630,14 @@ const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
  * A visually different variation of {@link AddPhotosButton}. It also does not
  * shrink on mobile sized screens.
  */
-const AddMorePhotosButton: React.FC<ButtonProps> = (props) => {
+const AddMorePhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
+
     return (
         <FocusVisibleButton
-            {...props}
-            disabled={disabled}
-            color={"accent"}
+            color="accent"
             startIcon={<AddPhotoAlternateOutlinedIcon />}
+            {...{ onClick, disabled }}
         >
             {t("add_more_photos")}
         </FocusVisibleButton>

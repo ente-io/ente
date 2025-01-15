@@ -86,7 +86,7 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { IconButton, Stack, Typography } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import CollectionNamer, {
     CollectionNamerAttributes,
@@ -1194,7 +1194,7 @@ const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const icon = <FileUploadOutlinedIcon />;
 
     return (
-        <Box>
+        <>
             {isSmallWidth ? (
                 <IconButton {...{ onClick, disabled }}>{icon}</IconButton>
             ) : (
@@ -1206,7 +1206,7 @@ const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
                     {t("upload")}
                 </FocusVisibleButton>
             )}
-        </Box>
+        </>
     );
 };
 
