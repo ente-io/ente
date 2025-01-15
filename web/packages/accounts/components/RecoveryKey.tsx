@@ -7,7 +7,6 @@ import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { downloadString } from "@/base/utils/web";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
-import CodeBlock from "@ente/shared/components/CodeBlock";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import {
     Dialog,
@@ -20,6 +19,7 @@ import {
 import * as bip39 from "bip39";
 import { t } from "i18next";
 import { useCallback, useEffect, useState } from "react";
+import { CodeBlock } from "./CodeBlock";
 
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
