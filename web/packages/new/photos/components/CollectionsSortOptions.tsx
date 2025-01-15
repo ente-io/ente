@@ -52,12 +52,11 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
             },
             nestedInDialog ? { backgroundColor: "background.paper2" } : {},
         ]}
-        triggerButtonSxProps={{
-            backgroundColor: (theme) =>
-                transparentTriggerButtonBackground
-                    ? undefined
-                    : theme.colors.fill.faint,
-        }}
+        triggerButtonSxProps={[
+            transparentTriggerButtonBackground
+                ? {}
+                : { backgroundColor: "fill.faint" },
+        ]}
     >
         <SortByOption {...optProps} sortBy="name">
             {t("name")}
