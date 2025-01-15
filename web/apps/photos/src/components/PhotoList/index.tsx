@@ -132,13 +132,15 @@ const ListItemContainer = styled(FlexWrapper)<{ span: number }>`
     grid-column: span ${(props) => props.span};
 `;
 
-const DateContainer = styled(ListItemContainer)`
+const DateContainer = styled(ListItemContainer)(
+    ({ theme }) => `
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     height: ${DATE_CONTAINER_HEIGHT}px;
-    color: ${({ theme }) => theme.colors.text.muted};
-`;
+    color: ${theme.vars.palette.text.muted};
+`,
+);
 
 const FooterContainer = styled(ListItemContainer)`
     margin-bottom: 0.75rem;

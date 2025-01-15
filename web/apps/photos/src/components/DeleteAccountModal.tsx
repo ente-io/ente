@@ -240,9 +240,9 @@ const FeedbackInput: React.FC<FeedbackInputProps> = ({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={t("delete_account_feedback_placeholder")}
-            sx={(theme) => ({
+            sx={{
                 border: "1px solid",
-                borderColor: theme.colors.stroke.faint,
+                borderColor: "stroke.faint",
                 borderRadius: "8px",
                 padding: "12px",
                 ".MuiInputBase-formControl": {
@@ -250,7 +250,7 @@ const FeedbackInput: React.FC<FeedbackInputProps> = ({
                         borderBottom: "none !important",
                     },
                 },
-            })}
+            }}
         />
         <Typography variant="small" sx={{ px: "8px", color: "critical.main" }}>
             {errorMessage}

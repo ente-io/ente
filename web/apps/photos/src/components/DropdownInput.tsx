@@ -69,16 +69,16 @@ export default function DropdownInput<T extends string>({
                         },
                     },
                 }}
-                sx={(theme) => ({
+                sx={{
                     "::before , ::after": {
                         borderBottom: "none !important",
                     },
                     ".MuiInput-root": {
-                        background: theme.colors.fill.faint,
+                        background: "fill.faint",
                         borderRadius: "8px",
                     },
                     ".MuiSelect-select": {
-                        background: theme.colors.fill.faint,
+                        background: "fill.faint",
                         borderRadius: "8px",
                     },
                     "&&& .MuiSelect-select": {
@@ -86,9 +86,9 @@ export default function DropdownInput<T extends string>({
                     },
                     ".MuiSelect-icon": {
                         mr: "12px",
-                        color: theme.colors.stroke.muted,
+                        color: "stroke.muted",
                     },
-                })}
+                }}
                 renderValue={(selected) => {
                     return !selected?.length ? (
                         <Box sx={{ color: "text.muted" }}>

@@ -1,6 +1,9 @@
 import type { PaletteColor } from "@mui/material";
 import React from "react";
 
+// Import the module augmentation that provides types for `theme.vars.*`.
+import type {} from "@mui/material/themeCssVarsAugmentation";
+
 declare module "@mui/material/styles" {
     interface Theme {
         colors: ThemeColors;
