@@ -134,8 +134,8 @@ class PersonData {
         ? <ClusterInfo>[]
         : List<ClusterInfo>.from(
             json['assigned']
-              .where((x) => x is Map<String, dynamic>)
-              .map((x) => ClusterInfo.fromJson(x as Map<String, dynamic>)),
+                .where((x) => x is Map<String, dynamic>)
+                .map((x) => ClusterInfo.fromJson(x as Map<String, dynamic>)),
           );
 
     final List<String> rejectedFaceIDs =
