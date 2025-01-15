@@ -166,7 +166,8 @@ const AlbumFooterContainer = styled(ListItemContainer, {
     justify-content: center;
 `;
 
-const FullStretchContainer = styled("div")`
+const FullStretchContainer = styled("div")(
+    ({ theme }) => `
     margin: 0 -24px;
     width: calc(100% + 46px);
     left: -24px;
@@ -175,8 +176,9 @@ const FullStretchContainer = styled("div")`
         width: calc(100% + 6px);
         left: -4px;
     }
-    background-color: ${({ theme }) => theme.colors.accent.A500};
-`;
+    background-color: ${theme.vars.palette.accent.main};
+`,
+);
 
 const NothingContainer = styled(ListItemContainer)`
     color: #979797;
