@@ -47,7 +47,6 @@ import {
 } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
@@ -90,6 +89,7 @@ import exportService from "services/export";
 import { testUpload } from "../../../tests/upload.test";
 import { Preferences } from "./Preferences";
 import { SubscriptionCard } from "./SubscriptionCard";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
 
 interface Iprops {
     collectionSummaries: CollectionSummaries;
