@@ -60,7 +60,7 @@ export const UploaderNameInput: React.FC<UploaderNameInput> = ({
                         width: "44px",
                         height: "44px",
                     },
-                    color: theme.colors.stroke.muted,
+                    color: theme.vars.palette.stroke.muted,
                 })}
             >
                 {<AutoAwesomeOutlinedIcon />}
