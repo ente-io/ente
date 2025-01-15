@@ -44,6 +44,9 @@ interface EnteMenuItemProps {
     disabled?: boolean;
 }
 
+/**
+ * A MUI {@link MenuItem} customized as per our designs and use cases.
+ */
 export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
     onClick,
     color = "primary",
@@ -58,14 +61,14 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
     disabled = false,
 }) => {
     const handleButtonClick = () => {
-        if (variant === "toggle") {
+        if (variant == "toggle") {
             return;
         }
         onClick();
     };
 
     const handleIconClick = () => {
-        if (variant !== "toggle") {
+        if (variant != "toggle") {
             return;
         }
         onClick();
@@ -90,12 +93,12 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
                     p: 0,
                     borderRadius: "4px",
                 }),
-                variant !== "captioned" &&
+                variant != "captioned" &&
                     ((theme) => ({
                         color: theme.palette[color].main,
                     })),
-                variant !== "secondary" &&
-                    variant !== "mini" &&
+                variant != "secondary" &&
+                    variant != "mini" &&
                     ((theme) => ({
                         backgroundColor: theme.colors.fill.faint,
                     })),
@@ -107,13 +110,20 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
                     <Box px={"2px"}>
                         {labelComponent ? (
                             labelComponent
-                        ) : variant === "captioned" ? (
-                            <CaptionedText
-                                color={color}
-                                mainText={labelOrDefault}
-                                caption={caption}
-                            />
-                        ) : variant === "mini" ? (
+                        ) : variant == "captioned" ? (
+                            <Stack
+                                direction="row"
+                                sx={{ gap: "4px", alignItems: "center" }}
+                            >
+                                <Typography>{labelOrDefault}</Typography>
+                                <CaptionTypography color={color}>
+                                    {"•"}
+                                </CaptionTypography>
+                                <CaptionTypography color={color}>
+                                    {caption}
+                                </CaptionTypography>
+                            </Stack>
+                        ) : variant == "mini" ? (
                             <Typography variant="mini" color="text.muted">
                                 {labelOrDefault}
                             </Typography>
@@ -126,7 +136,7 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
                 </VerticallyCenteredFlex>
                 <VerticallyCenteredFlex gap={"4px"}>
                     {endIcon && endIcon}
-                    {variant === "toggle" && (
+                    {variant == "toggle" && (
                         <EnteSwitch
                             checked={checked}
                             onClick={handleIconClick}
@@ -137,24 +147,6 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
         </MenuItem>
     );
 };
-
-interface CaptionedTextProps {
-    mainText: string;
-    caption?: React.ReactNode;
-    color?: ButtonProps["color"];
-}
-
-const CaptionedText: React.FC<CaptionedTextProps> = ({
-    mainText,
-    caption,
-    color,
-}) => (
-    <Stack direction="row" sx={{ gap: "4px", alignItems: "center" }}>
-        <Typography>{mainText}</Typography>
-        <CaptionTypography color={color}>{"•"}</CaptionTypography>
-        <CaptionTypography color={color}>{caption}</CaptionTypography>
-    </Stack>
-);
 
 const CaptionTypography: React.FC<
     React.PropsWithChildren<{ color: EnteMenuItemProps["color"] }>
