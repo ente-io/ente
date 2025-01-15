@@ -39,13 +39,6 @@ export const StaticThumbnail: React.FC<Iprops> = (props) => {
     );
 };
 
-export const LoadingThumbnail = () => {
-    return (
-        <Overlay
-            sx={(theme) => ({
-                backgroundColor: theme.colors.fill.faint,
-                borderRadius: "4px",
-            })}
-        />
-    );
-};
+export const LoadingThumbnail = () => (
+    <Overlay sx={{ backgroundColor: "fill.faint", borderRadius: "4px" }} />
+);
