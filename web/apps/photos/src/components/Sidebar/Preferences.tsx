@@ -13,6 +13,7 @@ import {
     type SupportedLocale,
 } from "@/base/i18n";
 import { MLSettings } from "@/new/photos/components/sidebar/MLSettings";
+import { isInternalUser } from "@/new/photos/services/settings";
 import {
     confirmDisableMapsDialogAttributes,
     confirmEnableMapsDialogAttributes,
@@ -65,7 +66,7 @@ export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 />
                 <Stack sx={{ px: "16px", py: "8px", gap: "24px" }}>
                     <LanguageSelector />
-                    <ThemeSelector />
+                    {isInternalUser() && <ThemeSelector />}
                     <Divider sx={{ my: "2px", opacity: 0.1 }} />
                     {isMLSupported && (
                         <MenuItemGroup>
@@ -172,6 +173,7 @@ const ThemeSelector = () => {
     // During SSR, mode is always undefined.
     if (!mode) return null;
 
+    // TODO: Use translations, also remove unused t("CHOSE_THEME")
     return (
         <DropdownInput
             options={[
@@ -179,7 +181,7 @@ const ThemeSelector = () => {
                 { label: pt("Light"), value: "light" },
                 { label: pt("Dark"), value: "dark" },
             ]}
-            label={pt("Theme")} /* TODO: remove Choose theem */
+            label={pt("Theme")}
             labelSxProps={{ color: "text.muted" }}
             selected={mode}
             setSelected={setMode}

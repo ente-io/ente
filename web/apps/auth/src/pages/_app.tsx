@@ -5,9 +5,8 @@ import { LoadingOverlay } from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
 import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
-import { THEME_COLOR, getTheme } from "@/base/components/utils/theme";
+import { getTheme } from "@/base/components/utils/theme";
 import { logStartupBanner } from "@/base/log-web";
-import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
     LS_KEYS,
@@ -32,10 +31,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     const isI18nReady = useSetupI18n();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
-    const [themeColor, setThemeColor] = useLocalState(
-        LS_KEYS.THEME,
-        THEME_COLOR.DARK,
-    );
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER) as User | undefined | null;
@@ -65,10 +60,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         () => ({
             logout,
             showMiniDialog,
-            themeColor,
-            setThemeColor,
         }),
-        [logout, showMiniDialog, themeColor, setThemeColor],
+        [logout, showMiniDialog],
     );
 
     const title = isI18nReady ? t("title_auth") : staticAppTitle;
@@ -77,7 +70,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         <>
             <CustomHead {...{ title }} />
 
-            <ThemeProvider theme={getTheme(themeColor, "auth")}>
+            <ThemeProvider theme={getTheme("auth")}>
                 <CssBaseline enableColorScheme />
 
                 <AttributedMiniDialog {...miniDialogProps} />

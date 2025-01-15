@@ -4,7 +4,7 @@ import { LoadingOverlay } from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
 import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
-import { getTheme, THEME_COLOR } from "@/base/components/utils/theme";
+import { getTheme } from "@/base/components/utils/theme";
 import "@fontsource-variable/inter";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
@@ -27,7 +27,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         <>
             <CustomHead {...{ title }} />
 
-            <ThemeProvider theme={getTheme(THEME_COLOR.DARK, "photos")}>
+            <ThemeProvider theme={getTheme("photos")}>
                 <CssBaseline enableColorScheme />
                 <AttributedMiniDialog {...miniDialogProps} />
 

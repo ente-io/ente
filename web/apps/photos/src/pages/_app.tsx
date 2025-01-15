@@ -7,7 +7,7 @@ import {
     useAttributedMiniDialog,
 } from "@/base/components/utils/dialog";
 import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
-import { THEME_COLOR, getTheme } from "@/base/components/utils/theme";
+import { getTheme } from "@/base/components/utils/theme";
 import log from "@/base/log";
 import { logStartupBanner } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
@@ -22,7 +22,6 @@ import { runMigrations } from "@/new/photos/services/migration";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
 import { AppContext } from "@/new/photos/types/context";
-import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
     LS_KEYS,
@@ -54,10 +53,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
     const { showNotification, notificationProps } = useNotification();
     const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
-    const [themeColor, setThemeColor] = useLocalState(
-        LS_KEYS.THEME,
-        THEME_COLOR.DARK,
-    );
 
     const [loading, setLoading] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
@@ -164,8 +159,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             hideLoadingBar,
             watchFolderView,
             setWatchFolderView,
-            themeColor,
-            setThemeColor,
             showMiniDialog,
             showNotification,
             onGenericError,
@@ -175,7 +168,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             showLoadingBar,
             hideLoadingBar,
             watchFolderView,
-            themeColor,
             showMiniDialog,
             showNotification,
             onGenericError,
@@ -189,7 +181,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         <>
             <CustomHead {...{ title }} />
 
-            <ThemeProvider theme={getTheme(themeColor, "photos")}>
+            <ThemeProvider theme={getTheme("photos")}>
                 <CssBaseline enableColorScheme />
                 <LoadingBar color="#51cd7c" ref={loadingBarRef} />
 

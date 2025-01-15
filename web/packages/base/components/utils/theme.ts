@@ -12,17 +12,14 @@ import { createTheme } from "@mui/material";
 import type { Components } from "@mui/material/styles/components";
 import type { TypographyOptions } from "@mui/material/styles/createTypography";
 
-export enum THEME_COLOR {
+enum THEME_COLOR {
     LIGHT = "light",
     DARK = "dark",
 }
 
-export const getTheme = (
-    themeColor: THEME_COLOR,
-    colorAccentType: ColorAccentType,
-) => {
-    const colors = getColors(themeColor, colorAccentType);
-    const palette = getPallette(themeColor, colors);
+export const getTheme = (colorAccentType: ColorAccentType) => {
+    const colors = getColors(THEME_COLOR.DARK, colorAccentType);
+    const palette = getPallette(THEME_COLOR.DARK, colors);
     const components = getComponents(colors, palette, typography);
     return createTheme({
         cssVariables: true,

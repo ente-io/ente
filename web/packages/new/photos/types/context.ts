@@ -1,5 +1,4 @@
 import type { AccountsContextT } from "@/accounts/types/context";
-import { THEME_COLOR } from "@/base/components/utils/theme";
 import { type NotificationAttributes } from "@/new/photos/components/Notification";
 import { createContext, useContext } from "react";
 
@@ -27,8 +26,6 @@ export type AppContextT = AccountsContextT & {
     onGenericError: (error: unknown) => void;
     watchFolderView: boolean;
     setWatchFolderView: (isOpen: boolean) => void;
-    themeColor: THEME_COLOR;
-    setThemeColor: (themeColor: THEME_COLOR) => void;
 };
 
 /**

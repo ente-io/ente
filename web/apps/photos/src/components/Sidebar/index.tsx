@@ -7,7 +7,6 @@ import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
-import { THEME_COLOR } from "@/base/components/utils/theme";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
@@ -51,9 +50,7 @@ import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
 import CloseIcon from "@mui/icons-material/Close";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import LightModeIcon from "@mui/icons-material/LightMode";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
@@ -66,8 +63,6 @@ import {
     Skeleton,
     Stack,
     styled,
-    ToggleButton,
-    ToggleButtonGroup,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
@@ -480,13 +475,8 @@ interface UtilitySectionProps {
 
 const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
     const router = useRouter();
-    const {
-        watchFolderView,
-        setWatchFolderView,
-        themeColor,
-        setThemeColor,
-        showMiniDialog,
-    } = useAppContext();
+    const { watchFolderView, setWatchFolderView, showMiniDialog } =
+        useAppContext();
 
     const { show: showRecoveryKey, props: recoveryKeyVisibilityProps } =
         useModalVisibility();
@@ -512,13 +502,6 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
 
     const handleDeduplicate = () => router.push("/duplicates");
 
-    const toggleTheme = () =>
-        setThemeColor(
-            themeColor === THEME_COLOR.DARK
-                ? THEME_COLOR.LIGHT
-                : THEME_COLOR.DARK,
-        );
-
     return (
         <>
             {isDesktop && (
@@ -533,19 +516,6 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 onClick={showRecoveryKey}
                 label={t("recovery_key")}
             />
-            {isInternalUser() && (
-                <EnteMenuItem
-                    onClick={toggleTheme}
-                    variant="secondary"
-                    label={t("CHOSE_THEME")}
-                    endIcon={
-                        <ThemeSwitcher
-                            themeColor={themeColor}
-                            setThemeColor={setThemeColor}
-                        />
-                    }
-                />
-            )}
             <EnteMenuItem
                 variant="secondary"
                 onClick={showTwoFactor}
@@ -556,7 +526,6 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 onClick={redirectToAccountsPage}
                 label={t("passkeys")}
             />
-
             <EnteMenuItem
                 variant="secondary"
                 onClick={redirectToChangePasswordPage}
@@ -597,38 +566,6 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 onRootClose={closeSidebar}
             />
         </>
-    );
-};
-
-interface ThemeSwitcherProps {
-    themeColor: THEME_COLOR;
-    setThemeColor: (themeColor: THEME_COLOR) => void;
-}
-
-const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
-    themeColor,
-    setThemeColor,
-}) => {
-    const handleChange = (event, themeColor: THEME_COLOR) => {
-        if (themeColor !== null) {
-            setThemeColor(themeColor);
-        }
-    };
-
-    return (
-        <ToggleButtonGroup
-            size="small"
-            value={themeColor}
-            exclusive
-            onChange={handleChange}
-        >
-            <ToggleButton value={THEME_COLOR.LIGHT}>
-                <LightModeIcon />
-            </ToggleButton>
-            <ToggleButton value={THEME_COLOR.DARK}>
-                <DarkModeIcon />
-            </ToggleButton>
-        </ToggleButtonGroup>
     );
 };
 
