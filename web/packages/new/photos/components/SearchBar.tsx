@@ -379,8 +379,7 @@ const shouldShowEmptyState = (inputValue: string) => {
     if (!isMLSupported) return false;
 
     const status = mlStatusSnapshot();
-    if (!status || status.phase == "disabled" || status.phase == "done")
-        return false;
+    if (!status || status.phase == "disabled") return false;
 
     // Show it otherwise.
     return true;
@@ -396,13 +395,13 @@ const EmptyState: React.FC<
     const mlStatus = useMLStatusSnapshot();
     const people = usePeopleStateSnapshot()?.visiblePeople;
 
-    if (!mlStatus || mlStatus.phase == "disabled" || mlStatus.phase == "done") {
+    if (!mlStatus || mlStatus.phase == "disabled") {
         // The preflight check should've prevented us from coming here.
         assertionFailed();
         return <></>;
     }
 
-    let label: string;
+    let label: string | undefined;
     switch (mlStatus.phase) {
         case "scheduled":
             label = t("indexing_scheduled");
@@ -426,9 +425,11 @@ const EmptyState: React.FC<
                     <SearchPeopleList {...{ people, onSelectPerson }} />
                 </>
             )}
-            <Typography variant="mini" sx={{ mt: "5px", mb: "4px" }}>
-                {label}
-            </Typography>
+            {label && (
+                <Typography variant="mini" sx={{ mt: "5px", mb: "4px" }}>
+                    {label}
+                </Typography>
+            )}
         </Box>
     );
 };
