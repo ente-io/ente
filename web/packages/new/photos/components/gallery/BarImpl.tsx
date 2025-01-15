@@ -351,8 +351,12 @@ const ModeButton = styled(UnstyledButton, {
     shouldForwardProp: (propName) => propName != "active",
 })<{ active: boolean }>(
     ({ theme, active }) => `
-    p { color: ${active ? theme.colors.text.base : theme.colors.text.muted} }
-    p:hover { color: ${theme.colors.text.base} }
+p {
+    color: ${active ? theme.vars.palette.text.base : theme.vars.palette.text.muted}
+}
+p:hover {
+    color: ${theme.vars.palette.text.base}
+}
 `,
 );
 
@@ -374,8 +378,8 @@ const ScrollButtonBase_ = styled("button")(({ theme }) => ({
     padding: 0,
     margin: 0,
     borderRadius: "50%",
-    backgroundColor: theme.palette.backdrop.muted,
-    color: theme.colors.stroke.base,
+    backgroundColor: theme.vars.palette.backdrop.muted,
+    color: theme.vars.palette.stroke.base,
     cursor: "pointer",
     "& > svg": {
         borderRadius: "50%",

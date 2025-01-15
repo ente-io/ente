@@ -324,13 +324,13 @@ const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
             }}
         >
             <Box
-                sx={(theme) => ({
+                sx={{
                     display: "inline-flex",
                     // Match the default padding of the ValueContainer to make
                     // the icon look properly spaced and aligned.
                     pl: "8px",
-                    color: theme.colors.stroke.muted,
-                })}
+                    color: "stroke.muted",
+                }}
             >
                 {iconForOption(props.getValue()[0])}
             </Box>
