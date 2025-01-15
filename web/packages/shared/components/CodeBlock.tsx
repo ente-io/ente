@@ -16,6 +16,7 @@ export default function CodeBlock({ code, ...props }: BoxProps<"div", Iprops>) {
             </Wrapper>
         );
     }
+
     return (
         <Wrapper {...props}>
             <CodeWrapper>
@@ -28,17 +29,21 @@ export default function CodeBlock({ code, ...props }: BoxProps<"div", Iprops>) {
     );
 }
 
-const Wrapper = styled(CenteredFlex)`
+const Wrapper = styled(CenteredFlex)(
+    ({ theme }) => `
     position: relative;
-    background-color: ${({ theme }) => theme.palette.accent.dark};
-    border-radius: ${({ theme }) => theme.shape.borderRadius}px;
+    background-color: ${theme.vars.palette.accent.dark};
+    border-radius: ${theme.shape.borderRadius}px;
     min-height: 80px;
-`;
+`,
+);
 
-const CodeWrapper = styled("div")`
+const CodeWrapper = styled("div")(
+    ({ theme }) => `
     padding: 16px 36px 16px 16px;
-    border-radius: ${({ theme }) => theme.shape.borderRadius}px;
-`;
+    border-radius: ${theme.shape.borderRadius}px;
+`,
+);
 
 const FreeFlowText = styled("div")`
     word-break: break-word;
@@ -46,9 +51,11 @@ const FreeFlowText = styled("div")`
     text-align: left;
 `;
 
-const CopyButtonWrapper = styled("div")`
+const CopyButtonWrapper = styled("div")(
+    ({ theme }) => `
     position: absolute;
     top: 0px;
     right: 0px;
-    margin-top: ${({ theme }) => theme.spacing(1)};
-`;
+    margin-top: ${theme.spacing(1)};
+`,
+);
