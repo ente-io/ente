@@ -29,7 +29,7 @@ export const getTheme = (colorAccentType: ColorAccentType) => {
         typography,
         components,
         shape: {
-            // Increase the default border radius mulitplier from 4 to 8.
+            // Increase the default border radius multiplier from 4 to 8.
             borderRadius: 8,
         },
         transitions: {
@@ -45,7 +45,7 @@ export type ColorAccentType = "auth" | "photos";
  * [Note: Colors]
  *
  * The word "color" in MUI stands for different things. In particular, the color
- * prop for (e.g.) a Button is not the same as the color prop for the sx prop.
+ * prop for (e.g.) a Button is not the same as the color passed in the sx prop.
  *
  * There are three layers (only the first is necessary, rest are semantic):
  *
@@ -67,8 +67,8 @@ export type ColorAccentType = "auth" | "photos";
  *            A700: string;
  *        }
  *
- *  3. Finally, there are "PaletteColors" (the naming of props and documentation
- *     within MUI (as of v6) omits the palette qualifier).
+ *  3. Finally, there are "PaletteColors" (the naming of props, and
+ *     documentation within MUI (as of v6), omits the palette qualifier).
  *
  *         export interface PaletteColor {
  *             light: string;
@@ -83,7 +83,8 @@ export type ColorAccentType = "auth" | "photos";
  *
  * Within the sx prop we need to specify a color value, which can come from the
  * palette. The "palette", as defined by the palette property we provide when
- * creating the theme, can consist of arbitrary and nested key value pairs.
+ * creating the theme, can consist of arbitrary (and nestable) key value pairs.
+ *
  * Within sx prop, the "color" and "backgroundColor" props can refer to paths
  * inside this palette object. That is,
  *
@@ -93,9 +94,9 @@ export type ColorAccentType = "auth" | "photos";
  *
  * [Note: Color names]
  *
- * When defining color names, there is some attempt at trying to use MUI v6
- * (which uses MD (Material Design) v2) nomenclature when feasible (just to keep
- * the number of concepts low), but as such, the color names should not be
+ * When defining color names, there is some attempt at trying to use MUI v6,
+ * which uses MD (Material Design) v2, nomenclature when feasible (just to keep
+ * the number of concepts low), but as such, our color names should not be
  * thought of as following Material Design, and should be treated as arbitrary
  * tokens reflecting our own design system.
  *
@@ -107,8 +108,8 @@ export type ColorAccentType = "auth" | "photos";
  * - Our "critical" is similar to and the alternative for the MD error (which is
  *   not used).
  *
- * - Two of the other semantic default MD PaletteColors - warning, success - are
- *   used rarely, while info is not used at all.
+ * - Two of the other default MD PaletteColors - warning, success - are used
+ *   rarely, while info is not used at all.
  *
  * [Note: Theme and palette custom variables]
  *

@@ -2,7 +2,7 @@ import { Switch, styled, type SwitchProps } from "@mui/material";
 import React from "react";
 
 /**
- * A custom variant of the MUI {@link Switch}, styled per our requirements.
+ * A custom variant of the MUI {@link Switch}, styled per our designs.
  */
 export const EnteSwitch: React.FC<SwitchProps> = styled((props) => (
     <Switch
