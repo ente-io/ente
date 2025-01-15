@@ -5,11 +5,7 @@ import React from "react";
  * A custom variant of the MUI {@link Switch}, styled per our designs.
  */
 export const EnteSwitch: React.FC<SwitchProps> = styled((props) => (
-    <Switch
-        focusVisibleClassName=".Mui-focusVisible"
-        disableRipple
-        {...props}
-    />
+    <Switch disableRipple {...props} />
 ))(({ theme }) => ({
     width: 40,
     height: 24,
@@ -20,7 +16,7 @@ export const EnteSwitch: React.FC<SwitchProps> = styled((props) => (
         transitionDuration: "300ms",
         "&.Mui-checked": {
             transform: "translateX(16px)",
-            color: "#fff",
+            color: theme.vars.palette.fixed.white,
             "& + .MuiSwitch-track": {
                 backgroundColor: "#65C466",
                 opacity: 1,
@@ -32,10 +28,6 @@ export const EnteSwitch: React.FC<SwitchProps> = styled((props) => (
             "&.Mui-disabled + .MuiSwitch-track": {
                 opacity: 0.5,
             },
-        },
-        "&.Mui-focusVisible .MuiSwitch-thumb": {
-            color: "#33cf4d",
-            border: "6px solid #fff",
         },
         "&.Mui-disabled .MuiSwitch-thumb": {
             color: theme.palette.grey[600],
@@ -65,5 +57,16 @@ export const EnteSwitch: React.FC<SwitchProps> = styled((props) => (
         ...theme.applyStyles("light", {
             backgroundColor: "#E9E9EA",
         }),
+    },
+    // Use an alternative affordance to indicate focusVisible as the ripple
+    // effect is disabled.
+    ".MuiSwitch-switchBase.Mui-focusVisible + .MuiSwitch-track": {
+        outline: `1px solid ${theme.vars.palette.fixed.white}`,
+        outlineOffset: "-1px",
+    },
+    // Same for when the switch is actived.
+    ".MuiSwitch-switchBase:active + .MuiSwitch-track": {
+        outline: `1px solid ${theme.vars.palette.stroke.faint}`,
+        outlineOffset: "-1px",
     },
 }));

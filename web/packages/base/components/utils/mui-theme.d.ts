@@ -173,6 +173,7 @@ declare module "@mui/material/styles" {
          * These change with the color scheme.
          */
         stroke: {
+            base: string;
             muted: string;
             faint: string;
         };

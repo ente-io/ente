@@ -3,6 +3,7 @@ import { stashRedirect } from "@/accounts/services/redirect";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { AppNavbar, NavbarBase } from "@/base/components/Navbar";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
@@ -85,7 +86,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import type { ButtonProps, IconButtonProps } from "@mui/material";
-import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
+import { Box, IconButton, Stack, Typography } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import CollectionNamer, {
     CollectionNamerAttributes,
@@ -1199,14 +1200,14 @@ const UploadButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
                     {icon}
                 </IconButton>
             ) : (
-                <Button
+                <FocusVisibleButton
                     {...props}
                     disabled={disabled}
                     color={"secondary"}
                     startIcon={icon}
                 >
                     {t("upload")}
-                </Button>
+                </FocusVisibleButton>
             )}
         </Box>
     );
