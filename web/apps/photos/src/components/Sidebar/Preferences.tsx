@@ -28,8 +28,8 @@ import {
 import { useAppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { Divider, Stack, useColorScheme } from "@mui/material";
-import DropdownInput from "components/DropdownInput";
+import { Divider, Stack, Typography, useColorScheme } from "@mui/material";
+import { DropdownInput_ } from "components/DropdownInput";
 import { t } from "i18next";
 import React, { useCallback, useEffect } from "react";
 
@@ -121,13 +121,16 @@ const LanguageSelector = () => {
     }));
 
     return (
-        <DropdownInput
-            options={options}
-            label={t("language")}
-            labelSxProps={{ color: "text.muted" }}
-            selected={locale}
-            setSelected={updateCurrentLocale}
-        />
+        <Stack sx={{ gap: 1 }}>
+            <Typography variant="small" sx={{ px: 1, color: "text.muted" }}>
+                {t("language")}
+            </Typography>
+            <DropdownInput_
+                options={options}
+                selected={locale}
+                setSelected={updateCurrentLocale}
+            />
+        </Stack>
     );
 };
 
@@ -175,17 +178,20 @@ const ThemeSelector = () => {
 
     // TODO(LM): Use translations, also remove unused t("CHOSE_THEME")
     return (
-        <DropdownInput
-            options={[
-                { label: pt("System"), value: "system" },
-                { label: pt("Light"), value: "light" },
-                { label: pt("Dark"), value: "dark" },
-            ]}
-            label={pt("Theme")}
-            labelSxProps={{ color: "text.muted" }}
-            selected={mode}
-            setSelected={setMode}
-        />
+        <Stack sx={{ gap: 1 }}>
+            <Typography variant="small" sx={{ px: 1, color: "text.muted" }}>
+                {pt("Theme")}
+            </Typography>
+            <DropdownInput_
+                options={[
+                    { label: pt("System"), value: "system" },
+                    { label: pt("Light"), value: "light" },
+                    { label: pt("Dark"), value: "dark" },
+                ]}
+                selected={mode}
+                setSelected={setMode}
+            />
+        </Stack>
     );
 };
 
