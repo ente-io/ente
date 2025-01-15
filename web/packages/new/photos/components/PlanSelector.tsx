@@ -391,8 +391,8 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
         <Box>
             <Stack
                 sx={(theme) => ({
-                    border: `1px solid ${theme.palette.divider}`,
-                    borderRadius: `${theme.shape.borderRadius}px`,
+                    border: `1px solid ${theme.vars.palette.divider}`,
+                    borderRadius: 1,
                     gap: 3,
                     p: 1.5,
                 })}
