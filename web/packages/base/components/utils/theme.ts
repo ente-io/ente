@@ -335,12 +335,22 @@ const getPalletteOptions = (
             paper2: colors.background?.paper2,
         },
         text: {
+            // Alias base so that we don't have to change the default.
             primary: colors.text?.base,
-            secondary: colors.text?.muted,
-            disabled: colors.text?.faint,
+            // Don't use.
+            secondary: "blue" /* don't use */, // colors.text?.muted,
+            // Don't use.
+            disabled: "blue" /* don't use */, // colors.text?.faint,
             base: colors.text?.base,
             muted: colors.text?.muted,
             faint: colors.text?.faint,
+        },
+        fill: {
+            faint: colors.fill!.faint!,
+        },
+        stroke: {
+            muted: colors.stroke!.muted!,
+            faint: colors.stroke!.faint!,
         },
         divider: colors.stroke?.faint,
         fixed: { ..._colors.fixed },

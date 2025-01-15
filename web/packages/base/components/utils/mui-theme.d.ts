@@ -162,6 +162,30 @@ declare module "@mui/material/styles" {
          */
         critical: PaletteColor;
         /**
+         * Neutral tranparent colors for the stroke of icons and other outlines.
+         *
+         * Comes in three strengths which are meant to play nicely with the
+         * corresponding strengths of "text.*" and "fill.*".
+         *
+         * These change with the color scheme.
+         */
+        stroke: {
+            muted: string;
+            faint: string;
+        };
+        /**
+         * Neutral transparent colors for filling small areas like icon or
+         * button backgrounds.
+         *
+         * Comes in three strengths which are meant to play nicely with the
+         * corresponding strengths of "text.*" and "stroke.*".
+         *
+         * These change with the color scheme.
+         */
+        fill: {
+            faint: string;
+        };
+        /**
          * Transparent background fills that serve as the backdrop of modals,
          * dialogs and drawers etc.
          *
@@ -207,6 +231,8 @@ declare module "@mui/material/styles" {
     interface PaletteOptions {
         accent?: Palette["accent"];
         critical?: Palette["critical"];
+        stroke?: Palette["stroke"];
+        fill?: Palette["fill"];
         backdrop?: Palette["backdrop"];
         fixed?: Palette["fixed"];
         boxShadow?: Palette["boxShadow"];
