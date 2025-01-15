@@ -6,32 +6,31 @@
 import type {
     FixedColors,
     PaletteOptions,
-    Shadow,
+    Theme,
     ThemeColorsOptions,
 } from "@mui/material";
 import { createTheme } from "@mui/material";
 import type { Components } from "@mui/material/styles/components";
 import type { TypographyOptions } from "@mui/material/styles/createTypography";
 
-export enum THEME_COLOR {
+enum THEME_COLOR {
     LIGHT = "light",
     DARK = "dark",
 }
 
-export const getTheme = (
-    themeColor: THEME_COLOR,
-    colorAccentType: ColorAccentType,
-) => {
-    const colors = getColors(themeColor, colorAccentType);
-    const palette = getPallette(themeColor, colors);
-    const components = getComponents(colors, typography);
+const getTheme = (colorAccentType: ColorAccentType): Theme => {
+    const colors = getColors(THEME_COLOR.DARK, colorAccentType);
+    const palette = getPallette(THEME_COLOR.DARK, colors);
+    const components = getComponents(colors, palette, typography);
     return createTheme({
+        cssVariables: true,
+        colorSchemes: { dark: true, light: false },
         colors,
         palette,
         typography,
         components,
         shape: {
-            // Increase the default border radius mulitplier from 4 to 8.
+            // Increase the default border radius multiplier from 4 to 8.
             borderRadius: 8,
         },
         transitions: {
@@ -41,8 +40,95 @@ export const getTheme = (
     });
 };
 
-export type ColorAccentType = "auth" | "photos";
+type ColorAccentType = "auth" | "photos";
 
+/**
+ * [Note: Colors]
+ *
+ * The word "color" in MUI stands for different things. In particular, the color
+ * prop for (e.g.) a Button is not the same as the color passed in the sx prop.
+ *
+ * There are three layers (only the first is necessary, rest are semantic):
+ *
+ * 1. Consider some color, say a shade of red. This will be represented by its
+ *    exact CSS color value, say "#ee0000".
+ *
+ * 2. These can be groups of color values that have roughly the same hue, but
+ *    different levels of saturation. Such hue groups are arranged together into
+ *    a "Colors" exported by "@/mui/material":
+ *
+ *        export interface Color {
+ *            50: string;
+ *            100: string;
+ *            ...
+ *            800: string;
+ *            900: string;
+ *            A100: string;
+ *            ...
+ *            A700: string;
+ *        }
+ *
+ *  3. Finally, there are "PaletteColors" (the naming of props, and
+ *     documentation within MUI (as of v6), omits the palette qualifier).
+ *
+ *         export interface PaletteColor {
+ *             light: string;
+ *             main: string;
+ *             dark: string;
+ *             contrastText: string;
+ *         }
+ *
+ * The PaletteColors are what we use in the MUI component props (e.g. Button).
+ * The PaletteColors are defined by providing color values for the four "tokens"
+ * that make them up, either directly ("#aa000") or via Colors ("red[500]").
+ *
+ * Within the sx prop we need to specify a color value, which can come from the
+ * palette. The "palette", as defined by the palette property we provide when
+ * creating the theme, can consist of arbitrary (and nestable) key value pairs.
+ *
+ * Within sx prop, the "color" and "backgroundColor" props can refer to paths
+ * inside this palette object. That is,
+ *
+ *         sx={{ color: "foo.bar" }}
+ *
+ * resolves to theme.vars.palette.foo.bar.
+ *
+ * [Note: Color names]
+ *
+ * When defining color names, there is some attempt at trying to use MUI v6,
+ * which uses MD (Material Design) v2, nomenclature when feasible (just to keep
+ * the number of concepts low), but as such, our color names should not be
+ * thought of as following Material Design, and should be treated as arbitrary
+ * tokens reflecting our own design system.
+ *
+ * Some callouts:
+ *
+ * - Our "primary" and "secondary" are neutral grays instead of the two-tone
+ *   primary and secondary in MD. Our "accent" is corresponds to the MD primary.
+ *
+ * - Our "critical" is similar to and the alternative for the MD error (which is
+ *   not used).
+ *
+ * - Two of the other default MD PaletteColors - warning, success - are used
+ *   rarely, while info is not used at all.
+ *
+ * [Note: Theme and palette custom variables]
+ *
+ * Custom variables can be added to both the top level theme object, and to the
+ * palette object within the theme. One would imagine that within the palette
+ * there would only be colors that follow PaletteColor, but that's not something
+ * MUI itself follows.
+ *
+ * So there is no particular reason to place custom color related variables in
+ * theme vs in the palette. As a convention:
+ *
+ * - Custom colors (even if they're not PaletteColors) go within the palette.
+ *
+ * - Non-color tokens that depend on the color scheme (e.g. box shadows) also go
+ *   within the palette so that they can be made color scheme specific.
+ *
+ * - All other custom variables remain within the top level theme.
+ */
 const getColors = (
     themeColor: THEME_COLOR,
     accentType: ColorAccentType,
@@ -75,22 +161,20 @@ const fixedColors = (
 const commonFixedColors: Partial<Pick<ThemeColorsOptions, keyof FixedColors>> =
     {
         accent: {
-            A700: "#00B33C",
+            A700: "#00B33C" /* prune */,
             A500: "#1DB954",
-            A400: "#26CB5F",
-            A300: "#01DE4D",
+            A400: "#26CB5F" /* prune */,
+            A300: "#01DE4D" /* prune */,
         },
         warning: {
-            A500: "#FFC247",
+            A500: "#FFC247" /* prune */,
         },
         danger: {
-            A800: "#F53434",
-            A700: "#EA3F3F",
+            A800: "#F53434" /* prune */,
+            A700: "#EA3F3F" /* prune */,
             A500: "#FF6565",
-            A400: "#FF6F6F",
+            A400: "#FF6F6F" /* prune */,
         },
-        white: { base: "#fff", muted: "rgba(255, 255, 255, 0.48)" },
-        black: { base: "#000", muted: "rgba(0, 0, 0, 0.65)" },
     };
 
 const authAccentColor = {
@@ -101,17 +185,17 @@ const authAccentColor = {
 };
 
 const photosAccentColor = {
-    A700: "#00B33C",
+    A700: "#00B33C" /* prune */,
     A500: "#1DB954",
-    A400: "#26CB5F",
-    A300: "#01DE4D",
+    A400: "#26CB5F" /* prune */,
+    A300: "#01DE4D" /* prune */,
 };
 
 const lightThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
     background: {
         base: "#fff",
-        elevated: "#fff",
-        elevated2: "rgba(153, 153, 153, 0.04)",
+        paper: "#fff",
+        paper2: "rgba(153, 153, 153, 0.04)",
     },
     backdrop: {
         base: "rgba(255, 255, 255, 0.92)",
@@ -136,42 +220,24 @@ const lightThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
         faint: "rgba(0, 0, 0, 0.12)",
     },
 
-    shadows: {
-        float: [{ x: 0, y: 0, blur: 10, color: "rgba(0, 0, 0, 0.25)" }],
-        menu: [
-            {
-                x: 0,
-                y: 0,
-                blur: 6,
-                color: "rgba(0, 0, 0, 0.16)",
-            },
-            {
-                x: 0,
-                y: 3,
-                blur: 6,
-                color: "rgba(0, 0, 0, 0.12)",
-            },
-        ],
-        button: [
-            {
-                x: 0,
-                y: 4,
-                blur: 4,
-                color: "rgba(0, 0, 0, 0.25)",
-            },
-        ],
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    boxShadow: {
+        float: "0px 0px 10px rgba(0, 0, 0, 0.25)",
+        menu: "0px 0px 6px rgba(0, 0, 0, 0.16), 0px 3px 6px rgba(0, 0, 0, 0.12)",
+        button: "0px 4px 4px rgba(0, 0, 0, 0.25)",
     },
 };
 
 const darkThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
     background: {
         base: "#000000",
-        elevated: "#1b1b1b",
-        elevated2: "#252525",
+        paper: "#1b1b1b",
+        paper2: "#252525",
     },
     backdrop: {
-        base: "rgba(0, 0, 0, 0.90)",
-        muted: "rgba(0, 0, 0, 0.65)",
+        base: "rgba(0, 0, 0, 0.90)" /* unused */,
+        muted: "rgba(0, 0, 0, 0.65)" /* unused */,
         faint: "rgba(0, 0, 0,0.20)",
     },
     text: {
@@ -192,37 +258,12 @@ const darkThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
         faint: "rgba(255,255,255,0.16)",
     },
 
-    shadows: {
-        float: [
-            {
-                x: 0,
-                y: 2,
-                blur: 12,
-                color: "rgba(0, 0, 0, 0.75)",
-            },
-        ],
-        menu: [
-            {
-                x: 0,
-                y: 0,
-                blur: 6,
-                color: "rgba(0, 0, 0, 0.50)",
-            },
-            {
-                x: 0,
-                y: 3,
-                blur: 6,
-                color: "rgba(0, 0, 0, 0.25)",
-            },
-        ],
-        button: [
-            {
-                x: 0,
-                y: 4,
-                blur: 4,
-                color: "rgba(0, 0, 0, 0.75)",
-            },
-        ],
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    boxShadow: {
+        float: "0px 2px 12px rgba(0, 0, 0, 0.75)",
+        menu: "0px 0px 6px rgba(0, 0, 0, 0.50), 0px 3px 6px rgba(0, 0, 0, 0.25)",
+        button: "0px 4px 4px rgba(0, 0, 0, 0.75)",
     },
 };
 
@@ -239,6 +280,33 @@ const getPallette = (
     }
 };
 
+/**
+ * The color values.
+ *
+ * Use this arbitrarily shaped object to define the palette. It both prevents
+ * duplication across color schemes, and also us to see the semantic
+ * relationships between the colors (if there are any).
+ */
+const _colors = {
+    accentPhotos: {
+        dark: "#00B33C",
+        main: "#1DB954",
+        light: "#01DE4D",
+    },
+    fixed: {
+        white: "#fff",
+        black: "#000",
+        success: "#1DB954",
+        warning: "#FFC247",
+        danger: {
+            dark: "#F53434",
+            main: "#EA3F3F",
+            light: "#FF6565",
+        },
+        overlayIndicatorMuted: "rgba(255, 255, 255, 0.48)",
+    },
+};
+
 const getPalletteOptions = (
     themeColor: THEME_COLOR,
     colors: ThemeColorsOptions,
@@ -252,7 +320,9 @@ const getPalletteOptions = (
             main: colors.fill.base,
             dark: colors.fill?.basePressed,
             contrastText:
-                themeColor === "dark" ? colors.black?.base : colors.white?.base,
+                themeColor === "dark"
+                    ? _colors.fixed.black
+                    : _colors.fixed.white,
         },
         secondary: {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -261,23 +331,28 @@ const getPalletteOptions = (
             dark: colors.fill?.faintPressed,
             contrastText: colors.text?.base,
         },
+        success: { main: _colors.fixed.success },
+        warning: { main: _colors.fixed.warning },
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         accent: {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             main: colors.accent.A500,
-            dark: colors.accent?.A700,
-            contrastText: colors.white?.base,
+            dark: colors.accent!.A700!,
+            light: colors.accent!.A300!,
+            contrastText: _colors.fixed.white,
         },
         critical: {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            main: colors.danger.A700,
-            dark: colors.danger?.A800,
-            contrastText: colors.white?.base,
+            main: _colors.fixed.danger.main,
+            dark: _colors.fixed.danger.dark,
+            light: _colors.fixed.danger.light,
+            contrastText: _colors.fixed.white,
         },
         background: {
             default: colors.background?.base,
-            paper: colors.background?.elevated,
+            paper: colors.background?.paper,
+            paper2: colors.background?.paper2,
         },
         text: {
             primary: colors.text?.base,
@@ -288,6 +363,15 @@ const getPalletteOptions = (
             faint: colors.text?.faint,
         },
         divider: colors.stroke?.faint,
+        fixed: { ..._colors.fixed },
+        backdrop: {
+            base: colors.backdrop!.base!,
+            muted: colors.backdrop!.muted!,
+            faint: colors.backdrop!.faint!,
+        },
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        boxShadow: colors.boxShadow,
     };
 };
 
@@ -384,6 +468,7 @@ const typography: TypographyOptions = {
 
 const getComponents = (
     colors: ThemeColorsOptions,
+    palette: PaletteOptions,
     typography: TypographyOptions,
 ): Components => ({
     MuiCssBaseline: {
@@ -417,15 +502,28 @@ const getComponents = (
         },
     },
 
-    MuiDrawer: {
+    MuiModal: {
         styleOverrides: {
             root: {
-                ".MuiBackdrop-root": {
-                    backgroundColor: colors.backdrop?.faint,
+                // A workaround to prevent stuck modals from blocking clicks.
+                // https://github.com/mui/material-ui/issues/32286#issuecomment-1287951109
+                '&:has(> div[style*="opacity: 0"])': {
+                    pointerEvents: "none",
                 },
             },
         },
     },
+
+    MuiDrawer: {
+        styleOverrides: {
+            root: {
+                ".MuiBackdrop-root": {
+                    backgroundColor: palette.backdrop?.faint,
+                },
+            },
+        },
+    },
+
     MuiDialog: {
         defaultProps: {
             // This is required to prevent console errors about aria-hiding a
@@ -437,10 +535,10 @@ const getComponents = (
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
-                    backgroundColor: colors.backdrop?.faint,
+                    backgroundColor: palette.backdrop?.faint,
                 },
                 "& .MuiDialog-paper": {
-                    filter: getDropShadowStyle(colors.shadows?.float),
+                    boxShadow: palette.boxShadow?.float,
                 },
                 // Reset the MUI default paddings to 16px everywhere.
                 //
@@ -476,9 +574,10 @@ const getComponents = (
             },
         },
     },
+
     MuiPaper: {
         // MUI applies a semi-transparent background image for elevation in dark
-        // mode. Remove it to use the elevated Paper background from our design.
+        // mode. Remove it to match the Paper background from our design.
         styleOverrides: { root: { backgroundImage: "none" } },
     },
     MuiLink: {
@@ -576,6 +675,25 @@ const getComponents = (
             },
         },
     },
+
+    MuiCheckbox: {
+        defaultProps: {
+            // Disable the ripple effect for all checkboxes.
+            disableRipple: true,
+        },
+        styleOverrides: {
+            // Since we've disabled the ripple, add other affordances to it (a
+            // background and outline) to clearly indicate whenever it gains
+            // keyboard focus.
+            root: {
+                "&.Mui-focusVisible": {
+                    backgroundColor: colors.fill?.faint,
+                    outline: `1px solid ${colors.stroke.faint}`,
+                },
+            },
+        },
+    },
+
     MuiSvgIcon: {
         styleOverrides: {
             root: ({ ownerState }) => ({
@@ -601,15 +719,7 @@ const getComponents = (
             },
         },
     },
-    MuiModal: {
-        styleOverrides: {
-            root: {
-                '&:has(> div[style*="opacity: 0"])': {
-                    pointerEvents: "none",
-                },
-            },
-        },
-    },
+
     MuiMenuItem: {
         styleOverrides: {
             // don't reduce opacity of disabled items
@@ -621,15 +731,6 @@ const getComponents = (
         },
     },
 });
-
-const getDropShadowStyle = (shadows: Shadow[] | undefined) => {
-    return (shadows ?? [])
-        .map(
-            (shadow) =>
-                `drop-shadow(${shadow.x}px ${shadow.y}px ${shadow.blur}px ${shadow.color})`,
-        )
-        .join(" ");
-};
 
 interface IconColorableOwnerState {
     color?: string;
@@ -657,3 +758,18 @@ function getIconColor(
     }
     return {};
 }
+
+// Exports ---
+
+/**
+ * The MUI {@link Theme} to use for the photos app.
+ *
+ * This is also the "default" theme, in that it is used for the accounts app
+ * which serves both photos and auth.
+ */
+export const photosTheme = getTheme("photos");
+
+/**
+ * The MUI {@link Theme} to use for the auth app.
+ */
+export const authTheme = getTheme("auth");

@@ -21,6 +21,7 @@ import {
 import { isHTTP401Error, PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
 import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
+import { useFileInput } from "@/gallery/components/utils/use-file-input";
 import { downloadManager } from "@/gallery/services/download";
 import { extractCollectionKeyFromShareURL } from "@/gallery/services/share";
 import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
@@ -46,7 +47,6 @@ import SingleInputForm, {
 } from "@ente/shared/components/SingleInputForm";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
-import { useFileInput } from "@ente/shared/hooks/useFileInput";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";

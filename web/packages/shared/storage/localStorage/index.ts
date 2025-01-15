@@ -12,7 +12,6 @@ export enum LS_KEYS {
     // LOGS = "logs",
     // Migrated to (and only used by) useCollectionsSortByLocalState.
     COLLECTION_SORT_BY = "collectionSortBy",
-    THEME = "theme",
     // Moved to the new wrapper @/base/local-storage
     // LOCALE = 'locale',
     SRP_SETUP_ATTRIBUTES = "srpSetupAttributes",

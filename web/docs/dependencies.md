@@ -97,7 +97,9 @@ DOM.
 
 We use [MUI](https://mui.com)'s
 [@mui/material](https://mui.com/material-ui/getting-started/installation/) as
-our base React component library.
+our base React component library (In our code and documentation, we use the name
+"MUI" to refer to the the combination of both MUI's "Material UI" and "System"
+packages that we use).
 
 MUI uses [Emotion](https://emotion.sh/) as its preferred CSS-in-JS library, for
 which we need to install install two Emotion packages (`@emotion/react` and

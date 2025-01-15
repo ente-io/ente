@@ -820,7 +820,6 @@ export function PhotoList({
                                         }
                                         size="small"
                                         sx={{ pl: 0 }}
-                                        disableRipple={true}
                                     />
                                 )}
                                 {item.date}
@@ -840,7 +839,6 @@ export function PhotoList({
                                 }
                                 size="small"
                                 sx={{ pl: 0 }}
-                                disableRipple={true}
                             />
                         )}
                         {listItem.date}

@@ -248,7 +248,7 @@ const Footer: React.FC<FooterProps> = ({ step, onSubmit, onClose }) =>
                 </FocusVisibleButton>
             )}
             {step == "completed" && (
-                <FocusVisibleButton color="primary" fullWidth onClick={onClose}>
+                <FocusVisibleButton fullWidth onClick={onClose}>
                     {t("close")}
                 </FocusVisibleButton>
             )}

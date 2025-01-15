@@ -311,12 +311,7 @@ const EntryOptions: React.FC<EntryOptionsProps> = ({ confirmStopWatching }) => {
     return (
         <OverflowMenu
             ariaID={"watch-mapping-option"}
-            menuPaperProps={{
-                sx: {
-                    backgroundColor: (theme) =>
-                        theme.colors.background.elevated2,
-                },
-            }}
+            menuPaperSxProps={{ backgroundColor: "background.paper2" }}
         >
             <OverflowMenuOption
                 color="critical"
