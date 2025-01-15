@@ -25,6 +25,8 @@ export const getTheme = (
     const palette = getPallette(themeColor, colors);
     const components = getComponents(colors, palette, typography);
     return createTheme({
+        cssVariables: true,
+        colorSchemes: { dark: true, light: false },
         colors,
         palette,
         typography,
