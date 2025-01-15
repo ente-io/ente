@@ -243,16 +243,20 @@ const App: React.FC = () => {
             setLocalToken(userToken);
             setToken(userToken);
 
-            document.getElementById(":r1:").readOnly = true;
+            const editToken = document.getElementById(":r1:");
+            if (editToken instanceof HTMLInputElement) {
+                editToken.readOnly = true;
+            }
         }
     }, []);
 
     const updateToken = () => {
         const editToken = document.getElementById(":r1:");
-        editToken.readOnly = false;
-
-        // Change focus to Token input form
-        editToken.focus();
+        if (editToken instanceof HTMLInputElement) {
+            editToken.readOnly = false;
+            // Change focus to token field
+            editToken.focus();
+        }
     };
 
     return (
@@ -287,7 +291,6 @@ const App: React.FC = () => {
                                     style={{ maxWidth: "parent" }}
                                 />
                                 <Link
-                                    to="/"
                                     style={{ textAlign: "left" }}
                                     onClick={updateToken}
                                 >
