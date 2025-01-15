@@ -185,6 +185,8 @@
   },
   "allowAddPhotosDescription": "Permitir a las personas con el enlace añadir fotos al álbum compartido.",
   "passwordLock": "Bloqueo con contraseña",
+  "canNotOpenTitle": "No es posible abrir este álbum",
+  "canNotOpenBody": "Lo sentimos, este álbum no se puede abrir en la aplicación.",
   "disableDownloadWarningTitle": "Por favor, ten en cuenta",
   "disableDownloadWarningBody": "Los espectadores todavía pueden tomar capturas de pantalla o guardar una copia de tus fotos usando herramientas externas",
   "allowDownloads": "Permitir descargas",
@@ -1378,6 +1380,7 @@
   "extraPhotosFound": "Fotos adicionales encontradas",
   "configuration": "Configuración",
   "localIndexing": "Indexado local",
+  "processed": "Procesado",
   "resetPerson": "Eliminar",
   "areYouSureYouWantToResetThisPerson": "¿Seguro que desea eliminar esta persona?",
   "allPersonGroupingWillReset": "Se eliminarán todas las agrupaciones para esta persona, y se eliminarán todas sus sugerencias",
@@ -1580,5 +1583,9 @@
   "authToManageLegacy": "Por favor, autentícate para administrar tus contactos de confianza",
   "useDifferentPlayerInfo": "¿Tienes problemas para reproducir este video? Mantén pulsado aquí para probar un reproductor diferente.",
   "hideSharedItemsFromHomeGallery": "Ocultar elementos compartidos de la galería de inicio",
-  "gallery": "Galería"
+  "gallery": "Galería",
+  "joinAlbum": "Unir álbum",
+  "joinAlbumSubtext": "para ver y añadir tus fotos",
+  "joinAlbumSubtextViewer": "para añadir esto a los álbumes compartidos",
+  "join": "Unir"
 }

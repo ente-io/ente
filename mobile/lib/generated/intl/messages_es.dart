@@ -494,6 +494,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Datos almacenados en caché"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculando..."),
+        "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
+            "Lo sentimos, este álbum no se puede abrir en la aplicación."),
+        "canNotOpenTitle": MessageLookupByLibrary.simpleMessage(
+            "No es posible abrir este álbum"),
         "canNotUploadToAlbumsOwnedByOthers":
             MessageLookupByLibrary.simpleMessage(
                 "No se puede subir a álbumes que sean propiedad de otros"),
@@ -1082,6 +1086,12 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Los artículos muestran el número de días restantes antes de ser borrados permanente"),
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "Los elementos seleccionados serán eliminados de este álbum"),
+        "join": MessageLookupByLibrary.simpleMessage("Unir"),
+        "joinAlbum": MessageLookupByLibrary.simpleMessage("Unir álbum"),
+        "joinAlbumSubtext":
+            MessageLookupByLibrary.simpleMessage("para ver y añadir tus fotos"),
+        "joinAlbumSubtextViewer": MessageLookupByLibrary.simpleMessage(
+            "para añadir esto a los álbumes compartidos"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Únete al Discord"),
         "keepPhotos":
             MessageLookupByLibrary.simpleMessage("Conservar las fotos"),
@@ -1437,6 +1447,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "privateSharing":
             MessageLookupByLibrary.simpleMessage("Compartir en privado"),
         "proceed": MessageLookupByLibrary.simpleMessage("Continuar"),
+        "processed": MessageLookupByLibrary.simpleMessage("Procesado"),
         "processingImport": m54,
         "publicLinkCreated":
             MessageLookupByLibrary.simpleMessage("Enlace público creado"),

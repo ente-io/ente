@@ -1,4 +1,4 @@
-import { Overlay } from "@/base/components/mui/Container";
+import { Overlay } from "@/base/components/containers";
 import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
 import { FileType } from "@/media/file-type";
@@ -176,29 +176,18 @@ export const SelectedOverlay = styled("div")<{ selected: boolean }>`
     border-radius: 4px;
 `;
 
-export const FileTypeIndicatorOverlay = styled(Overlay)(
-    ({ theme }) => `
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-end;
-    background:${
-        theme.palette.mode === "dark"
-            ? `linear-gradient(
-        315deg,
-        rgba(0, 0, 0, 0.14) 0%,
-        rgba(0, 0, 0, 0.05) 29.61%,
-        rgba(0, 0, 0, 0) 49.86%
-    )`
-            : `linear-gradient(
-        315deg,
-        rgba(255, 255, 255, 0.14) 0%,
-        rgba(255, 255, 255, 0.05) 29.61%,
-        rgba(255, 255, 255, 0) 49.86%
-    `
-    };
-    padding: 8px;
-`,
-);
+export const FileTypeIndicatorOverlay = styled(Overlay)(({ theme }) => ({
+    display: "flex",
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+    padding: "8px",
+    background:
+        "linear-gradient(315deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.05) 29.61%, rgba(255, 255, 255, 0) 49.86%)",
+    ...theme.applyStyles("dark", {
+        background:
+            "linear-gradient(315deg, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0.05) 29.61%, rgba(0, 0, 0, 0) 49.86%)",
+    }),
+}));
 
 const Cont = styled("div")<{ disabled: boolean }>`
     display: flex;

@@ -88,6 +88,8 @@
   "useRecoveryKey": "Naudoti atkūrimo raktą",
   "incorrectPasswordTitle": "Neteisingas slaptažodis.",
   "welcomeBack": "Sveiki sugrįžę!",
+  "emailAlreadyRegistered": "El. paštas jau užregistruotas.",
+  "emailNotRegistered": "El. paštas neregistruotas.",
   "madeWithLoveAtPrefix": "sukurta su ❤️ vietoje ",
   "supportDevs": "Prenumeruokite <bold-green>„ente“</bold-green>, kad palaikytumėte mus",
   "supportDiscount": "Naudokite kupono kodą „AUTH“, kad gautumėte 10 % nuolaida pirmiesiems metams",

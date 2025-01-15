@@ -1,8 +1,8 @@
 import { isDesktop } from "@/base/app";
 import { assertionFailed } from "@/base/assert";
+import { Overlay } from "@/base/components/containers";
 import { FilledIconButton, type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { Overlay } from "@/base/components/mui/Container";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { lowercaseExtension } from "@/base/file-name";
 import log from "@/base/log";
@@ -989,7 +989,7 @@ const CaptionContainer = styled("div")(({ theme }) => ({
     maxWidth: "375px",
     fontSize: "14px",
     lineHeight: "17px",
-    backgroundColor: theme.colors.backdrop.faint,
+    backgroundColor: theme.palette.backdrop.faint,
     backdropFilter: "blur(96px)",
 }));
 
@@ -1009,7 +1009,7 @@ const CircularProgressWithLabel: React.FC<
             <Typography
                 variant="mini"
                 component="div"
-                sx={{ color: "text.secondary" }}
+                sx={{ color: "text.muted" }}
             >{`${Math.round(value)}%`}</Typography>
         </Overlay>
     </>

@@ -108,14 +108,18 @@ const AllCollectionsHeader = ({
         <FlexWrapper>
             <FluidContainer mr={1.5}>
                 <Box>
-                    <Typography variant="h3">
+                    <Typography variant="h5">
                         {isInHiddenSection
                             ? t("all_hidden_albums")
                             : t("all_albums")}
                     </Typography>
                     <Typography
                         variant="small"
-                        sx={{ fontWeight: "normal", color: "text.muted" }}
+                        sx={{
+                            color: "text.muted",
+                            // Undo the effects of DialogTitle.
+                            fontWeight: "normal",
+                        }}
                     >
                         {t("albums_count", { count: collectionCount })}
                     </Typography>

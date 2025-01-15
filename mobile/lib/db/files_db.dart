@@ -1808,16 +1808,12 @@ class FilesDB {
     return FileLoadResult(filteredFiles, files.length == limit);
   }
 
-  Future<List<int>> getOwnedFileIDs(int ownerID) async {
+  Future<List<int>> getAllFileIDs() async {
     final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      '''
+    final results = await db.getAll('''
       SELECT DISTINCT $columnUploadedFileID FROM $filesTable
-      WHERE ($columnOwnerID = ? AND $columnUploadedFileID IS NOT NULL AND
-      $columnUploadedFileID IS NOT -1)    
-    ''',
-      [ownerID],
-    );
+      WHERE  $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1    
+    ''');
     final ids = <int>[];
     for (final result in results) {
       ids.add(result[columnUploadedFileID] as int);

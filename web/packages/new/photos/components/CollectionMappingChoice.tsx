@@ -1,4 +1,4 @@
-import { SpaceBetweenFlex } from "@/base/components/mui/Container";
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import type { CollectionMapping } from "@/base/types/ipc";

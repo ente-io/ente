@@ -88,6 +88,8 @@
   "useRecoveryKey": "Използвайте ключ за възстановяване",
   "incorrectPasswordTitle": "Грешна парола",
   "welcomeBack": "Добре дошли отново!",
+  "emailAlreadyRegistered": "Имейлът вече е регистриран.",
+  "emailNotRegistered": "Имейлът не е регистриран.",
   "madeWithLoveAtPrefix": "направено с ❤️ от ",
   "supportDevs": "Абонирайте се за <bold-green>ente</bold-green>, за да ни подкрепите",
   "supportDiscount": "Използвайте промокод „AUTH“, за да получите 10% отстъпка през първата година",

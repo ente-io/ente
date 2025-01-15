@@ -97,7 +97,9 @@ DOM.
 
 We use [MUI](https://mui.com)'s
 [@mui/material](https://mui.com/material-ui/getting-started/installation/) as
-our base React component library.
+our base React component library (In our code and documentation, we use the name
+"MUI" to refer to the the combination of both MUI's "Material UI" and "System"
+packages that we use).
 
 MUI uses [Emotion](https://emotion.sh/) as its preferred CSS-in-JS library, for
 which we need to install install two Emotion packages (`@emotion/react` and
@@ -141,6 +143,11 @@ Note that inspite of the "next" in the name of the library, it has nothing to do
 with Next.js.
 
 For more details, see [translations.md](translations.md).
+
+### Font
+
+Inter Variable (with support for weights 100 - 90) is used as the primary font,
+via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 
 ### UI components
 

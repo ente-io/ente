@@ -67,11 +67,7 @@ export default function ExportFinished(props: Props) {
                 >
                     {t("close")}
                 </FocusVisibleButton>
-                <FocusVisibleButton
-                    fullWidth
-                    color="primary"
-                    onClick={props.onResync}
-                >
+                <FocusVisibleButton fullWidth onClick={props.onResync}>
                     {t("export_again")}
                 </FocusVisibleButton>
             </DialogActions>

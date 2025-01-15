@@ -113,15 +113,13 @@ export const setupI18n = async () => {
             },
             react: {
                 useSuspense: false,
-                transKeepBasicHtmlNodesFor: [
-                    "div",
-                    "strong",
-                    "h2",
-                    "span",
-                    "code",
-                    "p",
-                    "br",
-                ],
+                // Allow the following tags (without any attributes) to be used
+                // in translations. Such keys can then be rendered using the
+                // Trans component, but without otherwise needing any other
+                // input from our side.
+                //
+                // https://react.i18next.com/latest/trans-component
+                transKeepBasicHtmlNodesFor: ["br", "p", "strong", "code"],
             },
         });
 

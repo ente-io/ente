@@ -1,6 +1,6 @@
+import { Notification } from "@/new/photos/components/Notification";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import { useAppContext } from "@/new/photos/types/context";
-import Notification from "components/Notification";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import { useContext } from "react";
@@ -126,25 +126,21 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
                     onClose={handleClose(attributes)}
                     keepOpenOnClick
                     attributes={{
-                        variant: isFilesDownloadCompletedWithErrors(attributes)
+                        color: isFilesDownloadCompletedWithErrors(attributes)
                             ? "critical"
                             : "secondary",
                         title: isFilesDownloadCompletedWithErrors(attributes)
-                            ? t("DOWNLOAD_FAILED")
+                            ? t("download_failed")
                             : isFilesDownloadCompleted(attributes)
-                              ? t("DOWNLOAD_COMPLETE")
-                              : t("DOWNLOADING_COLLECTION", {
+                              ? t("download_complete")
+                              : t("downloading_album", {
                                     name: attributes.folderName,
                                 }),
                         caption: isFilesDownloadCompleted(attributes)
                             ? attributes.folderName
-                            : t("DOWNLOAD_PROGRESS", {
-                                  progress: {
-                                      current:
-                                          attributes.success +
-                                          attributes.failed,
-                                      total: attributes.total,
-                                  },
+                            : t("download_progress", {
+                                  count: attributes.success + attributes.failed,
+                                  total: attributes.total,
                               }),
                         onClick: handleOnClick(attributes.id),
                     }}

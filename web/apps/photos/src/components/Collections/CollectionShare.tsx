@@ -302,11 +302,11 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
             {sharableLinkError && (
                 <Typography
                     variant="small"
-                    sx={(theme) => ({
-                        color: theme.colors.danger.A700,
+                    sx={{
+                        color: "critical.main",
                         mt: 0.5,
                         textAlign: "center",
-                    })}
+                    }}
                 >
                     {sharableLinkError}
                 </Typography>
@@ -981,7 +981,6 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                 ))}
                                 <EnteMenuItem
                                     startIcon={<AddIcon />}
-                                    fontWeight={"bold"}
                                     onClick={openAddViewer}
                                     label={
                                         viewers?.length
@@ -1462,11 +1461,11 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                     {sharableLinkError && (
                         <Typography
                             variant="small"
-                            sx={(theme) => ({
-                                color: theme.colors.danger.A700,
+                            sx={{
+                                color: "critical.main",
                                 mt: 0.5,
                                 textAlign: "center",
-                            })}
+                            }}
                         >
                             {sharableLinkError}
                         </Typography>
@@ -1892,10 +1891,7 @@ function PublicLinkSetPassword({
             fullWidth
         >
             <Stack sx={{ gap: 3, p: 1.5 }}>
-                <Typography
-                    variant="h3"
-                    sx={{ fontWeight: "bold", px: 1, py: 0.5 }}
-                >
+                <Typography variant="h3" sx={{ px: 1, py: 0.5 }}>
                     {t("password_lock")}
                 </Typography>
                 <SingleInputForm

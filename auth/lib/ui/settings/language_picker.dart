@@ -128,6 +128,8 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         return 'العربية';
       case 'ca':
         return 'Català';
+      case 'cs':
+        return 'Čeština';
       case 'en':
         return 'English';
       case 'bg':
@@ -145,8 +147,14 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         return 'Français';
       case 'de':
         return 'Deutsch';
+      case 'hu':
+        return 'Magyar';
+      case 'id':
+        return 'Bahasa Indonesia';
       case 'it':
         return 'Italiano';
+      case 'lt':
+        return 'Lietuvių';
       case 'nl':
         return 'Nederlands';
       case 'pl':
@@ -160,6 +168,8 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         }
       case 'ru':
         return 'Русский';
+      case 'sl':
+        return 'Slovenščina';
       case 'sk':
         return 'Slovenčina';
       case 'tr':

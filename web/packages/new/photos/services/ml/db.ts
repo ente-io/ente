@@ -249,9 +249,7 @@ export const addFileEntry = async (fileID: number) => {
 /**
  * Update entries in ML DB to align with the state of local files outside ML DB.
  *
- * @param localFileIDs IDs of all the files that the client is aware of,
- * filtered to only keep the files that the user owns and the formats that can
- * be indexed by our current indexing pipelines.
+ * @param localFileIDs IDs of all the files that the client is aware of.
  *
  * @param localTrashFilesIDs IDs of all the files in trash.
  *

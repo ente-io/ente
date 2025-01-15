@@ -178,9 +178,7 @@ export const Export: React.FC<ExportProps> = ({
     return (
         <Dialog {...{ open, onClose }} maxWidth="xs" fullWidth>
             <SpaceBetweenFlex sx={{ p: "12px 4px 0px 0px" }}>
-                <DialogTitle variant="h3" fontWeight={"bold"}>
-                    {t("export_data")}
-                </DialogTitle>
+                <DialogTitle variant="h3">{t("export_data")}</DialogTitle>
                 <DialogCloseIconButton {...{ onClose }} />
             </SpaceBetweenFlex>
 
@@ -271,7 +269,7 @@ const DirectoryPathContainer = styled(LinkButton)(
 const ChangeDirectoryOption: React.FC<ButtonishProps> = ({ onClick }) => (
     <OverflowMenu ariaID="export-option" triggerButtonProps={{ sx: { ml: 1 } }}>
         <OverflowMenuOption onClick={onClick} startIcon={<FolderIcon />}>
-            {t("CHANGE_FOLDER")}
+            {t("change_folder")}
         </OverflowMenuOption>
     </OverflowMenu>
 );

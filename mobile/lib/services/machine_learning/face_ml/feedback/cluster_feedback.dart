@@ -357,6 +357,7 @@ class ClusterFeedbackService {
       personID: person.remoteID,
       clusterID: clusterID,
     );
+    Bus.instance.fire(PeopleChangedEvent());
   }
 
   Future<void> ignoreCluster(String clusterID) async {

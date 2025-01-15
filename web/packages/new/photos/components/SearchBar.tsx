@@ -251,7 +251,7 @@ const SearchInputWrapper = styled("div")`
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: ${({ theme }) => theme.colors.background.base};
+    background: transparent;
     max-width: 484px;
     margin: auto;
 `;
@@ -260,15 +260,16 @@ const loadOptions = pDebounce(searchOptionsForString, 250);
 
 const createSelectStyles = ({
     colors,
+    palette,
 }: Theme): StylesConfig<SearchOption, false> => ({
     container: (style) => ({ ...style, flex: 1 }),
     control: (style, { isFocused }) => ({
         ...style,
-        backgroundColor: colors.background.elevated,
-        borderColor: isFocused ? colors.accent.A500 : "transparent",
+        backgroundColor: palette.background.paper,
+        borderColor: isFocused ? palette.accent.main : "transparent",
         boxShadow: "none",
         ":hover": {
-            borderColor: colors.accent.A300,
+            borderColor: palette.accent.light,
             cursor: "text",
         },
     }),
@@ -281,7 +282,9 @@ const createSelectStyles = ({
         ...style,
         // Suppress the default margin at the top.
         marginTop: "1px",
-        backgroundColor: colors.background.elevated,
+        // Give an opaque and elevated surface color to the menu to override the
+        // default (transparent).
+        backgroundColor: palette.background.paper,
     }),
     option: (style, { isFocused }) => ({
         ...style,
@@ -290,8 +293,9 @@ const createSelectStyles = ({
         "& :hover": {
             cursor: "pointer",
         },
+        // Elevate the focused option further.
         "& .option-contents": isFocused
-            ? { backgroundColor: colors.background.elevated2 }
+            ? { backgroundColor: palette.background.paper2 }
             : {},
         "&:last-child .MuiDivider-root": {
             display: "none",
@@ -375,7 +379,8 @@ const shouldShowEmptyState = (inputValue: string) => {
     if (!isMLSupported) return false;
 
     const status = mlStatusSnapshot();
-    if (!status || status.phase == "disabled") return false;
+    if (!status || status.phase == "disabled" || status.phase == "done")
+        return false;
 
     // Show it otherwise.
     return true;
@@ -391,7 +396,7 @@ const EmptyState: React.FC<
     const mlStatus = useMLStatusSnapshot();
     const people = usePeopleStateSnapshot()?.visiblePeople;
 
-    if (!mlStatus || mlStatus.phase == "disabled") {
+    if (!mlStatus || mlStatus.phase == "disabled" || mlStatus.phase == "done") {
         // The preflight check should've prevented us from coming here.
         assertionFailed();
         return <></>;
@@ -403,16 +408,13 @@ const EmptyState: React.FC<
             label = t("indexing_scheduled");
             break;
         case "indexing":
-            label = t("indexing_photos", mlStatus);
+            label = t("indexing_photos");
             break;
         case "fetching":
-            label = t("indexing_fetching", mlStatus);
+            label = t("indexing_fetching");
             break;
         case "clustering":
-            label = t("indexing_people", mlStatus);
-            break;
-        case "done":
-            label = t("indexing_done", mlStatus);
+            label = t("indexing_people");
             break;
     }
 
@@ -470,7 +472,7 @@ const OptionContents = ({ data: option }: { data: SearchOption }) => (
         >
             <Box>
                 <Typography
-                    sx={{ fontWeight: "bold", wordBreak: "break-word" }}
+                    sx={{ fontWeight: "medium", wordBreak: "break-word" }}
                 >
                     {option.suggestion.label}
                 </Typography>

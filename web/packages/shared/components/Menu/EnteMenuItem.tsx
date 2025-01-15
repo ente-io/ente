@@ -41,7 +41,7 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
     subIcon,
     checked,
     variant = "primary",
-    fontWeight = "bold",
+    fontWeight = "medium",
     labelComponent,
     disabled = false,
 }) => {

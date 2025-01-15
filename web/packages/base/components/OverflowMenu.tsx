@@ -34,10 +34,10 @@ interface OverflowMenuProps {
      */
     triggerButtonProps?: Partial<IconButtonProps>;
     /**
-     * Optional additional properties for the MUI {@link Paper} that underlies
-     * the {@link Menu}.
+     * Optional additional sx props for the MUI {@link Paper} that underlies the
+     * {@link Menu}.
      */
-    menuPaperProps?: Partial<PaperProps>;
+    menuPaperSxProps?: PaperProps["sx"];
 }
 
 /**
@@ -50,7 +50,7 @@ export const OverflowMenu: React.FC<
     ariaID,
     triggerButtonIcon,
     triggerButtonProps,
-    menuPaperProps,
+    menuPaperSxProps,
     children,
 }) => {
     const [anchorEl, setAnchorEl] = useState<MenuProps["anchorEl"]>();
@@ -79,7 +79,7 @@ export const OverflowMenu: React.FC<
                     disablePadding: true,
                     "aria-labelledby": ariaID,
                 }}
-                slotProps={{ paper: menuPaperProps }}
+                slotProps={{ paper: { sx: menuPaperSxProps } }}
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
             >
@@ -148,7 +148,7 @@ export const OverflowMenuOption: React.FC<
                 }}
             >
                 {startIcon}
-                <Typography sx={{ flex: 1, fontWeight: "bold" }}>
+                <Typography sx={{ flex: 1, fontWeight: "medium" }}>
                     {children}
                 </Typography>
                 {endIcon}

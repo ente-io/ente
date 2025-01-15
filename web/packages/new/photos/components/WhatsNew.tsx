@@ -75,10 +75,8 @@ const ChangelogContent: React.FC = () => {
     return (
         <StyledUL>
             <li>
-                <Typography color="primary">
-                    {ut("Improved date search")}
-                </Typography>
-                <Typography>
+                <Typography>{ut("Improved date search")}</Typography>
+                <Typography sx={{ color: "text.muted" }}>
                     Search for photos by day of week (<i>Wednesday</i>) or hour
                     of day (<i>8 pm</i>) in addition to the existing search by
                     partial dates (<i>20 July</i>, or even <i>2021</i>) and
@@ -86,10 +84,8 @@ const ChangelogContent: React.FC = () => {
                 </Typography>
             </li>
             <li>
-                <Typography color="primary">
-                    {ut("Faster magic search")}
-                </Typography>
-                <Typography>
+                <Typography>{ut("Faster magic search")}</Typography>
+                <Typography sx={{ color: "text.muted" }}>
                     {ut(
                         "The magic search beta, where you can search for photos just by typing whatever is in them, just got faster.",
                     )}

@@ -1,3 +1,4 @@
+import { isSxArray } from "@/base/components/utils/sx";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
     Box,
@@ -52,17 +53,20 @@ export default function DropdownInput<T extends string>({
                         },
                     },
                     MenuListProps: {
-                        sx: (theme) => ({
-                            backgroundColor: theme.colors.background.elevated2,
+                        sx: {
+                            backgroundColor: "background.paper2",
                             ".MuiMenuItem-root ": {
-                                color: theme.colors.text.faint,
+                                color: "text.faint",
                                 whiteSpace: "normal",
                             },
+                            // Make the selected item pop out by giving it a
+                            // different color instead of giving it a different
+                            // background color.
                             "&&& > .Mui-selected": {
-                                background: theme.colors.background.elevated2,
-                                color: theme.colors.text.base,
+                                backgroundColor: "background.paper2",
+                                color: "text.base",
                             },
-                        }),
+                        },
                     },
                 }}
                 sx={(theme) => ({
@@ -119,7 +123,7 @@ export default function DropdownInput<T extends string>({
                     variant="small"
                     sx={[
                         { px: "8px", color: "text.muted" },
-                        ...(Array.isArray(messageSxProps)
+                        ...(isSxArray(messageSxProps)
                             ? messageSxProps
                             : [messageSxProps]),
                     ]}

@@ -71,6 +71,7 @@ void main() async {
     await WindowListenerService.instance.init();
     WindowOptions windowOptions = WindowOptions(
       size: WindowListenerService.instance.getWindowSize(),
+      maximumSize: const Size(8192, 8192),
     );
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await DirectoryUtils.migrateNamingChanges();

@@ -1,7 +1,14 @@
+import {
+    AccountsPageContents,
+    AccountsPageTitle,
+} from "@/accounts/components/layouts/centered-paper";
+import {
+    SpaceBetweenFlex,
+    Stack100vhCenter,
+} from "@/base/components/containers";
 import { EnteLogoSVG } from "@/base/components/EnteLogo";
-import { FormPaper, FormPaperTitle } from "@/base/components/FormPaper";
+import { LoadingIndicator } from "@/base/components/loaders";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import {
     OverflowMenu,
@@ -13,6 +20,8 @@ import {
 } from "@/base/components/utils/hooks";
 import { isHTTP401Error, PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
+import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
+import { useFileInput } from "@/gallery/components/utils/use-file-input";
 import { downloadManager } from "@/gallery/services/download";
 import { extractCollectionKeyFromShareURL } from "@/gallery/services/share";
 import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
@@ -32,14 +41,12 @@ import { useAppContext } from "@/new/photos/types/context";
 import {
     CenteredFlex,
     FluidContainer,
-    VerticallyCentered,
 } from "@ente/shared/components/Container";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
-import { useFileInput } from "@ente/shared/hooks/useFileInput";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -51,8 +58,7 @@ import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
 } from "components/FilesDownloadProgress";
-import FullScreenDropZone from "components/FullScreenDropZone";
-import { LoadingOverlay } from "components/LoadingOverlay";
+import { GalleryLoadingOverlay } from "components/GalleryLoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import Uploader from "components/Upload/Uploader";
@@ -415,7 +421,7 @@ export default function PublicCollectionGallery() {
         } catch (e) {
             log.error("Failed to verifyLinkPassword", e);
             if (isHTTP401Error(e)) {
-                setFieldError(t("INCORRECT_PASSPHRASE"));
+                setFieldError(t("incorrect_password"));
             } else {
                 setFieldError(t("generic_error_retry"));
             }
@@ -455,18 +461,20 @@ export default function PublicCollectionGallery() {
     };
 
     if (loading && (!publicFiles || !credentials.current)) {
-        return (
-            <VerticallyCentered>
-                <ActivityIndicator />
-            </VerticallyCentered>
-        );
+        return <LoadingIndicator />;
     } else if (errorMessage) {
-        return <VerticallyCentered>{errorMessage}</VerticallyCentered>;
+        return (
+            <Stack100vhCenter>
+                <Typography sx={{ color: "critical.main" }}>
+                    {errorMessage}
+                </Typography>
+            </Stack100vhCenter>
+        );
     } else if (isPasswordProtected && !credentials.current.accessTokenJWT) {
         return (
-            <VerticallyCentered>
-                <FormPaper>
-                    <FormPaperTitle>{t("password")}</FormPaperTitle>
+            <AccountsPageContents>
+                <AccountsPageTitle>{t("password")}</AccountsPageTitle>
+                <Stack>
                     <Typography
                         variant="small"
                         sx={{ color: "text.muted", mb: 2 }}
@@ -479,11 +487,15 @@ export default function PublicCollectionGallery() {
                         buttonText={t("unlock")}
                         fieldType="password"
                     />
-                </FormPaper>
-            </VerticallyCentered>
+                </Stack>
+            </AccountsPageContents>
         );
     } else if (!publicFiles || !credentials.current) {
-        return <VerticallyCentered>{t("NOT_FOUND")}</VerticallyCentered>;
+        return (
+            <Stack100vhCenter>
+                <Typography>{t("NOT_FOUND")}</Typography>
+            </Stack100vhCenter>
+        );
     }
 
     // TODO: memo this (after the dependencies are traceable).
@@ -520,9 +532,9 @@ export default function PublicCollectionGallery() {
                     selectable={downloadEnabled}
                 />
                 {blockingLoad && (
-                    <LoadingOverlay>
+                    <GalleryLoadingOverlay>
                         <ActivityIndicator />
-                    </LoadingOverlay>
+                    </GalleryLoadingOverlay>
                 )}
                 <Uploader
                     syncWithRemote={syncWithRemote}

@@ -88,6 +88,8 @@
   "useRecoveryKey": "Use recovery key",
   "incorrectPasswordTitle": "Incorrect password",
   "welcomeBack": "Welcome back!",
+  "emailAlreadyRegistered": "Email already registered.",
+  "emailNotRegistered": "Email not registered.",
   "madeWithLoveAtPrefix": "made with ❤️ at ",
   "supportDevs": "Subscribe to <bold-green>ente</bold-green> to support us",
   "supportDiscount": "Use coupon code \"AUTH\" to get 10% off first year",

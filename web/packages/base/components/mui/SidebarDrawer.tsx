@@ -10,8 +10,8 @@ import {
     type DrawerProps,
 } from "@mui/material";
 import React from "react";
+import { SpaceBetweenFlex } from "../containers";
 import type { ModalVisibilityProps } from "../utils/modal";
-import { SpaceBetweenFlex } from "./Container";
 
 /**
  * A MUI {@link Drawer} with a standard set of styling that we use for our left
@@ -126,9 +126,7 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
             </Stack>
         </SpaceBetweenFlex>
         <Box sx={{ px: "16px", py: "4px" }}>
-            <Typography variant="h3" sx={{ fontWeight: "bold" }}>
-                {title}
-            </Typography>
+            <Typography variant="h3">{title}</Typography>
             <Typography
                 variant="small"
                 sx={{

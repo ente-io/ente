@@ -1,7 +1,7 @@
 import { useRedirectIfNeedsCredentials } from "@/accounts/components/utils/use-redirect";
+import { CenteredFill } from "@/base/components/containers";
 import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { CenteredFill } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     OverflowMenu,
@@ -57,14 +57,13 @@ import {
 import { useAppContext } from "../types/context";
 
 const Page: React.FC = () => {
-    const { showNavBar, onGenericError } = useAppContext();
+    const { onGenericError } = useAppContext();
 
     const [state, dispatch] = useReducer(dedupReducer, initialDedupState);
 
     useRedirectIfNeedsCredentials("/duplicates");
 
     useEffect(() => {
-        showNavBar(false);
         dispatch({ type: "analyze" });
         void deduceDuplicates()
             .then((duplicateGroups) =>
@@ -74,7 +73,7 @@ const Page: React.FC = () => {
                 log.error("Failed to detect duplicates", e);
                 dispatch({ type: "analysisFailed" });
             });
-    }, [showNavBar]);
+    }, []);
 
     const handleRemoveDuplicates = useCallback(() => {
         dispatch({ type: "dedupe" });
@@ -122,7 +121,7 @@ const Page: React.FC = () => {
     })();
 
     return (
-        <Stack sx={{ flex: 1 }}>
+        <Stack sx={{ height: "100vh" }}>
             <Navbar
                 sortOrder={state.sortOrder}
                 onChangeSortOrder={(sortOrder) =>
@@ -359,7 +358,7 @@ const Navbar: React.FC<NavbarProps> = ({
                     <ArrowBackIcon />
                 </IconButton>
             </Box>
-            <Typography variant="large">{t("remove_duplicates")}</Typography>
+            <Typography variant="h6">{t("remove_duplicates")}</Typography>
             <Stack direction="row" sx={{ gap: "4px" }}>
                 <SortMenu {...{ sortOrder, onChangeSortOrder }} />
                 <OptionsMenu {...{ onDeselectAll }} />

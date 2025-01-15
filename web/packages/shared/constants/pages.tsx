@@ -1,5 +1,4 @@
 export enum PHOTOS_PAGES {
-    CHANGE_EMAIL = "/change-email",
     CHANGE_PASSWORD = "/change-password",
     CREDENTIALS = "/credentials",
     GALLERY = "/gallery",
@@ -16,7 +15,6 @@ export enum PHOTOS_PAGES {
 }
 
 export enum AUTH_PAGES {
-    CHANGE_EMAIL = "/change-email",
     CHANGE_PASSWORD = "/change-password",
     CREDENTIALS = "/credentials",
     GALLERY = "/gallery",

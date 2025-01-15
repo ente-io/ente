@@ -15,12 +15,11 @@ import {
     Stack,
     TextField,
     Typography,
-    type TypographyProps,
 } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import { useContext, useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import { deleteAccount, getAccountDeleteChallenge } from "services/userService";
 import * as Yup from "yup";
@@ -165,23 +164,14 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                 messageSxProps={{ color: "critical.main" }}
                                 message={errors.reason}
                             />
-                            <MultilineInput
-                                label={t("delete_account_feedback_label")}
-                                placeholder={t(
-                                    "delete_account_feedback_placeholder",
-                                )}
+                            <FeedbackInput
                                 value={values.feedback}
                                 onChange={handleChange("feedback")}
-                                message={errors.feedback}
-                                messageSxProps={{ color: "critical.main" }}
-                                rowCount={3}
+                                errorMessage={errors.feedback}
                             />
-                            <CheckboxInput
+                            <ConfirmationCheckboxInput
                                 checked={acceptDataDeletion}
                                 onChange={setAcceptDataDeletion}
-                                label={t(
-                                    "delete_account_confirm_checkbox_label",
-                                )}
                             />
                             <Stack spacing={"8px"}>
                                 <LoadingButton
@@ -230,97 +220,70 @@ const deleteReasonOptions = (): DropdownOption<DeleteReason>[] =>
         value: reason,
     }));
 
-interface MultilineInputProps {
-    label: string;
-    labelProps?: TypographyProps;
-    message?: string;
-    messageSxProps?: TypographyProps["sx"];
-    placeholder?: string;
+interface FeedbackInputProps {
     value: string;
-    rowCount: number;
+    errorMessage?: string;
     onChange: (value: string) => void;
 }
 
-function MultilineInput({
-    label,
-    message,
-    messageSxProps,
-    placeholder,
+const FeedbackInput: React.FC<FeedbackInputProps> = ({
     value,
-    rowCount,
     onChange,
-}: MultilineInputProps) {
-    return (
-        <Stack spacing={"4px"}>
-            <Typography>{label}</Typography>
-            <TextField
-                variant="standard"
-                multiline
-                rows={rowCount}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                placeholder={placeholder}
-                sx={(theme) => ({
-                    border: "1px solid",
-                    borderColor: theme.colors.stroke.faint,
-                    borderRadius: "8px",
-                    padding: "12px",
-                    ".MuiInputBase-formControl": {
-                        "::before, ::after": {
-                            borderBottom: "none !important",
-                        },
+    errorMessage,
+}) => (
+    <Stack spacing={"4px"}>
+        <Typography>{t("delete_account_feedback_label")}</Typography>
+        <TextField
+            variant="standard"
+            multiline
+            rows={3}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={t("delete_account_feedback_placeholder")}
+            sx={(theme) => ({
+                border: "1px solid",
+                borderColor: theme.colors.stroke.faint,
+                borderRadius: "8px",
+                padding: "12px",
+                ".MuiInputBase-formControl": {
+                    "::before, ::after": {
+                        borderBottom: "none !important",
                     },
-                })}
-            />
-            <Typography
-                variant="small"
-                sx={[
-                    { px: "8px", color: "text.secondary" },
-                    ...(Array.isArray(messageSxProps)
-                        ? messageSxProps
-                        : [messageSxProps]),
-                ]}
-            >
-                {message}
-            </Typography>
-        </Stack>
-    );
-}
+                },
+            })}
+        />
+        <Typography variant="small" sx={{ px: "8px", color: "critical.main" }}>
+            {errorMessage}
+        </Typography>
+    </Stack>
+);
 
-interface CheckboxInputProps {
-    disabled?: boolean;
+interface ConfirmationCheckboxInputProps {
     checked: boolean;
     onChange: (value: boolean) => void;
-    label: string;
 }
 
-function CheckboxInput({
-    disabled,
+const ConfirmationCheckboxInput: React.FC<ConfirmationCheckboxInputProps> = ({
     checked,
     onChange,
-    label,
-}: CheckboxInputProps) {
-    return (
-        <FormGroup sx={{ width: "100%" }}>
-            <FormControlLabel
-                control={
-                    <Checkbox
-                        size="small"
-                        disabled={disabled}
-                        checked={checked}
-                        onChange={(e) => onChange(e.target.checked)}
-                        color="accent"
-                    />
-                }
-                label={
-                    <Typography sx={{ color: "text.secondary" }}>
-                        {label}
-                    </Typography>
-                }
-            />
-        </FormGroup>
-    );
-}
+}) => (
+    <FormGroup>
+        <FormControlLabel
+            control={
+                <Checkbox
+                    size="small"
+                    checked={checked}
+                    onChange={(e) => onChange(e.target.checked)}
+                />
+            }
+            label={
+                <Typography sx={{ color: "text.muted" }}>
+                    {t("delete_account_confirm_checkbox_label")}
+                </Typography>
+            }
+        />
+    </FormGroup>
+);
 
 async function decryptDeleteAccountChallenge(encryptedChallenge: string) {
     const cryptoWorker = await sharedCryptoWorker();

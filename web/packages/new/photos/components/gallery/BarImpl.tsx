@@ -1,5 +1,5 @@
+import { Overlay } from "@/base/components/containers";
 import { FilledIconButton } from "@/base/components/mui";
-import { Overlay } from "@/base/components/mui/Container";
 import { Ellipsized2LineTypography } from "@/base/components/Typography";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
@@ -364,24 +364,25 @@ const ScrollButtonBase: React.FC<
     </ScrollButtonBase_>
 );
 
-const ScrollButtonBase_ = styled("button")`
-    position: absolute;
-    z-index: 2;
-    top: 7px;
-    height: 50px;
-    width: 50px;
-    border: none;
-    padding: 0;
-    margin: 0;
-    border-radius: 50%;
-    background-color: ${({ theme }) => theme.colors.backdrop.muted};
-    color: ${({ theme }) => theme.colors.stroke.base};
-    & > svg {
-        border-radius: 50%;
-        height: 30px;
-        width: 30px;
-    }
-`;
+const ScrollButtonBase_ = styled("button")(({ theme }) => ({
+    position: "absolute",
+    zIndex: 2,
+    top: "7px",
+    height: "50px",
+    width: "50px",
+    border: "none",
+    padding: 0,
+    margin: 0,
+    borderRadius: "50%",
+    backgroundColor: theme.palette.backdrop.muted,
+    color: theme.colors.stroke.base,
+    cursor: "pointer",
+    "& > svg": {
+        borderRadius: "50%",
+        height: "30px",
+        width: "30px",
+    },
+}));
 
 const ScrollButtonLeft = styled(ScrollButtonBase)`
     left: 0;
@@ -529,9 +530,7 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     <CollectionBarCardIcon_>
         {type == "favorites" && <FavoriteRoundedIcon />}
         {type == "archived" && (
-            <ArchiveIcon
-                sx={(theme) => ({ color: theme.colors.white.muted })}
-            />
+            <ArchiveIcon sx={{ color: "fixed.overlayIndicatorMuted" }} />
         )}
         {type == "outgoingShare" && <PeopleIcon />}
         {(type == "incomingShareViewer" ||

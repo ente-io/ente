@@ -45,6 +45,17 @@
       "hex": "fd4b2d"
     },
     {
+      "title": "AzurHosts",
+      "slug": "azurhosts",
+      "altNames": [
+        "minenode"
+      ]
+    },
+    {
+      "title": "AzurWare",
+      "slug": "azuware"
+    },
+    {
       "title": "BaiduCloud",
       "slug": "baidu_cloud",
       "altNames": [
@@ -305,7 +316,7 @@
     },
     {
       "title": "enom",
-      "slug": "enom_v1"
+      "slug": "enom"
     },
     {
       "title": "Epic Games",
@@ -317,6 +328,10 @@
     },
     {
       "title": "Estateguru"
+    },
+    {
+      "title": "Fastmail",
+      "hex": "0067B9"
     },
     {
       "title": "Fidelity",

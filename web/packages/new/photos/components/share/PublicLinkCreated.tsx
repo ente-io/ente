@@ -40,7 +40,6 @@ export const PublicLinkCreated: React.FC<PublicLinkCreatedProps> = ({
                         onCopyLink();
                         onClose();
                     }}
-                    color="primary"
                     fullWidth
                 >
                     {t("copy_link")}

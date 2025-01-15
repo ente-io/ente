@@ -2,6 +2,8 @@
   "@@locale ": "en",
   "enterYourEmailAddress": "Įveskite savo el. pašto adresą",
   "accountWelcomeBack": "Sveiki sugrįžę!",
+  "emailAlreadyRegistered": "El. paštas jau užregistruotas.",
+  "emailNotRegistered": "El. paštas neregistruotas.",
   "email": "El. paštas",
   "cancel": "Atšaukti",
   "verify": "Patvirtinti",
@@ -185,6 +187,8 @@
   },
   "allowAddPhotosDescription": "Leiskite nuorodą turintiems asmenims taip pat pridėti nuotraukų į bendrinamą albumą.",
   "passwordLock": "Slaptažodžio užraktas",
+  "canNotOpenTitle": "Negalima atverti šio albumo",
+  "canNotOpenBody": "Atsiprašome, šio albumo negalima atverti programoje.",
   "disableDownloadWarningTitle": "Atkreipkite dėmesį",
   "disableDownloadWarningBody": "Žiūrėtojai vis tiek gali daryti ekrano kopijas arba išsaugoti nuotraukų kopijas naudojant išorinius įrankius",
   "allowDownloads": "Leisti atsisiuntimus",
@@ -1061,6 +1065,7 @@
   "extraPhotosFound": "Rastos papildomos nuotraukos",
   "configuration": "Konfiguracija",
   "localIndexing": "Vietinis indeksavimas",
+  "processed": "Apdorota",
   "areYouSureYouWantToResetThisPerson": "Ar tikrai norite iš naujo nustatyti šį asmenį?",
   "allPersonGroupingWillReset": "Visi šio asmens grupavimai bus iš naujo nustatyti, o jūs neteksite visų šiam asmeniui pateiktų pasiūlymų",
   "yesResetPerson": "Taip, nustatyti asmenį iš naujo",
@@ -1253,5 +1258,9 @@
   "authToManageLegacy": "Nustatykite tapatybę, kad tvarkytumėte patikimus kontaktus",
   "useDifferentPlayerInfo": "Turite problemų paleidžiant šį vaizdo įrašą? Ilgai paspauskite čia, kad išbandytumėte kitą leistuvę.",
   "hideSharedItemsFromHomeGallery": "Slėpti bendrinamus elementus iš pagrindinės galerijos",
-  "gallery": "Galerija"
+  "gallery": "Galerija",
+  "joinAlbum": "Junkitės prie albumo",
+  "joinAlbumSubtext": "kad peržiūrėtumėte ir pridėtumėte savo nuotraukas",
+  "joinAlbumSubtextViewer": "kad pridėtumėte tai prie bendrinamų albumų",
+  "join": "Jungtis"
 }
