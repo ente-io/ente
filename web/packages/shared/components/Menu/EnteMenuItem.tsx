@@ -148,17 +148,25 @@ const CaptionedText: React.FC<CaptionedTextProps> = ({
     mainText,
     caption,
     color,
-}) => {
-    const subTextColor = color == "critical" ? "critical.main" : "text.faint";
-    return (
-        <Stack direction="row" sx={{ gap: "4px", alignItems: "center" }}>
-            <Typography>{mainText}</Typography>
-            <Typography variant="small" sx={{ color: subTextColor }}>
-                {"•"}
-            </Typography>
-            <Typography variant="small" sx={{ color: subTextColor }}>
-                {caption}
-            </Typography>
-        </Stack>
-    );
-};
+}) => (
+    <Stack direction="row" sx={{ gap: "4px", alignItems: "center" }}>
+        <Typography>{mainText}</Typography>
+        <CaptionTypography color={color}>{"•"}</CaptionTypography>
+        <CaptionTypography color={color}>{caption}</CaptionTypography>
+    </Stack>
+);
+
+const CaptionTypography: React.FC<
+    React.PropsWithChildren<{ color: EnteMenuItemProps["color"] }>
+> = ({ color, children }) => (
+    <Typography
+        variant="small"
+        sx={[
+            color == "critical"
+                ? { color: "critical.main" }
+                : { color: "text.faint" },
+        ]}
+    >
+        {children}
+    </Typography>
+);
