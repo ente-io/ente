@@ -7,6 +7,7 @@ import {
 import { useModalVisibility } from "@/base/components/utils/modal";
 import {
     getLocaleInUse,
+    pt,
     setLocaleInUse,
     supportedLocales,
     type SupportedLocale,
@@ -19,6 +20,7 @@ import {
 import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { isMLSupported } from "@/new/photos/services/ml";
 import {
+    isInternalUser,
     syncSettings,
     updateCFProxyDisabledPreference,
     updateMapEnabled,
@@ -26,7 +28,7 @@ import {
 import { useAppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { Stack } from "@mui/material";
+import { Divider, Stack, useColorScheme } from "@mui/material";
 import DropdownInput from "components/DropdownInput";
 import { t } from "i18next";
 import React, { useCallback, useEffect } from "react";
@@ -62,8 +64,10 @@ export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                     title={t("preferences")}
                     onRootClose={handleRootClose}
                 />
-                <Stack sx={{ px: "16px", py: "20px", gap: "24px" }}>
+                <Stack sx={{ px: "16px", py: "8px", gap: "24px" }}>
                     <LanguageSelector />
+                    {isInternalUser() && <ThemeSelector />}
+                    <Divider sx={{ my: "2px", opacity: 0.1 }} />
                     {isMLSupported && (
                         <MenuItemGroup>
                             <EnteMenuItem
@@ -161,6 +165,28 @@ const localeName = (locale: SupportedLocale) => {
         case "vi-VN":
             return "Tiếng Việt";
     }
+};
+
+const ThemeSelector = () => {
+    const { mode, setMode } = useColorScheme();
+
+    // During SSR, mode is always undefined.
+    if (!mode) return null;
+
+    // TODO: Use translations, also remove unused t("CHOSE_THEME")
+    return (
+        <DropdownInput
+            options={[
+                { label: pt("System"), value: "system" },
+                { label: pt("Light"), value: "light" },
+                { label: pt("Dark"), value: "dark" },
+            ]}
+            label={pt("Theme")}
+            labelSxProps={{ color: "text.muted" }}
+            selected={mode}
+            setSelected={setMode}
+        />
+    );
 };
 
 export const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
