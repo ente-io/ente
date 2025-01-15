@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/sirupsen/logrus"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/utils/time"
@@ -91,6 +92,33 @@ FROM emergency_recovery WHERE user_id=$1  and emergency_contact_id=$2 AND status
 	return sessions, nil
 }
 
+func (r *Repository) GetActiveRecoveryForNotification() (*[]RecoverRow, error) {
+	rows, err := r.DB.Query(`
+SELECT id, user_id, emergency_contact_id, status, wait_till, next_reminder_at, created_at
+FROM emergency_recovery WHERE (status = $1) and next_reminder_at < now_utc_micro_seconds()`, ente.RecoveryStatusWaiting)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+	var sessions []RecoverRow
+	for rows.Next() {
+		var row RecoverRow
+		if err := rows.Scan(&row.ID, &row.UserID, &row.EmergencyContactID, &row.Status, &row.WaitTill, &row.NextReminderAt, &row.CreatedAt); err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		sessions = append(sessions, row)
+	}
+	return &sessions, nil
+}
+
+func (r *Repository) UpdateNextReminder(ctx context.Context, sessionID uuid.UUID, nextReminder int64) error {
+	_, err := r.DB.ExecContext(ctx, `UPDATE emergency_recovery SET next_reminder_at=$1 WHERE id=$2`, nextReminder, sessionID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	return nil
+}
+
 func (repo *Repository) UpdateRecoveryStatusForID(ctx context.Context, sessionID uuid.UUID, status ente.RecoveryStatus) (bool, error) {
 	validPrevStatus := validPreviousStatus(status)
 	var result sql.Result
@@ -106,6 +134,7 @@ func (repo *Repository) UpdateRecoveryStatusForID(ctx context.Context, sessionID
 	rows, _ := result.RowsAffected()
 	return rows > 0, nil
 }
+
 func (repo *Repository) GetRecoverRowByID(ctx context.Context, sessionID uuid.UUID) (*RecoverRow, error) {
 	var row RecoverRow
 	err := repo.DB.QueryRowContext(ctx, `SELECT id, user_id, emergency_contact_id, status, wait_till, next_reminder_at, created_at
