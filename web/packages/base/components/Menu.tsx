@@ -36,21 +36,21 @@ export const MenuSectionTitle: React.FC<MenuSectionTitleProps> = ({
 );
 
 interface MenuItemDividerProps {
+    /**
+     * If true, then the menu divider leaves the leading edge hanging which
+     * visually looks better when used to separate menu items which have leading
+     * icons.
+     */
     hasIcon?: boolean;
 }
 
 export const MenuItemDivider: React.FC<MenuItemDividerProps> = ({
     hasIcon,
-}) => {
-    return (
-        <Divider
-            sx={[
-                { "&&&": { my: 0 } },
-                hasIcon ? { "&&&": { ml: "48px" } } : { "&&&": { ml: "16px" } },
-            ]}
-        />
-    );
-};
+}) => (
+    <Divider
+        sx={[{ "&&&": { my: 0 } }, hasIcon ? { ml: "48px" } : { ml: "16px" }]}
+    />
+);
 
 export const MenuItemGroup = styled("div")(
     ({ theme }) => `
@@ -66,7 +66,7 @@ export const MenuItemGroup = styled("div")(
         border-top-left-radius: 0;
         border-top-right-radius: 0;
     }
-    background-color: ${theme.colors.fill.faint};
+    background-color: ${theme.vars.palette.fill.faint};
     border-radius: 8px;
 `,
 );
