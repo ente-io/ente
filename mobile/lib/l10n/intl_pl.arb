@@ -8,7 +8,7 @@
   "invalidEmailAddress": "Nieprawidłowy adres e-mail",
   "enterValidEmail": "Prosimy podać prawidłowy adres e-mail.",
   "deleteAccount": "Usuń konto",
-  "askDeleteReason": "Jaka jest przyczyna usunięcia konta?",
+  "askDeleteReason": "Jaka jest główna przyczyna usunięcia Twojego konta?",
   "deleteAccountFeedbackPrompt": "Przykro nam, że odchodzisz. Wyjaśnij nam, dlaczego nas opuszczasz, aby pomóc ulepszać nasze usługi.",
   "feedback": "Opinia",
   "kindlyHelpUsWithThisInformation": "Pomóż nam z tą informacją",
@@ -689,6 +689,8 @@
   "noPhotosAreBeingBackedUpRightNow": "W tej chwili nie wykonuje się kopii zapasowej zdjęć",
   "preserveMore": "Zachowaj więcej",
   "grantFullAccessPrompt": "Zezwól na dostęp do wszystkich zdjęć w aplikacji Ustawienia",
+  "allowPermTitle": "Zezwól na dostęp do zdjęć",
+  "allowPermBody": "Prosimy zezwolić na dostęp do swoich zdjęć w Ustawieniach, aby Ente mogło wyświetlać i tworzyć kopię zapasową Twojej biblioteki.",
   "openSettings": "Otwórz Ustawienia",
   "selectMorePhotos": "Wybierz więcej zdjęć",
   "existingUser": "Istniejący użytkownik",
@@ -1270,7 +1272,7 @@
   "editPerson": "Edytuj osobę",
   "mergedPhotos": "Scalone zdjęcia",
   "orMergeWithExistingPerson": "Lub złącz z istniejącymi",
-  "enterDateOfBirth": "Data urodzenia (nieobowiązkowo)",
+  "enterDateOfBirth": "Urodziny (nieobowiązkowo)",
   "birthday": "Urodziny",
   "removePersonLabel": "Usuń etykietę osoby",
   "autoPairDesc": "Automatyczne parowanie działa tylko z urządzeniami obsługującymi Chromecast.",
@@ -1382,8 +1384,8 @@
   "onlyThem": "Tylko te",
   "checkingModels": "Sprawdzanie modeli...",
   "enableMachineLearningBanner": "Włącz nauczanie maszynowe dla magicznego wyszukiwania i rozpoznawania twarzy",
-  "searchDiscoverEmptySection": "Obrazy będą wyświetlane tutaj po zakończeniu przetwarzania",
-  "searchPersonsEmptySection": "Osoby będą wyświetlane tutaj po zakończeniu przetwarzania",
+  "searchDiscoverEmptySection": "Obrazy będą wyświetlane tutaj po zakończeniu przetwarzania i synchronizacji",
+  "searchPersonsEmptySection": "Osoby będą wyświetlane tutaj po zakończeniu przetwarzania i synchronizacji",
   "viewersSuccessfullyAdded": "{count, plural, =0 {Dodano 0 widzów} =1 {Dodano 1 widza}  other {Dodano {count} widzów}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1449,6 +1451,7 @@
   },
   "info": "Informacje",
   "addFiles": "Dodaj Pliki",
+  "castAlbum": "Odtwórz album",
   "imageNotAnalyzed": "Obraz nie został przeanalizowany",
   "noFacesFound": "Nie znaleziono twarzy",
   "fileNotUploadedYet": "Plik nie został jeszcze przesłany",
@@ -1478,15 +1481,15 @@
     }
   },
   "file": "Plik",
-  "searchSectionsLengthMismatch": "Niezgodność długości sekcji: {snapshotLenght} != {searchLenght}",
+  "searchSectionsLengthMismatch": "Niezgodność długości sekcji: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
     "description": "Appears in search tab page",
     "placeholders": {
-      "snapshotLenght": {
+      "snapshotLength": {
         "type": "int",
         "example": "1"
       },
-      "searchLenght": {
+      "searchLength": {
         "type": "int",
         "example": "2"
       }
@@ -1513,5 +1516,66 @@
   "openAlbumInBrowserTitle": "Prosimy użyć aplikacji internetowej, aby dodać zdjęcia do tego albumu",
   "allow": "Zezwól",
   "allowAppToOpenSharedAlbumLinks": "Zezwalaj aplikacji na otwieranie udostępnianych linków do albumu",
-  "seePublicAlbumLinksInApp": "Zobacz publiczne linki do albumów w aplikacji"
+  "seePublicAlbumLinksInApp": "Zobacz publiczne linki do albumów w aplikacji",
+  "emergencyContacts": "Kontakty Alarmowe",
+  "acceptTrustInvite": "Zaakceptuj Zaproszenie",
+  "declineTrustInvite": "Odrzuć Zaproszenie",
+  "removeYourselfAsTrustedContact": "Usuń siebie z listy zaufanych kontaktów",
+  "legacy": "Dziedzictwo",
+  "legacyPageDesc": "Dziedzictwo pozwala zaufanym kontaktom na dostęp do Twojego konta w razie Twojej nieobecności.",
+  "legacyPageDesc2": "Zaufane kontakty mogą rozpocząć odzyskiwanie konta, a jeśli nie zostaną zablokowane w ciągu 30 dni, zresetować Twoje hasło i uzyskać dostęp do Twojego konta.",
+  "legacyAccounts": "Odziedziczone konta",
+  "trustedContacts": "Zaufane kontakty",
+  "addTrustedContact": "Dodaj Zaufany Kontakt",
+  "removeInvite": "Usuń zaproszenie",
+  "recoveryWarning": "Zaufany kontakt próbuje uzyskać dostęp do Twojego konta",
+  "rejectRecovery": "Odrzuć odzyskiwanie",
+  "recoveryInitiated": "Odzyskiwanie rozpoczęte",
+  "recoveryInitiatedDesc": "Możesz uzyskać dostęp do konta po dniu {days} dni. Powiadomienie zostanie wysłane na {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Anuluj odzyskiwanie",
+  "recoveryAccount": "Odzyskaj konto",
+  "cancelAccountRecoveryBody": "Czy na pewno chcesz anulować odzyskiwanie?",
+  "startAccountRecoveryTitle": "Rozpocznij odzyskiwanie",
+  "whyAddTrustContact": "Zaufany kontakt może pomóc w odzyskaniu Twoich danych.",
+  "recoveryReady": "Możesz teraz odzyskać konto {email} poprzez ustawienie nowego hasła.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} próbuje odzyskać Twoje konto.",
+  "trustedInviteBody": "Zostałeś zaproszony do bycia dziedzicznym kontaktem przez {email}.",
+  "warning": "Uwaga",
+  "proceed": "Kontynuuj",
+  "confirmAddingTrustedContact": "Zamierzasz dodać {email} jako zaufany kontakt. Będą mogli odzyskać Twoje konto, jeśli jesteś nieobecny przez {numOfDays} dni.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} zaprosił Cię do zostania zaufanym kontaktem",
+  "authToManageLegacy": "Prosimy uwierzytelnić się, aby zarządzać zaufanymi kontaktami",
+  "useDifferentPlayerInfo": "Masz problem z odtwarzaniem tego wideo? Przytrzymaj tutaj, aby spróbować innego odtwarzacza."
 }

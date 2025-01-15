@@ -2,6 +2,8 @@ package emergency
 
 import (
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller"
+
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller/user"
 	"github.com/ente-io/museum/pkg/repo"
@@ -12,9 +14,10 @@ import (
 )
 
 type Controller struct {
-	Repo     *emergency.Repository
-	UserRepo *repo.UserRepository
-	UserCtrl *user.UserController
+	Repo              *emergency.Repository
+	UserRepo          *repo.UserRepository
+	UserCtrl          *user.UserController
+	PasskeyController *controller.PasskeyController
 }
 
 func (c *Controller) UpdateContact(ctx *gin.Context,
@@ -23,19 +26,77 @@ func (c *Controller) UpdateContact(ctx *gin.Context,
 	if err := validateUpdateReq(userID, req); err != nil {
 		return stacktrace.Propagate(err, "")
 	}
+	if req.State == ente.ContactDenied || req.State == ente.ContactLeft || req.State == ente.UserRevokedContact {
+		activeSessions, sessionErr := c.Repo.GetActiveSessions(ctx, req.UserID, req.EmergencyContactID)
+		if sessionErr != nil {
+			return stacktrace.Propagate(sessionErr, "")
+		}
+		for _, session := range activeSessions {
+			if req.State == ente.UserRevokedContact {
+				rejErr := c.RejectRecovery(ctx, userID, ente.RecoveryIdentifier{
+					ID:                 session.ID,
+					UserID:             session.UserID,
+					EmergencyContactID: session.EmergencyContactID,
+				})
+				if rejErr != nil {
+					return stacktrace.Propagate(rejErr, "failed to reject recovery")
+				}
+			} else {
+				stopErr := c.StopRecovery(ctx, userID, ente.RecoveryIdentifier{
+					ID:                 session.ID,
+					UserID:             session.UserID,
+					EmergencyContactID: session.EmergencyContactID,
+				})
+				if stopErr != nil {
+					return stacktrace.Propagate(stopErr, "failed to stop recovery")
+				}
+			}
+		}
+	}
 	hasUpdate, err := c.Repo.UpdateState(ctx, req.UserID, req.EmergencyContactID, req.State)
 	if !hasUpdate {
 		log.WithField("userID", userID).WithField("req", req).
 			Warn("No update applied for emergency contact")
-	}
-	recoverStatus := getNextRecoveryStatusFromContactState(req.State)
-	if recoverStatus != nil {
-		if err := c.Repo.UpdateRecoveryStatus(ctx, req.UserID, req.EmergencyContactID, *recoverStatus); err != nil {
-			return stacktrace.Propagate(err, "")
-		}
+	} else {
+		go c.sendContactNotification(ctx, req.UserID, req.EmergencyContactID, req.State)
 	}
 	if err != nil {
 		return stacktrace.Propagate(err, "")
+	}
+	return nil
+}
+
+func (c *Controller) HandleAccountDeletion(ctx *gin.Context, userID int64, logger *log.Entry) error {
+	logger.Info("Clean up emergency contacts on account deletion")
+	contacts, err := c.Repo.GetActiveContactForUser(ctx, userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if len(contacts) == 0 {
+		return nil
+	}
+	for _, contact := range contacts {
+		if contact.UserID == userID {
+			logger.Info("Removing emergency contact from user side")
+			removeErr := c.UpdateContact(ctx, userID, ente.UpdateContact{
+				UserID:             userID,
+				EmergencyContactID: contact.EmergencyContactID,
+				State:              ente.UserRevokedContact,
+			})
+			if removeErr != nil {
+				return stacktrace.Propagate(removeErr, "")
+			}
+		} else {
+			logger.Info("Removing user from emergency contact side")
+			leaveErr := c.UpdateContact(ctx, userID, ente.UpdateContact{
+				UserID:             contact.UserID,
+				EmergencyContactID: userID,
+				State:              ente.ContactLeft,
+			})
+			if leaveErr != nil {
+				return stacktrace.Propagate(leaveErr, "")
+			}
+		}
 	}
 	return nil
 }
@@ -63,21 +124,4 @@ func validateUpdateReq(userID int64, req ente.UpdateContact) error {
 		}
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("Can not update state to %s", req.State)), "")
 	}
-}
-
-// When a user contact state is update, we need to update the recovery status for any ongoing recovery
-func getNextRecoveryStatusFromContactState(state ente.ContactState) *ente.RecoveryStatus {
-	switch state {
-	case ente.ContactAccepted:
-		return nil
-	case ente.UserInvitedContact:
-		return nil
-	case ente.ContactLeft:
-		return ente.RecoveryStatusStopped.Ptr()
-	case ente.ContactDenied:
-		return ente.RecoveryStatusStopped.Ptr()
-	case ente.UserRevokedContact:
-		return ente.RecoveryStatusRejected.Ptr()
-	}
-	return nil
 }

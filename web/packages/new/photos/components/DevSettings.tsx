@@ -58,12 +58,12 @@ type ContentsProps = Pick<DevSettingsProps, "onClose">;
 const Contents: React.FC<ContentsProps> = (props) => {
     // We need two nested components.
     //
-    // -   The initialAPIOrigin cannot be in our parent (the top level
-    //     DevSettings) otherwise it gets preserved across dialog reopens
-    //     instead of being read from storage on opening the dialog.
+    // - The initialAPIOrigin cannot be in our parent (the top level
+    //   DevSettings) otherwise it gets preserved across dialog reopens instead
+    //   of being read from storage on opening the dialog.
     //
-    // -   The initialAPIOrigin cannot be in our child (Form) because Formik
-    //     doesn't have supported for async initial values.
+    // - The initialAPIOrigin cannot be in our child (Form) because Formik
+    //   doesn't have supported for async initial values.
     const [initialAPIOrigin, setInitialAPIOrigin] = useState<
         string | undefined
     >();
@@ -149,24 +149,26 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
                             ? form.errors.apiOrigin
                             : " " /* always show an empty string to prevent a layout shift */
                     }
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <Link
-                                    href="https://help.ente.io/self-hosting/guides/custom-server/"
-                                    target="_blank"
-                                    rel="noopener"
-                                >
-                                    <IconButton
-                                        aria-label={t("more_information")}
-                                        color="secondary"
-                                        edge="end"
+                    slotProps={{
+                        input: {
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <Link
+                                        href="https://help.ente.io/self-hosting/guides/custom-server/"
+                                        target="_blank"
+                                        rel="noopener"
                                     >
-                                        <InfoOutlinedIcon />
-                                    </IconButton>
-                                </Link>
-                            </InputAdornment>
-                        ),
+                                        <IconButton
+                                            aria-label={t("more_information")}
+                                            color="secondary"
+                                            edge="end"
+                                        >
+                                            <InfoOutlinedIcon />
+                                        </IconButton>
+                                    </Link>
+                                </InputAdornment>
+                            ),
+                        },
                     }}
                 />
             </DialogContent>

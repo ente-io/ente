@@ -66,25 +66,28 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
             disabled={disabled}
             onClick={handleButtonClick}
             disableRipple={variant == "toggle"}
-            sx={{
-                width: "100%",
-                color: (theme) =>
-                    variant !== "captioned"
-                        ? theme.palette[color].main
-                        : "inherit",
-                backgroundColor: (theme) =>
-                    variant !== "secondary" && variant !== "mini"
-                        ? theme.colors.fill.faint
-                        : "inherit",
-                "&:hover": {
-                    backgroundColor: (theme) => theme.colors.fill.faintPressed,
-                },
-                "& .MuiSvgIcon-root": {
-                    fontSize: "20px",
-                },
-                p: 0,
-                borderRadius: "4px",
-            }}
+            sx={[
+                (theme) => ({
+                    width: "100%",
+                    "&:hover": {
+                        backgroundColor: theme.colors.fill.faintPressed,
+                    },
+                    "& .MuiSvgIcon-root": {
+                        fontSize: "20px",
+                    },
+                    p: 0,
+                    borderRadius: "4px",
+                }),
+                variant !== "captioned" &&
+                    ((theme) => ({
+                        color: theme.palette[color].main,
+                    })),
+                variant !== "secondary" &&
+                    variant !== "mini" &&
+                    ((theme) => ({
+                        backgroundColor: theme.colors.fill.faint,
+                    })),
+            ]}
         >
             <SpaceBetweenFlex sx={{ pl: "16px", pr: "12px" }}>
                 <VerticallyCenteredFlex sx={{ py: "14px" }} gap={"10px"}>
@@ -141,15 +144,15 @@ const CaptionedText: React.FC<CaptionedTextProps> = ({
     return (
         <VerticallyCenteredFlex gap={"4px"}>
             <Typography>{mainText}</Typography>
-            <Typography variant="small" color={subTextColor}>
+            <Typography variant="small" sx={{ color: subTextColor }}>
                 {"•"}
             </Typography>
             {subText ? (
-                <Typography variant="small" color={subTextColor}>
+                <Typography variant="small" sx={{ color: subTextColor }}>
                     {subText}
                 </Typography>
             ) : (
-                <Typography variant="small" color={subTextColor}>
+                <Typography variant="small" sx={{ color: subTextColor }}>
                     {subIcon}
                 </Typography>
             )}

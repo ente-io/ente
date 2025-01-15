@@ -16,9 +16,11 @@ the same code we use for our own cloud service.
 
 ## Getting started
 
-#### Installing Docker 
+#### Installing Docker
 
-Refer to [How to install Docker from the APT repository](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) for detailed instructions.
+Refer to
+[How to install Docker from the APT repository](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
+for detailed instructions.
 
 #### Start the server
 
@@ -33,12 +35,12 @@ docker compose up --build
 > You can also use a pre-built Docker image from `ghcr.io/ente-io/server`
 > ([More info](https://github.com/ente-io/ente/blob/main/server/docs/docker.md))
 
-Install the necessary dependencies for running the web client 
+Install the necessary dependencies for running the web client
 
-```sh 
-# installing npm and yarn 
+```sh
+# installing npm and yarn
 
-sudo apt update 
+sudo apt update
 sudo apt install nodejs npm
 sudo npm install -g yarn // to install yarn globally
 ```
@@ -66,23 +68,18 @@ apps and configure them to use your
 
 ## Next steps
 
--   More details about the server are in its
-    [README](https://github.com/ente-io/ente/tree/main/server#readme)
+- More details about the server are in its
+  [README](https://github.com/ente-io/ente/tree/main/server#readme)
 
--   More details about running the server (with or without Docker) are in
-    [RUNNING](https://github.com/ente-io/ente/blob/main/server/RUNNING.md)
+- More details about running the server (with or without Docker) are in
+  [RUNNING](https://github.com/ente-io/ente/blob/main/server/RUNNING.md)
 
--   If you have questions around self-hosting that are not answered in any of
-    the existing documentation, you can ask in our
-    [GitHub Discussions](https://github.com/ente-io/ente/discussions). **Please
-    remember to search first if the query has been already asked and answered.**
+- If you have questions around self-hosting that are not answered in any of the
+  existing documentation, you can ask in our
+  [GitHub Discussions](https://github.com/ente-io/ente/discussions). **Please
+  remember to search first if the query has been already asked and answered.**
 
 ## Contributing!
-
-While we would love to provide a completely seamless self-hosting experience,
-right now we do not have the engineering bandwidth to answer all queries,
-document everything exactly etc. We will try (that's why we're writing this!),
-but we also hope that community members will step up to fill any gaps.
 
 One particular way in which you can help is by adding new [guides](guides/) on
 this help site. The documentation is written in Markdown and adding new pages is

@@ -258,6 +258,10 @@
   "areYouSureYouWantToLogout": "Are you sure you want to logout?",
   "yesLogout": "Yes, logout",
   "exit": "Exit",
+  "theme": "Theme",
+  "lightTheme": "Light",
+  "darkTheme": "Dark",
+  "systemTheme": "System",
   "verifyingRecoveryKey": "Verifying recovery key...",
   "recoveryKeyVerified": "Recovery key verified",
   "recoveryKeySuccessBody": "Great! Your recovery key is valid. Thank you for verifying.\n\nPlease remember to keep your recovery key safely backed up.",
@@ -454,7 +458,6 @@
   "pinnedCodeMessage": "{code} has been pinned",
   "unpinnedCodeMessage": "{code} has been unpinned",
   "pinned": "Pinned",
-
   "tags": "Tags",
   "createNewTag": "Create New Tag",
   "tag": "Tag",
@@ -491,5 +494,13 @@
   "appLockNotEnabled": "App lock not enabled",
   "appLockNotEnabledDescription": "Please enable app lock from Security > App Lock",
   "authToViewPasskey": "Please authenticate to view passkey",
-  "appLockOfflineModeWarning": "You have chosen to proceed without backups. If you forget your applock, you will be locked out from accessing your data."
+  "appLockOfflineModeWarning": "You have chosen to proceed without backups. If you forget your applock, you will be locked out from accessing your data.",
+  "duplicateCodes": "Duplicate codes",
+  "noDuplicates": "✨ No duplicates",
+  "youveNoDuplicateCodesThatCanBeCleared": "You've no duplicate codes that can be cleared",
+  "deduplicateCodes": "Deduplicate codes",
+  "deselectAll": "Deselect all",
+  "selectAll": "Select all",
+  "deleteDuplicates": "Delete duplicates",
+  "plainHTML": "Plain HTML"
 }

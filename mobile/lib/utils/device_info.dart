@@ -50,3 +50,21 @@ Future<bool> isAndroidSDKVersionLowerThan(int inputSDK) async {
     return false;
   }
 }
+
+Future<String?> getDeviceName() async {
+  try {
+    if (Platform.isIOS) {
+      final IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
+      return iosInfo.utsname.machine;
+    } else if (Platform.isAndroid) {
+      final AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
+
+      return "${androidInfo.brand} ${androidInfo.model}";
+    } else {
+      return "Not iOS or Android";
+    }
+  } catch (e) {
+    Logger("device_info").severe("deviceSpec check failed", e);
+    return null;
+  }
+}

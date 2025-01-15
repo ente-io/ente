@@ -23,14 +23,15 @@ type AdminUpdateKeyValueRequest struct {
 type FeatureFlagResponse struct {
 	EnableStripe bool `json:"enableStripe"`
 	// If true, the mobile client will stop using CF worker to download files
-	DisableCFWorker     bool `json:"disableCFWorker"`
-	MapEnabled          bool `json:"mapEnabled"`
-	FaceSearchEnabled   bool `json:"faceSearchEnabled"`
-	PassKeyEnabled      bool `json:"passKeyEnabled"`
-	RecoveryKeyVerified bool `json:"recoveryKeyVerified"`
-	InternalUser        bool `json:"internalUser"`
-	BetaUser            bool `json:"betaUser"`
-	EnableMobMultiPart  bool `json:"enableMobMultiPart"`
+	DisableCFWorker     bool   `json:"disableCFWorker"`
+	MapEnabled          bool   `json:"mapEnabled"`
+	FaceSearchEnabled   bool   `json:"faceSearchEnabled"`
+	PassKeyEnabled      bool   `json:"passKeyEnabled"`
+	RecoveryKeyVerified bool   `json:"recoveryKeyVerified"`
+	InternalUser        bool   `json:"internalUser"`
+	BetaUser            bool   `json:"betaUser"`
+	EnableMobMultiPart  bool   `json:"enableMobMultiPart"`
+	CastUrl             string `json:"castUrl"`
 }
 
 type FlagKey string

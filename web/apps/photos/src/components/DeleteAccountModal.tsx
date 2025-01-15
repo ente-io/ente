@@ -1,3 +1,4 @@
+import { assertionFailed } from "@/base/assert";
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
@@ -40,10 +41,12 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     const { authenticateUser } = useContext(GalleryContext);
 
     const [loading, setLoading] = useState(false);
-    const deleteAccountChallenge = useRef<string>();
+    const deleteAccountChallenge = useRef<string | undefined>(undefined);
 
     const [acceptDataDeletion, setAcceptDataDeletion] = useState(false);
-    const reasonAndFeedbackRef = useRef<{ reason: string; feedback: string }>();
+    const reasonAndFeedbackRef = useRef<
+        { reason: string; feedback: string } | undefined
+    >(undefined);
 
     const initiateDelete = async (
         { reason, feedback }: FormValues,
@@ -113,6 +116,10 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     };
 
     const solveChallengeAndDeleteAccount = async () => {
+        if (!deleteAccountChallenge.current || !reasonAndFeedbackRef.current) {
+            assertionFailed();
+            return;
+        }
         const decryptedChallenge = await decryptDeleteAccountChallenge(
             deleteAccountChallenge.current,
         );
@@ -155,7 +162,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                 )}
                                 selected={values.reason}
                                 setSelected={handleChange("reason")}
-                                messageProps={{ color: "critical.main" }}
+                                messageSxProps={{ color: "critical.main" }}
                                 message={errors.reason}
                             />
                             <MultilineInput
@@ -166,7 +173,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                 value={values.feedback}
                                 onChange={handleChange("feedback")}
                                 message={errors.feedback}
-                                messageProps={{ color: "critical.main" }}
+                                messageSxProps={{ color: "critical.main" }}
                                 rowCount={3}
                             />
                             <CheckboxInput
@@ -179,7 +186,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                             <Stack spacing={"8px"}>
                                 <LoadingButton
                                     type="submit"
-                                    size="large"
+                                    fullWidth
                                     color="critical"
                                     disabled={!acceptDataDeletion}
                                     loading={loading}
@@ -187,8 +194,8 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                     {t("delete_account_confirm")}
                                 </LoadingButton>
                                 <FocusVisibleButton
-                                    size="large"
-                                    color={"secondary"}
+                                    fullWidth
+                                    color="secondary"
                                     onClick={onClose}
                                 >
                                     {t("cancel")}
@@ -227,7 +234,7 @@ interface MultilineInputProps {
     label: string;
     labelProps?: TypographyProps;
     message?: string;
-    messageProps?: TypographyProps;
+    messageSxProps?: TypographyProps["sx"];
     placeholder?: string;
     value: string;
     rowCount: number;
@@ -236,9 +243,8 @@ interface MultilineInputProps {
 
 function MultilineInput({
     label,
-    labelProps,
     message,
-    messageProps,
+    messageSxProps,
     placeholder,
     value,
     rowCount,
@@ -246,7 +252,7 @@ function MultilineInput({
 }: MultilineInputProps) {
     return (
         <Stack spacing={"4px"}>
-            <Typography {...labelProps}>{label}</Typography>
+            <Typography>{label}</Typography>
             <TextField
                 variant="standard"
                 multiline
@@ -267,10 +273,13 @@ function MultilineInput({
                 })}
             />
             <Typography
-                px={"8px"}
                 variant="small"
-                color="text.secondary"
-                {...messageProps}
+                sx={[
+                    { px: "8px", color: "text.secondary" },
+                    ...(Array.isArray(messageSxProps)
+                        ? messageSxProps
+                        : [messageSxProps]),
+                ]}
             >
                 {message}
             </Typography>
@@ -283,7 +292,6 @@ interface CheckboxInputProps {
     checked: boolean;
     onChange: (value: boolean) => void;
     label: string;
-    labelProps?: TypographyProps;
 }
 
 function CheckboxInput({
@@ -291,7 +299,6 @@ function CheckboxInput({
     checked,
     onChange,
     label,
-    labelProps,
 }: CheckboxInputProps) {
     return (
         <FormGroup sx={{ width: "100%" }}>
@@ -306,7 +313,7 @@ function CheckboxInput({
                     />
                 }
                 label={
-                    <Typography color="text.secondary" {...labelProps}>
+                    <Typography sx={{ color: "text.secondary" }}>
                         {label}
                     </Typography>
                 }

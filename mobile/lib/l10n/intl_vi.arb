@@ -412,7 +412,7 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Kích thước lưới ảnh",
-  "manageDeviceStorage": "Manage device Cache",
+  "manageDeviceStorage": "Quản lý bộ nhớ đệm của thiết bị",
   "manageDeviceStorageDesc": "Review and clear local cache storage.",
   "machineLearning": "Học máy",
   "mlConsent": "Kích hoạt học máy",
@@ -689,6 +689,8 @@
   "noPhotosAreBeingBackedUpRightNow": "Hiện tại không có ảnh nào đang được sao lưu",
   "preserveMore": "Lưu giữ nhiều hơn",
   "grantFullAccessPrompt": "Vui lòng cho phép truy cập vào tất cả ảnh trong ứng dụng Cài đặt",
+  "allowPermTitle": "Cho phép truy cập ảnh",
+  "allowPermBody": "Vui lòng cho phép truy cập vào ảnh của bạn từ Cài đặt để Ente có thể hiển thị và sao lưu thư viện của bạn.",
   "openSettings": "Mở Cài đặt",
   "selectMorePhotos": "Chọn thêm ảnh",
   "existingUser": "Người dùng hiện tại",
@@ -940,8 +942,8 @@
   "verificationFailedPleaseTryAgain": "Xác minh không thành công, vui lòng thử lại",
   "authenticating": "Đang xác thực...",
   "authenticationSuccessful": "Xác thực thành công!",
-  "incorrectRecoveryKey": "Khóa phục hồi không chính xác",
-  "theRecoveryKeyYouEnteredIsIncorrect": "Khóa phục hồi bạn đã nhập không chính xác",
+  "incorrectRecoveryKey": "Khóa khôi phục không chính xác",
+  "theRecoveryKeyYouEnteredIsIncorrect": "Khóa khôi phục bạn đã nhập không chính xác",
   "twofactorAuthenticationSuccessfullyReset": "Xác thực hai yếu tố đã được đặt lại thành công",
   "pleaseVerifyTheCodeYouHaveEntered": "Vui lòng xác minh mã bạn đã nhập",
   "pleaseContactSupportIfTheProblemPersists": "Vui lòng liên hệ với bộ phận hỗ trợ nếu vấn đề vẫn tiếp diễn",
@@ -1382,8 +1384,8 @@
   "onlyThem": "Chỉ họ",
   "checkingModels": "Đang kiểm tra các mô hình...",
   "enableMachineLearningBanner": "Bật học máy cho tìm kiếm ma thuật và nhận diện khuôn mặt",
-  "searchDiscoverEmptySection": "Hình ảnh sẽ được hiển thị ở đây khi quá trình xử lý hoàn tất",
-  "searchPersonsEmptySection": "Người sẽ được hiển thị ở đây khi quá trình xử lý hoàn tất",
+  "searchDiscoverEmptySection": "Hình ảnh sẽ được hiển thị ở đây sau khi hoàn tất xử lý và đồng bộ",
+  "searchPersonsEmptySection": "Người sẽ được hiển thị ở đây sau khi hoàn tất xử lý và đồng bộ",
   "viewersSuccessfullyAdded": "{count, plural, =0 {Đã thêm 0 người xem} =1 {Đã thêm 1 người xem} other {Đã thêm {count} người xem}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1479,15 +1481,15 @@
     }
   },
   "file": "Tệp",
-  "searchSectionsLengthMismatch": "Chiều dài các phần không khớp: {snapshotLenght} != {searchLenght}",
+  "searchSectionsLengthMismatch": "Độ dài các phần không khớp: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
     "description": "Appears in search tab page",
     "placeholders": {
-      "snapshotLenght": {
+      "snapshotLength": {
         "type": "int",
         "example": "1"
       },
-      "searchLenght": {
+      "searchLength": {
         "type": "int",
         "example": "2"
       }
@@ -1514,5 +1516,66 @@
   "openAlbumInBrowserTitle": "Vui lòng sử dụng ứng dụng web để thêm ảnh vào album này",
   "allow": "Cho phép",
   "allowAppToOpenSharedAlbumLinks": "Cho phép ứng dụng mở liên kết album chia sẻ",
-  "seePublicAlbumLinksInApp": "Xem liên kết album công khai trong ứng dụng"
+  "seePublicAlbumLinksInApp": "Xem liên kết album công khai trong ứng dụng",
+  "emergencyContacts": "Liên hệ khẩn cấp",
+  "acceptTrustInvite": "Chấp nhận lời mời",
+  "declineTrustInvite": "Từ chối lời mời",
+  "removeYourselfAsTrustedContact": "Gỡ bỏ bạn khỏi liên hệ tin cậy",
+  "legacy": "Thừa kế",
+  "legacyPageDesc": "Thừa kế cho phép các liên hệ tin cậy truy cập tài khoản của bạn khi bạn không hoạt động.",
+  "legacyPageDesc2": "Các liên hệ tin cậy có thể khởi động quá trình khôi phục tài khoản, và nếu không bị chặn trong vòng 30 ngày, có thể đặt lại mật khẩu và truy cập tài khoản của bạn.",
+  "legacyAccounts": "Tài khoản thừa kế",
+  "trustedContacts": "Liên hệ tin cậy",
+  "addTrustedContact": "Thêm liên hệ tin cậy",
+  "removeInvite": "Gỡ bỏ lời mời",
+  "recoveryWarning": "Một liên hệ tin cậy đang cố gắng truy cập tài khoản của bạn",
+  "rejectRecovery": "Từ chối khôi phục",
+  "recoveryInitiated": "Quá trình khôi phục đã được khởi động",
+  "recoveryInitiatedDesc": "Bạn có thể truy cập tài khoản sau {days} ngày. Một thông báo sẽ được gửi đến {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Hủy khôi phục",
+  "recoveryAccount": "Khôi phục tài khoản",
+  "cancelAccountRecoveryBody": "Bạn có chắc chắn muốn hủy khôi phục không?",
+  "startAccountRecoveryTitle": "Bắt đầu khôi phục",
+  "whyAddTrustContact": "Liên hệ tin cậy có thể giúp khôi phục dữ liệu của bạn.",
+  "recoveryReady": "Bạn có thể khôi phục tài khoản của {email} bằng cách đặt lại mật khẩu mới.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} đang cố gắng khôi phục tài khoản của bạn.",
+  "trustedInviteBody": "Bạn đã được mời làm người liên hệ thừa kế bởi {email}.",
+  "warning": "Cảnh báo",
+  "proceed": "Tiếp tục",
+  "confirmAddingTrustedContact": "Bạn sắp thêm {email} làm liên hệ tin cậy. Họ sẽ có thể khôi phục tài khoản của bạn nếu bạn không hoạt động trong {numOfDays} ngày.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} đã mời bạn trở thành một liên hệ tin cậy",
+  "authToManageLegacy": "Vui lòng xác thực để quản lý các liên hệ tin cậy của bạn",
+  "useDifferentPlayerInfo": "Phát video gặp vấn đề? Ấn giữ tại đây để thử một trình phát khác."
 }

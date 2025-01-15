@@ -1,7 +1,7 @@
 import { isDesktop } from "@/base/app";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { getKV, setKV } from "@/base/kv";
-import { apiURL, familyAppOrigin, paymentsAppOrigin } from "@/base/origins";
+import { apiURL } from "@/base/origins";
 import {
     nullishToEmpty,
     nullishToZero,
@@ -367,6 +367,8 @@ export const cancelStripeSubscription = async () => {
     return syncUserDetails();
 };
 
+const paymentsAppOrigin = "https://payments.ente.io";
+
 /**
  * Start the flow to purchase or update a subscription by redirecting the user
  * to the payments app.
@@ -381,7 +383,7 @@ export const redirectToPaymentsApp = async (
 ) => {
     const paymentToken = await getPaymentToken();
     const redirectURL = paymentCompletionRedirectURL();
-    window.location.href = `${paymentsAppOrigin()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${redirectURL}`;
+    window.location.href = `${paymentsAppOrigin}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${redirectURL}`;
 };
 
 /**
@@ -390,7 +392,7 @@ export const redirectToPaymentsApp = async (
  */
 const paymentCompletionRedirectURL = () =>
     isDesktop
-        ? `${paymentsAppOrigin()}/desktop-redirect`
+        ? `${paymentsAppOrigin}/desktop-redirect`
         : `${window.location.origin}/gallery`;
 
 /**
@@ -505,25 +507,34 @@ export const familyUsage = (userDetails: UserDetails) =>
 export const getFamilyPortalRedirectURL = async () => {
     const userDetails = userDetailsSnapshot();
 
-    const token = await getFamiliesToken();
+    const { familiesToken: token, familyUrl: familiesURL } =
+        await getFamiliesTokenAndURL();
     const isFamilyCreated =
         userDetails && isPartOfFamily(userDetails) ? "true" : "false";
     const redirectURL = `${window.location.origin}/gallery`;
     const params = new URLSearchParams({ token, isFamilyCreated, redirectURL });
-    return `${familyAppOrigin()}?${params.toString()}`;
+    return `${familiesURL}?${params.toString()}`;
 };
 
 /**
  * Fetch and return a one-time token that can be used to authenticate user's
- * requests to the families app.
+ * requests to the families app, alongwith the URL of the families app.
  */
-const getFamiliesToken = async () => {
+const getFamiliesTokenAndURL = async () => {
     const res = await fetch(await apiURL("/users/families-token"), {
         headers: await authenticatedRequestHeaders(),
     });
     ensureOk(res);
-    return z.object({ familiesToken: z.string() }).parse(await res.json())
-        .familiesToken;
+    return z
+        .object({
+            // The origin that serves the family dashboard which can be used to
+            // create or manage family plans.
+            familyUrl: z.string(),
+            // A token that can be used to authenticate with the family
+            // dashboard.
+            familiesToken: z.string(),
+        })
+        .parse(await res.json());
 };
 
 /**

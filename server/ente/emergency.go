@@ -33,7 +33,6 @@ const (
 	UserInvitedContact ContactState = "INVITED"
 	UserRevokedContact ContactState = "REVOKED"
 	ContactAccepted    ContactState = "ACCEPTED"
-	ContactDeleted     ContactState = "DELETED"
 	ContactLeft        ContactState = "CONTACT_LEFT"
 	ContactDenied      ContactState = "CONTACT_DENIED"
 )
@@ -48,6 +47,7 @@ type EmergencyContactEntity struct {
 type RecoveryStatus string
 
 const (
+	RecoveryStatusInitiated RecoveryStatus = "INITIATED"
 	RecoveryStatusWaiting   RecoveryStatus = "WAITING"
 	RecoveryStatusRejected  RecoveryStatus = "REJECTED"
 	RecoveryStatusRecovered RecoveryStatus = "RECOVERED"

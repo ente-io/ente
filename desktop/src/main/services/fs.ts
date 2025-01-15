@@ -22,7 +22,7 @@ export const fsReadTextFile = async (filePath: string) =>
     fs.readFile(filePath, "utf-8");
 
 export const fsWriteFile = (path: string, contents: string) =>
-    fs.writeFile(path, contents);
+    fs.writeFile(path, contents, { flush: true });
 
 export const fsIsDir = async (dirPath: string) => {
     if (!existsSync(dirPath)) return false;

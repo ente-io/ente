@@ -36,9 +36,15 @@ import {
 } from "@/new/photos/services/collection";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
 import {
+    getAllLatestCollections,
+    getAllLocalCollections,
+    syncTrash,
+} from "@/new/photos/services/collections";
+import {
     getLocalFiles,
     getLocalTrashedFiles,
     sortFiles,
+    syncFiles,
 } from "@/new/photos/services/files";
 import {
     filterSearchableFiles,
@@ -46,6 +52,7 @@ import {
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { initSettings } from "@/new/photos/services/settings";
+import { preCollectionsAndFilesSync, sync } from "@/new/photos/services/sync";
 import {
     initUserDetailsOrTriggerSync,
     redirectToCustomerPortal,
@@ -54,16 +61,11 @@ import {
 } from "@/new/photos/services/user-details";
 import { useAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
-import {
-    CenteredFlex,
-    FlexWrapper,
-    HorizontalFlex,
-} from "@ente/shared/components/Container";
+import { CenteredFlex, FlexWrapper } from "@ente/shared/components/Container";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
 import { useFileInput } from "@ente/shared/hooks/useFileInput";
-import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
     getToken,
@@ -77,11 +79,11 @@ import {
     clearKeys,
     getKey,
 } from "@ente/shared/storage/sessionStorage";
-import ArrowBack from "@mui/icons-material/ArrowBack";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import type { ButtonProps, IconButtonProps } from "@mui/material";
-import { Box, Button, IconButton, Typography } from "@mui/material";
+import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import CollectionNamer, {
     CollectionNamerAttributes,
@@ -105,7 +107,14 @@ import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
-import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import {
+    createContext,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { useDropzone } from "react-dropzone";
 import { Trans } from "react-i18next";
 import {
@@ -113,12 +122,8 @@ import {
     constructUserIDToEmailMap,
     createAlbum,
     createUnCategorizedCollection,
-    getAllLatestCollections,
-    getAllLocalCollections,
 } from "services/collectionService";
-import { syncFiles } from "services/fileService";
-import { preFileInfoSync, sync } from "services/sync";
-import { syncTrash } from "services/trashService";
+import exportService from "services/export";
 import uploadManager from "services/upload/uploadManager";
 import { isTokenValid } from "services/userService";
 import {
@@ -192,7 +197,7 @@ export default function Gallery() {
         // ... the props we should apply to the <input> element,
         getInputProps: getDragAndDropInputProps,
         // ... and the files that we got.
-        acceptedFiles: dragAndDropFiles,
+        acceptedFiles: dragAndDropFilesReadOnly,
     } = useDropzone({
         noClick: true,
         noKeyboard: true,
@@ -222,8 +227,12 @@ export default function Gallery() {
     });
 
     const syncInProgress = useRef(false);
-    const syncInterval = useRef<NodeJS.Timeout>();
-    const resync = useRef<{ force: boolean; silent: boolean }>();
+    const syncInterval = useRef<ReturnType<typeof setInterval> | undefined>(
+        undefined,
+    );
+    const resync = useRef<{ force: boolean; silent: boolean } | undefined>(
+        undefined,
+    );
 
     const {
         showLoadingBar,
@@ -249,7 +258,7 @@ export default function Gallery() {
     const [authenticateUserModalView, setAuthenticateUserModalView] =
         useState(false);
 
-    const onAuthenticateCallback = useRef<() => void>();
+    const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
 
     const authenticateUser = (callback: () => void) => {
         onAuthenticateCallback.current = callback;
@@ -258,10 +267,6 @@ export default function Gallery() {
     const closeAuthenticateUserModal = () =>
         setAuthenticateUserModalView(false);
 
-    // The option selected by the user selected from the search bar dropdown.
-    const [selectedSearchOption, setSelectedSearchOption] = useState<
-        SearchOption | undefined
-    >();
     // If the fix creation time dialog is being shown, then the list of files on
     // which it should act.
     const [fixCreationTimeFiles, setFixCreationTimeFiles] = useState<
@@ -449,28 +454,31 @@ export default function Gallery() {
     }, [peopleState]);
 
     useEffect(() => {
-        if (isInSearchMode && selectedSearchOption) {
+        if (isInSearchMode && state.searchSuggestion) {
             setPhotoListHeader({
                 height: 104,
                 item: (
                     <SearchResultsHeader
-                        selectedOption={selectedSearchOption}
+                        searchSuggestion={state.searchSuggestion}
+                        fileCount={state.searchResults?.length ?? 0}
                     />
                 ),
                 itemType: ITEM_TYPE.HEADER,
             });
         }
-    }, [isInSearchMode, selectedSearchOption]);
+    }, [isInSearchMode, state.searchSuggestion, state.searchResults]);
 
-    // TODO: Make this a normal useEffect.
-    useMemoSingleThreaded(async () => {
-        if (selectedSearchOption) {
-            const searchResults = await filterSearchableFiles(
-                selectedSearchOption.suggestion,
+    useEffect(() => {
+        const pendingSearchSuggestion = state.pendingSearchSuggestions.at(-1);
+        if (!state.isRecomputingSearchResults && pendingSearchSuggestion) {
+            dispatch({ type: "updatingSearchResults" });
+            filterSearchableFiles(pendingSearchSuggestion).then(
+                (searchResults) => {
+                    dispatch({ type: "setSearchResults", searchResults });
+                },
             );
-            dispatch({ type: "setSearchResults", searchResults });
         }
-    }, [selectedSearchOption]);
+    }, [state.isRecomputingSearchResults, state.pendingSearchSuggestions]);
 
     const selectAll = (e: KeyboardEvent) => {
         // ignore ctrl/cmd + a if the user is typing in a text field
@@ -547,6 +555,12 @@ export default function Gallery() {
         };
     }, [selectAll, clearSelection]);
 
+    // Create a regular array from the readonly array returned by dropzone.
+    const dragAndDropFiles = useMemo(
+        () => [...dragAndDropFilesReadOnly],
+        [dragAndDropFilesReadOnly],
+    );
+
     const showSessionExpiredDialog = () =>
         showMiniDialog(sessionExpiredDialogAttributes(logout));
 
@@ -568,7 +582,7 @@ export default function Gallery() {
                 throw new Error(CustomError.SESSION_EXPIRED);
             }
             !silent && showLoadingBar();
-            await preFileInfoSync();
+            await preCollectionsAndFilesSync();
             const allCollections = await getAllLatestCollections();
             const [hiddenCollections, collections] = splitByPredicate(
                 allCollections,
@@ -579,13 +593,13 @@ export default function Gallery() {
                 collections,
                 hiddenCollections,
             });
-            await syncFiles(
+            const didUpdateNormalFiles = await syncFiles(
                 "normal",
                 collections,
                 (files) => dispatch({ type: "setFiles", files }),
                 (files) => dispatch({ type: "fetchFiles", files }),
             );
-            await syncFiles(
+            const didUpdateHiddenFiles = await syncFiles(
                 "hidden",
                 hiddenCollections,
                 (hiddenFiles) =>
@@ -593,6 +607,8 @@ export default function Gallery() {
                 (hiddenFiles) =>
                     dispatch({ type: "fetchHiddenFiles", hiddenFiles }),
             );
+            if (didUpdateNormalFiles || didUpdateHiddenFiles)
+                exportService.onLocalFilesUpdated();
             await syncTrash(allCollections, (trashedFiles: EnteFile[]) =>
                 dispatch({ type: "setTrashedFiles", trashedFiles }),
             );
@@ -617,15 +633,14 @@ export default function Gallery() {
                     log.error("syncWithRemote failed", e);
             }
         } finally {
-            dispatch({ type: "clearTempDeleted" });
-            dispatch({ type: "clearTempHidden" });
+            dispatch({ type: "clearUnsyncedState" });
             !silent && hideLoadingBar();
         }
         syncInProgress.current = false;
         if (resync.current) {
             const { force, silent } = resync.current;
             setTimeout(() => syncWithRemote(force, silent), 0);
-            resync.current = null;
+            resync.current = undefined;
         }
     };
 
@@ -783,13 +798,13 @@ export default function Gallery() {
                     personID: searchOption.suggestion.person.id,
                 });
             }
-            setSelectedSearchOption(undefined);
         } else if (searchOption) {
-            dispatch({ type: "enterSearchMode" });
-            setSelectedSearchOption(searchOption);
+            dispatch({
+                type: "enterSearchMode",
+                searchSuggestion: searchOption.suggestion,
+            });
         } else {
             dispatch({ type: "exitSearch" });
-            setSelectedSearchOption(undefined);
         }
         setIsClipSearchResult(type == "clip");
     };
@@ -883,7 +898,10 @@ export default function Gallery() {
                 )}
                 {isFirstLoad && (
                     <CenteredFlex>
-                        <Typography color="text.muted" variant="small">
+                        <Typography
+                            variant="small"
+                            sx={{ color: "text.muted" }}
+                        >
                             {t("INITIAL_LOAD_DELAY_WARNING")}
                         </Typography>
                     </CenteredFlex>
@@ -1026,14 +1044,20 @@ export default function Gallery() {
                     <PeopleEmptyState />
                 ) : (
                     <PhotoFrame
-                        page={PAGES.GALLERY}
                         mode={barMode}
                         modePlus={isInSearchMode ? "search" : barMode}
                         files={filteredFiles}
                         syncWithRemote={syncWithRemote}
-                        favItemIds={state.favoriteFileIDs}
                         setSelected={setSelected}
                         selected={selected}
+                        favoriteFileIDs={state.favoriteFileIDs}
+                        markUnsyncedFavoriteUpdate={(fileID, isFavorite) =>
+                            dispatch({
+                                type: "markUnsyncedFavoriteUpdate",
+                                fileID,
+                                isFavorite,
+                            })
+                        }
                         markTempDeleted={(files) =>
                             dispatch({ type: "markTempDeleted", files })
                         }
@@ -1173,20 +1197,21 @@ interface HiddenSectionNavbarContentsProps {
 const HiddenSectionNavbarContents: React.FC<
     HiddenSectionNavbarContentsProps
 > = ({ onBack }) => (
-    <HorizontalFlex
-        gap={"24px"}
-        sx={{
+    <Stack
+        direction="row"
+        sx={(theme) => ({
+            gap: "24px",
             width: "100%",
-            background: (theme) => theme.palette.background.default,
-        }}
+            background: theme.palette.background.default,
+        })}
     >
         <IconButton onClick={onBack}>
-            <ArrowBack />
+            <ArrowBackIcon />
         </IconButton>
         <FlexWrapper>
             <Typography>{t("section_hidden")}</Typography>
         </FlexWrapper>
-    </HorizontalFlex>
+    </Stack>
 );
 
 /**

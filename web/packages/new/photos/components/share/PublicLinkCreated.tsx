@@ -1,6 +1,6 @@
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import Check from "@mui/icons-material/Check";
+import CheckIcon from "@mui/icons-material/Check";
 import { Box, Dialog, DialogContent, DialogTitle, Stack } from "@mui/material";
 import { t } from "i18next";
 
@@ -24,7 +24,7 @@ export const PublicLinkCreated: React.FC<PublicLinkCreatedProps> = ({
     <Dialog
         {...{ open, onClose }}
         disablePortal
-        componentsProps={{ backdrop: { sx: { position: "absolute" } } }}
+        slotProps={{ backdrop: { sx: { position: "absolute" } } }}
         sx={{ position: "absolute" }}
     >
         <DialogTitle sx={{ textAlign: "center" }}>
@@ -32,7 +32,7 @@ export const PublicLinkCreated: React.FC<PublicLinkCreatedProps> = ({
         </DialogTitle>
         <DialogContent>
             <Box sx={{ textAlign: "center" }}>
-                <Check sx={{ fontSize: "48px" }} />
+                <CheckIcon sx={{ fontSize: "48px" }} />
             </Box>
             <Stack sx={{ pt: 3, gap: 1 }}>
                 <FocusVisibleButton

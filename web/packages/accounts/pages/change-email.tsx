@@ -4,6 +4,7 @@ import {
     FormPaperTitle,
 } from "@/base/components/FormPaper";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
+import { isHTTPErrorWithStatus } from "@/base/http";
 import log from "@/base/log";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
@@ -16,7 +17,7 @@ import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";
 import { appHomeRoute } from "../services/redirect";
-import { changeEmail, sendOTTForEmailChange } from "../services/user";
+import { changeEmail, sendOTT } from "../services/user";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = () => {
@@ -32,7 +33,7 @@ const Page: React.FC<PageProps> = () => {
     return (
         <VerticallyCentered>
             <FormPaper>
-                <FormPaperTitle>{t("CHANGE_EMAIL")}</FormPaperTitle>
+                <FormPaperTitle>{t("change_email")}</FormPaperTitle>
                 <ChangeEmailForm />
             </FormPaper>
         </VerticallyCentered>
@@ -60,7 +61,7 @@ const ChangeEmailForm: React.FC = () => {
     ) => {
         try {
             setLoading(true);
-            await sendOTTForEmailChange(email);
+            await sendOTT(email, "change");
             setEmail(email);
             setShowOttInputVisibility(true);
             setShowMessage(true);
@@ -71,7 +72,12 @@ const ChangeEmailForm: React.FC = () => {
             // }, 250);
         } catch (e) {
             log.error(e);
-            setFieldError("email", t("email_already_taken"));
+            setFieldError(
+                "email",
+                isHTTPErrorWithStatus(e, 403)
+                    ? t("email_already_taken")
+                    : t("generic_error"),
+            );
         }
         setLoading(false);
     };
@@ -89,7 +95,7 @@ const ChangeEmailForm: React.FC = () => {
         } catch (e) {
             log.error(e);
             setLoading(false);
-            setFieldError("ott", t("INCORRECT_CODE"));
+            setFieldError("ott", t("incorrect_code"));
         }
     };
 
@@ -102,13 +108,13 @@ const ChangeEmailForm: React.FC = () => {
                 ottInputVisible
                     ? Yup.object().shape({
                           email: Yup.string()
-                              .email(t("EMAIL_ERROR"))
+                              .email(t("invalid_email_error"))
                               .required(t("required")),
                           ott: Yup.string().required(t("required")),
                       })
                     : Yup.object().shape({
                           email: Yup.string()
-                              .email(t("EMAIL_ERROR"))
+                              .email(t("invalid_email_error"))
                               .required(t("required")),
                       })
             }
@@ -124,12 +130,12 @@ const ChangeEmailForm: React.FC = () => {
                             onClose={() => setShowMessage(false)}
                         >
                             <Trans
-                                i18nKey="EMAIL_SENT"
+                                i18nKey="email_sent"
                                 components={{
                                     a: (
                                         <Box
-                                            color="text.muted"
                                             component={"span"}
+                                            sx={{ color: "text.muted" }}
                                         />
                                     ),
                                 }}
@@ -141,23 +147,25 @@ const ChangeEmailForm: React.FC = () => {
                         <VerticallyCentered>
                             <TextField
                                 fullWidth
-                                InputProps={{
-                                    readOnly: ottInputVisible,
-                                }}
                                 type="email"
-                                label={t("ENTER_EMAIL")}
+                                label={t("enter_email")}
                                 value={values.email}
                                 onChange={handleChange("email")}
                                 error={Boolean(errors.email)}
                                 helperText={errors.email}
                                 autoFocus
                                 disabled={loading}
+                                slotProps={{
+                                    input: {
+                                        readOnly: ottInputVisible,
+                                    },
+                                }}
                             />
                             {ottInputVisible && (
                                 <TextField
                                     fullWidth
                                     type="text"
-                                    label={t("ENTER_OTT")}
+                                    label={t("verification_code")}
                                     value={values.ott}
                                     onChange={handleChange("ott")}
                                     error={Boolean(errors.ott)}
@@ -172,7 +180,7 @@ const ChangeEmailForm: React.FC = () => {
                                 sx={{ mt: 2, mb: 4 }}
                                 loading={loading}
                             >
-                                {!ottInputVisible ? t("SEND_OTT") : t("VERIFY")}
+                                {!ottInputVisible ? t("send_otp") : t("verify")}
                             </LoadingButton>
                         </VerticallyCentered>
                     </form>
@@ -188,7 +196,7 @@ const ChangeEmailForm: React.FC = () => {
                             <LinkButton
                                 onClick={() => setShowOttInputVisibility(false)}
                             >
-                                {t("CHANGE_EMAIL")}?
+                                {t("change_email")}?
                             </LinkButton>
                         )}
                         <LinkButton onClick={goToApp}>

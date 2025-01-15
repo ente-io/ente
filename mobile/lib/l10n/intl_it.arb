@@ -351,6 +351,7 @@
   "failedToLoadAlbums": "Impossibile caricare gli album",
   "hidden": "Nascosti",
   "authToViewYourHiddenFiles": "Autenticati per visualizzare i file nascosti",
+  "authToViewTrashedFiles": "Autenticati per visualizzare i file cancellati",
   "trash": "Cestino",
   "uncategorized": "Senza categoria",
   "videoSmallCase": "video",
@@ -815,6 +816,16 @@
   "referFriendsAnd2xYourPlan": "Invita un amico e raddoppia il tuo spazio",
   "shareAlbumHint": "Apri un album e tocca il pulsante di condivisione in alto a destra per condividerlo.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Gli elementi mostrano il numero di giorni rimanenti prima della cancellazione permanente",
+  "trashDaysLeft": "{count, plural, =0 {Presto} =1 {1 giorno} other {{count} giorni}}",
+  "@trashDaysLeft": {
+    "description": "Text to indicate number of days remaining before permanent deletion",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
   "deleteAll": "Elimina tutto",
   "renameAlbum": "Rinomina album",
   "convertToAlbum": "Converti in album",
@@ -1363,7 +1374,6 @@
   "yesResetPerson": "Sì, resetta persona",
   "onlyThem": "Solo loro",
   "checkingModels": "Verifica dei modelli...",
-  "searchDiscoverEmptySection": "Le immagini saranno mostrate qui una volta che l'elaborazione sarà completata",
   "accountIsAlreadyConfigured": "L'account è già configurato.",
   "sessionIdMismatch": "ID sessione non corrispondente",
   "@sessionIdMismatch": {
@@ -1404,5 +1414,71 @@
   "changeLogBackupStatusTitle": "Stato Backup",
   "changeLogDiscoverTitle": "Esplora",
   "selectCoverPhoto": "Seleziona foto di copertina",
-  "newLocation": "Nuova posizione"
+  "newLocation": "Nuova posizione",
+  "faceNotClusteredYet": "Faccia non ancora raggruppata, per favore torna più tardi",
+  "openFile": "Apri file",
+  "allow": "Consenti",
+  "emergencyContacts": "Contatti di emergenza",
+  "acceptTrustInvite": "Accetta l'invito",
+  "declineTrustInvite": "Rifiuta l'invito",
+  "removeYourselfAsTrustedContact": "Rimuovi te stesso come contatto fidato",
+  "legacy": "Legacy",
+  "legacyPageDesc": "Legacy consente ai contatti fidati di accedere al tuo account in tua assenza.",
+  "legacyPageDesc2": "I contatti fidati possono avviare il recupero dell'account e, se non sono bloccati entro 30 giorni, reimpostare la password e accedere al tuo account.",
+  "legacyAccounts": "Account Legacy",
+  "trustedContacts": "Contatti fidati",
+  "addTrustedContact": "Aggiungi contatto fidato",
+  "removeInvite": "Rimuovi invito",
+  "recoveryWarning": "Un contatto fidato sta tentando di accedere al tuo account",
+  "rejectRecovery": "Rifiuta il recupero",
+  "recoveryInitiated": "Recupero avviato",
+  "recoveryInitiatedDesc": "Puoi accedere all'account dopo {days} giorni. Una notifica verrà inviata a {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Annulla il recupero",
+  "recoveryAccount": "Recupera l'account",
+  "cancelAccountRecoveryBody": "Sei sicuro di voler annullare il recupero?",
+  "startAccountRecoveryTitle": "Avvia il recupero",
+  "whyAddTrustContact": "Un contatto fidato può aiutare a recuperare i tuoi dati.",
+  "recoveryReady": "Ora puoi recuperare l'account di {email} impostando una nuova password.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} sta cercando di recuperare il tuo account.",
+  "trustedInviteBody": "Sei stato invitato a essere un contatto Legacy da {email}.",
+  "warning": "Attenzione",
+  "proceed": "Prosegui",
+  "confirmAddingTrustedContact": "Stai per aggiungere {email} come contatto fidato. Potranno recuperare il tuo account se sei assente per {numOfDays} giorni.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} ti ha invitato a essere un contatto fidato",
+  "authToManageLegacy": "Autenticati per gestire i tuoi contatti fidati",
+  "useDifferentPlayerInfo": "Hai problemi a riprodurre questo video? Premi a lungo qui per provare un altro lettore.",
+  "hideSharedItemsFromHomeGallery": "Nascondi gli elementi condivisi dalla galleria principale",
+  "gallery": "Galleria"
 }

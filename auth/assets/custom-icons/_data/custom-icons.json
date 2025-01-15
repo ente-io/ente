@@ -73,6 +73,9 @@
       ]
     },
     {
+      "title": "Belo"
+    },
+    {
       "title": "Bethesda",
       "altNames": [
         "Bethesda Softworks"
@@ -176,6 +179,9 @@
       "title": "Bybit"
     },
     {
+      "title": "Caixa"
+    },
+    {
       "title": "Canva"
     },
     {
@@ -268,6 +274,10 @@
     },
     {
       "title": "Dropbox"
+    },
+    {
+      "title": "DreamHost Panel",
+      "slug": "dreamhost_panel"
     },
     {
       "title": "dus.net",
@@ -529,7 +539,9 @@
     },
     {
       "title": "matlab",
-      "altNames": ["mathworks"]
+      "altNames": [
+        "mathworks"
+      ]
     },
     {
       "title": "Mercado Livre",
@@ -607,6 +619,10 @@
       "title": "NextDNS"
     },
     {
+      "title": "Newgrounds",
+      "slug": "newgrounds"
+    },
+    {
       "title": "Newton",
       "altNames": [
         "Newton Crypto"
@@ -615,6 +631,9 @@
     {
       "title": "ngrok",
       "hex": "858585"
+    },
+    {
+      "title": "Nelnet"
     },
     {
       "title": "nintendo",
@@ -628,8 +647,10 @@
     {
       "title": "nordvpn",
       "slug": "nordaccount",
-      "hex": "#4687FF",
-      "altNames": "Nord Account"
+      "hex": "4687FF",
+      "altNames": [
+        "Nord Account"
+      ]
     },
     {
       "title": "Notesnook"
@@ -703,6 +724,14 @@
       "title": "PostNL"
     },
     {
+      "title": "PostScan Mail",
+      "slug": "postscanmail",
+      "altNames": [
+        "Post Scan Mail",
+        "PostScanMail"
+      ]
+    },
+    {
       "title": "Privacy Guides",
       "slug": "privacyguides"
     },
@@ -735,7 +764,8 @@
       ]
     },
     {
-      "title": "randstad"
+      "title": "randstad",
+      "hex": "2175D9"
     },
     {
       "title": "Real-Debrid",
@@ -966,6 +996,10 @@
     },
     {
       "title": "Upstox"
+    },
+    {
+      "title": "US Mobile",
+      "slug": "us_mobile"
     },
     {
       "title": "Vikunja"

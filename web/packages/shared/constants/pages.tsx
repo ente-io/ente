@@ -13,7 +13,6 @@ export enum PHOTOS_PAGES {
     VERIFY = "/verify",
     ROOT = "/",
     SHARED_ALBUMS = "/shared-albums",
-    DEDUPLICATE = "/deduplicate",
 }
 
 export enum AUTH_PAGES {

@@ -1,5 +1,6 @@
 import { FilledIconButton } from "@/base/components/mui";
 import { Overlay } from "@/base/components/mui/Container";
+import { Ellipsized2LineTypography } from "@/base/components/Typography";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
 import {
@@ -19,12 +20,12 @@ import type {
 } from "@/new/photos/services/collection/ui";
 import type { Person } from "@/new/photos/services/ml/people";
 import ArchiveIcon from "@mui/icons-material/Archive";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import Favorite from "@mui/icons-material/FavoriteRounded";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import LinkIcon from "@mui/icons-material/Link";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PeopleIcon from "@mui/icons-material/People";
-import PushPin from "@mui/icons-material/PushPin";
+import PushPinIcon from "@mui/icons-material/PushPin";
 import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, {
@@ -217,7 +218,10 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 
     const controls1 = isSmallWidth && (
-        <Box display="flex" alignItems={"center"} gap={1} minHeight={"64px"}>
+        <Stack
+            direction="row"
+            sx={{ alignItems: "center", gap: 1, minHeight: "64px" }}
+        >
             {mode != "people" && (
                 <>
                     <CollectionsSortOptions
@@ -226,23 +230,26 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         transparentTriggerButtonBackground
                     />
                     <IconButton onClick={onShowAllCollections}>
-                        <ExpandMore />
+                        <ExpandMoreIcon />
                     </IconButton>
                 </>
             )}
-        </Box>
+        </Stack>
     );
 
     const controls2 = !isSmallWidth && mode != "people" && (
-        <Box display="flex" alignItems={"center"} gap={1} height={"64px"}>
+        <Stack
+            direction="row"
+            sx={{ alignItems: "center", gap: 1, height: "64px" }}
+        >
             <CollectionsSortOptions
                 activeSortBy={collectionsSortBy}
                 onChangeSortBy={onChangeCollectionsSortBy}
             />
             <FilledIconButton onClick={onShowAllCollections}>
-                <ExpandMore />
+                <ExpandMoreIcon />
             </FilledIconButton>
-        </Box>
+        </Stack>
     );
 
     return (
@@ -284,7 +291,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 };
 
-const BarWrapper = styled(Box)`
+const BarWrapper = styled("div")`
     padding-inline: 24px;
     @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
         padding-inline: 4px;
@@ -293,7 +300,7 @@ const BarWrapper = styled(Box)`
     border-block-end: 1px solid ${({ theme }) => theme.palette.divider};
 `;
 
-export const Row1 = styled(Box)`
+export const Row1 = styled("div")`
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -301,7 +308,7 @@ export const Row1 = styled(Box)`
     margin-block-end: 12px;
 `;
 
-export const Row2 = styled(Box)`
+export const Row2 = styled("div")`
     display: flex;
     align-items: flex-start;
     gap: 16px;
@@ -343,7 +350,7 @@ const ModeIndicator: React.FC<
 const ModeButton = styled(UnstyledButton, {
     shouldForwardProp: (propName) => propName != "active",
 })<{ active: boolean }>(
-    ({ active, theme }) => `
+    ({ theme, active }) => `
     p { color: ${active ? theme.colors.text.base : theme.colors.text.muted} }
     p:hover { color: ${theme.colors.text.base} }
 `,
@@ -366,11 +373,9 @@ const ScrollButtonBase_ = styled("button")`
     border: none;
     padding: 0;
     margin: 0;
-
     border-radius: 50%;
     background-color: ${({ theme }) => theme.colors.backdrop.muted};
     color: ${({ theme }) => theme.colors.stroke.base};
-
     & > svg {
         border-radius: 50%;
         height: 30px;
@@ -382,7 +387,6 @@ const ScrollButtonLeft = styled(ScrollButtonBase)`
     left: 0;
     text-align: right;
     transform: translate(-50%, 0%);
-
     & > svg {
         transform: rotate(180deg);
     }
@@ -394,7 +398,7 @@ const ScrollButtonRight = styled(ScrollButtonBase)`
     transform: translate(50%, 0%);
 `;
 
-const ListWrapper = styled(Box)`
+const ListWrapper = styled("div")`
     position: relative;
     overflow: hidden;
     height: 86px;
@@ -507,21 +511,13 @@ const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
 
 const CardText: React.FC<React.PropsWithChildren> = ({ children }) => (
     <TileTextOverlay>
-        <Box height={"2.1em"}>
-            <Ellipsized variant="small">{children}</Ellipsized>
+        <Box sx={{ height: "2.1em" }}>
+            <Ellipsized2LineTypography variant="small">
+                {children}
+            </Ellipsized2LineTypography>
         </Box>
     </TileTextOverlay>
 );
-
-const Ellipsized = styled(Typography)`
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; // number of lines to show
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    word-break: break-word;
-`;
 
 interface CollectionBarCardIconProps {
     type: CollectionSummaryType;
@@ -531,19 +527,17 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     type,
 }) => (
     <CollectionBarCardIcon_>
-        {type == "favorites" && <Favorite />}
+        {type == "favorites" && <FavoriteRoundedIcon />}
         {type == "archived" && (
             <ArchiveIcon
-                sx={(theme) => ({
-                    color: theme.colors.white.muted,
-                })}
+                sx={(theme) => ({ color: theme.colors.white.muted })}
             />
         )}
         {type == "outgoingShare" && <PeopleIcon />}
         {(type == "incomingShareViewer" ||
             type == "incomingShareCollaborator") && <PeopleIcon />}
         {type == "sharedOnlyViaLink" && <LinkIcon />}
-        {type == "pinned" && <PushPin />}
+        {type == "pinned" && <PushPinIcon />}
     </CollectionBarCardIcon_>
 );
 

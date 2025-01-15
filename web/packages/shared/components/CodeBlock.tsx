@@ -1,6 +1,6 @@
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { CenteredFlex } from "@ente/shared/components/Container";
-import { Box, type BoxProps, styled } from "@mui/material";
+import { type BoxProps, styled } from "@mui/material";
 import React from "react";
 import CopyButton from "./CopyButton";
 
@@ -46,7 +46,7 @@ const FreeFlowText = styled("div")`
     text-align: left;
 `;
 
-const CopyButtonWrapper = styled(Box)`
+const CopyButtonWrapper = styled("div")`
     position: absolute;
     top: 0px;
     right: 0px;

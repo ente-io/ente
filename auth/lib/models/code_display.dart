@@ -12,6 +12,8 @@ class CodeDisplay {
   String note;
   final List<String> tags;
   int position;
+  String iconSrc;
+  String iconID;
 
   CodeDisplay({
     this.pinned = false,
@@ -21,7 +23,11 @@ class CodeDisplay {
     this.tags = const [],
     this.note = '',
     this.position = 0,
+    this.iconSrc = '',
+    this.iconID = '',
   });
+
+  bool get isCustomIcon => (iconSrc != '' && iconID != '');
 
   // copyWith
   CodeDisplay copyWith({
@@ -32,6 +38,8 @@ class CodeDisplay {
     List<String>? tags,
     String? note,
     int? position,
+    String? iconSrc,
+    String? iconID,
   }) {
     final bool updatedPinned = pinned ?? this.pinned;
     final bool updatedTrashed = trashed ?? this.trashed;
@@ -40,6 +48,8 @@ class CodeDisplay {
     final List<String> updatedTags = tags ?? this.tags;
     final String updatedNote = note ?? this.note;
     final int updatedPosition = position ?? this.position;
+    final String updatedIconSrc = iconSrc ?? this.iconSrc;
+    final String updatedIconID = iconID ?? this.iconID;
 
     return CodeDisplay(
       pinned: updatedPinned,
@@ -49,6 +59,8 @@ class CodeDisplay {
       tags: updatedTags,
       note: updatedNote,
       position: updatedPosition,
+      iconSrc: updatedIconSrc,
+      iconID: updatedIconID,
     );
   }
 
@@ -64,6 +76,8 @@ class CodeDisplay {
       tags: List<String>.from(json['tags'] ?? []),
       note: json['note'] ?? '',
       position: json['position'] ?? 0,
+      iconSrc: json['iconSrc'] ?? 'ente',
+      iconID: json['iconID'] ?? '',
     );
   }
 
@@ -106,6 +120,8 @@ class CodeDisplay {
       'tags': tags,
       'note': note,
       'position': position,
+      'iconSrc': iconSrc,
+      'iconID': iconID,
     };
   }
 

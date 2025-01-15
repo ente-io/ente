@@ -7,8 +7,8 @@ description:
 
 # Migrating to/from Ente Photos
 
--   [Import from Google Photos](from-google-photos/)
--   [Import from Apple Photos](from-apple-photos/)
--   [Import from Amazon Photos](from-amazon-photos)
--   [Import from local hard disk](from-local-hard-disk)
--   [Export out of Ente Photos](export/)
+- [Import from Google Photos](from-google-photos/)
+- [Import from Apple Photos](from-apple-photos/)
+- [Import from Amazon Photos](from-amazon-photos)
+- [Import from local hard disk](from-local-hard-disk)
+- [Export out of Ente Photos](export/)

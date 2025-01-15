@@ -1,4 +1,5 @@
 import { FormPaperFooter, FormPaperTitle } from "@/base/components/FormPaper";
+import { isMuseumHTTPError } from "@/base/http";
 import log from "@/base/log";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
@@ -10,7 +11,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { PAGES } from "../constants/pages";
 import { getSRPAttributes } from "../services/srp-remote";
-import { sendOtt } from "../services/user";
+import { sendOTT } from "../services/user";
 
 interface LoginProps {
     signUp: () => void;
@@ -26,26 +27,30 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
         setFieldError,
     ) => {
         try {
-            await setLSUser({ email });
             const srpAttributes = await getSRPAttributes(email);
             log.debug(() => ["srpAttributes", JSON.stringify(srpAttributes)]);
             if (!srpAttributes || srpAttributes.isEmailMFAEnabled) {
-                await sendOtt(email);
+                try {
+                    await sendOTT(email, "login");
+                } catch (e) {
+                    if (
+                        await isMuseumHTTPError(e, 404, "USER_NOT_REGISTERED")
+                    ) {
+                        setFieldError(t("email_not_registered"));
+                        return;
+                    }
+                    throw e;
+                }
+                await setLSUser({ email });
                 void router.push(PAGES.VERIFY);
             } else {
+                await setLSUser({ email });
                 setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
                 void router.push(PAGES.CREDENTIALS);
             }
         } catch (e) {
-            if (e instanceof Error) {
-                setFieldError(
-                    `${t("generic_error_retry")} (reason:${e.message})`,
-                );
-            } else {
-                setFieldError(
-                    `${t("generic_error_retry")} (reason:${JSON.stringify(e)})`,
-                );
-            }
+            log.error("Login failed", e);
+            setFieldError(t("generic_error"));
         }
     };
 
@@ -55,22 +60,20 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
             <SingleInputForm
                 callback={loginUser}
                 fieldType="email"
-                placeholder={t("ENTER_EMAIL")}
+                placeholder={t("enter_email")}
                 buttonText={t("login")}
                 autoComplete="username"
                 hiddenPostInput={
                     <Input sx={{ display: "none" }} type="password" value="" />
                 }
             />
-
             <FormPaperFooter>
-                <Stack gap={4}>
+                <Stack sx={{ gap: 4 }}>
                     <LinkButton onClick={signUp}>{t("NO_ACCOUNT")}</LinkButton>
 
                     <Typography
                         variant="mini"
-                        color="text.faint"
-                        minHeight={"32px"}
+                        sx={{ color: "text.faint", minHeight: "32px" }}
                     >
                         {host ?? "" /* prevent layout shift with a minHeight */}
                     </Typography>

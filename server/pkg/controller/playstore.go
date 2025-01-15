@@ -3,9 +3,10 @@ package controller
 import (
 	"context"
 	"errors"
+	"os"
+
 	"github.com/ente-io/museum/pkg/controller/commonbilling"
 	"github.com/ente-io/museum/pkg/repo/storagebonus"
-	"os"
 
 	"github.com/ente-io/stacktrace"
 
@@ -144,7 +145,7 @@ func (c *PlayStoreController) HandleNotification(notification playstore.Develope
 			return stacktrace.Propagate(err, "")
 		}
 	case playstore.SubscriptionNotificationTypeCanceled:
-		err := c.BillingRepo.UpdateSubscriptionCancellationStatus(subscription.UserID, true)
+		err := c.CommonBillCtrl.OnSubscriptionCancelled(subscription.UserID)
 		if err != nil {
 			return stacktrace.Propagate(err, "")
 		}

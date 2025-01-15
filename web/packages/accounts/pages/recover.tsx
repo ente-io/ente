@@ -1,5 +1,5 @@
 import { PAGES } from "@/accounts/constants/pages";
-import { sendOtt } from "@/accounts/services/user";
+import { sendOTT } from "@/accounts/services/user";
 import {
     FormPaper,
     FormPaperFooter,
@@ -48,7 +48,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             return;
         }
         if (!user?.encryptedToken && !user?.token) {
-            void sendOtt(user.email);
+            void sendOTT(user.email, undefined);
             stashRedirect(PAGES.RECOVER);
             void router.push(PAGES.VERIFY);
             return;
@@ -84,8 +84,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             const cryptoWorker = await sharedCryptoWorker();
             const keyAttr = keyAttributes!;
             const masterKey = await cryptoWorker.decryptB64(
-                keyAttr.masterKeyEncryptedWithRecoveryKey,
-                keyAttr.masterKeyDecryptionNonce,
+                keyAttr.masterKeyEncryptedWithRecoveryKey!,
+                keyAttr.masterKeyDecryptionNonce!,
                 await cryptoWorker.fromHex(recoveryKey),
             );
             await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);

@@ -156,6 +156,7 @@
   "twoFactorAuthTitle": "Autenticazione a due fattori",
   "passkeyAuthTitle": "Verifica della passkey",
   "verifyPasskey": "Verifica passkey",
+  "loginWithTOTP": "Login con TOTP",
   "recoverAccount": "Recupera account",
   "enterRecoveryKeyHint": "Inserisci la tua chiave di recupero",
   "recover": "Recupera",
@@ -257,6 +258,10 @@
   "areYouSureYouWantToLogout": "Sei sicuro di volerti disconnettere?",
   "yesLogout": "Si, effettua la disconnessione",
   "exit": "Esci",
+  "theme": "Tema",
+  "lightTheme": "Chiaro",
+  "darkTheme": "Scuro",
+  "systemTheme": "Sistema",
   "verifyingRecoveryKey": "Verifica della chiave di recupero...",
   "recoveryKeyVerified": "Chiave di recupero verificata",
   "recoveryKeySuccessBody": "Ottimo! La tua chiave di recupero è valida. Grazie per averla verificata.\n\nRicordati di effettuare il backup sicuro della tua chiave di recupero.",
@@ -327,6 +332,10 @@
       }
     }
   },
+  "manualSort": "Personalizzato",
+  "editOrder": "Modifica ordine",
+  "mostFrequentlyUsed": "Utilizzato di frequente",
+  "mostRecentlyUsed": "Utilizzato di recente",
   "activeSessions": "Sessioni attive",
   "somethingWentWrongPleaseTryAgain": "Qualcosa è andato storto, per favore riprova",
   "thisWillLogYouOutOfThisDevice": "Questo ti disconnetterà da questo dispositivo!",
@@ -448,6 +457,7 @@
   "unpinText": "Sgancia",
   "pinnedCodeMessage": "{code} è stato fissato",
   "unpinnedCodeMessage": "{code} è stato sganciato",
+  "pinned": "Fissato",
   "tags": "Tag",
   "createNewTag": "Crea un nuovo tag",
   "tag": "Tag",
@@ -484,5 +494,13 @@
   "appLockNotEnabled": "Blocco app non abilitato",
   "appLockNotEnabledDescription": "Si prega di abilitare il blocco dell'app da Sicurezza > Blocco App",
   "authToViewPasskey": "Autenticati per visualizzare le tue passkey",
-  "appLockOfflineModeWarning": "Hai scelto di procedere senza backup. Se dimentichi il tuo codice di blocco dell'app, non potrai più accedere ai tuoi dati."
+  "appLockOfflineModeWarning": "Hai scelto di procedere senza backup. Se dimentichi il tuo codice di blocco dell'app, non potrai più accedere ai tuoi dati.",
+  "duplicateCodes": "Codici duplicati",
+  "noDuplicates": "✨ Nessun doppione",
+  "youveNoDuplicateCodesThatCanBeCleared": "Non ci sono codici duplicati che possono essere cancellati",
+  "deduplicateCodes": "Codici deduplicati",
+  "deselectAll": "Deselezionare tutti",
+  "selectAll": "Seleziona tutti",
+  "deleteDuplicates": "Elimina i duplicati",
+  "plainHTML": "HTML semplice"
 }

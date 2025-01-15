@@ -21,8 +21,10 @@ Future<ButtonResult?> showDialogWidget({
   required List<ButtonWidget> buttons,
   IconData? icon,
   bool isDismissible = true,
+  bool useRootNavigator = false,
 }) {
   return showDialog(
+    useRootNavigator: useRootNavigator,
     barrierDismissible: isDismissible,
     barrierColor: backdropFaintDark,
     context: context,

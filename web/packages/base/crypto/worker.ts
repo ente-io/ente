@@ -13,6 +13,11 @@ import * as libsodium from "./libsodium";
  * Note: Keep these methods logic free. They are meant to be trivial proxies.
  */
 export class CryptoWorker {
+    toB64 = ei._toB64;
+    toB64URLSafe = ei._toB64URLSafe;
+    fromB64 = ei._fromB64;
+    toHex = ei._toHex;
+    fromHex = ei._fromHex;
     generateBoxKey = ei._generateBoxKey;
     generateBlobOrStreamKey = ei._generateBlobOrStreamKey;
     encryptBoxB64 = ei._encryptBoxB64;
@@ -89,26 +94,6 @@ export class CryptoWorker {
         context: string,
     ) {
         return libsodium.generateSubKey(key, subKeyLength, subKeyID, context);
-    }
-
-    async toB64(data: Uint8Array) {
-        return libsodium.toB64(data);
-    }
-
-    async toB64URLSafe(data: Uint8Array) {
-        return libsodium.toB64URLSafe(data);
-    }
-
-    async fromB64(string: string) {
-        return libsodium.fromB64(string);
-    }
-
-    async toHex(string: string) {
-        return libsodium.toHex(string);
-    }
-
-    async fromHex(string: string) {
-        return libsodium.fromHex(string);
     }
 }
 

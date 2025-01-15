@@ -151,6 +151,13 @@ class Collection {
     return publicURLs?.first?.enableCollect ?? false;
   }
 
+  bool get isJoinEnabled {
+    if (publicURLs == null || publicURLs!.isEmpty) {
+      return false;
+    }
+    return publicURLs?.first?.enableJoin ?? false;
+  }
+
   CollectionParticipantRole getRole(int userID) {
     if (isOwner(userID)) {
       return CollectionParticipantRole.owner;

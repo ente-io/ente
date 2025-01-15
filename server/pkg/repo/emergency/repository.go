@@ -118,8 +118,7 @@ func getValidPreviousState(cs ente.ContactState) []ente.ContactState {
 		return []ente.ContactState{ente.UserInvitedContact}
 	case ente.UserRevokedContact:
 		return []ente.ContactState{ente.UserInvitedContact, ente.ContactAccepted}
-	case ente.ContactDeleted:
-		return []ente.ContactState{ente.UserInvitedContact, ente.ContactAccepted}
+
 	}
 	panic("invalid state")
 }

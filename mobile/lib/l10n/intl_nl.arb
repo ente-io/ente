@@ -351,6 +351,7 @@
   "failedToLoadAlbums": "Laden van albums mislukt",
   "hidden": "Verborgen",
   "authToViewYourHiddenFiles": "Gelieve te verifiëren om je verborgen bestanden te bekijken",
+  "authToViewTrashedFiles": "Graag verifiëren om je verwijderde bestanden te bekijken",
   "trash": "Prullenbak",
   "uncategorized": "Ongecategoriseerd",
   "videoSmallCase": "video",
@@ -412,6 +413,8 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Foto raster grootte",
+  "manageDeviceStorage": "Apparaatcache beheren",
+  "manageDeviceStorageDesc": "Bekijk en wis lokale cache opslag.",
   "machineLearning": "Machine Learning",
   "mlConsent": "Schakel machine learning in",
   "mlConsentTitle": "Machine learning inschakelen?",
@@ -618,7 +621,7 @@
   "yesCancel": "Ja, opzeggen",
   "failedToRenew": "Verlengen mislukt",
   "failedToCancel": "Opzeggen mislukt",
-  "twoMonthsFreeOnYearlyPlans": "Krijg 2 maanden gratis op jaarlijkse abonnementen",
+  "twoMonthsFreeOnYearlyPlans": "Krijg 2 maanden gratis bij jaarlijkse abonnementen",
   "monthly": "Maandelijks",
   "@monthly": {
     "description": "The text to display for monthly plans",
@@ -687,6 +690,8 @@
   "noPhotosAreBeingBackedUpRightNow": "Er worden momenteel geen foto's geback-upt",
   "preserveMore": "Meer bewaren",
   "grantFullAccessPrompt": "Geef toegang tot alle foto's in de Instellingen app",
+  "allowPermTitle": "Toegang tot foto's toestaan",
+  "allowPermBody": "Geef toegang tot je foto's vanuit Instellingen zodat Ente je bibliotheek kan weergeven en back-uppen.",
   "openSettings": "Instellingen openen",
   "selectMorePhotos": "Selecteer meer foto's",
   "existingUser": "Bestaande gebruiker",
@@ -1232,6 +1237,7 @@
   "waitingForVerification": "Wachten op verificatie...",
   "passkey": "Passkey",
   "passkeyAuthTitle": "Passkey verificatie",
+  "loginWithTOTP": "Inloggen met TOTP",
   "passKeyPendingVerification": "Verificatie is nog in behandeling",
   "loginSessionExpired": "Sessie verlopen",
   "loginSessionExpiredDetails": "Jouw sessie is verlopen. Log opnieuw in.",
@@ -1379,8 +1385,8 @@
   "onlyThem": "Alleen hen",
   "checkingModels": "Modellen controleren...",
   "enableMachineLearningBanner": "Schakel machine learning in voor magische zoekopdrachten en gezichtsherkenning",
-  "searchDiscoverEmptySection": "Afbeeldingen worden hier getoond zodra de verwerking voltooid is",
-  "searchPersonsEmptySection": "Mensen worden hier getoond zodra de verwerking voltooid is",
+  "searchDiscoverEmptySection": "Afbeeldingen worden hier getoond zodra verwerking en synchroniseren voltooid is",
+  "searchPersonsEmptySection": "Personen worden hier getoond zodra verwerking en synchroniseren voltooid is",
   "viewersSuccessfullyAdded": "{count, plural, =0 {0 kijkers toegevoegd} =1 {1 kijker toegevoegd} other {{count} kijkers toegevoegd}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1476,15 +1482,15 @@
     }
   },
   "file": "Bestand",
-  "searchSectionsLengthMismatch": "Lengte van secties komt niet overeen: {snapshotLenght} != {searchLenght}",
+  "searchSectionsLengthMismatch": "Lengte van secties komt niet overeen: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
     "description": "Appears in search tab page",
     "placeholders": {
-      "snapshotLenght": {
+      "snapshotLength": {
         "type": "int",
         "example": "1"
       },
-      "searchLenght": {
+      "searchLength": {
         "type": "int",
         "example": "2"
       }
@@ -1502,5 +1508,75 @@
   "changeLogDiscoverTitle": "Ontdek",
   "changeLogDiscoverContent": "Op zoek naar foto's van je identiteitskaarten, notities of zelfs herinneringen? Ga naar het tabblad Zoeken en bekijk ontdekking. Op basis van onze semantische zoekopdracht is het een plek om foto's te vinden die belangrijk voor jou kunnen zijn.\\n\\nAlleen beschikbaar als je Machine Learning hebt ingeschakeld.",
   "selectCoverPhoto": "Selecteer omslagfoto",
-  "newLocation": "Nieuwe locatie"
+  "newLocation": "Nieuwe locatie",
+  "faceNotClusteredYet": "Gezicht nog niet geclusterd, kom later terug",
+  "theLinkYouAreTryingToAccessHasExpired": "De link die je probeert te openen is verlopen.",
+  "openFile": "Bestand openen",
+  "backupFile": "Back-up bestand",
+  "openAlbumInBrowser": "Open album in browser",
+  "openAlbumInBrowserTitle": "Gebruik de webapp om foto's aan dit album toe te voegen",
+  "allow": "Toestaan",
+  "allowAppToOpenSharedAlbumLinks": "App toestaan gedeelde album links te openen",
+  "seePublicAlbumLinksInApp": "Bekijk publieke album links in de app",
+  "emergencyContacts": "Noodcontacten",
+  "acceptTrustInvite": "Uitnodiging accepteren",
+  "declineTrustInvite": "Uitnodiging afwijzen",
+  "removeYourselfAsTrustedContact": "Verwijder jezelf als vertrouwd contact",
+  "legacy": "Legacy",
+  "legacyPageDesc": "Legacy geeft vertrouwde contacten toegang tot je account bij afwezigheid.",
+  "legacyPageDesc2": "Vertrouwde contacten kunnen accountherstel starten, en indien deze niet binnen 30 dagen wordt geblokkeerd, je wachtwoord resetten en toegang krijgen tot je account.",
+  "legacyAccounts": "Legacy accounts",
+  "trustedContacts": "Vertrouwde contacten",
+  "addTrustedContact": "Vertrouwd contact toevoegen",
+  "removeInvite": "Verwijder uitnodiging",
+  "recoveryWarning": "Een vertrouwd contact probeert toegang te krijgen tot je account",
+  "rejectRecovery": "Herstel weigeren",
+  "recoveryInitiated": "Herstel gestart",
+  "recoveryInitiatedDesc": "U krijgt toegang tot het account na {days} dagen. Een melding zal worden verzonden naar {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Herstel annuleren",
+  "recoveryAccount": "Account herstellen",
+  "cancelAccountRecoveryBody": "Weet je zeker dat je het herstel wilt annuleren?",
+  "startAccountRecoveryTitle": "Herstel starten",
+  "whyAddTrustContact": "Vertrouwde contacten kunnen helpen bij het herstellen van je data.",
+  "recoveryReady": "U kunt nu het account van {email} herstellen door een nieuw wachtwoord in te stellen.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} probeert je account te herstellen.",
+  "trustedInviteBody": "Je bent uitgenodigd om een legacy contact van {email} te zijn.",
+  "warning": "Waarschuwing",
+  "proceed": "Verder",
+  "confirmAddingTrustedContact": "Je staat op het punt {email} toe te voegen als vertrouwde contactpersoon. Ze kunnen je account herstellen als je {numOfDays} dagen afwezig bent.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} heeft je uitgenodigd om een vertrouwd contact te zijn",
+  "authToManageLegacy": "Verifieer om je vertrouwde contacten te beheren",
+  "useDifferentPlayerInfo": "Problemen met het afspelen van deze video? Hier ingedrukt houden om een andere speler te proberen."
 }

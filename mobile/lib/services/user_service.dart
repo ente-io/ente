@@ -399,6 +399,7 @@ class UserService {
       if (response.statusCode == 200) {
         Widget page;
         final String passkeySessionID = response.data["passkeySessionID"];
+        final String accountsUrl = response.data["accountsUrl"] ?? kAccountsUrl;
         String twoFASessionID = response.data["twoFactorSessionID"];
         if (twoFASessionID.isEmpty &&
             response.data["twoFactorSessionIDV2"] != null) {
@@ -408,6 +409,7 @@ class UserService {
           page = PasskeyPage(
             passkeySessionID,
             totp2FASessionID: twoFASessionID,
+            accountsUrl: accountsUrl,
           );
         } else if (twoFASessionID.isNotEmpty) {
           await setTwoFactor(value: true);
@@ -725,10 +727,15 @@ class UserService {
         twoFASessionID = response.data["twoFactorSessionIDV2"];
       }
       final String passkeySessionID = response.data["passkeySessionID"];
+      final String accountsUrl = response.data["accountsUrl"] ?? kAccountsUrl;
 
       Configuration.instance.setVolatilePassword(userPassword);
       if (passkeySessionID.isNotEmpty) {
-        page = PasskeyPage(passkeySessionID, totp2FASessionID: twoFASessionID);
+        page = PasskeyPage(
+          passkeySessionID,
+          totp2FASessionID: twoFASessionID,
+          accountsUrl: accountsUrl,
+        );
       } else if (twoFASessionID.isNotEmpty) {
         await setTwoFactor(value: true);
         page = TwoFactorAuthenticationPage(twoFASessionID);
@@ -1187,11 +1194,13 @@ class UserService {
     }
   }
 
-  Future<String> getFamiliesToken() async {
+  Future<String> getFamilyPortalUrl(bool familyExist) async {
     try {
       final response = await _enteDio.get("/users/families-token");
       if (response.statusCode == 200) {
-        return response.data["familiesToken"];
+        final String url = response.data["familyUrl"] ?? kFamilyUrl;
+        final String jwtToken = response.data["familiesToken"];
+        return '$url?token=$jwtToken&isFamilyCreated=$familyExist';
       } else {
         throw Exception("non 200 ok response");
       }

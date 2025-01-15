@@ -40,6 +40,10 @@ export const sidebar = [
                     },
                     { text: "Hidden photos", link: "/photos/features/hide" },
                     {
+                        text: "Legacy",
+                        link: "/photos/features/legacy/",
+                    },
+                    {
                         text: "Location tags",
                         link: "/photos/features/location-tags",
                     },
@@ -227,11 +231,14 @@ export const sidebar = [
         collapsed: true,
         items: [
             { text: "Getting started", link: "/self-hosting/" },
-            { text: "System requirements", link: "/self-hosting/guides/system-requirements", },
+            {
+                text: "System requirements",
+                link: "/self-hosting/guides/system-requirements",
+            },
             {
                 text: "Guides",
                 items: [
-                    { text: "Introduction", link: "/self-hosting/guides/" },  
+                    { text: "Introduction", link: "/self-hosting/guides/" },
                     {
                         text: "Connect to custom server",
                         link: "/self-hosting/guides/custom-server/",
@@ -254,7 +261,7 @@ export const sidebar = [
                         link: "/self-hosting/guides/configuring-s3",
                     },
                     {
-                        text: "Using external S3",
+                        text: "Hosting Ente with external S3 (Community)",
                         link: "/self-hosting/guides/external-s3",
                     },
                     {
@@ -267,8 +274,8 @@ export const sidebar = [
                     },
                     {
                         text: "Configure CLI for Self Hosted Instance",
-                        link: "/self-hosting/guides/selfhost-cli"
-                    }
+                        link: "/self-hosting/guides/selfhost-cli",
+                    },
                 ],
             },
             {

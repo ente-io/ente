@@ -7,7 +7,6 @@ import (
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 func (c *Controller) AddContact(ctx *gin.Context, userID int64, request ente.AddContact) error {
@@ -27,8 +26,8 @@ func (c *Controller) AddContact(ctx *gin.Context, userID int64, request ente.Add
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	if !hasUpdated {
-		log.Warn("No update applied for emergency contact")
+	if hasUpdated {
+		go c.sendContactNotification(ctx, userID, emergencyContactID, ente.UserInvitedContact)
 	}
 	return nil
 }

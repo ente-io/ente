@@ -1,10 +1,10 @@
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     FlexWrapper,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
 import {
     Box,
-    Button,
     DialogActions,
     DialogContent,
     LinearProgress,
@@ -41,7 +41,7 @@ export default function ExportInProgress(props: Props) {
         <>
             <DialogContent>
                 <VerticallyCentered>
-                    <Box mb={1.5}>
+                    <Box sx={{ mb: 1.5 }}>
                         {props.exportStage === ExportStage.STARTING ? (
                             t("EXPORT_STARTING")
                         ) : props.exportStage === ExportStage.MIGRATION ? (
@@ -85,20 +85,20 @@ export default function ExportInProgress(props: Props) {
                 </VerticallyCentered>
             </DialogContent>
             <DialogActions>
-                <Button
+                <FocusVisibleButton
+                    fullWidth
                     color="secondary"
-                    size="large"
                     onClick={props.closeExportDialog}
                 >
                     {t("close")}
-                </Button>
-                <Button
-                    size="large"
+                </FocusVisibleButton>
+                <FocusVisibleButton
+                    fullWidth
                     color="critical"
                     onClick={props.stopExport}
                 >
                     {t("STOP_EXPORT")}
-                </Button>
+                </FocusVisibleButton>
             </DialogActions>
         </>
     );

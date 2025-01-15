@@ -4,13 +4,17 @@ import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "@/base/components/OverflowMenu";
+import {
     useIsSmallWidth,
     useIsTouchscreen,
 } from "@/base/components/utils/hooks";
-import { sharedCryptoWorker } from "@/base/crypto";
 import { isHTTP401Error, PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
+import { extractCollectionKeyFromShareURL } from "@/gallery/services/share";
 import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
 import type { Collection } from "@/media/collection";
 import { type EnteFile, mergeMetadata } from "@/media/file";
@@ -30,24 +34,19 @@ import {
     FluidContainer,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "@ente/shared/components/OverflowMenu";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import { useFileInput } from "@ente/shared/hooks/useFileInput";
-import AddPhotoAlternateOutlined from "@mui/icons-material/AddPhotoAlternateOutlined";
+import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import bs58 from "bs58";
 import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
@@ -85,7 +84,7 @@ import { downloadSelectedFiles, getSelectedFiles } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export default function PublicCollectionGallery() {
-    const credentials = useRef<PublicAlbumsCredentials | undefined>();
+    const credentials = useRef<PublicAlbumsCredentials | undefined>(undefined);
     const collectionKey = useRef<string>(null);
     const url = useRef<string>(null);
     const referralCode = useRef<string>("");
@@ -117,7 +116,7 @@ export default function PublicCollectionGallery() {
     const {
         getRootProps: getDragAndDropRootProps,
         getInputProps: getDragAndDropInputProps,
-        acceptedFiles: dragAndDropFiles,
+        acceptedFiles: dragAndDropFilesReadOnly,
     } = useDropzone({
         noClick: true,
         noKeyboard: true,
@@ -176,6 +175,12 @@ export default function PublicCollectionGallery() {
             return updater;
         };
 
+    // Create a regular array from the readonly array returned by dropzone.
+    const dragAndDropFiles = useMemo(
+        () => [...dragAndDropFilesReadOnly],
+        [dragAndDropFilesReadOnly],
+    );
+
     const onAddPhotos = useMemo(() => {
         return publicCollection?.publicURLs?.[0]?.enableCollect
             ? () => setUploadTypeSelectorView(true)
@@ -222,12 +227,10 @@ export default function PublicCollectionGallery() {
         const main = async () => {
             let redirectingToWebsite = false;
             try {
-                const cryptoWorker = await sharedCryptoWorker();
-
                 url.current = window.location.href;
                 const currentURL = new URL(url.current);
                 const t = currentURL.searchParams.get("t");
-                const ck = currentURL.hash.slice(1);
+                const ck = await extractCollectionKeyFromShareURL(currentURL);
                 if (!t && !ck) {
                     window.location.href = "https://ente.io";
                     redirectingToWebsite = true;
@@ -235,11 +238,7 @@ export default function PublicCollectionGallery() {
                 if (!t || !ck) {
                     return;
                 }
-                const dck =
-                    ck.length < 50
-                        ? await cryptoWorker.toB64(bs58.decode(ck))
-                        : await cryptoWorker.fromHex(ck);
-                collectionKey.current = dck;
+                collectionKey.current = ck;
                 url.current = window.location.href;
                 const localCollection = await getLocalPublicCollection(
                     collectionKey.current,
@@ -443,7 +442,7 @@ export default function PublicCollectionGallery() {
             const selectedFiles = getSelectedFiles(selected, publicFiles);
             const setFilesDownloadProgressAttributes =
                 setFilesDownloadProgressAttributesCreator(
-                    `${selectedFiles.length} ${t("FILES")}`,
+                    t("files_count", { count: selectedFiles.length }),
                 );
             await downloadSelectedFiles(
                 selectedFiles,
@@ -468,7 +467,10 @@ export default function PublicCollectionGallery() {
             <VerticallyCentered>
                 <FormPaper>
                     <FormPaperTitle>{t("password")}</FormPaperTitle>
-                    <Typography color={"text.muted"} mb={2} variant="small">
+                    <Typography
+                        variant="small"
+                        sx={{ color: "text.muted", mb: 2 }}
+                    >
                         {t("link_password_description")}
                     </Typography>
                     <SingleInputForm
@@ -504,7 +506,6 @@ export default function PublicCollectionGallery() {
                 />
                 <SharedAlbumNavbar onAddPhotos={onAddPhotos} />
                 <PhotoFrame
-                    page={PAGES.SHARED_ALBUMS}
                     files={publicFiles}
                     syncWithRemote={syncWithRemote}
                     setSelected={setSelected}
@@ -591,7 +592,7 @@ const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
     const isSmallWidth = useIsSmallWidth();
 
-    const icon = <AddPhotoAlternateOutlined />;
+    const icon = <AddPhotoAlternateOutlinedIcon />;
 
     return (
         <Box>
@@ -625,7 +626,7 @@ const AddMorePhotosButton: React.FC<ButtonProps> = (props) => {
                 {...props}
                 disabled={disabled}
                 color={"accent"}
-                startIcon={<AddPhotoAlternateOutlined />}
+                startIcon={<AddPhotoAlternateOutlinedIcon />}
             >
                 {t("add_more_photos")}
             </Button>
@@ -661,9 +662,11 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />
                 </IconButton>
-                <Box ml={1.5}>{t("selected_count", { selected: count })}</Box>
+                <Box sx={{ ml: 1.5 }}>
+                    {t("selected_count", { selected: count })}
+                </Box>
             </FluidContainer>
-            <Stack spacing={2} direction="row" mr={2}>
+            <Stack direction="row" sx={{ gap: 2, mr: 2 }}>
                 <Tooltip title={t("download")}>
                     <IconButton onClick={downloadFilesHelper}>
                         <DownloadIcon />
@@ -710,7 +713,7 @@ const ListHeader: React.FC<ListHeaderProps> = ({
                     fileCount={publicFiles.length}
                 />
                 {downloadEnabled && (
-                    <OverflowMenu ariaID={"collection-options"}>
+                    <OverflowMenu ariaID="collection-options">
                         <OverflowMenuOption
                             startIcon={<FileDownloadOutlinedIcon />}
                             onClick={downloadAllFiles}

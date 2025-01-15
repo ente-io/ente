@@ -87,10 +87,10 @@ export interface CGroupUserEntityData {
      *
      * This is similar to the [@link displayFaceID}, the difference being:
      *
-     * -   {@link avatarFaceID} is the face selected by the user.
+     * - {@link avatarFaceID} is the face selected by the user.
      *
-     * -   {@link displayFaceID} is the automatic placeholder, and only comes
-     *     into effect if the user has not explicitly selected a face.
+     * - {@link displayFaceID} is the automatic placeholder, and only comes into
+     *   effect if the user has not explicitly selected a face.
      *
      * Also, see: [Note: Mark optional for Zod/exactOptionalPropertyTypes]
      */

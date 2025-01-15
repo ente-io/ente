@@ -225,6 +225,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                             ButtonWidget(
                               buttonType: ButtonType.primary,
                               labelText: S.of(context).addTrustedContact,
+                              shouldSurfaceExecutionStates: false,
                               onTap: () async {
                                 await routeToPage(
                                   context,

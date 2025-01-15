@@ -248,6 +248,17 @@ class _FileSelectionActionsWidgetState
       );
     }
 
+    if (widget.type.showDeleteOption()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.delete_outline,
+          labelText: S.of(context).delete,
+          onTap: anyOwnedFiles ? _onDeleteClick : null,
+          shouldShow: ownedAndPendingUploadFilesCount > 0,
+        ),
+      );
+    }
+
     if (widget.type.showRemoveFromAlbum()) {
       items.add(
         SelectionActionButton(
@@ -302,17 +313,6 @@ class _FileSelectionActionsWidgetState
           labelText: S.of(context).createCollage,
           onTap: _onCreateCollageClicked,
           shouldShow: showCollageOption,
-        ),
-      );
-    }
-
-    if (widget.type.showDeleteOption()) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.delete_outline,
-          labelText: S.of(context).delete,
-          onTap: anyOwnedFiles ? _onDeleteClick : null,
-          shouldShow: ownedAndPendingUploadFilesCount > 0,
         ),
       );
     }
@@ -822,17 +822,30 @@ class _FileSelectionActionsWidgetState
   }
 
   Future<void> _download(List<EnteFile> files) async {
+    final totalFiles = files.length;
+    int downloadedFiles = 0;
+
     final dialog = createProgressDialog(
       context,
-      S.of(context).downloading,
+      S.of(context).downloading + " ($downloadedFiles/$totalFiles)",
       isDismissible: true,
     );
     await dialog.show();
     try {
+      final downloadQueue = DownloadQueue(maxConcurrent: 5);
       final futures = <Future>[];
       for (final file in files) {
         if (file.localID == null) {
-          futures.add(downloadToGallery(file));
+          futures.add(
+            downloadQueue.add(() async {
+              await downloadToGallery(file);
+              downloadedFiles++;
+              dialog.update(
+                message: S.of(context).downloading +
+                    " ($downloadedFiles/$totalFiles)",
+              );
+            }),
+          );
         }
       }
       await Future.wait(futures);

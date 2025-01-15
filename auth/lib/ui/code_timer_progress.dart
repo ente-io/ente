@@ -1,58 +1,63 @@
-import 'package:ente_auth/services/preference_service.dart';
+import 'dart:async';
+import 'dart:io';
+
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-
-class CodeTimerProgressCache {
-  static final Map<int, CodeTimerProgress> _cache = {};
-
-  static CodeTimerProgress getCachedWidget(int period) {
-    if (!_cache.containsKey(period)) {
-      _cache[period] = CodeTimerProgress(period: period);
-    }
-    return _cache[period]!;
-  }
-}
 
 class CodeTimerProgress extends StatefulWidget {
   final int period;
-
+  final bool isCompactMode;
   const CodeTimerProgress({
     super.key,
     required this.period,
+    this.isCompactMode = false,
   });
 
   @override
   State<CodeTimerProgress> createState() => _CodeTimerProgressState();
 }
 
-class _CodeTimerProgressState extends State<CodeTimerProgress>
-    with SingleTickerProviderStateMixin {
-  late final Ticker _ticker;
+class _CodeTimerProgressState extends State<CodeTimerProgress> {
+  late final Timer _timer;
   late final ValueNotifier<double> _progress;
-  late final int _microSecondsInPeriod;
-  late bool _isCompactMode=false;
+  late final int _periodInMicros;
+
+  // Reduce update frequency
+  final int _updateIntervalMs =
+      (Platform.isAndroid || Platform.isIOS) ? 16 : 500; // approximately 60 FPS
 
   @override
   void initState() {
     super.initState();
-    _microSecondsInPeriod = widget.period * 1000000;
+    _periodInMicros = widget.period * 1000000;
     _progress = ValueNotifier<double>(0.0);
-    _ticker = createTicker(_updateTimeRemaining);
-    _ticker.start();
-    _isCompactMode = PreferenceService.instance.isCompactMode();
-    _updateTimeRemaining(Duration.zero);
+    _updateTimeRemaining(DateTime.now().microsecondsSinceEpoch);
+
+    _timer = Timer.periodic(Duration(milliseconds: _updateIntervalMs), (timer) {
+      final now = DateTime.now().microsecondsSinceEpoch;
+      _updateTimeRemaining(now);
+    });
   }
 
-  void _updateTimeRemaining(Duration elapsed) {
-    int timeRemaining = _microSecondsInPeriod -
-        (DateTime.now().microsecondsSinceEpoch % _microSecondsInPeriod);
-    _progress.value = timeRemaining / _microSecondsInPeriod;
+  void _updateTimeRemaining(int currentMicros) {
+    // More efficient time calculation using modulo
+    final elapsed = (currentMicros) % _periodInMicros;
+    final timeRemaining = _periodInMicros - elapsed;
+    _progress.value = timeRemaining / _periodInMicros;
+  }
+
+  @override
+  void didUpdateWidget(covariant CodeTimerProgress oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.period != widget.period) {
+      _periodInMicros = widget.period * 1000000;
+      _updateTimeRemaining(DateTime.now().microsecondsSinceEpoch);
+    }
   }
 
   @override
   void dispose() {
-    _ticker.dispose();
+    _timer.cancel();
     _progress.dispose();
     super.dispose();
   }
@@ -60,18 +65,19 @@ class _CodeTimerProgressState extends State<CodeTimerProgress>
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: _isCompactMode ?1:3,
+      height: widget.isCompactMode ? 1 : 3,
       child: ValueListenableBuilder<double>(
         valueListenable: _progress,
         builder: (context, progress, _) {
           return CustomPaint(
+            key: Key(progress.toString()), // Add key here
             painter: _ProgressPainter(
               progress: progress,
               color: progress > 0.4
                   ? getEnteColorScheme(context).primary700
                   : Colors.orange,
             ),
-            size: Size.infinite,
+            size: const Size.fromHeight(double.infinity),
           );
         },
       ),
@@ -83,7 +89,10 @@ class _ProgressPainter extends CustomPainter {
   final double progress;
   final Color color;
 
-  _ProgressPainter({required this.progress, required this.color});
+  const _ProgressPainter({
+    required this.progress,
+    required this.color,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {

@@ -30,10 +30,10 @@ Learn more at [ente.io](https://ente.io).
 
 ![Screenshots of Ente Photos](.github/assets/photos.png)
 
-Our flagship product. 3x data replication. On device machine learning. Cross
-platform. Private sharing. Collaborative albums. Family plans. Easy import,
-easier export. Background uploads. The list goes on. And of course, all of this,
-while being fully end-to-end encrypted.
+Our flagship product. 3x data replication. Face detection. Semantic search.
+Private sharing. Collaborative albums. Family plans. Easy import, easier export.
+Background uploads. The list goes on. And of course, all of this, while being
+fully end-to-end encrypted across platforms.
 
 Ente Photos is a paid service, but we offer 5GB of free storage.
 You can also clone this repository and choose to self-host.

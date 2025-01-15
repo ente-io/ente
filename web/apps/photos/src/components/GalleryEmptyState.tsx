@@ -5,7 +5,7 @@ import {
 } from "@ente/shared/components/Container";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import FolderIcon from "@mui/icons-material/FolderOutlined";
-import { Box, Button, Stack, Typography, styled } from "@mui/material";
+import { Button, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
 import uploadManager from "services/upload/uploadManager";
@@ -17,10 +17,11 @@ export default function GalleryEmptyState({ openUploader }) {
                 <VerticallyCentered sx={{ flex: "none" }}>
                     <Typography
                         variant="h3"
-                        color="text.muted"
                         sx={{
+                            color: "text.muted",
                             userSelect: "none",
                             marginBlockEnd: 1,
+
                             svg: {
                                 color: "text.base",
                                 verticalAlign: "middle",
@@ -42,10 +43,8 @@ export default function GalleryEmptyState({ openUploader }) {
                 height={287.57}
                 alt=""
                 src="/images/empty-state/ente_duck.png"
-                srcSet="/images/empty-state/ente_duck@2x.png,
-                                /images/empty-state/ente_duck@3x.png"
+                srcSet="/images/empty-state/ente_duck@2x.png, /images/empty-state/ente_duck@3x.png"
             />
-
             <VerticallyCentered paddingTop={1.5} paddingBottom={1.5}>
                 <Button
                     style={{
@@ -93,7 +92,7 @@ export default function GalleryEmptyState({ openUploader }) {
     );
 }
 
-const Wrapper = styled(Box)`
+const Wrapper = styled("div")`
     display: flex;
     flex-direction: column;
     align-items: center;

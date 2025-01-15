@@ -222,16 +222,16 @@ export const updateOrCreateUserEntities = async (
  * Return the entity key that can be used to decrypt the encrypted contents of
  * user entities of the given {@link type}.
  *
- * 1.  See if we have the encrypted entity key present locally. If so, return
- *     the entity key by decrypting it using with the user's master key.
+ * 1. See if we have the encrypted entity key present locally. If so, return the
+ *    entity key by decrypting it using with the user's master key.
  *
- * 2.  Otherwise fetch the encrypted entity key for that type from remote. If we
- *     get one, obtain the entity key by decrypt the encrypted one using the
- *     user's master key, save it locally for future use, and return it.
+ * 2. Otherwise fetch the encrypted entity key for that type from remote. If we
+ *    get one, obtain the entity key by decrypt the encrypted one using the
+ *    user's master key, save it locally for future use, and return it.
  *
- * 3.  Otherwise generate a new entity key, encrypt it using the user's master
- *     key, putting the encrypted one to remote and also saving it locally, and
- *     return it.
+ * 3. Otherwise generate a new entity key, encrypt it using the user's master
+ *    key, putting the encrypted one to remote and also saving it locally, and
+ *    return it.
  *
  * See also, [Note: User entity keys].
  */

@@ -5,7 +5,6 @@ import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/ml/db.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -120,7 +119,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                                     child: ClipPath(
                                       clipper: ShapeBorderClipper(
                                         shape: ContinuousRectangleBorder(
-                                          borderRadius: BorderRadius.circular(80),
+                                          borderRadius:
+                                              BorderRadius.circular(80),
                                         ),
                                       ),
                                       child: snapshot.hasData
@@ -165,8 +165,9 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                                               person!,
                                             );
                                             if (result != null) {
-                                              _logger
-                                                  .info('Person avatar updated');
+                                              _logger.info(
+                                                'Person avatar updated',
+                                              );
                                               setState(() {
                                                 person = result;
                                               });
@@ -286,7 +287,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                         ),
                       if (widget.isEditing)
                         Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0, top: 24.0),
+                          padding:
+                              const EdgeInsets.only(bottom: 12.0, top: 24.0),
                           child: PersonClustersWidget(person!),
                         ),
                     ],
@@ -370,8 +372,9 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                               return;
                             }
                             userAlreadyAssigned = true;
-                            await MLDataDB.instance.assignClusterToPerson(
-                              personID: person.$1.remoteID,
+                            await ClusterFeedbackService.instance
+                                .addClusterToExistingPerson(
+                              person: person.$1,
                               clusterID: widget.clusterID!,
                             );
                             Bus.instance.fire(PeopleChangedEvent());

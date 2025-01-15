@@ -8,9 +8,9 @@
  *
  * [Note: Crypto code hierarchy]
  *
- * 1.  @/base/crypto            (Crypto API for our code)
- * 2.  @/base/crypto/libsodium  (Lower level wrappers over libsodium)
- * 3.  libsodium-wrappers       (JavaScript bindings to libsodium)
+ * 1. @/base/crypto            (Crypto API for our code)
+ * 2. @/base/crypto/libsodium  (Lower level wrappers over libsodium)
+ * 3. libsodium-wrappers       (JavaScript bindings to libsodium)
  *
  * Our cryptography primitives are provided by libsodium, specifically, its
  * JavaScript bindings ("libsodium-wrappers"). This is the lowest layer. Note
@@ -97,6 +97,44 @@ const assertInWorker = <T>(x: T): T => {
     if (!inWorker()) assertionFailed("Currently only usable in a web worker");
     return x;
 };
+
+/**
+ * Convert bytes ({@link Uint8Array}) to a base64 string.
+ */
+export const toB64 = (bytes: Uint8Array) =>
+    inWorker() ? ei._toB64(bytes) : sharedWorker().then((w) => w.toB64(bytes));
+
+/**
+ * URL safe variant of {@link toB64}.
+ */
+export const toB64URLSafe = (bytes: Uint8Array) =>
+    inWorker()
+        ? ei._toB64URLSafe(bytes)
+        : sharedWorker().then((w) => w.toB64URLSafe(bytes));
+
+/**
+ * Convert a base64 string to bytes ({@link Uint8Array}).
+ */
+export const fromB64 = (b64String: string) =>
+    inWorker()
+        ? ei._fromB64(b64String)
+        : sharedWorker().then((w) => w.fromB64(b64String));
+
+/**
+ * Convert a base64 string to the hex representation of the underlying bytes.
+ */
+export const toHex = (b64String: string) =>
+    inWorker()
+        ? ei._toHex(b64String)
+        : sharedWorker().then((w) => w.toHex(b64String));
+
+/**
+ * Convert a hex string to the base64 representation of the underlying bytes.
+ */
+export const fromHex = (hexString: string) =>
+    inWorker()
+        ? ei._fromHex(hexString)
+        : sharedWorker().then((w) => w.fromHex(hexString));
 
 /**
  * Return a new randomly generated 256-bit key (as a base64 string) suitable for

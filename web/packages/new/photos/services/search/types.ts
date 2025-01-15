@@ -32,14 +32,17 @@ export type SearchSuggestion = { label: string } & (
  * An option shown in the the search bar's select dropdown.
  *
  * The {@link SearchOption} wraps a {@link SearchSuggestion} with some metadata
- * used when showing a corresponding entry in the dropdown, and in the results
- * header.
+ * used when showing a corresponding entry in the dropdown.
  *
  * If the user selects the option, then we will re-run the search using the
  * {@link suggestion} to filter the list of files shown to the user.
  */
 export interface SearchOption {
     suggestion: SearchSuggestion;
+    /**
+     * The count of files that matched the search option when it was initially
+     * computed.
+     */
     fileCount: number;
     previewFiles: EnteFile[];
 }

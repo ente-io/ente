@@ -92,6 +92,12 @@ class _PeoplePageState extends State<PeoplePage> {
     log("loadPersonFiles");
     final result = await SearchService.instance
         .getClusterFilesForPersonID(widget.person.remoteID);
+    if (result.isEmpty) {
+      _logger.severe(
+        "No files found for person with id ${widget.person.remoteID}, can't load files",
+      );
+      return [];
+    }
     smallestClusterSize = result.values.fold<int>(result.values.first.length,
         (previousValue, element) {
       return element.length < previousValue ? element.length : previousValue;

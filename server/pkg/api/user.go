@@ -4,8 +4,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller/emergency"
 	"github.com/gin-contrib/requestid"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"net/http"
 	"strconv"
 	"strings"
@@ -22,7 +24,8 @@ import (
 
 // UserHandler exposes request handlers for all user related requests
 type UserHandler struct {
-	UserController *user.UserController
+	UserController      *user.UserController
+	EmergencyController *emergency.Controller
 }
 
 // SendOTT generates and sends an OTT to the provided email address
@@ -471,6 +474,7 @@ func (h *UserHandler) GetFamiliesToken(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"familiesToken": token,
+		"familyUrl":     viper.GetString("apps.family"),
 	})
 }
 
@@ -483,6 +487,7 @@ func (h *UserHandler) GetAccountsToken(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"accountsToken": token,
+		"accountsUrl":   viper.GetString("apps.accounts"),
 	})
 }
 
@@ -527,6 +532,17 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 	var request ente.DeleteAccountRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Could not bind request params"))
+		return
+	}
+	// todo: (neeraj) refactor this part, currently there's a circular dependency between user and emergency controllers
+	removeLegacyErr := h.EmergencyController.HandleAccountDeletion(c, auth.GetUserID(c.Request.Header),
+		logrus.WithFields(logrus.Fields{
+			"user_id": auth.GetUserID(c.Request.Header),
+			"req_id":  requestid.Get(c),
+			"req_ctx": "self_account_deletion",
+		}))
+	if removeLegacyErr != nil {
+		handler.Error(c, stacktrace.Propagate(removeLegacyErr, ""))
 		return
 	}
 	response, err := h.UserController.SelfDeleteAccount(c, request)

@@ -2,6 +2,7 @@ import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
+import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import {
     publishCastPayload,
@@ -34,11 +35,17 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
     onClose,
     collection,
 }) => {
+    const { castURL } = useSettingsSnapshot();
+
     const [view, setView] = useState<
         "choose" | "auto" | "pin" | "auto-cast-error"
     >("choose");
 
     const [browserCanCast, setBrowserCanCast] = useState(false);
+
+    // The link to the cast app is to the full URL, but in the link text only
+    // show the host (e.g. for "https://cast.ente.io", show "cast.ente.io").
+    const castHost = new URL(castURL).host;
 
     useEffect(() => {
         // Determine if Chromecast is supported by the current browser
@@ -132,7 +139,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                 <Stack sx={{ py: 1, gap: 4 }}>
                     {browserCanCast && (
                         <Stack sx={{ gap: 2 }}>
-                            <Typography color={"text.muted"}>
+                            <Typography sx={{ color: "text.muted" }}>
                                 {t("cast_auto_pair_description")}
                             </Typography>
 
@@ -142,7 +149,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                         </Stack>
                     )}
                     <Stack sx={{ gap: 2 }}>
-                        <Typography color="text.muted">
+                        <Typography sx={{ color: "text.muted" }}>
                             {t("pair_with_pin_description")}
                         </Typography>
                         <Button onClick={() => setView("pin")}>
@@ -177,14 +184,9 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                             <Trans
                                 i18nKey="visit_cast_url"
                                 components={{
-                                    a: (
-                                        <Link
-                                            target="_blank"
-                                            href="https://cast.ente.io"
-                                        />
-                                    ),
+                                    a: <Link target="_blank" href={castURL} />,
                                 }}
-                                values={{ url: "cast.ente.io" }}
+                                values={{ url: castHost }}
                             />
                         </Typography>
                         <Typography>{t("enter_cast_pin_code")}</Typography>

@@ -17,10 +17,10 @@ The data in local storage is tied to the Document's origin (scheme + host).
 
 Some things that get stored here are:
 
--   Details about the logged in user, in particular their user id and a auth
-    token we can use to make API calls on their behalf.
+- Details about the logged in user, in particular their user id and a auth token
+  we can use to make API calls on their behalf.
 
--   Various user preferences
+- Various user preferences
 
 ## IndexedDB
 
@@ -39,8 +39,8 @@ but otherwise does not introduce any new abstractions.
 
 For more details, see:
 
--   https://web.dev/articles/indexeddb
--   https://github.com/jakearchibald/idb
+- https://web.dev/articles/indexeddb
+- https://github.com/jakearchibald/idb
 
 ## OPFS
 

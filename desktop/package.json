@@ -30,7 +30,7 @@
         "clip-bpe-js": "^0.0.6",
         "comlink": "^4.4.2",
         "compare-versions": "^6.1.1",
-        "electron-log": "^5.2.3",
+        "electron-log": "^5.2.4",
         "electron-store": "^8.2.0",
         "electron-updater": "^6.3.9",
         "ffmpeg-static": "^5.2.0",
@@ -40,23 +40,23 @@
         "onnxruntime-node": "^1.20.1"
     },
     "devDependencies": {
-        "@eslint/js": "^9.15.0",
+        "@eslint/js": "^9.17.0",
         "@tsconfig/node20": "^20.1.4",
         "@types/auto-launch": "^5.0.5",
         "@types/eslint__js": "^8.42.3",
         "@types/ffmpeg-static": "^3.0.3",
         "ajv": "^8.17.1",
-        "concurrently": "^9.1.0",
+        "concurrently": "^9.1.1",
         "cross-env": "^7.0.3",
         "electron": "^33.2.1",
         "electron-builder": "^25.1.8",
         "eslint": "^9",
-        "prettier": "3.3.3",
+        "prettier": "3.4.2",
         "prettier-plugin-organize-imports": "^4.1.0",
         "prettier-plugin-packagejson": "^2.5.6",
         "shx": "^0.3.4",
         "typescript": "^5.7.2",
-        "typescript-eslint": "^8.16.0"
+        "typescript-eslint": "^8.18.2"
     },
     "packageManager": "yarn@1.22.22",
     "productName": "ente"

@@ -10,7 +10,7 @@ import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/home/memories/memory_cover_widget.dart';
 
 class MemoriesWidget extends StatefulWidget {
-  const MemoriesWidget({Key? key}) : super(key: key);
+  const MemoriesWidget({super.key});
 
   @override
   State<MemoriesWidget> createState() => _MemoriesWidgetState();
@@ -89,7 +89,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     final collatedMemories = _collateMemories(memories);
 
     return SizedBox(
-      height: _maxHeight,
+      height: _maxHeight + MemoryCoverWidget.outerStrokeWidth * 2,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),

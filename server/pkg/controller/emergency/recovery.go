@@ -47,6 +47,13 @@ func (c *Controller) ChangePassword(ctx *gin.Context, userID int64, request ente
 	if err != nil {
 		return nil, err
 	}
+	// disable 2fa
+	if disableErr := c.UserCtrl.DisableTwoFactor(contact.UserID); disableErr != nil {
+		return nil, stacktrace.Propagate(disableErr, "failed to disable 2fa")
+	}
+	if disableErr := c.PasskeyController.RemovePasskey2FA(contact.UserID); disableErr != nil {
+		return nil, stacktrace.Propagate(disableErr, "failed to disable passkey")
+	}
 	resp, err := c.UserCtrl.UpdateSrpAndKeyAttributes(ctx, contact.UserID, request.UpdateSrp, false)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
@@ -59,6 +66,8 @@ func (c *Controller) ChangePassword(ctx *gin.Context, userID int64, request ente
 	if !hasUpdate {
 		log.WithField("userID", userID).WithField("req", request).
 			Warn("no row updated while rejecting recovery")
+	} else {
+		go c.sendRecoveryNotification(ctx, contact.UserID, contact.EmergencyContactID, ente.RecoveryStatusRecovered)
 	}
 
 	return resp, nil

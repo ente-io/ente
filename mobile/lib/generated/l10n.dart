@@ -1480,6 +1480,26 @@ class S {
     );
   }
 
+  /// `Cannot open this album`
+  String get canNotOpenTitle {
+    return Intl.message(
+      'Cannot open this album',
+      name: 'canNotOpenTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, this album cannot be opened in the app.`
+  String get canNotOpenBody {
+    return Intl.message(
+      'Sorry, this album cannot be opened in the app.',
+      name: 'canNotOpenBody',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Please note`
   String get disableDownloadWarningTitle {
     return Intl.message(
@@ -2692,6 +2712,16 @@ class S {
     );
   }
 
+  /// `Please authenticate to view your trashed files`
+  String get authToViewTrashedFiles {
+    return Intl.message(
+      'Please authenticate to view your trashed files',
+      name: 'authToViewTrashedFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Trash`
   String get trash {
     return Intl.message(
@@ -2896,10 +2926,10 @@ class S {
     );
   }
 
-  /// `Manage device Cache`
+  /// `Manage device cache`
   String get manageDeviceStorage {
     return Intl.message(
-      'Manage device Cache',
+      'Manage device cache',
       name: 'manageDeviceStorage',
       desc: '',
       args: [],
@@ -4911,6 +4941,26 @@ class S {
     return Intl.message(
       'Please allow access to all photos in the Settings app',
       name: 'grantFullAccessPrompt',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow access to photos`
+  String get allowPermTitle {
+    return Intl.message(
+      'Allow access to photos',
+      name: 'allowPermTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please allow access to your photos from Settings so Ente can display and backup your library.`
+  String get allowPermBody {
+    return Intl.message(
+      'Please allow access to your photos from Settings so Ente can display and backup your library.',
+      name: 'allowPermBody',
       desc: '',
       args: [],
     );
@@ -10027,20 +10077,20 @@ class S {
     );
   }
 
-  /// `Images will be shown here once processing is complete`
+  /// `Images will be shown here once processing and syncing is complete`
   String get searchDiscoverEmptySection {
     return Intl.message(
-      'Images will be shown here once processing is complete',
+      'Images will be shown here once processing and syncing is complete',
       name: 'searchDiscoverEmptySection',
       desc: '',
       args: [],
     );
   }
 
-  /// `People will be shown here once processing is complete`
+  /// `People will be shown here once processing and syncing is complete`
   String get searchPersonsEmptySection {
     return Intl.message(
-      'People will be shown here once processing is complete',
+      'People will be shown here once processing and syncing is complete',
       name: 'searchPersonsEmptySection',
       desc: '',
       args: [],
@@ -10298,13 +10348,13 @@ class S {
     );
   }
 
-  /// `Sections length mismatch: {snapshotLenght} != {searchLenght}`
-  String searchSectionsLengthMismatch(int snapshotLenght, int searchLenght) {
+  /// `Sections length mismatch: {snapshotLength} != {searchLength}`
+  String searchSectionsLengthMismatch(int snapshotLength, int searchLength) {
     return Intl.message(
-      'Sections length mismatch: $snapshotLenght != $searchLenght',
+      'Sections length mismatch: $snapshotLength != $searchLength',
       name: 'searchSectionsLengthMismatch',
       desc: 'Appears in search tab page',
-      args: [snapshotLenght, searchLenght],
+      args: [snapshotLength, searchLength],
     );
   }
 
@@ -10774,6 +10824,76 @@ class S {
     return Intl.message(
       'Please authenticate to manage your trusted contacts',
       name: 'authToManageLegacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Having trouble playing this video? Long press here to try a different player.`
+  String get useDifferentPlayerInfo {
+    return Intl.message(
+      'Having trouble playing this video? Long press here to try a different player.',
+      name: 'useDifferentPlayerInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide shared items from home gallery`
+  String get hideSharedItemsFromHomeGallery {
+    return Intl.message(
+      'Hide shared items from home gallery',
+      name: 'hideSharedItemsFromHomeGallery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Gallery`
+  String get gallery {
+    return Intl.message(
+      'Gallery',
+      name: 'gallery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Join album`
+  String get joinAlbum {
+    return Intl.message(
+      'Join album',
+      name: 'joinAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `to view and add your photos`
+  String get joinAlbumSubtext {
+    return Intl.message(
+      'to view and add your photos',
+      name: 'joinAlbumSubtext',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `to add this to shared albums`
+  String get joinAlbumSubtextViewer {
+    return Intl.message(
+      'to add this to shared albums',
+      name: 'joinAlbumSubtextViewer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Join`
+  String get join {
+    return Intl.message(
+      'Join',
+      name: 'join',
       desc: '',
       args: [],
     );

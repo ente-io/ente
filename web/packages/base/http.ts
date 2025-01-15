@@ -1,13 +1,15 @@
 import { retryAsyncOperation } from "@/utils/promise";
+import { z } from "zod";
 import { clientPackageName } from "./app";
 import { ensureAuthToken } from "./local-user";
+import log from "./log";
 
 /**
  * Return headers that should be passed alongwith (almost) all authenticated
  * `fetch` calls that we make to our API servers.
  *
- * -   The auth token
- * -   The client package name.
+ * - The auth token
+ * - The client package name.
  */
 export const authenticatedRequestHeaders = async () => ({
     "X-Auth-Token": await ensureAuthToken(),
@@ -18,7 +20,7 @@ export const authenticatedRequestHeaders = async () => ({
  * Return headers that should be passed alongwith (almost) all unauthenticated
  * `fetch` calls that we make to our API servers.
  *
- * -   The client package name.
+ * - The client package name.
  */
 export const publicRequestHeaders = () => ({
     "X-Client-Package": clientPackageName,
@@ -50,9 +52,9 @@ export interface PublicAlbumsCredentials {
  * Return headers that should be passed alongwith public collection related
  * authenticated `fetch` calls that we make to our API servers.
  *
- * -   The auth token.
- * -   The password protected auth token (if provided).
- * -   The client package name.
+ * - The auth token.
+ * - The password protected auth token (if provided).
+ * - The client package name.
  */
 export const authenticatedPublicAlbumsRequestHeaders = ({
     accessToken,
@@ -102,6 +104,12 @@ export const ensureOk = (res: Response) => {
 };
 
 /**
+ * Return true if this is a HTTP error with the given {@link httpStatus}.
+ */
+export const isHTTPErrorWithStatus = (e: unknown, httpStatus: number) =>
+    e instanceof HTTPError && e.res.status == httpStatus;
+
+/**
  * Return true if this is a HTTP "client" error.
  *
  * This is a convenience matcher to check if {@link e} is an instance of
@@ -120,6 +128,36 @@ export const isHTTP4xxError = (e: unknown) =>
 export const isHTTP401Error = (e: unknown) =>
     e instanceof HTTPError && e.res.status == 401;
 
+/**
+ * Return `true` if this is an error because of a HTTP failure response returned
+ * by museum with the given "code" and HTTP status.
+ *
+ * For some known set of errors, museum returns a payload of the form
+ *
+ *     {"code":"USER_NOT_REGISTERED","message":"User is not registered"}
+ *
+ * where the code can be used to match a specific reason for the HTTP request
+ * failing. This function can be used as a predicate to check both the HTTP
+ * status code and the "code" within the payload.
+ */
+export const isMuseumHTTPError = async (
+    e: unknown,
+    httpStatus: number,
+    code: string,
+) => {
+    if (e instanceof HTTPError && e.res.status == httpStatus) {
+        try {
+            const payload = z
+                .object({ code: z.string() })
+                .parse(await e.res.json());
+            return payload.code == code;
+        } catch (e) {
+            log.warn("Ignoring error when parsing error payload", e);
+            return false;
+        }
+    }
+    return false;
+};
 /**
  * A helper function to adapt {@link retryAsyncOperation} for HTTP fetches.
  *
