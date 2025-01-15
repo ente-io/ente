@@ -73,7 +73,6 @@ const App: React.FC = () => {
 
     useEffect(() => {
         const storedToken = localStorage.getItem("token");
-        console.log(storedToken);
         if (storedToken) {
             setToken(storedToken);
             setLocalToken(storedToken);
