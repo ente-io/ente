@@ -559,12 +559,14 @@ const CollectionBarCardIcon_ = styled(Overlay)`
     }
 `;
 
-const ActiveIndicator = styled("div")`
+const ActiveIndicator = styled("div")(
+    ({ theme }) => `
     height: 3px;
-    background-color: ${({ theme }) => theme.palette.primary.main};
+    background-color: ${theme.vars.palette.stroke.base};
     margin-top: 18px;
     border-radius: 2px;
-`;
+`,
+);
 
 interface PersonCardProps {
     person: Person;
