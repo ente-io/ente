@@ -587,7 +587,7 @@ const DisabledPlanButton = styled((props: ButtonProps) => (
 ))(({ theme }) => ({
     "&.Mui-disabled": {
         backgroundColor: "transparent",
-        color: theme.colors.text.base,
+        color: theme.vars.palette.text.muted,
     },
 }));
 
