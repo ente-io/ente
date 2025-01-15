@@ -47,7 +47,6 @@ import {
 } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
@@ -515,18 +514,6 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
         await openAccountsManagePasskeysPage();
     };
 
-    const redirectToDashboard = () => {
-        const token = getToken();
-        if (!token) {
-            console.error("Invalid Token");
-            return;
-        }
-
-        // To be replaced with the Staff app origin in future.
-        const baseURL = `http://localhost:5173`;
-        window.location.href = `${baseURL}/?token=${token}`;
-    };
-
     const handleDeduplicate = () => router.push("/duplicates");
 
     const toggleTheme = () =>
@@ -594,11 +581,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 onClick={showPreferences}
                 label={t("preferences")}
             />
-            <EnteMenuItem
-                variant="secondary"
-                onClick={redirectToDashboard}
-                label={t("Dashboard")}
-            />
+
             <RecoveryKey
                 {...recoveryKeyVisibilityProps}
                 {...{ showMiniDialog }}
