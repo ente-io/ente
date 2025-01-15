@@ -3,6 +3,7 @@ package emergency
 import (
 	"context"
 	"fmt"
+
 	"github.com/ente-io/museum/ente"
 	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/stacktrace"
@@ -131,10 +132,13 @@ func (c *Controller) sendContactNotification(ctx context.Context, legacyUserID i
 	return nil
 }
 
-func (c *Controller) createRecoveryEmailData(legacyUser, trustedUser ente.User, newStatus ente.RecoveryStatus) ([]emailData, error) {
+func (c *Controller) createRecoveryEmailData(legacyUser, trustedUser ente.User, newStatus ente.RecoveryStatus, daysLeft *int64) ([]emailData, error) {
 	templateData := map[string]interface{}{
 		"LegacyContact":  legacyUser.Email,
 		"TrustedContact": trustedUser.Email,
+	}
+	if daysLeft != nil {
+		templateData["DaysLeft"] = *daysLeft
 	}
 
 	var emailDatas []emailData
@@ -210,7 +214,7 @@ func (c *Controller) createRecoveryEmailData(legacyUser, trustedUser ente.User, 
 	return emailDatas, nil
 }
 
-func (c *Controller) sendRecoveryNotification(ctx context.Context, legacyUserID int64, trustedUserID int64, newStatus ente.RecoveryStatus) error {
+func (c *Controller) sendRecoveryNotification(ctx context.Context, legacyUserID int64, trustedUserID int64, newStatus ente.RecoveryStatus, daysLeft *int64) error {
 	legacyUser, err := c.UserRepo.Get(legacyUserID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -220,7 +224,7 @@ func (c *Controller) sendRecoveryNotification(ctx context.Context, legacyUserID 
 		return stacktrace.Propagate(err, "")
 	}
 
-	emailDatas, err := c.createRecoveryEmailData(legacyUser, trustedUser, newStatus)
+	emailDatas, err := c.createRecoveryEmailData(legacyUser, trustedUser, newStatus, daysLeft)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
