@@ -186,6 +186,7 @@ declare module "@mui/material/styles" {
          * These change with the color scheme.
          */
         fill: {
+            muted: string;
             faint: string;
         };
         /**

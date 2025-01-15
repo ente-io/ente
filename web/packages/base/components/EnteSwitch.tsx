@@ -57,7 +57,7 @@ export const EnteSwitch: React.FC<SwitchProps> = styled((props) => (
     },
     "& .MuiSwitch-track": {
         borderRadius: 22 / 2,
-        backgroundColor: theme.colors.fill.muted,
+        backgroundColor: theme.vars.palette.fill.muted,
         opacity: 1,
         transition: theme.transitions.create(["background-color"], {
             duration: 500,

@@ -349,6 +349,7 @@ const getPalletteOptions = (
             faint: colors.text?.faint,
         },
         fill: {
+            muted: colors.fill!.muted!,
             faint: colors.fill!.faint!,
         },
         stroke: {
