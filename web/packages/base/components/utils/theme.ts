@@ -1,4 +1,4 @@
-// TODO:
+// TODO(LM)
 /* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -351,7 +351,7 @@ const getPalletteOptions = (
         fill: {
             muted: colors.fill!.muted!,
             faint: colors.fill!.faint!,
-            faintPressed: colors.fill!.faintPressed!,
+            faintHover: colors.fill!.faintPressed!,
         },
         stroke: {
             base: colors.stroke!.base!,

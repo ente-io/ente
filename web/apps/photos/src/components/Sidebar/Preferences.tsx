@@ -173,7 +173,7 @@ const ThemeSelector = () => {
     // During SSR, mode is always undefined.
     if (!mode) return null;
 
-    // TODO: Use translations, also remove unused t("CHOSE_THEME")
+    // TODO(LM): Use translations, also remove unused t("CHOSE_THEME")
     return (
         <DropdownInput
             options={[

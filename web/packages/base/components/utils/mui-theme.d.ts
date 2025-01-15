@@ -185,13 +185,14 @@ declare module "@mui/material/styles" {
          * They come in three strengths which are meant to play nicely with the
          * corresponding strengths of "text.*" and "stroke.*".
          *
-         * The faint strength also comes with a pressed variant, useful to
-         * indicate the active state of buttons and menu items.
+         * The faint strength also comes with a hover variant, useful to
+         * indicate the hover state of buttons and menu items. TODO(LM) -
+         * consider moving to others.
          */
         fill: {
             muted: string;
             faint: string;
-            faintPressed: string;
+            faintHover: string;
         };
         /**
          * Transparent background fills that serve as the backdrop of modals,

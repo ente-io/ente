@@ -85,7 +85,7 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
                 (theme) => ({
                     width: "100%",
                     "&:hover": {
-                        backgroundColor: theme.colors.fill.faintPressed,
+                        backgroundColor: theme.vars.palette.fill.faintHover,
                     },
                     "& .MuiSvgIcon-root": {
                         fontSize: "20px",
@@ -100,7 +100,7 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
                 variant != "secondary" &&
                     variant != "mini" &&
                     ((theme) => ({
-                        backgroundColor: theme.colors.fill.faint,
+                        backgroundColor: theme.vars.palette.fill.faint,
                     })),
             ]}
         >
