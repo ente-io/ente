@@ -1222,7 +1222,7 @@ const HiddenSectionNavbarContents: React.FC<
         sx={(theme) => ({
             gap: "24px",
             width: "100%",
-            background: theme.palette.background.default,
+            background: theme.vars.palette.background.default,
         })}
     >
         <IconButton onClick={onBack}>

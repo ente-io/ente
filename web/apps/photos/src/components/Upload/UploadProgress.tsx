@@ -428,9 +428,9 @@ const InProgressItemContainer = styled("div")`
 const SectionAccordion = styled((props: AccordionProps) => (
     <Accordion disableGutters elevation={0} square {...props} />
 ))(({ theme }) => ({
-    borderTop: `1px solid ${theme.palette.divider}`,
+    borderTop: `1px solid ${theme.vars.palette.divider}`,
     "&:before": { display: "none" },
-    "&:last-child": { borderBottom: `1px solid ${theme.palette.divider}` },
+    "&:last-child": { borderBottom: `1px solid ${theme.vars.palette.divider}` },
 }));
 
 const SectionAccordionSummary = styled(AccordionSummary)(() => ({
@@ -456,8 +456,8 @@ const SectionInfo: React.FC<React.PropsWithChildren> = ({ children }) => (
 const NotUploadSectionHeader = styled("div")(
     ({ theme }) => `
     text-align: center;
-    color: ${theme.palette.critical.main};
-    border-bottom: 1px solid ${theme.palette.critical.main};
+    color: ${theme.vars.palette.critical.main};
+    border-bottom: 1px solid ${theme.vars.palette.critical.main};
     margin:${theme.spacing(3, 2, 1)}
 `,
 );

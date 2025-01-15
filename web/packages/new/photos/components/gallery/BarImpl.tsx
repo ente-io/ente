@@ -253,9 +253,12 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 
     return (
-        // Hide the bottom border if we're showing the empty state for people.
         <BarWrapper
-            sx={people.length ? {} : { borderBlockEndColor: "transparent" }}
+            sx={[
+                // Hide the bottom border if we're showing the empty state for people.
+                mode == "people" &&
+                    people.length == 0 && { borderColor: "transparent" },
+            ]}
         >
             <Row1>
                 <ModeIndicator {...{ mode, onChangeMode }} />
@@ -291,14 +294,16 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 };
 
-const BarWrapper = styled("div")`
+const BarWrapper = styled("div")(
+    ({ theme }) => `
     padding-inline: 24px;
     @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
         padding-inline: 4px;
     }
     margin-block-end: 16px;
-    border-block-end: 1px solid ${({ theme }) => theme.palette.divider};
-`;
+    border-block-end: 1px solid ${theme.vars.palette.divider};
+`,
+);
 
 export const Row1 = styled("div")`
     display: flex;
