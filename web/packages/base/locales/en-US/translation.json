@@ -11,7 +11,7 @@
     "existing_user": "Existing user",
     "enter_email": "Enter email address",
     "invalid_email_error": "Enter a valid email",
-    "required": "required",
+    "required": "Required",
     "email_not_registered": "Email not registered",
     "email_already_registered": "Email already registered",
     "email_sent": "Verification code sent to <a>{{email}}</a>",

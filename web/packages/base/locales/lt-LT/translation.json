@@ -11,7 +11,7 @@
     "existing_user": "Esamas naudotojas",
     "enter_email": "Įveskite el. pašto adresą",
     "invalid_email_error": "Įveskite tinkamą el. paštą.",
-    "required": "privaloma.",
+    "required": "Privaloma.",
     "email_not_registered": "El. paštas neregistruotas.",
     "email_already_registered": "El. paštas jau užregistruotas.",
     "email_sent": "Patvirtinimo kodas išsiųstas adresu <a>{{email}}</a>",

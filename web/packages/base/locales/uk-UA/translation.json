@@ -11,7 +11,7 @@
     "existing_user": "Існуючий користувач",
     "enter_email": "Введіть поштову адресу",
     "invalid_email_error": "Введіть дійсну поштову адресу",
-    "required": "обов'язково",
+    "required": "Обов'язково",
     "email_not_registered": "Пошту не зареєстровано",
     "email_already_registered": "Пошту вже зареєстровано",
     "email_sent": "Код підтвердження надіслано на <a>{{email}}</a>",

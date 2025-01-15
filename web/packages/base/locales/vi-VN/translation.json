@@ -11,7 +11,7 @@
     "existing_user": "Người dùng hiện tại",
     "enter_email": "Nhập địa chỉ email",
     "invalid_email_error": "Nhập một email hợp lệ",
-    "required": "bắt buộc",
+    "required": "Bắt buộc",
     "email_not_registered": "Email chưa được đăng kí",
     "email_already_registered": "Email đã được đăng kí",
     "email_sent": "Mã xác minh đã được gửi đến <a>{{email}}</a>",
