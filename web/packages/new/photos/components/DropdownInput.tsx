@@ -49,6 +49,44 @@ export const DropdownInput = <T extends string>({
     placeholder,
 }: DropdownInputProps<T>) => (
     <Select
+        value={selected}
+        onChange={(event: SelectChangeEvent) => {
+            onSelect(event.target.value as T);
+        }}
+        displayEmpty
+        renderValue={() => {
+            // Return the value that is shown in the unexpanded state.
+            const label = options.find((o) => o.value == selected)?.label;
+            return label ? (
+                <Typography>{label}</Typography>
+            ) : (
+                <Typography sx={{ color: "text.muted" }}>
+                    {placeholder}
+                </Typography>
+            );
+        }}
+    >
+        {options.map((option, index) => (
+            <MenuItem
+                key={option.value}
+                // divider={index !== options.length - 1}
+                // value={option.value}
+                // sx={{ px: "16px", py: "14px" }}
+            >
+                {/* <Typography>{option.label}</Typography> */}
+                {option.label}
+            </MenuItem>
+        ))}
+    </Select>
+);
+
+export const DropdownInput2 = <T extends string>({
+    options,
+    selected,
+    onSelect,
+    placeholder,
+}: DropdownInputProps<T>) => (
+    <Select
         IconComponent={ExpandMoreIcon}
         displayEmpty
         variant="standard"
