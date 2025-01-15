@@ -7,7 +7,7 @@ import {
     useAttributedMiniDialog,
 } from "@/base/components/utils/dialog";
 import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
-import { getTheme } from "@/base/components/utils/theme";
+import { photosTheme } from "@/base/components/utils/theme";
 import log from "@/base/log";
 import { logStartupBanner } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
@@ -181,7 +181,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         <>
             <CustomHead {...{ title }} />
 
-            <ThemeProvider theme={getTheme("photos")}>
+            <ThemeProvider theme={photosTheme}>
                 <CssBaseline enableColorScheme />
                 <LoadingBar color="#51cd7c" ref={loadingBarRef} />
 

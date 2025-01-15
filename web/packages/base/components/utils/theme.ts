@@ -6,6 +6,7 @@
 import type {
     FixedColors,
     PaletteOptions,
+    Theme,
     ThemeColorsOptions,
 } from "@mui/material";
 import { createTheme } from "@mui/material";
@@ -17,7 +18,7 @@ enum THEME_COLOR {
     DARK = "dark",
 }
 
-export const getTheme = (colorAccentType: ColorAccentType) => {
+const getTheme = (colorAccentType: ColorAccentType): Theme => {
     const colors = getColors(THEME_COLOR.DARK, colorAccentType);
     const palette = getPallette(THEME_COLOR.DARK, colors);
     const components = getComponents(colors, palette, typography);
@@ -39,7 +40,7 @@ export const getTheme = (colorAccentType: ColorAccentType) => {
     });
 };
 
-export type ColorAccentType = "auth" | "photos";
+type ColorAccentType = "auth" | "photos";
 
 /**
  * [Note: Colors]
@@ -757,3 +758,18 @@ function getIconColor(
     }
     return {};
 }
+
+// Exports ---
+
+/**
+ * The MUI {@link Theme} to use for the photos app.
+ *
+ * This is also the "default" theme, in that it is used for the accounts app
+ * which serves both photos and auth.
+ */
+export const photosTheme = getTheme("photos");
+
+/**
+ * The MUI {@link Theme} to use for the auth app.
+ */
+export const authTheme = getTheme("auth");
