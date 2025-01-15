@@ -13,7 +13,6 @@ import {
     type SupportedLocale,
 } from "@/base/i18n";
 import { MLSettings } from "@/new/photos/components/sidebar/MLSettings";
-import { isInternalUser } from "@/new/photos/services/settings";
 import {
     confirmDisableMapsDialogAttributes,
     confirmEnableMapsDialogAttributes,
@@ -21,6 +20,7 @@ import {
 import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { isMLSupported } from "@/new/photos/services/ml";
 import {
+    isInternalUser,
     syncSettings,
     updateCFProxyDisabledPreference,
     updateMapEnabled,
