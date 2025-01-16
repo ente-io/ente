@@ -261,6 +261,10 @@
       "title": "CSFloat"
     },
     {
+      "title": "CSGORoll",
+      "slug": "csgoroll"
+    },
+    {
       "title": "DCS",
       "altNames": [
         "Digital Combat Simulator"
