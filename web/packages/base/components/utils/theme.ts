@@ -287,42 +287,45 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
     },
 });
 
+/**
+ * [Note: Font weights]
+ *
+ * We only use three font weights:
+ *
+ * - 500 (sx "regular", CSS "normal")
+ * - 600 (sx "medium")
+ * - 700 (sx "bold", CSS "bold")
+ *
+ * While the sx prop allows us to use keywords "regular", "medium" and "bold",
+ * which we do elsewhere in the code, within this file those keywords cannot be
+ * used in all contexts because they instead map to the CSS keywords (which MUI
+ * can't and doesn't remap). To avoid any confusion, within this file we only
+ * use the numeric values.
+ *
+ * ---
+ *
+ * MUI (as of v6) uses the following font weights by default:
+ *
+ * - fontWeightLight 300
+ * - fontWeightRegular 400
+ * - fontWeightMedium 500
+ * - fontWeightBold 700
+ *
+ * The browser default (CSS keyword "normal"), is also 400.
+ *
+ * However for Inter, the font that we use, 400 is too light, and to improve
+ * legibility we change fontWeightRegular to 500.
+ *
+ * Correspondingly, we shift fontWeightMedium to 600. fontWeightBold then ends
+ * up mapping back to 700, which also nicely coincides with the CSS keyword
+ * "bold".
+ *
+ * MUI uses fontWeightLight only as the default font weight for the h1 and h2
+ * variants, but we override their font weight in our theme. Thus we don't need
+ * to bother with the light variant (though for consistency of specifying every
+ * value, we alias it the same weight as regular, 500).
+ */
 const typography: TypographyOptions = {
-    // [Note: Font weights]
-    //
-    // We only use three font weights:
-    //
-    // - 500 (sx "regular", CSS "normal")
-    // - 600 (sx "medium")
-    // - 700 (sx "bold", CSS "bold")
-    //
-    // While the sx prop allows us to use keywords "regular", "medium" and
-    // "bold", which we do elsewhere in the code, within this file those
-    // keywords cannot be used in all contexts because they instead map to the
-    // CSS keywords (which MUI can't and doesn't remap). To avoid any confusion,
-    // within this file we only use the numeric values.
-    //
-    // ---
-    //
-    // MUI (as of v6) uses the following font weights by default:
-    // - fontWeightLight 300
-    // - fontWeightRegular 400
-    // - fontWeightMedium 500
-    // - fontWeightBold 700
-    //
-    // The browser default (CSS keyword "normal"), is also 400.
-    //
-    // However for Inter, the font that we use, 400 is too light, and to improve
-    // legibility we change fontWeightRegular to 500.
-    //
-    // Correspondingly, we shift fontWeightMedium to 600. fontWeightBold then
-    // ends up mapping back to 700, which also nicely coincides with the CSS
-    // keyword "bold".
-    //
-    // MUI uses fontWeightLight only as the default font weight for the h1 and
-    // h2 variants, but we override their font weight in our theme. Thus we
-    // don't need to bother with the light variant (though for consistency of
-    // specifying every value, we alias it the same weight as regular, 500).
     fontFamily: "Inter Variable, sans-serif",
     fontWeightLight: 500,
     fontWeightRegular: 500 /* CSS baseline reset sets this as the default */,
@@ -331,7 +334,7 @@ const typography: TypographyOptions = {
     h1: {
         fontSize: "48px",
         lineHeight: "58px",
-        fontWeight: 600 /* medium */,
+        fontWeight: 600 /* Medium */,
     },
     h2: {
         fontSize: "32px",
@@ -341,7 +344,7 @@ const typography: TypographyOptions = {
     h3: {
         fontSize: "24px",
         lineHeight: "29px",
-        fontWeight: 600 /* medium */,
+        fontWeight: 600 /* Medium */,
     },
     h4: {
         fontSize: "22px",
@@ -351,14 +354,14 @@ const typography: TypographyOptions = {
     h5: {
         fontSize: "20px",
         lineHeight: "25px",
-        fontWeight: 600 /* medium */,
+        fontWeight: 600 /* Medium */,
     },
     // h6 is the default variant used by MUI's DialogTitle.
     h6: {
         // The font size and line height below is the same as large.
         fontSize: "18px",
         lineHeight: "22px",
-        fontWeight: 600 /* medium */,
+        fontWeight: 600 /* Medium */,
     },
     body: {
         fontSize: "16px",
