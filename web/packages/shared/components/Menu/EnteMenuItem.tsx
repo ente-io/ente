@@ -95,7 +95,7 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
                 }),
                 variant != "captioned" &&
                     ((theme) => ({
-                        color: theme.palette[color].main,
+                        color: theme.vars.palette[color].main,
                     })),
                 variant != "secondary" &&
                     variant != "mini" &&
