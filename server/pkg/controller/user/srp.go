@@ -3,10 +3,10 @@ package user
 import (
 	"context"
 	"database/sql"
+	"ente-io/go-srp"
 	"errors"
 	"fmt"
 	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/pkg/srp"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
@@ -172,7 +172,7 @@ func (c *UserController) createAndInsertSRPSession(
 	if err != nil {
 		return nil, nil, stacktrace.Propagate(err, "")
 	}
-	if unverifiedSessions >= MaxUnverifiedSessionInAnHour*100 {
+	if unverifiedSessions >= MaxUnverifiedSessionInAnHour {
 		go c.DiscordController.NotifyPotentialAbuse(fmt.Sprintf("Too many unverified sessions for user %s", srpUserID.String()))
 		return nil, nil, stacktrace.Propagate(&ente.ApiError{
 			Code:           "TOO_MANY_UNVERIFIED_SESSIONS",
@@ -252,7 +252,7 @@ func (c *UserController) verifySRPSession(ctx context.Context,
 		if err2 != nil {
 			return nil, stacktrace.Propagate(err2, "")
 		}
-		return nil, stacktrace.Propagate(err, "failed to verify srp session")
+		return nil, stacktrace.Propagate(ente.ErrInvalidPassword, "failed to verify srp session")
 	} else {
 		err2 := c.UserAuthRepo.SetSrpSessionVerified(ctx, sessionID)
 		if err2 != nil {

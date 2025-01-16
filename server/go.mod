@@ -1,6 +1,6 @@
 module github.com/ente-io/museum
 
-go 1.23.3
+go 1.23
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
@@ -36,9 +36,9 @@ require (
 	github.com/ua-parser/uap-go v0.0.0-20211112212520-00c877edfe0f
 	github.com/ulule/limiter/v3 v3.8.0
 	github.com/zsais/go-gin-prometheus v0.1.0
-	golang.org/x/crypto v0.31.0
-	golang.org/x/sync v0.10.0
-	golang.org/x/text v0.21.0
+	golang.org/x/crypto v0.21.0
+	golang.org/x/sync v0.8.0
+	golang.org/x/text v0.17.0
 	google.golang.org/api v0.114.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
@@ -48,7 +48,6 @@ require (
 	cloud.google.com/go/longrunning v0.4.1 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
-	github.com/ente-io/go-srp v0.0.0-20191210190804-cde1efa3c083 // indirect
 	github.com/fxamacker/cbor/v2 v2.6.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/go-webauthn/x v0.1.9 // indirect
@@ -57,7 +56,6 @@ require (
 	github.com/google/go-tpm v0.9.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
-	github.com/opencoff/go-srp v0.6.3 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
@@ -113,7 +111,7 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/oauth2 v0.7.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
