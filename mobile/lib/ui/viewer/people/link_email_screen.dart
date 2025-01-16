@@ -134,7 +134,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                               onTap: () async {
                                 textFieldFocusNode.unfocus();
                                 if (_selectedEmail == currentUser.email) {
-                                  _selectedEmail == null;
+                                  _selectedEmail = null;
                                 } else {
                                   _selectedEmail = currentUser.email;
                                 }
