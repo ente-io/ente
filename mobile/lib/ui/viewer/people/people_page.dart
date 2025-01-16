@@ -16,6 +16,8 @@ import 'package:photos/models/selected_files.dart';
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
@@ -23,9 +25,11 @@ import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.da
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
+import "package:photos/ui/viewer/people/link_email_screen.dart";
 import "package:photos/ui/viewer/people/people_app_bar.dart";
 import "package:photos/ui/viewer/people/people_banner.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class PeoplePage extends StatefulWidget {
   final String tagPrefix;
@@ -286,6 +290,13 @@ class _Gallery extends StatelessWidget {
       tagPrefix: tagPrefix + tagPrefix,
       selectedFiles: selectedFiles,
       initialFiles: personFiles.isNotEmpty ? [personFiles.first] : [],
+      header: ButtonWidget(
+        buttonType: ButtonType.primary,
+        labelText: "Link email",
+        onTap: () async {
+          routeToPage(context, LinkEmailScreen());
+        },
+      ),
     );
   }
 }
