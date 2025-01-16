@@ -18,6 +18,7 @@ import type {
 } from "@/media/collection";
 import { COLLECTION_ROLE, type CollectionUser } from "@/media/collection";
 import { PublicLinkCreated } from "@/new/photos/components/share/PublicLinkCreated";
+import { avatarTextColor } from "@/new/photos/services/avatar";
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { FlexWrapper } from "@ente/shared/components/Container";
@@ -171,7 +172,7 @@ function SharingDetails({ collection, type }) {
                 />
                 <MenuItemGroup>
                     <EnteMenuItem
-                        fontWeight="normal"
+                        fontWeight="regular"
                         onClick={() => {}}
                         label={isOwner ? t("you") : ownerEmail}
                         startIcon={<Avatar email={ownerEmail} />}
@@ -189,7 +190,7 @@ function SharingDetails({ collection, type }) {
                             {collaborators.map((item, index) => (
                                 <>
                                     <EnteMenuItem
-                                        fontWeight="normal"
+                                        fontWeight="regular"
                                         key={item}
                                         onClick={() => {}}
                                         label={isMe(item) ? t("you") : item}
@@ -210,7 +211,7 @@ function SharingDetails({ collection, type }) {
                         {viewers.map((item, index) => (
                             <>
                                 <EnteMenuItem
-                                    fontWeight="normal"
+                                    fontWeight="regular"
                                     key={item}
                                     onClick={() => {}}
                                     label={isMe(item) ? t("you") : item}
@@ -376,7 +377,7 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
                     {collection.sharees.length > 0 ? (
                         <>
                             <EnteMenuItem
-                                fontWeight={"normal"}
+                                fontWeight="regular"
                                 startIcon={
                                     <AvatarGroup sharees={collection.sharees} />
                                 }
@@ -440,7 +441,7 @@ const AvatarCounter = styled(NumberAvatar)({
     height: 20,
     width: 20,
     fontSize: 10,
-    color: "#fff",
+    color: avatarTextColor,
 });
 
 const SHAREE_AVATAR_LIMIT = 6;
@@ -700,7 +701,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                                     {props.optionsList.map((item, index) => (
                                         <>
                                             <EnteMenuItem
-                                                fontWeight="normal"
+                                                fontWeight="regular"
                                                 key={item}
                                                 onClick={() => {
                                                     if (
@@ -917,7 +918,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                             />
                             <MenuItemGroup>
                                 <EnteMenuItem
-                                    fontWeight="normal"
+                                    fontWeight="regular"
                                     onClick={() => {}}
                                     label={isOwner ? t("you") : ownerEmail}
                                     startIcon={<Avatar email={ownerEmail} />}
@@ -933,7 +934,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                 {collaborators.map((item) => (
                                     <>
                                         <EnteMenuItem
-                                            fontWeight={"normal"}
+                                            fontWeight="regular"
                                             key={item}
                                             onClick={() =>
                                                 openManageParticipant(item)
@@ -966,7 +967,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                 {viewers.map((item) => (
                                     <>
                                         <EnteMenuItem
-                                            fontWeight={"normal"}
+                                            fontWeight="regular"
                                             key={item}
                                             onClick={() =>
                                                 openManageParticipant(item)
@@ -1138,7 +1139,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
 
                         <MenuItemGroup>
                             <EnteMenuItem
-                                fontWeight="normal"
+                                fontWeight="regular"
                                 onClick={handleRoleChange("COLLABORATOR")}
                                 label={"Collaborator"}
                                 startIcon={<ModeEditIcon />}
@@ -1150,7 +1151,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                             <MenuItemDivider hasIcon />
 
                             <EnteMenuItem
-                                fontWeight="normal"
+                                fontWeight="regular"
                                 onClick={handleRoleChange("VIEWER")}
                                 label={"Viewer"}
                                 startIcon={<PhotoIcon />}
@@ -1180,7 +1181,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                             <MenuItemGroup>
                                 <EnteMenuItem
                                     color="critical"
-                                    fontWeight="normal"
+                                    fontWeight="regular"
                                     onClick={removeParticipant}
                                     label={"Remove"}
                                     startIcon={<BlockIcon />}
@@ -1594,7 +1595,7 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                             {shareExpireOption.map((item, index) => (
                                 <>
                                     <EnteMenuItem
-                                        fontWeight="normal"
+                                        fontWeight="regular"
                                         key={item.value()}
                                         onClick={changeShareExpiryValue(
                                             item.value(),
@@ -1715,7 +1716,7 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
                             {deviceLimitOptions.map((item, index) => (
                                 <>
                                     <EnteMenuItem
-                                        fontWeight="normal"
+                                        fontWeight="regular"
                                         key={item.label}
                                         onClick={changeDeviceLimitValue(
                                             item.value,

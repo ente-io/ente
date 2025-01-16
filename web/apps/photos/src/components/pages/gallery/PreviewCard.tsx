@@ -40,7 +40,8 @@ interface IProps {
     isFav: boolean;
 }
 
-const Check = styled("input")<{ $active: boolean }>`
+const Check = styled("input")<{ $active: boolean }>(
+    ({ theme, $active }) => `
     appearance: none;
     position: absolute;
     z-index: 10;
@@ -53,54 +54,52 @@ const Check = styled("input")<{ $active: boolean }>`
 
     &::before {
         content: "";
-        width: 16px;
-        height: 16px;
-        border: 2px solid #fff;
-        background-color: #ddd;
+        width: 19px;
+        height: 19px;
+        background-color: ${theme.vars.palette.fixed.gray.E};
         display: inline-block;
         border-radius: 50%;
         vertical-align: bottom;
-        margin: 8px 8px;
-        text-align: center;
-        line-height: 16px;
+        margin: 6px 6px;
         transition: background-color 0.3s ease;
         pointer-events: inherit;
-        color: #aaa;
+
     }
     &::after {
         content: "";
-        width: 5px;
-        height: 10px;
-        border-right: 2px solid #333;
-        border-bottom: 2px solid #333;
-        transform: translate(-18px, 8px);
-        transition: transform 0.3s ease;
         position: absolute;
+        width: 5px;
+        height: 11px;
+        border-right: 2px solid ${theme.vars.palette.fixed.gray.B};
+        border-bottom: 2px solid ${theme.vars.palette.fixed.gray.B};
+        transition: transform 0.3s ease;
         pointer-events: inherit;
-        transform: translate(-18px, 10px) rotate(45deg);
+        transform: translate(-18px, 9px) rotate(45deg);
     }
 
-    /** checked */
+    /* checkmark background (filled circle) */
     &:checked::before {
         content: "";
-        background-color: #51cd7c;
-        border-color: #51cd7c;
-        color: #fff;
+        background-color: ${theme.vars.palette.accent.main};
+        border-color: ${theme.vars.palette.accent.main};
+        color: ${theme.vars.palette.fixed.white};
     }
+    /* checkmark foreground (tick) */
     &:checked::after {
         content: "";
-        border-right: 2px solid #ddd;
-        border-bottom: 2px solid #ddd;
+        border-right: 2px solid ${theme.vars.palette.fixed.gray.E};
+        border-bottom: 2px solid ${theme.vars.palette.fixed.gray.E};
     }
     visibility: hidden;
-    ${(props) => props.$active && "visibility: visible; opacity: 0.5;"};
+    ${$active && "visibility: visible; opacity: 0.5;"};
     &:checked {
         visibility: visible;
         opacity: 1 !important;
     }
-`;
+`,
+);
 
-export const HoverOverlay = styled("div")<{ checked: boolean }>`
+const HoverOverlay = styled("div")<{ checked: boolean }>`
     opacity: 0;
     left: 0;
     top: 0;
@@ -113,7 +112,7 @@ export const HoverOverlay = styled("div")<{ checked: boolean }>`
         "background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))"};
 `;
 
-export const AvatarOverlay = styled(Overlay)`
+const AvatarOverlay = styled(Overlay)`
     display: flex;
     justify-content: flex-end;
     align-items: flex-start;
@@ -121,7 +120,7 @@ export const AvatarOverlay = styled(Overlay)`
     padding-top: 5px;
 `;
 
-export const FavOverlay = styled(Overlay)`
+const FavOverlay = styled(Overlay)`
     display: flex;
     justify-content: flex-start;
     align-items: flex-end;
@@ -130,18 +129,16 @@ export const FavOverlay = styled(Overlay)`
     opacity: 0.9;
 `;
 
-export const InSelectRangeOverLay = styled("div")<{ $active: boolean }>`
-    opacity: ${(props) => (!props.$active ? 0 : 1)};
-    left: 0;
-    top: 0;
+const InSelectRangeOverlay = styled(Overlay)(
+    ({ theme }) => `
     outline: none;
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    ${(props) => props.$active && "background:rgba(81, 205, 124, 0.25)"};
-`;
+    background: ${theme.vars.palette.accent.main};
+    opacity: 0.14;
+`,
+);
 
-export const FileAndCollectionNameOverlay = styled("div")`
+const FileAndCollectionNameOverlay = styled("div")(
+    ({ theme }) => `
     width: 100%;
     bottom: 0;
     left: 0;
@@ -161,28 +158,30 @@ export const FileAndCollectionNameOverlay = styled("div")`
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    color: #fff;
+    color: ${theme.vars.palette.fixed.white};
     position: absolute;
-`;
+`,
+);
 
-export const SelectedOverlay = styled("div")<{ selected: boolean }>`
+const SelectedOverlay = styled(Overlay)(
+    ({ theme }) => `
     z-index: 5;
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 100%;
-    ${(props) => props.selected && "border: 5px solid #51cd7c;"}
+    border: 2px solid ${theme.vars.palette.accent.main};
     border-radius: 4px;
-`;
+`,
+);
 
-export const FileTypeIndicatorOverlay = styled(Overlay)(({ theme }) => ({
+const FileTypeIndicatorOverlay = styled(Overlay)(({ theme }) => ({
     display: "flex",
     justifyContent: "flex-end",
     alignItems: "flex-end",
     padding: "8px",
+    // TODO(LM): Ditto the dark one until lm is ready.
+    // background:
+    // "linear-gradient(315deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255,
+    // 255, 0.05) 29.61%, rgba(255, 255, 255, 0) 49.86%)",
     background:
-        "linear-gradient(315deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.05) 29.61%, rgba(255, 255, 255, 0) 49.86%)",
+        "linear-gradient(315deg, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0.05) 29.61%, rgba(0, 0, 0, 0) 49.86%)",
     ...theme.applyStyles("dark", {
         background:
             "linear-gradient(315deg, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0.05) 29.61%, rgba(0, 0, 0, 0) 49.86%)",
@@ -340,7 +339,7 @@ export default function PreviewCard(props: IProps) {
                     </FileTypeIndicatorOverlay>
                 )
             )}
-            <SelectedOverlay selected={selected} />
+            {selected && <SelectedOverlay />}
             {shouldShowAvatar(file, galleryContext.user) && (
                 <AvatarOverlay>
                     <Avatar file={file} />
@@ -356,9 +355,10 @@ export default function PreviewCard(props: IProps) {
                 className="preview-card-hover-overlay"
                 checked={selected}
             />
-            <InSelectRangeOverLay
-                $active={isRangeSelectActive && isInsSelectRange}
-            />
+            {isRangeSelectActive && isInsSelectRange && (
+                <InSelectRangeOverlay />
+            )}
+
             {props?.activeCollectionID === TRASH_SECTION && file.isTrashed && (
                 <FileAndCollectionNameOverlay>
                     <p>{formatDateRelative(file.deleteBy / 1000)}</p>

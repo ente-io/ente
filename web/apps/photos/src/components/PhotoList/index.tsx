@@ -1,7 +1,15 @@
+import { assertionFailed } from "@/base/assert";
 import { EnteFile } from "@/media/file";
+import {
+    GAP_BTW_TILES,
+    IMAGE_CONTAINER_MAX_HEIGHT,
+    IMAGE_CONTAINER_MAX_WIDTH,
+    MIN_COLUMNS,
+} from "@/new/photos/components/PhotoList";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { formatDate } from "@ente/shared/time/format";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
+import type { PhotoFrameProps } from "components/PhotoFrame";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import { GalleryContext } from "pages/gallery";
@@ -14,15 +22,6 @@ import {
 } from "react-window";
 import { handleSelectCreator } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-
-import { assertionFailed } from "@/base/assert";
-import {
-    GAP_BTW_TILES,
-    IMAGE_CONTAINER_MAX_HEIGHT,
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-} from "@/new/photos/components/PhotoList";
-import type { PhotoFrameProps } from "components/PhotoFrame";
 
 export const DATE_CONTAINER_HEIGHT = 48;
 export const SPACE_BTW_DATES = 44;
@@ -121,7 +120,6 @@ const ListContainer = styled(Box, {
     grid-template-columns: ${(props) => props.gridTemplateColumns};
     grid-column-gap: ${GAP_BTW_TILES}px;
     width: 100%;
-    color: #fff;
     padding: 0 24px;
     @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
         padding: 0 4px;
@@ -148,7 +146,6 @@ const FooterContainer = styled(ListItemContainer)`
         font-size: 12px;
         margin-bottom: 0.5rem;
     }
-    color: #979797;
     text-align: center;
     justify-content: center;
     align-items: flex-end;
@@ -181,7 +178,6 @@ const FullStretchContainer = styled("div")(
 );
 
 const NothingContainer = styled(ListItemContainer)`
-    color: #979797;
     text-align: center;
     justify-content: center;
 `;
@@ -512,7 +508,9 @@ export function PhotoList({
             itemType: ITEM_TYPE.OTHER,
             item: (
                 <NothingContainer span={columns}>
-                    <div>{t("nothing_here")}</div>
+                    <Typography sx={{ color: "text.faint" }}>
+                        {t("nothing_here")}
+                    </Typography>
                 </NothingContainer>
             ),
             id: "empty-list-banner",
@@ -553,7 +551,7 @@ export function PhotoList({
             height: FOOTER_HEIGHT,
             item: (
                 <FooterContainer span={columns}>
-                    <Typography variant="small">
+                    <Typography variant="small" sx={{ color: "text.faint" }}>
                         <Trans
                             i18nKey={"install_mobile_app"}
                             components={{
@@ -618,7 +616,11 @@ export function PhotoList({
                         {publicCollectionGalleryContext.referralCode ? (
                             <FullStretchContainer>
                                 <Typography
-                                    sx={{ marginTop: "12px", padding: "8px" }}
+                                    sx={{
+                                        marginTop: "12px",
+                                        padding: "8px",
+                                        color: "accent.contrastText",
+                                    }}
                                 >
                                     <Trans
                                         i18nKey={"sharing_referral_code"}

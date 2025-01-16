@@ -1,32 +1,17 @@
-// TODO(LM)
-/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
-import type {
-    FixedColors,
-    PaletteOptions,
-    Theme,
-    ThemeColorsOptions,
-} from "@mui/material";
+import type { AppName } from "@/base/app";
+import type { Theme } from "@mui/material";
 import { createTheme } from "@mui/material";
 import type { Components } from "@mui/material/styles/components";
 import type { TypographyOptions } from "@mui/material/styles/createTypography";
 
-enum THEME_COLOR {
-    LIGHT = "light",
-    DARK = "dark",
-}
-
-const getTheme = (colorAccentType: ColorAccentType): Theme => {
-    const colors = getColors(THEME_COLOR.DARK, colorAccentType);
-    const palette = getPallette(THEME_COLOR.DARK, colors);
-    const components = getComponents(colors, palette, typography);
+const getTheme = (appName: AppName): Theme => {
+    const colors = getColors(appName);
+    const colorSchemes_ = getColorSchemes(colors);
+    // TODO(LM): Temp
+    const colorSchemes = { ...colorSchemes_, light: colorSchemes_.dark };
     return createTheme({
         cssVariables: true,
-        colorSchemes: { dark: true, light: false },
-        colors,
-        palette,
+        colorSchemes,
         typography,
         components,
         shape: {
@@ -39,8 +24,6 @@ const getTheme = (colorAccentType: ColorAccentType): Theme => {
         },
     });
 };
-
-type ColorAccentType = "auth" | "photos";
 
 /**
  * [Note: Colors]
@@ -129,149 +112,30 @@ type ColorAccentType = "auth" | "photos";
  *
  * - All other custom variables remain within the top level theme.
  */
-const getColors = (
-    themeColor: THEME_COLOR,
-    accentType: ColorAccentType,
-): ThemeColorsOptions => ({
-    ...commonFixedColors,
-    ...{ accent: accentType == "auth" ? authAccentColor : photosAccentColor },
-    ...(themeColor === THEME_COLOR.LIGHT ? lightThemeColors : darkThemeColors),
+const getColors = (appName: AppName) => ({
+    ..._colors,
+    ...{
+        accent: appName == "auth" ? _colors.accentAuth : _colors.accentPhotos,
+    },
 });
-
-const commonFixedColors: Partial<Pick<ThemeColorsOptions, keyof FixedColors>> =
-    {
-        accent: {
-            A700: "#00B33C" /* prune */,
-            A500: "#1DB954",
-            A400: "#26CB5F" /* prune */,
-            A300: "#01DE4D" /* prune */,
-        },
-        warning: {
-            A500: "#FFC247" /* prune */,
-        },
-        danger: {
-            A800: "#F53434" /* prune */,
-            A700: "#EA3F3F" /* prune */,
-            A500: "#FF6565",
-            A400: "#FF6F6F" /* prune */,
-        },
-    };
-
-const authAccentColor = {
-    A700: "rgb(164, 0, 182)",
-    A500: "rgb(150, 13, 214)",
-    A400: "rgb(122, 41, 193)",
-    A300: "rgb(152, 77, 244)",
-};
-
-const photosAccentColor = {
-    A700: "#00B33C" /* prune */,
-    A500: "#1DB954",
-    A400: "#26CB5F" /* prune */,
-    A300: "#01DE4D" /* prune */,
-};
-
-const lightThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
-    background: {
-        base: "#fff",
-        paper: "#fff",
-        paper2: "rgba(153, 153, 153, 0.04)",
-    },
-    backdrop: {
-        base: "rgba(255, 255, 255, 0.92)",
-        muted: "rgba(255, 255, 255, 0.75)",
-        faint: "rgba(255, 255, 255, 0.30)",
-    },
-    text: {
-        base: "#000",
-        muted: "rgba(0, 0, 0, 0.60)",
-        faint: "rgba(0, 0, 0, 0.50)",
-    },
-    fill: {
-        base: "#000",
-        muted: "rgba(0, 0, 0, 0.12)",
-        faint: "rgba(0, 0, 0, 0.04)",
-        basePressed: "rgba(0, 0, 0, 0.87))",
-        faintPressed: "rgba(0, 0, 0, 0.08)",
-    },
-    stroke: {
-        base: "#000",
-        muted: "rgba(0, 0, 0, 0.24)",
-        faint: "rgba(0, 0, 0, 0.12)",
-    },
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    boxShadow: {
-        float: "0px 0px 10px rgba(0, 0, 0, 0.25)",
-        menu: "0px 0px 6px rgba(0, 0, 0, 0.16), 0px 3px 6px rgba(0, 0, 0, 0.12)",
-        button: "0px 4px 4px rgba(0, 0, 0, 0.25)",
-    },
-};
-
-const darkThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
-    background: {
-        base: "#000000",
-        paper: "#1b1b1b",
-        paper2: "#252525",
-    },
-    backdrop: {
-        base: "rgba(0, 0, 0, 0.90)" /* unused */,
-        muted: "rgba(0, 0, 0, 0.65)" /* unused */,
-        faint: "rgba(0, 0, 0,0.20)",
-    },
-    text: {
-        base: "#fff",
-        muted: "rgba(255, 255, 255, 0.70)",
-        faint: "rgba(255, 255, 255, 0.50)",
-    },
-    fill: {
-        base: "#fff",
-        muted: "rgba(255, 255, 255, 0.16)",
-        faint: "rgba(255, 255, 255, 0.12)",
-        basePressed: "rgba(255, 255, 255, 0.90)",
-        faintPressed: "rgba(255, 255, 255, 0.06)",
-    },
-    stroke: {
-        base: "#ffffff",
-        muted: "rgba(255,255,255,0.24)",
-        faint: "rgba(255,255,255,0.16)",
-    },
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    boxShadow: {
-        float: "0px 2px 12px rgba(0, 0, 0, 0.75)",
-        menu: "0px 0px 6px rgba(0, 0, 0, 0.50), 0px 3px 6px rgba(0, 0, 0, 0.25)",
-        button: "0px 4px 4px rgba(0, 0, 0, 0.75)",
-    },
-};
-
-const getPallette = (
-    themeColor: THEME_COLOR,
-    colors: ThemeColorsOptions,
-): PaletteOptions => {
-    const paletteOptions = getPalletteOptions(themeColor, colors);
-    switch (themeColor) {
-        case THEME_COLOR.LIGHT:
-            return { mode: "light", ...paletteOptions };
-        default:
-            return { mode: "dark", ...paletteOptions };
-    }
-};
 
 /**
  * The color values.
  *
- * Use this arbitrarily shaped object to define the palette. It both prevents
- * duplication across color schemes, and also us to see the semantic
- * relationships between the colors (if there are any).
+ * Use this arbitrarily shaped object to define the palette. This avoid
+ * duplication across color schemes, and also helps see if there are any
+ * reusable colors.
  */
 const _colors = {
     accentPhotos: {
         dark: "#00B33C",
         main: "#1DB954",
         light: "#01DE4D",
+    },
+    accentAuth: {
+        dark: "rgb(164, 0, 182)",
+        main: "rgb(150, 13, 214)",
+        light: "rgb(152, 77, 244)",
     },
     fixed: {
         white: "#fff",
@@ -283,130 +147,230 @@ const _colors = {
             main: "#EA3F3F",
             light: "#FF6565",
         },
-        overlayIndicatorMuted: "rgba(255, 255, 255, 0.48)",
+        gray: {
+            A: "#1C1C1E",
+            B: "#333333",
+            E: "#ddd",
+        },
+        switchOn: "#2ECA45",
+        croppedAreaOverlay: "rgba(0 0 0 / 0.5)",
+        overlayIndicatorMuted: "rgba(255 255 255 / 0.48)",
+    },
+    light: {
+        background: {
+            base: "#fff",
+            paper: "#fff",
+            paper2: "rgba(153, 153, 153, 0.04)",
+        },
+        backdrop: {
+            base: "rgba(255, 255, 255, 0.92)",
+            muted: "rgba(255, 255, 255, 0.75)",
+            faint: "rgba(255, 255, 255, 0.30)",
+        },
+        text: {
+            base: "#000",
+            muted: "rgba(0, 0, 0, 0.60)",
+            faint: "rgba(0, 0, 0, 0.50)",
+        },
+        fill: {
+            base: "#000",
+            muted: "rgba(0, 0, 0, 0.12)",
+            faint: "rgba(0, 0, 0, 0.04)",
+            baseHover: "rgba(0, 0, 0, 0.87)",
+            faintHover: "rgba(0, 0, 0, 0.08)",
+        },
+        stroke: {
+            base: "#000",
+            muted: "rgba(0, 0, 0, 0.24)",
+            faint: "rgba(0, 0, 0, 0.12)",
+        },
+        boxShadow: {
+            float: "0px 0px 10px rgba(0, 0, 0, 0.25)",
+            menu: "0px 0px 6px rgba(0, 0, 0, 0.16), 0px 3px 6px rgba(0, 0, 0, 0.12)",
+            button: "0px 4px 4px rgba(0, 0, 0, 0.25)",
+        },
+    },
+    dark: {
+        background: {
+            base: "#000",
+            paper: "#1b1b1b",
+            paper2: "#252525",
+        },
+        backdrop: {
+            base: "rgba(0, 0, 0, 0.90)",
+            muted: "rgba(0, 0, 0, 0.65)",
+            faint: "rgba(0, 0, 0,0.20)",
+        },
+        text: {
+            base: "#fff",
+            muted: "rgba(255, 255, 255, 0.70)",
+            faint: "rgba(255, 255, 255, 0.50)",
+        },
+        fill: {
+            base: "#fff",
+            muted: "rgba(255, 255, 255, 0.16)",
+            faint: "rgba(255, 255, 255, 0.12)",
+            baseHover: "rgba(255, 255, 255, 0.90)",
+            faintHover: "rgba(255, 255, 255, 0.06)",
+        },
+        stroke: {
+            base: "#fff",
+            muted: "rgba(255,255,255,0.24)",
+            faint: "rgba(255,255,255,0.16)",
+        },
+        boxShadow: {
+            float: "0px 2px 12px rgba(0, 0, 0, 0.75)",
+            menu: "0px 0px 6px rgba(0, 0, 0, 0.50), 0px 3px 6px rgba(0, 0, 0, 0.25)",
+            button: "0px 4px 4px rgba(0, 0, 0, 0.75)",
+        },
     },
 };
 
-const getPalletteOptions = (
-    themeColor: THEME_COLOR,
-    colors: ThemeColorsOptions,
-): PaletteOptions => {
-    return {
-        primary: {
-            // See: [Note: strict mode migration]
+const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
+    // light: false,
+    dark: {
+        palette: {
+            background: {
+                default: colors.dark.background.base,
+                paper: colors.dark.background.paper,
+                paper2: colors.dark.background.paper2,
+            },
+            backdrop: {
+                base: colors.dark.backdrop.base,
+                muted: colors.dark.backdrop.muted,
+                faint: colors.dark.backdrop.faint,
+            },
+            primary: {
+                main: colors.dark.fill.base,
+                dark: colors.dark.fill.baseHover,
+                contrastText: colors.fixed.black,
+            },
+            secondary: {
+                main: colors.dark.fill.faint,
+                dark: colors.dark.fill.faintHover,
+                contrastText: colors.dark.text.base,
+            },
+            success: { main: colors.fixed.success },
+            warning: { main: colors.fixed.warning },
+            accent: {
+                main: colors.accent.main,
+                dark: colors.accent.dark,
+                light: colors.accent.light,
+                contrastText: colors.fixed.white,
+            },
+            critical: {
+                main: colors.fixed.danger.main,
+                dark: colors.fixed.danger.dark,
+                light: colors.fixed.danger.light,
+                contrastText: colors.fixed.white,
+            },
+            text: {
+                // Alias the tokens used by MUI to the ones that we use. This way,
+                // we don't need to change the default ("primary"), or update the
+                // MUI internal styling that refers to these tokens.
+                //
+                // Our own code should not use these.
+                primary: colors.dark.text.base,
+                secondary: colors.dark.text.muted,
+                disabled: colors.dark.text.faint,
+                // Our color tokens.
+                base: colors.dark.text.base,
+                muted: colors.dark.text.muted,
+                faint: colors.dark.text.faint,
+            },
+            fill: {
+                base: colors.dark.fill.base,
+                muted: colors.dark.fill.muted,
+                faint: colors.dark.fill.faint,
+                faintHover: colors.dark.fill.faintHover,
+            },
+            stroke: {
+                base: colors.dark.stroke.base,
+                muted: colors.dark.stroke.muted,
+                faint: colors.dark.stroke.faint,
+            },
+            divider: colors.dark.stroke.faint,
+            fixed: colors.fixed,
+            boxShadow: colors.dark.boxShadow,
+            // Override some MUI defaults for styling action elements like
+            // buttons and menu items.
             //
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            main: colors.fill.base,
-            dark: colors.fill?.basePressed,
-            contrastText:
-                themeColor === "dark"
-                    ? _colors.fixed.black
-                    : _colors.fixed.white,
-        },
-        secondary: {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            main: colors.fill.faint,
-            dark: colors.fill?.faintPressed,
-            contrastText: colors.text?.base,
-        },
-        success: { main: _colors.fixed.success },
-        warning: { main: _colors.fixed.warning },
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        accent: {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            main: colors.accent.A500,
-            dark: colors.accent!.A700!,
-            light: colors.accent!.A300!,
-            contrastText: _colors.fixed.white,
-        },
-        critical: {
-            main: _colors.fixed.danger.main,
-            dark: _colors.fixed.danger.dark,
-            light: _colors.fixed.danger.light,
-            contrastText: _colors.fixed.white,
-        },
-        background: {
-            default: colors.background?.base,
-            paper: colors.background?.paper,
-            paper2: colors.background?.paper2,
-        },
-        text: {
-            // Alias the tokens used by MUI to the ones that we use. This way,
-            // we don't need to change the default ("primary"), or update the
-            // MUI internal styling that refers to these tokens.
+            // https://github.com/mui/material-ui/blob/v6.4.0/packages/mui-material/src/styles/createPalette.js#L68
+            action: {
+                // The color of an active action like an icon button.
+                active: colors.dark.stroke.base,
+                // The color of an hovered action.
+                hover: colors.dark.fill.faintHover,
+                hoverOpacity: 0.06,
+                // The color of a selected action.
+                //
+                // Placeholder; not clear how it impacts us.
+                selected: colors.dark.stroke.base,
+                selectedOpacity: 0.08,
+                // The color of a disabled action.
+                disabled: colors.dark.text.faint,
+                disabledOpacity: 0.12,
+                // The background color of a disabled action.
+                disabledBackground: colors.dark.fill.faint,
+                // Placeholder; not clear how it impacts us.
+                focus: colors.dark.stroke.base,
+                // Placeholder (MUI default); not clear how it impacts us.
+                focusOpacity: 1,
+                // Placeholder (MUI default); not clear how it impacts us.
+                activatedOpacity: 0.12,
+            },
+            // Override some internal MUI defaults that impact the components
+            // which we use.
             //
-            // Our own code should not use these.
-            primary: colors.text?.base,
-            secondary: colors.text?.muted,
-            disabled: colors.text?.faint,
-            // Our color tokens.
-            base: colors.text?.base,
-            muted: colors.text?.muted,
-            faint: colors.text?.faint,
+            // https://github.com/mui/material-ui/blob/v6.4.0/packages/mui-material/src/styles/createThemeWithVars.js#L271
+            FilledInput: {
+                bg: colors.dark.fill.faint,
+                hoverBg: colors.dark.fill.faintHover,
+                // We don't use this currently.
+                disabledBg: colors.dark.fill.faint,
+            },
         },
-        fill: {
-            muted: colors.fill!.muted!,
-            faint: colors.fill!.faint!,
-            faintHover: colors.fill!.faintPressed!,
-        },
-        stroke: {
-            base: colors.stroke!.base!,
-            muted: colors.stroke!.muted!,
-            faint: colors.stroke!.faint!,
-        },
-        divider: colors.stroke?.faint,
-        fixed: { ..._colors.fixed },
-        backdrop: {
-            base: colors.backdrop!.base!,
-            muted: colors.backdrop!.muted!,
-            faint: colors.backdrop!.faint!,
-        },
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        boxShadow: colors.boxShadow,
-    };
-};
+    },
+});
 
+/**
+ * [Note: Font weights]
+ *
+ * We only use three font weights:
+ *
+ * - 500 (sx "regular")
+ * - 600 (sx "medium")
+ * - 700 (sx "bold", CSS "bold")
+ *
+ * While the sx prop allows us to use keywords "regular", "medium" and "bold",
+ * which we do elsewhere in the code, within this file those keywords cannot be
+ * used in all contexts because they instead map to the CSS keywords. To avoid
+ * any confusion, within this file we only use the numeric values.
+ *
+ * ---
+ *
+ * MUI (as of v6) uses the following font weights by default:
+ *
+ * - fontWeightLight 300
+ * - fontWeightRegular 400
+ * - fontWeightMedium 500
+ * - fontWeightBold 700
+ *
+ * The browser default (CSS keyword "normal"), is also 400.
+ *
+ * However for Inter, the font that we use, 400 is too light, and to improve
+ * legibility we change fontWeightRegular to 500.
+ *
+ * Correspondingly, we shift fontWeightMedium to 600. fontWeightBold then ends
+ * up mapping back to 700, which also nicely coincides with the CSS keyword
+ * "bold".
+ *
+ * MUI uses fontWeightLight only as the default font weight for the h1 and h2
+ * variants, but we override their font weight in our theme. Thus we don't need
+ * to bother with the light variant (though for consistency of specifying every
+ * value, we alias it the same weight as regular, 500).
+ */
 const typography: TypographyOptions = {
-    // [Note: Font weights]
-    //
-    // We only use three font weights:
-    //
-    // - 500 (sx "regular", CSS "normal")
-    // - 600 (sx "medium")
-    // - 700 (sx "bold", CSS "bold")
-    //
-    // While the sx prop allows us to use keywords "regular", "medium" and
-    // "bold", which we do elsewhere in the code, within this file those
-    // keywords cannot be used in all contexts because they instead map to the
-    // CSS keywords (which MUI can't and doesn't remap). To avoid any confusion,
-    // within this file we only use the numeric values.
-    //
-    // ---
-    //
-    // MUI (as of v6) uses the following font weights by default:
-    // - fontWeightLight 300
-    // - fontWeightRegular 400
-    // - fontWeightMedium 500
-    // - fontWeightBold 700
-    //
-    // The browser default (CSS keyword "normal"), is also 400.
-    //
-    // However for Inter, the font that we use, 400 is too light, and to improve
-    // legibility we change fontWeightRegular to 500.
-    //
-    // Correspondingly, we shift fontWeightMedium to 600. fontWeightBold then
-    // ends up mapping back to 700, which also nicely coincides with the CSS
-    // keyword "bold".
-    //
-    // MUI uses fontWeightLight only as the default font weight for the h1 and
-    // h2 variants, but we override their font weight in our theme. Thus we
-    // don't need to bother with the light variant (though for consistency of
-    // specifying every value, we alias it the same weight as regular, 500).
     fontFamily: "Inter Variable, sans-serif",
     fontWeightLight: 500,
     fontWeightRegular: 500 /* CSS baseline reset sets this as the default */,
@@ -415,7 +379,7 @@ const typography: TypographyOptions = {
     h1: {
         fontSize: "48px",
         lineHeight: "58px",
-        fontWeight: 600 /* medium */,
+        fontWeight: 600 /* Medium */,
     },
     h2: {
         fontSize: "32px",
@@ -425,7 +389,7 @@ const typography: TypographyOptions = {
     h3: {
         fontSize: "24px",
         lineHeight: "29px",
-        fontWeight: 600 /* medium */,
+        fontWeight: 600 /* Medium */,
     },
     h4: {
         fontSize: "22px",
@@ -435,14 +399,14 @@ const typography: TypographyOptions = {
     h5: {
         fontSize: "20px",
         lineHeight: "25px",
-        fontWeight: 600 /* medium */,
+        fontWeight: 600 /* Medium */,
     },
     // h6 is the default variant used by MUI's DialogTitle.
     h6: {
         // The font size and line height below is the same as large.
         fontSize: "18px",
         lineHeight: "22px",
-        fontWeight: 600 /* medium */,
+        fontWeight: 600 /* Medium */,
     },
     body: {
         fontSize: "16px",
@@ -462,11 +426,7 @@ const typography: TypographyOptions = {
     },
 };
 
-const getComponents = (
-    colors: ThemeColorsOptions,
-    palette: PaletteOptions,
-    typography: TypographyOptions,
-): Components => ({
+const components: Components = {
     MuiCssBaseline: {
         styleOverrides: {
             body: {
@@ -514,7 +474,7 @@ const getComponents = (
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
-                    backgroundColor: palette.backdrop?.faint,
+                    backgroundColor: "var(--mui-palette-backdrop-faint)",
                 },
             },
         },
@@ -531,10 +491,10 @@ const getComponents = (
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
-                    backgroundColor: palette.backdrop?.faint,
+                    backgroundColor: "var(--mui-palette-backdrop-faint)",
                 },
                 "& .MuiDialog-paper": {
-                    boxShadow: palette.boxShadow?.float,
+                    boxShadow: "var(--mui-palette-boxShadow-float)",
                 },
                 // Reset the MUI default paddings to 16px everywhere.
                 //
@@ -576,16 +536,17 @@ const getComponents = (
         // mode. Remove it to match the Paper background from our design.
         styleOverrides: { root: { backgroundImage: "none" } },
     },
+
     MuiLink: {
         defaultProps: {
-            color: colors.accent?.A500,
+            color: "var(--mui-palette-accent-main)",
             underline: "none",
         },
         styleOverrides: {
             root: {
                 "&:hover": {
                     underline: "always",
-                    color: colors.accent?.A500,
+                    color: "var(--mui-palette-accent-main)",
                 },
             },
         },
@@ -623,6 +584,7 @@ const getComponents = (
             },
         },
     },
+
     MuiInputBase: {
         styleOverrides: {
             formControl: {
@@ -630,11 +592,9 @@ const getComponents = (
                 // border radius is only applied to the top for the "filled"
                 // variant of input used inside TextFields.
                 borderRadius: "8px",
-                // TODO: Should we also add overflow hidden so that there is no
-                // gap between the filled area and the (full width) border. Not
-                // sure how this might interact with selects.
-                // overflow: "hidden",
-
+                // Clip the bottom border so that there is no gap between the
+                // filled area and the (full width) border.
+                overflow: "hidden",
                 // Hide the bottom border that always appears for the "filled"
                 // variant of input used inside TextFields.
                 "::before": {
@@ -643,15 +603,27 @@ const getComponents = (
             },
         },
     },
+
     MuiFilledInput: {
         styleOverrides: {
             input: {
+                // Set the background color for text fields when they get
+                // autofilled by the user agent.
+                //
+                // TODO(LM): Right now we need to set it until the light mode is
+                // fully independent. Post that, see if we really need to
+                // override the user agent defaults. Also note that MUI does
+                // overwrite the UA defaults, so we might need to too.
+                //
+                // https://github.com/search?q=repo%3Amui%2Fmaterial-ui%20path%3A%2F%5Epackages%5C%2Fmui-material%5C%2Fsrc%5C%2F%2F%20WebkitBoxShadow&type=code
                 "&:autofill": {
-                    boxShadow: "#c7fd4f",
+                    boxShadow: "0 0 0 100px #266798 inset",
+                    WebkitTextFillColor: "var(--mui-palette-fixed-white)",
                 },
             },
         },
     },
+
     MuiTextField: {
         defaultProps: {
             // The MUI default variant is "outlined", override it to use the
@@ -683,8 +655,8 @@ const getComponents = (
             // keyboard focus.
             root: {
                 "&.Mui-focusVisible": {
-                    backgroundColor: colors.fill?.faint,
-                    outline: `1px solid ${colors.stroke.faint}`,
+                    backgroundColor: "var(--mui-palette-fill-faint)",
+                    outline: "1px solid var(--mui-palette-stroke-faint)",
                 },
             },
         },
@@ -692,20 +664,43 @@ const getComponents = (
 
     MuiSvgIcon: {
         styleOverrides: {
-            root: ({ ownerState }) => ({
-                ...getIconColor(ownerState, colors),
-            }),
+            root: {
+                variants: [
+                    {
+                        props: { color: "primary" },
+                        style: { color: "var(--mui-palette-stroke-base)" },
+                    },
+                    {
+                        props: { color: "secondary" },
+                        style: { color: "var(--mui-palette-stroke-muted)" },
+                    },
+                ],
+            },
         },
     },
 
     MuiIconButton: {
         styleOverrides: {
-            root: ({ ownerState }) => ({
-                ...getIconColor(ownerState, colors),
+            root: {
                 padding: "12px",
-            }),
+                variants: [
+                    {
+                        props: { color: "primary" },
+                        style: { color: "var(--mui-palette-stroke-base)" },
+                    },
+                    {
+                        props: { color: "secondary" },
+                        style: { color: "var(--mui-palette-stroke-muted)" },
+                    },
+                    {
+                        props: { color: "disabled" },
+                        style: { color: "var(--mui-palette-stroke-faint)" },
+                    },
+                ],
+            },
         },
     },
+
     MuiSnackbar: {
         styleOverrides: {
             root: {
@@ -715,45 +710,7 @@ const getComponents = (
             },
         },
     },
-
-    MuiMenuItem: {
-        styleOverrides: {
-            // don't reduce opacity of disabled items
-            root: {
-                "&.Mui-disabled": {
-                    opacity: 1,
-                },
-            },
-        },
-    },
-});
-
-interface IconColorableOwnerState {
-    color?: string;
-    disabled?: boolean;
-}
-
-function getIconColor(
-    ownerState: IconColorableOwnerState,
-    colors: ThemeColorsOptions,
-) {
-    switch (ownerState.color) {
-        case "primary":
-            return {
-                color: colors.stroke?.base,
-            };
-        case "secondary":
-            return {
-                color: colors.stroke?.muted,
-            };
-    }
-    if (ownerState.disabled) {
-        return {
-            color: colors.stroke?.faint,
-        };
-    }
-    return {};
-}
+};
 
 // Exports ---
 

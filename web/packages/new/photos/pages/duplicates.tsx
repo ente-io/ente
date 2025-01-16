@@ -672,7 +672,7 @@ const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
                             count: prunableCount,
                         })}
                     </Typography>
-                    <Typography variant="small" fontWeight={"normal"}>
+                    <Typography variant="small" fontWeight="regular">
                         {formattedByteSize(prunableSize)}
                     </Typography>
                 </>

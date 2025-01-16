@@ -51,6 +51,7 @@ export const DropdownInput = <T extends string>({
         onChange={(event: SelectChangeEvent) => {
             onSelect(event.target.value as T);
         }}
+        variant="outlined"
         displayEmpty
         renderValue={() => {
             // Return the value that is shown in the unexpanded state.
@@ -85,6 +86,17 @@ export const DropdownInput = <T extends string>({
                         color: "text.base",
                     },
                 },
+            },
+        }}
+        sx={{
+            // Remove the border in the quiescent state.
+            ".MuiOutlinedInput-notchedOutline": {
+                borderColor: "transparent",
+            },
+            // Give the default appearance a background fill, similar to our
+            // text inputs.
+            ".MuiSelect-select": {
+                backgroundColor: "fill.faint",
             },
         }}
     >

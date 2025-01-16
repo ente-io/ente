@@ -4,104 +4,6 @@ import React from "react";
 // Import the module augmentation that provides types for `theme.vars.*`.
 import type {} from "@mui/material/themeCssVarsAugmentation";
 
-declare module "@mui/material/styles" {
-    interface Theme {
-        colors: ThemeColors;
-    }
-
-    interface ThemeOptions {
-        colors?: ThemeColorsOptions;
-    }
-}
-
-declare module "@mui/material/Button" {
-    interface ButtonPropsColorOverrides {
-        accent: true;
-        critical: true;
-        error: false;
-        success: false;
-        info: false;
-        warning: false;
-        inherit: false;
-    }
-}
-declare module "@mui/material/Checkbox" {
-    interface CheckboxPropsColorOverrides {
-        accent: true;
-    }
-}
-
-declare module "@mui/material/Switch" {
-    interface SwitchPropsColorOverrides {
-        accent: true;
-    }
-}
-
-declare module "@mui/material/SvgIcon" {
-    interface SvgIconPropsColorOverrides {
-        accent: true;
-    }
-}
-
-declare module "@mui/material/CircularProgress" {
-    interface CircularProgressPropsColorOverrides {
-        accent: true;
-    }
-}
-
-// =================================================
-// Custom Interfaces
-// =================================================
-
-declare module "@mui/material/styles" {
-    interface ThemeColors {
-        background: BackgroundType;
-        backdrop: Strength;
-        text: Strength;
-        fill: FillStrength;
-        stroke: Strength;
-        accent: ColorStrength;
-        warning: ColorStrength;
-        danger: ColorStrength;
-    }
-
-    interface ThemeColorsOptions {
-        background?: Partial<BackgroundType>;
-        backdrop?: Partial<Strength>;
-        text?: Partial<Strength>;
-        fill?: Partial<FillStrength>;
-        stroke?: Partial<StrokeStrength>;
-        accent?: Partial<ColorStrength>;
-        warning?: Partial<ColorStrength>;
-        danger?: Partial<ColorStrength>;
-    }
-
-    interface ColorStrength {
-        A800: string;
-        A700: string;
-        A500: string;
-        A400: string;
-        A300: string;
-    }
-
-    interface FixedColors {
-        accent: string;
-        warning: string;
-        danger: string;
-    }
-
-    interface Strength {
-        base: string;
-        muted: string;
-        faint: string;
-    }
-
-    type FillStrength = Strength & {
-        basePressed: string;
-        faintPressed: string;
-    };
-}
-
 // Add new tokens to the Palette.
 //
 // https://mui.com/material-ui/customization/css-theme-variables/usage/#adding-new-theme-tokens
@@ -185,11 +87,11 @@ declare module "@mui/material/styles" {
          * They come in three strengths which are meant to play nicely with the
          * corresponding strengths of "text.*" and "stroke.*".
          *
-         * The faint strength also comes with a hover variant, useful to
-         * indicate the hover state of buttons and menu items. TODO(LM) -
-         * consider moving to others.
+         * The strength comes with a hover variant, useful to indicate the hover
+         * state of buttons and menu items that use the corresponding fill.
          */
         fill: {
+            base: string;
             muted: string;
             faint: string;
             faintHover: string;
@@ -214,7 +116,36 @@ declare module "@mui/material/styles" {
             white: string;
             black: string;
             /**
-             * e.g. color of the "archived" indicator shown on top of albums.
+             * Various fixed shades of gray.
+             * TODO(LM) - audit and rename.
+             */
+            gray: {
+                A: string;
+                /**
+                 * - Color of check on hovering on image thumbnail during
+                 *   selection.
+                 */
+                B: string;
+                /**
+                 * - Background of check on hovering on image thumbnail during
+                 *   selection.
+                 *
+                 * - Color of check on image thumbnail when it is selected.
+                 */
+                E: string;
+            };
+            /**
+             * The color of a switch when it is enabled.
+             */
+            switchOn: string;
+            /**
+             * The transparent overlay on top of the region that will be cropped
+             * during image editing.
+             */
+            croppedAreaOverlay: string;
+            /**
+             * Color of overlaid icons on top of thumbnails. e.g. color of the
+             * "archived" indicator shown on top of albums.
              */
             overlayIndicatorMuted: string;
         };
@@ -245,6 +176,58 @@ declare module "@mui/material/styles" {
         backdrop?: Palette["backdrop"];
         fixed?: Palette["fixed"];
         boxShadow?: Palette["boxShadow"];
+    }
+}
+
+// Make our custom palette colors available for use as the color prop of various
+// MUI components.
+
+declare module "@mui/material/Button" {
+    interface ButtonPropsColorOverrides {
+        // Turn off MUI provided palette colors we don't use.
+        error: false;
+        success: false;
+        info: false;
+        warning: false;
+        inherit: false;
+        // Add our custom palette colors.
+        accent: true;
+        critical: true;
+    }
+}
+
+declare module "@mui/material/IconButton" {
+    interface IconButtonPropsColorOverrides {
+        // Turn off MUI provided palette colors we don't use.
+        error: false;
+        success: false;
+        info: false;
+        warning: false;
+        inherit: false;
+    }
+}
+
+declare module "@mui/material/Checkbox" {
+    interface CheckboxPropsColorOverrides {
+        accent: true;
+    }
+}
+
+declare module "@mui/material/Switch" {
+    interface SwitchPropsColorOverrides {
+        accent: true;
+    }
+}
+
+declare module "@mui/material/SvgIcon" {
+    interface SvgIconPropsColorOverrides {
+        accent: true;
+    }
+}
+
+declare module "@mui/material/CircularProgress" {
+    interface CircularProgressPropsColorOverrides {
+        accent: true;
     }
 }
 
