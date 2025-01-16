@@ -18,10 +18,10 @@ export const PasswordStrengthHint: React.FC<PasswordStrengthHintProps> = ({
     const theme = useTheme();
     const color =
         passwordStrength == "weak"
-            ? theme.palette.critical.main
+            ? theme.vars.palette.critical.main
             : passwordStrength == "moderate"
-              ? theme.palette.warning.main
-              : theme.palette.accent.main;
+              ? theme.vars.palette.warning.main
+              : theme.vars.palette.accent.main;
 
     return (
         <Typography

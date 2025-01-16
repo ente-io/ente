@@ -2,7 +2,9 @@ import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dial
 import { stashRedirect } from "@/accounts/services/redirect";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { AppNavbar, NavbarBase } from "@/base/components/Navbar";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { TranslucentLoadingOverlay } from "@/base/components/loaders";
+import type { ButtonishProps } from "@/base/components/mui";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
@@ -84,8 +86,7 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
-import type { ButtonProps, IconButtonProps } from "@mui/material";
-import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
+import { IconButton, Stack, Typography } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import CollectionNamer, {
     CollectionNamerAttributes,
@@ -98,7 +99,6 @@ import {
 } from "components/FilesDownloadProgress";
 import { FixCreationTime } from "components/FixCreationTime";
 import GalleryEmptyState from "components/GalleryEmptyState";
-import { GalleryLoadingOverlay } from "components/GalleryLoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import Sidebar from "components/Sidebar";
@@ -901,11 +901,7 @@ const Page: React.FC = () => {
                     }}
                 />
                 <AppNavbar />
-                {blockingLoad && (
-                    <GalleryLoadingOverlay>
-                        <ActivityIndicator />
-                    </GalleryLoadingOverlay>
-                )}
+                {blockingLoad && <TranslucentLoadingOverlay />}
                 {isFirstLoad && (
                     <CenteredFlex>
                         <Typography
@@ -1180,35 +1176,32 @@ const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
     </>
 );
 
-const SidebarButton: React.FC<IconButtonProps> = (props) => (
-    <IconButton {...props}>
+const SidebarButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <IconButton {...{ onClick }}>
         <MenuIcon />
     </IconButton>
 );
 
-const UploadButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
+const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
     const isSmallWidth = useIsSmallWidth();
 
     const icon = <FileUploadOutlinedIcon />;
 
     return (
-        <Box>
+        <>
             {isSmallWidth ? (
-                <IconButton {...props} disabled={disabled}>
-                    {icon}
-                </IconButton>
+                <IconButton {...{ onClick, disabled }}>{icon}</IconButton>
             ) : (
-                <Button
-                    {...props}
-                    disabled={disabled}
-                    color={"secondary"}
+                <FocusVisibleButton
+                    color="secondary"
                     startIcon={icon}
+                    {...{ onClick, disabled }}
                 >
                     {t("upload")}
-                </Button>
+                </FocusVisibleButton>
             )}
-        </Box>
+        </>
     );
 };
 
@@ -1224,7 +1217,7 @@ const HiddenSectionNavbarContents: React.FC<
         sx={(theme) => ({
             gap: "24px",
             width: "100%",
-            background: theme.palette.background.default,
+            background: theme.vars.palette.background.default,
         })}
     >
         <IconButton onClick={onBack}>

@@ -12,6 +12,7 @@ import {
     supportedLocales,
     type SupportedLocale,
 } from "@/base/i18n";
+import { DropdownInput } from "@/new/photos/components/DropdownInput";
 import { MLSettings } from "@/new/photos/components/sidebar/MLSettings";
 import {
     confirmDisableMapsDialogAttributes,
@@ -28,8 +29,7 @@ import {
 import { useAppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { Divider, Stack, useColorScheme } from "@mui/material";
-import DropdownInput from "components/DropdownInput";
+import { Divider, Stack, Typography, useColorScheme } from "@mui/material";
 import { t } from "i18next";
 import React, { useCallback, useEffect } from "react";
 
@@ -121,13 +121,16 @@ const LanguageSelector = () => {
     }));
 
     return (
-        <DropdownInput
-            options={options}
-            label={t("language")}
-            labelSxProps={{ color: "text.muted" }}
-            selected={locale}
-            setSelected={updateCurrentLocale}
-        />
+        <Stack sx={{ gap: 1 }}>
+            <Typography variant="small" sx={{ px: 1, color: "text.muted" }}>
+                {t("language")}
+            </Typography>
+            <DropdownInput
+                options={options}
+                selected={locale}
+                onSelect={updateCurrentLocale}
+            />
+        </Stack>
     );
 };
 
@@ -173,19 +176,22 @@ const ThemeSelector = () => {
     // During SSR, mode is always undefined.
     if (!mode) return null;
 
-    // TODO: Use translations, also remove unused t("CHOSE_THEME")
+    // TODO(LM): Use translations, also remove unused t("CHOSE_THEME")
     return (
-        <DropdownInput
-            options={[
-                { label: pt("System"), value: "system" },
-                { label: pt("Light"), value: "light" },
-                { label: pt("Dark"), value: "dark" },
-            ]}
-            label={pt("Theme")}
-            labelSxProps={{ color: "text.muted" }}
-            selected={mode}
-            setSelected={setMode}
-        />
+        <Stack sx={{ gap: 1 }}>
+            <Typography variant="small" sx={{ px: 1, color: "text.muted" }}>
+                {pt("Theme")}
+            </Typography>
+            <DropdownInput
+                options={[
+                    { label: pt("System"), value: "system" },
+                    { label: pt("Light"), value: "light" },
+                    { label: pt("Dark"), value: "dark" },
+                ]}
+                selected={mode}
+                onSelect={setMode}
+            />
+        </Stack>
     );
 };
 

@@ -1,52 +1,56 @@
-import { VerticallyCenteredFlex } from "@ente/shared/components/Container";
-import { Divider, styled, Typography } from "@mui/material";
+import { Divider, Stack, styled, Typography } from "@mui/material";
 import React from "react";
 
 interface MenuSectionTitleProps {
+    /**
+     * The title for the menu section.
+     */
     title: string;
-    icon?: React.JSX.Element;
+    /**
+     * An optional leading SvgIcon.
+     */
+    icon?: React.ReactNode;
 }
 
 export const MenuSectionTitle: React.FC<MenuSectionTitleProps> = ({
     title,
     icon,
-}) => {
-    return (
-        <VerticallyCenteredFlex
-            px="8px"
-            py={"6px"}
-            gap={"8px"}
-            sx={(theme) => ({
-                "& > svg": {
-                    fontSize: "17px",
-                    color: theme.colors.stroke.muted,
-                },
-            })}
-        >
-            {icon && icon}
-            <Typography variant="small" sx={{ color: "text.muted" }}>
-                {title}
-            </Typography>
-        </VerticallyCenteredFlex>
-    );
-};
+}) => (
+    <Stack
+        direction="row"
+        sx={{
+            px: "8px",
+            py: "6px",
+            gap: "8px",
+            "& > svg": {
+                fontSize: "17px",
+                color: "stroke.muted",
+            },
+        }}
+    >
+        {icon && icon}
+        <Typography variant="small" sx={{ color: "text.muted" }}>
+            {title}
+        </Typography>
+    </Stack>
+);
 
 interface MenuItemDividerProps {
+    /**
+     * If true, then the menu divider leaves the leading edge hanging which
+     * visually looks better when used to separate menu items which have leading
+     * icons.
+     */
     hasIcon?: boolean;
 }
 
 export const MenuItemDivider: React.FC<MenuItemDividerProps> = ({
     hasIcon,
-}) => {
-    return (
-        <Divider
-            sx={[
-                { "&&&": { my: 0 } },
-                hasIcon ? { "&&&": { ml: "48px" } } : { "&&&": { ml: "16px" } },
-            ]}
-        />
-    );
-};
+}) => (
+    <Divider
+        sx={[{ "&&&": { my: 0 } }, hasIcon ? { ml: "48px" } : { ml: "16px" }]}
+    />
+);
 
 export const MenuItemGroup = styled("div")(
     ({ theme }) => `
@@ -62,7 +66,7 @@ export const MenuItemGroup = styled("div")(
         border-top-left-radius: 0;
         border-top-right-radius: 0;
     }
-    background-color: ${theme.colors.fill.faint};
+    background-color: ${theme.vars.palette.fill.faint};
     border-radius: 8px;
 `,
 );

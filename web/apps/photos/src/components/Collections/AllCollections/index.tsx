@@ -118,7 +118,7 @@ const AllCollectionsHeader = ({
                         sx={{
                             color: "text.muted",
                             // Undo the effects of DialogTitle.
-                            fontWeight: "normal",
+                            fontWeight: "regular",
                         }}
                     >
                         {t("albums_count", { count: collectionCount })}

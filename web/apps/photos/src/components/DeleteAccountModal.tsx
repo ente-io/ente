@@ -3,6 +3,10 @@ import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { sharedCryptoWorker } from "@/base/crypto";
+import {
+    DropdownInput,
+    type DropdownOption,
+} from "@/new/photos/components/DropdownInput";
 import { AppContext } from "@/new/photos/types/context";
 import { initiateEmail } from "@/new/photos/utils/web";
 import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
@@ -23,7 +27,6 @@ import React, { useContext, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import { deleteAccount, getAccountDeleteChallenge } from "services/userService";
 import * as Yup from "yup";
-import DropdownInput, { DropdownOption } from "./DropdownInput";
 
 interface Iprops {
     onClose: () => void;
@@ -152,18 +155,28 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                     handleSubmit,
                 }): React.JSX.Element => (
                     <form noValidate onSubmit={handleSubmit}>
-                        <Stack spacing={"24px"}>
-                            <DropdownInput
-                                options={deleteReasonOptions()}
-                                label={t("delete_account_reason_label")}
-                                placeholder={t(
-                                    "delete_account_reason_placeholder",
+                        <Stack sx={{ gap: "24px" }}>
+                            <Stack sx={{ gap: "4px" }}>
+                                <Typography>
+                                    {t("delete_account_reason_label")}
+                                </Typography>
+                                <DropdownInput
+                                    options={deleteReasonOptions()}
+                                    placeholder={t(
+                                        "delete_account_reason_placeholder",
+                                    )}
+                                    selected={values.reason}
+                                    onSelect={handleChange("reason")}
+                                />
+                                {errors.reason && (
+                                    <Typography
+                                        variant="small"
+                                        sx={{ px: 1, color: "critical.main" }}
+                                    >
+                                        {errors.reason}
+                                    </Typography>
                                 )}
-                                selected={values.reason}
-                                setSelected={handleChange("reason")}
-                                messageSxProps={{ color: "critical.main" }}
-                                message={errors.reason}
-                            />
+                            </Stack>
                             <FeedbackInput
                                 value={values.feedback}
                                 onChange={handleChange("feedback")}
@@ -240,9 +253,9 @@ const FeedbackInput: React.FC<FeedbackInputProps> = ({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={t("delete_account_feedback_placeholder")}
-            sx={(theme) => ({
+            sx={{
                 border: "1px solid",
-                borderColor: theme.colors.stroke.faint,
+                borderColor: "stroke.faint",
                 borderRadius: "8px",
                 padding: "12px",
                 ".MuiInputBase-formControl": {
@@ -250,7 +263,7 @@ const FeedbackInput: React.FC<FeedbackInputProps> = ({
                         borderBottom: "none !important",
                     },
                 },
-            })}
+            }}
         />
         <Typography variant="small" sx={{ px: "8px", color: "critical.main" }}>
             {errorMessage}
