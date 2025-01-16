@@ -239,9 +239,14 @@ class MLService {
 
   Future<void> clusterAllImages({bool clusterInBuckets = true}) async {
     if (!_canRunMLFunction(function: "Clustering")) return;
+    if (_clusteringIsHappening) {
+      _logger.info("clusterAllImages() is already running, returning");
+      return;
+    }
 
     _logger.info("`clusterAllImages()` called");
     _isIndexingOrClusteringRunning = true;
+    _clusteringIsHappening = true;
     final clusterAllImagesTime = DateTime.now();
 
     _logger.info('Pulling remote feedback before actually clustering');
@@ -261,8 +266,6 @@ class MLService {
     }
 
     try {
-      _clusteringIsHappening = true;
-
       // Get a sense of the total number of faces in the database
       final int totalFaces = await MLDataDB.instance.getTotalFaceCount();
       final fileIDToCreationTime =
