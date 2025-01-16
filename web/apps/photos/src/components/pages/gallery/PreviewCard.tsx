@@ -56,22 +56,22 @@ const Check = styled("input")<{ $active: boolean }>(
         content: "";
         width: 19px;
         height: 19px;
-        background-color: #ddd;
+        background-color: ${theme.vars.palette.fixed.gray.E};
         display: inline-block;
         border-radius: 50%;
         vertical-align: bottom;
         margin: 6px 6px;
         transition: background-color 0.3s ease;
         pointer-events: inherit;
-        color: #aaa;
+
     }
     &::after {
         content: "";
         position: absolute;
         width: 5px;
         height: 11px;
-        border-right: 2px solid #333;
-        border-bottom: 2px solid #333;
+        border-right: 2px solid ${theme.vars.palette.fixed.gray.B};
+        border-bottom: 2px solid ${theme.vars.palette.fixed.gray.B};
         transition: transform 0.3s ease;
         pointer-events: inherit;
         transform: translate(-18px, 9px) rotate(45deg);
@@ -87,8 +87,8 @@ const Check = styled("input")<{ $active: boolean }>(
     /* checkmark foreground (tick) */
     &:checked::after {
         content: "";
-        border-right: 2px solid #ddd;
-        border-bottom: 2px solid #ddd;
+        border-right: 2px solid ${theme.vars.palette.fixed.gray.E};
+        border-bottom: 2px solid ${theme.vars.palette.fixed.gray.E};
     }
     visibility: hidden;
     ${$active && "visibility: visible; opacity: 0.5;"};
@@ -99,7 +99,7 @@ const Check = styled("input")<{ $active: boolean }>(
 `,
 );
 
-export const HoverOverlay = styled("div")<{ checked: boolean }>`
+const HoverOverlay = styled("div")<{ checked: boolean }>`
     opacity: 0;
     left: 0;
     top: 0;
@@ -112,7 +112,7 @@ export const HoverOverlay = styled("div")<{ checked: boolean }>`
         "background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))"};
 `;
 
-export const AvatarOverlay = styled(Overlay)`
+const AvatarOverlay = styled(Overlay)`
     display: flex;
     justify-content: flex-end;
     align-items: flex-start;
@@ -120,7 +120,7 @@ export const AvatarOverlay = styled(Overlay)`
     padding-top: 5px;
 `;
 
-export const FavOverlay = styled(Overlay)`
+const FavOverlay = styled(Overlay)`
     display: flex;
     justify-content: flex-start;
     align-items: flex-end;
@@ -129,18 +129,16 @@ export const FavOverlay = styled(Overlay)`
     opacity: 0.9;
 `;
 
-export const InSelectRangeOverLay = styled("div")<{ $active: boolean }>`
-    opacity: ${(props) => (!props.$active ? 0 : 1)};
-    left: 0;
-    top: 0;
+const InSelectRangeOverlay = styled(Overlay)(
+    ({ theme }) => `
     outline: none;
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    ${(props) => props.$active && "background:rgba(81, 205, 124, 0.25)"};
-`;
+    background: ${theme.vars.palette.accent.main};
+    opacity: 0.14;
+`,
+);
 
-export const FileAndCollectionNameOverlay = styled("div")`
+const FileAndCollectionNameOverlay = styled("div")(
+    ({ theme }) => `
     width: 100%;
     bottom: 0;
     left: 0;
@@ -160,24 +158,20 @@ export const FileAndCollectionNameOverlay = styled("div")`
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    color: #fff;
+    color: ${theme.vars.palette.fixed.white};
     position: absolute;
-`;
-
-export const SelectedOverlay = styled("div")(
-    ({ theme }) => `
-    z-index: 5;
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 100%;
-    border: 2px solid ${theme.vars.palette.accent.main};
-    border-radius: 4px;
-    `,
+`,
 );
 
-export const FileTypeIndicatorOverlay = styled(Overlay)(({ theme }) => ({
+const SelectedOverlay = styled(Overlay)(
+    ({ theme }) => `
+    z-index: 5;
+    border: 2px solid ${theme.vars.palette.accent.main};
+    border-radius: 4px;
+`,
+);
+
+const FileTypeIndicatorOverlay = styled(Overlay)(({ theme }) => ({
     display: "flex",
     justifyContent: "flex-end",
     alignItems: "flex-end",
@@ -357,9 +351,10 @@ export default function PreviewCard(props: IProps) {
                 className="preview-card-hover-overlay"
                 checked={selected}
             />
-            <InSelectRangeOverLay
-                $active={isRangeSelectActive && isInsSelectRange}
-            />
+            {isRangeSelectActive && isInsSelectRange && (
+                <InSelectRangeOverlay />
+            )}
+
             {props?.activeCollectionID === TRASH_SECTION && file.isTrashed && (
                 <FileAndCollectionNameOverlay>
                     <p>{formatDateRelative(file.deleteBy / 1000)}</p>

@@ -116,6 +116,25 @@ declare module "@mui/material/styles" {
             white: string;
             black: string;
             /**
+             * Various fixed shades of gray.
+             * TODO(LM) - audit and rename.
+             */
+            gray: {
+                A: string;
+                /**
+                 * - Color of check on hovering on image thumbnail during
+                 *   selection.
+                 */
+                B: string;
+                /**
+                 * - Background of check on hovering on image thumbnail during
+                 *   selection.
+                 *
+                 * - Color of check on image thumbnail when it is selected.
+                 */
+                E: string;
+            };
+            /**
              * The transparent overlay on top of the region that will be cropped
              * during image editing.
              */

@@ -150,6 +150,7 @@ const _colors = {
         gray: {
             A: "#1C1C1E",
             B: "#333333",
+            E: "#ddd",
         },
         croppedAreaOverlay: "rgba(0 0 0 / 0.5)",
         overlayIndicatorMuted: "rgba(255 255 255 / 0.48)",
