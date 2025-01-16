@@ -167,8 +167,8 @@ const _colors = {
             base: "#000",
             muted: "rgba(0, 0, 0, 0.12)",
             faint: "rgba(0, 0, 0, 0.04)",
-            basePressed: "rgba(0, 0, 0, 0.87))",
-            faintPressed: "rgba(0, 0, 0, 0.08)",
+            baseHover: "rgba(0, 0, 0, 0.87)",
+            faintHover: "rgba(0, 0, 0, 0.08)",
         },
         stroke: {
             base: "#000",
@@ -201,8 +201,8 @@ const _colors = {
             base: "#fff",
             muted: "rgba(255, 255, 255, 0.16)",
             faint: "rgba(255, 255, 255, 0.12)",
-            basePressed: "rgba(255, 255, 255, 0.90)",
-            faintPressed: "rgba(255, 255, 255, 0.06)",
+            baseHover: "rgba(255, 255, 255, 0.90)",
+            faintHover: "rgba(255, 255, 255, 0.06)",
         },
         stroke: {
             base: "#ffffff",
@@ -233,12 +233,12 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             },
             primary: {
                 main: colors.dark.fill.base,
-                dark: colors.dark.fill.basePressed,
-                contrastText: colors.fixed.white,
+                dark: colors.dark.fill.baseHover,
+                contrastText: colors.dark.text.base,
             },
             secondary: {
                 main: colors.dark.fill.faint,
-                dark: colors.dark.fill.faintPressed,
+                dark: colors.dark.fill.faintHover,
                 contrastText: colors.dark.text.base,
             },
             success: { main: colors.fixed.success },
@@ -273,7 +273,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 base: colors.dark.fill.base,
                 muted: colors.dark.fill.muted,
                 faint: colors.dark.fill.faint,
-                faintHover: colors.dark.fill.faintPressed,
+                faintHover: colors.dark.fill.faintHover,
             },
             stroke: {
                 base: colors.dark.stroke.base,
