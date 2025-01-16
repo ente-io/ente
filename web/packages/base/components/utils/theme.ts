@@ -222,31 +222,18 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
     dark: {
         palette: {
             primary: {
-                // See: [Note: strict mode migration]
-                //
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
                 main: colors.dark.fill.base,
                 dark: colors.dark.fill.basePressed,
-                contrastText:
-                    // themeColor === "dark"
-                    // ? _colors.fixed.black
-                    colors.fixed.white,
+                contrastText: colors.fixed.white,
             },
             secondary: {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
                 main: colors.dark.fill.faint,
                 dark: colors.dark.fill.faintPressed,
                 contrastText: colors.dark.text.base,
             },
             success: { main: colors.fixed.success },
             warning: { main: colors.fixed.warning },
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
             accent: {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
                 main: colors.accent.main,
                 dark: colors.accent.dark,
                 light: colors.accent.light,
