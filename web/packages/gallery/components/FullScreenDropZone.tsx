@@ -65,7 +65,8 @@ export const FullScreenDropZone: React.FC<
     );
 };
 
-const DropZoneOverlay = styled(Stack)`
+const DropZoneOverlay = styled(Stack)(
+    ({ theme }) => `
     position: absolute;
     left: 0;
     top: 0;
@@ -75,12 +76,13 @@ const DropZoneOverlay = styled(Stack)`
     justify-content: center;
     align-items: center;
     transition: border 0.24s ease-in-out;
-    border-width: 8px;
+    border-width: 5px;
     border-style: solid;
-    border-color: #51cd7c;
-    background: rgba(0, 0, 0, 0.9);
+    border-color: ${theme.vars.palette.accent.light};
+    background-color: ${theme.vars.palette.backdrop.base};
     z-index: 3000;
-`;
+`,
+);
 
 const CloseButton = styled(IconButton)`
     position: absolute;
