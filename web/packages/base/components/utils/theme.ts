@@ -6,7 +6,9 @@ import type { TypographyOptions } from "@mui/material/styles/createTypography";
 
 const getTheme = (appName: AppName): Theme => {
     const colors = getColors(appName);
-    const colorSchemes = getColorSchemes(colors);
+    const colorSchemes_ = getColorSchemes(colors);
+    // TODO(LM): Temp
+    const colorSchemes = { ...colorSchemes_, light: colorSchemes_.dark };
     return createTheme({
         cssVariables: true,
         colorSchemes,
