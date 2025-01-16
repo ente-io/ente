@@ -190,6 +190,7 @@ declare module "@mui/material/styles" {
          * consider moving to others.
          */
         fill: {
+            base: string;
             muted: string;
             faint: string;
             faintHover: string;

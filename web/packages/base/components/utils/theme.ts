@@ -3,30 +3,19 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import type {
-    FixedColors,
-    PaletteOptions,
-    Theme,
-    ThemeColorsOptions,
-} from "@mui/material";
+import type { AppName } from "@/base/app";
+import type { PaletteOptions, Theme, ThemeColorsOptions } from "@mui/material";
 import { createTheme } from "@mui/material";
 import type { Components } from "@mui/material/styles/components";
 import type { TypographyOptions } from "@mui/material/styles/createTypography";
 
-enum THEME_COLOR {
-    LIGHT = "light",
-    DARK = "dark",
-}
-
-const getTheme = (colorAccentType: ColorAccentType): Theme => {
-    const colors = getColors(THEME_COLOR.DARK, colorAccentType);
-    const palette = getPallette(THEME_COLOR.DARK, colors);
+const getTheme = (appName: AppName): Theme => {
+    const colors = getColors(appName);
+    const colorSchemes = getColorSchemes(colors);
     const components = getComponents(colors, palette, typography);
     return createTheme({
         cssVariables: true,
-        colorSchemes: { dark: true, light: false },
-        colors,
-        palette,
+        colorSchemes,
         typography,
         components,
         shape: {
@@ -39,8 +28,6 @@ const getTheme = (colorAccentType: ColorAccentType): Theme => {
         },
     });
 };
-
-type ColorAccentType = "auth" | "photos";
 
 /**
  * [Note: Colors]
@@ -129,149 +116,30 @@ type ColorAccentType = "auth" | "photos";
  *
  * - All other custom variables remain within the top level theme.
  */
-const getColors = (
-    themeColor: THEME_COLOR,
-    accentType: ColorAccentType,
-): ThemeColorsOptions => ({
-    ...commonFixedColors,
-    ...{ accent: accentType == "auth" ? authAccentColor : photosAccentColor },
-    ...(themeColor === THEME_COLOR.LIGHT ? lightThemeColors : darkThemeColors),
+const getColors = (appName: AppName) => ({
+    ..._colors,
+    ...{
+        accent: appName == "auth" ? _colors.accentAuth : _colors.accentPhotos,
+    },
 });
-
-const commonFixedColors: Partial<Pick<ThemeColorsOptions, keyof FixedColors>> =
-    {
-        accent: {
-            A700: "#00B33C" /* prune */,
-            A500: "#1DB954",
-            A400: "#26CB5F" /* prune */,
-            A300: "#01DE4D" /* prune */,
-        },
-        warning: {
-            A500: "#FFC247" /* prune */,
-        },
-        danger: {
-            A800: "#F53434" /* prune */,
-            A700: "#EA3F3F" /* prune */,
-            A500: "#FF6565",
-            A400: "#FF6F6F" /* prune */,
-        },
-    };
-
-const authAccentColor = {
-    A700: "rgb(164, 0, 182)",
-    A500: "rgb(150, 13, 214)",
-    A400: "rgb(122, 41, 193)",
-    A300: "rgb(152, 77, 244)",
-};
-
-const photosAccentColor = {
-    A700: "#00B33C" /* prune */,
-    A500: "#1DB954",
-    A400: "#26CB5F" /* prune */,
-    A300: "#01DE4D" /* prune */,
-};
-
-const lightThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
-    background: {
-        base: "#fff",
-        paper: "#fff",
-        paper2: "rgba(153, 153, 153, 0.04)",
-    },
-    backdrop: {
-        base: "rgba(255, 255, 255, 0.92)",
-        muted: "rgba(255, 255, 255, 0.75)",
-        faint: "rgba(255, 255, 255, 0.30)",
-    },
-    text: {
-        base: "#000",
-        muted: "rgba(0, 0, 0, 0.60)",
-        faint: "rgba(0, 0, 0, 0.50)",
-    },
-    fill: {
-        base: "#000",
-        muted: "rgba(0, 0, 0, 0.12)",
-        faint: "rgba(0, 0, 0, 0.04)",
-        basePressed: "rgba(0, 0, 0, 0.87))",
-        faintPressed: "rgba(0, 0, 0, 0.08)",
-    },
-    stroke: {
-        base: "#000",
-        muted: "rgba(0, 0, 0, 0.24)",
-        faint: "rgba(0, 0, 0, 0.12)",
-    },
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    boxShadow: {
-        float: "0px 0px 10px rgba(0, 0, 0, 0.25)",
-        menu: "0px 0px 6px rgba(0, 0, 0, 0.16), 0px 3px 6px rgba(0, 0, 0, 0.12)",
-        button: "0px 4px 4px rgba(0, 0, 0, 0.25)",
-    },
-};
-
-const darkThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
-    background: {
-        base: "#000000",
-        paper: "#1b1b1b",
-        paper2: "#252525",
-    },
-    backdrop: {
-        base: "rgba(0, 0, 0, 0.90)" /* unused */,
-        muted: "rgba(0, 0, 0, 0.65)" /* unused */,
-        faint: "rgba(0, 0, 0,0.20)",
-    },
-    text: {
-        base: "#fff",
-        muted: "rgba(255, 255, 255, 0.70)",
-        faint: "rgba(255, 255, 255, 0.50)",
-    },
-    fill: {
-        base: "#fff",
-        muted: "rgba(255, 255, 255, 0.16)",
-        faint: "rgba(255, 255, 255, 0.12)",
-        basePressed: "rgba(255, 255, 255, 0.90)",
-        faintPressed: "rgba(255, 255, 255, 0.06)",
-    },
-    stroke: {
-        base: "#ffffff",
-        muted: "rgba(255,255,255,0.24)",
-        faint: "rgba(255,255,255,0.16)",
-    },
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    boxShadow: {
-        float: "0px 2px 12px rgba(0, 0, 0, 0.75)",
-        menu: "0px 0px 6px rgba(0, 0, 0, 0.50), 0px 3px 6px rgba(0, 0, 0, 0.25)",
-        button: "0px 4px 4px rgba(0, 0, 0, 0.75)",
-    },
-};
-
-const getPallette = (
-    themeColor: THEME_COLOR,
-    colors: ThemeColorsOptions,
-): PaletteOptions => {
-    const paletteOptions = getPalletteOptions(themeColor, colors);
-    switch (themeColor) {
-        case THEME_COLOR.LIGHT:
-            return { mode: "light", ...paletteOptions };
-        default:
-            return { mode: "dark", ...paletteOptions };
-    }
-};
 
 /**
  * The color values.
  *
- * Use this arbitrarily shaped object to define the palette. It both prevents
- * duplication across color schemes, and also us to see the semantic
- * relationships between the colors (if there are any).
+ * Use this arbitrarily shaped object to define the palette. This avoid
+ * duplication across color schemes, and also helps see if there are any
+ * reusable colors.
  */
 const _colors = {
     accentPhotos: {
         dark: "#00B33C",
         main: "#1DB954",
         light: "#01DE4D",
+    },
+    accentAuth: {
+        dark: "rgb(164, 0, 182)",
+        main: "rgb(150, 13, 214)",
+        light: "rgb(152, 77, 244)",
     },
     fixed: {
         white: "#fff",
@@ -285,91 +153,159 @@ const _colors = {
         },
         overlayIndicatorMuted: "rgba(255, 255, 255, 0.48)",
     },
-};
-
-const getPalletteOptions = (
-    themeColor: THEME_COLOR,
-    colors: ThemeColorsOptions,
-): PaletteOptions => {
-    return {
-        primary: {
-            // See: [Note: strict mode migration]
-            //
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            main: colors.fill.base,
-            dark: colors.fill?.basePressed,
-            contrastText:
-                themeColor === "dark"
-                    ? _colors.fixed.black
-                    : _colors.fixed.white,
-        },
-        secondary: {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            main: colors.fill.faint,
-            dark: colors.fill?.faintPressed,
-            contrastText: colors.text?.base,
-        },
-        success: { main: _colors.fixed.success },
-        warning: { main: _colors.fixed.warning },
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        accent: {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            main: colors.accent.A500,
-            dark: colors.accent!.A700!,
-            light: colors.accent!.A300!,
-            contrastText: _colors.fixed.white,
-        },
-        critical: {
-            main: _colors.fixed.danger.main,
-            dark: _colors.fixed.danger.dark,
-            light: _colors.fixed.danger.light,
-            contrastText: _colors.fixed.white,
-        },
+    light: {
         background: {
-            default: colors.background?.base,
-            paper: colors.background?.paper,
-            paper2: colors.background?.paper2,
+            base: "#fff",
+            paper: "#fff",
+            paper2: "rgba(153, 153, 153, 0.04)",
+        },
+        backdrop: {
+            base: "rgba(255, 255, 255, 0.92)",
+            muted: "rgba(255, 255, 255, 0.75)",
+            faint: "rgba(255, 255, 255, 0.30)",
         },
         text: {
-            // Alias the tokens used by MUI to the ones that we use. This way,
-            // we don't need to change the default ("primary"), or update the
-            // MUI internal styling that refers to these tokens.
-            //
-            // Our own code should not use these.
-            primary: colors.text?.base,
-            secondary: colors.text?.muted,
-            disabled: colors.text?.faint,
-            // Our color tokens.
-            base: colors.text?.base,
-            muted: colors.text?.muted,
-            faint: colors.text?.faint,
+            base: "#000",
+            muted: "rgba(0, 0, 0, 0.60)",
+            faint: "rgba(0, 0, 0, 0.50)",
         },
         fill: {
-            muted: colors.fill!.muted!,
-            faint: colors.fill!.faint!,
-            faintHover: colors.fill!.faintPressed!,
+            base: "#000",
+            muted: "rgba(0, 0, 0, 0.12)",
+            faint: "rgba(0, 0, 0, 0.04)",
+            basePressed: "rgba(0, 0, 0, 0.87))",
+            faintPressed: "rgba(0, 0, 0, 0.08)",
         },
         stroke: {
-            base: colors.stroke!.base!,
-            muted: colors.stroke!.muted!,
-            faint: colors.stroke!.faint!,
+            base: "#000",
+            muted: "rgba(0, 0, 0, 0.24)",
+            faint: "rgba(0, 0, 0, 0.12)",
         },
-        divider: colors.stroke?.faint,
-        fixed: { ..._colors.fixed },
+        boxShadow: {
+            float: "0px 0px 10px rgba(0, 0, 0, 0.25)",
+            menu: "0px 0px 6px rgba(0, 0, 0, 0.16), 0px 3px 6px rgba(0, 0, 0, 0.12)",
+            button: "0px 4px 4px rgba(0, 0, 0, 0.25)",
+        },
+    },
+    dark: {
+        background: {
+            base: "#000000",
+            paper: "#1b1b1b",
+            paper2: "#252525",
+        },
         backdrop: {
-            base: colors.backdrop!.base!,
-            muted: colors.backdrop!.muted!,
-            faint: colors.backdrop!.faint!,
+            base: "rgba(0, 0, 0, 0.90)" /* unused */,
+            muted: "rgba(0, 0, 0, 0.65)" /* unused */,
+            faint: "rgba(0, 0, 0,0.20)",
         },
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        boxShadow: colors.boxShadow,
-    };
+        text: {
+            base: "#fff",
+            muted: "rgba(255, 255, 255, 0.70)",
+            faint: "rgba(255, 255, 255, 0.50)",
+        },
+        fill: {
+            base: "#fff",
+            muted: "rgba(255, 255, 255, 0.16)",
+            faint: "rgba(255, 255, 255, 0.12)",
+            basePressed: "rgba(255, 255, 255, 0.90)",
+            faintPressed: "rgba(255, 255, 255, 0.06)",
+        },
+        stroke: {
+            base: "#ffffff",
+            muted: "rgba(255,255,255,0.24)",
+            faint: "rgba(255,255,255,0.16)",
+        },
+        boxShadow: {
+            float: "0px 2px 12px rgba(0, 0, 0, 0.75)",
+            menu: "0px 0px 6px rgba(0, 0, 0, 0.50), 0px 3px 6px rgba(0, 0, 0, 0.25)",
+            button: "0px 4px 4px rgba(0, 0, 0, 0.75)",
+        },
+    },
 };
+
+const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
+    light: false,
+    dark: {
+        palette: {
+            primary: {
+                // See: [Note: strict mode migration]
+                //
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                main: colors.dark.fill.base,
+                dark: colors.dark.fill.basePressed,
+                contrastText:
+                    // themeColor === "dark"
+                        // ? _colors.fixed.black
+                        colors.fixed.white,
+            },
+            secondary: {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                main: colors.dark.fill.faint,
+                dark: colors.dark.fill.faintPressed,
+                contrastText: colors.dark.text.base,
+            },
+            success: { main: colors.fixed.success },
+            warning: { main: colors.fixed.warning },
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            accent: {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                main: colors.accent.main,
+                dark: colors.accent.dark,
+                light: colors.accent.light,
+                contrastText: colors.fixed.white,
+            },
+            critical: {
+                main: colors.fixed.danger.main,
+                dark: colors.fixed.danger.dark,
+                light: colors.fixed.danger.light,
+                contrastText: colors.fixed.white,
+            },
+            background: {
+                default: colors.dark.background.base,
+                paper: colors.dark.background.paper,
+                paper2: colors.dark.background.paper2,
+            },
+            text: {
+                // Alias the tokens used by MUI to the ones that we use. This way,
+                // we don't need to change the default ("primary"), or update the
+                // MUI internal styling that refers to these tokens.
+                //
+                // Our own code should not use these.
+                primary: colors.dark.text.base,
+                secondary: colors.dark.text.muted,
+                disabled: colors.dark.text.faint,
+                // Our color tokens.
+                base: colors.dark.text.base,
+                muted: colors.dark.text.muted,
+                faint: colors.dark.text.faint,
+            },
+            fill: {
+                muted: colors.dark.fill.muted,
+                faint: colors.dark.fill.faint,
+                faintHover: colors.dark.fill.faintPressed,
+            },
+            stroke: {
+                base: colors.dark.stroke.base,
+                muted: colors.dark.stroke.muted,
+                faint: colors.dark.stroke.faint,
+            },
+            divider: colors.dark.stroke.faint,
+            fixed: colors.fixed,
+            backdrop: {
+                base: colors.dark.backdrop.base,
+                muted: colors.dark.backdrop.muted,
+                faint: colors.dark.backdrop.faint,
+            },
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            boxShadow: colors.dark.boxShadow,
+        },
+    },
+});
 
 const typography: TypographyOptions = {
     // [Note: Font weights]
