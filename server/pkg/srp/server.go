@@ -48,7 +48,7 @@ func (s *SRPServer) SetA(A []byte) {
 	S := serverGetS(s.Params, s.Verifier, AInt, s.Secret2, U)
 
 	s.K = getK(s.Params, S)
-	s.M1 = getM1(s.Params, A, intToBytes(s.B), S)
+	s.M1 = getM1(s.Params, A, padToN(s.B, s.Params), S)
 	s.M2 = getM2(s.Params, A, s.M1, s.K)
 
 	s.u = U               // only for tests
