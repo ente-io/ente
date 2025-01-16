@@ -321,15 +321,14 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
  *
  * We only use three font weights:
  *
- * - 500 (sx "regular", CSS "normal")
+ * - 500 (sx "regular")
  * - 600 (sx "medium")
  * - 700 (sx "bold", CSS "bold")
  *
  * While the sx prop allows us to use keywords "regular", "medium" and "bold",
  * which we do elsewhere in the code, within this file those keywords cannot be
- * used in all contexts because they instead map to the CSS keywords (which MUI
- * can't and doesn't remap). To avoid any confusion, within this file we only
- * use the numeric values.
+ * used in all contexts because they instead map to the CSS keywords. To avoid
+ * any confusion, within this file we only use the numeric values.
  *
  * ---
  *
