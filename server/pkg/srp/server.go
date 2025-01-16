@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"math/big"
 )
 
@@ -25,6 +26,7 @@ func NewServer(params *SRPParams, Vb []byte, S2b []byte) *SRPServer {
 	secret2 := intFromBytes(S2b)
 
 	Bb := getB(params, multiplier, V, secret2)
+	logrus.Infof("NewServer: length of Bb %d, Vb %d, S2b %d", len(Bb), len(Vb), len(S2b))
 	B := intFromBytes(Bb)
 
 	return &SRPServer{
@@ -40,9 +42,6 @@ func (s *SRPServer) ComputeB() []byte {
 }
 
 func (s *SRPServer) SetA(A []byte) {
-	if len(A) != 512 {
-		panic("invalid client-supplied 'A', must be 1..N-1")
-	}
 	AInt := intFromBytes(A)
 	U := getu(s.Params, AInt, s.B)
 	S := serverGetS(s.Params, s.Verifier, AInt, s.Secret2, U)
@@ -50,6 +49,8 @@ func (s *SRPServer) SetA(A []byte) {
 	s.K = getK(s.Params, S)
 	s.M1 = getM1(s.Params, A, padToN(s.B, s.Params), S)
 	s.M2 = getM2(s.Params, A, s.M1, s.K)
+
+	logrus.Infof("SetA: length of A %d, M1 %d, M2 %d, K %d, S %d", len(A), len(s.M1), len(s.M2), len(s.K), len(S))
 
 	s.u = U               // only for tests
 	s.s = intFromBytes(S) // only for tests
@@ -60,7 +61,7 @@ func (s *SRPServer) CheckM1(M1 []byte) ([]byte, error) {
 		return nil, fmt.Errorf("client m1 length (%d) is different from server m1 length %d", len(M1), len(s.M1))
 	}
 	if !bytes.Equal(s.M1, M1) {
-		return nil, errors.New("Client did not use the same password")
+		return nil, errors.New("client did not use the same password")
 	} else {
 		return s.M2, nil
 	}

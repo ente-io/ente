@@ -74,8 +74,8 @@ func getK(params *SRPParams, S []byte) []byte {
 
 func getu(params *SRPParams, A, B *big.Int) *big.Int {
 	hashU := params.Hash.New()
-	hashU.Write(A.Bytes())
-	hashU.Write(B.Bytes())
+	hashU.Write(padToN(A, params))
+	hashU.Write(padToN(B, params))
 
 	return hashToInt(hashU)
 }
