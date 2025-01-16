@@ -168,6 +168,17 @@ declare module "@mui/material/Button" {
     }
 }
 
+declare module "@mui/material/IconButton" {
+    interface IconButtonPropsColorOverrides {
+        // Turn off MUI provided palette colors we don't use.
+        error: false;
+        success: false;
+        info: false;
+        warning: false;
+        inherit: false;
+    }
+}
+
 declare module "@mui/material/Checkbox" {
     interface CheckboxPropsColorOverrides {
         accent: true;

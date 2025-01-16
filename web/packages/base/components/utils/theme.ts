@@ -295,8 +295,6 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 muted: colors.dark.backdrop.muted,
                 faint: colors.dark.backdrop.faint,
             },
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
             boxShadow: colors.dark.boxShadow,
         },
     },
@@ -503,9 +501,9 @@ const components: Components = {
         // mode. Remove it to match the Paper background from our design.
         styleOverrides: { root: { backgroundImage: "none" } },
     },
+
     MuiLink: {
         defaultProps: {
-            // color: colors.accent?.A500,
             color: "var(--mui-palette-accent-main)",
             underline: "none",
         },
@@ -513,7 +511,6 @@ const components: Components = {
             root: {
                 "&:hover": {
                     underline: "always",
-                    // color: colors.accent?.A500,
                     color: "var(--mui-palette-accent-main)",
                 },
             },
@@ -552,6 +549,7 @@ const components: Components = {
             },
         },
     },
+
     MuiInputBase: {
         styleOverrides: {
             formControl: {
@@ -572,6 +570,7 @@ const components: Components = {
             },
         },
     },
+
     MuiFilledInput: {
         styleOverrides: {
             input: {
@@ -581,6 +580,7 @@ const components: Components = {
             },
         },
     },
+
     MuiTextField: {
         defaultProps: {
             // The MUI default variant is "outlined", override it to use the
@@ -612,8 +612,6 @@ const components: Components = {
             // keyboard focus.
             root: {
                 "&.Mui-focusVisible": {
-                    // backgroundColor: colors.fill?.faint,
-                    // outline: `1px solid ${colors.stroke.faint}`,
                     backgroundColor: "var(--mui-palette-fill-faint)",
                     outline: "1px solid var(--mui-palette-stroke-faint)",
                 },
