@@ -40,7 +40,8 @@ interface IProps {
     isFav: boolean;
 }
 
-const Check = styled("input")<{ $active: boolean }>`
+const Check = styled("input")<{ $active: boolean }>(
+    ({ theme, $active }) => `
     appearance: none;
     position: absolute;
     z-index: 10;
@@ -53,52 +54,50 @@ const Check = styled("input")<{ $active: boolean }>`
 
     &::before {
         content: "";
-        width: 16px;
-        height: 16px;
-        border: 2px solid #fff;
+        width: 19px;
+        height: 19px;
         background-color: #ddd;
         display: inline-block;
         border-radius: 50%;
         vertical-align: bottom;
-        margin: 8px 8px;
-        text-align: center;
-        line-height: 16px;
+        margin: 6px 6px;
         transition: background-color 0.3s ease;
         pointer-events: inherit;
         color: #aaa;
     }
     &::after {
         content: "";
+        position: absolute;
         width: 5px;
-        height: 10px;
+        height: 11px;
         border-right: 2px solid #333;
         border-bottom: 2px solid #333;
-        transform: translate(-18px, 8px);
         transition: transform 0.3s ease;
-        position: absolute;
         pointer-events: inherit;
-        transform: translate(-18px, 10px) rotate(45deg);
+        transform: translate(-18px, 9px) rotate(45deg);
     }
 
-    /** checked */
+    /* checkmark background (filled circle) */
     &:checked::before {
         content: "";
-        background-color: #51cd7c;
-        border-color: #51cd7c;
-        color: #fff;
+        background-color: ${theme.vars.palette.accent.main};
+        border-color: ${theme.vars.palette.accent.main};
+        color: ${theme.vars.palette.fixed.white};
     }
+    /* checkmark foreground (tick) */
     &:checked::after {
         content: "";
         border-right: 2px solid #ddd;
         border-bottom: 2px solid #ddd;
     }
     visibility: hidden;
-    ${(props) => props.$active && "visibility: visible; opacity: 0.5;"};
+    ${$active && "visibility: visible; opacity: 0.5;"};
     &:checked {
         visibility: visible;
         opacity: 1 !important;
     }
-`;
+`,
+);
 
 export const HoverOverlay = styled("div")<{ checked: boolean }>`
     opacity: 0;
@@ -165,16 +164,18 @@ export const FileAndCollectionNameOverlay = styled("div")`
     position: absolute;
 `;
 
-export const SelectedOverlay = styled("div")<{ selected: boolean }>`
+export const SelectedOverlay = styled("div")(
+    ({ theme }) => `
     z-index: 5;
     position: absolute;
     left: 0;
     top: 0;
     height: 100%;
     width: 100%;
-    ${(props) => props.selected && "border: 5px solid #51cd7c;"}
+    border: 2px solid ${theme.vars.palette.accent.main};
     border-radius: 4px;
-`;
+    `,
+);
 
 export const FileTypeIndicatorOverlay = styled(Overlay)(({ theme }) => ({
     display: "flex",
@@ -340,7 +341,7 @@ export default function PreviewCard(props: IProps) {
                     </FileTypeIndicatorOverlay>
                 )
             )}
-            <SelectedOverlay selected={selected} />
+            {selected && <SelectedOverlay />}
             {shouldShowAvatar(file, galleryContext.user) && (
                 <AvatarOverlay>
                     <Avatar file={file} />
