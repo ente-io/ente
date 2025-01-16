@@ -147,6 +147,10 @@ const _colors = {
             main: "#EA3F3F",
             light: "#FF6565",
         },
+        gray: {
+            A: "#1C1C1E",
+            B: "#333333",
+        },
         croppedAreaOverlay: "rgba(0 0 0 / 0.5)",
         overlayIndicatorMuted: "rgba(255 255 255 / 0.48)",
     },
@@ -286,6 +290,28 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             divider: colors.dark.stroke.faint,
             fixed: colors.fixed,
             boxShadow: colors.dark.boxShadow,
+            // Override some undocumented MUI defaults.
+            // https://github.com/mui/material-ui/blob/master/packages/mui-material/src/styles/createThemeWithVars.js#L271
+            action: {
+                active: colors.dark.stroke.base,
+                // TODO(LM):
+                // hover: "red",
+                // hoverOpacity: 1,
+                // selected: "red",
+                // selectedOpacity: 1,
+                disabled: colors.dark.text.faint,
+                // disabledOpacity: 0.2,
+                disabledBackground: colors.dark.fill.faint,
+                // focus: "red",
+                // focusOpacity: 1,
+                // activatedOpacity: 1,
+            },
+            FilledInput: {
+                bg: colors.dark.fill.faint,
+                hoverBg: colors.dark.fill.faintHover,
+                // TODO(LM):
+                // disabledBg: "transparent",
+            },
         },
     },
 });
