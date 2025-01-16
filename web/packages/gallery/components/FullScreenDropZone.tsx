@@ -51,21 +51,21 @@ export const FullScreenDropZone: React.FC<
     return (
         <Stack sx={{ flex: 1 }} {...getDragAndDropRootProps({ onDragEnter })}>
             {isDragActive && (
-                <Overlay onDrop={onDragLeave} onDragLeave={onDragLeave}>
+                <DropZoneOverlay onDrop={onDragLeave} onDragLeave={onDragLeave}>
                     <CloseButton onClick={onDragLeave}>
                         <CloseIcon />
                     </CloseButton>
                     <Typography variant="h3">
                         {message ?? t("upload_dropzone_hint")}
                     </Typography>
-                </Overlay>
+                </DropZoneOverlay>
             )}
             {children}
         </Stack>
     );
 };
 
-const Overlay = styled(Stack)`
+const DropZoneOverlay = styled(Stack)`
     position: absolute;
     left: 0;
     top: 0;
