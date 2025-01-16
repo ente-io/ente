@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/ente-io/go-srp"
 	"github.com/ente-io/museum/ente"
