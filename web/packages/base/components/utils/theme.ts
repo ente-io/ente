@@ -145,7 +145,8 @@ const _colors = {
             main: "#EA3F3F",
             light: "#FF6565",
         },
-        overlayIndicatorMuted: "rgba(255, 255, 255, 0.48)",
+        croppedAreaOverlay: "rgba(0 0 0 / 0.5)",
+        overlayIndicatorMuted: "rgba(255 255 255 / 0.48)",
     },
     light: {
         background: {

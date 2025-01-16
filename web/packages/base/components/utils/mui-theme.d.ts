@@ -116,7 +116,13 @@ declare module "@mui/material/styles" {
             white: string;
             black: string;
             /**
-             * e.g. color of the "archived" indicator shown on top of albums.
+             * The transparent overlay on top of the region that will be cropped
+             * during image editing.
+             */
+            croppedAreaOverlay: string;
+            /**
+             * Color of overlaid icons on top of thumbnails. e.g. color of the
+             * "archived" indicator shown on top of albums.
              */
             overlayIndicatorMuted: string;
         };

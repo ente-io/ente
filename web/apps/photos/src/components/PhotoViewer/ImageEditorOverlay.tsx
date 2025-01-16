@@ -36,6 +36,7 @@ import {
     IconButton,
     Slider,
     Stack,
+    styled,
     Tab,
     Tabs,
     Typography,
@@ -936,56 +937,47 @@ const FreehandCropRegion = forwardRef(
         return (
             <>
                 {/* Top overlay */}
-                <div
-                    style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: cropBox.y + "px", // height up to the top of the crop box
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                        pointerEvents: "none",
-                    }}
-                ></div>
+                <CropOverlayRegionTemplate
+                    // Height up to the top of the crop box.
+                    sx={{ top: 0, left: 0, right: 0, height: cropBox.y + "px" }}
+                />
 
                 {/* Bottom overlay */}
-                <div
-                    style={{
-                        position: "absolute",
+                <CropOverlayRegionTemplate
+                    // Height from the bottom of the crop box to the bottom of
+                    // the canvas.
+                    sx={{
                         bottom: 0,
                         left: 0,
                         right: 0,
-                        height: `calc(100% - ${cropBox.y + cropBox.height}px)`, // height from the bottom of the crop box to the bottom of the canvas
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                        pointerEvents: "none",
+                        height: `calc(100% - ${cropBox.y + cropBox.height}px)`,
                     }}
-                ></div>
+                />
 
                 {/* Left overlay */}
-                <div
-                    style={{
-                        position: "absolute",
+                <CropOverlayRegionTemplate
+                    sx={{
                         top: cropBox.y + "px",
                         left: 0,
-                        width: cropBox.x + "px", // width up to the left side of the crop box
-                        height: cropBox.height + "px", // same height as the crop box
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                        pointerEvents: "none",
+                        // Width up to the left side of the crop box.
+                        width: cropBox.x + "px",
+                        // Same height as the crop box.
+                        height: cropBox.height + "px",
                     }}
-                ></div>
+                />
 
                 {/* Right overlay */}
-                <div
-                    style={{
-                        position: "absolute",
+                <CropOverlayRegionTemplate
+                    sx={{
                         top: cropBox.y + "px",
                         right: 0,
-                        width: `calc(100% - ${cropBox.x + cropBox.width}px)`, // width from the right side of the crop box to the right side of the canvas
-                        height: cropBox.height + "px", // same height as the crop box
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                        pointerEvents: "none",
+                        // Width from the right side of the crop box to the
+                        // right side of the canvas.
+                        width: `calc(100% - ${cropBox.x + cropBox.width}px)`,
+                        // Same height as the crop box.
+                        height: cropBox.height + "px",
                     }}
-                ></div>
+                />
 
                 <div
                     style={{
@@ -1004,14 +996,15 @@ const FreehandCropRegion = forwardRef(
                     ref={ref}
                 >
                     {Array.from({ length: 9 }).map((_, index) => (
-                        <div
+                        <Box
                             key={index}
-                            style={{
-                                border: "1px solid white",
+                            sx={{
+                                border: "1px solid",
+                                borderColor: "fixed.white",
                                 boxSizing: "border-box",
                                 pointerEvents: "none",
                             }}
-                        ></div>
+                        ></Box>
                     ))}
 
                     <Box
@@ -1036,6 +1029,12 @@ const FreehandCropRegion = forwardRef(
         );
     },
 );
+
+const CropOverlayRegionTemplate = styled("div")(({ theme }) => ({
+    position: "absolute",
+    backgroundColor: theme.vars.palette.fixed.croppedAreaOverlay,
+    pointerEvents: "none",
+}));
 
 const PRESET_ASPECT_RATIOS = [
     {
