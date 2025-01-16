@@ -1,8 +1,3 @@
-// TODO(LM)
-/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
 import type { AppName } from "@/base/app";
 import type { Theme } from "@mui/material";
 import { createTheme } from "@mui/material";
@@ -223,7 +218,7 @@ const _colors = {
 };
 
 const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
-    light: false,
+    // light: false,
     dark: {
         palette: {
             primary: {
