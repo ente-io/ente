@@ -237,8 +237,11 @@ class MLService {
     }
   }
 
-  Future<void> clusterAllImages({bool clusterInBuckets = true}) async {
-    if (!_canRunMLFunction(function: "Clustering")) return;
+  Future<void> clusterAllImages({
+    bool clusterInBuckets = true,
+    bool force = false,
+  }) async {
+    if (!_canRunMLFunction(function: "Clustering") && !force) return;
     if (_clusteringIsHappening) {
       _logger.info("clusterAllImages() is already running, returning");
       return;
