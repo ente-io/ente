@@ -3,6 +3,7 @@ import { EnteFile } from "@/media/file";
 import {
     avatarBackgroundColor,
     avatarBackgroundColorPublicCollectedFile,
+    avatarTextColor,
 } from "@/new/photos/services/avatar";
 import { styled } from "@mui/material";
 import { GalleryContext } from "pages/gallery";
@@ -27,7 +28,7 @@ const AvatarBase = styled("div")<{
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #fff;
+    color: ${avatarTextColor};
     font-weight: bold;
     font-size: ${({ size }) => `${Math.floor(size / 2)}px`};
 `;

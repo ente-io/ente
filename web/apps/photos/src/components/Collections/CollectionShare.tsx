@@ -18,6 +18,7 @@ import type {
 } from "@/media/collection";
 import { COLLECTION_ROLE, type CollectionUser } from "@/media/collection";
 import { PublicLinkCreated } from "@/new/photos/components/share/PublicLinkCreated";
+import { avatarTextColor } from "@/new/photos/services/avatar";
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { FlexWrapper } from "@ente/shared/components/Container";
@@ -440,7 +441,7 @@ const AvatarCounter = styled(NumberAvatar)({
     height: 20,
     width: 20,
     fontSize: 10,
-    color: "#fff",
+    color: avatarTextColor,
 });
 
 const SHAREE_AVATAR_LIMIT = 6;

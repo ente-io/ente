@@ -7,7 +7,10 @@ import {
     Stack100vhCenter,
 } from "@/base/components/containers";
 import { EnteLogoSVG } from "@/base/components/EnteLogo";
-import { LoadingIndicator, TranslucentLoadingOverlay } from "@/base/components/loaders";
+import {
+    LoadingIndicator,
+    TranslucentLoadingOverlay,
+} from "@/base/components/loaders";
 import type { ButtonishProps } from "@/base/components/mui";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
