@@ -657,17 +657,6 @@ const components: Components = {
             },
         },
     },
-
-    MuiMenuItem: {
-        styleOverrides: {
-            // don't reduce opacity of disabled items
-            root: {
-                "&.Mui-disabled": {
-                    opacity: 1,
-                },
-            },
-        },
-    },
 };
 
 // Exports ---
