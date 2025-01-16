@@ -1014,13 +1014,14 @@ const FreehandCropRegion = forwardRef(
                         ></div>
                     ))}
 
-                    <div
-                        style={{
+                    <Box
+                        sx={{
                             position: "absolute",
                             height: "10px",
                             width: "10px",
-                            backgroundColor: "white",
-                            border: "1px solid black",
+                            backgroundColor: "fixed.white",
+                            border: "1px solid",
+                            borderColor: "fixed.black",
                             right: "-5px",
                             bottom: "-5px",
                             cursor: "se-resize",
@@ -1029,7 +1030,7 @@ const FreehandCropRegion = forwardRef(
                             e.preventDefault();
                             setIsDragging(true);
                         }}
-                    ></div>
+                    ></Box>
                 </div>
             </>
         );

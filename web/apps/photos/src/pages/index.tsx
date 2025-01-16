@@ -1,5 +1,6 @@
 import { LoginContents } from "@/accounts/components/LoginContents";
 import { SignUpContents } from "@/accounts/components/SignUpContents";
+import { CenteredFill } from "@/base/components/containers";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
@@ -24,7 +25,7 @@ const Page: React.FC = () => {
 
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(true);
-    const [host, setHost] = useState<string | undefined>();
+    const [host, setHost] = useState<string | undefined>(undefined);
 
     const router = useRouter();
 
@@ -202,27 +203,20 @@ const TappableContainer: React.FC<
     };
 
     return (
-        <TappableContainer_ onClick={handleClick}>
-            <>
-                <DevSettings open={showDevSettings} onClose={handleClose} />
-                {children}
-            </>
-        </TappableContainer_>
+        <CenteredFill
+            sx={{
+                bgcolor: "background.default",
+                "@media (width <= 1024px)": {
+                    flexDirection: "column",
+                },
+            }}
+            onClick={handleClick}
+        >
+            <DevSettings open={showDevSettings} onClose={handleClose} />
+            {children}
+        </CenteredFill>
     );
 };
-
-const TappableContainer_ = styled("div")`
-    flex: 1;
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-    background-color: #000;
-
-    @media (width <= 1024px) {
-        flex-direction: column;
-    }
-`;
 
 /**
  * Disable the ability to set the custom server when we're running on our own
