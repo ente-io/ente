@@ -183,7 +183,7 @@ const _colors = {
     },
     dark: {
         background: {
-            base: "#000000",
+            base: "#000",
             paper: "#1b1b1b",
             paper2: "#252525",
         },
@@ -205,7 +205,7 @@ const _colors = {
             faintHover: "rgba(255, 255, 255, 0.06)",
         },
         stroke: {
-            base: "#ffffff",
+            base: "#fff",
             muted: "rgba(255,255,255,0.24)",
             faint: "rgba(255,255,255,0.16)",
         },

@@ -520,225 +520,214 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
     };
 
     return (
-        <>
-            <Backdrop
+        <Backdrop
+            sx={{
+                backgroundColor: "background.default" /* Opaque */,
+                zIndex: photosDialogZIndex,
+                width: "100%",
+            }}
+            open
+        >
+            <Box
                 sx={{
-                    background: "#000",
-                    zIndex: photosDialogZIndex,
+                    padding: "1rem",
                     width: "100%",
+                    height: "100%",
                 }}
-                open
             >
-                <Box
+                <Stack
+                    direction="row"
                     sx={{
-                        padding: "1rem",
-                        width: "100%",
-                        height: "100%",
+                        justifyContent: "space-between",
+                        alignItems: "center",
                     }}
                 >
-                    <Stack
-                        direction="row"
-                        sx={{
-                            justifyContent: "space-between",
-                            alignItems: "center",
+                    <Typography variant="h2" sx={{ fontWeight: "medium" }}>
+                        {t("photo_editor")}
+                    </Typography>
+                    <IconButton
+                        onClick={() => {
+                            setShowControlsDrawer(true);
                         }}
                     >
-                        <Typography variant="h2" sx={{ fontWeight: "medium" }}>
-                            {t("photo_editor")}
-                        </Typography>
-                        <IconButton
-                            onClick={() => {
-                                setShowControlsDrawer(true);
-                            }}
-                        >
-                            <MenuIcon />
-                        </IconButton>
-                    </Stack>
-                    <Stack
-                        direction="row"
-                        onMouseUp={handleDragEnd}
-                        onMouseMove={isDragging ? handleDrag : null}
-                        onMouseDown={handleDragStart}
+                        <MenuIcon />
+                    </IconButton>
+                </Stack>
+                <Stack
+                    direction="row"
+                    onMouseUp={handleDragEnd}
+                    onMouseMove={isDragging ? handleDrag : null}
+                    onMouseDown={handleDragStart}
+                    sx={{
+                        width: "100%",
+                        height: "100%",
+                        overflow: "hidden",
+                        boxSizing: "border-box",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        position: "relative",
+                    }}
+                >
+                    <Box
                         sx={{
+                            position: "relative",
                             width: "100%",
                             height: "100%",
-                            overflow: "hidden",
-                            boxSizing: "border-box",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            position: "relative",
                         }}
                     >
-                        <Box
+                        <Stack
+                            ref={parentRef}
+                            direction="row"
                             sx={{
-                                position: "relative",
+                                height: "88%",
                                 width: "100%",
-                                height: "100%",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                position: "relative",
                             }}
                         >
-                            <Stack
-                                ref={parentRef}
-                                direction="row"
-                                sx={{
-                                    height: "88%",
-                                    width: "100%",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    position: "relative",
-                                }}
-                            >
-                                {(fileURL === null || canvasLoading) && (
-                                    <CircularProgress />
-                                )}
-
-                                <canvas
-                                    ref={canvasRef}
-                                    style={{
-                                        objectFit: "contain",
-                                        display:
-                                            fileURL === null || canvasLoading
-                                                ? "none"
-                                                : "block",
-                                        position: "absolute",
-                                    }}
-                                />
-                                <canvas
-                                    ref={originalSizeCanvasRef}
-                                    style={{
-                                        display: "none",
-                                    }}
-                                />
-
-                                {currentTab === "crop" && (
-                                    <FreehandCropRegion
-                                        cropBox={cropBox}
-                                        ref={cropBoxRef}
-                                        setIsDragging={setIsDragging}
-                                    />
-                                )}
-                            </Stack>
-                            {currentTab === "crop" && (
-                                <CenteredFlex marginTop="1rem">
-                                    <Button
-                                        color="accent"
-                                        startIcon={<CropIcon />}
-                                        onClick={applyCrop}
-                                    >
-                                        {t("apply_crop")}
-                                    </Button>
-                                </CenteredFlex>
+                            {(fileURL === null || canvasLoading) && (
+                                <CircularProgress />
                             )}
-                        </Box>
-                    </Stack>
-                </Box>
-                <SidebarDrawer
-                    variant="persistent"
-                    anchor="right"
-                    open={showControlsDrawer}
-                    onClose={handleCloseWithConfirmation}
-                >
-                    <Stack
-                        direction="row"
-                        sx={{ justifyContent: "space-between" }}
-                    >
-                        <IconButton
-                            onClick={() => {
-                                setShowControlsDrawer(false);
-                            }}
-                        >
-                            <ChevronRightIcon />
-                        </IconButton>
-                        <IconButton onClick={handleCloseWithConfirmation}>
-                            <CloseIcon />
-                        </IconButton>
-                    </Stack>
-                    <Stack
-                        direction="row"
-                        sx={{
-                            gap: "0.5rem",
-                            marginBottom: "1rem",
+
+                            <canvas
+                                ref={canvasRef}
+                                style={{
+                                    objectFit: "contain",
+                                    display:
+                                        fileURL === null || canvasLoading
+                                            ? "none"
+                                            : "block",
+                                    position: "absolute",
+                                }}
+                            />
+                            <canvas
+                                ref={originalSizeCanvasRef}
+                                style={{
+                                    display: "none",
+                                }}
+                            />
+
+                            {currentTab === "crop" && (
+                                <FreehandCropRegion
+                                    cropBox={cropBox}
+                                    ref={cropBoxRef}
+                                    setIsDragging={setIsDragging}
+                                />
+                            )}
+                        </Stack>
+                        {currentTab === "crop" && (
+                            <CenteredFlex marginTop="1rem">
+                                <Button
+                                    color="accent"
+                                    startIcon={<CropIcon />}
+                                    onClick={applyCrop}
+                                >
+                                    {t("apply_crop")}
+                                </Button>
+                            </CenteredFlex>
+                        )}
+                    </Box>
+                </Stack>
+            </Box>
+            <SidebarDrawer
+                variant="persistent"
+                anchor="right"
+                open={showControlsDrawer}
+                onClose={handleCloseWithConfirmation}
+            >
+                <Stack direction="row" sx={{ justifyContent: "space-between" }}>
+                    <IconButton
+                        onClick={() => {
+                            setShowControlsDrawer(false);
                         }}
                     >
-                        <Tabs
-                            value={currentTab}
-                            onChange={(_, value) => {
-                                setCurrentTab(value);
-                            }}
-                        >
-                            <Tab label={t("crop")} value="crop" />
-                            <Tab label={t("transform")} value="transform" />
-                            <Tab
-                                label={t("colors")}
-                                value="colors"
-                                disabled={transformationPerformed}
-                            />
-                        </Tabs>
-                    </Stack>
-                    <MenuSectionTitle title={t("reset")} />
-                    <MenuItemGroup sx={{ mb: "0.5rem" }}>
-                        <EnteMenuItem
-                            disabled={canvasLoading}
-                            startIcon={<CropOriginalIcon />}
-                            onClick={() => {
-                                loadCanvas();
-                            }}
-                            label={t("restore_original")}
+                        <ChevronRightIcon />
+                    </IconButton>
+                    <IconButton onClick={handleCloseWithConfirmation}>
+                        <CloseIcon />
+                    </IconButton>
+                </Stack>
+                <Stack
+                    direction="row"
+                    sx={{
+                        gap: "0.5rem",
+                        marginBottom: "1rem",
+                    }}
+                >
+                    <Tabs
+                        value={currentTab}
+                        onChange={(_, value) => {
+                            setCurrentTab(value);
+                        }}
+                    >
+                        <Tab label={t("crop")} value="crop" />
+                        <Tab label={t("transform")} value="transform" />
+                        <Tab
+                            label={t("colors")}
+                            value="colors"
+                            disabled={transformationPerformed}
                         />
-                    </MenuItemGroup>
-                    {currentTab === "crop" && (
-                        <CropMenu
-                            {...menuProps}
-                            previewScale={previewCanvasScale}
-                            cropBoxProps={cropBox}
-                            cropBoxRef={cropBoxRef}
-                            resetCropBox={resetCropBox}
-                        />
-                    )}
-                    {currentTab === "transform" && (
-                        <TransformMenu {...menuProps} />
-                    )}
-                    {currentTab === "colors" && (
-                        <ColoursMenu
-                            brightness={brightness}
-                            contrast={contrast}
-                            saturation={saturation}
-                            blur={blur}
-                            invert={invert}
-                            setBrightness={setBrightness}
-                            setContrast={setContrast}
-                            setSaturation={setSaturation}
-                            setBlur={setBlur}
-                            setInvert={setInvert}
-                        />
-                    )}
-                    <MenuSectionTitle title={t("export_data")} />
-                    <MenuItemGroup>
-                        <EnteMenuItem
-                            startIcon={<DownloadIcon />}
-                            onClick={downloadEditedPhoto}
-                            label={t("download_edited")}
-                            disabled={
-                                !transformationPerformed && !coloursAdjusted
-                            }
-                        />
-                        <MenuItemDivider />
-                        <EnteMenuItem
-                            startIcon={<CloudUploadIcon />}
-                            onClick={saveCopyToEnte}
-                            label={t("save_a_copy_to_ente")}
-                            disabled={
-                                !transformationPerformed && !coloursAdjusted
-                            }
-                        />
-                    </MenuItemGroup>
-                    {!transformationPerformed && !coloursAdjusted && (
-                        <MenuSectionTitle
-                            title={t("photo_edit_required_to_save")}
-                        />
-                    )}
-                </SidebarDrawer>
-            </Backdrop>
-        </>
+                    </Tabs>
+                </Stack>
+                <MenuSectionTitle title={t("reset")} />
+                <MenuItemGroup sx={{ mb: "0.5rem" }}>
+                    <EnteMenuItem
+                        disabled={canvasLoading}
+                        startIcon={<CropOriginalIcon />}
+                        onClick={() => {
+                            loadCanvas();
+                        }}
+                        label={t("restore_original")}
+                    />
+                </MenuItemGroup>
+                {currentTab === "crop" && (
+                    <CropMenu
+                        {...menuProps}
+                        previewScale={previewCanvasScale}
+                        cropBoxProps={cropBox}
+                        cropBoxRef={cropBoxRef}
+                        resetCropBox={resetCropBox}
+                    />
+                )}
+                {currentTab === "transform" && <TransformMenu {...menuProps} />}
+                {currentTab === "colors" && (
+                    <ColoursMenu
+                        brightness={brightness}
+                        contrast={contrast}
+                        saturation={saturation}
+                        blur={blur}
+                        invert={invert}
+                        setBrightness={setBrightness}
+                        setContrast={setContrast}
+                        setSaturation={setSaturation}
+                        setBlur={setBlur}
+                        setInvert={setInvert}
+                    />
+                )}
+                <MenuSectionTitle title={t("export_data")} />
+                <MenuItemGroup>
+                    <EnteMenuItem
+                        startIcon={<DownloadIcon />}
+                        onClick={downloadEditedPhoto}
+                        label={t("download_edited")}
+                        disabled={!transformationPerformed && !coloursAdjusted}
+                    />
+                    <MenuItemDivider />
+                    <EnteMenuItem
+                        startIcon={<CloudUploadIcon />}
+                        onClick={saveCopyToEnte}
+                        label={t("save_a_copy_to_ente")}
+                        disabled={!transformationPerformed && !coloursAdjusted}
+                    />
+                </MenuItemGroup>
+                {!transformationPerformed && !coloursAdjusted && (
+                    <MenuSectionTitle
+                        title={t("photo_edit_required_to_save")}
+                    />
+                )}
+            </SidebarDrawer>
+        </Backdrop>
     );
 };
 
