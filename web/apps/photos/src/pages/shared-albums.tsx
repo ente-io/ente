@@ -7,9 +7,8 @@ import {
     Stack100vhCenter,
 } from "@/base/components/containers";
 import { EnteLogoSVG } from "@/base/components/EnteLogo";
-import { LoadingIndicator } from "@/base/components/loaders";
+import { LoadingIndicator, TranslucentLoadingOverlay } from "@/base/components/loaders";
 import type { ButtonishProps } from "@/base/components/mui";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import {
@@ -59,7 +58,6 @@ import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
 } from "components/FilesDownloadProgress";
-import { GalleryLoadingOverlay } from "components/GalleryLoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import Uploader from "components/Upload/Uploader";
@@ -532,11 +530,7 @@ export default function PublicCollectionGallery() {
                     }
                     selectable={downloadEnabled}
                 />
-                {blockingLoad && (
-                    <GalleryLoadingOverlay>
-                        <ActivityIndicator />
-                    </GalleryLoadingOverlay>
-                )}
+                {blockingLoad && <TranslucentLoadingOverlay />}
                 <Uploader
                     syncWithRemote={syncWithRemote}
                     uploadCollection={publicCollection}

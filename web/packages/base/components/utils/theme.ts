@@ -189,8 +189,8 @@ const _colors = {
             paper2: "#252525",
         },
         backdrop: {
-            base: "rgba(0, 0, 0, 0.90)" /* unused */,
-            muted: "rgba(0, 0, 0, 0.65)" /* unused */,
+            base: "rgba(0, 0, 0, 0.90)",
+            muted: "rgba(0, 0, 0, 0.65)",
             faint: "rgba(0, 0, 0,0.20)",
         },
         text: {

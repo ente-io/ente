@@ -2,8 +2,8 @@ import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dial
 import { stashRedirect } from "@/accounts/services/redirect";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { AppNavbar, NavbarBase } from "@/base/components/Navbar";
+import { TranslucentLoadingOverlay } from "@/base/components/loaders";
 import type { ButtonishProps } from "@/base/components/mui";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
@@ -99,7 +99,6 @@ import {
 } from "components/FilesDownloadProgress";
 import { FixCreationTime } from "components/FixCreationTime";
 import GalleryEmptyState from "components/GalleryEmptyState";
-import { GalleryLoadingOverlay } from "components/GalleryLoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import Sidebar from "components/Sidebar";
@@ -902,11 +901,7 @@ const Page: React.FC = () => {
                     }}
                 />
                 <AppNavbar />
-                {blockingLoad && (
-                    <GalleryLoadingOverlay>
-                        <ActivityIndicator />
-                    </GalleryLoadingOverlay>
-                )}
+                {blockingLoad && <TranslucentLoadingOverlay />}
                 {isFirstLoad && (
                     <CenteredFlex>
                         <Typography

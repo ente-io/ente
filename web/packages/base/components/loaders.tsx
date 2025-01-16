@@ -33,3 +33,23 @@ export const LoadingOverlay: React.FC = () => (
         <ActivityIndicator />
     </Overlay>
 );
+
+/**
+ * An translucent overlay that covers the entire viewport and shows an activity
+ * indicator in its center.
+ *
+ * Used as a overscreen during blocking actions.
+ */
+export const TranslucentLoadingOverlay: React.FC = () => (
+    <Overlay
+        sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9000,
+            backgroundColor: "backdrop.muted",
+        }}
+    >
+        <ActivityIndicator />
+    </Overlay>
+);
