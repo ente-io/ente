@@ -176,8 +176,12 @@ const FileTypeIndicatorOverlay = styled(Overlay)(({ theme }) => ({
     justifyContent: "flex-end",
     alignItems: "flex-end",
     padding: "8px",
+    // TODO(LM): Ditto the dark one until lm is ready.
+    // background:
+    // "linear-gradient(315deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255,
+    // 255, 0.05) 29.61%, rgba(255, 255, 255, 0) 49.86%)",
     background:
-        "linear-gradient(315deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.05) 29.61%, rgba(255, 255, 255, 0) 49.86%)",
+        "linear-gradient(315deg, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0.05) 29.61%, rgba(0, 0, 0, 0) 49.86%)",
     ...theme.applyStyles("dark", {
         background:
             "linear-gradient(315deg, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0.05) 29.61%, rgba(0, 0, 0, 0) 49.86%)",
