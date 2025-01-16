@@ -50,7 +50,6 @@ package srp
 
 import (
 	"crypto/rand"
-	"github.com/sirupsen/logrus"
 	"io"
 	"math/big"
 )
@@ -67,7 +66,6 @@ func GenKey() []byte {
 
 func getK(params *SRPParams, S []byte) []byte {
 	hashK := params.Hash.New()
-	logrus.Infof("getK: length of S %d", len(S))
 	hashK.Write(S)
 	return hashToBytes(hashK)
 }
@@ -76,13 +74,11 @@ func getu(params *SRPParams, A, B *big.Int) *big.Int {
 	hashU := params.Hash.New()
 	hashU.Write(padToN(A, params))
 	hashU.Write(padToN(B, params))
-
 	return hashToInt(hashU)
 }
 
 func getM1(params *SRPParams, A, B, S []byte) []byte {
 	hashM1 := params.Hash.New()
-	logrus.Infof("getM1: length of A %d, B %d, S %d", len(A), len(B), len(S))
 	hashM1.Write(A)
 	hashM1.Write(B)
 	hashM1.Write(S)
@@ -91,7 +87,6 @@ func getM1(params *SRPParams, A, B, S []byte) []byte {
 
 func getM2(params *SRPParams, A, M, K []byte) []byte {
 	hashM1 := params.Hash.New()
-	logrus.Infof("getM2: length of A %d, M %d, K %d", len(A), len(M), len(K))
 	hashM1.Write(A)
 	hashM1.Write(M)
 	hashM1.Write(K)

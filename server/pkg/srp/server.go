@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"math/big"
 )
 
@@ -26,7 +25,7 @@ func NewServer(params *SRPParams, Vb []byte, S2b []byte) *SRPServer {
 	secret2 := intFromBytes(S2b)
 
 	Bb := getB(params, multiplier, V, secret2)
-	logrus.Infof("NewServer: length of Bb %d, Vb %d, S2b %d", len(Bb), len(Vb), len(S2b))
+
 	B := intFromBytes(Bb)
 
 	return &SRPServer{
@@ -49,8 +48,6 @@ func (s *SRPServer) SetA(A []byte) {
 	s.K = getK(s.Params, S)
 	s.M1 = getM1(s.Params, A, padToN(s.B, s.Params), S)
 	s.M2 = getM2(s.Params, A, s.M1, s.K)
-
-	logrus.Infof("SetA: length of A %d, M1 %d, M2 %d, K %d, S %d", len(A), len(s.M1), len(s.M2), len(s.K), len(S))
 
 	s.u = U               // only for tests
 	s.s = intFromBytes(S) // only for tests

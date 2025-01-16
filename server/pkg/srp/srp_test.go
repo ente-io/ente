@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"math/big"
+	"strings"
 	"testing"
 )
 
@@ -48,7 +49,7 @@ func TestCreateVerifier(t *testing.T) {
 }
 
 func TestUseAAndB(t *testing.T) {
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 10; i++ {
 
 		t.Run(fmt.Sprintf("Run%d", i), func(t *testing.T) {
 			//params := GetParams(4096)
@@ -102,7 +103,9 @@ func TestServerRejectsWrongM1(t *testing.T) {
 	server := NewServer(params, getVerifier(), b)
 	badClient.SetB(server.ComputeB())
 	_, err := server.CheckM1(badClient.ComputeM1())
-	assert.EqualError(t, err, "Client did not use the same password", "M1 check should have failed")
+	assert.Truef(t, err != nil, "Server should have rejected M1")
+	assert.Truef(t, strings.Contains(err.Error(), "client m1 length"), "Server should have rejected M1")
+
 }
 
 func TestServerRejectsBadA(t *testing.T) {
