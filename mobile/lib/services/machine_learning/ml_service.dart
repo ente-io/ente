@@ -43,10 +43,10 @@ class MLService {
 
   bool get isInitialized => _isInitialized;
 
-  bool get showClusteringIsHappening => _showClusteringIsHappening;
+  bool get showClusteringIsHappening => _clusteringIsHappening;
 
   bool debugIndexingDisabled = false;
-  bool _showClusteringIsHappening = false;
+  bool _clusteringIsHappening = false;
   bool _mlControllerStatus = false;
   bool _isIndexingOrClusteringRunning = false;
   bool _isRunningML = false;
@@ -261,7 +261,7 @@ class MLService {
     }
 
     try {
-      _showClusteringIsHappening = true;
+      _clusteringIsHappening = true;
 
       // Get a sense of the total number of faces in the database
       final int totalFaces = await MLDataDB.instance.getTotalFaceCount();
@@ -413,7 +413,7 @@ class MLService {
     } catch (e, s) {
       _logger.severe("`clusterAllImages` failed", e, s);
     } finally {
-      _showClusteringIsHappening = false;
+      _clusteringIsHappening = false;
       _isIndexingOrClusteringRunning = false;
       _cancelPauseIndexingAndClustering();
     }
