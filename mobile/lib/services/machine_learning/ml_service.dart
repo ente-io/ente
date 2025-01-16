@@ -123,7 +123,7 @@ class MLService {
       if (force) {
         _mlControllerStatus = true;
       }
-      if (_cannotRunMLFunction() && !force) return;
+      if (_cannotRunMLFunction(function: "AllML") && !force) return;
       _isRunningML = true;
       await sync();
 
@@ -182,7 +182,7 @@ class MLService {
   /// This function first fetches from remote and checks if the image has already been analyzed
   /// with the lastest faceMlVersion and stored on remote or local database. If so, it skips the image.
   Future<void> fetchAndIndexAllImages() async {
-    if (_cannotRunMLFunction()) return;
+    if (_cannotRunMLFunction(function: "Indexing")) return;
 
     try {
       _isIndexingOrClusteringRunning = true;
@@ -238,7 +238,7 @@ class MLService {
   }
 
   Future<void> clusterAllImages({bool clusterInBuckets = true}) async {
-    if (_cannotRunMLFunction()) return;
+    if (_cannotRunMLFunction(function: "Clustering")) return;
 
     _logger.info("`clusterAllImages()` called");
     _isIndexingOrClusteringRunning = true;
@@ -264,8 +264,7 @@ class MLService {
       _showClusteringIsHappening = true;
 
       // Get a sense of the total number of faces in the database
-      final int totalFaces =
-          await MLDataDB.instance.getTotalFaceCount();
+      final int totalFaces = await MLDataDB.instance.getTotalFaceCount();
       final fileIDToCreationTime =
           await FilesDB.instance.getFileIDToCreationTime();
       final startEmbeddingFetch = DateTime.now();
@@ -532,7 +531,7 @@ class MLService {
     }
   }
 
-  bool _cannotRunMLFunction({String function = ""}) {
+  bool _cannotRunMLFunction({required String function}) {
     if (kDebugMode && Platform.isIOS && !_isIndexingOrClusteringRunning) {
       return false;
     }
