@@ -282,7 +282,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
                 isPasswordInput: widget.isPasswordInput,
                 textEditingController: _textEditingController,
                 textInputFormatter: widget.textInputFormatter,
-                textInputType: widget.textInputType,
+                keyboardType: widget.textInputType,
               ),
             ),
             const SizedBox(height: 36),
