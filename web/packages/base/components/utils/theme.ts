@@ -290,27 +290,42 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             divider: colors.dark.stroke.faint,
             fixed: colors.fixed,
             boxShadow: colors.dark.boxShadow,
-            // Override some undocumented MUI defaults.
-            // https://github.com/mui/material-ui/blob/master/packages/mui-material/src/styles/createThemeWithVars.js#L271
+            // Override some MUI defaults for styling action elements like
+            // buttons and menu items.
+            //
+            // https://github.com/mui/material-ui/blob/v6.4.0/packages/mui-material/src/styles/createPalette.js#L68
             action: {
+                // The color of an active action like an icon button.
                 active: colors.dark.stroke.base,
-                // TODO(LM):
-                // hover: "red",
-                // hoverOpacity: 1,
-                // selected: "red",
-                // selectedOpacity: 1,
+                // The color of an hovered action.
+                hover: colors.dark.fill.faintHover,
+                hoverOpacity: 0.06,
+                // The color of a selected action.
+                //
+                // Placeholder; not clear how it impacts us.
+                selected: colors.dark.stroke.base,
+                selectedOpacity: 0.08,
+                // The color of a disabled action.
                 disabled: colors.dark.text.faint,
-                // disabledOpacity: 0.2,
+                disabledOpacity: 0.12,
+                // The background color of a disabled action.
                 disabledBackground: colors.dark.fill.faint,
-                // focus: "red",
-                // focusOpacity: 1,
-                // activatedOpacity: 1,
+                // Placeholder; not clear how it impacts us.
+                focus: colors.dark.stroke.base,
+                // Placeholder (MUI default); not clear how it impacts us.
+                focusOpacity: 1,
+                // Placeholder (MUI default); not clear how it impacts us.
+                activatedOpacity: 0.12,
             },
+            // Override some internal MUI defaults that impact the components
+            // which we use.
+            //
+            // https://github.com/mui/material-ui/blob/v6.4.0/packages/mui-material/src/styles/createThemeWithVars.js#L271
             FilledInput: {
                 bg: colors.dark.fill.faint,
                 hoverBg: colors.dark.fill.faintHover,
-                // TODO(LM):
-                // disabledBg: "transparent",
+                // We don't use this currently.
+                disabledBg: colors.dark.fill.faint,
             },
         },
     },
