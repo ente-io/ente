@@ -221,6 +221,16 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
     // light: false,
     dark: {
         palette: {
+            background: {
+                default: colors.dark.background.base,
+                paper: colors.dark.background.paper,
+                paper2: colors.dark.background.paper2,
+            },
+            backdrop: {
+                base: colors.dark.backdrop.base,
+                muted: colors.dark.backdrop.muted,
+                faint: colors.dark.backdrop.faint,
+            },
             primary: {
                 main: colors.dark.fill.base,
                 dark: colors.dark.fill.basePressed,
@@ -244,11 +254,6 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 dark: colors.fixed.danger.dark,
                 light: colors.fixed.danger.light,
                 contrastText: colors.fixed.white,
-            },
-            background: {
-                default: colors.dark.background.base,
-                paper: colors.dark.background.paper,
-                paper2: colors.dark.background.paper2,
             },
             text: {
                 // Alias the tokens used by MUI to the ones that we use. This way,
@@ -277,11 +282,6 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             },
             divider: colors.dark.stroke.faint,
             fixed: colors.fixed,
-            backdrop: {
-                base: colors.dark.backdrop.base,
-                muted: colors.dark.backdrop.muted,
-                faint: colors.dark.backdrop.faint,
-            },
             boxShadow: colors.dark.boxShadow,
         },
     },
