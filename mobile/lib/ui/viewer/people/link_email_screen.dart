@@ -7,6 +7,7 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/user_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
+import "package:photos/ui/actions/person_contact_linking_actions.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
@@ -15,10 +16,10 @@ import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/components/text_input_widget.dart";
 import 'package:photos/ui/sharing/user_avator_widget.dart';
-import "package:photos/utils/toast_util.dart";
 
 class LinkEmailScreen extends StatefulWidget {
-  const LinkEmailScreen({super.key});
+  final String personID;
+  const LinkEmailScreen(this.personID, {super.key});
 
   @override
   State<StatefulWidget> createState() => _LinkEmailScreen();
@@ -31,16 +32,19 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
   bool isKeypadOpen = false;
   late CollectionActions collectionActions;
   late List<User> _suggestedUsers;
+  late List<User> _filteredUsers;
 
   // Focus nodes are necessary
   final textFieldFocusNode = FocusNode();
   final _textController = TextEditingController();
+  final personContactLinkingActions = PersonContactLinkingActions();
 
   @override
   void initState() {
     super.initState();
     collectionActions = CollectionActions(CollectionsService.instance);
     _suggestedUsers = _getContacts();
+    _filteredUsers = _suggestedUsers;
   }
 
   @override
@@ -52,13 +56,6 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final filterSuggestedUsers = _suggestedUsers
-        .where(
-          (element) => element.email.toLowerCase().contains(
-                _textController.text.trim().toLowerCase(),
-              ),
-        )
-        .toList();
     isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
 
     return Scaffold(
@@ -86,6 +83,20 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
               textEditingController: _textController,
               shouldSurfaceExecutionStates: false,
               onChange: (value) {
+                _filteredUsers = _suggestedUsers
+                    .where(
+                      (element) => element.email.toLowerCase().contains(
+                            _textController.text.trim().toLowerCase(),
+                          ),
+                    )
+                    .toList();
+
+                final filterdFilesHaveSelectedEmail =
+                    _filteredUsers.any((user) => user.email == _selectedEmail);
+                if (!filterdFilesHaveSelectedEmail) {
+                  _selectedEmail = null;
+                }
+
                 _newEmail = value.trim();
                 _emailIsValid = EmailValidator.validate(_newEmail);
                 setState(() {});
@@ -102,7 +113,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 children: [
-                  filterSuggestedUsers.isNotEmpty
+                  _filteredUsers.isNotEmpty
                       ? const MenuSectionTitle(
                           title: "Or pick from your contacts",
                         )
@@ -111,7 +122,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                     child: ListView.builder(
                       physics: const BouncingScrollPhysics(),
                       itemBuilder: (context, index) {
-                        final currentUser = filterSuggestedUsers[index];
+                        final currentUser = _filteredUsers[index];
                         return Column(
                           children: [
                             MenuItemWidget(
@@ -142,9 +153,9 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                               },
                               isTopBorderRadiusRemoved: index > 0,
                               isBottomBorderRadiusRemoved:
-                                  index < (filterSuggestedUsers.length - 1),
+                                  index < (_filteredUsers.length - 1),
                             ),
-                            (index == (filterSuggestedUsers.length - 1))
+                            (index == (_filteredUsers.length - 1))
                                 ? const SizedBox.shrink()
                                 : DividerWidget(
                                     dividerType: DividerType.menu,
@@ -154,7 +165,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                           ],
                         );
                       },
-                      itemCount: filterSuggestedUsers.length,
+                      itemCount: _filteredUsers.length,
                     ),
                   ),
                 ],
@@ -177,15 +188,20 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                     buttonType: ButtonType.primary,
                     buttonSize: ButtonSize.large,
                     labelText: "Link",
-                    isDisabled: _selectedEmail == null,
+                    isDisabled:
+                        !_emailIsValid && (_selectedEmail?.isEmpty ?? true),
                     onTap: () async {
-                      //Check if email is vaild and do operation
-                      showToast(
+                      final result =
+                          await personContactLinkingActions.linkEmailToPerson(
+                        _emailIsValid ? _newEmail : _selectedEmail!,
+                        widget.personID,
                         context,
-                        "Linked",
                       );
+                      if (!result) {
+                        _textController.clear();
+                        return;
+                      }
 
-                      //if successfull
                       Navigator.of(context).pop(true);
                     },
                   ),

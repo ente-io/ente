@@ -181,6 +181,7 @@ class _PeoplePageState extends State<PeoplePage> {
                                               selectedFiles: _selectedFiles,
                                               personFiles: personFiles,
                                               loadPersonFiles: loadPersonFiles,
+                                              personID: widget.person.remoteID,
                                             );
                                     },
                                   )
@@ -189,6 +190,7 @@ class _PeoplePageState extends State<PeoplePage> {
                                     selectedFiles: _selectedFiles,
                                     personFiles: personFiles,
                                     loadPersonFiles: loadPersonFiles,
+                                    personID: widget.person.remoteID,
                                   ),
                             FileSelectionOverlayBar(
                               PeoplePage.overlayType,
@@ -253,12 +255,14 @@ class _Gallery extends StatelessWidget {
   final SelectedFiles selectedFiles;
   final List<EnteFile> personFiles;
   final Future<List<EnteFile>> Function() loadPersonFiles;
+  final String personID;
 
   const _Gallery({
     required this.tagPrefix,
     required this.selectedFiles,
     required this.personFiles,
     required this.loadPersonFiles,
+    required this.personID,
   });
 
   @override
@@ -294,7 +298,7 @@ class _Gallery extends StatelessWidget {
         buttonType: ButtonType.primary,
         labelText: "Link email",
         onTap: () async {
-          routeToPage(context, LinkEmailScreen());
+          await routeToPage(context, LinkEmailScreen(personID));
         },
       ),
     );

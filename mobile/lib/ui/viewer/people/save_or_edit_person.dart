@@ -271,6 +271,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                               context,
                               text: _inputName,
                               clusterID: widget.clusterID!,
+                              birthdate: _selectedDate,
+                              //TODO: email
                             );
                           }
                         },
@@ -410,6 +412,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     BuildContext context, {
     String text = '',
     required String clusterID,
+    String? birthdate,
+    String? email,
   }) async {
     try {
       if (userAlreadyAssigned) {
@@ -419,8 +423,12 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
         return;
       }
       userAlreadyAssigned = true;
-      final personEntity =
-          await PersonService.instance.addPerson(text, clusterID);
+      final personEntity = await PersonService.instance.addPerson(
+        name: text,
+        clusterID: clusterID,
+        birthdate: birthdate,
+        email: email,
+      );
       final bool extraPhotosFound =
           await ClusterFeedbackService.instance.checkAndDoAutomaticMerges(
         personEntity,
@@ -451,6 +459,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
         person!.remoteID,
         name: name,
         birthDate: birthDate,
+        //TODO: email
       );
 
       Bus.instance.fire(PeopleChangedEvent());

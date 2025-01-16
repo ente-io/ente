@@ -150,10 +150,12 @@ class PersonService {
     return false;
   }
 
-  Future<PersonEntity> addPerson(
-    String name,
-    String clusterID, {
+  Future<PersonEntity> addPerson({
+    required String name,
+    required String clusterID,
     bool isHidden = false,
+    String? birthdate,
+    String? email,
   }) async {
     final faceIds = await faceMLDataDB.getFaceIDsForCluster(clusterID);
     final data = PersonData(
@@ -165,6 +167,8 @@ class PersonService {
         ),
       ],
       isHidden: isHidden,
+      birthDate: birthdate,
+      email: email,
     );
     final result = await entityService.addOrUpdate(
       EntityType.cgroup,
@@ -410,6 +414,7 @@ class PersonService {
     bool? isHidden,
     int? version,
     String? birthDate,
+    String? email,
   }) async {
     final person = (await getPerson(id))!;
     final updatedPerson = person.copyWith(
@@ -419,6 +424,7 @@ class PersonService {
         isHidden: isHidden,
         version: version,
         birthDate: birthDate,
+        email: email,
       ),
     );
     await updatePerson(updatedPerson);
