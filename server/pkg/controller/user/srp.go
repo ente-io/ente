@@ -3,9 +3,8 @@ package user
 import (
 	"context"
 	"database/sql"
-	"ente-io/go-srp"
-	"errors"
 	"fmt"
+	"github.com/ente-io/go-srp"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/stacktrace"
