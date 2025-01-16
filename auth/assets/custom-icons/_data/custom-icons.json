@@ -639,6 +639,10 @@
       "slug": "name_com"
     },
     {
+      "title": "Nextcloud",
+      "slug": "nextcloud"
+    },
+    {
       "title": "NeteaseMail",
       "slug": "netease_mail",
       "altNames": [
