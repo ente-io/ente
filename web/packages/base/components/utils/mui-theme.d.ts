@@ -4,69 +4,6 @@ import React from "react";
 // Import the module augmentation that provides types for `theme.vars.*`.
 import type {} from "@mui/material/themeCssVarsAugmentation";
 
-declare module "@mui/material/styles" {
-    interface Theme {
-        colors: ThemeColors;
-    }
-
-    interface ThemeOptions {
-        colors?: ThemeColorsOptions;
-    }
-}
-
-// =================================================
-// Custom Interfaces
-// =================================================
-
-declare module "@mui/material/styles" {
-    interface ThemeColors {
-        background: BackgroundType;
-        backdrop: Strength;
-        text: Strength;
-        fill: FillStrength;
-        stroke: Strength;
-        accent: ColorStrength;
-        warning: ColorStrength;
-        danger: ColorStrength;
-    }
-
-    interface ThemeColorsOptions {
-        background?: Partial<BackgroundType>;
-        backdrop?: Partial<Strength>;
-        text?: Partial<Strength>;
-        fill?: Partial<FillStrength>;
-        stroke?: Partial<StrokeStrength>;
-        accent?: Partial<ColorStrength>;
-        warning?: Partial<ColorStrength>;
-        danger?: Partial<ColorStrength>;
-    }
-
-    interface ColorStrength {
-        A800: string;
-        A700: string;
-        A500: string;
-        A400: string;
-        A300: string;
-    }
-
-    interface FixedColors {
-        accent: string;
-        warning: string;
-        danger: string;
-    }
-
-    interface Strength {
-        base: string;
-        muted: string;
-        faint: string;
-    }
-
-    type FillStrength = Strength & {
-        basePressed: string;
-        faintPressed: string;
-    };
-}
-
 // Add new tokens to the Palette.
 //
 // https://mui.com/material-ui/customization/css-theme-variables/usage/#adding-new-theme-tokens
@@ -230,6 +167,7 @@ declare module "@mui/material/Button" {
         critical: true;
     }
 }
+
 declare module "@mui/material/Checkbox" {
     interface CheckboxPropsColorOverrides {
         accent: true;
