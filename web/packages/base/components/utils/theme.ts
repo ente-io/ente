@@ -152,6 +152,7 @@ const _colors = {
             B: "#333333",
             E: "#ddd",
         },
+        switchOn: "#2ECA45",
         croppedAreaOverlay: "rgba(0 0 0 / 0.5)",
         overlayIndicatorMuted: "rgba(255 255 255 / 0.48)",
     },
@@ -606,8 +607,18 @@ const components: Components = {
     MuiFilledInput: {
         styleOverrides: {
             input: {
+                // Set the background color for text fields when they get
+                // autofilled by the user agent.
+                //
+                // TODO(LM): Right now we need to set it until the light mode is
+                // fully independent. Post that, see if we really need to
+                // override the user agent defaults. Also note that MUI does
+                // overwrite the UA defaults, so we might need to too.
+                //
+                // https://github.com/search?q=repo%3Amui%2Fmaterial-ui%20path%3A%2F%5Epackages%5C%2Fmui-material%5C%2Fsrc%5C%2F%2F%20WebkitBoxShadow&type=code
                 "&:autofill": {
-                    boxShadow: "#c7fd4f",
+                    boxShadow: "0 0 0 100px #266798 inset",
+                    WebkitTextFillColor: "var(--mui-palette-fixed-white)",
                 },
             },
         },

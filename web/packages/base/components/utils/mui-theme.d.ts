@@ -135,6 +135,10 @@ declare module "@mui/material/styles" {
                 E: string;
             };
             /**
+             * The color of a switch when it is enabled.
+             */
+            switchOn: string;
+            /**
              * The transparent overlay on top of the region that will be cropped
              * during image editing.
              */
