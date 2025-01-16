@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"sync/atomic"
 	"time"
 
@@ -145,22 +144,22 @@ func (r *RateLimitMiddleware) APIRateLimitForUserMiddleware(urlSanitizer func(_ 
 // getLimiter, based on reqPath & reqMethod, return instance of limiter.Limiter which needs to
 // be applied for a request. It returns nil if the request is not rate limited
 func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limiter.Limiter {
-	if reqPath == "/users/ott" ||
-		reqPath == "/users/verify-email" ||
-		reqPath == "/public-collection/verify-password" ||
-		reqPath == "/family/accept-invite" ||
-		reqPath == "/users/srp/attributes" ||
-		(reqPath == "/cast/device-info" && reqMethod == "POST") ||
-		(reqPath == "/cast/device-info/" && reqMethod == "POST") ||
-		reqPath == "/users/srp/create-session" ||
-		reqPath == "/users/srp/verify-session" ||
-		reqPath == "/family/invite-info/:token" ||
-		reqPath == "/family/add-member" ||
-		strings.HasPrefix(reqPath, "/users/srp/") ||
-		strings.HasPrefix(reqPath, "/users/two-factor/") {
-		return r.limit10ReqPerMin
-	} else if reqPath == "/files/preview" {
-		return r.limit200ReqPerSec
-	}
+	//if reqPath == "/users/ott" ||
+	//	reqPath == "/users/verify-email" ||
+	//	reqPath == "/public-collection/verify-password" ||
+	//	reqPath == "/family/accept-invite" ||
+	//	reqPath == "/users/srp/attributes" ||
+	//	(reqPath == "/cast/device-info" && reqMethod == "POST") ||
+	//	(reqPath == "/cast/device-info/" && reqMethod == "POST") ||
+	//	reqPath == "/users/srp/create-session" ||
+	//	reqPath == "/users/srp/verify-session" ||
+	//	reqPath == "/family/invite-info/:token" ||
+	//	reqPath == "/family/add-member" ||
+	//	strings.HasPrefix(reqPath, "/users/srp/") ||
+	//	strings.HasPrefix(reqPath, "/users/two-factor/") {
+	//	return r.limit10ReqPerMin
+	//} else if reqPath == "/files/preview" {
+	//	return r.limit200ReqPerSec
+	//}
 	return nil
 }
