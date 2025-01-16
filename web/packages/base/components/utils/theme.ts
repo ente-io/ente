@@ -234,7 +234,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             primary: {
                 main: colors.dark.fill.base,
                 dark: colors.dark.fill.baseHover,
-                contrastText: colors.dark.text.base,
+                contrastText: colors.fixed.black,
             },
             secondary: {
                 main: colors.dark.fill.faint,
@@ -547,11 +547,9 @@ const components: Components = {
                 // border radius is only applied to the top for the "filled"
                 // variant of input used inside TextFields.
                 borderRadius: "8px",
-                // TODO: Should we also add overflow hidden so that there is no
-                // gap between the filled area and the (full width) border. Not
-                // sure how this might interact with selects.
-                // overflow: "hidden",
-
+                // Clip the bottom border so that there is no gap between the
+                // filled area and the (full width) border.
+                overflow: "hidden",
                 // Hide the bottom border that always appears for the "filled"
                 // variant of input used inside TextFields.
                 "::before": {
