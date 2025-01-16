@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import type { AppName } from "@/base/app";
-import type { PaletteOptions, Theme, ThemeColorsOptions } from "@mui/material";
+import type { Theme } from "@mui/material";
 import { createTheme } from "@mui/material";
 import type { Components } from "@mui/material/styles/components";
 import type { TypographyOptions } from "@mui/material/styles/createTypography";
@@ -12,7 +12,6 @@ import type { TypographyOptions } from "@mui/material/styles/createTypography";
 const getTheme = (appName: AppName): Theme => {
     const colors = getColors(appName);
     const colorSchemes = getColorSchemes(colors);
-    const components = getComponents(colors, palette, typography);
     return createTheme({
         cssVariables: true,
         colorSchemes,
@@ -236,8 +235,8 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 dark: colors.dark.fill.basePressed,
                 contrastText:
                     // themeColor === "dark"
-                        // ? _colors.fixed.black
-                        colors.fixed.white,
+                    // ? _colors.fixed.black
+                    colors.fixed.white,
             },
             secondary: {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -284,6 +283,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 faint: colors.dark.text.faint,
             },
             fill: {
+                base: colors.dark.fill.base,
                 muted: colors.dark.fill.muted,
                 faint: colors.dark.fill.faint,
                 faintHover: colors.dark.fill.faintPressed,
@@ -398,11 +398,7 @@ const typography: TypographyOptions = {
     },
 };
 
-const getComponents = (
-    colors: ThemeColorsOptions,
-    palette: PaletteOptions,
-    typography: TypographyOptions,
-): Components => ({
+const components: Components = {
     MuiCssBaseline: {
         styleOverrides: {
             body: {
@@ -450,7 +446,7 @@ const getComponents = (
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
-                    backgroundColor: palette.backdrop?.faint,
+                    backgroundColor: "var(--mui-palette-backdrop-faint)",
                 },
             },
         },
@@ -467,10 +463,10 @@ const getComponents = (
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
-                    backgroundColor: palette.backdrop?.faint,
+                    backgroundColor: "var(--mui-palette-backdrop-faint)",
                 },
                 "& .MuiDialog-paper": {
-                    boxShadow: palette.boxShadow?.float,
+                    boxShadow: "var(--mui-palette-boxShadow-float)",
                 },
                 // Reset the MUI default paddings to 16px everywhere.
                 //
@@ -514,14 +510,16 @@ const getComponents = (
     },
     MuiLink: {
         defaultProps: {
-            color: colors.accent?.A500,
+            // color: colors.accent?.A500,
+            color: "var(--mui-palette-accent-main)",
             underline: "none",
         },
         styleOverrides: {
             root: {
                 "&:hover": {
                     underline: "always",
-                    color: colors.accent?.A500,
+                    // color: colors.accent?.A500,
+                    color: "var(--mui-palette-accent-main)",
                 },
             },
         },
@@ -619,8 +617,10 @@ const getComponents = (
             // keyboard focus.
             root: {
                 "&.Mui-focusVisible": {
-                    backgroundColor: colors.fill?.faint,
-                    outline: `1px solid ${colors.stroke.faint}`,
+                    // backgroundColor: colors.fill?.faint,
+                    // outline: `1px solid ${colors.stroke.faint}`,
+                    backgroundColor: "var(--mui-palette-fill-faint)",
+                    outline: "1px solid var(--mui-palette-stroke-faint)",
                 },
             },
         },
@@ -628,20 +628,43 @@ const getComponents = (
 
     MuiSvgIcon: {
         styleOverrides: {
-            root: ({ ownerState }) => ({
-                ...getIconColor(ownerState, colors),
-            }),
+            root: {
+                variants: [
+                    {
+                        props: { color: "primary" },
+                        style: { color: "var(--mui-palette-stroke-base)" },
+                    },
+                    {
+                        props: { color: "secondary" },
+                        style: { color: "var(--mui-palette-stroke-muted)" },
+                    },
+                ],
+            },
         },
     },
 
     MuiIconButton: {
         styleOverrides: {
-            root: ({ ownerState }) => ({
-                ...getIconColor(ownerState, colors),
+            root: {
                 padding: "12px",
-            }),
+                variants: [
+                    {
+                        props: { color: "primary" },
+                        style: { color: "var(--mui-palette-stroke-base)" },
+                    },
+                    {
+                        props: { color: "secondary" },
+                        style: { color: "var(--mui-palette-stroke-muted)" },
+                    },
+                    {
+                        props: { color: "disabled" },
+                        style: { color: "var(--mui-palette-stroke-faint)" },
+                    },
+                ],
+            },
         },
     },
+
     MuiSnackbar: {
         styleOverrides: {
             root: {
@@ -662,34 +685,7 @@ const getComponents = (
             },
         },
     },
-});
-
-interface IconColorableOwnerState {
-    color?: string;
-    disabled?: boolean;
-}
-
-function getIconColor(
-    ownerState: IconColorableOwnerState,
-    colors: ThemeColorsOptions,
-) {
-    switch (ownerState.color) {
-        case "primary":
-            return {
-                color: colors.stroke?.base,
-            };
-        case "secondary":
-            return {
-                color: colors.stroke?.muted,
-            };
-    }
-    if (ownerState.disabled) {
-        return {
-            color: colors.stroke?.faint,
-        };
-    }
-    return {};
-}
+};
 
 // Exports ---
 
