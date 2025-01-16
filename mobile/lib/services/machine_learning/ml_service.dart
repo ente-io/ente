@@ -123,7 +123,7 @@ class MLService {
       if (force) {
         _mlControllerStatus = true;
       }
-      if (_cannotRunMLFunction(function: "AllML") && !force) return;
+      if (!_canRunMLFunction(function: "AllML") && !force) return;
       _isRunningML = true;
       await sync();
 
@@ -182,7 +182,7 @@ class MLService {
   /// This function first fetches from remote and checks if the image has already been analyzed
   /// with the lastest faceMlVersion and stored on remote or local database. If so, it skips the image.
   Future<void> fetchAndIndexAllImages() async {
-    if (_cannotRunMLFunction(function: "Indexing")) return;
+    if (!_canRunMLFunction(function: "Indexing")) return;
 
     try {
       _isIndexingOrClusteringRunning = true;
@@ -238,7 +238,7 @@ class MLService {
   }
 
   Future<void> clusterAllImages({bool clusterInBuckets = true}) async {
-    if (_cannotRunMLFunction(function: "Clustering")) return;
+    if (!_canRunMLFunction(function: "Clustering")) return;
 
     _logger.info("`clusterAllImages()` called");
     _isIndexingOrClusteringRunning = true;
@@ -531,30 +531,30 @@ class MLService {
     }
   }
 
-  bool _cannotRunMLFunction({required String function}) {
+  bool _canRunMLFunction({required String function}) {
     if (kDebugMode && Platform.isIOS && !_isIndexingOrClusteringRunning) {
-      return false;
+      return true;
     }
     if (_isIndexingOrClusteringRunning) {
       _logger.info(
         "Cannot run $function because indexing or clustering is already running",
       );
       _logStatus();
-      return true;
+      return false;
     }
     if (_mlControllerStatus == false) {
       _logger.info(
         "Cannot run $function because MLController does not allow it",
       );
       _logStatus();
-      return true;
+      return false;
     }
     if (debugIndexingDisabled) {
       _logger.info(
         "Cannot run $function because debugIndexingDisabled is true",
       );
       _logStatus();
-      return true;
+      return false;
     }
     if (_shouldPauseIndexingAndClustering) {
       // This should ideally not be triggered, because one of the above should be triggered instead.
@@ -562,9 +562,9 @@ class MLService {
         "Cannot run $function because indexing and clustering is being paused",
       );
       _logStatus();
-      return true;
+      return false;
     }
-    return false;
+    return true;
   }
 
   void _logStatus() {
