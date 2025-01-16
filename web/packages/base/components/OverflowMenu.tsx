@@ -128,7 +128,7 @@ export const OverflowMenuOption: React.FC<
             onClick={handleClick}
             sx={(theme) => ({
                 minWidth: 220,
-                color: theme.palette[color].main,
+                color: theme.vars.palette[color].main,
                 // Reduce the size of the icons a bit to make it fit better with
                 // the text.
                 "& .MuiSvgIcon-root": {

@@ -74,10 +74,8 @@ interface CollectionHeaderProps {
  * A header shown at the top of the list of photos in the gallery, when the
  * gallery is showing a collection.
  */
-export const CollectionHeader: React.FC<CollectionHeaderProps> = ({
-    collectionSummary,
-    ...rest
-}) => {
+export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
+    const { collectionSummary } = props;
     if (!collectionSummary) {
         assertionFailed("Gallery/CollectionHeader without a collection");
         return <></>;
@@ -111,9 +109,7 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = ({
                     fileCount={fileCount}
                     endIcon={<EndIcon type={type} />}
                 />
-                {shouldShowOptions(type) && (
-                    <CollectionOptions collectionSummaryType={type} {...rest} />
-                )}
+                {shouldShowOptions(type) && <CollectionOptions {...props} />}
             </SpaceBetweenFlex>
         </GalleryItemsHeaderAdapter>
     );
@@ -122,16 +118,9 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = ({
 const shouldShowOptions = (type: CollectionSummaryType) =>
     type != "all" && type != "archive";
 
-type CollectionOptionsProps = Omit<
-    CollectionHeaderProps,
-    "collectionSummary"
-> & {
-    collectionSummaryType: CollectionSummaryType;
-};
-
-const CollectionOptions: React.FC<CollectionOptionsProps> = ({
+const CollectionOptions: React.FC<CollectionHeaderProps> = ({
     activeCollection,
-    collectionSummaryType,
+    collectionSummary,
     setActiveCollectionID,
     onCollectionShare,
     onCollectionCast,
@@ -146,6 +135,8 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
         useModalVisibility();
+
+    const { type: collectionSummaryType } = collectionSummary;
 
     /**
      * Return a new function by wrapping an async function in an error handler,
@@ -248,11 +239,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
 
         if (collectionSummaryType == "hiddenItems") {
             return downloadDefaultHiddenCollectionHelper(
-                setFilesDownloadProgressAttributesCreator(
-                    activeCollection.name,
-                    HIDDEN_ITEMS_SECTION,
-                    true,
-                ),
+                setFilesDownloadProgressAttributesCreator,
             );
         } else {
             return downloadCollectionHelper(

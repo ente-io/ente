@@ -147,6 +147,8 @@ export const DuplicateItemTile = styled(BaseTile)`
  * A variant of {@link BaseTile} meant for use when the tile is interactable.
  */
 export const BaseTileButton = styled(UnstyledButton)`
+    /* Buttons reset this to the special token buttontext */
+    color: inherit;
     /* Buttons reset this to center */
     text-align: inherit;
 

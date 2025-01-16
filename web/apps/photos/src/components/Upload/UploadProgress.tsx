@@ -182,7 +182,7 @@ function UploadProgressSubtitleText() {
         <Typography
             variant="body"
             sx={{
-                fontWeight: "normal",
+                fontWeight: "regular",
                 color: "text.muted",
                 marginTop: "4px",
             }}

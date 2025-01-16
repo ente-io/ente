@@ -258,24 +258,23 @@ const SearchInputWrapper = styled("div")`
 
 const loadOptions = pDebounce(searchOptionsForString, 250);
 
-const createSelectStyles = ({
-    colors,
-    palette,
-}: Theme): StylesConfig<SearchOption, false> => ({
+const createSelectStyles = (
+    theme: Theme,
+): StylesConfig<SearchOption, false> => ({
     container: (style) => ({ ...style, flex: 1 }),
     control: (style, { isFocused }) => ({
         ...style,
-        backgroundColor: palette.background.paper,
-        borderColor: isFocused ? palette.accent.main : "transparent",
+        backgroundColor: theme.vars.palette.background.paper,
+        borderColor: isFocused ? theme.vars.palette.accent.main : "transparent",
         boxShadow: "none",
         ":hover": {
-            borderColor: palette.accent.light,
+            borderColor: theme.vars.palette.accent.light,
             cursor: "text",
         },
     }),
     input: (styles) => ({
         ...styles,
-        color: colors.text.base,
+        color: theme.vars.palette.text.base,
         overflowX: "hidden",
     }),
     menu: (style) => ({
@@ -284,7 +283,7 @@ const createSelectStyles = ({
         marginTop: "1px",
         // Give an opaque and elevated surface color to the menu to override the
         // default (transparent).
-        backgroundColor: palette.background.paper,
+        backgroundColor: theme.vars.palette.background.paper,
     }),
     option: (style, { isFocused }) => ({
         ...style,
@@ -295,7 +294,7 @@ const createSelectStyles = ({
         },
         // Elevate the focused option further.
         "& .option-contents": isFocused
-            ? { backgroundColor: palette.background.paper2 }
+            ? { backgroundColor: theme.vars.palette.background.paper2 }
             : {},
         "&:last-child .MuiDivider-root": {
             display: "none",
@@ -303,7 +302,7 @@ const createSelectStyles = ({
     }),
     placeholder: (style) => ({
         ...style,
-        color: colors.text.muted,
+        color: theme.vars.palette.text.muted,
         whiteSpace: "nowrap",
         overflowX: "hidden",
     }),

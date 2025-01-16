@@ -197,13 +197,13 @@ const NoWatches: React.FC = () => {
                 </Typography>
                 <Typography variant={"small"} sx={{ color: "text.muted" }}>
                     <FlexWrapper gap={1}>
-                        <CheckmarkIcon />
+                        <Check />
                         {t("watch_folders_hint_2")}
                     </FlexWrapper>
                 </Typography>
                 <Typography variant={"small"} sx={{ color: "text.muted" }}>
                     <FlexWrapper gap={1}>
-                        <CheckmarkIcon />
+                        <Check />
                         {t("watch_folders_hint_3")}
                     </FlexWrapper>
                 </Typography>
@@ -218,18 +218,12 @@ const NoWatchesContainer = styled(VerticallyCentered)({
     marginBottom: "32px",
 });
 
-const CheckmarkIcon: React.FC = () => {
-    return (
-        <CheckIcon
-            fontSize="small"
-            sx={(theme) => ({
-                display: "inline",
-                fontSize: "15px",
-                color: theme.palette.secondary.main,
-            })}
-        />
-    );
-};
+const Check: React.FC = () => (
+    <CheckIcon
+        fontSize="small"
+        sx={{ display: "inline", fontSize: "15px", color: "stroke.muted" }}
+    />
+);
 
 interface WatchEntryProps {
     watch: FolderWatch;
