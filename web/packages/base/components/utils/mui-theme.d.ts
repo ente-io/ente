@@ -14,41 +14,6 @@ declare module "@mui/material/styles" {
     }
 }
 
-declare module "@mui/material/Button" {
-    interface ButtonPropsColorOverrides {
-        accent: true;
-        critical: true;
-        error: false;
-        success: false;
-        info: false;
-        warning: false;
-        inherit: false;
-    }
-}
-declare module "@mui/material/Checkbox" {
-    interface CheckboxPropsColorOverrides {
-        accent: true;
-    }
-}
-
-declare module "@mui/material/Switch" {
-    interface SwitchPropsColorOverrides {
-        accent: true;
-    }
-}
-
-declare module "@mui/material/SvgIcon" {
-    interface SvgIconPropsColorOverrides {
-        accent: true;
-    }
-}
-
-declare module "@mui/material/CircularProgress" {
-    interface CircularProgressPropsColorOverrides {
-        accent: true;
-    }
-}
-
 // =================================================
 // Custom Interfaces
 // =================================================
@@ -246,6 +211,46 @@ declare module "@mui/material/styles" {
         backdrop?: Palette["backdrop"];
         fixed?: Palette["fixed"];
         boxShadow?: Palette["boxShadow"];
+    }
+}
+
+// Make our custom palette colors available for use as the color prop of various
+// MUI components.
+
+declare module "@mui/material/Button" {
+    interface ButtonPropsColorOverrides {
+        // Turn off MUI provided palette colors we don't use.
+        error: false;
+        success: false;
+        info: false;
+        warning: false;
+        inherit: false;
+        // Add our custom palette colors.
+        accent: true;
+        critical: true;
+    }
+}
+declare module "@mui/material/Checkbox" {
+    interface CheckboxPropsColorOverrides {
+        accent: true;
+    }
+}
+
+declare module "@mui/material/Switch" {
+    interface SwitchPropsColorOverrides {
+        accent: true;
+    }
+}
+
+declare module "@mui/material/SvgIcon" {
+    interface SvgIconPropsColorOverrides {
+        accent: true;
+    }
+}
+
+declare module "@mui/material/CircularProgress" {
+    interface CircularProgressPropsColorOverrides {
+        accent: true;
     }
 }
 
