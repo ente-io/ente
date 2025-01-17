@@ -180,7 +180,8 @@ const _colors = {
             baseHover: "rgba(0 0 0 / 0.87)",
             muted: "rgba(0 0 0 / 0.12)",
             faint: "rgba(0 0 0 / 0.04)",
-            faintHover: "rgba(0 0 0 / 0.08)",
+            // TODO(LM): Different from Figma.
+            faintHover: "rgba(0 20 0 / 0.06)",
             fainter: "rgba(0 0 0 / 0.02)",
         },
         stroke: {
@@ -240,7 +241,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             primary: {
                 main: colors.light.fill.base,
                 dark: colors.light.fill.baseHover,
-                contrastText: colors.fixed.black,
+                contrastText: colors.fixed.white,
             },
             secondary: {
                 main: colors.light.fill.faint,
@@ -636,6 +637,8 @@ const components: Components = {
         defaultProps: {
             // Change the default button variant from "text" to "contained".
             variant: "contained",
+            // Disable shadows.
+            disableElevation: true,
         },
         styleOverrides: {
             // We don't use the size prop for the MUI button, or rather it
