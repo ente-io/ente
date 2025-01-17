@@ -128,7 +128,7 @@ const Page: React.FC = () => {
                 {timeStatus === 0 && (
                     <Box
                         sx={{
-                            backgroundColor: "#1C1C1E",
+                            backgroundColor: "fixed.gray.A",
                             borderRadius: "10px",
                             paddingBottom: "20px",
                             position: "relative",
