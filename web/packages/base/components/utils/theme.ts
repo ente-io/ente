@@ -4,11 +4,15 @@ import { createTheme } from "@mui/material";
 import type { Components } from "@mui/material/styles/components";
 import type { TypographyOptions } from "@mui/material/styles/createTypography";
 
+export const wipTheme = !!process.env.NEXT_PUBLIC_ENTE_WIP_THEME;
+
 const getTheme = (appName: AppName): Theme => {
     const colors = getColors(appName);
     const colorSchemes_ = getColorSchemes(colors);
     // TODO(LM): Temp
-    const colorSchemes = { ...colorSchemes_, light: colorSchemes_.dark };
+    const colorSchemes = wipTheme
+        ? { ...colorSchemes_ }
+        : { ...colorSchemes_, light: colorSchemes_.dark };
     return createTheme({
         cssVariables: true,
         colorSchemes,
@@ -128,118 +132,205 @@ const getColors = (appName: AppName) => ({
  */
 const _colors = {
     accentPhotos: {
-        dark: "#00B33C",
-        main: "#1DB954",
-        light: "#01DE4D",
+        dark: "#00b33c",
+        main: "#1db954",
+        light: "#01de4d",
     },
     accentAuth: {
-        dark: "rgb(164, 0, 182)",
-        main: "rgb(150, 13, 214)",
-        light: "rgb(152, 77, 244)",
+        dark: "#8e0fcb",
+        // TODO(LM): Shift up
+        main: "#9610d6",
+        light: "#8e2de2",
+        lighter: "#984df4" /* TODO(LM) */,
     },
     fixed: {
         white: "#fff",
         black: "#000",
-        success: "#1DB954",
-        warning: "#FFC247",
+        success: "#1db954",
+        golden: "#ffc107",
         danger: {
-            dark: "#F53434",
-            main: "#EA3F3F",
-            light: "#FF6565",
+            dark: "#f53434",
+            main: "#ea3f3f",
+            light: "#ff6565",
         },
         gray: {
-            A: "#1C1C1E",
-            B: "#333333",
+            A: "#1c1c1e",
+            B: "#333",
             E: "#ddd",
         },
-        switchOn: "#2ECA45",
+        switchOn: "#2eca45",
         croppedAreaOverlay: "rgba(0 0 0 / 0.5)",
         overlayIndicatorMuted: "rgba(255 255 255 / 0.48)",
+        storageCardUsageFill: "rgba(255 255 255 / 0.2)",
     },
     light: {
         background: {
-            base: "#fff",
+            default: "#fff",
             paper: "#fff",
-            paper2: "rgba(153, 153, 153, 0.04)",
+            paper2: "rgba(153 153 153 / 0.04)",
         },
         backdrop: {
-            base: "rgba(255, 255, 255, 0.92)",
-            muted: "rgba(255, 255, 255, 0.75)",
-            faint: "rgba(255, 255, 255, 0.30)",
+            base: "rgba(255 255 255 / 0.92)",
+            muted: "rgba(255 255 255 / 0.75)",
+            faint: "rgba(255 255 255 / 0.30)",
         },
         text: {
             base: "#000",
-            muted: "rgba(0, 0, 0, 0.60)",
-            faint: "rgba(0, 0, 0, 0.50)",
+            muted: "rgba(0 0 0 / 0.60)",
+            faint: "rgba(0 0 0 / 0.50)",
         },
         fill: {
             base: "#000",
-            muted: "rgba(0, 0, 0, 0.12)",
-            faint: "rgba(0, 0, 0, 0.04)",
-            baseHover: "rgba(0, 0, 0, 0.87)",
-            faintHover: "rgba(0, 0, 0, 0.08)",
+            baseHover: "rgba(0 0 0 / 0.87)",
+            muted: "rgba(0 0 0 / 0.12)",
+            faint: "rgba(0 0 0 / 0.04)",
+            // TODO(LM): Different from Figma.
+            faintHover: "rgba(0 20 0 / 0.06)",
+            fainter: "rgba(0 0 0 / 0.02)",
         },
         stroke: {
             base: "#000",
-            muted: "rgba(0, 0, 0, 0.24)",
-            faint: "rgba(0, 0, 0, 0.12)",
+            muted: "rgba(0 0 0 / 0.24)",
+            faint: "rgba(0 0 0 / 0.12)",
         },
         boxShadow: {
-            float: "0px 0px 10px rgba(0, 0, 0, 0.25)",
-            menu: "0px 0px 6px rgba(0, 0, 0, 0.16), 0px 3px 6px rgba(0, 0, 0, 0.12)",
-            button: "0px 4px 4px rgba(0, 0, 0, 0.25)",
+            // TODO(LM): Rename to paper
+            float: "0px 0px 10px rgba(0 0 0 / 0.25)",
+            menu: "0px 0px 6px rgba(0 0 0 / 0.16), 0px 3px 6px rgba(0 0 0 / 0.12)",
+            button: "0px 4px 4px rgba(0 0 0 / 0.25)",
         },
     },
     dark: {
         background: {
-            base: "#000",
+            default: "#000",
             paper: "#1b1b1b",
             paper2: "#252525",
         },
         backdrop: {
-            base: "rgba(0, 0, 0, 0.90)",
-            muted: "rgba(0, 0, 0, 0.65)",
-            faint: "rgba(0, 0, 0,0.20)",
+            base: "rgba(0 0 0 / 0.90)",
+            muted: "rgba(0 0 0 / 0.65)",
+            faint: "rgba(0 0 0 / 0.20)",
         },
         text: {
             base: "#fff",
-            muted: "rgba(255, 255, 255, 0.70)",
-            faint: "rgba(255, 255, 255, 0.50)",
+            muted: "rgba(255 255 255 / 0.70)",
+            faint: "rgba(255 255 255 / 0.50)",
         },
         fill: {
             base: "#fff",
-            muted: "rgba(255, 255, 255, 0.16)",
-            faint: "rgba(255, 255, 255, 0.12)",
-            baseHover: "rgba(255, 255, 255, 0.90)",
-            faintHover: "rgba(255, 255, 255, 0.06)",
+            baseHover: "rgba(255 255 255 / 0.90)",
+            muted: "rgba(255 255 255 / 0.16)",
+            faint: "rgba(255 255 255 / 0.12)",
+            faintHover: "rgba(255 255 255 / 0.06)",
+            fainter: "rgba(255 255 255 / 0.05)",
         },
         stroke: {
             base: "#fff",
-            muted: "rgba(255,255,255,0.24)",
-            faint: "rgba(255,255,255,0.16)",
+            muted: "rgba(255 255 255 / 0.24)",
+            faint: "rgba(255 255 255 / 0.16)",
         },
         boxShadow: {
-            float: "0px 2px 12px rgba(0, 0, 0, 0.75)",
-            menu: "0px 0px 6px rgba(0, 0, 0, 0.50), 0px 3px 6px rgba(0, 0, 0, 0.25)",
-            button: "0px 4px 4px rgba(0, 0, 0, 0.75)",
+            float: "0px 2px 12px rgba(0 0 0 / 0.75)",
+            menu: "0px 0px 6px rgba(0 0 0 / 0.50), 0px 3px 6px rgba(0 0 0 / 0.25)",
+            button: "0px 4px 4px rgba(0 0 0 / 0.75)",
         },
     },
 };
 
 const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
-    // light: false,
+    light: {
+        palette: {
+            background: colors.light.background,
+            backdrop: colors.light.backdrop,
+            primary: {
+                main: colors.light.fill.base,
+                dark: colors.light.fill.baseHover,
+                contrastText: colors.fixed.white,
+            },
+            secondary: {
+                main: colors.light.fill.faint,
+                dark: colors.light.fill.faintHover,
+                contrastText: colors.light.text.base,
+            },
+            success: { main: colors.fixed.success },
+            warning: { main: colors.fixed.golden },
+            accent: {
+                main: colors.accent.main,
+                dark: colors.accent.dark,
+                light: colors.accent.light,
+                contrastText: colors.fixed.white,
+            },
+            critical: {
+                main: colors.fixed.danger.main,
+                dark: colors.fixed.danger.dark,
+                light: colors.fixed.danger.light,
+                contrastText: colors.fixed.white,
+            },
+            text: {
+                // Alias the tokens used by MUI to the ones that we use. This way,
+                // we don't need to change the default ("primary"), or update the
+                // MUI internal styling that refers to these tokens.
+                //
+                // Our own code should not use these.
+                primary: colors.light.text.base,
+                secondary: colors.light.text.muted,
+                disabled: colors.light.text.faint,
+                // Our color tokens.
+                base: colors.light.text.base,
+                muted: colors.light.text.muted,
+                faint: colors.light.text.faint,
+            },
+            fill: colors.light.fill,
+            stroke: colors.light.stroke,
+            divider: colors.light.stroke.faint,
+            fixed: colors.fixed,
+            boxShadow: colors.light.boxShadow,
+            // Override some MUI defaults for styling action elements like
+            // buttons and menu items.
+            //
+            // https://github.com/mui/material-ui/blob/v6.4.0/packages/mui-material/src/styles/createPalette.js#L68
+            action: {
+                // The color of an active action like an icon button.
+                active: colors.light.stroke.base,
+                // The color of an hovered action.
+                hover: colors.light.fill.faintHover,
+                // For an icon button, the hover background color is derived
+                // from the active color above and this opacity.
+                hoverOpacity: 0.04,
+                // TODO(LM): Remove commented.
+                // The color of a selected action.
+                //
+                // Placeholder; not clear how it impacts us.
+                // selected: "#ff0000", //colors.light.stroke.base,
+                // selectedOpacity: 0.08,
+                // The color of a disabled action.
+                disabled: colors.light.text.faint,
+                // disabledOpacity: 0.12,
+                // The background color of a disabled action.
+                disabledBackground: colors.light.fill.faint,
+                // Placeholder; not clear how it impacts us.
+                // focus: "#ff0000", //colors.light.stroke.base,
+                // Placeholder (MUI default); not clear how it impacts us.
+                // focusOpacity: 1,
+                // Placeholder (MUI default); not clear how it impacts us.
+                // activatedOpacity: 0.12,
+            },
+            // Override some internal MUI defaults that impact the components
+            // which we use.
+            //
+            // https://github.com/mui/material-ui/blob/v6.4.0/packages/mui-material/src/styles/createThemeWithVars.js#L271
+            FilledInput: {
+                bg: colors.light.fill.faint,
+                hoverBg: colors.light.fill.faintHover,
+                // We don't use this currently.
+                // disabledBg: "#ff0000", //colors.light.fill.faint,
+            },
+        },
+    },
     dark: {
         palette: {
-            background: {
-                default: colors.dark.background.base,
-                paper: colors.dark.background.paper,
-                paper2: colors.dark.background.paper2,
-            },
-            backdrop: {
-                base: colors.dark.backdrop.base,
-                muted: colors.dark.backdrop.muted,
-                faint: colors.dark.backdrop.faint,
-            },
+            background: colors.dark.background,
+            backdrop: colors.dark.backdrop,
             primary: {
                 main: colors.dark.fill.base,
                 dark: colors.dark.fill.baseHover,
@@ -251,7 +342,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 contrastText: colors.dark.text.base,
             },
             success: { main: colors.fixed.success },
-            warning: { main: colors.fixed.warning },
+            warning: { main: colors.fixed.golden },
             accent: {
                 main: colors.accent.main,
                 dark: colors.accent.dark,
@@ -278,17 +369,8 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 muted: colors.dark.text.muted,
                 faint: colors.dark.text.faint,
             },
-            fill: {
-                base: colors.dark.fill.base,
-                muted: colors.dark.fill.muted,
-                faint: colors.dark.fill.faint,
-                faintHover: colors.dark.fill.faintHover,
-            },
-            stroke: {
-                base: colors.dark.stroke.base,
-                muted: colors.dark.stroke.muted,
-                faint: colors.dark.stroke.faint,
-            },
+            fill: colors.dark.fill,
+            stroke: colors.dark.stroke,
             divider: colors.dark.stroke.faint,
             fixed: colors.fixed,
             boxShadow: colors.dark.boxShadow,
@@ -297,27 +379,29 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             //
             // https://github.com/mui/material-ui/blob/v6.4.0/packages/mui-material/src/styles/createPalette.js#L68
             action: {
-                // The color of an active action like an icon button.
+                // The color of an active action, like an icon button.
                 active: colors.dark.stroke.base,
                 // The color of an hovered action.
                 hover: colors.dark.fill.faintHover,
-                hoverOpacity: 0.06,
+                // For an icon button, the hover background color is derived
+                // from the active color above and this opacity.
+                hoverOpacity: 0.12,
                 // The color of a selected action.
                 //
                 // Placeholder; not clear how it impacts us.
-                selected: colors.dark.stroke.base,
-                selectedOpacity: 0.08,
-                // The color of a disabled action.
+                // selected: colors.dark.stroke.base,
+                // selectedOpacity: 0.08,
+                // The color of a disabled action (including regular buttons).
                 disabled: colors.dark.text.faint,
-                disabledOpacity: 0.12,
+                // disabledOpacity: 0.12,
                 // The background color of a disabled action.
                 disabledBackground: colors.dark.fill.faint,
                 // Placeholder; not clear how it impacts us.
-                focus: colors.dark.stroke.base,
+                // focus: colors.dark.stroke.base,
                 // Placeholder (MUI default); not clear how it impacts us.
-                focusOpacity: 1,
+                // focusOpacity: 1,
                 // Placeholder (MUI default); not clear how it impacts us.
-                activatedOpacity: 0.12,
+                // activatedOpacity: 0.12,
             },
             // Override some internal MUI defaults that impact the components
             // which we use.
@@ -327,7 +411,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 bg: colors.dark.fill.faint,
                 hoverBg: colors.dark.fill.faintHover,
                 // We don't use this currently.
-                disabledBg: colors.dark.fill.faint,
+                // disabledBg: colors.dark.fill.faint,
             },
         },
     },
@@ -532,9 +616,15 @@ const components: Components = {
     },
 
     MuiPaper: {
-        // MUI applies a semi-transparent background image for elevation in dark
-        // mode. Remove it to match the Paper background from our design.
-        styleOverrides: { root: { backgroundImage: "none" } },
+        styleOverrides: {
+            root: {
+                // MUI applies a semi-transparent background image for elevation
+                // in dark mode. Remove it to match background for our designs.
+                backgroundImage: "none",
+                // Use our paper shadow.
+                boxShadow: "var(--mui-palette-boxShadow-float)",
+            },
+        },
     },
 
     MuiLink: {
@@ -556,6 +646,8 @@ const components: Components = {
         defaultProps: {
             // Change the default button variant from "text" to "contained".
             variant: "contained",
+            // Disable shadows.
+            disableElevation: true,
         },
         styleOverrides: {
             // We don't use the size prop for the MUI button, or rather it

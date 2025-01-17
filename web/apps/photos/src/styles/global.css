@@ -18,7 +18,7 @@ body {
     height: 48px;
     background: none !important;
     background-image: none !important;
-    color: #fff;
+    color: var(--mui-palette-stroke-base);
 }
 
 .pswp__item video {
@@ -65,8 +65,8 @@ body {
 
 .pswp__button--arrow--left,
 .pswp__button--arrow--right {
-    color: #fff;
-    background-color: #333333 !important;
+    color: var(--mui-palette-stroke-base);
+    background-color: var(--mui-palette-fill-faint) !important;
     border-radius: 50%;
     width: 56px;
     height: 56px;

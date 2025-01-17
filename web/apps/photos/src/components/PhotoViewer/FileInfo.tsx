@@ -1,3 +1,5 @@
+import { CopyButton } from "@/base/components/CopyButton";
+import { LinkButtonUndecorated } from "@/base/components/LinkButton";
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
@@ -40,7 +42,6 @@ import { updateMapEnabled } from "@/new/photos/services/settings";
 import { AppContext } from "@/new/photos/types/context";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import CopyButton from "@ente/shared/components/CopyButton";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -68,7 +69,6 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import LinkButton from "components/pages/gallery/LinkButton";
 import type { DisplayFile } from "components/PhotoFrame";
 import { Formik } from "formik";
 import { t } from "i18next";
@@ -254,18 +254,13 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                         {t("view_on_map")}
                                     </Link>
                                 ) : (
-                                    <LinkButton
+                                    <LinkButtonUndecorated
                                         onClick={
                                             openDisableMapConfirmationDialog
                                         }
-                                        sx={{
-                                            textDecoration: "none",
-                                            color: "text.muted",
-                                            fontWeight: "medium",
-                                        }}
                                     >
                                         {t("disable_map")}
-                                    </LinkButton>
+                                    </LinkButtonUndecorated>
                                 )
                             }
                             trailingButton={
@@ -296,16 +291,9 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         ) : !exif.tags ? (
                             t("no_exif")
                         ) : (
-                            <LinkButton
-                                onClick={showRawExif}
-                                sx={{
-                                    textDecoration: "none",
-                                    color: "text.muted",
-                                    fontWeight: "medium",
-                                }}
-                            >
+                            <LinkButtonUndecorated onClick={showRawExif}>
                                 {t("view_exif")}
-                            </LinkButton>
+                            </LinkButtonUndecorated>
                         )
                     }
                 />
@@ -913,13 +901,15 @@ const MapBoxContainer = styled("div")`
     width: 100%;
 `;
 
-const MapBoxEnableContainer = styled(MapBoxContainer)`
+const MapBoxEnableContainer = styled(MapBoxContainer)(
+    ({ theme }) => `
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.09);
-`;
+    background-color: ${theme.vars.palette.fill.fainter};
+`,
+);
 
 interface RawExifProps {
     open: boolean;

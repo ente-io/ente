@@ -4,10 +4,7 @@ import {
     type UploadPhase,
 } from "@/new/photos/services/upload/types";
 import { useAppContext } from "@/new/photos/types/context";
-import {
-    SpaceBetweenFlex,
-    VerticallyCenteredFlex,
-} from "@ente/shared/components/Container";
+import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
@@ -433,8 +430,12 @@ const SectionAccordion = styled((props: AccordionProps) => (
     "&:last-child": { borderBottom: `1px solid ${theme.vars.palette.divider}` },
 }));
 
-const SectionAccordionSummary = styled(AccordionSummary)(() => ({
-    backgroundColor: "rgba(255, 255, 255, .05)",
+const SectionAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
+    backgroundColor: theme.vars.palette.fill.fainter,
+    // AccordionSummary is a button, and for a reasons to do with MUI internal
+    // that I didn't explore further, the user agent default font family is
+    // getting applied in this case.
+    fontFamily: "inherit",
 }));
 
 const SectionAccordionDetails = styled(AccordionDetails)(({ theme }) => ({
@@ -534,7 +535,12 @@ interface TitleTextProps {
 }
 
 const TitleText: React.FC<TitleTextProps> = ({ title, count }) => (
-    <VerticallyCenteredFlex gap={"4px"}>
+    <Stack
+        direction="row"
+        // Need to reset the font weight since it gets reset by the
+        // AccordionSummary (see SectionAccordionSummary).
+        sx={{ gap: 1, fontWeight: "regular", alignItems: "baseline" }}
+    >
         <Typography>{title}</Typography>
         <Typography variant="small" sx={{ color: "text.faint" }}>
             {"•"}
@@ -542,7 +548,7 @@ const TitleText: React.FC<TitleTextProps> = ({ title, count }) => (
         <Typography variant="small" sx={{ color: "text.faint" }}>
             {count ?? 0}
         </Typography>
-    </VerticallyCenteredFlex>
+    </Stack>
 );
 
 const DoneFooter: React.FC = () => {

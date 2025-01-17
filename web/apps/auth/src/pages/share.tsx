@@ -1,6 +1,6 @@
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { decryptMetadataJSON_New } from "@/base/crypto";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 
 interface SharedCode {
@@ -18,6 +18,8 @@ const Page: React.FC = () => {
         nextCode: "",
         progress: 0,
     });
+
+    const theme = useTheme();
 
     const getTimeStatus = (
         currentTime: number,
@@ -65,7 +67,11 @@ const Page: React.FC = () => {
     useEffect(() => {
         if (!sharedCode) return;
 
+        let done = false;
+
         const updateCode = () => {
+            if (done) return;
+
             const currentTime = Date.now();
             const codes = sharedCode.codes.split(",");
             const status = getTimeStatus(
@@ -85,15 +91,23 @@ const Page: React.FC = () => {
                     ),
                 );
             }
+
+            requestAnimationFrame(updateCode);
         };
 
-        const interval = setInterval(updateCode, 100);
-        return () => clearInterval(interval);
+        updateCode();
+
+        return () => {
+            done = true;
+        };
     }, [sharedCode]);
 
     const progressBarColor = useMemo(
-        () => (100 - codeDisplay.progress > 40 ? "#8E2DE2" : "#FFC107"),
-        [codeDisplay.progress],
+        () =>
+            100 - codeDisplay.progress > 40
+                ? theme.vars.palette.accent.light
+                : theme.vars.palette.warning.main,
+        [theme, codeDisplay.progress],
     );
 
     return (
@@ -128,17 +142,17 @@ const Page: React.FC = () => {
                 {timeStatus === 0 && (
                     <Box
                         sx={{
-                            backgroundColor: "#1C1C1E",
+                            backgroundColor: "fixed.gray.A",
                             borderRadius: "10px",
                             paddingBottom: "20px",
                             position: "relative",
                         }}
                     >
-                        <div
-                            style={{
+                        <Box
+                            sx={{
                                 width: "100%",
                                 height: "4px",
-                                backgroundColor: "#333333",
+                                backgroundColor: "fixed.gray.B",
                                 borderRadius: "2px",
                             }}
                         >
@@ -150,7 +164,7 @@ const Page: React.FC = () => {
                                     borderRadius: "2px",
                                 }}
                             />
-                        </div>
+                        </Box>
                         <div
                             style={{
                                 fontSize: "36px",
@@ -191,7 +205,7 @@ const Page: React.FC = () => {
             <Button
                 color="accent"
                 sx={{
-                    backgroundColor: "#8E2DE2",
+                    backgroundColor: "accent.light",
                     borderRadius: "25px",
                     padding: "15px 30px",
                     marginBottom: "42px",

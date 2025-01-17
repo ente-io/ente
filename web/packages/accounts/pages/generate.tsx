@@ -15,9 +15,9 @@ import {
 } from "@/accounts/services/srp";
 import { putAttributes } from "@/accounts/services/user";
 import type { PageProps } from "@/accounts/types/page";
+import { LinkButton } from "@/base/components/LinkButton";
 import { LoadingIndicator } from "@/base/components/loaders";
 import log from "@/base/log";
-import LinkButton from "@ente/shared/components/LinkButton";
 import {
     generateAndSaveIntermediateKeyAttributes,
     saveKeyInSessionStore,

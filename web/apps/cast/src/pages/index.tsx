@@ -1,3 +1,4 @@
+import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
 import { Box, Stack, styled, Typography } from "@mui/material";
@@ -63,7 +64,7 @@ const Page: React.FC = () => {
 
     return (
         <Container>
-            <img width={150} src="/images/ente.svg" />
+            <EnteLogo height={45} />
             <Typography variant="h2" sx={{ marginBlock: "2rem" }}>
                 Enter this code on <b>Ente Photos</b> to pair this screen
             </Typography>

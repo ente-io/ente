@@ -46,6 +46,7 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 	smtpUsername := viper.GetString("smtp.username")
 	smtpPassword := viper.GetString("smtp.password")
 	smtpEmail := viper.GetString("smtp.email")
+	smtpSenderName := viper.GetString("smtp.sender-name")
 
 	var emailMessage string
 	var auth smtp.Auth = nil
@@ -62,9 +63,13 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 		emailAddresses += email
 	}
 
-	// If an sender email is provided use it instead of the fromEmail.
+	// If a sender email is provided use it instead of the fromEmail.
 	if smtpEmail != "" {
 		fromEmail = smtpEmail
+	}
+	// If a sender name is provided use it instead of the fromName.
+	if smtpSenderName != "" {
+		fromName = smtpSenderName
 	}
 
 	header := "From: " + fromName + " <" + fromEmail + ">\n" +

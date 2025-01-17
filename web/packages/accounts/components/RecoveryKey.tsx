@@ -85,7 +85,9 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
                 <Stack
                     sx={{
                         border: "1px dashed",
-                        borderColor: "gray.A400",
+                        borderColor: "stroke.muted",
+                        // TODO(LM): Brighter?
+                        // borderColor: "gray.A400",
                         borderRadius: 1,
                     }}
                 >

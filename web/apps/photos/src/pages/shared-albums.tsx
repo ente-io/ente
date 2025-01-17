@@ -6,7 +6,7 @@ import {
     SpaceBetweenFlex,
     Stack100vhCenter,
 } from "@/base/components/containers";
-import { EnteLogoSVG } from "@/base/components/EnteLogo";
+import { EnteLogo } from "@/base/components/EnteLogo";
 import {
     LoadingIndicator,
     TranslucentLoadingOverlay,
@@ -584,7 +584,7 @@ const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
     <NavbarBase>
         <FluidContainer>
             <EnteLogoLink href="https://ente.io">
-                <EnteLogoSVG height={15} />
+                <EnteLogo height={15} />
             </EnteLogoLink>
         </FluidContainer>
         {onAddPhotos ? <AddPhotosButton onClick={onAddPhotos} /> : <GoToEnte />}
