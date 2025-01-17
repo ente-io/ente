@@ -901,13 +901,17 @@ const MapBoxContainer = styled("div")`
     width: 100%;
 `;
 
-const MapBoxEnableContainer = styled(MapBoxContainer)`
+const MapBoxEnableContainer = styled(MapBoxContainer)(
+    ({ theme }) => `
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.09);
-`;
+    /* TODO(LM): Name? */
+    background-color: ${theme.vars.palette.fill.faintHover};
+    // background-color: rgba(255, 255, 255, 0.09);
+`,
+);
 
 interface RawExifProps {
     open: boolean;
