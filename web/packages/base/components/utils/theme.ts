@@ -138,6 +138,7 @@ const _colors = {
     },
     accentAuth: {
         dark: "#8e0fcb",
+        // TODO(LM): Shift up
         main: "#9610d6",
         light: "#8e2de2",
         lighter: "#984df4" /* TODO(LM) */,
@@ -293,6 +294,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 active: colors.light.stroke.base,
                 // The color of an hovered action.
                 hover: colors.light.fill.faintHover,
+                // TODO(LM): Remove commented.
                 // hoverOpacity: 0.06,
                 // The color of a selected action.
                 //

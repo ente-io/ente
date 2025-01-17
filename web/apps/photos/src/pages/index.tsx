@@ -140,11 +140,11 @@ const Page: React.FC = () => {
                             {
                                 bgcolor: wipTheme
                                     ? "background.default"
-                                    : "fill.faint",
+                                    : "background.paper2",
                             },
                             (theme) =>
                                 theme.applyStyles("dark", {
-                                    bgcolor: "fill.faint",
+                                    bgcolor: "background.paper2",
                                 }),
                         ]}
                     >
