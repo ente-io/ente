@@ -294,8 +294,10 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 active: colors.light.stroke.base,
                 // The color of an hovered action.
                 hover: colors.light.fill.faintHover,
+                // For an icon button, the hover background color is derived
+                // from the active color above and this opacity.
+                hoverOpacity: 0.04,
                 // TODO(LM): Remove commented.
-                // hoverOpacity: 0.06,
                 // The color of a selected action.
                 //
                 // Placeholder; not clear how it impacts us.
@@ -381,7 +383,9 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 active: colors.dark.stroke.base,
                 // The color of an hovered action.
                 hover: colors.dark.fill.faintHover,
-                // hoverOpacity: 0.06,
+                // For an icon button, the hover background color is derived
+                // from the active color above and this opacity.
+                hoverOpacity: 0.12,
                 // The color of a selected action.
                 //
                 // Placeholder; not clear how it impacts us.
