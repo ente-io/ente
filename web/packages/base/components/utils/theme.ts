@@ -136,7 +136,7 @@ const _colors = {
         dark: "#8e0fcb",
         main: "#9610d6",
         light: "#8e2de2",
-        lighter: "#984df4", /* TODO(LM) */
+        lighter: "#984df4" /* TODO(LM) */,
     },
     fixed: {
         white: "#fff",
