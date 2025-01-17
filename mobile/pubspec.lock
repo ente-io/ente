@@ -2770,7 +2770,7 @@ packages:
     description:
       path: "."
       ref: prateekmedia-patch-1
-      resolved-ref: c347ccd60c76f79e71f968661c282f75c27b26fd
+      resolved-ref: "8bce37682e20da618ea155fca1b4756b22621882"
       url: "https://github.com/prateekmedia/VideoCompress-forked.git"
     source: git
     version: "3.1.5"

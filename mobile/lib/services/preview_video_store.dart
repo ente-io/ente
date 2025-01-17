@@ -107,9 +107,12 @@ class PreviewVideoStore {
     _logger.info(
       'Generating HLS Playlist ${enteFile.displayName} at $prefix/output.m3u8}',
     );
+
     final session = await FFmpegKit.execute(
       '-i "${mediaInfo!.path}" '
-      '-c copy -f hls -hls_time 10 -hls_flags single_file '
+      '-metadata:s:v:0 rotate=0 '
+      '-c:v libx264 -crf 18 -preset veryfast '
+      '-c:a copy -f hls -hls_time 10 -hls_flags single_file '
       '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
       '$prefix/output.m3u8',
     );
