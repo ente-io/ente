@@ -85,16 +85,18 @@ declare module "@mui/material/styles" {
          * These change with the color scheme.
          *
          * They come in three strengths which are meant to play nicely with the
-         * corresponding strengths of "text.*" and "stroke.*".
+         * corresponding strengths of "text.*" and "stroke.*", plus extra ones.
          *
-         * The strength comes with a hover variant, useful to indicate the hover
-         * state of buttons and menu items that use the corresponding fill.
+         * Some strengths also have a hover variant, useful to indicate hover on
+         * buttons and menu items that use the corresponding fill.
          */
         fill: {
             base: string;
+            baseHover: string;
             muted: string;
             faint: string;
             faintHover: string;
+            fainter: string;
         };
         /**
          * Transparent background fills that serve as the backdrop of modals,

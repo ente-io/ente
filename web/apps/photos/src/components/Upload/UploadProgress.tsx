@@ -433,8 +433,8 @@ const SectionAccordion = styled((props: AccordionProps) => (
     "&:last-child": { borderBottom: `1px solid ${theme.vars.palette.divider}` },
 }));
 
-const SectionAccordionSummary = styled(AccordionSummary)(() => ({
-    backgroundColor: "rgba(255, 255, 255, .05)",
+const SectionAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
+    backgroundColor: theme.vars.palette.fill.fainter,
 }));
 
 const SectionAccordionDetails = styled(AccordionDetails)(({ theme }) => ({

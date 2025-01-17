@@ -156,7 +156,7 @@ const _colors = {
         switchOn: "#2ECA45",
         croppedAreaOverlay: "rgba(0 0 0 / 0.5)",
         overlayIndicatorMuted: "rgba(255 255 255 / 0.48)",
-        storageCardUsageFill: "rgba(255 255 255 / 0.2)"
+        storageCardUsageFill: "rgba(255 255 255 / 0.2)",
     },
     light: {
         background: {
@@ -210,10 +210,11 @@ const _colors = {
         },
         fill: {
             base: "#fff",
+            baseHover: "rgba(255 255 255 / 0.90)",
             muted: "rgba(255 255 255 / 0.16)",
             faint: "rgba(255 255 255 / 0.12)",
-            baseHover: "rgba(255 255 255 / 0.90)",
             faintHover: "rgba(255 255 255 / 0.06)",
+            fainter: "rgba(255 255 255 / 0.05)",
         },
         stroke: {
             base: "#fff",
@@ -282,9 +283,11 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             },
             fill: {
                 base: colors.dark.fill.base,
+                baseHover: colors.dark.fill.baseHover,
                 muted: colors.dark.fill.muted,
                 faint: colors.dark.fill.faint,
                 faintHover: colors.dark.fill.faintHover,
+                fainter: colors.dark.fill.fainter,
             },
             stroke: {
                 base: colors.dark.stroke.base,

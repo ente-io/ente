@@ -907,9 +907,7 @@ const MapBoxEnableContainer = styled(MapBoxContainer)(
     display: flex;
     justify-content: center;
     align-items: center;
-    /* TODO(LM): Name? */
-    background-color: ${theme.vars.palette.fill.faintHover};
-    // background-color: rgba(255, 255, 255, 0.09);
+    background-color: ${theme.vars.palette.fill.fainter};
 `,
 );
 
