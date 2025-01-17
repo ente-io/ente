@@ -37,7 +37,7 @@ export const AppNavbar: React.FC = () => {
     );
 };
 
-const NavbarBaseNormalFlow = styled("div")(
+export const NavbarBaseNormalFlow = styled("div")(
     ({ theme }) => `
     flex: 0 0 64px;
     display: flex;

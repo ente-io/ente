@@ -87,7 +87,8 @@ const Page: React.FC = () => {
 const ContentsPaper = styled(Paper)(({ theme }) => ({
     marginBlock: theme.spacing(2),
     padding: theme.spacing(4, 2),
-    width: "min(420px, 95vw)",
+    // Wide enough to fit the QR code secret in one line under default settings.
+    width: "min(440px, 95vw)",
     display: "flex",
     flexDirection: "column",
     gap: theme.spacing(4),

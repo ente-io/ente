@@ -4,6 +4,7 @@ import { CenteredFill, CenteredFlex } from "@/base/components/containers";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { wipTheme } from "@/base/components/utils/theme";
 import log from "@/base/log";
 import { albumsAppOrigin, customAPIHost } from "@/base/origins";
 import { DevSettings } from "@/new/photos/components/DevSettings";
@@ -134,7 +135,19 @@ const Page: React.FC = () => {
                         </FocusVisibleButton>
                         <MobileBoxFooter {...{ host }} />
                     </MobileBox>
-                    <DesktopBox>
+                    <DesktopBox
+                        sx={[
+                            {
+                                bgcolor: wipTheme
+                                    ? "background.default"
+                                    : "background.paper2",
+                            },
+                            (theme) =>
+                                theme.applyStyles("dark", {
+                                    bgcolor: "background.paper2",
+                                }),
+                        ]}
+                    >
                         <Stack sx={{ width: "320px", py: 4, gap: 4 }}>
                             {showLogin ? (
                                 <LoginContents
@@ -204,12 +217,20 @@ const TappableContainer: React.FC<
 
     return (
         <CenteredFill
-            sx={{
-                bgcolor: "background.default",
-                "@media (width <= 1024px)": {
-                    flexDirection: "column",
+            sx={[
+                {
+                    bgcolor: wipTheme
+                        ? "background.paper2"
+                        : "background.default",
+                    "@media (width <= 1024px)": {
+                        flexDirection: "column",
+                    },
                 },
-            }}
+                (theme) =>
+                    theme.applyStyles("dark", {
+                        bgcolor: "background.default",
+                    }),
+            ]}
             onClick={handleClick}
         >
             <DevSettings open={showDevSettings} onClose={handleClose} />
@@ -286,21 +307,18 @@ const MobileBoxFooter: React.FC<MobileBoxFooterProps> = ({ host }) => {
     );
 };
 
-const DesktopBox = styled(CenteredFlex)(
-    ({ theme }) => `
+const DesktopBox = styled(CenteredFlex)`
     flex-shrink: 0;
     flex-grow: 2;
     flex-basis: auto;
 
     height: 100%;
     padding-inline: 20px;
-    background-color: ${theme.vars.palette.fill.faint};
 
     @media (width <= 1024px) {
         display: none;
     }
-`,
-);
+`;
 
 const Slideshow: React.FC = () => {
     const [selectedIndex, setSelectedIndex] = useState(0);

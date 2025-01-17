@@ -23,6 +23,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Box,
     Checkbox,
+    Divider,
     FormControlLabel,
     FormGroup,
     IconButton,
@@ -158,7 +159,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                 handleSubmit,
             }): React.JSX.Element => (
                 <form noValidate onSubmit={handleSubmit}>
-                    <VerticallyCentered sx={{ mb: 1 }}>
+                    <VerticallyCentered sx={{ mb: 2 }}>
                         <TextField
                             fullWidth
                             id="email"
@@ -303,7 +304,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                             />
                         </FormGroup>
                     </VerticallyCentered>
-                    <Box sx={{ mb: 3 }}>
+                    <Box sx={{ mb: 1 }}>
                         <LoadingButton
                             fullWidth
                             color="accent"
@@ -338,8 +339,9 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
         <>
             <AccountsPageTitle>{t("sign_up")}</AccountsPageTitle>
             {form}
+            <Divider />
             <AccountsPageFooter>
-                <Stack sx={{ gap: 5, textAlign: "center" }}>
+                <Stack sx={{ gap: 3, textAlign: "center" }}>
                     <LinkButton onClick={onLogin}>
                         {t("existing_account")}
                     </LinkButton>
