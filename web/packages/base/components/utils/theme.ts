@@ -8,7 +8,8 @@ const getTheme = (appName: AppName): Theme => {
     const colors = getColors(appName);
     const colorSchemes_ = getColorSchemes(colors);
     // TODO(LM): Temp
-    const colorSchemes = { ...colorSchemes_, light: colorSchemes_.dark };
+    // const colorSchemes = { ...colorSchemes_, light: colorSchemes_.dark };
+    const colorSchemes = { ...colorSchemes_ }; //, light: colorSchemes_.dark };
     return createTheme({
         cssVariables: true,
         colorSchemes,
@@ -231,7 +232,92 @@ const _colors = {
 };
 
 const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
-    // light: false,
+    light: {
+        palette: {
+            background: colors.light.background,
+            backdrop: colors.light.backdrop,
+            primary: {
+                main: colors.light.fill.base,
+                dark: colors.light.fill.baseHover,
+                contrastText: colors.fixed.black,
+            },
+            secondary: {
+                main: colors.light.fill.faint,
+                dark: colors.light.fill.faintHover,
+                contrastText: colors.light.text.base,
+            },
+            success: { main: colors.fixed.success },
+            warning: { main: colors.fixed.golden },
+            accent: {
+                main: colors.accent.main,
+                dark: colors.accent.dark,
+                light: colors.accent.light,
+                contrastText: colors.fixed.white,
+            },
+            critical: {
+                main: colors.fixed.danger.main,
+                dark: colors.fixed.danger.dark,
+                light: colors.fixed.danger.light,
+                contrastText: colors.fixed.white,
+            },
+            text: {
+                // Alias the tokens used by MUI to the ones that we use. This way,
+                // we don't need to change the default ("primary"), or update the
+                // MUI internal styling that refers to these tokens.
+                //
+                // Our own code should not use these.
+                primary: colors.light.text.base,
+                secondary: colors.light.text.muted,
+                disabled: colors.light.text.faint,
+                // Our color tokens.
+                base: colors.light.text.base,
+                muted: colors.light.text.muted,
+                faint: colors.light.text.faint,
+            },
+            fill: colors.light.fill,
+            stroke: colors.light.stroke,
+            divider: colors.light.stroke.faint,
+            fixed: colors.fixed,
+            boxShadow: colors.light.boxShadow,
+            // Override some MUI defaults for styling action elements like
+            // buttons and menu items.
+            //
+            // https://github.com/mui/material-ui/blob/v6.4.0/packages/mui-material/src/styles/createPalette.js#L68
+            action: {
+                // The color of an active action like an icon button.
+                active: colors.light.stroke.base,
+                // The color of an hovered action.
+                hover: colors.light.fill.faintHover,
+                hoverOpacity: 0.06,
+                // The color of a selected action.
+                //
+                // Placeholder; not clear how it impacts us.
+                selected: colors.light.stroke.base,
+                selectedOpacity: 0.08,
+                // The color of a disabled action.
+                disabled: colors.light.text.faint,
+                disabledOpacity: 0.12,
+                // The background color of a disabled action.
+                disabledBackground: colors.light.fill.faint,
+                // Placeholder; not clear how it impacts us.
+                focus: colors.light.stroke.base,
+                // Placeholder (MUI default); not clear how it impacts us.
+                focusOpacity: 1,
+                // Placeholder (MUI default); not clear how it impacts us.
+                activatedOpacity: 0.12,
+            },
+            // Override some internal MUI defaults that impact the components
+            // which we use.
+            //
+            // https://github.com/mui/material-ui/blob/v6.4.0/packages/mui-material/src/styles/createThemeWithVars.js#L271
+            FilledInput: {
+                bg: colors.light.fill.faint,
+                hoverBg: colors.light.fill.faintHover,
+                // We don't use this currently.
+                disabledBg: colors.light.fill.faint,
+            },
+        },
+    },
     dark: {
         palette: {
             background: colors.dark.background,
