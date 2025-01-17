@@ -7,7 +7,7 @@ import {
     type SvgIconProps,
 } from "@mui/material";
 import { t } from "i18next";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 export default function CopyButton({
     code,
@@ -18,13 +18,13 @@ export default function CopyButton({
     color?: IconButtonProps["color"];
     size?: SvgIconProps["fontSize"];
 }) {
-    const [copied, setCopied] = useState<boolean>(false);
+    const [copied, setCopied] = useState(false);
 
-    const copyToClipboardHelper = (text: string) => () => {
-        navigator.clipboard.writeText(text);
+    const handleClick = useCallback(() => {
+        navigator.clipboard.writeText(code);
         setCopied(true);
         setTimeout(() => setCopied(false), 1000);
-    };
+    }, [code]);
 
     return (
         <Tooltip
@@ -33,7 +33,7 @@ export default function CopyButton({
             title={t("copied")}
             slotProps={{ popper: { sx: { zIndex: 2000 } } }}
         >
-            <IconButton onClick={copyToClipboardHelper(code)} color={color}>
+            <IconButton onClick={handleClick} color={color}>
                 {copied ? (
                     <DoneIcon fontSize={size ?? "small"} />
                 ) : (
