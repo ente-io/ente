@@ -4,7 +4,7 @@ on:
     schedule:
         # [Note: Run workflow every 24 hours]
         #
-        # Run everyday at ~8:00 AM IST (except Sundays).
+        # Run every weekday at ~8:00 AM IST.
         #
         # First field is minute, second is hour of the day. Last is day of week,
         # 0 being Sunday.
@@ -15,7 +15,7 @@ on:
         # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
         # https://crontab.guru/
         #
-        - cron: "25 2 * * 1-6"
+        - cron: "25 2 * * 1-5"
     # Also allow manually running the workflow
     workflow_dispatch:
 
