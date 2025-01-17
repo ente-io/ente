@@ -156,6 +156,7 @@ const _colors = {
         switchOn: "#2ECA45",
         croppedAreaOverlay: "rgba(0 0 0 / 0.5)",
         overlayIndicatorMuted: "rgba(255 255 255 / 0.48)",
+        storageCardUsageFill: "rgba(255 255 255 / 0.2)"
     },
     light: {
         background: {

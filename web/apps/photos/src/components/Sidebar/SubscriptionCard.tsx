@@ -304,12 +304,12 @@ const UsageBar: React.FC<UsageBarProps> = ({ used, total, sx }) => (
     />
 );
 
-const UsageBar_ = styled(LinearProgress)(() => ({
+const UsageBar_ = styled(LinearProgress)(({ theme }) => ({
     ".MuiLinearProgress-bar": {
         borderRadius: "2px",
     },
     borderRadius: "2px",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: theme.vars.palette.fixed.storageCardUsageFill,
 }));
 
 interface LegendProps {

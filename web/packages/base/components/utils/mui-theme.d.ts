@@ -148,6 +148,10 @@ declare module "@mui/material/styles" {
              * "archived" indicator shown on top of albums.
              */
             overlayIndicatorMuted: string;
+            /**
+             * Color of the total space in the usage bar on the storage card.
+             */
+            storageCardUsageFill: string;
         };
         /**
          * MUI as of v6 does not allow customizing shadows easily. This is due
