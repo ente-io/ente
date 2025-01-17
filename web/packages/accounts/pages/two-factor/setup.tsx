@@ -69,7 +69,7 @@ const Page: React.FC = () => {
                             onSubmit={onSubmit}
                             buttonText={t("enable")}
                         />
-                        <LinkButton sx={{ mt: 1 }} onClick={router.back}>
+                        <LinkButton onClick={router.back}>
                             {t("go_back")}
                         </LinkButton>
                     </Stack>

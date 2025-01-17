@@ -1,12 +1,6 @@
 import { Link, type ButtonProps, type LinkProps } from "@mui/material";
 import React from "react";
 
-export type LinkButtonProps = React.PropsWithChildren<{
-    onClick: () => void;
-    variant?: string;
-    style?: React.CSSProperties;
-}>;
-
 const LinkButton: React.FC<
     LinkProps<"button", { color?: ButtonProps["color"] }>
 > = ({ children, sx, color, ...props }) => {
