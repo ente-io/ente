@@ -261,6 +261,10 @@
       "title": "CSFloat"
     },
     {
+      "title": "CSGORoll",
+      "slug": "csgoroll"
+    },
+    {
       "title": "DCS",
       "altNames": [
         "Digital Combat Simulator"
@@ -352,6 +356,10 @@
       "title": "Filen"
     },
     {
+      "title": "Finanzfluss",
+      "slug": "finanzfluss"
+    },
+    {
       "title": "Firefox",
       "slug": "mozilla"
     },
@@ -369,6 +377,14 @@
     },
     {
       "title": "GMX"
+    },
+    {
+      "title": "GommeHD.net",
+      "slug": "gommehd",
+      "altNames": [
+        "GommeHD",
+        "GommeHDnet"
+      ]
     },
     {
       "title": "Google"
@@ -516,6 +532,10 @@
       "slug": "laposte"
     },
     {
+      "title": "LabyMod",
+      "slug": "labymod"
+    },
+    {
       "title": "Lark",
       "slug": "lark",
       "altNames": [
@@ -631,6 +651,10 @@
       "slug": "name_com"
     },
     {
+      "title": "Nextcloud",
+      "slug": "nextcloud"
+    },
+    {
       "title": "NeteaseMail",
       "slug": "netease_mail",
       "altNames": [
@@ -704,6 +728,10 @@
       "altNames": [
         "欧易"
       ]
+    },
+    {
+      "title": "Parqet",
+      "slug": "parqet"
     },
     {
       "title": "Parsec"
