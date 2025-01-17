@@ -290,23 +290,23 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 active: colors.light.stroke.base,
                 // The color of an hovered action.
                 hover: colors.light.fill.faintHover,
-                hoverOpacity: 0.06,
+                // hoverOpacity: 0.06,
                 // The color of a selected action.
                 //
                 // Placeholder; not clear how it impacts us.
-                selected: colors.light.stroke.base,
-                selectedOpacity: 0.08,
+                // selected: "#ff0000", //colors.light.stroke.base,
+                // selectedOpacity: 0.08,
                 // The color of a disabled action.
                 disabled: colors.light.text.faint,
-                disabledOpacity: 0.12,
+                // disabledOpacity: 0.12,
                 // The background color of a disabled action.
                 disabledBackground: colors.light.fill.faint,
                 // Placeholder; not clear how it impacts us.
-                focus: colors.light.stroke.base,
+                // focus: "#ff0000", //colors.light.stroke.base,
                 // Placeholder (MUI default); not clear how it impacts us.
-                focusOpacity: 1,
+                // focusOpacity: 1,
                 // Placeholder (MUI default); not clear how it impacts us.
-                activatedOpacity: 0.12,
+                // activatedOpacity: 0.12,
             },
             // Override some internal MUI defaults that impact the components
             // which we use.
@@ -316,7 +316,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 bg: colors.light.fill.faint,
                 hoverBg: colors.light.fill.faintHover,
                 // We don't use this currently.
-                disabledBg: colors.light.fill.faint,
+                // disabledBg: "#ff0000", //colors.light.fill.faint,
             },
         },
     },
@@ -372,27 +372,27 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             //
             // https://github.com/mui/material-ui/blob/v6.4.0/packages/mui-material/src/styles/createPalette.js#L68
             action: {
-                // The color of an active action like an icon button.
+                // The color of an active action, like an icon button.
                 active: colors.dark.stroke.base,
                 // The color of an hovered action.
                 hover: colors.dark.fill.faintHover,
-                hoverOpacity: 0.06,
+                // hoverOpacity: 0.06,
                 // The color of a selected action.
                 //
                 // Placeholder; not clear how it impacts us.
-                selected: colors.dark.stroke.base,
-                selectedOpacity: 0.08,
-                // The color of a disabled action.
+                // selected: colors.dark.stroke.base,
+                // selectedOpacity: 0.08,
+                // The color of a disabled action (including regular buttons).
                 disabled: colors.dark.text.faint,
-                disabledOpacity: 0.12,
+                // disabledOpacity: 0.12,
                 // The background color of a disabled action.
                 disabledBackground: colors.dark.fill.faint,
                 // Placeholder; not clear how it impacts us.
-                focus: colors.dark.stroke.base,
+                // focus: colors.dark.stroke.base,
                 // Placeholder (MUI default); not clear how it impacts us.
-                focusOpacity: 1,
+                // focusOpacity: 1,
                 // Placeholder (MUI default); not clear how it impacts us.
-                activatedOpacity: 0.12,
+                // activatedOpacity: 0.12,
             },
             // Override some internal MUI defaults that impact the components
             // which we use.
@@ -402,7 +402,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 bg: colors.dark.fill.faint,
                 hoverBg: colors.dark.fill.faintHover,
                 // We don't use this currently.
-                disabledBg: colors.dark.fill.faint,
+                // disabledBg: colors.dark.fill.faint,
             },
         },
     },
