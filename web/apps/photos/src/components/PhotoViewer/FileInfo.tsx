@@ -68,7 +68,7 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import LinkButton from "components/pages/gallery/LinkButton";
+import LinkButton from "@ente/shared/components/LinkButton";
 import type { DisplayFile } from "components/PhotoFrame";
 import { Formik } from "formik";
 import { t } from "i18next";
