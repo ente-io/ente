@@ -1,4 +1,4 @@
-import { EnteLogo } from "@/base/components/EnteLogo";
+import { EnteLogo, EnteLogoSVG } from "@/base/components/EnteLogo";
 import { CenteredFlex, FlexWrapper } from "@ente/shared/components/Container";
 import { styled } from "@mui/material";
 import React from "react";
@@ -53,7 +53,7 @@ const NavbarBaseNormalFlow = styled("div")(
  */
 export const AppNavbarNormalFlow: React.FC = () => (
     <NavbarBaseNormalFlow>
-        <EnteLogo />
+        <EnteLogoSVG />
     </NavbarBaseNormalFlow>
 );
 
