@@ -132,9 +132,9 @@ const getColors = (appName: AppName) => ({
  */
 const _colors = {
     accentPhotos: {
-        dark: "#00B33C",
-        main: "#1DB954",
-        light: "#01DE4D",
+        dark: "#00b33c",
+        main: "#1db954",
+        light: "#01de4d",
     },
     accentAuth: {
         dark: "#8e0fcb",
@@ -145,19 +145,19 @@ const _colors = {
     fixed: {
         white: "#fff",
         black: "#000",
-        success: "#1DB954",
-        golden: "#FFC107",
+        success: "#1db954",
+        golden: "#ffc107",
         danger: {
-            dark: "#F53434",
-            main: "#EA3F3F",
-            light: "#FF6565",
+            dark: "#f53434",
+            main: "#ea3f3f",
+            light: "#ff6565",
         },
         gray: {
-            A: "#1C1C1E",
-            B: "#333333",
+            A: "#1c1c1e",
+            B: "#333",
             E: "#ddd",
         },
-        switchOn: "#2ECA45",
+        switchOn: "#2eca45",
         croppedAreaOverlay: "rgba(0 0 0 / 0.5)",
         overlayIndicatorMuted: "rgba(255 255 255 / 0.48)",
         storageCardUsageFill: "rgba(255 255 255 / 0.2)",
