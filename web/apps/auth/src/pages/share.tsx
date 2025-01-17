@@ -106,7 +106,7 @@ const Page: React.FC = () => {
         () =>
             100 - codeDisplay.progress > 40
                 ? theme.vars.palette.accent.light
-                : "#FFC107",
+                : theme.vars.palette.warning.main,
         [theme, codeDisplay.progress],
     );
 
@@ -205,7 +205,7 @@ const Page: React.FC = () => {
             <Button
                 color="accent"
                 sx={{
-                    backgroundColor: "#8E2DE2",
+                    backgroundColor: "accent.light",
                     borderRadius: "25px",
                     padding: "15px 30px",
                     marginBottom: "42px",

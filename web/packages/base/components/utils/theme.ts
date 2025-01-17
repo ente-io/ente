@@ -142,7 +142,7 @@ const _colors = {
         white: "#fff",
         black: "#000",
         success: "#1DB954",
-        warning: "#FFC247",
+        golden: "#FFC107",
         danger: {
             dark: "#F53434",
             main: "#EA3F3F",
@@ -252,7 +252,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 contrastText: colors.dark.text.base,
             },
             success: { main: colors.fixed.success },
-            warning: { main: colors.fixed.warning },
+            warning: { main: colors.fixed.golden },
             accent: {
                 main: colors.accent.main,
                 dark: colors.accent.dark,
