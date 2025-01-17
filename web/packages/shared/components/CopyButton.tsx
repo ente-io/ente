@@ -25,6 +25,7 @@ export default function CopyButton({
         setCopied(true);
         setTimeout(() => setCopied(false), 1000);
     };
+
     return (
         <Tooltip
             arrow
