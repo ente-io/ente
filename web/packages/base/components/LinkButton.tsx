@@ -1,6 +1,5 @@
-import { Link } from "@mui/material";
+import { Link, type ButtonProps } from "@mui/material";
 import React from "react";
-import { type ButtonishProps } from "./mui";
 
 /**
  * A button that looks like a link.
@@ -8,10 +7,9 @@ import { type ButtonishProps } from "./mui";
  * The use of this component is not encouraged. It is only useful in uncommon
  * cases where we do not have sufficient space to include a proper button.
  */
-export const LinkButton: React.FC<React.PropsWithChildren<ButtonishProps>> = ({
-    onClick,
-    children,
-}) => (
+export const LinkButton: React.FC<
+    React.PropsWithChildren<Pick<ButtonProps, "onClick">>
+> = ({ onClick, children }) => (
     <Link
         component="button"
         sx={(theme) => ({
@@ -39,7 +37,7 @@ export const LinkButton: React.FC<React.PropsWithChildren<ButtonishProps>> = ({
  * Similar caveats as {@link LinkButton} apply.
  */
 export const LinkButtonUndecorated: React.FC<
-    React.PropsWithChildren<ButtonishProps>
+    React.PropsWithChildren<Pick<ButtonProps, "onClick">>
 > = ({ onClick, children }) => (
     <Link
         component="button"
