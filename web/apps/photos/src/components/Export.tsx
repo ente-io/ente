@@ -5,6 +5,7 @@ import {
     OverflowMenu,
     OverflowMenuOption,
 } from "@/base/components/OverflowMenu";
+import { EllipsizedTypography } from "@/base/components/Typography";
 import type { ButtonishProps } from "@/base/components/mui";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { ensureElectron } from "@/base/electron";
@@ -12,10 +13,7 @@ import log from "@/base/log";
 import { EnteFile } from "@/media/file";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { useAppContext } from "@/new/photos/types/context";
-import {
-    SpaceBetweenFlex,
-    VerticallyCenteredFlex,
-} from "@ente/shared/components/Container";
+import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { CustomError } from "@ente/shared/error";
 import FolderIcon from "@mui/icons-material/Folder";
 import {
@@ -25,9 +23,9 @@ import {
     DialogContent,
     DialogTitle,
     Divider,
+    Stack,
     Tooltip,
     Typography,
-    styled,
 } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
@@ -183,15 +181,17 @@ export const Export: React.FC<ExportProps> = ({
             </SpaceBetweenFlex>
 
             <DialogContent>
-                <ExportDirectory
-                    exportFolder={exportFolder}
-                    changeExportDirectory={handleChangeExportDirectoryClick}
-                    exportStage={exportStage}
-                />
-                <ContinuousExport
-                    continuousExport={continuousExport}
-                    toggleContinuousExport={toggleContinuousExport}
-                />
+                <Stack>
+                    <ExportDirectory
+                        exportFolder={exportFolder}
+                        changeExportDirectory={handleChangeExportDirectoryClick}
+                        exportStage={exportStage}
+                    />
+                    <ContinuousExport
+                        continuousExport={continuousExport}
+                        toggleContinuousExport={toggleContinuousExport}
+                    />
+                </Stack>
             </DialogContent>
             <Divider />
             <ExportDynamicContent
@@ -210,64 +210,56 @@ export const Export: React.FC<ExportProps> = ({
 
 function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
     return (
-        <SpaceBetweenFlex minHeight={"48px"}>
-            <Typography sx={{ color: "text.muted", mr: "16px" }}>
+        <Stack
+            direction="row"
+            sx={{
+                gap: 1,
+                justifyContent: "space-between",
+                alignItems: "center",
+            }}
+        >
+            <Typography sx={{ color: "text.muted", mr: 1 }}>
                 {t("destination")}
             </Typography>
-            <>
-                {!exportFolder ? (
-                    <Button color={"accent"} onClick={changeExportDirectory}>
-                        {t("select_folder")}
-                    </Button>
-                ) : (
-                    <VerticallyCenteredFlex>
-                        <DirectoryPath width={262} path={exportFolder} />
-                        {exportStage === ExportStage.FINISHED ||
-                        exportStage === ExportStage.INIT ? (
-                            <ChangeDirectoryOption
-                                onClick={changeExportDirectory}
-                            />
-                        ) : (
-                            <Box sx={{ width: "16px" }} />
-                        )}
-                    </VerticallyCenteredFlex>
-                )}
-            </>
-        </SpaceBetweenFlex>
+            {exportFolder ? (
+                <>
+                    <DirectoryPath path={exportFolder} />
+                    {exportStage === ExportStage.FINISHED ||
+                    exportStage === ExportStage.INIT ? (
+                        <ChangeDirectoryOption
+                            onClick={changeExportDirectory}
+                        />
+                    ) : (
+                        // Prevent layout shift.
+                        <Box sx={{ width: "16px", height: "48px" }} />
+                    )}
+                </>
+            ) : (
+                <Button color={"accent"} onClick={changeExportDirectory}>
+                    {t("select_folder")}
+                </Button>
+            )}
+        </Stack>
     );
 }
 
-const DirectoryPath = ({ width, path }) => {
-    const handleClick = async () => {
-        try {
-            await ensureElectron().openDirectory(path);
-        } catch (e) {
-            log.error("openDirectory failed", e);
-        }
-    };
-    return (
-        <DirectoryPathContainer width={width} onClick={handleClick}>
-            <Tooltip title={path}>
-                <span>{path}</span>
-            </Tooltip>
-        </DirectoryPathContainer>
-    );
-};
-
-const DirectoryPathContainer = styled(LinkButton)(
-    ({ width }) => `
-    width: ${width}px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    /* Beginning of string */
-    direction: rtl;
-    text-align: left;
-`,
+const DirectoryPath = ({ path }) => (
+    <LinkButton onClick={() => void ensureElectron().openDirectory(path)}>
+        <Tooltip title={path}>
+            <EllipsizedTypography
+                // Haven't found a way to get the path to ellipsize without
+                // providing a maxWidth. Luckily, this is the context of the
+                // desktop app where this width is should not be too off.
+                sx={{ maxWidth: "262px" }}
+            >
+                {path}
+            </EllipsizedTypography>
+        </Tooltip>
+    </LinkButton>
 );
 
 const ChangeDirectoryOption: React.FC<ButtonishProps> = ({ onClick }) => (
-    <OverflowMenu ariaID="export-option" triggerButtonSxProps={{ ml: 1 }}>
+    <OverflowMenu ariaID="export-option">
         <OverflowMenuOption onClick={onClick} startIcon={<FolderIcon />}>
             {t("change_folder")}
         </OverflowMenuOption>
