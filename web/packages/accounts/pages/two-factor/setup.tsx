@@ -6,8 +6,8 @@ import { appHomeRoute } from "@/accounts/services/redirect";
 import type { TwoFactorSecret } from "@/accounts/services/user";
 import { enableTwoFactor, setupTwoFactor } from "@/accounts/services/user";
 import { CenteredFill } from "@/base/components/containers";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import log from "@/base/log";
-import LinkButton from "@ente/shared/components/LinkButton";
 import { encryptWithRecoveryKey } from "@ente/shared/crypto/helpers";
 import { getData, LS_KEYS, setLSUser } from "@ente/shared/storage/localStorage";
 import { Paper, Stack, styled, Typography } from "@mui/material";
@@ -69,9 +69,14 @@ const Page: React.FC = () => {
                             onSubmit={onSubmit}
                             buttonText={t("enable")}
                         />
-                        <LinkButton onClick={router.back}>
-                            {t("go_back")}
-                        </LinkButton>
+                        <Stack sx={{ alignItems: "center" }}>
+                            <FocusVisibleButton
+                                variant="text"
+                                onClick={router.back}
+                            >
+                                {t("go_back")}
+                            </FocusVisibleButton>
+                        </Stack>
                     </Stack>
                 </ContentsPaper>
             </CenteredFill>
