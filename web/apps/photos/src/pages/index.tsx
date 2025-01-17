@@ -134,7 +134,15 @@ const Page: React.FC = () => {
                         </FocusVisibleButton>
                         <MobileBoxFooter {...{ host }} />
                     </MobileBox>
-                    <DesktopBox>
+                    <DesktopBox
+                        sx={[
+                            { bgcolor: "background.default" },
+                            (theme) =>
+                                theme.applyStyles("dark", {
+                                    bgcolor: "fill.faint",
+                                }),
+                        ]}
+                    >
                         <Stack sx={{ width: "320px", py: 4, gap: 4 }}>
                             {showLogin ? (
                                 <LoginContents
@@ -204,12 +212,18 @@ const TappableContainer: React.FC<
 
     return (
         <CenteredFill
-            sx={{
-                bgcolor: "background.default",
-                "@media (width <= 1024px)": {
-                    flexDirection: "column",
+            sx={[
+                {
+                    bgcolor: "background.paper2",
+                    "@media (width <= 1024px)": {
+                        flexDirection: "column",
+                    },
                 },
-            }}
+                (theme) =>
+                    theme.applyStyles("dark", {
+                        bgcolor: "background.default",
+                    }),
+            ]}
             onClick={handleClick}
         >
             <DevSettings open={showDevSettings} onClose={handleClose} />
@@ -286,21 +300,18 @@ const MobileBoxFooter: React.FC<MobileBoxFooterProps> = ({ host }) => {
     );
 };
 
-const DesktopBox = styled(CenteredFlex)(
-    ({ theme }) => `
+const DesktopBox = styled(CenteredFlex)`
     flex-shrink: 0;
     flex-grow: 2;
     flex-basis: auto;
 
     height: 100%;
     padding-inline: 20px;
-    background-color: ${theme.vars.palette.fill.faint};
 
     @media (width <= 1024px) {
         display: none;
     }
-`,
-);
+`;
 
 const Slideshow: React.FC = () => {
     const [selectedIndex, setSelectedIndex] = useState(0);
