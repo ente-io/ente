@@ -1,4 +1,4 @@
-import { EnteLogo, EnteLogoSVG } from "@/base/components/EnteLogo";
+import { EnteLogoSVG } from "@/base/components/EnteLogo";
 import { CenteredFlex, FlexWrapper } from "@ente/shared/components/Container";
 import { styled } from "@mui/material";
 import React from "react";
@@ -31,7 +31,7 @@ export const AppNavbar: React.FC = () => {
     return (
         <NavbarBase>
             <CenteredFlex>
-                <EnteLogo />
+                <EnteLogoSVG />
             </CenteredFlex>
         </NavbarBase>
     );
