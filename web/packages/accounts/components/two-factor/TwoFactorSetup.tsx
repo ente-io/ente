@@ -99,7 +99,7 @@ const LoadingQRCode = styled(VerticallyCentered)(
     ({ theme }) => `
     width: 200px;
     aspect-ratio:1;
-    border: 1px solid ${theme.palette.grey.A200};
+    border: 1px solid ${theme.palette.stroke.muted};
     margin: ${theme.spacing(2)};
     `,
 );

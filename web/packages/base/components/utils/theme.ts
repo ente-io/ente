@@ -218,7 +218,7 @@ const _colors = {
         },
         stroke: {
             base: "#fff",
-            muted: "rgba(255 255 255 /0.24)",
+            muted: "rgba(255 255 255 / 0.24)",
             faint: "rgba(255 255 255 / 0.16)",
         },
         boxShadow: {
