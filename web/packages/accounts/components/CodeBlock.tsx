@@ -1,6 +1,6 @@
 import { CenteredFlex } from "@/base/components/containers";
+import { CopyButton } from "@/base/components/CopyButton";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import CopyButton from "@ente/shared/components/CopyButton";
 import { Box, Typography } from "@mui/material";
 import React from "react";
 
@@ -36,7 +36,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code }) => {
         >
             <Typography
                 sx={{
-                    padding: "16px 36px 16px 16px",
+                    padding: "16px 44px 16px 16px",
                     wordBreak: "break-word",
                     color: "accent.contrastText",
                     // Increase the line height from the body default.
@@ -46,7 +46,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code }) => {
                 {code}
             </Typography>
             <Box sx={{ position: "absolute", top: 0, right: 0, mt: 1 }}>
-                <CopyButton code={code} />
+                <CopyButton color="accentContrastText" code={code} />
             </Box>
         </Box>
     );
