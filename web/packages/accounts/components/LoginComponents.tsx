@@ -54,7 +54,7 @@ export const AccountsPageFooterWithHost: React.FC<React.PropsWithChildren> = ({
     useEffect(() => void customAPIHost().then(setHost), []);
 
     return (
-        <Stack sx={{ gap: 2 }}>
+        <Stack sx={{ gap: 3 }}>
             <AccountsPageFooter>{children}</AccountsPageFooter>
             {host && (
                 <Typography

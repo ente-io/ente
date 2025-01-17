@@ -339,16 +339,15 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
             <AccountsPageTitle>{t("sign_up")}</AccountsPageTitle>
             {form}
             <AccountsPageFooter>
-                <Stack sx={{ gap: 3, textAlign: "center" }}>
+                <Stack sx={{ gap: 5, textAlign: "center" }}>
                     <LinkButton onClick={onLogin}>
                         {t("existing_account")}
                     </LinkButton>
-                    <Typography
-                        variant="mini"
-                        sx={{ color: "text.faint", minHeight: "16px" }}
-                    >
-                        {host ?? "" /* prevent layout shift with a minHeight */}
-                    </Typography>
+                    {host && (
+                        <Typography variant="mini" sx={{ color: "text.faint" }}>
+                            {host}
+                        </Typography>
+                    )}
                 </Stack>
             </AccountsPageFooter>
         </>

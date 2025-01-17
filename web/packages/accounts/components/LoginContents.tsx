@@ -80,7 +80,7 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
                 }
             />
             <AccountsPageFooter>
-                <Stack sx={{ gap: 4, textAlign: "center" }}>
+                <Stack sx={{ gap: 3, textAlign: "center" }}>
                     <LinkButton onClick={onSignUp}>
                         {t("no_account")}
                     </LinkButton>
