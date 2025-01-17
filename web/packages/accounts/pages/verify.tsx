@@ -20,9 +20,9 @@ import type {
 import { getSRPAttributes } from "@/accounts/services/srp-remote";
 import { putAttributes, sendOTT, verifyEmail } from "@/accounts/services/user";
 import type { PageProps } from "@/accounts/types/page";
+import { LinkButton } from "@/base/components/LinkButton";
 import { LoadingIndicator } from "@/base/components/loaders";
 import log from "@/base/log";
-import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";

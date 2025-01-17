@@ -133,15 +133,16 @@ const _colors = {
         light: "#01DE4D",
     },
     accentAuth: {
-        dark: "rgb(164, 0, 182)",
-        main: "rgb(150, 13, 214)",
-        light: "rgb(152, 77, 244)",
+        dark: "#8e0fcb",
+        main: "#9610d6",
+        light: "#8e2de2",
+        lighter: "#984df4" /* TODO(LM) */,
     },
     fixed: {
         white: "#fff",
         black: "#000",
         success: "#1DB954",
-        warning: "#FFC247",
+        golden: "#FFC107",
         danger: {
             dark: "#F53434",
             main: "#EA3F3F",
@@ -155,6 +156,7 @@ const _colors = {
         switchOn: "#2ECA45",
         croppedAreaOverlay: "rgba(0 0 0 / 0.5)",
         overlayIndicatorMuted: "rgba(255 255 255 / 0.48)",
+        storageCardUsageFill: "rgba(255 255 255 / 0.2)",
     },
     light: {
         background: {
@@ -197,31 +199,32 @@ const _colors = {
             paper2: "#252525",
         },
         backdrop: {
-            base: "rgba(0, 0, 0, 0.90)",
-            muted: "rgba(0, 0, 0, 0.65)",
-            faint: "rgba(0, 0, 0,0.20)",
+            base: "rgba(0 0 0 / 0.90)",
+            muted: "rgba(0 0 0 / 0.65)",
+            faint: "rgba(0 0 0 / 0.20)",
         },
         text: {
             base: "#fff",
-            muted: "rgba(255, 255, 255, 0.70)",
-            faint: "rgba(255, 255, 255, 0.50)",
+            muted: "rgba(255 255 255 / 0.70)",
+            faint: "rgba(255 255 255 / 0.50)",
         },
         fill: {
             base: "#fff",
-            muted: "rgba(255, 255, 255, 0.16)",
-            faint: "rgba(255, 255, 255, 0.12)",
-            baseHover: "rgba(255, 255, 255, 0.90)",
-            faintHover: "rgba(255, 255, 255, 0.06)",
+            baseHover: "rgba(255 255 255 / 0.90)",
+            muted: "rgba(255 255 255 / 0.16)",
+            faint: "rgba(255 255 255 / 0.12)",
+            faintHover: "rgba(255 255 255 / 0.06)",
+            fainter: "rgba(255 255 255 / 0.05)",
         },
         stroke: {
             base: "#fff",
-            muted: "rgba(255,255,255,0.24)",
-            faint: "rgba(255,255,255,0.16)",
+            muted: "rgba(255 255 255 / 0.24)",
+            faint: "rgba(255 255 255 / 0.16)",
         },
         boxShadow: {
-            float: "0px 2px 12px rgba(0, 0, 0, 0.75)",
-            menu: "0px 0px 6px rgba(0, 0, 0, 0.50), 0px 3px 6px rgba(0, 0, 0, 0.25)",
-            button: "0px 4px 4px rgba(0, 0, 0, 0.75)",
+            float: "0px 2px 12px rgba(0 0 0 / 0.75)",
+            menu: "0px 0px 6px rgba(0 0 0 / 0.50), 0px 3px 6px rgba(0 0 0 / 0.25)",
+            button: "0px 4px 4px rgba(0 0 0 / 0.75)",
         },
     },
 };
@@ -251,7 +254,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 contrastText: colors.dark.text.base,
             },
             success: { main: colors.fixed.success },
-            warning: { main: colors.fixed.warning },
+            warning: { main: colors.fixed.golden },
             accent: {
                 main: colors.accent.main,
                 dark: colors.accent.dark,
@@ -280,9 +283,11 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             },
             fill: {
                 base: colors.dark.fill.base,
+                baseHover: colors.dark.fill.baseHover,
                 muted: colors.dark.fill.muted,
                 faint: colors.dark.fill.faint,
                 faintHover: colors.dark.fill.faintHover,
+                fainter: colors.dark.fill.fainter,
             },
             stroke: {
                 base: colors.dark.stroke.base,

@@ -1,6 +1,6 @@
 import { LoginContents } from "@/accounts/components/LoginContents";
 import { SignUpContents } from "@/accounts/components/SignUpContents";
-import { CenteredFill } from "@/base/components/containers";
+import { CenteredFill, CenteredFlex } from "@/base/components/containers";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
@@ -286,22 +286,21 @@ const MobileBoxFooter: React.FC<MobileBoxFooterProps> = ({ host }) => {
     );
 };
 
-const DesktopBox = styled("div")`
+const DesktopBox = styled(CenteredFlex)(
+    ({ theme }) => `
     flex-shrink: 0;
     flex-grow: 2;
     flex-basis: auto;
 
     height: 100%;
     padding-inline: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #242424;
+    background-color: ${theme.vars.palette.fill.faint};
 
     @media (width <= 1024px) {
         display: none;
     }
-`;
+`,
+);
 
 const Slideshow: React.FC = () => {
     const [selectedIndex, setSelectedIndex] = useState(0);

@@ -10,11 +10,11 @@ import {
     type TwoFactorType,
 } from "@/accounts/services/user";
 import type { AccountsContextT } from "@/accounts/types/context";
+import { LinkButton } from "@/base/components/LinkButton";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import log from "@/base/log";
-import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
