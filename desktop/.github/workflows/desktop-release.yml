@@ -12,10 +12,10 @@ on:
                 description: "Branch (ente-io/ente) to build"
                 type: string
     schedule:
-        # Run everyday at ~8:00 AM IST (except Sundays).
+        # Run every weekday at ~8:00 AM IST.
         # See: [Note: Run workflow every 24 hours]
         #
-        - cron: "45 2 * * 1-6"
+        - cron: "45 2 * * 1-5"
     push:
         # Run when a tag matching the pattern "vd.d.d" is pushed. In particular,
         # this excludes the "-beta" tags.
