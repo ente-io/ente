@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:developer" show log;
 import "dart:typed_data";
 
@@ -13,6 +14,7 @@ import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
+import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
@@ -121,6 +123,7 @@ class _FaceWidgetState extends State<FaceWidget> {
                   context,
                   S.of(context).faceNotClusteredYet,
                 );
+                unawaited(MLService.instance.clusterAllImages(force: true));
                 return;
               }
               if (widget.person != null) {
