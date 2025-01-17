@@ -189,6 +189,7 @@ const _colors = {
             faint: "rgba(0 0 0 / 0.12)",
         },
         boxShadow: {
+            // TODO(LM): Rename to paper
             float: "0px 0px 10px rgba(0 0 0 / 0.25)",
             menu: "0px 0px 6px rgba(0 0 0 / 0.16), 0px 3px 6px rgba(0 0 0 / 0.12)",
             button: "0px 4px 4px rgba(0 0 0 / 0.25)",
@@ -605,9 +606,15 @@ const components: Components = {
     },
 
     MuiPaper: {
-        // MUI applies a semi-transparent background image for elevation in dark
-        // mode. Remove it to match the Paper background from our design.
-        styleOverrides: { root: { backgroundImage: "none" } },
+        styleOverrides: {
+            root: {
+                // MUI applies a semi-transparent background image for elevation
+                // in dark mode. Remove it to match background for our designs.
+                backgroundImage: "none",
+                // Use our paper shadow.
+                boxShadow: "var(--mui-palette-boxShadow-float)",
+            },
+        },
     },
 
     MuiLink: {
