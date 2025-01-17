@@ -2,12 +2,12 @@ import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { formattedNumber } from "@/base/i18n";
 import { EnteFile } from "@/media/file";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
+import LinkButton from "@ente/shared/components/LinkButton";
 import { formatDateTime } from "@ente/shared/time/format";
 import { DialogActions, DialogContent, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";
 import ExportPendingList from "./ExportPendingList";
-import LinkButton from "./pages/gallery/LinkButton";
 
 interface Props {
     pendingExports: EnteFile[];

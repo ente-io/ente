@@ -67,7 +67,7 @@ import {
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
 import { WatchFolder } from "components/WatchFolder";
-import LinkButton from "components/pages/gallery/LinkButton";
+import LinkButton from "@ente/shared/components/LinkButton";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
