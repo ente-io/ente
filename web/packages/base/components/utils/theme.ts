@@ -133,9 +133,10 @@ const _colors = {
         light: "#01DE4D",
     },
     accentAuth: {
-        dark: "rgb(164, 0, 182)",
-        main: "rgb(150, 13, 214)",
-        light: "rgb(152, 77, 244)",
+        dark: "#8e0fcb",
+        main: "#9610d6",
+        light: "#8e2de2",
+        lighter: "#984df4", /* TODO(LM) */
     },
     fixed: {
         white: "#fff",

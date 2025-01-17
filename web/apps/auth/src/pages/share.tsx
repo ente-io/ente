@@ -1,6 +1,6 @@
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { decryptMetadataJSON_New } from "@/base/crypto";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 
 interface SharedCode {
@@ -18,6 +18,8 @@ const Page: React.FC = () => {
         nextCode: "",
         progress: 0,
     });
+
+    const theme = useTheme();
 
     const getTimeStatus = (
         currentTime: number,
@@ -101,8 +103,11 @@ const Page: React.FC = () => {
     }, [sharedCode]);
 
     const progressBarColor = useMemo(
-        () => (100 - codeDisplay.progress > 40 ? "#8E2DE2" : "#FFC107"),
-        [codeDisplay.progress],
+        () =>
+            100 - codeDisplay.progress > 40
+                ? theme.vars.palette.accent.light
+                : "#FFC107",
+        [theme, codeDisplay.progress],
     );
 
     return (
