@@ -5,7 +5,7 @@ import "dart:math" show max;
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
-import "package:ml_linalg/linalg.dart";
+import "package:ml_linalg/linalg.dart" as ml;
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/ente_theme_data.dart";
@@ -422,9 +422,9 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     final currentClusterEmbeddingData =
         currentClusterSummary[widget.clusterID!]?.$1;
     if (currentClusterEmbeddingData == null) return searchResults;
-    final Vector currentClusterEmbedding = Vector.fromList(
+    final ml.Vector currentClusterEmbedding = ml.Vector.fromList(
       EVector.fromBuffer(currentClusterEmbeddingData).values,
-      dtype: DType.float32,
+      dtype: ml.DType.float32,
     );
 
     // Get all cluster embeddings
@@ -440,12 +440,12 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     }
     allClusterSummary
         .removeWhere((key, value) => !clusterToPerson.containsKey(key));
-    final Map<String, Vector> allClusterEmbeddings = allClusterSummary.map(
+    final Map<String, ml.Vector> allClusterEmbeddings = allClusterSummary.map(
       (key, value) => MapEntry(
         key,
-        Vector.fromList(
+        ml.Vector.fromList(
           EVector.fromBuffer(value.$1).values,
-          dtype: DType.float32,
+          dtype: ml.DType.float32,
         ),
       ),
     );
