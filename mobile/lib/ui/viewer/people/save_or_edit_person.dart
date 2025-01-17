@@ -61,6 +61,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   late final Logger _logger = Logger("_SavePersonState");
   Timer? _debounce;
   List<(PersonEntity, EnteFile)> _cachedPersons = [];
+  final Map<String, double> _personToMaxSimilarity = {};
   PersonEntity? person;
 
   @override
@@ -342,7 +343,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
             if (searchResults.isEmpty) {
               return const SizedBox.shrink();
             }
-            final finalResults = await _sortByCosine(searchResults);
+            final finalResults = _sortByCosine(searchResults);
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -408,28 +409,27 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     if (_cachedPersons.isEmpty) {
       _cachedPersons = await _getPersonsWithRecentFile();
     }
+    if (widget.clusterID != null) {
+      if (_personToMaxSimilarity.isEmpty) {
+        await _temp();
+      }
+    }
     yield _cachedPersons;
   }
 
-  Future<List<(PersonEntity, EnteFile)>> _sortByCosine(
-    List<(PersonEntity, EnteFile)> searchResults,
-  ) async {
-    if (widget.clusterID == null) return searchResults;
-
+  Future<void> _temp() async {
     // Get current cluster embedding
-    final currentClusterSummary =
-        await MLDataDB.instance.getClusterToClusterSummary([widget.clusterID!]);
+    final allClusterSummary = await MLDataDB.instance.getAllClusterSummary();
     final currentClusterEmbeddingData =
-        currentClusterSummary[widget.clusterID!]?.$1;
-    if (currentClusterEmbeddingData == null) return searchResults;
+        allClusterSummary[widget.clusterID!]?.$1;
+    if (currentClusterEmbeddingData == null) return;
     final ml.Vector currentClusterEmbedding = ml.Vector.fromList(
       EVector.fromBuffer(currentClusterEmbeddingData).values,
       dtype: ml.DType.float32,
     );
 
     // Get all cluster embeddings
-    final allClusterSummary = await MLDataDB.instance.getAllClusterSummary();
-    final persons = searchResults.map((e) => e.$1).toList();
+    final persons = _cachedPersons.map((e) => e.$1).toList();
     final clusterToPerson = <String, String>{};
     for (final person in persons) {
       if (person.data.assigned != null) {
@@ -449,20 +449,29 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
         ),
       ),
     );
+
     // Calculate cosine similarity between current cluster and all clusters
-    final Map<String, double> personToMaxSimilarity = {};
     for (final entry in allClusterEmbeddings.entries) {
       final personId = clusterToPerson[entry.key]!;
       final similarity = currentClusterEmbedding.dot(entry.value);
-      personToMaxSimilarity[personId] = max(
-        personToMaxSimilarity[personId] ?? double.negativeInfinity,
+      _personToMaxSimilarity[personId] = max(
+        _personToMaxSimilarity[personId] ?? double.negativeInfinity,
         similarity,
       );
     }
+
+  }
+
+  List<(PersonEntity, EnteFile)> _sortByCosine(
+    List<(PersonEntity, EnteFile)> searchResults,
+  ) {
+    if (widget.clusterID == null) return searchResults;
+    if (_personToMaxSimilarity.isEmpty) return searchResults;
+
     // Sort search results based on cosine similarity
     searchResults.sort((a, b) {
-      final similarityA = personToMaxSimilarity[a.$1.remoteID] ?? 0;
-      final similarityB = personToMaxSimilarity[b.$1.remoteID] ?? 0;
+      final similarityA = _personToMaxSimilarity[a.$1.remoteID] ?? 0;
+      final similarityB = _personToMaxSimilarity[b.$1.remoteID] ?? 0;
       return similarityB.compareTo(similarityA);
     });
 
