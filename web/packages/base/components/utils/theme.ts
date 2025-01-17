@@ -160,7 +160,7 @@ const _colors = {
     },
     light: {
         background: {
-            base: "#fff",
+            default: "#fff",
             paper: "#fff",
             paper2: "rgba(153 153 153 / 0.04)",
         },
@@ -195,7 +195,7 @@ const _colors = {
     },
     dark: {
         background: {
-            base: "#000",
+            default: "#000",
             paper: "#1b1b1b",
             paper2: "#252525",
         },
@@ -234,16 +234,8 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
     // light: false,
     dark: {
         palette: {
-            background: {
-                default: colors.dark.background.base,
-                paper: colors.dark.background.paper,
-                paper2: colors.dark.background.paper2,
-            },
-            backdrop: {
-                base: colors.dark.backdrop.base,
-                muted: colors.dark.backdrop.muted,
-                faint: colors.dark.backdrop.faint,
-            },
+            background: colors.dark.background,
+            backdrop: colors.dark.backdrop,
             primary: {
                 main: colors.dark.fill.base,
                 dark: colors.dark.fill.baseHover,
@@ -282,19 +274,8 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 muted: colors.dark.text.muted,
                 faint: colors.dark.text.faint,
             },
-            fill: {
-                base: colors.dark.fill.base,
-                baseHover: colors.dark.fill.baseHover,
-                muted: colors.dark.fill.muted,
-                faint: colors.dark.fill.faint,
-                faintHover: colors.dark.fill.faintHover,
-                fainter: colors.dark.fill.fainter,
-            },
-            stroke: {
-                base: colors.dark.stroke.base,
-                muted: colors.dark.stroke.muted,
-                faint: colors.dark.stroke.faint,
-            },
+            fill: colors.dark.fill,
+            stroke: colors.dark.stroke,
             divider: colors.dark.stroke.faint,
             fixed: colors.fixed,
             boxShadow: colors.dark.boxShadow,
