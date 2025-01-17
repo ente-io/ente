@@ -5,9 +5,9 @@ import {
 import { PAGES } from "@/accounts/constants/pages";
 import { getSRPAttributes } from "@/accounts/services/srp-remote";
 import { sendOTT } from "@/accounts/services/user";
+import { LinkButton } from "@/base/components/LinkButton";
 import { isMuseumHTTPError } from "@/base/http";
 import log from "@/base/log";
-import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";

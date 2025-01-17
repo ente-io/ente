@@ -2,13 +2,13 @@ import { PAGES } from "@/accounts/constants/pages";
 import { generateKeyAndSRPAttributes } from "@/accounts/services/srp";
 import { sendOTT } from "@/accounts/services/user";
 import { isWeakPassword } from "@/accounts/utils/password";
+import { LinkButton } from "@/base/components/LinkButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { isMuseumHTTPError } from "@/base/http";
 import log from "@/base/log";
 import { LS_KEYS, setLSUser } from "@ente/shared//storage/localStorage";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
-import LinkButton from "@ente/shared/components/LinkButton";
 import {
     generateAndSaveIntermediateKeyAttributes,
     saveKeyInSessionStore,

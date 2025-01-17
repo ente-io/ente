@@ -4,12 +4,12 @@ import {
     passkeySessionExpiredErrorMessage,
     saveCredentialsAndNavigateTo,
 } from "@/accounts/services/passkey";
+import { LinkButton } from "@/base/components/LinkButton";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { genericErrorDialogAttributes } from "@/base/components/utils/dialog";
 import log from "@/base/log";
 import { customAPIHost } from "@/base/origins";
-import LinkButton from "@ente/shared/components/LinkButton";
 import { CircularProgress, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";

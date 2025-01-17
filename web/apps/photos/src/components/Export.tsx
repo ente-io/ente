@@ -1,5 +1,6 @@
 import { isDesktop } from "@/base/app";
 import { EnteSwitch } from "@/base/components/EnteSwitch";
+import { LinkButton } from "@/base/components/LinkButton";
 import {
     OverflowMenu,
     OverflowMenuOption,
@@ -15,7 +16,6 @@ import {
     SpaceBetweenFlex,
     VerticallyCenteredFlex,
 } from "@ente/shared/components/Container";
-import LinkButton from "@ente/shared/components/LinkButton";
 import { CustomError } from "@ente/shared/error";
 import FolderIcon from "@mui/icons-material/Folder";
 import {

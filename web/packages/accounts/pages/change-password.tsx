@@ -20,8 +20,8 @@ import {
     updateSRPAndKeys,
 } from "@/accounts/services/srp-remote";
 import type { UpdatedKey } from "@/accounts/services/user";
+import { LinkButton } from "@/base/components/LinkButton";
 import { sharedCryptoWorker } from "@/base/crypto";
-import LinkButton from "@ente/shared/components/LinkButton";
 import {
     generateAndSaveIntermediateKeyAttributes,
     generateLoginSubKey,

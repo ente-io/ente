@@ -1,6 +1,6 @@
 import { PAGES } from "@/accounts/constants/pages";
 import { verifyTwoFactor } from "@/accounts/services/user";
-import LinkButton from "@ente/shared/components/LinkButton";
+import { LinkButton } from "@/base/components/LinkButton";
 import { ApiError } from "@ente/shared/error";
 import {
     LS_KEYS,

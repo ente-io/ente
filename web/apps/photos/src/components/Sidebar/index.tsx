@@ -2,6 +2,7 @@ import { RecoveryKey } from "@/accounts/components/RecoveryKey";
 import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import { isDesktop } from "@/base/app";
 import { EnteLogo } from "@/base/components/EnteLogo";
+import { LinkButton } from "@/base/components/LinkButton";
 import { SpaceBetweenFlex } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
@@ -67,7 +68,6 @@ import {
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
 import { WatchFolder } from "components/WatchFolder";
-import LinkButton from "@ente/shared/components/LinkButton";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";

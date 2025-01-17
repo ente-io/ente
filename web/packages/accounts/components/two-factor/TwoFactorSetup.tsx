@@ -1,7 +1,7 @@
 import { CodeBlock } from "@/accounts/components/CodeBlock";
+import { LinkButton } from "@/base/components/LinkButton";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import LinkButton from "@ente/shared/components/LinkButton";
 import { Stack, styled, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";

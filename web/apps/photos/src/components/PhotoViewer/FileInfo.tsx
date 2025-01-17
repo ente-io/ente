@@ -1,3 +1,4 @@
+import { LinkButtonUndecorated } from "@/base/components/LinkButton";
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
@@ -68,7 +69,6 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import LinkButton from "@ente/shared/components/LinkButton";
 import type { DisplayFile } from "components/PhotoFrame";
 import { Formik } from "formik";
 import { t } from "i18next";
@@ -254,18 +254,13 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                         {t("view_on_map")}
                                     </Link>
                                 ) : (
-                                    <LinkButton
+                                    <LinkButtonUndecorated
                                         onClick={
                                             openDisableMapConfirmationDialog
                                         }
-                                        sx={{
-                                            textDecoration: "none",
-                                            color: "text.muted",
-                                            fontWeight: "medium",
-                                        }}
                                     >
                                         {t("disable_map")}
-                                    </LinkButton>
+                                    </LinkButtonUndecorated>
                                 )
                             }
                             trailingButton={
@@ -296,16 +291,9 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         ) : !exif.tags ? (
                             t("no_exif")
                         ) : (
-                            <LinkButton
-                                onClick={showRawExif}
-                                sx={{
-                                    textDecoration: "none",
-                                    color: "text.muted",
-                                    fontWeight: "medium",
-                                }}
-                            >
+                            <LinkButtonUndecorated onClick={showRawExif}>
                                 {t("view_exif")}
-                            </LinkButton>
+                            </LinkButtonUndecorated>
                         )
                     }
                 />
