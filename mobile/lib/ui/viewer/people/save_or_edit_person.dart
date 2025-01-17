@@ -61,7 +61,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   late final Logger _logger = Logger("_SavePersonState");
   Timer? _debounce;
   List<(PersonEntity, EnteFile)> _cachedPersons = [];
-  final Map<String, double> _personToMaxSimilarity = {};
+  Map<String, double> _personToMaxSimilarity = {};
   PersonEntity? person;
 
   @override
@@ -411,18 +411,20 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     }
     if (widget.clusterID != null) {
       if (_personToMaxSimilarity.isEmpty) {
-        await _temp();
+        _personToMaxSimilarity = await _calculateSimilarityWithPersons();
       }
     }
     yield _cachedPersons;
   }
 
-  Future<void> _temp() async {
-    // Get current cluster embedding
+  Future<Map<String, double>> _calculateSimilarityWithPersons() async {
+    // Get all cluster summaries from DB
     final allClusterSummary = await MLDataDB.instance.getAllClusterSummary();
+
+    // Get current cluster embedding
     final currentClusterEmbeddingData =
         allClusterSummary[widget.clusterID!]?.$1;
-    if (currentClusterEmbeddingData == null) return;
+    if (currentClusterEmbeddingData == null) return {};
     final ml.Vector currentClusterEmbedding = ml.Vector.fromList(
       EVector.fromBuffer(currentClusterEmbeddingData).values,
       dtype: ml.DType.float32,
@@ -459,14 +461,15 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
         similarity,
       );
     }
-
+    return _personToMaxSimilarity;
   }
 
   List<(PersonEntity, EnteFile)> _sortByCosine(
     List<(PersonEntity, EnteFile)> searchResults,
   ) {
-    if (widget.clusterID == null) return searchResults;
-    if (_personToMaxSimilarity.isEmpty) return searchResults;
+    if (widget.clusterID == null || _personToMaxSimilarity.isEmpty) {
+      return searchResults;
+    }
 
     // Sort search results based on cosine similarity
     searchResults.sort((a, b) {
