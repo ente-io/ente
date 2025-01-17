@@ -21,7 +21,7 @@ interface EnteLogoProps {
  * providing a {@link height} prop: the SVG will preserve its aspect ratio when
  * fitting inside the provided viewport.
  */
-export const EnteLogoSVG: React.FC<EnteLogoProps> = ({ height }) => (
+export const EnteLogo: React.FC<EnteLogoProps> = ({ height }) => (
     <svg
         height={height ?? "18"}
         viewBox="0 0 43 13"

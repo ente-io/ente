@@ -1,4 +1,4 @@
-import { EnteLogoSVG } from "@/base/components/EnteLogo";
+import { EnteLogo } from "@/base/components/EnteLogo";
 import { decryptMetadataJSON_New } from "@/base/crypto";
 import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
@@ -119,7 +119,7 @@ const Page: React.FC = () => {
                 padding: "20px",
             }}
         >
-            <EnteLogoSVG />
+            <EnteLogo />
 
             <Box sx={{ width: "min(100%, 300px)" }}>
                 {error && (

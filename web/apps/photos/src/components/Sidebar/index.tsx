@@ -1,7 +1,7 @@
 import { RecoveryKey } from "@/accounts/components/RecoveryKey";
 import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import { isDesktop } from "@/base/app";
-import { EnteLogoSVG } from "@/base/components/EnteLogo";
+import { EnteLogo } from "@/base/components/EnteLogo";
 import { LinkButton } from "@/base/components/LinkButton";
 import { SpaceBetweenFlex } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
@@ -133,7 +133,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({ closeSidebar }) => {
         <SpaceBetweenFlex
             sx={{ marginBlock: "4px 4px", paddingInlineStart: "12px" }}
         >
-            <EnteLogoSVG />
+            <EnteLogo />
             <IconButton
                 aria-label={t("close")}
                 onClick={closeSidebar}

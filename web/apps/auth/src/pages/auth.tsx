@@ -1,6 +1,6 @@
 import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { stashRedirect } from "@/accounts/services/redirect";
-import { EnteLogoSVG } from "@/base/components/EnteLogo";
+import { EnteLogo } from "@/base/components/EnteLogo";
 import { LoadingIndicator } from "@/base/components/loaders";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { NavbarBase } from "@/base/components/Navbar";
@@ -135,7 +135,7 @@ const AuthNavbar: React.FC = () => {
     return (
         <NavbarBase>
             <Stack direction="row" sx={{ flex: 1, justifyContent: "center" }}>
-                <EnteLogoSVG />
+                <EnteLogo />
             </Stack>
             <Stack direction="row" sx={{ position: "absolute", right: "24px" }}>
                 <OverflowMenu ariaID="auth-options">

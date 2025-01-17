@@ -1,7 +1,7 @@
 import { LoginContents } from "@/accounts/components/LoginContents";
 import { SignUpContents } from "@/accounts/components/SignUpContents";
 import { CenteredFill, CenteredFlex } from "@/base/components/containers";
-import { EnteLogoSVG } from "@/base/components/EnteLogo";
+import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { wipTheme } from "@/base/components/utils/theme";
@@ -119,7 +119,7 @@ const Page: React.FC = () => {
                 <>
                     <SlideshowPanel>
                         <Logo_>
-                            <EnteLogoSVG height={24} />
+                            <EnteLogo height={24} />
                         </Logo_>
                         <Slideshow />
                     </SlideshowPanel>

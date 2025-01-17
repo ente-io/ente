@@ -1,5 +1,5 @@
 import { CenteredFill } from "@/base/components/containers";
-import { EnteLogoSVG } from "@/base/components/EnteLogo";
+import { EnteLogo } from "@/base/components/EnteLogo";
 import { NavbarBaseNormalFlow } from "@/base/components/Navbar";
 import { wipTheme } from "@/base/components/utils/theme";
 import { Paper, Stack, styled, Typography } from "@mui/material";
@@ -29,7 +29,7 @@ export const AccountsPageContents: React.FC<React.PropsWithChildren> = ({
                     }),
             ]}
         >
-            <EnteLogoSVG />
+            <EnteLogo />
         </NavbarBaseNormalFlow>
         <CenteredFill
             sx={[

@@ -1,4 +1,4 @@
-import { EnteLogoSVG } from "@/base/components/EnteLogo";
+import { EnteLogo } from "@/base/components/EnteLogo";
 import {
     FlexWrapper,
     VerticallyCentered,
@@ -30,7 +30,7 @@ export default function GalleryEmptyState({ openUploader }) {
                     >
                         <Trans
                             i18nKey="welcome_to_ente_title"
-                            components={{ a: <EnteLogoSVG /> }}
+                            components={{ a: <EnteLogo /> }}
                         />
                     </Typography>
                     <Typography variant="h2">
