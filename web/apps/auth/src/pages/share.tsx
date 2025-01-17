@@ -134,11 +134,11 @@ const Page: React.FC = () => {
                             position: "relative",
                         }}
                     >
-                        <div
-                            style={{
+                        <Box
+                            sx={{
                                 width: "100%",
                                 height: "4px",
-                                backgroundColor: "#333333",
+                                backgroundColor: "fixed.gray.B",
                                 borderRadius: "2px",
                             }}
                         >
@@ -150,7 +150,7 @@ const Page: React.FC = () => {
                                     borderRadius: "2px",
                                 }}
                             />
-                        </div>
+                        </Box>
                         <div
                             style={{
                                 fontSize: "36px",
