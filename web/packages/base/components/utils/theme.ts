@@ -4,12 +4,15 @@ import { createTheme } from "@mui/material";
 import type { Components } from "@mui/material/styles/components";
 import type { TypographyOptions } from "@mui/material/styles/createTypography";
 
+export const wipTheme = !!process.env.NEXT_PUBLIC_ENTE_WIP_THEME;
+
 const getTheme = (appName: AppName): Theme => {
     const colors = getColors(appName);
     const colorSchemes_ = getColorSchemes(colors);
     // TODO(LM): Temp
-    // const colorSchemes = { ...colorSchemes_, light: colorSchemes_.dark };
-    const colorSchemes = { ...colorSchemes_ }; //, light: colorSchemes_.dark };
+    const colorSchemes = wipTheme
+        ? { ...colorSchemes_ }
+        : { ...colorSchemes_, light: colorSchemes_.dark };
     return createTheme({
         cssVariables: true,
         colorSchemes,
