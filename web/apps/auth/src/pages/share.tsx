@@ -65,7 +65,11 @@ const Page: React.FC = () => {
     useEffect(() => {
         if (!sharedCode) return;
 
+        let done = false;
+
         const updateCode = () => {
+            if (done) return;
+
             const currentTime = Date.now();
             const codes = sharedCode.codes.split(",");
             const status = getTimeStatus(
@@ -85,10 +89,15 @@ const Page: React.FC = () => {
                     ),
                 );
             }
+
+            requestAnimationFrame(updateCode);
         };
 
-        const interval = setInterval(updateCode, 100);
-        return () => clearInterval(interval);
+        updateCode();
+
+        return () => {
+            done = true;
+        };
     }, [sharedCode]);
 
     const progressBarColor = useMemo(
