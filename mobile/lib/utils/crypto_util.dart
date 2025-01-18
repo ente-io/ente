@@ -8,7 +8,6 @@ import 'package:logging/logging.dart';
 import "package:photos/core/errors.dart";
 import 'package:photos/models/derived_key_result.dart';
 import 'package:photos/models/encryption_result.dart';
-import "package:photos/utils/device_info.dart";
 
 const int encryptionChunkSize = 4 * 1024 * 1024;
 final int decryptionChunkSize =
@@ -18,7 +17,7 @@ const int loginSubKeyLen = 32;
 const int loginSubKeyId = 1;
 const String loginSubKeyContext = "loginctx";
 
-const int _keyDerivcationStregth = 1073741824 * 4;
+const int _keyDerivationStregth = 1073741824 * 4;
 
 Uint8List cryptoSecretboxEasy(Map<String, dynamic> args) {
   return Sodium.cryptoSecretboxEasy(args["source"], args["nonce"], args["key"]);
@@ -410,7 +409,7 @@ class CryptoUtil {
         Sodium.cryptoPwhashMemlimitModerate; // = 4
     int opsLimit = Sodium.cryptoPwhashOpslimitSensitive * factor; // = 16
     if (memLimit * opsLimit != desiredStrength ||
-        desiredStrength != _keyDerivcationStregth) {
+        desiredStrength != _keyDerivationStregth) {
       throw UnsupportedError(
         "unexpcted values for memLimit $memLimit and opsLimit: $opsLimit or desiredStrength: $desiredStrength",
       );
