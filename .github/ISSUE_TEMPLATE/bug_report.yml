@@ -1,6 +1,6 @@
 name: Report a bug
 description: Let us know if something's not working the way you expected.
-labels: ["triage"]
+labels: []
 body:
     - type: markdown
       attributes:
