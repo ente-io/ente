@@ -17,8 +17,6 @@ const int loginSubKeyLen = 32;
 const int loginSubKeyId = 1;
 const String loginSubKeyContext = "loginctx";
 
-const int _keyDerivationStregth = 1073741824 * 4;
-
 Uint8List cryptoSecretboxEasy(Map<String, dynamic> args) {
   return Sodium.cryptoSecretboxEasy(args["source"], args["nonce"], args["key"]);
 }
@@ -408,10 +406,9 @@ class CryptoUtil {
     final factor = Sodium.cryptoPwhashMemlimitSensitive ~/
         Sodium.cryptoPwhashMemlimitModerate; // = 4
     int opsLimit = Sodium.cryptoPwhashOpslimitSensitive * factor; // = 16
-    if (memLimit * opsLimit != desiredStrength ||
-        desiredStrength != _keyDerivationStregth) {
+    if (memLimit * opsLimit != desiredStrength) {
       throw UnsupportedError(
-        "unexpcted values for memLimit $memLimit and opsLimit: $opsLimit or desiredStrength: $desiredStrength",
+        "unexpcted values for memLimit $memLimit and opsLimit: $opsLimit",
       );
     }
 
