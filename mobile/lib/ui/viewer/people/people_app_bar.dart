@@ -64,6 +64,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
   bool isQuickLink = false;
   late GalleryType galleryType;
   late PersonEntity person;
+  late StreamSubscription<PeopleChangedEvent> _peopleChangedEventSubscription;
 
   @override
   void initState() {
@@ -80,12 +81,24 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     person = widget.person;
     _appBarTitle = widget.title;
     galleryType = widget.type;
+    _peopleChangedEventSubscription =
+        Bus.instance.on<PeopleChangedEvent>().listen(
+      (event) {
+        if (event.type == PeopleEventType.saveOrEditPerson &&
+            event.source == "linkEmailToPerson") {
+          _appBarTitle = event.person?.data.name;
+          person = event.person!;
+          setState(() {});
+        }
+      },
+    );
   }
 
   @override
   void dispose() {
     _userAuthEventSubscription.cancel();
     widget.selectedFiles.removeListener(_selectedFilesListener);
+    _peopleChangedEventSubscription.cancel();
     super.dispose();
   }
 

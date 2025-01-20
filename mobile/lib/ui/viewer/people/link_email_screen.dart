@@ -19,7 +19,12 @@ import 'package:photos/ui/sharing/user_avator_widget.dart';
 
 class LinkEmailScreen extends StatefulWidget {
   final String personID;
-  const LinkEmailScreen(this.personID, {super.key});
+  final bool isFromSaveEditPerson;
+  const LinkEmailScreen(
+    this.personID, {
+    this.isFromSaveEditPerson = false,
+    super.key,
+  });
 
   @override
   State<StatefulWidget> createState() => _LinkEmailScreen();
@@ -191,9 +196,15 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                     isDisabled:
                         !_emailIsValid && (_selectedEmail?.isEmpty ?? true),
                     onTap: () async {
+                      final newEmail =
+                          _emailIsValid ? _newEmail : _selectedEmail!;
+                      if (widget.isFromSaveEditPerson) {
+                        Navigator.of(context).pop(newEmail);
+                        return;
+                      }
                       final result =
                           await personContactLinkingActions.linkEmailToPerson(
-                        _emailIsValid ? _newEmail : _selectedEmail!,
+                        newEmail,
                         widget.personID,
                         context,
                       );
@@ -202,7 +213,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                         return;
                       }
 
-                      Navigator.of(context).pop(true);
+                      Navigator.of(context).pop(newEmail);
                     },
                   ),
                   const SizedBox(height: 12),

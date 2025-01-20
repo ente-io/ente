@@ -18,7 +18,9 @@ import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/date_input.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/dialog_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/hooks/pick_person_avatar.dart";
@@ -53,255 +55,364 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   bool isKeypadOpen = false;
   String _inputName = "";
   String? _selectedDate;
+  String? _email;
   bool userAlreadyAssigned = false;
   late final Logger _logger = Logger("_SavePersonState");
   Timer? _debounce;
   List<(PersonEntity, EnteFile)> _cachedPersons = [];
   PersonEntity? person;
+  final _nameFocsNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _inputName = widget.person?.data.name ?? "";
     _selectedDate = widget.person?.data.birthDate;
+    _email = widget.person?.data.email;
     person = widget.person;
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
+    _nameFocsNode.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: isKeypadOpen,
-      appBar: AppBar(
-        title: Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            widget.isEditing
-                ? context.l10n.editPerson
-                : context.l10n.savePerson,
+    return PopScope(
+      canPop: changed && _inputName.isNotEmpty ? false : true,
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        if (didPop) {
+          return;
+        }
+
+        _nameFocsNode.unfocus();
+        final result = await _saveChangesPrompt(context);
+
+        if (result is PersonEntity) {
+          if (context.mounted) {
+            Navigator.pop(context, result);
+          }
+
+          return;
+        }
+
+        late final bool shouldPop;
+        if (result == ButtonAction.first || result == ButtonAction.second) {
+          shouldPop = true;
+        } else {
+          shouldPop = false;
+        }
+
+        if (context.mounted && shouldPop) {
+          Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: isKeypadOpen,
+        appBar: AppBar(
+          title: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              widget.isEditing
+                  ? context.l10n.editPerson
+                  : context.l10n.savePerson,
+            ),
           ),
         ),
-      ),
-      body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).unfocus();
-        },
-        child: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.only(
-                    bottom: 32.0,
-                    left: 16.0,
-                    right: 16.0,
-                  ),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 48),
-                      if (person != null)
-                        FutureBuilder<(String, EnteFile)>(
-                          future: _getRecentFileWithClusterID(person!),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              final String personClusterID = snapshot.data!.$1;
-                              final personFile = snapshot.data!.$2;
-                              return Stack(
-                                children: [
-                                  SizedBox(
-                                    height: 110,
-                                    width: 110,
-                                    child: ClipPath(
-                                      clipper: ShapeBorderClipper(
-                                        shape: ContinuousRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(80),
+        body: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          child: SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(
+                      bottom: 32.0,
+                      left: 16.0,
+                      right: 16.0,
+                    ),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 48),
+                        if (person != null)
+                          FutureBuilder<(String, EnteFile)>(
+                            future: _getRecentFileWithClusterID(person!),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                final String personClusterID =
+                                    snapshot.data!.$1;
+                                final personFile = snapshot.data!.$2;
+                                return Stack(
+                                  children: [
+                                    SizedBox(
+                                      height: 110,
+                                      width: 110,
+                                      child: ClipPath(
+                                        clipper: ShapeBorderClipper(
+                                          shape: ContinuousRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(80),
+                                          ),
                                         ),
-                                      ),
-                                      child: snapshot.hasData
-                                          ? PersonFaceWidget(
-                                              key: ValueKey(
-                                                person?.data.avatarFaceID ?? "",
+                                        child: snapshot.hasData
+                                            ? PersonFaceWidget(
+                                                key: ValueKey(
+                                                  person?.data.avatarFaceID ??
+                                                      "",
+                                                ),
+                                                personFile,
+                                                clusterID: personClusterID,
+                                                personId: person!.remoteID,
+                                              )
+                                            : const NoThumbnailWidget(
+                                                addBorder: false,
                                               ),
-                                              personFile,
-                                              clusterID: personClusterID,
-                                              personId: person!.remoteID,
-                                            )
-                                          : const NoThumbnailWidget(
-                                              addBorder: false,
-                                            ),
-                                    ),
-                                  ),
-                                  if (person != null)
-                                    Positioned(
-                                      right: 0,
-                                      bottom: 0,
-                                      child: Container(
-                                        width: 28,
-                                        height: 28,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                          boxShadow: Theme.of(context)
-                                              .colorScheme
-                                              .enteTheme
-                                              .shadowMenu,
-                                          color: getEnteColorScheme(context)
-                                              .backgroundElevated2,
-                                        ),
-                                        child: IconButton(
-                                          icon: const Icon(Icons.edit),
-                                          iconSize:
-                                              16, // specify the size of the icon
-                                          onPressed: () async {
-                                            final result =
-                                                await showPersonAvatarPhotoSheet(
-                                              context,
-                                              person!,
-                                            );
-                                            if (result != null) {
-                                              _logger.info(
-                                                'Person avatar updated',
-                                              );
-                                              setState(() {
-                                                person = result;
-                                              });
-                                              Bus.instance.fire(
-                                                PeopleChangedEvent(),
-                                              );
-                                            }
-                                          },
-                                        ),
                                       ),
                                     ),
-                                ],
-                              );
+                                    if (person != null)
+                                      Positioned(
+                                        right: 0,
+                                        bottom: 0,
+                                        child: Container(
+                                          width: 28,
+                                          height: 28,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                            boxShadow: Theme.of(context)
+                                                .colorScheme
+                                                .enteTheme
+                                                .shadowMenu,
+                                            color: getEnteColorScheme(context)
+                                                .backgroundElevated2,
+                                          ),
+                                          child: IconButton(
+                                            icon: const Icon(Icons.edit),
+                                            iconSize:
+                                                16, // specify the size of the icon
+                                            onPressed: () async {
+                                              final result =
+                                                  await showPersonAvatarPhotoSheet(
+                                                context,
+                                                person!,
+                                              );
+                                              if (result != null) {
+                                                _logger.info(
+                                                  'Person avatar updated',
+                                                );
+                                                setState(() {
+                                                  person = result;
+                                                });
+                                                Bus.instance.fire(
+                                                  PeopleChangedEvent(
+                                                    type: PeopleEventType
+                                                        .saveOrEditPerson,
+                                                    source:
+                                                        "_SaveOrEditPersonState",
+                                                    person: result,
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                );
+                              } else {
+                                return const SizedBox.shrink();
+                              }
+                            },
+                          ),
+                        if (person == null)
+                          SizedBox(
+                            height: 110,
+                            width: 110,
+                            child: ClipPath(
+                              clipper: ShapeBorderClipper(
+                                shape: ContinuousRectangleBorder(
+                                  borderRadius: BorderRadius.circular(80),
+                                ),
+                              ),
+                              child: widget.file != null
+                                  ? PersonFaceWidget(
+                                      widget.file!,
+                                      clusterID: widget.clusterID,
+                                    )
+                                  : const NoThumbnailWidget(
+                                      addBorder: false,
+                                    ),
+                            ),
+                          ),
+                        const SizedBox(height: 36),
+                        TextFormField(
+                          keyboardType: TextInputType.name,
+                          textCapitalization: TextCapitalization.words,
+                          autocorrect: false,
+                          focusNode: _nameFocsNode,
+                          onChanged: (value) {
+                            if (_debounce?.isActive ?? false) {
+                              _debounce?.cancel();
+                            }
+                            _debounce =
+                                Timer(const Duration(milliseconds: 300), () {
+                              setState(() {
+                                _inputName = value;
+                              });
+                            });
+                          },
+                          initialValue: _inputName,
+                          decoration: InputDecoration(
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(8.0)),
+                              borderSide: BorderSide(
+                                color: getEnteColorScheme(context).strokeMuted,
+                              ),
+                            ),
+                            fillColor: getEnteColorScheme(context).fillFaint,
+                            filled: true,
+                            hintText: context.l10n.enterName,
+                            hintStyle: getEnteTextTheme(context).bodyFaint,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                            border: UnderlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        DatePickerField(
+                          hintText: context.l10n.enterDateOfBirth,
+                          firstDate: DateTime(100),
+                          lastDate: DateTime.now(),
+                          initialValue: _selectedDate,
+                          isRequired: false,
+                          onChanged: (date) {
+                            setState(() {
+                              // format date to yyyy-MM-dd
+                              _selectedDate =
+                                  date?.toIso8601String().split("T").first;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        _EmailSection(_email, person?.remoteID),
+                        const SizedBox(height: 32),
+                        ButtonWidget(
+                          buttonType: ButtonType.primary,
+                          labelText: context.l10n.save,
+                          isDisabled: !changed || _inputName.isEmpty,
+                          onTap: () async {
+                            if (widget.isEditing) {
+                              final updatedPersonEntity =
+                                  await updatePerson(context);
+                              if (updatedPersonEntity != null) {
+                                Navigator.pop(context, updatedPersonEntity);
+                              }
                             } else {
-                              return const SizedBox.shrink();
+                              final newPersonEntity = await addNewPerson(
+                                context,
+                                text: _inputName,
+                                clusterID: widget.clusterID!,
+                                birthdate: _selectedDate,
+                                email: _email,
+                              );
+                              if (newPersonEntity != null) {
+                                Navigator.pop(context, newPersonEntity);
+                              }
                             }
                           },
                         ),
-                      if (person == null)
-                        SizedBox(
-                          height: 110,
-                          width: 110,
-                          child: ClipPath(
-                            clipper: ShapeBorderClipper(
-                              shape: ContinuousRectangleBorder(
-                                borderRadius: BorderRadius.circular(80),
-                              ),
-                            ),
-                            child: widget.file != null
-                                ? PersonFaceWidget(
-                                    widget.file!,
-                                    clusterID: widget.clusterID,
-                                  )
-                                : const NoThumbnailWidget(
-                                    addBorder: false,
-                                  ),
-                          ),
-                        ),
-                      const SizedBox(height: 36),
-                      TextFormField(
-                        keyboardType: TextInputType.name,
-                        textCapitalization: TextCapitalization.words,
-                        autocorrect: false,
-                        onChanged: (value) {
-                          if (_debounce?.isActive ?? false) _debounce?.cancel();
-                          _debounce =
-                              Timer(const Duration(milliseconds: 300), () {
-                            setState(() {
-                              _inputName = value;
-                            });
-                          });
-                        },
-                        initialValue: _inputName,
-                        decoration: InputDecoration(
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(8.0)),
-                            borderSide: BorderSide(
-                              color: getEnteColorScheme(context).strokeMuted,
+                        const SizedBox(height: 32),
+                        if (!widget.isEditing) _getPersonItems(),
+                        if (widget.isEditing)
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              context.l10n.mergedPhotos,
+                              style: getEnteTextTheme(context).body,
                             ),
                           ),
-                          fillColor: getEnteColorScheme(context).fillFaint,
-                          filled: true,
-                          hintText: context.l10n.enterName,
-                          hintStyle: getEnteTextTheme(context).bodyFaint,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
+                        if (widget.isEditing)
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(bottom: 12.0, top: 24.0),
+                            child: PersonClustersWidget(person!),
                           ),
-                          border: UnderlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      DatePickerField(
-                        hintText: context.l10n.enterDateOfBirth,
-                        firstDate: DateTime(100),
-                        lastDate: DateTime.now(),
-                        initialValue: _selectedDate,
-                        isRequired: false,
-                        onChanged: (date) {
-                          setState(() {
-                            // format date to yyyy-MM-dd
-                            _selectedDate =
-                                date?.toIso8601String().split("T").first;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 32),
-                      ButtonWidget(
-                        buttonType: ButtonType.primary,
-                        labelText: context.l10n.save,
-                        isDisabled: !changed,
-                        onTap: () async {
-                          if (widget.isEditing) {
-                            await updatePerson(context);
-                          } else {
-                            await addNewPerson(
-                              context,
-                              text: _inputName,
-                              clusterID: widget.clusterID!,
-                              birthdate: _selectedDate,
-                              //TODO: email
-                            );
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 32),
-                      if (!widget.isEditing) _getPersonItems(),
-                      if (widget.isEditing)
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            context.l10n.mergedPhotos,
-                            style: getEnteTextTheme(context).body,
-                          ),
-                        ),
-                      if (widget.isEditing)
-                        Padding(
-                          padding:
-                              const EdgeInsets.only(bottom: 12.0, top: 24.0),
-                          child: PersonClustersWidget(person!),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  Future<dynamic> _saveChangesPrompt(BuildContext context) async {
+    PersonEntity? updatedPersonEntity;
+    return await showActionSheet(
+      body: "Save changes before leaving?",
+      context: context,
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.neutral,
+          labelText: S.of(context).save,
+          isInAlert: true,
+          buttonAction: ButtonAction.first,
+          shouldStickToDarkTheme: true,
+          onTap: () async {
+            if (widget.isEditing) {
+              updatedPersonEntity = await updatePerson(context);
+            } else {
+              updatedPersonEntity = await addNewPerson(
+                context,
+                text: _inputName,
+                clusterID: widget.clusterID!,
+                birthdate: _selectedDate,
+                email: _email,
+              );
+            }
+          },
+        ),
+        const ButtonWidget(
+          buttonType: ButtonType.secondary,
+          labelText: "Don't save",
+          isInAlert: true,
+          buttonAction: ButtonAction.second,
+          shouldStickToDarkTheme: true,
+        ),
+        ButtonWidget(
+          buttonType: ButtonType.secondary,
+          labelText: S.of(context).cancel,
+          isInAlert: true,
+          buttonAction: ButtonAction.cancel,
+          shouldStickToDarkTheme: true,
+        ),
+      ],
+    ).then((buttonResult) {
+      if (buttonResult == null ||
+          buttonResult.action == null ||
+          buttonResult.action == ButtonAction.cancel) {
+        return ButtonAction.cancel;
+      } else if (buttonResult.action == ButtonAction.second) {
+        return ButtonAction.second;
+      } else {
+        return updatedPersonEntity;
+      }
+    });
   }
 
   Widget _getPersonItems() {
@@ -408,7 +519,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     yield _cachedPersons;
   }
 
-  Future<void> addNewPerson(
+  Future<PersonEntity?> addNewPerson(
     BuildContext context, {
     String text = '',
     required String clusterID,
@@ -417,10 +528,10 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   }) async {
     try {
       if (userAlreadyAssigned) {
-        return;
+        return null;
       }
       if (text.trim() == "") {
-        return;
+        return null;
       }
       userAlreadyAssigned = true;
       final personEntity = await PersonService.instance.addPerson(
@@ -437,21 +548,29 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
       if (extraPhotosFound) {
         showShortToast(context, S.of(context).extraPhotosFound);
       }
-      Bus.instance.fire(PeopleChangedEvent());
-      Navigator.pop(context, personEntity);
+      Bus.instance.fire(
+        PeopleChangedEvent(
+          type: PeopleEventType.saveOrEditPerson,
+          source: "_SaveOrEditPersonState addNewPerson",
+          person: personEntity,
+        ),
+      );
+      return personEntity;
     } catch (e) {
       _logger.severe("Error adding new person", e);
       userAlreadyAssigned = false;
       await showGenericErrorDialog(context: context, error: e);
+      return null;
     }
   }
 
   bool get changed => widget.isEditing
       ? (_inputName.trim() != person!.data.name ||
-          _selectedDate != person!.data.birthDate)
+              _selectedDate != person!.data.birthDate) ||
+          _email != person!.data.email
       : _inputName.trim().isNotEmpty;
 
-  Future<void> updatePerson(BuildContext context) async {
+  Future<PersonEntity?> updatePerson(BuildContext context) async {
     try {
       final String name = _inputName.trim();
       final String? birthDate = _selectedDate;
@@ -459,14 +578,21 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
         person!.remoteID,
         name: name,
         birthDate: birthDate,
-        //TODO: email
+        email: _email,
       );
 
-      Bus.instance.fire(PeopleChangedEvent());
-      Navigator.pop(context, personEntity);
+      Bus.instance.fire(
+        PeopleChangedEvent(
+          type: PeopleEventType.saveOrEditPerson,
+          source: "_SaveOrEditPersonState updatePerson",
+          person: personEntity,
+        ),
+      );
+      return personEntity;
     } catch (e) {
       _logger.severe("Error adding updating person", e);
       await showGenericErrorDialog(context: context, error: e);
+      return null;
     }
   }
 
@@ -527,5 +653,140 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
       return ("", EnteFile());
     }
     return (person.remoteID, resultFile);
+  }
+}
+
+class _EmailSection extends StatefulWidget {
+  final String? personID;
+  final String? email;
+  const _EmailSection(this.email, this.personID);
+
+  @override
+  State<_EmailSection> createState() => _EmailSectionState();
+}
+
+class _EmailSectionState extends State<_EmailSection> {
+  String? _email;
+
+  @override
+  void initState() {
+    super.initState();
+    _email = widget.email;
+  }
+
+  @override
+  void didUpdateWidget(covariant _EmailSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.email != widget.email) {
+      setState(() {
+        _email = widget.email;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_email == null || _email!.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 20),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
+          decoration: BoxDecoration(
+            color: getEnteColorScheme(context).fillFaint,
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: ButtonWidget(
+                    buttonType: ButtonType.secondary,
+                    labelText: "This is me!",
+                  ),
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: ButtonWidget(
+                    buttonType: ButtonType.primary,
+                    labelText: "Link email",
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    } else {
+      return TextFormField(
+        canRequestFocus: false,
+        autocorrect: false,
+        decoration: InputDecoration(
+          suffixIcon: GestureDetector(
+            onTap: _removeLinkFromTextField,
+            child: Icon(
+              Icons.close_outlined,
+              color: getEnteColorScheme(context).strokeMuted,
+            ),
+          ),
+          fillColor: getEnteColorScheme(context).fillFaint,
+          filled: true,
+          hintText: _email,
+          hintStyle: getEnteTextTheme(context).bodyFaint,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
+          border: UnderlineInputBorder(
+            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _removeLinkFromTextField() async {
+    PersonEntity? personEntity;
+    if (widget.personID != null) {
+      personEntity = await PersonService.instance.getPerson(
+        widget.personID!,
+      );
+    }
+    final name = personEntity?.data.name ?? '';
+    final email = personEntity?.data.email;
+    final result = await showDialogWidget(
+      context: context,
+      title:
+          name.isEmpty ? "Unlink email from person" : "Unlink email from $name",
+      icon: Icons.info_outline,
+      body: name.isEmpty
+          ? "This will unlink $email from this person"
+          : "This will unlink $email from $name",
+      isDismissible: true,
+      buttons: [
+        const ButtonWidget(
+          buttonAction: ButtonAction.first,
+          buttonType: ButtonType.neutral,
+          labelText: "Unlink",
+          isInAlert: true,
+        ),
+        ButtonWidget(
+          buttonAction: ButtonAction.cancel,
+          buttonType: ButtonType.secondary,
+          labelText: S.of(context).cancel,
+          isInAlert: true,
+        ),
+      ],
+    );
+
+    if (result != null && result.action == ButtonAction.first) {
+      final saveOrEditPersonState =
+          context.findAncestorStateOfType<_SaveOrEditPersonState>()!;
+      saveOrEditPersonState.setState(() {
+        saveOrEditPersonState._email = "";
+      });
+    }
   }
 }
