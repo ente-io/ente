@@ -184,31 +184,6 @@ func (c *UserController) UpdateEmailMFA(context *gin.Context, userID int64, isEn
 	return c.UserAuthRepo.UpdateEmailMFA(context, userID, isEnabled)
 }
 
-// UpdateKeys updates the user keys on password change
-func (c *UserController) UpdateKeys(context *gin.Context, userID int64,
-	request ente.UpdateKeysRequest, token string) error {
-	/*
-		todo: send email to the user on password change and may be keep history of old keys for X days.
-			History will allow easy recovery of the account when password is changed by a bad actor
-	*/
-	isSRPSetupDone, err := c.UserAuthRepo.IsSRPSetupDone(context, userID)
-	if err != nil {
-		return err
-	}
-	if isSRPSetupDone {
-		return stacktrace.Propagate(ente.NewBadRequestWithMessage("Need to upgrade client"), "can not use old API to change password after SRP is setup")
-	}
-	err = c.UserRepo.UpdateKeys(userID, request)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-	err = c.UserAuthRepo.RemoveAllOtherTokens(userID, token)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-	return nil
-}
-
 // SetRecoveryKey sets the recovery key attributes for a user, if not already set
 func (c *UserController) SetRecoveryKey(userID int64, request ente.SetRecoveryKeyRequest) error {
 	keyAttr, keyErr := c.UserRepo.GetKeyAttributes(userID)

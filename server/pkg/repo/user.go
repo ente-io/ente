@@ -265,13 +265,6 @@ func (repo *UserRepository) SetKeyAttributes(userID int64, keyAttributes ente.Ke
 	return stacktrace.Propagate(err, "")
 }
 
-// UpdateKeys sets the keys of a user
-func (repo *UserRepository) UpdateKeys(userID int64, keys ente.UpdateKeysRequest) error {
-	_, err := repo.DB.Exec(`UPDATE key_attributes SET kek_salt = $1, encrypted_key = $2, key_decryption_nonce = $3, mem_limit = $4, ops_limit = $5 WHERE user_id = $6`,
-		keys.KEKSalt, keys.EncryptedKey, keys.KeyDecryptionNonce, keys.MemLimit, keys.OpsLimit, userID)
-	return stacktrace.Propagate(err, "")
-}
-
 // SetRecoveryKeyAttributes sets the recovery key and related attributes for a user
 func (repo *UserRepository) SetRecoveryKeyAttributes(userID int64, keys ente.SetRecoveryKeyRequest) error {
 	_, err := repo.DB.Exec(`UPDATE key_attributes SET master_key_encrypted_with_recovery_key = $1, master_key_decryption_nonce = $2, recovery_key_encrypted_with_master_key = $3, recovery_key_decryption_nonce = $4 WHERE user_id = $5`,

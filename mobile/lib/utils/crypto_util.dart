@@ -17,6 +17,8 @@ const int loginSubKeyLen = 32;
 const int loginSubKeyId = 1;
 const String loginSubKeyContext = "loginctx";
 
+const int _keyDerivationStregth = 1073741824 * 4;
+
 Uint8List cryptoSecretboxEasy(Map<String, dynamic> args) {
   return Sodium.cryptoSecretboxEasy(args["source"], args["nonce"], args["key"]);
 }

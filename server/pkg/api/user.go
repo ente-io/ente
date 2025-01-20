@@ -105,23 +105,6 @@ func (h *UserHandler) UpdateEmailMFA(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-// UpdateKeys updates the user key attributes on password change
-func (h *UserHandler) UpdateKeys(c *gin.Context) {
-	userID := auth.GetUserID(c.Request.Header)
-	var request ente.UpdateKeysRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	token := auth.GetToken(c)
-	err := h.UserController.UpdateKeys(c, userID, request, token)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.Status(http.StatusOK)
-}
-
 // SetRecoveryKey sets the recovery key attributes for a user.
 func (h *UserHandler) SetRecoveryKey(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
