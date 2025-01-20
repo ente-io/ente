@@ -166,7 +166,7 @@ func (c *UserController) createAndInsertSRPSession(
 ) (*string, *uuid.UUID, error) {
 	srpABytes := convertStringToBytes(srpA)
 	if len(srpABytes) != 512 {
-		return nil, nil, stacktrace.NewError("srpA is not 512 bytes")
+		return nil, nil, ente.NewBadRequestWithMessage("Invalid length for srpA")
 	}
 	unverifiedSessions, err := c.UserAuthRepo.GetUnverifiedSessionsInLastHour(srpUserID)
 	if err != nil {
@@ -197,7 +197,7 @@ func (c *UserController) createAndInsertSRPSession(
 	}
 
 	if len(srpB) != 512 {
-		return nil, nil, stacktrace.NewError("srpB is not 512 bytes")
+		return nil, nil, ente.NewBadRequestWithMessage("Invalid length for srpB")
 	}
 
 	sessionID, err := c.UserAuthRepo.AddSRPSession(srpUserID, convertBytesToString(serverSecret), srpA)
