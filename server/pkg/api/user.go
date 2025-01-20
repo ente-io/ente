@@ -82,6 +82,10 @@ func (h *UserHandler) SetAttributes(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
+	if err := request.Validate(); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
 	err := h.UserController.SetAttributes(userID, request)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
