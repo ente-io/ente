@@ -2,6 +2,8 @@
   "@@locale ": "en",
   "enterYourEmailAddress": "Introduceți adresa de e-mail",
   "accountWelcomeBack": "Bine ați revenit!",
+  "emailAlreadyRegistered": "E-mail deja înregistrat.",
+  "emailNotRegistered": "E-mailul nu este înregistrat.",
   "email": "E-mail",
   "cancel": "Anulare",
   "verify": "Verificare",
@@ -185,6 +187,8 @@
   },
   "allowAddPhotosDescription": "Permiteți persoanelor care au linkul să adauge și fotografii la albumul distribuit.",
   "passwordLock": "Blocare cu parolă",
+  "canNotOpenTitle": "Nu se poate deschide acest album",
+  "canNotOpenBody": "Ne pare rău, acest album nu poate fi deschis în aplicație.",
   "disableDownloadWarningTitle": "Rețineți",
   "disableDownloadWarningBody": "Observatorii pot să facă capturi de ecran sau să salveze o copie a fotografiilor dvs. folosind instrumente externe",
   "allowDownloads": "Permiteți descărcările",
@@ -351,6 +355,7 @@
   "failedToLoadAlbums": "Încărcarea albumelor nu a reușit",
   "hidden": "Ascunse",
   "authToViewYourHiddenFiles": "Vă rugăm să vă autentificați pentru a vedea fișierele ascunse",
+  "authToViewTrashedFiles": "Vă rugăm să vă autentificați pentru a vedea fișierele din coșul de gunoi",
   "trash": "Coș de gunoi",
   "uncategorized": "Necategorisite",
   "videoSmallCase": "videoclip",
@@ -412,6 +417,7 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Dimensiunea grilei foto",
+  "manageDeviceStorage": "Gestionați memoria cache a dispozitivului",
   "manageDeviceStorageDesc": "Revizuiți și ștergeți spațiul din memoria cache locală.",
   "machineLearning": "Învățare automată",
   "mlConsent": "Activați învățarea automată",
@@ -688,6 +694,8 @@
   "noPhotosAreBeingBackedUpRightNow": "Nicio fotografie nu este salvată în acest moment",
   "preserveMore": "Păstrați mai multe",
   "grantFullAccessPrompt": "Vă rugăm să permiteți accesul la toate fotografiile în aplicația Setări",
+  "allowPermTitle": "Permiteți accesul la fotografii",
+  "allowPermBody": "Vă rugăm să permiteți accesul la fotografiile dvs. din Setări, astfel încât Ente să vă poată afișa și salva biblioteca.",
   "openSettings": "Deschideți Setări",
   "selectMorePhotos": "Selectați mai multe fotografii",
   "existingUser": "Utilizator existent",
@@ -1090,6 +1098,83 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Setare rază",
+  "familyPlanPortalTitle": "Familie",
+  "familyPlanOverview": "Adăugați 5 membri ai familiei la planul dvs. existent fără a plăti suplimentar.\n\nFiecare membru primește propriul spațiu privat și nu poate vedea fișierele celuilalt decât dacă acestea sunt partajate.\n\nPlanurile de familie sunt disponibile pentru clienții care au un abonament Ente plătit.\n\nAbonați-vă acum pentru a începe!",
+  "androidBiometricHint": "Verificați-vă identitatea",
+  "@androidBiometricHint": {
+    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricNotRecognized": "Neidentificat. Încercați din nou.",
+  "@androidBiometricNotRecognized": {
+    "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricSuccess": "Succes",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "Anulare",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "androidSignInTitle": "Autentificare necesară",
+  "@androidSignInTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricRequiredTitle": "Biometrice necesare",
+  "@androidBiometricRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsRequiredTitle": "Sunt necesare acreditările dispozitivului",
+  "@androidDeviceCredentialsRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up credentials authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsSetupDescription": "Sunt necesare acreditările dispozitivului",
+  "@androidDeviceCredentialsSetupDescription": {
+    "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
+  },
+  "goToSettings": "Mergeți la setări",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "androidGoToSettingsDescription": "Autentificarea biometrică nu este configurată pe dispozitivul dvs. Mergeți la „Setări > Securitate” pentru a adăuga autentificarea biometrică.",
+  "@androidGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
+  },
+  "iOSLockOut": "Autentificarea biometrică este dezactivată. Vă rugăm să blocați și să deblocați ecranul pentru a o activa.",
+  "@iOSLockOut": {
+    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
+  },
+  "iOSGoToSettingsDescription": "Autentificarea biometrică nu este configurată pe dispozitivul dvs. Vă rugăm să activați Touch ID sau Face ID pe telefonul dvs.",
+  "@iOSGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure Biometrics for their device. It shows in a dialog on iOS side."
+  },
+  "iOSOkButton": "OK",
+  "@iOSOkButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
+  "openstreetmapContributors": "Contribuitori OpenStreetMap",
+  "hostedAtOsmFrance": "Găzduit la OSM Franţa",
+  "map": "Hartă",
+  "@map": {
+    "description": "Label for the map view"
+  },
+  "maps": "Hărţi",
+  "enableMaps": "Activare hărți",
+  "enableMapsDesc": "Se va afișa fotografiile dvs. pe o hartă a lumii.\n\nAceastă hartă este găzduită de Open Street Map, iar locațiile exacte ale fotografiilor dvs. nu sunt niciodată partajate.\n\nPuteți dezactiva această funcție oricând din Setări.",
+  "quickLinks": "Link-uri rapide",
+  "selectItemsToAdd": "Selectați elementele de adăugat",
+  "addSelected": "Adăugați selectate",
+  "addFromDevice": "Adăugați de pe dispozitiv",
+  "addPhotos": "Adăugați fotografii",
+  "noPhotosFoundHere": "Nu s-au găsit fotografii aici",
+  "zoomOutToSeePhotos": "Micșorați pentru a vedea fotografiile",
+  "noImagesWithLocation": "Nicio imagine cu locație",
+  "unpinAlbum": "Anulați fixarea albumului",
+  "pinAlbum": "Fixați albumul",
+  "create": "Creare",
+  "viewAll": "Vizualizați tot",
+  "nothingSharedWithYouYet": "Nimic distribuit cu dvs. încă",
+  "noAlbumsSharedByYouYet": "Niciun album nu a fost distribuit de dvs. încă",
   "sharedWithYou": "Distribuite cu dvs.",
   "sharedByYou": "Distribuite de dvs.",
   "inviteYourFriendsToEnte": "Invitați-vă prietenii la Ente",
@@ -1152,6 +1237,21 @@
   "changeLocationOfSelectedItems": "Schimbați locația articolelor selectate?",
   "editsToLocationWillOnlyBeSeenWithinEnte": "Editările locației vor fi vizibile doar pe Ente",
   "cleanUncategorized": "Curățare Necategorisite",
+  "cleanUncategorizedDescription": "Eliminați toate fișierele din „Fără categorie” care sunt prezente în alte albume",
+  "waitingForVerification": "Se așteaptă verificarea...",
+  "passkey": "Cheie de acces",
+  "passkeyAuthTitle": "Verificare cheie de acces",
+  "loginWithTOTP": "Autentificare cu parolă unică (TOTP)",
+  "passKeyPendingVerification": "Verificarea este încă în așteptare",
+  "loginSessionExpired": "Sesiune expirată",
+  "loginSessionExpiredDetails": "Sesiunea a expirat. Vă rugăm să vă autentificați din nou.",
+  "verifyPasskey": "Verificați cheia de acces",
+  "playOnTv": "Redare album pe TV",
+  "pair": "Asociere",
+  "deviceNotFound": "Dispozitivul nu a fost găsit",
+  "castInstruction": "Accesați cast.ente.io de pe dispozitivul pe care doriți să îl asociați.\n\nIntroduceți codul de mai jos pentru a reda albumul pe TV.",
+  "deviceCodeHint": "Introduceți codul",
+  "joinDiscord": "Alăturați-vă pe Discord",
   "locations": "Locații",
   "addAName": "Adăugați un nume",
   "findThemQuickly": "Găsiți rapid",
@@ -1225,5 +1325,269 @@
   "panorama": "Panoramă",
   "reenterPassword": "Reintroduceți parola",
   "reenterPin": "Reintroduceți codul PIN",
-  "deviceLock": "Blocare dispozitiv"
+  "deviceLock": "Blocare dispozitiv",
+  "pinLock": "Blocare PIN",
+  "next": "Înainte",
+  "setNewPassword": "Setați parola noua",
+  "enterPin": "Introduceţi codul PIN",
+  "setNewPin": "Setați un cod nou PIN",
+  "appLock": "Blocare aplicație",
+  "noSystemLockFound": "Nu s-a găsit nicio blocare de sistem",
+  "tapToUnlock": "Atingeți pentru a debloca",
+  "tooManyIncorrectAttempts": "Prea multe încercări incorecte",
+  "videoInfo": "Informaţii video",
+  "autoLock": "Blocare automată",
+  "immediately": "Imediat",
+  "autoLockFeatureDescription": "Timpul după care aplicația se blochează după ce a fost pusă în fundal",
+  "hideContent": "Ascundeți conținutul",
+  "hideContentDescriptionAndroid": "Ascunde conținutul aplicației în comutatorul de aplicații și dezactivează capturile de ecran",
+  "hideContentDescriptionIos": "Ascunde conținutul aplicației în comutatorul de aplicații",
+  "passwordStrengthInfo": "Puterea parolei este calculată luând în considerare lungimea parolei, caracterele utilizate și dacă parola apare sau nu în top 10.000 cele mai utilizate parole",
+  "noQuickLinksSelected": "Nu au fost găsite linkuri rapide",
+  "pleaseSelectQuickLinksToRemove": "Vă rugăm să selectați linkurile rapide de eliminat",
+  "removePublicLinks": "Eliminați linkurile publice",
+  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Se vor elimina linkurile publice ale linkurilor rapide selectate.",
+  "guestView": "Mod oaspete",
+  "guestViewEnablePreSteps": "Pentru a activa modul oaspete, vă rugăm să configurați codul de acces al dispozitivului sau blocarea ecranului în setările sistemului.",
+  "nameTheAlbum": "Denumiți albumul",
+  "collectPhotosDescription": "Creați un link unde prietenii dvs. pot încărca fotografii la calitatea originală.",
+  "collect": "Colectare",
+  "appLockDescriptions": "Alegeți între ecranul de blocare implicit al dispozitivului dvs. și un ecran de blocare personalizat cu PIN sau parolă.",
+  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Pentru a activa blocarea aplicației, vă rugăm să configurați codul de acces al dispozitivului sau blocarea ecranului în setările sistemului.",
+  "authToViewPasskey": "Vă rugăm să vă autentificați pentru a vizualiza cheia de acces",
+  "loopVideoOn": "Repetare video activată",
+  "loopVideoOff": "Repetare video dezactivată",
+  "localSyncErrorMessage": "Se pare că ceva nu a mers bine, deoarece sincronizarea fotografiilor locale durează mai mult decât ne așteptam. Vă rugăm să contactați echipa noastră de asistență",
+  "showPerson": "Afișare persoană",
+  "sort": "Sortare",
+  "mostRecent": "Cele mai recente",
+  "mostRelevant": "Cele mai relevante",
+  "loadingYourPhotos": "Se încarcă fotografiile dvs...",
+  "processingImport": "Se procesează {folderName}...",
+  "personName": "Numele persoanei",
+  "addNewPerson": "Adăugare persoană nouă",
+  "addNameOrMerge": "Adăugare nume sau îmbinare",
+  "mergeWithExisting": "Îmbinare cu unul existent",
+  "newPerson": "Persoană nouă",
+  "addName": "Adăugare nume",
+  "add": "Adăugare",
+  "extraPhotosFoundFor": "S-au găsit fotografii extra pentru {text}",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "extraPhotosFound": "S-au găsit fotografii extra",
+  "configuration": "Configurare",
+  "localIndexing": "Indexare locală",
+  "processed": "Procesate",
+  "resetPerson": "Eliminare",
+  "areYouSureYouWantToResetThisPerson": "Sunteți sigur că doriți să resetaţi această persoană?",
+  "allPersonGroupingWillReset": "Toate grupările pentru această persoană vor fi resetate și veți pierde toate sugestiile făcute pentru această persoană",
+  "yesResetPerson": "Da, resetează persoana",
+  "onlyThem": "Numai el/ea",
+  "checkingModels": "Se verifică modelele...",
+  "enableMachineLearningBanner": "Activați învățarea automată pentru a folosi căutarea magică și recunoașterea facială",
+  "searchDiscoverEmptySection": "Imaginile vor fi afișate aici odată ce procesarea și sincronizarea este completă",
+  "searchPersonsEmptySection": "Persoanele vor fi afișate aici odată ce procesarea și sincronizarea este completă",
+  "viewersSuccessfullyAdded": "{count, plural, one {} few {S-au adăugat {count} observatori}=0 {S-au adăugat 0 observatori} =1 {S-a adăugat 1 observator} other {S-au adăugat {count} de observatori}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, one {} few {S-au adăugat {count} colaboratori}=0 {S-au adăugat 0 colaboratori} =1 {S-a adăugat 1 colaborator} other {S-au adăugat {count} de colaboratori}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  },
+  "accountIsAlreadyConfigured": "Contul este deja configurat.",
+  "sessionIdMismatch": "Nepotrivire ID sesiune",
+  "@sessionIdMismatch": {
+    "description": "In passkey page, deeplink is ignored because of session ID mismatch."
+  },
+  "failedToFetchActiveSessions": "Nu s-a reușit preluarea sesiunilor active",
+  "@failedToFetchActiveSessions": {
+    "description": "In session page, warn user (in toast) that active sessions could not be fetched."
+  },
+  "failedToRefreshStripeSubscription": "Nu s-a reușit reîmprospătarea abonamentului",
+  "failedToPlayVideo": "Eroare la redarea videoclipului",
+  "uploadIsIgnoredDueToIgnorereason": "Încărcare ignorată din motivul {ignoreReason}",
+  "@uploadIsIgnoredDueToIgnorereason": {
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "typeOfGallerGallerytypeIsNotSupportedForRename": "Tipul de galerie {galleryType} nu este acceptat pentru redenumire",
+  "@typeOfGallerGallerytypeIsNotSupportedForRename": {
+    "placeholders": {
+      "galleryType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUploadIsIgnoredDue": "Atingeți pentru a încărca, încărcarea este ignorată în prezent datorită {ignoreReason}",
+  "@tapToUploadIsIgnoredDue": {
+    "description": "Shown in upload icon widet, inside a tooltip.",
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUpload": "Atingeți pentru a încărca",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
+  "info": "Informații",
+  "addFiles": "Adăugați fișiere",
+  "castAlbum": "Difuzați albumul",
+  "imageNotAnalyzed": "Imaginea nu a fost analizată",
+  "noFacesFound": "Nu au fost găsite fețe",
+  "fileNotUploadedYet": "Fișierul nu a fost încărcat încă",
+  "noSuggestionsForPerson": "Nicio sugestie pentru {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "lună",
+  "yearShort": "an",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "rulează în prezent",
+  "ignored": "ignorat",
+  "photosCount": "{count, plural, one {} few {{count} fotografii}=0 {0 fotografii} =1 {1 fotografie} other {{count} de fotografii}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "file": "Fișier",
+  "searchSectionsLengthMismatch": "Lungimea secțiunilor nu se potrivesc: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "selectMailApp": "Selectați aplicația de e-mail",
+  "selectAllShort": "Toate",
+  "@selectAllShort": {
+    "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
+  },
+  "changeLogMagicSearchImprovementTitle": "Îmbunătățire a căutării magice",
+  "changeLogMagicSearchImprovementContent": "Am îmbunătățit căutarea magică pentru a deveni mult mai rapidă, astfel încât să nu trebuiască să așteptați pentru a găsi ceea ce căutați.",
+  "changeLogBackupStatusTitle": "Starea copiei de rezervă",
+  "changeLogBackupStatusContent": "Am adăugat un jurnal al tuturor fișierelor care au fost încărcate pe Ente, inclusiv eșecurile și coada de așteptare.",
+  "changeLogDiscoverTitle": "Descoperire",
+  "changeLogDiscoverContent": "Căutați fotografii ale cărților de identitate, notițe sau chiar meme-uri? Mergeți la fila de căutare și dați o privire la Descoperire. Bazat pe căutarea noastră semantică, este un loc în care puteți găsi fotografii care ar putea fi importante pentru dvs.\\n\\nEste disponibilă numai dacă ați activat învățarea automată.",
+  "selectCoverPhoto": "Selectați fotografia de copertă",
+  "newLocation": "Locație nouă",
+  "faceNotClusteredYet": "Fața nu este încă grupată, vă rugăm să reveniți mai târziu",
+  "theLinkYouAreTryingToAccessHasExpired": "Linkul pe care încercați să îl accesați a expirat.",
+  "openFile": "Deschidere fișier",
+  "backupFile": "Salvare fișier",
+  "openAlbumInBrowser": "Deschideți albumul în browser",
+  "openAlbumInBrowserTitle": "Vă rugăm să utilizați aplicația web pentru a adăuga fotografii la acest album",
+  "allow": "Permiteți",
+  "allowAppToOpenSharedAlbumLinks": "Permiteți aplicației să deschidă link-uri de album partajate",
+  "seePublicAlbumLinksInApp": "Vedeți linkurile albumelor publice în aplicație",
+  "emergencyContacts": "Contacte de urgență",
+  "acceptTrustInvite": "Acceptați invitația",
+  "declineTrustInvite": "Refuzați invitația",
+  "removeYourselfAsTrustedContact": "Eliminați-vă ca persoană de contact de încredere",
+  "legacy": "Moștenire",
+  "legacyPageDesc": "Moștenirea permite contactelor de încredere să vă acceseze contul în absența dvs.",
+  "legacyPageDesc2": "Persoanele de contact de încredere pot iniția recuperarea contului și, dacă nu este blocată în termen de 30 de zile, vă pot reseta parola și accesa contul.",
+  "legacyAccounts": "Conturi de moștenire",
+  "trustedContacts": "Contacte de încredere",
+  "addTrustedContact": "Adăugare contact de încredere",
+  "removeInvite": "Eliminare invitație",
+  "recoveryWarning": "Un contact de încredere încearcă să vă acceseze contul",
+  "rejectRecovery": "Respingeți recuperarea",
+  "recoveryInitiated": "Recuperare inițiată",
+  "recoveryInitiatedDesc": "Puteți accesa contul după {days} zile. O notificare va fi trimisă la {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Anulare recuperare",
+  "recoveryAccount": "Recuperare cont",
+  "cancelAccountRecoveryBody": "Sunteți sigur că doriți să anulați recuperarea?",
+  "startAccountRecoveryTitle": "Începeți recuperarea",
+  "whyAddTrustContact": "Contactul de încredere vă poate ajuta la recuperarea datelor.",
+  "recoveryReady": "Acum puteți recupera contul {email} setând o nouă parolă.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} încearcă să vă recupereze contul.",
+  "trustedInviteBody": "Ați fost învitat să fiți un contact de moștenire de către {email}.",
+  "warning": "Atenție",
+  "proceed": "Continuați",
+  "confirmAddingTrustedContact": "Sunteți pe cale să adăugați {email} ca persoană de contact de încredere. Acesta va putea să vă recupereze contul dacă lipsiți timp de {numOfDays} de zile.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} v-a invitat să fiți un contact de încredere",
+  "authToManageLegacy": "Vă rugăm să vă autentificați pentru a gestiona contactele de încredere",
+  "useDifferentPlayerInfo": "Aveți probleme cu redarea acestui videoclip? Apăsați lung aici pentru a încerca un alt player.",
+  "hideSharedItemsFromHomeGallery": "Ascundeți elementele distribuite din galeria principală",
+  "gallery": "Galerie",
+  "joinAlbum": "Alăturați-vă albumului",
+  "joinAlbumSubtext": "pentru a vedea și a adăuga fotografii",
+  "joinAlbumSubtextViewer": "pentru a adăuga la albumele distribuite",
+  "join": "Alăturare"
 }
