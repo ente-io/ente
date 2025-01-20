@@ -258,6 +258,9 @@
       ]
     },
     {
+      "title": "CSAM"
+    },
+    {
       "title": "CSFloat"
     },
     {
@@ -342,8 +345,7 @@
       "title": "Estateguru"
     },
     {
-      "title": "Fastmail",
-      "hex": "0067B9"
+      "title": "Fastmail"
     },
     {
       "title": "Fidelity",
@@ -833,6 +835,9 @@
         "registrobr",
         "Registro.br"
       ]
+    },
+    {
+      "title": "reMarkable"
     },
     {
       "title": "Restorecord"
