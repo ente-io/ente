@@ -88,6 +88,8 @@
   "useRecoveryKey": "Utilizza un codice di recupero",
   "incorrectPasswordTitle": "Password sbagliata",
   "welcomeBack": "Bentornato!",
+  "emailAlreadyRegistered": "Email già registrata.",
+  "emailNotRegistered": "Email non registrata.",
   "madeWithLoveAtPrefix": "realizzato con ❤️ a ",
   "supportDevs": "Iscriviti a <bold-green>ente</bold-green> per supportare questo progetto.",
   "supportDiscount": "Utilizzare il codice coupon \"AUTH\" per ottenere il 10% di sconto al primo anno",
