@@ -2,7 +2,7 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { CustomErrorMessage, type ZipItem } from "../../types/ipc";
+import { type ZipItem } from "../../types/ipc";
 import { execAsync, isDev } from "../utils/electron";
 import {
     deleteTempFileIgnoringErrors,
@@ -45,9 +45,6 @@ const convertToJPEGCommand = (
 
         case "linux":
         case "win32":
-            // The bundled binary is for x86 and arm64.
-            if (process.arch != "x64" && process.arch != "arm64")
-                throw new Error(CustomErrorMessage.NotAvailable);
             return [
                 imageMagickPath(),
                 "convert",
@@ -58,7 +55,7 @@ const convertToJPEGCommand = (
             ];
 
         default:
-            throw new Error(CustomErrorMessage.NotAvailable);
+            throw new Error("Not available on the current OS/arch");
     }
 };
 
@@ -138,9 +135,6 @@ const generateImageThumbnailCommand = (
 
         case "linux":
         case "win32":
-            // The bundled binary is for x86 and arm64.
-            if (process.arch != "x64" && process.arch != "arm64")
-                throw new Error(CustomErrorMessage.NotAvailable);
             return [
                 imageMagickPath(),
                 "convert",
@@ -158,6 +152,6 @@ const generateImageThumbnailCommand = (
             ];
 
         default:
-            throw new Error(CustomErrorMessage.NotAvailable);
+            throw new Error("Not available on the current OS/arch");
     }
 };
