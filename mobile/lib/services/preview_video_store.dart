@@ -23,7 +23,6 @@ import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/gzip.dart";
 import "package:photos/utils/toast_util.dart";
-import "package:video_compress/video_compress.dart";
 
 class PreviewVideoStore {
   PreviewVideoStore._privateConstructor();
@@ -34,22 +33,12 @@ class PreviewVideoStore {
   final _logger = Logger("PreviewVideoStore");
   final cacheManager = DefaultCacheManager();
   final videoCacheManager = VideoCacheManager.instance;
-  double _progress = 0;
 
   final files = <EnteFile>{};
   bool isUploading = false;
 
   final _dio = NetworkClient.instance.enteDio;
-  void init() {
-    VideoCompress.compressProgress$.subscribe((progress) {
-      if (kDebugMode) {
-        _progress = progress;
-        _logger.info("Compression progress: $progress");
-      }
-    });
-  }
-
-  List<VideoQuality> get qualities => VideoQuality.values;
+  void init() {}
 
   Future<void> chunkAndUploadVideo(BuildContext? ctx, EnteFile enteFile) async {
     if (!enteFile.isUploaded || !flagService.internalUser) return;
@@ -72,14 +61,8 @@ class PreviewVideoStore {
         rethrow;
       }
     }
-    if (isUploading || VideoCompress.isCompressing) {
+    if (isUploading) {
       files.add(enteFile);
-      if (ctx != null && VideoCompress.isCompressing) {
-        showShortToast(
-          ctx,
-          "Another is being compressed ($_progress %), please wait",
-        );
-      }
       return;
     }
     final String tempDir = Configuration.instance.getTempDirectory();
@@ -87,15 +70,6 @@ class PreviewVideoStore {
         "${tempDir}_${enteFile.uploadedFileID}_${newID("pv")}";
     Directory(prefix).createSync();
     _logger.info('Compressing video ${enteFile.displayName}');
-    final mediaInfo = await VideoCompress.compressVideo(
-      file.path,
-      quality: VideoQuality.Res1280x720Quality,
-      bitRate: 2000000,
-      frameRate: 30,
-    );
-    if (mediaInfo?.path == null) return;
-    _logger.info('CompressionDone ${enteFile.displayName}');
-
     final key = enc.Key.fromLength(16);
 
     final keyfile = File('$prefix/keyfile.key');
@@ -109,10 +83,11 @@ class PreviewVideoStore {
     );
 
     final session = await FFmpegKit.execute(
-      '-i "${mediaInfo!.path}" '
+      '-i "${file.path}" '
       '-metadata:s:v:0 rotate=0 '
-      '-c:v libx264 -crf 18 -preset veryfast '
-      '-c:a copy -f hls -hls_time 10 -hls_flags single_file '
+      '-vf "scale=-2:720,fps=30" '
+      '-c:v libx264 -b:v 2000k -preset medium '
+      '-c:a aac -b:a 128k -f hls -hls_time 10 -hls_flags single_file '
       '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
       '$prefix/output.m3u8',
     );
