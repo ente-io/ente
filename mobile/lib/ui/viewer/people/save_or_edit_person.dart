@@ -1,5 +1,6 @@
 import 'dart:async';
 import "dart:developer";
+import "dart:io";
 
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
@@ -366,6 +367,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   Future<dynamic> _saveChangesPrompt(BuildContext context) async {
     PersonEntity? updatedPersonEntity;
     return await showActionSheet(
+      useRootNavigator: Platform.isIOS ? true : false,
       body: "Save changes before leaving?",
       context: context,
       buttons: [
