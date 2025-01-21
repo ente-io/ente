@@ -21,7 +21,6 @@ import "package:photos/ui/common/date_input.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
-import "package:photos/ui/components/dialog_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/hooks/pick_person_avatar.dart";
@@ -671,11 +670,13 @@ class _EmailSection extends StatefulWidget {
 class _EmailSectionState extends State<_EmailSection> {
   String? _email;
   final _logger = Logger("_EmailSectionState");
+  bool _initialEmailIsUserEmail = false;
 
   @override
   void initState() {
     super.initState();
     _email = widget.email;
+    _initialEmailIsUserEmail = Configuration.instance.getEmail() == _email;
   }
 
   @override
@@ -706,37 +707,23 @@ class _EmailSectionState extends State<_EmailSection> {
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   final isMeAssigned = snapshot.data!;
-                  if (isMeAssigned) {
-                    return ButtonWidget(
-                      buttonType: ButtonType.primary,
-                      labelText: "Link email",
-                      shouldSurfaceExecutionStates: false,
-                      onTap: () async {
-                        final newEmail = await routeToPage(
-                          context,
-                          LinkEmailScreen(
-                            widget.personID,
-                            isFromSaveEditPerson: true,
-                          ),
-                        );
-                        if (newEmail != null) {
-                          final saveOrEditPersonState =
-                              context.findAncestorStateOfType<
-                                  _SaveOrEditPersonState>()!;
-                          saveOrEditPersonState.setState(() {
-                            saveOrEditPersonState._email = newEmail as String;
-                          });
-                        }
-                      },
-                    );
-                  } else {
+                  if (!isMeAssigned || _initialEmailIsUserEmail) {
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: ButtonWidget(
                             buttonType: ButtonType.secondary,
                             labelText: "This is me!",
+                            onTap: () async {
+                              final saveOrEditPersonState =
+                                  context.findAncestorStateOfType<
+                                      _SaveOrEditPersonState>()!;
+                              saveOrEditPersonState.setState(() {
+                                saveOrEditPersonState._email =
+                                    Configuration.instance.getEmail();
+                              });
+                            },
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -767,6 +754,29 @@ class _EmailSectionState extends State<_EmailSection> {
                         ),
                       ],
                     );
+                  } else {
+                    return ButtonWidget(
+                      buttonType: ButtonType.primary,
+                      labelText: "Link email",
+                      shouldSurfaceExecutionStates: false,
+                      onTap: () async {
+                        final newEmail = await routeToPage(
+                          context,
+                          LinkEmailScreen(
+                            widget.personID,
+                            isFromSaveEditPerson: true,
+                          ),
+                        );
+                        if (newEmail != null) {
+                          final saveOrEditPersonState =
+                              context.findAncestorStateOfType<
+                                  _SaveOrEditPersonState>()!;
+                          saveOrEditPersonState.setState(() {
+                            saveOrEditPersonState._email = newEmail as String;
+                          });
+                        }
+                      },
+                    );
                   }
                 } else if (snapshot.hasError) {
                   _logger.severe("Error getting isMeAssigned", snapshot.error);
@@ -785,7 +795,13 @@ class _EmailSectionState extends State<_EmailSection> {
         autocorrect: false,
         decoration: InputDecoration(
           suffixIcon: GestureDetector(
-            onTap: _removeLinkFromTextField,
+            onTap: () {
+              final saveOrEditPersonState =
+                  context.findAncestorStateOfType<_SaveOrEditPersonState>()!;
+              saveOrEditPersonState.setState(() {
+                saveOrEditPersonState._email = "";
+              });
+            },
             child: Icon(
               Icons.close_outlined,
               color: getEnteColorScheme(context).strokeMuted,
@@ -805,49 +821,6 @@ class _EmailSectionState extends State<_EmailSection> {
           ),
         ),
       );
-    }
-  }
-
-  Future<void> _removeLinkFromTextField() async {
-    PersonEntity? personEntity;
-    if (widget.personID != null) {
-      personEntity = await PersonService.instance.getPerson(
-        widget.personID!,
-      );
-    }
-    final name = personEntity?.data.name ?? '';
-    final email = personEntity?.data.email;
-    final result = await showDialogWidget(
-      context: context,
-      title:
-          name.isEmpty ? "Unlink email from person" : "Unlink email from $name",
-      icon: Icons.info_outline,
-      body: name.isEmpty
-          ? "This will unlink $email from this person"
-          : "This will unlink $email from $name",
-      isDismissible: true,
-      buttons: [
-        const ButtonWidget(
-          buttonAction: ButtonAction.first,
-          buttonType: ButtonType.neutral,
-          labelText: "Unlink",
-          isInAlert: true,
-        ),
-        ButtonWidget(
-          buttonAction: ButtonAction.cancel,
-          buttonType: ButtonType.secondary,
-          labelText: S.of(context).cancel,
-          isInAlert: true,
-        ),
-      ],
-    );
-
-    if (result != null && result.action == ButtonAction.first) {
-      final saveOrEditPersonState =
-          context.findAncestorStateOfType<_SaveOrEditPersonState>()!;
-      saveOrEditPersonState.setState(() {
-        saveOrEditPersonState._email = "";
-      });
     }
   }
 
