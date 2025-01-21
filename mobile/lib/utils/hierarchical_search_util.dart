@@ -325,7 +325,9 @@ List<ContactsFilter> _curateContactsFilter(
     if (file.ownerID == Configuration.instance.getUserID() ||
         file.uploadedFileID == null ||
         file.uploadedFileID == -1 ||
-        file.ownerID == null) continue;
+        file.ownerID == null) {
+      continue;
+    }
     ownerIdToOccurrence[file.ownerID!] =
         (ownerIdToOccurrence[file.ownerID] ?? 0) + 1;
   }

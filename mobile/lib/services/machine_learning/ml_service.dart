@@ -58,7 +58,9 @@ class MLService {
   Future<void> init() async {
     if (_isInitialized) return;
     if (!userRemoteFlagService
-        .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) return;
+        .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) {
+      return;
+    }
     _logger.info("init called");
 
     // Check if the device has enough RAM to run local indexing
@@ -72,7 +74,9 @@ class MLService {
     // Listen on MachineLearningController
     Bus.instance.on<MachineLearningControlEvent>().listen((event) {
       if (!userRemoteFlagService
-          .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) return;
+          .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) {
+        return;
+      }
 
       _mlControllerStatus = event.shouldRun;
       if (_mlControllerStatus) {

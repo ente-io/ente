@@ -9,8 +9,6 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/machine_learning_control_event.dart";
 
 class MachineLearningController {
-  MachineLearningController._privateConstructor();
-
   final _logger = Logger("MachineLearningController");
 
   static const kMaximumTemperature = 42; // 42 degree celsius

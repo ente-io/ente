@@ -3,7 +3,6 @@ import "dart:developer";
 import "dart:typed_data" show Uint8List;
 
 import "package:computer/computer.dart";
-import "package:flutter/foundation.dart" show kDebugMode;
 import "package:logging/logging.dart";
 import "package:ml_linalg/dtype.dart";
 import "package:ml_linalg/vector.dart";
@@ -400,7 +399,8 @@ ClusteringResult runLinearClustering(Map args) {
     } else {
       thresholdValue = distanceThreshold;
     }
-    final bool faceHasBeenRejectedBefore = sortedFaceInfos[i].rejectedClusterIds != null; 
+    final bool faceHasBeenRejectedBefore =
+        sortedFaceInfos[i].rejectedClusterIds != null;
     if (i % 250 == 0) {
       _logger.info("Processed ${offset != null ? i + offset : i} faces");
     }
@@ -416,8 +416,8 @@ ClusteringResult runLinearClustering(Map args) {
         if (faceHasBeenRejectedBefore &&
             sortedFaceInfos[j].clusterId != null &&
             sortedFaceInfos[i].rejectedClusterIds!.contains(
-              sortedFaceInfos[j].clusterId!,
-            )) {
+                  sortedFaceInfos[j].clusterId!,
+                )) {
           continue;
         }
         closestDistance = distance;
@@ -735,63 +735,4 @@ Map<String, (Uint8List, int)> _updateClusterSummaries({
   );
 
   return newClusterSummaries;
-}
-
-void _analyzeClusterResults(List<FaceInfo> sortedFaceInfos) {
-  if (!kDebugMode) return;
-  final stopwatch = Stopwatch()..start();
-
-  final Map<String, String> faceIdToCluster = {};
-  for (final faceInfo in sortedFaceInfos) {
-    faceIdToCluster[faceInfo.faceID] = faceInfo.clusterId!;
-  }
-
-  //  Find faceIDs that are part of a cluster which is larger than 5 and are new faceIDs
-  final Map<String, int> clusterIdToSize = {};
-  faceIdToCluster.forEach((key, value) {
-    if (clusterIdToSize.containsKey(value)) {
-      clusterIdToSize[value] = clusterIdToSize[value]! + 1;
-    } else {
-      clusterIdToSize[value] = 1;
-    }
-  });
-
-  // print top 10 cluster ids and their sizes based on the internal cluster id
-  final clusterIds = faceIdToCluster.values.toSet();
-  final clusterSizes = clusterIds.map((clusterId) {
-    return faceIdToCluster.values.where((id) => id == clusterId).length;
-  }).toList();
-  clusterSizes.sort();
-  // find clusters whose size is greater than 1
-  int oneClusterCount = 0;
-  int moreThan5Count = 0;
-  int moreThan10Count = 0;
-  int moreThan20Count = 0;
-  int moreThan50Count = 0;
-  int moreThan100Count = 0;
-
-  for (int i = 0; i < clusterSizes.length; i++) {
-    if (clusterSizes[i] > 100) {
-      moreThan100Count++;
-    } else if (clusterSizes[i] > 50) {
-      moreThan50Count++;
-    } else if (clusterSizes[i] > 20) {
-      moreThan20Count++;
-    } else if (clusterSizes[i] > 10) {
-      moreThan10Count++;
-    } else if (clusterSizes[i] > 5) {
-      moreThan5Count++;
-    } else if (clusterSizes[i] == 1) {
-      oneClusterCount++;
-    }
-  }
-
-  // print the metrics
-  log(
-    "[ClusterIsolate]  Total clusters ${clusterIds.length}: \n oneClusterCount $oneClusterCount \n moreThan5Count $moreThan5Count \n moreThan10Count $moreThan10Count \n moreThan20Count $moreThan20Count \n moreThan50Count $moreThan50Count \n moreThan100Count $moreThan100Count",
-  );
-  stopwatch.stop();
-  log(
-    "[ClusterIsolate]  Clustering additional analysis took ${stopwatch.elapsedMilliseconds} ms",
-  );
 }
