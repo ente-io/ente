@@ -90,8 +90,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _textController.addListener(_applyFilteringAndRefresh);
     _codeSortKey = PreferenceService.instance.codeSortKey();
+    _textController.addListener(_applyFilteringAndRefresh);
     _loadCodes();
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
       _loadCodes();
@@ -580,7 +580,7 @@ class _HomePageState extends State<HomePage> {
 
                   return ClipRect(
                     child: CodeWidget(
-                      key: ValueKey('${code.hashCode}_$newIndex_${_codeSortKey ?? ""}'),
+                      key: ValueKey('${code.hashCode}_${newIndex}_$_codeSortKey'),
                       code,
                       isCompactMode: isCompactMode,
                       sortKey: _codeSortKey,
