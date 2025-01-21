@@ -10,6 +10,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_local_authentication
   flutter_secure_storage_windows
   local_auth_windows
+  rive_common
   screen_retriever
   share_plus
   sodium_libs
