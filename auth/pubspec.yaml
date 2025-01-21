@@ -84,7 +84,6 @@ dependencies:
   qr_code_scanner: ^1.0.1
   qr_flutter: ^4.1.0
   rive: ^0.13.20
-  scan: ^1.6.0
   sentry: ^8.7.0
   sentry_flutter: ^8.7.0
   share_plus: ^10.0.2
