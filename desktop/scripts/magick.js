@@ -33,7 +33,12 @@ const fsp = require("fs/promises");
 
 const main = () => {
     const out = "build/magick";
-    if (fs.existsSync(out)) return;
+    try {
+        // Making the file executable is the last step, so if the file exists at
+        // this path and is executable, we assume it is the correct one.
+        fs.accessSync(out, fs.constants.X_OK);
+        return;
+    } catch {}
 
     let downloadName = (() => {
         switch (`${process.platform}-${process.arch}`) {
@@ -56,7 +61,8 @@ const main = () => {
     const downloadPath = `https://github.com/ente-io/ImageMagick/releases/download/2025-01-21/${downloadName}`;
     void fetch(downloadPath)
         .then((res) => res.blob())
-        .then((blob) => fsp.writeFile(out, blob.stream()));
+        .then((blob) => fsp.writeFile(out, blob.stream()))
+        .then(() => fsp.chmod(out, "744"));
 };
 
 main();
