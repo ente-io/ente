@@ -1318,14 +1318,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.15"
-  scan:
-    dependency: "direct main"
-    description:
-      name: scan
-      sha256: b343ec36f863a88d41eb4c174b810c055c6bd1f1822b2188ab31aab684fb7cdb
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.6.0"
   screen_retriever:
     dependency: transitive
     description:
