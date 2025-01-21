@@ -1,5 +1,8 @@
+import "dart:async";
+
 import "package:email_validator/email_validator.dart";
 import 'package:flutter/material.dart';
+import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
@@ -10,12 +13,15 @@ import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/actions/person_contact_linking_actions.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
+import "package:photos/ui/components/dialog_widget.dart";
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/components/text_input_widget.dart";
 import 'package:photos/ui/sharing/user_avator_widget.dart';
+import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/share_util.dart";
 
 class LinkEmailScreen extends StatefulWidget {
   final String? personID;
@@ -38,6 +44,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
   late CollectionActions collectionActions;
   late List<User> _suggestedUsers;
   late List<User> _filteredUsers;
+  final _logger = Logger('LinkEmailScreen');
 
   // Focus nodes are necessary
   final textFieldFocusNode = FocusNode();
@@ -199,21 +206,25 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                       final newEmail =
                           _emailIsValid ? _newEmail : _selectedEmail!;
                       if (widget.isFromSaveEditPerson) {
-                        Navigator.of(context).pop(newEmail);
-                        return;
-                      }
-                      final result =
-                          await personContactLinkingActions.linkEmailToPerson(
-                        newEmail,
-                        widget.personID!,
-                        context,
-                      );
-                      if (!result) {
-                        _textController.clear();
-                        return;
-                      }
+                        await _emailHoldsEnteAccount(newEmail).then((value) {
+                          if (value) {
+                            Navigator.of(context).pop(newEmail);
+                          }
+                        });
+                      } else {
+                        final result =
+                            await personContactLinkingActions.linkEmailToPerson(
+                          newEmail,
+                          widget.personID!,
+                          context,
+                        );
+                        if (!result) {
+                          _textController.clear();
+                          return;
+                        }
 
-                      Navigator.of(context).pop(newEmail);
+                        Navigator.of(context).pop(newEmail);
+                      }
                     },
                   ),
                   const SizedBox(height: 12),
@@ -260,5 +271,51 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
     suggestedUsers.sort((a, b) => a.email.compareTo(b.email));
 
     return suggestedUsers;
+  }
+
+  Future<bool> _emailHoldsEnteAccount(String email) async {
+    String? publicKey;
+
+    try {
+      publicKey = await UserService.instance.getPublicKey(email);
+    } catch (e) {
+      _logger.severe("Failed to get public key", e);
+      await showGenericErrorDialog(context: context, error: e);
+      return false;
+    }
+    // getPublicKey can return null when no user is associated with given
+    // email id
+    if (publicKey == null || publicKey == '') {
+      await showDialogWidget(
+        context: context,
+        title: "No Ente account!",
+        body: "$email does not have an ente account.",
+        icon: Icons.info_outline,
+        isDismissible: true,
+        buttons: [
+          ButtonWidget(
+            buttonType: ButtonType.neutral,
+            icon: Icons.adaptive.share,
+            labelText: S.of(context).invite,
+            isInAlert: true,
+            onTap: () async {
+              unawaited(
+                shareText(
+                  S.of(context).shareTextRecommendUsingEnte,
+                ),
+              );
+            },
+          ),
+          ButtonWidget(
+            buttonType: ButtonType.secondary,
+            labelText: S.of(context).cancel,
+            isInAlert: true,
+          ),
+        ],
+      );
+      return false;
+    } else {
+      return true;
+    }
   }
 }
