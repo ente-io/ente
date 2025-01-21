@@ -44,25 +44,29 @@ const convertToJPEGCommand = (
             ];
 
         case "linux":
-            // The bundled binary is an ELF x86-64 executable.
-            if (process.arch != "x64")
+        case "win32":
+            // The bundled binary is for x86 and arm64.
+            if (process.arch != "x64" && process.arch != "arm64")
                 throw new Error(CustomErrorMessage.NotAvailable);
             return [
                 imageMagickPath(),
+                "convert",
                 inputFilePath,
                 "-quality",
                 "100%",
                 outputFilePath,
             ];
 
-        default: // "win32"
+        default:
             throw new Error(CustomErrorMessage.NotAvailable);
     }
 };
 
-/** Path to the Linux image-magick executable bundled with our app */
+/**
+ * Path to the magick executable bundled with our app on Linux and Windows.
+ */
 const imageMagickPath = () =>
-    path.join(isDev ? "build" : process.resourcesPath, "image-magick");
+    path.join(isDev ? "build" : process.resourcesPath, "magick");
 
 export const generateImageThumbnail = async (
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,
@@ -133,14 +137,16 @@ const generateImageThumbnailCommand = (
             ];
 
         case "linux":
-            // The bundled binary is an ELF x86-64 executable.
-            if (process.arch != "x64")
+        case "win32":
+            // The bundled binary is for x86 and arm64.
+            if (process.arch != "x64" && process.arch != "arm64")
                 throw new Error(CustomErrorMessage.NotAvailable);
             return [
                 imageMagickPath(),
+                "convert",
+                inputFilePath,
                 "-define",
                 `jpeg:size=${2 * maxDimension}x${2 * maxDimension}`,
-                inputFilePath,
                 "-auto-orient",
                 "-thumbnail",
                 `${maxDimension}x${maxDimension}`,
@@ -151,7 +157,7 @@ const generateImageThumbnailCommand = (
                 outputFilePath,
             ];
 
-        default: // "win32"
+        default:
             throw new Error(CustomErrorMessage.NotAvailable);
     }
 };
