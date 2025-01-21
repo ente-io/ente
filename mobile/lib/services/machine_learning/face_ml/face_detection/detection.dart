@@ -13,8 +13,6 @@ extension FaceDirectionExtension on FaceDirection {
         return 'Right';
       case FaceDirection.straight:
         return 'Straight';
-      default:
-        throw Exception('Unknown FaceDirection');
     }
   }
 }

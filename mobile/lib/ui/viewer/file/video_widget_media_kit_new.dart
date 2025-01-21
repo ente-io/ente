@@ -1,7 +1,6 @@
 import "dart:async";
 import "dart:io";
 
-import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:media_kit/media_kit.dart";
@@ -17,7 +16,6 @@ import "package:photos/services/files_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
-import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
@@ -225,17 +223,6 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
         player.open(Media(url), play: _isAppInFG);
       });
     }
-  }
-
-  Widget _getThumbnail() {
-    return Container(
-      color: Colors.black,
-      constraints: const BoxConstraints.expand(),
-      child: ThumbnailWidget(
-        widget.file,
-        fit: BoxFit.contain,
-      ),
-    );
   }
 }
 

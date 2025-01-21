@@ -63,7 +63,9 @@ dependencies:
   fade_indexed_stack: ^0.2.2
   fast_base58: ^0.2.1
   ffmpeg_kit_flutter_min: ^6.0.3
-  figma_squircle: ^0.5.3
+  figma_squircle: 
+    git:
+      url: https://github.com/Ax0elz/figma_squircle.git
   file_saver:
     # Use forked version till this PR is merged: https://github.com/incrediblezayed/file_saver/pull/87
     git: https://github.com/jesims/file_saver.git
