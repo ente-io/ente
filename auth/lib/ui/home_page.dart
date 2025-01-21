@@ -274,7 +274,6 @@ class _HomePageState extends State<HomePage> {
         );
         break;
       case CodeSortKey.manual:
-      default:
         codes.sort((a, b) => a.display.position.compareTo(b.display.position));
         break;
     }
