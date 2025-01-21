@@ -104,7 +104,12 @@ Future<void> _runInForeground() async {
   final savedThemeMode = _themeMode(await AdaptiveTheme.getThemeMode());
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
-    await _init(false, via: 'mainMethod');
+    try {
+      await _init(false, via: 'mainMethod');
+    } catch (e, s) {
+      _logger.severe("Failed to init", e, s);
+      rethrow;
+    }
     final Locale? locale = await getLocale(noFallback: true);
     unawaited(UpdateService.instance.showUpdateNotification());
     runApp(
@@ -156,7 +161,7 @@ void _registerWindowsProtocol() {
 
 Future<void> _init(bool bool, {String? via}) async {
   _registerWindowsProtocol();
-  await initCryptoUtil();
+  await CryptoUtil.init();
 
   await PreferenceService.instance.init();
   await CodeStore.instance.init();
