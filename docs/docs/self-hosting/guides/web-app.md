@@ -10,6 +10,12 @@ description:
 The getting started instructions mention using `yarn dev` (which is an alias of
 `yarn dev:photos`) to serve your web app.
 
+>[!IMPORTANT]
+> Please note that Ente's Web App supports the Yarn version 1.22.xx or 1.22.22 specifically.
+> Make sure to install the right version or modify your yarn installation to meet the requirements. 
+> The user might end up into unknown version and dependency related errors if yarn
+> is on different version.
+
 ```sh
 cd ente/web
 git submodule update --init --recursive
@@ -159,7 +165,7 @@ Copy the below contents to a file called `ecosystem.config.js` inside the `ente/
 directory. 
 
 ```js 
-module.exports = {
+module.exports = {
   apps: [
     {
       name: "photos",
@@ -175,7 +181,8 @@ directory.
       env: {
         NODE_ENV: "development",
         PORT: "3001"
-      },
+      }
+    },
     {
       name: "auth",
       script: "yarn workspace auth next dev",
