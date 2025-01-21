@@ -18,7 +18,7 @@ import "package:photos/ui/components/text_input_widget.dart";
 import 'package:photos/ui/sharing/user_avator_widget.dart';
 
 class LinkEmailScreen extends StatefulWidget {
-  final String personID;
+  final String? personID;
   final bool isFromSaveEditPerson;
   const LinkEmailScreen(
     this.personID, {
@@ -205,7 +205,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                       final result =
                           await personContactLinkingActions.linkEmailToPerson(
                         newEmail,
-                        widget.personID,
+                        widget.personID!,
                         context,
                       );
                       if (!result) {

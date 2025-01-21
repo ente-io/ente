@@ -4,6 +4,7 @@ import "dart:developer";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/events/people_changed_event.dart";
@@ -669,6 +670,7 @@ class _EmailSection extends StatefulWidget {
 
 class _EmailSectionState extends State<_EmailSection> {
   String? _email;
+  final _logger = Logger("_EmailSectionState");
 
   @override
   void initState() {
@@ -699,40 +701,80 @@ class _EmailSectionState extends State<_EmailSection> {
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Expanded(
-                  child: ButtonWidget(
-                    buttonType: ButtonType.secondary,
-                    labelText: "This is me!",
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ButtonWidget(
-                    buttonType: ButtonType.primary,
-                    labelText: "Link email",
-                    shouldSurfaceExecutionStates: false,
-                    onTap: () async {
-                      final newEmail = await routeToPage(
-                        context,
-                        LinkEmailScreen(
-                          widget.personID,
-                          isFromSaveEditPerson: true,
+            child: FutureBuilder<bool>(
+              future: _isMeAssigned(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final isMeAssigned = snapshot.data!;
+                  if (isMeAssigned) {
+                    return ButtonWidget(
+                      buttonType: ButtonType.primary,
+                      labelText: "Link email",
+                      shouldSurfaceExecutionStates: false,
+                      onTap: () async {
+                        final newEmail = await routeToPage(
+                          context,
+                          LinkEmailScreen(
+                            widget.personID,
+                            isFromSaveEditPerson: true,
+                          ),
+                        );
+                        if (newEmail != null) {
+                          final saveOrEditPersonState =
+                              context.findAncestorStateOfType<
+                                  _SaveOrEditPersonState>()!;
+                          saveOrEditPersonState.setState(() {
+                            saveOrEditPersonState._email = newEmail as String;
+                          });
+                        }
+                      },
+                    );
+                  } else {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Expanded(
+                          child: ButtonWidget(
+                            buttonType: ButtonType.secondary,
+                            labelText: "This is me!",
+                          ),
                         ),
-                      );
-                      if (newEmail != null) {
-                        final saveOrEditPersonState = context
-                            .findAncestorStateOfType<_SaveOrEditPersonState>()!;
-                        saveOrEditPersonState.setState(() {
-                          saveOrEditPersonState._email = newEmail as String;
-                        });
-                      }
-                    },
-                  ),
-                ),
-              ],
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: ButtonWidget(
+                            buttonType: ButtonType.primary,
+                            labelText: "Link email",
+                            shouldSurfaceExecutionStates: false,
+                            onTap: () async {
+                              final newEmail = await routeToPage(
+                                context,
+                                LinkEmailScreen(
+                                  widget.personID,
+                                  isFromSaveEditPerson: true,
+                                ),
+                              );
+                              if (newEmail != null) {
+                                final saveOrEditPersonState =
+                                    context.findAncestorStateOfType<
+                                        _SaveOrEditPersonState>()!;
+                                saveOrEditPersonState.setState(() {
+                                  saveOrEditPersonState._email =
+                                      newEmail as String;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                } else if (snapshot.hasError) {
+                  _logger.severe("Error getting isMeAssigned", snapshot.error);
+                  return const RepaintBoundary(child: EnteLoadingWidget());
+                } else {
+                  return const RepaintBoundary(child: EnteLoadingWidget());
+                }
+              },
             ),
           ),
         ),
@@ -807,5 +849,19 @@ class _EmailSectionState extends State<_EmailSection> {
         saveOrEditPersonState._email = "";
       });
     }
+  }
+
+  Future<bool> _isMeAssigned() async {
+    final personEntities = await PersonService.instance.getPersons();
+    final currentUserEmail = Configuration.instance.getEmail();
+
+    bool isAssigned = false;
+    for (final personEntity in personEntities) {
+      if (personEntity.data.email == currentUserEmail) {
+        isAssigned = true;
+        break;
+      }
+    }
+    return isAssigned;
   }
 }
