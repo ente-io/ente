@@ -580,7 +580,7 @@ class _HomePageState extends State<HomePage> {
 
                   return ClipRect(
                     child: CodeWidget(
-                      key: ValueKey('${code.hashCode}_$newIndex'),
+                      key: ValueKey('${code.hashCode}_$newIndex_${_codeSortKey ?? ""}'),
                       code,
                       isCompactMode: isCompactMode,
                       sortKey: _codeSortKey,
@@ -616,6 +616,7 @@ class _HomePageState extends State<HomePage> {
                             key: ValueKey('${codeState.hashCode}_$index'),
                             codeState,
                             isCompactMode: isCompactMode,
+                            sortKey: _codeSortKey,
                           );
                         }),
                         itemCount: _filteredCodes.length,

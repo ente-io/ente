@@ -100,7 +100,7 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    ignorePin = widget.sortKey == null || widget.sortKey == CodeSortKey.manual;
+    ignorePin = widget.sortKey != null && widget.sortKey == CodeSortKey.manual;
     final colorScheme = getEnteColorScheme(context);
     if (isMaskingEnabled != PreferenceService.instance.shouldHideCodes()) {
       isMaskingEnabled = PreferenceService.instance.shouldHideCodes();
