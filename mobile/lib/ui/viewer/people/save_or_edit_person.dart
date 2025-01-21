@@ -24,10 +24,12 @@ import "package:photos/ui/components/dialog_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/hooks/pick_person_avatar.dart";
+import "package:photos/ui/viewer/people/link_email_screen.dart";
 import "package:photos/ui/viewer/people/person_clusters_page.dart";
 import "package:photos/ui/viewer/people/person_row_item.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/toast_util.dart";
 
 class SaveOrEditPerson extends StatefulWidget {
@@ -695,22 +697,39 @@ class _EmailSectionState extends State<_EmailSection> {
             color: getEnteColorScheme(context).fillFaint,
             borderRadius: BorderRadius.circular(12.0),
           ),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Expanded(
+                const Expanded(
                   child: ButtonWidget(
                     buttonType: ButtonType.secondary,
                     labelText: "This is me!",
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: ButtonWidget(
                     buttonType: ButtonType.primary,
                     labelText: "Link email",
+                    shouldSurfaceExecutionStates: false,
+                    onTap: () async {
+                      final newEmail = await routeToPage(
+                        context,
+                        LinkEmailScreen(
+                          widget.personID,
+                          isFromSaveEditPerson: true,
+                        ),
+                      );
+                      if (newEmail != null) {
+                        final saveOrEditPersonState = context
+                            .findAncestorStateOfType<_SaveOrEditPersonState>()!;
+                        saveOrEditPersonState.setState(() {
+                          saveOrEditPersonState._email = newEmail as String;
+                        });
+                      }
+                    },
                   ),
                 ),
               ],
