@@ -271,13 +271,9 @@ export interface Electron {
     /**
      * Try to convert an arbitrary image into JPEG using native layer tools.
      *
-     * The behaviour is OS dependent. On macOS we use the `sips` utility, and on
-     * some Linux architectures we use an ImageMagick executable bundled with
-     * our desktop app.
-     *
-     * In other cases (primarily Windows), where native JPEG conversion is not
-     * yet possible, this function will throw an error with the
-     * {@link CustomErrorMessage.NotAvailable} message.
+     * The behaviour is OS dependent. On macOS we use the `sips` utility, while
+     * on Linux and Windows we an ImageMagick executable bundled with our
+     * desktop app.
      *
      * @param imageData The raw image data (the contents of the image file).
      *
@@ -288,13 +284,9 @@ export interface Electron {
     /**
      * Generate a JPEG thumbnail for the given image.
      *
-     * The behaviour is OS dependent. On macOS we use the `sips` utility, and on
-     * some Linux architectures we use an ImageMagick executable bundled with
-     * our desktop app.
-     *
-     * In other cases (primarily Windows), where native thumbnail generation is
-     * not yet possible, this function will throw an error with the
-     * {@link CustomErrorMessage.NotAvailable} message.
+     * The behaviour is OS dependent. On macOS we use the `sips` utility, while
+     * on Linux and Windows we an ImageMagick executable bundled with our
+     * desktop app.
      *
      * @param dataOrPathOrZipItem The file whose thumbnail we want to generate.
      * It can be provided as raw image data (the contents of the image file), or
@@ -609,26 +601,6 @@ export interface ElectronMLWorker {
      */
     computeFaceEmbeddings: (input: Float32Array) => Promise<Float32Array>;
 }
-
-/**
- * Errors that have special semantics on the web side.
- *
- * [Note: Custom errors across Electron/Renderer boundary]
- *
- * If we need to identify errors thrown by the main process when invoked from
- * the renderer process, we can only use the `message` field because:
- *
- * > Errors thrown throw `handle` in the main process are not transparent as
- * > they are serialized and only the `message` property from the original error
- * > is provided to the renderer process.
- * >
- * > - https://www.electronjs.org/docs/latest/tutorial/ipc
- * >
- * > Ref: https://github.com/electron/electron/issues/24427
- */
-export const CustomErrorMessage = {
-    NotAvailable: "This feature in not available on the current OS/arch",
-};
 
 /**
  * Data passed across the IPC bridge when an app update is available.

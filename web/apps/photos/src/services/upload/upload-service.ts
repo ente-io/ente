@@ -5,7 +5,6 @@ import { ensureElectron } from "@/base/electron";
 import { basename, nameAndExtension } from "@/base/file-name";
 import type { PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
-import { CustomErrorMessage } from "@/base/types/ipc";
 import { extractVideoMetadata } from "@/gallery/services/ffmpeg";
 import {
     detectFileTypeInfoFromChunk,
@@ -1208,23 +1207,6 @@ const readImageOrVideo = async (
     return withThumbnail(uploadItem, fileTypeInfo, fileStream);
 };
 
-// TODO(MR): Merge with the uploader
-class ModuleState {
-    /**
-     * This will be set to true if we get an error from the Node.js side of our
-     * desktop app telling us that native image thumbnail generation is not
-     * available for the current OS/arch combination.
-     *
-     * That way, we can stop pestering it again and again (saving an IPC
-     * round-trip).
-     *
-     * Note the double negative when it is used.
-     */
-    isNativeImageThumbnailGenerationNotAvailable = false;
-}
-
-const moduleState = new ModuleState();
-
 /**
  * Augment the given {@link dataOrStream} with thumbnail information.
  *
@@ -1247,12 +1229,9 @@ const withThumbnail = async (
     let hasStaticThumbnail = false;
 
     const electron = globalThis.electron;
-    const notAvailable =
-        fileTypeInfo.fileType == FileType.image &&
-        moduleState.isNativeImageThumbnailGenerationNotAvailable;
 
     // 1. Native thumbnail generation using items's (effective) path.
-    if (electron && !notAvailable && !(uploadItem instanceof File)) {
+    if (electron && !(uploadItem instanceof File)) {
         try {
             thumbnail = await generateThumbnailNative(
                 electron,
@@ -1260,11 +1239,7 @@ const withThumbnail = async (
                 fileTypeInfo,
             );
         } catch (e) {
-            if (e.message.endsWith(CustomErrorMessage.NotAvailable)) {
-                moduleState.isNativeImageThumbnailGenerationNotAvailable = true;
-            } else {
-                log.error("Native thumbnail generation failed", e);
-            }
+            log.error("Native thumbnail generation failed", e);
         }
     }
 

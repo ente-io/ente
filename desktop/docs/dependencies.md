@@ -103,7 +103,7 @@ Some extra ones specific to the code here are:
 
 ### Format conversion
 
-The main tool we use is for arbitrary conversions is ffmpeg. To bundle a
+For video conversions and metadata extraction, we use ffmpeg. To bundle a
 (platform specific) static binary of ffmpeg with our app, we use
 [ffmpeg-static](https://github.com/eugeneware/ffmpeg-static).
 
@@ -111,10 +111,11 @@ The main tool we use is for arbitrary conversions is ffmpeg. To bundle a
 > ffmpeg binary and using the wasm one (that our renderer process already has).
 > Which is why we bundle it to speed up operations on the desktop app.
 
-In addition, we also bundle a static Linux binary of imagemagick in our extra
-resources (`build`) folder. This is used for thumbnail generation on Linux.
+On Linux and Windows, we use ImageMagick for thumbnail generation and JPEG
+conversion of unpreviewable images. A static OS/architecture specific binary of
+this is bundled in our extra resources (`build`) folder by `scripts/magick.sh`.
 
-On macOS, we use the `sips` CLI tool for conversion, but that is already
+On macOS, we use the `sips` CLI tool for these tasks, but that is already
 available on the host machine, and is not bundled with our app.
 
 ### ML
