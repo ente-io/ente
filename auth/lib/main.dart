@@ -33,7 +33,6 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tray_manager/tray_manager.dart';
-import 'package:win32/win32.dart';
 import 'package:window_manager/window_manager.dart';
 
 final _logger = Logger("main");
