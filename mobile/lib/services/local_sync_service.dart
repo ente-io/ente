@@ -78,8 +78,8 @@ class LocalSyncService {
       return _existingSync!.future;
     }
     _existingSync = Completer<void>();
-    final int ownerID = Configuration.instance.getUserID()!;
-    
+    final int ownerID = Configuration.instance.getUserID() ?? 0;
+
     // We use a lock to prevent synchronisation to occur while it is downloading
     // as this introduces wrong entry in FilesDB due to race condition
     // This is a fix for https://github.com/ente-io/ente/issues/4296
@@ -98,7 +98,8 @@ class LocalSyncService {
         );
       } else {
         // Load from 0 - 01.01.2010
-        Bus.instance.fire(SyncStatusUpdate(SyncStatus.startedFirstGalleryImport));
+        Bus.instance
+            .fire(SyncStatusUpdate(SyncStatus.startedFirstGalleryImport));
         var startTime = 0;
         var toYear = 2010;
         var toTime = DateTime(toYear).microsecondsSinceEpoch;
