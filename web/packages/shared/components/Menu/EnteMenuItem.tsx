@@ -65,14 +65,16 @@ interface EnteMenuItemProps {
      *
      * This is usually an icon like an {@link SvgIcon}, but it can be any
      * arbitrary component, the menu item does not make any assumptions as to
-     * what this is (apart from expecting it to be roughly "icon sized").
+     * what this is.
+     *
+     * If it is an {@link SvgIcon}, the menu item will size it appropriately.
      */
     startIcon?: React.ReactNode;
     /**
      * Optional icon shown at the trailing edge of the menu item.
      *
      * Similar to {@link startIcon} this can be any arbitrary component, though
-     * usually it is an {@link SvgIcon}.
+     * usually it is an {@link SvgIcon} whose size the menu item will set.
      */
     endIcon?: React.ReactNode;
     /**
@@ -118,76 +120,74 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
     label,
     caption,
     disabled = false,
-}) => {
-    const handleMenuItem = () => {
-        if (variant != "toggle") onClick();
-    };
-
-    const labelOrDefault = label ?? "";
-
-    return (
-        <MenuItem
-            disabled={disabled}
-            onClick={handleMenuItem}
-            disableRipple={variant == "toggle"}
-            sx={[
-                (theme) => ({
-                    width: "100%",
+}) => (
+    <MenuItem
+        disabled={disabled}
+        onClick={() => {
+            if (variant != "toggle") onClick();
+        }}
+        disableRipple={variant == "toggle"}
+        sx={[
+            {
+                // width: "100%",
+                "& .MuiSvgIcon-root": {
+                    fontSize: "20px",
+                },
+                p: 0,
+                borderRadius: "4px",
+            },
+            variant != "captioned" &&
+                ((theme) => ({
+                    color: theme.vars.palette[color].main,
+                })),
+            variant == "secondary" &&
+                ((theme) => ({
                     "&:hover": {
                         backgroundColor: theme.vars.palette.fill.faintHover,
                     },
-                    "& .MuiSvgIcon-root": {
-                        fontSize: "20px",
+                })),
+            variant != "secondary" &&
+                ((theme) => ({
+                    backgroundColor: theme.vars.palette.fill.faint,
+                    "&:hover": {
+                        backgroundColor: theme.vars.palette.fill.muted,
                     },
-                    p: 0,
-                    borderRadius: "4px",
-                }),
-                variant != "captioned" &&
-                    ((theme) => ({
-                        color: theme.vars.palette[color].main,
-                    })),
-                variant != "secondary" &&
-                    ((theme) => ({
-                        backgroundColor: theme.vars.palette.fill.faint,
-                    })),
-            ]}
-        >
-            <SpaceBetweenFlex sx={{ pl: "16px", pr: "12px" }}>
-                <VerticallyCenteredFlex sx={{ py: "14px" }} gap={"10px"}>
-                    {startIcon && startIcon}
-                    <Box px={"2px"}>
-                        {typeof label !== "string" ? (
-                            label
-                        ) : variant == "captioned" ? (
-                            <Stack
-                                direction="row"
-                                sx={{ gap: "4px", alignItems: "center" }}
-                            >
-                                <Typography>{labelOrDefault}</Typography>
-                                <CaptionTypography color={color}>
-                                    {"•"}
-                                </CaptionTypography>
-                                <CaptionTypography color={color}>
-                                    {caption}
-                                </CaptionTypography>
-                            </Stack>
-                        ) : (
-                            <Typography fontWeight={fontWeight}>
-                                {labelOrDefault}
-                            </Typography>
-                        )}
-                    </Box>
-                </VerticallyCenteredFlex>
-                <VerticallyCenteredFlex gap={"4px"}>
-                    {endIcon && endIcon}
-                    {variant == "toggle" && (
-                        <EnteSwitch {...{ checked, onClick }} />
+                })),
+        ]}
+    >
+        <SpaceBetweenFlex sx={{ pl: "16px", pr: "12px" }}>
+            <VerticallyCenteredFlex sx={{ py: "14px" }} gap={"10px"}>
+                {startIcon && startIcon}
+                <Box px={"2px"}>
+                    {typeof label !== "string" ? (
+                        label
+                    ) : variant == "captioned" ? (
+                        <Stack
+                            direction="row"
+                            sx={{ gap: "4px", alignItems: "center" }}
+                        >
+                            <Typography>{label}</Typography>
+                            <CaptionTypography color={color}>
+                                {"•"}
+                            </CaptionTypography>
+                            <CaptionTypography color={color}>
+                                {caption}
+                            </CaptionTypography>
+                        </Stack>
+                    ) : (
+                        <Typography fontWeight={fontWeight}>{label}</Typography>
                     )}
-                </VerticallyCenteredFlex>
-            </SpaceBetweenFlex>
-        </MenuItem>
-    );
-};
+                </Box>
+            </VerticallyCenteredFlex>
+            <VerticallyCenteredFlex gap={"4px"}>
+                {endIcon && endIcon}
+                {variant == "toggle" && (
+                    <EnteSwitch {...{ checked, onClick }} />
+                )}
+            </VerticallyCenteredFlex>
+        </SpaceBetweenFlex>
+    </MenuItem>
+);
 
 const CaptionTypography: React.FC<
     React.PropsWithChildren<{ color: EnteMenuItemProps["color"] }>
