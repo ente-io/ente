@@ -33,11 +33,11 @@ class BannerWidget extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     Color dashColor;
     List<BoxShadow>? boxShadow;
-    String rivePath;
+    String imagePath;
 
     switch (type) {
       case BannerType.rateUs:
-        rivePath = "assets/rate_us.png";
+        imagePath = "assets/rate_us.png";
         dashColor = const Color.fromRGBO(255, 191, 12, 1);
         boxShadow = [
           BoxShadow(
@@ -52,7 +52,7 @@ class BannerWidget extends StatelessWidget {
         ];
         break;
       case BannerType.starUs:
-        rivePath = "assets/star_us.png";
+        imagePath = "assets/star_us.png";
         dashColor = const Color.fromRGBO(233, 233, 233, 1);
         boxShadow = [
           BoxShadow(
@@ -67,7 +67,7 @@ class BannerWidget extends StatelessWidget {
         ];
 
       case BannerType.freeStorage:
-        rivePath = "assets/ente_5gb.png";
+        imagePath = "assets/ente_5gb.png";
         dashColor = const Color.fromRGBO(29, 185, 84, 1);
         boxShadow = [
           BoxShadow(
@@ -82,7 +82,7 @@ class BannerWidget extends StatelessWidget {
         ];
       case BannerType.discount:
         dashColor = const Color.fromRGBO(29, 185, 84, 1);
-        rivePath = "assets/discount.png";
+        imagePath = "assets/discount.png";
         boxShadow = [
           BoxShadow(
             color: const Color.fromRGBO(38, 203, 95, 1).withOpacity(0.08),
@@ -135,7 +135,7 @@ class BannerWidget extends StatelessWidget {
                       child: SizedBox(
                         height: 60,
                         width: 60,
-                        child: Image.asset(rivePath),
+                        child: Image.asset(imagePath),
                       ),
                     ),
                   ],
