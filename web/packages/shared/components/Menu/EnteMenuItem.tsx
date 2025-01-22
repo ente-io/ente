@@ -107,13 +107,6 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
         onClick();
     };
 
-    const handleIconClick = () => {
-        if (variant != "toggle") {
-            return;
-        }
-        onClick();
-    };
-
     const labelOrDefault = label ?? "";
 
     return (
@@ -177,10 +170,7 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
                 <VerticallyCenteredFlex gap={"4px"}>
                     {endIcon && endIcon}
                     {variant == "toggle" && (
-                        <EnteSwitch
-                            checked={checked}
-                            onClick={handleIconClick}
-                        />
+                        <EnteSwitch {...{ checked, onClick }} />
                     )}
                 </VerticallyCenteredFlex>
             </SpaceBetweenFlex>
