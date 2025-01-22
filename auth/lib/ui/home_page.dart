@@ -669,7 +669,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _handleDeeplink(BuildContext context, String? link) {
-    if (!Configuration.instance.hasConfiguredAccount() || link == null) {
+    bool isAccountConfigured = Configuration.instance.hasConfiguredAccount();
+    bool isOfflineModeEnabled = Configuration.instance.hasOptedForOfflineMode() &&
+        Configuration.instance.getOfflineSecretKey() != null;
+    if (!(isAccountConfigured || isOfflineModeEnabled) || link == null) {
       return;
     }
     if (mounted && link.toLowerCase().startsWith("otpauth://")) {
