@@ -16,8 +16,7 @@ import 'package:photos/models/selected_files.dart';
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/search_service.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/components/end_to_end_banner.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
@@ -277,8 +276,6 @@ class _Gallery extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
     return Gallery(
       asyncLoader: (
         creationStartTime,
@@ -311,54 +308,16 @@ class _Gallery extends StatelessWidget {
               ? const SizedBox.shrink()
               : Padding(
                   padding: const EdgeInsets.only(top: 12, bottom: 8),
-                  child: GestureDetector(
+                  child: EndToEndBanner(
+                    title: "Link email",
+                    caption: "for faster sharing",
+                    leadingIcon: Icons.email_outlined,
                     onTap: () async {
                       await routeToPage(
                         context,
                         LinkEmailScreen(personEntity.remoteID),
                       );
                     },
-                    child: Container(
-                      color: colorScheme.fillFaint,
-                      padding: const EdgeInsets.fromLTRB(12, 10, 0, 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 48,
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  color: colorScheme.backdropBase,
-                                  borderRadius: BorderRadius.circular(24),
-                                ),
-                                child: const Icon(Icons.email_outlined),
-                              ),
-                              const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Link email",
-                                    style: textTheme.bodyBold,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    "for faster sharing",
-                                    style: textTheme.miniMuted,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const IconButtonWidget(
-                            icon: Icons.chevron_right,
-                            iconButtonType: IconButtonType.primary,
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
                 ),
     );
