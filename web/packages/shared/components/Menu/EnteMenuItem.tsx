@@ -129,17 +129,13 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
         disableRipple={variant == "toggle"}
         sx={[
             {
-                // width: "100%",
+                p: 0,
+                borderRadius: "4px",
+                color: color == "critical" ? "critical.main" : "text.base",
                 "& .MuiSvgIcon-root": {
                     fontSize: "20px",
                 },
-                p: 0,
-                borderRadius: "4px",
             },
-            variant != "captioned" &&
-                ((theme) => ({
-                    color: theme.vars.palette[color].main,
-                })),
             variant == "secondary" &&
                 ((theme) => ({
                     "&:hover": {
@@ -150,7 +146,12 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
                 ((theme) => ({
                     backgroundColor: theme.vars.palette.fill.faint,
                     "&:hover": {
-                        backgroundColor: theme.vars.palette.fill.muted,
+                        backgroundColor:
+                            // Lighter fill for critical variant to retain
+                            // legibility of the red text.
+                            color == "critical"
+                                ? theme.vars.palette.fill.faintHover
+                                : theme.vars.palette.fill.muted,
                     },
                 })),
         ]}
