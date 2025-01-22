@@ -39,11 +39,7 @@
 
   <releases>
     <release version="1.7.8" date="2025-01-13">
-      <description>
-        <ul>
-          <li>Parse description from image metadata.</li>
-        </ul>
-      </description>
+      <url type="details">https://github.com/ente-io/photos-desktop/releases/tag/v1.7.8</url>
     </release>
   </releases>
 </component>

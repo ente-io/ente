@@ -34,7 +34,10 @@ module.exports = async (context) => {
     // https://nodejs.org/api/process.html#processarch
     if (arch == process.arch) {
         // `magick.js` would've already downloaded the file, nothing to do.
-        return;
+        //
+        // We must not return false, because
+        // > Resolving to false will skip dependencies install or rebuild.
+        return true;
     }
 
     const download = async (downloadName, outputName) => {
