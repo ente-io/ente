@@ -1,9 +1,5 @@
 import { EnteSwitch } from "@/base/components/EnteSwitch";
 import {
-    SpaceBetweenFlex,
-    VerticallyCenteredFlex,
-} from "@ente/shared/components/Container";
-import {
     Box,
     MenuItem,
     Stack,
@@ -75,6 +71,8 @@ interface EnteMenuItemProps {
      *
      * Similar to {@link startIcon} this can be any arbitrary component, though
      * usually it is an {@link SvgIcon} whose size the menu item will set.
+     *
+     * Not used if variant is "toggle".
      */
     endIcon?: React.ReactNode;
     /**
@@ -156,8 +154,17 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
                 })),
         ]}
     >
-        <SpaceBetweenFlex sx={{ pl: "16px", pr: "12px" }}>
-            <VerticallyCenteredFlex sx={{ py: "14px" }} gap={"10px"}>
+        <Stack
+            direction="row"
+            sx={{
+                flex: 1,
+                justifyContent: "space-between",
+                alignItems: "center",
+                px: "16px",
+                pr: "12px",
+            }}
+        >
+            <Stack direction="row" sx={{ py: "14px", gap: "10px" }}>
                 {startIcon && startIcon}
                 <Box px={"2px"}>
                     {typeof label !== "string" ? (
@@ -179,14 +186,13 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
                         <Typography fontWeight={fontWeight}>{label}</Typography>
                     )}
                 </Box>
-            </VerticallyCenteredFlex>
-            <VerticallyCenteredFlex gap={"4px"}>
-                {endIcon && endIcon}
-                {variant == "toggle" && (
-                    <EnteSwitch {...{ checked, onClick }} />
-                )}
-            </VerticallyCenteredFlex>
-        </SpaceBetweenFlex>
+            </Stack>
+            {endIcon ? (
+                endIcon
+            ) : variant == "toggle" ? (
+                <EnteSwitch {...{ checked, onClick }} />
+            ) : null}
+        </Stack>
     </MenuItem>
 );
 
