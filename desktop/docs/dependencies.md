@@ -113,7 +113,8 @@ For video conversions and metadata extraction, we use ffmpeg. To bundle a
 
 On Linux and Windows, we use ImageMagick for thumbnail generation and JPEG
 conversion of unpreviewable images. A static OS/architecture specific binary of
-this is bundled in our extra resources (`build`) folder by `scripts/magick.sh`.
+this is bundled in our extra resources (`build`) folder by `scripts/magick.sh`
+and/or `scripts/beforeBuild.js`. See "[Note: ImageMagick]" for more details.
 
 On macOS, we use the `sips` CLI tool for these tasks, but that is already
 available on the host machine, and is not bundled with our app.

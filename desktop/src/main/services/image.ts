@@ -63,7 +63,10 @@ const convertToJPEGCommand = (
  * Path to the magick executable bundled with our app on Linux and Windows.
  */
 const imageMagickPath = () =>
-    path.join(isDev ? "build" : process.resourcesPath, "magick");
+    path.join(
+        isDev ? "build" : process.resourcesPath,
+        process.platform == "win32" ? "magick.exe" : "magick",
+    );
 
 export const generateImageThumbnail = async (
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,
