@@ -676,7 +676,7 @@ class _HomePageState extends State<HomePage> {
       try {
         final newCode = Code.fromOTPAuthUrl(link);
         getNextTotp(newCode);
-        CodeStore.instance.addCode(newCode);
+        CodeStore.instance.addCode(newCode, shouldSync: false);
         _focusNewCode(newCode);
       } catch (e, s) {
         showGenericErrorDialog(
