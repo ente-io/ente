@@ -22,6 +22,8 @@ const fsp = require("fs/promises");
  *     },
  *     arch: 'arm64'
  *
+ *  Note that we must not return falsey from this function, because
+ * > Resolving to false will skip dependencies install or rebuild.
  */
 module.exports = async (context) => {
     const { appDir, platform, arch } = context;
@@ -34,7 +36,7 @@ module.exports = async (context) => {
     // https://nodejs.org/api/process.html#processarch
     if (arch == process.arch) {
         // `magick.js` would've already downloaded the file, nothing to do.
-        return;
+        return true;
     }
 
     const download = async (downloadName, outputName) => {
@@ -49,12 +51,14 @@ module.exports = async (context) => {
 
     switch (`${platform.nodeName}-${arch}`) {
         case "linux-x64":
-            return download("magick-x86_64", "magick");
+            await download("magick-x86_64", "magick");
         case "linux-arm64":
-            return download("magick-aarch64", "magick");
+            await download("magick-aarch64", "magick");
         case "win32-x64":
-            return download("magick-x64.exe", "magick.exe");
+            await download("magick-x64.exe", "magick.exe");
         case "linux-arm64":
-            return download("magick-arm64.exe", "magick.exe");
+            await download("magick-arm64.exe", "magick.exe");
     }
+
+    return true;
 };
