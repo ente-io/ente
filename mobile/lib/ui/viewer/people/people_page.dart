@@ -16,8 +16,8 @@ import 'package:photos/models/selected_files.dart';
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/search_service.dart";
-import "package:photos/ui/components/buttons/button_widget.dart";
-import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
@@ -26,6 +26,7 @@ import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/ui/viewer/people/link_email_screen.dart";
+
 import "package:photos/ui/viewer/people/people_app_bar.dart";
 import "package:photos/ui/viewer/people/people_banner.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
@@ -276,6 +277,8 @@ class _Gallery extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     return Gallery(
       asyncLoader: (
         creationStartTime,
@@ -306,15 +309,57 @@ class _Gallery extends StatelessWidget {
       header:
           personEntity.data.email != null && personEntity.data.email!.isNotEmpty
               ? const SizedBox.shrink()
-              : ButtonWidget(
-                  buttonType: ButtonType.primary,
-                  labelText: "Link email",
-                  onTap: () async {
-                    await routeToPage(
-                      context,
-                      LinkEmailScreen(personEntity.remoteID),
-                    );
-                  },
+              : Padding(
+                  padding: const EdgeInsets.only(top: 12, bottom: 8),
+                  child: GestureDetector(
+                    onTap: () async {
+                      await routeToPage(
+                        context,
+                        LinkEmailScreen(personEntity.remoteID),
+                      );
+                    },
+                    child: Container(
+                      color: colorScheme.fillFaint,
+                      padding: const EdgeInsets.fromLTRB(12, 10, 0, 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: colorScheme.backdropBase,
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                                child: const Icon(Icons.email_outlined),
+                              ),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Link email",
+                                    style: textTheme.bodyBold,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "for faster sharing",
+                                    style: textTheme.miniMuted,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const IconButtonWidget(
+                            icon: Icons.chevron_right,
+                            iconButtonType: IconButtonType.primary,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
     );
   }
