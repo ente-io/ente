@@ -296,7 +296,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 hover: colors.light.fill.faintHover,
                 // For an icon button, the hover background color is derived
                 // from the active color above and this opacity.
-                hoverOpacity: 0.04,
+                hoverOpacity: 0.06,
                 // TODO(LM): Remove commented.
                 // The color of a selected action.
                 //
