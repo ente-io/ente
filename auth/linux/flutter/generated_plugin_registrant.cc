@@ -10,7 +10,6 @@
 #include <flutter_local_authentication/flutter_local_authentication_plugin.h>
 #include <flutter_secure_storage_linux/flutter_secure_storage_linux_plugin.h>
 #include <gtk/gtk_plugin.h>
-#include <rive_common/rive_plugin.h>
 #include <screen_retriever/screen_retriever_plugin.h>
 #include <sentry_flutter/sentry_flutter_plugin.h>
 #include <sodium_libs/sodium_libs_plugin.h>
@@ -32,9 +31,6 @@ void fl_register_plugins(FlPluginRegistry* registry) {
   g_autoptr(FlPluginRegistrar) gtk_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "GtkPlugin");
   gtk_plugin_register_with_registrar(gtk_registrar);
-  g_autoptr(FlPluginRegistrar) rive_common_registrar =
-      fl_plugin_registry_get_registrar_for_plugin(registry, "RivePlugin");
-  rive_plugin_register_with_registrar(rive_common_registrar);
   g_autoptr(FlPluginRegistrar) screen_retriever_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "ScreenRetrieverPlugin");
   screen_retriever_plugin_register_with_registrar(screen_retriever_registrar);
