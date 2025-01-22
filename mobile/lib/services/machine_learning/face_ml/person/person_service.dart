@@ -19,7 +19,7 @@ class PersonService {
   final EntityService entityService;
   final MLDataDB faceMLDataDB;
   final SharedPreferences prefs;
-  final _emailToNameMap = <String, String>{};
+  final _emailToNameMapCache = <String, String>{};
 
   PersonService(this.entityService, this.faceMLDataDB, this.prefs);
 
@@ -44,14 +44,17 @@ class PersonService {
     _instance!.getPersons().then((value) {
       for (var person in value) {
         if (person.data.email != null && person.data.email!.isNotEmpty) {
-          _instance!._emailToNameMap[person.data.email!] = person.data.name;
+          _instance!._emailToNameMapCache[person.data.email!] =
+              person.data.name;
         }
       }
     });
   }
 
+  Map<String, String> get emailToNameMapCache => _emailToNameMapCache;
+
   void clearCache() {
-    _emailToNameMap.clear();
+    _emailToNameMapCache.clear();
   }
 
   Future<List<PersonEntity>> getPersons() async {
@@ -191,7 +194,7 @@ class PersonService {
       clusterID: clusterID,
     );
     if (data.email != null) {
-      _emailToNameMap[data.email!] = data.name;
+      _emailToNameMapCache[data.email!] = data.name;
     }
     return PersonEntity(result.id, data);
   }
@@ -282,7 +285,7 @@ class PersonService {
       justName.data.logStats();
 
       if (entity.data.email != null) {
-        _emailToNameMap.remove(entity.data.email!);
+        _emailToNameMapCache.remove(entity.data.email!);
       }
     } else {
       await entityService.deleteEntry(personID);
@@ -290,7 +293,7 @@ class PersonService {
 
       if (entity != null) {
         if (entity.data.email != null) {
-          _emailToNameMap.remove(entity.data.email!);
+          _emailToNameMapCache.remove(entity.data.email!);
         }
       }
     }
@@ -454,10 +457,10 @@ class PersonService {
     );
     await updatePerson(updatedPerson).then((value) {
       if (email != null) {
-        _emailToNameMap[email] = updatedPerson.data.name;
+        _emailToNameMapCache[email] = updatedPerson.data.name;
       }
       if (name != null && updatedPerson.data.email != null) {
-        _emailToNameMap[updatedPerson.data.email!] = name;
+        _emailToNameMapCache[updatedPerson.data.email!] = name;
       }
     });
     return updatedPerson;
