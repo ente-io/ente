@@ -667,7 +667,7 @@ class _HomePageState extends State<HomePage> {
     }
     return false;
   }
-
+  int lastScanTime = DateTime.now().millisecondsSinceEpoch - 1000;
   void _handleDeeplink(BuildContext context, String? link) {
     bool isAccountConfigured = Configuration.instance.hasConfiguredAccount();
     bool isOfflineModeEnabled = Configuration.instance.hasOptedForOfflineMode() &&
@@ -675,6 +675,11 @@ class _HomePageState extends State<HomePage> {
     if (!(isAccountConfigured || isOfflineModeEnabled) || link == null) {
       return;
     }
+    if (DateTime.now().millisecondsSinceEpoch - lastScanTime < 1000) {
+      _logger.info("Ignoring potential event for same deeplink");
+      return;
+    }
+    lastScanTime = DateTime.now().millisecondsSinceEpoch;
     if (mounted && link.toLowerCase().startsWith("otpauth://")) {
       try {
         final newCode = Code.fromOTPAuthUrl(link);
