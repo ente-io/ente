@@ -232,6 +232,15 @@ const App: React.FC = () => {
     ) => {
         setTabValue(newValue);
     };
+    useEffect(() => {
+        const searchParam = new URLSearchParams(window.location.search);
+        const userToken = searchParam.get("token");
+
+        if (userToken) {
+            setLocalToken(userToken);
+            setToken(userToken);
+        }
+    }, []);
 
     return (
         <div className="container">
