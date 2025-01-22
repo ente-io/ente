@@ -1402,7 +1402,7 @@ class SearchService {
       peopleToSharedFiles.forEach((key, value) {
         final name = key.displayName != null && key.displayName!.isNotEmpty
             ? key.displayName!
-            : key.email.split("@")[0];
+            : key.email;
         searchResults.add(
           GenericSearchResult(
             ResultType.shared,
