@@ -28,7 +28,7 @@ interface EnteMenuItemProps {
      *
      * - "mini": A variant of secondary with a smaller font.
      */
-    variant?: "primary" | "captioned" | "toggle" | "secondary" | "mini";
+    variant?: "primary" | "captioned" | "toggle" | "secondary";
     /**
      * Color of the menu item.
      *
@@ -60,7 +60,20 @@ interface EnteMenuItemProps {
      * Only valid for menu items with variant "toggle".
      */
     checked?: boolean;
+    /**
+     * Optional icon shown at the leading edge of the menu item.
+     *
+     * This is usually an icon like an {@link SvgIcon}, but it can be any
+     * arbitrary component, the menu item does not make any assumptions as to
+     * what this is (apart from expecting it to be roughly "icon sized").
+     */
     startIcon?: React.ReactNode;
+    /**
+     * Optional icon shown at the trailing edge of the menu item.
+     *
+     * Similar to {@link startIcon} this can be any arbitrary component, though
+     * usually it is an {@link SvgIcon}.
+     */
     endIcon?: React.ReactNode;
     /**
      * The label for the component.
@@ -106,11 +119,8 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
     caption,
     disabled = false,
 }) => {
-    const handleButtonClick = () => {
-        if (variant == "toggle") {
-            return;
-        }
-        onClick();
+    const handleMenuItem = () => {
+        if (variant != "toggle") onClick();
     };
 
     const labelOrDefault = label ?? "";
@@ -118,7 +128,7 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
     return (
         <MenuItem
             disabled={disabled}
-            onClick={handleButtonClick}
+            onClick={handleMenuItem}
             disableRipple={variant == "toggle"}
             sx={[
                 (theme) => ({
@@ -137,7 +147,6 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
                         color: theme.vars.palette[color].main,
                     })),
                 variant != "secondary" &&
-                    variant != "mini" &&
                     ((theme) => ({
                         backgroundColor: theme.vars.palette.fill.faint,
                     })),
@@ -162,10 +171,6 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
                                     {caption}
                                 </CaptionTypography>
                             </Stack>
-                        ) : variant == "mini" ? (
-                            <Typography variant="mini" color="text.muted">
-                                {labelOrDefault}
-                            </Typography>
                         ) : (
                             <Typography fontWeight={fontWeight}>
                                 {labelOrDefault}

@@ -8,6 +8,7 @@ import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { ut } from "@/base/i18n";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
@@ -688,14 +689,18 @@ const DebugSection: React.FC = () => {
             {isInternalUser() && (
                 <EnteMenuItem
                     variant="secondary"
+                    label={ut("Test Upload")}
                     onClick={testUpload}
-                    label={"Test Upload"}
                 />
             )}
             <EnteMenuItem
+                variant="secondary"
+                label={
+                    <Typography variant="mini" color="text.muted">
+                        {t("debug_logs")}
+                    </Typography>
+                }
                 onClick={confirmLogDownload}
-                variant="mini"
-                label={t("debug_logs")}
             />
             <Stack
                 sx={{
