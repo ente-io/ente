@@ -64,22 +64,6 @@ class CodeStore {
     return true;
   }
 
-  Future<void> updateCodeIndex(Code code) async {
-    final key = code.generatedID!;
-
-    _cacheCodes.remove(key);
-    int deletedIndex = code.display.position;
-
-    _cacheCodes.forEach((key, c) async {
-      if (c.display.position > deletedIndex) {
-        Code updatedCode = c.copyWith(
-          display: c.display.copyWith(position: c.display.position - 1),
-        );
-        await addCode(updatedCode);
-      }
-    });
-  }
-
   Future<List<Code>> getAllCodes({
     AccountMode? accountMode,
     bool sortCodes = true,
@@ -179,7 +163,6 @@ class CodeStore {
   Future<void> removeCode(Code code, {AccountMode? accountMode}) async {
     final mode = accountMode ?? _authenticatorService.getAccountMode();
     await _authenticatorService.deleteEntry(code.generatedID!, mode);
-    await updateCodeIndex(code);
     Bus.instance.fire(CodesUpdatedEvent());
   }
 
