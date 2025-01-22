@@ -296,7 +296,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 hover: colors.light.fill.faintHover,
                 // For an icon button, the hover background color is derived
                 // from the active color above and this opacity.
-                hoverOpacity: 0.04,
+                hoverOpacity: 0.06,
                 // TODO(LM): Remove commented.
                 // The color of a selected action.
                 //
@@ -627,15 +627,21 @@ const components: Components = {
         },
     },
 
+    // The default link "color" prop is "primary", which maps to "fill.base"
+    // (and equivalently, to "text.base"). In our current designs, the <Link>
+    // MUI component is only used in places where the surrounding text uses
+    // "text.muted", so this default already provides it a highlight compared to
+    // the text it in embedded in.
+    //
+    // We additionally disable the underline, and add a hover indication by
+    // switching its color to the main accent.
     MuiLink: {
         defaultProps: {
-            color: "var(--mui-palette-accent-main)",
             underline: "none",
         },
         styleOverrides: {
             root: {
                 "&:hover": {
-                    underline: "always",
                     color: "var(--mui-palette-accent-main)",
                 },
             },
