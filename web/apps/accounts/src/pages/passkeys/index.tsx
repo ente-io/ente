@@ -191,23 +191,20 @@ interface PasskeyListItemProps {
 const PasskeyListItem: React.FC<PasskeyListItemProps> = ({
     passkey,
     onClick,
-}) => {
-    const labelComponent = (
-        <PasskeyLabel>
-            <Typography sx={{ fontWeight: "medium" }}>
-                {passkey.friendlyName}
-            </Typography>
-        </PasskeyLabel>
-    );
-    return (
-        <EnteMenuItem
-            onClick={() => onClick(passkey)}
-            startIcon={<KeyIcon />}
-            endIcon={<ChevronRightIcon />}
-            labelComponent={labelComponent}
-        />
-    );
-};
+}) => (
+    <EnteMenuItem
+        onClick={() => onClick(passkey)}
+        startIcon={<KeyIcon />}
+        endIcon={<ChevronRightIcon />}
+        label={
+            <PasskeyLabel>
+                <Typography sx={{ fontWeight: "medium" }}>
+                    {passkey.friendlyName}
+                </Typography>
+            </PasskeyLabel>
+        }
+    />
+);
 
 const PasskeyLabel = styled("div")`
     /* If the name of the passkey does not fit in one line, break the text into

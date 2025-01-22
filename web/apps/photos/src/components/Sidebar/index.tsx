@@ -64,6 +64,7 @@ import {
     Skeleton,
     Stack,
     styled,
+    Tooltip,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
@@ -599,8 +600,12 @@ const HelpSection: React.FC = () => {
             />
             <EnteMenuItem
                 onClick={contactSupport}
-                labelComponent={
-                    <span title="support@ente.io">{t("support")}</span>
+                label={
+                    <Tooltip title="support@ente.io">
+                        <Typography sx={{ fontWeight: "medium" }}>
+                            {t("support")}
+                        </Typography>
+                    </Tooltip>
                 }
                 variant="secondary"
             />

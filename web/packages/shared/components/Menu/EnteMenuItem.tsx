@@ -63,21 +63,28 @@ interface EnteMenuItemProps {
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
     /**
-     * One of {@link label} or {@link labelComponent} must be specified.
-     * TODO: Try and reflect this is the type.
+     * The label for the component.
+     *
+     * Usually this is expected to be a string, in which case it is wrapped up
+     * in an appropriate {@link Typography} and shown on the menu item. But it
+     * can be an arbitrary react component too, to allow customizing its
+     * appearance or otherwise modifying it in one off cases (it will be used as
+     * it is and not wrapped in a {@link Typography} if it is not a string).
      */
-    label?: string;
+    label: React.ReactNode;
     /**
      * The text (or icon) to show alongside the {@link label} when the variant
      * is "captioned".
      *
-     * This is usually expected to be a string and is wrapped in a Typography
-     * component before being rendered. However, it can also be an SvgIcon (or
-     * any an arbitrary component, though in terms of styling, only an SvgIcon
-     * usually makes sense).
+     * This is usually expected to be a string, in which case it is wrapped in a
+     * {@link Typography} component before being rendered. However, it can also
+     * be an {@link SvgIcon} (or any an arbitrary component), though in terms of
+     * styling, only an {@link SvgIcon} usually makes sense.
+     *
+     * Similar to {@link label}, it will not be wrapped in a  {@link Typography}
+     * if it is not a string.
      */
     caption?: React.ReactNode;
-    labelComponent?: React.ReactNode;
     /**
      * If true, then the menu item will be disabled.
      */
@@ -97,7 +104,6 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
     endIcon,
     label,
     caption,
-    labelComponent,
     disabled = false,
 }) => {
     const handleButtonClick = () => {
@@ -141,8 +147,8 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
                 <VerticallyCenteredFlex sx={{ py: "14px" }} gap={"10px"}>
                     {startIcon && startIcon}
                     <Box px={"2px"}>
-                        {labelComponent ? (
-                            labelComponent
+                        {typeof label !== "string" ? (
+                            label
                         ) : variant == "captioned" ? (
                             <Stack
                                 direction="row"
