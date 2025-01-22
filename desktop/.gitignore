@@ -22,4 +22,4 @@ out
 dist/
 
 # We download it on demand, if needed for the particular OS/arch.
-build/magick
+build/magick*
