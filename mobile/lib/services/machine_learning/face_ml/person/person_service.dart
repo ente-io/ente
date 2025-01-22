@@ -19,6 +19,7 @@ class PersonService {
   final EntityService entityService;
   final MLDataDB faceMLDataDB;
   final SharedPreferences prefs;
+  final _emailToNameMap = <String, String>{};
 
   PersonService(this.entityService, this.faceMLDataDB, this.prefs);
 
@@ -40,6 +41,17 @@ class PersonService {
     SharedPreferences prefs,
   ) {
     _instance = PersonService(entityService, faceMLDataDB, prefs);
+    _instance!.getPersons().then((value) {
+      for (var person in value) {
+        if (person.data.email != null && person.data.email!.isNotEmpty) {
+          _instance!._emailToNameMap[person.data.email!] = person.data.name;
+        }
+      }
+    });
+  }
+
+  void clearCache() {
+    _emailToNameMap.clear();
   }
 
   Future<List<PersonEntity>> getPersons() async {
@@ -178,6 +190,9 @@ class PersonService {
       personID: result.id,
       clusterID: clusterID,
     );
+    if (data.email != null) {
+      _emailToNameMap[data.email!] = data.name;
+    }
     return PersonEntity(result.id, data);
   }
 
@@ -251,8 +266,8 @@ class PersonService {
   }
 
   Future<void> deletePerson(String personID, {bool onlyMapping = false}) async {
+    final entity = await getPerson(personID);
     if (onlyMapping) {
-      final PersonEntity? entity = await getPerson(personID);
       if (entity == null) {
         return;
       }
@@ -265,9 +280,19 @@ class PersonService {
       );
       await faceMLDataDB.removePerson(personID);
       justName.data.logStats();
+
+      if (entity.data.email != null) {
+        _emailToNameMap.remove(entity.data.email!);
+      }
     } else {
       await entityService.deleteEntry(personID);
       await faceMLDataDB.removePerson(personID);
+
+      if (entity != null) {
+        if (entity.data.email != null) {
+          _emailToNameMap.remove(entity.data.email!);
+        }
+      }
     }
 
     // fire PeopleChangeEvent
@@ -427,7 +452,14 @@ class PersonService {
         email: email,
       ),
     );
-    await updatePerson(updatedPerson);
+    await updatePerson(updatedPerson).then((value) {
+      if (email != null) {
+        _emailToNameMap[email] = updatedPerson.data.name;
+      }
+      if (name != null && updatedPerson.data.email != null) {
+        _emailToNameMap[updatedPerson.data.email!] = name;
+      }
+    });
     return updatedPerson;
   }
 
