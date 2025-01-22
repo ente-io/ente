@@ -90,7 +90,6 @@ class LockScreenSettings {
         : await PrivacyScreen.instance.enable(
             iosOptions: const PrivacyIosOptions(
               enablePrivacy: true,
-              // privacyImageName: 'LaunchImage',
             ),
             androidOptions: const PrivacyAndroidOptions(
               enableSecure: true,
