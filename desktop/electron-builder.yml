@@ -34,3 +34,4 @@ mac:
         arch: [universal]
     category: public.app-category.photography
     hardenedRuntime: true
+    mergeASARs: false
