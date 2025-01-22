@@ -1,3 +1,4 @@
+import { EnteMenuItem } from "@/base/components/EnteMenuItem";
 import {
     MenuItemDivider,
     MenuItemGroup,
@@ -22,7 +23,6 @@ import { avatarTextColor } from "@/new/photos/services/avatar";
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";

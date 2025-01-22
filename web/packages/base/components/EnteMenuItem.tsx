@@ -108,10 +108,10 @@ interface EnteMenuItemProps {
  * A MUI {@link MenuItem} customized as per our designs and use cases.
  */
 export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
-    onClick,
     variant = "primary",
     color = "primary",
     fontWeight = "medium",
+    onClick,
     checked,
     startIcon,
     endIcon,

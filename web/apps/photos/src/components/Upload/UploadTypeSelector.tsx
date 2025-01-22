@@ -1,8 +1,8 @@
 import { SpaceBetweenFlex } from "@/base/components/containers";
+import { EnteMenuItem } from "@/base/components/EnteMenuItem";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { useIsTouchscreen } from "@/base/components/utils/hooks";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import GoogleIcon from "@mui/icons-material/Google";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";

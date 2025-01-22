@@ -1,3 +1,4 @@
+import { EnteMenuItem } from "@/base/components/EnteMenuItem";
 import {
     MenuItemDivider,
     MenuItemGroup,
@@ -14,7 +15,6 @@ import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import { getLocalCollections } from "@/new/photos/services/collections";
 import { AppContext } from "@/new/photos/types/context";
 import { CenteredFlex } from "@ente/shared/components/Container";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";

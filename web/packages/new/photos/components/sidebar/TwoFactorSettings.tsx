@@ -1,3 +1,4 @@
+import { EnteMenuItem } from "@/base/components/EnteMenuItem";
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
@@ -7,7 +8,6 @@ import {
 } from "@/base/components/mui/SidebarDrawer";
 import { disable2FA, get2FAStatus } from "@/new/photos/services/user";
 import { useAppContext } from "@/new/photos/types/context";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import LockIcon from "@mui/icons-material/Lock";

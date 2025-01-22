@@ -1,3 +1,4 @@
+import { EnteMenuItem } from "@/base/components/EnteMenuItem";
 import { MenuItemGroup } from "@/base/components/Menu";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
@@ -7,7 +8,6 @@ import {
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
 import { disableML, enableML, type MLStatus } from "@/new/photos/services/ml";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
     Box,
     Button,

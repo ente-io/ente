@@ -1,3 +1,4 @@
+import { EnteMenuItem } from "@/base/components/EnteMenuItem";
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import {
     NestedSidebarDrawer,
@@ -27,7 +28,6 @@ import {
     updateMapEnabled,
 } from "@/new/photos/services/settings";
 import { useAppContext } from "@/new/photos/types/context";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { Divider, Stack, Typography, useColorScheme } from "@mui/material";
 import { t } from "i18next";
