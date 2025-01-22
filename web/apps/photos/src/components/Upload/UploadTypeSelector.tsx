@@ -1,5 +1,5 @@
 import { SpaceBetweenFlex } from "@/base/components/containers";
-import { EnteMenuItem } from "@/base/components/EnteMenuItem";
+import { EnteMenuItem } from "@/base/components/Menu";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { useIsTouchscreen } from "@/base/components/utils/hooks";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";

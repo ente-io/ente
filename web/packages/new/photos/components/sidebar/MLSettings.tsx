@@ -1,5 +1,4 @@
-import { EnteMenuItem } from "@/base/components/EnteMenuItem";
-import { MenuItemGroup } from "@/base/components/Menu";
+import { EnteMenuItem, MenuItemGroup } from "@/base/components/Menu";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {

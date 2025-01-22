@@ -1,5 +1,8 @@
-import { EnteMenuItem } from "@/base/components/EnteMenuItem";
-import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
+import {
+    EnteMenuItem,
+    MenuItemDivider,
+    MenuItemGroup,
+} from "@/base/components/Menu";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { AppNavbarNormalFlow } from "@/base/components/Navbar";
 import { SingleInputDialog } from "@/base/components/SingleInputDialog";

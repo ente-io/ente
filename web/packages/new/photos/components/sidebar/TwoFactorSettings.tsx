@@ -1,5 +1,8 @@
-import { EnteMenuItem } from "@/base/components/EnteMenuItem";
-import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
+import {
+    EnteMenuItem,
+    MenuItemGroup,
+    MenuSectionTitle,
+} from "@/base/components/Menu";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     NestedSidebarDrawer,

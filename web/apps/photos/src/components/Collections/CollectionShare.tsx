@@ -1,5 +1,5 @@
-import { EnteMenuItem } from "@/base/components/EnteMenuItem";
 import {
+    EnteMenuItem,
     MenuItemDivider,
     MenuItemGroup,
     MenuSectionTitle,
