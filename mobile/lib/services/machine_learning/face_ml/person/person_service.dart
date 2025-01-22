@@ -41,6 +41,17 @@ class PersonService {
     SharedPreferences prefs,
   ) {
     _instance = PersonService(entityService, faceMLDataDB, prefs);
+    _instance!._resetEmailToNameCache();
+  }
+
+  Map<String, String> get emailToNameMapCache => _emailToNameMapCache;
+
+  void clearCache() {
+    _emailToNameMapCache.clear();
+  }
+
+  void _resetEmailToNameCache() {
+    _emailToNameMapCache.clear();
     _instance!.getPersons().then((value) {
       for (var person in value) {
         if (person.data.email != null && person.data.email!.isNotEmpty) {
@@ -48,13 +59,8 @@ class PersonService {
               person.data.name;
         }
       }
+      logger.info("Email to name cache reset");
     });
-  }
-
-  Map<String, String> get emailToNameMapCache => _emailToNameMapCache;
-
-  void clearCache() {
-    _emailToNameMapCache.clear();
   }
 
   Future<List<PersonEntity>> getPersons() async {
@@ -194,7 +200,7 @@ class PersonService {
       clusterID: clusterID,
     );
     if (data.email != null) {
-      _emailToNameMapCache[data.email!] = data.name;
+      _resetEmailToNameCache();
     }
     return PersonEntity(result.id, data);
   }
@@ -285,7 +291,7 @@ class PersonService {
       justName.data.logStats();
 
       if (entity.data.email != null) {
-        _emailToNameMapCache.remove(entity.data.email!);
+        _resetEmailToNameCache();
       }
     } else {
       await entityService.deleteEntry(personID);
@@ -293,7 +299,7 @@ class PersonService {
 
       if (entity != null) {
         if (entity.data.email != null) {
-          _emailToNameMapCache.remove(entity.data.email!);
+          _resetEmailToNameCache();
         }
       }
     }
@@ -456,12 +462,7 @@ class PersonService {
       ),
     );
     await updatePerson(updatedPerson).then((value) {
-      if (email != null) {
-        _emailToNameMapCache[email] = updatedPerson.data.name;
-      }
-      if (name != null && updatedPerson.data.email != null) {
-        _emailToNameMapCache[updatedPerson.data.email!] = name;
-      }
+      _resetEmailToNameCache();
     });
     return updatedPerson;
   }
