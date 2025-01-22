@@ -71,9 +71,9 @@ android {
             dimension "default"
             applicationIdSuffix ".dev"
         }
-        face {
+        offline {
             dimension "default"
-            applicationIdSuffix ".face"
+            applicationIdSuffix ".offline"
         }
         playstore {
             dimension "default"

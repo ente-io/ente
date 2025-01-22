@@ -77,7 +77,7 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
     final gallery = Gallery(
       key: ValueKey(_shouldHideSharedItems),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        final ownerID = Configuration.instance.getUserID();
+        final ownerID = Configuration.instance.getUserID() ?? 0;
         final hasSelectedAllForBackup =
             Configuration.instance.hasSelectedAllFoldersForBackup();
         final collectionsToHide =
@@ -89,7 +89,7 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
           ignoredCollectionIDs: collectionsToHide,
           ignoreSavedFiles: true,
         );
-        if (hasSelectedAllForBackup) {
+        if (hasSelectedAllForBackup || ownerID == 0) {
           result = await FilesDB.instance.getAllLocalAndUploadedFiles(
             creationStartTime,
             creationEndTime,

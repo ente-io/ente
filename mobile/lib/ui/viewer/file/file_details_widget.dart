@@ -79,7 +79,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   @override
   void initState() {
     debugPrint('file_details_sheet initState');
-    _currentUserID = Configuration.instance.getUserID()!;
+    _currentUserID = Configuration.instance.getUserID() ?? 0;
     hasLocationData.value = widget.file.hasLocation;
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;

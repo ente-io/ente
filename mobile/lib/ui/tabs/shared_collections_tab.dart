@@ -3,6 +3,7 @@ import "dart:math";
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import "package:photos/core/configuration.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -71,6 +72,11 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
 
   @override
   Widget build(BuildContext context) {
+    if (Configuration.instance.getUserID() == null) {
+      return const Center(
+        child: Text("Please login to view shared collections"),
+      );
+    }
     super.build(context);
     return FutureBuilder<SharedCollections>(
       future: Future.value(CollectionsService.instance.getSharedCollections()),

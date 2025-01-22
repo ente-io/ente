@@ -3,6 +3,7 @@ import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
@@ -57,6 +58,10 @@ class _SearchTabState extends State<SearchTab> {
 
   @override
   Widget build(BuildContext context) {
+    if (Configuration.instance.getUserID() == null) {
+      return const Text("Not logged in");
+    }
+
     return AllSectionsExamplesProvider(
       child: FadeIndexedStack(
         lazy: false,

@@ -3,6 +3,7 @@ import "dart:async";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
+import "package:photos/core/configuration.dart";
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
@@ -119,6 +120,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   @override
   Widget build(BuildContext context) {
+    int? user = Configuration.instance.getUserID();
     if (widget.file.isRemoteFile) {
       _loadNetworkImage();
     } else {
@@ -193,7 +195,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       const ThumbnailPlaceHolder(),
       content ?? const SizedBox(),
     ];
-    if (widget.shouldShowSyncStatus && !widget.file.isUploaded) {
+    if (widget.shouldShowSyncStatus &&
+        !widget.file.isUploaded &&
+        user != null) {
       viewChildren.add(const UnSyncedIcon());
     }
 

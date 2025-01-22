@@ -5,6 +5,7 @@ import "package:battery_info/battery_info_plugin.dart";
 import "package:battery_info/model/android_battery_info.dart";
 import "package:battery_info/model/iso_battery_info.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/machine_learning_control_event.dart";
 
@@ -25,6 +26,9 @@ class MachineLearningController {
   bool get isDeviceHealthy => _isDeviceHealthy;
 
   MachineLearningController() {
+    if (Configuration.instance.getUserID() == null) {
+      return;
+    }
     _logger.info('MachineLearningController constructor');
     _startInteractionTimer(kDefaultInteractionTimeout);
     if (Platform.isIOS) {
@@ -45,6 +49,9 @@ class MachineLearningController {
   }
 
   void onUserInteraction() {
+    if (Configuration.instance.getUserID() == null) {
+      return;
+    }
     if (!_isUserInteracting) {
       _logger.info("User is interacting with the app");
       _isUserInteracting = true;
