@@ -24,6 +24,8 @@
 	<string>????</string>
 	<key>MinimumOSVersion</key>
 	<string>12.1</string>
+	<key>FlutterDeepLinkingEnabled</key>
+	<false/>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>googlegmail</string>
