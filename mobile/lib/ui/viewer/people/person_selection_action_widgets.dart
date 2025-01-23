@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/models/typedefs.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
@@ -109,9 +110,9 @@ class _LinkContactToPersonSelectionPageState
               ),
               itemCount: results.length,
               itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    PersonContactLinkingActions()
+                return _RoundedPersonFaceWidget(
+                  onTap: () async {
+                    await PersonContactLinkingActions()
                         .linkPersonToContact(
                       context,
                       emailToLink: widget.emailToLink!,
@@ -123,28 +124,9 @@ class _LinkContactToPersonSelectionPageState
                       }
                     });
                   },
-                  child: PersonFaceWidget(
-                    results[index].thumbnailFile,
-                    personId: results[index].person.remoteID,
-                    useFullFile: true,
-                  ),
+                  itemSize: itemSize,
+                  personEntitiesWithThumbnailFile: results[index],
                 );
-                // return PersonSearchExample(
-                //   searchResult: results[index],
-                //   size: itemSize,
-                // )
-                //     .animate(delay: Duration(milliseconds: index * 13))
-                //     .fadeIn(
-                //       duration: const Duration(milliseconds: 225),
-                //       curve: Curves.easeIn,
-                //     )
-                //     .slide(
-                //       begin: const Offset(0, -0.06),
-                //       curve: Curves.easeInOut,
-                //       duration: const Duration(
-                //         milliseconds: 225,
-                //       ),
-                //     );
               },
             );
           }
@@ -271,7 +253,7 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
               ),
               itemCount: results.length,
               itemBuilder: (context, index) {
-                return GestureDetector(
+                return _RoundedPersonFaceWidget(
                   onTap: () async {
                     final dialog =
                         createProgressDialog(context, "Reassigning...");
@@ -295,28 +277,9 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
                       );
                     }
                   },
-                  child: PersonFaceWidget(
-                    results[index].thumbnailFile,
-                    personId: results[index].person.remoteID,
-                    useFullFile: true,
-                  ),
+                  itemSize: itemSize,
+                  personEntitiesWithThumbnailFile: results[index],
                 );
-                // return PersonSearchExample(
-                //   searchResult: results[index],
-                //   size: itemSize,
-                // )
-                //     .animate(delay: Duration(milliseconds: index * 13))
-                //     .fadeIn(
-                //       duration: const Duration(milliseconds: 225),
-                //       curve: Curves.easeIn,
-                //     )
-                //     .slide(
-                //       begin: const Offset(0, -0.06),
-                //       curve: Curves.easeInOut,
-                //       duration: const Duration(
-                //         milliseconds: 225,
-                //       ),
-                //     );
               },
             );
           }
@@ -357,5 +320,85 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
       return EnteFile();
     }
     return resultFile;
+  }
+}
+
+class _RoundedPersonFaceWidget extends StatelessWidget {
+  final FutureVoidCallback onTap;
+  final double itemSize;
+  final PersonEntityWithThumbnailFile personEntitiesWithThumbnailFile;
+
+  const _RoundedPersonFaceWidget({
+    required this.onTap,
+    required this.itemSize,
+    required this.personEntitiesWithThumbnailFile,
+  });
+
+  double get borderRadius => 82 * (itemSize / 102);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              ClipPath(
+                clipper: ShapeBorderClipper(
+                  shape: ContinuousRectangleBorder(
+                    borderRadius: BorderRadius.circular(borderRadius),
+                  ),
+                ),
+                child: Container(
+                  width: itemSize,
+                  height: itemSize,
+                  decoration: BoxDecoration(
+                    color: getEnteColorScheme(context).strokeFaint,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: itemSize,
+                height: itemSize,
+                child: SizedBox(
+                  width: itemSize - 2,
+                  height: itemSize - 2,
+                  child: ClipPath(
+                    clipper: ShapeBorderClipper(
+                      shape: ContinuousRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          borderRadius - 1,
+                        ),
+                      ),
+                    ),
+                    child: PersonFaceWidget(
+                      personEntitiesWithThumbnailFile.thumbnailFile,
+                      personId: personEntitiesWithThumbnailFile.person.remoteID,
+                      useFullFile: true,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 6, bottom: 0),
+            child: Text(
+              personEntitiesWithThumbnailFile.person.data.name,
+              maxLines: 1,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: getEnteTextTheme(context).small,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
