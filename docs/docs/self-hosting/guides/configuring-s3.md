@@ -5,7 +5,7 @@ description:
     from outside localhost
 ---
 
-# Flow of your Data
+# Components of the Architecture
 
 ![Client, Museum, S3](/client-museum-s3.png)
 
@@ -42,20 +42,20 @@ and put your custom configuration there (in your case, you can put an entire
 
 By default, you only need to configure the endpoint for the first bucket.
 
-The docker compose file is shipped with MinIO as the Self Hosted S3 Storage. 
+The docker compose file is shipped with MinIO as the Self Hosted S3 Compatible Storage. 
 By default, MinIO server is served on `localhost:3200` and the MinIO UI on 
 `localhost:3201`. 
 For example, in a localhost network situation, the way this 
 connection works is, Museum (`1`) and MinIO (`2`) run on the same docker network and 
-the web app (`3`) which will also be hosted on the localhost. Hence, the 
-three components of the setup will be able to communicate with each other seamlessly.
+the web app (`3`) which will also be hosted on the localhost. This enables all the 
+three components of the setup being able to communicate with each other seamlessly.
 
 The same principle applies if you're deploying to your custom domain.
 
 ## Replication 
 
-If you're wondering why there are 3 buckets - that's because our production
-instance uses these to perform [replication](https://ente.io/reliability/).
+If you're wondering why there are 3 buckets on MinIO UI - that's because our 
+production instance uses these to perform [replication](https://ente.io/reliability/).
 
 In a self hosted Ente Instance replication is turned off by default.
 When replication is turned off, only the first bucket (`b2-eu-cen`) is used, 
@@ -63,7 +63,7 @@ and you can ignore the other two. Use the `s3.hot_storage.primary` option
 if you'd like to set one of the other predefined buckets as the primary bucket.
 
 > [!IMPORTANT]
-> As of now, Replication works only if all the the 3 storage type 
+> As of now, Replication works only if all the 3 storage type 
 > needs are fulfilled (1 Hot, 1 Cold and 1 Glacier Storage).
 >
 > [Reference](https://github.com/ente-io/ente/discussions/3167#discussioncomment-10585970)
@@ -111,8 +111,12 @@ for a particular error and its potential fix.
 
 In most situations, the problem turns out to be some minute mistakes or misconfigurations 
 on the users end and that turns out to be the bottleneck of the whole problem. 
-Please make sure to `reverse_proxy` Museum on a domain as well as check your S3 
+Please make sure to `reverse_proxy` Museum to a domain as well as check your S3 
 Credentials and whole config for any minor mis-configurations.
+
+It is also suggested that the user setups Bucket CORS on MinIO or any external
+S3 Bucket they are connecting to. To setup Bucket CORS, help yourself by upload
+[this](https://help.ente.io/self-hosting/guides/external-s3#_5-fix-potential-cors-issue-with-your-bucket).
 
 ### 403 Forbidden
 
@@ -132,3 +136,17 @@ To fix these, you should ensure the following:
 
 2.  The credentials are not being picked up (you might be setting the correct
     creds, but not in the place where museum picks them from).
+
+### Mismatch in File Size 
+
+The "Mismatch in File Size" error mostly occurs in a situation where the client (`1`) 
+is re-uploading a file which is already in the bucket with a different File Size. The 
+reason for re-upload could be anything including Network issue, sudden killing of app
+before the upload is complete and etc. 
+
+This is also one of Museums (`2`) Validation Checks for the size of file being 
+re-uploaded from the client to the size of the file which is already 
+uploaded to the S3 Bucket.
+
+In most case, it is very unlikely that this error could be a cause of some mistake in 
+the configuration or Browser/Bucket CORS.
