@@ -100,30 +100,23 @@ class _ContactsSectionState extends State<ContactsSection> {
         ),
         const ContactCTA(),
       ];
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SectionHeader(
-              SectionType.contacts,
-              hasMore:
-                  (_contactSearchResults.length >= kSearchSectionLimit - 1),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SectionHeader(
+            SectionType.contacts,
+            hasMore: (_contactSearchResults.length >= kSearchSectionLimit - 1),
+          ),
+          SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 4.5),
+            physics: const BouncingScrollPhysics(),
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: recommendations,
             ),
-            const SizedBox(height: 2),
-            SizedBox(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 4.5),
-                physics: const BouncingScrollPhysics(),
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: recommendations,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       );
     }
   }
