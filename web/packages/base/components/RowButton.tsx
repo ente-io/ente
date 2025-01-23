@@ -6,6 +6,7 @@ import {
     Stack,
     styled,
     Typography,
+    type ButtonProps,
     type TypographyProps,
 } from "@mui/material";
 import React from "react";
@@ -207,13 +208,6 @@ interface RowButtonProps {
  *
  * It can be used both standalone, or as part of a {@link RowButtonGroup}.
  */
-export const RowButton2 = (
-    { variant }, // `backgroundColor: 'tomato', color: 'white'`
-) => (
-    <RowButtonRoot variant={variant} color="primary">
-        Submit
-    </RowButtonRoot>
-);
 export const RowButton: React.FC<RowButtonProps> = ({
     variant = "primary",
     color = "primary",
@@ -227,7 +221,8 @@ export const RowButton: React.FC<RowButtonProps> = ({
     disabled = false,
 }) => (
     <RowButtonRoot
-        variant={variant}
+        rbVariant={variant}
+        rbColor={color}
         fullWidth
         disabled={disabled}
         onClick={() => {
@@ -311,29 +306,17 @@ export const RowButton: React.FC<RowButtonProps> = ({
     </RowButtonRoot>
 );
 
-type RowButtonRootProps = Pick<RowButtonProps, "variant">;
-
-const Button2 = styled(FocusVisibleButton)(({ theme }) => ({
-    border: "none",
-    padding: "0.75rem",
-    // ...other base styles
-    variants: [
-        {
-            props: { variant: "captioned", color: "primary" },
-            style: {
-                backgroundColor: theme.vars.palette.accent.main,
-                color: "white",
-            },
-        },
-        {
-            props: { variant: "secondary", color: "primary" },
-            style: { backgroundColor: "tomato", color: "white" },
-        },
-    ],
-}));
+type RowButtonRootProps = ButtonProps & {
+    // Prefix with "rb" to differentiate this from the "variant" prop of the MUI
+    // button that we're styling.
+    rbVariant: RowButtonProps["variant"];
+    // Prefix with "rb" to differentiate this from the "color" prop of the MUI
+    // button that we're styling.
+    rbColor: RowButtonProps["color"];
+};
 
 const RowButtonRoot = styled(FocusVisibleButton, {
-    // shouldForwardProp: (prop) => prop === "classes",
+    shouldForwardProp: (prop) => prop != "rbVariant" && prop != "rbColor",
     // name: "MuiMenuItem",
 })<React.PropsWithChildren<RowButtonRootProps>>(({ theme }) => ({
     // Remove button's default padding.
@@ -343,34 +326,44 @@ const RowButtonRoot = styled(FocusVisibleButton, {
     "& .MuiSvgIcon-root": {
         fontSize: "20px",
     },
+    color: theme.vars.palette.primary.main,
     variants: [
         {
-            props: { variant: "primary" },
+            props: { rbColor: "critical" },
+            style: { color: theme.vars.palette.critical.main },
+        },
+        {
+            props: { rbVariant: "primary" },
+            style: {
+                backgroundColor: theme.vars.palette.fill.faint,
+                "&:hover": {
+                    backgroundColor: theme.vars.palette.fill.muted,
+                },
+            },
+        },
+        {
+            props: { rbVariant: "captioned" },
+            style: {
+                backgroundColor: theme.vars.palette.fill.faint,
+                "&:hover": {
+                    backgroundColor: theme.vars.palette.fill.muted,
+                },
+            },
+        },
+        {
+            props: { rbVariant: "toggle" },
             style: { backgroundColor: theme.vars.palette.fill.faint },
         },
         {
-            props: { variant: "toggle" },
-            style: { backgroundColor: theme.vars.palette.fill.faint },
-        },
-        {
-            props: { variant: "captioned" },
-            style: { backgroundColor: theme.vars.palette.fill.faint },
-        },
-        {
-            props: { variant: "secondary" },
-            style: { backgroundColor: "transparent", color: "white" },
+            props: { rbVariant: "secondary" },
+            style: {
+                backgroundColor: "transparent",
+                color: "white",
+                "&:hover": { backgroundColor: theme.vars.palette.fill.faint },
+            },
         },
     ],
 
-    // variants: [
-    //     {
-    //         props: { variant: "secondary" },
-    //         style: {
-    //             backgroundColor: "red",
-    //         },
-    //     },
-    // ],
-    // ...theme.typography.body1,
     // display: "flex",
     // justifyContent: "flex-start",
     // alignItems: "center",
@@ -387,23 +380,6 @@ const RowButtonRoot = styled(FocusVisibleButton, {
     //     // Reset on touch devices, it doesn't add specificity
     //     "@media (hover: none)": {
     //         backgroundColor: "transparent",
-    //     },
-    // },
-    // [`&.${menuItemClasses.selected}`]: {
-    //     backgroundColor: theme.vars
-    //         ? `rgba(${theme.vars.palette.primary.mainChannel} / ${theme.vars.palette.action.selectedOpacity})`
-    //         : alpha(
-    //               theme.palette.primary.main,
-    //               theme.palette.action.selectedOpacity,
-    //           ),
-    //     [`&.${menuItemClasses.focusVisible}`]: {
-    //         backgroundColor: theme.vars
-    //             ? `rgba(${theme.vars.palette.primary.mainChannel} / calc(${theme.vars.palette.action.selectedOpacity} + ${theme.vars.palette.action.focusOpacity}))`
-    //             : alpha(
-    //                   theme.palette.primary.main,
-    //                   theme.palette.action.selectedOpacity +
-    //                       theme.palette.action.focusOpacity,
-    //               ),
     //     },
     // },
     // [`&.${menuItemClasses.selected}:hover`]: {
