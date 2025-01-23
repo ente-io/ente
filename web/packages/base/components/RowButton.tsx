@@ -1,8 +1,8 @@
 import { EnteSwitch } from "@/base/components/EnteSwitch";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     Box,
     Divider,
-    MenuItem,
     Stack,
     styled,
     Typography,
@@ -89,20 +89,20 @@ export const RowButtonDivider: React.FC<RowButtonDividerProps> = ({
 
 export const RowButtonGroup = styled("div")(
     ({ theme }) => `
-    & > .MuiMenuItem-root{
-        border-radius: 8px;
-        background-color: transparent;
-    }
-    & > .MuiMenuItem-root:not(:last-of-type) {
-        border-bottom-left-radius: 0;
-        border-bottom-right-radius: 0;
-    }
-    & > .MuiMenuItem-root:not(:first-of-type) {
-        border-top-left-radius: 0;
-        border-top-right-radius: 0;
-    }
-    background-color: ${theme.vars.palette.fill.faint};
-    border-radius: 8px;
+    // & > .MuiMenuItem-root{
+    //     border-radius: 8px;
+    //     background-color: transparent;
+    // }
+    // & > .MuiMenuItem-root:not(:last-of-type) {
+    //     border-bottom-left-radius: 0;
+    //     border-bottom-right-radius: 0;
+    // }
+    // & > .MuiMenuItem-root:not(:first-of-type) {
+    //     border-top-left-radius: 0;
+    //     border-top-right-radius: 0;
+    // }
+    // background-color: ${theme.vars.palette.fill.faint};
+    // border-radius: 8px;
 `,
 );
 
@@ -207,6 +207,13 @@ interface RowButtonProps {
  *
  * It can be used both standalone, or as part of a {@link RowButtonGroup}.
  */
+export const RowButton2 = (
+    { variant }, // `backgroundColor: 'tomato', color: 'white'`
+) => (
+    <RowButtonRoot variant={variant} color="primary">
+        Submit
+    </RowButtonRoot>
+);
 export const RowButton: React.FC<RowButtonProps> = ({
     variant = "primary",
     color = "primary",
@@ -219,40 +226,48 @@ export const RowButton: React.FC<RowButtonProps> = ({
     caption,
     disabled = false,
 }) => (
-    <MenuItem
+    <RowButtonRoot
+        variant={variant}
+        fullWidth
         disabled={disabled}
         onClick={() => {
             if (variant != "toggle") onClick();
         }}
-        disableRipple={variant == "toggle"}
-        sx={[
-            {
-                p: 0,
-                borderRadius: "4px",
-                color: color == "critical" ? "critical.main" : "text.base",
-                "& .MuiSvgIcon-root": {
-                    fontSize: "20px",
-                },
-            },
-            variant == "secondary" &&
-                ((theme) => ({
-                    "&:hover": {
-                        backgroundColor: theme.vars.palette.fill.faintHover,
-                    },
-                })),
-            variant != "secondary" &&
-                ((theme) => ({
-                    backgroundColor: theme.vars.palette.fill.faint,
-                    "&:hover": {
-                        backgroundColor:
-                            // Lighter fill for critical variant to retain
-                            // legibility of the red text.
-                            color == "critical"
-                                ? theme.vars.palette.fill.faintHover
-                                : theme.vars.palette.fill.muted,
-                    },
-                })),
-        ]}
+        // disableRipple={variant == "toggle"}
+        // sx={[
+        //     {
+        //         // Remove button's default padding.
+        //         p: 0,
+        //     },
+        // ]}
+        // sx={[
+        //     {
+        //         p: 0,
+        //         borderRadius: "4px",
+        //         color: color == "critical" ? "critical.main" : "text.base",
+        //         "& .MuiSvgIcon-root": {
+        //             fontSize: "20px",
+        //         },
+        //     },
+        //     variant == "secondary" &&
+        //         ((theme) => ({
+        //             "&:hover": {
+        //                 backgroundColor: theme.vars.palette.fill.faintHover,
+        //             },
+        //         })),
+        //     variant != "secondary" &&
+        //         ((theme) => ({
+        //             backgroundColor: theme.vars.palette.fill.faint,
+        //             "&:hover": {
+        //                 backgroundColor:
+        //                     // Lighter fill for critical variant to retain
+        //                     // legibility of the red text.
+        //                     color == "critical"
+        //                         ? theme.vars.palette.fill.faintHover
+        //                         : theme.vars.palette.fill.muted,
+        //             },
+        //         })),
+        // ]}
     >
         <Stack
             direction="row"
@@ -293,8 +308,140 @@ export const RowButton: React.FC<RowButtonProps> = ({
                 <EnteSwitch {...{ checked, onClick }} />
             ) : null}
         </Stack>
-    </MenuItem>
+    </RowButtonRoot>
 );
+
+type RowButtonRootProps = Pick<RowButtonProps, "variant">;
+
+const Button2 = styled(FocusVisibleButton)(({ theme }) => ({
+    border: "none",
+    padding: "0.75rem",
+    // ...other base styles
+    variants: [
+        {
+            props: { variant: "captioned", color: "primary" },
+            style: {
+                backgroundColor: theme.vars.palette.accent.main,
+                color: "white",
+            },
+        },
+        {
+            props: { variant: "secondary", color: "primary" },
+            style: { backgroundColor: "tomato", color: "white" },
+        },
+    ],
+}));
+
+const RowButtonRoot = styled(FocusVisibleButton, {
+    // shouldForwardProp: (prop) => prop === "classes",
+    // name: "MuiMenuItem",
+})<React.PropsWithChildren<RowButtonRootProps>>(({ theme }) => ({
+    // Remove button's default padding.
+    padding: 0,
+    // Set the size of the any icons (SvgIcon instances) provided to us to make
+    // them fit with the Typography within the button's content.
+    "& .MuiSvgIcon-root": {
+        fontSize: "20px",
+    },
+    variants: [
+        {
+            props: { variant: "primary" },
+            style: { backgroundColor: theme.vars.palette.fill.faint },
+        },
+        {
+            props: { variant: "toggle" },
+            style: { backgroundColor: theme.vars.palette.fill.faint },
+        },
+        {
+            props: { variant: "captioned" },
+            style: { backgroundColor: theme.vars.palette.fill.faint },
+        },
+        {
+            props: { variant: "secondary" },
+            style: { backgroundColor: "transparent", color: "white" },
+        },
+    ],
+
+    // variants: [
+    //     {
+    //         props: { variant: "secondary" },
+    //         style: {
+    //             backgroundColor: "red",
+    //         },
+    //     },
+    // ],
+    // ...theme.typography.body1,
+    // display: "flex",
+    // justifyContent: "flex-start",
+    // alignItems: "center",
+    // position: "relative",
+    // textDecoration: "none",
+    // minHeight: 48,
+    // paddingTop: 6,
+    // paddingBottom: 6,
+    // boxSizing: "border-box",
+    // whiteSpace: "nowrap",
+    // "&:hover": {
+    //     textDecoration: "none",
+    //     backgroundColor: theme.vars.palette.action.hover,
+    //     // Reset on touch devices, it doesn't add specificity
+    //     "@media (hover: none)": {
+    //         backgroundColor: "transparent",
+    //     },
+    // },
+    // [`&.${menuItemClasses.selected}`]: {
+    //     backgroundColor: theme.vars
+    //         ? `rgba(${theme.vars.palette.primary.mainChannel} / ${theme.vars.palette.action.selectedOpacity})`
+    //         : alpha(
+    //               theme.palette.primary.main,
+    //               theme.palette.action.selectedOpacity,
+    //           ),
+    //     [`&.${menuItemClasses.focusVisible}`]: {
+    //         backgroundColor: theme.vars
+    //             ? `rgba(${theme.vars.palette.primary.mainChannel} / calc(${theme.vars.palette.action.selectedOpacity} + ${theme.vars.palette.action.focusOpacity}))`
+    //             : alpha(
+    //                   theme.palette.primary.main,
+    //                   theme.palette.action.selectedOpacity +
+    //                       theme.palette.action.focusOpacity,
+    //               ),
+    //     },
+    // },
+    // [`&.${menuItemClasses.selected}:hover`]: {
+    //     backgroundColor: theme.vars
+    //         ? `rgba(${theme.vars.palette.primary.mainChannel} / calc(${theme.vars.palette.action.selectedOpacity} + ${theme.vars.palette.action.hoverOpacity}))`
+    //         : alpha(
+    //               theme.palette.primary.main,
+    //               theme.palette.action.selectedOpacity +
+    //                   theme.palette.action.hoverOpacity,
+    //           ),
+    //     // Reset on touch devices, it doesn't add specificity
+    //     "@media (hover: none)": {
+    //         backgroundColor: theme.vars
+    //             ? `rgba(${theme.vars.palette.primary.mainChannel} / ${theme.vars.palette.action.selectedOpacity})`
+    //             : alpha(
+    //                   theme.palette.primary.main,
+    //                   theme.palette.action.selectedOpacity,
+    //               ),
+    //     },
+    // },
+    // TODO:
+    // [`&.${menuItemClasses.focusVisible}`]: {
+    //     backgroundColor: theme.vars.palette.action.focus,
+    // },
+    // [`&.${menuItemClasses.disabled}`]: {
+    //     opacity: theme.vars.palette.action.disabledOpacity,
+    // },
+    // [`& .${listItemTextClasses.root}`]: {
+    //     marginTop: 0,
+    //     marginBottom: 0,
+    // },
+    // [`& .${listItemTextClasses.inset}`]: {
+    //     paddingLeft: 36,
+    // },
+    // [`& .${listItemIconClasses.root}`]: {
+    //     minWidth: 36,
+    // },
+}));
 
 const CaptionTypography: React.FC<
     React.PropsWithChildren<{ color: RowButtonProps["color"] }>
