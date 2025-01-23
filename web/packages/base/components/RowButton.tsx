@@ -101,6 +101,10 @@ export const RowButtonGroup = styled("div")(
         border-radius: 8px;
         background-color: transparent;
     }
+    /** Need to retarget the disabled state with increased specificity. */
+    & > button.Mui-disabled {
+        background-color: transparent;
+    }
     & > button:not(:last-of-type) {
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
@@ -248,9 +252,10 @@ export const RowButton: React.FC<RowButtonProps> = ({
                     alignItems: "center",
                     px: "16px",
                     pr: "12px",
-                    color: "primary.main",
+                    color: "text.base",
                 },
                 color == "critical" && { color: "critical.main" },
+                disabled && { color: "text.muted" },
             ]}
         >
             <Stack direction="row" sx={{ py: "14px", gap: "10px" }}>
