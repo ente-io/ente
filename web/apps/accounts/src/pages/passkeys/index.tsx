@@ -196,7 +196,6 @@ const PasskeyListItem: React.FC<PasskeyListItemProps> = ({
     onClick,
 }) => (
     <RowButton
-        onClick={() => onClick(passkey)}
         startIcon={<KeyIcon />}
         endIcon={<ChevronRightIcon />}
         label={
@@ -206,6 +205,7 @@ const PasskeyListItem: React.FC<PasskeyListItemProps> = ({
                 </Typography>
             </PasskeyLabel>
         }
+        onClick={() => onClick(passkey)}
     />
 );
 
@@ -294,16 +294,16 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                         </CreatedAtEntry>
                         <RowButtonGroup>
                             <RowButton
-                                onClick={showRenameDialog}
                                 startIcon={<EditIcon />}
                                 label={t("rename_passkey")}
+                                onClick={showRenameDialog}
                             />
                             <RowButtonDivider />
                             <RowButton
-                                onClick={showDeleteConfirmationDialog}
+                                color="critical"
                                 startIcon={<DeleteIcon />}
                                 label={t("delete_passkey")}
-                                color="critical"
+                                onClick={showDeleteConfirmationDialog}
                             />
                         </RowButtonGroup>
                     </Stack>

@@ -148,20 +148,19 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
         <Stack sx={{ px: "16px", py: "20px", gap: "24px" }}>
             <RowButtonGroup>
                 <RowButton
-                    onClick={confirmDisable}
                     variant="toggle"
                     checked={true}
                     label={t("enabled")}
+                    onClick={confirmDisable}
                 />
             </RowButtonGroup>
 
             <Stack>
                 <RowButtonGroup>
                     <RowButton
-                        onClick={confirmReconfigure}
-                        variant="primary"
                         checked={true}
                         label={t("reconfigure")}
+                        onClick={confirmReconfigure}
                     />
                 </RowButtonGroup>
                 <RowButtonGroupHint>

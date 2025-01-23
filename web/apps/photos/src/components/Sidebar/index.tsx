@@ -435,26 +435,22 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
         <>
             <RowButton
                 startIcon={<CategoryIcon />}
-                onClick={openUncategorizedSection}
-                variant="captioned"
                 label={t("section_uncategorized")}
                 caption={collectionSummaries
                     .get(uncategorizedCollectionId)
                     ?.fileCount.toString()}
+                onClick={openUncategorizedSection}
             />
             <RowButton
                 startIcon={<ArchiveOutlinedIcon />}
-                onClick={openArchiveSection}
-                variant="captioned"
                 label={t("section_archive")}
                 caption={collectionSummaries
                     .get(ARCHIVE_SECTION)
                     ?.fileCount.toString()}
+                onClick={openArchiveSection}
             />
             <RowButton
                 startIcon={<VisibilityOffIcon />}
-                onClick={openHiddenSection}
-                variant="captioned"
                 label={t("section_hidden")}
                 caption={
                     <LockOutlinedIcon
@@ -464,15 +460,15 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                         }}
                     />
                 }
+                onClick={openHiddenSection}
             />
             <RowButton
                 startIcon={<DeleteOutlineIcon />}
-                onClick={openTrashSection}
-                variant="captioned"
                 label={t("section_trash")}
                 caption={collectionSummaries
                     .get(TRASH_SECTION)
                     ?.fileCount.toString()}
+                onClick={openTrashSection}
             />
         </>
     );
@@ -515,45 +511,45 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
         <>
             {isDesktop && (
                 <RowButton
-                    onClick={showWatchFolder}
                     variant="secondary"
                     label={t("watch_folders")}
+                    onClick={showWatchFolder}
                 />
             )}
             <RowButton
                 variant="secondary"
-                onClick={showRecoveryKey}
                 label={t("recovery_key")}
+                onClick={showRecoveryKey}
             />
             <RowButton
                 variant="secondary"
-                onClick={showTwoFactor}
                 label={t("two_factor")}
+                onClick={showTwoFactor}
             />
             <RowButton
                 variant="secondary"
-                onClick={redirectToAccountsPage}
                 label={t("passkeys")}
+                onClick={redirectToAccountsPage}
             />
             <RowButton
                 variant="secondary"
-                onClick={redirectToChangePasswordPage}
                 label={t("change_password")}
+                onClick={redirectToChangePasswordPage}
             />
             <RowButton
                 variant="secondary"
-                onClick={handleChangeEmail}
                 label={t("change_email")}
+                onClick={handleChangeEmail}
             />
             <RowButton
                 variant="secondary"
-                onClick={handleDeduplicate}
                 label={t("deduplicate_files")}
+                onClick={handleDeduplicate}
             />
             <RowButton
                 variant="secondary"
-                onClick={showPreferences}
                 label={t("preferences")}
+                onClick={showPreferences}
             />
 
             <RecoveryKey
@@ -595,12 +591,12 @@ const HelpSection: React.FC = () => {
     return (
         <>
             <RowButton
-                onClick={requestFeature}
-                label={t("request_feature")}
                 variant="secondary"
+                label={t("request_feature")}
+                onClick={requestFeature}
             />
             <RowButton
-                onClick={contactSupport}
+                variant="secondary"
                 label={
                     <Tooltip title="support@ente.io">
                         <Typography sx={{ fontWeight: "medium" }}>
@@ -608,17 +604,17 @@ const HelpSection: React.FC = () => {
                         </Typography>
                     </Tooltip>
                 }
-                variant="secondary"
+                onClick={contactSupport}
             />
             <RowButton
-                onClick={handleExport}
+                variant="secondary"
                 label={t("export_data")}
                 endIcon={
                     exportService.isExportInProgress() && (
                         <ActivityIndicator size="20px" />
                     )
                 }
-                variant="secondary"
+                onClick={handleExport}
             />
         </>
     );
@@ -640,15 +636,15 @@ const ExitSection: React.FC = () => {
     return (
         <>
             <RowButton
-                onClick={handleLogout}
+                variant="secondary"
                 color="critical"
                 label={t("logout")}
-                variant="secondary"
+                onClick={handleLogout}
             />
             <RowButton
-                onClick={showDeleteAccount}
-                color="critical"
                 variant="secondary"
+                color="critical"
+                onClick={showDeleteAccount}
                 label={t("delete_account")}
             />
             <DeleteAccountModal {...deleteAccountVisibilityProps} />

@@ -1563,7 +1563,6 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                 <RowButton
                     onClick={openShareExpiryOptionsModalView}
                     endIcon={<ChevronRightIcon />}
-                    variant="captioned"
                     label={t("LINK_EXPIRY")}
                     color={
                         isLinkExpired(publicShareProp?.validTill)
@@ -1693,7 +1692,6 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
         <>
             <RowButton
                 label={t("LINK_DEVICE_LIMIT")}
-                variant="captioned"
                 caption={
                     publicShareProp.deviceLimit === 0
                         ? t("NO_DEVICE_LIMIT")

@@ -282,8 +282,8 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
             <Stack sx={{ gap: 3 }}>
                 <RowButtonGroup>
                     <RowButton
-                        label={t("enabled")}
                         variant="toggle"
+                        label={t("enabled")}
                         checked={true}
                         onClick={confirmDisableML}
                     />

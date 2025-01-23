@@ -676,10 +676,8 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                     <RowButton
                         disabled={canvasLoading}
                         startIcon={<CropOriginalIcon />}
-                        onClick={() => {
-                            loadCanvas();
-                        }}
                         label={t("restore_original")}
+                        onClick={() => void loadCanvas()}
                     />
                 </RowButtonGroup>
                 {currentTab === "crop" && (
@@ -709,17 +707,17 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                 <RowButtonGroupTitle>{t("export_data")}</RowButtonGroupTitle>
                 <RowButtonGroup>
                     <RowButton
-                        startIcon={<DownloadIcon />}
-                        onClick={downloadEditedPhoto}
-                        label={t("download_edited")}
                         disabled={!transformationPerformed && !coloursAdjusted}
+                        startIcon={<DownloadIcon />}
+                        label={t("download_edited")}
+                        onClick={downloadEditedPhoto}
                     />
                     <RowButtonDivider />
                     <RowButton
-                        startIcon={<CloudUploadIcon />}
-                        onClick={saveCopyToEnte}
-                        label={t("save_a_copy_to_ente")}
                         disabled={!transformationPerformed && !coloursAdjusted}
+                        startIcon={<CloudUploadIcon />}
+                        label={t("save_a_copy_to_ente")}
+                        onClick={saveCopyToEnte}
                     />
                 </RowButtonGroup>
                 {!transformationPerformed && !coloursAdjusted && (
@@ -829,6 +827,7 @@ const CropMenu: React.FC<CropMenuProps> = (props) => {
                 <RowButton
                     disabled={canvasLoading}
                     startIcon={<CropIcon />}
+                    label={t("apply_crop")}
                     onClick={() => {
                         if (!props.cropBoxRef.current || !canvasRef.current)
                             return;
@@ -852,7 +851,6 @@ const CropMenu: React.FC<CropMenuProps> = (props) => {
 
                         setCurrentTab("transform");
                     }}
-                    label={t("apply_crop")}
                 />
             </RowButtonGroup>
         </>
@@ -1237,8 +1235,8 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                 <RowButton
                     disabled={canvasLoading}
                     startIcon={<CropSquareIcon />}
-                    onClick={createCropHandler(1, 1)}
                     label={t("square") + " (1:1)"}
+                    onClick={createCropHandler(1, 1)}
                 />
             </RowButtonGroup>
             <RowButtonGroup sx={{ mb: "1rem" }}>
@@ -1247,11 +1245,11 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                         <RowButton
                             disabled={canvasLoading}
                             startIcon={ratio.icon}
+                            label={`${ratio.width}:${ratio.height}`}
                             onClick={createCropHandler(
                                 ratio.width,
                                 ratio.height,
                             )}
-                            label={`${ratio.width}:${ratio.height}`}
                         />
                         {index !== PRESET_ASPECT_RATIOS.length - 1 && (
                             <RowButtonDivider />
@@ -1263,14 +1261,14 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                 {PRESET_ASPECT_RATIOS.map((ratio, index) => (
                     <Fragment key={index}>
                         <RowButton
-                            disabled={canvasLoading}
                             key={index}
+                            disabled={canvasLoading}
                             startIcon={ratio.icon}
+                            label={`${ratio.height}:${ratio.width}`}
                             onClick={createCropHandler(
                                 ratio.height,
                                 ratio.width,
                             )}
-                            label={`${ratio.height}:${ratio.width}`}
                         />
                         {index !== PRESET_ASPECT_RATIOS.length - 1 && (
                             <RowButtonDivider />
@@ -1283,15 +1281,15 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                 <RowButton
                     disabled={canvasLoading}
                     startIcon={<RotateLeftIcon />}
-                    onClick={createRotationHandler("left")}
                     label={t("rotate_left") + " 90˚"}
+                    onClick={createRotationHandler("left")}
                 />
                 <RowButtonDivider />
                 <RowButton
                     disabled={canvasLoading}
                     startIcon={<RotateRightIcon />}
-                    onClick={createRotationHandler("right")}
                     label={t("rotate_right") + " 90˚"}
+                    onClick={createRotationHandler("right")}
                 />
             </RowButtonGroup>
             <RowButtonGroupTitle>{t("flip")}</RowButtonGroupTitle>
@@ -1301,15 +1299,15 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                     startIcon={
                         <FlipIcon style={{ transform: "rotateZ(90deg)" }} />
                     }
-                    onClick={createFlipCanvasHandler("vertical")}
                     label={t("flip_vertically")}
+                    onClick={createFlipCanvasHandler("vertical")}
                 />
                 <RowButtonDivider />
                 <RowButton
                     disabled={canvasLoading}
                     startIcon={<FlipIcon />}
-                    onClick={createFlipCanvasHandler("horizontal")}
                     label={t("flip_horizontally")}
+                    onClick={createFlipCanvasHandler("horizontal")}
                 />
             </RowButtonGroup>
         </>

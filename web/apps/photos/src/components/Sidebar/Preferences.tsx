@@ -75,20 +75,20 @@ export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         <RowButtonGroup>
                             <RowButton
                                 endIcon={<ChevronRightIcon />}
-                                onClick={showMLSettings}
                                 label={t("ml_search")}
+                                onClick={showMLSettings}
                             />
                         </RowButtonGroup>
                     )}
                     <RowButton
-                        onClick={showMapSettings}
                         endIcon={<ChevronRightIcon />}
                         label={t("map")}
+                        onClick={showMapSettings}
                     />
                     <RowButton
-                        onClick={showAdvancedSettings}
                         endIcon={<ChevronRightIcon />}
                         label={t("advanced")}
+                        onClick={showAdvancedSettings}
                     />
                 </Stack>
             </Stack>
@@ -241,10 +241,10 @@ export const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 <Stack sx={{ px: "16px", py: "20px" }}>
                     <RowButtonGroup>
                         <RowButton
-                            onClick={confirmToggle}
                             variant="toggle"
                             checked={mapEnabled}
                             label={t("enabled")}
+                            onClick={confirmToggle}
                         />
                     </RowButtonGroup>
                 </Stack>
@@ -286,8 +286,8 @@ export const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                             <RowButton
                                 variant="toggle"
                                 checked={!cfUploadProxyDisabled}
-                                onClick={toggle}
                                 label={t("faster_upload")}
+                                onClick={toggle}
                             />
                         </RowButtonGroup>
                         <RowButtonGroupHint>

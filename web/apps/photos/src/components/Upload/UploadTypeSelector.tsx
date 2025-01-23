@@ -177,24 +177,24 @@ const DefaultOptions: React.FC<OptionsProps> = ({
                 <Stack spacing={0.5}>
                     {intent != "import" && (
                         <RowButton
-                            onClick={() => onSelect("files")}
                             startIcon={<ImageOutlinedIcon />}
                             endIcon={<ChevronRightIcon />}
                             label={t("file")}
+                            onClick={() => onSelect("files")}
                         />
                     )}
                     <RowButton
-                        onClick={() => onSelect("folders")}
                         startIcon={<PermMediaOutlinedIcon />}
                         endIcon={<ChevronRightIcon />}
                         label={t("folder")}
+                        onClick={() => onSelect("folders")}
                     />
                     {intent !== "collect" && (
                         <RowButton
-                            onClick={() => onSelect("zips")}
                             startIcon={<GoogleIcon />}
                             endIcon={<ChevronRightIcon />}
                             label={t("google_takeout")}
+                            onClick={() => onSelect("zips")}
                         />
                     )}
                 </Stack>
