@@ -51,8 +51,8 @@ COPY apps/ .
 RUN corepack enable
 
 # Endpoint for Ente Server
-NEXT_PUBLIC_ENTE_ENDPOINT=https://your-ente-endpoint.com
-NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=https://your-albums-endpoint.com
+ENV NEXT_PUBLIC_ENTE_ENDPOINT=https://your-ente-endpoint.com
+ENV NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=https://your-albums-endpoint.com
 
 RUN yarn cache clean
 RUN yarn install --network-timeout 1000000000
