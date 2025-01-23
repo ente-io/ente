@@ -1,8 +1,8 @@
 import {
-    EnteMenuItem,
-    MenuItemGroup,
-    MenuSectionTitle,
-} from "@/base/components/Menu";
+    RowButton,
+    RowButtonGroup,
+    RowButtonGroupTitle,
+} from "@/base/components/RowButton";
 import {
     NestedSidebarDrawer,
     SidebarDrawerTitlebar,
@@ -72,20 +72,20 @@ export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                     {isInternalUser() && <ThemeSelector />}
                     <Divider sx={{ my: "2px", opacity: 0.1 }} />
                     {isMLSupported && (
-                        <MenuItemGroup>
-                            <EnteMenuItem
+                        <RowButtonGroup>
+                            <RowButton
                                 endIcon={<ChevronRightIcon />}
                                 onClick={showMLSettings}
                                 label={t("ml_search")}
                             />
-                        </MenuItemGroup>
+                        </RowButtonGroup>
                     )}
-                    <EnteMenuItem
+                    <RowButton
                         onClick={showMapSettings}
                         endIcon={<ChevronRightIcon />}
                         label={t("map")}
                     />
-                    <EnteMenuItem
+                    <RowButton
                         onClick={showAdvancedSettings}
                         endIcon={<ChevronRightIcon />}
                         label={t("advanced")}
@@ -239,14 +239,14 @@ export const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 />
 
                 <Stack sx={{ px: "16px", py: "20px" }}>
-                    <MenuItemGroup>
-                        <EnteMenuItem
+                    <RowButtonGroup>
+                        <RowButton
                             onClick={confirmToggle}
                             variant="toggle"
                             checked={mapEnabled}
                             label={t("enabled")}
                         />
-                    </MenuItemGroup>
+                    </RowButtonGroup>
                 </Stack>
             </Stack>
         </NestedSidebarDrawer>
@@ -282,15 +282,15 @@ export const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
 
                 <Stack sx={{ px: "16px", py: "20px" }}>
                     <Stack sx={{ gap: "4px" }}>
-                        <MenuItemGroup>
-                            <EnteMenuItem
+                        <RowButtonGroup>
+                            <RowButton
                                 variant="toggle"
                                 checked={!cfUploadProxyDisabled}
                                 onClick={toggle}
                                 label={t("faster_upload")}
                             />
-                        </MenuItemGroup>
-                        <MenuSectionTitle
+                        </RowButtonGroup>
+                        <RowButtonGroupTitle
                             title={t("faster_upload_description")}
                         />
                     </Stack>

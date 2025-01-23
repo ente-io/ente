@@ -1,8 +1,8 @@
 import {
-    EnteMenuItem,
-    MenuItemGroup,
-    MenuSectionTitle,
-} from "@/base/components/Menu";
+    RowButton,
+    RowButtonGroup,
+    RowButtonGroupTitle,
+} from "@/base/components/RowButton";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     NestedSidebarDrawer,
@@ -146,25 +146,25 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 
     return (
         <Stack sx={{ px: "16px", py: "20px", gap: "24px" }}>
-            <MenuItemGroup>
-                <EnteMenuItem
+            <RowButtonGroup>
+                <RowButton
                     onClick={confirmDisable}
                     variant="toggle"
                     checked={true}
                     label={t("enabled")}
                 />
-            </MenuItemGroup>
+            </RowButtonGroup>
 
             <Stack sx={{ gap: "4px" }}>
-                <MenuItemGroup>
-                    <EnteMenuItem
+                <RowButtonGroup>
+                    <RowButton
                         onClick={confirmReconfigure}
                         variant="primary"
                         checked={true}
                         label={t("reconfigure")}
                     />
-                </MenuItemGroup>
-                <MenuSectionTitle title={t("reconfigure_two_factor_hint")} />
+                </RowButtonGroup>
+                <RowButtonGroupTitle title={t("reconfigure_two_factor_hint")} />
             </Stack>
         </Stack>
     );

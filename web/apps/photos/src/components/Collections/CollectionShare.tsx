@@ -1,12 +1,12 @@
-import {
-    EnteMenuItem,
-    MenuItemDivider,
-    MenuItemGroup,
-    MenuSectionTitle,
-} from "@/base/components/Menu";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
+import {
+    RowButton,
+    RowButtonDivider,
+    RowButtonGroup,
+    RowButtonGroupTitle,
+} from "@/base/components/RowButton";
 import { Titlebar } from "@/base/components/Titlebar";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import { sharedCryptoWorker } from "@/base/crypto";
@@ -166,30 +166,30 @@ function SharingDetails({ collection, type }) {
     return (
         <>
             <Stack>
-                <MenuSectionTitle
+                <RowButtonGroupTitle
                     title={t("OWNER")}
                     icon={<AdminPanelSettingsIcon />}
                 />
-                <MenuItemGroup>
-                    <EnteMenuItem
+                <RowButtonGroup>
+                    <RowButton
                         fontWeight="regular"
                         onClick={() => {}}
                         label={isOwner ? t("you") : ownerEmail}
                         startIcon={<Avatar email={ownerEmail} />}
                     />
-                </MenuItemGroup>
+                </RowButtonGroup>
             </Stack>
             {type == "incomingShareCollaborator" &&
                 collaborators?.length > 0 && (
                     <Stack>
-                        <MenuSectionTitle
+                        <RowButtonGroupTitle
                             title={t("COLLABORATORS")}
                             icon={<ModeEditIcon />}
                         />
-                        <MenuItemGroup>
+                        <RowButtonGroup>
                             {collaborators.map((item, index) => (
                                 <>
-                                    <EnteMenuItem
+                                    <RowButton
                                         fontWeight="regular"
                                         key={item}
                                         onClick={() => {}}
@@ -197,20 +197,23 @@ function SharingDetails({ collection, type }) {
                                         startIcon={<Avatar email={item} />}
                                     />
                                     {index !== collaborators.length - 1 && (
-                                        <MenuItemDivider />
+                                        <RowButtonDivider />
                                     )}
                                 </>
                             ))}
-                        </MenuItemGroup>
+                        </RowButtonGroup>
                     </Stack>
                 )}
             {viewers?.length > 0 && (
                 <Stack>
-                    <MenuSectionTitle title={t("VIEWERS")} icon={<Photo />} />
-                    <MenuItemGroup>
+                    <RowButtonGroupTitle
+                        title={t("VIEWERS")}
+                        icon={<Photo />}
+                    />
+                    <RowButtonGroup>
                         {viewers.map((item, index) => (
                             <>
-                                <EnteMenuItem
+                                <RowButton
                                     fontWeight="regular"
                                     key={item}
                                     onClick={() => {}}
@@ -218,11 +221,11 @@ function SharingDetails({ collection, type }) {
                                     startIcon={<Avatar email={item} />}
                                 />
                                 {index !== viewers.length - 1 && (
-                                    <MenuItemDivider />
+                                    <RowButtonDivider />
                                 )}
                             </>
                         ))}
-                    </MenuItemGroup>
+                    </RowButtonGroup>
                 </Stack>
             )}
         </>
@@ -283,23 +286,23 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
 
     return (
         <Stack>
-            <MenuSectionTitle
+            <RowButtonGroupTitle
                 title={t("LINK_SHARE_TITLE")}
                 icon={<PublicIcon />}
             />
-            <MenuItemGroup>
-                <EnteMenuItem
+            <RowButtonGroup>
+                <RowButton
                     label={t("CREATE_PUBLIC_SHARING")}
                     startIcon={<LinkIcon />}
                     onClick={createSharableURLHelper}
                 />
-                <MenuItemDivider hasIcon />
-                <EnteMenuItem
+                <RowButtonDivider hasIcon />
+                <RowButton
                     label={t("COLLECT_PHOTOS")}
                     startIcon={<DownloadSharpIcon />}
                     onClick={createCollectPhotoShareableURLHelper}
                 />
-            </MenuItemGroup>
+            </RowButtonGroup>
             {sharableLinkError && (
                 <Typography
                     variant="small"
@@ -367,16 +370,16 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
     return (
         <>
             <Stack>
-                <MenuSectionTitle
+                <RowButtonGroupTitle
                     title={t("shared_with_people_count", {
                         count: collection.sharees?.length ?? 0,
                     })}
                     icon={<WorkspacesIcon />}
                 />
-                <MenuItemGroup>
+                <RowButtonGroup>
                     {collection.sharees.length > 0 ? (
                         <>
-                            <EnteMenuItem
+                            <RowButton
                                 fontWeight="regular"
                                 startIcon={
                                     <AvatarGroup sharees={collection.sharees} />
@@ -389,21 +392,21 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
                                 }
                                 endIcon={<ChevronRightIcon />}
                             />
-                            <MenuItemDivider hasIcon />
+                            <RowButtonDivider hasIcon />
                         </>
                     ) : null}
-                    <EnteMenuItem
+                    <RowButton
                         startIcon={<AddIcon />}
                         onClick={openAddViewer}
                         label={t("ADD_VIEWERS")}
                     />
-                    <MenuItemDivider hasIcon />
-                    <EnteMenuItem
+                    <RowButtonDivider hasIcon />
+                    <RowButton
                         startIcon={<AddIcon />}
                         onClick={openAddCollab}
                         label={t("ADD_COLLABORATORS")}
                     />
-                </MenuItemGroup>
+                </RowButtonGroup>
             </Stack>
             <AddParticipant
                 open={addParticipantView}
@@ -668,7 +671,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                     <Stack sx={{ gap: "24px", py: "20px", px: "12px" }}>
                         {props.hiddenPreInput}
                         <Stack>
-                            <MenuSectionTitle title={t("ADD_NEW_EMAIL")} />
+                            <RowButtonGroupTitle title={t("ADD_NEW_EMAIL")} />
                             <TextField
                                 sx={{ marginTop: 0 }}
                                 hiddenLabel={props.hiddenLabel}
@@ -694,13 +697,13 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
 
                         {props.optionsList.length > 0 && (
                             <Stack>
-                                <MenuSectionTitle
+                                <RowButtonGroupTitle
                                     title={t("OR_ADD_EXISTING")}
                                 />
-                                <MenuItemGroup>
+                                <RowButtonGroup>
                                     {props.optionsList.map((item, index) => (
                                         <>
-                                            <EnteMenuItem
+                                            <RowButton
                                                 fontWeight="regular"
                                                 key={item}
                                                 onClick={() => {
@@ -743,10 +746,10 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                                             />
                                             {index !==
                                                 props.optionsList.length -
-                                                    1 && <MenuItemDivider />}
+                                                    1 && <RowButtonDivider />}
                                         </>
                                     ))}
-                                </MenuItemGroup>
+                                </RowButtonGroup>
                             </Stack>
                         )}
 
@@ -912,28 +915,28 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                     />
                     <Stack sx={{ gap: "24px", py: "20px", px: "12px" }}>
                         <Stack>
-                            <MenuSectionTitle
+                            <RowButtonGroupTitle
                                 title={t("OWNER")}
                                 icon={<AdminPanelSettingsIcon />}
                             />
-                            <MenuItemGroup>
-                                <EnteMenuItem
+                            <RowButtonGroup>
+                                <RowButton
                                     fontWeight="regular"
                                     onClick={() => {}}
                                     label={isOwner ? t("you") : ownerEmail}
                                     startIcon={<Avatar email={ownerEmail} />}
                                 />
-                            </MenuItemGroup>
+                            </RowButtonGroup>
                         </Stack>
                         <Stack>
-                            <MenuSectionTitle
+                            <RowButtonGroupTitle
                                 title={t("COLLABORATORS")}
                                 icon={<ModeEditIcon />}
                             />
-                            <MenuItemGroup>
+                            <RowButtonGroup>
                                 {collaborators.map((item) => (
                                     <>
-                                        <EnteMenuItem
+                                        <RowButton
                                             fontWeight="regular"
                                             key={item}
                                             onClick={() =>
@@ -943,11 +946,11 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                             startIcon={<Avatar email={item} />}
                                             endIcon={<ChevronRightIcon />}
                                         />
-                                        <MenuItemDivider hasIcon />
+                                        <RowButtonDivider hasIcon />
                                     </>
                                 ))}
 
-                                <EnteMenuItem
+                                <RowButton
                                     startIcon={<AddIcon />}
                                     onClick={openAddCollab}
                                     label={
@@ -956,17 +959,17 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                             : t("ADD_COLLABORATORS")
                                     }
                                 />
-                            </MenuItemGroup>
+                            </RowButtonGroup>
                         </Stack>
                         <Stack>
-                            <MenuSectionTitle
+                            <RowButtonGroupTitle
                                 title={t("VIEWERS")}
                                 icon={<Photo />}
                             />
-                            <MenuItemGroup>
+                            <RowButtonGroup>
                                 {viewers.map((item) => (
                                     <>
-                                        <EnteMenuItem
+                                        <RowButton
                                             fontWeight="regular"
                                             key={item}
                                             onClick={() =>
@@ -977,10 +980,10 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                             endIcon={<ChevronRightIcon />}
                                         />
 
-                                        <MenuItemDivider hasIcon />
+                                        <RowButtonDivider hasIcon />
                                     </>
                                 ))}
-                                <EnteMenuItem
+                                <RowButton
                                     startIcon={<AddIcon />}
                                     onClick={openAddViewer}
                                     label={
@@ -989,7 +992,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                             : t("ADD_VIEWERS")
                                     }
                                 />
-                            </MenuItemGroup>
+                            </RowButtonGroup>
                         </Stack>
                     </Stack>
                 </Stack>
@@ -1137,8 +1140,8 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                             {t("ADDED_AS")}
                         </Typography>
 
-                        <MenuItemGroup>
-                            <EnteMenuItem
+                        <RowButtonGroup>
+                            <RowButton
                                 fontWeight="regular"
                                 onClick={handleRoleChange("COLLABORATOR")}
                                 label={"Collaborator"}
@@ -1148,9 +1151,9 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                                         "COLLABORATOR" && <DoneIcon />
                                 }
                             />
-                            <MenuItemDivider hasIcon />
+                            <RowButtonDivider hasIcon />
 
-                            <EnteMenuItem
+                            <RowButton
                                 fontWeight="regular"
                                 onClick={handleRoleChange("VIEWER")}
                                 label={"Viewer"}
@@ -1161,7 +1164,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                                     )
                                 }
                             />
-                        </MenuItemGroup>
+                        </RowButtonGroup>
 
                         <Typography
                             variant="small"
@@ -1178,15 +1181,15 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                                 {t("REMOVE_PARTICIPANT_HEAD")}
                             </Typography>
 
-                            <MenuItemGroup>
-                                <EnteMenuItem
+                            <RowButtonGroup>
+                                <RowButton
                                     color="critical"
                                     fontWeight="regular"
                                     onClick={removeParticipant}
                                     label={"Remove"}
                                     startIcon={<BlockIcon />}
                                 />
-                            </MenuItemGroup>
+                            </RowButtonGroup>
                         </Stack>
                     </Stack>
                 </Stack>
@@ -1288,9 +1291,9 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
                     <PublicIcon style={{ fontSize: 17, marginRight: 8 }} />
                     {t("PUBLIC_LINK_ENABLED")}
                 </Typography>
-                <MenuItemGroup>
+                <RowButtonGroup>
                     {isLinkExpired(publicShareProp.validTill) ? (
-                        <EnteMenuItem
+                        <RowButton
                             disabled
                             startIcon={<ErrorOutlineIcon />}
                             color="critical"
@@ -1298,7 +1301,7 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
                             label={t("link_expired")}
                         />
                     ) : (
-                        <EnteMenuItem
+                        <RowButton
                             startIcon={<ContentCopyIcon />}
                             onClick={copyToClipboardHelper}
                             disabled={isLinkExpired(publicShareProp.validTill)}
@@ -1306,14 +1309,14 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
                         />
                     )}
 
-                    <MenuItemDivider hasIcon={true} />
-                    <EnteMenuItem
+                    <RowButtonDivider hasIcon={true} />
+                    <RowButton
                         startIcon={<LinkIcon />}
                         endIcon={<ChevronRightIcon />}
                         onClick={openManageShare}
                         label={t("MANAGE_LINK")}
                     />
-                </MenuItemGroup>
+                </RowButtonGroup>
             </Stack>
             <ManagePublicShareOptions
                 open={manageShareView}
@@ -1417,7 +1420,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                             }
                             onRootClose={onRootClose}
                         />
-                        <MenuItemGroup>
+                        <RowButtonGroup>
                             <ManageDeviceLimit
                                 collection={collection}
                                 publicShareProp={publicShareProp}
@@ -1426,7 +1429,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                                 }
                                 onRootClose={onRootClose}
                             />
-                            <MenuItemDivider />
+                            <RowButtonDivider />
                             <ManageDownloadAccess
                                 collection={collection}
                                 publicShareProp={publicShareProp}
@@ -1434,7 +1437,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                                     updatePublicShareURLHelper
                                 }
                             />
-                            <MenuItemDivider />
+                            <RowButtonDivider />
                             <ManageLinkPassword
                                 collection={collection}
                                 publicShareProp={publicShareProp}
@@ -1442,22 +1445,22 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                                     updatePublicShareURLHelper
                                 }
                             />
-                        </MenuItemGroup>
-                        <MenuItemGroup>
-                            <EnteMenuItem
+                        </RowButtonGroup>
+                        <RowButtonGroup>
+                            <RowButton
                                 startIcon={<ContentCopyIcon />}
                                 onClick={copyToClipboardHelper(publicShareUrl)}
                                 label={t("copy_link")}
                             />
-                        </MenuItemGroup>
-                        <MenuItemGroup>
-                            <EnteMenuItem
+                        </RowButtonGroup>
+                        <RowButtonGroup>
+                            <RowButton
                                 color="critical"
                                 startIcon={<RemoveCircleOutlineIcon />}
                                 onClick={disablePublicSharing}
                                 label={t("REMOVE_LINK")}
                             />
-                        </MenuItemGroup>
+                        </RowButtonGroup>
                     </Stack>
                     {sharableLinkError && (
                         <Typography
@@ -1497,15 +1500,15 @@ const ManagePublicCollect: React.FC<ManagePublicCollectProps> = ({
 
     return (
         <Stack>
-            <MenuItemGroup>
-                <EnteMenuItem
+            <RowButtonGroup>
+                <RowButton
                     onClick={handleFileDownloadSetting}
                     variant="toggle"
                     checked={publicShareProp?.enableCollect}
                     label={t("PUBLIC_COLLECT")}
                 />
-            </MenuItemGroup>
-            <MenuSectionTitle title={t("PUBLIC_COLLECT_SUBTEXT")} />
+            </RowButtonGroup>
+            <RowButtonGroupTitle title={t("PUBLIC_COLLECT_SUBTEXT")} />
         </Stack>
     );
 };
@@ -1557,8 +1560,8 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
 
     return (
         <>
-            <MenuItemGroup>
-                <EnteMenuItem
+            <RowButtonGroup>
+                <RowButton
                     onClick={openShareExpiryOptionsModalView}
                     endIcon={<ChevronRightIcon />}
                     variant="captioned"
@@ -1578,7 +1581,7 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                               : t("never")
                     }
                 />
-            </MenuItemGroup>
+            </RowButtonGroup>
             <SidebarDrawer
                 anchor="right"
                 open={shareExpiryOptionsModalView}
@@ -1591,10 +1594,10 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                         onRootClose={onRootClose}
                     />
                     <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
-                        <MenuItemGroup>
+                        <RowButtonGroup>
                             {shareExpireOption.map((item, index) => (
                                 <>
-                                    <EnteMenuItem
+                                    <RowButton
                                         fontWeight="regular"
                                         key={item.value()}
                                         onClick={changeShareExpiryValue(
@@ -1603,11 +1606,11 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                                         label={item.label}
                                     />
                                     {index !== shareExpireOption.length - 1 && (
-                                        <MenuItemDivider />
+                                        <RowButtonDivider />
                                     )}
                                 </>
                             ))}
-                        </MenuItemGroup>
+                        </RowButtonGroup>
                     </Stack>
                 </Stack>
             </SidebarDrawer>
@@ -1689,7 +1692,7 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
 
     return (
         <>
-            <EnteMenuItem
+            <RowButton
                 label={t("LINK_DEVICE_LIMIT")}
                 variant="captioned"
                 caption={
@@ -1712,10 +1715,10 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
                         onRootClose={onRootClose}
                     />
                     <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
-                        <MenuItemGroup>
+                        <RowButtonGroup>
                             {deviceLimitOptions.map((item, index) => (
                                 <>
-                                    <EnteMenuItem
+                                    <RowButton
                                         fontWeight="regular"
                                         key={item.label}
                                         onClick={changeDeviceLimitValue(
@@ -1725,11 +1728,11 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
                                     />
                                     {index !==
                                         deviceLimitOptions.length - 1 && (
-                                        <MenuItemDivider />
+                                        <RowButtonDivider />
                                     )}
                                 </>
                             ))}
-                        </MenuItemGroup>
+                        </RowButtonGroup>
                     </Stack>
                 </Stack>
             </SidebarDrawer>
@@ -1777,7 +1780,7 @@ const ManageDownloadAccess: React.FC<ManageDownloadAccessProps> = ({
         });
     };
     return (
-        <EnteMenuItem
+        <RowButton
             checked={publicShareProp?.enableDownload ?? true}
             onClick={handleFileDownloadSetting}
             variant="toggle"
@@ -1828,7 +1831,7 @@ const ManageLinkPassword: React.FC<ManageLinkPasswordProps> = ({
 
     return (
         <>
-            <EnteMenuItem
+            <RowButton
                 label={t("password_lock")}
                 onClick={handlePasswordChangeSetting}
                 checked={!!publicShareProp?.passwordEnabled}

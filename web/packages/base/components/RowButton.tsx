@@ -10,9 +10,9 @@ import {
 } from "@mui/material";
 import React from "react";
 
-interface MenuSectionTitleProps {
+interface RowButtonGroupTitleProps {
     /**
-     * The title for the menu section.
+     * The title for the row button group.
      */
     title: string;
     /**
@@ -22,9 +22,9 @@ interface MenuSectionTitleProps {
 }
 
 /**
- * A section title, meant to precede a {@link MenuItemGroup}.
+ * A section title, meant to precede a {@link RowButtonGroup}.
  */
-export const MenuSectionTitle: React.FC<MenuSectionTitleProps> = ({
+export const RowButtonGroupTitle: React.FC<RowButtonGroupTitleProps> = ({
     title,
     icon,
 }) => (
@@ -47,19 +47,18 @@ export const MenuSectionTitle: React.FC<MenuSectionTitleProps> = ({
     </Stack>
 );
 
-interface MenuItemDividerProps {
+interface RowButtonDividerProps {
     /**
-     * If true, then the menu divider leaves the leading edge hanging which
-     * visually looks better when used to separate menu items which have leading
-     * icons.
+     * If true, then the divider leaves the leading edge hanging which visually
+     * looks better when used to separate buttons which have leading icons.
      */
     hasIcon?: boolean;
 }
 
 /**
- * A divider for items in a title, meant to precede a {@link MenuItemGroup}.
+ * A divider for buttons in a {@link RowButtonGroup}.
  */
-export const MenuItemDivider: React.FC<MenuItemDividerProps> = ({
+export const RowButtonDivider: React.FC<RowButtonDividerProps> = ({
     hasIcon,
 }) => (
     <Divider
@@ -68,10 +67,15 @@ export const MenuItemDivider: React.FC<MenuItemDividerProps> = ({
 );
 
 /**
- * A group of {@link EnteMenuItem}s.
+ * A group of {@link RowButton}s that visually look together as a single
+ * section.
+ *
+ * {@link RowButtonGroupTitle} can be used to provide a title for the entire
+ * group. {@link RowButtonDivider} can be used to to separate the individual
+ * buttons in the group.
  */
 
-export const MenuItemGroup = styled("div")(
+export const RowButtonGroup = styled("div")(
     ({ theme }) => `
     & > .MuiMenuItem-root{
         border-radius: 8px;
@@ -90,7 +94,7 @@ export const MenuItemGroup = styled("div")(
 `,
 );
 
-interface EnteMenuItemProps {
+interface RowButtonProps {
     /**
      * Variants:
      *
@@ -187,13 +191,11 @@ interface EnteMenuItemProps {
 }
 
 /**
- * A MUI {@link MenuItem} customized as per our designs and use cases.
+ * A button that looks like a row in a group of options / choices.
  *
- * The Ente prefix is used to differentiate it from the MUI MenuItem.
- *
- * See also: {@link MenuItemGroup}.
+ * It can be used both standalone, or as part of a {@link RowButtonGroup}.
  */
-export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
+export const RowButton: React.FC<RowButtonProps> = ({
     variant = "primary",
     color = "primary",
     fontWeight = "medium",
@@ -283,7 +285,7 @@ export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
 );
 
 const CaptionTypography: React.FC<
-    React.PropsWithChildren<{ color: EnteMenuItemProps["color"] }>
+    React.PropsWithChildren<{ color: RowButtonProps["color"] }>
 > = ({ color, children }) => (
     <Typography
         variant="small"

@@ -1,4 +1,4 @@
-import { EnteMenuItem, MenuItemGroup } from "@/base/components/Menu";
+import { RowButton, RowButtonGroup } from "@/base/components/RowButton";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
@@ -280,14 +280,14 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
     return (
         <Stack sx={{ px: "16px", py: "20px", gap: 4 }}>
             <Stack sx={{ gap: 3 }}>
-                <MenuItemGroup>
-                    <EnteMenuItem
+                <RowButtonGroup>
+                    <RowButton
                         label={t("enabled")}
                         variant="toggle"
                         checked={true}
                         onClick={confirmDisableML}
                     />
-                </MenuItemGroup>
+                </RowButtonGroup>
             </Stack>
             <Paper variant="outlined">
                 <Stack>

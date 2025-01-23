@@ -1,11 +1,11 @@
-import {
-    EnteMenuItem,
-    MenuItemDivider,
-    MenuItemGroup,
-    MenuSectionTitle,
-} from "@/base/components/Menu";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
+import {
+    RowButton,
+    RowButtonDivider,
+    RowButtonGroup,
+    RowButtonGroupTitle,
+} from "@/base/components/RowButton";
 import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
@@ -671,9 +671,9 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         />
                     </Tabs>
                 </Stack>
-                <MenuSectionTitle title={t("reset")} />
-                <MenuItemGroup sx={{ mb: "0.5rem" }}>
-                    <EnteMenuItem
+                <RowButtonGroupTitle title={t("reset")} />
+                <RowButtonGroup sx={{ mb: "0.5rem" }}>
+                    <RowButton
                         disabled={canvasLoading}
                         startIcon={<CropOriginalIcon />}
                         onClick={() => {
@@ -681,7 +681,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         }}
                         label={t("restore_original")}
                     />
-                </MenuItemGroup>
+                </RowButtonGroup>
                 {currentTab === "crop" && (
                     <CropMenu
                         {...menuProps}
@@ -706,24 +706,24 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         setInvert={setInvert}
                     />
                 )}
-                <MenuSectionTitle title={t("export_data")} />
-                <MenuItemGroup>
-                    <EnteMenuItem
+                <RowButtonGroupTitle title={t("export_data")} />
+                <RowButtonGroup>
+                    <RowButton
                         startIcon={<DownloadIcon />}
                         onClick={downloadEditedPhoto}
                         label={t("download_edited")}
                         disabled={!transformationPerformed && !coloursAdjusted}
                     />
-                    <MenuItemDivider />
-                    <EnteMenuItem
+                    <RowButtonDivider />
+                    <RowButton
                         startIcon={<CloudUploadIcon />}
                         onClick={saveCopyToEnte}
                         label={t("save_a_copy_to_ente")}
                         disabled={!transformationPerformed && !coloursAdjusted}
                     />
-                </MenuItemGroup>
+                </RowButtonGroup>
                 {!transformationPerformed && !coloursAdjusted && (
-                    <MenuSectionTitle
+                    <RowButtonGroupTitle
                         title={t("photo_edit_required_to_save")}
                     />
                 )}
@@ -824,9 +824,9 @@ const CropMenu: React.FC<CropMenuProps> = (props) => {
 
     return (
         <>
-            <MenuSectionTitle title={t("freehand")} />
-            <MenuItemGroup sx={{ mb: "0.5rem" }}>
-                <EnteMenuItem
+            <RowButtonGroupTitle title={t("freehand")} />
+            <RowButtonGroup sx={{ mb: "0.5rem" }}>
+                <RowButton
                     disabled={canvasLoading}
                     startIcon={<CropIcon />}
                     onClick={() => {
@@ -854,7 +854,7 @@ const CropMenu: React.FC<CropMenuProps> = (props) => {
                     }}
                     label={t("apply_crop")}
                 />
-            </MenuItemGroup>
+            </RowButtonGroup>
         </>
     );
 };
@@ -1232,19 +1232,19 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
 
     return (
         <>
-            <MenuSectionTitle title={t("aspect_ratio")} />
-            <MenuItemGroup sx={{ mb: "0.5rem" }}>
-                <EnteMenuItem
+            <RowButtonGroupTitle title={t("aspect_ratio")} />
+            <RowButtonGroup sx={{ mb: "0.5rem" }}>
+                <RowButton
                     disabled={canvasLoading}
                     startIcon={<CropSquareIcon />}
                     onClick={createCropHandler(1, 1)}
                     label={t("square") + " (1:1)"}
                 />
-            </MenuItemGroup>
-            <MenuItemGroup sx={{ mb: "1rem" }}>
+            </RowButtonGroup>
+            <RowButtonGroup sx={{ mb: "1rem" }}>
                 {PRESET_ASPECT_RATIOS.map((ratio, index) => (
                     <Fragment key={index}>
-                        <EnteMenuItem
+                        <RowButton
                             disabled={canvasLoading}
                             startIcon={ratio.icon}
                             onClick={createCropHandler(
@@ -1254,15 +1254,15 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                             label={`${ratio.width}:${ratio.height}`}
                         />
                         {index !== PRESET_ASPECT_RATIOS.length - 1 && (
-                            <MenuItemDivider />
+                            <RowButtonDivider />
                         )}
                     </Fragment>
                 ))}
-            </MenuItemGroup>
-            <MenuItemGroup sx={{ mb: "1rem" }}>
+            </RowButtonGroup>
+            <RowButtonGroup sx={{ mb: "1rem" }}>
                 {PRESET_ASPECT_RATIOS.map((ratio, index) => (
                     <Fragment key={index}>
-                        <EnteMenuItem
+                        <RowButton
                             disabled={canvasLoading}
                             key={index}
                             startIcon={ratio.icon}
@@ -1273,30 +1273,30 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                             label={`${ratio.height}:${ratio.width}`}
                         />
                         {index !== PRESET_ASPECT_RATIOS.length - 1 && (
-                            <MenuItemDivider />
+                            <RowButtonDivider />
                         )}
                     </Fragment>
                 ))}
-            </MenuItemGroup>
-            <MenuSectionTitle title={t("rotation")} />
-            <MenuItemGroup sx={{ mb: "1rem" }}>
-                <EnteMenuItem
+            </RowButtonGroup>
+            <RowButtonGroupTitle title={t("rotation")} />
+            <RowButtonGroup sx={{ mb: "1rem" }}>
+                <RowButton
                     disabled={canvasLoading}
                     startIcon={<RotateLeftIcon />}
                     onClick={createRotationHandler("left")}
                     label={t("rotate_left") + " 90˚"}
                 />
-                <MenuItemDivider />
-                <EnteMenuItem
+                <RowButtonDivider />
+                <RowButton
                     disabled={canvasLoading}
                     startIcon={<RotateRightIcon />}
                     onClick={createRotationHandler("right")}
                     label={t("rotate_right") + " 90˚"}
                 />
-            </MenuItemGroup>
-            <MenuSectionTitle title={t("flip")} />
-            <MenuItemGroup sx={{ mb: "1rem" }}>
-                <EnteMenuItem
+            </RowButtonGroup>
+            <RowButtonGroupTitle title={t("flip")} />
+            <RowButtonGroup sx={{ mb: "1rem" }}>
+                <RowButton
                     disabled={canvasLoading}
                     startIcon={
                         <FlipIcon style={{ transform: "rotateZ(90deg)" }} />
@@ -1304,14 +1304,14 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                     onClick={createFlipCanvasHandler("vertical")}
                     label={t("flip_vertically")}
                 />
-                <MenuItemDivider />
-                <EnteMenuItem
+                <RowButtonDivider />
+                <RowButton
                     disabled={canvasLoading}
                     startIcon={<FlipIcon />}
                     onClick={createFlipCanvasHandler("horizontal")}
                     label={t("flip_horizontally")}
                 />
-            </MenuItemGroup>
+            </RowButtonGroup>
         </>
     );
 };
@@ -1332,7 +1332,7 @@ interface ColoursMenuProps {
 const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
     <>
         <Box sx={{ px: "8px" }}>
-            <MenuSectionTitle title={t("brightness")} />
+            <RowButtonGroupTitle title={t("brightness")} />
             <Slider
                 min={0}
                 max={200}
@@ -1350,7 +1350,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                     props.setBrightness(value as number);
                 }}
             />
-            <MenuSectionTitle title={t("contrast")} />
+            <RowButtonGroupTitle title={t("contrast")} />
             <Slider
                 min={0}
                 max={200}
@@ -1368,7 +1368,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                     },
                 ]}
             />
-            <MenuSectionTitle title={t("blur")} />
+            <RowButtonGroupTitle title={t("blur")} />
             <Slider
                 min={0}
                 max={10}
@@ -1380,7 +1380,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                     props.setBlur(value as number);
                 }}
             />
-            <MenuSectionTitle title={t("saturation")} />
+            <RowButtonGroupTitle title={t("saturation")} />
             <Slider
                 min={0}
                 max={200}
@@ -1399,8 +1399,8 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                 ]}
             />
         </Box>
-        <MenuItemGroup sx={{ mb: "0.5rem" }}>
-            <EnteMenuItem
+        <RowButtonGroup sx={{ mb: "0.5rem" }}>
+            <RowButton
                 variant="toggle"
                 checked={props.invert}
                 label={t("invert_colors")}
@@ -1408,6 +1408,6 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                     props.setInvert(!props.invert);
                 }}
             />
-        </MenuItemGroup>
+        </RowButtonGroup>
     </>
 );

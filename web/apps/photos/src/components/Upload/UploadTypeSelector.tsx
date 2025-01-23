@@ -1,6 +1,6 @@
 import { SpaceBetweenFlex } from "@/base/components/containers";
-import { EnteMenuItem } from "@/base/components/Menu";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { RowButton } from "@/base/components/RowButton";
 import { useIsTouchscreen } from "@/base/components/utils/hooks";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -176,21 +176,21 @@ const DefaultOptions: React.FC<OptionsProps> = ({
             <Box sx={{ p: "12px", pt: "16px" }}>
                 <Stack spacing={0.5}>
                     {intent != "import" && (
-                        <EnteMenuItem
+                        <RowButton
                             onClick={() => onSelect("files")}
                             startIcon={<ImageOutlinedIcon />}
                             endIcon={<ChevronRightIcon />}
                             label={t("file")}
                         />
                     )}
-                    <EnteMenuItem
+                    <RowButton
                         onClick={() => onSelect("folders")}
                         startIcon={<PermMediaOutlinedIcon />}
                         endIcon={<ChevronRightIcon />}
                         label={t("folder")}
                     />
                     {intent !== "collect" && (
-                        <EnteMenuItem
+                        <RowButton
                             onClick={() => onSelect("zips")}
                             startIcon={<GoogleIcon />}
                             endIcon={<ChevronRightIcon />}

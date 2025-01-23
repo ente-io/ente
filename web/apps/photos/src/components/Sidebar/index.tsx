@@ -3,7 +3,7 @@ import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import { isDesktop } from "@/base/app";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { LinkButton } from "@/base/components/LinkButton";
-import { EnteMenuItem } from "@/base/components/Menu";
+import { RowButton } from "@/base/components/RowButton";
 import { SpaceBetweenFlex } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
@@ -433,7 +433,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
 
     return (
         <>
-            <EnteMenuItem
+            <RowButton
                 startIcon={<CategoryIcon />}
                 onClick={openUncategorizedSection}
                 variant="captioned"
@@ -442,7 +442,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                     .get(uncategorizedCollectionId)
                     ?.fileCount.toString()}
             />
-            <EnteMenuItem
+            <RowButton
                 startIcon={<ArchiveOutlinedIcon />}
                 onClick={openArchiveSection}
                 variant="captioned"
@@ -451,7 +451,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                     .get(ARCHIVE_SECTION)
                     ?.fileCount.toString()}
             />
-            <EnteMenuItem
+            <RowButton
                 startIcon={<VisibilityOffIcon />}
                 onClick={openHiddenSection}
                 variant="captioned"
@@ -465,7 +465,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                     />
                 }
             />
-            <EnteMenuItem
+            <RowButton
                 startIcon={<DeleteOutlineIcon />}
                 onClick={openTrashSection}
                 variant="captioned"
@@ -514,43 +514,43 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
     return (
         <>
             {isDesktop && (
-                <EnteMenuItem
+                <RowButton
                     onClick={showWatchFolder}
                     variant="secondary"
                     label={t("watch_folders")}
                 />
             )}
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
                 onClick={showRecoveryKey}
                 label={t("recovery_key")}
             />
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
                 onClick={showTwoFactor}
                 label={t("two_factor")}
             />
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
                 onClick={redirectToAccountsPage}
                 label={t("passkeys")}
             />
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
                 onClick={redirectToChangePasswordPage}
                 label={t("change_password")}
             />
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
                 onClick={handleChangeEmail}
                 label={t("change_email")}
             />
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
                 onClick={handleDeduplicate}
                 label={t("deduplicate_files")}
             />
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
                 onClick={showPreferences}
                 label={t("preferences")}
@@ -594,12 +594,12 @@ const HelpSection: React.FC = () => {
 
     return (
         <>
-            <EnteMenuItem
+            <RowButton
                 onClick={requestFeature}
                 label={t("request_feature")}
                 variant="secondary"
             />
-            <EnteMenuItem
+            <RowButton
                 onClick={contactSupport}
                 label={
                     <Tooltip title="support@ente.io">
@@ -610,7 +610,7 @@ const HelpSection: React.FC = () => {
                 }
                 variant="secondary"
             />
-            <EnteMenuItem
+            <RowButton
                 onClick={handleExport}
                 label={t("export_data")}
                 endIcon={
@@ -639,13 +639,13 @@ const ExitSection: React.FC = () => {
 
     return (
         <>
-            <EnteMenuItem
+            <RowButton
                 onClick={handleLogout}
                 color="critical"
                 label={t("logout")}
                 variant="secondary"
             />
-            <EnteMenuItem
+            <RowButton
                 onClick={showDeleteAccount}
                 color="critical"
                 variant="secondary"
@@ -687,13 +687,13 @@ const DebugSection: React.FC = () => {
     return (
         <>
             {isInternalUser() && (
-                <EnteMenuItem
+                <RowButton
                     variant="secondary"
                     label={ut("Test Upload")}
                     onClick={testUpload}
                 />
             )}
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
                 label={
                     <Typography variant="mini" color="text.muted">
