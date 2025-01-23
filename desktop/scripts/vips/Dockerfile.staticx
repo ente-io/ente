@@ -70,9 +70,5 @@ RUN cd tools \
     && staticx vips /bin/vips \
     && strip -s /bin/vips
 
-FROM scratch
-COPY --from=builder /bin/vips /bin/vips
-# This is a nice hack to mkdir /tmp in a scratch image.
-WORKDIR /tmp/
 ENTRYPOINT ["/bin/vips"]
 CMD ["--help"]
