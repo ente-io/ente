@@ -250,29 +250,30 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
   List<User> _getContacts() {
     final List<User> suggestedUsers = [];
     final int ownerID = Configuration.instance.getUserID()!;
+    final cachedEmailToNameMap = PersonService.instance.emailToNameMapCache;
 
     for (final c in CollectionsService.instance.getActiveCollections()) {
       if (c.owner?.id == ownerID) {
         for (final User? u in c.sharees ?? []) {
           if (u != null && u.id != null && u.email.isNotEmpty) {
-            if (!suggestedUsers.any((user) => user.email == u.email)) {
+            if (!suggestedUsers.any((user) => user.email == u.email) &&
+                cachedEmailToNameMap[u.email] == null) {
               suggestedUsers.add(u);
             }
           }
         }
-      } else if (c.owner != null &&
-          c.owner!.id != null &&
-          c.owner!.email.isNotEmpty) {
-        if (!suggestedUsers.any((user) => user.email == c.owner!.email)) {
+      } else if (c.owner?.id != null && c.owner!.email.isNotEmpty) {
+        if (!suggestedUsers.any((user) => user.email == c.owner!.email) &&
+            cachedEmailToNameMap[c.owner!.email] == null) {
           suggestedUsers.add(c.owner!);
         }
       }
     }
     final cachedUserDetails = UserService.instance.getCachedUserDetails();
-    if (cachedUserDetails != null &&
-        (cachedUserDetails.familyData?.members?.isNotEmpty ?? false)) {
-      for (final member in cachedUserDetails.familyData!.members!) {
-        if (!suggestedUsers.any((user) => user.email == member.email)) {
+    if (cachedUserDetails?.familyData?.members?.isNotEmpty ?? false) {
+      for (final member in cachedUserDetails!.familyData!.members!) {
+        if (!suggestedUsers.any((user) => user.email == member.email) &&
+            cachedEmailToNameMap[member.email] == null) {
           suggestedUsers.add(User(email: member.email));
         }
       }
