@@ -31,6 +31,7 @@ import "package:photos/ui/viewer/people/person_row_item.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/person_contact_linking_util.dart";
 import "package:photos/utils/toast_util.dart";
 
 class SaveOrEditPerson extends StatefulWidget {
@@ -379,15 +380,23 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
           shouldStickToDarkTheme: true,
           onTap: () async {
             if (widget.isEditing) {
-              updatedPersonEntity = await updatePerson(context);
+              try {
+                updatedPersonEntity = await updatePerson(context);
+              } catch (e) {
+                _logger.severe("Error updating person", e);
+              }
             } else {
-              updatedPersonEntity = await addNewPerson(
-                context,
-                text: _inputName,
-                clusterID: widget.clusterID!,
-                birthdate: _selectedDate,
-                email: _email,
-              );
+              try {
+                updatedPersonEntity = await addNewPerson(
+                  context,
+                  text: _inputName,
+                  clusterID: widget.clusterID!,
+                  birthdate: _selectedDate,
+                  email: _email,
+                );
+              } catch (e) {
+                _logger.severe("Error updating person", e);
+              }
             }
           },
         ),
@@ -530,6 +539,11 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     String? birthdate,
     String? email,
   }) async {
+    if (email != null &&
+        email.isNotEmpty &&
+        await checkIfEmailAlreadyAssignedToAPerson(context, email)) {
+      throw Exception("Email already assigned to a person");
+    }
     try {
       if (userAlreadyAssigned) {
         return null;
@@ -576,6 +590,12 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
 
   Future<PersonEntity?> updatePerson(BuildContext context) async {
     try {
+      if (_email != null &&
+          _email!.isNotEmpty &&
+          _email != person!.data.email &&
+          await checkIfEmailAlreadyAssignedToAPerson(context, _email!)) {
+        throw Exception("Email already assigned to a person");
+      }
       final String name = _inputName.trim();
       final String? birthDate = _selectedDate;
       final personEntity = await PersonService.instance.updateAttributes(

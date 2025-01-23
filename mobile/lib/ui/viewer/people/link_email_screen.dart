@@ -24,6 +24,7 @@ import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/components/text_input_widget.dart";
 import 'package:photos/ui/sharing/user_avator_widget.dart';
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/person_contact_linking_util.dart";
 import "package:photos/utils/share_util.dart";
 
 class LinkEmailScreen extends StatefulWidget {
@@ -214,17 +215,21 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                           }
                         });
                       } else {
-                        final result = await linkEmailToPerson(
-                          newEmail,
-                          widget.personID!,
-                          context,
-                        );
-                        if (!result) {
-                          _textController.clear();
-                          return;
-                        }
+                        try {
+                          final result = await linkEmailToPerson(
+                            newEmail,
+                            widget.personID!,
+                            context,
+                          );
+                          if (!result) {
+                            _textController.clear();
+                            return;
+                          }
 
-                        Navigator.of(context).pop(newEmail);
+                          Navigator.of(context).pop(newEmail);
+                        } catch (e) {
+                          _logger.severe("Failed to link email to person", e);
+                        }
                       }
                     },
                   ),
@@ -325,6 +330,10 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
     String personID,
     BuildContext context,
   ) async {
+    if (await checkIfEmailAlreadyAssignedToAPerson(context, email)) {
+      throw Exception("Email already linked to a person");
+    }
+
     String? publicKey;
 
     try {

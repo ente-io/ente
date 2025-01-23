@@ -17,6 +17,7 @@ import "package:photos/ui/components/dialog_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/person_contact_linking_util.dart";
 import "package:photos/utils/toast_util.dart";
 
 class PersonEntityWithThumbnailFile {
@@ -45,6 +46,7 @@ class _LinkContactToPersonSelectionPageState
     extends State<LinkContactToPersonSelectionPage> {
   late Future<List<PersonEntityWithThumbnailFile>>
       _personEntitiesWithThumnailFile;
+  final _logger = Logger('LinkContactToPersonSelectionPage');
 
   @override
   void initState() {
@@ -115,15 +117,21 @@ class _LinkContactToPersonSelectionPageState
               itemBuilder: (context, index) {
                 return _RoundedPersonFaceWidget(
                   onTap: () async {
-                    await linkPersonToContact(
-                      context,
-                      emailToLink: widget.emailToLink!,
-                      personEntity: results[index].person,
-                    ).then((updatedPerson) {
-                      if (updatedPerson != null) {
-                        Navigator.of(context).pop(updatedPerson);
-                      }
-                    });
+                    try {
+                      unawaited(
+                        linkPersonToContact(
+                          context,
+                          emailToLink: widget.emailToLink!,
+                          personEntity: results[index].person,
+                        ).then((updatedPerson) {
+                          if (updatedPerson != null) {
+                            Navigator.of(context).pop(updatedPerson);
+                          }
+                        }),
+                      );
+                    } catch (e) {
+                      _logger.severe("Failed to link person to contact", e);
+                    }
                   },
                   itemSize: itemSize,
                   personEntitiesWithThumbnailFile: results[index],
@@ -141,6 +149,10 @@ class _LinkContactToPersonSelectionPageState
     required String emailToLink,
     required PersonEntity personEntity,
   }) async {
+    if (await checkIfEmailAlreadyAssignedToAPerson(context, emailToLink)) {
+      throw Exception("Email already linked");
+    }
+
     final personName = personEntity.data.name;
     PersonEntity? updatedPerson;
     final result = await showDialogWidget(
