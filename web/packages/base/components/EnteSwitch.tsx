@@ -66,8 +66,8 @@ export const EnteSwitch: React.FC<SwitchProps> = styled((props) => (
     // Use an alternative affordance to indicate focusVisible as the ripple
     // effect is disabled.
     ".MuiSwitch-switchBase.Mui-focusVisible + .MuiSwitch-track": {
-        outline: `1px solid ${theme.vars.palette.fixed.white}`,
-        outlineOffset: "-1px",
+        outline: `2px solid ${theme.vars.palette.stroke.muted}`,
+        outlineOffset: "-2px",
     },
     // Same for when the switch is actived.
     ".MuiSwitch-switchBase:active + .MuiSwitch-track": {
