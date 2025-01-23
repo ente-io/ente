@@ -96,12 +96,12 @@ export const RowButtonGroup = styled("div")(
     ({ theme }) => `
     background-color: ${theme.vars.palette.fill.faint};
     border-radius: 8px;
-    /** Modify the RowButton style when it is placed inside a RowButtonGroup */
+    /* Modify the RowButton style when it is placed inside a RowButtonGroup. */
     & > button {
         border-radius: 8px;
         background-color: transparent;
     }
-    /** Need to retarget the disabled state with increased specificity. */
+    /* Need to retarget the disabled state with increased specificity. */
     & > button.Mui-disabled {
         background-color: transparent;
     }
@@ -119,6 +119,16 @@ export const RowButtonGroup = styled("div")(
            a similar outcome of the hover state as for a RowButton that is not
            inside a RowButtonGroup */
         background-color: ${theme.vars.palette.fill.faintHover};
+    }
+    /* Reset the border radius when showing focus outlines that will be added
+       by the styles attached to FocusVisibleButton. */
+    & > button.Mui-focusVisible  {
+        border-radius: 8px;
+    }
+    /* Modify the outline offset added by FocusVisibleButton for a visual
+       effect that fits better with these row buttons. */
+    & > button:active  {
+        outline-offset: 0;
     }
 `,
 );
