@@ -152,4 +152,53 @@ class PersonContactLinkingActions {
       return false;
     }
   }
+
+  Future<PersonEntity?> linkPersonToContact(
+    BuildContext context, {
+    required String emailToLink,
+    required PersonEntity personEntity,
+  }) async {
+    final personName = personEntity.data.name;
+    PersonEntity? updatedPerson;
+    final result = await showDialogWidget(
+      context: context,
+      title: "Link person to $emailToLink",
+      icon: Icons.info_outline,
+      body: "This will link $personName to $emailToLink",
+      isDismissible: true,
+      buttons: [
+        ButtonWidget(
+          buttonAction: ButtonAction.first,
+          buttonType: ButtonType.neutral,
+          labelText: "Link",
+          isInAlert: true,
+          onTap: () async {
+            updatedPerson = await PersonService.instance
+                .updateAttributes(personEntity.remoteID, email: emailToLink);
+            Bus.instance.fire(
+              PeopleChangedEvent(
+                type: PeopleEventType.saveOrEditPerson,
+                source: "linkPersonToContact",
+                person: updatedPerson,
+              ),
+            );
+          },
+        ),
+        ButtonWidget(
+          buttonAction: ButtonAction.cancel,
+          buttonType: ButtonType.secondary,
+          labelText: S.of(context).cancel,
+          isInAlert: true,
+        ),
+      ],
+    );
+
+    if (result?.exception != null) {
+      _logger.severe("Failed to link person to contact", result!.exception);
+      await showGenericErrorDialog(context: context, error: result.exception);
+      return null;
+    } else {
+      return updatedPerson;
+    }
+  }
 }

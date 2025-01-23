@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:email_validator/email_validator.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -7,8 +8,10 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
+import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/search/search_result.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/ui/components/end_to_end_banner.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
@@ -17,8 +20,10 @@ import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.da
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
+import "package:photos/ui/viewer/people/link_contact_to_person_selection_page.dart";
+import "package:photos/utils/navigation_util.dart";
 
-class SearchResultPage extends StatefulWidget {
+class ContactResultPage extends StatefulWidget {
   final SearchResult searchResult;
   final bool enableGrouping;
   final String tagPrefix;
@@ -26,7 +31,7 @@ class SearchResultPage extends StatefulWidget {
   static const GalleryType appBarType = GalleryType.searchResults;
   static const GalleryType overlayType = GalleryType.searchResults;
 
-  const SearchResultPage(
+  const ContactResultPage(
     this.searchResult, {
     this.enableGrouping = true,
     this.tagPrefix = "",
@@ -34,18 +39,20 @@ class SearchResultPage extends StatefulWidget {
   });
 
   @override
-  State<SearchResultPage> createState() => _SearchResultPageState();
+  State<ContactResultPage> createState() => _ContactResultPageState();
 }
 
-class _SearchResultPageState extends State<SearchResultPage> {
+class _ContactResultPageState extends State<ContactResultPage> {
   final _selectedFiles = SelectedFiles();
   late final List<EnteFile> files;
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
+  late String _searchResultName;
 
   @override
   void initState() {
     super.initState();
     files = widget.searchResult.resultFiles();
+    _searchResultName = widget.searchResult.name();
     _filesUpdatedEvent =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       if (event.type == EventType.deletedFromDevice ||
@@ -94,6 +101,29 @@ class _SearchResultPageState extends State<SearchResultPage> {
       selectedFiles: _selectedFiles,
       enableFileGrouping: widget.enableGrouping,
       initialFiles: [widget.searchResult.resultFiles().first],
+      header: EmailValidator.validate(_searchResultName)
+          ? Padding(
+              padding: const EdgeInsets.only(top: 12, bottom: 8),
+              child: EndToEndBanner(
+                title: "Link person",
+                caption: "for better sharing experience",
+                leadingIcon: Icons.person,
+                onTap: () async {
+                  final PersonEntity? updatedPerson = await routeToPage(
+                    context,
+                    LinkContactToPersonSelectionPage(
+                      emailToLink: _searchResultName,
+                    ),
+                  );
+                  if (updatedPerson != null) {
+                    setState(() {
+                      _searchResultName = updatedPerson.data.name;
+                    });
+                  }
+                },
+              ),
+            )
+          : null,
     );
 
     return GalleryFilesState(
@@ -106,8 +136,9 @@ class _SearchResultPageState extends State<SearchResultPage> {
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(90.0),
             child: GalleryAppBarWidget(
-              SearchResultPage.appBarType,
-              widget.searchResult.name(),
+              key: ValueKey(_searchResultName),
+              ContactResultPage.appBarType,
+              _searchResultName,
               _selectedFiles,
             ),
           ),
@@ -134,7 +165,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
                   },
                 ),
                 FileSelectionOverlayBar(
-                  SearchResultPage.overlayType,
+                  ContactResultPage.overlayType,
                   _selectedFiles,
                 ),
               ],

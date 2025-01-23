@@ -11,7 +11,7 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
-import "package:photos/ui/viewer/search/result/search_result_page.dart";
+import "package:photos/ui/viewer/search/result/contact_result_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -148,7 +148,7 @@ class ContactRecommendation extends StatelessWidget {
           } else {
             routeToPage(
               context,
-              SearchResultPage(contactSearchResult),
+              ContactResultPage(contactSearchResult),
             );
           }
         },
