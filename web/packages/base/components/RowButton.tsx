@@ -157,6 +157,11 @@ interface RowButtonProps {
      *   would've entailed.
      */
     color?: "primary" | "critical";
+    /**
+     * Modify the font weight of the {@link label}, when label is a string.
+     *
+     * Default: "medium".
+     */
     fontWeight?: TypographyProps["fontWeight"];
     /**
      * If true, then the row button will be disabled.
@@ -245,7 +250,7 @@ export const RowButton: React.FC<RowButtonProps> = ({
         >
             <Stack direction="row" sx={{ py: "14px", gap: "10px" }}>
                 {startIcon && startIcon}
-                <Box px={"2px"}>
+                <Box sx={{ px: "2px" }}>
                     {typeof label !== "string" ? (
                         label
                     ) : caption ? (
@@ -344,7 +349,8 @@ interface RowSwitchProps {
 
 /**
  * A row that visually looks similar to a {@link RowButton}, but instead of a
- * button is a normal div with a {@link EnteSwitch} at its trailing edge.
+ * button is a normal {@link Typography} with a {@link EnteSwitch} at its
+ * trailing edge.
  *
  * It only works (visually) when placed within a {@link RowButtonGroup} since
  * that is where it gets its background color from.
@@ -368,5 +374,55 @@ export const RowSwitch: React.FC<RowSwitchProps> = ({
             {label}
         </Typography>
         <EnteSwitch {...{ checked, onClick }} />
+    </Stack>
+);
+
+interface RowLabelProps {
+    /**
+     * Optional icon shown at the leading edge of the row button.
+     *
+     * This is usually an icon like an {@link SvgIcon}, but it can be any
+     * arbitrary component, the row button does not make any assumptions as to
+     * what this is.
+     *
+     * Unlike a {@link RowButton}, there is not sizing applied to it.
+     */
+    startIcon?: React.ReactNode;
+    /**
+     * The label for the component.
+     *
+     * Similar to the {@link label} prop for {@link RowButton}, but can only be
+     * a string instead of an arbitrary component.
+     */
+    label: string;
+}
+
+/**
+ * A row that visually looks similar to a {@link RowButton}, but instead of a
+ * button is a normal {@link Typography}.
+ *
+ * This is useful for creating non-interactive, static, labels.
+ *
+ * It only works (visually) when placed within a {@link RowButtonGroup} since
+ * that is where it gets its background color from.
+ */
+export const RowLabel: React.FC<RowLabelProps> = ({ startIcon, label }) => (
+    <Stack
+        direction="row"
+        sx={{
+            flex: 1,
+            justifyContent: "space-between",
+            alignItems: "center",
+            px: "16px",
+            pr: "12px",
+        }}
+    >
+        <Stack direction="row" sx={{ py: "14px", gap: "10px" }}>
+            {startIcon && startIcon}
+            <Box sx={{ px: "2px" }}>
+                {/* Nb: Unlike the button, this has "regular" fontWeight. */}
+                <Typography>{label}</Typography>
+            </Box>
+        </Stack>
     </Stack>
 );

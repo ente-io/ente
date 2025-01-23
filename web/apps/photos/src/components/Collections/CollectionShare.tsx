@@ -7,6 +7,7 @@ import {
     RowButtonGroup,
     RowButtonGroupHint,
     RowButtonGroupTitle,
+    RowLabel,
     RowSwitch,
 } from "@/base/components/RowButton";
 import { Titlebar } from "@/base/components/Titlebar";
@@ -172,11 +173,9 @@ function SharingDetails({ collection, type }) {
                     {t("OWNER")}
                 </RowButtonGroupTitle>
                 <RowButtonGroup>
-                    <RowButton
-                        fontWeight="regular"
-                        onClick={() => {}}
-                        label={isOwner ? t("you") : ownerEmail}
+                    <RowLabel
                         startIcon={<Avatar email={ownerEmail} />}
+                        label={isOwner ? t("you") : ownerEmail}
                     />
                 </RowButtonGroup>
             </Stack>
@@ -189,12 +188,10 @@ function SharingDetails({ collection, type }) {
                         <RowButtonGroup>
                             {collaborators.map((item, index) => (
                                 <>
-                                    <RowButton
-                                        fontWeight="regular"
+                                    <RowLabel
                                         key={item}
-                                        onClick={() => {}}
-                                        label={isMe(item) ? t("you") : item}
                                         startIcon={<Avatar email={item} />}
+                                        label={isMe(item) ? t("you") : item}
                                     />
                                     {index !== collaborators.length - 1 && (
                                         <RowButtonDivider />
@@ -212,10 +209,8 @@ function SharingDetails({ collection, type }) {
                     <RowButtonGroup>
                         {viewers.map((item, index) => (
                             <>
-                                <RowButton
-                                    fontWeight="regular"
+                                <RowLabel
                                     key={item}
-                                    onClick={() => {}}
                                     label={isMe(item) ? t("you") : item}
                                     startIcon={<Avatar email={item} />}
                                 />
@@ -381,13 +376,13 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
                                 startIcon={
                                     <AvatarGroup sharees={collection.sharees} />
                                 }
-                                onClick={openManageEmailShare}
                                 label={
                                     collection.sharees.length === 1
                                         ? collection.sharees[0]?.email
                                         : null
                                 }
                                 endIcon={<ChevronRightIcon />}
+                                onClick={openManageEmailShare}
                             />
                             <RowButtonDivider hasIcon />
                         </>
@@ -920,11 +915,9 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                 {t("OWNER")}
                             </RowButtonGroupTitle>
                             <RowButtonGroup>
-                                <RowButton
-                                    fontWeight="regular"
-                                    onClick={() => {}}
-                                    label={isOwner ? t("you") : ownerEmail}
+                                <RowLabel
                                     startIcon={<Avatar email={ownerEmail} />}
+                                    label={isOwner ? t("you") : ownerEmail}
                                 />
                             </RowButtonGroup>
                         </Stack>
