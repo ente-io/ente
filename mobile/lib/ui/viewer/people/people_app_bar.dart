@@ -70,25 +70,38 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
   @override
   void initState() {
     super.initState();
+    person = widget.person;
+    galleryType = widget.type;
+    collectionActions = CollectionActions(CollectionsService.instance);
     _selectedFilesListener = () {
       setState(() {});
     };
-    collectionActions = CollectionActions(CollectionsService.instance);
+
     widget.selectedFiles.addListener(_selectedFilesListener);
+
+    if (person.data.email == Configuration.instance.getEmail()) {
+      _appBarTitle = "${widget.title} (Me)";
+    } else {
+      _appBarTitle = widget.title;
+    }
+
     _userAuthEventSubscription =
         Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       setState(() {});
     });
-    person = widget.person;
-    _appBarTitle = widget.title;
-    galleryType = widget.type;
+
     _peopleChangedEventSubscription =
         Bus.instance.on<PeopleChangedEvent>().listen(
       (event) {
         if (event.type == PeopleEventType.saveOrEditPerson &&
             event.source == "linkEmailToPerson") {
-          _appBarTitle = event.person?.data.name;
           person = event.person!;
+
+          if (person.data.email == Configuration.instance.getEmail()) {
+            _appBarTitle = "${person.data.name} (Me)";
+          } else {
+            _appBarTitle = person.data.name;
+          }
           setState(() {});
         }
       },
