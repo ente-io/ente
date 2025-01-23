@@ -1,17 +1,20 @@
 import "dart:async";
 
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/typedefs.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import "package:photos/services/machine_learning/ml_result.dart";
-import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/actions/person_contact_linking_actions.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/dialog_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/toast_util.dart";
@@ -54,7 +57,7 @@ class _LinkContactToPersonSelectionPageState
         if (person.data.email != null && person.data.email!.isNotEmpty) {
           continue;
         }
-        final file = await _getRecentFile(person);
+        final file = await PersonService.instance.getRecentFileOfPerson(person);
         result.add(PersonEntityWithThumbnailFile(person, file));
       }
       return result;
@@ -112,13 +115,11 @@ class _LinkContactToPersonSelectionPageState
               itemBuilder: (context, index) {
                 return _RoundedPersonFaceWidget(
                   onTap: () async {
-                    await PersonContactLinkingActions()
-                        .linkPersonToContact(
+                    await linkPersonToContact(
                       context,
                       emailToLink: widget.emailToLink!,
                       personEntity: results[index].person,
-                    )
-                        .then((updatedPerson) {
+                    ).then((updatedPerson) {
                       if (updatedPerson != null) {
                         Navigator.of(context).pop(updatedPerson);
                       }
@@ -135,38 +136,54 @@ class _LinkContactToPersonSelectionPageState
     );
   }
 
-  Future<EnteFile> _getRecentFile(
-    PersonEntity person,
-  ) async {
-    final clustersToFiles =
-        await SearchService.instance.getClusterFilesForPersonID(
-      person.remoteID,
+  Future<PersonEntity?> linkPersonToContact(
+    BuildContext context, {
+    required String emailToLink,
+    required PersonEntity personEntity,
+  }) async {
+    final personName = personEntity.data.name;
+    PersonEntity? updatedPerson;
+    final result = await showDialogWidget(
+      context: context,
+      title: "Link person to $emailToLink",
+      icon: Icons.info_outline,
+      body: "This will link $personName to $emailToLink",
+      isDismissible: true,
+      buttons: [
+        ButtonWidget(
+          buttonAction: ButtonAction.first,
+          buttonType: ButtonType.neutral,
+          labelText: "Link",
+          isInAlert: true,
+          onTap: () async {
+            updatedPerson = await PersonService.instance
+                .updateAttributes(personEntity.remoteID, email: emailToLink);
+            Bus.instance.fire(
+              PeopleChangedEvent(
+                type: PeopleEventType.saveOrEditPerson,
+                source: "linkPersonToContact",
+                person: updatedPerson,
+              ),
+            );
+          },
+        ),
+        ButtonWidget(
+          buttonAction: ButtonAction.cancel,
+          buttonType: ButtonType.secondary,
+          labelText: S.of(context).cancel,
+          isInAlert: true,
+        ),
+      ],
     );
-    int? avatarFileID;
-    if (person.data.hasAvatar()) {
-      avatarFileID = tryGetFileIdFromFaceId(person.data.avatarFaceID!);
+
+    if (result?.exception != null) {
+      Logger("linkPersonToContact")
+          .severe("Failed to link person to contact", result!.exception);
+      await showGenericErrorDialog(context: context, error: result.exception);
+      return null;
+    } else {
+      return updatedPerson;
     }
-    EnteFile? resultFile;
-    // iterate over all clusters and get the first file
-    for (final clusterFiles in clustersToFiles.values) {
-      for (final file in clusterFiles) {
-        if (avatarFileID != null && file.uploadedFileID! == avatarFileID) {
-          resultFile = file;
-          break;
-        }
-        resultFile ??= file;
-        if (resultFile.creationTime! < file.creationTime!) {
-          resultFile = file;
-        }
-      }
-    }
-    if (resultFile == null) {
-      debugPrint(
-        "Person ${kDebugMode ? person.data.name : person.remoteID} has no files",
-      );
-      return EnteFile();
-    }
-    return resultFile;
   }
 }
 
@@ -185,6 +202,7 @@ class ReassignMeSelectionPage extends StatefulWidget {
 class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
   late Future<List<PersonEntityWithThumbnailFile>>
       _personEntitiesWithThumnailFile;
+  final _logger = Logger('ReassignMeSelectionPage');
 
   @override
   void initState() {
@@ -197,7 +215,7 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
         if (person.data.email != null && person.data.email!.isNotEmpty) {
           continue;
         }
-        final file = await _getRecentFile(person);
+        final file = await PersonService.instance.getRecentFileOfPerson(person);
         result.add(PersonEntityWithThumbnailFile(person, file));
       }
       return result;
@@ -259,7 +277,7 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
                         createProgressDialog(context, "Reassigning...");
                     unawaited(dialog.show());
                     try {
-                      await PersonContactLinkingActions().reassignMe(
+                      await reassignMe(
                         currentPersonID: widget.currentMeId,
                         newPersonID: results[index].person.remoteID,
                       );
@@ -288,38 +306,34 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
     );
   }
 
-  Future<EnteFile> _getRecentFile(
-    PersonEntity person,
-  ) async {
-    final clustersToFiles =
-        await SearchService.instance.getClusterFilesForPersonID(
-      person.remoteID,
-    );
-    int? avatarFileID;
-    if (person.data.hasAvatar()) {
-      avatarFileID = tryGetFileIdFromFaceId(person.data.avatarFaceID!);
-    }
-    EnteFile? resultFile;
-    // iterate over all clusters and get the first file
-    for (final clusterFiles in clustersToFiles.values) {
-      for (final file in clusterFiles) {
-        if (avatarFileID != null && file.uploadedFileID! == avatarFileID) {
-          resultFile = file;
-          break;
-        }
-        resultFile ??= file;
-        if (resultFile.creationTime! < file.creationTime!) {
-          resultFile = file;
-        }
-      }
-    }
-    if (resultFile == null) {
-      debugPrint(
-        "Person ${kDebugMode ? person.data.name : person.remoteID} has no files",
+  Future<void> reassignMe({
+    required String currentPersonID,
+    required String newPersonID,
+  }) async {
+    try {
+      final email = Configuration.instance.getEmail();
+      final updatedPerson1 = await PersonService.instance
+          .updateAttributes(currentPersonID, email: '');
+      Bus.instance.fire(
+        PeopleChangedEvent(
+          type: PeopleEventType.saveOrEditPerson,
+          source: "reassignMe",
+          person: updatedPerson1,
+        ),
       );
-      return EnteFile();
+      final updatedPerson2 = await PersonService.instance
+          .updateAttributes(newPersonID, email: email);
+      Bus.instance.fire(
+        PeopleChangedEvent(
+          type: PeopleEventType.saveOrEditPerson,
+          source: "reassignMe",
+          person: updatedPerson2,
+        ),
+      );
+    } catch (e) {
+      _logger.severe("Failed to reassign me", e);
+      rethrow;
     }
-    return resultFile;
   }
 }
 

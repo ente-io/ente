@@ -13,6 +13,8 @@ import 'package:photos/models/ml/face/face.dart';
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/entity_service.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/services/search_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class PersonService {
@@ -479,5 +481,39 @@ class PersonService {
       logger.severe("Failed to update person", e, s);
       rethrow;
     }
+  }
+
+  Future<EnteFile> getRecentFileOfPerson(
+    PersonEntity person,
+  ) async {
+    final clustersToFiles =
+        await SearchService.instance.getClusterFilesForPersonID(
+      person.remoteID,
+    );
+    int? avatarFileID;
+    if (person.data.hasAvatar()) {
+      avatarFileID = tryGetFileIdFromFaceId(person.data.avatarFaceID!);
+    }
+    EnteFile? resultFile;
+    // iterate over all clusters and get the first file
+    for (final clusterFiles in clustersToFiles.values) {
+      for (final file in clusterFiles) {
+        if (avatarFileID != null && file.uploadedFileID! == avatarFileID) {
+          resultFile = file;
+          break;
+        }
+        resultFile ??= file;
+        if (resultFile.creationTime! < file.creationTime!) {
+          resultFile = file;
+        }
+      }
+    }
+    if (resultFile == null) {
+      debugPrint(
+        "Person ${kDebugMode ? person.data.name : person.remoteID} has no files",
+      );
+      return EnteFile();
+    }
+    return resultFile;
   }
 }

@@ -4,13 +4,16 @@ import "package:email_validator/email_validator.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
+import "package:photos/models/ml/face/person.dart";
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/user_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
-import "package:photos/ui/actions/person_contact_linking_actions.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import "package:photos/ui/components/dialog_widget.dart";
@@ -49,7 +52,6 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
   // Focus nodes are necessary
   final textFieldFocusNode = FocusNode();
   final _textController = TextEditingController();
-  final personContactLinkingActions = PersonContactLinkingActions();
 
   @override
   void initState() {
@@ -212,8 +214,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                           }
                         });
                       } else {
-                        final result =
-                            await personContactLinkingActions.linkEmailToPerson(
+                        final result = await linkEmailToPerson(
                           newEmail,
                           widget.personID!,
                           context,
@@ -316,6 +317,78 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
       return false;
     } else {
       return true;
+    }
+  }
+
+  Future<bool> linkEmailToPerson(
+    String email,
+    String personID,
+    BuildContext context,
+  ) async {
+    String? publicKey;
+
+    try {
+      publicKey = await UserService.instance.getPublicKey(email);
+    } catch (e) {
+      _logger.severe("Failed to get public key", e);
+      await showGenericErrorDialog(context: context, error: e);
+      return false;
+    }
+    // getPublicKey can return null when no user is associated with given
+    // email id
+    if (publicKey == null || publicKey == '') {
+      await showDialogWidget(
+        context: context,
+        title: "No Ente account!",
+        icon: Icons.info_outline,
+        body: S.of(context).emailNoEnteAccount(email),
+        isDismissible: true,
+        buttons: [
+          ButtonWidget(
+            buttonType: ButtonType.neutral,
+            icon: Icons.adaptive.share,
+            labelText: S.of(context).invite,
+            isInAlert: true,
+            onTap: () async {
+              unawaited(
+                shareText(
+                  S.of(context).shareTextRecommendUsingEnte,
+                ),
+              );
+            },
+          ),
+        ],
+      );
+      return false;
+    } else {
+      try {
+        final personEntity = await PersonService.instance.getPerson(personID);
+        late final PersonEntity updatedPerson;
+
+        if (personEntity == null) {
+          //Note: The idea is, email cannot be linked before a name is assigned
+          //to the person.
+          throw AssertionError(
+            "Cannot link email to non-existent person. First save the person",
+          );
+        } else {
+          updatedPerson = await PersonService.instance
+              .updateAttributes(personID, email: email);
+        }
+
+        Bus.instance.fire(
+          PeopleChangedEvent(
+            type: PeopleEventType.saveOrEditPerson,
+            source: "linkEmailToPerson",
+            person: updatedPerson,
+          ),
+        );
+        return true;
+      } catch (e) {
+        _logger.severe("Failed to link email to person", e);
+        await showGenericErrorDialog(context: context, error: e);
+        return false;
+      }
     }
   }
 }
