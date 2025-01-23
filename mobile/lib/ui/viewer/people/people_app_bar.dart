@@ -22,6 +22,7 @@ import "package:photos/ui/viewer/hierarchicial_search/recommended_filters_for_ap
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
+import "package:photos/ui/viewer/people/person_selection_action_widgets.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -93,8 +94,11 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     _peopleChangedEventSubscription =
         Bus.instance.on<PeopleChangedEvent>().listen(
       (event) {
-        if (event.type == PeopleEventType.saveOrEditPerson &&
-            event.source == "linkEmailToPerson") {
+        if (event.person != null &&
+            event.type == PeopleEventType.saveOrEditPerson &&
+            widget.person.remoteID == event.person!.remoteID &&
+            (event.source == "linkEmailToPerson" ||
+                event.source == "reassignMe")) {
           person = event.person!;
 
           if (person.data.email == Configuration.instance.getEmail()) {
@@ -310,6 +314,8 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
               await _showPerson(context);
             } else if (value == PeoplePopupAction.removeLabel) {
               await _resetPerson(context);
+            } else if (value == PeoplePopupAction.reassignMe) {
+              await _reassignMe(context);
             }
           },
         ),
@@ -383,5 +389,14 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     // if (coverPhotoID != null) {
     //   unawaited(changeCoverPhoto(context, widget.collection!, coverPhotoID));
     // }
+  }
+
+  Future<void> _reassignMe(BuildContext context) async {
+    await routeToPage(
+      context,
+      ReassignMeSelectionPage(
+        currentMeId: widget.person.remoteID,
+      ),
+    );
   }
 }

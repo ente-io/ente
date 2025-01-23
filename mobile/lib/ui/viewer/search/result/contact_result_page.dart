@@ -20,7 +20,7 @@ import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.da
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
-import "package:photos/ui/viewer/people/link_contact_to_person_selection_page.dart";
+import "package:photos/ui/viewer/people/person_selection_action_widgets.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class ContactResultPage extends StatefulWidget {

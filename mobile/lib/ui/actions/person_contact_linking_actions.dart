@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -199,6 +200,36 @@ class PersonContactLinkingActions {
       return null;
     } else {
       return updatedPerson;
+    }
+  }
+
+  Future<void> reassignMe({
+    required String currentPersonID,
+    required String newPersonID,
+  }) async {
+    try {
+      final email = Configuration.instance.getEmail();
+      final updatedPerson1 = await PersonService.instance
+          .updateAttributes(currentPersonID, email: '');
+      Bus.instance.fire(
+        PeopleChangedEvent(
+          type: PeopleEventType.saveOrEditPerson,
+          source: "reassignMe",
+          person: updatedPerson1,
+        ),
+      );
+      final updatedPerson2 = await PersonService.instance
+          .updateAttributes(newPersonID, email: email);
+      Bus.instance.fire(
+        PeopleChangedEvent(
+          type: PeopleEventType.saveOrEditPerson,
+          source: "reassignMe",
+          person: updatedPerson2,
+        ),
+      );
+    } catch (e) {
+      _logger.severe("Failed to reassign me", e);
+      rethrow;
     }
   }
 }
