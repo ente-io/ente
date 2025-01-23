@@ -12,10 +12,6 @@ import React from "react";
 
 interface RowButtonGroupTitleProps {
     /**
-     * The title for the row button group.
-     */
-    title: string;
-    /**
      * An optional leading SvgIcon before the title.
      */
     icon?: React.ReactNode;
@@ -24,10 +20,9 @@ interface RowButtonGroupTitleProps {
 /**
  * A section title, meant to precede a {@link RowButtonGroup}.
  */
-export const RowButtonGroupTitle: React.FC<RowButtonGroupTitleProps> = ({
-    title,
-    icon,
-}) => (
+export const RowButtonGroupTitle: React.FC<
+    React.PropsWithChildren<RowButtonGroupTitleProps>
+> = ({ children, icon }) => (
     <Stack
         direction="row"
         sx={{
@@ -42,7 +37,7 @@ export const RowButtonGroupTitle: React.FC<RowButtonGroupTitleProps> = ({
     >
         {icon && icon}
         <Typography variant="small" sx={{ color: "text.muted" }}>
-            {title}
+            {children}
         </Typography>
     </Stack>
 );

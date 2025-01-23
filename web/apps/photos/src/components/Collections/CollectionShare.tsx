@@ -166,10 +166,9 @@ function SharingDetails({ collection, type }) {
     return (
         <>
             <Stack>
-                <RowButtonGroupTitle
-                    title={t("OWNER")}
-                    icon={<AdminPanelSettingsIcon />}
-                />
+                <RowButtonGroupTitle icon={<AdminPanelSettingsIcon />}>
+                    {t("OWNER")}
+                </RowButtonGroupTitle>
                 <RowButtonGroup>
                     <RowButton
                         fontWeight="regular"
@@ -182,10 +181,9 @@ function SharingDetails({ collection, type }) {
             {type == "incomingShareCollaborator" &&
                 collaborators?.length > 0 && (
                     <Stack>
-                        <RowButtonGroupTitle
-                            title={t("COLLABORATORS")}
-                            icon={<ModeEditIcon />}
-                        />
+                        <RowButtonGroupTitle icon={<ModeEditIcon />}>
+                            {t("COLLABORATORS")}
+                        </RowButtonGroupTitle>
                         <RowButtonGroup>
                             {collaborators.map((item, index) => (
                                 <>
@@ -206,10 +204,9 @@ function SharingDetails({ collection, type }) {
                 )}
             {viewers?.length > 0 && (
                 <Stack>
-                    <RowButtonGroupTitle
-                        title={t("VIEWERS")}
-                        icon={<Photo />}
-                    />
+                    <RowButtonGroupTitle icon={<Photo />}>
+                        {t("VIEWERS")}
+                    </RowButtonGroupTitle>
                     <RowButtonGroup>
                         {viewers.map((item, index) => (
                             <>
@@ -286,10 +283,9 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
 
     return (
         <Stack>
-            <RowButtonGroupTitle
-                title={t("LINK_SHARE_TITLE")}
-                icon={<PublicIcon />}
-            />
+            <RowButtonGroupTitle icon={<PublicIcon />}>
+                {t("LINK_SHARE_TITLE")}
+            </RowButtonGroupTitle>
             <RowButtonGroup>
                 <RowButton
                     label={t("CREATE_PUBLIC_SHARING")}
@@ -370,12 +366,11 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
     return (
         <>
             <Stack>
-                <RowButtonGroupTitle
-                    title={t("shared_with_people_count", {
+                <RowButtonGroupTitle icon={<WorkspacesIcon />}>
+                    {t("shared_with_people_count", {
                         count: collection.sharees?.length ?? 0,
                     })}
-                    icon={<WorkspacesIcon />}
-                />
+                </RowButtonGroupTitle>
                 <RowButtonGroup>
                     {collection.sharees.length > 0 ? (
                         <>
@@ -671,7 +666,9 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                     <Stack sx={{ gap: "24px", py: "20px", px: "12px" }}>
                         {props.hiddenPreInput}
                         <Stack>
-                            <RowButtonGroupTitle title={t("ADD_NEW_EMAIL")} />
+                            <RowButtonGroupTitle>
+                                {t("ADD_NEW_EMAIL")}
+                            </RowButtonGroupTitle>
                             <TextField
                                 sx={{ marginTop: 0 }}
                                 hiddenLabel={props.hiddenLabel}
@@ -697,9 +694,9 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
 
                         {props.optionsList.length > 0 && (
                             <Stack>
-                                <RowButtonGroupTitle
-                                    title={t("OR_ADD_EXISTING")}
-                                />
+                                <RowButtonGroupTitle>
+                                    {t("OR_ADD_EXISTING")}
+                                </RowButtonGroupTitle>
                                 <RowButtonGroup>
                                     {props.optionsList.map((item, index) => (
                                         <>
@@ -916,9 +913,10 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                     <Stack sx={{ gap: "24px", py: "20px", px: "12px" }}>
                         <Stack>
                             <RowButtonGroupTitle
-                                title={t("OWNER")}
                                 icon={<AdminPanelSettingsIcon />}
-                            />
+                            >
+                                {t("OWNER")}
+                            </RowButtonGroupTitle>
                             <RowButtonGroup>
                                 <RowButton
                                     fontWeight="regular"
@@ -929,10 +927,9 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                             </RowButtonGroup>
                         </Stack>
                         <Stack>
-                            <RowButtonGroupTitle
-                                title={t("COLLABORATORS")}
-                                icon={<ModeEditIcon />}
-                            />
+                            <RowButtonGroupTitle icon={<ModeEditIcon />}>
+                                {t("COLLABORATORS")}
+                            </RowButtonGroupTitle>
                             <RowButtonGroup>
                                 {collaborators.map((item) => (
                                     <>
@@ -962,10 +959,9 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                             </RowButtonGroup>
                         </Stack>
                         <Stack>
-                            <RowButtonGroupTitle
-                                title={t("VIEWERS")}
-                                icon={<Photo />}
-                            />
+                            <RowButtonGroupTitle icon={<Photo />}>
+                                {t("VIEWERS")}
+                            </RowButtonGroupTitle>
                             <RowButtonGroup>
                                 {viewers.map((item) => (
                                     <>
@@ -1508,7 +1504,9 @@ const ManagePublicCollect: React.FC<ManagePublicCollectProps> = ({
                     label={t("PUBLIC_COLLECT")}
                 />
             </RowButtonGroup>
-            <RowButtonGroupTitle title={t("PUBLIC_COLLECT_SUBTEXT")} />
+            <RowButtonGroupTitle>
+                {t("PUBLIC_COLLECT_SUBTEXT")}
+            </RowButtonGroupTitle>
         </Stack>
     );
 };
