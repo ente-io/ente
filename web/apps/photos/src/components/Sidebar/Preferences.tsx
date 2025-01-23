@@ -1,4 +1,9 @@
-import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
+import {
+    RowButton,
+    RowButtonGroup,
+    RowButtonGroupHint,
+    RowSwitch,
+} from "@/base/components/RowButton";
 import {
     NestedSidebarDrawer,
     SidebarDrawerTitlebar,
@@ -27,7 +32,6 @@ import {
     updateMapEnabled,
 } from "@/new/photos/services/settings";
 import { useAppContext } from "@/new/photos/types/context";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { Divider, Stack, Typography, useColorScheme } from "@mui/material";
 import { t } from "i18next";
@@ -69,23 +73,23 @@ export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                     {isInternalUser() && <ThemeSelector />}
                     <Divider sx={{ my: "2px", opacity: 0.1 }} />
                     {isMLSupported && (
-                        <MenuItemGroup>
-                            <EnteMenuItem
+                        <RowButtonGroup>
+                            <RowButton
                                 endIcon={<ChevronRightIcon />}
-                                onClick={showMLSettings}
                                 label={t("ml_search")}
+                                onClick={showMLSettings}
                             />
-                        </MenuItemGroup>
+                        </RowButtonGroup>
                     )}
-                    <EnteMenuItem
-                        onClick={showMapSettings}
+                    <RowButton
                         endIcon={<ChevronRightIcon />}
                         label={t("map")}
+                        onClick={showMapSettings}
                     />
-                    <EnteMenuItem
-                        onClick={showAdvancedSettings}
+                    <RowButton
                         endIcon={<ChevronRightIcon />}
                         label={t("advanced")}
+                        onClick={showAdvancedSettings}
                     />
                 </Stack>
             </Stack>
@@ -236,14 +240,13 @@ export const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 />
 
                 <Stack sx={{ px: "16px", py: "20px" }}>
-                    <MenuItemGroup>
-                        <EnteMenuItem
-                            onClick={confirmToggle}
-                            variant="toggle"
-                            checked={mapEnabled}
+                    <RowButtonGroup>
+                        <RowSwitch
                             label={t("enabled")}
+                            checked={mapEnabled}
+                            onClick={confirmToggle}
                         />
-                    </MenuItemGroup>
+                    </RowButtonGroup>
                 </Stack>
             </Stack>
         </NestedSidebarDrawer>
@@ -279,17 +282,16 @@ export const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
 
                 <Stack sx={{ px: "16px", py: "20px" }}>
                     <Stack sx={{ gap: "4px" }}>
-                        <MenuItemGroup>
-                            <EnteMenuItem
-                                variant="toggle"
+                        <RowButtonGroup>
+                            <RowSwitch
+                                label={t("faster_upload")}
                                 checked={!cfUploadProxyDisabled}
                                 onClick={toggle}
-                                label={t("faster_upload")}
                             />
-                        </MenuItemGroup>
-                        <MenuSectionTitle
-                            title={t("faster_upload_description")}
-                        />
+                        </RowButtonGroup>
+                        <RowButtonGroupHint>
+                            {t("faster_upload_description")}
+                        </RowButtonGroupHint>
                     </Stack>
                 </Stack>
             </Stack>

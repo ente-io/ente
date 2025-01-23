@@ -185,7 +185,7 @@ const _colors = {
             muted: "rgba(0 0 0 / 0.12)",
             faint: "rgba(0 0 0 / 0.04)",
             // TODO(LM): Different from Figma.
-            faintHover: "rgba(0 20 0 / 0.06)",
+            faintHover: "rgba(0 0 0 / 0.06)",
             fainter: "rgba(0 0 0 / 0.02)",
         },
         stroke: {
