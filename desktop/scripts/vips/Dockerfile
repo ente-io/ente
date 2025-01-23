@@ -1,7 +1,6 @@
 FROM ubuntu:24.04
 
-RUN set -e && \
-apt-get update -y && \
-apt-get install -y libvips-tools
+RUN apt-get update -y
 
-ENTRYPOINT ["vips"]
+RUN apt-get install -y libvips-tools
+
