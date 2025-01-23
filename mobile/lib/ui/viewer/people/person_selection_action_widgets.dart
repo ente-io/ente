@@ -118,18 +118,17 @@ class _LinkContactToPersonSelectionPageState
                 return _RoundedPersonFaceWidget(
                   onTap: () async {
                     try {
-                      unawaited(
-                        linkPersonToContact(
-                          context,
-                          emailToLink: widget.emailToLink!,
-                          personEntity: results[index].person,
-                        ).then((updatedPerson) {
-                          if (updatedPerson != null) {
-                            Navigator.of(context).pop(updatedPerson);
-                          }
-                        }),
+                      final updatedPerson = await linkPersonToContact(
+                        context,
+                        emailToLink: widget.emailToLink!,
+                        personEntity: results[index].person,
                       );
+
+                      if (updatedPerson != null) {
+                        Navigator.of(context).pop(updatedPerson);
+                      }
                     } catch (e) {
+                      await showGenericErrorDialog(context: context, error: e);
                       _logger.severe("Failed to link person to contact", e);
                     }
                   },
@@ -149,8 +148,8 @@ class _LinkContactToPersonSelectionPageState
     required String emailToLink,
     required PersonEntity personEntity,
   }) async {
-    if (await checkIfEmailAlreadyAssignedToAPerson(context, emailToLink)) {
-      throw Exception("Email already linked");
+    if (await checkIfEmailAlreadyAssignedToAPerson(emailToLink)) {
+      throw Exception("Email already linked to a person");
     }
 
     final personName = personEntity.data.name;

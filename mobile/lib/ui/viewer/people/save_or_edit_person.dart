@@ -330,7 +330,10 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                                 clusterID: widget.clusterID!,
                                 birthdate: _selectedDate,
                                 email: _email,
-                              );
+                              ).catchError((e) {
+                                _logger.severe("Error adding new person", e);
+                                return null;
+                              });
                               if (newPersonEntity != null) {
                                 Navigator.pop(context, newPersonEntity);
                               }
@@ -380,11 +383,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
           shouldStickToDarkTheme: true,
           onTap: () async {
             if (widget.isEditing) {
-              try {
-                updatedPersonEntity = await updatePerson(context);
-              } catch (e) {
-                _logger.severe("Error updating person", e);
-              }
+              updatedPersonEntity = await updatePerson(context);
             } else {
               try {
                 updatedPersonEntity = await addNewPerson(
@@ -541,9 +540,17 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   }) async {
     if (email != null &&
         email.isNotEmpty &&
-        await checkIfEmailAlreadyAssignedToAPerson(context, email)) {
-      throw Exception("Email already assigned to a person");
+        await checkIfEmailAlreadyAssignedToAPerson(email)) {
+      _logger.severe(
+        "Failed to addNewPerson, email is already assigned to a person",
+      );
+      await showGenericErrorDialog(
+        context: context,
+        error: "Email already assigned",
+      );
+      return null;
     }
+
     try {
       if (userAlreadyAssigned) {
         return null;
@@ -593,7 +600,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
       if (_email != null &&
           _email!.isNotEmpty &&
           _email != person!.data.email &&
-          await checkIfEmailAlreadyAssignedToAPerson(context, _email!)) {
+          await checkIfEmailAlreadyAssignedToAPerson(_email!)) {
         throw Exception("Email already assigned to a person");
       }
       final String name = _inputName.trim();

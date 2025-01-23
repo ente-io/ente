@@ -228,6 +228,10 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
 
                           Navigator.of(context).pop(newEmail);
                         } catch (e) {
+                          await showGenericErrorDialog(
+                            context: context,
+                            error: e,
+                          );
                           _logger.severe("Failed to link email to person", e);
                         }
                       }
@@ -330,7 +334,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
     String personID,
     BuildContext context,
   ) async {
-    if (await checkIfEmailAlreadyAssignedToAPerson(context, email)) {
+    if (await checkIfEmailAlreadyAssignedToAPerson(email)) {
       throw Exception("Email already linked to a person");
     }
 
