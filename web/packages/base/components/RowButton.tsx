@@ -94,20 +94,28 @@ export const RowButtonDivider: React.FC<RowButtonDividerProps> = ({
  */
 export const RowButtonGroup = styled("div")(
     ({ theme }) => `
-    // & > .MuiMenuItem-root{
-    //     border-radius: 8px;
-    //     background-color: transparent;
-    // }
-    // & > .MuiMenuItem-root:not(:last-of-type) {
-    //     border-bottom-left-radius: 0;
-    //     border-bottom-right-radius: 0;
-    // }
-    // & > .MuiMenuItem-root:not(:first-of-type) {
-    //     border-top-left-radius: 0;
-    //     border-top-right-radius: 0;
-    // }
-    // background-color: ${theme.vars.palette.fill.faint};
-    // border-radius: 8px;
+    background-color: ${theme.vars.palette.fill.faint};
+    border-radius: 8px;
+    /** Modify the RowButton style when it is placed inside a RowButtonGroup */
+    & > button {
+        border-radius: 8px;
+        background-color: transparent;
+    }
+    & > button:not(:last-of-type) {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+    & > button:not(:first-of-type) {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
+    & > button:hover {
+        /* These fills are translucent and additive, and the RowButtonGroup
+           already has a background, so pick a (transparent) color that gives us
+           a similar outcome of the hover state as for a RowButton that is not
+           inside a RowButtonGroup */
+        background-color: ${theme.vars.palette.fill.faintHover};
+    }
 `,
 );
 
