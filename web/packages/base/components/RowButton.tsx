@@ -42,6 +42,20 @@ export const RowButtonGroupTitle: React.FC<
     </Stack>
 );
 
+/**
+ * A short description text meant to come after a {@link RowButtonGroup}.
+ */
+export const RowButtonGroupHint: React.FC<React.PropsWithChildren> = ({
+    children,
+}) => (
+    <Typography
+        variant="small"
+        sx={{ color: "text.muted", px: "8px", py: "6px" }}
+    >
+        {children}
+    </Typography>
+);
+
 interface RowButtonDividerProps {
     /**
      * If true, then the divider leaves the leading edge hanging which visually
@@ -66,8 +80,11 @@ export const RowButtonDivider: React.FC<RowButtonDividerProps> = ({
  * section.
  *
  * {@link RowButtonGroupTitle} can be used to provide a title for the entire
- * group. {@link RowButtonDivider} can be used to to separate the individual
- * buttons in the group.
+ * group, and {@link RowButtonGroupHint} can be used to provide a hint text that
+ * follows the group.
+ *
+ * {@link RowButtonDivider} can be used to to separate the individual buttons in
+ * the group.
  */
 
 export const RowButtonGroup = styled("div")(

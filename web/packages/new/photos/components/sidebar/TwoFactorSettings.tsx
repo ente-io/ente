@@ -1,7 +1,7 @@
 import {
     RowButton,
     RowButtonGroup,
-    RowButtonGroupTitle,
+    RowButtonGroupHint,
 } from "@/base/components/RowButton";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
@@ -155,7 +155,7 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
                 />
             </RowButtonGroup>
 
-            <Stack sx={{ gap: "4px" }}>
+            <Stack>
                 <RowButtonGroup>
                     <RowButton
                         onClick={confirmReconfigure}
@@ -164,7 +164,9 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
                         label={t("reconfigure")}
                     />
                 </RowButtonGroup>
-                <RowButtonGroupTitle title={t("reconfigure_two_factor_hint")} />
+                <RowButtonGroupHint>
+                    {t("reconfigure_two_factor_hint")}
+                </RowButtonGroupHint>
             </Stack>
         </Stack>
     );

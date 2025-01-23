@@ -5,6 +5,7 @@ import {
     RowButton,
     RowButtonDivider,
     RowButtonGroup,
+    RowButtonGroupHint,
     RowButtonGroupTitle,
 } from "@/base/components/RowButton";
 import { Titlebar } from "@/base/components/Titlebar";
@@ -1504,9 +1505,9 @@ const ManagePublicCollect: React.FC<ManagePublicCollectProps> = ({
                     label={t("PUBLIC_COLLECT")}
                 />
             </RowButtonGroup>
-            <RowButtonGroupTitle>
+            <RowButtonGroupHint>
                 {t("PUBLIC_COLLECT_SUBTEXT")}
-            </RowButtonGroupTitle>
+            </RowButtonGroupHint>
         </Stack>
     );
 };

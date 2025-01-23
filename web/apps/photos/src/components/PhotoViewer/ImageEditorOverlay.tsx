@@ -671,7 +671,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         />
                     </Tabs>
                 </Stack>
-                <RowButtonGroupTitle title={t("reset")} />
+                <RowButtonGroupTitle>{t("reset")}</RowButtonGroupTitle>
                 <RowButtonGroup sx={{ mb: "0.5rem" }}>
                     <RowButton
                         disabled={canvasLoading}
@@ -706,7 +706,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                         setInvert={setInvert}
                     />
                 )}
-                <RowButtonGroupTitle title={t("export_data")} />
+                <RowButtonGroupTitle>{t("export_data")}</RowButtonGroupTitle>
                 <RowButtonGroup>
                     <RowButton
                         startIcon={<DownloadIcon />}
@@ -723,9 +723,9 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                     />
                 </RowButtonGroup>
                 {!transformationPerformed && !coloursAdjusted && (
-                    <RowButtonGroupTitle
-                        title={t("photo_edit_required_to_save")}
-                    />
+                    <RowButtonGroupTitle>
+                        {t("photo_edit_required_to_save")}
+                    </RowButtonGroupTitle>
                 )}
             </SidebarDrawer>
         </Backdrop>
@@ -824,7 +824,7 @@ const CropMenu: React.FC<CropMenuProps> = (props) => {
 
     return (
         <>
-            <RowButtonGroupTitle title={t("freehand")} />
+            <RowButtonGroupTitle>{t("freehand")}</RowButtonGroupTitle>
             <RowButtonGroup sx={{ mb: "0.5rem" }}>
                 <RowButton
                     disabled={canvasLoading}
@@ -1232,7 +1232,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
 
     return (
         <>
-            <RowButtonGroupTitle title={t("aspect_ratio")} />
+            <RowButtonGroupTitle>{t("aspect_ratio")}</RowButtonGroupTitle>
             <RowButtonGroup sx={{ mb: "0.5rem" }}>
                 <RowButton
                     disabled={canvasLoading}
@@ -1278,7 +1278,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                     </Fragment>
                 ))}
             </RowButtonGroup>
-            <RowButtonGroupTitle title={t("rotation")} />
+            <RowButtonGroupTitle>{t("rotation")}</RowButtonGroupTitle>
             <RowButtonGroup sx={{ mb: "1rem" }}>
                 <RowButton
                     disabled={canvasLoading}
@@ -1294,7 +1294,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                     label={t("rotate_right") + " 90˚"}
                 />
             </RowButtonGroup>
-            <RowButtonGroupTitle title={t("flip")} />
+            <RowButtonGroupTitle>{t("flip")}</RowButtonGroupTitle>
             <RowButtonGroup sx={{ mb: "1rem" }}>
                 <RowButton
                     disabled={canvasLoading}
@@ -1332,7 +1332,7 @@ interface ColoursMenuProps {
 const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
     <>
         <Box sx={{ px: "8px" }}>
-            <RowButtonGroupTitle title={t("brightness")} />
+            <RowButtonGroupTitle>{t("brightness")}</RowButtonGroupTitle>
             <Slider
                 min={0}
                 max={200}
@@ -1350,7 +1350,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                     props.setBrightness(value as number);
                 }}
             />
-            <RowButtonGroupTitle title={t("contrast")} />
+            <RowButtonGroupTitle>{t("contrast")}</RowButtonGroupTitle>
             <Slider
                 min={0}
                 max={200}
@@ -1368,7 +1368,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                     },
                 ]}
             />
-            <RowButtonGroupTitle title={t("blur")} />
+            <RowButtonGroupTitle>{t("blur")}</RowButtonGroupTitle>
             <Slider
                 min={0}
                 max={10}
@@ -1380,7 +1380,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                     props.setBlur(value as number);
                 }}
             />
-            <RowButtonGroupTitle title={t("saturation")} />
+            <RowButtonGroupTitle>{t("saturation")}</RowButtonGroupTitle>
             <Slider
                 min={0}
                 max={200}
@@ -1391,12 +1391,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                 onChange={(_, value) => {
                     props.setSaturation(value as number);
                 }}
-                marks={[
-                    {
-                        value: 100,
-                        label: "100%",
-                    },
-                ]}
+                marks={[{ value: 100, label: "100%" }]}
             />
         </Box>
         <RowButtonGroup sx={{ mb: "0.5rem" }}>

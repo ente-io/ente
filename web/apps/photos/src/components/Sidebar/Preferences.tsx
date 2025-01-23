@@ -1,6 +1,7 @@
 import {
     RowButton,
     RowButtonGroup,
+    RowButtonGroupHint,
     RowButtonGroupTitle,
 } from "@/base/components/RowButton";
 import {
@@ -290,9 +291,9 @@ export const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                                 label={t("faster_upload")}
                             />
                         </RowButtonGroup>
-                        <RowButtonGroupTitle
-                            title={t("faster_upload_description")}
-                        />
+                        <RowButtonGroupHint>
+                            {t("faster_upload_description")}
+                        </RowButtonGroupHint>
                     </Stack>
                 </Stack>
             </Stack>
