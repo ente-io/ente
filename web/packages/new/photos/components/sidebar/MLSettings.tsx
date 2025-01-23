@@ -1,4 +1,4 @@
-import { RowButton, RowButtonGroup } from "@/base/components/RowButton";
+import { RowButtonGroup, RowSwitch } from "@/base/components/RowButton";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
@@ -281,8 +281,7 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
         <Stack sx={{ px: "16px", py: "20px", gap: 4 }}>
             <Stack sx={{ gap: 3 }}>
                 <RowButtonGroup>
-                    <RowButton
-                        variant="toggle"
+                    <RowSwitch
                         label={t("enabled")}
                         checked={true}
                         onClick={confirmDisableML}

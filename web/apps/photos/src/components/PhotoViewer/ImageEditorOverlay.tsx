@@ -5,6 +5,7 @@ import {
     RowButtonDivider,
     RowButtonGroup,
     RowButtonGroupTitle,
+    RowSwitch,
 } from "@/base/components/RowButton";
 import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
@@ -1393,8 +1394,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
             />
         </Box>
         <RowButtonGroup sx={{ mb: "0.5rem" }}>
-            <RowButton
-                variant="toggle"
+            <RowSwitch
                 checked={props.invert}
                 label={t("invert_colors")}
                 onClick={() => {

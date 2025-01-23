@@ -139,12 +139,9 @@ interface RowButtonProps {
      *
      * - "primary" (default): A row button with a filled in background color.
      *
-     * - "toggle": A variant of primary that shows a toggle button (an
-     *   {@link EnteSwitch}) at the trailing edge of the row button.
-     *
      * - "secondary": A row button without a fill.
      */
-    variant?: "primary" | "toggle" | "secondary";
+    variant?: "primary" | "secondary";
     /**
      * Color of the row button.
      *
@@ -166,21 +163,9 @@ interface RowButtonProps {
      */
     disabled?: boolean;
     /**
-     * Called when the row button, or the switch it contains, is clicked.
-     *
-     * - For row buttons with variant "toggle", this will be called if the user
-     *   toggles the value of the {@link EnteSwitch}.
-     *
-     * - For all other variants, this will be called when the user activates
-     *   (e.g. clicks) the row button itself.
+     * Called when the row button is activated (e.g. by a click).
      */
     onClick: () => void;
-    /**
-     * The state of the toggle associated with the row button.
-     *
-     * Only valid for row buttons with variant "toggle".
-     */
-    checked?: boolean;
     /**
      * Optional icon shown at the leading edge of the row button.
      *
@@ -196,8 +181,6 @@ interface RowButtonProps {
      *
      * Similar to {@link startIcon} this can be any arbitrary component, though
      * usually it is an {@link SvgIcon} whose size the row button will set.
-     *
-     * Not used if variant is "toggle".
      */
     endIcon?: React.ReactNode;
     /**
@@ -238,21 +221,13 @@ export const RowButton: React.FC<RowButtonProps> = ({
     color = "primary",
     fontWeight = "medium",
     disabled = false,
-    checked,
     startIcon,
     endIcon,
     label,
     caption,
     onClick,
 }) => (
-    <RowButtonRoot
-        rbVariant={variant}
-        fullWidth
-        disabled={disabled}
-        onClick={() => {
-            if (variant != "toggle") onClick();
-        }}
-    >
+    <RowButtonRoot rbVariant={variant} fullWidth {...{ disabled, onClick }}>
         <Stack
             direction="row"
             sx={[
@@ -291,11 +266,7 @@ export const RowButton: React.FC<RowButtonProps> = ({
                     )}
                 </Box>
             </Stack>
-            {endIcon ? (
-                endIcon
-            ) : variant == "toggle" ? (
-                <EnteSwitch {...{ checked, onClick }} />
-            ) : null}
+            {endIcon && endIcon}
         </Stack>
     </RowButtonRoot>
 );
@@ -328,10 +299,6 @@ const RowButtonRoot = styled(FocusVisibleButton, {
             },
         },
         {
-            props: { rbVariant: "toggle" },
-            style: { backgroundColor: theme.vars.palette.fill.faint },
-        },
-        {
             props: { rbVariant: "secondary" },
             style: {
                 backgroundColor: "transparent",
@@ -355,4 +322,51 @@ const CaptionTypography: React.FC<
     >
         {children}
     </Typography>
+);
+
+interface RowSwitchProps {
+    /**
+     * The state of the contained {@link EnteSwitch}.
+     */
+    checked?: boolean;
+    /**
+     * Called when the user activates the contained {@link EnteSwitch}.
+     */
+    onClick: () => void;
+    /**
+     * The label for the component.
+     *
+     * Similar to the {@link label} prop for {@link RowButton}, but can only be
+     * a string instead of an arbitrary component.
+     */
+    label: string;
+}
+
+/**
+ * A row that visually looks similar to a {@link RowButton}, but instead of a
+ * button is a normal div with a {@link EnteSwitch} at its trailing edge.
+ *
+ * It only works (visually) when placed within a {@link RowButtonGroup} since
+ * that is where it gets its background color from.
+ */
+export const RowSwitch: React.FC<RowSwitchProps> = ({
+    checked,
+    label,
+    onClick,
+}) => (
+    <Stack
+        direction="row"
+        sx={{
+            flex: 1,
+            justifyContent: "space-between",
+            alignItems: "center",
+            px: "16px",
+            pr: "12px",
+        }}
+    >
+        <Typography sx={{ py: "14px", px: "2px", fontWeight: "medium" }}>
+            {label}
+        </Typography>
+        <EnteSwitch {...{ checked, onClick }} />
+    </Stack>
 );

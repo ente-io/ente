@@ -2,6 +2,7 @@ import {
     RowButton,
     RowButtonGroup,
     RowButtonGroupHint,
+    RowSwitch,
 } from "@/base/components/RowButton";
 import {
     NestedSidebarDrawer,
@@ -240,10 +241,9 @@ export const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
 
                 <Stack sx={{ px: "16px", py: "20px" }}>
                     <RowButtonGroup>
-                        <RowButton
-                            variant="toggle"
-                            checked={mapEnabled}
+                        <RowSwitch
                             label={t("enabled")}
+                            checked={mapEnabled}
                             onClick={confirmToggle}
                         />
                     </RowButtonGroup>
@@ -283,10 +283,9 @@ export const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 <Stack sx={{ px: "16px", py: "20px" }}>
                     <Stack sx={{ gap: "4px" }}>
                         <RowButtonGroup>
-                            <RowButton
-                                variant="toggle"
-                                checked={!cfUploadProxyDisabled}
+                            <RowSwitch
                                 label={t("faster_upload")}
+                                checked={!cfUploadProxyDisabled}
                                 onClick={toggle}
                             />
                         </RowButtonGroup>

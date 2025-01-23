@@ -7,6 +7,7 @@ import {
     RowButtonGroup,
     RowButtonGroupHint,
     RowButtonGroupTitle,
+    RowSwitch,
 } from "@/base/components/RowButton";
 import { Titlebar } from "@/base/components/Titlebar";
 import { useModalVisibility } from "@/base/components/utils/modal";
@@ -1498,11 +1499,10 @@ const ManagePublicCollect: React.FC<ManagePublicCollectProps> = ({
     return (
         <Stack>
             <RowButtonGroup>
-                <RowButton
-                    onClick={handleFileDownloadSetting}
-                    variant="toggle"
-                    checked={publicShareProp?.enableCollect}
+                <RowSwitch
                     label={t("PUBLIC_COLLECT")}
+                    checked={publicShareProp?.enableCollect}
+                    onClick={handleFileDownloadSetting}
                 />
             </RowButtonGroup>
             <RowButtonGroupHint>
@@ -1777,11 +1777,10 @@ const ManageDownloadAccess: React.FC<ManageDownloadAccessProps> = ({
         });
     };
     return (
-        <RowButton
+        <RowSwitch
+            label={t("FILE_DOWNLOAD")}
             checked={publicShareProp?.enableDownload ?? true}
             onClick={handleFileDownloadSetting}
-            variant="toggle"
-            label={t("FILE_DOWNLOAD")}
         />
     );
 };
@@ -1828,11 +1827,10 @@ const ManageLinkPassword: React.FC<ManageLinkPasswordProps> = ({
 
     return (
         <>
-            <RowButton
+            <RowSwitch
                 label={t("password_lock")}
-                onClick={handlePasswordChangeSetting}
                 checked={!!publicShareProp?.passwordEnabled}
-                variant="toggle"
+                onClick={handlePasswordChangeSetting}
             />
             <PublicLinkSetPassword
                 open={changePasswordView}

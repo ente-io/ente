@@ -2,6 +2,7 @@ import {
     RowButton,
     RowButtonGroup,
     RowButtonGroupHint,
+    RowSwitch,
 } from "@/base/components/RowButton";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
@@ -147,10 +148,9 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
     return (
         <Stack sx={{ px: "16px", py: "20px", gap: "24px" }}>
             <RowButtonGroup>
-                <RowButton
-                    variant="toggle"
-                    checked={true}
+                <RowSwitch
                     label={t("enabled")}
+                    checked={true}
                     onClick={confirmDisable}
                 />
             </RowButtonGroup>
@@ -158,7 +158,6 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
             <Stack>
                 <RowButtonGroup>
                     <RowButton
-                        checked={true}
                         label={t("reconfigure")}
                         onClick={confirmReconfigure}
                     />
