@@ -222,57 +222,27 @@ export const RowButton: React.FC<RowButtonProps> = ({
 }) => (
     <RowButtonRoot
         rbVariant={variant}
-        rbColor={color}
         fullWidth
         disabled={disabled}
         onClick={() => {
             if (variant != "toggle") onClick();
         }}
-        // disableRipple={variant == "toggle"}
         // sx={[
-        //     {
-        //         // Remove button's default padding.
-        //         p: 0,
-        //     },
-        // ]}
-        // sx={[
-        //     {
-        //         p: 0,
         //         borderRadius: "4px",
-        //         color: color == "critical" ? "critical.main" : "text.base",
-        //         "& .MuiSvgIcon-root": {
-        //             fontSize: "20px",
-        //         },
-        //     },
-        //     variant == "secondary" &&
-        //         ((theme) => ({
-        //             "&:hover": {
-        //                 backgroundColor: theme.vars.palette.fill.faintHover,
-        //             },
-        //         })),
-        //     variant != "secondary" &&
-        //         ((theme) => ({
-        //             backgroundColor: theme.vars.palette.fill.faint,
-        //             "&:hover": {
-        //                 backgroundColor:
-        //                     // Lighter fill for critical variant to retain
-        //                     // legibility of the red text.
-        //                     color == "critical"
-        //                         ? theme.vars.palette.fill.faintHover
-        //                         : theme.vars.palette.fill.muted,
-        //             },
-        //         })),
-        // ]}
     >
         <Stack
             direction="row"
-            sx={{
-                flex: 1,
-                justifyContent: "space-between",
-                alignItems: "center",
-                px: "16px",
-                pr: "12px",
-            }}
+            sx={[
+                {
+                    flex: 1,
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    px: "16px",
+                    pr: "12px",
+                    color: "primary.main",
+                },
+                color == "critical" && { color: "critical.main" },
+            ]}
         >
             <Stack direction="row" sx={{ py: "14px", gap: "10px" }}>
                 {startIcon && startIcon}
@@ -310,13 +280,10 @@ type RowButtonRootProps = ButtonProps & {
     // Prefix with "rb" to differentiate this from the "variant" prop of the MUI
     // button that we're styling.
     rbVariant: RowButtonProps["variant"];
-    // Prefix with "rb" to differentiate this from the "color" prop of the MUI
-    // button that we're styling.
-    rbColor: RowButtonProps["color"];
 };
 
 const RowButtonRoot = styled(FocusVisibleButton, {
-    shouldForwardProp: (prop) => prop != "rbVariant" && prop != "rbColor",
+    shouldForwardProp: (prop) => prop != "rbVariant",
     // name: "MuiMenuItem",
 })<React.PropsWithChildren<RowButtonRootProps>>(({ theme }) => ({
     // Remove button's default padding.
@@ -326,12 +293,7 @@ const RowButtonRoot = styled(FocusVisibleButton, {
     "& .MuiSvgIcon-root": {
         fontSize: "20px",
     },
-    color: theme.vars.palette.primary.main,
     variants: [
-        {
-            props: { rbColor: "critical" },
-            style: { color: theme.vars.palette.critical.main },
-        },
         {
             props: { rbVariant: "primary" },
             style: {
@@ -363,60 +325,6 @@ const RowButtonRoot = styled(FocusVisibleButton, {
             },
         },
     ],
-
-    // display: "flex",
-    // justifyContent: "flex-start",
-    // alignItems: "center",
-    // position: "relative",
-    // textDecoration: "none",
-    // minHeight: 48,
-    // paddingTop: 6,
-    // paddingBottom: 6,
-    // boxSizing: "border-box",
-    // whiteSpace: "nowrap",
-    // "&:hover": {
-    //     textDecoration: "none",
-    //     backgroundColor: theme.vars.palette.action.hover,
-    //     // Reset on touch devices, it doesn't add specificity
-    //     "@media (hover: none)": {
-    //         backgroundColor: "transparent",
-    //     },
-    // },
-    // [`&.${menuItemClasses.selected}:hover`]: {
-    //     backgroundColor: theme.vars
-    //         ? `rgba(${theme.vars.palette.primary.mainChannel} / calc(${theme.vars.palette.action.selectedOpacity} + ${theme.vars.palette.action.hoverOpacity}))`
-    //         : alpha(
-    //               theme.palette.primary.main,
-    //               theme.palette.action.selectedOpacity +
-    //                   theme.palette.action.hoverOpacity,
-    //           ),
-    //     // Reset on touch devices, it doesn't add specificity
-    //     "@media (hover: none)": {
-    //         backgroundColor: theme.vars
-    //             ? `rgba(${theme.vars.palette.primary.mainChannel} / ${theme.vars.palette.action.selectedOpacity})`
-    //             : alpha(
-    //                   theme.palette.primary.main,
-    //                   theme.palette.action.selectedOpacity,
-    //               ),
-    //     },
-    // },
-    // TODO:
-    // [`&.${menuItemClasses.focusVisible}`]: {
-    //     backgroundColor: theme.vars.palette.action.focus,
-    // },
-    // [`&.${menuItemClasses.disabled}`]: {
-    //     opacity: theme.vars.palette.action.disabledOpacity,
-    // },
-    // [`& .${listItemTextClasses.root}`]: {
-    //     marginTop: 0,
-    //     marginBottom: 0,
-    // },
-    // [`& .${listItemTextClasses.inset}`]: {
-    //     paddingLeft: 36,
-    // },
-    // [`& .${listItemIconClasses.root}`]: {
-    //     minWidth: 36,
-    // },
 }));
 
 const CaptionTypography: React.FC<
