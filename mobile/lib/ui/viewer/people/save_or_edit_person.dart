@@ -849,7 +849,7 @@ class _EmailSectionState extends State<_EmailSection> {
                                   context,
                                   LinkEmailScreen(
                                     widget.personID,
-                                    isFromSaveEditPerson: true,
+                                    isFromSaveOrEditPerson: true,
                                   ),
                                 );
                                 if (newEmail != null) {
@@ -876,7 +876,7 @@ class _EmailSectionState extends State<_EmailSection> {
                             context,
                             LinkEmailScreen(
                               widget.personID,
-                              isFromSaveEditPerson: true,
+                              isFromSaveOrEditPerson: true,
                             ),
                           );
                           if (newEmail != null) {

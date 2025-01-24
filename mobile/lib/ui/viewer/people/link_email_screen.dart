@@ -28,10 +28,10 @@ import "package:photos/utils/share_util.dart";
 
 class LinkEmailScreen extends StatefulWidget {
   final String? personID;
-  final bool isFromSaveEditPerson;
+  final bool isFromSaveOrEditPerson;
   const LinkEmailScreen(
     this.personID, {
-    this.isFromSaveEditPerson = false,
+    this.isFromSaveOrEditPerson = false,
     super.key,
   });
 
@@ -204,7 +204,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                     onTap: () async {
                       final newEmail =
                           _emailIsValid ? _newEmail : _selectedEmail!;
-                      if (widget.isFromSaveEditPerson) {
+                      if (widget.isFromSaveOrEditPerson) {
                         await _emailHoldsEnteAccount(newEmail).then((value) {
                           if (value) {
                             Navigator.of(context).pop(newEmail);
