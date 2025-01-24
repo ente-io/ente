@@ -3,16 +3,13 @@ import "dart:math";
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection_items.dart';
-import "package:photos/models/search/generic_search_result.dart";
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/search_service.dart";
 import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
 import 'package:photos/ui/common/loading_widget.dart';
@@ -295,26 +292,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                   )
                 : const SizedBox.shrink(),
             const SizedBox(height: 2),
-            FutureBuilder(
-              future: SearchService.instance
-                  .getAllContactsSearchResults(kSearchSectionLimit),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return ContactsSection(
-                    snapshot.data as List<GenericSearchResult>,
-                  );
-                } else if (snapshot.hasError) {
-                  _logger.severe(
-                    "failed to load contacts section",
-                    snapshot.error,
-                    snapshot.stackTrace,
-                  );
-                  return const EnteLoadingWidget();
-                } else {
-                  return const EnteLoadingWidget();
-                }
-              },
-            ),
+            const ContactsSection(),
             const SizedBox(height: 4),
             const CollectPhotosCardWidget(),
             const SizedBox(height: 32),
