@@ -836,9 +836,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "left": MessageLookupByLibrary.simpleMessage("左"),
         "light": MessageLookupByLibrary.simpleMessage("ライト"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("ライト"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "linkCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("リンクをクリップボードにコピーしました"),
         "linkDeviceLimit": MessageLookupByLibrary.simpleMessage("デバイスの制限"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("有効"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("期限切れ"),
         "linkExpiresOn": m43,
@@ -969,6 +971,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noDeviceThatCanBeDeleted":
             MessageLookupByLibrary.simpleMessage("削除できるファイルがありません"),
         "noDuplicates": MessageLookupByLibrary.simpleMessage("✨ 重複なし"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noExifData": MessageLookupByLibrary.simpleMessage("EXIFデータはありません"),
         "noHiddenPhotosOrVideos":
             MessageLookupByLibrary.simpleMessage("非表示の写真やビデオはありません"),

@@ -200,8 +200,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("กรุณาช่วยเราด้วยข้อมูลนี้"),
         "lastUpdated": MessageLookupByLibrary.simpleMessage("อัปเดตล่าสุด"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("สว่าง"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "linkCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "คัดลอกลิงก์ไปยังคลิปบอร์ดแล้ว"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkHasExpired":
             MessageLookupByLibrary.simpleMessage("ลิงก์หมดอายุแล้ว"),
         "loadMessage9": MessageLookupByLibrary.simpleMessage(
@@ -217,6 +219,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("ย้ายไปยังอัลบั้ม"),
         "name": MessageLookupByLibrary.simpleMessage("ชื่อ"),
         "newest": MessageLookupByLibrary.simpleMessage("ใหม่สุด"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("ไม่มีคีย์การกู้คืน?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(

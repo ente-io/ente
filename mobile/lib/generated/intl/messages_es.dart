@@ -1118,10 +1118,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Los contactos de confianza pueden iniciar la recuperación de la cuenta, y si no están bloqueados en un plazo de 30 días, restablecer su contraseña y acceder a su cuenta."),
         "light": MessageLookupByLibrary.simpleMessage("Brillo"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Claro"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "linkCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Enlace copiado al portapapeles"),
         "linkDeviceLimit":
             MessageLookupByLibrary.simpleMessage("Límite del dispositivo"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Habilitado"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Vencido"),
         "linkExpiresOn": m43,
@@ -1284,6 +1286,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "No tienes archivos en este dispositivo que puedan ser borrados"),
         "noDuplicates":
             MessageLookupByLibrary.simpleMessage("✨ Sin duplicados"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noExifData": MessageLookupByLibrary.simpleMessage("No hay datos EXIF"),
         "noFacesFound":
             MessageLookupByLibrary.simpleMessage("No se han encontrado caras"),

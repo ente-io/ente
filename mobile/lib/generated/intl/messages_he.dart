@@ -533,10 +533,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("לעזוב את האלבום המשותף?"),
         "light": MessageLookupByLibrary.simpleMessage("אור"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("בהיר"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "linkCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("הקישור הועתק ללוח"),
         "linkDeviceLimit":
             MessageLookupByLibrary.simpleMessage("מגבלת כמות מכשירים"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("מאופשר"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("פג תוקף"),
         "linkExpiresOn": m43,
@@ -585,6 +587,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "אין לך קבצים במכשיר הזה שניתן למחוק אותם"),
         "noDuplicates": MessageLookupByLibrary.simpleMessage("✨ אין כפילויות"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noPhotosAreBeingBackedUpRightNow":
             MessageLookupByLibrary.simpleMessage(
                 "אף תמונה אינה נמצאת בתהליך גיבוי כרגע"),

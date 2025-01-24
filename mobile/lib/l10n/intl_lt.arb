@@ -1262,5 +1262,8 @@
   "joinAlbum": "Junkitės prie albumo",
   "joinAlbumSubtext": "kad peržiūrėtumėte ir pridėtumėte savo nuotraukas",
   "joinAlbumSubtextViewer": "kad pridėtumėte tai prie bendrinamų albumų",
-  "join": "Jungtis"
+  "join": "Jungtis",
+  "linkEmail": "Link email",
+  "link": "Link",
+  "noEnteAccountExclamation": "No Ente account!"
 }

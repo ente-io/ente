@@ -10928,6 +10928,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Link email`
+  String get linkEmail {
+    return Intl.message(
+      'Link email',
+      name: 'linkEmail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Link`
+  String get link {
+    return Intl.message(
+      'Link',
+      name: 'link',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No Ente account!`
+  String get noEnteAccountExclamation {
+    return Intl.message(
+      'No Ente account!',
+      name: 'noEnteAccountExclamation',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

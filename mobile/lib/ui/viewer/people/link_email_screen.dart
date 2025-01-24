@@ -72,8 +72,8 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
-        title: const Text(
-          "Link email",
+        title: Text(
+          S.of(context).linkEmail,
         ),
       ),
       body: Column(
@@ -81,10 +81,10 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 12),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: MenuSectionTitle(
-              title: "Add a new email",
+              title: S.of(context).addANewEmail,
             ),
           ),
           Padding(
@@ -198,7 +198,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                   ButtonWidget(
                     buttonType: ButtonType.primary,
                     buttonSize: ButtonSize.large,
-                    labelText: "Link",
+                    labelText: S.of(context).link,
                     isDisabled:
                         !_emailIsValid && (_selectedEmail?.isEmpty ?? true),
                     onTap: () async {
@@ -295,7 +295,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
     if (publicKey == null || publicKey == '') {
       await showDialogWidget(
         context: context,
-        title: "No Ente account!",
+        title: S.of(context).noEnteAccountExclamation,
         body: "$email does not have an ente account.",
         icon: Icons.info_outline,
         isDismissible: true,

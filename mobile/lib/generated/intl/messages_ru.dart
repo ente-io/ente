@@ -1026,10 +1026,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Доверенные контакты могут инициировать восстановление учетной записи, если они не будут заблокированы в течение 30 дней, сбросить пароль и получить доступ к вашей учетной записи."),
         "light": MessageLookupByLibrary.simpleMessage("Светлая тема"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Светлая тема"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "linkCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Ссылка скопирована в буфер обмена"),
         "linkDeviceLimit":
             MessageLookupByLibrary.simpleMessage("Лимит устройств"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Разрешён"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Истекшая"),
         "linkExpiresOn": m43,
@@ -1189,6 +1191,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "У вас нет файлов на этом устройстве, которые могут быть удалены"),
         "noDuplicates":
             MessageLookupByLibrary.simpleMessage("✨ Дубликатов нет"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noExifData": MessageLookupByLibrary.simpleMessage("Нет данных EXIF"),
         "noFacesFound": MessageLookupByLibrary.simpleMessage("Лица не найдены"),
         "noHiddenPhotosOrVideos":

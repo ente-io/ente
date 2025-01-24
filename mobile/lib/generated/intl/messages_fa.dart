@@ -241,6 +241,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "لطفا با این اطلاعات به ما کمک کنید"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("روشن"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "loadMessage2": MessageLookupByLibrary.simpleMessage(
             "ما تا کنون بیش از ۳۰ میلیون خاطره را حفظ کرده‌ایم"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("قفل"),
@@ -262,6 +264,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "never": MessageLookupByLibrary.simpleMessage("هرگز"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("کاربر جدید Ente"),
         "no": MessageLookupByLibrary.simpleMessage("خیر"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("کلید بازیابی ندارید؟"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
