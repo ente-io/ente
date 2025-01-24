@@ -19,7 +19,7 @@ class ContactsFilter extends HierarchicalSearchFilter {
   String name() {
     final name = user.displayName;
     if (name == null || name.isEmpty) {
-      return user.email.split("@")[0];
+      return user.email;
     }
     return name;
   }
