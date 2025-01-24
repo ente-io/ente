@@ -8,6 +8,13 @@ export default defineConfig({
     head: [["link", { rel: "icon", type: "image/png", href: "/favicon.png" }]],
     cleanUrls: true,
     ignoreDeadLinks: "localhostLinks",
+    vite: {
+      build: {
+        rollupOptions: {
+          external: ['client-museum-s3.png'] // Added to handle static asset import
+        }
+      }
+    },
     themeConfig: {
         // We use the default theme (with some CSS color overrides). This
         // themeConfig block can be used to further customize the default theme.
