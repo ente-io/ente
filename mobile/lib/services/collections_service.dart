@@ -949,9 +949,8 @@ class CollectionsService {
         data: {
           "collectionID": collection.id,
           "enableCollect": enableCollect,
-          "enableJoin": flagService.internalUser,
-          "joinViaLink":
-              flagService.internalUser, // todo: remove after server deployment
+          "enableJoin": true,
+          // todo: remove after server deployment
         },
       );
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
