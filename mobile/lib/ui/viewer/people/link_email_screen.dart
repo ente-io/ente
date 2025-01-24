@@ -377,8 +377,6 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
         late final PersonEntity updatedPerson;
 
         if (personEntity == null) {
-          //Note: The idea is, email cannot be linked before a name is assigned
-          //to the person.
           throw AssertionError(
             "Cannot link email to non-existent person. First save the person",
           );
