@@ -26,7 +26,7 @@ class EndToEndBanner extends StatelessWidget {
       onTap: onTap,
       child: Container(
         color: colorScheme.fillFaint,
-        padding: const EdgeInsets.fromLTRB(16, 8, 0, 8),
+        padding: EdgeInsets.fromLTRB(16, 8, trailingWidget != null ? 16 : 0, 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

@@ -903,7 +903,7 @@ class _EmailSectionState extends State<_EmailSection> {
               ),
             ),
           ).animate().fadeIn(
-                duration: const Duration(milliseconds: 150),
+                duration: const Duration(milliseconds: 200),
                 curve: Curves.easeInOutQuad,
               ),
         ),
@@ -940,7 +940,7 @@ class _EmailSectionState extends State<_EmailSection> {
           ),
         ),
       ).animate().fadeIn(
-            duration: const Duration(milliseconds: 150),
+            duration: const Duration(milliseconds: 200),
             curve: Curves.easeInOutQuad,
           );
     }

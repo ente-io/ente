@@ -23,20 +23,11 @@ class ContactsSectionAllPage extends StatefulWidget {
 
 class _ContactsSectionAllPageState extends State<ContactsSectionAllPage> {
   late Future<List<SearchResult>> resutls;
-  final streamSubscriptions = <StreamSubscription>[];
 
   @override
   void initState() {
     super.initState();
     resutls = SearchService.instance.getAllContactsSearchResults(null);
-  }
-
-  @override
-  void dispose() {
-    for (var subscriptions in streamSubscriptions) {
-      subscriptions.cancel();
-    }
-    super.dispose();
   }
 
   @override

@@ -950,7 +950,6 @@ class CollectionsService {
           "collectionID": collection.id,
           "enableCollect": enableCollect,
           "enableJoin": true,
-          // todo: remove after server deployment
         },
       );
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
