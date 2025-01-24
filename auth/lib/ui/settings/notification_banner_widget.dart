@@ -38,7 +38,7 @@ class NotificationBannerWidget extends StatelessWidget {
                   ),
                   sectionSpacing,
                   const BannerWidget(
-                    text: "Support <bold-green>ente<bold-green>",
+                    text: "Support <bold-green>ente</bold-green>",
                     subText: "Give us a star on Github",
                     type: BannerType.starUs,
                   ),
@@ -51,7 +51,7 @@ class NotificationBannerWidget extends StatelessWidget {
                 contents.addAll(
                   [
                     const BannerWidget(
-                      text: "5GB free on <bold-green>ente<bold-green> Photos",
+                      text: "5GB free on <bold-green>ente</bold-green> Photos",
                       subText: "Login with your Auth account",
                       type: BannerType.freeStorage,
                     ),
@@ -62,7 +62,7 @@ class NotificationBannerWidget extends StatelessWidget {
                 contents.addAll(
                   [
                     const BannerWidget(
-                      text: "10% off on <bold-green>ente<bold-green> photos",
+                      text: "10% off on <bold-green>ente</bold-green> photos",
                       subText: "Use code “AUTH” to get 10% off first year",
                       type: BannerType.discount,
                     ),
@@ -87,7 +87,7 @@ class NotificationBannerWidget extends StatelessWidget {
             ),
             sectionSpacing,
             const BannerWidget(
-              text: "Support ente",
+              text: "Support <bold-green>ente</bold-green>",
               subText: "Give us a star on Github",
               type: BannerType.starUs,
             ),
