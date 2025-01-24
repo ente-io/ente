@@ -201,37 +201,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                     labelText: S.of(context).link,
                     isDisabled:
                         !_emailIsValid && (_selectedEmail?.isEmpty ?? true),
-                    onTap: () async {
-                      final newEmail =
-                          _emailIsValid ? _newEmail : _selectedEmail!;
-                      if (widget.isFromSaveOrEditPerson) {
-                        await _emailHoldsEnteAccount(newEmail).then((value) {
-                          if (value) {
-                            Navigator.of(context).pop(newEmail);
-                          }
-                        });
-                      } else {
-                        try {
-                          final result = await linkEmailToPerson(
-                            newEmail,
-                            widget.personID!,
-                            context,
-                          );
-                          if (!result) {
-                            _textController.clear();
-                            return;
-                          }
-
-                          Navigator.of(context).pop(newEmail);
-                        } catch (e) {
-                          await showGenericErrorDialog(
-                            context: context,
-                            error: e,
-                          );
-                          _logger.severe("Failed to link email to person", e);
-                        }
-                      }
-                    },
+                    onTap: _onLinkButtonTap,
                   ),
                   const SizedBox(height: 12),
                 ],
@@ -241,6 +211,37 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _onLinkButtonTap() async {
+    final newEmail = _emailIsValid ? _newEmail : _selectedEmail!;
+    if (widget.isFromSaveOrEditPerson) {
+      await _emailHoldsEnteAccount(newEmail).then((value) {
+        if (value) {
+          Navigator.of(context).pop(newEmail);
+        }
+      });
+    } else {
+      try {
+        final result = await linkEmailToPerson(
+          newEmail,
+          widget.personID!,
+          context,
+        );
+        if (!result) {
+          _textController.clear();
+          return;
+        }
+
+        Navigator.of(context).pop(newEmail);
+      } catch (e) {
+        await showGenericErrorDialog(
+          context: context,
+          error: e,
+        );
+        _logger.severe("Failed to link email to person", e);
+      }
+    }
   }
 
   List<User> _getContacts() {
