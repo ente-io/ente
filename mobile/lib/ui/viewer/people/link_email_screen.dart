@@ -13,7 +13,6 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/user_service.dart";
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import "package:photos/ui/components/dialog_widget.dart";
@@ -45,19 +44,16 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
   String _newEmail = '';
   bool _emailIsValid = false;
   bool isKeypadOpen = false;
-  late CollectionActions collectionActions;
   late List<User> _suggestedUsers;
   late List<User> _filteredUsers;
   final _logger = Logger('LinkEmailScreen');
 
-  // Focus nodes are necessary
   final textFieldFocusNode = FocusNode();
   final _textController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    collectionActions = CollectionActions(CollectionsService.instance);
     _suggestedUsers = _getContacts();
     _filteredUsers = _suggestedUsers;
   }
