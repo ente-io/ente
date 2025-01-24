@@ -23,9 +23,11 @@ class PreferenceService {
   static const kShouldAutoFocusOnSearchBar = "should_auto_focus_on_search_bar";
   static const kShouldMinimizeOnCopy = "should_minimize_on_copy";
   static const kCompactMode = "vi.compactMode";
+  static const kAppInstallTime = "appInstallTime";
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
+    await setAppInstallTime();
   }
 
   bool hasShownCoachMark() {
@@ -102,5 +104,20 @@ class PreferenceService {
 
   Future<void> setShouldMinimizeOnCopy(bool value) async {
     await _prefs.setBool(kShouldMinimizeOnCopy, value);
+  }
+
+  int getAppInstalledTime() {
+    if (_prefs.containsKey(kAppInstallTime)) {
+      return _prefs.getInt(kAppInstallTime)!;
+    } else {
+      return DateTime.now().millisecondsSinceEpoch;
+    }
+  }
+
+  Future<void> setAppInstallTime() async {
+    if (!_prefs.containsKey(kAppInstallTime)) {
+      final installedTimeinMillis = DateTime.now().millisecondsSinceEpoch;
+      await _prefs.setInt(kAppInstallTime, installedTimeinMillis);
+    }
   }
 }
