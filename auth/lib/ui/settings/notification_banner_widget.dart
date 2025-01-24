@@ -16,7 +16,7 @@ class NotificationBannerWidget extends StatelessWidget {
     final appInstallTime = PreferenceService.instance.getAppInstalledTime();
     final differenceInDays = currentTime
         .difference(DateTime.fromMillisecondsSinceEpoch(appInstallTime))
-        .inMinutes;
+        .inDays;
 
     if (Configuration.instance.hasConfiguredAccount()) {
       return FutureBuilder<UserDetails>(
