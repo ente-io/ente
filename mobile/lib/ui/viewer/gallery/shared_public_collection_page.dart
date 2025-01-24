@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/collection_meta_event.dart";
 import "package:photos/events/collection_updated_event.dart";
@@ -95,7 +96,8 @@ class _SharedPublicCollectionPageState
       selectedFiles: _selectedFiles,
       initialFiles: initialFiles,
       albumName: widget.c.collection.displayName,
-      header: widget.c.collection.isJoinEnabled
+      header: widget.c.collection.isJoinEnabled &&
+              Configuration.instance.isLoggedIn()
           ? Padding(
               padding: const EdgeInsets.all(8.0),
               child: EndToEndBanner(
@@ -109,6 +111,7 @@ class _SharedPublicCollectionPageState
                   buttonSize: ButtonSize.small,
                   icon: null,
                   labelText: context.l10n.join,
+                  shouldSurfaceExecutionStates: false,
                   onTap: _joinAlbum,
                 ),
               ),
