@@ -21,7 +21,6 @@ import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/pick_center_point_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
-import "package:photos/utils/share_util.dart";
 
 enum ResultType {
   collection,
@@ -46,8 +45,6 @@ enum SectionType {
   // includes year, month , day, event ResultType
   moment,
   album,
-  // People section shows the files shared by other persons
-  contacts,
   fileTypesAndExtension,
 }
 
@@ -63,8 +60,6 @@ extension SectionTypeExtensions on SectionType {
         return S.of(context).moments;
       case SectionType.location:
         return S.of(context).locations;
-      case SectionType.contacts:
-        return S.of(context).contacts;
       case SectionType.album:
         return S.of(context).albums;
       case SectionType.fileTypesAndExtension:
@@ -82,8 +77,6 @@ extension SectionTypeExtensions on SectionType {
         return S.of(context).searchDatesEmptySection;
       case SectionType.location:
         return S.of(context).searchLocationEmptySection;
-      case SectionType.contacts:
-        return S.of(context).searchPeopleEmptySection;
       case SectionType.album:
         return S.of(context).searchAlbumsEmptySection;
       case SectionType.fileTypesAndExtension:
@@ -102,8 +95,6 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.moment:
         return false;
       case SectionType.location:
-        return true;
-      case SectionType.contacts:
         return true;
       case SectionType.album:
         return true;
@@ -124,8 +115,6 @@ extension SectionTypeExtensions on SectionType {
         return false;
       case SectionType.location:
         return true;
-      case SectionType.contacts:
-        return true;
       case SectionType.album:
         return true;
       case SectionType.fileTypesAndExtension:
@@ -145,8 +134,6 @@ extension SectionTypeExtensions on SectionType {
         return S.of(context).addNew;
       case SectionType.location:
         return S.of(context).addNew;
-      case SectionType.contacts:
-        return S.of(context).invite;
       case SectionType.album:
         return S.of(context).addNew;
       case SectionType.fileTypesAndExtension:
@@ -164,8 +151,6 @@ extension SectionTypeExtensions on SectionType {
         return null;
       case SectionType.location:
         return Icons.add_location_alt_outlined;
-      case SectionType.contacts:
-        return Icons.adaptive.share;
       case SectionType.album:
         return Icons.add;
       case SectionType.fileTypesAndExtension:
@@ -175,12 +160,6 @@ extension SectionTypeExtensions on SectionType {
 
   FutureVoidCallback ctaOnTap(BuildContext context) {
     switch (this) {
-      case SectionType.contacts:
-        return () async {
-          await shareText(
-            S.of(context).shareTextRecommendUsingEnte,
-          );
-        };
       case SectionType.location:
         return () async {
           final centerPoint = await showPickCenterPointSheet(context);
@@ -248,9 +227,6 @@ extension SectionTypeExtensions on SectionType {
 
       case SectionType.location:
         return SearchService.instance.getAllLocationTags(limit);
-
-      case SectionType.contacts:
-        return SearchService.instance.getAllContactsSearchResults(limit);
 
       case SectionType.album:
         return SearchService.instance.getAllCollectionSearchResults(limit);
