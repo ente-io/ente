@@ -828,13 +828,9 @@ class _EmailSectionState extends State<_EmailSection> {
                               buttonType: ButtonType.secondary,
                               labelText: "This is me!",
                               onTap: () async {
-                                final saveOrEditPersonState =
-                                    context.findAncestorStateOfType<
-                                        _SaveOrEditPersonState>()!;
-                                saveOrEditPersonState.setState(() {
-                                  saveOrEditPersonState._email =
-                                      Configuration.instance.getEmail();
-                                });
+                                _updateEmailField(
+                                  Configuration.instance.getEmail(),
+                                );
                               },
                             ),
                           ),
@@ -853,13 +849,7 @@ class _EmailSectionState extends State<_EmailSection> {
                                   ),
                                 );
                                 if (newEmail != null) {
-                                  final saveOrEditPersonState =
-                                      context.findAncestorStateOfType<
-                                          _SaveOrEditPersonState>()!;
-                                  saveOrEditPersonState.setState(() {
-                                    saveOrEditPersonState._email =
-                                        newEmail as String;
-                                  });
+                                  _updateEmailField(newEmail as String);
                                 }
                               },
                             ),
@@ -880,12 +870,7 @@ class _EmailSectionState extends State<_EmailSection> {
                             ),
                           );
                           if (newEmail != null) {
-                            final saveOrEditPersonState =
-                                context.findAncestorStateOfType<
-                                    _SaveOrEditPersonState>()!;
-                            saveOrEditPersonState.setState(() {
-                              saveOrEditPersonState._email = newEmail as String;
-                            });
+                            _updateEmailField(newEmail as String);
                           }
                         },
                       );
@@ -915,11 +900,7 @@ class _EmailSectionState extends State<_EmailSection> {
         decoration: InputDecoration(
           suffixIcon: GestureDetector(
             onTap: () {
-              final saveOrEditPersonState =
-                  context.findAncestorStateOfType<_SaveOrEditPersonState>()!;
-              saveOrEditPersonState.setState(() {
-                saveOrEditPersonState._email = "";
-              });
+              _updateEmailField("");
             },
             child: Icon(
               Icons.close_outlined,
@@ -958,5 +939,13 @@ class _EmailSectionState extends State<_EmailSection> {
       }
     }
     return isAssigned;
+  }
+
+  void _updateEmailField(String? newEmail) {
+    final saveOrEditPersonState =
+        context.findAncestorStateOfType<_SaveOrEditPersonState>()!;
+    saveOrEditPersonState.setState(() {
+      saveOrEditPersonState._email = newEmail;
+    });
   }
 }

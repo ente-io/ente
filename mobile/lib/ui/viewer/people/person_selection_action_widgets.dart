@@ -323,6 +323,7 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
   }) async {
     try {
       final email = Configuration.instance.getEmail();
+
       final updatedPerson1 = await PersonService.instance
           .updateAttributes(currentPersonID, email: '');
       Bus.instance.fire(
@@ -332,6 +333,7 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
           person: updatedPerson1,
         ),
       );
+
       final updatedPerson2 = await PersonService.instance
           .updateAttributes(newPersonID, email: email);
       Bus.instance.fire(
