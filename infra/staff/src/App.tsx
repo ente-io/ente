@@ -1,4 +1,3 @@
-import { Link } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -233,7 +232,6 @@ const App: React.FC = () => {
     ) => {
         setTabValue(newValue);
     };
-
     useEffect(() => {
         const searchParam = new URLSearchParams(window.location.search);
         const userToken = searchParam.get("token");
@@ -241,22 +239,8 @@ const App: React.FC = () => {
         if (userToken) {
             setLocalToken(userToken);
             setToken(userToken);
-
-            const editToken = document.getElementById(":r1:");
-            if (editToken instanceof HTMLInputElement) {
-                editToken.readOnly = true;
-            }
         }
     }, []);
-
-    const updateToken = () => {
-        const editToken = document.getElementById(":r1:");
-        if (editToken instanceof HTMLInputElement) {
-            editToken.readOnly = false;
-            // Change focus to token field
-            editToken.focus();
-        }
-    };
 
     return (
         <div className="container">
@@ -272,30 +256,6 @@ const App: React.FC = () => {
                             staff.ente.io
                         </a>
                         <div className="text-fields">
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                }}
-                            >
-                                <TextField
-                                    label="Token"
-                                    value={localToken}
-                                    onChange={(e) => {
-                                        setLocalToken(e.target.value);
-                                        setToken(e.target.value);
-                                    }}
-                                    size="medium"
-                                    className="text-field-token"
-                                    style={{ maxWidth: "parent" }}
-                                />
-                                <Link
-                                    style={{ textAlign: "left" }}
-                                    onClick={updateToken}
-                                >
-                                    Update Token?
-                                </Link>
-                            </div>
                             <TextField
                                 label="Email"
                                 value={localEmail}

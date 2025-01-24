@@ -24,12 +24,10 @@
 .link-text {
     display: flex;
     align-items: center;
-    padding: 0 16px; /* Add padding for better appearance */
     text-decoration: none; /* Remove underline */
     color: inherit; /* Inherit color from parent */
     font-weight: bold; /* Make the text bold */
     font-size: 40px;
-    margin-bottom: 25px;
 }
 
 .duckie-container {
@@ -62,7 +60,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: space-around;
-    marign: 20px;
+    margin: 20px;
 }
 
 .horizontal-group {
