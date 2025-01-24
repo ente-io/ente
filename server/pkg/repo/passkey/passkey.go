@@ -14,6 +14,7 @@ import (
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/google/uuid"
 	"github.com/spf13/viper"
+	"github.com/sirupsen/logrus"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/utils/byteMarshaller"
@@ -392,7 +393,8 @@ func (r *Repository) FinishAuthentication(user *ente.User, req *http.Request, se
 
 	_, err = r.webAuthnInstance.FinishLogin(passkeyUser, *sessionData, req)
 	if err != nil {
-		err = stacktrace.Propagate(err, "")
+		logrus.Warnf("Could not finish passkey authentication: %s", err)
+		err = &ente.ApiError{Code: ente.BadRequest, Message: "Invalid signature", HttpStatusCode: http.StatusUnauthorized}
 		return
 	}
 
