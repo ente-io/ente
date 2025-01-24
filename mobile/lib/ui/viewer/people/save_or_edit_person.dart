@@ -4,6 +4,7 @@ import "dart:io";
 
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
+import "package:flutter_animate/flutter_animate.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
@@ -310,7 +311,11 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                           },
                         ),
                         const SizedBox(height: 16),
-                        _EmailSection(_email, person?.remoteID),
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeInOutQuad,
+                          child: _EmailSection(_email, person?.remoteID),
+                        ),
                         const SizedBox(height: 32),
                         ButtonWidget(
                           buttonType: ButtonType.primary,
@@ -721,101 +726,111 @@ class _EmailSectionState extends State<_EmailSection> {
   @override
   Widget build(BuildContext context) {
     if (_email == null || _email!.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 20),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
-          decoration: BoxDecoration(
-            color: getEnteColorScheme(context).fillFaint,
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: FutureBuilder<bool>(
-              future: _isMeAssigned(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  final isMeAssigned = snapshot.data!;
-                  if (!isMeAssigned || _initialEmailIsUserEmail) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: ButtonWidget(
-                            buttonType: ButtonType.secondary,
-                            labelText: "This is me!",
-                            onTap: () async {
-                              final saveOrEditPersonState =
-                                  context.findAncestorStateOfType<
-                                      _SaveOrEditPersonState>()!;
-                              saveOrEditPersonState.setState(() {
-                                saveOrEditPersonState._email =
-                                    Configuration.instance.getEmail();
-                              });
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: ButtonWidget(
-                            buttonType: ButtonType.primary,
-                            labelText: "Link email",
-                            shouldSurfaceExecutionStates: false,
-                            onTap: () async {
-                              final newEmail = await routeToPage(
-                                context,
-                                LinkEmailScreen(
-                                  widget.personID,
-                                  isFromSaveEditPerson: true,
-                                ),
-                              );
-                              if (newEmail != null) {
+      return AnimatedSize(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOutQuad,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 20),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
+            decoration: BoxDecoration(
+              color: getEnteColorScheme(context).fillFaint,
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: FutureBuilder<bool>(
+                future: _isMeAssigned(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final isMeAssigned = snapshot.data!;
+                    if (!isMeAssigned || _initialEmailIsUserEmail) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: ButtonWidget(
+                              buttonType: ButtonType.secondary,
+                              labelText: "This is me!",
+                              onTap: () async {
                                 final saveOrEditPersonState =
                                     context.findAncestorStateOfType<
                                         _SaveOrEditPersonState>()!;
                                 saveOrEditPersonState.setState(() {
                                   saveOrEditPersonState._email =
-                                      newEmail as String;
+                                      Configuration.instance.getEmail();
                                 });
-                              }
-                            },
+                              },
+                            ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: ButtonWidget(
+                              buttonType: ButtonType.primary,
+                              labelText: "Link email",
+                              shouldSurfaceExecutionStates: false,
+                              onTap: () async {
+                                final newEmail = await routeToPage(
+                                  context,
+                                  LinkEmailScreen(
+                                    widget.personID,
+                                    isFromSaveEditPerson: true,
+                                  ),
+                                );
+                                if (newEmail != null) {
+                                  final saveOrEditPersonState =
+                                      context.findAncestorStateOfType<
+                                          _SaveOrEditPersonState>()!;
+                                  saveOrEditPersonState.setState(() {
+                                    saveOrEditPersonState._email =
+                                        newEmail as String;
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    } else {
+                      return ButtonWidget(
+                        buttonType: ButtonType.primary,
+                        labelText: "Link email",
+                        shouldSurfaceExecutionStates: false,
+                        onTap: () async {
+                          final newEmail = await routeToPage(
+                            context,
+                            LinkEmailScreen(
+                              widget.personID,
+                              isFromSaveEditPerson: true,
+                            ),
+                          );
+                          if (newEmail != null) {
+                            final saveOrEditPersonState =
+                                context.findAncestorStateOfType<
+                                    _SaveOrEditPersonState>()!;
+                            saveOrEditPersonState.setState(() {
+                              saveOrEditPersonState._email = newEmail as String;
+                            });
+                          }
+                        },
+                      );
+                    }
+                  } else if (snapshot.hasError) {
+                    _logger.severe(
+                      "Error getting isMeAssigned",
+                      snapshot.error,
                     );
+                    return const RepaintBoundary(child: EnteLoadingWidget());
                   } else {
-                    return ButtonWidget(
-                      buttonType: ButtonType.primary,
-                      labelText: "Link email",
-                      shouldSurfaceExecutionStates: false,
-                      onTap: () async {
-                        final newEmail = await routeToPage(
-                          context,
-                          LinkEmailScreen(
-                            widget.personID,
-                            isFromSaveEditPerson: true,
-                          ),
-                        );
-                        if (newEmail != null) {
-                          final saveOrEditPersonState =
-                              context.findAncestorStateOfType<
-                                  _SaveOrEditPersonState>()!;
-                          saveOrEditPersonState.setState(() {
-                            saveOrEditPersonState._email = newEmail as String;
-                          });
-                        }
-                      },
-                    );
+                    return const RepaintBoundary(child: EnteLoadingWidget());
                   }
-                } else if (snapshot.hasError) {
-                  _logger.severe("Error getting isMeAssigned", snapshot.error);
-                  return const RepaintBoundary(child: EnteLoadingWidget());
-                } else {
-                  return const RepaintBoundary(child: EnteLoadingWidget());
-                }
-              },
+                },
+              ),
             ),
-          ),
+          ).animate().fadeIn(
+                duration: const Duration(milliseconds: 150),
+                curve: Curves.easeInOutQuad,
+              ),
         ),
       );
     } else {
@@ -849,7 +864,10 @@ class _EmailSectionState extends State<_EmailSection> {
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-      );
+      ).animate().fadeIn(
+            duration: const Duration(milliseconds: 150),
+            curve: Curves.easeInOutQuad,
+          );
     }
   }
 
