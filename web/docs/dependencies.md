@@ -214,7 +214,8 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
   that it'd entail is not worth the upgrade.
 
 - [heic-convert](https://github.com/catdad-experiments/heic-convert) is used for
-  converting HEIC files (which browsers don't natively support) into JPEG.
+  converting HEIC files (which browsers don't natively support) into JPEG. For
+  (much more) details, see [heic.md](heic.md).
 
 ## Photos app specific
 
