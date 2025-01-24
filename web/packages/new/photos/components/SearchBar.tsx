@@ -258,24 +258,23 @@ const SearchInputWrapper = styled("div")`
 
 const loadOptions = pDebounce(searchOptionsForString, 250);
 
-const createSelectStyles = ({
-    colors,
-    palette,
-}: Theme): StylesConfig<SearchOption, false> => ({
+const createSelectStyles = (
+    theme: Theme,
+): StylesConfig<SearchOption, false> => ({
     container: (style) => ({ ...style, flex: 1 }),
     control: (style, { isFocused }) => ({
         ...style,
-        backgroundColor: palette.background.paper,
-        borderColor: isFocused ? palette.accent.main : "transparent",
+        backgroundColor: theme.vars.palette.background.paper,
+        borderColor: isFocused ? theme.vars.palette.accent.main : "transparent",
         boxShadow: "none",
         ":hover": {
-            borderColor: palette.accent.light,
+            borderColor: theme.vars.palette.accent.light,
             cursor: "text",
         },
     }),
     input: (styles) => ({
         ...styles,
-        color: colors.text.base,
+        color: theme.vars.palette.text.base,
         overflowX: "hidden",
     }),
     menu: (style) => ({
@@ -284,7 +283,7 @@ const createSelectStyles = ({
         marginTop: "1px",
         // Give an opaque and elevated surface color to the menu to override the
         // default (transparent).
-        backgroundColor: palette.background.paper,
+        backgroundColor: theme.vars.palette.background.paper,
     }),
     option: (style, { isFocused }) => ({
         ...style,
@@ -295,7 +294,7 @@ const createSelectStyles = ({
         },
         // Elevate the focused option further.
         "& .option-contents": isFocused
-            ? { backgroundColor: palette.background.paper2 }
+            ? { backgroundColor: theme.vars.palette.background.paper2 }
             : {},
         "&:last-child .MuiDivider-root": {
             display: "none",
@@ -303,7 +302,7 @@ const createSelectStyles = ({
     }),
     placeholder: (style) => ({
         ...style,
-        color: colors.text.muted,
+        color: theme.vars.palette.text.muted,
         whiteSpace: "nowrap",
         overflowX: "hidden",
     }),
@@ -324,13 +323,13 @@ const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
             }}
         >
             <Box
-                sx={(theme) => ({
+                sx={{
                     display: "inline-flex",
                     // Match the default padding of the ValueContainer to make
                     // the icon look properly spaced and aligned.
                     pl: "8px",
-                    color: theme.colors.stroke.muted,
-                })}
+                    color: "stroke.muted",
+                }}
             >
                 {iconForOption(props.getValue()[0])}
             </Box>
@@ -379,8 +378,7 @@ const shouldShowEmptyState = (inputValue: string) => {
     if (!isMLSupported) return false;
 
     const status = mlStatusSnapshot();
-    if (!status || status.phase == "disabled" || status.phase == "done")
-        return false;
+    if (!status || status.phase == "disabled") return false;
 
     // Show it otherwise.
     return true;
@@ -396,13 +394,13 @@ const EmptyState: React.FC<
     const mlStatus = useMLStatusSnapshot();
     const people = usePeopleStateSnapshot()?.visiblePeople;
 
-    if (!mlStatus || mlStatus.phase == "disabled" || mlStatus.phase == "done") {
+    if (!mlStatus || mlStatus.phase == "disabled") {
         // The preflight check should've prevented us from coming here.
         assertionFailed();
         return <></>;
     }
 
-    let label: string;
+    let label: string | undefined;
     switch (mlStatus.phase) {
         case "scheduled":
             label = t("indexing_scheduled");
@@ -426,28 +424,23 @@ const EmptyState: React.FC<
                     <SearchPeopleList {...{ people, onSelectPerson }} />
                 </>
             )}
-            <Typography variant="mini" sx={{ mt: "5px", mb: "4px" }}>
-                {label}
-            </Typography>
+            {label && (
+                <Typography variant="mini" sx={{ mt: "5px", mb: "4px" }}>
+                    {label}
+                </Typography>
+            )}
         </Box>
     );
 };
 
 const SearchPeopleHeader: React.FC<ButtonishProps> = ({ onClick }) => (
-    <SearchPeopleHeaderButton {...{ onClick }}>
-        <Typography sx={{ color: "text.muted" }}>{t("people")}</Typography>
-    </SearchPeopleHeaderButton>
-);
-
-const SearchPeopleHeaderButton = styled(UnstyledButton)(
-    ({ theme }) => `
-    /* The color for the chevron */
-    color: ${theme.colors.stroke.muted};
-    /* Hover indication */
-    && :hover {
-        color: ${theme.colors.stroke.base};
-    }
-`,
+    <UnstyledButton {...{ onClick }}>
+        <Typography
+            sx={{ color: "text.muted", ":hover": { color: "text.base" } }}
+        >
+            {t("people")}
+        </Typography>
+    </UnstyledButton>
 );
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (

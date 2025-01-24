@@ -7,9 +7,9 @@ import { PAGES } from "@/accounts/constants/pages";
 import { appHomeRoute, stashRedirect } from "@/accounts/services/redirect";
 import { sendOTT } from "@/accounts/services/user";
 import type { PageProps } from "@/accounts/types/page";
+import { LinkButton } from "@/base/components/LinkButton";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
-import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";

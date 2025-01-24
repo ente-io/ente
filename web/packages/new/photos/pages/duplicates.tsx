@@ -350,7 +350,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "8px 4px",
-                borderBottom: `1px solid ${theme.palette.divider}`,
+                borderBottom: `1px solid ${theme.vars.palette.divider}`,
             })}
         >
             <Box sx={{ minWidth: "100px" /* 2 icons + gap */ }}>
@@ -672,7 +672,7 @@ const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
                             count: prunableCount,
                         })}
                     </Typography>
-                    <Typography variant="small" fontWeight={"normal"}>
+                    <Typography variant="small" fontWeight="regular">
                         {formattedByteSize(prunableSize)}
                     </Typography>
                 </>

@@ -1,4 +1,9 @@
-import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
+import {
+    RowButton,
+    RowButtonGroup,
+    RowButtonGroupHint,
+    RowSwitch,
+} from "@/base/components/RowButton";
 import {
     NestedSidebarDrawer,
     SidebarDrawerTitlebar,
@@ -12,6 +17,7 @@ import {
     supportedLocales,
     type SupportedLocale,
 } from "@/base/i18n";
+import { DropdownInput } from "@/new/photos/components/DropdownInput";
 import { MLSettings } from "@/new/photos/components/sidebar/MLSettings";
 import {
     confirmDisableMapsDialogAttributes,
@@ -26,10 +32,8 @@ import {
     updateMapEnabled,
 } from "@/new/photos/services/settings";
 import { useAppContext } from "@/new/photos/types/context";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { Divider, Stack, useColorScheme } from "@mui/material";
-import DropdownInput from "components/DropdownInput";
+import { Divider, Stack, Typography, useColorScheme } from "@mui/material";
 import { t } from "i18next";
 import React, { useCallback, useEffect } from "react";
 
@@ -69,23 +73,23 @@ export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                     {isInternalUser() && <ThemeSelector />}
                     <Divider sx={{ my: "2px", opacity: 0.1 }} />
                     {isMLSupported && (
-                        <MenuItemGroup>
-                            <EnteMenuItem
+                        <RowButtonGroup>
+                            <RowButton
                                 endIcon={<ChevronRightIcon />}
-                                onClick={showMLSettings}
                                 label={t("ml_search")}
+                                onClick={showMLSettings}
                             />
-                        </MenuItemGroup>
+                        </RowButtonGroup>
                     )}
-                    <EnteMenuItem
-                        onClick={showMapSettings}
+                    <RowButton
                         endIcon={<ChevronRightIcon />}
                         label={t("map")}
+                        onClick={showMapSettings}
                     />
-                    <EnteMenuItem
-                        onClick={showAdvancedSettings}
+                    <RowButton
                         endIcon={<ChevronRightIcon />}
                         label={t("advanced")}
+                        onClick={showAdvancedSettings}
                     />
                 </Stack>
             </Stack>
@@ -121,13 +125,16 @@ const LanguageSelector = () => {
     }));
 
     return (
-        <DropdownInput
-            options={options}
-            label={t("language")}
-            labelSxProps={{ color: "text.muted" }}
-            selected={locale}
-            setSelected={updateCurrentLocale}
-        />
+        <Stack sx={{ gap: 1 }}>
+            <Typography variant="small" sx={{ px: 1, color: "text.muted" }}>
+                {t("language")}
+            </Typography>
+            <DropdownInput
+                options={options}
+                selected={locale}
+                onSelect={updateCurrentLocale}
+            />
+        </Stack>
     );
 };
 
@@ -173,19 +180,22 @@ const ThemeSelector = () => {
     // During SSR, mode is always undefined.
     if (!mode) return null;
 
-    // TODO: Use translations, also remove unused t("CHOSE_THEME")
+    // TODO(LM): Use translations, also remove unused t("CHOSE_THEME")
     return (
-        <DropdownInput
-            options={[
-                { label: pt("System"), value: "system" },
-                { label: pt("Light"), value: "light" },
-                { label: pt("Dark"), value: "dark" },
-            ]}
-            label={pt("Theme")}
-            labelSxProps={{ color: "text.muted" }}
-            selected={mode}
-            setSelected={setMode}
-        />
+        <Stack sx={{ gap: 1 }}>
+            <Typography variant="small" sx={{ px: 1, color: "text.muted" }}>
+                {pt("Theme")}
+            </Typography>
+            <DropdownInput
+                options={[
+                    { label: pt("System"), value: "system" },
+                    { label: pt("Light"), value: "light" },
+                    { label: pt("Dark"), value: "dark" },
+                ]}
+                selected={mode}
+                onSelect={setMode}
+            />
+        </Stack>
     );
 };
 
@@ -230,14 +240,13 @@ export const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 />
 
                 <Stack sx={{ px: "16px", py: "20px" }}>
-                    <MenuItemGroup>
-                        <EnteMenuItem
-                            onClick={confirmToggle}
-                            variant="toggle"
-                            checked={mapEnabled}
+                    <RowButtonGroup>
+                        <RowSwitch
                             label={t("enabled")}
+                            checked={mapEnabled}
+                            onClick={confirmToggle}
                         />
-                    </MenuItemGroup>
+                    </RowButtonGroup>
                 </Stack>
             </Stack>
         </NestedSidebarDrawer>
@@ -273,17 +282,16 @@ export const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
 
                 <Stack sx={{ px: "16px", py: "20px" }}>
                     <Stack sx={{ gap: "4px" }}>
-                        <MenuItemGroup>
-                            <EnteMenuItem
-                                variant="toggle"
+                        <RowButtonGroup>
+                            <RowSwitch
+                                label={t("faster_upload")}
                                 checked={!cfUploadProxyDisabled}
                                 onClick={toggle}
-                                label={t("faster_upload")}
                             />
-                        </MenuItemGroup>
-                        <MenuSectionTitle
-                            title={t("faster_upload_description")}
-                        />
+                        </RowButtonGroup>
+                        <RowButtonGroupHint>
+                            {t("faster_upload_description")}
+                        </RowButtonGroupHint>
                     </Stack>
                 </Stack>
             </Stack>

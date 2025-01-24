@@ -19,7 +19,7 @@ export default ts.config(
     {
         // The list of (minimatch) globs to ignore. This needs to be the only
         // key in this configuration object.
-        ignores: ["eslint.config.mjs", "app/", "out/", "dist/"],
+        ignores: ["eslint.config.mjs", "scripts/*.js", "app/", "out/", "dist/"],
     },
     {
         // Rule customizations.

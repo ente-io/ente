@@ -275,18 +275,19 @@ export const AttributedMiniDialog: React.FC<
             {(attributes.icon ?? attributes.title) ? (
                 <Stack
                     direction="row"
-                    sx={(theme) => ({
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        "& > svg": {
-                            fontSize: "32px",
-                            color: theme.colors.stroke.faint,
+                    sx={[
+                        {
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            "& > svg": {
+                                fontSize: "32px",
+                                color: "stroke.faint",
+                            },
                         },
-                        padding:
-                            attributes.icon && attributes.title
-                                ? "20px 16px 0px 16px"
-                                : "24px 16px 4px 16px",
-                    })}
+                        attributes.icon && attributes.title
+                            ? { padding: "20px 16px 0px 16px" }
+                            : { padding: "24px 16px 4px 16px" },
+                    ]}
                 >
                     {attributes.title && (
                         <DialogTitle

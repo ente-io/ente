@@ -248,15 +248,6 @@ export const sidebar = [
                         link: "/self-hosting/guides/web-app",
                     },
                     {
-                        text: "Administering your server",
-                        link: "/self-hosting/guides/admin",
-                    },
-
-                    {
-                        text: "Mobile build",
-                        link: "/self-hosting/guides/mobile-build",
-                    },
-                    {
                         text: "Configuring S3",
                         link: "/self-hosting/guides/configuring-s3",
                     },
@@ -275,6 +266,15 @@ export const sidebar = [
                     {
                         text: "Configure CLI for Self Hosted Instance",
                         link: "/self-hosting/guides/selfhost-cli",
+                    },
+                    {
+                        text: "Administering your server",
+                        link: "/self-hosting/guides/admin",
+                    },
+
+                    {
+                        text: "Mobile build",
+                        link: "/self-hosting/guides/mobile-build",
                     },
                 ],
             },

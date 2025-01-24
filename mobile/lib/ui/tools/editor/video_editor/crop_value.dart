@@ -25,8 +25,6 @@ enum CropValue {
         return Fraction.fromString("3/4");
       case CropValue.ratio_4_3:
         return Fraction.fromString("4/3");
-      default:
-        return null;
     }
   }
 

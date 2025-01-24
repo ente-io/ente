@@ -123,8 +123,6 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           return bSize - aSize;
         case SortKey.count:
           return second.files.length - first.files.length;
-        default:
-          throw Exception("Unexpected sort key $sortKey");
       }
     });
   }

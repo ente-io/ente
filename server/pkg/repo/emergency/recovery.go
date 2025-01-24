@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/sirupsen/logrus"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/utils/time"
@@ -33,14 +34,21 @@ func (r RecoverRow) CanRecover() error {
 	return nil
 }
 
-func (repo *Repository) InsertIntoRecovery(ctx *gin.Context, req ente.ContactIdentifier, row ContactRow) (bool, error) {
-	waitTime := time.MicrosecondsAfterHours(row.NoticePeriodInHrs)
-	nextReminder := time.MicrosecondsAfterHours(row.NoticePeriodInHrs - 24)
-	if row.NoticePeriodInHrs < 25 {
-		nextReminder = time.Microseconds()
+func (repo *Repository) InsertIntoRecovery(ctx *gin.Context, contact ente.ContactIdentifier, contactRow ContactRow) (bool, error) {
+	if contactRow.NoticePeriodInHrs <= 24 {
+		logrus.Warn("notice period is less than 24 hours")
+		return false, ente.NewBadRequestWithMessage("notice period should be greater than 24 hours")
+	}
+	waitTime := time.MicrosecondsAfterHours(contactRow.NoticePeriodInHrs)
+	// remind after 7 days.
+	nextReminder := time.MicrosecondsAfterHours(24 * 7)
+	if nextReminder >= waitTime {
+		logrus.Warn("initial reminder is greater than wait time")
+		// remind in 1 day if notice period is less than 7 days.
+		nextReminder = time.MicrosecondsAfterHours(24 * 1)
 	}
 	result, err := repo.DB.ExecContext(ctx, `INSERT INTO emergency_recovery (id,user_id, emergency_contact_id, status, wait_till, next_reminder_at) VALUES ($1, $2, $3, $4, $5, $6) on conflict DO NOTHING`,
-		uuid.New(), req.UserID, req.EmergencyContactID, ente.RecoveryStatusWaiting, waitTime, nextReminder)
+		uuid.New(), contact.UserID, contact.EmergencyContactID, ente.RecoveryStatusWaiting, waitTime, nextReminder)
 	if err != nil {
 		return false, stacktrace.Propagate(err, "")
 	}
@@ -84,6 +92,33 @@ FROM emergency_recovery WHERE user_id=$1  and emergency_contact_id=$2 AND status
 	return sessions, nil
 }
 
+func (r *Repository) GetActiveRecoveryForNotification() (*[]RecoverRow, error) {
+	rows, err := r.DB.Query(`
+SELECT id, user_id, emergency_contact_id, status, wait_till, next_reminder_at, created_at
+FROM emergency_recovery WHERE (status = $1) and next_reminder_at < now_utc_micro_seconds()`, ente.RecoveryStatusWaiting)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+	var sessions []RecoverRow
+	for rows.Next() {
+		var row RecoverRow
+		if err := rows.Scan(&row.ID, &row.UserID, &row.EmergencyContactID, &row.Status, &row.WaitTill, &row.NextReminderAt, &row.CreatedAt); err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		sessions = append(sessions, row)
+	}
+	return &sessions, nil
+}
+
+func (r *Repository) UpdateNextReminder(ctx context.Context, sessionID uuid.UUID, nextReminder int64) error {
+	_, err := r.DB.ExecContext(ctx, `UPDATE emergency_recovery SET next_reminder_at=$1 WHERE id=$2`, nextReminder, sessionID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	return nil
+}
+
 func (repo *Repository) UpdateRecoveryStatusForID(ctx context.Context, sessionID uuid.UUID, status ente.RecoveryStatus) (bool, error) {
 	validPrevStatus := validPreviousStatus(status)
 	var result sql.Result
@@ -99,6 +134,7 @@ func (repo *Repository) UpdateRecoveryStatusForID(ctx context.Context, sessionID
 	rows, _ := result.RowsAffected()
 	return rows > 0, nil
 }
+
 func (repo *Repository) GetRecoverRowByID(ctx context.Context, sessionID uuid.UUID) (*RecoverRow, error) {
 	var row RecoverRow
 	err := repo.DB.QueryRowContext(ctx, `SELECT id, user_id, emergency_contact_id, status, wait_till, next_reminder_at, created_at

@@ -11,6 +11,13 @@
 export const avatarBackgroundColorPublicCollectedFile = "#000000";
 
 /**
+ * Foreground / text color for the avatars.
+ *
+ * All avatar background colors are chosen to work with this.
+ */
+export const avatarTextColor = "#fff";
+
+/**
  * The ordered list of CSS colors for the owner indicator avatar background on
  * files that the user does not own in shared albums.
  *

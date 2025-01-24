@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/ente-io/go-srp"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/kong/go-srp"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -164,7 +164,10 @@ func (c *UserController) createAndInsertSRPSession(
 	srpVerifier string,
 	srpA string,
 ) (*string, *uuid.UUID, error) {
-
+	srpABytes := convertStringToBytes(srpA)
+	if len(srpABytes) != 512 {
+		return nil, nil, ente.NewBadRequestWithMessage("Invalid length for srpA")
+	}
 	unverifiedSessions, err := c.UserAuthRepo.GetUnverifiedSessionsInLastHour(srpUserID)
 	if err != nil {
 		return nil, nil, stacktrace.Propagate(err, "")
@@ -186,12 +189,15 @@ func (c *UserController) createAndInsertSRPSession(
 		return nil, nil, stacktrace.NewError("server is nil")
 	}
 
-	srpServer.SetA(convertStringToBytes(srpA))
-
+	srpServer.SetA(srpABytes)
 	srpB := srpServer.ComputeB()
 
 	if srpB == nil {
 		return nil, nil, stacktrace.NewError("srpB is nil")
+	}
+
+	if len(srpB) != 512 {
+		return nil, nil, ente.NewBadRequestWithMessage("Invalid length for srpB")
 	}
 
 	sessionID, err := c.UserAuthRepo.AddSRPSession(srpUserID, convertBytesToString(serverSecret), srpA)
@@ -209,6 +215,10 @@ func (c *UserController) verifySRPSession(ctx context.Context,
 	sessionID uuid.UUID,
 	srpM1 string,
 ) (*string, error) {
+	srpM1Bytes := convertStringToBytes(srpM1)
+	if len(srpM1Bytes) != 32 {
+		return nil, ente.NewBadRequestWithMessage(fmt.Sprintf("srpM1 size is %d, expected 32", len(srpM1Bytes)))
+	}
 	srpSession, err := c.UserAuthRepo.GetSrpSessionEntity(ctx, sessionID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
@@ -231,10 +241,11 @@ func (c *UserController) verifySRPSession(ctx context.Context,
 	if srpServer == nil {
 		return nil, stacktrace.NewError("server is nil")
 	}
+	srpABytes := convertStringToBytes(srpSession.SRP_A)
 
-	srpServer.SetA(convertStringToBytes(srpSession.SRP_A))
+	srpServer.SetA(srpABytes)
 
-	srpM2Bytes, err := srpServer.CheckM1(convertStringToBytes(srpM1))
+	srpM2Bytes, err := srpServer.CheckM1(srpM1Bytes)
 
 	if err != nil {
 		err2 := c.UserAuthRepo.IncrementSrpSessionAttemptCount(ctx, sessionID)

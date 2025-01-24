@@ -1,4 +1,4 @@
-import { MenuItemGroup } from "@/base/components/Menu";
+import { RowButtonGroup, RowSwitch } from "@/base/components/RowButton";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
@@ -7,7 +7,6 @@ import {
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
 import { disableML, enableML, type MLStatus } from "@/new/photos/services/ml";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
     Box,
     Button,
@@ -281,14 +280,13 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
     return (
         <Stack sx={{ px: "16px", py: "20px", gap: 4 }}>
             <Stack sx={{ gap: 3 }}>
-                <MenuItemGroup>
-                    <EnteMenuItem
+                <RowButtonGroup>
+                    <RowSwitch
                         label={t("enabled")}
-                        variant="toggle"
                         checked={true}
                         onClick={confirmDisableML}
                     />
-                </MenuItemGroup>
+                </RowButtonGroup>
             </Stack>
             <Paper variant="outlined">
                 <Stack>

@@ -5,9 +5,9 @@ import {
 import { PAGES } from "@/accounts/constants/pages";
 import { getSRPAttributes } from "@/accounts/services/srp-remote";
 import { sendOTT } from "@/accounts/services/user";
+import { LinkButton } from "@/base/components/LinkButton";
 import { isMuseumHTTPError } from "@/base/http";
 import log from "@/base/log";
-import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -80,7 +80,7 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
                 }
             />
             <AccountsPageFooter>
-                <Stack sx={{ gap: 4, textAlign: "center" }}>
+                <Stack sx={{ gap: 3, textAlign: "center" }}>
                     <LinkButton onClick={onSignUp}>
                         {t("no_account")}
                     </LinkButton>

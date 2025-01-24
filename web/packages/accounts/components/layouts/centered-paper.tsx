@@ -1,5 +1,7 @@
 import { CenteredFill } from "@/base/components/containers";
-import { AppNavbarNormalFlow } from "@/base/components/Navbar";
+import { EnteLogo } from "@/base/components/EnteLogo";
+import { NavbarBaseNormalFlow } from "@/base/components/Navbar";
+import { wipTheme } from "@/base/components/utils/theme";
 import { Paper, Stack, styled, Typography } from "@mui/material";
 
 /**
@@ -19,8 +21,25 @@ export const AccountsPageContents: React.FC<React.PropsWithChildren> = ({
     children,
 }) => (
     <Stack sx={{ minHeight: "100svh" }}>
-        <AppNavbarNormalFlow />
-        <CenteredFill>
+        <NavbarBaseNormalFlow
+            sx={[
+                (theme) =>
+                    theme.applyStyles("light", {
+                        borderBottomColor: wipTheme ? "stroke.base" : "divider",
+                    }),
+            ]}
+        >
+            <EnteLogo />
+        </NavbarBaseNormalFlow>
+        <CenteredFill
+            sx={[
+                { bgcolor: wipTheme ? "accent.main" : "background.default" },
+                (theme) =>
+                    theme.applyStyles("dark", {
+                        bgcolor: "background.default",
+                    }),
+            ]}
+        >
             <AccountsPagePaper>{children}</AccountsPagePaper>
         </CenteredFill>
     </Stack>

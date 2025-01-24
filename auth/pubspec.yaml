@@ -1,7 +1,7 @@
 
 name: ente_auth
 description: ente two-factor authenticator
-version: 4.2.7+427
+version: 4.3.1+431
 publish_to: none
 
 environment:
@@ -32,7 +32,9 @@ dependencies:
   expandable: ^5.0.1
   expansion_tile_card: ^3.0.0
   ffi: ^2.1.0
-  figma_squircle: ^0.5.3
+  figma_squircle: 
+    git:
+      url: https://github.com/Ax0elz/figma_squircle.git
   file_picker: ^8.1.7
   # https://github.com/incrediblezayed/file_saver/issues/86
   file_saver: ^0.2.11
@@ -82,8 +84,7 @@ dependencies:
   privacy_screen: ^0.0.6
   protobuf: ^3.0.0
   qr_code_scanner: ^1.0.1
-  qr_flutter: ^4.1.0
-  scan: ^1.6.0
+  qr_flutter: ^4.1.0 
   sentry: ^8.7.0
   sentry_flutter: ^8.7.0
   share_plus: ^10.0.2

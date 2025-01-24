@@ -155,8 +155,6 @@ class SearchResultWidget extends StatelessWidget {
         return "Shared";
       case ResultType.faces:
         return "Person";
-      default:
-        return type.name.toUpperCase();
     }
   }
 }

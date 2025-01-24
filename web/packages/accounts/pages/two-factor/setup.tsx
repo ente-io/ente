@@ -6,8 +6,8 @@ import { appHomeRoute } from "@/accounts/services/redirect";
 import type { TwoFactorSecret } from "@/accounts/services/user";
 import { enableTwoFactor, setupTwoFactor } from "@/accounts/services/user";
 import { CenteredFill } from "@/base/components/containers";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import log from "@/base/log";
-import LinkButton from "@ente/shared/components/LinkButton";
 import { encryptWithRecoveryKey } from "@ente/shared/crypto/helpers";
 import { getData, LS_KEYS, setLSUser } from "@ente/shared/storage/localStorage";
 import { Paper, Stack, styled, Typography } from "@mui/material";
@@ -69,9 +69,14 @@ const Page: React.FC = () => {
                             onSubmit={onSubmit}
                             buttonText={t("enable")}
                         />
-                        <LinkButton sx={{ mt: 1 }} onClick={router.back}>
-                            {t("go_back")}
-                        </LinkButton>
+                        <Stack sx={{ alignItems: "center" }}>
+                            <FocusVisibleButton
+                                variant="text"
+                                onClick={router.back}
+                            >
+                                {t("go_back")}
+                            </FocusVisibleButton>
+                        </Stack>
                     </Stack>
                 </ContentsPaper>
             </CenteredFill>
@@ -82,7 +87,8 @@ const Page: React.FC = () => {
 const ContentsPaper = styled(Paper)(({ theme }) => ({
     marginBlock: theme.spacing(2),
     padding: theme.spacing(4, 2),
-    width: "min(420px, 95vw)",
+    // Wide enough to fit the QR code secret in one line under default settings.
+    width: "min(440px, 95vw)",
     display: "flex",
     flexDirection: "column",
     gap: theme.spacing(4),

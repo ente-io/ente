@@ -6,6 +6,7 @@ files:
 extraFiles:
     - from: build
       to: resources
+beforeBuild: scripts/beforeBuild.js
 protocols:
     - name: Ente
       schemes: ["ente"]
@@ -33,3 +34,4 @@ mac:
         arch: [universal]
     category: public.app-category.photography
     hardenedRuntime: true
+    mergeASARs: false

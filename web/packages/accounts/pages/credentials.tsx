@@ -26,12 +26,12 @@ import {
 import type { SRPAttributes } from "@/accounts/services/srp-remote";
 import { getSRPAttributes } from "@/accounts/services/srp-remote";
 import type { PageProps } from "@/accounts/types/page";
+import { LinkButton } from "@/base/components/LinkButton";
 import { LoadingIndicator } from "@/base/components/loaders";
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import { clearLocalStorage } from "@/base/local-storage";
 import log from "@/base/log";
-import LinkButton from "@ente/shared/components/LinkButton";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";

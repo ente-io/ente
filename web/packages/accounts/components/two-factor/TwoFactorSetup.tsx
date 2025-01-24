@@ -1,8 +1,8 @@
+import { CodeBlock } from "@/accounts/components/CodeBlock";
+import { LinkButton } from "@/base/components/LinkButton";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import CodeBlock from "@ente/shared/components/CodeBlock";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import LinkButton from "@ente/shared/components/LinkButton";
-import { styled, Typography } from "@mui/material";
+import { Stack, styled, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";
 import { type SetupMode } from "../../pages/two-factor/setup";
@@ -45,15 +45,15 @@ function SetupManualMode({
     changeToQRMode,
 }: SetupManualModeProps) {
     return (
-        <>
+        <Stack sx={{ gap: 3 }}>
             <Typography sx={{ color: "text.muted" }}>
                 {t("two_factor_manual_entry_message")}
             </Typography>
-            <CodeBlock code={twoFactorSecret?.secretCode ?? ""} my={2} />
+            <CodeBlock code={twoFactorSecret?.secretCode} />
             <LinkButton onClick={changeToQRMode}>
                 {t("scan_qr_title")}
             </LinkButton>
-        </>
+        </Stack>
     );
 }
 
@@ -99,7 +99,7 @@ const LoadingQRCode = styled(VerticallyCentered)(
     ({ theme }) => `
     width: 200px;
     aspect-ratio:1;
-    border: 1px solid ${theme.palette.grey.A200};
+    border: 1px solid ${theme.palette.stroke.muted};
     margin: ${theme.spacing(2)};
     `,
 );

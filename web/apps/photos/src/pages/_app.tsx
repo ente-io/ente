@@ -12,6 +12,7 @@ import log from "@/base/log";
 import { logStartupBanner } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
 import { Notification } from "@/new/photos/components/Notification";
+import { ThemedLoadingBar } from "@/new/photos/components/ThemedLoadingBar";
 import {
     updateAvailableForDownloadDialogAttributes,
     updateReadyToInstallDialogAttributes,
@@ -39,7 +40,6 @@ import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
 
@@ -183,7 +183,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
             <ThemeProvider theme={photosTheme}>
                 <CssBaseline enableColorScheme />
-                <LoadingBar color="#51cd7c" ref={loadingBarRef} />
+                <ThemedLoadingBar ref={loadingBarRef} />
 
                 <AttributedMiniDialog
                     sx={{ zIndex: photosDialogZIndex }}

@@ -7,19 +7,19 @@ import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { downloadString } from "@/base/utils/web";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
-import CodeBlock from "@ente/shared/components/CodeBlock";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import {
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
+    Stack,
     Typography,
-    styled,
 } from "@mui/material";
 import * as bip39 from "bip39";
 import { t } from "i18next";
 import { useCallback, useEffect, useState } from "react";
+import { CodeBlock } from "./CodeBlock";
 
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
@@ -82,12 +82,20 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
                 <Typography sx={{ mb: 3 }}>
                     {t("recovery_key_description")}
                 </Typography>
-                <DashedBorderWrapper>
+                <Stack
+                    sx={{
+                        border: "1px dashed",
+                        borderColor: "stroke.muted",
+                        // TODO(LM): Brighter?
+                        // borderColor: "gray.A400",
+                        borderRadius: 1,
+                    }}
+                >
                     <CodeBlock code={recoveryKey} />
                     <Typography sx={{ m: 2 }}>
                         {t("key_not_stored_note")}
                     </Typography>
-                </DashedBorderWrapper>
+                </Stack>
             </DialogContent>
             <DialogActions>
                 <FocusVisibleButton
@@ -108,11 +116,6 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
         </Dialog>
     );
 };
-
-const DashedBorderWrapper = styled("div")(({ theme }) => ({
-    border: `1px dashed ${theme.palette.grey.A400}`,
-    borderRadius: theme.spacing(1),
-}));
 
 const getRecoveryKeyMnemonic = async () =>
     bip39.entropyToMnemonic(await getRecoveryKey());

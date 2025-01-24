@@ -159,8 +159,6 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                           snapshot.data!.elementAt(index)
                               as List<GenericSearchResult>,
                         );
-                      default:
-                        const SizedBox.shrink();
                     }
                   },
                 )

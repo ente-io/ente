@@ -56,6 +56,14 @@
       "slug": "azuware"
     },
     {
+      "title": "Badlion",
+      "slug": "badlion",
+      "altNames": [
+        "Badlion Client",
+        "BadlionClient"
+      ]
+    },
+    {
       "title": "BaiduCloud",
       "slug": "baidu_cloud",
       "altNames": [
@@ -250,7 +258,14 @@
       ]
     },
     {
+      "title": "CSAM"
+    },
+    {
       "title": "CSFloat"
+    },
+    {
+      "title": "CSGORoll",
+      "slug": "csgoroll"
     },
     {
       "title": "DCS",
@@ -330,8 +345,7 @@
       "title": "Estateguru"
     },
     {
-      "title": "Fastmail",
-      "hex": "0067B9"
+      "title": "Fastmail"
     },
     {
       "title": "Fidelity",
@@ -342,6 +356,10 @@
     },
     {
       "title": "Filen"
+    },
+    {
+      "title": "Finanzfluss",
+      "slug": "finanzfluss"
     },
     {
       "title": "Firefox",
@@ -361,6 +379,14 @@
     },
     {
       "title": "GMX"
+    },
+    {
+      "title": "GommeHD.net",
+      "slug": "gommehd",
+      "altNames": [
+        "GommeHD",
+        "GommeHDnet"
+      ]
     },
     {
       "title": "Google"
@@ -508,6 +534,10 @@
       "slug": "laposte"
     },
     {
+      "title": "LabyMod",
+      "slug": "labymod"
+    },
+    {
       "title": "Lark",
       "slug": "lark",
       "altNames": [
@@ -623,6 +653,10 @@
       "slug": "name_com"
     },
     {
+      "title": "Nextcloud",
+      "slug": "nextcloud"
+    },
+    {
       "title": "NeteaseMail",
       "slug": "netease_mail",
       "altNames": [
@@ -696,6 +730,10 @@
       "altNames": [
         "欧易"
       ]
+    },
+    {
+      "title": "Parqet",
+      "slug": "parqet"
     },
     {
       "title": "Parsec"
@@ -799,6 +837,9 @@
       ]
     },
     {
+      "title": "reMarkable"
+    },
+    {
       "title": "Restorecord"
     },
     {
@@ -879,6 +920,15 @@
     {
       "title": "Standard Notes",
       "slug": "standardnotes"
+    },
+    {
+      "title": "Starbreeze",
+      "altNames": [
+        "Starbreeze Nebula",
+        "Starbreeze Account",
+        "PAYDAY",
+        "PAYDAY 3"
+      ]
     },
     {
       "title": "Surfshark"

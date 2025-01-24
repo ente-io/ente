@@ -7,7 +7,5 @@ String twoFactorTypeToString(TwoFactorType type) {
       return "totp";
     case TwoFactorType.passkey:
       return "passkey";
-    default:
-      return type.name;
   }
 }

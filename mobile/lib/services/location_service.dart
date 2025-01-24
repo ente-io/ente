@@ -267,7 +267,9 @@ Map<LocationTag, int> _getLocationTagsToOccurenceForIsolate(
   for (EnteFile file in files) {
     if (file.uploadedFileID == null ||
         file.uploadedFileID == -1 ||
-        !file.hasLocation) continue;
+        !file.hasLocation) {
+      continue;
+    }
     for (LocalEntity<LocationTag> locationTagEntity in locationTagEntities) {
       final locationTag = locationTagEntity.item;
       final fileCoordinates = file.location!;

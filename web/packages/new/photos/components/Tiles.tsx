@@ -147,6 +147,8 @@ export const DuplicateItemTile = styled(BaseTile)`
  * A variant of {@link BaseTile} meant for use when the tile is interactable.
  */
 export const BaseTileButton = styled(UnstyledButton)`
+    /* Buttons reset this to the special token buttontext */
+    color: inherit;
     /* Buttons reset this to center */
     text-align: inherit;
 
@@ -217,13 +219,15 @@ export const LargeTileTextOverlay = styled(ItemTileOverlay)`
 /**
  * A container for "+", suitable for use with a {@link LargeTileTextOverlay}.
  */
-export const LargeTilePlusOverlay = styled(ItemTileOverlay)`
+export const LargeTilePlusOverlay = styled(ItemTileOverlay)(
+    ({ theme }) => `
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 42px;
-    color: ${({ theme }) => theme.colors.stroke.muted};
-`;
+    color: ${theme.vars.palette.stroke.muted};
+`,
+);
 
 /**
  * An {@link ItemTileOverlay} suitable for holding the collection name shown
