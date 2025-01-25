@@ -6,6 +6,7 @@ import "package:flutter/foundation.dart";
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
+import "package:photos/db/ml/base.dart";
 import 'package:photos/db/ml/db_fields.dart';
 import "package:photos/db/ml/db_model_mappers.dart";
 import "package:photos/extensions/stop_watch.dart";
@@ -28,7 +29,7 @@ import 'package:sqlite_async/sqlite_async.dart';
 ///
 /// [clipTable] - Stores the embeddings of the CLIP model
 /// [fileDataTable] - Stores data about the files that are already processed by the ML models
-class MLDataDB {
+class MLDataDB extends IMLDataDB {
   static final Logger _logger = Logger("MLDataDB");
 
   static const _databaseName = "ente.ml.db";
@@ -108,6 +109,7 @@ class MLDataDB {
   // bulkInsertFaces inserts the faces in the database in batches of 1000.
   // This is done to avoid the error "too many SQL variables" when inserting
   // a large number of faces.
+  @override
   Future<void> bulkInsertFaces(List<Face> faces) async {
     final db = await instance.asyncDB;
     const batchSize = 500;
@@ -143,6 +145,7 @@ class MLDataDB {
     }
   }
 
+  @override
   Future<void> updateFaceIdToClusterId(
     Map<String, String> faceIDToClusterID,
   ) async {
@@ -166,6 +169,7 @@ class MLDataDB {
   }
 
   /// Returns a map of fileID to the indexed ML version
+  @override
   Future<Map<int, int>> faceIndexedFileIds({
     int minimumMlVersion = faceMlVersion,
   }) async {
@@ -183,6 +187,7 @@ class MLDataDB {
     return result;
   }
 
+  @override
   Future<int> getFaceIndexedFileCount({
     int minimumMlVersion = faceMlVersion,
   }) async {
@@ -193,6 +198,7 @@ class MLDataDB {
     return maps.first['count'] as int;
   }
 
+  @override
   Future<Map<String, int>> clusterIdToFaceCount() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
@@ -205,6 +211,7 @@ class MLDataDB {
     return result;
   }
 
+  @override
   Future<Set<String>> getPersonIgnoredClusters(String personID) async {
     final db = await instance.asyncDB;
     // find out clusterIds that are assigned to other persons using the clusters table
@@ -223,6 +230,7 @@ class MLDataDB {
     return ignoredClusterIDs.union(rejectClusterIDs);
   }
 
+  @override
   Future<Set<String>> getPersonClusterIDs(String personID) async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
@@ -232,6 +240,7 @@ class MLDataDB {
     return maps.map((e) => e[clusterIDColumn] as String).toSet();
   }
 
+  @override
   Future<Set<String>> getPersonsClusterIDs(List<String> personID) async {
     final db = await instance.asyncDB;
     final inParam = personID.map((e) => "'$e'").join(',');
@@ -241,6 +250,7 @@ class MLDataDB {
     return maps.map((e) => e[clusterIDColumn] as String).toSet();
   }
 
+  @override
   Future<void> clearTable() async {
     final db = await instance.asyncDB;
 
@@ -253,6 +263,7 @@ class MLDataDB {
     await db.execute(deleteFileDataTable);
   }
 
+  @override
   Future<Iterable<Uint8List>> getFaceEmbeddingsForCluster(
     String clusterID, {
     int? limit,
@@ -265,6 +276,7 @@ class MLDataDB {
     return maps.map((e) => e[embeddingColumn] as Uint8List);
   }
 
+  @override
   Future<Map<String, Iterable<Uint8List>>> getFaceEmbeddingsForClusters(
     Iterable<String> clusterIDs, {
     int? limit,
@@ -297,6 +309,7 @@ class MLDataDB {
     return result;
   }
 
+  @override
   Future<Face?> getCoverFaceForPerson({
     required int recentFileID,
     String? personID,
@@ -384,6 +397,7 @@ class MLDataDB {
     return null;
   }
 
+  @override
   Future<List<Face>?> getFacesForGivenFileID(int fileUploadID) async {
     final db = await instance.asyncDB;
     const String query = '''
@@ -400,6 +414,7 @@ class MLDataDB {
     return maps.map((e) => mapRowToFace(e)).toList();
   }
 
+  @override
   Future<Map<String, Iterable<String>>> getClusterToFaceIDs(
     Set<String> clusterIDs,
   ) async {
@@ -423,6 +438,7 @@ class MLDataDB {
     return result;
   }
 
+  @override
   Future<String?> getClusterIDForFaceID(String faceID) async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
@@ -435,6 +451,7 @@ class MLDataDB {
     return maps.first[clusterIDColumn] as String;
   }
 
+  @override
   Future<Map<String, Iterable<String>>> getAllClusterIdToFaceIDs() async {
     final db = await instance.asyncDB;
     final Map<String, List<String>> result = {};
@@ -449,6 +466,7 @@ class MLDataDB {
     return result;
   }
 
+  @override
   Future<Iterable<String>> getFaceIDsForCluster(String clusterID) async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
@@ -460,6 +478,7 @@ class MLDataDB {
   }
 
   // Get Map of personID to Map of clusterID to faceIDs
+  @override
   Future<Map<String, Map<String, Set<String>>>>
       getPersonToClusterIdToFaceIds() async {
     final db = await instance.asyncDB;
@@ -480,6 +499,7 @@ class MLDataDB {
     return result;
   }
 
+  @override
   Future<Map<String, Set<String>>> getClusterIdToFaceIdsForPerson(
     String personID,
   ) async {
@@ -499,6 +519,7 @@ class MLDataDB {
     return result;
   }
 
+  @override
   Future<Set<String>> getFaceIDsForPerson(String personID) async {
     final db = await instance.asyncDB;
     final faceIdsResult = await db.getAll(
@@ -510,6 +531,7 @@ class MLDataDB {
     return faceIdsResult.map((e) => e[faceIDColumn] as String).toSet();
   }
 
+  @override
   Future<Iterable<double>> getBlurValuesForCluster(String clusterID) async {
     final db = await instance.asyncDB;
     const String query = '''
@@ -530,6 +552,7 @@ class MLDataDB {
     return maps.map((e) => e[faceBlur] as double).toSet();
   }
 
+  @override
   Future<Map<String, String?>> getFaceIdsToClusterIds(
     Iterable<String> faceIds,
   ) async {
@@ -544,6 +567,7 @@ class MLDataDB {
     return result;
   }
 
+  @override
   Future<Map<int, Set<String>>> getFileIdToClusterIds() async {
     final Map<int, Set<String>> result = {};
     final db = await instance.asyncDB;
@@ -560,6 +584,7 @@ class MLDataDB {
     return result;
   }
 
+  @override
   Future<void> forceUpdateClusterIds(
     Map<String, String> faceIDToClusterID,
   ) async {
@@ -575,6 +600,7 @@ class MLDataDB {
     await db.executeBatch(sql, parameterSets);
   }
 
+  @override
   Future<void> removeFaceIdToClusterId(
     Map<String, String> faceIDToClusterID,
   ) async {
@@ -588,6 +614,7 @@ class MLDataDB {
     await db.executeBatch(sql, parameterSets);
   }
 
+  @override
   Future<void> removePerson(String personID) async {
     final db = await instance.asyncDB;
 
@@ -613,6 +640,7 @@ class MLDataDB {
     });
   }
 
+  @override
   Future<List<FaceDbInfoForClustering>> getFaceInfoForClustering({
     int maxFaces = 20000,
     int offset = 0,
@@ -668,6 +696,7 @@ class MLDataDB {
     }
   }
 
+  @override
   Future<Map<String, Uint8List>> getFaceEmbeddingMapForFaces(
     Iterable<String> faceIDs,
   ) async {
@@ -706,6 +735,7 @@ class MLDataDB {
     return result;
   }
 
+  @override
   Future<int> getTotalFaceCount() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
@@ -714,6 +744,7 @@ class MLDataDB {
     return maps.first['count'] as int;
   }
 
+  @override
   Future<int> getErroredFaceCount() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
@@ -722,6 +753,7 @@ class MLDataDB {
     return maps.first['count'] as int;
   }
 
+  @override
   Future<Set<int>> getErroredFileIDs() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
@@ -730,6 +762,7 @@ class MLDataDB {
     return maps.map((e) => e[fileIDColumn] as int).toSet();
   }
 
+  @override
   Future<void> deleteFaceIndexForFiles(List<int> fileIDs) async {
     final db = await instance.asyncDB;
     final String sql = '''
@@ -738,6 +771,7 @@ class MLDataDB {
     await db.execute(sql);
   }
 
+  @override
   Future<int> getClusteredOrFacelessFileCount() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> clustered = await db.getAll(
@@ -768,6 +802,7 @@ class MLDataDB {
     return clusteredFileIDs.length + trulyFacelessFiles.length;
   }
 
+  @override
   Future<double> getClusteredToIndexableFilesRatio() async {
     final int indexableFiles = (await getIndexableFileIDs()).length;
     final int clusteredFiles = await getClusteredOrFacelessFileCount();
@@ -775,6 +810,7 @@ class MLDataDB {
     return clusteredFiles / indexableFiles;
   }
 
+  @override
   Future<int> getUnclusteredFaceCount() async {
     final db = await instance.asyncDB;
     const String query = '''
@@ -791,6 +827,7 @@ class MLDataDB {
 
   /// WARNING: Only use this method if the person has just been created.
   /// Otherwise, use [ClusterFeedbackService.instance.addClusterToExistingPerson] instead.
+  @override
   Future<void> assignClusterToPerson({
     required String personID,
     required String clusterID,
@@ -803,6 +840,7 @@ class MLDataDB {
     await db.execute(sql, [personID, clusterID]);
   }
 
+  @override
   Future<void> bulkAssignClusterToPersonID(
     Map<String, String> clusterToPersonID,
   ) async {
@@ -816,6 +854,7 @@ class MLDataDB {
     await db.executeBatch(sql, parameterSets);
   }
 
+  @override
   Future<void> captureNotPersonFeedback({
     required String personID,
     required String clusterID,
@@ -828,6 +867,7 @@ class MLDataDB {
     await db.execute(sql, [personID, clusterID]);
   }
 
+  @override
   Future<void> bulkCaptureNotPersonFeedback(
     Map<String, String> clusterToPersonID,
   ) async {
@@ -842,6 +882,7 @@ class MLDataDB {
     await db.executeBatch(sql, parameterSets);
   }
 
+  @override
   Future<void> removeNotPersonFeedback({
     required String personID,
     required String clusterID,
@@ -854,6 +895,7 @@ class MLDataDB {
     await db.execute(sql, [personID, clusterID]);
   }
 
+  @override
   Future<void> removeClusterToPerson({
     required String personID,
     required String clusterID,
@@ -867,6 +909,7 @@ class MLDataDB {
   }
 
   // for a given personID, return a map of clusterID to fileIDs using join query
+  @override
   Future<Map<int, Set<String>>> getFileIdToClusterIDSet(String personID) {
     final db = instance.asyncDB;
     return db.then((db) async {
@@ -888,6 +931,7 @@ class MLDataDB {
     });
   }
 
+  @override
   Future<Map<int, Set<String>>> getFileIdToClusterIDSetForCluster(
     Set<String> clusterIDs,
   ) {
@@ -912,6 +956,7 @@ class MLDataDB {
     });
   }
 
+  @override
   Future<void> clusterSummaryUpdate(
     Map<String, (Uint8List, int)> summary,
   ) async {
@@ -937,6 +982,7 @@ class MLDataDB {
     await db.executeBatch(sql, parameterSets);
   }
 
+  @override
   Future<void> deleteClusterSummary(String clusterID) async {
     final db = await instance.asyncDB;
     const String sqlDelete =
@@ -945,6 +991,7 @@ class MLDataDB {
   }
 
   /// Returns a map of clusterID to (avg embedding, count)
+  @override
   Future<Map<String, (Uint8List, int)>> getAllClusterSummary([
     int? minClusterSize,
   ]) async {
@@ -962,6 +1009,7 @@ class MLDataDB {
     return result;
   }
 
+  @override
   Future<Map<String, (Uint8List, int)>> getClusterToClusterSummary(
     Iterable<String> clusterIDs,
   ) async {
@@ -982,6 +1030,7 @@ class MLDataDB {
     return result;
   }
 
+  @override
   Future<Map<String, String>> getClusterIDToPersonID() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
@@ -995,6 +1044,7 @@ class MLDataDB {
   }
 
   /// WARNING: This will delete ALL data in the database! Only use this for debug/testing purposes!
+  @override
   Future<void> dropClustersAndPersonTable({bool faces = false}) async {
     try {
       final db = await instance.asyncDB;
@@ -1022,6 +1072,7 @@ class MLDataDB {
   }
 
   /// WARNING: This will delete ALL data in the tables! Only use this for debug/testing purposes!
+  @override
   Future<void> dropFacesFeedbackTables() async {
     try {
       final db = await instance.asyncDB;
@@ -1038,6 +1089,7 @@ class MLDataDB {
     }
   }
 
+  @override
   Future<List<int>> getFileIDsOfPersonID(String personID) async {
     final db = await instance.asyncDB;
     final result = await db.getAll(
@@ -1054,6 +1106,7 @@ class MLDataDB {
     return [for (final row in result) row[fileIDColumn]];
   }
 
+  @override
   Future<List<int>> getFileIDsOfClusterID(String clusterID) async {
     final db = await instance.asyncDB;
     final result = await db.getAll(
@@ -1069,6 +1122,7 @@ class MLDataDB {
     return [for (final row in result) row[fileIDColumn]];
   }
 
+  @override
   Future<Set<int>> getAllFileIDsOfFaceIDsNotInAnyCluster() async {
     final db = await instance.asyncDB;
     final result = await db.getAll(
@@ -1082,6 +1136,7 @@ class MLDataDB {
     return <int>{for (final row in result) row[fileIDColumn]};
   }
 
+  @override
   Future<Set<int>> getAllFilesAssociatedWithAllClusters({
     List<String>? exceptClusters,
   }) async {
