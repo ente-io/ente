@@ -1,4 +1,9 @@
-import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
+import {
+    RowButton,
+    RowButtonGroup,
+    RowButtonGroupHint,
+    RowSwitch,
+} from "@/base/components/RowButton";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     NestedSidebarDrawer,
@@ -7,7 +12,6 @@ import {
 } from "@/base/components/mui/SidebarDrawer";
 import { disable2FA, get2FAStatus } from "@/new/photos/services/user";
 import { useAppContext } from "@/new/photos/types/context";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import LockIcon from "@mui/icons-material/Lock";
@@ -143,25 +147,24 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 
     return (
         <Stack sx={{ px: "16px", py: "20px", gap: "24px" }}>
-            <MenuItemGroup>
-                <EnteMenuItem
-                    onClick={confirmDisable}
-                    variant="toggle"
-                    checked={true}
+            <RowButtonGroup>
+                <RowSwitch
                     label={t("enabled")}
+                    checked={true}
+                    onClick={confirmDisable}
                 />
-            </MenuItemGroup>
+            </RowButtonGroup>
 
-            <Stack sx={{ gap: "4px" }}>
-                <MenuItemGroup>
-                    <EnteMenuItem
-                        onClick={confirmReconfigure}
-                        variant="primary"
-                        checked={true}
+            <Stack>
+                <RowButtonGroup>
+                    <RowButton
                         label={t("reconfigure")}
+                        onClick={confirmReconfigure}
                     />
-                </MenuItemGroup>
-                <MenuSectionTitle title={t("reconfigure_two_factor_hint")} />
+                </RowButtonGroup>
+                <RowButtonGroupHint>
+                    {t("reconfigure_two_factor_hint")}
+                </RowButtonGroupHint>
             </Stack>
         </Stack>
     );

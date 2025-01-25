@@ -32,13 +32,14 @@
     </screenshot>
   </screenshots>
 
+  <branding>
+    <color type="primary" scheme_preference="light">#1db954</color>
+    <color type="primary" scheme_preference="dark">#1db954</color>
+  </branding>
+
   <releases>
     <release version="1.7.8" date="2025-01-13">
-      <description>
-        <ul>
-          <li>Parse description from image metadata.</li>
-        </ul>
-      </description>
+      <url type="details">https://github.com/ente-io/photos-desktop/releases/tag/v1.7.8</url>
     </release>
   </releases>
 </component>

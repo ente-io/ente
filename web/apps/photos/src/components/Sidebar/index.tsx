@@ -3,11 +3,13 @@ import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import { isDesktop } from "@/base/app";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { LinkButton } from "@/base/components/LinkButton";
+import { RowButton } from "@/base/components/RowButton";
 import { SpaceBetweenFlex } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { ut } from "@/base/i18n";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
@@ -46,7 +48,6 @@ import {
     FlexWrapper,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
@@ -64,6 +65,7 @@ import {
     Skeleton,
     Stack,
     styled,
+    Tooltip,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
@@ -431,28 +433,24 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
 
     return (
         <>
-            <EnteMenuItem
+            <RowButton
                 startIcon={<CategoryIcon />}
-                onClick={openUncategorizedSection}
-                variant="captioned"
                 label={t("section_uncategorized")}
                 caption={collectionSummaries
                     .get(uncategorizedCollectionId)
                     ?.fileCount.toString()}
+                onClick={openUncategorizedSection}
             />
-            <EnteMenuItem
+            <RowButton
                 startIcon={<ArchiveOutlinedIcon />}
-                onClick={openArchiveSection}
-                variant="captioned"
                 label={t("section_archive")}
                 caption={collectionSummaries
                     .get(ARCHIVE_SECTION)
                     ?.fileCount.toString()}
+                onClick={openArchiveSection}
             />
-            <EnteMenuItem
+            <RowButton
                 startIcon={<VisibilityOffIcon />}
-                onClick={openHiddenSection}
-                variant="captioned"
                 label={t("section_hidden")}
                 caption={
                     <LockOutlinedIcon
@@ -462,15 +460,15 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                         }}
                     />
                 }
+                onClick={openHiddenSection}
             />
-            <EnteMenuItem
+            <RowButton
                 startIcon={<DeleteOutlineIcon />}
-                onClick={openTrashSection}
-                variant="captioned"
                 label={t("section_trash")}
                 caption={collectionSummaries
                     .get(TRASH_SECTION)
                     ?.fileCount.toString()}
+                onClick={openTrashSection}
             />
         </>
     );
@@ -512,46 +510,46 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
     return (
         <>
             {isDesktop && (
-                <EnteMenuItem
-                    onClick={showWatchFolder}
+                <RowButton
                     variant="secondary"
                     label={t("watch_folders")}
+                    onClick={showWatchFolder}
                 />
             )}
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
-                onClick={showRecoveryKey}
                 label={t("recovery_key")}
+                onClick={showRecoveryKey}
             />
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
-                onClick={showTwoFactor}
                 label={t("two_factor")}
+                onClick={showTwoFactor}
             />
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
-                onClick={redirectToAccountsPage}
                 label={t("passkeys")}
+                onClick={redirectToAccountsPage}
             />
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
-                onClick={redirectToChangePasswordPage}
                 label={t("change_password")}
+                onClick={redirectToChangePasswordPage}
             />
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
-                onClick={handleChangeEmail}
                 label={t("change_email")}
+                onClick={handleChangeEmail}
             />
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
-                onClick={handleDeduplicate}
                 label={t("deduplicate_files")}
+                onClick={handleDeduplicate}
             />
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
-                onClick={showPreferences}
                 label={t("preferences")}
+                onClick={showPreferences}
             />
 
             <RecoveryKey
@@ -592,27 +590,31 @@ const HelpSection: React.FC = () => {
 
     return (
         <>
-            <EnteMenuItem
-                onClick={requestFeature}
+            <RowButton
+                variant="secondary"
                 label={t("request_feature")}
-                variant="secondary"
+                onClick={requestFeature}
             />
-            <EnteMenuItem
-                onClick={contactSupport}
-                labelComponent={
-                    <span title="support@ente.io">{t("support")}</span>
+            <RowButton
+                variant="secondary"
+                label={
+                    <Tooltip title="support@ente.io">
+                        <Typography sx={{ fontWeight: "medium" }}>
+                            {t("support")}
+                        </Typography>
+                    </Tooltip>
                 }
-                variant="secondary"
+                onClick={contactSupport}
             />
-            <EnteMenuItem
-                onClick={handleExport}
+            <RowButton
+                variant="secondary"
                 label={t("export_data")}
                 endIcon={
                     exportService.isExportInProgress() && (
                         <ActivityIndicator size="20px" />
                     )
                 }
-                variant="secondary"
+                onClick={handleExport}
             />
         </>
     );
@@ -633,16 +635,16 @@ const ExitSection: React.FC = () => {
 
     return (
         <>
-            <EnteMenuItem
-                onClick={handleLogout}
+            <RowButton
+                variant="secondary"
                 color="critical"
                 label={t("logout")}
-                variant="secondary"
+                onClick={handleLogout}
             />
-            <EnteMenuItem
-                onClick={showDeleteAccount}
-                color="critical"
+            <RowButton
                 variant="secondary"
+                color="critical"
+                onClick={showDeleteAccount}
                 label={t("delete_account")}
             />
             <DeleteAccountModal {...deleteAccountVisibilityProps} />
@@ -681,16 +683,20 @@ const DebugSection: React.FC = () => {
     return (
         <>
             {isInternalUser() && (
-                <EnteMenuItem
+                <RowButton
                     variant="secondary"
+                    label={ut("Test Upload")}
                     onClick={testUpload}
-                    label={"Test Upload"}
                 />
             )}
-            <EnteMenuItem
+            <RowButton
+                variant="secondary"
+                label={
+                    <Typography variant="mini" color="text.muted">
+                        {t("debug_logs")}
+                    </Typography>
+                }
                 onClick={confirmLogDownload}
-                variant="mini"
-                label={t("debug_logs")}
             />
             <Stack
                 sx={{

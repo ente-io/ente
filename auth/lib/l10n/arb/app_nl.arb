@@ -88,6 +88,8 @@
   "useRecoveryKey": "Herstelsleutel gebruiken",
   "incorrectPasswordTitle": "Onjuist wachtwoord",
   "welcomeBack": "Welkom terug!",
+  "emailAlreadyRegistered": "E-mail is al geregistreerd.",
+  "emailNotRegistered": "E-mail niet geregistreerd.",
   "madeWithLoveAtPrefix": "met ❤️ gemaakt door",
   "supportDevs": "Abonneer u op <bold-green>ente</bold-green> om ons te steunen",
   "supportDiscount": "Gebruik couponcode \"AUTH\" om het eerste jaar 10% korting te krijgen",

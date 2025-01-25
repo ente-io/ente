@@ -777,9 +777,32 @@ export const deriveKey = async (
  */
 export const deriveSensitiveKey = async (passphrase: string, salt: string) => {
     await sodium.ready;
+
+    const desiredStrength =
+        sodium.crypto_pwhash_MEMLIMIT_SENSITIVE *
+        sodium.crypto_pwhash_OPSLIMIT_SENSITIVE;
+    // When the sensitive memLimit (1 GB) is used, on low spec devices the OS
+    // often kills the app with OOM. Note that could happen at a later stage
+    // too, so checking the current device's capabilities will not help. For
+    // example, the user may create an account on a powerful desktop device, but
+    // then try to log in later on their weaker mobile device, and will need to
+    // reset their password.
+    //
+    // To avoid this, we start with the moderate memLimit (256 MB), but scale up
+    // the opsLimit correspondingly (16). This ensures that the product of these
+    // two variables (the area under the graph that determines the amount of
+    // work) stays the same.
+    let memLimit = sodium.crypto_pwhash_MEMLIMIT_MODERATE; // = 256 MB
+    const factor = Math.floor(
+        sodium.crypto_pwhash_MEMLIMIT_SENSITIVE /
+            sodium.crypto_pwhash_MEMLIMIT_MODERATE,
+    ); // = 4
+    let opsLimit = sodium.crypto_pwhash_OPSLIMIT_SENSITIVE * factor; // = 16
+    if (memLimit * opsLimit != desiredStrength) {
+        throw new Error(`Invalid mem and ops limits: ${memLimit}, ${opsLimit}`);
+    }
+
     const minMemLimit = sodium.crypto_pwhash_MEMLIMIT_MIN;
-    let opsLimit = sodium.crypto_pwhash_OPSLIMIT_SENSITIVE;
-    let memLimit = sodium.crypto_pwhash_MEMLIMIT_SENSITIVE;
     while (memLimit > minMemLimit) {
         try {
             const key = await deriveKey(passphrase, salt, opsLimit, memLimit);

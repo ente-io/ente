@@ -1,8 +1,8 @@
 import { SpaceBetweenFlex } from "@/base/components/containers";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { RowButton } from "@/base/components/RowButton";
 import { useIsTouchscreen } from "@/base/components/utils/hooks";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import GoogleIcon from "@mui/icons-material/Google";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
@@ -176,25 +176,25 @@ const DefaultOptions: React.FC<OptionsProps> = ({
             <Box sx={{ p: "12px", pt: "16px" }}>
                 <Stack spacing={0.5}>
                     {intent != "import" && (
-                        <EnteMenuItem
-                            onClick={() => onSelect("files")}
+                        <RowButton
                             startIcon={<ImageOutlinedIcon />}
                             endIcon={<ChevronRightIcon />}
                             label={t("file")}
+                            onClick={() => onSelect("files")}
                         />
                     )}
-                    <EnteMenuItem
-                        onClick={() => onSelect("folders")}
+                    <RowButton
                         startIcon={<PermMediaOutlinedIcon />}
                         endIcon={<ChevronRightIcon />}
                         label={t("folder")}
+                        onClick={() => onSelect("folders")}
                     />
                     {intent !== "collect" && (
-                        <EnteMenuItem
-                            onClick={() => onSelect("zips")}
+                        <RowButton
                             startIcon={<GoogleIcon />}
                             endIcon={<ChevronRightIcon />}
                             label={t("google_takeout")}
+                            onClick={() => onSelect("zips")}
                         />
                     )}
                 </Stack>

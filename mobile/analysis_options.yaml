@@ -61,6 +61,7 @@ analyzer:
     unnecessary_const: error
     cancel_subscriptions: error
     unrelated_type_equality_checks: error
+    unnecessary_cast: info
 
 
     unawaited_futures: warning # convert to warning after fixing existing issues

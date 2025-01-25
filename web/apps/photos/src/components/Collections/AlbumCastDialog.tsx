@@ -187,7 +187,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
             {view == "pin" && (
                 <>
                     <Stack sx={{ gap: 2, mb: 2 }}>
-                        <Typography>
+                        <Typography sx={{ color: "text.muted" }}>
                             <Trans
                                 i18nKey="visit_cast_url"
                                 components={{
@@ -196,7 +196,9 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                                 values={{ url: castHost }}
                             />
                         </Typography>
-                        <Typography>{t("enter_cast_pin_code")}</Typography>
+                        <Typography sx={{ color: "text.muted" }}>
+                            {t("enter_cast_pin_code")}
+                        </Typography>
                     </Stack>
                     <SingleInputForm
                         callback={onSubmit}
