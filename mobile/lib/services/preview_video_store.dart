@@ -85,7 +85,9 @@ class PreviewVideoStore {
     final session = await FFmpegKit.execute(
       '-i "${file.path}" '
       '-metadata:s:v:0 rotate=0 '
-      '-vf "scale=-2:720,fps=30" '
+      '-vf "scale=-2:720,fps=30,format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" '
+      '-color_primaries bt709 -color_trc bt709 -colorspace bt709 '
+      '-x264-params "colorprim=bt709:transfer=bt709:colormatrix=bt709" '
       '-c:v libx264 -b:v 2000k -preset medium '
       '-c:a aac -b:a 128k -f hls -hls_time 10 -hls_flags single_file '
       '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
