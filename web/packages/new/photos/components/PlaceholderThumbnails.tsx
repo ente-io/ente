@@ -1,51 +1,54 @@
-import { Overlay } from "@/base/components/mui/Container";
+import { Overlay } from "@/base/components/containers";
 import { FileType } from "@/media/file-type";
-import PhotoOutlined from "@mui/icons-material/PhotoOutlined";
-import PlayCircleOutlineOutlined from "@mui/icons-material/PlayCircleOutlineOutlined";
+import PhotoOutlinedIcon from "@mui/icons-material/PhotoOutlined";
+import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { styled } from "@mui/material";
 import React from "react";
 
-interface Iprops {
+/**
+ * A thumbnail shown when we're loading the thumbnail for a file.
+ * @returns
+ */
+export const LoadingThumbnail = () => (
+    <Overlay sx={{ backgroundColor: "fill.faint", borderRadius: "4px" }} />
+);
+
+interface StaticThumbnailProps {
+    /**
+     * The type of the file for which we're showing the placeholder thumbnail.
+     */
     fileType: FileType;
 }
+
+/**
+ * A thumbnail shown when a file does not have a thumbnail.
+ */
+export const StaticThumbnail: React.FC<StaticThumbnailProps> = ({
+    fileType,
+}) => (
+    <CenteredOverlay
+        sx={{
+            backgroundColor: "fill.faint",
+            borderWidth: "1px",
+            borderStyle: "solid",
+            borderColor: "stroke.faint",
+            borderRadius: "4px",
+            "& > svg": {
+                color: "stroke.muted",
+                fontSize: "50px",
+            },
+        }}
+    >
+        {fileType != FileType.video ? (
+            <PhotoOutlinedIcon />
+        ) : (
+            <PlayCircleOutlineOutlinedIcon />
+        )}
+    </CenteredOverlay>
+);
 
 const CenteredOverlay = styled(Overlay)`
     display: flex;
     justify-content: center;
     align-items: center;
 `;
-
-export const StaticThumbnail: React.FC<Iprops> = (props) => {
-    return (
-        <CenteredOverlay
-            sx={(theme) => ({
-                backgroundColor: theme.colors.fill.faint,
-                borderWidth: "1px",
-                borderStyle: "solid",
-                borderColor: theme.colors.stroke.faint,
-                borderRadius: "4px",
-                "& > svg": {
-                    color: theme.colors.stroke.muted,
-                    fontSize: "50px",
-                },
-            })}
-        >
-            {props.fileType !== FileType.video ? (
-                <PhotoOutlined />
-            ) : (
-                <PlayCircleOutlineOutlined />
-            )}
-        </CenteredOverlay>
-    );
-};
-
-export const LoadingThumbnail = () => {
-    return (
-        <Overlay
-            sx={(theme) => ({
-                backgroundColor: theme.colors.fill.faint,
-                borderRadius: "4px",
-            })}
-        />
-    );
-};

@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import { Typography, useTheme } from "@mui/material";
 import { t } from "i18next";
 import React, { useMemo } from "react";
 import { estimatePasswordStrength } from "../utils/password";
@@ -15,20 +15,24 @@ export const PasswordStrengthHint: React.FC<PasswordStrengthHintProps> = ({
         [password],
     );
 
+    const theme = useTheme();
+    const color =
+        passwordStrength == "weak"
+            ? theme.vars.palette.critical.main
+            : passwordStrength == "moderate"
+              ? theme.vars.palette.warning.main
+              : theme.vars.palette.accent.main;
+
     return (
         <Typography
             variant="small"
-            sx={(theme) => ({
+            sx={{
                 mt: "8px",
                 alignSelf: "flex-start",
                 whiteSpace: "pre",
-                color:
-                    passwordStrength == "weak"
-                        ? theme.colors.danger.A700
-                        : passwordStrength == "moderate"
-                          ? theme.colors.warning.A500
-                          : theme.colors.accent.A500,
-            })}
+                color: "var(--color)",
+            }}
+            style={{ "--color": color } as React.CSSProperties}
         >
             {password
                 ? t("passphrase_strength", { context: passwordStrength })

@@ -2,11 +2,14 @@ import { RecoveryKey } from "@/accounts/components/RecoveryKey";
 import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import { isDesktop } from "@/base/app";
 import { EnteLogo } from "@/base/components/EnteLogo";
+import { LinkButton } from "@/base/components/LinkButton";
+import { RowButton } from "@/base/components/RowButton";
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { ut } from "@/base/i18n";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
@@ -45,17 +48,13 @@ import {
     FlexWrapper,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { THEME_COLOR } from "@ente/shared/themes/constants";
-import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
+import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
 import CloseIcon from "@mui/icons-material/Close";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import DeleteOutline from "@mui/icons-material/DeleteOutline";
-import LightModeIcon from "@mui/icons-material/LightMode";
-import LockOutlined from "@mui/icons-material/LockOutlined";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
     Box,
     Button,
@@ -66,13 +65,11 @@ import {
     Skeleton,
     Stack,
     styled,
-    ToggleButton,
-    ToggleButtonGroup,
+    Tooltip,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
 import { WatchFolder } from "components/WatchFolder";
-import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
@@ -106,7 +103,7 @@ export default function Sidebar({
             <HeaderSection closeSidebar={closeSidebar} />
             <Divider />
             <UserDetailsSection sidebarView={sidebarView} />
-            <Stack spacing={0.5} mb={3}>
+            <Stack sx={{ gap: 0.5, mb: 3 }}>
                 <ShortcutSection
                     closeSidebar={closeSidebar}
                     collectionSummaries={collectionSummaries}
@@ -197,8 +194,8 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
 
     return (
         <>
-            <Box px={0.5} mt={2} pb={1.5} mb={1}>
-                <Typography px={1} pb={1} color="text.muted">
+            <Box sx={{ px: 0.5, mt: 2, pb: 1.5, mb: 1 }}>
+                <Typography sx={{ px: 1, pb: 1, color: "text.muted" }}>
                     {userDetails ? (
                         userDetails.email
                     ) : (
@@ -311,12 +308,14 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     if (!message) return <></>;
 
     return (
-        <Box px={1} pt={0.5}>
+        <Box sx={{ px: 1, pt: 0.5 }}>
             <Typography
                 variant="small"
-                color={"text.muted"}
                 onClick={handleClick && handleClick}
-                sx={{ cursor: handleClick && "pointer" }}
+                sx={{
+                    color: "text.muted",
+                    cursor: handleClick && "pointer",
+                }}
             >
                 {message}
             </Typography>
@@ -347,10 +346,8 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
         <Dialog {...{ open, onClose, fullScreen }} maxWidth="xs" fullWidth>
             <SpaceBetweenFlex sx={{ p: "20px 8px 12px 16px" }}>
                 <Stack>
-                    <Typography variant="h3" fontWeight={"bold"}>
-                        {t("subscription")}
-                    </Typography>
-                    <Typography color={"text.muted"}>
+                    <Typography variant="h3">{t("subscription")}</Typography>
+                    <Typography sx={{ color: "text.muted" }}>
                         {t("family_plan")}
                     </Typography>
                 </Stack>
@@ -358,8 +355,8 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
             </SpaceBetweenFlex>
             <DialogContent>
                 <VerticallyCentered>
-                    <Box mb={4}>
-                        <Typography color="text.muted">
+                    <Box sx={{ mb: 4 }}>
+                        <Typography sx={{ color: "text.muted" }}>
                             {t("subscription_info_family")}
                         </Typography>
                         <Typography>
@@ -370,12 +367,11 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
                     <img
                         height={256}
                         src="/images/family-plan/1x.png"
-                        srcSet="/images/family-plan/2x.png 2x,
-                                /images/family-plan/3x.png 3x"
+                        srcSet="/images/family-plan/2x.png 2x, /images/family-plan/3x.png 3x"
                     />
                     <FlexWrapper px={2}>
                         <Button
-                            size="large"
+                            fullWidth
                             variant="outlined"
                             color="critical"
                             onClick={confirmLeaveFamily}
@@ -437,39 +433,42 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
 
     return (
         <>
-            <EnteMenuItem
+            <RowButton
                 startIcon={<CategoryIcon />}
-                onClick={openUncategorizedSection}
-                variant="captioned"
                 label={t("section_uncategorized")}
-                subText={collectionSummaries
+                caption={collectionSummaries
                     .get(uncategorizedCollectionId)
                     ?.fileCount.toString()}
+                onClick={openUncategorizedSection}
             />
-            <EnteMenuItem
-                startIcon={<ArchiveOutlined />}
-                onClick={openArchiveSection}
-                variant="captioned"
+            <RowButton
+                startIcon={<ArchiveOutlinedIcon />}
                 label={t("section_archive")}
-                subText={collectionSummaries
+                caption={collectionSummaries
                     .get(ARCHIVE_SECTION)
                     ?.fileCount.toString()}
+                onClick={openArchiveSection}
             />
-            <EnteMenuItem
-                startIcon={<VisibilityOff />}
-                onClick={openHiddenSection}
-                variant="captioned"
+            <RowButton
+                startIcon={<VisibilityOffIcon />}
                 label={t("section_hidden")}
-                subIcon={<LockOutlined />}
+                caption={
+                    <LockOutlinedIcon
+                        sx={{
+                            verticalAlign: "middle",
+                            fontSize: "19px !important",
+                        }}
+                    />
+                }
+                onClick={openHiddenSection}
             />
-            <EnteMenuItem
-                startIcon={<DeleteOutline />}
-                onClick={openTrashSection}
-                variant="captioned"
+            <RowButton
+                startIcon={<DeleteOutlineIcon />}
                 label={t("section_trash")}
-                subText={collectionSummaries
+                caption={collectionSummaries
                     .get(TRASH_SECTION)
                     ?.fileCount.toString()}
+                onClick={openTrashSection}
             />
         </>
     );
@@ -481,13 +480,8 @@ interface UtilitySectionProps {
 
 const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
     const router = useRouter();
-    const {
-        watchFolderView,
-        setWatchFolderView,
-        themeColor,
-        setThemeColor,
-        showMiniDialog,
-    } = useAppContext();
+    const { watchFolderView, setWatchFolderView, showMiniDialog } =
+        useAppContext();
 
     const { show: showRecoveryKey, props: recoveryKeyVisibilityProps } =
         useModalVisibility();
@@ -504,10 +498,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
         router.push(PAGES.CHANGE_PASSWORD);
     };
 
-    const redirectToChangeEmailPage = () => {
-        closeSidebar();
-        router.push(PAGES.CHANGE_EMAIL);
-    };
+    const handleChangeEmail = () => router.push("/change-email");
 
     const redirectToAccountsPage = async () => {
         closeSidebar();
@@ -516,70 +507,49 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
 
     const handleDeduplicate = () => router.push("/duplicates");
 
-    const toggleTheme = () =>
-        setThemeColor(
-            themeColor === THEME_COLOR.DARK
-                ? THEME_COLOR.LIGHT
-                : THEME_COLOR.DARK,
-        );
-
     return (
         <>
             {isDesktop && (
-                <EnteMenuItem
-                    onClick={showWatchFolder}
+                <RowButton
                     variant="secondary"
                     label={t("watch_folders")}
+                    onClick={showWatchFolder}
                 />
             )}
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
-                onClick={showRecoveryKey}
                 label={t("recovery_key")}
+                onClick={showRecoveryKey}
             />
-            {isInternalUser() && (
-                <EnteMenuItem
-                    onClick={toggleTheme}
-                    variant="secondary"
-                    label={t("CHOSE_THEME")}
-                    endIcon={
-                        <ThemeSwitcher
-                            themeColor={themeColor}
-                            setThemeColor={setThemeColor}
-                        />
-                    }
-                />
-            )}
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
-                onClick={showTwoFactor}
                 label={t("two_factor")}
+                onClick={showTwoFactor}
             />
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
-                onClick={redirectToAccountsPage}
                 label={t("passkeys")}
+                onClick={redirectToAccountsPage}
             />
-
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
+                label={t("change_password")}
                 onClick={redirectToChangePasswordPage}
-                label={t("CHANGE_PASSWORD")}
             />
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
-                onClick={redirectToChangeEmailPage}
-                label={t("CHANGE_EMAIL")}
+                label={t("change_email")}
+                onClick={handleChangeEmail}
             />
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
-                onClick={handleDeduplicate}
                 label={t("deduplicate_files")}
+                onClick={handleDeduplicate}
             />
-            <EnteMenuItem
+            <RowButton
                 variant="secondary"
-                onClick={showPreferences}
                 label={t("preferences")}
+                onClick={showPreferences}
             />
 
             <RecoveryKey
@@ -604,38 +574,6 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
     );
 };
 
-interface ThemeSwitcherProps {
-    themeColor: THEME_COLOR;
-    setThemeColor: (themeColor: THEME_COLOR) => void;
-}
-
-const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
-    themeColor,
-    setThemeColor,
-}) => {
-    const handleChange = (event, themeColor: THEME_COLOR) => {
-        if (themeColor !== null) {
-            setThemeColor(themeColor);
-        }
-    };
-
-    return (
-        <ToggleButtonGroup
-            size="small"
-            value={themeColor}
-            exclusive
-            onChange={handleChange}
-        >
-            <ToggleButton value={THEME_COLOR.LIGHT}>
-                <LightModeIcon />
-            </ToggleButton>
-            <ToggleButton value={THEME_COLOR.DARK}>
-                <DarkModeIcon />
-            </ToggleButton>
-        </ToggleButtonGroup>
-    );
-};
-
 const HelpSection: React.FC = () => {
     const { showMiniDialog } = useContext(AppContext);
     const { openExportModal } = useContext(GalleryContext);
@@ -652,27 +590,31 @@ const HelpSection: React.FC = () => {
 
     return (
         <>
-            <EnteMenuItem
-                onClick={requestFeature}
+            <RowButton
+                variant="secondary"
                 label={t("request_feature")}
-                variant="secondary"
+                onClick={requestFeature}
             />
-            <EnteMenuItem
-                onClick={contactSupport}
-                labelComponent={
-                    <span title="support@ente.io">{t("support")}</span>
+            <RowButton
+                variant="secondary"
+                label={
+                    <Tooltip title="support@ente.io">
+                        <Typography sx={{ fontWeight: "medium" }}>
+                            {t("support")}
+                        </Typography>
+                    </Tooltip>
                 }
-                variant="secondary"
+                onClick={contactSupport}
             />
-            <EnteMenuItem
-                onClick={handleExport}
+            <RowButton
+                variant="secondary"
                 label={t("export_data")}
                 endIcon={
                     exportService.isExportInProgress() && (
                         <ActivityIndicator size="20px" />
                     )
                 }
-                variant="secondary"
+                onClick={handleExport}
             />
         </>
     );
@@ -693,16 +635,16 @@ const ExitSection: React.FC = () => {
 
     return (
         <>
-            <EnteMenuItem
-                onClick={handleLogout}
+            <RowButton
+                variant="secondary"
                 color="critical"
                 label={t("logout")}
-                variant="secondary"
+                onClick={handleLogout}
             />
-            <EnteMenuItem
-                onClick={showDeleteAccount}
-                color="critical"
+            <RowButton
                 variant="secondary"
+                color="critical"
+                onClick={showDeleteAccount}
                 label={t("delete_account")}
             />
             <DeleteAccountModal {...deleteAccountVisibilityProps} />
@@ -741,18 +683,29 @@ const DebugSection: React.FC = () => {
     return (
         <>
             {isInternalUser() && (
-                <EnteMenuItem
+                <RowButton
                     variant="secondary"
+                    label={ut("Test Upload")}
                     onClick={testUpload}
-                    label={"Test Upload"}
                 />
             )}
-            <EnteMenuItem
+            <RowButton
+                variant="secondary"
+                label={
+                    <Typography variant="mini" color="text.muted">
+                        {t("debug_logs")}
+                    </Typography>
+                }
                 onClick={confirmLogDownload}
-                variant="mini"
-                label={t("debug_logs")}
             />
-            <Stack py={"14px"} px={"16px"} gap={"24px"} color="text.muted">
+            <Stack
+                sx={{
+                    py: "14px",
+                    px: "16px",
+                    gap: "24px",
+                    color: "text.muted",
+                }}
+            >
                 {appVersion && (
                     <Typography variant="mini">{appVersion}</Typography>
                 )}

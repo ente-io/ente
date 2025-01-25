@@ -1,16 +1,14 @@
+import { CenteredFill, SpaceBetweenFlex } from "@/base/components/containers";
 import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
 import { type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import {
-    CenteredFill,
-    SpaceBetweenFlex,
-} from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import {
     OverflowMenu,
     OverflowMenuOption,
 } from "@/base/components/OverflowMenu";
+import { SingleInputDialog } from "@/base/components/SingleInputDialog";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import {
     useModalVisibility,
@@ -64,7 +62,6 @@ import type { FaceCluster } from "../../services/ml/cluster";
 import { useAppContext } from "../../types/context";
 import { DialogCloseIconButton } from "../mui/Dialog";
 import { SuggestionFaceList } from "../PeopleList";
-import { SingleInputDialog } from "../SingleInputForm";
 import {
     ItemCard,
     LargeTileButton,
@@ -356,9 +353,7 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
                 PaperProps={{ sx: { maxWidth: "490px" } }}
             >
                 <SpaceBetweenFlex sx={{ padding: "10px 8px 6px 0" }}>
-                    <DialogTitle variant="h3" fontWeight={"bold"}>
-                        {t("add_name")}
-                    </DialogTitle>
+                    <DialogTitle variant="h3">{t("add_name")}</DialogTitle>
                     <DialogCloseIconButton {...{ onClose }} />
                 </SpaceBetweenFlex>
                 <DialogContent_>
@@ -638,12 +633,12 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             PaperProps={{ sx: { minHeight: "80svh" } }}
         >
             <SpaceBetweenFlex
-                sx={{
-                    padding: "20px 16px 16px 16px",
-                    backgroundColor: state.showChoices
-                        ? (theme) => theme.colors.fill.faint
-                        : "transparent",
-                }}
+                sx={[
+                    { padding: "20px 16px 16px 16px" },
+                    state.showChoices
+                        ? { backgroundColor: "fill.faint" }
+                        : { backgroundColor: "transparent" },
+                ]}
             >
                 <Stack sx={{ gap: "8px" }}>
                     <DialogTitle sx={{ "&&&": { p: 0 } }}>
@@ -651,7 +646,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                             ? t("saved_choices")
                             : t("review_suggestions")}
                     </DialogTitle>
-                    <Typography color="text.muted">
+                    <Typography sx={{ color: "text.muted" }}>
                         {person.name ?? " "}
                     </Typography>
                 </Stack>
@@ -664,11 +659,11 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                                 ? t("saved_choices")
                                 : t("review_suggestions")
                         }
-                        sx={{
-                            backgroundColor: state.showChoices
-                                ? (theme) => theme.colors.fill.muted
-                                : "transparent",
-                        }}
+                        sx={[
+                            state.showChoices
+                                ? { backgroundColor: "fill.muted" }
+                                : { backgroundColor: "transparent" },
+                        ]}
                     >
                         <RestoreIcon />
                     </IconButton>
@@ -698,8 +693,10 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 ) : state.suggestions.length == 0 ? (
                     <CenteredFill>
                         <Typography
-                            color="text.muted"
-                            sx={{ textAlign: "center" }}
+                            sx={{
+                                color: "text.muted",
+                                textAlign: "center",
+                            }}
                         >
                             {t("people_suggestions_empty")}
                         </Typography>
@@ -760,7 +757,7 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
                 }}
             >
                 <Stack sx={{ gap: "10px" }}>
-                    <Typography variant="small" color="text.muted">
+                    <Typography variant="small" sx={{ color: "text.muted" }}>
                         {/* Use the face count as as stand-in for the photo count */}
                         {t("photos_count", { count: item.faces.length })}
                     </Typography>

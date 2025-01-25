@@ -21,7 +21,11 @@ export const SearchPeopleList: React.FC<SearchPeopleListProps> = ({
     const isSmallWidth = useIsSmallWidth();
     return (
         <SearchPeopleContainer
-            sx={{ justifyContent: people.length > 3 ? "center" : "start" }}
+            sx={[
+                people.length > 3
+                    ? { justifyContent: "center" }
+                    : { justifyContent: "start" },
+            ]}
         >
             {people.slice(0, isSmallWidth ? 6 : 7).map((person) => (
                 <SearchPersonButton
@@ -59,7 +63,7 @@ const SearchPersonButton = styled(UnstyledButton)(
         height: 100%;
     }
     :hover {
-        outline: 1px solid ${theme.colors.stroke.faint};
+        outline: 1px solid ${theme.vars.palette.stroke.faint};
         outline-offset: 2px;
     }
 `,
@@ -123,7 +127,7 @@ const AnnotatedFaceButton = styled(UnstyledButton)(
         height: 100%;
     }
     :hover {
-        outline: 1px solid ${theme.colors.stroke.faint};
+        outline: 1px solid ${theme.vars.palette.stroke.faint};
         outline-offset: 2px;
     }
 `,
@@ -212,9 +216,7 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
         <Skeleton
             variant="circular"
             animation="wave"
-            sx={{
-                backgroundColor: (theme) => theme.colors.background.elevated2,
-            }}
+            sx={{ backgroundColor: "background.paper2" }}
             width={placeholderDimension}
             height={placeholderDimension}
         />

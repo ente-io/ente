@@ -1,42 +1,3 @@
-/* inter-regular - latin */
-@font-face {
-    font-family: "Inter";
-    font-style: normal;
-    font-weight: 400;
-    src:
-        local(""),
-        url("/fonts/inter-v11-latin-500.woff2") format("woff2"),
-        /* Chrome 26+, Opera 23+, Firefox 39+ */
-            url("/fonts/inter-v11-latin-500.woff") format("woff"); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-    font-display: swap; /*https://web.dev/font-display/?utm_source=lighthouse&utm_medium=devtools#how-to-avoid-showing-invisible-text*/
-}
-
-/* inter-600 - latin */
-@font-face {
-    font-family: "Inter";
-    font-style: normal;
-    font-weight: 700;
-    src:
-        local(""),
-        url("/fonts/inter-v11-latin-600.woff2") format("woff2"),
-        /* Chrome 26+, Opera 23+, Firefox 39+ */
-            url("/fonts/inter-v11-latin-600.woff") format("woff"); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-    font-display: swap;
-}
-
-/* inter-800 - latin */
-@font-face {
-    font-family: "Inter";
-    font-style: normal;
-    font-weight: 900;
-    src:
-        local(""),
-        url("/fonts/inter-v11-latin-800.woff2") format("woff2"),
-        /* Chrome 26+, Opera 23+, Firefox 39+ */
-            url("/fonts/inter-v11-latin-800.woff") format("woff"); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-    font-display: swap;
-}
-
 html,
 body {
     height: 100%;
@@ -57,7 +18,7 @@ body {
     height: 48px;
     background: none !important;
     background-image: none !important;
-    color: #fff;
+    color: var(--mui-palette-stroke-base);
 }
 
 .pswp__item video {
@@ -99,13 +60,13 @@ body {
        a split second when an image is zoomed on to for the first time (this can
        be used as a test to see when this workaround is no longer required).
      */
-    background-color: black;
+    background-color: var(--mui-palette-background-default);
 }
 
 .pswp__button--arrow--left,
 .pswp__button--arrow--right {
-    color: #fff;
-    background-color: #333333 !important;
+    color: var(--mui-palette-stroke-base);
+    background-color: var(--mui-palette-fill-faint) !important;
     border-radius: 50%;
     width: 56px;
     height: 56px;

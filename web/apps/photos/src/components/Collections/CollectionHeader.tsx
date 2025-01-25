@@ -1,6 +1,6 @@
 import { assertionFailed } from "@/base/assert";
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import {
     OverflowMenu,
     OverflowMenuOption,
@@ -27,23 +27,22 @@ import {
     isPinnedCollection,
 } from "@/new/photos/services/magic-metadata";
 import { useAppContext } from "@/new/photos/types/context";
-import { HorizontalFlex } from "@ente/shared/components/Container";
-import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
+import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
-import Favorite from "@mui/icons-material/FavoriteRounded";
+import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import LinkIcon from "@mui/icons-material/Link";
 import LogoutIcon from "@mui/icons-material/Logout";
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import PeopleIcon from "@mui/icons-material/People";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import SortIcon from "@mui/icons-material/Sort";
 import TvIcon from "@mui/icons-material/Tv";
-import Unarchive from "@mui/icons-material/Unarchive";
-import VisibilityOffOutlined from "@mui/icons-material/VisibilityOffOutlined";
-import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
+import UnarchiveIcon from "@mui/icons-material/Unarchive";
+import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Menu, Stack, Tooltip } from "@mui/material";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import { t } from "i18next";
@@ -75,10 +74,8 @@ interface CollectionHeaderProps {
  * A header shown at the top of the list of photos in the gallery, when the
  * gallery is showing a collection.
  */
-export const CollectionHeader: React.FC<CollectionHeaderProps> = ({
-    collectionSummary,
-    ...rest
-}) => {
+export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
+    const { collectionSummary } = props;
     if (!collectionSummary) {
         assertionFailed("Gallery/CollectionHeader without a collection");
         return <></>;
@@ -89,9 +86,9 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = ({
     const EndIcon = ({ type }: { type: CollectionSummaryType }) => {
         switch (type) {
             case "favorites":
-                return <Favorite />;
+                return <FavoriteRoundedIcon />;
             case "archived":
-                return <ArchiveOutlined />;
+                return <ArchiveOutlinedIcon />;
             case "incomingShareViewer":
             case "incomingShareCollaborator":
                 return <PeopleIcon />;
@@ -112,9 +109,7 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = ({
                     fileCount={fileCount}
                     endIcon={<EndIcon type={type} />}
                 />
-                {shouldShowOptions(type) && (
-                    <CollectionOptions collectionSummaryType={type} {...rest} />
-                )}
+                {shouldShowOptions(type) && <CollectionOptions {...props} />}
             </SpaceBetweenFlex>
         </GalleryItemsHeaderAdapter>
     );
@@ -123,16 +118,9 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = ({
 const shouldShowOptions = (type: CollectionSummaryType) =>
     type != "all" && type != "archive";
 
-type CollectionOptionsProps = Omit<
-    CollectionHeaderProps,
-    "collectionSummary"
-> & {
-    collectionSummaryType: CollectionSummaryType;
-};
-
-const CollectionOptions: React.FC<CollectionOptionsProps> = ({
+const CollectionOptions: React.FC<CollectionHeaderProps> = ({
     activeCollection,
-    collectionSummaryType,
+    collectionSummary,
     setActiveCollectionID,
     onCollectionShare,
     onCollectionCast,
@@ -147,6 +135,8 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
         useModalVisibility();
+
+    const { type: collectionSummaryType } = collectionSummary;
 
     /**
      * Return a new function by wrapping an async function in an error handler,
@@ -196,7 +186,12 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                 <Trans
                     i18nKey={"delete_album_message"}
                     components={{
-                        a: <Box component={"span"} color="text.base" />,
+                        a: (
+                            <Box
+                                component={"span"}
+                                sx={{ color: "text.base" }}
+                            />
+                        ),
                     }}
                 />
             ),
@@ -244,11 +239,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
 
         if (collectionSummaryType == "hiddenItems") {
             return downloadDefaultHiddenCollectionHelper(
-                setFilesDownloadProgressAttributesCreator(
-                    activeCollection.name,
-                    HIDDEN_ITEMS_SECTION,
-                    true,
-                ),
+                setFilesDownloadProgressAttributesCreator,
             );
         } else {
             return downloadCollectionHelper(
@@ -319,7 +310,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     );
 
     return (
-        <HorizontalFlex sx={{ display: "inline-flex", gap: "16px" }}>
+        <Box sx={{ display: "inline-flex", gap: "16px" }}>
             <QuickOptions
                 collectionSummaryType={collectionSummaryType}
                 isDownloadInProgress={isActiveCollectionDownloadInProgress}
@@ -330,7 +321,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
 
             <OverflowMenu
                 ariaID="collection-options"
-                triggerButtonIcon={<MoreHoriz ref={overFlowMenuIconRef} />}
+                triggerButtonIcon={<MoreHorizIcon ref={overFlowMenuIconRef} />}
             >
                 {collectionSummaryType == "trash" ? (
                     <EmptyTrashOption onClick={confirmEmptyTrash} />
@@ -385,7 +376,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                 onAscClick={changeSortOrderAsc}
                 onDescClick={changeSortOrderDesc}
             />
-        </HorizontalFlex>
+        </Box>
     );
 };
 
@@ -566,14 +557,14 @@ const SharedCollectionOptions: React.FC<SharedCollectionOptionProps> = ({
         {isArchived ? (
             <OverflowMenuOption
                 onClick={onUnarchiveClick}
-                startIcon={<Unarchive />}
+                startIcon={<UnarchiveIcon />}
             >
                 {t("unarchive_album")}
             </OverflowMenuOption>
         ) : (
             <OverflowMenuOption
                 onClick={onArchiveClick}
-                startIcon={<ArchiveOutlined />}
+                startIcon={<ArchiveOutlinedIcon />}
             >
                 {t("archive_album")}
             </OverflowMenuOption>
@@ -650,14 +641,14 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
                 {isArchived ? (
                     <OverflowMenuOption
                         onClick={onUnarchiveClick}
-                        startIcon={<Unarchive />}
+                        startIcon={<UnarchiveIcon />}
                     >
                         {t("unarchive_album")}
                     </OverflowMenuOption>
                 ) : (
                     <OverflowMenuOption
                         onClick={onArchiveClick}
-                        startIcon={<ArchiveOutlined />}
+                        startIcon={<ArchiveOutlinedIcon />}
                     >
                         {t("archive_album")}
                     </OverflowMenuOption>
@@ -667,14 +658,14 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
         {isHidden ? (
             <OverflowMenuOption
                 onClick={onUnhideClick}
-                startIcon={<VisibilityOutlined />}
+                startIcon={<VisibilityOutlinedIcon />}
             >
                 {t("unhide_collection")}
             </OverflowMenuOption>
         ) : (
             <OverflowMenuOption
                 onClick={onHideClick}
-                startIcon={<VisibilityOffOutlined />}
+                startIcon={<VisibilityOffOutlinedIcon />}
             >
                 {t("hide_collection")}
             </OverflowMenuOption>
@@ -697,7 +688,7 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
 interface CollectionSortOrderMenuProps {
     open: boolean;
     onClose: () => void;
-    overFlowMenuIconRef: React.MutableRefObject<SVGSVGElement>;
+    overFlowMenuIconRef: React.RefObject<SVGSVGElement>;
     onAscClick: () => void;
     onDescClick: () => void;
 }

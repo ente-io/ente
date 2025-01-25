@@ -228,6 +228,9 @@ smtp:
     # The email address from which to send the email. Set this to an email
     # address whose credentials you're providing.
     email:
+    # Optional override for the sender name in the emails. If specified, it will
+    # be used for all emails sent by the instance (default is email specific).
+    sender-name:
 
 # Zoho Zeptomail config (optional)
 #
@@ -331,10 +334,8 @@ internal:
     admin:
     # If set to true, users will not be able to register a new account.
     #
-    # Account creation will fail when entering the email ott. This doesn't
-    # affect the clients, users can still go through the registration flow, but
-    # when entering the ott they received via mail, they will get an
-    # unauthorized error and thus cannot create new accounts.
+    # During sign up, the client will get an unauthorized error and
+    # thus cannot create new accounts.
     disable-registration: false
 
 # Replication config

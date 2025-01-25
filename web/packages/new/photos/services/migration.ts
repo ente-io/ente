@@ -110,3 +110,12 @@ const m4 = () => {
     localStorage.removeItem("subscription");
     localStorage.removeItem("familyData");
 };
+
+// Future cleanup. Prunable so far.
+/*
+const m5 = () => {
+    // MUI now persists the color scheme (also in local storage). This was
+    // anyway never released, was only ever an internal user flag.
+    localStorage.removeItem("theme");
+};
+*/

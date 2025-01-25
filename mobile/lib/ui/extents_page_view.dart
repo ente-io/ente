@@ -346,7 +346,6 @@ class _PageViewState extends State<ExtentsPageView> {
                   break;
 
                 case Axis.horizontal:
-                default:
                   cacheExtent = constraints.maxWidth * widget.extents;
                   break;
               }

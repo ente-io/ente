@@ -1,24 +1,17 @@
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     FlexWrapper,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
 import {
-    Box,
-    Button,
     DialogActions,
     DialogContent,
     LinearProgress,
-    styled,
+    Typography,
 } from "@mui/material";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
 import { ExportStage, type ExportProgress } from "services/export";
-
-export const ComfySpan = styled("span")`
-    padding: 0 0.5rem;
-    word-spacing: 1rem;
-    color: #ddd;
-`;
 
 interface Props {
     exportStage: ExportStage;
@@ -41,7 +34,7 @@ export default function ExportInProgress(props: Props) {
         <>
             <DialogContent>
                 <VerticallyCentered>
-                    <Box mb={1.5}>
+                    <Typography sx={{ mb: 1.5 }}>
                         {props.exportStage === ExportStage.STARTING ? (
                             t("EXPORT_STARTING")
                         ) : props.exportStage === ExportStage.MIGRATION ? (
@@ -56,17 +49,31 @@ export default function ExportInProgress(props: Props) {
                           ExportStage.TRASHING_DELETED_COLLECTIONS ? (
                             t("TRASHING_DELETED_COLLECTIONS")
                         ) : (
-                            <Trans
-                                i18nKey={"EXPORT_PROGRESS"}
-                                components={{
-                                    a: <ComfySpan />,
-                                }}
-                                values={{
-                                    progress: props.exportProgress,
-                                }}
-                            />
+                            <Typography
+                                component="span"
+                                sx={{ color: "text.muted" }}
+                            >
+                                <Trans
+                                    i18nKey={"EXPORT_PROGRESS"}
+                                    components={{
+                                        a: (
+                                            <Typography
+                                                component="span"
+                                                sx={{
+                                                    color: "text.base",
+                                                    pr: "1rem",
+                                                    wordSpacing: "1rem",
+                                                }}
+                                            />
+                                        ),
+                                    }}
+                                    values={{
+                                        progress: props.exportProgress,
+                                    }}
+                                />
+                            </Typography>
                         )}
-                    </Box>
+                    </Typography>
                     <FlexWrapper px={1}>
                         {showIndeterminateProgress() ? (
                             <LinearProgress />
@@ -85,20 +92,20 @@ export default function ExportInProgress(props: Props) {
                 </VerticallyCentered>
             </DialogContent>
             <DialogActions>
-                <Button
+                <FocusVisibleButton
+                    fullWidth
                     color="secondary"
-                    size="large"
                     onClick={props.closeExportDialog}
                 >
                     {t("close")}
-                </Button>
-                <Button
-                    size="large"
+                </FocusVisibleButton>
+                <FocusVisibleButton
+                    fullWidth
                     color="critical"
                     onClick={props.stopExport}
                 >
                     {t("STOP_EXPORT")}
-                </Button>
+                </FocusVisibleButton>
             </DialogActions>
         </>
     );

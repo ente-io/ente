@@ -13,7 +13,6 @@ import { FileType } from "@/media/file-type";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import { extractExifDates } from "@/new/photos/services/exif";
 import {
-    Box,
     Dialog,
     DialogContent,
     DialogTitle,
@@ -136,12 +135,12 @@ const messageForStatus = (step?: Step) => {
 
 const Progress: React.FC<FixProgress> = ({ completed, total }) => (
     <Stack sx={{ width: "100%", gap: "2rem", marginBlockEnd: "20px" }}>
-        <Box sx={{ display: "flex", justifyContent: "center", gap: "2rem" }}>
+        <Stack direction="row" sx={{ justifyContent: "center", gap: "2rem" }}>
             <Typography sx={{ wordSpacing: "1rem" }}>
                 {completed} / {total}
             </Typography>
             <Typography>{t("fix_creation_time_file_updated")}</Typography>
-        </Box>
+        </Stack>
 
         <LinearProgress
             variant="determinate"
@@ -231,10 +230,10 @@ interface FooterProps {
 
 const Footer: React.FC<FooterProps> = ({ step, onSubmit, onClose }) =>
     step != "running" && (
-        <div
-            style={{
+        <Stack
+            direction="row"
+            sx={{
                 width: "100%",
-                display: "flex",
                 marginTop: "24px",
                 justifyContent: "space-around",
             }}
@@ -249,7 +248,7 @@ const Footer: React.FC<FooterProps> = ({ step, onSubmit, onClose }) =>
                 </FocusVisibleButton>
             )}
             {step == "completed" && (
-                <FocusVisibleButton color="primary" fullWidth onClick={onClose}>
+                <FocusVisibleButton fullWidth onClick={onClose}>
                     {t("close")}
                 </FocusVisibleButton>
             )}
@@ -266,7 +265,7 @@ const Footer: React.FC<FooterProps> = ({ step, onSubmit, onClose }) =>
                     </FocusVisibleButton>
                 </>
             )}
-        </div>
+        </Stack>
     );
 
 const updateFiles = async (
@@ -296,11 +295,11 @@ const updateFiles = async (
  * This is generally treated as the creation date of the underlying asset
  * (photo, video, live photo) that this file stores.
  *
- * -   For images, this function allows us to update this date from the Exif and
- *     other metadata embedded in the file.
+ * - For images, this function allows us to update this date from the Exif and
+ *   other metadata embedded in the file.
  *
- * -   For all types of files (including images), this function allows us to
- *     update this date to an explicitly provided value.
+ * - For all types of files (including images), this function allows us to
+ *   update this date to an explicitly provided value.
  *
  * If an Exif-involving {@link fixOption} is passed for an non-image file, then
  * that file is just skipped over. Similarly, if an Exif-involving

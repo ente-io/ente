@@ -59,9 +59,9 @@ const defaultLocale: SupportedLocale = "en-US";
  *
  * Our custom formatters:
  *
- * -   "date": Formats an epoch microsecond value into a string containing the
- *     year, month and day of the the date. For example, under "en-US" it'll
- *     produce a string like "July 19, 2024".
+ * - "date": Formats an epoch microsecond value into a string containing the
+ *   year, month and day of the the date. For example, under "en-US" it'll
+ *   produce a string like "July 19, 2024".
  */
 export const setupI18n = async () => {
     const localeString = localStorage.getItem("locale") ?? undefined;
@@ -113,15 +113,13 @@ export const setupI18n = async () => {
             },
             react: {
                 useSuspense: false,
-                transKeepBasicHtmlNodesFor: [
-                    "div",
-                    "strong",
-                    "h2",
-                    "span",
-                    "code",
-                    "p",
-                    "br",
-                ],
+                // Allow the following tags (without any attributes) to be used
+                // in translations. Such keys can then be rendered using the
+                // Trans component, but without otherwise needing any other
+                // input from our side.
+                //
+                // https://react.i18next.com/latest/trans-component
+                transKeepBasicHtmlNodesFor: ["br", "p", "strong", "code"],
             },
         });
 
@@ -129,8 +127,8 @@ export const setupI18n = async () => {
     i18n.services.formatter?.addCached("date", (locale) => {
         // The "long" dateStyle:
         //
-        // -   Includes: year (y), long-month (MMMM), day (d)
-        // -   English pattern examples: MMMM d, y ("September 14, 1999")
+        // - Includes: year (y), long-month (MMMM), day (d)
+        // - English pattern examples: MMMM d, y ("September 14, 1999")
         //
         const formatter = Intl.DateTimeFormat(locale, { dateStyle: "long" });
         // Value is an epoch microsecond so that we can directly pass the

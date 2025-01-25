@@ -96,7 +96,7 @@ export default function AuthenticateUserModal({
             title={t("password")}
         >
             <VerifyMasterPasswordForm
-                buttonText={t("AUTHENTICATE")}
+                buttonText={t("authenticate")}
                 callback={useMasterPassword}
                 user={user}
                 keyAttributes={keyAttributes}

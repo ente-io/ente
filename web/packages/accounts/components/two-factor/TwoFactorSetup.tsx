@@ -1,8 +1,8 @@
+import { CodeBlock } from "@/accounts/components/CodeBlock";
+import { LinkButton } from "@/base/components/LinkButton";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import CodeBlock from "@ente/shared/components/CodeBlock";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import LinkButton from "@ente/shared/components/LinkButton";
-import { styled, Typography } from "@mui/material";
+import { Stack, styled, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";
 import { type SetupMode } from "../../pages/two-factor/setup";
@@ -20,7 +20,7 @@ export function TwoFactorSetup({ twoFactorSecret }: TwoFactorSetupProps) {
     const changeToQRMode = () => setSetupMode("qrCode");
 
     return (
-        <VerticallyCentered sx={{ mb: 3 }}>
+        <VerticallyCentered sx={{ mb: 3, gap: 1 }}>
             {setupMode == "qrCode" ? (
                 <SetupQRMode
                     twoFactorSecret={twoFactorSecret}
@@ -45,13 +45,15 @@ function SetupManualMode({
     changeToQRMode,
 }: SetupManualModeProps) {
     return (
-        <>
-            <Typography>{t("TWO_FACTOR_MANUAL_CODE_INSTRUCTION")}</Typography>
-            <CodeBlock code={twoFactorSecret?.secretCode ?? ""} my={2} />
+        <Stack sx={{ gap: 3 }}>
+            <Typography sx={{ color: "text.muted" }}>
+                {t("two_factor_manual_entry_message")}
+            </Typography>
+            <CodeBlock code={twoFactorSecret?.secretCode} />
             <LinkButton onClick={changeToQRMode}>
-                {t("SCAN_QR_CODE")}
+                {t("scan_qr_title")}
             </LinkButton>
-        </>
+        </Stack>
     );
 }
 
@@ -66,7 +68,9 @@ function SetupQRMode({
 }: SetupQRModeProps) {
     return (
         <>
-            <Typography>{t("TWO_FACTOR_QR_INSTRUCTION")}</Typography>
+            <Typography sx={{ color: "text.muted" }}>
+                {t("two_factor_qr_help")}
+            </Typography>
             {!twoFactorSecret ? (
                 <LoadingQRCode>
                     <ActivityIndicator />
@@ -77,7 +81,7 @@ function SetupQRMode({
                 />
             )}
             <LinkButton onClick={changeToManualMode}>
-                {t("ENTER_CODE_MANUALLY")}
+                {t("two_factor_manual_entry_title")}
             </LinkButton>
         </>
     );
@@ -95,7 +99,7 @@ const LoadingQRCode = styled(VerticallyCentered)(
     ({ theme }) => `
     width: 200px;
     aspect-ratio:1;
-    border: 1px solid ${theme.palette.grey.A200};
+    border: 1px solid ${theme.palette.stroke.muted};
     margin: ${theme.spacing(2)};
     `,
 );

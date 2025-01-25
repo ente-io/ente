@@ -469,9 +469,9 @@ export const shouldShowAvatar = (file: EnteFile, user: User) => {
 export const handleFileOps = async (
     ops: FILE_OPS_TYPE,
     files: EnteFile[],
-    markTempDeleted: (tempDeletedFiles: EnteFile[]) => void,
+    markTempDeleted: (files: EnteFile[]) => void,
     clearTempDeleted: () => void,
-    markTempHidden: (tempHiddenFiles: EnteFile[]) => void,
+    markTempHidden: (files: EnteFile[]) => void,
     clearTempHidden: () => void,
     fixCreationTime: (files: EnteFile[]) => void,
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,

@@ -1,4 +1,14 @@
 import {
+    AccountsPageContents,
+    AccountsPageFooter,
+    AccountsPageTitle,
+} from "@/accounts/components/layouts/centered-paper";
+import SetPasswordForm, {
+    type SetPasswordFormProps,
+} from "@/accounts/components/SetPasswordForm";
+import { PAGES } from "@/accounts/constants/pages";
+import { appHomeRoute, stashRedirect } from "@/accounts/services/redirect";
+import {
     convertBase64ToBuffer,
     convertBufferToBase64,
     generateSRPClient,
@@ -9,14 +19,9 @@ import {
     startSRPSetup,
     updateSRPAndKeys,
 } from "@/accounts/services/srp-remote";
-import {
-    FormPaper,
-    FormPaperFooter,
-    FormPaperTitle,
-} from "@/base/components/FormPaper";
+import type { UpdatedKey } from "@/accounts/services/user";
+import { LinkButton } from "@/base/components/LinkButton";
 import { sharedCryptoWorker } from "@/base/crypto";
-import { VerticallyCentered } from "@ente/shared/components/Container";
-import LinkButton from "@ente/shared/components/LinkButton";
 import {
     generateAndSaveIntermediateKeyAttributes,
     generateLoginSubKey,
@@ -29,15 +34,8 @@ import type { KEK, KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import SetPasswordForm, {
-    type SetPasswordFormProps,
-} from "../components/SetPasswordForm";
-import { PAGES } from "../constants/pages";
-import { appHomeRoute, stashRedirect } from "../services/redirect";
-import type { UpdatedKey } from "../services/user";
-import type { PageProps } from "../types/page";
 
-const Page: React.FC<PageProps> = () => {
+const Page: React.FC = () => {
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
 
@@ -66,7 +64,7 @@ const Page: React.FC<PageProps> = () => {
         try {
             kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
         } catch {
-            setFieldError("confirm", t("PASSWORD_GENERATION_FAILED"));
+            setFieldError("confirm", t("password_generation_failed"));
             return;
         }
         const encryptedKeyAttributes = await cryptoWorker.encryptToB64(
@@ -138,23 +136,21 @@ const Page: React.FC<PageProps> = () => {
 
     // TODO: Handle the case where user is not loaded yet.
     return (
-        <VerticallyCentered>
-            <FormPaper>
-                <FormPaperTitle>{t("CHANGE_PASSWORD")}</FormPaperTitle>
-                <SetPasswordForm
-                    userEmail={user?.email ?? ""}
-                    callback={onSubmit}
-                    buttonText={t("CHANGE_PASSWORD")}
-                />
-                {(getData(LS_KEYS.SHOW_BACK_BUTTON)?.value ?? true) && (
-                    <FormPaperFooter>
-                        <LinkButton onClick={router.back}>
-                            {t("go_back")}
-                        </LinkButton>
-                    </FormPaperFooter>
-                )}
-            </FormPaper>
-        </VerticallyCentered>
+        <AccountsPageContents>
+            <AccountsPageTitle>{t("change_password")}</AccountsPageTitle>
+            <SetPasswordForm
+                userEmail={user?.email ?? ""}
+                callback={onSubmit}
+                buttonText={t("change_password")}
+            />
+            {(getData(LS_KEYS.SHOW_BACK_BUTTON)?.value ?? true) && (
+                <AccountsPageFooter>
+                    <LinkButton onClick={router.back}>
+                        {t("go_back")}
+                    </LinkButton>
+                </AccountsPageFooter>
+            )}
+        </AccountsPageContents>
     );
 };
 

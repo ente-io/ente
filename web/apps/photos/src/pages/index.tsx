@@ -1,7 +1,10 @@
-import { Login } from "@/accounts/components/Login";
-import { SignUp } from "@/accounts/components/SignUp";
+import { LoginContents } from "@/accounts/components/LoginContents";
+import { SignUpContents } from "@/accounts/components/SignUpContents";
+import { CenteredFill, CenteredFlex } from "@/base/components/containers";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { wipTheme } from "@/base/components/utils/theme";
 import log from "@/base/log";
 import { albumsAppOrigin, customAPIHost } from "@/base/origins";
 import { DevSettings } from "@/new/photos/components/DevSettings";
@@ -12,26 +15,18 @@ import localForage from "@ente/shared/storage/localForage";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
-import {
-    Box,
-    Button,
-    Typography,
-    styled,
-    type TypographyProps,
-} from "@mui/material";
+import { Box, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { CarouselProvider, DotGroup, Slide, Slider } from "pure-react-carousel";
-import "pure-react-carousel/dist/react-carousel.es.css";
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 
-export default function LandingPage() {
-    const { showNavBar, showMiniDialog } = useAppContext();
+const Page: React.FC = () => {
+    const { showMiniDialog } = useAppContext();
 
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(true);
-    const [host, setHost] = useState<string | undefined>();
+    const [host, setHost] = useState<string | undefined>(undefined);
 
     const router = useRouter();
 
@@ -42,7 +37,6 @@ export default function LandingPage() {
 
     useEffect(() => {
         refreshHost();
-        showNavBar(false);
         const currentURL = new URL(window.location.href);
         const albumsURL = new URL(albumsAppOrigin());
         currentURL.pathname = router.pathname;
@@ -123,41 +117,56 @@ export default function LandingPage() {
                 <ActivityIndicator />
             ) : (
                 <>
-                    <SlideContainer>
+                    <SlideshowPanel>
                         <Logo_>
                             <EnteLogo height={24} />
                         </Logo_>
                         <Slideshow />
-                    </SlideContainer>
+                    </SlideshowPanel>
                     <MobileBox>
-                        <Button
+                        <FocusVisibleButton
                             color="accent"
-                            size="large"
                             onClick={redirectToSignupPage}
                         >
-                            {t("NEW_USER")}
-                        </Button>
-                        <Button size="large" onClick={redirectToLoginPage}>
-                            {t("EXISTING_USER")}
-                        </Button>
+                            {t("new_to_ente")}
+                        </FocusVisibleButton>
+                        <FocusVisibleButton onClick={redirectToLoginPage}>
+                            {t("existing_user")}
+                        </FocusVisibleButton>
                         <MobileBoxFooter {...{ host }} />
                     </MobileBox>
-                    <DesktopBox>
-                        <SideBox>
-                            <Box sx={{ maxWidth: "320px" }}>
-                                {showLogin ? (
-                                    <Login {...{ signUp, host }} />
-                                ) : (
-                                    <SignUp {...{ router, login, host }} />
-                                )}
-                            </Box>
-                        </SideBox>
+                    <DesktopBox
+                        sx={[
+                            {
+                                bgcolor: wipTheme
+                                    ? "background.default"
+                                    : "background.paper2",
+                            },
+                            (theme) =>
+                                theme.applyStyles("dark", {
+                                    bgcolor: "background.paper2",
+                                }),
+                        ]}
+                    >
+                        <Stack sx={{ width: "320px", py: 4, gap: 4 }}>
+                            {showLogin ? (
+                                <LoginContents
+                                    {...{ onSignUp: signUp, host }}
+                                />
+                            ) : (
+                                <SignUpContents
+                                    {...{ router, onLogin: login, host }}
+                                />
+                            )}
+                        </Stack>
                     </DesktopBox>
                 </>
             )}
         </TappableContainer>
     );
-}
+};
+
+export default Page;
 
 interface TappableContainerProps {
     /**
@@ -207,26 +216,28 @@ const TappableContainer: React.FC<
     };
 
     return (
-        <TappableContainer_ onClick={handleClick}>
-            <>
-                <DevSettings open={showDevSettings} onClose={handleClose} />
-                {children}
-            </>
-        </TappableContainer_>
+        <CenteredFill
+            sx={[
+                {
+                    bgcolor: wipTheme
+                        ? "background.paper2"
+                        : "background.default",
+                    "@media (width <= 1024px)": {
+                        flexDirection: "column",
+                    },
+                },
+                (theme) =>
+                    theme.applyStyles("dark", {
+                        bgcolor: "background.default",
+                    }),
+            ]}
+            onClick={handleClick}
+        >
+            <DevSettings open={showDevSettings} onClose={handleClose} />
+            {children}
+        </CenteredFill>
     );
 };
-
-const TappableContainer_ = styled("div")`
-    display: flex;
-    flex: 1;
-    align-items: center;
-    justify-content: center;
-    background-color: #000;
-
-    @media (max-width: 1024px) {
-        flex-direction: column;
-    }
-`;
 
 /**
  * Disable the ability to set the custom server when we're running on our own
@@ -237,28 +248,40 @@ const shouldAllowChangingAPIOrigin = () => {
     return !(hostname.endsWith(".ente.io") || hostname.endsWith(".ente.sh"));
 };
 
-const SlideContainer = styled("div")`
-    flex: 1;
+const SlideshowPanel = styled("div")`
+    align-self: stretch;
+
+    flex-shrink: 1;
+    flex-grow: 1;
+    flex-basis: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: center;
 
-    @media (max-width: 1024px) {
+    @media (width <= 1024px) {
         flex-grow: 0;
+    }
+    @media (width > 1024px) {
+        width: 700px;
     }
 `;
 
 const Logo_ = styled("div")`
+    /* Bias towards the left for better visual alignment with the slides. */
+    padding-inline-end: 1rem;
+
     margin-block-start: 32px;
-    margin-block-end: 48px;
+    margin-block-end: 40px;
+    @media (width >= 1024px) {
+        margin-block-end: 48px;
+    }
 `;
 
 const MobileBox = styled("div")`
     display: none;
 
-    @media (max-width: 1024px) {
+    @media (width <= 1024px) {
         max-width: 375px;
         width: 100%;
         padding: 12px;
@@ -274,9 +297,9 @@ interface MobileBoxFooterProps {
 
 const MobileBoxFooter: React.FC<MobileBoxFooterProps> = ({ host }) => {
     return (
-        <Box pt={4} textAlign="center">
+        <Box sx={{ pt: 4, textAlign: "center" }}>
             {host && (
-                <Typography variant="mini" color="text.faint">
+                <Typography variant="mini" sx={{ color: "text.faint" }}>
                     {host}
                 </Typography>
             )}
@@ -284,119 +307,112 @@ const MobileBoxFooter: React.FC<MobileBoxFooterProps> = ({ host }) => {
     );
 };
 
-const DesktopBox = styled("div")`
-    flex: 1;
-    height: 100%;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #242424;
+const DesktopBox = styled(CenteredFlex)`
+    flex-shrink: 0;
+    flex-grow: 2;
+    flex-basis: auto;
 
-    @media (max-width: 1024px) {
+    height: 100%;
+    padding-inline: 20px;
+
+    @media (width <= 1024px) {
         display: none;
     }
 `;
 
-const SideBox = styled("div")`
-    display: flex;
-    flex-direction: column;
-    min-width: 320px;
-`;
-
 const Slideshow: React.FC = () => {
+    const [selectedIndex, setSelectedIndex] = useState(0);
+    const containerRef = useRef<HTMLDivElement | undefined>(undefined);
+
+    useEffect(() => {
+        const intervalID = setInterval(() => {
+            setSelectedIndex((selectedIndex + 1) % 3);
+        }, 5000);
+        return () => clearInterval(intervalID);
+    });
+
+    useEffect(() => {
+        const container = containerRef.current!;
+        const left = containerRef.current!.offsetWidth * selectedIndex;
+        // Smooth scroll doesn't work with Chrome intermittently. A common
+        // workaround is to wrap the scrollTo in a setTimeout etc, but even that
+        // doesn't help for our particular scenario.
+        //
+        // Ref: https://github.com/facebook/react/issues/23396
+        //
+        // As an alternative, scroll twice (once smoothly, once without) to the
+        // same position so that at least the fallback works on Chrome.
+        container.scrollTo({ left, behavior: "smooth" });
+        setTimeout(() => container.scrollTo({ left }), 500);
+    }, [selectedIndex]);
+
     return (
-        <CarouselProvider
-            naturalSlideWidth={400}
-            naturalSlideHeight={300}
-            isIntrinsicHeight={true}
-            totalSlides={3}
-            isPlaying={true}
-        >
-            <Slider>
-                <Slide index={0}>
-                    <Img
-                        src="/images/onboarding-lock/1x.png"
-                        srcSet="/images/onboarding-lock/2x.png 2x,
-/images/onboarding-lock/3x.png 3x"
-                    />
-                    <FeatureText>
-                        <Trans i18nKey={"intro_slide_1_title"} />
-                    </FeatureText>
-                    <TextContainer>{t("intro_slide_1")}</TextContainer>
-                </Slide>
-                <Slide index={1}>
-                    <SlideContents>
-                        <Img
-                            src="/images/onboarding-safe/1x.png"
-                            srcSet="/images/onboarding-safe/2x.png 2x,
-                /images/onboarding-safe/3x.png 3x"
-                        />
-                        <FeatureText>
-                            <Trans i18nKey={"intro_slide_2_title"} />
-                        </FeatureText>
-                        <TextContainer>{t("intro_slide_2")}</TextContainer>
-                    </SlideContents>
-                </Slide>
-                <Slide index={2}>
-                    <SlideContents>
-                        <Img
-                            src="/images/onboarding-sync/1x.png"
-                            srcSet="/images/onboarding-sync/2x.png 2x,
-                /images/onboarding-sync/3x.png 3x"
-                        />
-                        <FeatureText>
-                            <Trans i18nKey={"intro_slide_3_title"} />
-                        </FeatureText>
-                        <TextContainer>{t("intro_slide_3")}</TextContainer>
-                    </SlideContents>
-                </Slide>
-            </Slider>
-            <CustomDotGroup />
-        </CarouselProvider>
+        <SlidesContainer ref={containerRef}>
+            <Slide>
+                <Img
+                    src="/images/onboarding-lock/1x.png"
+                    srcSet="/images/onboarding-lock/2x.png 2x, /images/onboarding-lock/3x.png 3x"
+                />
+                <SlideTitle>
+                    <Trans i18nKey={"intro_slide_1_title"} />
+                </SlideTitle>
+                <SlideDescription>{t("intro_slide_1")}</SlideDescription>
+            </Slide>
+            <Slide>
+                <Img
+                    src="/images/onboarding-safe/1x.png"
+                    srcSet="/images/onboarding-safe/2x.png 2x, /images/onboarding-safe/3x.png 3x"
+                />
+                <SlideTitle>
+                    <Trans i18nKey={"intro_slide_2_title"} />
+                </SlideTitle>
+                <SlideDescription>{t("intro_slide_2")}</SlideDescription>
+            </Slide>
+            <Slide>
+                <Img
+                    src="/images/onboarding-sync/1x.png"
+                    srcSet="/images/onboarding-sync/2x.png 2x, /images/onboarding-sync/3x.png 3x"
+                />
+                <SlideTitle>
+                    <Trans i18nKey={"intro_slide_3_title"} />
+                </SlideTitle>
+                <SlideDescription>{t("intro_slide_3")}</SlideDescription>
+            </Slide>
+        </SlidesContainer>
     );
 };
 
-const TextContainer = (props: TypographyProps) => (
-    <Typography color={"text.muted"} mt={2} mb={3} {...props} />
+const SlidesContainer = styled("div")`
+    /* Override the center align for ourselves so that we don't revert back to
+       our intrinsic width. */
+    align-self: stretch;
+    display: flex;
+    overflow-x: hidden;
+`;
+
+const Slide = styled(Stack)`
+    min-width: 100%;
+    align-items: center;
+    text-align: center;
+`;
+
+const SlideTitle: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <Typography variant="h3" sx={{ mt: 4 }}>
+        {children}
+    </Typography>
 );
 
-const FeatureText = (props: TypographyProps) => (
-    <Typography variant="h3" mt={4} {...props} />
+const SlideDescription: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <Typography sx={{ color: "text.muted", mt: 2, mb: 3 }}>
+        {children}
+    </Typography>
 );
 
 const Img = styled("img")`
     height: 250px;
     object-fit: contain;
 
-    @media (max-width: 400px) {
+    @media (width <= 400px) {
         height: 180px;
     }
-`;
-
-const CustomDotGroup = styled(DotGroup)`
-    margin-block-start: 2px;
-    margin-block-end: 24px;
-
-    button {
-        margin-inline-end: 14px;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        padding: 0;
-        border: 0;
-        background-color: #fff;
-        opacity: 0.5;
-        transition: opacity 0.6s ease;
-    }
-
-    button.carousel__dot--selected {
-        background-color: #51cd7c;
-        opacity: 1;
-    }
-`;
-
-const SlideContents = styled("div")`
-    display: flex;
-    flex-direction: column;
 `;

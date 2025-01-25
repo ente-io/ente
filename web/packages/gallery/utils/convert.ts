@@ -1,20 +1,10 @@
 import { isDesktop } from "@/base/app";
 import log from "@/base/log";
-import { CustomErrorMessage } from "@/base/types/ipc";
 import { workerBridge } from "@/base/worker/worker-bridge";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
 import { convertToMP4 } from "../services/ffmpeg";
 import { detectFileTypeInfo } from "./detect-type";
-
-/**
- * This will be set to false if we get an error from the Node.js side of our
- * desktop app telling us that native JPEG conversion is not available for the
- * current OS/arch combination.
- *
- * That way, we can stop pestering it again and again, saving an IPC round-trip.
- */
-let _isNativeJPEGConversionAvailable = true;
 
 /**
  * Return a new {@link Blob} containing an image's data in a format that the
@@ -23,33 +13,33 @@ let _isNativeJPEGConversionAvailable = true;
  * The type of the returned blob is set, whenever possible, to the MIME type of
  * the data that we're dealing with.
  *
- * @param fileName The name of the file whose data is {@link imageBlob}.
- *
  * @param imageBlob A {@link Blob} containing the contents of an image file.
+ *
+ * @param fileName The name of the file whose data {@link imageBlob} is.
  *
  * The logic used by this function is:
  *
- * 1.  Try to detect the MIME type of the file from its contents and/or name.
+ * 1. Try to detect the MIME type of the file from its contents and/or name.
  *
- * 2.  If this detected type is one of the types that we know that the browser
- *     likely cannot render, continue. Otherwise return the imageBlob that was
- *     passed in (after setting its MIME type).
+ * 2. If this detected type is one of the types that we know that the browser
+ *    likely cannot render, continue. Otherwise return the imageBlob that was
+ *    passed in (after setting its MIME type).
  *
- * 3.  If we're running in our desktop app and this MIME type is something our
- *     desktop app can natively convert to a JPEG (using ffmpeg), do that and
- *     return the resultant JPEG blob.
+ * 3. If we're running in our desktop app and this MIME type is something our
+ *    desktop app can natively convert to a JPEG (using ffmpeg), do that and
+ *    return the resultant JPEG blob.
  *
- * 4.  If this is an HEIC file, use our (WASM) HEIC converter and return the
- *     resultant JPEG blob.
+ * 4. If this is an HEIC file, use our (WASM) HEIC converter and return the
+ *    resultant JPEG blob.
  *
- * 5.  Otherwise return the original (with the MIME type if we were able to
- *     deduce one).
+ * 5. Otherwise return the original (with the MIME type if we were able to
+ *    deduce one).
  *
  * In will catch all errors and return the original in those cases.
  */
 export const renderableImageBlob = async (
-    fileName: string,
     imageBlob: Blob,
+    fileName: string,
 ) => {
     try {
         const file = new File([imageBlob], fileName);
@@ -62,18 +52,11 @@ export const renderableImageBlob = async (
             // If we're running in our desktop app, see if our Node.js layer can
             // convert this into a JPEG using native tools.
 
-            if (isDesktop && _isNativeJPEGConversionAvailable) {
+            if (isDesktop) {
                 try {
                     return await nativeConvertToJPEG(imageBlob);
                 } catch (e) {
-                    if (
-                        e instanceof Error &&
-                        e.message.endsWith(CustomErrorMessage.NotAvailable)
-                    ) {
-                        _isNativeJPEGConversionAvailable = false;
-                    } else {
-                        log.error("Native conversion to JPEG failed", e);
-                    }
+                    log.error("Native conversion to JPEG failed", e);
                 }
             }
 

@@ -45,6 +45,25 @@
       "hex": "fd4b2d"
     },
     {
+      "title": "AzurHosts",
+      "slug": "azurhosts",
+      "altNames": [
+        "minenode"
+      ]
+    },
+    {
+      "title": "AzurWare",
+      "slug": "azuware"
+    },
+    {
+      "title": "Badlion",
+      "slug": "badlion",
+      "altNames": [
+        "Badlion Client",
+        "BadlionClient"
+      ]
+    },
+    {
       "title": "BaiduCloud",
       "slug": "baidu_cloud",
       "altNames": [
@@ -71,6 +90,9 @@
         "NGA玩家社区",
         "NGA社区"
       ]
+    },
+    {
+      "title": "Belo"
     },
     {
       "title": "Bethesda",
@@ -176,6 +198,9 @@
       "title": "Bybit"
     },
     {
+      "title": "Caixa"
+    },
+    {
       "title": "Canva"
     },
     {
@@ -233,7 +258,14 @@
       ]
     },
     {
+      "title": "CSAM"
+    },
+    {
       "title": "CSFloat"
+    },
+    {
+      "title": "CSGORoll",
+      "slug": "csgoroll"
     },
     {
       "title": "DCS",
@@ -299,7 +331,7 @@
     },
     {
       "title": "enom",
-      "slug": "enom_v1"
+      "slug": "enom"
     },
     {
       "title": "Epic Games",
@@ -313,6 +345,9 @@
       "title": "Estateguru"
     },
     {
+      "title": "Fastmail"
+    },
+    {
       "title": "Fidelity",
       "slug": "fidelity",
       "altNames": [
@@ -321,6 +356,10 @@
     },
     {
       "title": "Filen"
+    },
+    {
+      "title": "Finanzfluss",
+      "slug": "finanzfluss"
     },
     {
       "title": "Firefox",
@@ -340,6 +379,14 @@
     },
     {
       "title": "GMX"
+    },
+    {
+      "title": "GommeHD.net",
+      "slug": "gommehd",
+      "altNames": [
+        "GommeHD",
+        "GommeHDnet"
+      ]
     },
     {
       "title": "Google"
@@ -487,6 +534,10 @@
       "slug": "laposte"
     },
     {
+      "title": "LabyMod",
+      "slug": "labymod"
+    },
+    {
       "title": "Lark",
       "slug": "lark",
       "altNames": [
@@ -602,6 +653,10 @@
       "slug": "name_com"
     },
     {
+      "title": "Nextcloud",
+      "slug": "nextcloud"
+    },
+    {
       "title": "NeteaseMail",
       "slug": "netease_mail",
       "altNames": [
@@ -611,6 +666,10 @@
     },
     {
       "title": "NextDNS"
+    },
+    {
+      "title": "Newgrounds",
+      "slug": "newgrounds"
     },
     {
       "title": "Newton",
@@ -673,6 +732,10 @@
       ]
     },
     {
+      "title": "Parqet",
+      "slug": "parqet"
+    },
+    {
       "title": "Parsec"
     },
     {
@@ -712,6 +775,14 @@
     },
     {
       "title": "PostNL"
+    },
+    {
+      "title": "PostScan Mail",
+      "slug": "postscanmail",
+      "altNames": [
+        "Post Scan Mail",
+        "PostScanMail"
+      ]
     },
     {
       "title": "Privacy Guides",
@@ -764,6 +835,9 @@
         "registrobr",
         "Registro.br"
       ]
+    },
+    {
+      "title": "reMarkable"
     },
     {
       "title": "Restorecord"
@@ -846,6 +920,15 @@
     {
       "title": "Standard Notes",
       "slug": "standardnotes"
+    },
+    {
+      "title": "Starbreeze",
+      "altNames": [
+        "Starbreeze Nebula",
+        "Starbreeze Account",
+        "PAYDAY",
+        "PAYDAY 3"
+      ]
     },
     {
       "title": "Surfshark"

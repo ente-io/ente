@@ -265,6 +265,36 @@ class EnteFile {
     }
   }
 
+  String get publicDownloadUrl {
+    if (localFileServer.isNotEmpty) {
+      return "$localFileServer/$uploadedFileID";
+    }
+    final endpoint = Configuration.instance.getHttpEndpoint();
+    if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
+      return endpoint +
+          "/public-collection/files/download/" +
+          uploadedFileID.toString();
+    } else {
+      return "https://public-albums.ente.io/download/?fileID=" +
+          uploadedFileID.toString();
+    }
+  }
+
+  String get pubPreviewUrl {
+    if (localFileServer.isNotEmpty) {
+      return "$localFileServer/thumb/$uploadedFileID";
+    }
+    final endpoint = Configuration.instance.getHttpEndpoint();
+    if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
+      return endpoint +
+          "/public-collection/files/preview/" +
+          uploadedFileID.toString();
+    } else {
+      return "https://public-albums.ente.io/preview/?fileID=" +
+          uploadedFileID.toString();
+    }
+  }
+
   String? get caption {
     return pubMagicMetadata?.caption;
   }

@@ -12,16 +12,16 @@ import type { LocalFaceIndex } from "./face";
  *
  * The index related object stores are the following:
  *
- * -   "file-status": Contains {@link FileStatus} objects, one for each
- *     {@link EnteFile} that the ML subsystem knows about. Periodically (and
- *     when required), this is synced with the list of files that the current
- *     client knows about locally.
+ * - "file-status": Contains {@link FileStatus} objects, one for each
+ *   {@link EnteFile} that the ML subsystem knows about. Periodically (and when
+ *   required), this is synced with the list of files that the current client
+ *   knows about locally.
  *
- * -   "face-index": Contains {@link LocalFaceIndex} objects, either indexed
- *     locally or fetched from remote.
+ * - "face-index": Contains {@link LocalFaceIndex} objects, either indexed
+ *   locally or fetched from remote.
  *
- * -   "clip-index": Contains {@link LocalCLIPIndex} objects, either indexed
- *     locally or fetched from remote.
+ * - "clip-index": Contains {@link LocalCLIPIndex} objects, either indexed
+ *   locally or fetched from remote.
  *
  * These three stores are keyed by {@link fileID}. The "file-status" contains
  * book-keeping about the indexing process (whether or not a file needs
@@ -33,9 +33,9 @@ import type { LocalFaceIndex } from "./face";
  *
  * The face clustering related object stores are the following:
  *
- * -   "face-cluster": Contains {@link FaceCluster} objects, one for each
- *     cluster of faces that either the clustering algorithm produced locally.
- *     It is indexed by the cluster ID.
+ * - "face-cluster": Contains {@link FaceCluster} objects, one for each cluster
+ *   of faces that either the clustering algorithm produced locally. It is
+ *   indexed by the cluster ID.
  */
 interface MLDBSchema extends DBSchema {
     "file-status": {
@@ -249,9 +249,7 @@ export const addFileEntry = async (fileID: number) => {
 /**
  * Update entries in ML DB to align with the state of local files outside ML DB.
  *
- * @param localFileIDs IDs of all the files that the client is aware of,
- * filtered to only keep the files that the user owns and the formats that can
- * be indexed by our current indexing pipelines.
+ * @param localFileIDs IDs of all the files that the client is aware of.
  *
  * @param localTrashFilesIDs IDs of all the files in trash.
  *

@@ -1,7 +1,6 @@
 import "dart:async";
 import "dart:io";
 
-import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:media_kit/media_kit.dart";
@@ -17,7 +16,6 @@ import "package:photos/services/files_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
-import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
@@ -226,17 +224,6 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
       });
     }
   }
-
-  Widget _getThumbnail() {
-    return Container(
-      color: Colors.black,
-      constraints: const BoxConstraints.expand(),
-      child: ThumbnailWidget(
-        widget.file,
-        fit: BoxFit.contain,
-      ),
-    );
-  }
 }
 
 class _VideoWidget extends StatefulWidget {
@@ -353,24 +340,27 @@ class __VideoWidgetState extends State<_VideoWidget> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  16,
-                                  12,
-                                  16,
-                                  8,
-                                ),
-                                child: Text(
-                                  widget.file.caption!,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                  style:
-                                      getEnteTextTheme(context).mini.copyWith(
-                                            color: textBaseDark,
-                                          ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
+                              widget.file.caption != null
+                                  ? Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        16,
+                                        12,
+                                        16,
+                                        8,
+                                      ),
+                                      child: Text(
+                                        widget.file.caption!,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                        style: getEnteTextTheme(context)
+                                            .mini
+                                            .copyWith(
+                                              color: textBaseDark,
+                                            ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(),
                               _SeekBarAndDuration(
                                 controller: widget.controller,
                                 isSeekingNotifier: _isSeekingNotifier,

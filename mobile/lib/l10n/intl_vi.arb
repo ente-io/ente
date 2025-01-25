@@ -185,6 +185,8 @@
   },
   "allowAddPhotosDescription": "Cho phép người có liên kết cũng thêm ảnh vào album chia sẻ.",
   "passwordLock": "Khóa bằng mật khẩu",
+  "canNotOpenTitle": "Không thể mở album này",
+  "canNotOpenBody": "Xin lỗi, album này không thể mở trong ứng dụng.",
   "disableDownloadWarningTitle": "Xin lưu ý",
   "disableDownloadWarningBody": "Người xem vẫn có thể chụp màn hình hoặc lưu bản sao ảnh của bạn bằng các công cụ bên ngoài",
   "allowDownloads": "Cho phép tải xuống",
@@ -351,6 +353,7 @@
   "failedToLoadAlbums": "Không thể tải album",
   "hidden": "Ẩn",
   "authToViewYourHiddenFiles": "Vui lòng xác thực để xem các tệp ẩn của bạn",
+  "authToViewTrashedFiles": "Vui lòng xác thực để xem các tệp đã xóa của bạn",
   "trash": "Thùng rác",
   "uncategorized": "Chưa phân loại",
   "videoSmallCase": "video",
@@ -412,6 +415,7 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Kích thước lưới ảnh",
+  "manageDeviceStorage": "Quản lý bộ nhớ đệm của thiết bị",
   "manageDeviceStorageDesc": "Review and clear local cache storage.",
   "machineLearning": "Học máy",
   "mlConsent": "Kích hoạt học máy",
@@ -1082,7 +1086,7 @@
   "@storageUsageInfo": {
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
-  "availableStorageSpace": "{freeAmount} {storageUnit} miễn phí",
+  "availableStorageSpace": "{freeAmount} {storageUnit} còn trống",
   "appVersion": "Phiên bản: {versionValue}",
   "verifyIDLabel": "Xác minh",
   "fileInfoAddDescHint": "Thêm mô tả...",
@@ -1480,6 +1484,20 @@
     }
   },
   "file": "Tệp",
+  "searchSectionsLengthMismatch": "Độ dài các phần không khớp: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "selectMailApp": "Chọn ứng dụng email",
   "selectAllShort": "Tất cả",
   "@selectAllShort": {
@@ -1562,5 +1580,11 @@
   },
   "legacyInvite": "{email} đã mời bạn trở thành một liên hệ tin cậy",
   "authToManageLegacy": "Vui lòng xác thực để quản lý các liên hệ tin cậy của bạn",
-  "useDifferentPlayerInfo": "Phát video gặp vấn đề? Ấn giữ tại đây để thử một trình phát khác."
+  "useDifferentPlayerInfo": "Phát video gặp vấn đề? Ấn giữ tại đây để thử một trình phát khác.",
+  "hideSharedItemsFromHomeGallery": "Ẩn các mục được chia sẻ khỏi thư viện chính",
+  "gallery": "Thư viện",
+  "joinAlbum": "Tham gia album",
+  "joinAlbumSubtext": "để xem và thêm ảnh của bạn",
+  "joinAlbumSubtextViewer": "thêm vào album được chia sẻ",
+  "join": "Tham gia"
 }

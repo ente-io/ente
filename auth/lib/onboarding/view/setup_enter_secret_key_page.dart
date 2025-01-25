@@ -318,6 +318,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                   SizedBox(
                     width: 400,
                     child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
                       onPressed: () async {
                         if ((_accountController.text.trim().isEmpty &&
                                 _issuerController.text.trim().isEmpty) ||
@@ -361,8 +364,15 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
           widget.code?.display.copyWith(tags: selectedTags) ??
               CodeDisplay(tags: selectedTags);
       display.note = notes;
+      if (widget.code != null) {
+        if (widget.code!.issuer != issuer) {
+          display.iconID = issuer.toLowerCase();
+        }
+        if (widget.code!.display.iconID != _customIconID.toLowerCase()) {
+          display.iconID = _customIconID.toLowerCase();
+        }
+      }
 
-      display.iconID = _customIconID.toLowerCase();
       display.iconSrc =
           _iconSrc == IconType.simpleIcon ? 'simpleIcon' : 'customIcon';
 

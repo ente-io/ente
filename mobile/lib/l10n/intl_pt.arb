@@ -2,6 +2,8 @@
   "@@locale ": "en",
   "enterYourEmailAddress": "Insira seu endereço de e-mail",
   "accountWelcomeBack": "Bem-vindo(a) de volta!",
+  "emailAlreadyRegistered": "E-mail já registrado.",
+  "emailNotRegistered": "E-mail não registrado.",
   "email": "E-mail",
   "cancel": "Cancelar",
   "verify": "Verificar",
@@ -185,6 +187,8 @@
   },
   "allowAddPhotosDescription": "Permitir que as pessoas com link também adicionem fotos ao álbum compartilhado.",
   "passwordLock": "Bloqueio por senha",
+  "canNotOpenTitle": "Não pôde abrir este álbum",
+  "canNotOpenBody": "Desculpe, este álbum não pode ser aberto no aplicativo.",
   "disableDownloadWarningTitle": "Por favor, saiba que",
   "disableDownloadWarningBody": "Os visualizadores podem fazer capturas de tela ou salvar uma cópia de suas fotos usando ferramentas externas",
   "allowDownloads": "Permitir downloads",
@@ -351,6 +355,7 @@
   "failedToLoadAlbums": "Falhou ao carregar álbuns",
   "hidden": "Oculto",
   "authToViewYourHiddenFiles": "Autentique-se para visualizar seus arquivos ocultos",
+  "authToViewTrashedFiles": "Autentique-se para ver seus arquivos excluídos",
   "trash": "Lixeira",
   "uncategorized": "Sem categoria",
   "videoSmallCase": "vídeo",
@@ -412,6 +417,7 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Tamanho da grade de fotos",
+  "manageDeviceStorage": "Gerenciar cache do dispositivo",
   "manageDeviceStorageDesc": "Reveja e limpe o armazenamento de cache local.",
   "machineLearning": "Aprendizagem automática",
   "mlConsent": "Ativar aprendizagem automática",
@@ -1376,6 +1382,7 @@
   "extraPhotosFound": "Fotos adicionais encontradas",
   "configuration": "Configuração",
   "localIndexing": "Indexação local",
+  "processed": "Processado",
   "resetPerson": "Remover",
   "areYouSureYouWantToResetThisPerson": "Deseja redefinir esta pessoa?",
   "allPersonGroupingWillReset": "Todos os agrupamentos dessa pessoa serão redefinidos, e você perderá todas as sugestões feitas por essa pessoa.",
@@ -1480,6 +1487,20 @@
     }
   },
   "file": "Arquivo",
+  "searchSectionsLengthMismatch": "Incompatibilidade de comprimento de seções: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "selectMailApp": "Selecionar aplicativo de e-mail",
   "selectAllShort": "Tudo",
   "@selectAllShort": {
@@ -1562,5 +1583,11 @@
   },
   "legacyInvite": "{email} convidou você para ser um contato confiável",
   "authToManageLegacy": "Autentique-se para gerenciar seus contatos confiáveis",
-  "useDifferentPlayerInfo": "Enfrentando problemas ao reproduzir este vídeo? Mantenha pressionado aqui ou tente outro reprodutor de vídeo"
+  "useDifferentPlayerInfo": "Enfrentando problemas ao reproduzir este vídeo? Mantenha pressionado aqui ou tente outro reprodutor de vídeo",
+  "hideSharedItemsFromHomeGallery": "Ocultar itens compartilhados da galeria inicial",
+  "gallery": "Galeria",
+  "joinAlbum": "Unir-se ao álbum",
+  "joinAlbumSubtext": "para visualizar e adicionar suas fotos",
+  "joinAlbumSubtextViewer": "para adicionar isso aos álbuns compartilhados",
+  "join": "Unir-se"
 }

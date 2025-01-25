@@ -4,11 +4,8 @@ import {
     type UploadPhase,
 } from "@/new/photos/services/upload/types";
 import { useAppContext } from "@/new/photos/types/context";
-import {
-    SpaceBetweenFlex,
-    VerticallyCenteredFlex,
-} from "@ente/shared/components/Container";
-import Close from "@mui/icons-material/Close";
+import { SpaceBetweenFlex } from "@ente/shared/components/Container";
+import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
@@ -31,7 +28,6 @@ import {
     Typography,
     type AccordionProps,
     type DialogProps,
-    type TypographyProps,
 } from "@mui/material";
 import ItemList from "components/ItemList";
 import { t } from "i18next";
@@ -182,9 +178,11 @@ function UploadProgressSubtitleText() {
     return (
         <Typography
             variant="body"
-            fontWeight={"normal"}
-            color="text.muted"
-            marginTop={"4px"}
+            sx={{
+                fontWeight: "regular",
+                color: "text.muted",
+                marginTop: "4px",
+            }}
         >
             {subtitleText(uploadPhase, uploadCounter)}
         </Typography>
@@ -228,7 +226,7 @@ const UploadProgressTitle: React.FC = () => {
                             {expanded ? <UnfoldLessIcon /> : <UnfoldMoreIcon />}
                         </FilledIconButton>
                         <FilledIconButton onClick={onClose}>
-                            <Close />
+                            <CloseIcon />
                         </FilledIconButton>
                     </Stack>
                 </Box>
@@ -427,28 +425,40 @@ const InProgressItemContainer = styled("div")`
 const SectionAccordion = styled((props: AccordionProps) => (
     <Accordion disableGutters elevation={0} square {...props} />
 ))(({ theme }) => ({
-    borderTop: `1px solid ${theme.palette.divider}`,
+    borderTop: `1px solid ${theme.vars.palette.divider}`,
     "&:before": { display: "none" },
-    "&:last-child": { borderBottom: `1px solid ${theme.palette.divider}` },
+    "&:last-child": { borderBottom: `1px solid ${theme.vars.palette.divider}` },
 }));
 
-const SectionAccordionSummary = styled(AccordionSummary)(() => ({
-    backgroundColor: "rgba(255, 255, 255, .05)",
+const SectionAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
+    backgroundColor: theme.vars.palette.fill.fainter,
+    // AccordionSummary is a button, and for a reasons to do with MUI internal
+    // that I didn't explore further, the user agent default font family is
+    // getting applied in this case.
+    fontFamily: "inherit",
 }));
 
 const SectionAccordionDetails = styled(AccordionDetails)(({ theme }) => ({
     padding: theme.spacing(2),
 }));
 
-const SectionInfo = (props: TypographyProps) => (
-    <Typography color="text.muted" variant="small" sx={{ mb: 1 }} {...props} />
+const SectionInfo: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <Typography
+        variant="small"
+        sx={{
+            color: "text.muted",
+            mb: 1,
+        }}
+    >
+        {children}
+    </Typography>
 );
 
 const NotUploadSectionHeader = styled("div")(
     ({ theme }) => `
     text-align: center;
-    color: ${theme.colors.danger.A700};
-    border-bottom: 1px solid ${theme.colors.danger.A700};
+    color: ${theme.vars.palette.critical.main};
+    border-bottom: 1px solid ${theme.vars.palette.critical.main};
     margin:${theme.spacing(3, 2, 1)}
 `,
 );
@@ -525,15 +535,20 @@ interface TitleTextProps {
 }
 
 const TitleText: React.FC<TitleTextProps> = ({ title, count }) => (
-    <VerticallyCenteredFlex gap={"4px"}>
+    <Stack
+        direction="row"
+        // Need to reset the font weight since it gets reset by the
+        // AccordionSummary (see SectionAccordionSummary).
+        sx={{ gap: 1, fontWeight: "regular", alignItems: "baseline" }}
+    >
         <Typography>{title}</Typography>
-        <Typography variant="small" color="text.faint">
+        <Typography variant="small" sx={{ color: "text.faint" }}>
             {"•"}
         </Typography>
-        <Typography variant="small" color="text.faint">
+        <Typography variant="small" sx={{ color: "text.faint" }}>
             {count ?? 0}
         </Typography>
-    </VerticallyCenteredFlex>
+    </Stack>
 );
 
 const DoneFooter: React.FC = () => {
@@ -546,11 +561,11 @@ const DoneFooter: React.FC = () => {
             {uploadPhase == "done" &&
                 (finishedUploads?.get(UPLOAD_RESULT.FAILED)?.length > 0 ||
                 finishedUploads?.get(UPLOAD_RESULT.BLOCKED)?.length > 0 ? (
-                    <Button variant="contained" fullWidth onClick={retryFailed}>
+                    <Button fullWidth onClick={retryFailed}>
                         {t("RETRY_FAILED")}
                     </Button>
                 ) : (
-                    <Button variant="contained" fullWidth onClick={onClose}>
+                    <Button fullWidth onClick={onClose}>
                         {t("close")}
                     </Button>
                 ))}

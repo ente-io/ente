@@ -1,8 +1,8 @@
 # Dependencies
 
--   [Electron](#electron)
--   [Dev dependencies](#dev)
--   [Functionality](#functionality)
+- [Electron](#electron)
+- [Dev dependencies](#dev)
+- [Functionality](#functionality)
 
 ## Electron
 
@@ -13,24 +13,24 @@ Electron embeds Chromium and Node.js in the generated app's binary. The
 generated app thus consists of two separate processes - the _main_ process, and
 a _renderer_ process.
 
--   The _main_ process runs the embedded node. This process can deal with the
-    host OS - it is conceptually like a `node` repl running on your machine. In
-    our case, the TypeScript code (in the `src/` directory) gets transpiled by
-    `tsc` into JavaScript in the `build/app/` directory, which gets bundled in
-    the generated app's binary and is loaded by the node (main) process when the
-    app starts.
+- The _main_ process runs the embedded node. This process can deal with the host
+  OS - it is conceptually like a `node` repl running on your machine. In our
+  case, the TypeScript code (in the `src/` directory) gets transpiled by `tsc`
+  into JavaScript in the `build/app/` directory, which gets bundled in the
+  generated app's binary and is loaded by the node (main) process when the app
+  starts.
 
--   The _renderer_ process is a regular web app that gets loaded into the
-    embedded Chromium. When the main process starts, it creates a new "window"
-    that shows this embedded Chromium. In our case, we build and bundle a static
-    export of the [Photos web app](../../web/README.md) in the generated desktop
-    app. This gets loaded by the embedded Chromium at runtime, acting as the
-    desktop app's UI.
+- The _renderer_ process is a regular web app that gets loaded into the embedded
+  Chromium. When the main process starts, it creates a new "window" that shows
+  this embedded Chromium. In our case, we build and bundle a static export of
+  the [Photos web app](../../web/README.md) in the generated desktop app. This
+  gets loaded by the embedded Chromium at runtime, acting as the desktop app's
+  UI.
 
 There is also a third environment that gets temporarily created:
 
--   The [preload script](../src/preload.ts) acts as a gateway between the _main_
-    and the _renderer_ process. It runs in its own isolated environment.
+- The [preload script](../src/preload.ts) acts as a gateway between the _main_
+  and the _renderer_ process. It runs in its own isolated environment.
 
 ### Packaging
 
@@ -66,15 +66,15 @@ Electron process. This allows us to directly use the output produced by
 
 ### Others
 
--   [any-shell-escape](https://github.com/boazy/any-shell-escape) is for
-    escaping shell commands before we execute them (e.g. say when invoking the
-    embedded ffmpeg CLI).
+- [any-shell-escape](https://github.com/boazy/any-shell-escape) is for escaping
+  shell commands before we execute them (e.g. say when invoking the embedded
+  ffmpeg CLI).
 
--   [auto-launch](https://github.com/Teamwork/node-auto-launch) is for
-    automatically starting our app on login, if the user so wishes.
+- [auto-launch](https://github.com/Teamwork/node-auto-launch) is for
+  automatically starting our app on login, if the user so wishes.
 
--   [electron-store](https://github.com/sindresorhus/electron-store) is used for
-    persisting user preferences and other arbitrary data.
+- [electron-store](https://github.com/sindresorhus/electron-store) is used for
+  persisting user preferences and other arbitrary data.
 
 ## Dev
 
@@ -84,26 +84,26 @@ are similar to that in the web code.
 
 Some extra ones specific to the code here are:
 
--   [@tsconfig/recommended](https://github.com/tsconfig/bases) gives us a base
-    tsconfig for the Node.js version that our current Electron version uses.
+- [@tsconfig/recommended](https://github.com/tsconfig/bases) gives us a base
+  tsconfig for the Node.js version that our current Electron version uses.
 
--   [shx](https://github.com/shelljs/shx) provides us a portable way to use Unix
-    commands in our `package.json` scripts. This allows us to use the same
-    commands (like `ln`) across both POSIX platforms (Linux, macOS) and Windows.
+- [shx](https://github.com/shelljs/shx) provides us a portable way to use Unix
+  commands in our `package.json` scripts. This allows us to use the same
+  commands (like `ln`) across both POSIX platforms (Linux, macOS) and Windows.
 
--   [cross-env](https://github.com/kentcdodds/cross-env) is similar to shx, but
-    for allowing us to set environment variables in a way that also works on
-    Windows.
+- [cross-env](https://github.com/kentcdodds/cross-env) is similar to shx, but
+  for allowing us to set environment variables in a way that also works on
+  Windows.
 
--   We don't need `ajv`, but it is a transitive dependency which breaks the
-    build if we let its version be resolved via the yarn resolution mechanism.
-    Taking a direct dependency on it is the easiest workaround for now.
+- We don't need `ajv`, but it is a transitive dependency which breaks the build
+  if we let its version be resolved via the yarn resolution mechanism. Taking a
+  direct dependency on it is the easiest workaround for now.
 
 ## Functionality
 
 ### Format conversion
 
-The main tool we use is for arbitrary conversions is ffmpeg. To bundle a
+For video conversions and metadata extraction, we use ffmpeg. To bundle a
 (platform specific) static binary of ffmpeg with our app, we use
 [ffmpeg-static](https://github.com/eugeneware/ffmpeg-static).
 
@@ -111,10 +111,12 @@ The main tool we use is for arbitrary conversions is ffmpeg. To bundle a
 > ffmpeg binary and using the wasm one (that our renderer process already has).
 > Which is why we bundle it to speed up operations on the desktop app.
 
-In addition, we also bundle a static Linux binary of imagemagick in our extra
-resources (`build`) folder. This is used for thumbnail generation on Linux.
+On Linux and Windows, we use ImageMagick for thumbnail generation and JPEG
+conversion of unpreviewable images. A static OS/architecture specific binary of
+this is bundled in our extra resources (`build`) folder by `scripts/magick.sh`
+and/or `scripts/beforeBuild.js`. See "[Note: ImageMagick]" for more details.
 
-On macOS, we use the `sips` CLI tool for conversion, but that is already
+On macOS, we use the `sips` CLI tool for these tasks, but that is already
 available on the host machine, and is not bundled with our app.
 
 ### ML

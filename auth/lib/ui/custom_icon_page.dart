@@ -4,6 +4,7 @@ import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomIconPage extends StatefulWidget {
   final Map<String, AllIconData> allIcons;
@@ -29,12 +30,15 @@ class _CustomIconPageState extends State<CustomIconPage> {
 
   // Used to request focus on the search box when clicked the search icon
   late FocusNode searchBoxFocusNode;
+  final Set<LogicalKeyboardKey> _pressedKeys = <LogicalKeyboardKey>{};
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     _filteredIcons = widget.allIcons;
     _showSearchBox = _autoFocusSearch;
     searchBoxFocusNode = FocusNode();
+    ServicesBinding.instance.keyboard.addHandler(_handleKeyEvent);
     super.initState();
   }
 
@@ -42,7 +46,39 @@ class _CustomIconPageState extends State<CustomIconPage> {
   void dispose() {
     _textController.dispose();
     searchBoxFocusNode.dispose();
+    _scrollController.dispose();
+    ServicesBinding.instance.keyboard.removeHandler(_handleKeyEvent);
     super.dispose();
+  }
+
+  bool _handleKeyEvent(KeyEvent event) {
+    if (event is KeyDownEvent) {
+      _pressedKeys.add(event.logicalKey);
+      if ((_pressedKeys.contains(LogicalKeyboardKey.controlLeft) ||
+              _pressedKeys.contains(LogicalKeyboardKey.control) ||
+              _pressedKeys.contains(LogicalKeyboardKey.controlRight)) &&
+          event.logicalKey == LogicalKeyboardKey.keyF) {
+        setState(() {
+          _showSearchBox = true;
+          searchBoxFocusNode.requestFocus();
+          _textController.clear();
+          _searchText = "";
+        });
+        return true;
+      }
+      if (event.logicalKey == LogicalKeyboardKey.escape) {
+        setState(() {
+          _textController.clear();
+          _searchText = "";
+          _showSearchBox = false;
+          _applyFilteringAndRefresh();
+        });
+        return true;
+      }
+    } else if (event is KeyUpEvent) {
+      _pressedKeys.remove(event.logicalKey);
+    }
+    return false;
   }
 
   void _applyFilteringAndRefresh() {
@@ -121,8 +157,11 @@ class _CustomIconPageState extends State<CustomIconPage> {
             children: [
               Expanded(
                 child: Scrollbar(
+                  controller: _scrollController,
                   thumbVisibility: true,
+                  interactive: true,
                   child: GridView.builder(
+                    controller: _scrollController,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: (MediaQuery.sizeOf(context).width ~/ 90)
                           .clamp(1, double.infinity)

@@ -169,6 +169,8 @@ export interface GalleryState {
     hiddenFileIDs: Set<number>;
     /**
      * File IDs of all the files that the user has marked as a favorite.
+     *
+     * Includes the effects of {@link unsyncedFavoriteUpdates}.
      */
     favoriteFileIDs: Set<number>;
     /**
@@ -211,6 +213,32 @@ export interface GalleryState {
      * hidden.
      */
     tempHiddenFileIDs: Set<number>;
+    /**
+     * Updates to the favorite status of files that have just been toggled by
+     * the user in the file viewer, but whose effects on remote have not been
+     * yet synced back to our local DB.
+     *
+     * Each entry is from a file ID to `true` (if that file should be considered
+     * as part of the favorites) or `false` (if that file should not be
+     * considered as part of the favorites).
+     *
+     * When the user marks a file as a favorite (or unmarks it as a favorite),
+     * we add an entry in this map so that we can give them immediate feedback
+     * in the UI.
+     *
+     * The request to update the favorite status on remote proceeds in parallel.
+     * If that request fails, we remove the entry from here.
+     *
+     * If the remote request succeeds, we still need to sync the files and
+     * collections in our local DB with the remote state, but that happens in a
+     * batch when the user exits the viewer. So until that point, these updates
+     * remain in this in-flight updates map.
+     *
+     * Once the remote file + collection sync completes, we can clear this map
+     * since just deriving {@link favoriteFileIDs} from our local files would
+     * reflect the correct state on remote too.
+     */
+    unsyncedFavoriteUpdates: Map<number, boolean>;
 
     /*--<  State that underlies transient UI state  >--*/
 
@@ -335,6 +363,14 @@ export type GalleryAction =
     | { type: "clearTempDeleted" }
     | { type: "markTempHidden"; files: EnteFile[] }
     | { type: "clearTempHidden" }
+    | {
+          type: "markUnsyncedFavoriteUpdate";
+          fileID: number;
+          // Passing undefined clears any existing entry, concrete values add or
+          // update one.
+          isFavorite: boolean | undefined;
+      }
+    | { type: "clearUnsyncedState" }
     | { type: "showAll" }
     | { type: "showHidden" }
     | { type: "showAlbums" }
@@ -366,8 +402,9 @@ const initialGalleryState: GalleryState = {
     fileCollectionIDs: new Map(),
     collectionSummaries: new Map(),
     hiddenCollectionSummaries: new Map(),
-    tempDeletedFileIDs: new Set<number>(),
-    tempHiddenFileIDs: new Set<number>(),
+    tempDeletedFileIDs: new Set(),
+    tempHiddenFileIDs: new Set(),
+    unsyncedFavoriteUpdates: new Map(),
     selectedCollectionSummaryID: undefined,
     selectedPersonID: undefined,
     extraVisiblePerson: undefined,
@@ -384,7 +421,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
     state,
     action,
 ) => {
-    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) console.log("dispatch", action);
+    if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("dispatch", action);
     switch (action.type) {
         case "mount": {
             const [hiddenCollections, collections] = splitByPredicate(
@@ -415,6 +452,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     collections,
                     action.files,
+                    state.unsyncedFavoriteUpdates,
                 ),
                 allCollectionNameByID: createCollectionNameByID(
                     action.allCollections,
@@ -466,6 +504,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     collections,
                     state.files,
+                    state.unsyncedFavoriteUpdates,
                 ),
                 allCollectionNameByID: createCollectionNameByID(
                     collections.concat(state.hiddenCollections),
@@ -529,6 +568,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     collections,
                     state.files,
+                    state.unsyncedFavoriteUpdates,
                 ),
                 allCollectionNameByID: createCollectionNameByID(
                     collections.concat(hiddenCollections),
@@ -554,6 +594,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     state.collections,
                     files,
+                    state.unsyncedFavoriteUpdates,
                 ),
                 fileCollectionIDs: createFileCollectionIDs(action.files),
                 collectionSummaries: deriveCollectionSummaries(
@@ -584,6 +625,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     state.collections,
                     files,
+                    state.unsyncedFavoriteUpdates,
                 ),
                 fileCollectionIDs: createFileCollectionIDs(action.files),
                 collectionSummaries: deriveCollectionSummaries(
@@ -610,6 +652,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     state.collections,
                     files,
+                    state.unsyncedFavoriteUpdates,
                 ),
                 fileCollectionIDs: createFileCollectionIDs(files),
                 // TODO: Consider batching this instead of doing it per file
@@ -730,6 +773,43 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ...state,
                 tempHiddenFileIDs: new Set(),
             });
+
+        case "markUnsyncedFavoriteUpdate": {
+            const unsyncedFavoriteUpdates = new Map(
+                state.unsyncedFavoriteUpdates,
+            );
+            if (action.isFavorite === undefined) {
+                unsyncedFavoriteUpdates.delete(action.fileID);
+            } else {
+                unsyncedFavoriteUpdates.set(action.fileID, action.isFavorite);
+            }
+            // Skipping a call to stateByUpdatingFilteredFiles since it
+            // currently doesn't depend on favorites.
+            return {
+                ...state,
+                favoriteFileIDs: deriveFavoriteFileIDs(
+                    state.collections,
+                    state.files,
+                    unsyncedFavoriteUpdates,
+                ),
+                unsyncedFavoriteUpdates,
+            };
+        }
+
+        case "clearUnsyncedState": {
+            const unsyncedFavoriteUpdates = new Map<number, boolean>();
+            return stateByUpdatingFilteredFiles({
+                ...state,
+                favoriteFileIDs: deriveFavoriteFileIDs(
+                    state.collections,
+                    state.files,
+                    unsyncedFavoriteUpdates,
+                ),
+                tempDeletedFileIDs: new Set(),
+                tempHiddenFileIDs: new Set(),
+                unsyncedFavoriteUpdates,
+            });
+        }
 
         case "showAll":
             return stateByUpdatingFilteredFiles({
@@ -926,17 +1006,24 @@ const deriveHiddenFileIDs = (hiddenFiles: EnteFile[]) =>
 const deriveFavoriteFileIDs = (
     collections: Collection[],
     files: EnteFile[],
+    unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"],
 ): Set<number> => {
+    let favoriteFileIDs = new Set<number>();
     for (const collection of collections) {
         if (collection.type === CollectionType.favorites) {
-            return new Set(
+            favoriteFileIDs = new Set(
                 files
                     .filter((file) => file.collectionID === collection.id)
-                    .map((file): number => file.id),
+                    .map((file) => file.id),
             );
+            break;
         }
     }
-    return new Set();
+    for (const [fileID, isFavorite] of unsyncedFavoriteUpdates.entries()) {
+        if (isFavorite) favoriteFileIDs.add(fileID);
+        else favoriteFileIDs.delete(fileID);
+    }
+    return favoriteFileIDs;
 };
 
 /**
@@ -954,6 +1041,18 @@ const deriveCollectionSummaries = (
         collections,
         files,
     );
+
+    const uncategorizedCollection = collections.find(
+        ({ type }) => type === CollectionType.uncategorized,
+    );
+    if (!uncategorizedCollection) {
+        collectionSummaries.set(DUMMY_UNCATEGORIZED_COLLECTION, {
+            ...pseudoCollectionOptionsForFiles([]),
+            id: DUMMY_UNCATEGORIZED_COLLECTION,
+            type: "uncategorized",
+            name: t("section_uncategorized"),
+        });
+    }
 
     const allSectionFiles = findAllSectionVisibleFiles(
         files,
@@ -1031,12 +1130,7 @@ const createCollectionSummaries = (
     const filesByCollection = groupFilesByCollectionID(files);
     const coverFiles = findCoverFiles(collections, filesByCollection);
 
-    let hasUncategorizedCollection = false;
     for (const collection of collections) {
-        if (collection.type === CollectionType.uncategorized) {
-            hasUncategorizedCollection = true;
-        }
-
         let type: CollectionSummaryType;
         if (isIncomingShare(collection, user)) {
             if (isIncomingCollabShare(collection, user)) {
@@ -1094,15 +1188,6 @@ const createCollectionSummaries = (
             updationTime: collection.updationTime,
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             order: collection.magicMetadata?.data?.order ?? 0,
-        });
-    }
-
-    if (!hasUncategorizedCollection) {
-        collectionSummaries.set(DUMMY_UNCATEGORIZED_COLLECTION, {
-            ...pseudoCollectionOptionsForFiles([]),
-            id: DUMMY_UNCATEGORIZED_COLLECTION,
-            type: "uncategorized",
-            name: t("section_uncategorized"),
         });
     }
 

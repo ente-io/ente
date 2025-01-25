@@ -6,12 +6,12 @@
         "appIDs": [
           "6Z68YJY9Q2.io.ente.frame"
         ],
-        "paths": [
-          "*"
-        ],
         "components": [
           {
-            "/": "/*"
+            "/": "/",
+            "?": { "t": "*" },
+            "#": "*",
+            "comment": "Matches URLs with no path, any query item 't', and any or no fragment"
           }
         ]
       }

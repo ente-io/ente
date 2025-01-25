@@ -1,12 +1,16 @@
 import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { stashRedirect } from "@/accounts/services/redirect";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
-import { NavbarBase } from "@/base/components/Navbar";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { AppNavbar, NavbarBase } from "@/base/components/Navbar";
+import { TranslucentLoadingOverlay } from "@/base/components/loaders";
+import type { ButtonishProps } from "@/base/components/mui";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
+import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
+import { useFileInput } from "@/gallery/components/utils/use-file-input";
 import { type Collection } from "@/media/collection";
 import { mergeMetadata, type EnteFile } from "@/media/file";
 import {
@@ -27,6 +31,7 @@ import {
     useGalleryReducer,
     type GalleryBarMode,
 } from "@/new/photos/components/gallery/reducer";
+import { useIsOffline } from "@/new/photos/components/utils/use-is-offline";
 import { usePeopleStateSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import {
@@ -61,15 +66,10 @@ import {
 } from "@/new/photos/services/user-details";
 import { useAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
-import {
-    CenteredFlex,
-    FlexWrapper,
-    HorizontalFlex,
-} from "@ente/shared/components/Container";
+import { CenteredFlex, FlexWrapper } from "@ente/shared/components/Container";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
-import { useFileInput } from "@ente/shared/hooks/useFileInput";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
     getToken,
@@ -86,8 +86,7 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
-import type { ButtonProps, IconButtonProps } from "@mui/material";
-import { Box, Button, IconButton, Typography } from "@mui/material";
+import { IconButton, Stack, Typography } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import CollectionNamer, {
     CollectionNamerAttributes,
@@ -99,9 +98,7 @@ import {
     FilesDownloadProgressAttributes,
 } from "components/FilesDownloadProgress";
 import { FixCreationTime } from "components/FixCreationTime";
-import FullScreenDropZone from "components/FullScreenDropZone";
 import GalleryEmptyState from "components/GalleryEmptyState";
-import { LoadingOverlay } from "components/LoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import Sidebar from "components/Sidebar";
@@ -111,7 +108,14 @@ import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
-import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import {
+    createContext,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { useDropzone } from "react-dropzone";
 import { Trans } from "react-i18next";
 import {
@@ -171,7 +175,17 @@ export const GalleryContext = createContext<GalleryContextType>(
  *     ---------------------      |
  *           Photo List           v
  */
-export default function Gallery() {
+const Page: React.FC = () => {
+    const {
+        showLoadingBar,
+        hideLoadingBar,
+        showMiniDialog,
+        onGenericError,
+        watchFolderView,
+        logout,
+    } = useAppContext();
+
+    const isOffline = useIsOffline();
     const [state, dispatch] = useGalleryReducer();
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
@@ -194,7 +208,7 @@ export default function Gallery() {
         // ... the props we should apply to the <input> element,
         getInputProps: getDragAndDropInputProps,
         // ... and the files that we got.
-        acceptedFiles: dragAndDropFiles,
+        acceptedFiles: dragAndDropFilesReadOnly,
     } = useDropzone({
         noClick: true,
         noKeyboard: true,
@@ -224,17 +238,13 @@ export default function Gallery() {
     });
 
     const syncInProgress = useRef(false);
-    const syncInterval = useRef<NodeJS.Timeout>();
-    const resync = useRef<{ force: boolean; silent: boolean }>();
+    const syncInterval = useRef<ReturnType<typeof setInterval> | undefined>(
+        undefined,
+    );
+    const resync = useRef<{ force: boolean; silent: boolean } | undefined>(
+        undefined,
+    );
 
-    const {
-        showLoadingBar,
-        hideLoadingBar,
-        showMiniDialog,
-        onGenericError,
-        logout,
-        ...appContext
-    } = useAppContext();
     const [userIDToEmailMap, setUserIDToEmailMap] =
         useState<Map<number, string>>(null);
     const [emailList, setEmailList] = useState<string[]>(null);
@@ -251,7 +261,7 @@ export default function Gallery() {
     const [authenticateUserModalView, setAuthenticateUserModalView] =
         useState(false);
 
-    const onAuthenticateCallback = useRef<() => void>();
+    const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
 
     const authenticateUser = (callback: () => void) => {
         onAuthenticateCallback.current = callback;
@@ -313,7 +323,7 @@ export default function Gallery() {
     const isInSearchMode = state.isInSearchMode;
     const filteredFiles = state.filteredFiles;
 
-    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) console.log("render", state);
+    if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("render", state);
 
     const router = useRouter();
 
@@ -331,7 +341,6 @@ export default function Gallery() {
     };
 
     useEffect(() => {
-        appContext.showNavBar(true);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         const token = getToken();
         if (!key || !token) {
@@ -548,6 +557,12 @@ export default function Gallery() {
         };
     }, [selectAll, clearSelection]);
 
+    // Create a regular array from the readonly array returned by dropzone.
+    const dragAndDropFiles = useMemo(
+        () => [...dragAndDropFilesReadOnly],
+        [dragAndDropFilesReadOnly],
+    );
+
     const showSessionExpiredDialog = () =>
         showMiniDialog(sessionExpiredDialogAttributes(logout));
 
@@ -620,15 +635,14 @@ export default function Gallery() {
                     log.error("syncWithRemote failed", e);
             }
         } finally {
-            dispatch({ type: "clearTempDeleted" });
-            dispatch({ type: "clearTempHidden" });
+            dispatch({ type: "clearUnsyncedState" });
             !silent && hideLoadingBar();
         }
         syncInProgress.current = false;
         if (resync.current) {
             const { force, silent } = resync.current;
             setTimeout(() => syncWithRemote(force, silent), 0);
-            resync.current = null;
+            resync.current = undefined;
         }
     };
 
@@ -764,7 +778,7 @@ export default function Gallery() {
         return () =>
             setCollectionNamerAttributes({
                 title: t("new_album"),
-                buttonText: t("CREATE"),
+                buttonText: t("create"),
                 autoFilledName: "",
                 callback,
             });
@@ -870,7 +884,14 @@ export default function Gallery() {
                 setSelectedFiles: setSelected,
             }}
         >
-            <FullScreenDropZone {...{ getDragAndDropRootProps }}>
+            <FullScreenDropZone
+                {...{ getDragAndDropRootProps }}
+                message={
+                    watchFolderView
+                        ? t("watch_folder_dropzone_hint")
+                        : undefined
+                }
+            >
                 <UploadSelectorInputs
                     {...{
                         getDragAndDropInputProps,
@@ -879,14 +900,14 @@ export default function Gallery() {
                         getZipFileSelectorInputProps,
                     }}
                 />
-                {blockingLoad && (
-                    <LoadingOverlay>
-                        <ActivityIndicator />
-                    </LoadingOverlay>
-                )}
+                <AppNavbar />
+                {blockingLoad && <TranslucentLoadingOverlay />}
                 {isFirstLoad && (
                     <CenteredFlex>
-                        <Typography color="text.muted" variant="small">
+                        <Typography
+                            variant="small"
+                            sx={{ color: "text.muted" }}
+                        >
                             {t("INITIAL_LOAD_DELAY_WARNING")}
                         </Typography>
                     </CenteredFlex>
@@ -950,6 +971,7 @@ export default function Gallery() {
                         />
                     )}
                 </NavbarBase>
+                {isOffline && <OfflineMessage />}
 
                 <GalleryBarAndListHeader
                     {...{
@@ -1033,9 +1055,16 @@ export default function Gallery() {
                         modePlus={isInSearchMode ? "search" : barMode}
                         files={filteredFiles}
                         syncWithRemote={syncWithRemote}
-                        favItemIds={state.favoriteFileIDs}
                         setSelected={setSelected}
                         selected={selected}
+                        favoriteFileIDs={state.favoriteFileIDs}
+                        markUnsyncedFavoriteUpdate={(fileID, isFavorite) =>
+                            dispatch({
+                                type: "markUnsyncedFavoriteUpdate",
+                                fileID,
+                                isFavorite,
+                            })
+                        }
                         markTempDeleted={(files) =>
                             dispatch({ type: "markTempDeleted", files })
                         }
@@ -1108,7 +1137,18 @@ export default function Gallery() {
             </FullScreenDropZone>
         </GalleryContext.Provider>
     );
-}
+};
+
+export default Page;
+
+const OfflineMessage: React.FC = () => (
+    <Typography
+        variant="small"
+        sx={{ bgcolor: "background.paper", p: 2, mb: 1, textAlign: "center" }}
+    >
+        {t("offline_message")}
+    </Typography>
+);
 
 /**
  * Preload all three variants of a responsive image.
@@ -1136,35 +1176,32 @@ const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
     </>
 );
 
-const SidebarButton: React.FC<IconButtonProps> = (props) => (
-    <IconButton {...props}>
+const SidebarButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <IconButton {...{ onClick }}>
         <MenuIcon />
     </IconButton>
 );
 
-const UploadButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
+const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
     const isSmallWidth = useIsSmallWidth();
 
     const icon = <FileUploadOutlinedIcon />;
 
     return (
-        <Box>
+        <>
             {isSmallWidth ? (
-                <IconButton {...props} disabled={disabled}>
-                    {icon}
-                </IconButton>
+                <IconButton {...{ onClick, disabled }}>{icon}</IconButton>
             ) : (
-                <Button
-                    {...props}
-                    disabled={disabled}
-                    color={"secondary"}
+                <FocusVisibleButton
+                    color="secondary"
                     startIcon={icon}
+                    {...{ onClick, disabled }}
                 >
                     {t("upload")}
-                </Button>
+                </FocusVisibleButton>
             )}
-        </Box>
+        </>
     );
 };
 
@@ -1175,12 +1212,13 @@ interface HiddenSectionNavbarContentsProps {
 const HiddenSectionNavbarContents: React.FC<
     HiddenSectionNavbarContentsProps
 > = ({ onBack }) => (
-    <HorizontalFlex
-        gap={"24px"}
-        sx={{
+    <Stack
+        direction="row"
+        sx={(theme) => ({
+            gap: "24px",
             width: "100%",
-            background: (theme) => theme.palette.background.default,
-        }}
+            background: theme.vars.palette.background.default,
+        })}
     >
         <IconButton onClick={onBack}>
             <ArrowBackIcon />
@@ -1188,7 +1226,7 @@ const HiddenSectionNavbarContents: React.FC<
         <FlexWrapper>
             <Typography>{t("section_hidden")}</Typography>
         </FlexWrapper>
-    </HorizontalFlex>
+    </Stack>
 );
 
 /**

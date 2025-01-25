@@ -412,6 +412,7 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Rozmiar siatki zdjęć",
+  "manageDeviceStorage": "Zarządzaj pamięcią podręczną urządzenia",
   "manageDeviceStorageDesc": "Przejrzyj i wyczyść lokalną pamięć podręczną.",
   "machineLearning": "Nauczanie maszynowe",
   "mlConsent": "Włącz nauczanie maszynowe",
@@ -1271,7 +1272,7 @@
   "editPerson": "Edytuj osobę",
   "mergedPhotos": "Scalone zdjęcia",
   "orMergeWithExistingPerson": "Lub złącz z istniejącymi",
-  "enterDateOfBirth": "Data urodzenia (nieobowiązkowo)",
+  "enterDateOfBirth": "Urodziny (nieobowiązkowo)",
   "birthday": "Urodziny",
   "removePersonLabel": "Usuń etykietę osoby",
   "autoPairDesc": "Automatyczne parowanie działa tylko z urządzeniami obsługującymi Chromecast.",
@@ -1480,6 +1481,20 @@
     }
   },
   "file": "Plik",
+  "searchSectionsLengthMismatch": "Niezgodność długości sekcji: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "selectMailApp": "Wybierz aplikację pocztową",
   "selectAllShort": "Wszystko",
   "@selectAllShort": {

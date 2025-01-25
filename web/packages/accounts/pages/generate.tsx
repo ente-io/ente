@@ -1,22 +1,23 @@
+import {
+    AccountsPageContents,
+    AccountsPageFooter,
+    AccountsPageTitle,
+} from "@/accounts/components/layouts/centered-paper";
 import { RecoveryKey } from "@/accounts/components/RecoveryKey";
 import SetPasswordForm, {
     type SetPasswordFormProps,
 } from "@/accounts/components/SetPasswordForm";
 import { PAGES } from "@/accounts/constants/pages";
+import { appHomeRoute } from "@/accounts/services/redirect";
 import {
     configureSRP,
     generateKeyAndSRPAttributes,
 } from "@/accounts/services/srp";
 import { putAttributes } from "@/accounts/services/user";
-import {
-    FormPaper,
-    FormPaperFooter,
-    FormPaperTitle,
-} from "@/base/components/FormPaper";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import type { PageProps } from "@/accounts/types/page";
+import { LinkButton } from "@/base/components/LinkButton";
+import { LoadingIndicator } from "@/base/components/loaders";
 import log from "@/base/log";
-import { VerticallyCentered } from "@ente/shared/components/Container";
-import LinkButton from "@ente/shared/components/LinkButton";
 import {
     generateAndSaveIntermediateKeyAttributes,
     saveKeyInSessionStore,
@@ -31,8 +32,6 @@ import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { appHomeRoute } from "../services/redirect";
-import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { logout, showMiniDialog } = appContext;
@@ -66,7 +65,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             setToken(user.token);
             setLoading(false);
         }
-        appContext.showNavBar(true);
     }, []);
 
     const onSubmit: SetPasswordFormProps["callback"] = async (
@@ -90,16 +88,14 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             setOpenRecoveryKey(true);
         } catch (e) {
             log.error("failed to generate password", e);
-            setFieldError("passphrase", t("PASSWORD_GENERATION_FAILED"));
+            setFieldError("passphrase", t("password_generation_failed"));
         }
     };
 
     return (
         <>
             {loading || !user ? (
-                <VerticallyCentered>
-                    <ActivityIndicator />
-                </VerticallyCentered>
+                <LoadingIndicator />
             ) : openRecoveryKey ? (
                 <RecoveryKey
                     open={openRecoveryKey}
@@ -110,21 +106,17 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     showMiniDialog={showMiniDialog}
                 />
             ) : (
-                <VerticallyCentered>
-                    <FormPaper>
-                        <FormPaperTitle>{t("SET_PASSPHRASE")}</FormPaperTitle>
-                        <SetPasswordForm
-                            userEmail={user.email}
-                            callback={onSubmit}
-                            buttonText={t("SET_PASSPHRASE")}
-                        />
-                        <FormPaperFooter>
-                            <LinkButton onClick={logout}>
-                                {t("go_back")}
-                            </LinkButton>
-                        </FormPaperFooter>
-                    </FormPaper>
-                </VerticallyCentered>
+                <AccountsPageContents>
+                    <AccountsPageTitle>{t("set_password")}</AccountsPageTitle>
+                    <SetPasswordForm
+                        userEmail={user.email}
+                        callback={onSubmit}
+                        buttonText={t("set_password")}
+                    />
+                    <AccountsPageFooter>
+                        <LinkButton onClick={logout}>{t("go_back")}</LinkButton>
+                    </AccountsPageFooter>
+                </AccountsPageContents>
             )}
         </>
     );

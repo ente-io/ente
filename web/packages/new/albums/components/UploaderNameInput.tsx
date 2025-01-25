@@ -54,21 +54,20 @@ export const UploaderNameInput: React.FC<UploaderNameInput> = ({
             fullWidth
         >
             <Box
-                sx={{
+                sx={(theme) => ({
                     padding: "24px 16px 0px 16px",
                     svg: {
                         width: "44px",
                         height: "44px",
                     },
-                    color: (theme) => theme.colors.stroke.muted,
-                }}
+                    color: theme.vars.palette.stroke.muted,
+                })}
             >
                 {<AutoAwesomeOutlinedIcon />}
             </Box>
             <DialogTitle>{t("enter_name")}</DialogTitle>
-
             <DialogContent>
-                <Typography color={"text.muted"} sx={{ pb: 1 }}>
+                <Typography sx={{ color: "text.muted", pb: 1 }}>
                     {t("uploader_name_hint")}
                 </Typography>
                 <SingleInputForm

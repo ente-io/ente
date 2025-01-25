@@ -1,8 +1,28 @@
-import { FormPaper, FormPaperTitle } from "@/base/components/FormPaper";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import {
+    AccountsPageContents,
+    AccountsPageFooter,
+    AccountsPageTitle,
+} from "@/accounts/components/layouts/centered-paper";
+import { VerifyingPasskey } from "@/accounts/components/LoginComponents";
+import { SecondFactorChoice } from "@/accounts/components/SecondFactorChoice";
+import { useSecondFactorChoiceIfNeeded } from "@/accounts/components/utils/second-factor-choice";
+import { PAGES } from "@/accounts/constants/pages";
+import {
+    openPasskeyVerificationURL,
+    passkeyVerificationRedirectURL,
+} from "@/accounts/services/passkey";
+import { stashedRedirect, unstashRedirect } from "@/accounts/services/redirect";
+import { configureSRP } from "@/accounts/services/srp";
+import type {
+    SRPAttributes,
+    SRPSetupAttributes,
+} from "@/accounts/services/srp-remote";
+import { getSRPAttributes } from "@/accounts/services/srp-remote";
+import { putAttributes, sendOTT, verifyEmail } from "@/accounts/services/user";
+import type { PageProps } from "@/accounts/types/page";
+import { LinkButton } from "@/base/components/LinkButton";
+import { LoadingIndicator } from "@/base/components/loaders";
 import log from "@/base/log";
-import { VerticallyCentered } from "@ente/shared/components/Container";
-import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -20,33 +40,15 @@ import {
 } from "@ente/shared/storage/localStorage/helpers";
 import { clearKeys } from "@ente/shared/storage/sessionStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { HttpStatusCode } from "axios";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import {
-    LoginFlowFormFooter,
-    VerifyingPasskey,
-} from "../components/LoginComponents";
-import { SecondFactorChoice } from "../components/SecondFactorChoice";
-import { useSecondFactorChoiceIfNeeded } from "../components/utils/second-factor-choice";
-import { PAGES } from "../constants/pages";
-import {
-    openPasskeyVerificationURL,
-    passkeyVerificationRedirectURL,
-} from "../services/passkey";
-import { stashedRedirect, unstashRedirect } from "../services/redirect";
-import { configureSRP } from "../services/srp";
-import type { SRPAttributes, SRPSetupAttributes } from "../services/srp-remote";
-import { getSRPAttributes } from "../services/srp-remote";
-import type { UserVerificationResponse } from "../services/user";
-import { putAttributes, sendOTT, verifyOtt } from "../services/user";
-import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { logout, showNavBar, showMiniDialog } = appContext;
+    const { logout, showMiniDialog } = appContext;
 
     const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
@@ -72,7 +74,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
         };
         void main();
-        showNavBar(true);
     }, []);
 
     const onSubmit: SingleInputFormProps["callback"] = async (
@@ -80,8 +81,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         setFieldError,
     ) => {
         try {
-            const referralSource = getLocalReferralSource();
-            const resp = await verifyOtt(email, ott, referralSource);
+            const referralSource = getLocalReferralSource()?.trim();
+            const cleanedReferral = referralSource
+                ? `web:${referralSource}`
+                : undefined;
             const {
                 keyAttributes,
                 encryptedToken,
@@ -89,8 +92,9 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 id,
                 twoFactorSessionID,
                 passkeySessionID,
+                accountsUrl,
             } = await userVerificationResultAfterResolvingSecondFactorChoice(
-                resp.data as UserVerificationResponse,
+                await verifyEmail(email, ott, cleanedReferral),
             );
             if (passkeySessionID) {
                 const user = getData(LS_KEYS.USER);
@@ -106,7 +110,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 // Update: This flag causes the interactive encryption key to be
                 // generated, so it has a functional impact we need.
                 setIsFirstLogin(true);
-                const url = passkeyVerificationRedirectURL(passkeySessionID);
+                const url = passkeyVerificationRedirectURL(
+                    accountsUrl,
+                    passkeySessionID,
+                );
                 setPasskeyVerificationData({ passkeySessionID, url });
                 openPasskeyVerificationURL({ passkeySessionID, url });
             } else if (twoFactorSessionID) {
@@ -156,10 +163,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             if (e instanceof ApiError) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                 if (e?.httpStatusCode === HttpStatusCode.Unauthorized) {
-                    setFieldError(t("INVALID_CODE"));
+                    setFieldError(t("invalid_code_error"));
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                 } else if (e?.httpStatusCode === HttpStatusCode.Gone) {
-                    setFieldError(t("EXPIRED_CODE"));
+                    setFieldError(t("expired_code_error"));
                 }
             } else {
                 log.error("OTT verification failed", e);
@@ -176,11 +183,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     };
 
     if (!email) {
-        return (
-            <VerticallyCentered>
-                <ActivityIndicator />
-            </VerticallyCentered>
-        );
+        return <LoadingIndicator />;
     }
 
     if (passkeyVerificationData) {
@@ -194,11 +197,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         // See: [Note: Passkey verification in the desktop app]
 
         if (!globalThis.electron) {
-            return (
-                <VerticallyCentered>
-                    <ActivityIndicator />
-                </VerticallyCentered>
-            );
+            return <LoadingIndicator />;
         }
 
         return (
@@ -214,46 +213,49 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     }
 
     return (
-        <VerticallyCentered>
-            <FormPaper>
-                <FormPaperTitle sx={{ mb: 14, wordBreak: "break-word" }}>
-                    <Trans
-                        i18nKey="EMAIL_SENT"
-                        components={{
-                            a: <Box color="text.muted" component={"span"} />,
-                        }}
-                        values={{ email }}
-                    />
-                </FormPaperTitle>
-                <Typography color={"text.muted"} mb={2} variant="small">
-                    {t("CHECK_INBOX")}
-                </Typography>
-                <SingleInputForm
-                    fieldType="text"
-                    autoComplete="one-time-code"
-                    placeholder={t("ENTER_OTT")}
-                    buttonText={t("VERIFY")}
-                    callback={onSubmit}
+        <AccountsPageContents>
+            <AccountsPageTitle>
+                <Trans
+                    i18nKey="email_sent"
+                    components={{
+                        a: (
+                            <Box
+                                component={"span"}
+                                sx={{
+                                    color: "text.muted",
+                                    wordBreak: "break-word",
+                                }}
+                            />
+                        ),
+                    }}
+                    values={{ email }}
                 />
+            </AccountsPageTitle>
 
-                <LoginFlowFormFooter>
-                    <Stack direction="row" justifyContent="space-between">
-                        {resend === 0 && (
-                            <LinkButton onClick={resendEmail}>
-                                {t("RESEND_MAIL")}
-                            </LinkButton>
-                        )}
-                        {resend === 1 && <span>{t("SENDING")}</span>}
-                        {resend === 2 && <span>{t("SENT")}</span>}
-                        <LinkButton onClick={logout}>
-                            {t("CHANGE_EMAIL")}
-                        </LinkButton>
-                    </Stack>
-                </LoginFlowFormFooter>
-            </FormPaper>
+            <Typography variant="small" sx={{ color: "text.muted", mb: 2 }}>
+                {t("check_inbox_hint")}
+            </Typography>
+            <SingleInputForm
+                fieldType="text"
+                autoComplete="one-time-code"
+                placeholder={t("verification_code")}
+                buttonText={t("verify")}
+                callback={onSubmit}
+            />
+
+            <AccountsPageFooter>
+                {resend === 0 && (
+                    <LinkButton onClick={resendEmail}>
+                        {t("resend_code")}
+                    </LinkButton>
+                )}
+                {resend === 1 && <span>{t("status_sending")}</span>}
+                {resend === 2 && <span>{t("status_sent")}</span>}
+                <LinkButton onClick={logout}>{t("change_email")}</LinkButton>
+            </AccountsPageFooter>
 
             <SecondFactorChoice {...secondFactorChoiceProps} />
-        </VerticallyCentered>
+        </AccountsPageContents>
     );
 };
 

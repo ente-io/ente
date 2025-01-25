@@ -56,10 +56,10 @@ export const createImageBitmapAndData = async (
  * The blob from the relevant image component is either constructed using the
  * given {@link uploadItem} if present, otherwise it is downloaded from remote.
  *
- * -   For images it is constructed from the image.
- * -   For videos it is constructed from the thumbnail.
- * -   For live photos it is constructed from the image component of the live
- *     photo.
+ * - For images it is constructed from the image.
+ * - For videos it is constructed from the thumbnail.
+ * - For live photos it is constructed from the image component of the live
+ *   photo.
  *
  * Then, if the image blob we have seems to be something that the browser cannot
  * handle, we convert it into a JPEG blob so that it can subsequently be used to
@@ -95,7 +95,7 @@ const fetchRenderableUploadItemBlob = async (
         return new Blob([thumbnailData!]);
     } else {
         const blob = await readNonVideoUploadItem(uploadItem, electron);
-        return renderableImageBlob(file.metadata.title, blob);
+        return renderableImageBlob(blob, file.metadata.title);
     }
 };
 
@@ -157,9 +157,9 @@ export const fetchRenderableEnteFileBlob = async (
             file.metadata.title,
             originalFileBlob,
         );
-        return renderableImageBlob(imageFileName, new Blob([imageData]));
+        return renderableImageBlob(new Blob([imageData]), imageFileName);
     } else if (fileType == FileType.image) {
-        return await renderableImageBlob(file.metadata.title, originalFileBlob);
+        return await renderableImageBlob(originalFileBlob, file.metadata.title);
     } else {
         // A layer above us should've already filtered these out.
         throw new Error(`Cannot index unsupported file type ${fileType}`);

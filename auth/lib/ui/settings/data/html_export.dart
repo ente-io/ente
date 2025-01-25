@@ -8,9 +8,17 @@ import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 Future<String> generateQRImageBase64(String data) async {
-  final qrPainter = QrPainter(
+  const size = 250.0;
+  const padding = 20.0;
+
+  final qrCode = QrCode.fromData(
     data: data,
-    version: QrVersions.auto,
+    errorCorrectLevel: QrErrorCorrectLevel.L,
+  );
+
+  final qrPainter = QrPainter.withQr(
+    qr: qrCode,
+    gapless: true,
     eyeStyle: const QrEyeStyle(
       eyeShape: QrEyeShape.square,
       color: Colors.black,
@@ -21,12 +29,18 @@ Future<String> generateQRImageBase64(String data) async {
     ),
   );
 
-  const size = 250.0;
+  const totalSize = size + padding * 2;
+
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(recorder);
-  qrPainter.paint(canvas, const Size(size, size));
+  const paintBounds = Size(size, size);
+
+  canvas.translate(padding, padding);
+
+  qrPainter.paint(canvas, paintBounds);
+
   final picture = recorder.endRecording();
-  final img = await picture.toImage(size.toInt(), size.toInt());
+  final img = await picture.toImage(totalSize.toInt(), totalSize.toInt());
   final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
   final pngBytes = byteData!.buffer.asUint8List();
 

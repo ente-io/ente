@@ -1,7 +1,9 @@
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
+import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import {
     publishCastPayload,
@@ -12,7 +14,7 @@ import { loadCast } from "@/new/photos/utils/chromecast-sender";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
-import { Button, Link, Stack, Typography } from "@mui/material";
+import { Link, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
@@ -34,11 +36,17 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
     onClose,
     collection,
 }) => {
+    const { castURL } = useSettingsSnapshot();
+
     const [view, setView] = useState<
         "choose" | "auto" | "pin" | "auto-cast-error"
     >("choose");
 
     const [browserCanCast, setBrowserCanCast] = useState(false);
+
+    // The link to the cast app is to the full URL, but in the link text only
+    // show the host (e.g. for "https://cast.ente.io", show "cast.ente.io").
+    const castHost = new URL(castURL).host;
 
     useEffect(() => {
         // Determine if Chromecast is supported by the current browser
@@ -132,22 +140,22 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                 <Stack sx={{ py: 1, gap: 4 }}>
                     {browserCanCast && (
                         <Stack sx={{ gap: 2 }}>
-                            <Typography color={"text.muted"}>
+                            <Typography sx={{ color: "text.muted" }}>
                                 {t("cast_auto_pair_description")}
                             </Typography>
 
-                            <Button onClick={() => setView("auto")}>
+                            <FocusVisibleButton onClick={() => setView("auto")}>
                                 {t("cast_auto_pair")}
-                            </Button>
+                            </FocusVisibleButton>
                         </Stack>
                     )}
                     <Stack sx={{ gap: 2 }}>
-                        <Typography color="text.muted">
+                        <Typography sx={{ color: "text.muted" }}>
                             {t("pair_with_pin_description")}
                         </Typography>
-                        <Button onClick={() => setView("pin")}>
+                        <FocusVisibleButton onClick={() => setView("pin")}>
                             {t("pair_with_pin")}
-                        </Button>
+                        </FocusVisibleButton>
                     </Stack>
                 </Stack>
             )}
@@ -157,37 +165,40 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                         <ActivityIndicator />
                     </div>
                     <Typography>{t("choose_device_from_browser")}</Typography>
-                    <Button color="secondary" onClick={() => setView("choose")}>
+                    <FocusVisibleButton
+                        color="secondary"
+                        onClick={() => setView("choose")}
+                    >
                         {t("go_back")}
-                    </Button>
+                    </FocusVisibleButton>
                 </Stack>
             )}
             {view == "auto-cast-error" && (
                 <Stack sx={{ pt: 1, gap: 3, textAlign: "center" }}>
                     <Typography>{t("cast_auto_pair_failed")}</Typography>
-                    <Button color="secondary" onClick={() => setView("choose")}>
+                    <FocusVisibleButton
+                        color="secondary"
+                        onClick={() => setView("choose")}
+                    >
                         {t("go_back")}
-                    </Button>
+                    </FocusVisibleButton>
                 </Stack>
             )}
             {view == "pin" && (
                 <>
                     <Stack sx={{ gap: 2, mb: 2 }}>
-                        <Typography>
+                        <Typography sx={{ color: "text.muted" }}>
                             <Trans
                                 i18nKey="visit_cast_url"
                                 components={{
-                                    a: (
-                                        <Link
-                                            target="_blank"
-                                            href="https://cast.ente.io"
-                                        />
-                                    ),
+                                    a: <Link target="_blank" href={castURL} />,
                                 }}
-                                values={{ url: "cast.ente.io" }}
+                                values={{ url: castHost }}
                             />
                         </Typography>
-                        <Typography>{t("enter_cast_pin_code")}</Typography>
+                        <Typography sx={{ color: "text.muted" }}>
+                            {t("enter_cast_pin_code")}
+                        </Typography>
                     </Stack>
                     <SingleInputForm
                         callback={onSubmit}
@@ -197,13 +208,13 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                         buttonText={t("pair_device_to_tv")}
                         submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
                     />
-                    <Button
+                    <FocusVisibleButton
                         variant="text"
                         fullWidth
                         onClick={() => setView("choose")}
                     >
                         {t("go_back")}
-                    </Button>
+                    </FocusVisibleButton>
                 </>
             )}
         </TitledMiniDialog>

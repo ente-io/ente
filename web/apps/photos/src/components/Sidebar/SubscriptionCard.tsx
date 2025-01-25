@@ -1,5 +1,5 @@
+import { Overlay } from "@/base/components/containers";
 import type { ButtonishProps } from "@/base/components/mui";
-import { Overlay } from "@/base/components/mui/Container";
 import type { UserDetails } from "@/new/photos/services/user-details";
 import {
     familyUsage,
@@ -42,7 +42,7 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
     }
 
     return (
-        <Box position="relative">
+        <Box sx={{ position: "relative" }}>
             <BackgroundOverlay />
             <SubscriptionCardContentOverlay userDetails={userDetails} />
             <ClickOverlay onClick={onClick} />
@@ -123,14 +123,14 @@ const IndividualSubscriptionCardContent: React.FC<
     );
 };
 
-const MobileSmallBox = styled(Box)`
+const MobileSmallBox = styled("div")`
     display: none;
     @media (max-width: 359px) {
         display: block;
     }
 `;
 
-const DefaultBox = styled(Box)`
+const DefaultBox = styled("div")`
     display: none;
     @media (min-width: 360px) {
         display: block;
@@ -144,25 +144,19 @@ interface StorageSectionProps {
 
 const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
     return (
-        <Box width="100%">
-            <Typography variant="small" color={"text.muted"}>
+        <Box sx={{ width: "100%" }}>
+            <Typography variant="small" sx={{ color: "text.muted" }}>
                 {t("storage")}
             </Typography>
             <DefaultBox>
-                <Typography
-                    fontWeight={"bold"}
-                    sx={{ fontSize: "24px", lineHeight: "30px" }}
-                >
+                <Typography variant="h3">
                     {`${formattedStorageByteSize(usage, { round: true })} ${t(
                         "of",
                     )} ${formattedStorageByteSize(storage)} ${t("used")}`}
                 </Typography>
             </DefaultBox>
             <MobileSmallBox>
-                <Typography
-                    fontWeight={"bold"}
-                    sx={{ fontSize: "24px", lineHeight: "30px" }}
-                >
+                <Typography variant="h3">
                     {`${bytesInGB(usage)} /  ${bytesInGB(storage)} ${t("storage_unit.gb")} ${t("used")}`}
                 </Typography>
             </MobileSmallBox>
@@ -193,17 +187,13 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
     // all such pluralizable strings use the _count suffix, but that's not a
     // requirement from the library).
     return (
-        <Box width="100%">
+        <Box sx={{ width: "100%" }}>
             <UsageBar used={usage} total={storage} />
-            <SpaceBetweenFlex
-                sx={{
-                    marginTop: 1.5,
-                }}
-            >
+            <SpaceBetweenFlex sx={{ marginTop: 1.5 }}>
                 <Typography variant="mini">{`${formattedStorageByteSize(
                     storage - usage,
                 )} ${t("free")}`}</Typography>
-                <Typography variant="mini" fontWeight={"bold"}>
+                <Typography variant="mini" sx={{ fontWeight: "medium" }}>
                     {t("photos_count", { count: fileCount ?? 0 })}
                 </Typography>
             </SpaceBetweenFlex>
@@ -249,22 +239,18 @@ const FamilyUsageSection: React.FC<FamilyUsageSectionProps> = ({
     totalStorage,
 }) => {
     return (
-        <Box width="100%">
+        <Box sx={{ width: "100%" }}>
             <FamilyUsageBar
                 totalUsage={totalUsage}
                 userUsage={userUsage}
                 totalStorage={totalStorage}
             />
-            <SpaceBetweenFlex
-                sx={{
-                    marginTop: 1.5,
-                }}
-            >
+            <SpaceBetweenFlex sx={{ marginTop: 1.5 }}>
                 <Stack direction={"row"} spacing={1.5}>
                     <Legend label={t("you")} color="text.base" />
                     <Legend label={t("family")} color="text.muted" />
                 </Stack>
-                <Typography variant="mini" fontWeight={"bold"}>
+                <Typography variant="mini" sx={{ fontWeight: "medium" }}>
                     {t("photos_count", { count: fileCount ?? 0 })}
                 </Typography>
             </SpaceBetweenFlex>
@@ -318,12 +304,12 @@ const UsageBar: React.FC<UsageBarProps> = ({ used, total, sx }) => (
     />
 );
 
-const UsageBar_ = styled(LinearProgress)(() => ({
+const UsageBar_ = styled(LinearProgress)(({ theme }) => ({
     ".MuiLinearProgress-bar": {
         borderRadius: "2px",
     },
     borderRadius: "2px",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: theme.vars.palette.fixed.storageCardUsageFill,
 }));
 
 interface LegendProps {
@@ -332,12 +318,12 @@ interface LegendProps {
 }
 
 const Legend: React.FC<LegendProps> = ({ label, color }) => (
-    <Box sx={{ display: "flex", alignItems: "center" }}>
+    <Stack direction="row" sx={{ alignItems: "center" }}>
         <LegendDot sx={{ color }} />
-        <Typography variant="mini" fontWeight={"bold"}>
+        <Typography variant="mini" sx={{ fontWeight: "medium" }}>
             {label}
         </Typography>
-    </Box>
+    </Stack>
 );
 
 const LegendDot = styled(CircleIcon)`

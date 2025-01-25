@@ -7,7 +7,7 @@
         "@ente/shared": "*",
         "@types/zxcvbn": "^4.4.5",
         "react-otp-input": "^3.1.1",
-        "uuid": "^11.0.3",
+        "uuid": "^11.0.5",
         "zxcvbn": "^4.4.2"
     },
     "devDependencies": {

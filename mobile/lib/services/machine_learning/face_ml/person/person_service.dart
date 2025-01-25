@@ -84,7 +84,7 @@ class PersonService {
     for (var personID in dbPersonClusterInfo.keys) {
       final person = persons[personID];
       if (person == null) {
-        logger.warning("Person $personID not found");
+        logger.severe("Person $personID not found");
         continue;
       }
       final personData = person.data;
@@ -196,7 +196,7 @@ class PersonService {
     }
     personData.rejectedFaceIDs ??= [];
     personData.rejectedFaceIDs!.addAll(clusterInfo.faces);
-    personData.assigned!.removeWhere((element) => element.id != clusterID);
+    personData.assigned!.removeWhere((element) => element.id == clusterID);
     await entityService.addOrUpdate(
       EntityType.cgroup,
       personData.toJson(),
@@ -426,11 +426,16 @@ class PersonService {
   }
 
   Future<void> updatePerson(PersonEntity updatePerson) async {
-    await entityService.addOrUpdate(
-      EntityType.cgroup,
-      updatePerson.data.toJson(),
-      id: updatePerson.remoteID,
-    );
-    updatePerson.data.logStats();
+    try {
+      await entityService.addOrUpdate(
+        EntityType.cgroup,
+        updatePerson.data.toJson(),
+        id: updatePerson.remoteID,
+      );
+      updatePerson.data.logStats();
+    } catch (e, s) {
+      logger.severe("Failed to update person", e, s);
+      rethrow;
+    }
   }
 }

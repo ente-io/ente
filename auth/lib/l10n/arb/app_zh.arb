@@ -88,6 +88,8 @@
   "useRecoveryKey": "使用恢复密钥",
   "incorrectPasswordTitle": "密码错误",
   "welcomeBack": "欢迎回来！",
+  "emailAlreadyRegistered": "电子邮件地址已被注册。",
+  "emailNotRegistered": "电子邮件地址未注册。",
   "madeWithLoveAtPrefix": "用❤️制作 ",
   "supportDevs": "订阅 <bold-green>ente</bold-green> 以支持我们",
   "supportDiscount": "使用优惠码“AUTH”可享受首年 10% 折扣",

@@ -1,4 +1,4 @@
-import { SpaceBetweenFlex } from "@/base/components/mui/Container";
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import type { CollectionMapping } from "@/base/types/ipc";
@@ -49,10 +49,11 @@ export const CollectionMappingChoice: React.FC<
                 gap: "20px",
             }}
         >
-            <Typography color="text.muted">{t("upload_to_choice")}</Typography>
+            <Typography sx={{ color: "text.muted" }}>
+                {t("upload_to_choice")}
+            </Typography>
             <Stack sx={{ gap: "12px" }}>
                 <FocusVisibleButton
-                    size="medium"
                     color="accent"
                     startIcon={<FolderIcon />}
                     onClick={() => {
@@ -64,7 +65,6 @@ export const CollectionMappingChoice: React.FC<
                 </FocusVisibleButton>
 
                 <FocusVisibleButton
-                    size="medium"
                     color="accent"
                     startIcon={<FolderCopyIcon />}
                     onClick={() => {

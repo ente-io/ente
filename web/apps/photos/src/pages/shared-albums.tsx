@@ -1,7 +1,18 @@
-import { EnteLogoSVG } from "@/base/components/EnteLogo";
-import { FormPaper, FormPaperTitle } from "@/base/components/FormPaper";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { SpaceBetweenFlex } from "@/base/components/mui/Container";
+import {
+    AccountsPageContents,
+    AccountsPageTitle,
+} from "@/accounts/components/layouts/centered-paper";
+import {
+    SpaceBetweenFlex,
+    Stack100vhCenter,
+} from "@/base/components/containers";
+import { EnteLogo } from "@/base/components/EnteLogo";
+import {
+    LoadingIndicator,
+    TranslucentLoadingOverlay,
+} from "@/base/components/loaders";
+import type { ButtonishProps } from "@/base/components/mui";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import {
     OverflowMenu,
@@ -13,6 +24,8 @@ import {
 } from "@/base/components/utils/hooks";
 import { isHTTP401Error, PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
+import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
+import { useFileInput } from "@/gallery/components/utils/use-file-input";
 import { downloadManager } from "@/gallery/services/download";
 import { extractCollectionKeyFromShareURL } from "@/gallery/services/share";
 import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
@@ -32,27 +45,22 @@ import { useAppContext } from "@/new/photos/types/context";
 import {
     CenteredFlex,
     FluidContainer,
-    VerticallyCentered,
 } from "@ente/shared/components/Container";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
-import { useFileInput } from "@ente/shared/hooks/useFileInput";
-import AddPhotoAlternateOutlined from "@mui/icons-material/AddPhotoAlternateOutlined";
+import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
 } from "components/FilesDownloadProgress";
-import FullScreenDropZone from "components/FullScreenDropZone";
-import { LoadingOverlay } from "components/LoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import Uploader from "components/Upload/Uploader";
@@ -84,7 +92,7 @@ import { downloadSelectedFiles, getSelectedFiles } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export default function PublicCollectionGallery() {
-    const credentials = useRef<PublicAlbumsCredentials | undefined>();
+    const credentials = useRef<PublicAlbumsCredentials | undefined>(undefined);
     const collectionKey = useRef<string>(null);
     const url = useRef<string>(null);
     const referralCode = useRef<string>("");
@@ -116,7 +124,7 @@ export default function PublicCollectionGallery() {
     const {
         getRootProps: getDragAndDropRootProps,
         getInputProps: getDragAndDropInputProps,
-        acceptedFiles: dragAndDropFiles,
+        acceptedFiles: dragAndDropFilesReadOnly,
     } = useDropzone({
         noClick: true,
         noKeyboard: true,
@@ -174,6 +182,12 @@ export default function PublicCollectionGallery() {
             });
             return updater;
         };
+
+    // Create a regular array from the readonly array returned by dropzone.
+    const dragAndDropFiles = useMemo(
+        () => [...dragAndDropFilesReadOnly],
+        [dragAndDropFilesReadOnly],
+    );
 
     const onAddPhotos = useMemo(() => {
         return publicCollection?.publicURLs?.[0]?.enableCollect
@@ -409,7 +423,7 @@ export default function PublicCollectionGallery() {
         } catch (e) {
             log.error("Failed to verifyLinkPassword", e);
             if (isHTTP401Error(e)) {
-                setFieldError(t("INCORRECT_PASSPHRASE"));
+                setFieldError(t("incorrect_password"));
             } else {
                 setFieldError(t("generic_error_retry"));
             }
@@ -449,19 +463,24 @@ export default function PublicCollectionGallery() {
     };
 
     if (loading && (!publicFiles || !credentials.current)) {
-        return (
-            <VerticallyCentered>
-                <ActivityIndicator />
-            </VerticallyCentered>
-        );
+        return <LoadingIndicator />;
     } else if (errorMessage) {
-        return <VerticallyCentered>{errorMessage}</VerticallyCentered>;
+        return (
+            <Stack100vhCenter>
+                <Typography sx={{ color: "critical.main" }}>
+                    {errorMessage}
+                </Typography>
+            </Stack100vhCenter>
+        );
     } else if (isPasswordProtected && !credentials.current.accessTokenJWT) {
         return (
-            <VerticallyCentered>
-                <FormPaper>
-                    <FormPaperTitle>{t("password")}</FormPaperTitle>
-                    <Typography color={"text.muted"} mb={2} variant="small">
+            <AccountsPageContents>
+                <AccountsPageTitle>{t("password")}</AccountsPageTitle>
+                <Stack>
+                    <Typography
+                        variant="small"
+                        sx={{ color: "text.muted", mb: 2 }}
+                    >
                         {t("link_password_description")}
                     </Typography>
                     <SingleInputForm
@@ -470,11 +489,15 @@ export default function PublicCollectionGallery() {
                         buttonText={t("unlock")}
                         fieldType="password"
                     />
-                </FormPaper>
-            </VerticallyCentered>
+                </Stack>
+            </AccountsPageContents>
         );
     } else if (!publicFiles || !credentials.current) {
-        return <VerticallyCentered>{t("NOT_FOUND")}</VerticallyCentered>;
+        return (
+            <Stack100vhCenter>
+                <Typography>{t("NOT_FOUND")}</Typography>
+            </Stack100vhCenter>
+        );
     }
 
     // TODO: memo this (after the dependencies are traceable).
@@ -510,11 +533,7 @@ export default function PublicCollectionGallery() {
                     }
                     selectable={downloadEnabled}
                 />
-                {blockingLoad && (
-                    <LoadingOverlay>
-                        <ActivityIndicator />
-                    </LoadingOverlay>
-                )}
+                {blockingLoad && <TranslucentLoadingOverlay />}
                 <Uploader
                     syncWithRemote={syncWithRemote}
                     uploadCollection={publicCollection}
@@ -553,17 +572,19 @@ export default function PublicCollectionGallery() {
 
 interface SharedAlbumNavbarProps {
     /**
-     * If provided, then an "Add Photos" button will be shown in the navbar.
+     * If provided, then an "Add Photos" button will be shown in the navbar, and
+     * this function will be called when it is clicked.
      */
-    onAddPhotos: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onAddPhotos: (() => void) | undefined;
 }
+
 const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
     onAddPhotos,
 }) => (
     <NavbarBase>
         <FluidContainer>
             <EnteLogoLink href="https://ente.io">
-                <EnteLogoSVG height={15} />
+                <EnteLogo height={15} />
             </EnteLogoLink>
         </FluidContainer>
         {onAddPhotos ? <AddPhotosButton onClick={onAddPhotos} /> : <GoToEnte />}
@@ -573,33 +594,30 @@ const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
 const EnteLogoLink = styled("a")(({ theme }) => ({
     // Remove the excess space at the top.
     svg: { verticalAlign: "middle" },
-    color: theme.colors.text.base,
+    color: theme.vars.palette.text.base,
     ":hover": {
-        color: theme.palette.accent.main,
+        color: theme.vars.palette.accent.main,
     },
 }));
 
-const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
+const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
     const isSmallWidth = useIsSmallWidth();
 
-    const icon = <AddPhotoAlternateOutlined />;
+    const icon = <AddPhotoAlternateOutlinedIcon />;
 
     return (
         <Box>
             {isSmallWidth ? (
-                <IconButton {...props} disabled={disabled}>
-                    {icon}
-                </IconButton>
+                <IconButton {...{ onClick, disabled }}>{icon}</IconButton>
             ) : (
-                <Button
-                    {...props}
-                    disabled={disabled}
-                    color={"secondary"}
+                <FocusVisibleButton
+                    color="secondary"
                     startIcon={icon}
+                    {...{ onClick, disabled }}
                 >
                     {t("add_photos")}
-                </Button>
+                </FocusVisibleButton>
             )}
         </Box>
     );
@@ -609,19 +627,17 @@ const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
  * A visually different variation of {@link AddPhotosButton}. It also does not
  * shrink on mobile sized screens.
  */
-const AddMorePhotosButton: React.FC<ButtonProps> = (props) => {
+const AddMorePhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
+
     return (
-        <Box>
-            <Button
-                {...props}
-                disabled={disabled}
-                color={"accent"}
-                startIcon={<AddPhotoAlternateOutlined />}
-            >
-                {t("add_more_photos")}
-            </Button>
-        </Box>
+        <FocusVisibleButton
+            color="accent"
+            startIcon={<AddPhotoAlternateOutlinedIcon />}
+            {...{ onClick, disabled }}
+        >
+            {t("add_more_photos")}
+        </FocusVisibleButton>
     );
 };
 
@@ -653,9 +669,11 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />
                 </IconButton>
-                <Box ml={1.5}>{t("selected_count", { selected: count })}</Box>
+                <Box sx={{ ml: 1.5 }}>
+                    {t("selected_count", { selected: count })}
+                </Box>
             </FluidContainer>
-            <Stack spacing={2} direction="row" mr={2}>
+            <Stack direction="row" sx={{ gap: 2, mr: 2 }}>
                 <Tooltip title={t("download")}>
                     <IconButton onClick={downloadFilesHelper}>
                         <DownloadIcon />

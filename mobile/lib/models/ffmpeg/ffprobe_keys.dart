@@ -93,8 +93,6 @@ enum SideDataType {
     switch (this) {
       case SideDataType.displayMatrix:
         return 'Display Matrix';
-      default:
-        assert(false, 'Unknown side data type: $this');
     }
   }
 }

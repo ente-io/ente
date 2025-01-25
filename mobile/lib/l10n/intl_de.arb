@@ -2,6 +2,8 @@
   "@@locale ": "en",
   "enterYourEmailAddress": "Gib deine E-Mail-Adresse ein",
   "accountWelcomeBack": "Willkommen zurück!",
+  "emailAlreadyRegistered": "E-Mail ist bereits registriert.",
+  "emailNotRegistered": "E-Mail nicht registriert.",
   "email": "E-Mail",
   "cancel": "Abbrechen",
   "verify": "Überprüfen",
@@ -185,6 +187,8 @@
   },
   "allowAddPhotosDescription": "Erlaube Nutzern, mit diesem Link ebenfalls Fotos zu diesem geteilten Album hinzuzufügen.",
   "passwordLock": "Passwort Sperre",
+  "canNotOpenTitle": "Album kann nicht geöffnet werden",
+  "canNotOpenBody": "Leider kann dieses Album nicht in der App geöffnet werden.",
   "disableDownloadWarningTitle": "Bitte beachten Sie:",
   "disableDownloadWarningBody": "Zuschauer können weiterhin Screenshots oder mit anderen externen Programmen Kopien der Bilder machen.",
   "allowDownloads": "Downloads erlauben",
@@ -351,6 +355,7 @@
   "failedToLoadAlbums": "Laden der Alben fehlgeschlagen",
   "hidden": "Versteckt",
   "authToViewYourHiddenFiles": "Bitte authentifizieren, um die versteckten Dateien anzusehen",
+  "authToViewTrashedFiles": "Bitte authentifizieren, um die gelöschten Dateien anzuzeigen",
   "trash": "Papierkorb",
   "uncategorized": "Unkategorisiert",
   "videoSmallCase": "Video",
@@ -412,6 +417,7 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Fotorastergröße",
+  "manageDeviceStorage": "Geräte-Cache verwalten",
   "manageDeviceStorageDesc": "Lokalen Cache-Speicher überprüfen und löschen.",
   "machineLearning": "Maschinelles Lernen",
   "mlConsent": "Maschinelles Lernen aktivieren",
@@ -1376,6 +1382,7 @@
   "extraPhotosFound": "Zusätzliche Fotos gefunden",
   "configuration": "Konfiguration",
   "localIndexing": "Lokale Indizierung",
+  "processed": "Verarbeitet",
   "resetPerson": "Entfernen",
   "areYouSureYouWantToResetThisPerson": "Bist du sicher, dass du diese Person zurücksetzen möchtest?",
   "allPersonGroupingWillReset": "Alle Gruppierungen für diese Person werden zurückgesetzt und du wirst alle Vorschläge für diese Person verlieren",
@@ -1480,6 +1487,20 @@
     }
   },
   "file": "Datei",
+  "searchSectionsLengthMismatch": "Abschnittslänge stimmt nicht überein: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "selectMailApp": "E-Mail-App auswählen",
   "selectAllShort": "Alle",
   "@selectAllShort": {
@@ -1562,5 +1583,11 @@
   },
   "legacyInvite": "{email} hat dich eingeladen, ein vertrauenswürdiger Kontakt zu werden",
   "authToManageLegacy": "Bitte authentifiziere dich, um deine vertrauenswürdigen Kontakte zu verwalten",
-  "useDifferentPlayerInfo": "Hast du Probleme beim Abspielen dieses Videos? Halte hier gedrückt, um einen anderen Player auszuprobieren."
+  "useDifferentPlayerInfo": "Hast du Probleme beim Abspielen dieses Videos? Halte hier gedrückt, um einen anderen Player auszuprobieren.",
+  "hideSharedItemsFromHomeGallery": "Geteilte Elemente in der Home-Galerie ausblenden",
+  "gallery": "Galerie",
+  "joinAlbum": "Album beitreten",
+  "joinAlbumSubtext": "um deine Fotos anzuzeigen und hinzuzufügen",
+  "joinAlbumSubtextViewer": "um dies zu geteilten Alben hinzuzufügen",
+  "join": "Beitreten"
 }

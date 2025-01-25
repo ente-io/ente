@@ -155,7 +155,7 @@ func (repo *CollectionRepository) GetCollectionsOwnedByUserV2(userID int64, upda
 		SELECT 
 c.collection_id, c.owner_id, c.encrypted_key,c.key_decryption_nonce, c.name, c.encrypted_name, c.name_decryption_nonce, c.type, c.app, c.attributes, c.updation_time, c.is_deleted, c.magic_metadata, c.pub_magic_metadata,
 users.user_id, users.encrypted_email, users.email_decryption_nonce, cs.role_type,
-pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_at, pct.pw_hash, pct.pw_nonce, pct.mem_limit, pct.ops_limit, pct.enable_download, pct.enable_collect 
+pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_at, pct.pw_hash, pct.pw_nonce, pct.mem_limit, pct.ops_limit, pct.enable_download, pct.enable_collect, pct.enable_join 
     FROM collections c
     LEFT JOIN collection_shares cs
     ON (cs.collection_id = c.collection_id AND cs.is_deleted = false)
@@ -175,14 +175,14 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 		var c ente.Collection
 		var name, encryptedName, nameDecryptionNonce sql.NullString
 		var pctDeviceLimit sql.NullInt32
-		var pctEnableDownload, pctEnableCollect sql.NullBool
+		var pctEnableDownload, pctEnableCollect, pctEnableJoin sql.NullBool
 		var shareUserID, pctValidTill, pctCreatedAt, pctUpdatedAt, pctMemLimit, pctOpsLimit sql.NullInt64
 		var encryptedEmail, nonce []byte
 		var shareeRoleType, pctToken, pctPwHash, pctPwNonce sql.NullString
 
 		if err := rows.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata,
 			&shareUserID, &encryptedEmail, &nonce, &shareeRoleType,
-			&pctToken, &pctValidTill, &pctDeviceLimit, &pctCreatedAt, &pctUpdatedAt, &pctPwHash, &pctPwNonce, &pctMemLimit, &pctOpsLimit, &pctEnableDownload, &pctEnableCollect); err != nil {
+			&pctToken, &pctValidTill, &pctDeviceLimit, &pctCreatedAt, &pctUpdatedAt, &pctPwHash, &pctPwNonce, &pctMemLimit, &pctOpsLimit, &pctEnableDownload, &pctEnableCollect, &pctEnableJoin); err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
 
@@ -222,6 +222,7 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 					EnableDownload:  pctEnableDownload.Bool,
 					EnableCollect:   pctEnableCollect.Bool,
 					PasswordEnabled: pctPwNonce.Valid,
+					EnableJoin:      pctEnableJoin.Bool,
 				}
 				if pctPwNonce.Valid {
 					url.Nonce = &pctPwNonce.String
@@ -317,6 +318,29 @@ func (repo *CollectionRepository) GetCollectionIDsSharedWithUser(userID int64) (
 	return cIDs, nil
 }
 
+func (repo *CollectionRepository) GetCollectionsSharedWithOrByUser(userID int64) ([]int64, error) {
+	rows, err := repo.DB.Query(`
+		SELECT collection_id
+		FROM collection_shares
+		WHERE (to_user_id = $1 OR from_user_id = $1)
+		AND is_deleted = $2`, userID, false)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+
+	cIDs := make([]int64, 0)
+	for rows.Next() {
+		var cID int64
+		if err := rows.Scan(&cID); err != nil {
+			return cIDs, stacktrace.Propagate(err, "")
+		}
+		cIDs = append(cIDs, cID)
+	}
+	return cIDs, nil
+
+}
+
 // GetCollectionIDsOwnedByUser returns the map of collectionID (owned by user) to collection deletion status
 func (repo *CollectionRepository) GetCollectionIDsOwnedByUser(userID int64) (map[int64]bool, error) {
 	rows, err := repo.DB.Query(`
@@ -372,6 +396,52 @@ func (repo *CollectionRepository) DoesFileExistInCollections(fileID int64, cIDs 
 	err := repo.DB.QueryRow(`SELECT EXISTS (SELECT 1 FROM collection_files WHERE file_id = $1 AND is_deleted = $2 AND collection_id = ANY ($3))`,
 		fileID, false, pq.Array(cIDs)).Scan(&exists)
 	return exists, stacktrace.Propagate(err, "")
+}
+
+func (repo *CollectionRepository) DoAllFilesExistInGivenCollections(fileIDs []int64, cIDs []int64) error {
+	// Query to get all distinct file_ids that exist in the collections
+	rows, err := repo.DB.Query(`
+        SELECT DISTINCT file_id 
+        FROM collection_files 
+        WHERE file_id = ANY ($1) 
+        AND is_deleted = false 
+        AND collection_id = ANY ($2)`,
+		pq.Array(fileIDs), pq.Array(cIDs))
+
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+
+	// Create a map of input fileIDs for easy lookup
+	fileIDMap := make(map[int64]bool)
+	for _, id := range fileIDs {
+		fileIDMap[id] = false // false means not found yet
+	}
+	// Mark files that were found
+	for rows.Next() {
+		var fileID int64
+		if err := rows.Scan(&fileID); err != nil {
+			return stacktrace.Propagate(err, "")
+		}
+		fileIDMap[fileID] = true // mark as found
+	}
+
+	if err = rows.Err(); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+
+	// Collect missing files
+	var missingFiles []int64
+	for id, found := range fileIDMap {
+		if !found {
+			missingFiles = append(missingFiles, id)
+		}
+	}
+	if len(missingFiles) > 0 {
+		return stacktrace.Propagate(fmt.Errorf("missing files %v", missingFiles), "")
+	}
+	return nil
 }
 
 // VerifyAllFileIDsExistsInCollection returns error if the fileIDs don't exist in the collection

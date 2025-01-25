@@ -109,7 +109,24 @@ class UserService {
     } on DioException catch (e) {
       await dialog.hide();
       _logger.info(e);
-      if (e.response != null && e.response!.statusCode == 403) {
+      final String? enteErrCode = e.response?.data["code"];
+      if (enteErrCode != null && enteErrCode == "USER_ALREADY_REGISTERED") {
+        unawaited(
+          showErrorDialog(
+            context,
+            context.l10n.oops,
+            context.l10n.emailAlreadyRegistered,
+          ),
+        );
+      } else if (enteErrCode != null && enteErrCode == "USER_NOT_REGISTERED") {
+        unawaited(
+          showErrorDialog(
+            context,
+            context.l10n.oops,
+            context.l10n.emailNotRegistered,
+          ),
+        );
+      } else if (e.response != null && e.response!.statusCode == 403) {
         unawaited(
           showErrorDialog(
             context,
@@ -672,7 +689,7 @@ class UserService {
       "${_config.getHttpEndpoint()}/users/srp/create-session",
       data: {
         "srpUserID": srpAttributes.srpUserID,
-        "srpA": base64Encode(SRP6Util.encodeBigInt(A!)),
+        "srpA": base64Encode(SRP6Util.getPadded(A!, 512)),
       },
     );
     final String sessionID = createSessionResponse.data["sessionID"];
@@ -688,7 +705,7 @@ class UserService {
       data: {
         "sessionID": sessionID,
         "srpUserID": srpAttributes.srpUserID,
-        "srpM1": base64Encode(SRP6Util.encodeBigInt(clientM!)),
+        "srpM1": base64Encode(SRP6Util.getPadded(clientM!, 32)),
       },
     );
     if (response.statusCode == 200) {

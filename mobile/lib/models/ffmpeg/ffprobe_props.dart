@@ -2,12 +2,10 @@
 
 import "dart:developer";
 
-import "package:collection/collection.dart";
 import "package:intl/intl.dart";
 import "package:photos/models/ffmpeg/channel_layouts.dart";
 import "package:photos/models/ffmpeg/codecs.dart";
 import "package:photos/models/ffmpeg/ffprobe_keys.dart";
-import "package:photos/models/ffmpeg/language.dart";
 import "package:photos/models/ffmpeg/mp4.dart";
 import "package:photos/models/location/location.dart";
 
@@ -342,12 +340,6 @@ class FFProbeProps {
           : (t / b).toStringAsFixed(2);
     }
     return value;
-  }
-
-  static String _formatLanguage(String value) {
-    final language = Language.living639_2
-        .firstWhereOrNull((language) => language.iso639_2 == value);
-    return language?.native ?? value;
   }
 
   static final _durationHmsmPattern = RegExp(r'(\d+):(\d+):(\d+)(.\d+)');

@@ -44,13 +44,13 @@ import { FileType } from "./file-type";
  * When the client needs to show a file, it needs to "merge" in 2 or 3 of these
  * sources.
  *
- * -   When showing a shared file, (1) and (3) are merged, with changes from (3)
- *     taking precedence, to obtain the full metadata pertinent to the file.
+ * - When showing a shared file, (1) and (3) are merged, with changes from (3)
+ *   taking precedence, to obtain the full metadata pertinent to the file.
  *
- * -   When showing a normal (un-shared) file, (1), (2) and (3) are merged, with
- *     changes from (2) and (3) taking precedence, to obtain the full metadata.
- *     (2) and (3) have no intersection of keys, so they can be merged in any
- *     order.
+ * - When showing a normal (un-shared) file, (1), (2) and (3) are merged, with
+ *   changes from (2) and (3) taking precedence, to obtain the full metadata.
+ *   (2) and (3) have no intersection of keys, so they can be merged in any
+ *   order.
  *
  * While these sources can be conceptually merged, it is important for the
  * client to also retain the original sources unchanged. This is because the
@@ -76,14 +76,14 @@ export interface Metadata {
      * This is our best attempt at detecting the time when the photo or live
      * photo or video was taken.
      *
-     * -   We first try to obtain this from metadata, using Exif and other
-     *     metadata for images and FFmpeg-extracted metadata for video.
+     * - We first try to obtain this from metadata, using Exif and other
+     *   metadata for images and FFmpeg-extracted metadata for video.
      *
-     * -   If no suitable metadata is available, then we try to deduce it from
-     *     file name (e.g. for screenshots without any embedded metadata).
+     * - If no suitable metadata is available, then we try to deduce it from
+     *   file name (e.g. for screenshots without any embedded metadata).
      *
-     * -   If nothing can be found, then it is set to the current time at the
-     *     time of the upload.
+     * - If nothing can be found, then it is set to the current time at the time
+     *   of the upload.
      */
     creationTime: number;
     /**
@@ -143,11 +143,10 @@ export interface Metadata {
 /**
  * Mutable private metadata associated with an {@link EnteFile}.
  *
- * -   Unlike {@link Metadata}, this can change after the file has been
- *     uploaded.
+ * - Unlike {@link Metadata}, this can change after the file has been uploaded.
  *
- * -   Unlike {@link PublicMagicMetadata}, this is only available to the owner
- *     of the file.
+ * - Unlike {@link PublicMagicMetadata}, this is only available to the owner of
+ *   the file.
  *
  * For historical reasons, the unqualified phrase "magic metadata" in various
  * APIs refers to the (this) private metadata, even though the mutable public
@@ -180,11 +179,10 @@ export enum ItemVisibility {
 /**
  * Mutable public metadata associated with an {@link EnteFile}.
  *
- * -   Unlike {@link Metadata}, this can change after the file has been
- *     uploaded.
+ * - Unlike {@link Metadata}, this can change after the file has been uploaded.
  *
- * -   Unlike {@link PrivateMagicMetadata}, this is available to all the people
- *     with whom the file has been shared.
+ * - Unlike {@link PrivateMagicMetadata}, this is available to all the people
+ *   with whom the file has been shared.
  *
  * For more details, see [Note: Metadatum].
  *
@@ -571,14 +569,14 @@ const putFilesPublicMagicMetadata = async (
  * Depending on the file type and the upload sequence, this data can come from
  * various places:
  *
- * -   For images it comes from the Exif and other forms of metadata (XMP, IPTC)
- *     embedded in the file.
+ * - For images it comes from the Exif and other forms of metadata (XMP, IPTC)
+ *   embedded in the file.
  *
- * -   For videos, similarly it is extracted from the metadata embedded in the
- *     file using ffmpeg.
+ * - For videos, similarly it is extracted from the metadata embedded in the
+ *   file using ffmpeg.
  *
- * -   From various sidecar files (like metadata JSONs) that might be sitting
- *     next to the original during an import.
+ * - From various sidecar files (like metadata JSONs) that might be sitting next
+ *   to the original during an import.
  *
  * These bits then get distributed and saved in the various metadata fields
  * associated with an {@link EnteFile} (See: [Note: Metadatum]).
@@ -606,6 +604,10 @@ export interface ParsedMetadata {
     creationDate?: ParsedMetadataDate;
     /** The GPS coordinates where the photo was taken. */
     location?: Location;
+    /**
+     * A caption / description attached by the user to the photo.
+     */
+    description?: string;
 }
 
 /**
@@ -692,13 +694,13 @@ export interface ParsedMetadataDate {
  * ---
  * Some examples:
  *
- * -   "2023"                          => ("2023-01-01T00:00:00.000", undefined)
- * -   "2023-08"                       => ("2023-08-01T00:00:00.000", undefined)
- * -   "2023-08-23"                    => ("2023-08-23T00:00:00.000", undefined)
- * -   "2023-08-23T18:03:00"           => ("2023-08-23T18:03:00.000", undefined)
- * -   "2023-08-23T18:03:00+05:30"     => ("2023-08-23T18:03:00.000', "+05:30")
- * -   "2023-08-23T18:03:00.000+05:30" => ("2023-08-23T18:03:00.000", "+05:30")
- * -   "2023-08-23T12:33:00.000Z"      => ("2023-08-23T12:33:00.000", "Z")
+ * - "2023"                          => ("2023-01-01T00:00:00.000", undefined)
+ * - "2023-08"                       => ("2023-08-01T00:00:00.000", undefined)
+ * - "2023-08-23"                    => ("2023-08-23T00:00:00.000", undefined)
+ * - "2023-08-23T18:03:00"           => ("2023-08-23T18:03:00.000", undefined)
+ * - "2023-08-23T18:03:00+05:30"     => ("2023-08-23T18:03:00.000', "+05:30")
+ * - "2023-08-23T18:03:00.000+05:30" => ("2023-08-23T18:03:00.000", "+05:30")
+ * - "2023-08-23T12:33:00.000Z"      => ("2023-08-23T12:33:00.000", "Z")
  */
 export const parseMetadataDate = (
     s: string,
@@ -734,10 +736,10 @@ export const parseMetadataDate = (
     //
     // In its full generality, this is non-trivial. The approach we take is:
     //
-    // 1.   Rely on the browser to be able to partial ISO 8601 string. This
-    //      relies on non-standard behaviour but works in practice seemingly.
+    // 1. Rely on the browser to be able to partial ISO 8601 string. This relies
+    //    on non-standard behaviour but works in practice seemingly.
     //
-    // 2.   Get an ISO 8601 representation of it. This is standard.
+    // 2. Get an ISO 8601 representation of it. This is standard.
     //
     // A thing to watch out for is that browsers treat date only and date time
     // strings differently when the offset is not present (as would be for us).

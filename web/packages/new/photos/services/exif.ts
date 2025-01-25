@@ -40,10 +40,12 @@ export const parseExif = (tags: RawExifTags) => {
     const location = parseLocation(tags);
     const creationDate = parseCreationDate(tags);
     const dimensions = parseDimensions(tags);
+    const description = parseDescription(tags);
 
     const metadata: ParsedMetadata = dimensions ?? {};
     if (creationDate) metadata.creationDate = creationDate;
     if (location) metadata.location = location;
+    if (description) metadata.description = description;
     return metadata;
 };
 
@@ -143,9 +145,9 @@ const parseDates = (tags: RawExifTags) => {
  * the photo was taken. The Exif specification has the following tags related to
  * photo's date:
  *
- * -   DateTimeOriginal
- * -   DateTimeDigitized (aka "CreateDate")
- * -   DateTime (aka "ModifyDate")
+ * - DateTimeOriginal
+ * - DateTimeDigitized (aka "CreateDate")
+ * - DateTime (aka "ModifyDate")
  *
  * DateTimeOriginal is meant to signify best when the original image was taken,
  * and we use it as the photo's creation date whenever it is present. If not, we
@@ -167,9 +169,9 @@ const parseDates = (tags: RawExifTags) => {
  * Additionally (and optionally), there are three SubSecTime* tags that provide
  * the fractional seconds (one for each of the above):
  *
- * -   SubSecTimeOriginal
- * -   SubSecTimeDigitized
- * -   SubSecTime
+ * - SubSecTimeOriginal
+ * - SubSecTimeDigitized
+ * - SubSecTime
  *
  * Each of which is a string specifying the fractional digits.
  *
@@ -178,9 +180,9 @@ const parseDates = (tags: RawExifTags) => {
  * local time. This is provided by the three OffsetTime* tags (one for each of
  * the above):
  *
- * -   OffsetTimeOriginal
- * -   OffsetTimeDigitized
- * -   OffsetTime
+ * - OffsetTimeOriginal
+ * - OffsetTimeDigitized
+ * - OffsetTime
  *
  * Each of these is a string of the format
  *
@@ -334,16 +336,16 @@ const parseIPTCDate = (
     // The library we use (ExifReader) parses them into a usable representation,
     // which we can use directly. Some notes:
     //
-    // -   There are currently no separate TypeScript types for the IPTC tags,
-    //     and instead they are listed as part of the ExifTags.
+    // - There are currently no separate TypeScript types for the IPTC tags, and
+    //   instead they are listed as part of the ExifTags.
     //
-    // -   For the date, whenever possible ExifReader parses the raw data into a
-    //     description of the form 'YYYY-MM-DD' (See `getCreationDate` in its
-    //     source code).
+    // - For the date, whenever possible ExifReader parses the raw data into a
+    //   description of the form 'YYYY-MM-DD' (See `getCreationDate` in its
+    //   source code).
     //
-    // -   For the time, whenever possible ExifReader parses the raw data into a
-    //     description either of the form 'HH:mm:ss` or `HH:mm:ss±HH:mm` (See
-    //     `getCreationTime` in its source code).
+    // - For the time, whenever possible ExifReader parses the raw data into a
+    //   description either of the form 'HH:mm:ss` or `HH:mm:ss±HH:mm` (See
+    //   `getCreationTime` in its source code).
     if (!dateTag) return undefined;
     let s = dateTag.description;
 
@@ -428,12 +430,12 @@ export type RawExifTags = Omit<ExifReader.ExpandedTags, "Thumbnail" | "xmp"> & {
  * We wish for a canonical "raw" JSON representing all the Exif data associated
  * with a file. This goal is tricky to achieve because:
  *
- * -   While Exif itself is a standard, with a standard set of tags (a numeric
- *     id), in practice vendors can use tags more than what are currently listed
- *     in the standard.
+ * - While Exif itself is a standard, with a standard set of tags (a numeric
+ *   id), in practice vendors can use tags more than what are currently listed
+ *   in the standard.
  *
- * -   We're not just interested in Exif tags, but rather at all forms of
- *     metadata (e.g. XMP, IPTC) that can be embedded in a file.
+ * - We're not just interested in Exif tags, but rather at all forms of metadata
+ *   (e.g. XMP, IPTC) that can be embedded in a file.
  *
  * By default, the library we use (ExifReader) returns a merged object
  * containing all tags it understands from all forms of metadata that it knows
@@ -531,8 +533,30 @@ export const extractRawExif = async (blob: Blob): Promise<RawExifTags> => {
  * values and returns a number.
  */
 export const tagNumericValue = (
-    tag: ExifReader.NumberTag & ExifReader.NumberArrayTag,
+    tag: ExifReader.NumberTag | ExifReader.NumberArrayTag,
 ) => {
     const v = tag.value;
     return Array.isArray(v) ? (v[0] ?? 0) / (v[1] ?? 1) : v;
 };
+
+/**
+ * Parse the description for an image from the metadata embedded in the file.
+ *
+ * This function will read the description from the following fields, in order:
+ *
+ * 1. XMP-dc:description
+ * 2. IPTC | Caption/Abstract (120)
+ * 3. EXIF IFD0 | 0x010e | ImageDescription
+ *
+ * For an overview of why this ordering was chosen, see
+ * https://github.com/ente-io/ente/discussions/3857#discussioncomment-11764990
+ */
+const parseDescription = (tags: RawExifTags) =>
+    // While the TypeScript tags for these three fields are varying (The XMP one
+    // doesn't have a static type, the IPTC one is marked as a number array, and
+    // the Exif one is a string array), for all three of these, the ExifReader
+    // description property (not related to the image "description" in the sense
+    // of this function) holds the singular string we're interested in.
+    tags.xmp?.description?.description ??
+    tags.iptc?.["Caption/Abstract"]?.description ??
+    tags.exif?.ImageDescription?.description;

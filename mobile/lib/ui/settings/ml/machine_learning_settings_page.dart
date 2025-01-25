@@ -1,7 +1,6 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
-import "package:intl/intl.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
@@ -430,11 +429,13 @@ class MLStatusWidget extends StatefulWidget {
 
 class MLStatusWidgetState extends State<MLStatusWidget> {
   Timer? _timer;
+  bool _isDeviceHealthy = machineLearningController.isDeviceHealthy;
   @override
   void initState() {
     super.initState();
     _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
       MLService.instance.triggerML();
+      _isDeviceHealthy = machineLearningController.isDeviceHealthy;
       setState(() {});
     });
   }
@@ -464,13 +465,12 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
           future: _getIndexStatus(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              final bool isDeviceHealthy =
-                  machineLearningController.isDeviceHealthy;
               final int indexedFiles = snapshot.data!.indexedItems;
               final int pendingFiles = snapshot.data!.pendingItems;
+              final int total = indexedFiles + pendingFiles;
               final bool hasWifi = snapshot.data!.hasWifiEnabled!;
 
-              if (!isDeviceHealthy && pendingFiles > 0) {
+              if (!_isDeviceHealthy && pendingFiles > 0) {
                 return MenuSectionDescriptionWidget(
                   content: S.of(context).indexingIsPaused,
                 );
@@ -480,23 +480,14 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
                 children: [
                   MenuItemWidget(
                     captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).indexedItems,
+                      title: S.of(context).processed,
                     ),
                     trailingWidget: Text(
-                      NumberFormat().format(indexedFiles),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    singleBorderRadius: 8,
-                    alignCaptionedTextToLeft: true,
-                    isGestureDetectorDisabled: true,
-                    key: ValueKey("indexed_items_" + indexedFiles.toString()),
-                  ),
-                  MenuItemWidget(
-                    captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).pendingItems,
-                    ),
-                    trailingWidget: Text(
-                      NumberFormat().format(pendingFiles),
+                      total < 1
+                          ? 'NA'
+                          : pendingFiles == 0
+                              ? '100%'
+                              : '${(indexedFiles * 100.0 / total * 1.0).toStringAsFixed(2)}%',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     singleBorderRadius: 8,

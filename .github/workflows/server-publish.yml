@@ -1,4 +1,4 @@
-name: "Publish (server)"
+name: "Publish ghcr (server)"
 
 on:
     # Run manually, providing it the commit.
@@ -39,7 +39,6 @@ jobs:
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Tag as server/ghcr
+            - name: Update branch server/ghcr to point to source commit
               run: |
-                  git tag -f server/ghcr
-                  git push -f origin server/ghcr
+                  git push -f origin HEAD:refs/heads/server/ghcr

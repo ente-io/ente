@@ -32,12 +32,12 @@ interface OverflowMenuProps {
     /**
      * Optional additional properties for the trigger icon button.
      */
-    triggerButtonProps?: Partial<IconButtonProps>;
+    triggerButtonSxProps?: IconButtonProps["sx"];
     /**
-     * Optional additional properties for the MUI {@link Paper} that underlies
-     * the {@link Menu}.
+     * Optional additional sx props for the MUI {@link Paper} that underlies the
+     * {@link Menu}.
      */
-    menuPaperProps?: Partial<PaperProps>;
+    menuPaperSxProps?: PaperProps["sx"];
 }
 
 /**
@@ -49,8 +49,8 @@ export const OverflowMenu: React.FC<
 > = ({
     ariaID,
     triggerButtonIcon,
-    triggerButtonProps,
-    menuPaperProps,
+    triggerButtonSxProps,
+    menuPaperSxProps,
     children,
 }) => {
     const [anchorEl, setAnchorEl] = useState<MenuProps["anchorEl"]>();
@@ -65,7 +65,7 @@ export const OverflowMenu: React.FC<
                 aria-controls={anchorEl ? ariaID : undefined}
                 aria-haspopup="true"
                 aria-expanded={anchorEl ? "true" : undefined}
-                {...triggerButtonProps}
+                sx={triggerButtonSxProps}
             >
                 {triggerButtonIcon ?? <MoreHorizIcon />}
             </IconButton>
@@ -79,7 +79,7 @@ export const OverflowMenu: React.FC<
                     disablePadding: true,
                     "aria-labelledby": ariaID,
                 }}
-                slotProps={{ paper: menuPaperProps }}
+                slotProps={{ paper: { sx: menuPaperSxProps } }}
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
             >
@@ -126,15 +126,15 @@ export const OverflowMenuOption: React.FC<
     return (
         <MenuItem
             onClick={handleClick}
-            sx={{
+            sx={(theme) => ({
                 minWidth: 220,
-                color: (theme) => theme.palette[color].main,
+                color: theme.vars.palette[color].main,
                 // Reduce the size of the icons a bit to make it fit better with
                 // the text.
                 "& .MuiSvgIcon-root": {
                     fontSize: "20px",
                 },
-            }}
+            })}
         >
             <Stack
                 direction="row"
@@ -148,7 +148,7 @@ export const OverflowMenuOption: React.FC<
                 }}
             >
                 {startIcon}
-                <Typography sx={{ flex: 1, fontWeight: "bold" }}>
+                <Typography sx={{ flex: 1, fontWeight: "medium" }}>
                     {children}
                 </Typography>
                 {endIcon}

@@ -18,6 +18,7 @@ import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
+import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/theme/text_style.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/code_error_widget.dart';
@@ -35,6 +36,7 @@ import 'package:ente_auth/ui/settings_page.dart';
 import 'package:ente_auth/ui/sort_option_menu.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/lock_screen_settings.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/foundation.dart';
@@ -83,12 +85,13 @@ class _HomePageState extends State<HomePage> {
   bool isCompactMode = false;
 
   late CodeSortKey _codeSortKey;
+  final Set<LogicalKeyboardKey> _pressedKeys = <LogicalKeyboardKey>{};
 
   @override
   void initState() {
     super.initState();
-    _textController.addListener(_applyFilteringAndRefresh);
     _codeSortKey = PreferenceService.instance.codeSortKey();
+    _textController.addListener(_applyFilteringAndRefresh);
     _loadCodes();
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
       _loadCodes();
@@ -109,6 +112,40 @@ class _HomePageState extends State<HomePage> {
     _showSearchBox = _autoFocusSearch;
 
     searchBoxFocusNode = FocusNode();
+    ServicesBinding.instance.keyboard.addHandler(_handleKeyEvent);
+  }
+
+  bool _handleKeyEvent(KeyEvent event) {
+    if (event is KeyDownEvent) {
+      _pressedKeys.add(event.logicalKey);
+      bool isMetaKeyPressed = Platform.isMacOS || Platform.isIOS
+          ? (_pressedKeys.contains(LogicalKeyboardKey.metaLeft) ||
+              _pressedKeys.contains(LogicalKeyboardKey.meta) ||
+              _pressedKeys.contains(LogicalKeyboardKey.metaRight))
+          : (_pressedKeys.contains(LogicalKeyboardKey.controlLeft) ||
+              _pressedKeys.contains(LogicalKeyboardKey.control) ||
+              _pressedKeys.contains(LogicalKeyboardKey.controlRight));
+
+      if (isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyF) {
+        setState(() {
+          _showSearchBox = true;
+          searchBoxFocusNode.requestFocus();
+        });
+        return true;
+      }
+      if (event.logicalKey == LogicalKeyboardKey.escape) {
+        setState(() {
+          _textController.clear();
+          _searchText = "";
+          _showSearchBox = false;
+          _applyFilteringAndRefresh();
+        });
+        return true;
+      }
+    } else if (event is KeyUpEvent) {
+      _pressedKeys.remove(event.logicalKey);
+    }
+    return false;
   }
 
   void _loadCodes() {
@@ -208,8 +245,9 @@ class _HomePageState extends State<HomePage> {
     _streamSubscription?.cancel();
     _triggerLogoutEvent?.cancel();
     _iconsChangedEvent?.cancel();
+    _textController.dispose();
     _textController.removeListener(_applyFilteringAndRefresh);
-
+    ServicesBinding.instance.keyboard.removeHandler(_handleKeyEvent);
     searchBoxFocusNode.dispose();
 
     super.dispose();
@@ -233,7 +271,6 @@ class _HomePageState extends State<HomePage> {
         );
         break;
       case CodeSortKey.manual:
-      default:
         codes.sort((a, b) => a.display.position.compareTo(b.display.position));
         break;
     }
@@ -321,6 +358,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    LockScreenSettings.instance
+        .setLightMode(getEnteColorScheme(context).isLightTheme);
     final l10n = context.l10n;
     isCompactMode = PreferenceService.instance.isCompactMode();
 
@@ -374,55 +413,52 @@ class _HomePageState extends State<HomePage> {
                 ),
           centerTitle: PlatformUtil.isDesktop() ? false : true,
           actions: <Widget>[
-            SortCodeMenuWidget(
-              currentKey: PreferenceService.instance.codeSortKey(),
-              onSelected: (newOrder) async {
-                await PreferenceService.instance.setCodeSortKey(newOrder);
-                if (newOrder == CodeSortKey.manual &&
-                    newOrder == _codeSortKey) {
-                  await navigateToReorderPage(_allCodes!);
-                }
-                setState(() {
-                  _codeSortKey = newOrder;
-                });
-                if (mounted) {
-                  _applyFilteringAndRefresh();
-                }
-              },
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SortCodeMenuWidget(
+                currentKey: PreferenceService.instance.codeSortKey(),
+                onSelected: (newOrder) async {
+                  await PreferenceService.instance.setCodeSortKey(newOrder);
+                  if (newOrder == CodeSortKey.manual &&
+                      newOrder == _codeSortKey) {
+                    await navigateToReorderPage(_allCodes!);
+                  }
+                  setState(() {
+                    _codeSortKey = newOrder;
+                  });
+                  if (mounted) {
+                    _applyFilteringAndRefresh();
+                  }
+                },
+              ),
             ),
-            PlatformUtil.isDesktop()
-                ? IconButton(
-                    icon: const Icon(Icons.lock),
-                    tooltip: l10n.appLock,
-                    onPressed: () async {
-                      await navigateToLockScreen();
-                    },
-                  )
-                : const SizedBox.shrink(),
-            const SizedBox(
-              width: 4,
-            ),
+            if (PlatformUtil.isDesktop())
+              IconButton(
+                icon: const Icon(Icons.lock),
+                tooltip: l10n.appLock,
+                padding: const EdgeInsets.all(8.0),
+                onPressed: () async {
+                  await navigateToLockScreen();
+                },
+              ),
             IconButton(
               icon: _showSearchBox
                   ? const Icon(Icons.clear)
                   : const Icon(Icons.search),
               tooltip: l10n.search,
+              padding: const EdgeInsets.all(8.0),
               onPressed: () {
-                setState(
-                  () {
-                    _showSearchBox = !_showSearchBox;
-                    if (!_showSearchBox) {
-                      _textController.clear();
-                      _searchText = "";
-                    } else {
-                      _searchText = _textController.text;
-
-                      // Request focus on the search box
-                      searchBoxFocusNode.requestFocus();
-                    }
-                    _applyFilteringAndRefresh();
-                  },
-                );
+                setState(() {
+                  _showSearchBox = !_showSearchBox;
+                  if (!_showSearchBox) {
+                    _textController.clear();
+                    _searchText = "";
+                  } else {
+                    _searchText = _textController.text;
+                    searchBoxFocusNode.requestFocus();
+                  }
+                  _applyFilteringAndRefresh();
+                });
               },
             ),
           ],
@@ -544,7 +580,7 @@ class _HomePageState extends State<HomePage> {
 
                   return ClipRect(
                     child: CodeWidget(
-                      key: ValueKey('${code.hashCode}_$newIndex'),
+                      key: ValueKey('${code.hashCode}_${newIndex}_$_codeSortKey'),
                       code,
                       isCompactMode: isCompactMode,
                       sortKey: _codeSortKey,
@@ -580,6 +616,7 @@ class _HomePageState extends State<HomePage> {
                             key: ValueKey('${codeState.hashCode}_$index'),
                             codeState,
                             isCompactMode: isCompactMode,
+                            sortKey: _codeSortKey,
                           );
                         }),
                         itemCount: _filteredCodes.length,
@@ -630,16 +667,24 @@ class _HomePageState extends State<HomePage> {
     }
     return false;
   }
-
+  int lastScanTime = DateTime.now().millisecondsSinceEpoch - 1000;
   void _handleDeeplink(BuildContext context, String? link) {
-    if (!Configuration.instance.hasConfiguredAccount() || link == null) {
+    bool isAccountConfigured = Configuration.instance.hasConfiguredAccount();
+    bool isOfflineModeEnabled = Configuration.instance.hasOptedForOfflineMode() &&
+        Configuration.instance.getOfflineSecretKey() != null;
+    if (!(isAccountConfigured || isOfflineModeEnabled) || link == null) {
       return;
     }
+    if (DateTime.now().millisecondsSinceEpoch - lastScanTime < 1000) {
+      _logger.info("Ignoring potential event for same deeplink");
+      return;
+    }
+    lastScanTime = DateTime.now().millisecondsSinceEpoch;
     if (mounted && link.toLowerCase().startsWith("otpauth://")) {
       try {
         final newCode = Code.fromOTPAuthUrl(link);
         getNextTotp(newCode);
-        CodeStore.instance.addCode(newCode);
+        CodeStore.instance.addCode(newCode, shouldSync: false);
         _focusNewCode(newCode);
       } catch (e, s) {
         showGenericErrorDialog(

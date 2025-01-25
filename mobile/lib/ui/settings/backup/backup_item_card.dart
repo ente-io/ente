@@ -5,6 +5,7 @@ import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_uploader.dart";
 
 class BackupItemCard extends StatefulWidget {
@@ -107,7 +108,36 @@ class _BackupItemCardState extends State<BackupItemCard> {
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          if (widget.item.error != null) const SizedBox(width: 12),
+          if (widget.item.error != null)
+            SizedBox(
+              height: 48,
+              width: 48,
+              child: IconButton(
+                icon: Icon(
+                  Icons.error_outline,
+                  color: getEnteColorScheme(context).fillBase,
+                ),
+                onPressed: () {
+                  String errorMessage = "";
+                  if (widget.item.error is Exception) {
+                    final Exception ex = widget.item.error as Exception;
+                    errorMessage = "Error: " +
+                        ex.runtimeType.toString() +
+                        " - " +
+                        ex.toString();
+                  } else {
+                    errorMessage = widget.item.error.toString();
+                  }
+                  showErrorDialog(
+                    context,
+                    'Upload failed',
+                    errorMessage,
+                  );
+                },
+              ),
+            ),
+          if (widget.item.error == null) const SizedBox(width: 12),
           SizedBox(
             height: 48,
             width: 48,

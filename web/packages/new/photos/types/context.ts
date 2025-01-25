@@ -1,7 +1,6 @@
 import type { AccountsContextT } from "@/accounts/types/context";
-import { THEME_COLOR } from "@ente/shared/themes/constants";
+import { type NotificationAttributes } from "@/new/photos/components/Notification";
 import { createContext, useContext } from "react";
-import type { SetNotificationAttributes } from "./notification";
 
 /**
  * The type of the React context available to all pages in the photos app.
@@ -17,16 +16,16 @@ export type AppContextT = AccountsContextT & {
      */
     hideLoadingBar: () => void;
     /**
+     * Show a {@link Notification}, customizing its contents and click behaviour
+     * using the provided {@link NotificationAttributes}.
+     */
+    showNotification: (attributes: NotificationAttributes) => void;
+    /**
      * Show a generic error dialog, and log the given error.
      */
     onGenericError: (error: unknown) => void;
-    setNotificationAttributes: SetNotificationAttributes;
     watchFolderView: boolean;
     setWatchFolderView: (isOpen: boolean) => void;
-    watchFolderFiles: FileList;
-    setWatchFolderFiles: (files: FileList) => void;
-    themeColor: THEME_COLOR;
-    setThemeColor: (themeColor: THEME_COLOR) => void;
 };
 
 /**

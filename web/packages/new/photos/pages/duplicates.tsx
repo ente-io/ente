@@ -1,7 +1,7 @@
 import { useRedirectIfNeedsCredentials } from "@/accounts/components/utils/use-redirect";
+import { CenteredFill } from "@/base/components/containers";
 import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { CenteredFill } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     OverflowMenu,
@@ -57,14 +57,13 @@ import {
 import { useAppContext } from "../types/context";
 
 const Page: React.FC = () => {
-    const { showNavBar, onGenericError } = useAppContext();
+    const { onGenericError } = useAppContext();
 
     const [state, dispatch] = useReducer(dedupReducer, initialDedupState);
 
     useRedirectIfNeedsCredentials("/duplicates");
 
     useEffect(() => {
-        showNavBar(false);
         dispatch({ type: "analyze" });
         void deduceDuplicates()
             .then((duplicateGroups) =>
@@ -122,7 +121,7 @@ const Page: React.FC = () => {
     })();
 
     return (
-        <Stack sx={{ flex: 1 }}>
+        <Stack sx={{ height: "100vh" }}>
             <Navbar
                 sortOrder={state.sortOrder}
                 onChangeSortOrder={(sortOrder) =>
@@ -351,7 +350,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "8px 4px",
-                borderBottom: `1px solid ${theme.palette.divider}`,
+                borderBottom: `1px solid ${theme.vars.palette.divider}`,
             })}
         >
             <Box sx={{ minWidth: "100px" /* 2 icons + gap */ }}>
@@ -359,7 +358,7 @@ const Navbar: React.FC<NavbarProps> = ({
                     <ArrowBackIcon />
                 </IconButton>
             </Box>
-            <Typography variant="large">{t("remove_duplicates")}</Typography>
+            <Typography variant="h6">{t("remove_duplicates")}</Typography>
             <Stack direction="row" sx={{ gap: "4px" }}>
                 <SortMenu {...{ sortOrder, onChangeSortOrder }} />
                 <OptionsMenu {...{ onDeselectAll }} />
@@ -535,6 +534,11 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
     return (
         <VariableSizeList
             key={key}
+            style={
+                {
+                    "--paddingInline": `${layoutParams.paddingInline}px`,
+                } as React.CSSProperties
+            }
             {...{ height, width, itemData, itemCount, itemSize, itemKey }}
         >
             {ListItem}
@@ -561,7 +565,10 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
         return (
             <Stack
                 {...{ style }}
-                sx={{ paddingBlockEnd: "16px", opacity: checked ? 1 : 0.8 }}
+                sx={[
+                    { paddingBlockEnd: "16px" },
+                    checked ? { opacity: 1 } : { opacity: 0.8 },
+                ]}
             >
                 <Stack
                     direction="row"
@@ -569,7 +576,7 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                         justifyContent: "space-between",
                         alignItems: "center",
                         marginInline: 1,
-                        paddingInline: `${layoutParams.paddingInline}px`,
+                        paddingInline: "var(--paddingInline)",
                         paddingBlock: "24px 0px",
                     }}
                 >
@@ -581,10 +588,10 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                 </Stack>
                 <Divider
                     variant="middle"
-                    sx={{
-                        opacity: hideDivider ? 0 : 0.8,
-                        marginBlock: "4px 20px",
-                    }}
+                    sx={[
+                        { marginBlock: "4px 20px" },
+                        hideDivider ? { opacity: 0 } : { opacity: 0.8 },
+                    ]}
                 />
                 <ItemGrid {...{ layoutParams }}>
                     {items.map((item, j) => (
@@ -665,7 +672,7 @@ const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
                             count: prunableCount,
                         })}
                     </Typography>
-                    <Typography variant="small" fontWeight={"normal"}>
+                    <Typography variant="small" fontWeight="regular">
                         {formattedByteSize(prunableSize)}
                     </Typography>
                 </>

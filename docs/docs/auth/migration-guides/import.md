@@ -12,12 +12,12 @@ description:
 Ente Auth natively supports imports from many 2FA providers. In addition to the
 providers specifically listed in the documentation, the supported providers are:
 
--   2FAS Authenticator
--   Aegis Authenticator
--   Bitwarden
--   Google Authenticator
--   Raivo OTP
--   LastPass
+- 2FAS Authenticator
+- Aegis Authenticator
+- Bitwarden
+- Google Authenticator
+- Raivo OTP
+- LastPass
 
 Details as to how codes may be imported from these providers may be found within
 the app.

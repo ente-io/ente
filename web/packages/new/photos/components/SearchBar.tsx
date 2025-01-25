@@ -120,11 +120,11 @@ interface MobileSearchAreaProps {
 }
 
 const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
-    <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+    <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
         <IconButton onClick={onSearch}>
             <SearchIcon />
         </IconButton>
-    </Box>
+    </Stack>
 );
 
 const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
@@ -245,43 +245,45 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     );
 };
 
-const SearchInputWrapper = styled(Box)`
+const SearchInputWrapper = styled("div")`
     display: flex;
     width: 100%;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: ${({ theme }) => theme.colors.background.base};
+    background: transparent;
     max-width: 484px;
     margin: auto;
 `;
 
 const loadOptions = pDebounce(searchOptionsForString, 250);
 
-const createSelectStyles = ({
-    colors,
-}: Theme): StylesConfig<SearchOption, false> => ({
+const createSelectStyles = (
+    theme: Theme,
+): StylesConfig<SearchOption, false> => ({
     container: (style) => ({ ...style, flex: 1 }),
     control: (style, { isFocused }) => ({
         ...style,
-        backgroundColor: colors.background.elevated,
-        borderColor: isFocused ? colors.accent.A500 : "transparent",
+        backgroundColor: theme.vars.palette.background.paper,
+        borderColor: isFocused ? theme.vars.palette.accent.main : "transparent",
         boxShadow: "none",
         ":hover": {
-            borderColor: colors.accent.A300,
+            borderColor: theme.vars.palette.accent.light,
             cursor: "text",
         },
     }),
     input: (styles) => ({
         ...styles,
-        color: colors.text.base,
+        color: theme.vars.palette.text.base,
         overflowX: "hidden",
     }),
     menu: (style) => ({
         ...style,
         // Suppress the default margin at the top.
         marginTop: "1px",
-        backgroundColor: colors.background.elevated,
+        // Give an opaque and elevated surface color to the menu to override the
+        // default (transparent).
+        backgroundColor: theme.vars.palette.background.paper,
     }),
     option: (style, { isFocused }) => ({
         ...style,
@@ -290,8 +292,9 @@ const createSelectStyles = ({
         "& :hover": {
             cursor: "pointer",
         },
+        // Elevate the focused option further.
         "& .option-contents": isFocused
-            ? { backgroundColor: colors.background.elevated2 }
+            ? { backgroundColor: theme.vars.palette.background.paper2 }
             : {},
         "&:last-child .MuiDivider-root": {
             display: "none",
@@ -299,7 +302,7 @@ const createSelectStyles = ({
     }),
     placeholder: (style) => ({
         ...style,
-        color: colors.text.muted,
+        color: theme.vars.palette.text.muted,
         whiteSpace: "nowrap",
         overflowX: "hidden",
     }),
@@ -325,7 +328,7 @@ const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
                     // Match the default padding of the ValueContainer to make
                     // the icon look properly spaced and aligned.
                     pl: "8px",
-                    color: (theme) => theme.colors.stroke.muted,
+                    color: "stroke.muted",
                 }}
             >
                 {iconForOption(props.getValue()[0])}
@@ -397,22 +400,19 @@ const EmptyState: React.FC<
         return <></>;
     }
 
-    let label: string;
+    let label: string | undefined;
     switch (mlStatus.phase) {
         case "scheduled":
             label = t("indexing_scheduled");
             break;
         case "indexing":
-            label = t("indexing_photos", mlStatus);
+            label = t("indexing_photos");
             break;
         case "fetching":
-            label = t("indexing_fetching", mlStatus);
+            label = t("indexing_fetching");
             break;
         case "clustering":
-            label = t("indexing_people", mlStatus);
-            break;
-        case "done":
-            label = t("indexing_done", mlStatus);
+            label = t("indexing_people");
             break;
     }
 
@@ -424,28 +424,23 @@ const EmptyState: React.FC<
                     <SearchPeopleList {...{ people, onSelectPerson }} />
                 </>
             )}
-            <Typography variant="mini" sx={{ mt: "5px", mb: "4px" }}>
-                {label}
-            </Typography>
+            {label && (
+                <Typography variant="mini" sx={{ mt: "5px", mb: "4px" }}>
+                    {label}
+                </Typography>
+            )}
         </Box>
     );
 };
 
 const SearchPeopleHeader: React.FC<ButtonishProps> = ({ onClick }) => (
-    <SearchPeopleHeaderButton {...{ onClick }}>
-        <Typography color="text.muted">{t("people")}</Typography>
-    </SearchPeopleHeaderButton>
-);
-
-const SearchPeopleHeaderButton = styled(UnstyledButton)(
-    ({ theme }) => `
-    /* The color for the chevron */
-    color: ${theme.colors.stroke.muted};
-    /* Hover indication */
-    && :hover {
-        color: ${theme.colors.stroke.base};
-    }
-`,
+    <UnstyledButton {...{ onClick }}>
+        <Typography
+            sx={{ color: "text.muted", ":hover": { color: "text.base" } }}
+        >
+            {t("people")}
+        </Typography>
+    </UnstyledButton>
 );
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
@@ -456,27 +451,30 @@ const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
 );
 
 const OptionContents = ({ data: option }: { data: SearchOption }) => (
-    <Stack className="option-contents" gap="4px" px={2} py={1}>
-        <Typography variant="mini" color="text.muted">
+    <Stack className="option-contents" sx={{ gap: "4px", px: 2, py: 1 }}>
+        <Typography variant="mini" sx={{ color: "text.muted" }}>
             {labelForOption(option)}
         </Typography>
         <Stack
             direction="row"
-            gap={1}
-            sx={{ alignItems: "center", justifyContent: "space-between" }}
+            sx={{
+                gap: 1,
+                alignItems: "center",
+                justifyContent: "space-between",
+            }}
         >
             <Box>
                 <Typography
-                    sx={{ fontWeight: "bold", wordBreak: "break-word" }}
+                    sx={{ fontWeight: "medium", wordBreak: "break-word" }}
                 >
                     {option.suggestion.label}
                 </Typography>
-                <Typography color="text.muted">
+                <Typography sx={{ color: "text.muted" }}>
                     {t("photos_count", { count: option.fileCount })}
                 </Typography>
             </Box>
 
-            <Stack direction={"row"} gap={1}>
+            <Stack direction={"row"} sx={{ gap: 1 }}>
                 {option.previewFiles.map((file) => (
                     <ItemCard
                         key={file.id}

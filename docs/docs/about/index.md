@@ -11,9 +11,9 @@ Ente is a end-to-end encrypted platform for privately, reliably, and securely
 storing your data on the cloud. On top of this platform, Ente offers two
 products:
 
--   **Ente Photos** - An alternative to Google Photos and Apple Photos
+- **Ente Photos** - An alternative to Google Photos and Apple Photos
 
--   **Ente Auth** - A free 2FA alternative to Authy
+- **Ente Auth** - A free 2FA alternative to Authy
 
 Both these apps are available for all desktop (Linux, Mac, Windows) and mobile
 (Android, iOS and F-Droid) platforms. They also work directly in your web
@@ -46,7 +46,8 @@ the name, and also led to the adoption of "Ducky", Ente's mascot:
 
 </div>
 
-For the full origin story of Ducky you can check out [this blog post](https://ente.io/blog/ducky/).
+For the full origin story of Ducky you can check out
+[this blog post](https://ente.io/blog/ducky/).
 
 ### How do I pronounce Ente?
 

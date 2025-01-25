@@ -1,4 +1,3 @@
-import "dart:io";
 import "dart:typed_data";
 
 import "package:logging/logging.dart";
@@ -97,16 +96,5 @@ extension ClipDB on MLDataDB {
       Float32List.fromList(embedding.embedding).buffer.asUint8List(),
       embedding.version,
     ];
-  }
-
-  Future<void> _clearDeprecatedStores(Directory dir) async {
-    final deprecatedObjectBox = Directory(dir.path + "/object-box-store");
-    if (await deprecatedObjectBox.exists()) {
-      await deprecatedObjectBox.delete(recursive: true);
-    }
-    final deprecatedIsar = File(dir.path + "/default.isar");
-    if (await deprecatedIsar.exists()) {
-      await deprecatedIsar.delete();
-    }
   }
 }

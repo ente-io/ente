@@ -2,7 +2,7 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { CustomErrorMessage, type ZipItem } from "../../types/ipc";
+import { type ZipItem } from "../../types/ipc";
 import { execAsync, isDev } from "../utils/electron";
 import {
     deleteTempFileIgnoringErrors,
@@ -44,25 +44,29 @@ const convertToJPEGCommand = (
             ];
 
         case "linux":
-            // The bundled binary is an ELF x86-64 executable.
-            if (process.arch != "x64")
-                throw new Error(CustomErrorMessage.NotAvailable);
+        case "win32":
             return [
                 imageMagickPath(),
+                "convert",
                 inputFilePath,
                 "-quality",
                 "100%",
                 outputFilePath,
             ];
 
-        default: // "win32"
-            throw new Error(CustomErrorMessage.NotAvailable);
+        default:
+            throw new Error("Not available on the current OS/arch");
     }
 };
 
-/** Path to the Linux image-magick executable bundled with our app */
+/**
+ * Path to the magick executable bundled with our app on Linux and Windows.
+ */
 const imageMagickPath = () =>
-    path.join(isDev ? "build" : process.resourcesPath, "image-magick");
+    path.join(
+        isDev ? "build" : process.resourcesPath,
+        process.platform == "win32" ? "magick.exe" : "magick",
+    );
 
 export const generateImageThumbnail = async (
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,
@@ -133,14 +137,13 @@ const generateImageThumbnailCommand = (
             ];
 
         case "linux":
-            // The bundled binary is an ELF x86-64 executable.
-            if (process.arch != "x64")
-                throw new Error(CustomErrorMessage.NotAvailable);
+        case "win32":
             return [
                 imageMagickPath(),
+                "convert",
+                inputFilePath,
                 "-define",
                 `jpeg:size=${2 * maxDimension}x${2 * maxDimension}`,
-                inputFilePath,
                 "-auto-orient",
                 "-thumbnail",
                 `${maxDimension}x${maxDimension}`,
@@ -151,7 +154,7 @@ const generateImageThumbnailCommand = (
                 outputFilePath,
             ];
 
-        default: // "win32"
-            throw new Error(CustomErrorMessage.NotAvailable);
+        default:
+            throw new Error("Not available on the current OS/arch");
     }
 };

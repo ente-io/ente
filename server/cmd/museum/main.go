@@ -5,11 +5,6 @@ import (
 	"database/sql"
 	b64 "encoding/base64"
 	"fmt"
-	"github.com/ente-io/museum/ente/base"
-	"github.com/ente-io/museum/pkg/controller/emergency"
-	"github.com/ente-io/museum/pkg/controller/file_copy"
-	"github.com/ente-io/museum/pkg/controller/filedata"
-	emergencyRepo "github.com/ente-io/museum/pkg/repo/emergency"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,6 +13,12 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/ente-io/museum/ente/base"
+	"github.com/ente-io/museum/pkg/controller/emergency"
+	"github.com/ente-io/museum/pkg/controller/file_copy"
+	"github.com/ente-io/museum/pkg/controller/filedata"
+	emergencyRepo "github.com/ente-io/museum/pkg/repo/emergency"
 
 	"github.com/ente-io/museum/pkg/repo/two_factor_recovery"
 
@@ -203,7 +204,7 @@ func main() {
 	plans := billing.GetPlans()
 	defaultPlan := billing.GetDefaultPlans(plans)
 	stripeClients := billing.GetStripeClients()
-	commonBillController := commonbilling.NewController(storagBonusRepo, userRepo, usageRepo)
+	commonBillController := commonbilling.NewController(emailNotificationCtrl, storagBonusRepo, userRepo, usageRepo, billingRepo)
 	appStoreController := controller.NewAppStoreController(defaultPlan,
 		billingRepo, fileRepo, userRepo, commonBillController)
 	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository}
@@ -305,6 +306,7 @@ func main() {
 
 	collectionController := &controller.CollectionController{
 		CollectionRepo:       collectionRepo,
+		EmailCtrl:            emailNotificationCtrl,
 		AccessCtrl:           accessCtrl,
 		PublicCollectionCtrl: publicCollectionCtrl,
 		UserRepo:             userRepo,
@@ -472,6 +474,7 @@ func main() {
 		UserRepo:          userRepo,
 		UserCtrl:          userController,
 		PasskeyController: passkeyCtrl,
+		LockCtrl:          lockController,
 	}
 	userHandler := &api.UserHandler{
 		UserController:      userController,
@@ -493,7 +496,6 @@ func main() {
 	privateAPI.POST("/users/two-factor/disable", userHandler.DisableTwoFactor)
 	privateAPI.PUT("/users/attributes", userHandler.SetAttributes)
 	privateAPI.PUT("/users/email-mfa", userHandler.UpdateEmailMFA)
-	privateAPI.PUT("/users/keys", userHandler.UpdateKeys)
 	privateAPI.POST("/users/srp/setup", userHandler.SetupSRP)
 	privateAPI.POST("/users/srp/complete", userHandler.CompleteSRPSetup)
 	privateAPI.POST("/users/srp/update", userHandler.UpdateSrpAndKeyAttributes)
@@ -535,6 +537,7 @@ func main() {
 	privateAPI.GET("/collections", collectionHandler.Get)
 	privateAPI.GET("/collections/v2", collectionHandler.GetV2)
 	privateAPI.POST("/collections/share", collectionHandler.Share)
+	privateAPI.POST("/collections/join-link", collectionHandler.JoinLink)
 	privateAPI.POST("/collections/share-url", collectionHandler.ShareURL)
 	privateAPI.PUT("/collections/share-url", collectionHandler.UpdateShareURL)
 	privateAPI.DELETE("/collections/share-url/:collectionID", collectionHandler.UnShareURL)
@@ -763,7 +766,7 @@ func main() {
 	setupAndStartBackgroundJobs(objectCleanupController, replicationController3, fileDataCtrl)
 	setupAndStartCrons(
 		userAuthRepo, publicCollectionRepo, twoFactorRepo, passkeysRepo, fileController, taskLockingRepo, emailNotificationCtrl,
-		trashController, pushController, objectController, dataCleanupController, storageBonusCtrl,
+		trashController, pushController, objectController, dataCleanupController, storageBonusCtrl, emergencyCtrl,
 		embeddingController, healthCheckHandler, kexCtrl, castDb)
 
 	// Create a new collector, the name will be used as a label on the metrics
@@ -898,6 +901,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 	objectController *controller.ObjectController,
 	dataCleanupCtrl *dataCleanupCtrl.DeleteUserCleanupController,
 	storageBonusCtrl *storagebonus.Controller,
+	emergencyCtrl *emergency.Controller,
 	embeddingCtrl *embeddingCtrl.Controller,
 	healthCheckHandler *api.HealthCheckHandler,
 	kexCtrl *kexCtrl.Controller,
@@ -991,6 +995,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 	})
 
 	scheduleAndRun(c, "@every 60m", func() {
+		emergencyCtrl.SendRecoveryReminder()
 		kexCtrl.DeleteOldKeys()
 	})
 
@@ -1007,7 +1012,9 @@ func cors() gin.HandlerFunc {
 		c.Writer.Header().Set("Access-Control-Max-Age", "1728000")
 
 		if c.Request.Method == http.MethodOptions {
-			c.AbortWithStatus(http.StatusNoContent)
+			// While 204 No Content is more appropriate, Safari intermittently
+			// (intermittently!) fails CORS if we return 204 instead of 200 OK.
+			c.Status(http.StatusOK)
 			return
 		}
 		c.Next()

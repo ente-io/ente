@@ -57,9 +57,9 @@ let _child: UtilityProcess | undefined;
  *
  * So we
  *
- * 1.  In the utility process create a message channel.
- * 2.  Spawn a utility process, and send one port of the pair to it.
- * 3.  Send the other port of the pair to the renderer.
+ * 1. In the utility process create a message channel.
+ * 2. Spawn a utility process, and send one port of the pair to it.
+ * 3. Send the other port of the pair to the renderer.
  *
  * The renderer will forward that port to the web worker that is coordinating
  * the ML indexing on the web layer. Thereafter, the utility process and web

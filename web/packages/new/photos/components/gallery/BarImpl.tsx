@@ -1,5 +1,5 @@
+import { Overlay } from "@/base/components/containers";
 import { FilledIconButton } from "@/base/components/mui";
-import { Overlay } from "@/base/components/mui/Container";
 import { Ellipsized2LineTypography } from "@/base/components/Typography";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
@@ -20,12 +20,12 @@ import type {
 } from "@/new/photos/services/collection/ui";
 import type { Person } from "@/new/photos/services/ml/people";
 import ArchiveIcon from "@mui/icons-material/Archive";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import Favorite from "@mui/icons-material/FavoriteRounded";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import LinkIcon from "@mui/icons-material/Link";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PeopleIcon from "@mui/icons-material/People";
-import PushPin from "@mui/icons-material/PushPin";
+import PushPinIcon from "@mui/icons-material/PushPin";
 import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, {
@@ -218,7 +218,10 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 
     const controls1 = isSmallWidth && (
-        <Box display="flex" alignItems={"center"} gap={1} minHeight={"64px"}>
+        <Stack
+            direction="row"
+            sx={{ alignItems: "center", gap: 1, minHeight: "64px" }}
+        >
             {mode != "people" && (
                 <>
                     <CollectionsSortOptions
@@ -227,29 +230,35 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         transparentTriggerButtonBackground
                     />
                     <IconButton onClick={onShowAllCollections}>
-                        <ExpandMore />
+                        <ExpandMoreIcon />
                     </IconButton>
                 </>
             )}
-        </Box>
+        </Stack>
     );
 
     const controls2 = !isSmallWidth && mode != "people" && (
-        <Box display="flex" alignItems={"center"} gap={1} height={"64px"}>
+        <Stack
+            direction="row"
+            sx={{ alignItems: "center", gap: 1, height: "64px" }}
+        >
             <CollectionsSortOptions
                 activeSortBy={collectionsSortBy}
                 onChangeSortBy={onChangeCollectionsSortBy}
             />
             <FilledIconButton onClick={onShowAllCollections}>
-                <ExpandMore />
+                <ExpandMoreIcon />
             </FilledIconButton>
-        </Box>
+        </Stack>
     );
 
     return (
-        // Hide the bottom border if we're showing the empty state for people.
         <BarWrapper
-            sx={people.length ? {} : { borderBlockEndColor: "transparent" }}
+            sx={[
+                // Hide the bottom border if we're showing the empty state for people.
+                mode == "people" &&
+                    people.length == 0 && { borderColor: "transparent" },
+            ]}
         >
             <Row1>
                 <ModeIndicator {...{ mode, onChangeMode }} />
@@ -285,16 +294,18 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 };
 
-const BarWrapper = styled(Box)`
+const BarWrapper = styled("div")(
+    ({ theme }) => `
     padding-inline: 24px;
     @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
         padding-inline: 4px;
     }
     margin-block-end: 16px;
-    border-block-end: 1px solid ${({ theme }) => theme.palette.divider};
-`;
+    border-block-end: 1px solid ${theme.vars.palette.divider};
+`,
+);
 
-export const Row1 = styled(Box)`
+export const Row1 = styled("div")`
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -302,7 +313,7 @@ export const Row1 = styled(Box)`
     margin-block-end: 12px;
 `;
 
-export const Row2 = styled(Box)`
+export const Row2 = styled("div")`
     display: flex;
     align-items: flex-start;
     gap: 16px;
@@ -344,9 +355,13 @@ const ModeIndicator: React.FC<
 const ModeButton = styled(UnstyledButton, {
     shouldForwardProp: (propName) => propName != "active",
 })<{ active: boolean }>(
-    ({ active, theme }) => `
-    p { color: ${active ? theme.colors.text.base : theme.colors.text.muted} }
-    p:hover { color: ${theme.colors.text.base} }
+    ({ theme, active }) => `
+p {
+    color: ${active ? theme.vars.palette.text.base : theme.vars.palette.text.muted}
+}
+p:hover {
+    color: ${theme.vars.palette.text.base}
+}
 `,
 );
 
@@ -358,32 +373,30 @@ const ScrollButtonBase: React.FC<
     </ScrollButtonBase_>
 );
 
-const ScrollButtonBase_ = styled("button")`
-    position: absolute;
-    z-index: 2;
-    top: 7px;
-    height: 50px;
-    width: 50px;
-    border: none;
-    padding: 0;
-    margin: 0;
-
-    border-radius: 50%;
-    background-color: ${({ theme }) => theme.colors.backdrop.muted};
-    color: ${({ theme }) => theme.colors.stroke.base};
-
-    & > svg {
-        border-radius: 50%;
-        height: 30px;
-        width: 30px;
-    }
-`;
+const ScrollButtonBase_ = styled("button")(({ theme }) => ({
+    position: "absolute",
+    zIndex: 2,
+    top: "7px",
+    height: "50px",
+    width: "50px",
+    border: "none",
+    padding: 0,
+    margin: 0,
+    borderRadius: "50%",
+    backgroundColor: theme.vars.palette.backdrop.muted,
+    color: theme.vars.palette.stroke.base,
+    cursor: "pointer",
+    "& > svg": {
+        borderRadius: "50%",
+        height: "30px",
+        width: "30px",
+    },
+}));
 
 const ScrollButtonLeft = styled(ScrollButtonBase)`
     left: 0;
     text-align: right;
     transform: translate(-50%, 0%);
-
     & > svg {
         transform: rotate(180deg);
     }
@@ -395,7 +408,7 @@ const ScrollButtonRight = styled(ScrollButtonBase)`
     transform: translate(50%, 0%);
 `;
 
-const ListWrapper = styled(Box)`
+const ListWrapper = styled("div")`
     position: relative;
     overflow: hidden;
     height: 86px;
@@ -508,7 +521,7 @@ const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
 
 const CardText: React.FC<React.PropsWithChildren> = ({ children }) => (
     <TileTextOverlay>
-        <Box height={"2.1em"}>
+        <Box sx={{ height: "2.1em" }}>
             <Ellipsized2LineTypography variant="small">
                 {children}
             </Ellipsized2LineTypography>
@@ -524,19 +537,15 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     type,
 }) => (
     <CollectionBarCardIcon_>
-        {type == "favorites" && <Favorite />}
+        {type == "favorites" && <FavoriteRoundedIcon />}
         {type == "archived" && (
-            <ArchiveIcon
-                sx={(theme) => ({
-                    color: theme.colors.white.muted,
-                })}
-            />
+            <ArchiveIcon sx={{ color: "fixed.overlayIndicatorMuted" }} />
         )}
         {type == "outgoingShare" && <PeopleIcon />}
         {(type == "incomingShareViewer" ||
             type == "incomingShareCollaborator") && <PeopleIcon />}
         {type == "sharedOnlyViaLink" && <LinkIcon />}
-        {type == "pinned" && <PushPin />}
+        {type == "pinned" && <PushPinIcon />}
     </CollectionBarCardIcon_>
 );
 
@@ -550,12 +559,14 @@ const CollectionBarCardIcon_ = styled(Overlay)`
     }
 `;
 
-const ActiveIndicator = styled("div")`
+const ActiveIndicator = styled("div")(
+    ({ theme }) => `
     height: 3px;
-    background-color: ${({ theme }) => theme.palette.primary.main};
+    background-color: ${theme.vars.palette.stroke.base};
     margin-top: 18px;
     border-radius: 2px;
-`;
+`,
+);
 
 interface PersonCardProps {
     person: Person;
