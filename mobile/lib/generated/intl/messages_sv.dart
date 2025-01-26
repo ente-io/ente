@@ -320,7 +320,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "language": MessageLookupByLibrary.simpleMessage("Språk"),
         "leave": MessageLookupByLibrary.simpleMessage("Lämna"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Ljust"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "linkDeviceLimit": MessageLookupByLibrary.simpleMessage("Enhetsgräns"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Aktiverat"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Upphört"),
         "linkExpiresOn": m43,
@@ -362,6 +364,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "next": MessageLookupByLibrary.simpleMessage("Nästa"),
         "no": MessageLookupByLibrary.simpleMessage("Nej"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Ingen"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noExifData": MessageLookupByLibrary.simpleMessage("Ingen EXIF-data"),
         "noInternetConnection":
             MessageLookupByLibrary.simpleMessage("Ingen internetanslutning"),

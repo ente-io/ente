@@ -1120,9 +1120,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Vertrauenswürdige Kontakte können eine Kontowiederherstellung einleiten und, wenn dies nicht innerhalb von 30 Tagen blockiert wird, dein Passwort und den Kontozugriff zurücksetzen."),
         "light": MessageLookupByLibrary.simpleMessage("Hell"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Hell"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "linkCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Link in Zwischenablage kopiert"),
         "linkDeviceLimit": MessageLookupByLibrary.simpleMessage("Geräte-Limit"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Aktiviert"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Abgelaufen"),
         "linkExpiresOn": m43,
@@ -1279,6 +1281,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Du hast keine Dateien auf diesem Gerät, die gelöscht werden können"),
         "noDuplicates":
             MessageLookupByLibrary.simpleMessage("✨ Keine Duplikate"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noExifData": MessageLookupByLibrary.simpleMessage("Keine Exif-Daten"),
         "noFacesFound":
             MessageLookupByLibrary.simpleMessage("Keine Gesichter gefunden"),

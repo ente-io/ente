@@ -1105,10 +1105,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Contatos confiáveis podem iniciar recuperação de conta, e se não for cancelado dentro de 30 dias, redefina sua senha e acesse sua conta."),
         "light": MessageLookupByLibrary.simpleMessage("Brilho"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Claro"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "linkCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Link copiado para a área de transferência"),
         "linkDeviceLimit":
             MessageLookupByLibrary.simpleMessage("Limite do dispositivo"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Ativado"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Expirado"),
         "linkExpiresOn": m43,
@@ -1267,6 +1269,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Você não tem arquivos neste dispositivo que possam ser excluídos"),
         "noDuplicates":
             MessageLookupByLibrary.simpleMessage("✨ Sem duplicatas"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noExifData": MessageLookupByLibrary.simpleMessage("Sem dados EXIF"),
         "noFacesFound":
             MessageLookupByLibrary.simpleMessage("Nenhum rosto encontrado"),

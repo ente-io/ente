@@ -1,3 +1,6 @@
 {
-  "@@locale ": "en"
+  "@@locale ": "en",
+  "linkEmail": "Link email",
+  "link": "Link",
+  "noEnteAccountExclamation": "No Ente account!"
 }

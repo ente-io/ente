@@ -1083,10 +1083,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Các liên hệ tin cậy có thể khởi động quá trình khôi phục tài khoản, và nếu không bị chặn trong vòng 30 ngày, có thể đặt lại mật khẩu và truy cập tài khoản của bạn."),
         "light": MessageLookupByLibrary.simpleMessage("Ánh sáng"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Sáng"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "linkCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Liên kết đã được sao chép vào clipboard"),
         "linkDeviceLimit":
             MessageLookupByLibrary.simpleMessage("Giới hạn thiết bị"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Đã bật"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Hết hạn"),
         "linkExpiresOn": m43,
@@ -1242,6 +1244,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bạn không có tệp nào trên thiết bị này có thể bị xóa"),
         "noDuplicates":
             MessageLookupByLibrary.simpleMessage("✨ Không có trùng lặp"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noExifData":
             MessageLookupByLibrary.simpleMessage("Không có dữ liệu EXIF"),
         "noFacesFound":

@@ -1587,5 +1587,8 @@
   "joinAlbum": "Unir álbum",
   "joinAlbumSubtext": "para ver y añadir tus fotos",
   "joinAlbumSubtextViewer": "para añadir esto a los álbumes compartidos",
-  "join": "Unir"
+  "join": "Unir",
+  "linkEmail": "Link email",
+  "link": "Link",
+  "noEnteAccountExclamation": "No Ente account!"
 }

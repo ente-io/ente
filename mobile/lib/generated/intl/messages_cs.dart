@@ -26,6 +26,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Jaký je váš hlavní důvod, proč mažete svůj účet?"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Zkontrolujte prosím svou doručenou poštu (a spam) pro dokončení ověření"),
-        "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage("")
+        "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(""),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!")
       };
 }

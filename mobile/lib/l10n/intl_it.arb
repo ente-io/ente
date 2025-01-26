@@ -1543,5 +1543,8 @@
   "authToManageLegacy": "Autenticati per gestire i tuoi contatti fidati",
   "useDifferentPlayerInfo": "Hai problemi a riprodurre questo video? Premi a lungo qui per provare un altro lettore.",
   "hideSharedItemsFromHomeGallery": "Nascondi gli elementi condivisi dalla galleria principale",
-  "gallery": "Galleria"
+  "gallery": "Galleria",
+  "linkEmail": "Link email",
+  "link": "Link",
+  "noEnteAccountExclamation": "No Ente account!"
 }

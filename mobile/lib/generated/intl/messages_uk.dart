@@ -1086,10 +1086,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Довірені контакти можуть ініціювати відновлення облікового запису, і якщо його не буде заблоковано протягом 30 днів, скинути пароль і отримати доступ до нього."),
         "light": MessageLookupByLibrary.simpleMessage("Яскравість"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Світла"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "linkCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Посилання скопійовано в буфер обміну"),
         "linkDeviceLimit":
             MessageLookupByLibrary.simpleMessage("Досягнуто ліміту пристроїв"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Увімкнено"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Закінчився"),
         "linkExpiresOn": m43,
@@ -1253,6 +1255,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "У вас не маєте файлів на цьому пристрої, які можна видалити"),
         "noDuplicates":
             MessageLookupByLibrary.simpleMessage("✨ Немає дублікатів"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noExifData": MessageLookupByLibrary.simpleMessage("Немає даних EXIF"),
         "noFacesFound":
             MessageLookupByLibrary.simpleMessage("Обличчя не знайдено"),

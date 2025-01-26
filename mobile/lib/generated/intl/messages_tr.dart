@@ -799,9 +799,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Paylaşılan albüm silinsin mi?"),
         "light": MessageLookupByLibrary.simpleMessage("Aydınlık"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Aydınlık"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "linkCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("Link panoya kopyalandı"),
         "linkDeviceLimit": MessageLookupByLibrary.simpleMessage("Cihaz limiti"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Geçerli"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Süresi dolmuş"),
         "linkExpiresOn": m43,
@@ -909,6 +911,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bu cihazda silinebilecek hiçbir dosyanız yok"),
         "noDuplicates":
             MessageLookupByLibrary.simpleMessage("Yinelenenleri kaldır"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noExifData": MessageLookupByLibrary.simpleMessage("EXIF verisi yok"),
         "noHiddenPhotosOrVideos": MessageLookupByLibrary.simpleMessage(
             "Gizli fotoğraf veya video yok"),

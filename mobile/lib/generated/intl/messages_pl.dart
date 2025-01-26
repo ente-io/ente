@@ -1091,10 +1091,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Zaufane kontakty mogą rozpocząć odzyskiwanie konta, a jeśli nie zostaną zablokowane w ciągu 30 dni, zresetować Twoje hasło i uzyskać dostęp do Twojego konta."),
         "light": MessageLookupByLibrary.simpleMessage("Jasny"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Jasny"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "linkCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("Link skopiowany do schowka"),
         "linkDeviceLimit":
             MessageLookupByLibrary.simpleMessage("Limit urządzeń"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Aktywny"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Wygasł"),
         "linkExpiresOn": m43,
@@ -1256,6 +1258,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nie masz żadnych plików na tym urządzeniu, które można usunąć"),
         "noDuplicates":
             MessageLookupByLibrary.simpleMessage("✨ Brak duplikatów"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noExifData": MessageLookupByLibrary.simpleMessage("Brak danych EXIF"),
         "noFacesFound":
             MessageLookupByLibrary.simpleMessage("Nie znaleziono twarzy"),

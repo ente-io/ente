@@ -1131,5 +1131,8 @@
   "rotate": "Putar",
   "left": "Kiri",
   "right": "Kanan",
-  "whatsNew": "Hal yang baru"
+  "whatsNew": "Hal yang baru",
+  "linkEmail": "Link email",
+  "link": "Link",
+  "noEnteAccountExclamation": "No Ente account!"
 }

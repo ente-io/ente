@@ -812,10 +812,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "left": MessageLookupByLibrary.simpleMessage("Kiri"),
         "light": MessageLookupByLibrary.simpleMessage("Cahaya"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Cerah"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "linkCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("Link tersalin ke papan klip"),
         "linkDeviceLimit":
             MessageLookupByLibrary.simpleMessage("Batas perangkat"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Aktif"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Kedaluwarsa"),
         "linkExpiresOn": m43,
@@ -925,6 +927,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Tidak ada file yang perlu dihapus dari perangkat ini"),
         "noDuplicates":
             MessageLookupByLibrary.simpleMessage("✨ Tak ada file duplikat"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noExifData":
             MessageLookupByLibrary.simpleMessage("Tidak ada data EXIF"),
         "noHiddenPhotosOrVideos": MessageLookupByLibrary.simpleMessage(

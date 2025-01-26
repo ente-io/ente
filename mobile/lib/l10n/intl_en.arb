@@ -1589,6 +1589,8 @@
   "joinAlbum": "Join album",
   "joinAlbumSubtext": "to view and add your photos",
   "joinAlbumSubtextViewer": "to add this to shared albums",
-  "join": "Join"
-  
+  "join": "Join",
+  "linkEmail": "Link email",
+  "link": "Link",
+  "noEnteAccountExclamation": "No Ente account!"
 }

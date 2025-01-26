@@ -14,9 +14,9 @@ class SectionTitle extends StatelessWidget {
     this.title,
     this.titleWithBrand,
     this.mutedTitle = false,
-    Key? key,
+    super.key,
     this.padding,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

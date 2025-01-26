@@ -156,6 +156,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Калі ласка, дапамажыце нам з гэтай інфармацыяй"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Светлая"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Экран блакіроўкі"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Увайсці"),
         "loginTerms": MessageLookupByLibrary.simpleMessage(
@@ -168,6 +170,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "never": MessageLookupByLibrary.simpleMessage("Ніколі"),
         "noDuplicates":
             MessageLookupByLibrary.simpleMessage("✨ Няма дублікатаў"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Няма ключа аднаўлення?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
