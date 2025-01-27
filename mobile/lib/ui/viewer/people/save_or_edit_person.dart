@@ -564,10 +564,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     final persons = _cachedPersons.map((e) => e.$1).toList();
     final clusterToPerson = <String, String>{};
     for (final person in persons) {
-      if (person.data.assigned != null) {
-        for (final cluster in person.data.assigned!) {
-          clusterToPerson[cluster.id] = person.remoteID;
-        }
+      for (final cluster in person.data.assigned) {
+        clusterToPerson[cluster.id] = person.remoteID;
       }
     }
     allClusterSummary
