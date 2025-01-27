@@ -50,8 +50,8 @@ class PersonData {
   final String name;
   final bool isHidden;
   String? avatarFaceID;
-  List<ClusterInfo>? assigned = List<ClusterInfo>.empty();
-  List<String>? rejectedFaceIDs = List<String>.empty();
+  List<ClusterInfo> assigned = List<ClusterInfo>.empty();
+  List<String> rejectedFaceIDs = List<String>.empty();
   final String? birthDate;
   /// email should be always looked via userID as user might have changed
   /// their email ids.
@@ -65,8 +65,8 @@ class PersonData {
 
   PersonData({
     required this.name,
-    this.assigned,
-    this.rejectedFaceIDs,
+    this.assigned = const <ClusterInfo>[],
+    this.rejectedFaceIDs = const <String>[],
     this.avatarFaceID,
     this.isHidden = false,
     this.birthDate,
