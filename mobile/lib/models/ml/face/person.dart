@@ -53,8 +53,8 @@ class PersonData {
   List<ClusterInfo>? assigned = List<ClusterInfo>.empty();
   List<String>? rejectedFaceIDs = List<String>.empty();
   final String? birthDate;
-  // email should be always looked via userID as user might have changed
-  // their email ids.
+  /// email should be always looked via userID as user might have changed
+  /// their email ids.
   final String? email;
   final int? userID;
 
