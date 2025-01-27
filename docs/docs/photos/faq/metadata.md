@@ -1,5 +1,5 @@
 ---
-title: Photo dates
+title: Metadata
 description: Handling of metadata, in particular creation dates, in Ente Photos
 ---
 
