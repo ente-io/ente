@@ -1,4 +1,5 @@
 import 'package:ente_auth/core/configuration.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/user_details.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/user_service.dart';
@@ -17,6 +18,7 @@ class NotificationBannerWidget extends StatelessWidget {
     final differenceInDays = currentTime
         .difference(DateTime.fromMillisecondsSinceEpoch(appInstallTime))
         .inDays;
+    final l10n = context.l10n;
 
     if (Configuration.instance.hasConfiguredAccount()) {
       return FutureBuilder<UserDetails>(
@@ -31,15 +33,15 @@ class NotificationBannerWidget extends StatelessWidget {
               contents.clear();
               contents.addAll(
                 [
-                  const BannerWidget(
-                    text: "Tell us what you think",
-                    subText: "Drop a review on the App/Play Store",
+                  BannerWidget(
+                    text: l10n.tellUsWhatYouThink,
+                    subText: l10n.dropReview,
                     type: BannerType.rateUs,
                   ),
                   sectionSpacing,
-                  const BannerWidget(
-                    text: "Support <bold-green>ente</bold-green>",
-                    subText: "Give us a star on Github",
+                  BannerWidget(
+                    text: l10n.supportEnte,
+                    subText: l10n.giveUsAStarOnGithub,
                     type: BannerType.starUs,
                   ),
                 ],
@@ -50,9 +52,9 @@ class NotificationBannerWidget extends StatelessWidget {
                 contents.clear();
                 contents.addAll(
                   [
-                    const BannerWidget(
-                      text: "5GB free on <bold-green>ente</bold-green> Photos",
-                      subText: "Login with your Auth account",
+                    BannerWidget(
+                      text: l10n.free5GB,
+                      subText: l10n.loginWithAuthAccount,
                       type: BannerType.freeStorage,
                     ),
                   ],
@@ -61,9 +63,9 @@ class NotificationBannerWidget extends StatelessWidget {
                   userDetails.subscription.productID == 'free') {
                 contents.addAll(
                   [
-                    const BannerWidget(
-                      text: "10% off on <bold-green>ente</bold-green> photos",
-                      subText: "Use code “AUTH” to get 10% off first year",
+                    BannerWidget(
+                      text: l10n.freeStorageOffer,
+                      subText: l10n.freeStorageOfferDescription,
                       type: BannerType.discount,
                     ),
                   ],
@@ -80,15 +82,15 @@ class NotificationBannerWidget extends StatelessWidget {
         contents.clear();
         contents.addAll(
           [
-            const BannerWidget(
-              text: "Tell us what you think",
-              subText: "Drop a review on the App/Play Store",
+            BannerWidget(
+              text: l10n.tellUsWhatYouThink,
+              subText: l10n.dropReview,
               type: BannerType.rateUs,
             ),
             sectionSpacing,
-            const BannerWidget(
-              text: "Support <bold-green>ente</bold-green>",
-              subText: "Give us a star on Github",
+            BannerWidget(
+              text: l10n.supportEnte,
+              subText: l10n.giveUsAStarOnGithub,
               type: BannerType.starUs,
             ),
           ],
