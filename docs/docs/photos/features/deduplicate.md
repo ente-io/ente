@@ -54,6 +54,6 @@ duplicates across different albums, but wish to keep only one copy.
 
 ## Adding to Ente album creates symlinks
 
-Note that once a file in is Ente, adding it to another Ente album will create a
+Note that once a file is in Ente, adding it to another Ente album will create a
 symlink, so that you can add it to as many albums as you wish but storage will
 only be counted once.
