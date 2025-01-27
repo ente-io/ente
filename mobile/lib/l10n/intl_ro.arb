@@ -1589,8 +1589,5 @@
   "joinAlbum": "Alăturați-vă albumului",
   "joinAlbumSubtext": "pentru a vedea și a adăuga fotografii",
   "joinAlbumSubtextViewer": "pentru a adăuga la albumele distribuite",
-  "join": "Alăturare",
-  "linkEmail": "Link email",
-  "link": "Link",
-  "noEnteAccountExclamation": "No Ente account!"
+  "join": "Alăturare"
 }

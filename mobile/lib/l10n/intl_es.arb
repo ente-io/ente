@@ -2,6 +2,8 @@
   "@@locale ": "en",
   "enterYourEmailAddress": "Escribe tu correo electrónico",
   "accountWelcomeBack": "¡Bienvenido de nuevo!",
+  "emailAlreadyRegistered": "Correo electrónico ya registrado.",
+  "emailNotRegistered": "Correo electrónico no registrado.",
   "email": "Correo electrónico",
   "cancel": "Cancelar",
   "verify": "Verificar",
@@ -1588,7 +1590,7 @@
   "joinAlbumSubtext": "para ver y añadir tus fotos",
   "joinAlbumSubtextViewer": "para añadir esto a los álbumes compartidos",
   "join": "Unir",
-  "linkEmail": "Link email",
-  "link": "Link",
-  "noEnteAccountExclamation": "No Ente account!"
+  "linkEmail": "Vincular correo electrónico",
+  "link": "Enlace",
+  "noEnteAccountExclamation": "¡No existe una cuenta de Ente!"
 }

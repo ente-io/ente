@@ -1,7 +1,4 @@
 {
   "@@locale ": "en",
-  "enterYourEmailAddress": "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας",
-  "linkEmail": "Link email",
-  "link": "Link",
-  "noEnteAccountExclamation": "No Ente account!"
+  "enterYourEmailAddress": "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας"
 }
