@@ -15,7 +15,12 @@ Try using libvips-packaging, see if it builds vips tools binaries too.
 git clone https://github.com/kleisauke/libvips-packaging
 cd libvips-packaging
 docker build -t vips-dev-linux-arm64 platforms/linux-arm64
+docker run -it --rm -e VERSION_VIPS=8.16.0 -e VERSION_LATEST_REQUIRED=false -v $(pwd):/packaging vips-dev-linux-arm64 /bin/bash
+# In the container
+$ /packaging/build/lin.sh
 ```
+
+This too is only producing the library, not the CLI tools.
 
 ## Notes
 
