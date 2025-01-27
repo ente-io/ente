@@ -51,13 +51,19 @@ export const parseExif = (tags: RawExifTags) => {
 
 /**
  * Parse GPS location from the metadata embedded in the file.
+ *
+ * - If a location is returned, then both latitude and longitude will be
+ *   defined.
+ * - NaNs are ignored, and treated as if they are not defined.
  */
 const parseLocation = (tags: RawExifTags) => {
     const latitude = tags.gps?.Latitude;
     const longitude = tags.gps?.Longitude;
-    return latitude !== undefined && longitude !== undefined
-        ? { latitude, longitude }
-        : undefined;
+
+    if (latitude === undefined || longitude === undefined) return undefined;
+    if (Number.isNaN(latitude) || Number.isNaN(longitude)) return undefined;
+
+    return { latitude, longitude };
 };
 
 /**
