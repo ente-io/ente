@@ -1,6 +1,8 @@
 import "dart:typed_data";
 
+import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/face/face.dart";
+import "package:photos/models/ml/vector.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 
 abstract class IMLDataDB {
@@ -103,4 +105,11 @@ abstract class IMLDataDB {
   Future<Set<int>> getAllFilesAssociatedWithAllClusters({
     List<String>? exceptClusters,
   });
+
+  Future<List<EmbeddingVector>> getAllClipVectors();
+  Future<Map<int, int>> clipIndexedFileWithVersion();
+  Future<int> getClipIndexedFileCount({int minimumMlVersion});
+  Future<void> putClip(List<ClipEmbedding> embeddings);
+  Future<void> deleteClipEmbeddings(List<int> fileIDs);
+  Future<void> deleteClipIndexes();
 }

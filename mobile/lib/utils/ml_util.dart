@@ -4,7 +4,6 @@ import "dart:math" as math show sqrt, min, max;
 import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/db/ml/clip_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/filedata.dart";
 import "package:photos/extensions/list.dart";
@@ -249,7 +248,7 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
       }
     }
     await MLDataDB.instance.bulkInsertFaces(faces);
-    await MLDataDB.instance.putMany(clipEmbeddings);
+    await MLDataDB.instance.putClip(clipEmbeddings);
   }
   // Yield any remaining instructions
   if (batchToYield.isNotEmpty) {

@@ -10,7 +10,6 @@ import "package:ml_linalg/vector.dart";
 import "package:photos/core/cache/lru_map.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/db/ml/clip_db.dart";
 import "package:photos/db/ml/db.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/models/file/file.dart";
@@ -68,7 +67,8 @@ class SemanticSearchService {
 
   bool isMagicSearchEnabledAndReady() {
     return userRemoteFlagService
-        .getCachedBoolValue(UserRemoteFlagService.mlEnabled) && _textModelIsLoaded;
+            .getCachedBoolValue(UserRemoteFlagService.mlEnabled) &&
+        _textModelIsLoaded;
   }
 
   // searchScreenQuery should only be used for the user initiate query on the search screen.
@@ -77,8 +77,7 @@ class SemanticSearchService {
     if (!isMagicSearchEnabledAndReady()) {
       if (flagService.internalUser) {
         _logger.info(
-          "ML global consent: ${userRemoteFlagService
-        .getCachedBoolValue(UserRemoteFlagService.mlEnabled)}, loaded: $_textModelIsLoaded ",
+          "ML global consent: ${userRemoteFlagService.getCachedBoolValue(UserRemoteFlagService.mlEnabled)}, loaded: $_textModelIsLoaded ",
         );
       }
       return (query, <EnteFile>[]);
@@ -221,12 +220,12 @@ class SemanticSearchService {
       embedding: clipResult.embedding,
       version: clipMlVersion,
     );
-    await MLDataDB.instance.put(embedding);
+    await MLDataDB.instance.putClip([embedding]);
   }
 
   static Future<void> storeEmptyClipImageResult(EnteFile entefile) async {
     final embedding = ClipEmbedding.empty(entefile.uploadedFileID!);
-    await MLDataDB.instance.put(embedding);
+    await MLDataDB.instance.putClip([embedding]);
   }
 
   Future<List<double>> _getTextEmbedding(String query) async {
