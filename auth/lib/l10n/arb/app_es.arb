@@ -88,6 +88,8 @@
   "useRecoveryKey": "Usar clave de recuperación",
   "incorrectPasswordTitle": "Contraseña incorrecta",
   "welcomeBack": "¡Te damos la bienvenida otra vez!",
+  "emailAlreadyRegistered": "Correo electrónico ya registrado.",
+  "emailNotRegistered": "Correo electrónico no registrado.",
   "madeWithLoveAtPrefix": "hecho con ❤️ en ",
   "supportDevs": "Suscríbase a <bold-green>ente</bold-green> para apoyar este proyecto",
   "supportDiscount": "Utiliza el cupón promocional \"AUTH\" para obtener un 10% de descuento en el primer año",
