@@ -27,7 +27,6 @@ class PreferenceService {
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
-    await setAppInstallTime();
   }
 
   bool hasShownCoachMark() {
@@ -110,14 +109,9 @@ class PreferenceService {
     if (_prefs.containsKey(kAppInstallTime)) {
       return _prefs.getInt(kAppInstallTime)!;
     } else {
-      return DateTime.now().millisecondsSinceEpoch;
-    }
-  }
-
-  Future<void> setAppInstallTime() async {
-    if (!_prefs.containsKey(kAppInstallTime)) {
-      final installedTimeinMillis = DateTime.now().millisecondsSinceEpoch;
-      await _prefs.setInt(kAppInstallTime, installedTimeinMillis);
+      int installedTimeinMillis = DateTime.now().millisecondsSinceEpoch;
+      _prefs.setInt(kAppInstallTime, installedTimeinMillis).ignore();
+      return installedTimeinMillis;
     }
   }
 }
