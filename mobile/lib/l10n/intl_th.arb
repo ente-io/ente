@@ -295,8 +295,5 @@
     "description": "Label for the map view"
   },
   "maps": "แผนที่",
-  "enableMaps": "เปิดใช้งานแผนที่",
-  "linkEmail": "Link email",
-  "link": "Link",
-  "noEnteAccountExclamation": "No Ente account!"
+  "enableMaps": "เปิดใช้งานแผนที่"
 }

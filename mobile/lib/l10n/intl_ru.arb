@@ -1462,8 +1462,5 @@
   "removeInvite": "Удалить приглашение",
   "recoveryWarning": "Доверенный контакт пытается получить доступ к вашей учетной записи",
   "rejectRecovery": "Отклонить восстановление",
-  "recoveryInitiated": "Восстановление запущено",
-  "linkEmail": "Link email",
-  "link": "Link",
-  "noEnteAccountExclamation": "No Ente account!"
+  "recoveryInitiated": "Восстановление запущено"
 }
