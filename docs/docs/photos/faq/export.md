@@ -31,7 +31,7 @@ album structure how you have set up within Ente.
 
 Yes, the metadata is written out to a separate JSON file during export. Note
 that the original is not modified. For more details, see the
-[description of the exported metadata](/photos/faq/photo-dates#export).
+[description of the exported metadata](/photos/faq/metadata#export).
 
 ## Can I do a 2-way sync?
 
