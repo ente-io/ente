@@ -90,6 +90,7 @@ class _ReorderCodesPageState extends State<ReorderCodesPage> {
                   key: ValueKey(code.generatedID),
                   code,
                   isCompactMode: isCompactMode,
+                  isReordering: true,
                 ),
               ),
           ],
