@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -23,9 +24,9 @@ class UserAvatarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final displayChar = (user.name == null || user.name!.isEmpty)
+    final displayChar = (user.displayName == null || user.displayName!.isEmpty)
         ? ((user.email.isEmpty) ? " " : user.email.substring(0, 1))
-        : user.name!.substring(0, 1);
+        : user.displayName!.substring(0, 1);
     Color decorationColor;
     if (user.id == null || user.id! <= 0 || user.id == currentUserID) {
       decorationColor = Colors.black;

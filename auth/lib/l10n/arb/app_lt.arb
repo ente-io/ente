@@ -16,7 +16,7 @@
   "secretCanNotBeEmpty": "Paslaptis negali būti tuščia.",
   "bothIssuerAndAccountCanNotBeEmpty": "Tiek išdavėjas ir paskyra negali būti tušti.",
   "incorrectDetails": "Neteisingi duomenys",
-  "pleaseVerifyDetails": "Patikrinkite duomenis ir bandykite dar kartą.",
+  "pleaseVerifyDetails": "Patvirtinkite duomenis ir bandykite dar kartą.",
   "codeIssuerHint": "Išdavėjas",
   "codeSecretKeyHint": "Slaptasis raktas",
   "secret": "Paslaptis",

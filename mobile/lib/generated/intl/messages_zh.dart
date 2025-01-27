@@ -890,9 +890,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "可信联系人可以启动账户恢复，如果 30 天内没有被阻止，则可以重置密码并访问您的账户。"),
         "light": MessageLookupByLibrary.simpleMessage("亮度"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("浅色"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "linkCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("链接已复制到剪贴板"),
         "linkDeviceLimit": MessageLookupByLibrary.simpleMessage("设备限制"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("已启用"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("已过期"),
         "linkExpiresOn": m43,
@@ -1022,6 +1024,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noDeviceThatCanBeDeleted":
             MessageLookupByLibrary.simpleMessage("您在此设备上没有可被删除的文件"),
         "noDuplicates": MessageLookupByLibrary.simpleMessage("✨ 没有重复内容"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noExifData": MessageLookupByLibrary.simpleMessage("无 EXIF 数据"),
         "noFacesFound": MessageLookupByLibrary.simpleMessage("未找到任何面部"),
         "noHiddenPhotosOrVideos":

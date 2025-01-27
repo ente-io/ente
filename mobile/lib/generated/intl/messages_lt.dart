@@ -850,8 +850,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Patikimi kontaktai gali pradėti paskyros atkūrimą, o jei per 30 dienų paskyra neužblokuojama, iš naujo nustatyti slaptažodį ir pasiekti paskyrą."),
         "light": MessageLookupByLibrary.simpleMessage("Šviesi"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Šviesi"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "linkDeviceLimit":
             MessageLookupByLibrary.simpleMessage("Įrenginių riba"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Įjungta"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Nebegalioja"),
         "linkExpiresOn": m43,
@@ -990,6 +992,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Jokio"),
         "noDuplicates":
             MessageLookupByLibrary.simpleMessage("✨ Dublikatų nėra"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noExifData": MessageLookupByLibrary.simpleMessage("Nėra EXIF duomenų"),
         "noFacesFound": MessageLookupByLibrary.simpleMessage("Nerasta veidų."),
         "noImagesWithLocation":

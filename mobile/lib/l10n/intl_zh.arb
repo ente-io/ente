@@ -2,6 +2,8 @@
   "@@locale ": "en",
   "enterYourEmailAddress": "请输入您的电子邮件地址",
   "accountWelcomeBack": "欢迎回来！",
+  "emailAlreadyRegistered": "此电子邮件地址已被注册。",
+  "emailNotRegistered": "此电子邮件地址未被注册。",
   "email": "电子邮件地址",
   "cancel": "取消",
   "verify": "验证",
@@ -19,7 +21,7 @@
   "selectReason": "选择原因",
   "deleteReason1": "找不到我想要的功能",
   "deleteReason2": "应用或某个功能没有按我的预期运行",
-  "deleteReason3": "我找到了另一个我喜欢更好的服务",
+  "deleteReason3": "我找到了另一个我喜欢的更好的服务",
   "deleteReason4": "我的原因未被列出",
   "sendEmail": "发送电子邮件",
   "deleteRequestSLAText": "您的请求将在 72 小时内处理。",
@@ -185,6 +187,8 @@
   },
   "allowAddPhotosDescription": "允许具有链接的人也将照片添加到共享相册。",
   "passwordLock": "密码锁",
+  "canNotOpenTitle": "无法打开此相册",
+  "canNotOpenBody": "抱歉，该相册无法在应用中打开。",
   "disableDownloadWarningTitle": "请注意",
   "disableDownloadWarningBody": "查看者仍然可以使用外部工具截图或保存您的照片副本",
   "allowDownloads": "允许下载",
@@ -351,6 +355,7 @@
   "failedToLoadAlbums": "加载相册失败",
   "hidden": "已隐藏",
   "authToViewYourHiddenFiles": "请验证以查看您的隐藏文件",
+  "authToViewTrashedFiles": "请验证身份以查看您已删除的文件",
   "trash": "回收站",
   "uncategorized": "未分类的",
   "videoSmallCase": "视频",
@@ -412,6 +417,7 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "照片网格大小",
+  "manageDeviceStorage": "管理设备缓存",
   "manageDeviceStorageDesc": "检查并清除本地缓存存储。",
   "machineLearning": "机器学习",
   "mlConsent": "启用机器学习",
@@ -1376,6 +1382,7 @@
   "extraPhotosFound": "发现额外照片",
   "configuration": "配置",
   "localIndexing": "本地索引",
+  "processed": "已处理",
   "resetPerson": "移除",
   "areYouSureYouWantToResetThisPerson": "您确定要重设此人吗？",
   "allPersonGroupingWillReset": "此人的所有分组都将被重设，并且您将丢失针对此人的所有建议",
@@ -1480,6 +1487,20 @@
     }
   },
   "file": "文件",
+  "searchSectionsLengthMismatch": "部分长度不匹配：{snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "selectMailApp": "选择邮件应用",
   "selectAllShort": "全部",
   "@selectAllShort": {
@@ -1562,5 +1583,11 @@
   },
   "legacyInvite": "{email} 已邀请您成为可信联系人",
   "authToManageLegacy": "请验证身份以管理您的可信联系人",
-  "useDifferentPlayerInfo": "播放此视频时遇到问题了吗？长按此处可尝试使用其他播放器。"
+  "useDifferentPlayerInfo": "播放此视频时遇到问题了吗？长按此处可尝试使用其他播放器。",
+  "hideSharedItemsFromHomeGallery": "隐藏主页图库中的共享项目",
+  "gallery": "图库",
+  "joinAlbum": "加入相册",
+  "joinAlbumSubtext": "来查看和添加您的照片",
+  "joinAlbumSubtextViewer": "来将其添加到共享相册",
+  "join": "加入"
 }

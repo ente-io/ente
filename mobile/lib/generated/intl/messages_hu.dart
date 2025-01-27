@@ -38,6 +38,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("Visszajelzés"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Érvénytelen e-mail cím"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "verify": MessageLookupByLibrary.simpleMessage("Hitelesítés")
       };
 }

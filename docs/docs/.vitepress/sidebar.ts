@@ -119,6 +119,10 @@ export const sidebar = [
                         link: "/photos/faq/export",
                     },
                     {
+                        text: "Metadata",
+                        link: "/photos/faq/metadata",
+                    },
+                    {
                         text: "Security and privacy",
                         link: "/photos/faq/security-and-privacy",
                     },
@@ -129,10 +133,6 @@ export const sidebar = [
                     {
                         text: "Hide vs archive",
                         link: "/photos/faq/hidden-and-archive",
-                    },
-                    {
-                        text: "Photo dates",
-                        link: "/photos/faq/photo-dates",
                     },
                     {
                         text: "Machine Learning",

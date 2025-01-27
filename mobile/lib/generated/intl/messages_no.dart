@@ -249,7 +249,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "keepPhotos": MessageLookupByLibrary.simpleMessage("Behold Bilder"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Vær vennlig og hjelp oss med denne informasjonen"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "linkDeviceLimit": MessageLookupByLibrary.simpleMessage("Enhetsgrense"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Aktivert"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Utløpt"),
         "linkExpiresOn": m43,
@@ -275,6 +277,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "never": MessageLookupByLibrary.simpleMessage("Aldri"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nytt album"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Ingen"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Ingen gjenopprettingsnøkkel?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(

@@ -13,12 +13,15 @@ import 'package:photos/models/ml/face/face.dart';
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/entity_service.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/services/search_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class PersonService {
   final EntityService entityService;
   final MLDataDB faceMLDataDB;
   final SharedPreferences prefs;
+  final _emailToNameMapCache = <String, String>{};
 
   PersonService(this.entityService, this.faceMLDataDB, this.prefs);
 
@@ -40,6 +43,26 @@ class PersonService {
     SharedPreferences prefs,
   ) {
     _instance = PersonService(entityService, faceMLDataDB, prefs);
+    _instance!._resetEmailToNameCache();
+  }
+
+  Map<String, String> get emailToNameMapCache => _emailToNameMapCache;
+
+  void clearCache() {
+    _emailToNameMapCache.clear();
+  }
+
+  void _resetEmailToNameCache() {
+    _emailToNameMapCache.clear();
+    _instance!.getPersons().then((value) {
+      for (var person in value) {
+        if (person.data.email != null && person.data.email!.isNotEmpty) {
+          _instance!._emailToNameMapCache[person.data.email!] =
+              person.data.name;
+        }
+      }
+      logger.info("Email to name cache reset");
+    });
   }
 
   Future<List<PersonEntity>> getPersons() async {
@@ -150,10 +173,12 @@ class PersonService {
     return false;
   }
 
-  Future<PersonEntity> addPerson(
-    String name,
-    String clusterID, {
+  Future<PersonEntity> addPerson({
+    required String name,
+    required String clusterID,
     bool isHidden = false,
+    String? birthdate,
+    String? email,
   }) async {
     final faceIds = await faceMLDataDB.getFaceIDsForCluster(clusterID);
     final data = PersonData(
@@ -165,6 +190,8 @@ class PersonService {
         ),
       ],
       isHidden: isHidden,
+      birthDate: birthdate,
+      email: email,
     );
     final result = await entityService.addOrUpdate(
       EntityType.cgroup,
@@ -174,6 +201,9 @@ class PersonService {
       personID: result.id,
       clusterID: clusterID,
     );
+    if (data.email != null) {
+      _resetEmailToNameCache();
+    }
     return PersonEntity(result.id, data);
   }
 
@@ -247,8 +277,8 @@ class PersonService {
   }
 
   Future<void> deletePerson(String personID, {bool onlyMapping = false}) async {
+    final entity = await getPerson(personID);
     if (onlyMapping) {
-      final PersonEntity? entity = await getPerson(personID);
       if (entity == null) {
         return;
       }
@@ -261,9 +291,19 @@ class PersonService {
       );
       await faceMLDataDB.removePerson(personID);
       justName.data.logStats();
+
+      if (entity.data.email != null) {
+        _resetEmailToNameCache();
+      }
     } else {
       await entityService.deleteEntry(personID);
       await faceMLDataDB.removePerson(personID);
+
+      if (entity != null) {
+        if (entity.data.email != null) {
+          _resetEmailToNameCache();
+        }
+      }
     }
 
     // fire PeopleChangeEvent
@@ -410,6 +450,7 @@ class PersonService {
     bool? isHidden,
     int? version,
     String? birthDate,
+    String? email,
   }) async {
     final person = (await getPerson(id))!;
     final updatedPerson = person.copyWith(
@@ -419,9 +460,12 @@ class PersonService {
         isHidden: isHidden,
         version: version,
         birthDate: birthDate,
+        email: email,
       ),
     );
-    await updatePerson(updatedPerson);
+    await updatePerson(updatedPerson).then((value) {
+      _resetEmailToNameCache();
+    });
     return updatedPerson;
   }
 
@@ -437,5 +481,39 @@ class PersonService {
       logger.severe("Failed to update person", e, s);
       rethrow;
     }
+  }
+
+  Future<EnteFile> getRecentFileOfPerson(
+    PersonEntity person,
+  ) async {
+    final clustersToFiles =
+        await SearchService.instance.getClusterFilesForPersonID(
+      person.remoteID,
+    );
+    int? avatarFileID;
+    if (person.data.hasAvatar()) {
+      avatarFileID = tryGetFileIdFromFaceId(person.data.avatarFaceID!);
+    }
+    EnteFile? resultFile;
+    // iterate over all clusters and get the first file
+    for (final clusterFiles in clustersToFiles.values) {
+      for (final file in clusterFiles) {
+        if (avatarFileID != null && file.uploadedFileID! == avatarFileID) {
+          resultFile = file;
+          break;
+        }
+        resultFile ??= file;
+        if (resultFile.creationTime! < file.creationTime!) {
+          resultFile = file;
+        }
+      }
+    }
+    if (resultFile == null) {
+      debugPrint(
+        "Person ${kDebugMode ? person.data.name : person.remoteID} has no files",
+      );
+      return EnteFile();
+    }
+    return resultFile;
   }
 }

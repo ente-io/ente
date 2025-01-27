@@ -5,6 +5,7 @@ import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/viewer/search/result/contact_result_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search/result/search_thumbnail_widget.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -15,10 +16,10 @@ class SearchableItemWidget extends StatelessWidget {
   final Function? onResultTap;
   const SearchableItemWidget(
     this.searchResult, {
-    Key? key,
+    super.key,
     this.resultCount,
     this.onResultTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,13 +40,23 @@ class SearchableItemWidget extends StatelessWidget {
         if (onResultTap != null) {
           onResultTap!();
         } else {
-          routeToPage(
-            context,
-            SearchResultPage(
-              searchResult,
-              tagPrefix: additionalPrefix,
-            ),
-          );
+          if (searchResult.type() == ResultType.shared) {
+            routeToPage(
+              context,
+              ContactResultPage(
+                searchResult,
+                tagPrefix: additionalPrefix,
+              ),
+            );
+          } else {
+            routeToPage(
+              context,
+              SearchResultPage(
+                searchResult,
+                tagPrefix: additionalPrefix,
+              ),
+            );
+          }
         }
       },
       child: Container(

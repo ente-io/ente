@@ -94,6 +94,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "invite": MessageLookupByLibrary.simpleMessage("Inviter"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Hjælp os venligst med disse oplysninger"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Logger ud..."),
         "longPressAnEmailToVerifyEndToEndEncryption":
             MessageLookupByLibrary.simpleMessage(
@@ -104,6 +106,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bemærk venligst, at maskinindlæring vil resultere i en højere båndbredde og batteriforbrug, indtil alle elementer er indekseret. Overvej at bruge desktop app til hurtigere indeksering, vil alle resultater blive synkroniseret automatisk."),
         "moments": MessageLookupByLibrary.simpleMessage("Øjeblikke"),
         "next": MessageLookupByLibrary.simpleMessage("Næste"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "password": MessageLookupByLibrary.simpleMessage("Adgangskode"),

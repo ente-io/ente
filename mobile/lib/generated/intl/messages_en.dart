@@ -1074,9 +1074,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account."),
         "light": MessageLookupByLibrary.simpleMessage("Light"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Light"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "linkCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("Link copied to clipboard"),
         "linkDeviceLimit": MessageLookupByLibrary.simpleMessage("Device limit"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Enabled"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Expired"),
         "linkExpiresOn": m43,
@@ -1226,6 +1228,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "You\'ve no files on this device that can be deleted"),
         "noDuplicates": MessageLookupByLibrary.simpleMessage("✨ No duplicates"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noExifData": MessageLookupByLibrary.simpleMessage("No EXIF data"),
         "noFacesFound": MessageLookupByLibrary.simpleMessage("No faces found"),
         "noHiddenPhotosOrVideos":
