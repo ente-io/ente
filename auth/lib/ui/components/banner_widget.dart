@@ -1,8 +1,11 @@
 import 'package:dotted_border/dotted_border.dart';
+import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:flutter/material.dart';
 import 'package:styled_text/tags/styled_text_tag.dart';
 import 'package:styled_text/widgets/styled_text.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 enum BannerType {
   rateUs,
@@ -34,9 +37,19 @@ class BannerWidget extends StatelessWidget {
     Color dashColor;
     List<BoxShadow>? boxShadow;
     String imagePath;
+    Uri? url;
+    final result = UpdateService.instance.getRateDetails();
+    final String rateUrl = result.item2;
 
     switch (type) {
       case BannerType.rateUs:
+        if (PlatformUtil.isMobile()) {
+          url = Uri.parse(rateUrl);
+        } else if (PlatformUtil.isDesktop()) {
+          url = Uri.parse(
+            "https://play.google.com/store/apps/details?id=io.ente.auth",
+          );
+        }
         imagePath = "assets/rate_us.png";
         dashColor = const Color.fromRGBO(255, 191, 12, 1);
         boxShadow = [
@@ -51,7 +64,9 @@ class BannerWidget extends StatelessWidget {
           ),
         ];
         break;
+
       case BannerType.starUs:
+        url = Uri.parse("https://github.com/ente-io/ente");
         imagePath = "assets/star_us.png";
         dashColor = const Color.fromRGBO(233, 233, 233, 1);
         boxShadow = [
@@ -65,6 +80,7 @@ class BannerWidget extends StatelessWidget {
             blurRadius: 25,
           ),
         ];
+        break;
 
       case BannerType.freeStorage:
         imagePath = "assets/ente_5gb.png";
@@ -80,6 +96,8 @@ class BannerWidget extends StatelessWidget {
             blurRadius: 25,
           ),
         ];
+        break;
+
       case BannerType.discount:
         dashColor = const Color.fromRGBO(29, 185, 84, 1);
         imagePath = "assets/discount.png";
@@ -94,83 +112,89 @@ class BannerWidget extends StatelessWidget {
             blurRadius: 25,
           ),
         ];
+        break;
     }
-    return ClipRRect(
-      borderRadius: const BorderRadius.all(Radius.circular(50)),
-      child: DottedBorder(
-        borderType: BorderType.RRect,
-        radius: const Radius.circular(50),
-        dashPattern: const <double>[3, 3],
-        color: dashColor,
-        child: Stack(
-          children: [
-            if (BannerType.starUs == type)
-              Positioned(
-                right: 0,
-                top: 0,
-                bottom: 0,
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(50)),
-                  child: isLightMode
-                      ? Image.asset("assets/calender_banner_light.png")
-                      : Image.asset("assets/calender_banner_dark.png"),
+    return GestureDetector(
+      onTap: () {
+        url != null ? launchUrl(url) : null;
+      },
+      child: ClipRRect(
+        borderRadius: const BorderRadius.all(Radius.circular(50)),
+        child: DottedBorder(
+          borderType: BorderType.RRect,
+          radius: const Radius.circular(50),
+          dashPattern: const <double>[3, 3],
+          color: dashColor,
+          child: Stack(
+            children: [
+              if (BannerType.starUs == type)
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.all(Radius.circular(50)),
+                    child: isLightMode
+                        ? Image.asset("assets/calender_banner_light.png")
+                        : Image.asset("assets/calender_banner_dark.png"),
+                  ),
                 ),
-              ),
-            Row(
-              children: [
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    if (!isLightMode)
-                      Container(
-                        height: 80,
-                        width: 80,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: boxShadow,
-                        ),
-                      ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: SizedBox(
-                        height: 60,
-                        width: 60,
-                        child: Image.asset(imagePath),
-                      ),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
                     children: [
-                      StyledText(
-                        text: text,
-                        style: getEnteTextTheme(context).large,
-                        textAlign: TextAlign.left,
-                        tags: {
-                          'bold-green': StyledTextTag(
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.primaryGreen,
-                            ),
+                      if (!isLightMode)
+                        Container(
+                          height: 80,
+                          width: 80,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: boxShadow,
                           ),
-                        },
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        subText ?? "",
-                        textAlign: TextAlign.left,
-                        style: const TextStyle(
-                          color: Colors.grey,
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: SizedBox(
+                          height: 60,
+                          width: 60,
+                          child: Image.asset(imagePath),
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-          ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        StyledText(
+                          text: text,
+                          style: getEnteTextTheme(context).large,
+                          textAlign: TextAlign.left,
+                          tags: {
+                            'bold-green': StyledTextTag(
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.primaryGreen,
+                              ),
+                            ),
+                          },
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          subText ?? "",
+                          textAlign: TextAlign.left,
+                          style: const TextStyle(
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
