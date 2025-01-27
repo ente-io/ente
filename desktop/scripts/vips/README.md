@@ -7,6 +7,16 @@ docker run -it --rm -v $(pwd):/w vips-test vips copy /w/1.heic /w/1.jpeg
 
 ---
 
+## Notes 2
+
+Try using libvips-packaging, see if it builds vips tools binaries too.
+
+```sh
+git clone https://github.com/kleisauke/libvips-packaging
+cd libvips-packaging
+docker build -t vips-dev-linux-arm64 platforms/linux-arm64
+```
+
 ## Notes
 
 Everything disabled + static
@@ -25,6 +35,7 @@ Patch meson.build
 +expat_dep = dependency('expat', static: true)
 +thread_dep = dependency('threads', static: true)
 ```
+
 ---
 
 Creates an otherwise statically linked executable but still depends on system
