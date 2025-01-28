@@ -7,6 +7,25 @@ docker run -it --rm -v $(pwd):/w vips-test vips copy /w/1.heic /w/1.jpeg
 
 ---
 
+## Notes 3
+
+Added a fork at https://github.com/ente-io/libvips-packaging.git
+
+```sh
+git clone https://github.com/ente-io/libvips-packaging
+cd libvips-packaging
+docker build -t vips-dev-linux-musl-arm64 platforms/linux-musl-arm64
+docker run -it --rm -e VERSION_VIPS=8.16.0 -e VERSION_LATEST_REQUIRED=false -v $(pwd):/packaging vips-dev-linux-musl-arm64 /bin/bash
+# In the container
+$ /packaging/build/lin.sh
+```
+
+Meanwhile, to recreate the existing imagemagick thumbnail conversion pipeline
+
+```sh
+./vips --help-operation thumbnail
+```
+
 ## Notes 2
 
 Try using libvips-packaging, see if it builds vips tools binaries too.
