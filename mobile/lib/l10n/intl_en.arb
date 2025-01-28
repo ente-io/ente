@@ -1592,5 +1592,6 @@
   "join": "Join",
   "linkEmail": "Link email",
   "link": "Link",
-  "noEnteAccountExclamation": "No Ente account!"
+  "noEnteAccountExclamation": "No Ente account!",
+  "videoStreaming": "Video Streaming"
 }

@@ -1477,7 +1477,7 @@
   },
   "currentlyRunning": "läuft gerade",
   "ignored": "ignoriert",
-  "photosCount": "{count, plural, one {1 Foto} =0 {0 Fotos} =1 {1 Foto} other {{count} Fotos}}",
+  "photosCount": "{count, plural, =0 {0 Fotos} =1 {1 Foto} other {{count} Fotos}}",
   "@photosCount": {
     "placeholders": {
       "count": {
