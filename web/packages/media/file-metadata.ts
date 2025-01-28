@@ -826,6 +826,7 @@ export const fileLocation = (file: EnteFile): Location | undefined => {
     const longitude = nullToUndefined(file.metadata.longitude);
 
     if (latitude === undefined || longitude === undefined) return undefined;
+    if (Number.isNaN(latitude) || Number.isNaN(longitude)) return undefined;
 
     return { latitude, longitude };
 };

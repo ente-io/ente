@@ -296,6 +296,9 @@
       "title": "DMarket"
     },
     {
+      "title": "DocuSeal"
+    },
+    {
       "title": "Doppler"
     },
     {
@@ -682,6 +685,22 @@
       "hex": "858585"
     },
     {
+      "title": "NekoHosting"
+      "slug": "nekohosting"
+      "altNames": [
+        "NekoHosting Billing",
+        "NekoHosting Dashboard"
+      ]
+    },
+    {
+      "title": "NekoHosting Gaming Panel"
+      "slug": "nekohosting_gp"
+      "altNames": [
+        "NekoHosting Game Panel",
+        "NekoHosting GamePanel"
+      ]
+    },
+    {
       "title": "Nelnet"
     },
     {
@@ -931,6 +950,10 @@
       ]
     },
     {
+      "title": "STRATO",
+      "hex": "FF8800"
+    },
+    {
       "title": "Surfshark"
     },
     {
@@ -990,13 +1013,16 @@
       "hex": "858585"
     },
     {
-      "title": "Titan"
-    },
-    {
       "title": "tianyiyun",
       "altNames": [
         "天翼云"
       ]
+    },
+    {
+      "title": "TikTok"
+    },
+    {
+      "title": "Titan"
     },
     {
       "title": "TorGuard"
@@ -1080,6 +1106,13 @@
       "slug": "wargamingnet"
     },
     {
+      "title": "World Cube Association",
+      "altNames": [
+        "WCA",
+        "worldcubeassociation"
+      ]
+    },
+    {
       "title": "Wealthfront"
     },
     {
@@ -1093,8 +1126,7 @@
       "title": "WHMCS"
     },
     {
-      "title": "Windscribe",
-      "hex": "858585"
+      "title": "Windscribe"
     },
     {
       "title": "Wise"
@@ -1112,7 +1144,12 @@
       "title": "WYZE"
     },
     {
-      "title": "yahoo"
+      "title": "Xbox",
+      "hex": "107C10"
+    },
+    {
+      "title": "Yahoo",
+      "hex": "5F01D2"
     },
     {
       "title": "Yandex",
@@ -1127,6 +1164,9 @@
       "altNames": [
         "You Need A Budget"
       ]
+    },
+    {
+      "title": "Zoom"
     }
   ]
 }

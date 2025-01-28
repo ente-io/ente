@@ -66,7 +66,10 @@ class AlbumSharesIcons extends StatelessWidget {
 
     return Padding(
       padding: padding,
-      child: Stack(children: widgets),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: widgets,
+      ),
     );
   }
 }

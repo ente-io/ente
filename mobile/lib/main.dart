@@ -289,7 +289,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     PreviewVideoStore.instance.init();
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
-    PersonService.init(
+    await PersonService.init(
       entityService,
       MLDataDB.instance,
       preferences,
