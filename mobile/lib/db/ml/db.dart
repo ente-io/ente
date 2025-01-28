@@ -400,6 +400,28 @@ class MLDataDB {
     return maps.map((e) => mapRowToFace(e)).toList();
   }
 
+  Future<Map<int, List<Face>>> getFacesForFileIDs(
+    Iterable<int> fileUploadIDs,
+  ) async {
+    final db = await instance.asyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      '''
+      SELECT * FROM $facesTable
+      WHERE $fileIDColumn IN (${fileUploadIDs.map((id) => "'$id'").join(",")})
+    ''',
+    );
+    if (maps.isEmpty) {
+      return {};
+    }
+    final result = <int, List<Face>>{};
+    for (final map in maps) {
+      final face = mapRowToFace(map);
+      final fileID = map[fileIDColumn] as int;
+      result.putIfAbsent(fileID, () => <Face>[]).add(face);
+    }
+    return result;
+  }
+
   Future<Map<String, Iterable<String>>> getClusterToFaceIDs(
     Set<String> clusterIDs,
   ) async {

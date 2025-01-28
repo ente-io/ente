@@ -17,6 +17,21 @@ extension ClipDB on MLDataDB {
     return _convertToVectors(results);
   }
 
+  Future<Map<int, EmbeddingVector>> getClipVectorsForFileIDs(
+    Iterable<int> fileIDs,
+  ) async {
+    final db = await MLDataDB.instance.asyncDB;
+    final results = await db.getAll(
+      'SELECT * FROM $clipTable WHERE $fileIDColumn IN (${fileIDs.join(", ")})',
+    );
+    final Map<int, EmbeddingVector> embeddings = {};
+    for (final result in results) {
+      final embedding = _getVectorFromRow(result);
+      embeddings[embedding.fileID] = embedding;
+    }
+    return embeddings;
+  }
+
   // Get indexed FileIDs
   Future<Map<int, int>> clipIndexedFileWithVersion() async {
     final db = await MLDataDB.instance.asyncDB;
