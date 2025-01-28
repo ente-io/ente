@@ -24,7 +24,22 @@ Meanwhile, to recreate the existing imagemagick thumbnail conversion pipeline
 
 ```sh
 ./vips --help-operation thumbnail
+./vips thumbnail sample.heic sample.heic.thumb.jpeg 720
+./vips thumbnail sample.heic sample.heic.thumb.jpeg[Q=50] 720
 ```
+
+
+> The output image will fit within a square of size width x width
+>
+> https://www.libvips.org/API/current/libvips-resample.html#vips-thumbnail
+
+> You can pass options to the implicit load and save operations enclosed in
+> square brackets after the filename:
+>
+>     vips affine k2.jpg x.jpg[Q=90,strip] "2 0 0 1"
+>
+> https://www.libvips.org/API/current/using-cli.html
+
 
 ## Notes 2
 
