@@ -35,7 +35,7 @@ class ClusterSuggestion {
   );
 }
 
-class ClusterFeedbackService {
+class ClusterFeedbackService<T> {
   final Logger _logger = Logger("ClusterFeedbackService");
   final _computer = Computer.shared();
   ClusterFeedbackService._privateConstructor();
@@ -145,7 +145,7 @@ class ClusterFeedbackService {
           .getFaceIDsForPerson(p.remoteID)
           .then((iterable) => iterable.toList());
       faceIDs.retainWhere((faceID) {
-        final fileID = getFileIdFromFaceId(faceID);
+        final fileID = getFileIdFromFaceId<int>(faceID);
         return files.any((file) => file.uploadedFileID == fileID);
       });
       final embeddings =
@@ -211,7 +211,7 @@ class ClusterFeedbackService {
           .getFaceIDsForCluster(clusterID)
           .then((iterable) => iterable.toList());
       faceIDs.retainWhere((faceID) {
-        final fileID = getFileIdFromFaceId(faceID);
+        final fileID = getFileIdFromFaceId<int>(faceID);
         return files.any((file) => file.uploadedFileID == fileID);
       });
       final embeddings =
@@ -278,7 +278,7 @@ class ClusterFeedbackService {
     final faceIDs = await faceMlDb.getFaceIDsForCluster(personClusterID);
     final ignoredClusters = await faceMlDb.getPersonIgnoredClusters(p.remoteID);
     if (faceIDs.length < 2 * kMinimumClusterSizeSearchResult) {
-      final fileIDs = faceIDs.map(getFileIdFromFaceId).toSet();
+      final fileIDs = faceIDs.map(getFileIdFromFaceId<int>).toSet();
       if (fileIDs.length < kMinimumClusterSizeSearchResult) {
         _logger.info(
           'Cluster $personClusterID has less than $kMinimumClusterSizeSearchResult faces, not doing automatic merges',
@@ -433,7 +433,7 @@ class ClusterFeedbackService {
           final faceIdsOfCluster =
               await faceMlDb.getFaceIDsForCluster(clusterID);
           final uniqueFileIDs =
-              faceIdsOfCluster.map(getFileIdFromFaceId).toSet();
+              faceIdsOfCluster.map(getFileIdFromFaceId<int>).toSet();
           susClusters.add((clusterID, uniqueFileIDs.length));
           _logger.info(
             '[CheckMixedClusters] Detected that cluster $clusterID with size ${uniqueFileIDs.length} might be mixed',
@@ -534,7 +534,7 @@ class ClusterFeedbackService {
     final personClusters = await faceMlDb.getPersonClusterIDs(p.remoteID);
     final personFaceIDs =
         await MLDataDB.instance.getFaceIDsForPerson(p.remoteID);
-    final personFileIDs = personFaceIDs.map(getFileIdFromFaceId).toSet();
+    final personFileIDs = personFaceIDs.map(getFileIdFromFaceId<int>).toSet();
     w?.log(
       '${p.data.name} has ${personClusters.length} existing clusters, getting all database data done',
     );
@@ -573,7 +573,7 @@ class ClusterFeedbackService {
         for (final suggestion in suggestionsMeanBigClusters) {
           // Skip suggestions that have a high overlap with the person's files
           final suggestionSet = allClusterIdToFaceIDs[suggestion.$1]!
-              .map((faceID) => getFileIdFromFaceId(faceID))
+              .map((faceID) => getFileIdFromFaceId<int>(faceID))
               .toSet();
           final overlap = personFileIDs.intersection(suggestionSet);
           if (overlap.isNotEmpty &&
@@ -978,7 +978,7 @@ class ClusterFeedbackService {
       );
       final fileIdToDistanceMap = {};
       for (final entry in faceIdToVectorMap.entries) {
-        fileIdToDistanceMap[getFileIdFromFaceId(entry.key)] =
+        fileIdToDistanceMap[getFileIdFromFaceId<int>(entry.key)] =
             1 - personAvg.dot(entry.value);
       }
       w?.log('calculated distances for cluster $clusterID');

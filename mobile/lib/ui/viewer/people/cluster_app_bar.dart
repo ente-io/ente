@@ -216,7 +216,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
           }
           // Get the files for the biggest new cluster
           final biggestClusterFileIDs = newClusterIDToFaceIDs[biggestClusterID]!
-              .map((e) => getFileIdFromFaceId(e))
+              .map((e) => getFileIdFromFaceId<int>(e))
               .toList();
           biggestClusterFiles = await FilesDB.instance
               .getFileIDToFileFromIDs(
@@ -260,7 +260,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
 
     final allFileIDs = newClusterIDToFaceIDs.values
         .expand((e) => e)
-        .map((e) => getFileIdFromFaceId(e))
+        .map((e) => getFileIdFromFaceId<int>(e))
         .toList();
 
     final fileIDtoFile = await FilesDB.instance.getFileIDToFileFromIDs(
@@ -271,7 +271,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
       (key, value) => MapEntry(
         key,
         value
-            .map((faceId) => fileIDtoFile[getFileIdFromFaceId(faceId)]!)
+            .map((faceId) => fileIDtoFile[getFileIdFromFaceId<int>(faceId)]!)
             .toList(),
       ),
     );

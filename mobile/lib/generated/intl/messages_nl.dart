@@ -490,6 +490,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
         "cachedData": MessageLookupByLibrary.simpleMessage("Cachegegevens"),
         "calculating": MessageLookupByLibrary.simpleMessage("Berekenen..."),
+        "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
+            "Sorry, dit album kan niet worden geopend in de app."),
+        "canNotOpenTitle":
+            MessageLookupByLibrary.simpleMessage("Kan dit album niet openen"),
         "canNotUploadToAlbumsOwnedByOthers":
             MessageLookupByLibrary.simpleMessage(
                 "Kan niet uploaden naar albums die van anderen zijn"),
@@ -812,8 +816,12 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Bewerkte locatie wordt alleen gezien binnen Ente"),
         "eligible": MessageLookupByLibrary.simpleMessage("gerechtigd"),
         "email": MessageLookupByLibrary.simpleMessage("E-mail"),
+        "emailAlreadyRegistered":
+            MessageLookupByLibrary.simpleMessage("E-mail is al geregistreerd."),
         "emailChangedTo": m30,
         "emailNoEnteAccount": m31,
+        "emailNotRegistered":
+            MessageLookupByLibrary.simpleMessage("E-mail niet geregistreerd."),
         "emailVerificationToggle":
             MessageLookupByLibrary.simpleMessage("E-mailverificatie"),
         "emailYourLogs":
@@ -981,6 +989,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bespaar ruimte op je apparaat door bestanden die al geback-upt zijn te wissen."),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Ruimte vrijmaken"),
         "freeUpSpaceSaving": m39,
+        "gallery": MessageLookupByLibrary.simpleMessage("Galerij"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Tot 1000 herinneringen getoond in de galerij"),
         "general": MessageLookupByLibrary.simpleMessage("Algemeen"),
@@ -1011,6 +1020,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Verbergt app-inhoud in de app-schakelaar en schakelt schermopnamen uit"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
             "Verbergt de inhoud van de app in de app-schakelaar"),
+        "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
+            "Verberg gedeelde bestanden uit de galerij"),
         "hiding": MessageLookupByLibrary.simpleMessage("Verbergen..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Gehost bij OSM France"),
@@ -1073,6 +1084,13 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Bestanden tonen het aantal resterende dagen voordat ze permanent worden verwijderd"),
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "Geselecteerde items zullen worden verwijderd uit dit album"),
+        "join": MessageLookupByLibrary.simpleMessage("Deelnemen"),
+        "joinAlbum":
+            MessageLookupByLibrary.simpleMessage("Deelnemen aan album"),
+        "joinAlbumSubtext": MessageLookupByLibrary.simpleMessage(
+            "om je foto\'s te bekijken en toe te voegen"),
+        "joinAlbumSubtextViewer": MessageLookupByLibrary.simpleMessage(
+            "om dit aan gedeelde albums toe te voegen"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join de Discord"),
         "keepPhotos": MessageLookupByLibrary.simpleMessage("Foto\'s behouden"),
         "kiloMeterUnit": MessageLookupByLibrary.simpleMessage("km"),
@@ -1422,6 +1440,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Privé back-ups"),
         "privateSharing": MessageLookupByLibrary.simpleMessage("Privé delen"),
         "proceed": MessageLookupByLibrary.simpleMessage("Verder"),
+        "processed": MessageLookupByLibrary.simpleMessage("Verwerkt"),
         "processingImport": m54,
         "publicLinkCreated":
             MessageLookupByLibrary.simpleMessage("Publieke link aangemaakt"),

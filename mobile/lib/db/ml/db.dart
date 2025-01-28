@@ -33,7 +33,7 @@ import 'package:sqlite_async/sqlite_async.dart';
 ///
 /// [clipTable] - Stores the embeddings of the CLIP model
 /// [fileDataTable] - Stores data about the files that are already processed by the ML models
-class MLDataDB extends IMLDataDB {
+class MLDataDB extends IMLDataDB<int> {
   static final Logger _logger = Logger("MLDataDB");
 
   static const _databaseName = "ente.ml.db";
@@ -582,7 +582,7 @@ class MLDataDB extends IMLDataDB {
     for (final map in maps) {
       final clusterID = map[clusterIDColumn] as String;
       final faceID = map[faceIDColumn] as String;
-      final fileID = getFileIdFromFaceId(faceID);
+      final fileID = getFileIdFromFaceId<int>(faceID);
       result[fileID] = (result[fileID] ?? {})..add(clusterID);
     }
     return result;
@@ -783,7 +783,7 @@ class MLDataDB extends IMLDataDB {
     );
     final Set<int> clusteredFileIDs = {};
     for (final map in clustered) {
-      final int fileID = getFileIdFromFaceId(map[faceIDColumn] as String);
+      final int fileID = getFileIdFromFaceId<int>(map[faceIDColumn] as String);
       clusteredFileIDs.add(fileID);
     }
 
@@ -928,7 +928,8 @@ class MLDataDB extends IMLDataDB {
       for (final map in maps) {
         final clusterID = map[clusterIDColumn] as String;
         final String faceID = map[faceIDColumn] as String;
-        final fileID = getFileIdFromFaceId(faceID);
+        final fileID = getFileIdFromFaceId<int>
+        (faceID);
         result[fileID] = (result[fileID] ?? {})..add(clusterID);
       }
       return result;
@@ -953,7 +954,7 @@ class MLDataDB extends IMLDataDB {
       for (final map in maps) {
         final clusterID = map[clusterIDColumn] as String;
         final faceID = map[faceIDColumn] as String;
-        final fileID = getFileIdFromFaceId(faceID);
+        final fileID = getFileIdFromFaceId<int>(faceID);
         result[fileID] = (result[fileID] ?? {})..add(clusterID);
       }
       return result;

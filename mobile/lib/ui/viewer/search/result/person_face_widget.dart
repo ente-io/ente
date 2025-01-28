@@ -110,7 +110,8 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
             await MLDataDB.instance.getFaceIDsForCluster(widget.clusterID!);
       }
       if (allFaces != null) {
-        final allFileIDs = allFaces.map((e) => getFileIdFromFaceId(e)).toSet();
+        final allFileIDs =
+            allFaces.map((e) => getFileIdFromFaceId<int>(e)).toSet();
         final hiddenFileIDs = await SearchService.instance
             .getHiddenFiles()
             .then((onValue) => onValue.map((e) => e.uploadedFileID));
