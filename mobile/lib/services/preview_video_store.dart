@@ -4,6 +4,7 @@ import "dart:io";
 import "package:dio/dio.dart";
 import "package:encrypt/encrypt.dart" as enc;
 import "package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart";
+import "package:ffmpeg_kit_flutter_full_gpl/ffmpeg_session.dart";
 import "package:ffmpeg_kit_flutter_full_gpl/return_code.dart";
 import "package:flutter/foundation.dart";
 // import "package:flutter/wid.dart";
@@ -17,9 +18,11 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/events/video_streaming_changed.dart";
 import "package:photos/models/base/id.dart";
+import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/services/filedata/filedata_service.dart";
+import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/gzip.dart";
@@ -50,7 +53,7 @@ class PreviewVideoStore {
   static const String _videoStreamingCutoff = "videoStreamingCutoff";
 
   bool get isVideoStreamingEnabled {
-    return _prefs.getBool(_videoStreamingEnabled) ?? true;
+    return _prefs.getBool(_videoStreamingEnabled) ?? false;
   }
 
   Future<void> setIsVideoStreamingEnabled(bool value) async {
@@ -73,6 +76,7 @@ class PreviewVideoStore {
     if (!enteFile.isUploaded || !isVideoStreamingEnabled) return;
     final file = await getFile(enteFile, isOrigin: true);
     if (file == null) return;
+
     try {
       // check if playlist already exist
       await getPlaylist(enteFile);
@@ -90,10 +94,27 @@ class PreviewVideoStore {
         rethrow;
       }
     }
+
+    final fileSize = file.lengthSync();
+    FFProbeProps? props;
+
+    if (fileSize <= 10 * 1024 * 1024) {
+      props = await getVideoPropsAsync(file);
+      final codec = props?.propData?["codec"].toString().toLowerCase();
+      if (codec == "h264") {
+        return;
+      }
+    }
     if (isUploading) {
       files.add(enteFile);
       return;
     }
+
+    props ??= await getVideoPropsAsync(file);
+
+    final codec = props?.propData?["codec"]?.toString().toLowerCase();
+    final bitrate = int.tryParse(props?.bitrate ?? "");
+
     final String tempDir = Configuration.instance.getTempDirectory();
     final String prefix =
         "${tempDir}_${enteFile.uploadedFileID}_${newID("pv")}";
@@ -111,7 +132,38 @@ class PreviewVideoStore {
       'Generating HLS Playlist ${enteFile.displayName} at $prefix/output.m3u8}',
     );
 
-    final session = await FFmpegKit.execute(
+    FFmpegSession? session;
+    if (bitrate != null && bitrate <= 4000 * 1000 && codec == "h264") {
+      // create playlist without compression, as is
+      session = await FFmpegKit.execute(
+        '-i "${file.path}" '
+        '-metadata:s:v:0 rotate=0 ' // Adjust metadata if needed
+        '-c:v copy ' // Copy the original video codec
+        '-c:a copy ' // Copy the original audio codec
+        '-f hls -hls_time 10 -hls_flags single_file '
+        '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
+        '$prefix/output.m3u8',
+      );
+    } else if (bitrate != null &&
+        codec != null &&
+        bitrate <= 2000 * 1000 &&
+        codec != "h264") {
+      // compress video with crf=21, h264 no change in resolution or frame rate,
+      // just change color scheme
+      session = await FFmpegKit.execute(
+        '-i "${file.path}" '
+        '-metadata:s:v:0 rotate=0 ' // Keep rotation metadata
+        '-vf "format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" ' // Adjust color scheme
+        '-color_primaries bt709 -color_trc bt709 -colorspace bt709 ' // Set color profile to BT.709
+        '-c:v libx264 -crf 21 -preset medium ' // Compress with CRF=21 using H.264
+        '-c:a copy ' // Keep original audio
+        '-f hls -hls_time 10 -hls_flags single_file '
+        '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
+        '$prefix/output.m3u8',
+      );
+    }
+
+    session ??= await FFmpegKit.execute(
       '-i "${file.path}" '
       '-metadata:s:v:0 rotate=0 '
       '-vf "scale=-2:720,fps=30,format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" '
@@ -122,26 +174,6 @@ class PreviewVideoStore {
       '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
       '$prefix/output.m3u8',
     );
-
-    // final session = await FFmpegKit.execute('-i "${file.path}" '
-    //     // Video encoding settings
-    //     '-c:v libx264 ' // Use H.264 codec
-    //     '-preset medium ' // Encoding speed preset
-    //     '-crf 23 ' // Quality setting (lower = better quality, 23 is a good balance)
-    //     '-profile:v main ' // H.264 profile for better compatibility
-    //     '-level:v 4.0 ' // H.264 level for device compatibility
-    //     '-vf scale=-2:720 ' // Scale to 720p while maintaining aspect ratio
-    //     // Audio encoding settings
-    //     '-c:a aac ' // Use AAC audio codec
-    //     '-b:a 128k ' // Audio bitrate
-    //     // HLS specific settings
-    //     '-f hls '
-    //     '-hls_time 10 '
-    //     '-hls_flags single_file '
-    //     '-hls_list_size 0 '
-    //     '-hls_key_info_file ${keyinfo.path} '
-    //     // Output
-    //     '$prefix/output.m3u8');
 
     final returnCode = await session.getReturnCode();
 
