@@ -13,16 +13,18 @@ import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/cache/video_cache_manager.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
 import "package:photos/core/network/network.dart";
+import "package:photos/events/video_streaming_changed.dart";
 import "package:photos/models/base/id.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/gzip.dart";
 import "package:photos/utils/toast_util.dart";
+import "package:shared_preferences/shared_preferences.dart";
 
 class PreviewVideoStore {
   PreviewVideoStore._privateConstructor();
@@ -38,10 +40,37 @@ class PreviewVideoStore {
   bool isUploading = false;
 
   final _dio = NetworkClient.instance.enteDio;
-  void init() {}
+
+  void init(SharedPreferences prefs) {
+    _prefs = prefs;
+  }
+
+  late final SharedPreferences _prefs;
+  static const String _videoStreamingEnabled = "videoStreamingEnabled";
+  static const String _videoStreamingCutoff = "videoStreamingCutoff";
+
+  bool get isVideoStreamingEnabled {
+    return _prefs.getBool(_videoStreamingEnabled) ?? true;
+  }
+
+  Future<void> setIsVideoStreamingEnabled(bool value) async {
+    final oneMonthBack = DateTime.now().subtract(const Duration(days: 30));
+    await _prefs.setBool(_videoStreamingEnabled, value);
+    await _prefs.setInt(
+      _videoStreamingCutoff,
+      oneMonthBack.millisecondsSinceEpoch,
+    );
+    Bus.instance.fire(VideoStreamingChanged());
+  }
+
+  Future<DateTime?> get videoStreamingCutoff async {
+    final milliseconds = _prefs.getInt(_videoStreamingCutoff);
+    if (milliseconds == null) return null;
+    return DateTime.fromMillisecondsSinceEpoch(milliseconds);
+  }
 
   Future<void> chunkAndUploadVideo(BuildContext? ctx, EnteFile enteFile) async {
-    if (!enteFile.isUploaded || !flagService.internalUser) return;
+    if (!enteFile.isUploaded || !isVideoStreamingEnabled) return;
     final file = await getFile(enteFile, isOrigin: true);
     if (file == null) return;
     try {

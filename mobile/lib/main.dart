@@ -286,7 +286,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       });
     }
     _logger.info("PushService/HomeWidget done $tlog");
-    PreviewVideoStore.instance.init();
+    PreviewVideoStore.instance.init(preferences);
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
     await PersonService.init(
