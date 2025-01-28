@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
-import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/filedata_service.dart";
+import "package:photos/services/preview_video_store.dart";
 import "package:photos/ui/viewer/file/preview_video_widget.dart";
 import "package:photos/ui/viewer/file/video_widget.dart";
 import "package:photos/ui/viewer/file/zoomable_live_image_new.dart";
@@ -44,7 +44,8 @@ class FileWidget extends StatelessWidget {
       );
     } else if (file.fileType == FileType.video) {
       if (file.isUploaded &&
-          flagService.internalUser &&
+          file.localID == null &&
+          PreviewVideoStore.instance.isVideoStreamingEnabled &&
           (FileDataService.instance.previewIds
                   ?.containsKey(file.uploadedFileID!) ??
               false)) {
