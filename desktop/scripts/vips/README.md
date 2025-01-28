@@ -22,6 +22,114 @@ $ /packaging/build/lin.sh
 
 This too is only producing the library, not the CLI tools.
 
+The following patch can be made to make it work (need to cleanup). It
+
+1. Builds `--default-library=static`
+2. Builds the tools and includes them in the package
+3. Adds libde265 for HEIC decoding
+
+```patch
+diff --git a/build/lin.sh b/build/lin-1-a.sh
+index 4400503..5d363c2 100755
+--- a/build/lin.sh
++++ b/build/lin-1-a.sh
+@@ -9,7 +9,7 @@ case ${PLATFORM} in
+     TARGET=/target
+     PACKAGE=/packaging
+     ROOT=/root
+-    VIPS_CPP_DEP=libvips-cpp.so.42
++    VIPS_CPP_DEP=libvips.a
+     ;;
+   osx*)
+     DARWIN=true
+@@ -271,6 +271,14 @@ AOM_AS_FLAGS="${FLAGS}" cmake -G"Unix Makefiles" \
+   ..
+ make install/strip
+
++cd ${DEPS}
++git clone --depth 1 https://github.com/strukturag/libde265.git
++cd ${DEPS}/libde265
++CFLAGS="${CFLAGS} -O3" CXXFLAGS="${CXXFLAGS} -O3" cmake -G"Unix Makefiles" \
++  -DCMAKE_TOOLCHAIN_FILE=${ROOT}/Toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TARGET} -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
++  -DBUILD_SHARED_LIBS=FALSE
++make install
++
+ mkdir ${DEPS}/heif
+ $CURL https://github.com/strukturag/libheif/releases/download/v${VERSION_HEIF}/libheif-${VERSION_HEIF}.tar.gz | tar xzC ${DEPS}/heif --strip-components=1
+ cd ${DEPS}/heif
+@@ -278,7 +286,7 @@ cd ${DEPS}/heif
+ sed -i'.bak' "/^cmake_minimum_required/s/3.16.3/3.12/" CMakeLists.txt
+ CFLAGS="${CFLAGS} -O3" CXXFLAGS="${CXXFLAGS} -O3" cmake -G"Unix Makefiles" \
+   -DCMAKE_TOOLCHAIN_FILE=${ROOT}/Toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TARGET} -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+-  -DBUILD_SHARED_LIBS=FALSE -DBUILD_TESTING=0 -DENABLE_PLUGIN_LOADING=0 -DWITH_EXAMPLES=0 -DWITH_LIBDE265=0 -DWITH_X265=0
++  -DBUILD_SHARED_LIBS=FALSE -DBUILD_TESTING=0 -DENABLE_PLUGIN_LOADING=0 -DWITH_EXAMPLES=0 -DWITH_LIBDE265=1 -DWITH_X265=0
+ make install/strip
+ if [ "$PLATFORM" == "linux-arm" ]; then
+   # Remove -lstdc++ from Libs.private, it won't work with -static-libstdc++
+@@ -468,8 +476,8 @@ if [ "$LINUX" = true ]; then
+   printf "{local:g_param_spec_types;};" > vips.map
+ fi
+ # Disable building man pages, gettext po files, tools, and (fuzz-)tests
+-sed -i'.bak' "/subdir('man')/{N;N;N;N;d;}" meson.build
+-CFLAGS="${CFLAGS} -O3" CXXFLAGS="${CXXFLAGS} -O3" meson setup _build --default-library=shared --buildtype=release --strip --prefix=${TARGET} ${MESON} \
++# sed -i'.bak' "/subdir('man')/{N;N;N;N;d;}" meson.build
++CFLAGS="${CFLAGS} -O3" CXXFLAGS="${CXXFLAGS} -O3" meson setup _build --default-library=static --buildtype=release --strip --prefix=${TARGET} ${MESON} \
+   -Ddeprecated=false -Dexamples=false -Dintrospection=disabled -Dmodules=disabled -Dcfitsio=disabled -Dfftw=disabled -Djpeg-xl=disabled \
+   -Dmagick=disabled -Dmatio=disabled -Dnifti=disabled -Dopenexr=disabled -Dopenjpeg=disabled -Dopenslide=disabled \
+   -Dpdfium=disabled -Dpoppler=disabled -Dquantizr=disabled \
+@@ -478,7 +486,7 @@ CFLAGS="${CFLAGS} -O3" CXXFLAGS="${CXXFLAGS} -O3" meson setup _build --default-l
+ meson install -C _build --tag runtime,devel
+
+ # Cleanup
+-rm -rf ${TARGET}/lib/{pkgconfig,.libs,*.la,cmake}
++# rm -rf ${TARGET}/lib/{pkgconfig,.libs,*.la,cmake}
+
+ mkdir ${TARGET}/lib-filtered
+ mv ${TARGET}/lib/glib-2.0 ${TARGET}/lib-filtered
+@@ -524,20 +532,20 @@ function copydeps {
+   done;
+ }
+
+-cd ${TARGET}/lib
+-if [ "$LINUX" = true ]; then
+-  # Check that we really linked with -z nodelete
+-  readelf -Wd libvips.so.42 | grep -qF NODELETE || (echo "libvips.so.42 was not linked with -z nodelete" && exit 1)
+-fi
+-if [ "$PLATFORM" == "linux-arm" ]; then
+-  # Check that we really didn't link libstdc++ dynamically
+-  readelf -Wd ${VIPS_CPP_DEP} | grep -qF libstdc && echo "$VIPS_CPP_DEP is dynamically linked against libstdc++" && exit 1
+-fi
+-if [ "${PLATFORM%-*}" == "linux-musl" ]; then
+-  # Check that we really compiled with -D_GLIBCXX_USE_CXX11_ABI=1
+-  # This won't work on RHEL/CentOS 7: https://stackoverflow.com/a/52611576
+-  readelf -Ws ${VIPS_CPP_DEP} | c++filt | grep -qF "::__cxx11::" || (echo "$VIPS_CPP_DEP mistakenly uses the C++03 ABI" && exit 1)
+-fi
++# cd ${TARGET}/lib
++# if [ "$LINUX" = true ]; then
++#   # Check that we really linked with -z nodelete
++#   readelf -Wd libvips.so.42 | grep -qF NODELETE || (echo "libvips.so.42 was not linked with -z nodelete" && exit 1)
++# fi
++# if [ "$PLATFORM" == "linux-arm" ]; then
++#   # Check that we really didn't link libstdc++ dynamically
++#   readelf -Wd ${VIPS_CPP_DEP} | grep -qF libstdc && echo "$VIPS_CPP_DEP is dynamically linked against libstdc++" && exit 1
++# fi
++# if [ "${PLATFORM%-*}" == "linux-musl" ]; then
++#   # Check that we really compiled with -D_GLIBCXX_USE_CXX11_ABI=1
++#   # This won't work on RHEL/CentOS 7: https://stackoverflow.com/a/52611576
++#   readelf -Ws ${VIPS_CPP_DEP} | c++filt | grep -qF "::__cxx11::" || (echo "$VIPS_CPP_DEP mistakenly uses the C++03 ABI" && exit 1)
++# fi
+ copydeps ${VIPS_CPP_DEP} ${TARGET}/lib-filtered
+
+ # Create JSON file of version numbers
+@@ -583,6 +591,7 @@ mv lib-filtered lib
+ tar chzf ${PACKAGE}/libvips-${VERSION_VIPS}-${PLATFORM}.tar.gz \
+   include \
+   lib \
++  bin \
+   versions.json \
+   THIRD-PARTY-NOTICES.md
+```
+
 ## Notes
 
 Everything disabled + static
