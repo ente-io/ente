@@ -29,7 +29,7 @@ on:
             - "auth-v*"
 
 env:
-    FLUTTER_VERSION: "3.27.2"
+    FLUTTER_VERSION: "3.24.3"
 
 jobs:
     build-ubuntu:
