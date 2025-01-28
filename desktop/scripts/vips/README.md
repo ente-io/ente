@@ -20,6 +20,8 @@ docker run -it --rm -e VERSION_VIPS=8.16.0 -e VERSION_LATEST_REQUIRED=false -v $
 $ /packaging/build/lin.sh
 ```
 
+(ditto `linux-x64`)
+
 Meanwhile, to recreate the existing imagemagick thumbnail conversion pipeline
 
 ```sh
@@ -40,6 +42,28 @@ Meanwhile, to recreate the existing imagemagick thumbnail conversion pipeline
 >
 > https://www.libvips.org/API/current/using-cli.html
 
+For Windows,
+
+```sh
+docker build -t vips-dev-win32 platforms/win32
+docker run -it --rm -e VERSION_VIPS=8.16.0 -e PLATFORM=win-arm64 -v $(pwd):/packaging vips-dev-win32 /bin/bash
+```
+
+(ditto `win-x64`)
+
+Then in the container
+
+```sh
+export VARIANT=static
+export ARCH=arm64
+apt install -y git
+git clone --depth 1 https://github.com/libvips/build-win64-mxe
+cd build-win64-mxe
+./build.sh --with-hevc all aarch64 static
+# pull docker.io/library/buildpack-deps:bullseye
+# build -t libvips-build-win-mxe container
+# run --rm -t -u 0:0 -v /vips/build-win64-mxe/build:/data -v /var/tmp/mxe:/var/tmp:z -e GIT_COMMIT= -e FFI_COMPAT=false -e JPEG_IMPL=mozjpeg -e DISP=false -e HEVC=true -e DEBUG=false -e LLVM=true -e ZLIB_NG=true libvips-build-win-mxe all aarch64-w64-mingw32.static
+```
 
 ## Notes 2
 
