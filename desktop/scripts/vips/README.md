@@ -14,8 +14,8 @@ Added a fork at https://github.com/ente-io/libvips-packaging.git
 ```sh
 git clone https://github.com/ente-io/libvips-packaging
 cd libvips-packaging
-docker build -t vips-dev-linux-musl-arm64 platforms/linux-musl-arm64
-docker run -it --rm -e VERSION_VIPS=8.16.0 -e VERSION_LATEST_REQUIRED=false -v $(pwd):/packaging vips-dev-linux-musl-arm64 /bin/bash
+docker build -t vips-dev-linux-arm64 platforms/linux-arm64
+docker run -it --rm -e VERSION_VIPS=8.16.0 -e VERSION_LATEST_REQUIRED=false -v $(pwd):/packaging vips-dev-linux-arm64 /bin/bash
 # In the container
 $ /packaging/build/lin.sh
 ```
