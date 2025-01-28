@@ -8,7 +8,7 @@ on:
             - ".github/workflows/auth-lint.yml"
 
 env:
-    FLUTTER_VERSION: "3.27.2"
+    FLUTTER_VERSION: "3.24.3"
 
 jobs:
     lint:
