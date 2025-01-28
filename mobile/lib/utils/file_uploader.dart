@@ -475,7 +475,7 @@ class FileUploader {
   void _uploadPreview(EnteFile file) {
     final collection =
         CollectionsService.instance.getCollectionByID(file.collectionID!);
-    if (collection?.displayName == "Camera") {
+    if (Platform.isIOS || collection?.displayName == "Camera") {
       unawaited(
         _previewVideoStore.chunkAndUploadVideo(null, file),
       );
@@ -749,7 +749,9 @@ class FileUploader {
         throw SyncStopRequestedError();
       }
 
-      _uploadPreview(file);
+      if (PreviewVideoStore.instance.isVideoStreamingEnabled) {
+        _uploadPreview(file);
+      }
       EnteFile remoteFile;
       if (isUpdatedFile) {
         remoteFile = await _updateFile(
