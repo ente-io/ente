@@ -188,6 +188,7 @@ class SearchExampleRow extends StatelessWidget {
 class PersonSearchExample extends StatelessWidget {
   final SearchResult searchResult;
   final double size;
+
   const PersonSearchExample({
     super.key,
     required this.searchResult,
@@ -196,6 +197,8 @@ class PersonSearchExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final borderRadius = 82 * (size / 102);
+
     final bool isCluster = (searchResult.type() == ResultType.faces &&
         int.tryParse(searchResult.name()) != null);
 
@@ -217,60 +220,54 @@ class PersonSearchExample extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ClipPath(
-            clipper: ShapeBorderClipper(
-              shape: ContinuousRectangleBorder(
-                borderRadius: BorderRadius.circular(82),
-              ),
-            ),
-            child: Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.center,
-              children: [
-                ClipPath(
-                  clipper: ShapeBorderClipper(
-                    shape: ContinuousRectangleBorder(
-                      borderRadius: BorderRadius.circular(82),
-                    ),
-                  ),
-                  child: Container(
-                    width: size,
-                    height: size,
-                    decoration: BoxDecoration(
-                      color: getEnteColorScheme(context).strokeFaint,
-                    ),
+          Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              ClipPath(
+                clipper: ShapeBorderClipper(
+                  shape: ContinuousRectangleBorder(
+                    borderRadius: BorderRadius.circular(borderRadius),
                   ),
                 ),
-                SizedBox(
-                  width: size - 2,
-                  height: size - 2,
-                  child: searchResult.previewThumbnail() != null
-                      ? ClipPath(
-                          clipper: ShapeBorderClipper(
-                            shape: ContinuousRectangleBorder(
-                              borderRadius: BorderRadius.circular(81),
-                            ),
-                          ),
-                          child: searchResult.type() != ResultType.faces
-                              ? ThumbnailWidget(
-                                  searchResult.previewThumbnail()!,
-                                  shouldShowSyncStatus: false,
-                                )
-                              : FaceSearchResult(searchResult),
-                        )
-                      : ClipPath(
-                          clipper: ShapeBorderClipper(
-                            shape: ContinuousRectangleBorder(
-                              borderRadius: BorderRadius.circular(81),
-                            ),
-                          ),
-                          child: const NoThumbnailWidget(
-                            addBorder: false,
+                child: Container(
+                  width: size,
+                  height: size,
+                  decoration: BoxDecoration(
+                    color: getEnteColorScheme(context).strokeFaint,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: size - 2,
+                height: size - 2,
+                child: searchResult.previewThumbnail() != null
+                    ? ClipPath(
+                        clipper: ShapeBorderClipper(
+                          shape: ContinuousRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(borderRadius - 1),
                           ),
                         ),
-                ),
-              ],
-            ),
+                        child: searchResult.type() != ResultType.faces
+                            ? ThumbnailWidget(
+                                searchResult.previewThumbnail()!,
+                                shouldShowSyncStatus: false,
+                              )
+                            : FaceSearchResult(searchResult),
+                      )
+                    : ClipPath(
+                        clipper: ShapeBorderClipper(
+                          shape: ContinuousRectangleBorder(
+                            borderRadius: BorderRadius.circular(81),
+                          ),
+                        ),
+                        child: const NoThumbnailWidget(
+                          addBorder: false,
+                        ),
+                      ),
+              ),
+            ],
           ),
           isCluster
               ? GestureDetector(
