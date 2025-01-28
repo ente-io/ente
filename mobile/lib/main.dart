@@ -282,16 +282,11 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("PushService/HomeWidget done $tlog");
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
-    final stopwatch = Stopwatch()..start();
     await PersonService.init(
       entityService,
       MLDataDB.instance,
       preferences,
     );
-    _logger.info(
-      "PersonService init took ${stopwatch.elapsedMilliseconds}ms",
-    );
-    stopwatch.stop();
     initComplete = true;
     _logger.info("Initialization done $tlog");
   } catch (e, s) {

@@ -66,18 +66,12 @@ class PersonService {
   }
 
   Future<List<PersonEntity>> getPersons() async {
-    final stopwatch = Stopwatch()..start();
     final entities = await entityService.getEntities(EntityType.cgroup);
-    final res = entities
+    return entities
         .map(
           (e) => PersonEntity(e.id, PersonData.fromJson(json.decode(e.data))),
         )
         .toList();
-    logger.info(
-      "Got ${res.length} persons in ${stopwatch.elapsedMilliseconds}ms",
-    );
-    stopwatch.stop();
-    return res;
   }
 
   Future<PersonEntity?> getPerson(String id) {
