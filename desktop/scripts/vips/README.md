@@ -30,7 +30,6 @@ Meanwhile, to recreate the existing imagemagick thumbnail conversion pipeline
 ./vips thumbnail sample.heic sample.heic.thumb.jpeg[Q=50] 720
 ```
 
-
 > The output image will fit within a square of size width x width
 >
 > https://www.libvips.org/API/current/libvips-resample.html#vips-thumbnail
@@ -45,25 +44,17 @@ Meanwhile, to recreate the existing imagemagick thumbnail conversion pipeline
 For Windows,
 
 ```sh
-docker build -t vips-dev-win32 platforms/win32
-docker run -it --rm -e VERSION_VIPS=8.16.0 -e PLATFORM=win-arm64 -v $(pwd):/packaging vips-dev-win32 /bin/bash
+git clone --depth 1 https://github.com/libvips/build-win64-mxe
+cd build-win64-mxe
+# For M1 macOS
+# docker build --platform=linux/amd64 -t libvips-build-win-mxe container
+docker build -t libvips-build-win-mxe container
+docker run --platform=linux/amd64 -it --rm -e VERSION_VIPS=8.16.0 -e PLATFORM=win-arm64 -v $(pwd)/build:/data --entrypoint /bin/bash libvips-build-win-mxe
+# Then in the container
+$ FFI_COMPAT=false JPEG_IMPL=mozjpeg DISP=false HEVC=true DEBUG=false LLVM=true ZLIB_NG=true /data/build.sh all aarch64-w64-mingw32.static
 ```
 
 (ditto `win-x64`)
-
-Then in the container
-
-```sh
-export VARIANT=static
-export ARCH=arm64
-apt install -y git
-git clone --depth 1 https://github.com/libvips/build-win64-mxe
-cd build-win64-mxe
-./build.sh --with-hevc all aarch64 static
-# pull docker.io/library/buildpack-deps:bullseye
-# build -t libvips-build-win-mxe container
-# run --rm -t -u 0:0 -v /vips/build-win64-mxe/build:/data -v /var/tmp/mxe:/var/tmp:z -e GIT_COMMIT= -e FFI_COMPAT=false -e JPEG_IMPL=mozjpeg -e DISP=false -e HEVC=true -e DEBUG=false -e LLVM=true -e ZLIB_NG=true libvips-build-win-mxe all aarch64-w64-mingw32.static
-```
 
 ## Notes 2
 
