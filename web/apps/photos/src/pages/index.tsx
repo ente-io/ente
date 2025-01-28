@@ -30,6 +30,43 @@ const Page: React.FC = () => {
 
     const router = useRouter();
 
+    const { view } = router.query;
+
+    const [screenWidth, setScreenWidth] = useState<number>(0); // Initial value can be 0
+
+    // Update screen width on resize, only on the client-side
+    useEffect(() => {
+        const handleResize = () => {
+            const newWidth = window.innerWidth;
+            if (newWidth !== screenWidth) {
+                setScreenWidth(newWidth);
+            }
+        };
+
+        handleResize();
+
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, [screenWidth]);
+
+    useEffect(() => {
+        if (!view || screenWidth === 0) return;
+
+        if (view === "signup") {
+            if (screenWidth <= 1024) {
+                router.push(PAGES.SIGNUP);
+            } else {
+                setShowLogin(false);
+            }
+        } else if (view === "login") {
+            if (screenWidth <= 1024) {
+                router.push(PAGES.LOGIN);
+            } else {
+                setShowLogin(true);
+            }
+        }
+    }, [view, screenWidth]);
+
     const refreshHost = useCallback(
         () => void customAPIHost().then(setHost),
         [],
@@ -123,43 +160,46 @@ const Page: React.FC = () => {
                         </Logo_>
                         <Slideshow />
                     </SlideshowPanel>
-                    <MobileBox>
-                        <FocusVisibleButton
-                            color="accent"
-                            onClick={redirectToSignupPage}
+                    {screenWidth <= 1024 ? (
+                        <MobileBox>
+                            <FocusVisibleButton
+                                color="accent"
+                                onClick={redirectToSignupPage}
+                            >
+                                {t("new_to_ente")}
+                            </FocusVisibleButton>
+                            <FocusVisibleButton onClick={redirectToLoginPage}>
+                                {t("existing_user")}
+                            </FocusVisibleButton>
+                            <MobileBoxFooter {...{ host }} />
+                        </MobileBox>
+                    ) : (
+                        <DesktopBox
+                            sx={[
+                                {
+                                    bgcolor: wipTheme
+                                        ? "background.default"
+                                        : "background.paper2",
+                                },
+                                (theme) =>
+                                    theme.applyStyles("dark", {
+                                        bgcolor: "background.paper2",
+                                    }),
+                            ]}
                         >
-                            {t("new_to_ente")}
-                        </FocusVisibleButton>
-                        <FocusVisibleButton onClick={redirectToLoginPage}>
-                            {t("existing_user")}
-                        </FocusVisibleButton>
-                        <MobileBoxFooter {...{ host }} />
-                    </MobileBox>
-                    <DesktopBox
-                        sx={[
-                            {
-                                bgcolor: wipTheme
-                                    ? "background.default"
-                                    : "background.paper2",
-                            },
-                            (theme) =>
-                                theme.applyStyles("dark", {
-                                    bgcolor: "background.paper2",
-                                }),
-                        ]}
-                    >
-                        <Stack sx={{ width: "320px", py: 4, gap: 4 }}>
-                            {showLogin ? (
-                                <LoginContents
-                                    {...{ onSignUp: signUp, host }}
-                                />
-                            ) : (
-                                <SignUpContents
-                                    {...{ router, onLogin: login, host }}
-                                />
-                            )}
-                        </Stack>
-                    </DesktopBox>
+                            <Stack sx={{ width: "320px", py: 4, gap: 4 }}>
+                                {showLogin ? (
+                                    <LoginContents
+                                        {...{ onSignUp: signUp, host }}
+                                    />
+                                ) : (
+                                    <SignUpContents
+                                        {...{ router, onLogin: login, host }}
+                                    />
+                                )}
+                            </Stack>
+                        </DesktopBox>
+                    )}
                 </>
             )}
         </TappableContainer>
