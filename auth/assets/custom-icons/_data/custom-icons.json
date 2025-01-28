@@ -685,16 +685,16 @@
       "hex": "858585"
     },
     {
-      "title": "NekoHosting"
-      "slug": "nekohosting"
+      "title": "NekoHosting",
+      "slug": "nekohosting",
       "altNames": [
         "NekoHosting Billing",
         "NekoHosting Dashboard"
       ]
     },
     {
-      "title": "NekoHosting Gaming Panel"
-      "slug": "nekohosting_gp"
+      "title": "NekoHosting Gaming Panel",
+      "slug": "nekohosting_gp",
       "altNames": [
         "NekoHosting Game Panel",
         "NekoHosting GamePanel"
