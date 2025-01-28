@@ -1350,7 +1350,7 @@ class SearchService {
             final fClip = fileIdToClip[filteredFile.uploadedFileID!];
             if (fClip == null) continue;
             final similarity = clip.vector.dot(fClip.vector);
-            if (similarity > 0.15) {
+            if (similarity > 0.80) {
               skipped++;
               continue filesLoop;
             }
