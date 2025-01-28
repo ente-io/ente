@@ -78,8 +78,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "kindlyHelpUsWithThisInformation":
             MessageLookupByLibrary.simpleMessage("വിവരങ്ങൾ തന്നു സഹായിക്കുക"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("തെളിഞ"),
-        "link": MessageLookupByLibrary.simpleMessage("Link"),
-        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("കാലഹരണപ്പെട്ടു"),
         "mastodon": MessageLookupByLibrary.simpleMessage("മാസ്റ്റഡോൺ"),
         "matrix": MessageLookupByLibrary.simpleMessage("മേട്രിക്സ്"),
@@ -88,8 +86,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "name": MessageLookupByLibrary.simpleMessage("പേര്"),
         "no": MessageLookupByLibrary.simpleMessage("വേണ്ട"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("ഒന്നുമില്ല"),
-        "noEnteAccountExclamation":
-            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "nothingToSeeHere":
             MessageLookupByLibrary.simpleMessage("ഇവിടൊന്നും കാണ്മാനില്ല! 👀"),
         "ok": MessageLookupByLibrary.simpleMessage("ശരി"),

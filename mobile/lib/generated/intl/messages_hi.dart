@@ -75,10 +75,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("अमान्य ईमेल ऐड्रेस"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "कृपया हमें इस जानकारी के लिए सहायता करें"),
-        "link": MessageLookupByLibrary.simpleMessage("Link"),
-        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
-        "noEnteAccountExclamation":
-            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("रिकवरी कुंजी नहीं है?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
