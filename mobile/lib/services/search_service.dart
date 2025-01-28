@@ -1358,6 +1358,8 @@ class SearchService {
         }
         filteredFiles.add(file);
       }
+      // Order the final selection chronologically
+      filteredFiles.sort((a, b) => b.creationTime!.compareTo(a.creationTime!));
       return filteredFiles;
     } else {
       // TODO: lau: add logic for multiple years. Main extra thing is getting distribution over the years right
