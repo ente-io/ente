@@ -49,8 +49,9 @@ cd build-win64-mxe
 # For M1 macOS
 # docker build --platform=linux/amd64 -t libvips-build-win-mxe container
 docker build -t libvips-build-win-mxe container
-docker run --platform=linux/amd64 -it --rm -e VERSION_VIPS=8.16.0 -e PLATFORM=win-arm64 -v $(pwd)/build:/data --entrypoint /bin/bash libvips-build-win-mxe
+docker run --platform=linux/amd64 -it --rm -e VERSION_VIPS=8.16.0 -v $(pwd)/build:/data --entrypoint /bin/bash libvips-build-win-mxe
 # Then in the container
+$ FFI_COMPAT=false JPEG_IMPL=mozjpeg DISP=false HEVC=true DEBUG=false LLVM=false ZLIB_NG=true /data/build.sh all x86_64-w64-mingw32.static
 $ FFI_COMPAT=false JPEG_IMPL=mozjpeg DISP=false HEVC=true DEBUG=false LLVM=true ZLIB_NG=true /data/build.sh all aarch64-w64-mingw32.static
 ```
 
