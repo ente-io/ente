@@ -37,13 +37,13 @@ class PersonService {
 
   late Logger logger = Logger("PersonService");
 
-  static init(
+  static Future<void> init(
     EntityService entityService,
     MLDataDB faceMLDataDB,
     SharedPreferences prefs,
-  ) {
+  ) async {
     _instance = PersonService(entityService, faceMLDataDB, prefs);
-    _instance!._resetEmailToNameCache();
+    await _instance!._resetEmailToNameCache();
   }
 
   Map<String, String> get emailToNameMapCache => _emailToNameMapCache;
@@ -52,9 +52,9 @@ class PersonService {
     _emailToNameMapCache.clear();
   }
 
-  void _resetEmailToNameCache() {
+  Future<void> _resetEmailToNameCache() async {
     _emailToNameMapCache.clear();
-    _instance!.getPersons().then((value) {
+    await _instance!.getPersons().then((value) {
       for (var person in value) {
         if (person.data.email != null && person.data.email!.isNotEmpty) {
           _instance!._emailToNameMapCache[person.data.email!] =
@@ -66,12 +66,18 @@ class PersonService {
   }
 
   Future<List<PersonEntity>> getPersons() async {
+    final stopwatch = Stopwatch()..start();
     final entities = await entityService.getEntities(EntityType.cgroup);
-    return entities
+    final res = entities
         .map(
           (e) => PersonEntity(e.id, PersonData.fromJson(json.decode(e.data))),
         )
         .toList();
+    logger.info(
+      "Got ${res.length} persons in ${stopwatch.elapsedMilliseconds}ms",
+    );
+    stopwatch.stop();
+    return res;
   }
 
   Future<PersonEntity?> getPerson(String id) {

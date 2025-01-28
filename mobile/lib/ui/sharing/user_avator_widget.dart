@@ -91,6 +91,14 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                       thumbnailView: widget.thumbnailView,
                       type: widget.type,
                     );
+                  } else if (snapshot.connectionState == ConnectionState.done &&
+                      snapshot.data == null) {
+                    return _FirstLetterAvatar(
+                      user: widget.user,
+                      currentUserID: widget.currentUserID,
+                      thumbnailView: widget.thumbnailView,
+                      type: widget.type,
+                    );
                   }
                   return const SizedBox.shrink();
                 },
