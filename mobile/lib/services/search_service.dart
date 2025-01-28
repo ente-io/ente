@@ -1322,7 +1322,7 @@ class SearchService {
             .compareTo(fileToScore[a.uploadedFileID!]!),
       );
 
-      // then sort on faces
+      // then sort on faces TODO: lau: prioritize named faces
       final fileToFaceCount = <int, int>{};
       for (final file in files) {
         final faces = fileIdToFace[file.uploadedFileID!];
