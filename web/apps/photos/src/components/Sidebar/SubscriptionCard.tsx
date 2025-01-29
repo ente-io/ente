@@ -50,17 +50,14 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
     );
 };
 
-const BackgroundOverlay: React.FC = () => {
-    return (
-        <img
-            style={{ aspectRatio: "2/1" }}
-            width="100%"
-            src="/images/subscription-card-background/1x.png"
-            srcSet="/images/subscription-card-background/2x.png 2x,
-                        /images/subscription-card-background/3x.png 3x"
-        />
-    );
-};
+const BackgroundOverlay: React.FC = () => (
+    <img
+        style={{ aspectRatio: "2/1" }}
+        width="100%"
+        src="/images/subscription-card-background/1x.png"
+        srcSet="/images/subscription-card-background/2x.png 2x, /images/subscription-card-background/3x.png 3x"
+    />
+);
 
 const ClickOverlay: React.FC<ButtonishProps> = ({ onClick }) => (
     <Overlay
@@ -82,25 +79,21 @@ interface SubscriptionCardContentOverlayProps {
 
 export const SubscriptionCardContentOverlay: React.FC<
     SubscriptionCardContentOverlayProps
-> = ({ userDetails }) => {
-    return (
-        <Overlay>
-            <SpaceBetweenFlex
-                height={"100%"}
-                flexDirection={"column"}
-                padding={"20px 16px"}
-            >
-                {userDetails && isPartOfFamilyWithOtherMembers(userDetails) ? (
-                    <FamilySubscriptionCardContent userDetails={userDetails} />
-                ) : (
-                    <IndividualSubscriptionCardContent
-                        userDetails={userDetails}
-                    />
-                )}
-            </SpaceBetweenFlex>
-        </Overlay>
-    );
-};
+> = ({ userDetails }) => (
+    <Overlay>
+        <SpaceBetweenFlex
+            height={"100%"}
+            flexDirection={"column"}
+            padding={"20px 16px"}
+        >
+            {userDetails && isPartOfFamilyWithOtherMembers(userDetails) ? (
+                <FamilySubscriptionCardContent userDetails={userDetails} />
+            ) : (
+                <IndividualSubscriptionCardContent userDetails={userDetails} />
+            )}
+        </SpaceBetweenFlex>
+    </Overlay>
+);
 
 interface IndividualSubscriptionCardContentProps {
     userDetails: UserDetails;
