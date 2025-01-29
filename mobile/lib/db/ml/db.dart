@@ -928,8 +928,7 @@ class MLDataDB extends IMLDataDB<int> {
       for (final map in maps) {
         final clusterID = map[clusterIDColumn] as String;
         final String faceID = map[faceIDColumn] as String;
-        final fileID = getFileIdFromFaceId<int>
-        (faceID);
+        final fileID = getFileIdFromFaceId<int>(faceID);
         result[fileID] = (result[fileID] ?? {})..add(clusterID);
       }
       return result;
@@ -1160,7 +1159,7 @@ class MLDataDB extends IMLDataDB<int> {
   @override
   Future<List<EmbeddingVector>> getAllClipVectors() async {
     Logger("ClipDB").info("reading all embeddings from DB");
-    final db = await MLDataDB.instance.asyncDB;
+    final db = await instance.asyncDB;
     final results = await db.getAll('SELECT * FROM $clipTable');
     return _convertToVectors(results);
   }
@@ -1168,7 +1167,7 @@ class MLDataDB extends IMLDataDB<int> {
   // Get indexed FileIDs
   @override
   Future<Map<int, int>> clipIndexedFileWithVersion() async {
-    final db = await MLDataDB.instance.asyncDB;
+    final db = await instance.asyncDB;
     final maps = await db
         .getAll('SELECT $fileIDColumn , $mlVersionColumn FROM $clipTable');
     final Map<int, int> result = {};
@@ -1182,7 +1181,7 @@ class MLDataDB extends IMLDataDB<int> {
   Future<int> getClipIndexedFileCount({
     int minimumMlVersion = clipMlVersion,
   }) async {
-    final db = await MLDataDB.instance.asyncDB;
+    final db = await instance.asyncDB;
     final String query =
         'SELECT COUNT(DISTINCT $fileIDColumn) as count FROM $clipTable WHERE $mlVersionColumn >= $minimumMlVersion';
     final List<Map<String, dynamic>> maps = await db.getAll(query);
@@ -1192,7 +1191,7 @@ class MLDataDB extends IMLDataDB<int> {
   @override
   Future<void> putClip(List<ClipEmbedding> embeddings) async {
     if (embeddings.isEmpty) return;
-    final db = await MLDataDB.instance.asyncDB;
+    final db = await instance.asyncDB;
     if (embeddings.length == 1) {
       await db.execute(
         'INSERT OR REPLACE INTO $clipTable ($fileIDColumn, $embeddingColumn, $mlVersionColumn) VALUES (?, ?, ?)',
@@ -1210,7 +1209,7 @@ class MLDataDB extends IMLDataDB<int> {
 
   @override
   Future<void> deleteClipEmbeddings(List<int> fileIDs) async {
-    final db = await MLDataDB.instance.asyncDB;
+    final db = await instance.asyncDB;
     await db.execute(
       'DELETE FROM $clipTable WHERE $fileIDColumn IN (${fileIDs.join(", ")})',
     );
@@ -1219,7 +1218,7 @@ class MLDataDB extends IMLDataDB<int> {
 
   @override
   Future<void> deleteClipIndexes() async {
-    final db = await MLDataDB.instance.asyncDB;
+    final db = await instance.asyncDB;
     await db.execute('DELETE FROM $clipTable');
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }

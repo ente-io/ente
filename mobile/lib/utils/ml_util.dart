@@ -55,11 +55,10 @@ class FileMLInstruction {
 
 Future<IndexStatus> getIndexStatus() async {
   try {
+    final faceMLDB = MLDataDB.instance;
     final int indexableFiles = (await getIndexableFileIDs()).length;
-    final int facesIndexedFiles =
-        await MLDataDB.instance.getFaceIndexedFileCount();
-    final int clipIndexedFiles =
-        await MLDataDB.instance.getClipIndexedFileCount();
+    final int facesIndexedFiles = await faceMLDB.getFaceIndexedFileCount();
+    final int clipIndexedFiles = await faceMLDB.getClipIndexedFileCount();
     final int indexedFiles = math.min(facesIndexedFiles, clipIndexedFiles);
 
     final showIndexedFiles = math.min(indexedFiles, indexableFiles);
@@ -83,16 +82,15 @@ int _lastFetchTimeForOthersIndexed = 0;
 /// Return a list of file instructions for files that should be indexed for ML
 Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   _logger.info('getFilesForMlIndexing called');
+  final faceMLDB = MLDataDB.instance;
   final time = DateTime.now();
   // Get indexed fileIDs for each ML service
-  final Map<int, int> faceIndexedFileIDs =
-      await MLDataDB.instance.faceIndexedFileIds();
+  final Map<int, int> faceIndexedFileIDs = await faceMLDB.faceIndexedFileIds();
   final Map<int, int> clipIndexedFileIDs =
-      await MLDataDB.instance.clipIndexedFileWithVersion();
+      await faceMLDB.clipIndexedFileWithVersion();
   final Set<int> queuedFiledIDs = {};
 
-  final Set<int> filesWithFDStatus =
-      await MLDataDB.instance.getFileIDsWithFDData();
+  final Set<int> filesWithFDStatus = await faceMLDB.getFileIDsWithFDData();
 
   // Get all regular files and all hidden files
   final enteFiles = await SearchService.instance.getAllFilesForSearch();
@@ -185,6 +183,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
 Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
   int yieldSize,
 ) async* {
+  final faceMLDB = MLDataDB.instance;
   final List<FileMLInstruction> filesToIndex = await getFilesForMlIndexing();
   final List<List<FileMLInstruction>> chunks =
       filesToIndex.chunks(embeddingFetchLimit);
@@ -247,8 +246,8 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
         }
       }
     }
-    await MLDataDB.instance.bulkInsertFaces(faces);
-    await MLDataDB.instance.putClip(clipEmbeddings);
+    await faceMLDB.bulkInsertFaces(faces);
+    await faceMLDB.putClip(clipEmbeddings);
   }
   // Yield any remaining instructions
   if (batchToYield.isNotEmpty) {
