@@ -157,5 +157,5 @@ T getFileIdFromFaceId<T extends Object>(String faceId) {
 }
 
 int? tryGetFileIdFromFaceId(String faceId) {
-  return int.tryParse(faceId.split("_").first);
+  return int.tryParse(faceId.substring(0, faceId.indexOf('_')));
 }
