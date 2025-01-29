@@ -22,33 +22,39 @@ import { t } from "i18next";
 import type React from "react";
 
 interface SubscriptionCardProps {
-    userDetails: UserDetails;
+    /**
+     * Details for the logged in user.
+     *
+     * Can be undefined if the fetch has not yet completed.
+     */
+    userDetails: UserDetails | undefined;
+    /**
+     * Called when the user clicks on the card.
+     */
     onClick: () => void;
 }
 
+/**
+ * The card in the sidebar that shows a summary of the user's plan and usage.
+ */
 export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
     userDetails,
     onClick,
-}) => {
-    if (!userDetails) {
-        return (
-            <Skeleton
-                animation="wave"
-                variant="rectangular"
-                height={152}
-                sx={{ borderRadius: "8px" }}
-            />
-        );
-    }
-
-    return (
+}) =>
+    !userDetails ? (
+        <Skeleton
+            animation="wave"
+            variant="rectangular"
+            height={152}
+            sx={{ borderRadius: "8px" }}
+        />
+    ) : (
         <Box sx={{ position: "relative" }}>
             <BackgroundOverlay />
             <SubscriptionCardContentOverlay userDetails={userDetails} />
             <ClickOverlay onClick={onClick} />
         </Box>
     );
-};
 
 const BackgroundOverlay: React.FC = () => (
     <img
@@ -88,24 +94,21 @@ export const SubscriptionCardContentOverlay: React.FC<
                 padding: "20px 16px",
             }}
         >
-            {userDetails && isPartOfFamilyWithOtherMembers(userDetails) ? (
-                <FamilySubscriptionCardContent userDetails={userDetails} />
+            {isPartOfFamilyWithOtherMembers(userDetails) ? (
+                <FamilySubscriptionCardContents userDetails={userDetails} />
             ) : (
-                <IndividualSubscriptionCardContent userDetails={userDetails} />
+                <IndividualSubscriptionCardContents userDetails={userDetails} />
             )}
         </Stack>
     </Overlay>
 );
 
-interface IndividualSubscriptionCardContentProps {
-    userDetails: UserDetails;
-}
-
-const IndividualSubscriptionCardContent: React.FC<
-    IndividualSubscriptionCardContentProps
+const IndividualSubscriptionCardContents: React.FC<
+    SubscriptionCardContentOverlayProps
 > = ({ userDetails }) => {
     const totalStorage =
         userDetails.subscription.storage + userDetails.storageBonus;
+
     return (
         <>
             <StorageSection storage={totalStorage} usage={userDetails.usage} />
@@ -137,27 +140,25 @@ interface StorageSectionProps {
     storage: number;
 }
 
-const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
-    return (
-        <Box sx={{ width: "100%" }}>
-            <Typography variant="small" sx={{ color: "text.muted" }}>
-                {t("storage")}
+const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => (
+    <Box sx={{ width: "100%" }}>
+        <Typography variant="small" sx={{ color: "text.muted" }}>
+            {t("storage")}
+        </Typography>
+        <DefaultBox>
+            <Typography variant="h3">
+                {`${formattedStorageByteSize(usage, { round: true })} ${t(
+                    "of",
+                )} ${formattedStorageByteSize(storage)} ${t("used")}`}
             </Typography>
-            <DefaultBox>
-                <Typography variant="h3">
-                    {`${formattedStorageByteSize(usage, { round: true })} ${t(
-                        "of",
-                    )} ${formattedStorageByteSize(storage)} ${t("used")}`}
-                </Typography>
-            </DefaultBox>
-            <MobileSmallBox>
-                <Typography variant="h3">
-                    {`${bytesInGB(usage)} /  ${bytesInGB(storage)} ${t("storage_unit.gb")} ${t("used")}`}
-                </Typography>
-            </MobileSmallBox>
-        </Box>
-    );
-};
+        </DefaultBox>
+        <MobileSmallBox>
+            <Typography variant="h3">
+                {`${bytesInGB(usage)} /  ${bytesInGB(storage)} ${t("storage_unit.gb")} ${t("used")}`}
+            </Typography>
+        </MobileSmallBox>
+    </Box>
+);
 
 interface IndividualUsageSectionProps {
     usage: number;
@@ -196,12 +197,8 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
     );
 };
 
-interface FamilySubscriptionCardContentProps {
-    userDetails: UserDetails;
-}
-
-const FamilySubscriptionCardContent: React.FC<
-    FamilySubscriptionCardContentProps
+const FamilySubscriptionCardContents: React.FC<
+    SubscriptionCardContentOverlayProps
 > = ({ userDetails }) => {
     const totalUsage = familyUsage(userDetails);
     const totalStorage =
