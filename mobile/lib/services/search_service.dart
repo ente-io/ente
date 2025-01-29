@@ -1305,52 +1305,58 @@ class SearchService {
       final creationTime = DateTime.fromMicrosecondsSinceEpoch(e.creationTime!);
       return creationTime.year;
     }).toSet();
+
+    // Get clip scores for each file
+    const query =
+        'Photo of a precious memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion';
+    // TODO: lau: optimize this later so we don't keep computing embedding
+    final textEmbedding = await MLComputer.instance.runClipText(query);
+    final textVector = Vector.fromList(textEmbedding);
+    final fileToScore = <int, double>{};
+    for (final file in files) {
+      final clip = fileIdToClip[file.uploadedFileID!];
+      if (clip == null) {
+        fileToScore[file.uploadedFileID!] = 0;
+        continue;
+      }
+      final score = clip.vector.dot(textVector);
+      fileToScore[file.uploadedFileID!] = score;
+    }
+
+    // Get face scores for each file
+    final fileToFaceCount = <int, int>{};
+    for (final file in files) {
+      final fileID = file.uploadedFileID!;
+      fileToFaceCount[fileID] = 0;
+      final faces = fileIdToFace[fileID];
+      if (faces == null || faces.isEmpty) {
+        continue;
+      }
+      for (final face in faces) {
+        if (faceIDsToPersonID.containsKey(face.faceID)) {
+          fileToFaceCount[fileID] = fileToFaceCount[fileID]! + 10;
+        } else {
+          fileToFaceCount[fileID] = fileToFaceCount[fileID]! + 1;
+        }
+      }
+    }
+
+    final filteredFiles = <EnteFile>[];
     if (allYears.length <= 1) {
       // sort first on clip embeddings
-      const query =
-          'Photo of a precious memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion';
-      // TODO: lau: optimize this later so we don't keep computing embedding
-      final textEmbedding = await MLComputer.instance.runClipText(query);
-      final textVector = Vector.fromList(textEmbedding);
-      final fileToScore = <int, double>{};
-      for (final file in files) {
-        final clip = fileIdToClip[file.uploadedFileID!];
-        if (clip == null) {
-          fileToScore[file.uploadedFileID!] = 0;
-          continue;
-        }
-        final score = clip.vector.dot(textVector);
-        fileToScore[file.uploadedFileID!] = score;
-      }
       files.sort(
         (a, b) => fileToScore[b.uploadedFileID!]!
             .compareTo(fileToScore[a.uploadedFileID!]!),
       );
 
       // then sort on faces, heavily prioritizing named faces
-      final fileToFaceCount = <int, int>{};
-      for (final file in files) {
-        final fileID = file.uploadedFileID!;
-        fileToFaceCount[fileID] = 0;
-        final faces = fileIdToFace[fileID];
-        if (faces == null || faces.isEmpty) {
-          continue;
-        }
-        for (final face in faces) {
-          if (faceIDsToPersonID.containsKey(face.faceID)) {
-            fileToFaceCount[fileID] = fileToFaceCount[fileID]! + 10;
-          } else {
-            fileToFaceCount[fileID] = fileToFaceCount[fileID]! + 1;
-          }
-        }
-      }
       files.sort(
         (a, b) => fileToFaceCount[b.uploadedFileID!]!
             .compareTo(fileToFaceCount[a.uploadedFileID!]!),
       );
 
       // then filter out similar images as much as possible
-      final filteredFiles = <EnteFile>[files.first];
+      filteredFiles.add(files.first);
       final fileCount = files.length;
       int skipped = 0;
       filesLoop:
@@ -1370,13 +1376,119 @@ class SearchService {
         }
         filteredFiles.add(file);
       }
-      // Order the final selection chronologically
-      filteredFiles.sort((a, b) => b.creationTime!.compareTo(a.creationTime!));
-      return filteredFiles;
     } else {
-      // TODO: lau: add logic for multiple years. Main extra thing is getting distribution over the years right
-      return files;
+      // Handle multiple years, ensuring each is represented and roughly equally distributed
+
+      // Group files by year and sort each year's list by CLIP then face count
+      final yearToFiles = <int, List<EnteFile>>{};
+      for (final file in files) {
+        final creationTime =
+            DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+        final year = creationTime.year;
+        yearToFiles.putIfAbsent(year, () => []).add(file);
+      }
+
+      for (final year in yearToFiles.keys) {
+        final yearFiles = yearToFiles[year]!;
+        // Sort by CLIP score descending
+        yearFiles.sort(
+          (a, b) => fileToScore[b.uploadedFileID!]!
+              .compareTo(fileToScore[a.uploadedFileID!]!),
+        );
+        // Then sort by face count descending
+        yearFiles.sort(
+          (a, b) => fileToFaceCount[b.uploadedFileID!]!
+              .compareTo(fileToFaceCount[a.uploadedFileID!]!),
+        );
+      }
+
+      // Track available files per year after each selection
+      final availableFilesByYear = <int, List<EnteFile>>{};
+      yearToFiles.forEach((year, files) {
+        availableFilesByYear[year] = List.from(files);
+      });
+
+      // Collect initial selection: one from each year (prioritizing recent years)
+      final initialSelection = <EnteFile>[];
+      final years = yearToFiles.keys.toList()
+        ..sort((a, b) => b.compareTo(a)); // Recent years first
+
+      for (final year in years) {
+        final available = availableFilesByYear[year]!;
+        if (available.isNotEmpty) {
+          initialSelection.add(available.removeAt(0));
+        }
+      }
+
+      // Fill remaining slots by cycling through years
+      int remainingSlots = 10 - initialSelection.length;
+      if (remainingSlots > 0) {
+        int currentYearIndex = 0;
+        while (remainingSlots > 0) {
+          final year = years[currentYearIndex % years.length];
+          final available = availableFilesByYear[year]!;
+          if (available.isNotEmpty) {
+            initialSelection.add(available.removeAt(0));
+            remainingSlots--;
+          }
+          currentYearIndex++;
+          // Break if no more files across all years
+          if (availableFilesByYear.values.every((list) => list.isEmpty)) {
+            break;
+          }
+        }
+      }
+
+      // Apply similarity filtering
+      if (initialSelection.isNotEmpty) {
+        filteredFiles.add(initialSelection.first);
+        int skipped = 0;
+
+        filesLoop:
+        for (final file in initialSelection.sublist(1)) {
+          if (filteredFiles.length >= 10) break;
+          final clip = fileIdToClip[file.uploadedFileID!];
+          if (clip != null) {
+            for (final filteredFile in filteredFiles) {
+              final fClip = fileIdToClip[filteredFile.uploadedFileID!];
+              if (fClip == null) continue;
+              final similarity = clip.vector.dot(fClip.vector);
+              if (similarity > 0.80) {
+                skipped++;
+                continue filesLoop;
+              }
+            }
+          }
+          filteredFiles.add(file);
+        }
+      }
+
+      // Ensure all years are represented after filtering
+      final filteredYears = filteredFiles.map((f) {
+        final creationTime =
+            DateTime.fromMicrosecondsSinceEpoch(f.creationTime!);
+        return creationTime.year;
+      }).toSet();
+
+      for (final year in yearToFiles.keys) {
+        if (!filteredYears.contains(year)) {
+          // Add the top file from this year's original sorted list
+          final topFile = yearToFiles[year]!.first;
+          if (!filteredFiles.contains(topFile)) {
+            filteredFiles.add(topFile);
+          }
+        }
+      }
+
+      // Trim to 10 files if needed, keeping the highest priority files
+      while (filteredFiles.length > 10) {
+        filteredFiles.removeLast();
+      }
     }
+
+    // Order the final selection chronologically
+    filteredFiles.sort((a, b) => b.creationTime!.compareTo(a.creationTime!));
+    return filteredFiles;
   }
 
   Future<GenericSearchResult?> getRandomDateResults(
