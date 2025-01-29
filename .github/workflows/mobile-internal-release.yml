@@ -4,7 +4,7 @@ on:
     workflow_dispatch: # Allow manually running the action
 
 env:
-    FLUTTER_VERSION: "3.27.2"
+    FLUTTER_VERSION: "3.24.3"
 
 jobs:
     build:

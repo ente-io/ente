@@ -10,7 +10,8 @@ class MoreCountWidget extends StatelessWidget {
   final bool thumbnailView;
   final int count;
 
-  const MoreCountWidget(this.count, {
+  const MoreCountWidget(
+    this.count, {
     super.key,
     this.type = MoreCountType.mini,
     this.thumbnailView = false,
@@ -30,34 +31,39 @@ class MoreCountWidget extends StatelessWidget {
         ? avatarStyle.item2.copyWith(color: textFaintLight)
         : avatarStyle.item2.copyWith(color: Colors.white);
     return Container(
-      height: size,
-      width: size,
-      padding: thumbnailView
-          ? const EdgeInsets.only(bottom: 1)
-          : const EdgeInsets.all(2),
-      decoration: thumbnailView
-          ? null
-          : BoxDecoration(
+      padding: const EdgeInsets.all(0.5),
+      decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: decorationColor,
         border: Border.all(
-          color: strokeBaseDark,
+          color: thumbnailView
+              ? strokeMutedDark
+              : getEnteColorScheme(context).strokeMuted,
           width: 1.0,
+          strokeAlign: BorderSide.strokeAlignOutside,
         ),
       ),
-      child: CircleAvatar(
-        backgroundColor: decorationColor,
-        child: Text(
-          displayChar.toUpperCase(),
-          // fixed color
-          style: textStyle,
+      child: SizedBox(
+        height: size,
+        width: size,
+        child: CircleAvatar(
+          backgroundColor: decorationColor,
+          child: Transform.scale(
+            scale: 0.85,
+            child: Text(
+              displayChar.toUpperCase(),
+              // fixed color
+              style: textStyle,
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Tuple2<double, TextStyle> getAvatarStyle(BuildContext context,
-      MoreCountType type,) {
+  Tuple2<double, TextStyle> getAvatarStyle(
+    BuildContext context,
+    MoreCountType type,
+  ) {
     final enteTextTheme = getEnteTextTheme(context);
     switch (type) {
       case MoreCountType.small:

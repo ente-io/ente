@@ -161,8 +161,9 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
                                     );
                                     Bus.instance.fire(
                                       PeopleChangedEvent(
-                                          // person: personEntity,
-                                          ),
+                                        type: PeopleEventType.saveOrEditPerson,
+                                        person: result,
+                                      ),
                                     );
                                     Navigator.pop(context, result);
                                   },

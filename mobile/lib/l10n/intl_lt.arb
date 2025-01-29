@@ -281,14 +281,18 @@
   "change": "Keisti",
   "unavailableReferralCode": "Atsiprašome, šis kodas nepasiekiamas.",
   "codeChangeLimitReached": "Atsiprašome, pasiekėte kodo pakeitimų ribą.",
+  "onlyFamilyAdminCanChangeCode": "Susisiekite su {familyAdminEmail}, kad pakeistumėte savo kodą.",
   "storageInGB": "{storageAmountInGB} GB",
   "claimed": "Gauta",
   "@claimed": {
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
+  "details": "Išsami informacija",
   "claimMore": "Gaukite daugiau!",
+  "theyAlsoGetXGb": "Jie taip pat gauna {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB kiekvieną kartą, kai kas nors užsiregistruoja mokamam planui ir pritaiko jūsų kodą.",
   "shareTextReferralCode": "„Ente“ rekomendacijos kodas: {referralCode} \n\nTaikykite jį per Nustatymai → Bendrieji → Rekomendacijos, kad gautumėte {referralStorageInGB} GB nemokamai po to, kai užsiregistruosite mokamam planui.\n\nhttps://ente.io",
+  "claimFreeStorage": "Gaukite nemokamos saugyklos",
   "inviteYourFriends": "Kviesti savo draugus",
   "failedToFetchReferralDetails": "Nepavyksta gauti rekomendacijos informacijos. Bandykite dar kartą vėliau.",
   "referralStep1": "1. Duokite šį kodą savo draugams",
@@ -310,12 +314,22 @@
     }
   },
   "faq": "DUK",
+  "help": "Pagalba",
+  "oopsSomethingWentWrong": "Ups, kažkas nutiko ne taip",
+  "peopleUsingYourCode": "Asmenys, naudojantys jūsų kodą",
+  "eligible": "tinkamas",
   "total": "iš viso",
+  "codeUsedByYou": "Jūsų naudojamas kodas",
+  "freeStorageClaimed": "Gauta nemokama saugykla",
+  "freeStorageUsable": "Naudojama nemokama saugykla",
   "usableReferralStorageInfo": "Naudojama saugykla ribojama pagal jūsų dabartinį planą. Perteklinė gauta saugykla automatiškai taps tinkama naudoti, kai pakeisite planą.",
   "removeFromAlbumTitle": "Pašalinti iš albumo?",
   "removeFromAlbum": "Šalinti iš albumo",
   "itemsWillBeRemovedFromAlbum": "Pasirinkti elementai bus pašalinti iš šio albumo",
   "removeShareItemsWarning": "Kai kuriuos elementus, kuriuos šalinate, pridėjo kiti asmenys, todėl prarasite prieigą prie jų",
+  "addingToFavorites": "Pridedama prie mėgstamų...",
+  "removingFromFavorites": "Pašalinama iš mėgstamų...",
+  "sorryCouldNotAddToFavorites": "Atsiprašome, nepavyko pridėti prie mėgstamų.",
   "sorryCouldNotRemoveFromFavorites": "Atsiprašome, nepavyko pašalinti iš mėgstamų.",
   "subscribeToEnableSharing": "Kad įjungtumėte bendrinimą, reikia aktyvios mokamos prenumeratos.",
   "subscribe": "Prenumeruoti",
@@ -332,10 +346,13 @@
   "deletePhotos": "Ištrinti nuotraukas",
   "inviteToEnte": "Kviesti į „Ente“",
   "removePublicLink": "Šalinti viešą nuorodą",
+  "disableLinkMessage": "Tai pašalins viešą nuorodą, skirtą pasiekti „{albumName}“.",
   "sharing": "Bendrinima...",
   "youCannotShareWithYourself": "Negalite bendrinti su savimi.",
   "archive": "Archyvas",
+  "createAlbumActionHint": "Ilgai paspauskite, kad pasirinktumėte nuotraukas, ir spustelėkite +, kad sukurtumėte albumą",
   "importing": "Importuojama....",
+  "failedToLoadAlbums": "Nepavyko įkelti albumų.",
   "hidden": "Paslėpti",
   "authToViewYourHiddenFiles": "Nustatykite tapatybę, kad peržiūrėtumėte paslėptus failus",
   "authToViewTrashedFiles": "Nustatykite tapatybę, kad peržiūrėtumėte išmestus failus",
@@ -343,8 +360,10 @@
   "uncategorized": "Nekategorizuoti",
   "videoSmallCase": "vaizdo įrašas",
   "photoSmallCase": "nuotrauka",
+  "singleFileDeleteHighlight": "Jis bus ištrintas iš visų albumų.",
   "singleFileInBothLocalAndRemote": "Šis {fileType} yra ir saugykloje „Ente“ bei įrenginyje.",
   "singleFileInRemoteOnly": "Šis {fileType} bus ištrintas iš „Ente“.",
+  "singleFileDeleteFromDevice": "Šis {fileType} bus ištrintas iš jūsų įrenginio.",
   "deleteFromEnte": "Ištrinti iš „Ente“",
   "yesDelete": "Taip, ištrinti",
   "movedToTrash": "Perkelta į šiukšlinę",
@@ -352,6 +371,21 @@
   "deleteFromBoth": "Ištrinti iš abiejų",
   "newAlbum": "Naujas albumas",
   "albums": "Albumai",
+  "memoryCount": "{count, plural, zero{nėra prisiminimų} one{{formattedCount} prisiminimas} few{{formattedCount} prisiminimai} many{{formattedCount} prisiminimo} other{{formattedCount} prisiminimų}}",
+  "@memoryCount": {
+    "description": "The text to display the number of memories",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedCount": {
+        "type": "String",
+        "example": "11.513, 11,511"
+      }
+    }
+  },
   "selectedPhotos": "{count} pasirinkta",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -382,6 +416,7 @@
   "@advancedSettings": {
     "description": "The text to display in the advanced settings section"
   },
+  "photoGridSize": "Nuotraukų tinklelio dydis",
   "manageDeviceStorage": "Tvarkyti įrenginio podėlį",
   "manageDeviceStorageDesc": "Peržiūrėkite ir išvalykite vietinę podėlį.",
   "machineLearning": "Mašininis mokymasis",
@@ -410,7 +445,9 @@
   "discover_sunset": "Saulėlydis",
   "discover_hills": "Kalvos",
   "discover_greenery": "Žaluma",
+  "mlIndexingDescription": "Atkreipkite dėmesį, kad mašininis mokymasis padidins pralaidumą ir akumuliatoriaus naudojimą, kol bus indeksuoti visi elementai. Apsvarstykite galimybę naudoti darbalaukio programą, kad indeksavimas būtų spartesnis – visi rezultatai bus sinchronizuojami automatiškai.",
   "loadingModel": "Atsisiunčiami modeliai...",
+  "waitingForWifi": "Laukiama „WiFi“...",
   "status": "Būsena",
   "indexedItems": "Indeksuoti elementai",
   "pendingItems": "Laukiami elementai",
@@ -421,6 +458,8 @@
   "selectAll": "Pasirinkti viską",
   "skip": "Praleisti",
   "updatingFolderSelection": "Atnaujinamas aplankų pasirinkimas...",
+  "itemCount": "{count, plural, one{{count} elementas} few {{count} elementai} many {{count} elemento} other{{count} elementų}}",
+  "deleteItemCount": "{count, plural, =1 {Ištrinti {count} elementą} few {Ištrinti {count} elementus} many {Ištrinti {count} elemento} other {Ištrinti {count} elementų}}",
   "duplicateItemsGroup": "{count} failai (-ų), kiekvienas {formattedSize}",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -438,6 +477,13 @@
   },
   "showMemories": "Rodyti prisiminimus",
   "yearsAgo": "{count, plural, one{prieš {count} metus} few {prieš {count} metus} many {prieš {count} metų} other{prieš {count} metų}}",
+  "backupSettings": "Atsarginės kopijos nustatymai",
+  "backupStatus": "Atsarginės kopijos būsena",
+  "backupStatusDescription": "Čia bus rodomi elementai, kurių atsarginės kopijos buvo sukurtos.",
+  "backupOverMobileData": "Kurti atsargines kopijas per mobiliuosius duomenis",
+  "backupVideos": "Kurti atsargines vaizdo įrašų kopijas",
+  "disableAutoLock": "Išjungti automatinį užraktą",
+  "deviceLockExplanation": "Išjunkite įrenginio ekrano užraktą, kai „Ente“ yra priekiniame fone ir kuriama atsarginės kopijos. Paprastai to nereikia, bet tai gali padėti greičiau užbaigti didelius įkėlimus ir pradinį didelių bibliotekų importą.",
   "about": "Apie",
   "weAreOpenSource": "Esame atviro kodo!",
   "privacy": "Privatumas",
@@ -458,15 +504,40 @@
   "authToInitiateAccountDeletion": "Nustatykite tapatybę, kad pradėtumėte paskyros ištrynimą",
   "areYouSureYouWantToLogout": "Ar tikrai norite atsijungti?",
   "yesLogout": "Taip, atsijungti",
+  "aNewVersionOfEnteIsAvailable": "Yra nauja „Ente“ versija.",
+  "update": "Atnaujinti",
+  "installManually": "Diegti rankiniu būdu",
+  "criticalUpdateAvailable": "Yra kritinis naujinimas",
+  "updateAvailable": "Yra naujinimas",
   "ignoreUpdate": "Ignoruoti",
   "downloading": "Atsisiunčiama...",
+  "cannotDeleteSharedFiles": "Negalima ištrinti bendrinamų failų.",
+  "theDownloadCouldNotBeCompleted": "Atsisiuntimas negalėjo būti baigtas.",
+  "retry": "Kartoti",
   "backup": "Kurti atsarginę kopiją",
   "removeDuplicates": "Šalinti dublikatus",
   "noDuplicates": "✨ Dublikatų nėra",
-  "youveNoDuplicateFilesThatCanBeCleared": "Neturite dubliuotų failų, kuriuos būtų galima išvalyti",
+  "youveNoDuplicateFilesThatCanBeCleared": "Neturite dubliuotų failų, kuriuos būtų galima išvalyti.",
   "success": "Sėkmė",
   "rateUs": "Vertinti mus",
   "remindToEmptyDeviceTrash": "Taip pat ištuštinkite Neseniai ištrinti iš Nustatymai -> Saugykla, kad atlaisvintumėte vietos.",
+  "remindToEmptyEnteTrash": "Taip pat ištuštinkite šiukšlinę, kad gautumėte laisvos vietos.",
+  "sparkleSuccess": "✨ Sėkmė",
+  "duplicateFileCountWithStorageSaved": "Išvalėte {count, plural, one{{count} dubliuojantį failą} few {{count} dubliuojančius failus} many {{count} dubliuojančio failo} other{{count} dubliuojančių failų}}, išsaugodami ({storageSaved}).",
+  "@duplicateFileCountWithStorageSaved": {
+    "description": "The text to display when the user has successfully cleaned up duplicate files",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "storageSaved": {
+        "example": "1.2 GB",
+        "type": "String"
+      }
+    }
+  },
   "familyPlans": "Šeimos planai",
   "notifications": "Pranešimai",
   "sharedPhotoNotifications": "Naujos bendrintos nuotraukos",
@@ -571,6 +642,7 @@
   "areYouSureYouWantToExit": "Ar tikrai norite išeiti?",
   "thankYou": "Dėkojame",
   "failedToVerifyPaymentStatus": "Nepavyko patvirtinti mokėjimo būsenos",
+  "pleaseWaitForSometimeBeforeRetrying": "Palaukite kurį laiką prieš bandydami pakartotinai",
   "paymentFailedMessage": "Deja, jūsų mokėjimas nepavyko. Susisiekite su palaikymo komanda ir mes jums padėsime!",
   "leaveFamily": "Palikti šeimą",
   "areYouSureThatYouWantToLeaveTheFamily": "Ar tikrai norite palikti šeimos planą?",
@@ -601,6 +673,7 @@
     "description": "Button text for raising a support tickets in case of unhandled errors during backup",
     "type": "text"
   },
+  "couldNotBackUpTryLater": "Nepavyko sukurti atsarginės duomenų kopijos.\nBandysime pakartotinai vėliau.",
   "pleaseGrantPermissions": "Suteikite leidimus.",
   "grantPermission": "Suteikti leidimą",
   "privateSharing": "Privatus bendrinimas",
@@ -661,6 +734,10 @@
   "moveItem": "{count, plural, one {Perkelti elementą} few {Perkelti elementus} many {Perkelti elemento} other {Perkelti elementų}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, one {Pridėti elementą} few {Pridėti elementus} many {Pridėti elemento} other {Pridėti elementų}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
   },
   "createOrSelectAlbum": "Kurkite arba pasirinkite albumą",
   "enterAlbumName": "Įveskite albumo pavadinimą",
@@ -751,6 +828,8 @@
   "empty": "Ištuštinti",
   "couldNotFreeUpSpace": "Nepavyko atlaisvinti vietos.",
   "permanentlyDeleteFromDevice": "Ištrinti negrįžtamai iš įrenginio?",
+  "someOfTheFilesYouAreTryingToDeleteAre": "Kai kurie failai, kuriuos bandote ištrinti, yra pasiekiami tik jūsų įrenginyje ir jų negalima atkurti, jei jie buvo ištrinti.",
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Atrodo, kad kažkas nutiko ne taip. Bandykite pakartotinai po kurio laiko. Jei klaida tęsiasi, susisiekite su mūsų palaikymo komanda.",
   "error": "Klaida",
   "tempErrorContactSupportIfPersists": "Atrodo, kad kažkas nutiko ne taip. Bandykite dar kartą po kurio laiko. Jei klaida tęsiasi, susisiekite su mūsų palaikymo komanda.",
   "networkHostLookUpErr": "Nepavyksta prisijungti prie „Ente“. Patikrinkite tinklo nustatymus ir susisiekite su palaikymo komanda, jei klaida tęsiasi.",
@@ -791,6 +870,7 @@
   "kiloMeterUnit": "km",
   "addLocationButton": "Pridėti",
   "locationTagFeatureDescription": "Vietos žymė grupuoja visas nuotraukas, kurios buvo padarytos tam tikru spinduliu nuo nuotraukos",
+  "galleryMemoryLimitInfo": "Galerijoje rodoma iki 1000 prisiminimų",
   "centerPoint": "Vidurio taškas",
   "resetToDefault": "Atkurti numatytąsias reikšmes",
   "@resetToDefault": {
@@ -814,6 +894,7 @@
   },
   "appVersion": "Versija: {versionValue}",
   "verifyIDLabel": "Patvirtinti",
+  "fileInfoAddDescHint": "Pridėti aprašymą...",
   "editLocationTagTitle": "Redaguoti vietovę",
   "setLabel": "Nustatyti",
   "@setLabel": {
@@ -886,6 +967,7 @@
   "hearUsExplanation": "Mes nesekame programų diegimų. Mums padėtų, jei pasakytumėte, kur mus radote.",
   "viewAddOnButton": "Peržiūrėti priedus",
   "addOns": "Priedai",
+  "addOnPageSubtitle": "Išsami informacija apie priedus",
   "yourMap": "Jūsų žemėlapis",
   "blackFridaySale": "Juodojo penktadienio išpardavimas",
   "upto50OffUntil4thDec": "Iki 50% nuolaida, gruodžio 4 d.",
@@ -1262,5 +1344,8 @@
   "joinAlbum": "Junkitės prie albumo",
   "joinAlbumSubtext": "kad peržiūrėtumėte ir pridėtumėte savo nuotraukas",
   "joinAlbumSubtextViewer": "kad pridėtumėte tai prie bendrinamų albumų",
-  "join": "Jungtis"
+  "join": "Jungtis",
+  "linkEmail": "Susieti el. paštą",
+  "link": "Susieti",
+  "noEnteAccountExclamation": "Nėra „Ente“ paskyros!"
 }

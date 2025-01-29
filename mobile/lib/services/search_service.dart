@@ -12,6 +12,7 @@ import 'package:photos/data/years.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/ml/db.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
@@ -1346,7 +1347,8 @@ class SearchService {
           .getFileOwner(file.ownerID!, file.collectionID);
 
       if (fileOwner.email.toLowerCase().contains(lowerCaseQuery) ||
-          ((fileOwner.name?.toLowerCase().contains(lowerCaseQuery)) ?? false)) {
+          ((fileOwner.displayName?.toLowerCase().contains(lowerCaseQuery)) ??
+              false)) {
         if (peopleToSharedFiles.containsKey(fileOwner)) {
           peopleToSharedFiles[fileOwner]!.add(file);
         } else {
@@ -1359,7 +1361,9 @@ class SearchService {
       searchResults.add(
         GenericSearchResult(
           ResultType.shared,
-          key.name != null && key.name!.isNotEmpty ? key.name! : key.email,
+          key.displayName != null && key.displayName!.isNotEmpty
+              ? key.displayName!
+              : key.email,
           value,
           hierarchicalSearchFilter: ContactsFilter(
             user: key,
@@ -1396,9 +1400,9 @@ class SearchService {
       }
 
       peopleToSharedFiles.forEach((key, value) {
-        final name = key.name != null && key.name!.isNotEmpty
-            ? key.name!
-            : key.email.split("@")[0];
+        final name = key.displayName != null && key.displayName!.isNotEmpty
+            ? key.displayName!
+            : key.email;
         searchResults.add(
           GenericSearchResult(
             ResultType.shared,

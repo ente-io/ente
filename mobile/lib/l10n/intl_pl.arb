@@ -1083,7 +1083,7 @@
   "@storageUsageInfo": {
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
-  "availableStorageSpace": "{freeAmount} {storageUnit} za darmo",
+  "availableStorageSpace": "{freeAmount} {storageUnit} wolne",
   "appVersion": "Wersja: {versionValue}",
   "verifyIDLabel": "Zweryfikuj",
   "fileInfoAddDescHint": "Dodaj opis...",

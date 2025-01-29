@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/extensions/list.dart';
+import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
@@ -106,7 +107,11 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             captionedTextWidget: CaptionedTextWidget(
                               title: isOwner
                                   ? S.of(context).you
-                                  : widget.collection.owner?.email ?? '',
+                                  : widget.collection.owner != null
+                                      ? _nameIfAvailableElseEmail(
+                                          widget.collection.owner!,
+                                        )
+                                      : '',
                               makeTextBold: isOwner,
                             ),
                             leadingIconWidget: UserAvatarWidget(
@@ -150,7 +155,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                           captionedTextWidget: CaptionedTextWidget(
                             title: isSameAsLoggedInUser
                                 ? S.of(context).you
-                                : currentUser.email,
+                                : _nameIfAvailableElseEmail(currentUser),
                             makeTextBold: isSameAsLoggedInUser,
                           ),
                           leadingIconSize: 24.0,
@@ -228,7 +233,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                           captionedTextWidget: CaptionedTextWidget(
                             title: isSameAsLoggedInUser
                                 ? S.of(context).you
-                                : currentUser.email,
+                                : _nameIfAvailableElseEmail(currentUser),
                             makeTextBold: isSameAsLoggedInUser,
                           ),
                           leadingIconSize: 24.0,
@@ -287,5 +292,13 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
         ],
       ),
     );
+  }
+
+  String _nameIfAvailableElseEmail(User user) {
+    final name = user.displayName;
+    if (name != null && name.isNotEmpty) {
+      return name;
+    }
+    return user.email;
   }
 }

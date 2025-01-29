@@ -698,12 +698,19 @@ class _FileSelectionActionsWidgetState
 
   Future<void> _setPersonCover() async {
     final EnteFile file = widget.selectedFiles.files.first;
-    await PersonService.instance.updateAvatar(widget.person!, file);
+    final updatedPerson =
+        await PersonService.instance.updateAvatar(widget.person!, file);
     widget.selectedFiles.clearAll();
     if (mounted) {
       setState(() => {});
     }
-    Bus.instance.fire(PeopleChangedEvent());
+    Bus.instance.fire(
+      PeopleChangedEvent(
+        type: PeopleEventType.saveOrEditPerson,
+        source: "setPersonCover",
+        person: updatedPerson,
+      ),
+    );
   }
 
   Future<void> _onNotpersonClicked() async {

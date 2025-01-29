@@ -114,9 +114,9 @@ class SwipeableRouteBuilder<T> extends PageRoute<T> {
 class TransparentRoute extends PageRoute<void> {
   TransparentRoute({
     required this.builder,
-    RouteSettings? settings,
+    super.settings,
   })  : assert(builder != null),
-        super(settings: settings, fullscreenDialog: false);
+        super(fullscreenDialog: false);
 
   final WidgetBuilder? builder;
 

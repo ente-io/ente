@@ -1589,5 +1589,7 @@
   "joinAlbum": "Album beitreten",
   "joinAlbumSubtext": "um deine Fotos anzuzeigen und hinzuzufügen",
   "joinAlbumSubtextViewer": "um dies zu geteilten Alben hinzuzufügen",
-  "join": "Beitreten"
+  "join": "Beitreten",
+  "link": "Link",
+  "noEnteAccountExclamation": "Kein Ente-Konto!"
 }

@@ -14,14 +14,14 @@ class AlbumSharesIcons extends StatelessWidget {
   final Widget? trailingWidget;
 
   const AlbumSharesIcons({
-    Key? key,
+    super.key,
     required this.sharees,
     this.type = AvatarType.tiny,
     this.limitCountTo = 2,
     this.removeBorder = true,
     this.trailingWidget,
     this.padding = const EdgeInsets.only(left: 10.0, top: 10, bottom: 10),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,7 @@ class AlbumSharesIcons extends StatelessWidget {
       widgets.add(
         Positioned(
           left: (overlapPadding * (displayCount + (hasMore ? 1 : 0))) +
-              (displayCount > 0 ?  12 : 0),
+              (displayCount > 0 ? 12 : 0),
           child: trailingWidget!,
         ),
       );
@@ -66,7 +66,10 @@ class AlbumSharesIcons extends StatelessWidget {
 
     return Padding(
       padding: padding,
-      child: Stack(children: widgets),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: widgets,
+      ),
     );
   }
 }

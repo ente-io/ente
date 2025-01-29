@@ -26,6 +26,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/home_widget_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync_service.dart';
@@ -216,6 +217,7 @@ class Configuration {
       FavoritesService.instance.clearCache();
       MemoriesService.instance.clearCache();
       SearchService.instance.clearCache();
+      PersonService.instance.clearCache();
       unawaited(HomeWidgetService.instance.clearHomeWidget());
       Bus.instance.fire(UserLoggedOutEvent());
     } else {

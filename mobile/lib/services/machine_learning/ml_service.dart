@@ -262,13 +262,10 @@ class MLService {
     final persons = await PersonService.instance.getPersons();
     final faceIdNotToCluster = <String, List<String>>{};
     for (final person in persons) {
-      if (person.data.rejectedFaceIDs != null &&
-          person.data.rejectedFaceIDs!.isNotEmpty) {
-        final personClusters = person.data.assigned?.map((e) => e.id).toList();
-        if (personClusters != null) {
-          for (final faceID in person.data.rejectedFaceIDs!) {
-            faceIdNotToCluster[faceID] = personClusters;
-          }
+      if (person.data.rejectedFaceIDs.isNotEmpty) {
+        final personClusters = person.data.assigned.map((e) => e.id).toList();
+        for (final faceID in person.data.rejectedFaceIDs) {
+          faceIdNotToCluster[faceID] = personClusters;
         }
       }
     }

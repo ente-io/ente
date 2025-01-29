@@ -1,9 +1,9 @@
 ---
-title: Photo dates
+title: Metadata
 description: Handling of metadata, in particular creation dates, in Ente Photos
 ---
 
-# Photos dates
+# Metadata
 
 This document describes Ente's handling of metadata, in particular photo
 creation dates.

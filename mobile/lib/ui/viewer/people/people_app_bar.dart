@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -15,6 +14,7 @@ import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/hierarchicial_search/applied_filters_for_appbar.dart";
@@ -22,6 +22,7 @@ import "package:photos/ui/viewer/hierarchicial_search/recommended_filters_for_ap
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
+import "package:photos/ui/viewer/people/person_selection_action_widgets.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -52,6 +53,7 @@ enum PeoplePopupAction {
   removeLabel,
   reviewSuggestions,
   unignore,
+  reassignMe,
 }
 
 class _AppBarWidgetState extends State<PeopleAppBar> {
@@ -64,28 +66,57 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
   bool isQuickLink = false;
   late GalleryType galleryType;
   late PersonEntity person;
+  late StreamSubscription<PeopleChangedEvent> _peopleChangedEventSubscription;
 
   @override
   void initState() {
     super.initState();
+    person = widget.person;
+    galleryType = widget.type;
+    collectionActions = CollectionActions(CollectionsService.instance);
     _selectedFilesListener = () {
       setState(() {});
     };
-    collectionActions = CollectionActions(CollectionsService.instance);
+
     widget.selectedFiles.addListener(_selectedFilesListener);
+
+    if (person.data.email == Configuration.instance.getEmail()) {
+      _appBarTitle = "${widget.title} (Me)";
+    } else {
+      _appBarTitle = widget.title;
+    }
+
     _userAuthEventSubscription =
         Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       setState(() {});
     });
-    person = widget.person;
-    _appBarTitle = widget.title;
-    galleryType = widget.type;
+
+    _peopleChangedEventSubscription =
+        Bus.instance.on<PeopleChangedEvent>().listen(
+      (event) {
+        if (event.person != null &&
+            event.type == PeopleEventType.saveOrEditPerson &&
+            widget.person.remoteID == event.person!.remoteID &&
+            (event.source == "linkEmailToPerson" ||
+                event.source == "reassignMe")) {
+          person = event.person!;
+
+          if (person.data.email == Configuration.instance.getEmail()) {
+            _appBarTitle = "${person.data.name} (Me)";
+          } else {
+            _appBarTitle = person.data.name;
+          }
+          setState(() {});
+        }
+      },
+    );
   }
 
   @override
   void dispose() {
     _userAuthEventSubscription.cancel();
     widget.selectedFiles.removeListener(_selectedFilesListener);
+    _peopleChangedEventSubscription.cancel();
     super.dispose();
   }
 
@@ -150,7 +181,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     final result = await routeToPage(
       context,
       SaveOrEditPerson(
-        person.data.assigned?.first.id ?? "",
+        person.data.assigned.first.id,
         person: person,
         isEditing: true,
       ),
@@ -163,6 +194,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
   }
 
   List<Widget> _getDefaultActions(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
     final List<Widget> actions = <Widget>[];
     // If the user has selected files, don't show any actions
     if (widget.selectedFiles.files.isNotEmpty ||
@@ -183,7 +215,10 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(S.of(context).edit),
+                Text(
+                  S.of(context).edit,
+                  style: textTheme.bodyBold,
+                ),
               ],
             ),
           ),
@@ -195,7 +230,10 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(S.of(context).review),
+                Text(
+                  S.of(context).review,
+                  style: textTheme.bodyBold,
+                ),
               ],
             ),
           ),
@@ -207,10 +245,30 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(S.of(context).remove),
+                Text(
+                  S.of(context).remove,
+                  style: textTheme.bodyBold,
+                ),
               ],
             ),
           ),
+          if (widget.person.data.email != null &&
+              (widget.person.data.email == Configuration.instance.getEmail()))
+            PopupMenuItem(
+              value: PeoplePopupAction.reassignMe,
+              child: Row(
+                children: [
+                  const Icon(Icons.delete_outline),
+                  const Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text(
+                    "Reassign \"Me\"",
+                    style: textTheme.bodyBold,
+                  ),
+                ],
+              ),
+            ),
         ],
       );
     } else {
@@ -256,6 +314,8 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
               await _showPerson(context);
             } else if (value == PeoplePopupAction.removeLabel) {
               await _resetPerson(context);
+            } else if (value == PeoplePopupAction.reassignMe) {
+              await _reassignMe(context);
             }
           },
         ),
@@ -304,7 +364,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     if (assignName) {
       final result = await showAssignPersonAction(
         context,
-        clusterID: widget.person.data.assigned!.first.id,
+        clusterID: widget.person.data.assigned.first.id,
       );
       Navigator.pop(context);
       if (result != null) {
@@ -329,5 +389,14 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     // if (coverPhotoID != null) {
     //   unawaited(changeCoverPhoto(context, widget.collection!, coverPhotoID));
     // }
+  }
+
+  Future<void> _reassignMe(BuildContext context) async {
+    await routeToPage(
+      context,
+      ReassignMeSelectionPage(
+        currentMeId: widget.person.remoteID,
+      ),
+    );
   }
 }

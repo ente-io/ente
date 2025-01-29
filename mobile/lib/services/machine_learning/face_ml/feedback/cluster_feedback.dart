@@ -333,13 +333,13 @@ class ClusterFeedbackService<T> {
     required PersonEntity person,
     required String clusterID,
   }) async {
-    if (person.data.rejectedFaceIDs != null &&
-        person.data.rejectedFaceIDs!.isNotEmpty) {
-      final clusterFaceIDs = await faceMLDB.getFaceIDsForCluster(clusterID);
-      final rejectedLengthBefore = person.data.rejectedFaceIDs!.length;
-      person.data.rejectedFaceIDs!
+    if (person.data.rejectedFaceIDs.isNotEmpty) {
+      final clusterFaceIDs =
+          await MLDataDB.instance.getFaceIDsForCluster(clusterID);
+      final rejectedLengthBefore = person.data.rejectedFaceIDs.length;
+      person.data.rejectedFaceIDs
           .removeWhere((faceID) => clusterFaceIDs.contains(faceID));
-      final rejectedLengthAfter = person.data.rejectedFaceIDs!.length;
+      final rejectedLengthAfter = person.data.rejectedFaceIDs.length;
       if (rejectedLengthBefore != rejectedLengthAfter) {
         _logger.info(
           'Removed ${rejectedLengthBefore - rejectedLengthAfter} rejected faces from person ${person.data.name} due to adding cluster $clusterID',
@@ -355,7 +355,8 @@ class ClusterFeedbackService<T> {
   }
 
   Future<void> ignoreCluster(String clusterID) async {
-    await PersonService.instance.addPerson('', clusterID, isHidden: true);
+    await PersonService.instance
+        .addPerson(name: '', clusterID: clusterID, isHidden: true);
     Bus.instance.fire(PeopleChangedEvent());
     return;
   }
