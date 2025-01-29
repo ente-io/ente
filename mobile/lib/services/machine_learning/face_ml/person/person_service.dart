@@ -202,7 +202,7 @@ class PersonService {
       clusterID: clusterID,
     );
     if (data.email != null) {
-      _resetEmailToNameCache();
+      _resetEmailToNameCache().ignore();
     }
     return PersonEntity(result.id, data);
   }
@@ -291,7 +291,7 @@ class PersonService {
       justName.data.logStats();
 
       if (entity.data.email != null) {
-        _resetEmailToNameCache();
+        _resetEmailToNameCache().ignore();
       }
     } else {
       await entityService.deleteEntry(personID);
@@ -299,7 +299,7 @@ class PersonService {
 
       if (entity != null) {
         if (entity.data.email != null) {
-          _resetEmailToNameCache();
+          _resetEmailToNameCache().ignore();
         }
       }
     }
