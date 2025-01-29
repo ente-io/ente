@@ -6,7 +6,6 @@ import {
     isPartOfFamilyWithOtherMembers,
 } from "@/new/photos/services/user-details";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
-import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CircleIcon from "@mui/icons-material/Circle";
 import {
@@ -168,7 +167,7 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
 
     <Stack sx={{ gap: 1.5 }}>
         <UsageBar used={usage} total={storage} />
-        <Stack direction="row" sx={{ justifyContent: 'space-between'}}>
+        <Stack direction="row" sx={{ justifyContent: "space-between" }}>
             <Typography variant="mini">
                 {`${formattedStorageByteSize(storage - usage)} ${t("free")}`}
             </Typography>
@@ -211,26 +210,24 @@ const FamilyUsageSection: React.FC<FamilyUsageSectionProps> = ({
     totalUsage,
     fileCount,
     totalStorage,
-}) => {
-    return (
-        <Box sx={{ width: "100%" }}>
-            <FamilyUsageBar
-                totalUsage={totalUsage}
-                userUsage={userUsage}
-                totalStorage={totalStorage}
-            />
-            <SpaceBetweenFlex sx={{ marginTop: 1.5 }}>
-                <Stack direction={"row"} spacing={1.5}>
-                    <Legend label={t("you")} color="text.base" />
-                    <Legend label={t("family")} color="text.muted" />
-                </Stack>
-                <Typography variant="mini" sx={{ fontWeight: "medium" }}>
-                    {t("photos_count", { count: fileCount ?? 0 })}
-                </Typography>
-            </SpaceBetweenFlex>
-        </Box>
-    );
-};
+}) => (
+    <Stack sx={{ gap: 1.5 }}>
+        <FamilyUsageBar
+            totalUsage={totalUsage}
+            userUsage={userUsage}
+            totalStorage={totalStorage}
+        />
+        <Stack direction="row" sx={{ justifyContent: "space-between" }}>
+            <Stack direction="row" sx={{ gap: 1.5 }}>
+                <Legend label={t("you")} color="text.base" />
+                <Legend label={t("family")} color="text.muted" />
+            </Stack>
+            <Typography variant="mini" sx={{ fontWeight: "medium" }}>
+                {t("photos_count", { count: fileCount ?? 0 })}
+            </Typography>
+        </Stack>
+    </Stack>
+);
 
 interface FamilyUsageBarProps {
     userUsage: number;
@@ -243,7 +240,7 @@ const FamilyUsageBar: React.FC<FamilyUsageBarProps> = ({
     totalUsage,
     totalStorage,
 }) => (
-    <Box sx={{ position: "relative", width: "100%" }}>
+    <Box sx={{ position: "relative" }}>
         <UsageBar
             used={userUsage}
             total={totalStorage}
