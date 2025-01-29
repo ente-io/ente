@@ -153,7 +153,7 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
     usage,
     storage,
     fileCount,
-}) => {
+}) => (
     // [Note: Fallback translation for languages with multiple plurals]
     //
     // Languages like Polish and Arabian have multiple plural forms, and
@@ -165,20 +165,19 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
     // it foo_count (To keep our heads straight, we adopt the convention that
     // all such pluralizable strings use the _count suffix, but that's not a
     // requirement from the library).
-    return (
-        <Box sx={{ width: "100%" }}>
-            <UsageBar used={usage} total={storage} />
-            <SpaceBetweenFlex sx={{ marginTop: 1.5 }}>
-                <Typography variant="mini">{`${formattedStorageByteSize(
-                    storage - usage,
-                )} ${t("free")}`}</Typography>
-                <Typography variant="mini" sx={{ fontWeight: "medium" }}>
-                    {t("photos_count", { count: fileCount ?? 0 })}
-                </Typography>
-            </SpaceBetweenFlex>
-        </Box>
-    );
-};
+
+    <Stack sx={{ gap: 1.5 }}>
+        <UsageBar used={usage} total={storage} />
+        <Stack direction="row" sx={{ justifyContent: 'space-between'}}>
+            <Typography variant="mini">
+                {`${formattedStorageByteSize(storage - usage)} ${t("free")}`}
+            </Typography>
+            <Typography variant="mini" sx={{ fontWeight: "medium" }}>
+                {t("photos_count", { count: fileCount ?? 0 })}
+            </Typography>
+        </Stack>
+    </Stack>
+);
 
 const FamilySubscriptionCardContents: React.FC<
     SubscriptionCardContentOverlayProps
