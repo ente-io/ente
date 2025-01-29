@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import "package:photos/db/files_db.dart";
+import 'package:photos/db/ml/base.dart';
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import 'package:photos/events/subscription_purchased_event.dart';
@@ -35,8 +36,8 @@ class ClusterAppBar extends StatefulWidget {
     this.selectedFiles,
     this.clusterID, {
     this.person,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<ClusterAppBar> createState() => _AppBarWidgetState();
@@ -58,6 +59,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
   final GlobalKey shareButtonKey = GlobalKey();
   bool isQuickLink = false;
   late GalleryType galleryType;
+  late final IMLDataDB mlDataDB = MLDataDB.instance;
 
   @override
   void initState() {
@@ -199,10 +201,10 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
               breakupResult.newFaceIdToCluster;
 
           // Update to delete the old clusters and save the new clusters
-          await MLDataDB.instance.deleteClusterSummary(widget.clusterID);
+          await mlDataDB.deleteClusterSummary(widget.clusterID);
           await MLDataDB.instance
               .clusterSummaryUpdate(breakupResult.newClusterSummaries);
-          await MLDataDB.instance.updateFaceIdToClusterId(newFaceIdToClusterID);
+          await mlDataDB.updateFaceIdToClusterId(newFaceIdToClusterID);
 
           // Find the biggest cluster
           biggestClusterID = '';
