@@ -502,6 +502,22 @@ class MLDataDB {
     return result;
   }
 
+  Future<Map<String, String>> getFaceIdToPersonIdForFaces(
+    Iterable<String> faceIDs,
+  ) async {
+    final db = await instance.asyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT $faceIDColumn, $personIdColumn FROM $clusterPersonTable '
+      'INNER JOIN $faceClustersTable ON $clusterPersonTable.$clusterIDColumn = $faceClustersTable.$clusterIDColumn '
+      'WHERE $faceIDColumn IN (${faceIDs.map((id) => "'$id'").join(",")})',
+    );
+    final Map<String, String> result = {};
+    for (final map in maps) {
+      result[map[faceIDColumn] as String] = map[personIdColumn] as String;
+    }
+    return result;
+  }
+
   Future<Map<String, Set<String>>> getClusterIdToFaceIdsForPerson(
     String personID,
   ) async {

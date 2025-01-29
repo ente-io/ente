@@ -1295,6 +1295,10 @@ class SearchService {
     if (files.length <= 10) return files;
     final fileIDs = files.map((e) => e.uploadedFileID!).toSet();
     final fileIdToFace = await MLDataDB.instance.getFacesForFileIDs(fileIDs);
+    final faceIDs =
+        fileIdToFace.values.expand((x) => x.map((face) => face.faceID)).toSet();
+    final faceIDsToPersonID =
+        await MLDataDB.instance.getFaceIdToPersonIdForFaces(faceIDs);
     final fileIdToClip =
         await MLDataDB.instance.getClipVectorsForFileIDs(fileIDs);
     final allYears = files.map((e) {
@@ -1322,15 +1326,22 @@ class SearchService {
             .compareTo(fileToScore[a.uploadedFileID!]!),
       );
 
-      // then sort on faces TODO: lau: prioritize named faces
+      // then sort on faces, heavily prioritizing named faces
       final fileToFaceCount = <int, int>{};
       for (final file in files) {
-        final faces = fileIdToFace[file.uploadedFileID!];
-        if (faces == null) {
-          fileToFaceCount[file.uploadedFileID!] = 0;
+        final fileID = file.uploadedFileID!;
+        fileToFaceCount[fileID] = 0;
+        final faces = fileIdToFace[fileID];
+        if (faces == null || faces.isEmpty) {
           continue;
         }
-        fileToFaceCount[file.uploadedFileID!] = faces.length;
+        for (final face in faces) {
+          if (faceIDsToPersonID.containsKey(face.faceID)) {
+            fileToFaceCount[fileID] = fileToFaceCount[fileID]! + 10;
+          } else {
+            fileToFaceCount[fileID] = fileToFaceCount[fileID]! + 1;
+          }
+        }
       }
       files.sort(
         (a, b) => fileToFaceCount[b.uploadedFileID!]!
