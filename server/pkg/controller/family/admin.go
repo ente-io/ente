@@ -57,7 +57,7 @@ func (c *Controller) CreateFamily(ctx context.Context, adminUserID int64) error 
 }
 
 // InviteMember invites a user to join the family plan of admin User
-func (c *Controller) InviteMember(ctx *gin.Context, adminUserID int64, email string) error {
+func (c *Controller) InviteMember(ctx *gin.Context, adminUserID int64, email string, memberUserID uuid.UUID, StorageLimit int64) error {
 	err := c.BillingCtrl.IsActivePayingSubscriber(adminUserID)
 	if err != nil {
 		return stacktrace.Propagate(ente.ErrNoActiveSubscription, "you must be on a paid plan")
@@ -118,6 +118,14 @@ func (c *Controller) InviteMember(ctx *gin.Context, adminUserID int64, email str
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
+
+	if adminUser.FamilyAdminID != nil {
+		err = c.FamilyRepo.UpdateStorage(ctx, adminUserID, StorageLimit, AcceptedTemplate)
+		if err != nil {
+			return stacktrace.Propagate(err, "failed to update storage limit")
+		}
+	}
+
 	go func(token string) {
 		notificationErr := c.sendNotification(ctx, adminUserID, potentialMemberID, ente.INVITED, &token)
 		if notificationErr != nil {

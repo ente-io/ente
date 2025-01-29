@@ -18,7 +18,8 @@ const (
 )
 
 type InviteMemberRequest struct {
-	Email string `json:"email" binding:"required"`
+	Email        string `json:"email" binding:"required"`
+	StorageLimit string `json:"storageLimit" binding:"required"`
 }
 
 type InviteInfoResponse struct {

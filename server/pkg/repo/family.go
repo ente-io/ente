@@ -144,6 +144,22 @@ func (repo *FamilyRepository) GetMembersWithStatus(adminID int64, statuses []ent
 	return convertRowsToFamilyMember(rows)
 }
 
+// UpdateStorage will set the value of storage for the given user by the Admin of the family.
+func (repo *FamilyRepository) UpdateStorage(ctx context.Context, adminID int64, storageLimit int64, token string) error {
+	tx, err := repo.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	// Update Storage limit
+	_, err = tx.ExecContext(ctx, `UPDATE users SET storage=$1 WHERE token=$2`, storageLimit, token)
+	if err != nil {
+		tx.Rollback()
+		return stacktrace.Propagate(err, "failed to update storage")
+	}
+
+	return stacktrace.Propagate(tx.Commit(), "failed to commit txn for updating storage")
+}
+
 // AcceptInvite change the invitation status in the family db for the given invite token
 func (repo *FamilyRepository) AcceptInvite(ctx context.Context, adminID int64, memberID int64, token string) error {
 	tx, err := repo.DB.BeginTx(ctx, nil)
