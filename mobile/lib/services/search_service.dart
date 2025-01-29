@@ -1306,9 +1306,9 @@ class SearchService {
       return creationTime.year;
     }).toSet();
     if (allYears.length <= 1) {
-      // sort first on clip embeddings TODO: lau: come up with a better prompt
+      // sort first on clip embeddings
       const query =
-          'Photo of a treasured memory radiating happiness, connection, or quiet beauty';
+          'Photo of a precious memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion';
       // TODO: lau: optimize this later so we don't keep computing embedding
       final textEmbedding = await MLComputer.instance.runClipText(query);
       final textVector = Vector.fromList(textEmbedding);
