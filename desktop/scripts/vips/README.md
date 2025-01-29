@@ -59,6 +59,18 @@ docker run --rm -e VERSION_VIPS=8.16.0 -e FFI_COMPAT=false -e JPEG_IMPL=mozjpeg 
 /data/build.sh all x86_64-w64-mingw32.static
 ```
 
+Looks like we need a fork of build-win64-mxe because the default build takes TOO
+long for it to be feasible on a GitHub action. Even upstream seems to build
+elsewhere and upload the binaries.
+
+The slowness primarily comes because the mxe toolchain needs to be built from
+source, including llvm and rust. There used to be mxe packages, and perhaps they
+will again be in the future, but currrently the mxe pkg repo is not maintained
+and doesn't work with build-win64-mxe.
+
+While in our fork we can't trim of llvm itself, we can trim off a lot of
+dependencies that we don't need for our current purpose.
+
 ## Notes 2
 
 Try using libvips-packaging, see if it builds vips tools binaries too.
