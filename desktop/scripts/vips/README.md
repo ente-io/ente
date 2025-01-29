@@ -114,6 +114,15 @@ index 33492f8..f79eedb 100644
          '$(BUILD_DIR)'
 ```
 
+Custom fork's at https://github.com/ente-io/build-win64-mxe, invoke with
+
+```sh
+docker run -it --rm -v $(pwd)/build:/data --entrypoint /bin/bash libvips-build-win-mxe /data/custom.sh x86_64
+```
+
+(TODO Clean this entire document up and move to top level docs after we have a
+successful build)
+
 ## Notes 2
 
 Try using libvips-packaging, see if it builds vips tools binaries too.
