@@ -145,14 +145,15 @@ class FaceResult {
   }
 }
 
-T getFileIdFromFaceId<T>(String faceId) {
+T getFileIdFromFaceId<T extends Object>(String faceId) {
+  final String faceIdSplit = faceId.substring(0, faceId.indexOf('_'));
   if (T == int) {
-    return int.parse(faceId.split("_").first) as T;
-  } else if (T == String) {
-    return faceId.split("_").first as T;
-  } else {
-    throw ArgumentError("Unsupported type");
+    return int.parse(faceIdSplit) as T;
   }
+  if (T == String) {
+    return faceIdSplit as T;
+  }
+  throw ArgumentError("Unsupported type: $T");
 }
 
 int? tryGetFileIdFromFaceId(String faceId) {
