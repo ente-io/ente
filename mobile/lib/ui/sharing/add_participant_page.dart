@@ -1,6 +1,7 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
@@ -139,7 +140,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                           children: [
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
-                                title: currentUser.email,
+                                title: currentUser.displayName ??
+                                    currentUser.email,
                               ),
                               leadingIconSize: 24.0,
                               leadingIconWidget: UserAvatarWidget(
@@ -239,7 +241,13 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                           results.where((e) => e).length;
                       showToast(
                         context,
-                        widget.isAddingViewer ? S.of(context).viewersSuccessfullyAdded(noOfSuccessfullAdds) : S.of(context).collaboratorsSuccessfullyAdded(noOfSuccessfullAdds),
+                        widget.isAddingViewer
+                            ? S
+                                .of(context)
+                                .viewersSuccessfullyAdded(noOfSuccessfullAdds)
+                            : S.of(context).collaboratorsSuccessfullyAdded(
+                                  noOfSuccessfullAdds,
+                                ),
                       );
 
                       if (!results.any((e) => e == false) && mounted) {
