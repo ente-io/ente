@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:developer";
 
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
@@ -102,7 +101,6 @@ class _PeoplePageState extends State<PeoplePage> {
   }
 
   Future<List<EnteFile>> loadPersonFiles() async {
-    log("loadPersonFiles");
     final result = await SearchService.instance
         .getClusterFilesForPersonID(_person.remoteID);
     if (result.isEmpty) {
@@ -243,7 +241,7 @@ class _PeoplePageState extends State<PeoplePage> {
                   ],
                 );
               } else if (snapshot.hasError) {
-                log("Error: ${snapshot.error} ${snapshot.stackTrace}}");
+                _logger.severe("Error: ${snapshot.error} ${snapshot.stackTrace}}");
                 //Need to show an error on the UI here
                 return const SizedBox.shrink();
               } else {

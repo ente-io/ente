@@ -76,7 +76,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
         } else {
           if (snapshot.hasError) {
             _logger.severe(
-              "Error getting cover face for person: ${snapshot.error}",
+              "Error getting cover face for person: ${snapshot.error} ${snapshot.stackTrace}}",
             );
           }
           return widget.thumbnailFallback
