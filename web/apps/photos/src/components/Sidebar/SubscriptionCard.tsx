@@ -166,31 +166,12 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
     // requirement from the library).
 
     <Stack sx={{ gap: 1.5 }}>
-        <Box
-            sx={{
-                position: "relative",
-                height: "4px",
-                borderRadius: "4px",
-                backgroundColor: "rgba(255 255 255 / 0.2)",
-            }}
-        >
-            <Box
-                sx={{
-                    position: "absolute",
-                    left: 1,
-                    top: 0,
-                    width: "max(var(--width), 2px)",
-                    height: "4px",
-                    borderRadius: "4px",
-                    backgroundColor: "rgb(255 255 255)",
-                }}
-                style={
-                    {
-                        "--width": `${Math.min(usage / storage, 1) * 100}%`,
-                    } as React.CSSProperties
-                }
+        <UsageBar2>
+            <UsageBar2Segment_
+                {...{ usage, storage }}
+                fillColor="rgba(255 255 255 / 1)"
             />
-        </Box>
+        </UsageBar2>
         <Stack direction="row" sx={{ justifyContent: "space-between" }}>
             <Typography variant="mini">
                 {`${formattedStorageByteSize(storage - usage)} ${t("free")}`}
@@ -200,6 +181,47 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
             </Typography>
         </Stack>
     </Stack>
+);
+
+const UsageBar2 = styled("div")`
+    position: relative;
+    height: 4px;
+    border-radius: 4px;
+    background-color: rgba(255 255 255 / 0.2);
+`;
+
+interface UsageBar2SegmentProps {
+    usage: number;
+    storage: number;
+    /** A CSS color string representing the color that this segment  */
+    fillColor: string;
+}
+
+/**
+ * A bar inside a UsageContainer.
+ */
+const UsageBar2Segment_: React.FC<UsageBar2SegmentProps> = ({
+    usage,
+    storage,
+    fillColor,
+}) => (
+    <Box
+        sx={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width: "max(var(--width), 2px)",
+            height: "4px",
+            borderRadius: "4px",
+            backgroundColor: "var(--background-color)",
+        }}
+        style={
+            {
+                "--width": `${Math.min(usage / storage, 1) * 100}%`,
+                "--background-color": fillColor,
+            } as React.CSSProperties
+        }
+    />
 );
 
 const FamilySubscriptionCardContents: React.FC<
