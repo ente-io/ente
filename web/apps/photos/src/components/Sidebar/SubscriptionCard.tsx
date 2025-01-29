@@ -10,13 +10,11 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CircleIcon from "@mui/icons-material/Circle";
 import {
     Box,
-    LinearProgress,
     Skeleton,
     Stack,
     Typography,
     styled,
     useMediaQuery,
-    type LinearProgressProps,
 } from "@mui/material";
 import { t } from "i18next";
 import type React from "react";
@@ -142,11 +140,14 @@ const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
     );
 };
 
-interface IndividualUsageSectionProps {
+interface UsageStorage {
     usage: number;
-    fileCount: number;
     storage: number;
 }
+
+type IndividualUsageSectionProps = UsageStorage & {
+    fileCount: number;
+};
 
 const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
     usage,
@@ -166,12 +167,12 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
     // requirement from the library).
 
     <Stack sx={{ gap: 1.5 }}>
-        <UsageBar2>
-            <UsageBar2Segment_
+        <UsageBar>
+            <UsageBarSegment
                 {...{ usage, storage }}
                 fillColor="rgba(255 255 255 / 1)"
             />
-        </UsageBar2>
+        </UsageBar>
         <Stack direction="row" sx={{ justifyContent: "space-between" }}>
             <Typography variant="mini">
                 {`${formattedStorageByteSize(storage - usage)} ${t("free")}`}
@@ -183,24 +184,22 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
     </Stack>
 );
 
-const UsageBar2 = styled("div")`
+const UsageBar = styled("div")`
     position: relative;
     height: 4px;
     border-radius: 4px;
     background-color: rgba(255 255 255 / 0.2);
 `;
 
-interface UsageBar2SegmentProps {
-    usage: number;
-    storage: number;
+type UsageBarSegmentProps = UsageStorage & {
     /** A CSS color string representing the color that this segment  */
     fillColor: string;
-}
+};
 
 /**
  * A bar inside a UsageContainer.
  */
-const UsageBar2Segment_: React.FC<UsageBar2SegmentProps> = ({
+const UsageBarSegment: React.FC<UsageBarSegmentProps> = ({
     usage,
     storage,
     fillColor,
@@ -227,46 +226,49 @@ const UsageBar2Segment_: React.FC<UsageBar2SegmentProps> = ({
 const FamilySubscriptionCardContents: React.FC<
     SubscriptionCardContentOverlayProps
 > = ({ userDetails }) => {
-    const totalUsage = familyUsage(userDetails);
-    const totalStorage =
+    const usage = familyUsage(userDetails);
+    const storage =
         (userDetails.familyData?.storage ?? 0) + userDetails.storageBonus;
 
     return (
         <>
-            <StorageSection storage={totalStorage} usage={totalUsage} />
+            <StorageSection {...{ storage, usage }} />
             <FamilyUsageSection
                 userUsage={userDetails.usage}
                 fileCount={userDetails.fileCount}
-                totalUsage={totalUsage}
-                totalStorage={totalStorage}
+                {...{ storage, usage }}
             />
         </>
     );
 };
 
-interface FamilyUsageSectionProps {
+type FamilyUsageSectionProps = UsageStorage & {
     userUsage: number;
-    totalUsage: number;
     fileCount: number;
-    totalStorage: number;
-}
+};
 
 const FamilyUsageSection: React.FC<FamilyUsageSectionProps> = ({
+    usage,
+    storage,
     userUsage,
-    totalUsage,
     fileCount,
-    totalStorage,
 }) => (
     <Stack sx={{ gap: 1.5 }}>
-        <FamilyUsageBar
-            totalUsage={totalUsage}
-            userUsage={userUsage}
-            totalStorage={totalStorage}
-        />
+        <UsageBar>
+            <UsageBarSegment
+                {...{ storage }}
+                usage={userUsage}
+                fillColor="rgba(255 255 255 / 1)"
+            />
+            <UsageBarSegment
+                {...{ usage, storage }}
+                fillColor="rgba(255 255 255 / 0.6)"
+            />
+        </UsageBar>
         <Stack direction="row" sx={{ justifyContent: "space-between" }}>
             <Stack direction="row" sx={{ gap: 1.5 }}>
                 <Legend label={t("you")} opacity={1} />
-                <Legend label={t("family")} opacity={0.7} />
+                <Legend label={t("family")} opacity={0.8} />
             </Stack>
             <Typography variant="mini" sx={{ fontWeight: "medium" }}>
                 {t("photos_count", { count: fileCount ?? 0 })}
@@ -274,60 +276,6 @@ const FamilyUsageSection: React.FC<FamilyUsageSectionProps> = ({
         </Stack>
     </Stack>
 );
-
-interface FamilyUsageBarProps {
-    userUsage: number;
-    totalUsage: number;
-    totalStorage: number;
-}
-
-const FamilyUsageBar: React.FC<FamilyUsageBarProps> = ({
-    userUsage,
-    totalUsage,
-    totalStorage,
-}) => (
-    <Box sx={{ position: "relative" }}>
-        <UsageBar
-            used={userUsage}
-            total={totalStorage}
-            sx={{ backgroundColor: 0.2 }}
-        />
-        <UsageBar
-            used={totalUsage}
-            total={totalStorage}
-            sx={{
-                position: "absolute",
-                top: 0,
-                zIndex: 1,
-                // ".MuiLinearProgress-bar ": {
-                // backgroundColor: "text.muted",
-                // },
-                width: "100%",
-                opacity: 0.7,
-            }}
-        />
-    </Box>
-);
-
-type UsageBarProps = Pick<LinearProgressProps, "sx"> & {
-    used: number;
-    total: number;
-};
-
-const UsageBar: React.FC<UsageBarProps> = ({ used, total, sx }) => (
-    <UsageBar_
-        variant="determinate"
-        sx={sx}
-        value={Math.min(used / total, 1) * 100}
-    />
-);
-
-const UsageBar_ = styled(LinearProgress)(({ theme }) => ({
-    ".MuiLinearProgress-bar": { borderRadius: "2px" },
-    borderRadius: "2px",
-    // backgroundColor: theme.vars.palette.fixed.storageCardUsageFill,
-    // backgroundColor: theme.vars.palette.fixed.white,
-}));
 
 interface LegendProps {
     label: string;
