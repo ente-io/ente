@@ -1106,13 +1106,6 @@
       "slug": "wargamingnet"
     },
     {
-      "title": "World Cube Association",
-      "altNames": [
-        "WCA",
-        "worldcubeassociation"
-      ]
-    },
-    {
       "title": "Wealthfront"
     },
     {
@@ -1138,6 +1131,14 @@
       "title": "WorkOS",
       "altNames": [
         "Work OS"
+      ]
+    },
+    {
+      "title": "World Cube Association",
+      "slug": "wca",
+      "altNames": [
+        "WCA",
+        "worldcubeassociation"
       ]
     },
     {
