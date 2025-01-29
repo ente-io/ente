@@ -81,17 +81,19 @@ export const SubscriptionCardContentOverlay: React.FC<
     SubscriptionCardContentOverlayProps
 > = ({ userDetails }) => (
     <Overlay>
-        <SpaceBetweenFlex
-            height={"100%"}
-            flexDirection={"column"}
-            padding={"20px 16px"}
+        <Stack
+            sx={{
+                height: "100%",
+                justifyContent: "space-between",
+                padding: "20px 16px",
+            }}
         >
             {userDetails && isPartOfFamilyWithOtherMembers(userDetails) ? (
                 <FamilySubscriptionCardContent userDetails={userDetails} />
             ) : (
                 <IndividualSubscriptionCardContent userDetails={userDetails} />
             )}
-        </SpaceBetweenFlex>
+        </Stack>
     </Overlay>
 );
 
