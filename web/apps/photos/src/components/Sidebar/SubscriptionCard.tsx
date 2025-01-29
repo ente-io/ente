@@ -16,6 +16,7 @@ import {
     Stack,
     Typography,
     styled,
+    useMediaQuery,
     type LinearProgressProps,
 } from "@mui/material";
 import { t } from "i18next";
@@ -121,44 +122,26 @@ const IndividualSubscriptionCardContents: React.FC<
     );
 };
 
-const MobileSmallBox = styled("div")`
-    display: none;
-    @media (max-width: 359px) {
-        display: block;
-    }
-`;
-
-const DefaultBox = styled("div")`
-    display: none;
-    @media (min-width: 360px) {
-        display: block;
-    }
-`;
-
 interface StorageSectionProps {
     usage: number;
     storage: number;
 }
 
-const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => (
-    <Box sx={{ width: "100%" }}>
-        <Typography variant="small" sx={{ color: "text.muted" }}>
-            {t("storage")}
-        </Typography>
-        <DefaultBox>
-            <Typography variant="h3">
-                {`${formattedStorageByteSize(usage, { round: true })} ${t(
-                    "of",
-                )} ${formattedStorageByteSize(storage)} ${t("used")}`}
+const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
+    const isExtraSmallWidth = useMediaQuery("(width < 360px)");
+    const label = isExtraSmallWidth
+        ? `${bytesInGB(usage)} /  ${bytesInGB(storage)} ${t("storage_unit.gb")} ${t("used")}`
+        : `${formattedStorageByteSize(usage, { round: true })} ${t("of")} ${formattedStorageByteSize(storage)} ${t("used")}`;
+
+    return (
+        <Box>
+            <Typography variant="small" sx={{ color: "text.muted" }}>
+                {t("storage")}
             </Typography>
-        </DefaultBox>
-        <MobileSmallBox>
-            <Typography variant="h3">
-                {`${bytesInGB(usage)} /  ${bytesInGB(storage)} ${t("storage_unit.gb")} ${t("used")}`}
-            </Typography>
-        </MobileSmallBox>
-    </Box>
-);
+            <Typography variant="h3">{label}</Typography>
+        </Box>
+    );
+};
 
 interface IndividualUsageSectionProps {
     usage: number;
