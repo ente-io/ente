@@ -1,0 +1,2 @@
+ALTER TABLE families
+ADD COLUMN storage INTEGER;
