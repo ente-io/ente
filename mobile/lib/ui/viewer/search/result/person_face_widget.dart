@@ -1,7 +1,7 @@
-import "dart:developer";
 import "dart:typed_data";
 
 import 'package:flutter/widgets.dart';
+import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import 'package:photos/models/file/file.dart';
@@ -14,6 +14,8 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/face/face_box_crop.dart";
+
+final _logger = Logger("PersonFaceWidget");
 
 class PersonFaceWidget extends StatefulWidget {
   final EnteFile file;
@@ -73,7 +75,9 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
           );
         } else {
           if (snapshot.hasError) {
-            log('Error getting cover face for person: ${snapshot.error}');
+            _logger.severe(
+              "Error getting cover face for person: ${snapshot.error}",
+            );
           }
           return widget.thumbnailFallback
               ? ThumbnailWidget(widget.file)
@@ -160,10 +164,10 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
       );
       return cropMap?[face.faceID];
     } catch (e, s) {
-      log(
+      _logger.severe(
         "Error getting cover face for person: ${widget.personId} and cluster ${widget.clusterID}",
-        error: e,
-        stackTrace: s,
+        e,
+        s,
       );
       return null;
     }
