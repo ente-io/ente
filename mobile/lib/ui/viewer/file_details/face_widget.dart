@@ -5,6 +5,7 @@ import "dart:typed_data";
 import "package:flutter/cupertino.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/base/id.dart";
@@ -49,6 +50,8 @@ class FaceWidget extends StatefulWidget {
 
 class _FaceWidgetState extends State<FaceWidget> {
   bool isJustRemoved = false;
+
+  final _logger = Logger("FaceWidget");
 
   @override
   Widget build(BuildContext context) {
@@ -266,7 +269,9 @@ class _FaceWidgetState extends State<FaceWidget> {
             );
           }
           if (snapshot.hasError) {
-            log('Error getting face: ${snapshot.error}');
+            _logger.severe(
+              'Error getting face: ${snapshot.error} ${snapshot.stackTrace}',
+            );
           }
           return const ClipRRect(
             borderRadius: BorderRadius.all(Radius.elliptical(16, 12)),
@@ -296,7 +301,9 @@ class _FaceWidgetState extends State<FaceWidget> {
         isJustRemoved = !isJustRemoved;
       });
     } catch (e, s) {
-      log("removing face/file from cluster from file info widget failed: $e, \n $s");
+      _logger.severe(
+        "removing face/file from cluster from file info widget failed: $e, \n $s",
+      );
     }
   }
 }
