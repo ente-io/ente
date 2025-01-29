@@ -59,6 +59,70 @@ docker run --rm -e VERSION_VIPS=8.16.0 -e FFI_COMPAT=false -e JPEG_IMPL=mozjpeg 
 /data/build.sh all x86_64-w64-mingw32.static
 ```
 
+Looks like we need a fork of build-win64-mxe because the default build takes TOO
+long for it to be feasible on a GitHub action. Even upstream seems to build
+elsewhere and upload the binaries.
+
+The slowness primarily comes because the mxe toolchain needs to be built from
+source, including llvm and rust. There used to be mxe packages, and perhaps they
+will again be in the future, but currrently the mxe pkg repo is not maintained
+and doesn't work with build-win64-mxe.
+
+While in our fork we can't trim of llvm itself, we can trim off a lot of
+dependencies that we don't need for our current purpose.
+
+The patch we need boils down to
+
+```patch
+diff --git a/build/vips-all.mk b/build/vips-all.mk
+index 33492f8..f79eedb 100644
+--- a/build/vips-all.mk
++++ b/build/vips-all.mk
+@@ -8,10 +8,10 @@ $(PKG)_PATCHES  := $(realpath $(sort $(wildcard $(dir $(lastword $(MAKEFILE_LIST
+ $(PKG)_GH_CONF  := libvips/libvips/releases,v,,,,.tar.xz
+ $(PKG)_SUBDIR   := vips-$($(PKG)_VERSION)
+ $(PKG)_FILE     := vips-$($(PKG)_VERSION).tar.xz
+-$(PKG)_DEPS     := cc meson-wrapper libwebp librsvg glib pango libarchive \
++$(PKG)_DEPS     := cc meson-wrapper libwebp glib libarchive \
+                    libjpeg-turbo tiff lcms libexif libheif libpng \
+-                   libspng libimagequant highway imagemagick matio openexr \
+-                   cfitsio nifticlib poppler fftw openslide libjxl cgif
++                   libspng libimagequant highway \
++                   fftw cgif
+
+ define $(PKG)_PRE_CONFIGURE
+     # Copy some files to the packaging directory
+@@ -85,11 +85,16 @@ define $(PKG)_BUILD
+         -Ddeprecated=false \
+         -Dexamples=false \
+         -Dintrospection=disabled \
+-        -Dmodules=enabled \
+-        -Dheif-module=$(if $(IS_HEVC),enabled,disabled) \
+-        $(if $(findstring graphicsmagick,$($(PKG)_DEPS)), -Dmagick-package=GraphicsMagick) \
++        -Dcplusplus=false \
++        -Dmodules=disabled \
++        -Dheif=enabled \
++        -Dmagick=disabled \
+         -Dpdfium=disabled \
+         -Dquantizr=disabled \
++        -Dpangocairo=disabled \
++        -Dpoppler=disabled \
++        -Drsvg=disabled \
++        -Dopenslide=disabled \
+         -Dc_args='$(CFLAGS) -DVIPS_DLLDIR_AS_LIBDIR' \
+         '$(SOURCE_DIR)' \
+         '$(BUILD_DIR)'
+```
+
+Custom fork's at https://github.com/ente-io/build-win64-mxe, invoke with
+
+```sh
+docker run -it --rm -v $(pwd)/build:/data --entrypoint /bin/bash libvips-build-win-mxe /data/custom.sh x86_64
+```
+
+(TODO Clean this entire document up and move to top level docs after we have a
+successful build)
+
 ## Notes 2
 
 Try using libvips-packaging, see if it builds vips tools binaries too.
