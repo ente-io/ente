@@ -114,9 +114,9 @@ export interface Electron {
 
     /**
      * Set or clear the callback {@link cb} to invoke whenever the app gets
-     * asked to open a deeplink. This allows the Node.js layer to ask the
-     * renderer to handle deeplinks and redirect itself to a new location if
-     * needed.
+     * asked to open a deeplink that begins with "ente://". This allows the
+     * Node.js layer to ask the renderer to handle deeplinks and redirect itself
+     * to a new location if needed.
      *
      * In particular, this is necessary for handling passkey authentication.
      * See: [Note: Passkey verification in the desktop app]
@@ -127,7 +127,7 @@ export interface Electron {
      * "ente://" URL. The URL string (a.k.a. "deeplink") we were asked to open
      * is passed to the function verbatim.
      */
-    onOpenURL: (cb: ((url: string) => void) | undefined) => void;
+    onOpenEnteURL: (cb: ((url: string) => void) | undefined) => void;
 
     // - App update
 

@@ -127,9 +127,9 @@ const onMainWindowFocus = (cb: (() => void) | undefined) => {
     if (cb) ipcRenderer.on("mainWindowFocus", cb);
 };
 
-const onOpenURL = (cb: ((url: string) => void) | undefined) => {
-    ipcRenderer.removeAllListeners("openURL");
-    if (cb) ipcRenderer.on("openURL", (_, url: string) => cb(url));
+const onOpenEnteURL = (cb: ((url: string) => void) | undefined) => {
+    ipcRenderer.removeAllListeners("openEnteURL");
+    if (cb) ipcRenderer.on("openEnteURL", (_, url: string) => cb(url));
 };
 
 // - App update
@@ -348,7 +348,7 @@ contextBridge.exposeInMainWorld("electron", {
     lastShownChangelogVersion,
     setLastShownChangelogVersion,
     onMainWindowFocus,
-    onOpenURL,
+    onOpenEnteURL,
 
     // - App update
 
