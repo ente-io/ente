@@ -49,7 +49,7 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
             sx={{ borderRadius: "8px" }}
         />
     ) : (
-        <Box sx={{ position: "relative" }}>
+        <Box sx={{ position: "relative", color: "fixed.white" }}>
             <BackgroundOverlay />
             <SubscriptionCardContentOverlay userDetails={userDetails} />
             <ClickOverlay onClick={onClick} />
@@ -134,7 +134,7 @@ const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
 
     return (
         <Box>
-            <Typography variant="small" sx={{ color: "text.muted" }}>
+            <Typography variant="small" sx={{ opacity: 0.7 }}>
                 {t("storage")}
             </Typography>
             <Typography variant="h3">{label}</Typography>
@@ -166,7 +166,7 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
     // requirement from the library).
 
     <Stack sx={{ gap: 1.5 }}>
-        <UsageBar used={usage} total={storage} />
+        <UsageBar used={usage} total={storage} sx={{opacity: 0.2}} />
         <Stack direction="row" sx={{ justifyContent: "space-between" }}>
             <Typography variant="mini">
                 {`${formattedStorageByteSize(storage - usage)} ${t("free")}`}
@@ -219,8 +219,8 @@ const FamilyUsageSection: React.FC<FamilyUsageSectionProps> = ({
         />
         <Stack direction="row" sx={{ justifyContent: "space-between" }}>
             <Stack direction="row" sx={{ gap: 1.5 }}>
-                <Legend label={t("you")} color="text.base" />
-                <Legend label={t("family")} color="text.muted" />
+                <Legend label={t("you")} opacity={1} />
+                <Legend label={t("family")} opacity={0.7} />
             </Stack>
             <Typography variant="mini" sx={{ fontWeight: "medium" }}>
                 {t("photos_count", { count: fileCount ?? 0 })}
@@ -244,7 +244,7 @@ const FamilyUsageBar: React.FC<FamilyUsageBarProps> = ({
         <UsageBar
             used={userUsage}
             total={totalStorage}
-            sx={{ backgroundColor: "transparent" }}
+            sx={{ backgroundColor: 0.2 }}
         />
         <UsageBar
             used={totalUsage}
@@ -253,10 +253,11 @@ const FamilyUsageBar: React.FC<FamilyUsageBarProps> = ({
                 position: "absolute",
                 top: 0,
                 zIndex: 1,
-                ".MuiLinearProgress-bar ": {
-                    backgroundColor: "text.muted",
-                },
+                // ".MuiLinearProgress-bar ": {
+                    // backgroundColor: "text.muted",
+                // },
                 width: "100%",
+                opacity: 0.7
             }}
         />
     </Box>
@@ -276,21 +277,21 @@ const UsageBar: React.FC<UsageBarProps> = ({ used, total, sx }) => (
 );
 
 const UsageBar_ = styled(LinearProgress)(({ theme }) => ({
-    ".MuiLinearProgress-bar": {
-        borderRadius: "2px",
-    },
+    ".MuiLinearProgress-bar": {        borderRadius: "2px",    },
     borderRadius: "2px",
-    backgroundColor: theme.vars.palette.fixed.storageCardUsageFill,
+    // backgroundColor: theme.vars.palette.fixed.storageCardUsageFill,
+    // backgroundColor: theme.vars.palette.fixed.white,
+
 }));
 
 interface LegendProps {
     label: string;
-    color: string;
+    opacity: number;
 }
 
-const Legend: React.FC<LegendProps> = ({ label, color }) => (
-    <Stack direction="row" sx={{ alignItems: "center" }}>
-        <LegendDot sx={{ color }} />
+const Legend: React.FC<LegendProps> = ({ label, opacity }) => (
+    <Stack direction="row" sx={{ alignItems: "center", opacity }}>
+        <LegendDot />
         <Typography variant="mini" sx={{ fontWeight: "medium" }}>
             {label}
         </Typography>
