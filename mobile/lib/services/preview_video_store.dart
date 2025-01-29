@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:collection";
 import "dart:io";
 
 import "package:dio/dio.dart";
@@ -16,11 +17,14 @@ import "package:photos/core/cache/video_cache_manager.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/core/network/network.dart";
+import "package:photos/events/preview_updated_event.dart";
 import "package:photos/events/video_streaming_changed.dart";
 import "package:photos/models/base/id.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/models/preview/preview_item.dart";
+import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/utils/exif_util.dart";
@@ -31,6 +35,8 @@ import "package:photos/utils/toast_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class PreviewVideoStore {
+  final LinkedHashMap<int, PreviewItem> _items = LinkedHashMap();
+
   PreviewVideoStore._privateConstructor();
 
   static final PreviewVideoStore instance =
@@ -40,7 +46,7 @@ class PreviewVideoStore {
   final cacheManager = DefaultCacheManager();
   final videoCacheManager = VideoCacheManager.instance;
 
-  final files = <EnteFile>{};
+  LinkedHashSet<EnteFile> files = LinkedHashSet();
   bool isUploading = false;
 
   final _dio = NetworkClient.instance.enteDio;
@@ -107,9 +113,21 @@ class PreviewVideoStore {
       }
     }
     if (isUploading) {
+      _items[enteFile.uploadedFileID!] = PreviewItem(
+        status: PreviewItemStatus.inQueue,
+        file: enteFile,
+        collectionID: enteFile.collectionID ?? 0,
+      );
+      Bus.instance.fire(PreviewUpdatedEvent(_items));
       files.add(enteFile);
       return;
     }
+    _items[enteFile.uploadedFileID!] = PreviewItem(
+      status: PreviewItemStatus.compressing,
+      file: enteFile,
+      collectionID: enteFile.collectionID ?? 0,
+    );
+    Bus.instance.fire(PreviewUpdatedEvent(_items));
 
     props ??= await getVideoPropsAsync(file);
 
@@ -178,29 +196,71 @@ class PreviewVideoStore {
 
     final returnCode = await session.getReturnCode();
 
+    String? error;
+
     if (ReturnCode.isSuccess(returnCode)) {
-      _logger.info('Playlist Generated ${enteFile.displayName}');
-      final playlistFile = File("$prefix/output.m3u8");
-      final previewFile = File("$prefix/output.ts");
-      final result = await _uploadPreviewVideo(enteFile, previewFile);
-      final String objectID = result.$1;
-      final objectSize = result.$2;
-      await _reportVideoPreview(
-        enteFile,
-        playlistFile,
-        objectID: objectID,
-        objectSize: objectSize,
-      );
-      _logger.info("Video preview uploaded for $enteFile");
+      try {
+        _items[enteFile.uploadedFileID!] = PreviewItem(
+          status: PreviewItemStatus.uploading,
+          file: enteFile,
+          collectionID: enteFile.collectionID ?? 0,
+        );
+        Bus.instance.fire(PreviewUpdatedEvent(_items));
+
+        _logger.info('Playlist Generated ${enteFile.displayName}');
+        final playlistFile = File("$prefix/output.m3u8");
+        final previewFile = File("$prefix/output.ts");
+        final result = await _uploadPreviewVideo(enteFile, previewFile);
+        final String objectID = result.$1;
+        final objectSize = result.$2;
+        await _reportVideoPreview(
+          enteFile,
+          playlistFile,
+          objectID: objectID,
+          objectSize: objectSize,
+        );
+        _logger.info("Video preview uploaded for $enteFile");
+      } catch (_) {
+        error = "Failed to upload video preview";
+      }
     } else if (ReturnCode.isCancel(returnCode)) {
       _logger.warning("FFmpeg command cancelled");
+      error = "FFmpeg command cancelled";
     } else {
       _logger.severe("FFmpeg command failed with return code $returnCode");
       if (kDebugMode) {
         final output = await session.getOutput();
         _logger.severe(output);
       }
+      error = "Failed to generate video preview";
     }
+
+    if (error == null) {
+      _items[enteFile.uploadedFileID!] = PreviewItem(
+        status: PreviewItemStatus.uploaded,
+        file: enteFile,
+        retryCount: _items[enteFile.uploadedFileID!]!.retryCount,
+        collectionID: enteFile.collectionID ?? 0,
+      );
+    } else {
+      if (_items[enteFile.uploadedFileID!]!.retryCount < 3) {
+        _items[enteFile.uploadedFileID!] = PreviewItem(
+          status: PreviewItemStatus.retry,
+          file: enteFile,
+          retryCount: _items[enteFile.uploadedFileID!]!.retryCount + 1,
+          collectionID: enteFile.collectionID ?? 0,
+        );
+        files.add(enteFile);
+      } else {
+        _items[enteFile.uploadedFileID!] = PreviewItem(
+          status: PreviewItemStatus.failed,
+          file: enteFile,
+          retryCount: _items[enteFile.uploadedFileID!]!.retryCount,
+          collectionID: enteFile.collectionID ?? 0,
+        );
+      }
+    }
+    Bus.instance.fire(PreviewUpdatedEvent(_items));
 
     isUploading = false;
     if (files.isNotEmpty) {
@@ -239,6 +299,7 @@ class PreviewVideoStore {
       );
     } catch (e, s) {
       _logger.severe("Failed to report video preview", e, s);
+      rethrow;
     }
   }
 
