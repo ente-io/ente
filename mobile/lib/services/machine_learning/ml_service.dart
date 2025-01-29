@@ -53,7 +53,7 @@ class MLService {
   bool _shouldPauseIndexingAndClustering = false;
 
   static const _kForceClusteringFaceCount = 8000;
-  late final faceMLDB = MLDataDB.instance;
+  late final mlDataDB = MLDataDB.instance;
 
   /// Only call this function once at app startup, after that you can directly call [runAllML]
   Future<void> init() async {
@@ -133,7 +133,7 @@ class MLService {
       await sync();
 
       final int unclusteredFacesCount =
-          await faceMLDB.getUnclusteredFaceCount();
+          await mlDataDB.getUnclusteredFaceCount();
       if (unclusteredFacesCount > _kForceClusteringFaceCount) {
         _logger.info(
           "There are $unclusteredFacesCount unclustered faces, doing clustering first",
@@ -147,7 +147,7 @@ class MLService {
       if (canFetch()) {
         await fetchAndIndexAllImages();
       }
-      if ((await faceMLDB.getUnclusteredFaceCount()) > 0) {
+      if ((await mlDataDB.getUnclusteredFaceCount()) > 0) {
         await clusterAllImages();
       }
       if (_mlControllerStatus == true) {
@@ -272,12 +272,12 @@ class MLService {
 
     try {
       // Get a sense of the total number of faces in the database
-      final int totalFaces = await faceMLDB.getTotalFaceCount();
+      final int totalFaces = await mlDataDB.getTotalFaceCount();
       final fileIDToCreationTime =
           await FilesDB.instance.getFileIDToCreationTime();
       final startEmbeddingFetch = DateTime.now();
       // read all embeddings
-      final result = await faceMLDB.getFaceInfoForClustering(
+      final result = await mlDataDB.getFaceInfoForClustering(
         maxFaces: totalFaces,
       );
       final Set<int> missingFileIDs = {};
@@ -304,7 +304,7 @@ class MLService {
 
       // Get the current cluster statistics
       final Map<String, (Uint8List, int)> oldClusterSummaries =
-          await faceMLDB.getAllClusterSummary();
+          await mlDataDB.getAllClusterSummary();
 
       if (clusterInBuckets) {
         const int bucketSize = 10000;
@@ -363,9 +363,9 @@ class MLService {
             return;
           }
 
-          await faceMLDB
+          await mlDataDB
               .updateFaceIdToClusterId(clusteringResult.newFaceIdToCluster);
-          await faceMLDB
+          await mlDataDB
               .clusterSummaryUpdate(clusteringResult.newClusterSummaries);
           Bus.instance.fire(PeopleChangedEvent());
           for (final faceInfo in faceInfoForClustering) {
@@ -408,9 +408,9 @@ class MLService {
         _logger.info(
           'Updating ${clusteringResult.newFaceIdToCluster.length} FaceIDs with clusterIDs in the DB',
         );
-        await faceMLDB
+        await mlDataDB
             .updateFaceIdToClusterId(clusteringResult.newFaceIdToCluster);
-        await faceMLDB
+        await mlDataDB
             .clusterSummaryUpdate(clusteringResult.newClusterSummaries);
         Bus.instance.fire(PeopleChangedEvent());
         _logger.info('Done updating FaceIDs with clusterIDs in the DB, in '
@@ -499,7 +499,7 @@ class MLService {
       );
       _logger.info("ML results for fileID ${result.fileId} stored on remote");
       // Storing results locally
-      if (result.facesRan) await faceMLDB.bulkInsertFaces(faces);
+      if (result.facesRan) await mlDataDB.bulkInsertFaces(faces);
       if (result.clipRan) {
         await SemanticSearchService.instance.storeClipImageResult(
           result.clip!,
@@ -522,7 +522,7 @@ class MLService {
           e,
           s,
         );
-        await faceMLDB.bulkInsertFaces(
+        await mlDataDB.bulkInsertFaces(
           [Face.empty(instruction.file.uploadedFileID!, error: true)],
         );
         await SemanticSearchService.instance.storeEmptyClipImageResult(

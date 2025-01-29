@@ -27,7 +27,7 @@ class MLUserDeveloperOptions extends StatefulWidget {
 }
 
 class _MLUserDeveloperOptionsState extends State<MLUserDeveloperOptions> {
-  late final IMLDataDB<int> faceMLDB = MLDataDB.instance;
+  late final IMLDataDB<int> mlDataDB = MLDataDB.instance;
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
@@ -122,9 +122,9 @@ class _MLUserDeveloperOptionsState extends State<MLUserDeveloperOptions> {
 
   Future<void> deleteEmptyIndices(BuildContext context) async {
     try {
-      final Set<int> emptyFileIDs = await faceMLDB.getErroredFileIDs();
-      await faceMLDB.deleteFaceIndexForFiles(emptyFileIDs.toList());
-      await faceMLDB.deleteClipEmbeddings(emptyFileIDs.toList());
+      final Set<int> emptyFileIDs = await mlDataDB.getErroredFileIDs();
+      await mlDataDB.deleteFaceIndexForFiles(emptyFileIDs.toList());
+      await mlDataDB.deleteClipEmbeddings(emptyFileIDs.toList());
       showShortToast(context, "Deleted ${emptyFileIDs.length} entries");
     } catch (e) {
       // ignore: unawaited_futures
@@ -137,7 +137,7 @@ class _MLUserDeveloperOptionsState extends State<MLUserDeveloperOptions> {
 
   Future<void> deleteAllLocalML(BuildContext context) async {
     try {
-      await faceMLDB.dropClustersAndPersonTable(faces: true);
+      await mlDataDB.dropClustersAndPersonTable(faces: true);
       await SemanticSearchService.instance.clearIndexes();
       Bus.instance.fire(PeopleChangedEvent());
       showShortToast(context, "All local ML cleared");

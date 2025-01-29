@@ -138,7 +138,7 @@ class _FaceWidgetState extends State<FaceWidget> {
                 );
               } else if (widget.clusterID != null) {
                 final fileIdsToClusterIds =
-                    await MLDataDB.instance.getFileIdToClusterIds();
+                    await mlDataDB.getFileIdToClusterIds();
                 final files =
                     await SearchService.instance.getAllFilesForSearch();
                 final clusterFiles = files

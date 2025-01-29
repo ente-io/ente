@@ -34,7 +34,7 @@ class SemanticSearchService {
   static final Computer _computer = Computer.shared();
   final LRUMap<String, List<double>> _queryEmbeddingCache = LRUMap(20);
   static const kMinimumSimilarityThreshold = 0.175;
-  late final faceMLDB = MLDataDB.instance;
+  late final mlDataDB = MLDataDB.instance;
 
   bool _hasInitialized = false;
   bool _textModelIsLoaded = false;
@@ -106,7 +106,7 @@ class SemanticSearchService {
   }
 
   Future<void> clearIndexes() async {
-    await faceMLDB.deleteClipIndexes();
+    await mlDataDB.deleteClipIndexes();
     final preferences = await SharedPreferences.getInstance();
     await preferences.remove("sync_time_embeddings_v3");
     _logger.info("Indexes cleared");
@@ -116,7 +116,7 @@ class SemanticSearchService {
     if (_cachedImageEmbeddingVectors != null) {
       return _cachedImageEmbeddingVectors!;
     }
-    _cachedImageEmbeddingVectors ??= faceMLDB.getAllClipVectors();
+    _cachedImageEmbeddingVectors ??= mlDataDB.getAllClipVectors();
     _logger.info("read all embeddings from DB");
 
     return _cachedImageEmbeddingVectors!;
@@ -181,7 +181,7 @@ class SemanticSearchService {
     _logger.info(results.length.toString() + " results");
 
     if (deletedEntries.isNotEmpty) {
-      unawaited(faceMLDB.deleteClipEmbeddings(deletedEntries));
+      unawaited(mlDataDB.deleteClipEmbeddings(deletedEntries));
     }
 
     return results;
@@ -221,12 +221,12 @@ class SemanticSearchService {
       embedding: clipResult.embedding,
       version: clipMlVersion,
     );
-    await faceMLDB.putClip([embedding]);
+    await mlDataDB.putClip([embedding]);
   }
 
   Future<void> storeEmptyClipImageResult(EnteFile entefile) async {
     final embedding = ClipEmbedding.empty(entefile.uploadedFileID!);
-    await faceMLDB.putClip([embedding]);
+    await mlDataDB.putClip([embedding]);
   }
 
   Future<List<double>> _getTextEmbedding(String query) async {
