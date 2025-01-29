@@ -166,7 +166,31 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
     // requirement from the library).
 
     <Stack sx={{ gap: 1.5 }}>
-        <UsageBar used={usage} total={storage} sx={{opacity: 0.2}} />
+        <Box
+            sx={{
+                position: "relative",
+                height: "4px",
+                borderRadius: "4px",
+                backgroundColor: "rgba(255 255 255 / 0.2)",
+            }}
+        >
+            <Box
+                sx={{
+                    position: "absolute",
+                    left: 1,
+                    top: 0,
+                    width: "max(var(--width), 2px)",
+                    height: "4px",
+                    borderRadius: "4px",
+                    backgroundColor: "rgb(255 255 255)",
+                }}
+                style={
+                    {
+                        "--width": `${Math.min(usage / storage, 1) * 100}%`,
+                    } as React.CSSProperties
+                }
+            />
+        </Box>
         <Stack direction="row" sx={{ justifyContent: "space-between" }}>
             <Typography variant="mini">
                 {`${formattedStorageByteSize(storage - usage)} ${t("free")}`}
@@ -254,10 +278,10 @@ const FamilyUsageBar: React.FC<FamilyUsageBarProps> = ({
                 top: 0,
                 zIndex: 1,
                 // ".MuiLinearProgress-bar ": {
-                    // backgroundColor: "text.muted",
+                // backgroundColor: "text.muted",
                 // },
                 width: "100%",
-                opacity: 0.7
+                opacity: 0.7,
             }}
         />
     </Box>
@@ -277,11 +301,10 @@ const UsageBar: React.FC<UsageBarProps> = ({ used, total, sx }) => (
 );
 
 const UsageBar_ = styled(LinearProgress)(({ theme }) => ({
-    ".MuiLinearProgress-bar": {        borderRadius: "2px",    },
+    ".MuiLinearProgress-bar": { borderRadius: "2px" },
     borderRadius: "2px",
     // backgroundColor: theme.vars.palette.fixed.storageCardUsageFill,
     // backgroundColor: theme.vars.palette.fixed.white,
-
 }));
 
 interface LegendProps {
