@@ -17,8 +17,8 @@ class SearchThumbnailWidget extends StatelessWidget {
     this.file,
     this.tagPrefix, {
     this.searchResult,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
