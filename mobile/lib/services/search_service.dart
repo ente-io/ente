@@ -1292,7 +1292,8 @@ class SearchService {
   /// Makes sure that the selection is not more than 10 files,
   /// and that each year of the original list is represented.
   Future<List<EnteFile>> _bestSelection(List<EnteFile> files) async {
-    if (files.length <= 10) return files;
+    final fileCount = files.length;
+    if (fileCount <= 10) return files;
     final fileIDs = files.map((e) => e.uploadedFileID!).toSet();
     final fileIdToFace = await MLDataDB.instance.getFacesForFileIDs(fileIDs);
     final faceIDs =
@@ -1343,13 +1344,12 @@ class SearchService {
 
     final filteredFiles = <EnteFile>[];
     if (allYears.length <= 1) {
-      // sort first on clip embeddings
+      // sort first on clip embeddings score (descending)
       files.sort(
         (a, b) => fileToScore[b.uploadedFileID!]!
             .compareTo(fileToScore[a.uploadedFileID!]!),
       );
-
-      // then sort on faces, heavily prioritizing named faces
+      // then sort on faces (descending), heavily prioritizing named faces
       files.sort(
         (a, b) => fileToFaceCount[b.uploadedFileID!]!
             .compareTo(fileToFaceCount[a.uploadedFileID!]!),
@@ -1357,7 +1357,6 @@ class SearchService {
 
       // then filter out similar images as much as possible
       filteredFiles.add(files.first);
-      final fileCount = files.length;
       int skipped = 0;
       filesLoop:
       for (final file in files.sublist(1)) {
@@ -1377,7 +1376,7 @@ class SearchService {
         filteredFiles.add(file);
       }
     } else {
-      // Handle multiple years, ensuring each is represented and roughly equally distributed
+      // Multiple years, each represented and roughly equally distributed
 
       // Group files by year and sort each year's list by CLIP then face count
       final yearToFiles = <int, List<EnteFile>>{};
@@ -1390,99 +1389,52 @@ class SearchService {
 
       for (final year in yearToFiles.keys) {
         final yearFiles = yearToFiles[year]!;
-        // Sort by CLIP score descending
+        // sort first on clip embeddings score (descending)
         yearFiles.sort(
           (a, b) => fileToScore[b.uploadedFileID!]!
               .compareTo(fileToScore[a.uploadedFileID!]!),
         );
-        // Then sort by face count descending
+        // then sort on faces (descending), heavily prioritizing named faces
         yearFiles.sort(
           (a, b) => fileToFaceCount[b.uploadedFileID!]!
               .compareTo(fileToFaceCount[a.uploadedFileID!]!),
         );
       }
 
-      // Track available files per year after each selection
-      final availableFilesByYear = <int, List<EnteFile>>{};
-      yearToFiles.forEach((year, files) {
-        availableFilesByYear[year] = List.from(files);
-      });
-
-      // Collect initial selection: one from each year (prioritizing recent years)
-      final initialSelection = <EnteFile>[];
+      // Then join the years together one by one and filter similar images
       final years = yearToFiles.keys.toList()
         ..sort((a, b) => b.compareTo(a)); // Recent years first
-
-      for (final year in years) {
-        final available = availableFilesByYear[year]!;
-        if (available.isNotEmpty) {
-          initialSelection.add(available.removeAt(0));
-        }
-      }
-
-      // Fill remaining slots by cycling through years
-      int remainingSlots = 10 - initialSelection.length;
-      if (remainingSlots > 0) {
-        int currentYearIndex = 0;
-        while (remainingSlots > 0) {
-          final year = years[currentYearIndex % years.length];
-          final available = availableFilesByYear[year]!;
-          if (available.isNotEmpty) {
-            initialSelection.add(available.removeAt(0));
-            remainingSlots--;
-          }
-          currentYearIndex++;
-          // Break if no more files across all years
-          if (availableFilesByYear.values.every((list) => list.isEmpty)) {
-            break;
-          }
-        }
-      }
-
-      // Apply similarity filtering
-      if (initialSelection.isNotEmpty) {
-        filteredFiles.add(initialSelection.first);
-        int skipped = 0;
-
-        filesLoop:
-        for (final file in initialSelection.sublist(1)) {
-          if (filteredFiles.length >= 10) break;
-          final clip = fileIdToClip[file.uploadedFileID!];
-          if (clip != null) {
-            for (final filteredFile in filteredFiles) {
-              final fClip = fileIdToClip[filteredFile.uploadedFileID!];
-              if (fClip == null) continue;
-              final similarity = clip.vector.dot(fClip.vector);
-              if (similarity > 0.80) {
-                skipped++;
-                continue filesLoop;
+      int round = 0;
+      int skipped = 0;
+      filteredFiles.add(yearToFiles[years[0]]!.removeAt(0));
+      while (true) {
+        yearLoop:
+        for (final year in years) {
+          final yearFiles = yearToFiles[year]!;
+          if (yearFiles.isEmpty) continue;
+          final newFile = yearFiles.removeAt(0);
+          if (round != 0) {
+            // check for filtering
+            final clip = fileIdToClip[newFile.uploadedFileID!];
+            if (clip != null && (fileCount - skipped) > 10) {
+              for (final filteredFile in filteredFiles) {
+                final fClip = fileIdToClip[filteredFile.uploadedFileID!];
+                if (fClip == null) continue;
+                final similarity = clip.vector.dot(fClip.vector);
+                if (similarity > 0.80) {
+                  skipped++;
+                  continue yearLoop;
+                }
               }
             }
           }
-          filteredFiles.add(file);
-        }
-      }
-
-      // Ensure all years are represented after filtering
-      final filteredYears = filteredFiles.map((f) {
-        final creationTime =
-            DateTime.fromMicrosecondsSinceEpoch(f.creationTime!);
-        return creationTime.year;
-      }).toSet();
-
-      for (final year in yearToFiles.keys) {
-        if (!filteredYears.contains(year)) {
-          // Add the top file from this year's original sorted list
-          final topFile = yearToFiles[year]!.first;
-          if (!filteredFiles.contains(topFile)) {
-            filteredFiles.add(topFile);
+          filteredFiles.add(newFile);
+          if (filteredFiles.length >= 10 ||
+              filteredFiles.length + skipped >= fileCount) {
+            break;
           }
         }
-      }
-
-      // Trim to 10 files if needed, keeping the highest priority files
-      while (filteredFiles.length > 10) {
-        filteredFiles.removeLast();
+        round++;
       }
     }
 
