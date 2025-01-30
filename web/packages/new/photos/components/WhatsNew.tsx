@@ -38,7 +38,7 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
     return (
         <Dialog
             {...{ open, fullScreen }}
-            TransitionComponent={SlideUpTransition}
+            slots={{ transition: SlideUpTransition }}
             maxWidth="xs"
             fullWidth
         >

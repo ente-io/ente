@@ -134,6 +134,7 @@ class HTTPService {
     public async request(config: AxiosRequestConfig, customConfig?: any) {
         config.headers = {
             ...this.headers,
+            // eslint-disable-next-line @typescript-eslint/no-misused-spread
             ...config.headers,
         };
         if (customConfig?.cancel) {

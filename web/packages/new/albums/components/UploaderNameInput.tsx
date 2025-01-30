@@ -47,10 +47,10 @@ export const UploaderNameInput: React.FC<UploaderNameInput> = ({
 
     return (
         <Dialog
-            open={open}
-            onClose={onClose}
-            PaperProps={{ sx: fullScreen ? {} : { maxWidth: "346px" } }}
-            fullScreen={fullScreen}
+            {...{ open, onClose, fullScreen }}
+            slotProps={{
+                paper: { sx: fullScreen ? {} : { maxWidth: "346px" } },
+            }}
             fullWidth
         >
             <Box

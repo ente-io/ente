@@ -44,7 +44,7 @@ export const errorDialogAttributes = (
     optionalMessage?: string,
 ): MiniDialogAttributes => {
     const title = optionalMessage ? messageOrTitle : t("error");
-    const message = optionalMessage ? optionalMessage : messageOrTitle;
+    const message = optionalMessage ?? messageOrTitle;
 
     return {
         title,
