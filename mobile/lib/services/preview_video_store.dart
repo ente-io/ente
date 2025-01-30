@@ -17,6 +17,7 @@ import "package:photos/core/cache/video_cache_manager.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/core/network/network.dart";
+import 'package:photos/db/files_db.dart';
 import "package:photos/events/preview_updated_event.dart";
 import "package:photos/events/video_streaming_changed.dart";
 import "package:photos/models/base/id.dart";
@@ -72,6 +73,14 @@ class PreviewVideoStore {
       oneMonthBack.millisecondsSinceEpoch,
     );
     Bus.instance.fire(VideoStreamingChanged());
+
+    if (isVideoStreamingEnabled) {
+      await putFilesForPreviewCreation();
+    } else {
+      _items.clear();
+      Bus.instance.fire(PreviewUpdatedEvent(_items));
+      files.clear();
+    }
   }
 
   Future<DateTime?> get videoStreamingCutoff async {
@@ -444,5 +453,27 @@ class PreviewVideoStore {
       _logger.warning("Failed to get preview url", e);
       rethrow;
     }
+  }
+
+  // get all files after cutoff date and add it to queue for preview creation
+  // only run when video streaming is enabled
+  Future<void> putFilesForPreviewCreation() async {
+    if (!isVideoStreamingEnabled) return;
+
+    final cutoff = await videoStreamingCutoff;
+    if (cutoff == null) return;
+    final files = await FilesDB.instance.getAllFilesAfterDate(
+      fileType: FileType.video,
+      beginDate: cutoff,
+    );
+    final previewIds = FileDataService.instance.previewIds;
+    final allFiles = files.where((file) {
+      return previewIds?[file.uploadedFileID!] == null;
+    }).toList();
+    final file = allFiles.first;
+    allFiles.remove(file);
+
+    this.files.addAll(allFiles);
+    await chunkAndUploadVideo(null, file);
   }
 }
