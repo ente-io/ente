@@ -1291,9 +1291,13 @@ class SearchService {
   /// Returns the best selection of files from the given list.
   /// Makes sure that the selection is not more than 10 files,
   /// and that each year of the original list is represented.
-  Future<List<EnteFile>> _bestSelection(List<EnteFile> files) async {
+  Future<List<EnteFile>> _bestSelection(
+    List<EnteFile> files, {
+    int? prefferedSize,
+  }) async {
     final fileCount = files.length;
-    if (fileCount <= 10) return files;
+    int targetSize = prefferedSize ?? 10;
+    if (fileCount <= targetSize) return files;
     final fileIDs = files.map((e) => e.uploadedFileID!).toSet();
     final fileIdToFace = await MLDataDB.instance.getFacesForFileIDs(fileIDs);
     final faceIDs =
@@ -1360,9 +1364,9 @@ class SearchService {
       int skipped = 0;
       filesLoop:
       for (final file in files.sublist(1)) {
-        if (filteredFiles.length >= 10) break;
+        if (filteredFiles.length >= targetSize) break;
         final clip = fileIdToClip[file.uploadedFileID!];
-        if (clip != null && (fileCount - skipped) > 10) {
+        if (clip != null && (fileCount - skipped) > targetSize) {
           for (final filteredFile in filteredFiles) {
             final fClip = fileIdToClip[filteredFile.uploadedFileID!];
             if (fClip == null) continue;
@@ -1377,6 +1381,10 @@ class SearchService {
       }
     } else {
       // Multiple years, each represented and roughly equally distributed
+      if (prefferedSize == null && (allYears.length * 2) > 10) {
+        targetSize = allYears.length * 3;
+        if (fileCount < targetSize) return files;
+      }
 
       // Group files by year and sort each year's list by CLIP then face count
       final yearToFiles = <int, List<EnteFile>>{};
@@ -1416,7 +1424,7 @@ class SearchService {
           if (round != 0) {
             // check for filtering
             final clip = fileIdToClip[newFile.uploadedFileID!];
-            if (clip != null && (fileCount - skipped) > 10) {
+            if (clip != null && (fileCount - skipped) > targetSize) {
               for (final filteredFile in filteredFiles) {
                 final fClip = fileIdToClip[filteredFile.uploadedFileID!];
                 if (fClip == null) continue;
@@ -1429,7 +1437,7 @@ class SearchService {
             }
           }
           filteredFiles.add(newFile);
-          if (filteredFiles.length >= 10 ||
+          if (filteredFiles.length >= targetSize ||
               filteredFiles.length + skipped >= fileCount) {
             break;
           }
