@@ -2,16 +2,22 @@ import "dart:async";
 
 import "package:dotted_border/dotted_border.dart";
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
+import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/search/result/contact_result_page.dart";
+import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -129,26 +135,51 @@ class _ContactsSectionState extends State<ContactsSection> {
   }
 }
 
-class ContactRecommendation extends StatelessWidget {
+class ContactRecommendation extends StatefulWidget {
   final GenericSearchResult contactSearchResult;
   const ContactRecommendation(this.contactSearchResult, {super.key});
 
   @override
+  State<ContactRecommendation> createState() => _ContactRecommendationState();
+}
+
+class _ContactRecommendationState extends State<ContactRecommendation> {
+  Future<EnteFile?>? _mostRecentFileOfPerson;
+  late String? _personID;
+  final _logger = Logger("_ContactRecommendationState");
+
+  @override
+  void initState() {
+    super.initState();
+    _personID = widget.contactSearchResult.params[kPersonParamID];
+    if (_personID != null) {
+      _mostRecentFileOfPerson =
+          PersonService.instance.getPerson(_personID!).then((person) {
+        if (person == null) {
+          return null;
+        } else {
+          return PersonService.instance.getRecentFileOfPerson(person);
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final heroTag = contactSearchResult.heroTag() +
-        (contactSearchResult.previewThumbnail()?.tag ?? "");
+    final heroTag = widget.contactSearchResult.heroTag() +
+        (widget.contactSearchResult.previewThumbnail()?.tag ?? "");
     final enteTextTheme = getEnteTextTheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2.5),
       child: GestureDetector(
         onTap: () {
-          RecentSearches().add(contactSearchResult.name());
-          if (contactSearchResult.onResultTap != null) {
-            contactSearchResult.onResultTap!(context);
+          RecentSearches().add(widget.contactSearchResult.name());
+          if (widget.contactSearchResult.onResultTap != null) {
+            widget.contactSearchResult.onResultTap!(context);
           } else {
             routeToPage(
               context,
-              ContactResultPage(contactSearchResult),
+              ContactResultPage(widget.contactSearchResult),
             );
           }
         },
@@ -169,16 +200,55 @@ class ContactRecommendation extends StatelessWidget {
                   child: SizedBox(
                     width: 67.75,
                     height: 67.75,
-                    child: contactSearchResult.previewThumbnail() != null
-                        ? Hero(
-                            tag: heroTag,
-                            child: ThumbnailWidget(
-                              contactSearchResult.previewThumbnail()!,
-                              shouldShowArchiveStatus: false,
-                              shouldShowSyncStatus: false,
-                            ),
+                    child: _mostRecentFileOfPerson != null
+                        ? FutureBuilder(
+                            future: _mostRecentFileOfPerson,
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return PersonFaceWidget(
+                                  snapshot.data!,
+                                  personId: _personID,
+                                );
+                              } else if (snapshot.connectionState ==
+                                      ConnectionState.done &&
+                                  snapshot.data == null) {
+                                if (widget.contactSearchResult
+                                        .previewThumbnail() !=
+                                    null) {
+                                  return Hero(
+                                    tag: heroTag,
+                                    child: ThumbnailWidget(
+                                      widget.contactSearchResult
+                                          .previewThumbnail()!,
+                                      shouldShowArchiveStatus: false,
+                                      shouldShowSyncStatus: false,
+                                    ),
+                                  );
+                                } else {
+                                  return const NoThumbnailWidget();
+                                }
+                              } else if (snapshot.hasError) {
+                                _logger.severe(
+                                  "Error loading personID",
+                                  snapshot.error,
+                                );
+                                return const NoThumbnailWidget();
+                              } else {
+                                return const EnteLoadingWidget();
+                              }
+                            },
                           )
-                        : const NoThumbnailWidget(),
+                        : widget.contactSearchResult.previewThumbnail() != null
+                            ? Hero(
+                                tag: heroTag,
+                                child: ThumbnailWidget(
+                                  widget.contactSearchResult
+                                      .previewThumbnail()!,
+                                  shouldShowArchiveStatus: false,
+                                  shouldShowSyncStatus: false,
+                                ),
+                              )
+                            : const NoThumbnailWidget(),
                   ),
                 ),
                 const SizedBox(height: 10.5),
@@ -189,7 +259,7 @@ class ContactRecommendation extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        contactSearchResult.name(),
+                        widget.contactSearchResult.name(),
                         style: enteTextTheme.small,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,

@@ -59,7 +59,7 @@ class PersonService {
       for (var person in value) {
         if (person.data.email != null && person.data.email!.isNotEmpty) {
           _instance!._emailToPartialPersonDataMapCache[person.data.email!] = {
-            "remoteID": person.remoteID,
+            "person_id": person.remoteID,
             "name": person.data.name,
           };
         }

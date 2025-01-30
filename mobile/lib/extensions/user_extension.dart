@@ -6,4 +6,8 @@ extension UserExtension on User {
   String? get displayName =>
       PersonService.instance.emailToPartialPersonDataMapCache[email]?["name"] ??
       ((name?.isEmpty ?? true) ? null : name);
+
+  String? get linkedPersonID =>
+      PersonService.instance.emailToPartialPersonDataMapCache[email]
+          ?["person_id"];
 }
