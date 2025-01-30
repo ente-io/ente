@@ -1421,10 +1421,10 @@ class SearchService {
           final yearFiles = yearToFiles[year]!;
           if (yearFiles.isEmpty) continue;
           final newFile = yearFiles.removeAt(0);
-          if (round != 0) {
+          if (round != 0 && (fileCount - skipped) > targetSize) {
             // check for filtering
             final clip = fileIdToClip[newFile.uploadedFileID!];
-            if (clip != null && (fileCount - skipped) > targetSize) {
+            if (clip != null) {
               for (final filteredFile in filteredFiles) {
                 final fClip = fileIdToClip[filteredFile.uploadedFileID!];
                 if (fClip == null) continue;
