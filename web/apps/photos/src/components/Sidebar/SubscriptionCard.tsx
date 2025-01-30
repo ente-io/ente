@@ -1,6 +1,6 @@
 import { Overlay } from "@/base/components/containers";
 import type { ButtonishProps } from "@/base/components/mui";
-import { UnstyledButton } from "@/new/photos/components/UnstyledButton";
+import { FocusVisibleUnstyledButton } from "@/new/photos/components/UnstyledButton";
 import type { UserDetails } from "@/new/photos/services/user-details";
 import {
     familyUsage,
@@ -74,8 +74,11 @@ const ClickOverlay: React.FC<ButtonishProps> = ({ onClick }) => (
     </ClickOverlayButton>
 );
 
-/** A mixin of UnstyledButton and {@link Overlay}, plus custom styling. */
-const ClickOverlayButton = styled(UnstyledButton)`
+/**
+ * The transparent button element offers activation of the subscription card is activated on clicks
+ * A mixin of UnstyledButton, FocusVisibleUnstyledButton, {@link Overlay}, plus
+ * custom styling. */
+const ClickOverlayButton = styled(FocusVisibleUnstyledButton)`
     /* Overlay */
     position: absolute;
     width: 100%;

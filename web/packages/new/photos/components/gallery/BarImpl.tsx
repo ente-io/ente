@@ -12,7 +12,7 @@ import {
     ItemCard,
     TileTextOverlay,
 } from "@/new/photos/components/Tiles";
-import { UnstyledButton } from "@/new/photos/components/UnstyledButton";
+import { FocusVisibleUnstyledButton } from "@/new/photos/components/UnstyledButton";
 import type {
     CollectionSummary,
     CollectionSummaryType,
@@ -42,8 +42,8 @@ import {
     type ListChildComponentProps,
     areEqual,
 } from "react-window";
-import { isMLSupported } from "../../services/ml";
 import type { GalleryBarMode } from "./reducer";
+import { isMLSupported } from "../../services/ml";
 
 export interface GalleryBarImplProps {
     /**
@@ -352,7 +352,7 @@ const ModeIndicator: React.FC<
     );
 };
 
-const ModeButton = styled(UnstyledButton, {
+const ModeButton = styled(FocusVisibleUnstyledButton, {
     shouldForwardProp: (propName) => propName != "active",
 })<{ active: boolean }>(
     ({ theme, active }) => `
