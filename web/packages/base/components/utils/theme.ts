@@ -184,8 +184,7 @@ const _colors = {
             baseHover: "rgba(0 0 0 / 0.87)",
             muted: "rgba(0 0 0 / 0.12)",
             faint: "rgba(0 0 0 / 0.04)",
-            // TODO(LM): Different from Figma.
-            faintHover: "rgba(0 0 0 / 0.06)",
+            faintHover: "rgba(0 0 0 / 0.08)",
             fainter: "rgba(0 0 0 / 0.02)",
         },
         stroke: {
@@ -295,8 +294,9 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 // The color of an hovered action.
                 hover: colors.light.fill.faintHover,
                 // For an icon button, the hover background color is derived
-                // from the active color above and this opacity.
-                hoverOpacity: 0.06,
+                // from the active color above and this opacity. Use a value
+                // that results in the same result as faintHover.
+                hoverOpacity: 0.08,
                 // TODO(LM): Remove commented.
                 // The color of a selected action.
                 //
@@ -323,7 +323,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 bg: colors.light.fill.faint,
                 hoverBg: colors.light.fill.faintHover,
                 // We don't use this currently.
-                // disabledBg: "#ff0000", //colors.light.fill.faint,
+                // disabledBg: colors.light.fill.fainter,
             },
         },
     },
