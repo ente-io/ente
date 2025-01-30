@@ -1,14 +1,21 @@
 import 'dart:async';
 
 import 'package:chewie/chewie.dart';
-import 'package:chewie/src/material/material_progress_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
-import 'package:photos/utils/date_time_util.dart';
+import "package:photos/models/file/file.dart";
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/viewer/file/preview_status_widget.dart";
+import "package:photos/utils/debouncer.dart";
 import 'package:video_player/video_player.dart';
 
 class VideoControls extends StatefulWidget {
-  const VideoControls({Key? key}) : super(key: key);
+  const VideoControls({
+    super.key,
+    required this.file,
+  });
+  final EnteFile file;
 
   @override
   State<StatefulWidget> createState() {
@@ -58,20 +65,39 @@ class _VideoControlsState extends State<VideoControls> {
           absorbing: _hideStuff,
           child: Stack(
             children: <Widget>[
-              Column(
-                children: [
-                  _latestValue != null &&
-                          !_latestValue!.isPlaying &&
-                          _latestValue!.isBuffering
-                      ? const Center(
-                          child: CircularProgressIndicator(),
-                        )
-                      : _buildHitArea(),
-                ],
-              ),
+              if (_latestValue != null &&
+                  !_latestValue!.isPlaying &&
+                  _latestValue!.isBuffering)
+                const Align(
+                  alignment: Alignment.center,
+                  child: Center(
+                    child: EnteLoadingWidget(
+                      size: 32,
+                      color: fillBaseDark,
+                      padding: 0,
+                    ),
+                  ),
+                )
+              else
+                Positioned.fill(child: _buildHitArea()),
               Align(
                 alignment: Alignment.bottomCenter,
-                child: _buildBottomBar(context),
+                child: SafeArea(
+                  top: false,
+                  left: false,
+                  right: false,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      PreviewStatusWidget(
+                        showControls: !_hideStuff,
+                        file: widget.file,
+                        isPreviewPlayer: true,
+                      ),
+                      _buildBottomBar(context),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
@@ -110,100 +136,53 @@ class _VideoControlsState extends State<VideoControls> {
   Widget _buildBottomBar(
     BuildContext context,
   ) {
-    final iconColor = Theme.of(context).textTheme.labelLarge!.color;
-
     return Container(
       padding: const EdgeInsets.only(bottom: 60),
+      height: 100,
       child: AnimatedOpacity(
         opacity: _hideStuff ? 0.0 : 1.0,
         duration: const Duration(milliseconds: 300),
-        child: Container(
-          height: barHeight,
-          color: Colors.transparent,
-          child: Row(
-            children: <Widget>[
-              _buildCurrentPosition(iconColor),
-              chewieController!.isLive ? const SizedBox() : _buildProgressBar(),
-              _buildTotalDuration(iconColor),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Expanded _buildHitArea() {
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          if (_latestValue != null) {
-            if (_displayTapped) {
-              setState(() {
-                _hideStuff = true;
-              });
-            } else {
-              _cancelAndRestartTimer();
-            }
-          } else {
-            _playPause();
-
+        child: _SeekBarAndDuration(
+          controller: controller,
+          latestValue: _latestValue,
+          updateDragging: (bool value) {
             setState(() {
-              _hideStuff = true;
+              _dragging = value;
             });
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHitArea() {
+    return GestureDetector(
+      onTap: () {
+        if (_latestValue != null) {
+          if (_displayTapped) {
+            setState(() {
+              _hideStuff = !_hideStuff;
+            });
+          } else {
+            _cancelAndRestartTimer();
           }
-        },
-        child: Container(
-          color: Colors.transparent,
-          child: Center(
-            child: AnimatedOpacity(
-              opacity:
-                  _latestValue != null && !_hideStuff && !_dragging ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 300),
-              child: GestureDetector(
-                onTap: _playPause,
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Icon(
-                    _latestValue!.isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: Colors.white, // same for both themes
-                    size: 64.0,
-                  ),
-                ),
-              ),
-            ),
+        } else {
+          _playPause();
+
+          setState(() {
+            _hideStuff = true;
+          });
+        }
+      },
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedOpacity(
+        opacity: _latestValue != null && !_hideStuff && !_dragging ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 300),
+        child: Center(
+          child: _PlayPauseButton(
+            _playPause,
+            _latestValue!.isPlaying,
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCurrentPosition(Color? iconColor) {
-    final position =
-        _latestValue != null ? _latestValue!.position : Duration.zero;
-
-    return Container(
-      margin: const EdgeInsets.only(left: 20.0, right: 16.0),
-      child: Text(
-        formatDuration(position),
-        style: const TextStyle(
-          fontSize: 12.0,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTotalDuration(Color? iconColor) {
-    final duration =
-        _latestValue != null ? _latestValue!.duration : Duration.zero;
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 20.0),
-      child: Text(
-        formatDuration(duration),
-        style: const TextStyle(
-          fontSize: 12.0,
-          color: Colors.white,
         ),
       ),
     );
@@ -275,34 +254,235 @@ class _VideoControlsState extends State<VideoControls> {
       _latestValue = controller.value;
     });
   }
+}
 
-  Widget _buildProgressBar() {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.only(right: 16.0),
-        child: MaterialVideoProgressBar(
-          controller,
-          onDragStart: () {
-            setState(() {
-              _dragging = true;
-            });
+class _SeekBarAndDuration extends StatelessWidget {
+  final VideoPlayerController? controller;
+  final VideoPlayerValue? latestValue;
+  final Function(bool) updateDragging;
 
-            _hideTimer?.cancel();
-          },
-          onDragEnd: () {
-            setState(() {
-              _dragging = false;
-            });
+  const _SeekBarAndDuration({
+    required this.controller,
+    required this.latestValue,
+    required this.updateDragging,
+  });
 
-            _startHideTimer();
-          },
-          colors: chewieController!.materialProgressColors ??
-              ChewieProgressColors(
-                playedColor: Theme.of(context).colorScheme.greenAlternative,
-                handleColor: Colors.white,
-                bufferedColor: Colors.white,
-                backgroundColor: Theme.of(context).disabledColor,
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+      ),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          4,
+          16,
+          4,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.3),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(8),
+          ),
+          border: Border.all(
+            color: strokeFaintDark,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            if (latestValue?.position == null)
+              Text(
+                "0:00",
+                style: getEnteTextTheme(
+                  context,
+                ).mini.copyWith(
+                      color: textBaseDark,
+                    ),
+              )
+            else
+              Text(
+                _secondsToDuration(latestValue!.position.inSeconds),
+                style: getEnteTextTheme(
+                  context,
+                ).mini.copyWith(
+                      color: textBaseDark,
+                    ),
               ),
+            Expanded(
+              child: _SeekBar(controller!, updateDragging),
+            ),
+            Text(
+              _secondsToDuration(
+                latestValue?.duration.inSeconds ?? 0,
+              ),
+              style: getEnteTextTheme(
+                context,
+              ).mini.copyWith(
+                    color: textBaseDark,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Returns the duration in the format "h:mm:ss" or "m:ss".
+  String _secondsToDuration(int totalSeconds) {
+    final hours = totalSeconds ~/ 3600;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+    final seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      return '${hours.toString().padLeft(1, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    } else {
+      return '${minutes.toString().padLeft(1, '0')}:${seconds.toString().padLeft(2, '0')}';
+    }
+  }
+}
+
+class _SeekBar extends StatefulWidget {
+  final VideoPlayerController controller;
+  final Function(bool) updateDragging;
+  const _SeekBar(
+    this.controller,
+    this.updateDragging,
+  );
+
+  @override
+  State<_SeekBar> createState() => _SeekBarState();
+}
+
+class _SeekBarState extends State<_SeekBar> {
+  double _sliderValue = 0.0;
+  final _debouncer = Debouncer(
+    const Duration(milliseconds: 300),
+    executionInterval: const Duration(milliseconds: 300),
+  );
+  bool _controllerWasPlaying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(updateSlider);
+  }
+
+  void updateSlider() {
+    if (widget.controller.value.isInitialized) {
+      setState(() {
+        _sliderValue = widget.controller.value.position.inSeconds.toDouble();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _debouncer.cancelDebounceTimer();
+    widget.controller.removeListener(updateSlider);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    return SliderTheme(
+      data: SliderTheme.of(context).copyWith(
+        trackHeight: 1.0,
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8.0),
+        overlayShape: const RoundSliderOverlayShape(overlayRadius: 14.0),
+        activeTrackColor: colorScheme.primary300,
+        inactiveTrackColor: fillMutedDark,
+        thumbColor: backgroundElevatedLight,
+        overlayColor: fillMutedDark,
+      ),
+      child: Slider(
+        min: 0.0,
+        max: widget.controller.value.duration.inSeconds.toDouble(),
+        value: _sliderValue,
+        onChangeStart: (value) async {
+          widget.updateDragging(true);
+          _controllerWasPlaying = widget.controller.value.isPlaying;
+          if (_controllerWasPlaying) {
+            await widget.controller.pause();
+          }
+        },
+        onChanged: (value) {
+          if (mounted) {
+            setState(() {
+              _sliderValue = value;
+            });
+          }
+
+          _debouncer.run(() async {
+            await widget.controller.seekTo(Duration(seconds: value.toInt()));
+          });
+        },
+        divisions: 4500,
+        onChangeEnd: (value) async {
+          await widget.controller.seekTo(Duration(seconds: value.toInt()));
+
+          if (_controllerWasPlaying) {
+            await widget.controller.play();
+          }
+          widget.updateDragging(false);
+        },
+        allowedInteraction: SliderInteraction.tapAndSlide,
+      ),
+    );
+  }
+}
+
+class _PlayPauseButton extends StatefulWidget {
+  final void Function() playPause;
+  final bool isPlaying;
+  const _PlayPauseButton(
+    this.playPause,
+    this.isPlaying,
+  );
+
+  @override
+  State<_PlayPauseButton> createState() => _PlayPauseButtonState();
+}
+
+class _PlayPauseButtonState extends State<_PlayPauseButton> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 54,
+      height: 54,
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.3),
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: strokeFaintDark,
+          width: 1,
+        ),
+      ),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.playPause,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 250),
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return ScaleTransition(scale: animation, child: child);
+          },
+          switchInCurve: Curves.easeInOutQuart,
+          switchOutCurve: Curves.easeInOutQuart,
+          child: widget.isPlaying
+              ? const Icon(
+                  Icons.pause,
+                  size: 32,
+                  key: ValueKey("pause"),
+                  color: Colors.white,
+                )
+              : const Icon(
+                  Icons.play_arrow,
+                  size: 36,
+                  key: ValueKey("play"),
+                  color: Colors.white,
+                ),
         ),
       ),
     );

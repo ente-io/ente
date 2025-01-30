@@ -247,7 +247,7 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
       looping: true,
       allowMuting: true,
       allowFullScreen: false,
-      customControls: const VideoControls(),
+      customControls: VideoControls(file: widget.file),
     );
     return Container(
       color: Colors.black,

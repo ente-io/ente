@@ -22,6 +22,7 @@ import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/native_video_player_controls/play_pause_button.dart";
 import "package:photos/ui/viewer/file/native_video_player_controls/seek_bar.dart";
+import "package:photos/ui/viewer/file/preview_status_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -276,6 +277,15 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
+                                ValueListenableBuilder(
+                                  valueListenable: _showControls,
+                                  builder: (context, value, _) {
+                                    return PreviewStatusWidget(
+                                      showControls: value,
+                                      file: widget.file,
+                                    );
+                                  },
+                                ),
                                 _VideoDescriptionAndSwitchToMediaKitButton(
                                   file: widget.file,
                                   showControls: _showControls,

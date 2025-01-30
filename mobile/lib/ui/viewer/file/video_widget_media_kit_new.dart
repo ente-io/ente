@@ -16,6 +16,7 @@ import "package:photos/services/files_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
+import "package:photos/ui/viewer/file/preview_status_widget.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
@@ -361,6 +362,15 @@ class __VideoWidgetState extends State<_VideoWidget> {
                                       ),
                                     )
                                   : const SizedBox.shrink(),
+                              ValueListenableBuilder(
+                                valueListenable: showControlsNotifier,
+                                builder: (context, value, _) {
+                                  return PreviewStatusWidget(
+                                    showControls: value,
+                                    file: widget.file,
+                                  );
+                                },
+                              ),
                               _SeekBarAndDuration(
                                 controller: widget.controller,
                                 isSeekingNotifier: _isSeekingNotifier,

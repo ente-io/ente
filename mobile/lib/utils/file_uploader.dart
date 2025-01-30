@@ -749,9 +749,6 @@ class FileUploader {
         throw SyncStopRequestedError();
       }
 
-      if (PreviewVideoStore.instance.isVideoStreamingEnabled) {
-        _uploadPreview(file);
-      }
       EnteFile remoteFile;
       if (isUpdatedFile) {
         remoteFile = await _updateFile(
@@ -820,6 +817,9 @@ class FileUploader {
           remoteFile.localID = null;
         }
         await FilesDB.instance.update(remoteFile);
+      }
+      if (PreviewVideoStore.instance.isVideoStreamingEnabled) {
+        _uploadPreview(file);
       }
       await UploadLocksDB.instance.deleteMultipartTrack(lockKey);
 

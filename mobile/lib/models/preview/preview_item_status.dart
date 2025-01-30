@@ -1,8 +1,12 @@
 enum PreviewItemStatus {
+  // queued
   inQueue,
+  retry,
+  // in progress
   compressing,
   uploading,
-  retry,
-  uploaded,
+  // error
   failed,
+  // done
+  uploaded,
 }
