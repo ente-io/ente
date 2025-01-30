@@ -21,10 +21,5 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'sl';
 
   final messages = _notInlinedMessages(_notInlinedMessages);
-  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "link": MessageLookupByLibrary.simpleMessage("Link"),
-        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
-        "noEnteAccountExclamation":
-            MessageLookupByLibrary.simpleMessage("No Ente account!")
-      };
+  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{};
 }

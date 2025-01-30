@@ -60,6 +60,7 @@ class _FaceWidgetState extends State<FaceWidget> {
   }
 
   Widget _buildFaceImageGenerated(bool givenFaces) {
+    late final mlDataDB = MLDataDB.instance;
     return FutureBuilder<Map<String, Uint8List>?>(
       future: givenFaces
           ? widget.faceCrops
@@ -79,11 +80,11 @@ class _FaceWidgetState extends State<FaceWidget> {
               );
               if (widget.person == null && widget.clusterID == null) {
                 // Double check that it doesn't belong to an existing clusterID.
-                final existingClusterID = await MLDataDB.instance
-                    .getClusterIDForFaceID(widget.face.faceID);
+                final existingClusterID =
+                    await mlDataDB.getClusterIDForFaceID(widget.face.faceID);
                 if (existingClusterID != null) {
                   final fileIdsToClusterIds =
-                      await MLDataDB.instance.getFileIdToClusterIds();
+                      await mlDataDB.getFileIdToClusterIds();
                   final files =
                       await SearchService.instance.getAllFilesForSearch();
                   final clusterFiles = files
@@ -108,7 +109,7 @@ class _FaceWidgetState extends State<FaceWidget> {
                   // The face score is too low for automatic clustering,
                   // assigning a manual new clusterID so that the user can cluster it manually
                   final String clusterID = newClusterID();
-                  await MLDataDB.instance.updateFaceIdToClusterId(
+                  await mlDataDB.updateFaceIdToClusterId(
                     {widget.face.faceID: clusterID},
                   );
                   await Navigator.of(context).push(
@@ -140,7 +141,7 @@ class _FaceWidgetState extends State<FaceWidget> {
                 );
               } else if (widget.clusterID != null) {
                 final fileIdsToClusterIds =
-                    await MLDataDB.instance.getFileIdToClusterIds();
+                    await mlDataDB.getFileIdToClusterIds();
                 final files =
                     await SearchService.instance.getAllFilesForSearch();
                 final clusterFiles = files

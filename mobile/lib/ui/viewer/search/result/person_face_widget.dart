@@ -48,6 +48,7 @@ class PersonFaceWidget extends StatefulWidget {
 
 class _PersonFaceWidgetState extends State<PersonFaceWidget> {
   Future<Uint8List?>? faceCropFuture;
+  late final mlDataDB = MLDataDB.instance;
 
   @override
   void initState() {
@@ -105,16 +106,15 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
             if (tryCache != null) return tryCache;
           }
           if (personAvatarFaceID == null && widget.cannotTrustFile) {
-            allFaces =
-                await MLDataDB.instance.getFaceIDsForPerson(widget.personId!);
+            allFaces = await mlDataDB.getFaceIDsForPerson(widget.personId!);
           }
         }
       } else if (widget.clusterID != null && widget.cannotTrustFile) {
-        allFaces =
-            await MLDataDB.instance.getFaceIDsForCluster(widget.clusterID!);
+        allFaces = await mlDataDB.getFaceIDsForCluster(widget.clusterID!);
       }
       if (allFaces != null) {
-        final allFileIDs = allFaces.map((e) => getFileIdFromFaceId(e)).toSet();
+        final allFileIDs =
+            allFaces.map((e) => getFileIdFromFaceId<int>(e)).toSet();
         final hiddenFileIDs = await SearchService.instance
             .getHiddenFiles()
             .then((onValue) => onValue.map((e) => e.uploadedFileID));
@@ -140,7 +140,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
         }
       }
 
-      final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
+      final Face? face = await mlDataDB.getCoverFaceForPerson(
         recentFileID: fileForFaceCrop.uploadedFileID!,
         avatarFaceId: personAvatarFaceID,
         personID: widget.personId,

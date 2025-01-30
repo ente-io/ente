@@ -31,6 +31,7 @@ Future<List<EnteFile>> getFilteredFiles(
   List<HierarchicalSearchFilter> filters,
 ) async {
   final logger = Logger("HierarchicalSearchUtil");
+  final mlDataDB = MLDataDB.instance;
   late final List<EnteFile> filteredFiles;
   final files = await SearchService.instance.getAllFilesForHierarchicalSearch();
   final resultsNeverComputedFilters = <HierarchicalSearchFilter>[];
@@ -42,12 +43,12 @@ Future<List<EnteFile>> getFilteredFiles(
     if (filter is FaceFilter && filter.matchedUploadedIDs.isEmpty) {
       try {
         if (filter.personId != null) {
-          final fileIDs = await MLDataDB.instance.getFileIDsOfPersonID(
+          final fileIDs = await mlDataDB.getFileIDsOfPersonID(
             filter.personId!,
           );
           filter.matchedUploadedIDs.addAll(fileIDs);
         } else if (filter.clusterId != null) {
-          final fileIDs = await MLDataDB.instance.getFileIDsOfClusterID(
+          final fileIDs = await mlDataDB.getFileIDsOfClusterID(
             filter.clusterId!,
           );
           filter.matchedUploadedIDs.addAll(fileIDs);
@@ -80,19 +81,19 @@ Future<List<EnteFile>> getFilteredFiles(
           }
         }
 
-        await MLDataDB.instance
+        await mlDataDB
             .getPersonsClusterIDs(selectedPersonIDs)
             .then((clusterIDs) {
           selectedClusterIDs.addAll(clusterIDs);
         });
 
         final fileIDsToAvoid =
-            await MLDataDB.instance.getAllFilesAssociatedWithAllClusters(
+            await mlDataDB.getAllFilesAssociatedWithAllClusters(
           exceptClusters: selectedClusterIDs,
         );
 
         final filesOfFaceIDsNotInAnyCluster =
-            await MLDataDB.instance.getAllFileIDsOfFaceIDsNotInAnyCluster();
+            await mlDataDB.getAllFileIDsOfFaceIDsNotInAnyCluster();
 
         fileIDsToAvoid.addAll(filesOfFaceIDsNotInAnyCluster);
 
@@ -349,13 +350,13 @@ Future<List<FaceFilter>> curateFaceFilters(
   List<EnteFile> files,
 ) async {
   try {
+    final mlDataDB = MLDataDB.instance;
     final faceFilters = <FaceFilter>[];
     final Map<int, Set<String>> fileIdToClusterID =
-        await MLDataDB.instance.getFileIdToClusterIds();
+        await mlDataDB.getFileIdToClusterIds();
     final Map<String, PersonEntity> personIdToPerson =
         await PersonService.instance.getPersonsMap();
-    final clusterIDToPersonID =
-        await MLDataDB.instance.getClusterIDToPersonID();
+    final clusterIDToPersonID = await mlDataDB.getClusterIDToPersonID();
 
     final Map<String, List<EnteFile>> clusterIdToFiles = {};
     final Map<String, List<EnteFile>> personIdToFiles = {};

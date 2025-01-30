@@ -33,6 +33,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
   Timer? _timer;
   bool isExpanded = false;
   final Logger logger = Logger("MLDebugSectionWidget");
+  late final mlDataDB = MLDataDB.instance;
   @override
   void initState() {
     super.initState();
@@ -239,7 +240,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: FutureBuilder<double>(
-            future: MLDataDB.instance.getClusteredToIndexableFilesRatio(),
+            future: mlDataDB.getClusteredToIndexableFilesRatio(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(
@@ -310,7 +311,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            final emptyFaces = await MLDataDB.instance.getErroredFaceCount();
+            final emptyFaces = await mlDataDB.getErroredFaceCount();
             showShortToast(context, '$emptyFaces empty faces');
           },
         ),
@@ -332,7 +333,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               firstButtonLabel: "Yes, confirm",
               firstButtonOnTap: () async {
                 try {
-                  await MLDataDB.instance.dropFacesFeedbackTables();
+                  await mlDataDB.dropFacesFeedbackTables();
                   Bus.instance.fire(PeopleChangedEvent());
                   showShortToast(context, "Done");
                 } catch (e, s) {
@@ -365,7 +366,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                   for (final PersonEntity p in persons) {
                     await PersonService.instance.deletePerson(p.remoteID);
                   }
-                  await MLDataDB.instance.dropClustersAndPersonTable();
+                  await mlDataDB.dropClustersAndPersonTable();
                   Bus.instance.fire(PeopleChangedEvent());
                   showShortToast(context, "Done");
                 } catch (e, s) {
@@ -393,8 +394,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               firstButtonLabel: "Yes, confirm",
               firstButtonOnTap: () async {
                 try {
-                  await MLDataDB.instance
-                      .dropClustersAndPersonTable(faces: true);
+                  await mlDataDB.dropClustersAndPersonTable(faces: true);
                   Bus.instance.fire(PeopleChangedEvent());
                   showShortToast(context, "Done");
                 } catch (e, s) {
