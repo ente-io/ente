@@ -3,6 +3,8 @@ import "dart:async";
 import 'package:flutter/material.dart';
 import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
+import "package:photos/models/preview/preview_item.dart";
+import "package:photos/models/preview/preview_item_status.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -12,9 +14,11 @@ class BackupItemCard extends StatefulWidget {
   const BackupItemCard({
     super.key,
     required this.item,
+    required this.preview,
   });
 
   final BackupItem item;
+  final PreviewItem? preview;
 
   @override
   State<BackupItemCard> createState() => _BackupItemCardState();
@@ -151,14 +155,44 @@ class _BackupItemCardState extends State<BackupItemCard> {
                       color: colorScheme.primary700,
                     ),
                   ),
-                BackupItemStatus.uploaded => const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: Icon(
-                      Icons.check,
-                      color: Color(0xFF00B33C),
-                    ),
-                  ),
+                BackupItemStatus.uploaded => widget.preview != null &&
+                        widget.preview!.status != PreviewItemStatus.uploaded
+                    ? switch (widget.preview!.status) {
+                        PreviewItemStatus.compressing => const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: Text("CQ"),
+                          ),
+                        PreviewItemStatus.uploading => const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: Text("UQ"),
+                          ),
+                        PreviewItemStatus.failed => const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: Text("FQ"),
+                          ),
+                        PreviewItemStatus.inQueue => const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: Text("IQ"),
+                          ),
+                        PreviewItemStatus.retry => const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: Text("RQ"),
+                          ),
+                        _ => const SizedBox()
+                      }
+                    : const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: Icon(
+                          Icons.check,
+                          color: Color(0xFF00B33C),
+                        ),
+                      ),
                 BackupItemStatus.inQueue => SizedBox(
                     width: 24,
                     height: 24,

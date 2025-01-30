@@ -36,6 +36,7 @@ import "package:shared_preferences/shared_preferences.dart";
 
 class PreviewVideoStore {
   final LinkedHashMap<int, PreviewItem> _items = LinkedHashMap();
+  LinkedHashMap<int, PreviewItem> get previews => _items;
 
   PreviewVideoStore._privateConstructor();
 

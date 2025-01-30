@@ -10,6 +10,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
 import "package:photos/models/file/extensions/file_props.dart";
+import "package:photos/services/preview_video_store.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/settings/backup/backup_item_card.dart";
@@ -25,6 +26,7 @@ class BackupStatusScreen extends StatefulWidget {
 class _BackupStatusScreenState extends State<BackupStatusScreen> {
   LinkedHashMap<String, BackupItem> items = FileUploader.instance.allBackups;
   List<BackupItem>? result;
+  var previewResult = PreviewVideoStore.instance.previews;
 
   @override
   void initState() {
@@ -145,6 +147,7 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
                   return BackupItemCard(
                     item: allItems[index],
                     key: ValueKey(allItems[index].file.uploadedFileID),
+                    preview: previewResult[allItems[index].file.uploadedFileID],
                   );
                 },
                 itemCount: allItems.length,
