@@ -220,7 +220,7 @@ const _colors = {
             baseHover: "rgba(255 255 255 / 0.90)",
             muted: "rgba(255 255 255 / 0.16)",
             faint: "rgba(255 255 255 / 0.12)",
-            faintHover: "rgba(255 255 255 / 0.06)",
+            faintHover: "rgba(255 255 255 / 0.16)",
             fainter: "rgba(255 255 255 / 0.05)",
         },
         stroke: {
@@ -385,7 +385,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 hover: colors.dark.fill.faintHover,
                 // For an icon button, the hover background color is derived
                 // from the active color above and this opacity.
-                hoverOpacity: 0.12,
+                hoverOpacity: 0.16,
                 // The color of a selected action.
                 //
                 // Placeholder; not clear how it impacts us.
