@@ -42,8 +42,8 @@ import {
     type ListChildComponentProps,
     areEqual,
 } from "react-window";
-import type { GalleryBarMode } from "./reducer";
 import { isMLSupported } from "../../services/ml";
+import type { GalleryBarMode } from "./reducer";
 
 export interface GalleryBarImplProps {
     /**
