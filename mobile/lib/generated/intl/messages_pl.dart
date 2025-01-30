@@ -249,8 +249,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m82(ignoreReason) =>
       "Przesyłanie jest ignorowane z powodu ${ignoreReason}";
 
-  static String m83(count) =>
-      "${Intl.plural(count, one: 'Zachowywanie ${count} wspomnienia...', few: 'Zachowywanie ${count} wspomnienia...', many: 'Zachowywanie ${count} wspomnień...', other: 'Zachowywanie ${count} wspomnień...')}";
+  static String m83(count) => "Zachowywanie ${count} wspomnień...";
 
   static String m84(endDate) => "Ważne do ${endDate}";
 

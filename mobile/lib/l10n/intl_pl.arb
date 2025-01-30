@@ -959,7 +959,7 @@
   "encryptingBackup": "Szyfrowanie kopii zapasowej...",
   "syncStopped": "Synchronizacja zatrzymana",
   "syncProgress": "Zachowano {completed}/{total} wspomnień",
-  "uploadingMultipleMemories": "{count, plural, one{Zachowywanie {count} wspomnienia...} few {Zachowywanie {count} wspomnienia...} many {Zachowywanie {count} wspomnień...} other{Zachowywanie {count} wspomnień...}}",
+  "uploadingMultipleMemories": "Zachowywanie {count} wspomnień...",
   "uploadingSingleMemory": "Zachowywanie 1 wspomnienia...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
