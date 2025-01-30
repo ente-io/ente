@@ -17,6 +17,7 @@ import "package:photos/ui/viewer/search/result/no_result_widget.dart";
 import "package:photos/ui/viewer/search/search_suggestions.dart";
 import "package:photos/ui/viewer/search/tab_empty_state.dart";
 import 'package:photos/ui/viewer/search_tab/albums_section.dart';
+import "package:photos/ui/viewer/search_tab/contacts_section.dart";
 import "package:photos/ui/viewer/search_tab/file_type_section.dart";
 import "package:photos/ui/viewer/search_tab/locations_section.dart";
 import "package:photos/ui/viewer/search_tab/magic_section.dart";
@@ -144,11 +145,10 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                               as List<GenericSearchResult>,
                         );
                       case SectionType.contacts:
-                        // return ContactsSection(
-                        //   snapshot.data!.elementAt(index)
-                        //       as List<GenericSearchResult>,
-                        // );
-                        return const SizedBox.shrink();
+                        return ContactsSection(
+                          snapshot.data!.elementAt(index)
+                              as List<GenericSearchResult>,
+                        );
                       case SectionType.fileTypesAndExtension:
                         return FileTypeSection(
                           snapshot.data!.elementAt(index)
