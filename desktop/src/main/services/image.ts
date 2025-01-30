@@ -45,14 +45,17 @@ const convertToJPEGCommand = (
 
         case "linux":
         case "win32":
-            return [
-                imageMagickPath(),
-                "convert",
-                inputFilePath,
-                "-quality",
-                "100%",
-                outputFilePath,
-            ];
+            return [vipsPath(), "copy", inputFilePath, outputFilePath];
+
+        // TODO: Cleanup im
+        // return [
+        //     imageMagickPath(),
+        //     "convert",
+        //     inputFilePath,
+        //     "-quality",
+        //     "100%",
+        //     outputFilePath,
+        // ];
 
         default:
             throw new Error("Not available on the current OS/arch");
@@ -66,6 +69,15 @@ const imageMagickPath = () =>
     path.join(
         isDev ? "build" : process.resourcesPath,
         process.platform == "win32" ? "magick.exe" : "magick",
+    );
+
+/**
+ * Path to the vips executable bundled with our app on Linux and Windows.
+ */
+const vipsPath = () =>
+    path.join(
+        isDev ? "build" : process.resourcesPath,
+        process.platform == "win32" ? "vips.exe" : "vips",
     );
 
 export const generateImageThumbnail = async (
@@ -138,6 +150,16 @@ const generateImageThumbnailCommand = (
 
         case "linux":
         case "win32":
+            return [
+                vipsPath(),
+                "thumbnail",
+                inputFilePath,
+                `${outputFilePath}[Q=${quality}]`,
+                `${maxDimension}`,
+            ];
+
+        case "aix" /* dummy case to hold TODO */:
+            /* TODO: Cleanup im */
             return [
                 imageMagickPath(),
                 "convert",

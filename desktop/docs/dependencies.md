@@ -111,6 +111,8 @@ For video conversions and metadata extraction, we use ffmpeg. To bundle a
 > ffmpeg binary and using the wasm one (that our renderer process already has).
 > Which is why we bundle it to speed up operations on the desktop app.
 
+TODO: Cleanup im - update this
+
 On Linux and Windows, we use ImageMagick for thumbnail generation and JPEG
 conversion of unpreviewable images. A static OS/architecture specific binary of
 this is bundled in our extra resources (`build`) folder by `scripts/magick.sh`
