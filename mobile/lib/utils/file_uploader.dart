@@ -8,6 +8,7 @@ import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import "package:path/path.dart";
 import "package:permission_handler/permission_handler.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/constants.dart";
@@ -45,6 +46,8 @@ import "package:photos/utils/network_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import "package:uuid/uuid.dart";
+
+import "data_util.dart";
 
 class FileUploader {
   static const kMaximumConcurrentUploads = 4;
@@ -1022,7 +1025,6 @@ class FileUploader {
           "skip delete for multipart encrypted file $encryptedFilePath",
         );
       } else {
-        _logger.fine("deleting encrypted file $encryptedFilePath");
         await File(encryptedFilePath).delete();
       }
     }
@@ -1309,13 +1311,8 @@ class FileUploader {
     int fileSize, {
     int attempt = 1,
   }) async {
-    _logger.info(
-      "Putting object for " +
-          file.toString() +
-          " of size: " +
-          fileSize.toString(),
-    );
     final startTime = DateTime.now().millisecondsSinceEpoch;
+    final fileName = basename(file.path);
     try {
       await _dio.put(
         uploadURL.url,
@@ -1327,10 +1324,7 @@ class FileUploader {
         ),
       );
       _logger.info(
-        "Upload speed : " +
-            (fileSize / (DateTime.now().millisecondsSinceEpoch - startTime))
-                .toString() +
-            " kilo bytes per second",
+        "Uploaded object $fileName of size: ${formatBytes(fileSize)} at speed: ${(fileSize / (DateTime.now().millisecondsSinceEpoch - startTime)).toStringAsFixed(2)} KB/s",
       );
 
       return uploadURL.objectKey;
@@ -1338,6 +1332,7 @@ class FileUploader {
       if (e.message.startsWith("HttpException: Content size")) {
         rethrow;
       } else if (attempt < kMaximumUploadAttempts) {
+        _logger.info("Upload failed for $fileName, retrying");
         final newUploadURL = await _getUploadURL();
         return _putFile(
           newUploadURL,
@@ -1347,7 +1342,7 @@ class FileUploader {
         );
       } else {
         _logger.info(
-          "Upload failed for file with size " + fileSize.toString(),
+          "Failed to upload file ${basename(file.path)} after $attempt attempts",
           e,
         );
         rethrow;
