@@ -926,6 +926,7 @@ class UserService {
               );
             },
           ),
+          (route) => route.isFirst,
         );
       }
     } on DioError catch (e) {
@@ -1010,6 +1011,7 @@ class UserService {
           "twoFactorType": twoFactorTypeToString(type),
         },
       );
+      await dialog.hide();
       if (response.statusCode == 200) {
         showShortToast(
           context,
