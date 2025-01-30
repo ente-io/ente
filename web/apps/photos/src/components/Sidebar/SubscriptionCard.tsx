@@ -1,6 +1,6 @@
 import { Overlay } from "@/base/components/containers";
 import type { ButtonishProps } from "@/base/components/mui";
-import { FocusVisibleUnstyledButton } from "@/new/photos/components/UnstyledButton";
+import { UnstyledButton } from "@/new/photos/components/UnstyledButton";
 import type { UserDetails } from "@/new/photos/services/user-details";
 import {
     familyUsage,
@@ -75,10 +75,13 @@ const ClickOverlay: React.FC<ButtonishProps> = ({ onClick }) => (
 );
 
 /**
- * The transparent button element offers activation of the subscription card is activated on clicks
- * A mixin of UnstyledButton, FocusVisibleUnstyledButton, {@link Overlay}, plus
- * custom styling. */
-const ClickOverlayButton = styled(FocusVisibleUnstyledButton)`
+ * The transparent button element offers activation of the subscription card.
+ *
+ * A mixin of {@link FocusVisibleUnstyledButton} and {@link Overlay}, plus
+ * custom styling to place its contents (chevron) at the middle right.
+ */
+const ClickOverlayButton = styled(UnstyledButton)(
+    ({ theme }) => `
     /* Overlay */
     position: absolute;
     width: 100%;
@@ -93,7 +96,21 @@ const ClickOverlayButton = styled(FocusVisibleUnstyledButton)`
 
     /* Reset the button color */
     color: inherit;
-`;
+
+    /* FocusVisibleUnstyledButton, but customized to work button with the larger
+       subscription card and its border radii. */
+    &:focus-visible {
+        outline: 1.5px solid ${theme.vars.palette.stroke.base};
+        outline-offset: 2px;
+        border-radius: 3px;
+    }
+    &:active {
+        outline: 2px solid ${theme.vars.palette.stroke.faint};
+        outline-offset: 1px;
+        border-radius: 3px;
+    }
+`,
+);
 
 interface SubscriptionCardContentOverlayProps {
     userDetails: UserDetails;
