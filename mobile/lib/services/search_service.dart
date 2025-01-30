@@ -1414,8 +1414,8 @@ class SearchService {
         ..sort((a, b) => b.compareTo(a)); // Recent years first
       int round = 0;
       int skipped = 0;
-      filteredFiles.add(yearToFiles[years[0]]!.removeAt(0));
-      while (true) {
+      whileLoop:
+      while (filteredFiles.length + skipped < fileCount) {
         yearLoop:
         for (final year in years) {
           final yearFiles = yearToFiles[year]!;
@@ -1439,7 +1439,7 @@ class SearchService {
           filteredFiles.add(newFile);
           if (filteredFiles.length >= targetSize ||
               filteredFiles.length + skipped >= fileCount) {
-            break;
+            break whileLoop;
           }
         }
         round++;
