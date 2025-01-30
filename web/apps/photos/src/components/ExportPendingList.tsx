@@ -58,7 +58,7 @@ const ExportPendingList = (props: Iprops) => {
         <TitledMiniDialog
             open={props.isOpen}
             onClose={props.onClose}
-            slotProps={{ paper: { sx: { maxWidth: "444px" } } }}
+            paperMaxWidth="444px"
             title={t("PENDING_ITEMS")}
         >
             <ItemList

@@ -143,7 +143,7 @@ export interface MiniDialogAttributes {
     buttonDirection?: "row" | "column";
 }
 
-type MiniDialogProps = Omit<DialogProps, "onClose"> & {
+type MiniDialogProps = Pick<DialogProps, "open" | "sx"> & {
     onClose: () => void;
     attributes?: MiniDialogAttributes;
 };
@@ -158,7 +158,7 @@ type MiniDialogProps = Omit<DialogProps, "onClose"> & {
  */
 export const AttributedMiniDialog: React.FC<
     React.PropsWithChildren<MiniDialogProps>
-> = ({ open, onClose, attributes, children, ...props }) => {
+> = ({ open, onClose, sx, attributes, children }) => {
     const [phase, setPhase] = useState<
         "loading" | "secondary-loading" | "failed" | undefined
     >();
@@ -198,8 +198,6 @@ export const AttributedMiniDialog: React.FC<
             },
         ];
     })(attributes.cancel);
-
-    const { PaperProps, ...rest } = props;
 
     const loadingButton = attributes.continue && (
         <LoadingButton
@@ -260,17 +258,14 @@ export const AttributedMiniDialog: React.FC<
 
     return (
         <Dialog
-            open={open}
+            {...{ open, sx }}
+            onClose={handleClose}
             fullWidth
-            PaperProps={{
-                ...PaperProps,
-                sx: {
-                    maxWidth: "360px",
-                    ...PaperProps?.sx,
+            slotProps={{
+                paper: {
+                    sx: { maxWidth: "360px" },
                 },
             }}
-            onClose={handleClose}
-            {...rest}
         >
             {(attributes.icon ?? attributes.title) ? (
                 <Stack
@@ -343,12 +338,18 @@ export const AttributedMiniDialog: React.FC<
     );
 };
 
-type TitledMiniDialogProps = Omit<DialogProps, "onClose"> & {
+type TitledMiniDialogProps = Pick<DialogProps, "open" | "sx"> & {
     onClose: () => void;
     /**
      * The dialog's title.
      */
     title?: React.ReactNode;
+    /**
+     * Optional max width of the underlying MUI {@link Paper}.
+     *
+     * Default: 360px (same as {@link AttributedMiniDialog}).
+     */
+    paperMaxWidth?: string;
 };
 
 /**
@@ -366,27 +367,18 @@ type TitledMiniDialogProps = Omit<DialogProps, "onClose"> & {
  */
 export const TitledMiniDialog: React.FC<
     React.PropsWithChildren<TitledMiniDialogProps>
-> = ({ open, onClose, title, children, ...props }) => {
-    const { PaperProps, ...rest } = props;
-
-    return (
-        <Dialog
-            open={open}
-            onClose={onClose}
-            fullWidth
-            PaperProps={{
-                ...PaperProps,
-                sx: {
-                    maxWidth: "360px",
-                    ...PaperProps?.sx,
-                },
-            }}
-            {...rest}
-        >
-            <DialogTitle sx={{ "&&&": { paddingBlock: "24px 16px" } }}>
-                {title}
-            </DialogTitle>
-            <DialogContent>{children}</DialogContent>
-        </Dialog>
-    );
-};
+> = ({ open, onClose, sx, paperMaxWidth, title, children }) => (
+    <Dialog
+        {...{ open, sx }}
+        onClose={onClose}
+        fullWidth
+        slotProps={{
+            paper: { sx: { maxWidth: paperMaxWidth ?? "360px" } },
+        }}
+    >
+        <DialogTitle sx={{ "&&&": { paddingBlock: "24px 16px" } }}>
+            {title}
+        </DialogTitle>
+        <DialogContent>{children}</DialogContent>
+    </Dialog>
+);
