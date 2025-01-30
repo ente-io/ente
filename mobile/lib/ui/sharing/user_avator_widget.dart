@@ -38,7 +38,9 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   @override
   void initState() {
     super.initState();
-    if (PersonService.instance.emailToNameMapCache[widget.user.email] != null) {
+    if (PersonService
+            .instance.emailToPartialPersonDataMapCache[widget.user.email] !=
+        null) {
       _personID = PersonService.instance.getPersons().then((people) async {
         final person = people.firstWhereOrNull(
           (person) => person.data.email == widget.user.email,

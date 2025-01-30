@@ -21,7 +21,7 @@ class PersonService {
   final EntityService entityService;
   final MLDataDB faceMLDataDB;
   final SharedPreferences prefs;
-  final _emailToNameMapCache = <String, String>{};
+  final _emailToPartialPersonDataMapCache = <String, Map<String, String>>{};
 
   PersonService(this.entityService, this.faceMLDataDB, this.prefs);
 
@@ -46,19 +46,22 @@ class PersonService {
     await _instance!._resetEmailToNameCache();
   }
 
-  Map<String, String> get emailToNameMapCache => _emailToNameMapCache;
+  Map<String, Map<String, String>> get emailToPartialPersonDataMapCache =>
+      _emailToPartialPersonDataMapCache;
 
   void clearCache() {
-    _emailToNameMapCache.clear();
+    _emailToPartialPersonDataMapCache.clear();
   }
 
   Future<void> _resetEmailToNameCache() async {
-    _emailToNameMapCache.clear();
+    _emailToPartialPersonDataMapCache.clear();
     await _instance!.getPersons().then((value) {
       for (var person in value) {
         if (person.data.email != null && person.data.email!.isNotEmpty) {
-          _instance!._emailToNameMapCache[person.data.email!] =
-              person.data.name;
+          _instance!._emailToPartialPersonDataMapCache[person.data.email!] = {
+            "remoteID": person.remoteID,
+            "name": person.data.name,
+          };
         }
       }
       logger.info("Email to name cache reset");

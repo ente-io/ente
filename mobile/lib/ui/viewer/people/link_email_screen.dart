@@ -247,7 +247,8 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
   List<User> _getContacts() {
     final List<User> suggestedUsers = [];
     final int ownerID = Configuration.instance.getUserID()!;
-    final cachedEmailToNameMap = PersonService.instance.emailToNameMapCache;
+    final cachedEmailToNameMap =
+        PersonService.instance.emailToPartialPersonDataMapCache;
 
     for (final c in CollectionsService.instance.getActiveCollections()) {
       if (c.owner?.id == ownerID) {
