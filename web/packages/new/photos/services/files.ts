@@ -193,7 +193,7 @@ export const sortFiles = (files: EnteFile[], sortAsc = false) => {
 };
 
 /**
- * [Note: Collection Files]
+ * [Note: Collection File]
  *
  * File IDs themselves are unique across all the files for the user (in fact,
  * they're unique across all the files in an Ente instance). However, we still

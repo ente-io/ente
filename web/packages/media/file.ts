@@ -150,7 +150,7 @@ export interface EncryptedEnteFile {
  * While the file ID is unique, we'd can still have multiple entries for each
  * file ID in our local state, one per collection IDs to which the file belongs.
  * That is, the uniqueness is across the (fileID, collectionID) pairs. See
- * [Note: Collection Files].
+ * [Note: Collection File].
  */
 export interface EnteFile
     extends Omit<
