@@ -87,12 +87,14 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
         <Dialog
             open={open}
             fullWidth
-            PaperProps={{
-                sx: (theme) => ({
-                    maxWidth: "375px",
-                    p: 1,
-                    [theme.breakpoints.down(360)]: { p: 0 },
-                }),
+            slotProps={{
+                paper: {
+                    sx: (theme) => ({
+                        maxWidth: "375px",
+                        p: 1,
+                        [theme.breakpoints.down(360)]: { p: 0 },
+                    }),
+                },
             }}
             onClose={onClose}
         >

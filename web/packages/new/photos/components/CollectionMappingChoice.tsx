@@ -34,7 +34,7 @@ export const CollectionMappingChoice: React.FC<
         open={open}
         onClose={onClose}
         fullWidth
-        PaperProps={{ sx: { maxWidth: "360px", padding: "12px" } }}
+        slotProps={{ paper: { sx: { maxWidth: "360px", padding: "12px" } } }}
     >
         <SpaceBetweenFlex sx={{ paddingInlineEnd: "4px" }}>
             <DialogTitle>{t("multi_folder_upload")}</DialogTitle>

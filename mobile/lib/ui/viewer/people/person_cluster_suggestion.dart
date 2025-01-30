@@ -49,6 +49,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   List<SuggestionUserFeedback> pastUserFeedback = [];
   List<ClusterSuggestion> allSuggestions = [];
   late final Logger _logger = Logger('_PersonClustersState');
+  late final mlDataDB = MLDataDB.instance;
 
   // Declare a variable for the future
   late Future<List<ClusterSuggestion>> futureClusterSuggestions;
@@ -283,7 +284,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     int numberOfSuggestions,
   ) async {
     canGiveFeedback = false;
-    await MLDataDB.instance.captureNotPersonFeedback(
+    await mlDataDB.captureNotPersonFeedback(
       personID: widget.person.remoteID,
       clusterID: clusterID,
     );
@@ -504,7 +505,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
           clusterID: lastFeedback.suggestion.clusterIDToMerge,
         );
       } else {
-        await MLDataDB.instance.removeNotPersonFeedback(
+        await mlDataDB.removeNotPersonFeedback(
           personID: widget.person.remoteID,
           clusterID: lastFeedback.suggestion.clusterIDToMerge,
         );

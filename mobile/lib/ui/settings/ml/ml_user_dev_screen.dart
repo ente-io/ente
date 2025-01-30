@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/ml/clip_db.dart";
+import "package:photos/db/ml/base.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/service_locator.dart";
@@ -27,6 +27,7 @@ class MLUserDeveloperOptions extends StatefulWidget {
 }
 
 class _MLUserDeveloperOptionsState extends State<MLUserDeveloperOptions> {
+  late final IMLDataDB<int> mlDataDB = MLDataDB.instance;
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
@@ -79,7 +80,9 @@ class _MLUserDeveloperOptionsState extends State<MLUserDeveloperOptions> {
                         onChanged: () async {
                           try {
                             await localSettings.toggleRemoteFetch();
-                            _logger.info('Remote fetch is turned ${localSettings.remoteFetchEnabled ? 'on' : 'off'}');
+                            _logger.info(
+                              'Remote fetch is turned ${localSettings.remoteFetchEnabled ? 'on' : 'off'}',
+                            );
                             if (mounted) {
                               setState(() {});
                             }
@@ -119,9 +122,9 @@ class _MLUserDeveloperOptionsState extends State<MLUserDeveloperOptions> {
 
   Future<void> deleteEmptyIndices(BuildContext context) async {
     try {
-      final Set<int> emptyFileIDs = await MLDataDB.instance.getErroredFileIDs();
-      await MLDataDB.instance.deleteFaceIndexForFiles(emptyFileIDs.toList());
-      await MLDataDB.instance.deleteClipEmbeddings(emptyFileIDs.toList());
+      final Set<int> emptyFileIDs = await mlDataDB.getErroredFileIDs();
+      await mlDataDB.deleteFaceIndexForFiles(emptyFileIDs.toList());
+      await mlDataDB.deleteClipEmbeddings(emptyFileIDs.toList());
       showShortToast(context, "Deleted ${emptyFileIDs.length} entries");
     } catch (e) {
       // ignore: unawaited_futures
@@ -134,7 +137,7 @@ class _MLUserDeveloperOptionsState extends State<MLUserDeveloperOptions> {
 
   Future<void> deleteAllLocalML(BuildContext context) async {
     try {
-      await MLDataDB.instance.dropClustersAndPersonTable(faces: true);
+      await mlDataDB.dropClustersAndPersonTable(faces: true);
       await SemanticSearchService.instance.clearIndexes();
       Bus.instance.fire(PeopleChangedEvent());
       showShortToast(context, "All local ML cleared");

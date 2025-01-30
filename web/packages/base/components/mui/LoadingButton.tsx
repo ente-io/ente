@@ -1,4 +1,5 @@
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { isSxArray } from "@/base/components/utils/sx";
 import { CircularProgress, type ButtonProps } from "@mui/material";
 import React from "react";
 
@@ -20,13 +21,15 @@ export const LoadingButton: React.FC<ButtonProps & { loading?: boolean }> = ({
         <FocusVisibleButton
             {...{ color }}
             disabled
-            sx={{
-                "&.Mui-disabled": {
-                    backgroundColor: `${color}.main`,
-                    color: `${color}.contrastText`,
+            sx={[
+                {
+                    "&.Mui-disabled": {
+                        backgroundColor: `${color}.main`,
+                        color: `${color}.contrastText`,
+                    },
                 },
-                ...sx,
-            }}
+                ...(sx ? (isSxArray(sx) ? sx : [sx]) : []),
+            ]}
             {...rest}
         >
             <CircularProgress size={20} sx={{ color: "inherit" }} />

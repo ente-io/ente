@@ -877,6 +877,7 @@ class UserService {
           "twoFactorType": twoFactorTypeToString(type),
         },
       );
+      await dialog.hide();
       if (response.statusCode == 200) {
         // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
@@ -974,6 +975,7 @@ class UserService {
           "twoFactorType": twoFactorTypeToString(type),
         },
       );
+      await dialog.hide();
       if (response.statusCode == 200) {
         showShortToast(
           context,

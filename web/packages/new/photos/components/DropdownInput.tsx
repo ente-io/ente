@@ -66,12 +66,12 @@ export const DropdownInput = <T extends string>({
             );
         }}
         MenuProps={{
-            PaperProps: {
-                sx: {
+            slotProps: {
+                paper: {
                     // Select component sets the min width of each element to
                     // the width of the select input's width, so setting the
                     // maxWidth to 0 forces element widths to equal minWidth.
-                    maxWidth: 0,
+                    sx: { maxWidth: 0 },
                 },
             },
             MenuListProps: {

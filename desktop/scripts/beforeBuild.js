@@ -3,8 +3,8 @@ const fsp = require("fs/promises");
 /**
  * This hook is invoked during the initial build (e.g. when triggered by "yarn
  * build"), and importantly, on each rebuild for a different architecture during
- * the build. We use it to ensure that the magick binary is for the current
- * architecture being built. See "[Note: ImageMagick]" for more details.
+ * the build. We use it to ensure that the vips binary is for the current
+ * architecture being built. See "[Note: vips]" for more details.
  *
  * The documentation for this hook is at:
  * https://www.electron.build/app-builder-lib.interface.configuration#beforebuild
@@ -22,8 +22,10 @@ const fsp = require("fs/promises");
  *     },
  *     arch: 'arm64'
  *
- *  Note that we must not return falsey from this function, because
- * > Resolving to false will skip dependencies install or rebuild.
+ *  Note that we must not return falsey from this function, because:
+ *
+ *  > Resolving to false will skip dependencies install or rebuild.
+ *
  */
 module.exports = async (context) => {
     const { appDir, platform, arch } = context;
@@ -35,14 +37,14 @@ module.exports = async (context) => {
     // https://github.com/electron-userland/electron-builder/blob/master/packages/builder-util/src/arch.ts#L9
     // https://nodejs.org/api/process.html#processarch
     if (arch == process.arch) {
-        // `magick.js` would've already downloaded the file, nothing to do.
+        // `vips.js` would've already downloaded the file, nothing to do.
         return true;
     }
 
     const download = async (downloadName, outputName) => {
         const out = `${appDir}/build/${outputName}`;
         console.log(`Downloading ${downloadName}`);
-        const downloadPath = `https://github.com/ente-io/ImageMagick/releases/download/2025-01-21/${downloadName}`;
+        const downloadPath = `https://github.com/ente-io/libvips-packaging/releases/download/v8.16.0/${downloadName}`;
         return fetch(downloadPath)
             .then((res) => res.blob())
             .then((blob) => fsp.writeFile(out, blob.stream()))
@@ -51,13 +53,13 @@ module.exports = async (context) => {
 
     switch (`${platform.nodeName}-${arch}`) {
         case "linux-x64":
-            await download("magick-x86_64", "magick");
+            return download("vips-x64", "vips");
         case "linux-arm64":
-            await download("magick-aarch64", "magick");
+            return download("vips-arm64", "vips");
         case "win32-x64":
-            await download("magick-x64.exe", "magick.exe");
+            return download("vips-x86_64.exe", "vips.exe");
         case "linux-arm64":
-            await download("magick-arm64.exe", "magick.exe");
+            return download("vips-aarch64.exe", "vips.exe");
     }
 
     return true;

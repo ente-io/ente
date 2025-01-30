@@ -12,7 +12,7 @@ import {
     ItemCard,
     TileTextOverlay,
 } from "@/new/photos/components/Tiles";
-import { UnstyledButton } from "@/new/photos/components/UnstyledButton";
+import { FocusVisibleUnstyledButton } from "@/new/photos/components/UnstyledButton";
 import type {
     CollectionSummary,
     CollectionSummaryType,
@@ -352,7 +352,7 @@ const ModeIndicator: React.FC<
     );
 };
 
-const ModeButton = styled(UnstyledButton, {
+const ModeButton = styled(FocusVisibleUnstyledButton, {
     shouldForwardProp: (propName) => propName != "active",
 })<{ active: boolean }>(
     ({ theme, active }) => `

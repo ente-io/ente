@@ -44,7 +44,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
         <Dialog
             {...{ open, fullScreen }}
             onClose={handleDialogClose}
-            TransitionComponent={SlideUpTransition}
+            slots={{ transition: SlideUpTransition }}
             maxWidth="xs"
             fullWidth
         >

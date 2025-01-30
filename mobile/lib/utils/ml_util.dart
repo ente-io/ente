@@ -4,7 +4,6 @@ import "dart:math" as math show sqrt, min, max;
 import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/db/ml/clip_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/filedata.dart";
 import "package:photos/extensions/list.dart";
@@ -56,11 +55,10 @@ class FileMLInstruction {
 
 Future<IndexStatus> getIndexStatus() async {
   try {
+    final mlDataDB = MLDataDB.instance;
     final int indexableFiles = (await getIndexableFileIDs()).length;
-    final int facesIndexedFiles =
-        await MLDataDB.instance.getFaceIndexedFileCount();
-    final int clipIndexedFiles =
-        await MLDataDB.instance.getClipIndexedFileCount();
+    final int facesIndexedFiles = await mlDataDB.getFaceIndexedFileCount();
+    final int clipIndexedFiles = await mlDataDB.getClipIndexedFileCount();
     final int indexedFiles = math.min(facesIndexedFiles, clipIndexedFiles);
 
     final showIndexedFiles = math.min(indexedFiles, indexableFiles);
@@ -84,16 +82,15 @@ int _lastFetchTimeForOthersIndexed = 0;
 /// Return a list of file instructions for files that should be indexed for ML
 Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   _logger.info('getFilesForMlIndexing called');
+  final mlDataDB = MLDataDB.instance;
   final time = DateTime.now();
   // Get indexed fileIDs for each ML service
-  final Map<int, int> faceIndexedFileIDs =
-      await MLDataDB.instance.faceIndexedFileIds();
+  final Map<int, int> faceIndexedFileIDs = await mlDataDB.faceIndexedFileIds();
   final Map<int, int> clipIndexedFileIDs =
-      await MLDataDB.instance.clipIndexedFileWithVersion();
+      await mlDataDB.clipIndexedFileWithVersion();
   final Set<int> queuedFiledIDs = {};
 
-  final Set<int> filesWithFDStatus =
-      await MLDataDB.instance.getFileIDsWithFDData();
+  final Set<int> filesWithFDStatus = await mlDataDB.getFileIDsWithFDData();
 
   // Get all regular files and all hidden files
   final enteFiles = await SearchService.instance.getAllFilesForSearch();
@@ -174,7 +171,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
         }
       }
       _logger.info(
-        'Chececking index for ${filesOwnedByOthers.length} owned by others',
+        'Checking index for ${filesOwnedByOthers.length} owned by others',
       );
       return [...splitResult.matched, ...filesOwnedByOthers];
     }
@@ -186,6 +183,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
 Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
   int yieldSize,
 ) async* {
+  final mlDataDB = MLDataDB.instance;
   final List<FileMLInstruction> filesToIndex = await getFilesForMlIndexing();
   final List<List<FileMLInstruction>> chunks =
       filesToIndex.chunks(embeddingFetchLimit);
@@ -248,8 +246,8 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
         }
       }
     }
-    await MLDataDB.instance.bulkInsertFaces(faces);
-    await MLDataDB.instance.putMany(clipEmbeddings);
+    await mlDataDB.bulkInsertFaces(faces);
+    await mlDataDB.putClip(clipEmbeddings);
   }
   // Yield any remaining instructions
   if (batchToYield.isNotEmpty) {

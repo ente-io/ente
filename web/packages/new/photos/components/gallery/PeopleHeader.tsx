@@ -350,7 +350,7 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
                 {...{ open, onClose }}
                 fullWidth
                 fullScreen={isFullScreen}
-                PaperProps={{ sx: { maxWidth: "490px" } }}
+                slotProps={{ paper: { sx: { maxWidth: "490px" } } }}
             >
                 <SpaceBetweenFlex sx={{ padding: "10px 8px 6px 0" }}>
                     <DialogTitle variant="h3">{t("add_name")}</DialogTitle>
@@ -630,7 +630,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             maxWidth="sm"
             fullWidth
             fullScreen={isSmallWidth}
-            PaperProps={{ sx: { minHeight: "80svh" } }}
+            slotProps={{ paper: { sx: { minHeight: "80svh" } } }}
         >
             <SpaceBetweenFlex
                 sx={[

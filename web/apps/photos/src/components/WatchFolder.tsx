@@ -122,7 +122,9 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
                 open={open}
                 onClose={onClose}
                 fullWidth
-                PaperProps={{ sx: { height: "448px", maxWidth: "414px" } }}
+                slotProps={{
+                    paper: { sx: { height: "448px", maxWidth: "414px" } },
+                }}
             >
                 <SpaceBetweenFlex sx={{ p: "16px 8px 8px 8px" }}>
                     <DialogTitle variant="h3">

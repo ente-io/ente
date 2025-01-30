@@ -165,7 +165,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             onClose={handleClose}
             fullWidth
             fullScreen={isFullScreen}
-            PaperProps={{ sx: { maxWidth: "490px" } }}
+            slotProps={{ paper: { sx: { maxWidth: "490px" } } }}
         >
             <SpaceBetweenFlex sx={{ padding: "10px 8px 6px 0" }}>
                 <DialogTitle variant="h3">{titleForAction(action)}</DialogTitle>

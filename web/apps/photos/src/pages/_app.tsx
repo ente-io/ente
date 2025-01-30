@@ -73,7 +73,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         // This is for events that we should listen for always, not just when
         // the user is logged in.
 
-        const handleOpenURL = (url: string) => {
+        const handleOpenEnteURL = (url: string) => {
             if (url.startsWith("ente://app")) router.push(url);
             else log.info(`Ignoring unhandled open request for URL ${url}`);
         };
@@ -96,11 +96,11 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
         if (isMLSupported) initML();
 
-        electron.onOpenURL(handleOpenURL);
+        electron.onOpenEnteURL(handleOpenEnteURL);
         electron.onAppUpdateAvailable(showUpdateDialog);
 
         return () => {
-            electron.onOpenURL(undefined);
+            electron.onOpenEnteURL(undefined);
             electron.onAppUpdateAvailable(undefined);
         };
     }, []);

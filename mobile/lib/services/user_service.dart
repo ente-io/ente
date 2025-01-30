@@ -903,6 +903,7 @@ class UserService {
     final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     try {
+      _logger.info("recovering two factor");
       final response = await _dio.get(
         _config.getHttpEndpoint() + "/users/two-factor/recover",
         queryParameters: {
@@ -910,6 +911,8 @@ class UserService {
           "twoFactorType": twoFactorTypeToString(type),
         },
       );
+
+      await dialog.hide();
       if (response.statusCode == 200) {
         // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
@@ -928,7 +931,7 @@ class UserService {
       }
     } on DioError catch (e) {
       await dialog.hide();
-      _logger.severe(e);
+      _logger.severe('error while recovery 2fa', e);
       if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, S.of(context).sessionExpired);
         // ignore: unawaited_futures
@@ -949,6 +952,7 @@ class UserService {
         );
       }
     } catch (e) {
+      _logger.severe('unexpected error while recovery 2fa', e);
       await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
@@ -1007,6 +1011,7 @@ class UserService {
           "twoFactorType": twoFactorTypeToString(type),
         },
       );
+      await dialog.hide();
       if (response.statusCode == 200) {
         showShortToast(
           context,

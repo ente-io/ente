@@ -393,9 +393,11 @@ const parseExifInfo = (
     return info;
 };
 
-const FileInfoSidebar = styled((props: DialogProps) => (
-    <SidebarDrawer {...props} anchor="right" />
-))({
+const FileInfoSidebar = styled(
+    (props: Pick<DialogProps, "open" | "onClose" | "children">) => (
+        <SidebarDrawer {...props} anchor="right" />
+    ),
+)({
     zIndex: fileInfoDrawerZIndex,
     "& .MuiPaper-root": {
         padding: 8,

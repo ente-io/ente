@@ -130,7 +130,23 @@ class MultiPartUploader {
 
     if (multipartInfo.status == MultipartStatus.pending) {
       // upload individual parts and get their etags
-      etags = await _uploadParts(multipartInfo, encryptedFile);
+      try {
+        etags = await _uploadParts(multipartInfo, encryptedFile);
+      } on DioError catch (e) {
+        if (e.response?.statusCode == 404) {
+          _logger.severe(
+            "Multipart upload not found for key ${multipartInfo.urls.objectKey}",
+          );
+          await _db.deleteMultipartTrack(localId);
+        }
+        if (e.response?.statusCode == 401) {
+          _logger.severe(
+            "Multipart upload not authorized ${multipartInfo.urls.objectKey}",
+          );
+          await _db.deleteMultipartTrack(localId);
+        }
+        rethrow;
+      }
     }
 
     if (multipartInfo.status != MultipartStatus.completed) {

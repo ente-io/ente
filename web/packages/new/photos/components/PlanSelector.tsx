@@ -79,12 +79,14 @@ export const PlanSelector: React.FC<PlanSelectorProps> = ({
     return (
         <Dialog
             {...{ open, onClose, fullScreen }}
-            PaperProps={{
-                sx: (theme) => ({
-                    width: { sm: "391px" },
-                    p: 1,
-                    [theme.breakpoints.down(360)]: { p: 0 },
-                }),
+            slotProps={{
+                paper: {
+                    sx: (theme) => ({
+                        width: { sm: "391px" },
+                        p: 1,
+                        [theme.breakpoints.down(360)]: { p: 0 },
+                    }),
+                },
             }}
         >
             <PlanSelectorCard {...{ onClose, setLoading }} />
