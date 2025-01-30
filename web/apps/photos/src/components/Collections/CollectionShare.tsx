@@ -1876,9 +1876,18 @@ function PublicLinkSetPassword({
             open={open}
             onClose={onClose}
             disablePortal
-            slotProps={{ backdrop: { sx: { position: "absolute" } } }}
+            slotProps={{
+                // We're being shown within the sidebar drawer, so limit the
+                // backdrop to only cover the drawer.
+                backdrop: { sx: { position: "absolute" } },
+                // We're being shown within the sidebar drawer, and also the
+                // content of this dialog is lesser than what a normal dialog
+                // contains. Use a bespoke padding.
+                paper: {
+                    sx: { "&&": { padding: "4px" } },
+                },
+            }}
             sx={{ position: "absolute" }}
-            PaperProps={{ sx: { p: 1 } }}
             maxWidth={"sm"}
             fullWidth
         >
@@ -1892,7 +1901,7 @@ function PublicLinkSetPassword({
                     buttonText={t("lock")}
                     fieldType="password"
                     secondaryButtonAction={onClose}
-                    submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
+                    submitButtonProps={{ sx: { mt: 1, mb: 0 } }}
                 />
             </Stack>
         </Dialog>
