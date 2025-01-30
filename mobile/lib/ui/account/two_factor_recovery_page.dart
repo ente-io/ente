@@ -1,9 +1,8 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/account/two_factor.dart";
 import 'package:photos/services/user_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/utils/dialog_util.dart';
 
 class TwoFactorRecoveryPage extends StatefulWidget {
@@ -102,7 +101,8 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
                   style: TextStyle(
                     decoration: TextDecoration.underline,
                     fontSize: 12,
-                    color: Colors.white.withOpacity(0.9),
+                    color:
+                        getEnteColorScheme(context).textBase.withOpacity(0.9),
                   ),
                 ),
               ),
