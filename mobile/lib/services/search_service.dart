@@ -1289,7 +1289,7 @@ class SearchService {
   }
 
   /// Returns the best selection of files from the given list.
-  /// Makes sure that the selection is not more than 10 files,
+  /// Makes sure that the selection is not more than [prefferedSize] or 10 files,
   /// and that each year of the original list is represented.
   Future<List<EnteFile>> _bestSelection(
     List<EnteFile> files, {
