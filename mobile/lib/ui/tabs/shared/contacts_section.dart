@@ -1,157 +1,78 @@
-import "dart:async";
-
 import "package:dotted_border/dotted_border.dart";
 import "package:flutter/material.dart";
-import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
-import "package:photos/core/event_bus.dart";
-import "package:photos/events/files_updated_event.dart";
-import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
-import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/tabs/shared/contacts_all_page.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/search/result/contact_result_page.dart";
-import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
 
-class ContactsSection extends StatefulWidget {
-  const ContactsSection({super.key});
-
-  @override
-  State<ContactsSection> createState() => _ContactsSectionState();
-}
-
-class _ContactsSectionState extends State<ContactsSection> {
-  late Future<List<GenericSearchResult>> _contactSearchResults;
-  late final StreamSubscription<PeopleChangedEvent>
-      _peopleChangedEventSubscription;
-  final _logger = Logger("ContactsSection");
-  late StreamSubscription<FilesUpdatedEvent> _filesUpdatedEvent;
-  final _debouncer = Debouncer(
-    const Duration(seconds: 2),
-    executionInterval: const Duration(seconds: 10),
-  );
-
-  @override
-  void initState() {
-    super.initState();
-    //Adding delay to avoid operation on app start
-    _contactSearchResults =
-        Future.delayed(const Duration(seconds: 2)).then((_) {
-      return SearchService.instance
-          .getAllContactsSearchResults(kSearchSectionLimit);
-    });
-
-    _filesUpdatedEvent = Bus.instance.on<FilesUpdatedEvent>().listen((event) {
-      _reloadContacts();
-    });
-    _peopleChangedEventSubscription =
-        Bus.instance.on<PeopleChangedEvent>().listen((event) {
-      if (event.type == PeopleEventType.saveOrEditPerson) {
-        _reloadContacts();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _peopleChangedEventSubscription.cancel();
-    _filesUpdatedEvent.cancel();
-    _debouncer.cancelDebounceTimer();
-    super.dispose();
-  }
+class ContactsSection extends StatelessWidget {
+  final List<GenericSearchResult> contactSearchResults;
+  const ContactsSection(this.contactSearchResults, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<GenericSearchResult>>(
-      future: _contactSearchResults,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final results = snapshot.data!;
-          if (results.isEmpty) {
-            final textTheme = getEnteTextTheme(context);
-            return Padding(
-              padding: const EdgeInsets.only(left: 12, right: 8),
-              child: Row(
+    if (contactSearchResults.isEmpty) {
+      final textTheme = getEnteTextTheme(context);
+      return Padding(
+        padding: const EdgeInsets.only(left: 12, right: 8),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          S.of(context).contacts,
-                          style: textTheme.largeBold,
-                        ),
-                        const SizedBox(height: 24),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 4),
-                          child: Text(
-                            S.of(context).searchPeopleEmptySection,
-                            style: textTheme.smallMuted,
-                          ),
-                        ),
-                      ],
+                  Text(
+                    S.of(context).contacts,
+                    style: textTheme.largeBold,
+                  ),
+                  const SizedBox(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: Text(
+                      S.of(context).searchPeopleEmptySection,
+                      style: textTheme.smallMuted,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  const _ContactsSectionEmptyCTAIcon(),
                 ],
               ),
-            );
-          } else {
-            final recommendations = <Widget>[
-              ...results.map(
-                (contactSearchResult) =>
-                    ContactRecommendation(contactSearchResult),
-              ),
-              const ContactCTA(),
-            ];
-            return Column(
+            ),
+            const SizedBox(width: 8),
+            const _ContactsSectionEmptyCTAIcon(),
+          ],
+        ),
+      );
+    } else {
+      final recommendations = <Widget>[
+        ...contactSearchResults.map(
+          (contactSearchResult) => ContactRecommendation(contactSearchResult),
+        ),
+        const ContactCTA(),
+      ];
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionHeader(
+            hasMore: (contactSearchResults.length >= kSearchSectionLimit - 1),
+          ),
+          SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 4.5),
+            physics: const BouncingScrollPhysics(),
+            scrollDirection: Axis.horizontal,
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _SectionHeader(
-                  hasMore: (results.length >= kSearchSectionLimit - 1),
-                ),
-                SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.5),
-                  physics: const BouncingScrollPhysics(),
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: recommendations,
-                  ),
-                ),
-              ],
-            );
-          }
-        } else if (snapshot.hasError) {
-          _logger.severe("Error loading contacts: ${snapshot.error}");
-        }
-        return const RepaintBoundary(
-          child: EnteLoadingWidget(),
-        );
-      },
-    );
-  }
-
-  void _reloadContacts() {
-    _debouncer.run(
-      () async {
-        if (mounted) {
-          setState(() {
-            _contactSearchResults = SearchService.instance
-                .getAllContactsSearchResults(kSearchSectionLimit);
-          });
-        }
-      },
-    );
+              children: recommendations,
+            ),
+          ),
+        ],
+      );
+    }
   }
 }
 
