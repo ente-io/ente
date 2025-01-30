@@ -1,5 +1,6 @@
 import { Overlay } from "@/base/components/containers";
 import type { ButtonishProps } from "@/base/components/mui";
+import { UnstyledButton } from "@/new/photos/components/UnstyledButton";
 import type { UserDetails } from "@/new/photos/services/user-details";
 import {
     familyUsage,
@@ -56,7 +57,11 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
 
 const BackgroundOverlay: React.FC = () => (
     <img
-        style={{ aspectRatio: "2/1" }}
+        style={{
+            aspectRatio: "2/1",
+            // Remove extra whitespace below the image.
+            verticalAlign: "bottom",
+        }}
         width="100%"
         src="/images/subscription-card-background/1x.png"
         srcSet="/images/subscription-card-background/2x.png 2x, /images/subscription-card-background/3x.png 3x"
@@ -64,17 +69,47 @@ const BackgroundOverlay: React.FC = () => (
 );
 
 const ClickOverlay: React.FC<ButtonishProps> = ({ onClick }) => (
-    <Overlay
-        sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
-            cursor: "pointer",
-        }}
-        onClick={onClick}
-    >
+    <ClickOverlayButton onClick={onClick}>
         <ChevronRightIcon />
-    </Overlay>
+    </ClickOverlayButton>
+);
+
+/**
+ * The transparent button element offers activation of the subscription card.
+ *
+ * A mixin of {@link FocusVisibleUnstyledButton} and {@link Overlay}, plus
+ * custom styling to place its contents (chevron) at the middle right.
+ */
+const ClickOverlayButton = styled(UnstyledButton)(
+    ({ theme }) => `
+    /* Overlay */
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+
+    /* Position the chevron at the middle right */
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    /* Reset the button color */
+    color: inherit;
+
+    /* FocusVisibleUnstyledButton, but customized to work button with the larger
+       subscription card and its border radii. */
+    &:focus-visible {
+        outline: 1.5px solid ${theme.vars.palette.stroke.base};
+        outline-offset: 2px;
+        border-radius: 3px;
+    }
+    &:active {
+        outline: 2px solid ${theme.vars.palette.stroke.faint};
+        outline-offset: 1px;
+        border-radius: 3px;
+    }
+`,
 );
 
 interface SubscriptionCardContentOverlayProps {

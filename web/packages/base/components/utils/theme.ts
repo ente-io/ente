@@ -184,8 +184,7 @@ const _colors = {
             baseHover: "rgba(0 0 0 / 0.87)",
             muted: "rgba(0 0 0 / 0.12)",
             faint: "rgba(0 0 0 / 0.04)",
-            // TODO(LM): Different from Figma.
-            faintHover: "rgba(0 0 0 / 0.06)",
+            faintHover: "rgba(0 0 0 / 0.08)",
             fainter: "rgba(0 0 0 / 0.02)",
         },
         stroke: {
@@ -221,7 +220,7 @@ const _colors = {
             baseHover: "rgba(255 255 255 / 0.90)",
             muted: "rgba(255 255 255 / 0.16)",
             faint: "rgba(255 255 255 / 0.12)",
-            faintHover: "rgba(255 255 255 / 0.06)",
+            faintHover: "rgba(255 255 255 / 0.16)",
             fainter: "rgba(255 255 255 / 0.05)",
         },
         stroke: {
@@ -295,8 +294,9 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 // The color of an hovered action.
                 hover: colors.light.fill.faintHover,
                 // For an icon button, the hover background color is derived
-                // from the active color above and this opacity.
-                hoverOpacity: 0.06,
+                // from the active color above and this opacity. Use a value
+                // that results in the same result as faintHover.
+                hoverOpacity: 0.08,
                 // TODO(LM): Remove commented.
                 // The color of a selected action.
                 //
@@ -323,10 +323,11 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 bg: colors.light.fill.faint,
                 hoverBg: colors.light.fill.faintHover,
                 // We don't use this currently.
-                // disabledBg: "#ff0000", //colors.light.fill.faint,
+                // disabledBg: colors.light.fill.fainter,
             },
         },
     },
+    // -- See the light mode section for comments
     dark: {
         palette: {
             background: colors.dark.background,
@@ -356,15 +357,9 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 contrastText: colors.fixed.white,
             },
             text: {
-                // Alias the tokens used by MUI to the ones that we use. This way,
-                // we don't need to change the default ("primary"), or update the
-                // MUI internal styling that refers to these tokens.
-                //
-                // Our own code should not use these.
                 primary: colors.dark.text.base,
                 secondary: colors.dark.text.muted,
                 disabled: colors.dark.text.faint,
-                // Our color tokens.
                 base: colors.dark.text.base,
                 muted: colors.dark.text.muted,
                 faint: colors.dark.text.faint,
@@ -374,43 +369,23 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             divider: colors.dark.stroke.faint,
             fixed: colors.fixed,
             boxShadow: colors.dark.boxShadow,
-            // Override some MUI defaults for styling action elements like
-            // buttons and menu items.
-            //
-            // https://github.com/mui/material-ui/blob/v6.4.0/packages/mui-material/src/styles/createPalette.js#L68
+            // -- See the light mode section for comments
             action: {
-                // The color of an active action, like an icon button.
                 active: colors.dark.stroke.base,
-                // The color of an hovered action.
                 hover: colors.dark.fill.faintHover,
-                // For an icon button, the hover background color is derived
-                // from the active color above and this opacity.
-                hoverOpacity: 0.12,
-                // The color of a selected action.
-                //
-                // Placeholder; not clear how it impacts us.
+                hoverOpacity: 0.16,
                 // selected: colors.dark.stroke.base,
                 // selectedOpacity: 0.08,
-                // The color of a disabled action (including regular buttons).
                 disabled: colors.dark.text.faint,
                 // disabledOpacity: 0.12,
-                // The background color of a disabled action.
                 disabledBackground: colors.dark.fill.faint,
-                // Placeholder; not clear how it impacts us.
                 // focus: colors.dark.stroke.base,
-                // Placeholder (MUI default); not clear how it impacts us.
                 // focusOpacity: 1,
-                // Placeholder (MUI default); not clear how it impacts us.
                 // activatedOpacity: 0.12,
             },
-            // Override some internal MUI defaults that impact the components
-            // which we use.
-            //
-            // https://github.com/mui/material-ui/blob/v6.4.0/packages/mui-material/src/styles/createThemeWithVars.js#L271
             FilledInput: {
                 bg: colors.dark.fill.faint,
                 hoverBg: colors.dark.fill.faintHover,
-                // We don't use this currently.
                 // disabledBg: colors.dark.fill.faint,
             },
         },
