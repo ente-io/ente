@@ -143,6 +143,12 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                           snapshot.data!.elementAt(index)
                               as List<GenericSearchResult>,
                         );
+                      case SectionType.contacts:
+                        // return ContactsSection(
+                        //   snapshot.data!.elementAt(index)
+                        //       as List<GenericSearchResult>,
+                        // );
+                        return const SizedBox.shrink();
                       case SectionType.fileTypesAndExtension:
                         return FileTypeSection(
                           snapshot.data!.elementAt(index)

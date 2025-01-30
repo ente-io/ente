@@ -19,11 +19,11 @@ import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import 'package:photos/ui/tabs/section_title.dart';
 import "package:photos/ui/tabs/shared/all_quick_links_page.dart";
-import "package:photos/ui/tabs/shared/contacts_section.dart";
 import "package:photos/ui/tabs/shared/empty_state.dart";
 import "package:photos/ui/tabs/shared/quick_link_album_item.dart";
 import "package:photos/ui/viewer/gallery/collect_photos_card_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
+import "package:photos/ui/viewer/search_tab/contacts_section.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/navigation_util.dart";
 
