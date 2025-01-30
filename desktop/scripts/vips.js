@@ -58,7 +58,7 @@ const downloadIfNeeded = (downloadName, outputName) => {
     } catch {}
 
     console.log(`Downloading ${downloadName}`);
-    const downloadPath = `https://github.com/ente-io/libvips-packaging/releases/tag/v8.16.0/${downloadName}`;
+    const downloadPath = `https://github.com/ente-io/libvips-packaging/releases/download/v8.16.0/${downloadName}`;
     return fetch(downloadPath)
         .then((res) => res.blob())
         .then((blob) => fsp.writeFile(out, blob.stream()))
