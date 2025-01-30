@@ -1317,6 +1317,7 @@ class SearchService {
     // TODO: lau: optimize this later so we don't keep computing embedding
     final textEmbedding = await MLComputer.instance.runClipText(query);
     final textVector = Vector.fromList(textEmbedding);
+    const clipThreshold = 0.75;
     final fileToScore = <int, double>{};
     for (final file in files) {
       final clip = fileIdToClip[file.uploadedFileID!];
@@ -1371,7 +1372,7 @@ class SearchService {
             final fClip = fileIdToClip[filteredFile.uploadedFileID!];
             if (fClip == null) continue;
             final similarity = clip.vector.dot(fClip.vector);
-            if (similarity > 0.80) {
+            if (similarity > clipThreshold) {
               skipped++;
               continue filesLoop;
             }
@@ -1429,7 +1430,7 @@ class SearchService {
                 final fClip = fileIdToClip[filteredFile.uploadedFileID!];
                 if (fClip == null) continue;
                 final similarity = clip.vector.dot(fClip.vector);
-                if (similarity > 0.80) {
+                if (similarity > clipThreshold) {
                   skipped++;
                   continue yearLoop;
                 }
