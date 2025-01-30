@@ -89,17 +89,19 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
     });
     if (!mounted) return;
     if (file != null) {
-      final d =
-          FileDataService.instance.previewIds![widget.file.uploadedFileID!];
-      if (d != null && widget.file.fileSize != null) {
-        // show toast with human readable size
-        final size = formatBytes(widget.file.fileSize!);
-        showToast(
-          context,
-          "Preview OG Size ($size), previewSize: ${formatBytes(d.objectSize)}",
-        );
-      } else {
-        showShortToast(context, "Playing preview");
+      if (flagService.internalUser) {
+        final d =
+            FileDataService.instance.previewIds![widget.file.uploadedFileID!];
+        if (d != null && widget.file.fileSize != null) {
+          // show toast with human readable size
+          final size = formatBytes(widget.file.fileSize!);
+          showToast(
+            context,
+            "Preview OG Size ($size), previewSize: ${formatBytes(d.objectSize)}",
+          );
+        } else {
+          showShortToast(context, "Playing preview");
+        }
       }
       previewFile = file;
       _setVideoPlayerController();
