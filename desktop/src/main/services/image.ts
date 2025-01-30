@@ -14,7 +14,6 @@ export const convertToJPEG = async (imageData: Uint8Array) => {
     const inputFilePath = await makeTempFilePath();
     const outputFilePath = await makeTempFilePath("jpeg");
 
-    // Construct the command first, it may throw NotAvailable on win32.
     const command = convertToJPEGCommand(inputFilePath, outputFilePath);
 
     try {
@@ -47,29 +46,10 @@ const convertToJPEGCommand = (
         case "win32":
             return [vipsPath(), "copy", inputFilePath, outputFilePath];
 
-        // TODO: Cleanup im
-        // return [
-        //     imageMagickPath(),
-        //     "convert",
-        //     inputFilePath,
-        //     "-quality",
-        //     "100%",
-        //     outputFilePath,
-        // ];
-
         default:
             throw new Error("Not available on the current OS/arch");
     }
 };
-
-/**
- * Path to the magick executable bundled with our app on Linux and Windows.
- */
-const imageMagickPath = () =>
-    path.join(
-        isDev ? "build" : process.resourcesPath,
-        process.platform == "win32" ? "magick.exe" : "magick",
-    );
 
 /**
  * Path to the vips executable bundled with our app on Linux and Windows.
@@ -156,24 +136,6 @@ const generateImageThumbnailCommand = (
                 inputFilePath,
                 `${outputFilePath}[Q=${quality}]`,
                 `${maxDimension}`,
-            ];
-
-        case "aix" /* dummy case to hold TODO */:
-            /* TODO: Cleanup im */
-            return [
-                imageMagickPath(),
-                "convert",
-                inputFilePath,
-                "-define",
-                `jpeg:size=${2 * maxDimension}x${2 * maxDimension}`,
-                "-auto-orient",
-                "-thumbnail",
-                `${maxDimension}x${maxDimension}`,
-                "-unsharp",
-                "0x.5",
-                "-quality",
-                `${quality}`,
-                outputFilePath,
             ];
 
         default:

@@ -37,7 +37,7 @@ module.exports = async (context) => {
     // https://github.com/electron-userland/electron-builder/blob/master/packages/builder-util/src/arch.ts#L9
     // https://nodejs.org/api/process.html#processarch
     if (arch == process.arch) {
-        // `magick.js` would've already downloaded the file, nothing to do.
+        // `vips.js` would've already downloaded the file, nothing to do.
         return true;
     }
 

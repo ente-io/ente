@@ -272,8 +272,7 @@ export interface Electron {
      * Try to convert an arbitrary image into JPEG using native layer tools.
      *
      * The behaviour is OS dependent. On macOS we use the `sips` utility, while
-     * on Linux and Windows we an ImageMagick executable bundled with our
-     * desktop app.
+     * on Linux and Windows we use a `vips` bundled with our desktop app.
      *
      * @param imageData The raw image data (the contents of the image file).
      *
@@ -285,8 +284,7 @@ export interface Electron {
      * Generate a JPEG thumbnail for the given image.
      *
      * The behaviour is OS dependent. On macOS we use the `sips` utility, while
-     * on Linux and Windows we an ImageMagick executable bundled with our
-     * desktop app.
+     * on Linux and Windows we use a `vips` bundled with our desktop app.
      *
      * @param dataOrPathOrZipItem The file whose thumbnail we want to generate.
      * It can be provided as raw image data (the contents of the image file), or
