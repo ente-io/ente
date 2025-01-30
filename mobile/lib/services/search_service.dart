@@ -1349,6 +1349,7 @@ class SearchService {
 
     final filteredFiles = <EnteFile>[];
     if (allYears.length <= 1) {
+      // TODO: lau: eventually this sorting might have to be replaced with some scoring system
       // sort first on clip embeddings score (descending)
       files.sort(
         (a, b) => fileToScore[b.uploadedFileID!]!
