@@ -1224,6 +1224,7 @@ class SearchService {
     for (final dayMonth in dayMonthYearGroups.keys) {
       final dayDiff = dayMonth - currentDayMonth;
       if (dayDiff < 0 || dayDiff > 2) continue;
+      // TODO: lau: this doesn't cover month changes properly
 
       final yearGroups = dayMonthYearGroups[dayMonth]!;
       final significantYears = yearGroups.entries
