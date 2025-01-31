@@ -1,4 +1,4 @@
-import { SpaceBetweenFlex } from "@/base/components/containers";
+import { CenteredFlex, SpaceBetweenFlex } from "@/base/components/containers";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     OverflowMenu,
@@ -15,10 +15,7 @@ import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
 import { CollectionMappingChoice } from "@/new/photos/components/CollectionMappingChoice";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { useAppContext } from "@/new/photos/types/context";
-import {
-    FlexWrapper,
-    VerticallyCentered,
-} from "@ente/shared/components/Container";
+import { FlexWrapper } from "@ente/shared/components/Container";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import DoNotDisturbOutlinedIcon from "@mui/icons-material/DoNotDisturbOutlined";
@@ -188,7 +185,7 @@ const WatchesContainer = styled("div")(() => ({
 
 const NoWatches: React.FC = () => {
     return (
-        <NoWatchesContainer>
+        <CenteredFlex sx={{ flex: 1, mb: 4 }}>
             <Stack sx={{ gap: 1.5 }}>
                 <Typography variant="h6">{t("no_folders_added")}</Typography>
                 <Typography variant="small" sx={{ py: 1, color: "text.muted" }}>
@@ -207,19 +204,12 @@ const NoWatches: React.FC = () => {
                     </Stack>
                 </Typography>
             </Stack>
-        </NoWatchesContainer>
+        </CenteredFlex>
     );
 };
 
-const NoWatchesContainer = styled(VerticallyCentered)({
-    textAlign: "left",
-    alignItems: "flex-start",
-    marginBottom: "32px",
-});
-
 const Check: React.FC = () => (
     <CheckIcon
-        fontSize="small"
         sx={{ display: "inline", fontSize: "15px", color: "stroke.muted" }}
     />
 );
