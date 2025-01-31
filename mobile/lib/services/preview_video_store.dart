@@ -26,7 +26,6 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
@@ -62,7 +61,7 @@ class PreviewVideoStore {
   static const String _videoStreamingCutoff = "videoStreamingCutoff";
 
   bool get isVideoStreamingEnabled {
-    return _prefs.getBool(_videoStreamingEnabled) ?? flagService.internalUser;
+    return _prefs.getBool(_videoStreamingEnabled) ?? false;
   }
 
   Future<void> setIsVideoStreamingEnabled(bool value) async {
