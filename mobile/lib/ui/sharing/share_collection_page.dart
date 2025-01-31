@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
@@ -332,20 +333,21 @@ class EmailItemWidget extends StatelessWidget {
   const EmailItemWidget(
     this.collection, {
     this.onTap,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     if (collection.getSharees().isEmpty) {
       return const SizedBox.shrink();
     } else if (collection.getSharees().length == 1) {
+      final User? user = collection.getSharees().firstOrNull;
       return Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
-              title: collection.getSharees().firstOrNull?.email ?? '',
+              title: user?.displayName ?? user?.email ?? '',
             ),
             leadingIconWidget: UserAvatarWidget(
               collection.getSharees().first,
