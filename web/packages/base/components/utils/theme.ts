@@ -550,7 +550,11 @@ const components: Components = {
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
+                    // Use a translucent color for the backdrop.
                     backgroundColor: "var(--mui-palette-backdrop-faint)",
+                    // Apply a blur to the existing contents on which we're
+                    // shown, and show some of it through by reducing opacity.
+                    backdropFilter: "blur(60px) opacity(70%)",
                 },
                 "& .MuiDialog-paper": {
                     boxShadow: "var(--mui-palette-boxShadow-float)",
