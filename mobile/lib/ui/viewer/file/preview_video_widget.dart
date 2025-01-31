@@ -30,12 +30,14 @@ class PreviewVideoWidget extends StatefulWidget {
   final bool? autoPlay;
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
+  final void Function()? onStreamChange;
 
   const PreviewVideoWidget(
     this.file, {
     this.autoPlay = false,
     this.tagPrefix,
     this.playbackCallback,
+    this.onStreamChange,
     super.key,
   });
 
@@ -91,7 +93,7 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
     if (file != null) {
       if (flagService.internalUser) {
         final d =
-            FileDataService.instance.previewIds![widget.file.uploadedFileID!];
+            FileDataService.instance.previewIds?[widget.file.uploadedFileID!];
         if (d != null && widget.file.fileSize != null) {
           // show toast with human readable size
           final size = formatBytes(widget.file.fileSize!);
@@ -249,7 +251,10 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
       looping: true,
       allowMuting: true,
       allowFullScreen: false,
-      customControls: VideoControls(file: widget.file),
+      customControls: VideoControls(
+        file: widget.file,
+        onStreamChange: widget.onStreamChange,
+      ),
     );
     return Container(
       color: Colors.black,

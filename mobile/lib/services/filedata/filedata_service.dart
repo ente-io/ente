@@ -23,7 +23,7 @@ class FileDataService {
   final _logger = Logger("FileDataService");
   final _dio = NetworkClient.instance.enteDio;
   late final SharedPreferences _prefs;
-  Map<int, PreviewInfo>? previewIds = {};
+  Map<int, PreviewInfo>? previewIds;
 
   void init(SharedPreferences prefs) {
     _prefs = prefs;

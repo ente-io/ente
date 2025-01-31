@@ -155,35 +155,40 @@ class _BackupItemCardState extends State<BackupItemCard> {
                       color: colorScheme.primary700,
                     ),
                   ),
-                BackupItemStatus.uploaded => widget.preview != null &&
-                        widget.preview!.status != PreviewItemStatus.uploaded
+                BackupItemStatus.uploaded => widget.preview != null
                     ? switch (widget.preview!.status) {
-                        PreviewItemStatus.compressing => const SizedBox(
+                        PreviewItemStatus.uploading ||
+                        PreviewItemStatus.compressing =>
+                          SizedBox(
                             width: 24,
                             height: 24,
-                            child: Text("CQ"),
+                            child: Image.asset(
+                              "assets/processing-video.png",
+                            ),
                           ),
-                        PreviewItemStatus.uploading => const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: Text("UQ"),
-                          ),
-                        PreviewItemStatus.failed => const SizedBox(
+                        PreviewItemStatus.failed => SizedBox(
                             width: 24,
                             height: 24,
-                            child: Text("FQ"),
+                            child: Image.asset(
+                              "assets/processing-video-failed.png",
+                            ),
                           ),
-                        PreviewItemStatus.inQueue => const SizedBox(
+                        PreviewItemStatus.retry ||
+                        PreviewItemStatus.inQueue =>
+                          SizedBox(
                             width: 24,
                             height: 24,
-                            child: Text("IQ"),
+                            child: Image.asset(
+                              "assets/video-processing-queued.png",
+                            ),
                           ),
-                        PreviewItemStatus.retry => const SizedBox(
+                        PreviewItemStatus.uploaded => SizedBox(
                             width: 24,
                             height: 24,
-                            child: Text("RQ"),
+                            child: Image.asset(
+                              "assets/processing-video-success.png",
+                            ),
                           ),
-                        _ => const SizedBox()
                       }
                     : const SizedBox(
                         width: 24,

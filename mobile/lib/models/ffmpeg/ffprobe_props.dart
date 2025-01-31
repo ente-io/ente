@@ -19,6 +19,7 @@ class FFProbeProps {
   String? _width;
   String? _height;
   int? _rotation;
+  Duration? duration;
 
   // dot separated bitrate, fps, codecWidth, codecHeight. Ignore null value
   String get videoInfo {
@@ -134,6 +135,7 @@ class FFProbeProps {
           break;
         case FFProbeKeys.duration:
           parsedData[stringKey] = _formatDuration(json[key]);
+          result.duration = _parseDuration(json[key]);
         case FFProbeKeys.location:
           result.location = _formatLocation(json[key]);
           if (result.location != null) {

@@ -36,11 +36,13 @@ class VideoWidgetNative extends StatefulWidget {
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
   final bool isFromMemories;
+  final void Function()? onStreamChange;
   const VideoWidgetNative(
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
     this.isFromMemories = false,
+    required this.onStreamChange,
     super.key,
   });
 
@@ -283,6 +285,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                     return PreviewStatusWidget(
                                       showControls: value,
                                       file: widget.file,
+                                      onStreamChange: widget.onStreamChange,
                                     );
                                   },
                                 ),

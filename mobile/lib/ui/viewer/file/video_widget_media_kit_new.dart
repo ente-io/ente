@@ -27,11 +27,14 @@ class VideoWidgetMediaKitNew extends StatefulWidget {
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
   final bool isFromMemories;
+  final void Function()? onStreamChange;
+
   const VideoWidgetMediaKitNew(
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
     this.isFromMemories = false,
+    this.onStreamChange,
     super.key,
   });
 
@@ -232,11 +235,14 @@ class _VideoWidget extends StatefulWidget {
   final VideoController controller;
   final Function(bool)? playbackCallback;
   final bool isFromMemories;
+  final void Function()? onStreamChange;
+
   const _VideoWidget(
     this.file,
     this.controller,
     this.playbackCallback, {
     required this.isFromMemories,
+    this.onStreamChange,
   });
 
   @override
@@ -368,6 +374,7 @@ class __VideoWidgetState extends State<_VideoWidget> {
                                   return PreviewStatusWidget(
                                     showControls: value,
                                     file: widget.file,
+                                    onStreamChange: widget.onStreamChange,
                                   );
                                 },
                               ),

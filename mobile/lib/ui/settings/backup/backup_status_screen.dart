@@ -110,8 +110,28 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
         );
 
     final allItems = <BackupItem>[
-      ...items.where((element) => element.status != BackupItemStatus.uploaded),
-      if (result != null) ...result!,
+      ...items.where(
+        (element) => element.status != BackupItemStatus.uploaded,
+      ),
+      if (result != null)
+        ...result!
+            .where(
+              (element) =>
+                  element.file.uploadedFileID != null &&
+                  previewResult[element.file.uploadedFileID] != null,
+            )
+            .sorted(
+              (a, b) =>
+                  previewResult[a.file.uploadedFileID]!.status.index.compareTo(
+                        previewResult[b.file.uploadedFileID]!.status.index,
+                      ),
+            ),
+      if (result != null)
+        ...result!.where(
+          (element) =>
+              element.file.uploadedFileID == null ||
+              previewResult[element.file.uploadedFileID] == null,
+        ),
     ];
 
     return Scaffold(

@@ -14,8 +14,10 @@ class VideoControls extends StatefulWidget {
   const VideoControls({
     super.key,
     required this.file,
+    required this.onStreamChange,
   });
   final EnteFile file;
+  final void Function()? onStreamChange;
 
   @override
   State<StatefulWidget> createState() {
@@ -93,6 +95,7 @@ class _VideoControlsState extends State<VideoControls> {
                         showControls: !_hideStuff,
                         file: widget.file,
                         isPreviewPlayer: true,
+                        onStreamChange: widget.onStreamChange,
                       ),
                       _buildBottomBar(context),
                     ],

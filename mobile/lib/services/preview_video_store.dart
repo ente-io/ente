@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:collection";
 import "dart:io";
 
+import "package:collection/collection.dart";
 import "package:dio/dio.dart";
 import "package:encrypt/encrypt.dart" as enc;
 import "package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart";
@@ -116,8 +117,12 @@ class PreviewVideoStore {
 
     if (fileSize <= 10 * 1024 * 1024) {
       props = await getVideoPropsAsync(file);
-      final codec = props?.propData?["codec"].toString().toLowerCase();
-      if (codec == "h264") {
+      final videoData = List.from(props?.propData?["streams"] ?? [])
+          .firstWhereOrNull((e) => e["type"] == "video");
+
+      final codec = videoData["codec_name"]?.toString().toLowerCase();
+      final codecIsH264 = codec?.contains("h264") ?? false;
+      if (codecIsH264) {
         return;
       }
     }
@@ -140,8 +145,13 @@ class PreviewVideoStore {
 
     props ??= await getVideoPropsAsync(file);
 
-    final codec = props?.propData?["codec"]?.toString().toLowerCase();
-    final bitrate = int.tryParse(props?.bitrate ?? "");
+    final videoData = List.from(props?.propData?["streams"] ?? [])
+        .firstWhereOrNull((e) => e["type"] == "video");
+
+    final codec = videoData["codec_name"]?.toString().toLowerCase();
+    final bitrate = props?.duration?.inSeconds != null
+        ? (fileSize * 8) / props!.duration!.inSeconds
+        : null;
 
     final String tempDir = Configuration.instance.getTempDirectory();
     final String prefix =
@@ -161,7 +171,8 @@ class PreviewVideoStore {
     );
 
     FFmpegSession? session;
-    if (bitrate != null && bitrate <= 4000 * 1000 && codec == "h264") {
+    final codecIsH264 = codec?.contains("h264") ?? false;
+    if (bitrate != null && bitrate <= 4000 * 1000 && codecIsH264) {
       // create playlist without compression, as is
       session = await FFmpegKit.execute(
         '-i "${file.path}" '
@@ -175,7 +186,7 @@ class PreviewVideoStore {
     } else if (bitrate != null &&
         codec != null &&
         bitrate <= 2000 * 1000 &&
-        codec != "h264") {
+        !codecIsH264) {
       // compress video with crf=21, h264 no change in resolution or frame rate,
       // just change color scheme
       session = await FFmpegKit.execute(
@@ -357,7 +368,7 @@ class PreviewVideoStore {
     _logger.info("Getting playlist for $file");
     try {
       final objectKey =
-          FileDataService.instance.previewIds![file.uploadedFileID!]?.objectId;
+          FileDataService.instance.previewIds?[file.uploadedFileID!]?.objectId;
       final FileInfo? playlistCache = (objectKey == null)
           ? null
           : await cacheManager.getFileFromCache(_getCacheKey(objectKey));
@@ -459,20 +470,41 @@ class PreviewVideoStore {
   Future<void> putFilesForPreviewCreation() async {
     if (!isVideoStreamingEnabled) return;
 
-    final cutoff = await videoStreamingCutoff;
+    final cutoff = videoStreamingCutoff;
     if (cutoff == null) return;
+
     final files = await FilesDB.instance.getAllFilesAfterDate(
       fileType: FileType.video,
       beginDate: cutoff,
     );
-    final previewIds = FileDataService.instance.previewIds;
-    final allFiles = files.where((file) {
-      return previewIds?[file.uploadedFileID!] == null;
-    }).toList();
+    await Future.delayed(const Duration(seconds: 5));
+    var previewIds = FileDataService.instance.previewIds;
+    if (previewIds == null) {
+      await Future.delayed(const Duration(seconds: 15));
+      previewIds = FileDataService.instance.previewIds;
+    }
+
+    final allFiles = files
+        .where(
+          (file) =>
+              file.uploadedFileID != null &&
+              previewIds?[file.uploadedFileID] == null &&
+              file.fileType == FileType.video,
+        )
+        .toList();
     final file = allFiles.first;
     allFiles.remove(file);
 
     this.files.addAll(allFiles);
     await chunkAndUploadVideo(null, file);
+
+    // set all video status to be in queue
+    for (final file in allFiles) {
+      _items[file.uploadedFileID!] = PreviewItem(
+        status: PreviewItemStatus.inQueue,
+        file: file,
+        collectionID: file.collectionID ?? 0,
+      );
+    }
   }
 }

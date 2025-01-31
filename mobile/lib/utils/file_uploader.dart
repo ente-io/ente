@@ -475,9 +475,7 @@ class FileUploader {
   }
 
   void _uploadPreview(EnteFile file) {
-    final collection =
-        CollectionsService.instance.getCollectionByID(file.collectionID!);
-    if (Platform.isIOS || collection?.displayName == "Camera") {
+    if (file.fileType == FileType.video) {
       unawaited(
         _previewVideoStore.chunkAndUploadVideo(null, file),
       );

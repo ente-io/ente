@@ -9,6 +9,7 @@ import 'package:photos/events/notification_event.dart';
 import "package:photos/events/preview_updated_event.dart";
 import 'package:photos/events/sync_status_update_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/preview_video_store.dart";
 import 'package:photos/services/sync_service.dart';
@@ -34,7 +35,7 @@ class StatusBarWidget extends StatefulWidget {
 
 class _StatusBarWidgetState extends State<StatusBarWidget> {
   static final _logger = Logger("StatusBarWidget");
-  var previewResult = PreviewVideoStore.instance.previews;
+  int previewCount = 0;
 
   late StreamSubscription<SyncStatusUpdate> _subscription;
   late StreamSubscription<NotificationEvent> _notificationSubscription;
@@ -87,9 +88,24 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
       }
     });
 
+    // visit LinkedHashMap and calculat previewCount
+    previewCount = PreviewVideoStore.instance.previews.values
+        .where(
+          (element) =>
+              element.status == PreviewItemStatus.compressing ||
+              element.status == PreviewItemStatus.uploading,
+        )
+        .length;
+
     _previewSubscription =
         Bus.instance.on<PreviewUpdatedEvent>().listen((event) {
-      previewResult = event.items;
+      previewCount = event.items.values
+          .where(
+            (element) =>
+                element.status == PreviewItemStatus.compressing ||
+                element.status == PreviewItemStatus.uploading,
+          )
+          .length;
     });
     super.initState();
   }
@@ -119,7 +135,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                   },
                   child: const SyncStatusWidget(),
                 )
-              : previewResult.isNotEmpty
+              : previewCount > 0
                   ? GestureDetector(
                       onTap: () {
                         routeToPage(

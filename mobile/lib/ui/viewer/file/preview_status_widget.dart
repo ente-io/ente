@@ -15,12 +15,14 @@ class PreviewStatusWidget extends StatefulWidget {
     super.key,
     required bool showControls,
     required this.file,
+    required this.onStreamChange,
     this.isPreviewPlayer = false,
   }) : _showControls = showControls;
 
   final bool _showControls;
   final EnteFile file;
   final bool isPreviewPlayer;
+  final void Function()? onStreamChange;
 
   @override
   State<PreviewStatusWidget> createState() => _PreviewStatusWidgetState();
@@ -63,13 +65,14 @@ class _PreviewStatusWidgetState extends State<PreviewStatusWidget> {
     if (!isVideoStreamingEnabled) {
       return const SizedBox();
     }
-    final bool isPreviewAvailable = FileDataService.instance.previewIds
-            ?.containsKey(widget.file.uploadedFileID!) ??
-        false;
+    final bool isPreviewAvailable = widget.file.uploadedFileID != null &&
+        (FileDataService.instance.previewIds
+                ?.containsKey(widget.file.uploadedFileID) ??
+            false);
 
-    if (widget.file.localID != null && preview == null) {
-      return const SizedBox();
-    }
+    // if (widget.file.localID != null && preview == null) {
+    //   return const SizedBox();
+    // }
     final isInProgress = preview?.status == PreviewItemStatus.compressing ||
         preview?.status == PreviewItemStatus.uploading;
     final isInQueue = preview?.status == PreviewItemStatus.inQueue ||
@@ -101,70 +104,76 @@ class _PreviewStatusWidgetState extends State<PreviewStatusWidget> {
             right: 10,
             bottom: 4,
           ),
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 4,
-            ),
-            decoration: BoxDecoration(
-              color: isPreviewAvailable ? Colors.green : null,
-              borderRadius: const BorderRadius.all(
-                Radius.circular(200),
+          child: GestureDetector(
+            onTap:
+                preview == null || preview!.status == PreviewItemStatus.uploaded
+                    ? widget.onStreamChange
+                    : null,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 4,
               ),
-              border: isPreviewAvailable
-                  ? null
-                  : Border.all(
-                      color: strokeFaintDark,
-                      width: 1,
-                    ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                !isInProgress
-                    ? Icon(
-                        isInQueue
-                            ? Icons.history_outlined
-                            : isBeforeCutoffDate
-                                ? Icons.block_outlined
-                                : isFailed
-                                    ? Icons.error_outline
-                                    : Icons.play_arrow,
-                        size: 16,
-                      )
-                    : const SizedBox(
-                        width: 12,
-                        height: 12,
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation(
-                            Colors.white,
-                          ),
-                          backgroundColor: Colors.transparent,
-                          strokeWidth: 2,
-                        ),
+              decoration: BoxDecoration(
+                color: isPreviewAvailable ? Colors.green : null,
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(200),
+                ),
+                border: isPreviewAvailable
+                    ? null
+                    : Border.all(
+                        color: strokeFaintDark,
+                        width: 1,
                       ),
-                SizedBox(
-                  width: !isInProgress || isPreviewAvailable ? 2 : 6,
-                ),
-                Text(
-                  isInProgress
-                      ? "Processing"
-                      : isInQueue
-                          ? "Queued"
-                          : isBeforeCutoffDate
-                              ? "Ineligible"
-                              : isFailed
-                                  ? "Failed"
-                                  : widget.isPreviewPlayer
-                                      ? "Play original"
-                                      : "Play stream",
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  !isInProgress
+                      ? Icon(
+                          isInQueue
+                              ? Icons.history_outlined
+                              : isBeforeCutoffDate
+                                  ? Icons.block_outlined
+                                  : isFailed
+                                      ? Icons.error_outline
+                                      : Icons.play_arrow,
+                          size: 16,
+                        )
+                      : const SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation(
+                              Colors.white,
+                            ),
+                            backgroundColor: Colors.transparent,
+                            strokeWidth: 2,
+                          ),
+                        ),
+                  SizedBox(
+                    width: !isInProgress || isPreviewAvailable ? 2 : 6,
                   ),
-                ),
-              ],
+                  Text(
+                    isInProgress
+                        ? "Processing"
+                        : isInQueue
+                            ? "Queued"
+                            : isBeforeCutoffDate
+                                ? "Ineligible"
+                                : isFailed
+                                    ? "Failed"
+                                    : widget.isPreviewPlayer
+                                        ? "Play original"
+                                        : "Play stream",
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
