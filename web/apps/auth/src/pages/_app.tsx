@@ -29,7 +29,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
 
     const isI18nReady = useSetupI18n();
-    const isLoadingRoute = useIsRouteChangeInProgress();
+    const isChangingRoute = useIsRouteChangeInProgress();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
 
     useEffect(() => {
@@ -65,7 +65,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <AppContext.Provider value={appContext}>
                     {!isI18nReady ? (
                         <LoadingOverlay />
-                    ) : isLoadingRoute ? (
+                    ) : isChangingRoute ? (
                         <TranslucentLoadingOverlay />
                     ) : (
                         <Component {...pageProps} />

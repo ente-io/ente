@@ -1,12 +1,19 @@
 import { clientPackageName, isDesktop, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
-import { LoadingOverlay } from "@/base/components/loaders";
+import {
+    LoadingOverlay,
+    TranslucentLoadingOverlay,
+} from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import {
     genericErrorDialogAttributes,
     useAttributedMiniDialog,
 } from "@/base/components/utils/dialog";
-import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
+import {
+    useIsRouteChangeInProgress,
+    useSetupI18n,
+    useSetupLogs,
+} from "@/base/components/utils/hooks-app";
 import { photosTheme } from "@/base/components/utils/theme";
 import log from "@/base/log";
 import { logStartupBanner } from "@/base/log-web";
@@ -49,12 +56,12 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
 
     const isI18nReady = useSetupI18n();
+    const isChangingRoute = useIsRouteChangeInProgress();
     const router = useRouter();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
     const { showNotification, notificationProps } = useNotification();
     const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
 
-    const [loading, setLoading] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
 
     useEffect(() => {
@@ -115,12 +122,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         if (needsFamilyRedirect && getData(LS_KEYS.USER)?.token)
             redirectToFamilyPortal();
 
-        router.events.on("routeChangeStart", (url: string) => {
-            const newPathname = url.split("?")[0];
-            if (window.location.pathname !== newPathname) {
-                showLoadingBar();
-            }
-
+        router.events.on("routeChangeStart", () => {
             if (needsFamilyRedirect && getData(LS_KEYS.USER)?.token) {
                 redirectToFamilyPortal();
 
@@ -128,10 +130,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 // eslint-disable-next-line @typescript-eslint/only-throw-error
                 throw "Aborting route change, redirection in process....";
             }
-        });
-
-        router.events.on("routeChangeComplete", () => {
-            hideLoadingBar();
         });
     }, []);
 
@@ -191,6 +189,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <AppContext.Provider value={appContext}>
                     {!isI18nReady ? (
                         <LoadingOverlay />
+                    ) : isChangingRoute ? (
+                        <TranslucentLoadingOverlay />
                     ) : (
                         <Component {...pageProps} />
                     )}
