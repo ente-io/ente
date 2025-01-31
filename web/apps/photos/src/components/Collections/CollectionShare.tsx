@@ -1394,16 +1394,20 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                     title={t("share_album")}
                     onRootClose={onRootClose}
                 />
-                <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
-                    <Stack spacing={3}>
-                        <ManagePublicCollect
-                            collection={collection}
-                            publicShareProp={publicShareProp}
-                            updatePublicShareURLHelper={
-                                updatePublicShareURLHelper
-                            }
-                        />
-                        <ManageLinkExpiry
+                <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
+                    <ManagePublicCollect
+                        collection={collection}
+                        publicShareProp={publicShareProp}
+                        updatePublicShareURLHelper={updatePublicShareURLHelper}
+                    />
+                    <ManageLinkExpiry
+                        collection={collection}
+                        publicShareProp={publicShareProp}
+                        updatePublicShareURLHelper={updatePublicShareURLHelper}
+                        onRootClose={onRootClose}
+                    />
+                    <RowButtonGroup>
+                        <ManageDeviceLimit
                             collection={collection}
                             publicShareProp={publicShareProp}
                             updatePublicShareURLHelper={
@@ -1411,56 +1415,42 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                             }
                             onRootClose={onRootClose}
                         />
-                        <RowButtonGroup>
-                            <ManageDeviceLimit
-                                collection={collection}
-                                publicShareProp={publicShareProp}
-                                updatePublicShareURLHelper={
-                                    updatePublicShareURLHelper
-                                }
-                                onRootClose={onRootClose}
-                            />
-                            <RowButtonDivider />
-                            <ManageDownloadAccess
-                                collection={collection}
-                                publicShareProp={publicShareProp}
-                                updatePublicShareURLHelper={
-                                    updatePublicShareURLHelper
-                                }
-                            />
-                            <RowButtonDivider />
-                            <ManageLinkPassword
-                                collection={collection}
-                                publicShareProp={publicShareProp}
-                                updatePublicShareURLHelper={
-                                    updatePublicShareURLHelper
-                                }
-                            />
-                        </RowButtonGroup>
-                        <RowButtonGroup>
-                            <RowButton
-                                startIcon={<ContentCopyIcon />}
-                                onClick={copyToClipboardHelper(publicShareUrl)}
-                                label={t("copy_link")}
-                            />
-                        </RowButtonGroup>
-                        <RowButtonGroup>
-                            <RowButton
-                                color="critical"
-                                startIcon={<RemoveCircleOutlineIcon />}
-                                onClick={disablePublicSharing}
-                                label={t("REMOVE_LINK")}
-                            />
-                        </RowButtonGroup>
-                    </Stack>
+                        <RowButtonDivider />
+                        <ManageDownloadAccess
+                            collection={collection}
+                            publicShareProp={publicShareProp}
+                            updatePublicShareURLHelper={
+                                updatePublicShareURLHelper
+                            }
+                        />
+                        <RowButtonDivider />
+                        <ManageLinkPassword
+                            collection={collection}
+                            publicShareProp={publicShareProp}
+                            updatePublicShareURLHelper={
+                                updatePublicShareURLHelper
+                            }
+                        />
+                    </RowButtonGroup>
+                    <RowButtonGroup>
+                        <RowButton
+                            startIcon={<ContentCopyIcon />}
+                            onClick={copyToClipboardHelper(publicShareUrl)}
+                            label={t("copy_link")}
+                        />
+                    </RowButtonGroup>
+                    <RowButtonGroup>
+                        <RowButton
+                            color="critical"
+                            startIcon={<RemoveCircleOutlineIcon />}
+                            onClick={disablePublicSharing}
+                            label={t("REMOVE_LINK")}
+                        />
+                    </RowButtonGroup>
                     {sharableLinkError && (
                         <Typography
                             variant="small"
-                            sx={{
-                                color: "critical.main",
-                                mt: 0.5,
-                                textAlign: "center",
-                            }}
+                            sx={{ color: "critical.main", textAlign: "center" }}
                         >
                             {sharableLinkError}
                         </Typography>
