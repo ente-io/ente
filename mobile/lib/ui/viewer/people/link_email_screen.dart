@@ -135,6 +135,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                         return Column(
                           children: [
                             MenuItemWidget(
+                              key: ValueKey(currentUser.email),
                               captionedTextWidget: CaptionedTextWidget(
                                 title: currentUser.email,
                               ),

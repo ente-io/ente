@@ -140,6 +140,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                         return Column(
                           children: [
                             MenuItemWidget(
+                              key: ValueKey(
+                                currentUser.displayName ?? currentUser.email,
+                              ),
                               captionedTextWidget: CaptionedTextWidget(
                                 title: currentUser.displayName ??
                                     currentUser.email,
