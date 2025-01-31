@@ -1292,32 +1292,29 @@ class SearchService {
     // process to find significant weeks (only if there are no significant days)
     if (searchResults.isEmpty) {
       // Group files by week and year
-      final weekYearGroups = <int, Map<int, List<EnteFile>>>{};
-      // TODO: lau: just only do this week as with month
+      final currentWeekYearGroups = <int, List<EnteFile>>{};
       for (final file in allFiles) {
         if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
 
         final creationTime =
             DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
         final week = _getWeekNumber(creationTime);
+        if (week != currentWeek) continue;
         final year = creationTime.year;
 
-        weekYearGroups
-            .putIfAbsent(week, () => {})
-            .putIfAbsent(year, () => [])
-            .add(file);
+        currentWeekYearGroups.putIfAbsent(year, () => []).add(file);
       }
 
-      // Process each nearby day-month to find significant days
-      final currentWeekYears = weekYearGroups[currentWeek];
-      if (currentWeekYears != null) {
-        final significantWeeks = currentWeekYears.entries
+      // Process the week and see if it's significant
+      if (currentWeekYearGroups.isNotEmpty) {
+        final significantWeeks = currentWeekYearGroups.entries
             .where((e) => e.value.length > significantWeekThreshold)
             .map((e) => e.key)
             .toList();
         if (significantWeeks.length >= 3) {
           // Combine all years for this week
-          final allPhotos = currentWeekYears.values.expand((x) => x).toList();
+          final allPhotos =
+              currentWeekYearGroups.values.expand((x) => x).toList();
           final photoSelection = await _bestSelection(allPhotos);
 
           searchResults.add(
@@ -1340,7 +1337,7 @@ class SearchService {
             final date = DateTime(year, 1, 1).add(
               Duration(days: (currentWeek - 1) * 7),
             );
-            final files = currentWeekYears[year]!;
+            final files = currentWeekYearGroups[year]!;
             final photoSelection = await _bestSelection(files);
             final name =
                 "This week, ${currentTime.year - date.year} years back";
