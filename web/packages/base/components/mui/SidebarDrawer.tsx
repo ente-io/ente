@@ -10,7 +10,6 @@ import {
     type DrawerProps,
 } from "@mui/material";
 import React from "react";
-import { SpaceBetweenFlex } from "../containers";
 import type { ModalVisibilityProps } from "../utils/modal";
 
 /**
@@ -114,7 +113,7 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
     actionButton,
 }) => (
     <Stack sx={{ gap: "4px" }}>
-        <SpaceBetweenFlex sx={{ minHeight: "48px" }}>
+        <Stack direction="row" sx={{ justifyContent: "space-between" }}>
             <IconButton onClick={onClose} color="primary">
                 <ArrowBackIcon />
             </IconButton>
@@ -124,7 +123,7 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
                     <CloseIcon />
                 </IconButton>
             </Stack>
-        </SpaceBetweenFlex>
+        </Stack>
         <Box sx={{ px: "16px", py: "4px" }}>
             <Typography variant="h3">{title}</Typography>
             <Typography
