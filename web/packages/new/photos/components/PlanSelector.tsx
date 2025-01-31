@@ -312,32 +312,32 @@ const FreeSubscriptionPlanSelectorCard: React.FC<
 }) => (
     <>
         <Typography variant="h3">{t("choose_plan")}</Typography>
-        <Box>
-            <Stack spacing={3}>
-                <Box>
-                    <PeriodToggler
-                        planPeriod={planPeriod}
-                        togglePeriod={togglePeriod}
-                    />
-                    <Typography
-                        variant="small"
-                        sx={{ mt: 0.5, color: "text.muted" }}
-                    >
-                        {t("two_months_free")}
-                    </Typography>
-                </Box>
-                {children}
-                {subscription && addOnBonuses.length > 0 && (
-                    <>
+        <Stack sx={{ gap: 3 }}>
+            <Box>
+                <PeriodToggler
+                    planPeriod={planPeriod}
+                    togglePeriod={togglePeriod}
+                />
+                <Typography
+                    variant="small"
+                    sx={{ p: "8px 2px 0px 2px", color: "text.muted" }}
+                >
+                    {t("two_months_free")}
+                </Typography>
+            </Box>
+            {children}
+            {subscription && addOnBonuses.length > 0 && (
+                <Stack sx={{ gap: 2 }}>
+                    <Stack sx={{ gap: 1.5, p: 0.5 }}>
                         <AddOnBonusRows addOnBonuses={addOnBonuses} />
-                        <ManageSubscription
-                            {...{ onClose, setLoading, subscription }}
-                            hasAddOnBonus={true}
-                        />
-                    </>
-                )}
-            </Stack>
-        </Box>
+                    </Stack>
+                    <ManageSubscription
+                        {...{ onClose, setLoading, subscription }}
+                        hasAddOnBonus={true}
+                    />
+                </Stack>
+            )}
+        </Stack>
     </>
 );
 
@@ -409,7 +409,7 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
                     />
                     <Typography
                         variant="small"
-                        sx={{ mt: 0.5, color: "text.muted" }}
+                        sx={{ p: "8px 2px 0px 2px", color: "text.muted" }}
                     >
                         {t("two_months_free")}
                     </Typography>
@@ -417,7 +417,7 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
                 {children}
             </Stack>
 
-            <Stack sx={{ padding: "20px 8px 0px 8px", gap: 1 }}>
+            <Stack sx={{ padding: "20px 8px 0px 8px", gap: 2 }}>
                 <Typography sx={{ color: "text.muted" }}>
                     {!isSubscriptionCancelled(subscription)
                         ? t("subscription_status_renewal_active", {
