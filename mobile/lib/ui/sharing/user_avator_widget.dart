@@ -42,7 +42,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   final _logger = Logger("_UserAvatarWidgetState");
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedSubscription;
   final _debouncer = Debouncer(
-    const Duration(milliseconds: 750),
+    const Duration(milliseconds: 250),
     executionInterval: const Duration(seconds: 20),
   );
 
@@ -52,7 +52,8 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
     _reload();
     _peopleChangedSubscription =
         Bus.instance.on<PeopleChangedEvent>().listen((event) {
-      if (event.type == PeopleEventType.saveOrEditPerson) {
+      if (event.type == PeopleEventType.saveOrEditPerson ||
+          event.type == PeopleEventType.syncDone) {
         _reload();
       }
     });
