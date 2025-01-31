@@ -97,7 +97,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: changed && _inputName.isNotEmpty ? false : true,
+      canPop: !(changed && _inputName.isNotEmpty),
       onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) {
           return;
