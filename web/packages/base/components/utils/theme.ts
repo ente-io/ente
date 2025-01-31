@@ -532,7 +532,11 @@ const components: Components = {
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
-                    backgroundColor: "var(--mui-palette-backdrop-faint)",
+                    // Use a translucent color for the backdrop.
+                    backgroundColor: "var(--mui-palette-backdrop-muted)",
+                    // Apply a blur to the existing contents on which we're
+                    // shown, and show some of it through by reducing opacity.
+                    backdropFilter: "blur(60px) opacity(80%)",
                 },
             },
         },
@@ -548,11 +552,10 @@ const components: Components = {
         },
         styleOverrides: {
             root: {
+                // Modify the backdrop of dialogs similar to what we do for
+                // drawers (but with slightly different values).
                 ".MuiBackdrop-root": {
-                    // Use a translucent color for the backdrop.
                     backgroundColor: "var(--mui-palette-backdrop-muted)",
-                    // Apply a blur to the existing contents on which we're
-                    // shown, and show some of it through by reducing opacity.
                     backdropFilter: "blur(30px) opacity(95%)",
                 },
                 // Reset the MUI default paddings to 16px everywhere.
