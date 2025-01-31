@@ -1370,6 +1370,7 @@ class SearchService {
     const wantedMemories = 3;
     final neededMemories = wantedMemories - searchResults.length;
     if (neededMemories <= 0) return searchResults;
+    const monthSelectionSize = 20;
 
     // Group files by month and year
     final currentMonthYearGroups = <int, List<EnteFile>>{};
@@ -1397,7 +1398,10 @@ class SearchService {
         if (sortedYearsForCurrentMonth.isEmpty) break;
         final year = sortedYearsForCurrentMonth.removeAt(0);
         final monthYearFiles = currentMonthYearGroups[year]!;
-        final photoSelection = await _bestSelection(monthYearFiles);
+        final photoSelection = await _bestSelection(
+          monthYearFiles,
+          prefferedSize: monthSelectionSize,
+        );
         final monthName =
             DateFormat.MMMM(Localizations.localeOf(context).languageCode)
                 .format(DateTime(year, currentMonth));
@@ -1423,7 +1427,8 @@ class SearchService {
     final allPhotos = sortedYearsForCurrentMonth
         .expand((year) => currentMonthYearGroups[year]!)
         .toList();
-    final photoSelection = await _bestSelection(allPhotos);
+    final photoSelection =
+        await _bestSelection(allPhotos, prefferedSize: monthSelectionSize);
     final monthName =
         DateFormat.MMMM(Localizations.localeOf(context).languageCode)
             .format(DateTime(currentTime.year, currentMonth));
