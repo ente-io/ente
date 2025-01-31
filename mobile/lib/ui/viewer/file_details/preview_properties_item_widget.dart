@@ -30,7 +30,7 @@ class _PreviewPropertiesItemWidgetState
     return InfoItemWidget(
       key: const ValueKey("Stream properties"),
       leadingIcon: Icons.play_circle_outline,
-      title: "Stream Details",
+      title: "Stream Details", // TODO: i18n
       subtitleSection: _subTitleSection(),
     );
   }
