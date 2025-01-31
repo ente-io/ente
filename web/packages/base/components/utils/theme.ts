@@ -164,10 +164,12 @@ const _colors = {
         storageCardUsageFill: "rgba(255 255 255 / 0.2)",
     },
     light: {
+        // Keep these solid.
         background: {
             default: "#fff",
             paper: "#fff",
-            paper2: "rgba(153 153 153 / 0.04)",
+            paper2: "#fbfbfb",
+            searchInput: "#f3f3f3",
         },
         backdrop: {
             base: "rgba(255 255 255 / 0.92)",
@@ -212,6 +214,7 @@ const _colors = {
             default: "#000",
             paper: "#1b1b1b",
             paper2: "#252525",
+            searchInput: "#1b1b1b",
         },
         backdrop: {
             base: "rgba(0 0 0 / 0.90)",

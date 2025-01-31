@@ -15,12 +15,17 @@ declare module "@mui/material/styles" {
      * - background.default
      * - background.paper
      * - background.paper2
+     * - background.searchInput
      */
     interface TypeBackground {
         /**
          * A second level elevation, indicating a paper within a paper.
          */
         paper2: string;
+        /**
+         * Background color for the search input area.
+         */
+        searchInput: string;
     }
 
     /**
