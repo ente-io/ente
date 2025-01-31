@@ -115,12 +115,12 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
 }) => (
     <Stack sx={{ gap: "4px" }}>
         <SpaceBetweenFlex sx={{ minHeight: "48px" }}>
-            <IconButton onClick={onClose} color={"primary"}>
+            <IconButton onClick={onClose} color="primary">
                 <ArrowBackIcon />
             </IconButton>
             <Stack direction="row" sx={{ gap: "4px" }}>
                 {actionButton && actionButton}
-                <IconButton onClick={onRootClose} color={"secondary"}>
+                <IconButton onClick={onRootClose} color="secondary">
                     <CloseIcon />
                 </IconButton>
             </Stack>

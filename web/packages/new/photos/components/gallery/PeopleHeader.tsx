@@ -721,7 +721,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                     fullWidth
                     disabled={!hasUnsavedChanges}
                     loading={state.activity == "saving"}
-                    color={"accent"}
+                    color="accent"
                     onClick={handleSave}
                 >
                     {t("save")}

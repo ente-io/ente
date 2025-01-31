@@ -235,7 +235,7 @@ function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
                     )}
                 </>
             ) : (
-                <Button color={"accent"} onClick={changeExportDirectory}>
+                <Button color="accent" onClick={changeExportDirectory}>
                     {t("select_folder")}
                 </Button>
             )}

@@ -71,7 +71,7 @@ const ExportPendingList = (props: Iprops) => {
             />
             <FocusVisibleButton
                 fullWidth
-                color={"secondary"}
+                color="secondary"
                 onClick={props.onClose}
             >
                 {t("close")}

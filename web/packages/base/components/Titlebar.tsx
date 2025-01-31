@@ -39,7 +39,7 @@ export const Titlebar: React.FC<TitlebarProps> = ({
                 <Stack direction="row" sx={{ gap: "4px" }}>
                     {actionButton && actionButton}
                     {!backIsClose && (
-                        <IconButton onClick={onRootClose} color={"secondary"}>
+                        <IconButton onClick={onRootClose} color="secondary">
                             <CloseIcon />
                         </IconButton>
                     )}
