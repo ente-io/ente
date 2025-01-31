@@ -1244,7 +1244,7 @@ class SearchService {
         searchResults.add(
           GenericSearchResult(
             ResultType.event,
-            'Memories of ${DateFormat('MMMM d').format(date)}',
+            "${DateFormat('MMMM d').format(date)} through the years",
             photoSelection,
             hierarchicalSearchFilter: TopLevelGenericFilter(
               filterName: DateFormat('MMMM d').format(date),
@@ -1265,7 +1265,7 @@ class SearchService {
               DateFormat.yMMMd(Localizations.localeOf(context).languageCode)
                   .format(date);
           if (date.day == currentTime.day && date.month == currentTime.month) {
-            name = 'This day, ${currentTime.year - date.year} years back';
+            name = "This day, ${currentTime.year - date.year} years back";
           }
 
           searchResults.add(
