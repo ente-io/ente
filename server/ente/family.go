@@ -19,7 +19,7 @@ const (
 
 type InviteMemberRequest struct {
 	Email        string `json:"email" binding:"required"`
-	StorageLimit string `json:"storageLimit" binding:"required"`
+	StorageLimit int64  `json:"storageLimit" binding:"omitempty"`
 }
 
 type InviteInfoResponse struct {

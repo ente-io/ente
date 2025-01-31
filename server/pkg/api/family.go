@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/ente-io/museum/pkg/controller/family"
 	"github.com/ente-io/stacktrace"
@@ -17,7 +16,6 @@ import (
 
 	// "github.com/ente-io/museum/pkg/utils/time"
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 // FamilyHandler contains handlers for managing family plans
@@ -43,19 +41,9 @@ func (h *FamilyHandler) InviteMember(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, "Could not bind request params"))
 		return
 	}
-	storageLimit, err := strconv.ParseInt(request.StorageLimit, 10, 64)
-	if err != nil {
-		return
-	}
 
-	familyMembershipID, err := uuid.Parse(c.Param("id"))
-	logrus.Println("Hey hey hey, here I am, you're finding me", familyMembershipID)
+	err := h.Controller.InviteMember(c, auth.GetUserID(c.Request.Header), request.Email, request.StorageLimit)
 	if err != nil {
-		stacktrace.Propagate(err, "Invalid Membership ID")
-	}
-
-	inviteReq := h.Controller.InviteMember(c, auth.GetUserID(c.Request.Header), request.Email, familyMembershipID, storageLimit)
-	if inviteReq != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
