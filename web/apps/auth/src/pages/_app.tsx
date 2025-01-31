@@ -1,10 +1,13 @@
 import { accountLogout } from "@/accounts/services/logout";
 import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
-import { LoadingOverlay } from "@/base/components/loaders";
+import {
+    LoadingOverlay,
+    TranslucentLoadingOverlay,
+} from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
-import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
+import { useIsRouteChangeInProgress, useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
 import { authTheme } from "@/base/components/utils/theme";
 import { logStartupBanner } from "@/base/log-web";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -19,17 +22,14 @@ import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
-import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { AppContext } from "types/context";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
 
-    const router = useRouter();
-    const [loading, setLoading] = useState(false);
-
     const isI18nReady = useSetupI18n();
+    const isLoadingRoute = useIsRouteChangeInProgress();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
 
     useEffect(() => {
@@ -38,19 +38,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
     }, []);
-
-    useEffect(() => {
-        router.events.on("routeChangeStart", (url: string) => {
-            const newPathname = url.split("?")[0];
-            if (window.location.pathname !== newPathname) {
-                setLoading(true);
-            }
-        });
-
-        router.events.on("routeChangeComplete", () => {
-            setLoading(false);
-        });
-    }, [router]);
 
     const logout = useCallback(() => {
         void accountLogout().then(() => window.location.replace("/"));
@@ -76,8 +63,13 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <AttributedMiniDialog {...miniDialogProps} />
 
                 <AppContext.Provider value={appContext}>
-                    {(loading || !isI18nReady) && <LoadingOverlay />}
-                    {isI18nReady && <Component {...pageProps} />}
+                    {!isI18nReady ? (
+                        <LoadingOverlay />
+                    ) : isLoadingRoute ? (
+                        <TranslucentLoadingOverlay />
+                    ) : (
+                        <Component {...pageProps} />
+                    )}
                 </AppContext.Provider>
             </ThemeProvider>
         </>

@@ -1,6 +1,7 @@
 import { setupI18n } from "@/base/i18n";
 import { disableDiskLogs } from "@/base/log";
 import { logUnhandledErrorsAndRejections } from "@/base/log-web";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 /**
@@ -41,4 +42,30 @@ export const useSetupLogs = (opts?: SetupLoggingOptions) => {
         logUnhandledErrorsAndRejections(true);
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
+};
+
+/**
+ * A hook that keeps track of whether or not we are in the middle of a Next.js
+ * route change.
+ *
+ * The top level app component uses this to show a loading indicator.
+ */
+export const useIsRouteChangeInProgress = () => {
+    const router = useRouter();
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        router.events.on("routeChangeStart", (url: string) => {
+            const newPathname = url.split("?")[0];
+            if (window.location.pathname !== newPathname) {
+                setLoading(true);
+            }
+        });
+
+        router.events.on("routeChangeComplete", () => {
+            setLoading(false);
+        });
+    }, [router]);
+
+    return loading;
 };
