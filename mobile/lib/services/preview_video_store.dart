@@ -82,7 +82,7 @@ class PreviewVideoStore {
     }
   }
 
-  Future<DateTime?> get videoStreamingCutoff async {
+  DateTime? get videoStreamingCutoff {
     final milliseconds = _prefs.getInt(_videoStreamingCutoff);
     if (milliseconds == null) return null;
     return DateTime.fromMillisecondsSinceEpoch(milliseconds);

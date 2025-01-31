@@ -67,7 +67,7 @@ class _PreviewStatusWidgetState extends State<PreviewStatusWidget> {
             ?.containsKey(widget.file.uploadedFileID!) ??
         false;
 
-    if (isPreviewAvailable && widget.file.localID != null) {
+    if (widget.file.localID != null && preview == null) {
       return const SizedBox();
     }
     final isInProgress = preview?.status == PreviewItemStatus.compressing ||
@@ -75,6 +75,18 @@ class _PreviewStatusWidgetState extends State<PreviewStatusWidget> {
     final isInQueue = preview?.status == PreviewItemStatus.inQueue ||
         preview?.status == PreviewItemStatus.retry;
     final isFailed = preview?.status == PreviewItemStatus.failed;
+
+    final isBeforeCutoffDate = widget.file.updationTime != null &&
+            PreviewVideoStore.instance.videoStreamingCutoff != null
+        ? DateTime.fromMillisecondsSinceEpoch(widget.file.updationTime!)
+            .isBefore(
+            PreviewVideoStore.instance.videoStreamingCutoff!,
+          )
+        : false;
+
+    if (preview == null && isBeforeCutoffDate && !isPreviewAvailable) {
+      return const SizedBox();
+    }
 
     return Align(
       alignment: Alignment.centerRight,
@@ -112,13 +124,13 @@ class _PreviewStatusWidgetState extends State<PreviewStatusWidget> {
               children: [
                 !isInProgress
                     ? Icon(
-                        !isPreviewAvailable
-                            ? isInQueue
-                                ? Icons.history_outlined
-                                : !isFailed
-                                    ? Icons.block_outlined
-                                    : Icons.error_outline
-                            : Icons.play_arrow,
+                        isInQueue
+                            ? Icons.history_outlined
+                            : isBeforeCutoffDate
+                                ? Icons.block_outlined
+                                : isFailed
+                                    ? Icons.error_outline
+                                    : Icons.play_arrow,
                         size: 16,
                       )
                     : const SizedBox(
@@ -136,17 +148,17 @@ class _PreviewStatusWidgetState extends State<PreviewStatusWidget> {
                   width: !isInProgress || isPreviewAvailable ? 2 : 6,
                 ),
                 Text(
-                  !isPreviewAvailable
-                      ? isInProgress
-                          ? "Processing"
-                          : isInQueue
-                              ? "Queued"
-                              : !isFailed
-                                  ? "Ineligible"
-                                  : "Failed"
-                      : widget.isPreviewPlayer
-                          ? "Play original"
-                          : "Play stream",
+                  isInProgress
+                      ? "Processing"
+                      : isInQueue
+                          ? "Queued"
+                          : isBeforeCutoffDate
+                              ? "Ineligible"
+                              : isFailed
+                                  ? "Failed"
+                                  : widget.isPreviewPlayer
+                                      ? "Play original"
+                                      : "Play stream",
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
