@@ -1199,9 +1199,11 @@ class SearchService {
 
     final currentTime = DateTime.now().toLocal();
     final currentDayMonth = currentTime.month * 100 + currentTime.day;
+    final currentWeek = _getWeekNumber(currentTime);
     final cutOffTime = currentTime.subtract(const Duration(days: 365));
     final averageDailyPhotos = allFiles.length / 365;
-    final significanceThreshold = averageDailyPhotos * 0.25;
+    final significantDayThreshold = averageDailyPhotos * 0.25;
+    final significantWeekThreshold = averageDailyPhotos * 0.40;
 
     // Group files by day-month and year
     final dayMonthYearGroups = <int, Map<int, List<EnteFile>>>{};
@@ -1220,19 +1222,19 @@ class SearchService {
           .add(file);
     }
 
-    // Process each day-month
+    // Process each nearby day-month to find significant days
     for (final dayMonth in dayMonthYearGroups.keys) {
       final dayDiff = dayMonth - currentDayMonth;
       if (dayDiff < 0 || dayDiff > 2) continue;
       // TODO: lau: this doesn't cover month changes properly
 
       final yearGroups = dayMonthYearGroups[dayMonth]!;
-      final significantYears = yearGroups.entries
-          .where((e) => e.value.length > significanceThreshold)
+      final significantDays = yearGroups.entries
+          .where((e) => e.value.length > significantDayThreshold)
           .map((e) => e.key)
           .toList();
 
-      if (significantYears.length >= 3) {
+      if (significantDays.length >= 3) {
         // Combine all years for this day-month
         final date =
             DateTime(currentTime.year, dayMonth ~/ 100, dayMonth % 100);
@@ -1255,7 +1257,7 @@ class SearchService {
         );
       } else {
         // Individual entries for significant years
-        for (final year in significantYears) {
+        for (final year in significantDays) {
           final date = DateTime(year, dayMonth ~/ 100, dayMonth % 100);
           final files = yearGroups[year]!;
           final photoSelection = await _bestSelection(files);
@@ -1286,7 +1288,90 @@ class SearchService {
       if (limit != null && searchResults.length >= limit) break;
     }
 
+    // process to find significant weeks (only if there are no significant days)
+    if (searchResults.isEmpty) {
+      // Group files by week and year
+      final weekYearGroups = <int, Map<int, List<EnteFile>>>{};
+      for (final file in allFiles) {
+        if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
+
+        final creationTime =
+            DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+        final week = _getWeekNumber(creationTime);
+        final year = creationTime.year;
+
+        weekYearGroups
+            .putIfAbsent(week, () => {})
+            .putIfAbsent(year, () => [])
+            .add(file);
+      }
+
+      // Process each nearby day-month to find significant days
+      final currentWeekYears = weekYearGroups[currentWeek];
+      if (currentWeekYears != null) {
+        final significantWeeks = currentWeekYears.entries
+            .where((e) => e.value.length > significantWeekThreshold)
+            .map((e) => e.key)
+            .toList();
+        if (significantWeeks.length >= 3) {
+          // Combine all years for this week
+          final allPhotos = currentWeekYears.values.expand((x) => x).toList();
+          final photoSelection = await _bestSelection(allPhotos);
+
+          searchResults.add(
+            GenericSearchResult(
+              ResultType.event,
+              "This week through the years",
+              photoSelection,
+              hierarchicalSearchFilter: TopLevelGenericFilter(
+                filterName: "Week $currentWeek",
+                occurrence: kMostRelevantFilter,
+                filterResultType: ResultType.event,
+                matchedUploadedIDs: filesToUploadedFileIDs(photoSelection),
+                filterIcon: Icons.event_outlined,
+              ),
+            ),
+          );
+        } else {
+          // Individual entries for significant years
+          for (final year in significantWeeks) {
+            final date = DateTime(year, 1, 1).add(
+              Duration(days: (currentWeek - 1) * 7),
+            );
+            final files = currentWeekYears[year]!;
+            final photoSelection = await _bestSelection(files);
+            final name =
+                "This week, ${currentTime.year - date.year} years back";
+
+            searchResults.add(
+              GenericSearchResult(
+                ResultType.event,
+                name,
+                photoSelection,
+                hierarchicalSearchFilter: TopLevelGenericFilter(
+                  filterName: name,
+                  occurrence: kMostRelevantFilter,
+                  filterResultType: ResultType.event,
+                  matchedUploadedIDs: filesToUploadedFileIDs(photoSelection),
+                  filterIcon: Icons.event_outlined,
+                ),
+              ),
+            );
+          }
+        }
+      }
+    }
+
+    // process to find fillers
+
     return searchResults;
+  }
+
+  int _getWeekNumber(DateTime date) {
+    // Get day of year (1-366)
+    final int dayOfYear = int.parse(DateFormat('D').format(date));
+    // Integer division by 7 and add 1 to start from week 1
+    return ((dayOfYear - 1) ~/ 7) + 1;
   }
 
   /// Returns the best selection of files from the given list.
