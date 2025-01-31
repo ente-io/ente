@@ -86,6 +86,7 @@ Future<void> requestPermissionToOpenLinksInApp(
       await localSettings.setConfiguredLinksInAppPermissions(true);
       logger.info("In-app links permissions granted");
     } else {
+      await localSettings.setConfiguredLinksInAppPermissions(true);
       logger.info("In-app links permissions not granted");
     }
   } catch (e) {
