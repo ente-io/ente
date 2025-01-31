@@ -1386,7 +1386,9 @@ class SearchService {
     final fileCount = files.length;
     int targetSize = prefferedSize ?? 10;
     if (fileCount <= targetSize) return files;
-    final fileIDs = files.map((e) => e.uploadedFileID!).toSet();
+    final safeFiles =
+        files.where((file) => file.uploadedFileID != null).toList();
+    final fileIDs = safeFiles.map((e) => e.uploadedFileID!).toSet();
     final fileIdToFace = await MLDataDB.instance.getFacesForFileIDs(fileIDs);
     final faceIDs =
         fileIdToFace.values.expand((x) => x.map((face) => face.faceID)).toSet();
@@ -1394,7 +1396,7 @@ class SearchService {
         await MLDataDB.instance.getFaceIdToPersonIdForFaces(faceIDs);
     final fileIdToClip =
         await MLDataDB.instance.getClipVectorsForFileIDs(fileIDs);
-    final allYears = files.map((e) {
+    final allYears = safeFiles.map((e) {
       final creationTime = DateTime.fromMicrosecondsSinceEpoch(e.creationTime!);
       return creationTime.year;
     }).toSet();
@@ -1407,7 +1409,7 @@ class SearchService {
     final textVector = Vector.fromList(textEmbedding);
     const clipThreshold = 0.75;
     final fileToScore = <int, double>{};
-    for (final file in files) {
+    for (final file in safeFiles) {
       final clip = fileIdToClip[file.uploadedFileID!];
       if (clip == null) {
         fileToScore[file.uploadedFileID!] = 0;
@@ -1419,7 +1421,7 @@ class SearchService {
 
     // Get face scores for each file
     final fileToFaceCount = <int, int>{};
-    for (final file in files) {
+    for (final file in safeFiles) {
       final fileID = file.uploadedFileID!;
       fileToFaceCount[fileID] = 0;
       final faces = fileIdToFace[fileID];
@@ -1439,21 +1441,21 @@ class SearchService {
     if (allYears.length <= 1) {
       // TODO: lau: eventually this sorting might have to be replaced with some scoring system
       // sort first on clip embeddings score (descending)
-      files.sort(
+      safeFiles.sort(
         (a, b) => fileToScore[b.uploadedFileID!]!
             .compareTo(fileToScore[a.uploadedFileID!]!),
       );
       // then sort on faces (descending), heavily prioritizing named faces
-      files.sort(
+      safeFiles.sort(
         (a, b) => fileToFaceCount[b.uploadedFileID!]!
             .compareTo(fileToFaceCount[a.uploadedFileID!]!),
       );
 
       // then filter out similar images as much as possible
-      filteredFiles.add(files.first);
+      filteredFiles.add(safeFiles.first);
       int skipped = 0;
       filesLoop:
-      for (final file in files.sublist(1)) {
+      for (final file in safeFiles.sublist(1)) {
         if (filteredFiles.length >= targetSize) break;
         final clip = fileIdToClip[file.uploadedFileID!];
         if (clip != null && (fileCount - skipped) > targetSize) {
@@ -1473,12 +1475,12 @@ class SearchService {
       // Multiple years, each represented and roughly equally distributed
       if (prefferedSize == null && (allYears.length * 2) > 10) {
         targetSize = allYears.length * 3;
-        if (fileCount < targetSize) return files;
+        if (fileCount < targetSize) return safeFiles;
       }
 
       // Group files by year and sort each year's list by CLIP then face count
       final yearToFiles = <int, List<EnteFile>>{};
-      for (final file in files) {
+      for (final file in safeFiles) {
         final creationTime =
             DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
         final year = creationTime.year;
