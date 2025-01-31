@@ -105,11 +105,6 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
             anchor="right"
             open={props.open}
             onClose={handleDrawerClose}
-            slotProps={{
-                backdrop: {
-                    sx: { "&&&": { backgroundColor: "transparent" } },
-                },
-            }}
         >
             <Stack sx={{ gap: "4px", py: "12px" }}>
                 <Titlebar

@@ -964,10 +964,7 @@ const RawExif: React.FC<RawExifProps> = ({
                 caption={fileName}
                 onRootClose={handleRootClose}
                 actionButton={
-                    <CopyButton
-                        code={JSON.stringify(tags)}
-                        color={"secondary"}
-                    />
+                    <CopyButton code={JSON.stringify(tags)} color="secondary" />
                 }
             />
             <Stack sx={{ gap: 2, py: 3, px: 1 }}>

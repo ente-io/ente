@@ -164,10 +164,12 @@ const _colors = {
         storageCardUsageFill: "rgba(255 255 255 / 0.2)",
     },
     light: {
+        // Keep these solid.
         background: {
             default: "#fff",
             paper: "#fff",
-            paper2: "rgba(153 153 153 / 0.04)",
+            paper2: "#fbfbfb",
+            searchInput: "#f3f3f3",
         },
         backdrop: {
             base: "rgba(255 255 255 / 0.92)",
@@ -181,11 +183,20 @@ const _colors = {
         },
         fill: {
             base: "#000",
+            /* TODO: Unused */
             baseHover: "rgba(0 0 0 / 0.87)",
             muted: "rgba(0 0 0 / 0.12)",
             faint: "rgba(0 0 0 / 0.04)",
+            /** TODO(LM): Needed? */
             faintHover: "rgba(0 0 0 / 0.08)",
             fainter: "rgba(0 0 0 / 0.02)",
+        },
+        // MUI (as of v6.4) doesn't like it if we specify a non-solid color for
+        // primary.main or secondary.main, or don't specify it using the #nnnnnn
+        // notation; it seems to mess with the derivation of the color channels.
+        secondary: {
+            main: "#f5f5f5",
+            hover: "#e9e9e9",
         },
         stroke: {
             base: "#000",
@@ -203,6 +214,7 @@ const _colors = {
             default: "#000",
             paper: "#1b1b1b",
             paper2: "#252525",
+            searchInput: "#1b1b1b",
         },
         backdrop: {
             base: "rgba(0 0 0 / 0.90)",
@@ -221,6 +233,10 @@ const _colors = {
             faint: "rgba(255 255 255 / 0.12)",
             faintHover: "rgba(255 255 255 / 0.16)",
             fainter: "rgba(255 255 255 / 0.05)",
+        },
+        secondary: {
+            main: "#1f1f1f",
+            hover: "#292929",
         },
         stroke: {
             base: "#fff",
@@ -241,13 +257,12 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             background: colors.light.background,
             backdrop: colors.light.backdrop,
             primary: {
-                main: colors.light.fill.base,
-                dark: colors.light.fill.baseHover,
+                main: colors.fixed.black,
                 contrastText: colors.fixed.white,
             },
             secondary: {
-                main: colors.light.fill.faint,
-                dark: colors.light.fill.faintHover,
+                main: colors.light.secondary.main,
+                dark: colors.light.secondary.hover,
                 contrastText: colors.light.text.base,
             },
             success: { main: colors.fixed.success },
@@ -332,13 +347,12 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             background: colors.dark.background,
             backdrop: colors.dark.backdrop,
             primary: {
-                main: colors.dark.fill.base,
-                dark: colors.dark.fill.baseHover,
+                main: colors.fixed.white,
                 contrastText: colors.fixed.black,
             },
             secondary: {
-                main: colors.dark.fill.faint,
-                dark: colors.dark.fill.faintHover,
+                main: colors.dark.secondary.main,
+                dark: colors.dark.secondary.hover,
                 contrastText: colors.dark.text.base,
             },
             success: { main: colors.fixed.success },
@@ -532,7 +546,7 @@ const components: Components = {
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
-                    backgroundColor: "var(--mui-palette-backdrop-faint)",
+                    backgroundColor: "var(--mui-palette-backdrop-muted)",
                 },
             },
         },
@@ -549,11 +563,7 @@ const components: Components = {
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
-                    // Use a translucent color for the backdrop.
                     backgroundColor: "var(--mui-palette-backdrop-muted)",
-                    // Apply a blur to the existing contents on which we're
-                    // shown, and show some of it through by reducing opacity.
-                    backdropFilter: "blur(30px) opacity(95%)",
                 },
                 // Reset the MUI default paddings to 16px everywhere.
                 //
