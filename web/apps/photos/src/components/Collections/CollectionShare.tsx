@@ -1,6 +1,9 @@
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
+import {
+    NestedSidebarDrawer,
+    SidebarDrawer,
+} from "@/base/components/mui/SidebarDrawer";
 import {
     RowButton,
     RowButtonDivider,
@@ -491,6 +494,11 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
         [emailList, collection.sharees],
     );
 
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
+    };
+
     const collectionShare: AddParticipantFormProps["callback"] = async ({
         email,
         emails,
@@ -526,30 +534,21 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
         }
     };
 
-    const handleRootClose = () => {
-        onClose();
-        onRootClose();
-    };
-
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason == "backdropClick") {
-            handleRootClose();
-        } else {
-            onClose();
-        }
-    };
-
     return (
-        <SidebarDrawer anchor="right" open={open} onClose={handleDrawerClose}>
+        <NestedSidebarDrawer
+            anchor="right"
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+        >
             <Stack sx={{ gap: "4px", py: "12px" }}>
                 <Titlebar
-                    onClose={onClose}
+                    {...{ onClose }}
+                    onRootClose={handleRootClose}
                     title={
                         type === COLLECTION_ROLE.VIEWER
                             ? t("ADD_VIEWERS")
                             : t("ADD_COLLABORATORS")
                     }
-                    onRootClose={handleRootClose}
                     caption={collection.name}
                 />
                 <AddParticipantForm
@@ -570,7 +569,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                     disableAutoFocus
                 />
             </Stack>
-        </SidebarDrawer>
+        </NestedSidebarDrawer>
     );
 };
 
@@ -847,13 +846,6 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
         onClose();
         onRootClose();
     };
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason == "backdropClick") {
-            handleRootClose();
-        } else {
-            onClose();
-        }
-    };
 
     const collectionUnshare = async (email: string) => {
         try {
@@ -893,10 +885,10 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
 
     return (
         <>
-            <SidebarDrawer
+            <NestedSidebarDrawer
                 anchor="right"
-                open={open}
-                onClose={handleDrawerClose}
+                {...{ open, onClose }}
+                onRootClose={handleRootClose}
             >
                 <Stack sx={{ gap: "4px", py: "12px" }}>
                     <Titlebar
@@ -987,7 +979,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                         </Stack>
                     </Stack>
                 </Stack>
-            </SidebarDrawer>
+            </NestedSidebarDrawer>
             <ManageParticipant
                 collectionUnshare={collectionUnshare}
                 open={manageParticipantView}
@@ -1027,12 +1019,9 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
     const { showMiniDialog } = useAppContext();
     const galleryContext = useContext(GalleryContext);
 
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason == "backdropClick") {
-            onRootClose();
-        } else {
-            onClose();
-        }
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
     };
 
     const handleRemove = () => {
@@ -1113,12 +1102,16 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
     }
 
     return (
-        <SidebarDrawer anchor="right" open={open} onClose={handleDrawerClose}>
+        <NestedSidebarDrawer
+            anchor="right"
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+        >
             <Stack sx={{ gap: "4px", py: "12px" }}>
                 <Titlebar
                     onClose={onClose}
                     title={t("MANAGE")}
-                    onRootClose={onRootClose}
+                    onRootClose={handleRootClose}
                     caption={selectedParticipant.email}
                 />
 
@@ -1185,7 +1178,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                     </Stack>
                 </Stack>
             </Stack>
-        </SidebarDrawer>
+        </NestedSidebarDrawer>
     );
 };
 
@@ -1345,16 +1338,14 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     onRootClose,
     publicShareUrl,
 }) => {
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason == "backdropClick") {
-            onRootClose();
-        } else {
-            onClose();
-        }
-    };
     const galleryContext = useContext(GalleryContext);
 
     const [sharableLinkError, setSharableLinkError] = useState(null);
+
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
+    };
 
     const updatePublicShareURLHelper = async (req: UpdatePublicURL) => {
         try {
@@ -1383,16 +1374,22 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             galleryContext.setBlockingLoad(false);
         }
     };
+
     const copyToClipboardHelper = (text: string) => () => {
         navigator.clipboard.writeText(text);
     };
+
     return (
-        <SidebarDrawer anchor="right" open={open} onClose={handleDrawerClose}>
+        <NestedSidebarDrawer
+            anchor="right"
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+        >
             <Stack sx={{ gap: "4px", py: "12px" }}>
                 <Titlebar
                     onClose={onClose}
                     title={t("share_album")}
-                    onRootClose={onRootClose}
+                    onRootClose={handleRootClose}
                 />
                 <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
                     <ManagePublicCollect
@@ -1457,7 +1454,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                     )}
                 </Stack>
             </Stack>
-        </SidebarDrawer>
+        </NestedSidebarDrawer>
     );
 };
 
@@ -1563,7 +1560,7 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                     }
                 />
             </RowButtonGroup>
-            <SidebarDrawer
+            <NestedSidebarDrawer
                 anchor="right"
                 open={shareExpiryOptionsModalView}
                 onClose={handleDrawerClose}
@@ -1594,7 +1591,7 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                         </RowButtonGroup>
                     </Stack>
                 </Stack>
-            </SidebarDrawer>
+            </NestedSidebarDrawer>
         </>
     );
 };
@@ -1663,12 +1660,9 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
         setIsChangeDeviceLimitVisible(false);
     };
 
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason == "backdropClick") {
-            onRootClose();
-        } else {
-            closeDeviceLimitChangeModal();
-        }
+    const handleRootClose = () => {
+        closeDeviceLimitChangeModal();
+        onRootClose();
     };
 
     return (
@@ -1683,16 +1677,17 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
                 onClick={openDeviceLimitChangeModalView}
                 endIcon={<ChevronRightIcon />}
             />
-            <SidebarDrawer
+            <NestedSidebarDrawer
                 anchor="right"
                 open={isChangeDeviceLimitVisible}
-                onClose={handleDrawerClose}
+                onClose={closeDeviceLimitChangeModal}
+                onRootClose={handleRootClose}
             >
                 <Stack sx={{ gap: "4px", py: "12px" }}>
                     <Titlebar
                         onClose={closeDeviceLimitChangeModal}
+                        onRootClose={handleRootClose}
                         title={t("LINK_DEVICE_LIMIT")}
-                        onRootClose={onRootClose}
                     />
                     <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                         <RowButtonGroup>
@@ -1715,7 +1710,7 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
                         </RowButtonGroup>
                     </Stack>
                 </Stack>
-            </SidebarDrawer>
+            </NestedSidebarDrawer>
         </>
     );
 };
