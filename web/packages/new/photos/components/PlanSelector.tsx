@@ -562,10 +562,7 @@ const PlanRow: React.FC<PlanRowProps> = ({ plan, onPlanSelect, disabled }) => {
                 >
                     <Box sx={{ textAlign: "right" }}>
                         <Typography variant="h6">{plan.price}</Typography>
-                        <Typography
-                            variant="small"
-                            sx={{ color: "text.muted" }}
-                        >
+                        <Typography variant="small" sx={{ opacity: 0.7 }}>
                             {`/ ${
                                 plan.period === "month"
                                     ? t("month_short")
