@@ -60,9 +60,10 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   Widget build(BuildContext context) {
     final filterSuggestedUsers = _suggestedUsers
         .where(
-          (element) => element.email.toLowerCase().contains(
-                _textController.text.trim().toLowerCase(),
-              ),
+          (element) =>
+              (element.displayName ?? element.email).toLowerCase().contains(
+                    _textController.text.trim().toLowerCase(),
+                  ),
         )
         .toList();
     isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
@@ -359,47 +360,22 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   }
 
   List<User> _getSuggestedUser() {
-    final List<User> suggestedUsers = [];
     final Set<String> existingEmails = {};
-    final int ownerID = Configuration.instance.getUserID()!;
     existingEmails.add(Configuration.instance.getEmail()!);
     for (final User? u in widget.collection.sharees ?? []) {
       if (u != null && u.id != null && u.email.isNotEmpty) {
         existingEmails.add(u.email);
       }
     }
-    for (final c in CollectionsService.instance.getActiveCollections()) {
-      if (c.owner?.id == ownerID) {
-        for (final User? u in c.sharees ?? []) {
-          if (u != null &&
-              u.id != null &&
-              u.email.isNotEmpty &&
-              !existingEmails.contains(u.email)) {
-            existingEmails.add(u.email);
-            suggestedUsers.add(u);
-          }
-        }
-      } else if (c.owner != null &&
-          c.owner!.id != null &&
-          c.owner!.email.isNotEmpty &&
-          !existingEmails.contains(c.owner!.email)) {
-        existingEmails.add(c.owner!.email);
-        suggestedUsers.add(c.owner!);
-      }
-    }
-    final cachedUserDetails = UserService.instance.getCachedUserDetails();
-    if (cachedUserDetails != null &&
-        (cachedUserDetails.familyData?.members?.isNotEmpty ?? false)) {
-      for (final member in cachedUserDetails.familyData!.members!) {
-        if (!existingEmails.contains(member.email)) {
-          existingEmails.add(member.email);
-          suggestedUsers.add(User(email: member.email));
-        }
-      }
-    }
+
+    final List<User> suggestedUsers = UserService.instance.getRelevantContacts()
+      ..removeWhere(
+        (element) => existingEmails.contains(element.email),
+      );
+
     if (_textController.text.trim().isNotEmpty) {
       suggestedUsers.removeWhere(
-        (element) => !element.email
+        (element) => !(element.displayName ?? element.email)
             .toLowerCase()
             .contains(_textController.text.trim().toLowerCase()),
       );

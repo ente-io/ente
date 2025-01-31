@@ -3,13 +3,11 @@ import "dart:async";
 import "package:email_validator/email_validator.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
-import 'package:photos/core/configuration.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/ml/face/person.dart";
-import 'package:photos/services/collections_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/user_service.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -245,41 +243,18 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
   }
 
   List<User> _getContacts() {
-    final List<User> suggestedUsers = [];
-    final int ownerID = Configuration.instance.getUserID()!;
-    final cachedEmailToPartialPersonDataMap =
-        PersonService.instance.emailToPartialPersonDataMapCache;
+    final usersEmailsToAviod =
+        PersonService.instance.emailToPartialPersonDataMapCache.keys.toSet();
+    final relevantUsers = UserService.instance.getRelevantContacts()
+      ..removeWhere(
+        (user) => usersEmailsToAviod.contains(user.email),
+      );
 
-    for (final c in CollectionsService.instance.getActiveCollections()) {
-      if (c.owner?.id == ownerID) {
-        for (final User? u in c.sharees ?? []) {
-          if (u != null && u.id != null && u.email.isNotEmpty) {
-            if (!suggestedUsers.any((user) => user.email == u.email) &&
-                cachedEmailToPartialPersonDataMap[u.email] == null) {
-              suggestedUsers.add(u);
-            }
-          }
-        }
-      } else if (c.owner?.id != null && c.owner!.email.isNotEmpty) {
-        if (!suggestedUsers.any((user) => user.email == c.owner!.email) &&
-            cachedEmailToPartialPersonDataMap[c.owner!.email] == null) {
-          suggestedUsers.add(c.owner!);
-        }
-      }
-    }
-    final cachedUserDetails = UserService.instance.getCachedUserDetails();
-    if (cachedUserDetails?.familyData?.members?.isNotEmpty ?? false) {
-      for (final member in cachedUserDetails!.familyData!.members!) {
-        if (!suggestedUsers.any((user) => user.email == member.email) &&
-            cachedEmailToPartialPersonDataMap[member.email] == null) {
-          suggestedUsers.add(User(email: member.email));
-        }
-      }
-    }
+    relevantUsers.sort(
+      (a, b) => (a.email).compareTo(b.email),
+    );
 
-    suggestedUsers.sort((a, b) => a.email.compareTo(b.email));
-
-    return suggestedUsers;
+    return relevantUsers;
   }
 
   Future<bool> _emailHoldsEnteAccount(String email) async {
