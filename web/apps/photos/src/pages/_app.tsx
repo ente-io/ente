@@ -115,13 +115,10 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         if (needsFamilyRedirect && getData(LS_KEYS.USER)?.token)
             redirectToFamilyPortal();
 
-        // TODO: Remove me after instrumenting for a bit.
-        let t = Date.now();
         router.events.on("routeChangeStart", (url: string) => {
-            t = Date.now();
             const newPathname = url.split("?")[0];
             if (window.location.pathname !== newPathname) {
-                setLoading(true);
+                showLoadingBar();
             }
 
             if (needsFamilyRedirect && getData(LS_KEYS.USER)?.token) {
@@ -134,8 +131,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         });
 
         router.events.on("routeChangeComplete", () => {
-            log.debug(() => `Route change took ${Date.now() - t} ms`);
-            setLoading(false);
+            hideLoadingBar();
         });
     }, []);
 
@@ -193,8 +189,11 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <Notification {...notificationProps} />
 
                 <AppContext.Provider value={appContext}>
-                    {(loading || !isI18nReady) && <LoadingOverlay />}
-                    {isI18nReady && <Component {...pageProps} />}
+                    {!isI18nReady ? (
+                        <LoadingOverlay />
+                    ) : (
+                        <Component {...pageProps} />
+                    )}
                 </AppContext.Provider>
             </ThemeProvider>
         </>
