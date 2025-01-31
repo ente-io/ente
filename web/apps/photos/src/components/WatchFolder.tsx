@@ -189,7 +189,7 @@ const WatchesContainer = styled("div")(() => ({
 const NoWatches: React.FC = () => {
     return (
         <NoWatchesContainer>
-            <Stack spacing={1}>
+            <Stack sx={{ gap: 1 }}>
                 <Typography variant="h6">{t("no_folders_added")}</Typography>
                 <Typography
                     variant={"small"}

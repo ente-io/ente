@@ -498,7 +498,7 @@ const Plans: React.FC<PlansProps> = ({
     hasAddOnBonus,
     onPlanSelect,
 }) => (
-    <Stack spacing={2}>
+    <Stack sx={{ gap: 2 }}>
         {plansData?.plans
             .filter((plan) => plan.period === planPeriod)
             .map((plan) => (
@@ -681,7 +681,7 @@ function ManageSubscription({
     };
 
     return (
-        <Stack spacing={1}>
+        <Stack sx={{ gap: 1 }}>
             {isSubscriptionStripe(subscription) && (
                 <StripeSubscriptionOptions
                     {...{ onClose, subscription, hasAddOnBonus }}

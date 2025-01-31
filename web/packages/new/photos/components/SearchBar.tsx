@@ -474,7 +474,7 @@ const OptionContents = ({ data: option }: { data: SearchOption }) => (
                 </Typography>
             </Box>
 
-            <Stack direction={"row"} sx={{ gap: 1 }}>
+            <Stack direction="row" sx={{ gap: 1 }}>
                 {option.previewFiles.map((file) => (
                     <ItemCard
                         key={file.id}
