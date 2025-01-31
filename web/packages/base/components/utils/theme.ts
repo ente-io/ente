@@ -550,10 +550,10 @@ const components: Components = {
             root: {
                 ".MuiBackdrop-root": {
                     // Use a translucent color for the backdrop.
-                    backgroundColor: "var(--mui-palette-backdrop-faint)",
+                    backgroundColor: "var(--mui-palette-backdrop-muted)",
                     // Apply a blur to the existing contents on which we're
                     // shown, and show some of it through by reducing opacity.
-                    backdropFilter: "blur(60px) opacity(70%)",
+                    backdropFilter: "blur(30px) opacity(95%)",
                 },
                 // Reset the MUI default paddings to 16px everywhere.
                 //
