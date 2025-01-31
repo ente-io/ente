@@ -28,6 +28,7 @@ class UserAvatarWidget extends StatefulWidget {
 
   @override
   State<UserAvatarWidget> createState() => _UserAvatarWidgetState();
+  static const strokeWidth = 1.0;
 }
 
 class _UserAvatarWidgetState extends State<UserAvatarWidget> {
@@ -67,7 +68,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                 color: widget.thumbnailView
                     ? strokeMutedDark
                     : getEnteColorScheme(context).strokeMuted,
-                width: 1,
+                width: UserAvatarWidget.strokeWidth,
                 strokeAlign: BorderSide.strokeAlignOutside,
               ),
             ),
@@ -113,21 +114,6 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
             thumbnailView: widget.thumbnailView,
             type: widget.type,
           );
-  }
-
-  double getAvatarSize(
-    AvatarType type,
-  ) {
-    switch (type) {
-      case AvatarType.small:
-        return 36.0;
-      case AvatarType.mini:
-        return 24.0;
-      case AvatarType.tiny:
-        return 18.0;
-      case AvatarType.extra:
-        return 18.0;
-    }
   }
 }
 
@@ -178,7 +164,7 @@ class _FirstLetterAvatarState extends State<_FirstLetterAvatar> {
           color: widget.thumbnailView
               ? strokeMutedDark
               : getEnteColorScheme(context).strokeMuted,
-          width: 1.0,
+          width: UserAvatarWidget.strokeWidth,
           strokeAlign: BorderSide.strokeAlignOutside,
         ),
       ),
@@ -204,7 +190,7 @@ class _FirstLetterAvatarState extends State<_FirstLetterAvatar> {
     final enteTextTheme = getEnteTextTheme(context);
     switch (type) {
       case AvatarType.small:
-        return Tuple2(36.0, enteTextTheme.small);
+        return Tuple2(32.0, enteTextTheme.small);
       case AvatarType.mini:
         return Tuple2(24.0, enteTextTheme.mini);
       case AvatarType.tiny:
@@ -212,5 +198,20 @@ class _FirstLetterAvatarState extends State<_FirstLetterAvatar> {
       case AvatarType.extra:
         return Tuple2(18.0, enteTextTheme.tiny);
     }
+  }
+}
+
+double getAvatarSize(
+  AvatarType type,
+) {
+  switch (type) {
+    case AvatarType.small:
+      return 32.0;
+    case AvatarType.mini:
+      return 24.0;
+    case AvatarType.tiny:
+      return 18.0;
+    case AvatarType.extra:
+      return 18.0;
   }
 }
