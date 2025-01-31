@@ -87,6 +87,9 @@ export const PlanSelector: React.FC<PlanSelectorProps> = ({
                         [theme.breakpoints.down(360)]: { p: 0 },
                     }),
                 },
+                backdrop: {
+                    sx: { backdropFilter: "blur(30px) opacity(95%)" },
+                },
             }}
         >
             <PlanSelectorCard {...{ onClose, setLoading }} />
