@@ -1200,6 +1200,7 @@ class SearchService {
     final currentTime = DateTime.now().toLocal();
     final currentDayMonth = currentTime.month * 100 + currentTime.day;
     final currentWeek = _getWeekNumber(currentTime);
+    final currentMonth = currentTime.month;
     final cutOffTime = currentTime.subtract(const Duration(days: 365));
     final averageDailyPhotos = allFiles.length / 365;
     final significantDayThreshold = averageDailyPhotos * 0.25;
@@ -1292,6 +1293,7 @@ class SearchService {
     if (searchResults.isEmpty) {
       // Group files by week and year
       final weekYearGroups = <int, Map<int, List<EnteFile>>>{};
+      // TODO: lau: just only do this week as with month
       for (final file in allFiles) {
         if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
 
@@ -1364,7 +1366,82 @@ class SearchService {
 
     if (limit != null && searchResults.length >= limit) return searchResults;
 
-    // process to find fillers
+    // process to find fillers (months)
+    const wantedMemories = 3;
+    final neededMemories = wantedMemories - searchResults.length;
+    if (neededMemories <= 0) return searchResults;
+
+    // Group files by month and year
+    final currentMonthYearGroups = <int, List<EnteFile>>{};
+    for (final file in allFiles) {
+      if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
+
+      final creationTime =
+          DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+      final month = creationTime.month;
+      if (month != currentMonth) continue;
+      final year = creationTime.year;
+
+      currentMonthYearGroups.putIfAbsent(year, () => []).add(file);
+    }
+
+    // Add the largest two months plus the month through the years
+    final sortedYearsForCurrentMonth = currentMonthYearGroups.keys.toList()
+      ..sort(
+        (a, b) => currentMonthYearGroups[b]!.length.compareTo(
+              currentMonthYearGroups[a]!.length,
+            ),
+      );
+    if (neededMemories > 1) {
+      for (int i = neededMemories; i > 1; i--) {
+        if (sortedYearsForCurrentMonth.isEmpty) break;
+        final year = sortedYearsForCurrentMonth.removeAt(0);
+        final monthYearFiles = currentMonthYearGroups[year]!;
+        final photoSelection = await _bestSelection(monthYearFiles);
+        final monthName =
+            DateFormat.MMMM(Localizations.localeOf(context).languageCode)
+                .format(DateTime(year, currentMonth));
+        final name = monthName + ", ${currentTime.year - year} years back";
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.event,
+            name,
+            photoSelection,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: name,
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.event,
+              matchedUploadedIDs: filesToUploadedFileIDs(photoSelection),
+              filterIcon: Icons.event_outlined,
+            ),
+          ),
+        );
+      }
+    }
+    // Show the month through the remaining years
+    if (sortedYearsForCurrentMonth.isEmpty) return searchResults;
+    final allPhotos = sortedYearsForCurrentMonth
+        .expand((year) => currentMonthYearGroups[year]!)
+        .toList();
+    final photoSelection = await _bestSelection(allPhotos);
+    final monthName =
+        DateFormat.MMMM(Localizations.localeOf(context).languageCode)
+            .format(DateTime(currentTime.year, currentMonth));
+    final name = monthName + " through the years";
+    searchResults.add(
+      GenericSearchResult(
+        ResultType.event,
+        name,
+        photoSelection,
+        hierarchicalSearchFilter: TopLevelGenericFilter(
+          filterName: name,
+          occurrence: kMostRelevantFilter,
+          filterResultType: ResultType.event,
+          matchedUploadedIDs: filesToUploadedFileIDs(photoSelection),
+          filterIcon: Icons.event_outlined,
+        ),
+      ),
+    );
 
     return searchResults;
   }
