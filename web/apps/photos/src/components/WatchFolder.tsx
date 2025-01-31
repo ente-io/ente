@@ -1,3 +1,5 @@
+import { SpaceBetweenFlex } from "@/base/components/containers";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     OverflowMenu,
     OverflowMenuOption,
@@ -15,15 +17,14 @@ import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { useAppContext } from "@/new/photos/types/context";
 import {
     FlexWrapper,
-    SpaceBetweenFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
+import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import DoNotDisturbOutlinedIcon from "@mui/icons-material/DoNotDisturbOutlined";
 import FolderCopyOutlinedIcon from "@mui/icons-material/FolderCopyOutlined";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import {
-    Button,
     CircularProgress,
     Dialog,
     DialogContent,
@@ -126,7 +127,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
                     paper: { sx: { height: "448px", maxWidth: "414px" } },
                 }}
             >
-                <SpaceBetweenFlex sx={{ p: "16px 8px 8px 8px" }}>
+                <SpaceBetweenFlex sx={{ p: "16px 8px 0px 8px" }}>
                     <DialogTitle variant="h3">
                         {t("watched_folders")}
                     </DialogTitle>
@@ -135,15 +136,14 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
                 <DialogContent sx={{ flex: 1 }}>
                     <Stack sx={{ gap: 1, p: 1.5, height: "100%" }}>
                         <WatchList {...{ watches, removeWatch }} />
-                        <Button fullWidth color="accent" onClick={addNewWatch}>
-                            <span>+</span>
-                            <span
-                                style={{
-                                    marginLeft: "8px",
-                                }}
-                            ></span>
+                        <FocusVisibleButton
+                            fullWidth
+                            color="accent"
+                            onClick={addNewWatch}
+                            startIcon={<AddIcon />}
+                        >
                             {t("add_folder")}
-                        </Button>
+                        </FocusVisibleButton>
                     </Stack>
                 </DialogContent>
             </Dialog>
@@ -189,25 +189,22 @@ const WatchesContainer = styled("div")(() => ({
 const NoWatches: React.FC = () => {
     return (
         <NoWatchesContainer>
-            <Stack sx={{ gap: 1 }}>
+            <Stack sx={{ gap: 1.5 }}>
                 <Typography variant="h6">{t("no_folders_added")}</Typography>
-                <Typography
-                    variant={"small"}
-                    sx={{ py: 0.5, color: "text.muted" }}
-                >
+                <Typography variant="small" sx={{ py: 1, color: "text.muted" }}>
                     {t("watch_folders_hint_1")}
                 </Typography>
-                <Typography variant={"small"} sx={{ color: "text.muted" }}>
-                    <FlexWrapper gap={1}>
+                <Typography variant="small" sx={{ color: "text.muted" }}>
+                    <Stack direction="row" sx={{ gap: 1 }}>
                         <Check />
                         {t("watch_folders_hint_2")}
-                    </FlexWrapper>
+                    </Stack>
                 </Typography>
-                <Typography variant={"small"} sx={{ color: "text.muted" }}>
-                    <FlexWrapper gap={1}>
+                <Typography variant="small" sx={{ color: "text.muted" }}>
+                    <Stack direction="row" sx={{ gap: 1 }}>
                         <Check />
                         {t("watch_folders_hint_3")}
-                    </FlexWrapper>
+                    </Stack>
                 </Typography>
             </Stack>
         </NoWatchesContainer>
