@@ -147,7 +147,7 @@ export const Notification: React.FC<NotificationProps> = ({
                     // "secondary", then the notification becomes opaque, which
                     // is not what we want. So give the entire snackbar a solid
                     // background color.
-                    backgroundColor: "fixed.black",
+                    backgroundColor: "background.default",
                 },
                 ...(sx ? (isSxArray(sx) ? sx : [sx]) : []),
             ]}

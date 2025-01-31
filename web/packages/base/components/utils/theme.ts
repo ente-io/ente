@@ -193,8 +193,7 @@ const _colors = {
             faint: "rgba(0 0 0 / 0.12)",
         },
         boxShadow: {
-            // TODO(LM): Rename to paper
-            float: "0px 0px 10px rgba(0 0 0 / 0.25)",
+            paper: "0px 0px 10px rgba(0 0 0 / 0.25)",
             menu: "0px 0px 6px rgba(0 0 0 / 0.16), 0px 3px 6px rgba(0 0 0 / 0.12)",
             button: "0px 4px 4px rgba(0 0 0 / 0.25)",
         },
@@ -229,7 +228,7 @@ const _colors = {
             faint: "rgba(255 255 255 / 0.16)",
         },
         boxShadow: {
-            float: "0px 2px 12px rgba(0 0 0 / 0.75)",
+            paper: "0px 2px 12px rgba(0 0 0 / 0.75)",
             menu: "0px 0px 6px rgba(0 0 0 / 0.50), 0px 3px 6px rgba(0 0 0 / 0.25)",
             button: "0px 4px 4px rgba(0 0 0 / 0.75)",
         },
@@ -550,10 +549,11 @@ const components: Components = {
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
-                    backgroundColor: "var(--mui-palette-backdrop-faint)",
-                },
-                "& .MuiDialog-paper": {
-                    boxShadow: "var(--mui-palette-boxShadow-float)",
+                    // Use a translucent color for the backdrop.
+                    backgroundColor: "var(--mui-palette-backdrop-muted)",
+                    // Apply a blur to the existing contents on which we're
+                    // shown, and show some of it through by reducing opacity.
+                    backdropFilter: "blur(30px) opacity(95%)",
                 },
                 // Reset the MUI default paddings to 16px everywhere.
                 //
@@ -597,7 +597,7 @@ const components: Components = {
                 // in dark mode. Remove it to match background for our designs.
                 backgroundImage: "none",
                 // Use our paper shadow.
-                boxShadow: "var(--mui-palette-boxShadow-float)",
+                boxShadow: "var(--mui-palette-boxShadow-paper)",
             },
         },
     },
@@ -774,12 +774,23 @@ const components: Components = {
         },
     },
 
+    MuiMenu: {
+        styleOverrides: {
+            root: {
+                ".MuiMenu-paper": {
+                    boxShadow: "var(--mui-palette-boxShadow-menu)",
+                },
+            },
+        },
+    },
+
     MuiSnackbar: {
         styleOverrides: {
             root: {
                 // Set a default border radius for all snackbar's (e.g.
                 // notification popups).
                 borderRadius: "8px",
+                boxShadow: "var(--mui-palette-boxShadow-menu)",
             },
         },
     },

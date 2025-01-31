@@ -164,10 +164,15 @@ declare module "@mui/material/styles" {
          */
         boxShadow: {
             /**
-             * Drop shadow for "big" floating elements like {@link Dialog}.
+             * Drop shadow for the MUI {@link Paper}. In particular, this also
+             * gets used as the drop shadow for {@link Dialog} (which uses a
+             * {@link Paper} to embed its contents).
              */
-            float: string;
-            /** Currently unused. */
+            paper: string;
+            /**
+             * Drop shadow for the MUI {@link Menu} and other small floating
+             * elements like the {@link Notification} {@link Snackbar}.
+             */
             menu: string;
             /** Currently unused. */
             button: string;

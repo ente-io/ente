@@ -176,7 +176,7 @@ const DefaultOptions: React.FC<OptionsProps> = ({
                 <DialogCloseIconButton {...{ onClose }} />
             </SpaceBetweenFlex>
             <Box sx={{ p: "12px", pt: "16px" }}>
-                <Stack spacing={0.5}>
+                <Stack sx={{ gap: 0.5 }}>
                     {intent != "import" && (
                         <RowButton
                             startIcon={<ImageOutlinedIcon />}

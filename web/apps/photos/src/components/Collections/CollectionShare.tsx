@@ -1,6 +1,9 @@
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
+import {
+    NestedSidebarDrawer,
+    SidebarDrawer,
+} from "@/base/components/mui/SidebarDrawer";
 import {
     RowButton,
     RowButtonDivider,
@@ -491,6 +494,11 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
         [emailList, collection.sharees],
     );
 
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
+    };
+
     const collectionShare: AddParticipantFormProps["callback"] = async ({
         email,
         emails,
@@ -526,30 +534,21 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
         }
     };
 
-    const handleRootClose = () => {
-        onClose();
-        onRootClose();
-    };
-
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason == "backdropClick") {
-            handleRootClose();
-        } else {
-            onClose();
-        }
-    };
-
     return (
-        <SidebarDrawer anchor="right" open={open} onClose={handleDrawerClose}>
+        <NestedSidebarDrawer
+            anchor="right"
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+        >
             <Stack sx={{ gap: "4px", py: "12px" }}>
                 <Titlebar
-                    onClose={onClose}
+                    {...{ onClose }}
+                    onRootClose={handleRootClose}
                     title={
                         type === COLLECTION_ROLE.VIEWER
                             ? t("ADD_VIEWERS")
                             : t("ADD_COLLABORATORS")
                     }
-                    onRootClose={handleRootClose}
                     caption={collection.name}
                 />
                 <AddParticipantForm
@@ -570,7 +569,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                     disableAutoFocus
                 />
             </Stack>
-        </SidebarDrawer>
+        </NestedSidebarDrawer>
     );
 };
 
@@ -847,13 +846,6 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
         onClose();
         onRootClose();
     };
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason == "backdropClick") {
-            handleRootClose();
-        } else {
-            onClose();
-        }
-    };
 
     const collectionUnshare = async (email: string) => {
         try {
@@ -893,10 +885,10 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
 
     return (
         <>
-            <SidebarDrawer
+            <NestedSidebarDrawer
                 anchor="right"
-                open={open}
-                onClose={handleDrawerClose}
+                {...{ open, onClose }}
+                onRootClose={handleRootClose}
             >
                 <Stack sx={{ gap: "4px", py: "12px" }}>
                     <Titlebar
@@ -987,7 +979,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                         </Stack>
                     </Stack>
                 </Stack>
-            </SidebarDrawer>
+            </NestedSidebarDrawer>
             <ManageParticipant
                 collectionUnshare={collectionUnshare}
                 open={manageParticipantView}
@@ -1027,12 +1019,9 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
     const { showMiniDialog } = useAppContext();
     const galleryContext = useContext(GalleryContext);
 
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason == "backdropClick") {
-            onRootClose();
-        } else {
-            onClose();
-        }
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
     };
 
     const handleRemove = () => {
@@ -1113,12 +1102,16 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
     }
 
     return (
-        <SidebarDrawer anchor="right" open={open} onClose={handleDrawerClose}>
+        <NestedSidebarDrawer
+            anchor="right"
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+        >
             <Stack sx={{ gap: "4px", py: "12px" }}>
                 <Titlebar
                     onClose={onClose}
                     title={t("MANAGE")}
-                    onRootClose={onRootClose}
+                    onRootClose={handleRootClose}
                     caption={selectedParticipant.email}
                 />
 
@@ -1185,7 +1178,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                     </Stack>
                 </Stack>
             </Stack>
-        </SidebarDrawer>
+        </NestedSidebarDrawer>
     );
 };
 
@@ -1345,16 +1338,14 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     onRootClose,
     publicShareUrl,
 }) => {
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason == "backdropClick") {
-            onRootClose();
-        } else {
-            onClose();
-        }
-    };
     const galleryContext = useContext(GalleryContext);
 
     const [sharableLinkError, setSharableLinkError] = useState(null);
+
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
+    };
 
     const updatePublicShareURLHelper = async (req: UpdatePublicURL) => {
         try {
@@ -1383,27 +1374,37 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             galleryContext.setBlockingLoad(false);
         }
     };
+
     const copyToClipboardHelper = (text: string) => () => {
         navigator.clipboard.writeText(text);
     };
+
     return (
-        <SidebarDrawer anchor="right" open={open} onClose={handleDrawerClose}>
+        <NestedSidebarDrawer
+            anchor="right"
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+        >
             <Stack sx={{ gap: "4px", py: "12px" }}>
                 <Titlebar
                     onClose={onClose}
                     title={t("share_album")}
-                    onRootClose={onRootClose}
+                    onRootClose={handleRootClose}
                 />
-                <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
-                    <Stack spacing={3}>
-                        <ManagePublicCollect
-                            collection={collection}
-                            publicShareProp={publicShareProp}
-                            updatePublicShareURLHelper={
-                                updatePublicShareURLHelper
-                            }
-                        />
-                        <ManageLinkExpiry
+                <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
+                    <ManagePublicCollect
+                        collection={collection}
+                        publicShareProp={publicShareProp}
+                        updatePublicShareURLHelper={updatePublicShareURLHelper}
+                    />
+                    <ManageLinkExpiry
+                        collection={collection}
+                        publicShareProp={publicShareProp}
+                        updatePublicShareURLHelper={updatePublicShareURLHelper}
+                        onRootClose={onRootClose}
+                    />
+                    <RowButtonGroup>
+                        <ManageDeviceLimit
                             collection={collection}
                             publicShareProp={publicShareProp}
                             updatePublicShareURLHelper={
@@ -1411,63 +1412,49 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                             }
                             onRootClose={onRootClose}
                         />
-                        <RowButtonGroup>
-                            <ManageDeviceLimit
-                                collection={collection}
-                                publicShareProp={publicShareProp}
-                                updatePublicShareURLHelper={
-                                    updatePublicShareURLHelper
-                                }
-                                onRootClose={onRootClose}
-                            />
-                            <RowButtonDivider />
-                            <ManageDownloadAccess
-                                collection={collection}
-                                publicShareProp={publicShareProp}
-                                updatePublicShareURLHelper={
-                                    updatePublicShareURLHelper
-                                }
-                            />
-                            <RowButtonDivider />
-                            <ManageLinkPassword
-                                collection={collection}
-                                publicShareProp={publicShareProp}
-                                updatePublicShareURLHelper={
-                                    updatePublicShareURLHelper
-                                }
-                            />
-                        </RowButtonGroup>
-                        <RowButtonGroup>
-                            <RowButton
-                                startIcon={<ContentCopyIcon />}
-                                onClick={copyToClipboardHelper(publicShareUrl)}
-                                label={t("copy_link")}
-                            />
-                        </RowButtonGroup>
-                        <RowButtonGroup>
-                            <RowButton
-                                color="critical"
-                                startIcon={<RemoveCircleOutlineIcon />}
-                                onClick={disablePublicSharing}
-                                label={t("REMOVE_LINK")}
-                            />
-                        </RowButtonGroup>
-                    </Stack>
+                        <RowButtonDivider />
+                        <ManageDownloadAccess
+                            collection={collection}
+                            publicShareProp={publicShareProp}
+                            updatePublicShareURLHelper={
+                                updatePublicShareURLHelper
+                            }
+                        />
+                        <RowButtonDivider />
+                        <ManageLinkPassword
+                            collection={collection}
+                            publicShareProp={publicShareProp}
+                            updatePublicShareURLHelper={
+                                updatePublicShareURLHelper
+                            }
+                        />
+                    </RowButtonGroup>
+                    <RowButtonGroup>
+                        <RowButton
+                            startIcon={<ContentCopyIcon />}
+                            onClick={copyToClipboardHelper(publicShareUrl)}
+                            label={t("copy_link")}
+                        />
+                    </RowButtonGroup>
+                    <RowButtonGroup>
+                        <RowButton
+                            color="critical"
+                            startIcon={<RemoveCircleOutlineIcon />}
+                            onClick={disablePublicSharing}
+                            label={t("REMOVE_LINK")}
+                        />
+                    </RowButtonGroup>
                     {sharableLinkError && (
                         <Typography
                             variant="small"
-                            sx={{
-                                color: "critical.main",
-                                mt: 0.5,
-                                textAlign: "center",
-                            }}
+                            sx={{ color: "critical.main", textAlign: "center" }}
                         >
                             {sharableLinkError}
                         </Typography>
                     )}
                 </Stack>
             </Stack>
-        </SidebarDrawer>
+        </NestedSidebarDrawer>
     );
 };
 
@@ -1542,12 +1529,9 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
         setShareExpiryOptionsModalView(false);
     };
 
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason == "backdropClick") {
-            onRootClose();
-        } else {
-            closeShareExpiryOptionsModalView();
-        }
+    const handleRootClose = () => {
+        closeShareExpiryOptionsModalView();
+        onRootClose();
     };
 
     return (
@@ -1573,16 +1557,17 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                     }
                 />
             </RowButtonGroup>
-            <SidebarDrawer
+            <NestedSidebarDrawer
                 anchor="right"
                 open={shareExpiryOptionsModalView}
-                onClose={handleDrawerClose}
+                onClose={closeShareExpiryOptionsModalView}
+                onRootClose={handleRootClose}
             >
                 <Stack sx={{ gap: "4px", py: "12px" }}>
                     <Titlebar
                         onClose={closeShareExpiryOptionsModalView}
+                        onRootClose={handleRootClose}
                         title={t("LINK_EXPIRY")}
-                        onRootClose={onRootClose}
                     />
                     <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                         <RowButtonGroup>
@@ -1604,7 +1589,7 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                         </RowButtonGroup>
                     </Stack>
                 </Stack>
-            </SidebarDrawer>
+            </NestedSidebarDrawer>
         </>
     );
 };
@@ -1673,12 +1658,9 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
         setIsChangeDeviceLimitVisible(false);
     };
 
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason == "backdropClick") {
-            onRootClose();
-        } else {
-            closeDeviceLimitChangeModal();
-        }
+    const handleRootClose = () => {
+        closeDeviceLimitChangeModal();
+        onRootClose();
     };
 
     return (
@@ -1693,16 +1675,17 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
                 onClick={openDeviceLimitChangeModalView}
                 endIcon={<ChevronRightIcon />}
             />
-            <SidebarDrawer
+            <NestedSidebarDrawer
                 anchor="right"
                 open={isChangeDeviceLimitVisible}
-                onClose={handleDrawerClose}
+                onClose={closeDeviceLimitChangeModal}
+                onRootClose={handleRootClose}
             >
                 <Stack sx={{ gap: "4px", py: "12px" }}>
                     <Titlebar
                         onClose={closeDeviceLimitChangeModal}
+                        onRootClose={handleRootClose}
                         title={t("LINK_DEVICE_LIMIT")}
-                        onRootClose={onRootClose}
                     />
                     <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                         <RowButtonGroup>
@@ -1725,7 +1708,7 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
                         </RowButtonGroup>
                     </Stack>
                 </Stack>
-            </SidebarDrawer>
+            </NestedSidebarDrawer>
         </>
     );
 };
