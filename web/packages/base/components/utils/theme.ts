@@ -193,8 +193,7 @@ const _colors = {
             faint: "rgba(0 0 0 / 0.12)",
         },
         boxShadow: {
-            // TODO(LM): Rename to paper
-            float: "0px 0px 10px rgba(0 0 0 / 0.25)",
+            paper: "0px 0px 10px rgba(0 0 0 / 0.25)",
             menu: "0px 0px 6px rgba(0 0 0 / 0.16), 0px 3px 6px rgba(0 0 0 / 0.12)",
             button: "0px 4px 4px rgba(0 0 0 / 0.25)",
         },
@@ -229,7 +228,7 @@ const _colors = {
             faint: "rgba(255 255 255 / 0.16)",
         },
         boxShadow: {
-            float: "0px 2px 12px rgba(0 0 0 / 0.75)",
+            paper: "0px 2px 12px rgba(0 0 0 / 0.75)",
             menu: "0px 0px 6px rgba(0 0 0 / 0.50), 0px 3px 6px rgba(0 0 0 / 0.25)",
             button: "0px 4px 4px rgba(0 0 0 / 0.75)",
         },
@@ -556,9 +555,6 @@ const components: Components = {
                     // shown, and show some of it through by reducing opacity.
                     backdropFilter: "blur(60px) opacity(70%)",
                 },
-                "& .MuiDialog-paper": {
-                    boxShadow: "var(--mui-palette-boxShadow-float)",
-                },
                 // Reset the MUI default paddings to 16px everywhere.
                 //
                 // This is not a great choice either, usually most dialogs, for
@@ -601,7 +597,7 @@ const components: Components = {
                 // in dark mode. Remove it to match background for our designs.
                 backgroundImage: "none",
                 // Use our paper shadow.
-                boxShadow: "var(--mui-palette-boxShadow-float)",
+                boxShadow: "var(--mui-palette-boxShadow-paper)",
             },
         },
     },
