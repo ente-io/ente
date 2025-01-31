@@ -462,9 +462,8 @@ class PersonService {
         email: email,
       ),
     );
-    await updatePerson(updatedPerson).then((value) {
-      _resetEmailToNameCache();
-    });
+    await updatePerson(updatedPerson);
+    await _resetEmailToNameCache();
     return updatedPerson;
   }
 
