@@ -64,7 +64,7 @@ class PersonService {
           };
         }
       }
-      logger.info("Email to name cache reset");
+      logger.info("Email to partial person data cache reset");
     });
   }
 

@@ -102,7 +102,12 @@ class _ContactsSectionState extends State<ContactsSection> {
     } else {
       final recommendations = <Widget>[
         ..._contactSearchResults.map(
-          (contactSearchResult) => ContactRecommendation(contactSearchResult),
+          (contactSearchResult) => ContactRecommendation(
+            contactSearchResult,
+            key: ValueKey(
+              contactSearchResult.name(),
+            ),
+          ),
         ),
         const ContactCTA(),
       ];
