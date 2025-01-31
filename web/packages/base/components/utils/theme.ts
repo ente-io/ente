@@ -774,12 +774,23 @@ const components: Components = {
         },
     },
 
+    MuiMenu: {
+        styleOverrides: {
+            root: {
+                ".MuiMenu-paper": {
+                    boxShadow: "var(--mui-palette-boxShadow-menu)",
+                },
+            },
+        },
+    },
+
     MuiSnackbar: {
         styleOverrides: {
             root: {
                 // Set a default border radius for all snackbar's (e.g.
                 // notification popups).
                 borderRadius: "8px",
+                boxShadow: "var(--mui-palette-boxShadow-menu)",
             },
         },
     },

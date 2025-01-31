@@ -169,7 +169,10 @@ declare module "@mui/material/styles" {
              * {@link Paper} to embed its contents).
              */
             paper: string;
-            /** Currently unused. */
+            /**
+             * Drop shadow for the MUI {@link Menu} and other small floating
+             * elements like the {@link Notification} {@link Snackbar}.
+             */
             menu: string;
             /** Currently unused. */
             button: string;
