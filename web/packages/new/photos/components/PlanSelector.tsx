@@ -362,8 +362,11 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
     children,
 }) => (
     <>
-        <Box sx={{ pl: 1.5, py: 0.5 }}>
-            <SpaceBetweenFlex>
+        <Stack sx={{ gap: 2 }}>
+            <Stack
+                direction="row"
+                sx={{ pl: 0.5, pt: 0.5, justifyContent: "space-between" }}
+            >
                 <Box>
                     <Typography variant="h5" sx={{ fontWeight: "medium" }}>
                         {t("subscription")}
@@ -376,11 +379,11 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
                 <IconButton onClick={onClose} color="secondary">
                     <CloseIcon />
                 </IconButton>
-            </SpaceBetweenFlex>
-        </Box>
+            </Stack>
 
-        <Box sx={{ px: 1.5 }}>
-            <Typography sx={{ color: "text.muted", fontWeight: "medium" }}>
+            <Typography
+                sx={{ color: "text.muted", px: 0.5, fontWeight: "medium" }}
+            >
                 <Trans
                     i18nKey="current_usage"
                     values={{
@@ -388,7 +391,7 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
                     }}
                 />
             </Typography>
-        </Box>
+        </Stack>
 
         <Box>
             <Stack
@@ -414,7 +417,7 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
                 {children}
             </Stack>
 
-            <Box sx={{ py: 1, px: 1.5 }}>
+            <Stack sx={{ padding: "20px 8px 0px 8px", gap: 1 }}>
                 <Typography sx={{ color: "text.muted" }}>
                     {!isSubscriptionCancelled(subscription)
                         ? t("subscription_status_renewal_active", {
@@ -427,7 +430,7 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
                 {addOnBonuses.length > 0 && (
                     <AddOnBonusRows addOnBonuses={addOnBonuses} />
                 )}
-            </Box>
+            </Stack>
         </Box>
 
         <ManageSubscription
@@ -638,7 +641,7 @@ interface AddOnBonusRowsProps {
 const AddOnBonusRows: React.FC<AddOnBonusRowsProps> = ({ addOnBonuses }) => (
     <>
         {addOnBonuses.map((bonus, i) => (
-            <Typography key={i} sx={{ color: "text.muted", pt: 1 }}>
+            <Typography key={i} variant="small" sx={{ color: "text.muted" }}>
                 <Trans
                     i18nKey={"add_on_valid_till"}
                     values={{
