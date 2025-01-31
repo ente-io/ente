@@ -25,8 +25,10 @@ import "package:photos/models/base/id.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
+import "package:photos/services/file_magic_service.dart";
 import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
@@ -239,6 +241,17 @@ class PreviewVideoStore {
           objectID: objectID,
           objectSize: objectSize,
         );
+
+        FFProbeProps? props2;
+        props2 = await getVideoPropsAsync(playlistFile);
+        FileMagicService.instance.updatePublicMagicMetadata(
+          [enteFile],
+          {
+            previewHeightKey: props2?.height,
+            previewWidthKey: props2?.width,
+            previewSizeKey: objectSize,
+          },
+        ).ignore();
         _logger.info("Video preview uploaded for $enteFile");
       } catch (_) {
         error = "Failed to upload video preview";
