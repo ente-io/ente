@@ -19,6 +19,7 @@ class UserRemoteFlagService {
   static const String recoveryVerificationFlag = "recoveryKeyVerified";
   static const String mapEnabled = "mapEnabled";
   static const String mlEnabled = "faceSearchEnabled";
+  static const String videoStreamingEnabled = "videoStreamingEnabled";
   static const String needRecoveryKeyVerification =
       "needRecoveryKeyVerification";
 

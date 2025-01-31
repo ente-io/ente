@@ -10958,6 +10958,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Video Streaming`
+  String get videoStreaming {
+    return Intl.message(
+      'Video Streaming',
+      name: 'videoStreaming',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

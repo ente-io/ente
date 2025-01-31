@@ -5,6 +5,9 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/use_media_kit_for_video.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/services/filedata/filedata_service.dart";
+import "package:photos/services/preview_video_store.dart";
+import "package:photos/ui/viewer/file/preview_video_widget.dart";
 import "package:photos/ui/viewer/file/video_widget_media_kit_new.dart";
 import "package:photos/ui/viewer/file/video_widget_native.dart";
 
@@ -28,6 +31,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   bool useNativeVideoPlayer = true;
   late final StreamSubscription<UseMediaKitForVideo>
       useMediaKitForVideoSubscription;
+  bool selectPreviewForPlay = true;
 
   @override
   void initState() {
@@ -49,17 +53,47 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isPreviewVideoPlayable =
+        PreviewVideoStore.instance.isVideoStreamingEnabled &&
+            widget.file.isUploaded &&
+            // widget.file.localID == null &&
+            (FileDataService.instance.previewIds
+                    ?.containsKey(widget.file.uploadedFileID!) ??
+                false);
+    if (isPreviewVideoPlayable && selectPreviewForPlay) {
+      return PreviewVideoWidget(
+        widget.file,
+        tagPrefix: widget.tagPrefix,
+        playbackCallback: widget.playbackCallback,
+        onStreamChange: () {
+          setState(() {
+            selectPreviewForPlay = false;
+          });
+        },
+      );
+    }
+
     if (useNativeVideoPlayer) {
       return VideoWidgetNative(
         widget.file,
         tagPrefix: widget.tagPrefix,
         playbackCallback: widget.playbackCallback,
+        onStreamChange: () {
+          setState(() {
+            selectPreviewForPlay = true;
+          });
+        },
       );
     } else {
       return VideoWidgetMediaKitNew(
         widget.file,
         tagPrefix: widget.tagPrefix,
         playbackCallback: widget.playbackCallback,
+        onStreamChange: () {
+          setState(() {
+            selectPreviewForPlay = true;
+          });
+        },
       );
     }
   }

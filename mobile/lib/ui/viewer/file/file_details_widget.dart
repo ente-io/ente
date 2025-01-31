@@ -32,6 +32,7 @@ import 'package:photos/ui/viewer/file_details/exif_item_widgets.dart';
 import "package:photos/ui/viewer/file_details/faces_item_widget.dart";
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/location_tags_widget.dart";
+import "package:photos/ui/viewer/file_details/preview_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/video_exif_item.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
@@ -177,6 +178,18 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         ),
       ),
       const FileDetailsDivider(),
+      if (widget.file.pubMagicMetadata?.previewSize != null) ...[
+        ValueListenableBuilder(
+          valueListenable: _exifNotifier,
+          builder: (context, _, __) => PreviewPropertiesItemWidget(
+            file,
+            _isImage,
+            _exifData,
+            _currentUserID,
+          ),
+        ),
+        const FileDetailsDivider(),
+      ],
     ]);
     fileDetailsTiles.add(
       ValueListenableBuilder(

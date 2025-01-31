@@ -20,6 +20,7 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import "package:photos/services/local_authentication_service.dart";
+import "package:photos/services/preview_video_store.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/ui/viewer/file/custom_app_bar.dart';
@@ -299,6 +300,26 @@ class FileAppBarState extends State<FileAppBar> {
         );
       }
     }
+    if (flagService.internalUser &&
+        PreviewVideoStore.instance.isVideoStreamingEnabled) {
+      items.add(
+        PopupMenuItem(
+          value: 99,
+          child: Row(
+            children: [
+              Icon(
+                Icons.video_collection,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              const Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              const Text("Cache Preview"),
+            ],
+          ),
+        ),
+      );
+    }
     items.add(
       PopupMenuItem(
         value: 6,
@@ -379,6 +400,17 @@ class FileAppBarState extends State<FileAppBar> {
               await _handleUnHideRequest(context);
             } else if (value == 6) {
               await _onTapGuestView();
+            } else if (value == 99) {
+              try {
+                await PreviewVideoStore.instance.chunkAndUploadVideo(
+                  context,
+                  widget.file,
+                );
+              } catch (e) {
+                if (mounted) {
+                  await showGenericErrorDialog(context: context, error: e);
+                }
+              }
             } else if (value == 7) {
               _onToggleLoopVideo();
             }
