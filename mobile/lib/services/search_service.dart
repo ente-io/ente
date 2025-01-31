@@ -1285,7 +1285,7 @@ class SearchService {
         }
       }
 
-      if (limit != null && searchResults.length >= limit) break;
+      if (limit != null && searchResults.length >= limit) return searchResults;
     }
 
     // process to find significant weeks (only if there are no significant days)
@@ -1361,6 +1361,8 @@ class SearchService {
         }
       }
     }
+
+    if (limit != null && searchResults.length >= limit) return searchResults;
 
     // process to find fillers
 
