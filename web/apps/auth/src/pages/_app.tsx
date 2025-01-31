@@ -7,7 +7,11 @@ import {
 } from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
-import { useIsRouteChangeInProgress, useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
+import {
+    useIsRouteChangeInProgress,
+    useSetupI18n,
+    useSetupLogs,
+} from "@/base/components/utils/hooks-app";
 import { authTheme } from "@/base/components/utils/theme";
 import { logStartupBanner } from "@/base/log-web";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -65,10 +69,11 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <AppContext.Provider value={appContext}>
                     {!isI18nReady ? (
                         <LoadingOverlay />
-                    ) : isChangingRoute ? (
-                        <TranslucentLoadingOverlay />
                     ) : (
-                        <Component {...pageProps} />
+                        <>
+                            {isChangingRoute && <TranslucentLoadingOverlay />}
+                            <Component {...pageProps} />
+                        </>
                     )}
                 </AppContext.Provider>
             </ThemeProvider>

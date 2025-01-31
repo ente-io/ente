@@ -189,10 +189,11 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <AppContext.Provider value={appContext}>
                     {!isI18nReady ? (
                         <LoadingOverlay />
-                    ) : isChangingRoute ? (
-                        <TranslucentLoadingOverlay />
                     ) : (
-                        <Component {...pageProps} />
+                        <>
+                            {isChangingRoute && <TranslucentLoadingOverlay />}
+                            <Component {...pageProps} />
+                        </>
                     )}
                 </AppContext.Provider>
             </ThemeProvider>
