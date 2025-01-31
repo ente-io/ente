@@ -53,13 +53,13 @@ module.exports = async (context) => {
 
     switch (`${platform.nodeName}-${arch}`) {
         case "linux-x64":
-            return download("vips-x64", "vips");
+            await download("vips-x64", "vips");
         case "linux-arm64":
-            return download("vips-arm64", "vips");
+            await download("vips-arm64", "vips");
         case "win32-x64":
-            return download("vips-x86_64.exe", "vips.exe");
+            await download("vips-x86_64.exe", "vips.exe");
         case "linux-arm64":
-            return download("vips-aarch64.exe", "vips.exe");
+            await download("vips-aarch64.exe", "vips.exe");
     }
 
     return true;
