@@ -1529,12 +1529,9 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
         setShareExpiryOptionsModalView(false);
     };
 
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason == "backdropClick") {
-            onRootClose();
-        } else {
-            closeShareExpiryOptionsModalView();
-        }
+    const handleRootClose = () => {
+        closeShareExpiryOptionsModalView();
+        onRootClose();
     };
 
     return (
@@ -1563,13 +1560,14 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
             <NestedSidebarDrawer
                 anchor="right"
                 open={shareExpiryOptionsModalView}
-                onClose={handleDrawerClose}
+                onClose={closeShareExpiryOptionsModalView}
+                onRootClose={handleRootClose}
             >
                 <Stack sx={{ gap: "4px", py: "12px" }}>
                     <Titlebar
                         onClose={closeShareExpiryOptionsModalView}
+                        onRootClose={handleRootClose}
                         title={t("LINK_EXPIRY")}
-                        onRootClose={onRootClose}
                     />
                     <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                         <RowButtonGroup>
