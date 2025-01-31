@@ -70,9 +70,9 @@ class _PreviewStatusWidgetState extends State<PreviewStatusWidget> {
                 ?.containsKey(widget.file.uploadedFileID) ??
             false);
 
-    // if (widget.file.localID != null && preview == null) {
-    //   return const SizedBox();
-    // }
+    if (widget.file.localID != null && preview == null) {
+      return const SizedBox();
+    }
     final isInProgress = preview?.status == PreviewItemStatus.compressing ||
         preview?.status == PreviewItemStatus.uploading;
     final isInQueue = preview?.status == PreviewItemStatus.inQueue ||

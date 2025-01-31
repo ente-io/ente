@@ -48,6 +48,7 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
   }
 
   Future<List<Widget>> _subTitleSection() async {
+    final textStyle = getEnteTextTheme(context).miniMuted;
     final StringBuffer dimString = StringBuffer();
     if (widget.exifData["resolution"] != null &&
         widget.exifData["megaPixels"] != null) {
@@ -66,7 +67,7 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
       subSectionWidgets.add(
         Text(
           dimString.toString(),
-          style: getEnteTextTheme(context).miniMuted,
+          style: textStyle,
         ),
       );
     }
@@ -80,7 +81,7 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
     subSectionWidgets.add(
       Text(
         formatBytes(fileSize),
-        style: getEnteTextTheme(context).miniMuted,
+        style: textStyle,
       ),
     );
 
@@ -90,7 +91,7 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
         subSectionWidgets.add(
           Text(
             secondsToHHMMSS(widget.file.duration!),
-            style: getEnteTextTheme(context).miniMuted,
+            style: textStyle,
           ),
         );
       } else {
@@ -98,7 +99,7 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
         subSectionWidgets.add(
           Text(
             asset?.videoDuration.toString().split(".")[0] ?? "",
-            style: getEnteTextTheme(context).miniMuted,
+            style: textStyle,
           ),
         );
       }

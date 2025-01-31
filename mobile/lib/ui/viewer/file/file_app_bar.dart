@@ -300,7 +300,8 @@ class FileAppBarState extends State<FileAppBar> {
         );
       }
     }
-    if (flagService.internalUser) {
+    if (flagService.internalUser &&
+        PreviewVideoStore.instance.isVideoStreamingEnabled) {
       items.add(
         PopupMenuItem(
           value: 99,
