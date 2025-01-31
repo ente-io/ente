@@ -55,16 +55,24 @@ export const useIsRouteChangeInProgress = () => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        router.events.on("routeChangeStart", (url: string) => {
+        const handleRouteChangeStart = (url: string) => {
             const newPathname = url.split("?")[0];
             if (window.location.pathname !== newPathname) {
                 setLoading(true);
             }
-        });
+        };
 
-        router.events.on("routeChangeComplete", () => {
+        const handleRouteChangeComplete = () => {
             setLoading(false);
-        });
+        };
+
+        router.events.on("routeChangeStart", handleRouteChangeStart);
+        router.events.on("routeChangeComplete", handleRouteChangeComplete);
+
+        return () => {
+            router.events.off("routeChangeStart", handleRouteChangeStart);
+            router.events.off("routeChangeComplete", handleRouteChangeComplete);
+        };
     }, [router]);
 
     return loading;
