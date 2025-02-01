@@ -3,8 +3,8 @@ import type { TransitionProps } from "@mui/material/transitions";
 import React, { forwardRef } from "react";
 
 /**
- * A React component that can be passed as the {@link TransitionComponent} prop
- * to a MUI {@link Dialog} to get it to use a slide transition (by default, the
+ * A React component that can be passed as the {@link slots.transition} prop to
+ * a MUI {@link Dialog} to get it to use a slide transition (by default, the
  * dialog does a fade transition).
  */
 export const SlideUpTransition = forwardRef(function Transition(

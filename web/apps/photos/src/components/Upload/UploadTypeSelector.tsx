@@ -87,12 +87,14 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
         <Dialog
             open={open}
             fullWidth
-            PaperProps={{
-                sx: (theme) => ({
-                    maxWidth: "375px",
-                    p: 1,
-                    [theme.breakpoints.down(360)]: { p: 0 },
-                }),
+            slotProps={{
+                paper: {
+                    sx: (theme) => ({
+                        maxWidth: "375px",
+                        p: 1,
+                        [theme.breakpoints.down(360)]: { p: 0 },
+                    }),
+                },
             }}
             onClose={onClose}
         >
@@ -174,7 +176,7 @@ const DefaultOptions: React.FC<OptionsProps> = ({
                 <DialogCloseIconButton {...{ onClose }} />
             </SpaceBetweenFlex>
             <Box sx={{ p: "12px", pt: "16px" }}>
-                <Stack spacing={0.5}>
+                <Stack sx={{ gap: 0.5 }}>
                     {intent != "import" && (
                         <RowButton
                             startIcon={<ImageOutlinedIcon />}

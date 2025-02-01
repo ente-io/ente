@@ -198,13 +198,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
             <Titlebar onClose={handleCloseInfo} title={t("info")} backIsClose />
-            <Stack
-                spacing={"20px"}
-                sx={{
-                    pt: 1,
-                    pb: 3,
-                }}
-            >
+            <Stack sx={{ pt: 1, pb: 3, gap: "20px" }}>
                 <RenderCaption
                     {...{
                         file,
@@ -393,9 +387,11 @@ const parseExifInfo = (
     return info;
 };
 
-const FileInfoSidebar = styled((props: DialogProps) => (
-    <SidebarDrawer {...props} anchor="right" />
-))({
+const FileInfoSidebar = styled(
+    (props: Pick<DialogProps, "open" | "onClose" | "children">) => (
+        <SidebarDrawer {...props} anchor="right" />
+    ),
+)({
     zIndex: fileInfoDrawerZIndex,
     "& .MuiPaper-root": {
         padding: 8,
@@ -968,10 +964,7 @@ const RawExif: React.FC<RawExifProps> = ({
                 caption={fileName}
                 onRootClose={handleRootClose}
                 actionButton={
-                    <CopyButton
-                        code={JSON.stringify(tags)}
-                        color={"secondary"}
-                    />
+                    <CopyButton code={JSON.stringify(tags)} color="secondary" />
                 }
             />
             <Stack sx={{ gap: 2, py: 3, px: 1 }}>

@@ -84,7 +84,7 @@ const RemoteFaceCluster = z.object({
  */
 const RemoteCGroupData = z.object({
     name: z.string().nullish().transform(nullToUndefined),
-    assigned: z.array(RemoteFaceCluster),
+    assigned: z.array(RemoteFaceCluster).nullish().transform(nullishToEmpty),
     rejectedFaceIDs: z.array(z.string()).nullish().transform(nullishToEmpty),
     isHidden: z.boolean(),
     avatarFaceID: z.string().nullish().transform(nullToUndefined),

@@ -331,7 +331,7 @@ ClusteringResult runLinearClustering(Map args) {
         clusterId: face.clusterId,
         rejectedClusterIds: face.rejectedClusterIds,
         fileCreationTime:
-            fileIDToCreationTime?[getFileIdFromFaceId(face.faceID)],
+            fileIDToCreationTime?[getFileIdFromFaceId<int>(face.faceID)],
       ),
     );
   }
@@ -507,7 +507,7 @@ ClusteringResult _runCompleteClustering(Map args) {
           EVector.fromBuffer(entry.value).values,
           dtype: DType.float32,
         ),
-        fileCreationTime: fileIDToCreationTime?[getFileIdFromFaceId(entry.key)],
+        fileCreationTime: fileIDToCreationTime?[getFileIdFromFaceId<int>(entry.key)],
       ),
     );
   }

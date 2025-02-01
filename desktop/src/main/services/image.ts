@@ -14,7 +14,6 @@ export const convertToJPEG = async (imageData: Uint8Array) => {
     const inputFilePath = await makeTempFilePath();
     const outputFilePath = await makeTempFilePath("jpeg");
 
-    // Construct the command first, it may throw NotAvailable on win32.
     const command = convertToJPEGCommand(inputFilePath, outputFilePath);
 
     try {
@@ -45,14 +44,7 @@ const convertToJPEGCommand = (
 
         case "linux":
         case "win32":
-            return [
-                imageMagickPath(),
-                "convert",
-                inputFilePath,
-                "-quality",
-                "100%",
-                outputFilePath,
-            ];
+            return [vipsPath(), "copy", inputFilePath, outputFilePath];
 
         default:
             throw new Error("Not available on the current OS/arch");
@@ -60,12 +52,12 @@ const convertToJPEGCommand = (
 };
 
 /**
- * Path to the magick executable bundled with our app on Linux and Windows.
+ * Path to the vips executable bundled with our app on Linux and Windows.
  */
-const imageMagickPath = () =>
+const vipsPath = () =>
     path.join(
         isDev ? "build" : process.resourcesPath,
-        process.platform == "win32" ? "magick.exe" : "magick",
+        process.platform == "win32" ? "vips.exe" : "vips",
     );
 
 export const generateImageThumbnail = async (
@@ -139,19 +131,11 @@ const generateImageThumbnailCommand = (
         case "linux":
         case "win32":
             return [
-                imageMagickPath(),
-                "convert",
+                vipsPath(),
+                "thumbnail",
                 inputFilePath,
-                "-define",
-                `jpeg:size=${2 * maxDimension}x${2 * maxDimension}`,
-                "-auto-orient",
-                "-thumbnail",
-                `${maxDimension}x${maxDimension}`,
-                "-unsharp",
-                "0x.5",
-                "-quality",
-                `${quality}`,
-                outputFilePath,
+                `${outputFilePath}[Q=${quality}]`,
+                `${maxDimension}`,
             ];
 
         default:

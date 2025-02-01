@@ -1255,17 +1255,13 @@ const withThumbnail = async (
             // only that works with non-File uploadItems), and the thumbnail
             // generation failed.
             //
-            // The only know scenario is when we're trying to generate an image
-            // thumbnail on Windows or on ARM64 Linux, or are trying to
-            // generated the thumbnail for an HEIC file on Linux. This won't be
-            // possible since the bundled imagemagick doesn't yet support these
-            // OS/arch combinations.
+            // There are no expected scenarios when this should happen.
             //
             // The fallback in this case involves reading the entire stream into
             // memory, and passing that data across the IPC boundary in a single
             // go (i.e. not in a streaming manner). This is risky for videos of
             // unbounded sizes, and since anyways we are not expected to come
-            // here for videos, soo we only apply this fallback for images.
+            // here for videos, so we only apply this fallback for images.
 
             if (fileTypeInfo.fileType == FileType.image) {
                 const data = await readEntireStream(fileStream.stream);

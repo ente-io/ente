@@ -30,7 +30,7 @@ export const SecondFactorChoice: React.FC<SecondFactorChoiceProps> = ({
             if (reason != "backdropClick") onClose();
         }}
         fullWidth
-        PaperProps={{ sx: { maxWidth: "360px", padding: "12px" } }}
+        slotProps={{ paper: { sx: { maxWidth: "360px", padding: "12px" } } }}
     >
         <DialogTitle>{t("two_factor")}</DialogTitle>
         <DialogContent>

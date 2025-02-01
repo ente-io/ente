@@ -221,7 +221,7 @@ class PersonService {
       orElse: () => ClusterInfo(id: "noSuchClusterInRemotePerson", faces: {}),
     );
     if (clusterInfo.id == "noSuchClusterInRemotePerson") {
-      await MLDataDB.instance.removeClusterToPerson(
+      await faceMLDataDB.removeClusterToPerson(
         personID: personID,
         clusterID: clusterID,
       );
@@ -424,7 +424,7 @@ class PersonService {
   }
 
   Future<PersonEntity> updateAvatar(PersonEntity p, EnteFile file) async {
-    final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
+    final Face? face = await faceMLDataDB.getCoverFaceForPerson(
       recentFileID: file.uploadedFileID!,
       personID: p.remoteID,
     );

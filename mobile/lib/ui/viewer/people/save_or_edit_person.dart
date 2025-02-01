@@ -1,5 +1,4 @@
 import 'dart:async';
-import "dart:developer" as dev;
 import "dart:io";
 import "dart:math" show max;
 
@@ -448,7 +447,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
         stream: _getPersonsWithRecentFileStream(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            dev.log("Error: ${snapshot.error} ${snapshot.stackTrace}}");
+            _logger.severe("Error in _getPersonItems: ${snapshot.error} ${snapshot.stackTrace}}");
             if (kDebugMode) {
               return Column(
                 mainAxisSize: MainAxisSize.min,

@@ -137,9 +137,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Lahkuda jagatud albumist?"),
         "light": MessageLookupByLibrary.simpleMessage("Hele"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Hele"),
-        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "linkDeviceLimit": MessageLookupByLibrary.simpleMessage("Seadme limit"),
-        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Sees"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Aegunud"),
         "linkExpiry": MessageLookupByLibrary.simpleMessage("Lingi aegumine"),
@@ -167,8 +165,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "newest": MessageLookupByLibrary.simpleMessage("Uusimad"),
         "no": MessageLookupByLibrary.simpleMessage("Ei"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Puudub"),
-        "noEnteAccountExclamation":
-            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "oops": MessageLookupByLibrary.simpleMessage("Oih"),
         "oopsSomethingWentWrong":

@@ -23,10 +23,6 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
-            "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας"),
-        "link": MessageLookupByLibrary.simpleMessage("Link"),
-        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
-        "noEnteAccountExclamation":
-            MessageLookupByLibrary.simpleMessage("No Ente account!")
+            "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας")
       };
 }

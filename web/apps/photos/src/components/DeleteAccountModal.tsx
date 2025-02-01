@@ -186,7 +186,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                 checked={acceptDataDeletion}
                                 onChange={setAcceptDataDeletion}
                             />
-                            <Stack spacing={"8px"}>
+                            <Stack sx={{ gap: "8px" }}>
                                 <LoadingButton
                                     type="submit"
                                     fullWidth
@@ -244,7 +244,7 @@ const FeedbackInput: React.FC<FeedbackInputProps> = ({
     onChange,
     errorMessage,
 }) => (
-    <Stack spacing={"4px"}>
+    <Stack sx={{ gap: "4px" }}>
         <Typography>{t("delete_account_feedback_label")}</Typography>
         <TextField
             variant="standard"

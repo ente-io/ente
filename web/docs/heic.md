@@ -76,14 +76,13 @@ and also as a web WASM build.
 
 ## libheif + libde265
 
-Every other HEIC converter, binary or library, I've seen eventually seems to use
-the uses the combination of libheif (for the HEIF container) + libde265 (for the
-HEVC decoding), with an option to swap libde265 with libx265 or kvazaar.
+Every other HEIC converter, binary or library (e.g. ImageMagick, GraphicsMagick,
+libvips, sharp and wasm-vips), I've seen eventually the uses the combination of
+libheif (for the HEIF container) + libde265 (for the HEVC decoding), with an
+option to swap libde265 with libx265 or kvazaar.
 
-Examples are ImageMagick, GraphicsMagick, libvips, sharp and wasm-vips. Good
-luck trying to get static binaries or readily usable WASM builds for any of
-these with HEIC support.
-
-We currently use
+Currently our web app uses
 [heic-convert](https://github.com/catdad-experiments/heic-convert), which
-provides packaged WASM builds of libheif + libde265.
+provides packaged wasm builds of libheif + libde265, and the desktop app uses a
+[custom build](https://github.com/ente-io/libvips-packaging) of `vips` on Linux
+and Windows, and Apple's `sips` on macOS.

@@ -19,7 +19,7 @@
         "postinstall": "electron-builder install-app-deps",
         "lint": "yarn prettier --check --log-level warn . && yarn eslint && yarn tsc",
         "lint-fix": "yarn prettier --write --log-level warn . && yarn eslint && yarn tsc",
-        "prepare": "node scripts/magick.js"
+        "prepare": "node scripts/vips.js"
     },
     "resolutions": {
         "jackspeak": "2.1.1"
@@ -33,7 +33,7 @@
         "compare-versions": "^6.1.1",
         "electron-log": "^5.2.4",
         "electron-store": "^8.2.0",
-        "electron-updater": "^6.4.0-alpha.3",
+        "electron-updater": "^6.4.0",
         "ffmpeg-static": "^5.2.0",
         "lru-cache": "^11.0.2",
         "next-electron-server": "^1.0.0",
@@ -41,7 +41,7 @@
         "onnxruntime-node": "^1.20.1"
     },
     "devDependencies": {
-        "@eslint/js": "^9.18.0",
+        "@eslint/js": "^9.19.0",
         "@tsconfig/node20": "^20.1.4",
         "@types/auto-launch": "^5.0.5",
         "@types/eslint__js": "^8.42.3",
@@ -49,15 +49,15 @@
         "ajv": "^8.17.1",
         "concurrently": "^9.1.2",
         "cross-env": "^7.0.3",
-        "electron": "^34.0.0",
-        "electron-builder": "^26.0.0-alpha.10",
+        "electron": "^34.0.1",
+        "electron-builder": "^26.0.0",
         "eslint": "^9",
         "prettier": "3.4.2",
         "prettier-plugin-organize-imports": "^4.1.0",
         "prettier-plugin-packagejson": "^2.5.8",
         "shx": "^0.3.4",
         "typescript": "^5.7.2",
-        "typescript-eslint": "^8.21.0"
+        "typescript-eslint": "^8.22.0"
     },
     "packageManager": "yarn@1.22.22",
     "productName": "ente"

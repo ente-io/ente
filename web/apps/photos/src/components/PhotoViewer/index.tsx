@@ -1037,7 +1037,7 @@ const ConversionFailedNotification: React.FC<
         >
             <Paper sx={{ width: "320px" }}>
                 <Button
-                    color={"secondary"}
+                    color="secondary"
                     onClick={handleClick}
                     sx={{
                         borderRadius: "8px",
