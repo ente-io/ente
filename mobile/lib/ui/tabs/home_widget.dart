@@ -35,6 +35,7 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/local_sync_service.dart';
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/remote_sync_service.dart";
 import 'package:photos/services/user_service.dart';
@@ -635,7 +636,9 @@ class _HomeWidgetState extends State<HomeWidget> {
       return const LandingPageWidget();
     }
     if (!LocalSyncService.instance.hasGrantedPermissions()) {
-      entityService.syncEntities();
+      entityService.syncEntities().then((_) {
+        PersonService.instance.resetEmailToPartialPersonDataCache();
+      });
       return const GrantPermissionsWidget();
     }
     if (!LocalSyncService.instance.hasCompletedFirstImport()) {

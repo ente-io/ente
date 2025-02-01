@@ -43,7 +43,7 @@ class PersonService {
     SharedPreferences prefs,
   ) async {
     _instance = PersonService(entityService, faceMLDataDB, prefs);
-    await _instance!._resetEmailToNameCache();
+    await _instance!.resetEmailToPartialPersonDataCache();
   }
 
   Map<String, Map<String, String>> get emailToPartialPersonDataMapCache =>
@@ -53,7 +53,7 @@ class PersonService {
     _emailToPartialPersonDataMapCache.clear();
   }
 
-  Future<void> _resetEmailToNameCache() async {
+  Future<void> resetEmailToPartialPersonDataCache() async {
     _emailToPartialPersonDataMapCache.clear();
     await _instance!.getPersons().then((value) {
       for (var person in value) {
@@ -205,7 +205,7 @@ class PersonService {
       clusterID: clusterID,
     );
     if (data.email != null) {
-      await _resetEmailToNameCache();
+      await resetEmailToPartialPersonDataCache();
     }
     return PersonEntity(result.id, data);
   }
@@ -294,7 +294,7 @@ class PersonService {
       justName.data.logStats();
 
       if (entity.data.email != null) {
-        await _resetEmailToNameCache();
+        await resetEmailToPartialPersonDataCache();
       }
     } else {
       await entityService.deleteEntry(personID);
@@ -302,7 +302,7 @@ class PersonService {
 
       if (entity != null) {
         if (entity.data.email != null) {
-          await _resetEmailToNameCache();
+          await resetEmailToPartialPersonDataCache();
         }
       }
     }
@@ -463,7 +463,7 @@ class PersonService {
       ),
     );
     await updatePerson(updatedPerson);
-    await _resetEmailToNameCache();
+    await resetEmailToPartialPersonDataCache();
     return updatedPerson;
   }
 
