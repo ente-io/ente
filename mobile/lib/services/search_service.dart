@@ -42,6 +42,7 @@ import "package:photos/services/machine_learning/face_ml/face_filtering/face_fil
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/services/user_remote_flag_service.dart";
+import "package:photos/services/user_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";
@@ -1399,6 +1400,33 @@ class SearchService {
           if (limit != null && limit <= peopleCount) continue;
           peopleToSharedFiles[fileOwner] = [file];
           peopleCount++;
+        }
+      }
+
+      final userEmails = <String>{};
+      for (final user in peopleToSharedFiles.keys) {
+        userEmails.add(user.email);
+      }
+
+      final allRelevantEmails = UserService.instance
+          .getRelevantContacts()
+          .map((e) => e.email)
+          .toSet();
+
+      int? buffer = limit != null ? limit - peopleCount : null;
+      final emailsWithNoSharedFiles = allRelevantEmails.difference(userEmails);
+
+      if (buffer == null) {
+        for (final email in emailsWithNoSharedFiles) {
+          final user = User(email: email);
+          peopleToSharedFiles[user] = [];
+        }
+      } else {
+        for (final email in emailsWithNoSharedFiles) {
+          if (buffer == 0) break;
+          final user = User(email: email);
+          peopleToSharedFiles[user] = [];
+          buffer = buffer! - 1;
         }
       }
 

@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/search/generic_search_result.dart";
@@ -6,6 +6,7 @@ import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
@@ -114,13 +115,13 @@ class _ContactSearchThumbnailWidgetState
                         ? ThumbnailWidget(
                             _previewThumbnail!,
                           )
-                        : const NoThumbnailWidget();
+                        : const NoFaceOrFileContactWidget();
                   } else if (snapshot.hasError) {
                     _logger.severe(
                       "Error loading personID",
                       snapshot.error,
                     );
-                    return const NoThumbnailWidget();
+                    return const NoFaceOrFileContactWidget();
                   } else {
                     return const EnteLoadingWidget();
                   }
@@ -130,7 +131,36 @@ class _ContactSearchThumbnailWidgetState
                 ? ThumbnailWidget(
                     _previewThumbnail!,
                   )
-                : const NoThumbnailWidget(),
+                : const NoFaceOrFileContactWidget(),
+      ),
+    );
+  }
+}
+
+class NoFaceOrFileContactWidget extends StatelessWidget {
+  final bool addBorder;
+  const NoFaceOrFileContactWidget({this.addBorder = true, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final enteColorScheme = getEnteColorScheme(context);
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(1),
+        border: addBorder
+            ? Border.all(
+                color: enteColorScheme.strokeFaint,
+                width: 1,
+              )
+            : null,
+        color: enteColorScheme.fillFaint,
+      ),
+      child: Center(
+        child: Icon(
+          Icons.person_2_outlined,
+          color: enteColorScheme.strokeMuted,
+          size: 24,
+        ),
       ),
     );
   }
