@@ -289,6 +289,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
               ),
             ),
           ),
+          const SliverToBoxAdapter(child: SizedBox(height: 72)),
         ],
       ),
     );

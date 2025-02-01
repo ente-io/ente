@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/errors.dart";
 import 'package:photos/db/files_db.dart';
+import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/api/collection/create_request.dart';
 import "package:photos/models/api/collection/user.dart";
@@ -192,7 +193,7 @@ class CollectionActions {
         ),
       ],
       title: S.of(context).removeWithQuestionMark,
-      body: S.of(context).removeParticipantBody(user.email),
+      body: S.of(context).removeParticipantBody(user.displayName ?? user.email),
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {

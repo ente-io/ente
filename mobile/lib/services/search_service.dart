@@ -1370,6 +1370,9 @@ class SearchService {
             occurrence: kMostRelevantFilter,
             matchedUploadedIDs: filesToUploadedFileIDs(value),
           ),
+          params: {
+            kPersonParamID: key.linkedPersonID,
+          },
         ),
       );
     });
@@ -1413,6 +1416,9 @@ class SearchService {
               occurrence: kMostRelevantFilter,
               matchedUploadedIDs: filesToUploadedFileIDs(value),
             ),
+            params: {
+              kPersonParamID: key.linkedPersonID,
+            },
           ),
         );
       });

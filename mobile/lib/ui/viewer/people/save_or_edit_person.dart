@@ -15,18 +15,22 @@ import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/services/user_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/date_input.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/sharing/album_share_info_widget.dart";
+import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/hooks/pick_person_avatar.dart";
 import "package:photos/ui/viewer/people/link_email_screen.dart";
@@ -92,7 +96,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: changed && _inputName.isNotEmpty ? false : true,
+      canPop: !(changed && _inputName.isNotEmpty),
       onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) {
           return;
@@ -777,12 +781,14 @@ class _EmailSectionState extends State<_EmailSection> {
   String? _email;
   final _logger = Logger("_EmailSectionState");
   bool _initialEmailIsUserEmail = false;
+  late final List<User> _contacts;
 
   @override
   void initState() {
     super.initState();
     _email = widget.email;
     _initialEmailIsUserEmail = Configuration.instance.getEmail() == _email;
+    _contacts = _getContacts();
   }
 
   @override
@@ -797,6 +803,9 @@ class _EmailSectionState extends State<_EmailSection> {
 
   @override
   Widget build(BuildContext context) {
+    const limitCountTo = 5;
+    final avatarSize = getAvatarSize(AvatarType.small);
+    final overlapPadding = getOverlapPadding(AvatarType.small);
     if (_email == null || _email!.isEmpty) {
       return AnimatedSize(
         duration: const Duration(milliseconds: 200),
@@ -809,80 +818,108 @@ class _EmailSectionState extends State<_EmailSection> {
               color: getEnteColorScheme(context).fillFaint,
               borderRadius: BorderRadius.circular(12.0),
             ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: FutureBuilder<bool>(
-                future: _isMeAssigned(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    final isMeAssigned = snapshot.data!;
-                    if (!isMeAssigned || _initialEmailIsUserEmail) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: ButtonWidget(
-                              buttonType: ButtonType.secondary,
-                              labelText: "This is me!",
-                              onTap: () async {
-                                _updateEmailField(
-                                  Configuration.instance.getEmail(),
-                                );
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: ButtonWidget(
-                              buttonType: ButtonType.primary,
-                              labelText: "Link email",
-                              shouldSurfaceExecutionStates: false,
-                              onTap: () async {
-                                final newEmail = await routeToPage(
-                                  context,
-                                  LinkEmailScreen(
-                                    widget.personID,
-                                    isFromSaveOrEditPerson: true,
-                                  ),
-                                );
-                                if (newEmail != null) {
-                                  _updateEmailField(newEmail as String);
-                                }
-                              },
-                            ),
-                          ),
-                        ],
-                      );
-                    } else {
-                      return ButtonWidget(
-                        buttonType: ButtonType.primary,
-                        labelText: "Link email",
-                        shouldSurfaceExecutionStates: false,
-                        onTap: () async {
-                          final newEmail = await routeToPage(
-                            context,
-                            LinkEmailScreen(
-                              widget.personID,
-                              isFromSaveOrEditPerson: true,
-                            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (_contacts.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 1.0),
+                      height: 32 + 2 * UserAvatarWidget.strokeWidth,
+                      width: ((avatarSize) * (limitCountTo + 1)) -
+                          (((avatarSize) - overlapPadding) * limitCountTo) +
+                          (2 * UserAvatarWidget.strokeWidth),
+                      child: AlbumSharesIcons(
+                        sharees: _contacts,
+                        limitCountTo: limitCountTo,
+                        type: AvatarType.small,
+                        padding: EdgeInsets.zero,
+                        stackAlignment: Alignment.center,
+                      ),
+                    ),
+                  ),
+                if (_contacts.isNotEmpty) const SizedBox(height: 38),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: FutureBuilder<bool>(
+                    future: _isMeAssigned(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final isMeAssigned = snapshot.data!;
+                        if (!isMeAssigned || _initialEmailIsUserEmail) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: ButtonWidget(
+                                  buttonType: ButtonType.secondary,
+                                  labelText: "This is me!",
+                                  onTap: () async {
+                                    _updateEmailField(
+                                      Configuration.instance.getEmail(),
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: ButtonWidget(
+                                  buttonType: ButtonType.primary,
+                                  labelText: "Link email",
+                                  shouldSurfaceExecutionStates: false,
+                                  onTap: () async {
+                                    final newEmail = await routeToPage(
+                                      context,
+                                      LinkEmailScreen(
+                                        widget.personID,
+                                        isFromSaveOrEditPerson: true,
+                                      ),
+                                    );
+                                    if (newEmail != null) {
+                                      _updateEmailField(newEmail as String);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
                           );
-                          if (newEmail != null) {
-                            _updateEmailField(newEmail as String);
-                          }
-                        },
-                      );
-                    }
-                  } else if (snapshot.hasError) {
-                    _logger.severe(
-                      "Error getting isMeAssigned",
-                      snapshot.error,
-                    );
-                    return const RepaintBoundary(child: EnteLoadingWidget());
-                  } else {
-                    return const RepaintBoundary(child: EnteLoadingWidget());
-                  }
-                },
-              ),
+                        } else {
+                          return ButtonWidget(
+                            buttonType: ButtonType.primary,
+                            labelText: "Link email",
+                            shouldSurfaceExecutionStates: false,
+                            onTap: () async {
+                              final newEmail = await routeToPage(
+                                context,
+                                LinkEmailScreen(
+                                  widget.personID,
+                                  isFromSaveOrEditPerson: true,
+                                ),
+                              );
+                              if (newEmail != null) {
+                                _updateEmailField(newEmail as String);
+                              }
+                            },
+                          );
+                        }
+                      } else if (snapshot.hasError) {
+                        _logger.severe(
+                          "Error getting isMeAssigned",
+                          snapshot.error,
+                        );
+                        return const RepaintBoundary(
+                          child: EnteLoadingWidget(),
+                        );
+                      } else {
+                        return const RepaintBoundary(
+                          child: EnteLoadingWidget(),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ],
             ),
           ).animate().fadeIn(
                 duration: const Duration(milliseconds: 200),
@@ -944,5 +981,20 @@ class _EmailSectionState extends State<_EmailSection> {
     saveOrEditPersonState.setState(() {
       saveOrEditPersonState._email = newEmail;
     });
+  }
+
+  List<User> _getContacts() {
+    final usersEmailsToAviod =
+        PersonService.instance.emailToPartialPersonDataMapCache.keys;
+    final relevantUsers = UserService.instance.getRelevantContacts()
+      ..removeWhere(
+        (user) => usersEmailsToAviod.contains(user.email),
+      );
+
+    relevantUsers.sort(
+      (a, b) => (a.email).compareTo(b.email),
+    );
+
+    return relevantUsers;
   }
 }
