@@ -126,6 +126,8 @@ class PreviewVideoStore {
         final codec = videoData["codec_name"]?.toString().toLowerCase();
         final codecIsH264 = codec?.contains("h264") ?? false;
         if (codecIsH264) {
+          _items.removeWhere((key, value) => value.file == enteFile);
+          Bus.instance.fire(PreviewUpdatedEvent(_items));
           return;
         }
       }
