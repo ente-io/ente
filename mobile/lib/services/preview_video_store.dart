@@ -97,209 +97,211 @@ class PreviewVideoStore {
     if (file == null) return;
 
     try {
-      // check if playlist already exist
-      await getPlaylist(enteFile);
-      final resultUrl = await getPreviewUrl(enteFile);
-      if (ctx != null && ctx.mounted) {
-        showShortToast(ctx, 'Video preview already exists');
-      }
-      debugPrint("previewUrl $resultUrl");
-      return;
-    } catch (e, s) {
-      if (e is DioError && e.response?.statusCode == 404) {
-        _logger.info("No preview found for $enteFile");
-      } else {
-        _logger.warning("Failed to get playlist for $enteFile", e, s);
-        rethrow;
-      }
-    }
-
-    final fileSize = file.lengthSync();
-    FFProbeProps? props;
-
-    if (fileSize <= 10 * 1024 * 1024) {
-      props = await getVideoPropsAsync(file);
-      final videoData = List.from(props?.propData?["streams"] ?? [])
-          .firstWhereOrNull((e) => e["type"] == "video");
-
-      final codec = videoData["codec_name"]?.toString().toLowerCase();
-      final codecIsH264 = codec?.contains("h264") ?? false;
-      if (codecIsH264) {
-        return;
-      }
-    }
-    if (isUploading) {
-      _items[enteFile.uploadedFileID!] = PreviewItem(
-        status: PreviewItemStatus.inQueue,
-        file: enteFile,
-        collectionID: enteFile.collectionID ?? 0,
-      );
-      Bus.instance.fire(PreviewUpdatedEvent(_items));
-      files.add(enteFile);
-      return;
-    }
-    _items[enteFile.uploadedFileID!] = PreviewItem(
-      status: PreviewItemStatus.compressing,
-      file: enteFile,
-      collectionID: enteFile.collectionID ?? 0,
-    );
-    Bus.instance.fire(PreviewUpdatedEvent(_items));
-
-    props ??= await getVideoPropsAsync(file);
-
-    final videoData = List.from(props?.propData?["streams"] ?? [])
-        .firstWhereOrNull((e) => e["type"] == "video");
-
-    final codec = videoData["codec_name"]?.toString().toLowerCase();
-    final bitrate = props?.duration?.inSeconds != null
-        ? (fileSize * 8) / props!.duration!.inSeconds
-        : null;
-
-    final String tempDir = Configuration.instance.getTempDirectory();
-    final String prefix =
-        "${tempDir}_${enteFile.uploadedFileID}_${newID("pv")}";
-    Directory(prefix).createSync();
-    _logger.info('Compressing video ${enteFile.displayName}');
-    final key = enc.Key.fromLength(16);
-
-    final keyfile = File('$prefix/keyfile.key');
-    keyfile.writeAsBytesSync(key.bytes);
-
-    final keyinfo = File('$prefix/mykey.keyinfo');
-    keyinfo.writeAsStringSync("data:text/plain;base64,${key.base64}\n"
-        "${keyfile.path}\n");
-    _logger.info(
-      'Generating HLS Playlist ${enteFile.displayName} at $prefix/output.m3u8}',
-    );
-
-    FFmpegSession? session;
-    final codecIsH264 = codec?.contains("h264") ?? false;
-    if (bitrate != null && bitrate <= 4000 * 1000 && codecIsH264) {
-      // create playlist without compression, as is
-      session = await FFmpegKit.execute(
-        '-i "${file.path}" '
-        '-metadata:s:v:0 rotate=0 ' // Adjust metadata if needed
-        '-c:v copy ' // Copy the original video codec
-        '-c:a copy ' // Copy the original audio codec
-        '-f hls -hls_time 10 -hls_flags single_file '
-        '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
-        '$prefix/output.m3u8',
-      );
-    } else if (bitrate != null &&
-        codec != null &&
-        bitrate <= 2000 * 1000 &&
-        !codecIsH264) {
-      // compress video with crf=21, h264 no change in resolution or frame rate,
-      // just change color scheme
-      session = await FFmpegKit.execute(
-        '-i "${file.path}" '
-        '-metadata:s:v:0 rotate=0 ' // Keep rotation metadata
-        '-vf "format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" ' // Adjust color scheme
-        '-color_primaries bt709 -color_trc bt709 -colorspace bt709 ' // Set color profile to BT.709
-        '-c:v libx264 -crf 21 -preset medium ' // Compress with CRF=21 using H.264
-        '-c:a copy ' // Keep original audio
-        '-f hls -hls_time 10 -hls_flags single_file '
-        '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
-        '$prefix/output.m3u8',
-      );
-    }
-
-    session ??= await FFmpegKit.execute(
-      '-i "${file.path}" '
-      '-metadata:s:v:0 rotate=0 '
-      '-vf "scale=-2:720,fps=30,format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" '
-      '-color_primaries bt709 -color_trc bt709 -colorspace bt709 '
-      '-x264-params "colorprim=bt709:transfer=bt709:colormatrix=bt709" '
-      '-c:v libx264 -b:v 2000k -preset medium '
-      '-c:a aac -b:a 128k -f hls -hls_time 10 -hls_flags single_file '
-      '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
-      '$prefix/output.m3u8',
-    );
-
-    final returnCode = await session.getReturnCode();
-
-    String? error;
-
-    if (ReturnCode.isSuccess(returnCode)) {
       try {
+        // check if playlist already exist
+        await getPlaylist(enteFile);
+        final resultUrl = await getPreviewUrl(enteFile);
+        if (ctx != null && ctx.mounted) {
+          showShortToast(ctx, 'Video preview already exists');
+        }
+        debugPrint("previewUrl $resultUrl");
+        return;
+      } catch (e, s) {
+        if (e is DioError && e.response?.statusCode == 404) {
+          _logger.info("No preview found for $enteFile");
+        } else {
+          _logger.warning("Failed to get playlist for $enteFile", e, s);
+          rethrow;
+        }
+      }
+
+      final fileSize = file.lengthSync();
+      FFProbeProps? props;
+
+      if (fileSize <= 10 * 1024 * 1024) {
+        props = await getVideoPropsAsync(file);
+        final videoData = List.from(props?.propData?["streams"] ?? [])
+            .firstWhereOrNull((e) => e["type"] == "video");
+
+        final codec = videoData["codec_name"]?.toString().toLowerCase();
+        final codecIsH264 = codec?.contains("h264") ?? false;
+        if (codecIsH264) {
+          return;
+        }
+      }
+      if (isUploading) {
         _items[enteFile.uploadedFileID!] = PreviewItem(
-          status: PreviewItemStatus.uploading,
+          status: PreviewItemStatus.inQueue,
           file: enteFile,
           collectionID: enteFile.collectionID ?? 0,
         );
         Bus.instance.fire(PreviewUpdatedEvent(_items));
-
-        _logger.info('Playlist Generated ${enteFile.displayName}');
-        final playlistFile = File("$prefix/output.m3u8");
-        final previewFile = File("$prefix/output.ts");
-        final result = await _uploadPreviewVideo(enteFile, previewFile);
-        final String objectID = result.$1;
-        final objectSize = result.$2;
-        await _reportVideoPreview(
-          enteFile,
-          playlistFile,
-          objectID: objectID,
-          objectSize: objectSize,
-        );
-
-        FFProbeProps? props2;
-        props2 = await getVideoPropsAsync(playlistFile);
-        FileMagicService.instance.updatePublicMagicMetadata(
-          [enteFile],
-          {
-            previewHeightKey: props2?.height,
-            previewWidthKey: props2?.width,
-            previewSizeKey: objectSize,
-          },
-        ).ignore();
-        _logger.info("Video preview uploaded for $enteFile");
-      } catch (_) {
-        error = "Failed to upload video preview";
+        files.add(enteFile);
+        return;
       }
-    } else if (ReturnCode.isCancel(returnCode)) {
-      _logger.warning("FFmpeg command cancelled");
-      error = "FFmpeg command cancelled";
-    } else {
-      _logger.severe("FFmpeg command failed with return code $returnCode");
-      if (kDebugMode) {
-        final output = await session.getOutput();
-        _logger.severe(output);
-      }
-      error = "Failed to generate video preview";
-    }
-
-    if (error == null) {
       _items[enteFile.uploadedFileID!] = PreviewItem(
-        status: PreviewItemStatus.uploaded,
+        status: PreviewItemStatus.compressing,
         file: enteFile,
-        retryCount: _items[enteFile.uploadedFileID!]!.retryCount,
         collectionID: enteFile.collectionID ?? 0,
       );
-    } else {
-      if (_items[enteFile.uploadedFileID!]!.retryCount < 3) {
-        _items[enteFile.uploadedFileID!] = PreviewItem(
-          status: PreviewItemStatus.retry,
-          file: enteFile,
-          retryCount: _items[enteFile.uploadedFileID!]!.retryCount + 1,
-          collectionID: enteFile.collectionID ?? 0,
+      Bus.instance.fire(PreviewUpdatedEvent(_items));
+
+      props ??= await getVideoPropsAsync(file);
+
+      final videoData = List.from(props?.propData?["streams"] ?? [])
+          .firstWhereOrNull((e) => e["type"] == "video");
+
+      final codec = videoData["codec_name"]?.toString().toLowerCase();
+      final bitrate = props?.duration?.inSeconds != null
+          ? (fileSize * 8) / props!.duration!.inSeconds
+          : null;
+
+      final String tempDir = Configuration.instance.getTempDirectory();
+      final String prefix =
+          "${tempDir}_${enteFile.uploadedFileID}_${newID("pv")}";
+      Directory(prefix).createSync();
+      _logger.info('Compressing video ${enteFile.displayName}');
+      final key = enc.Key.fromLength(16);
+
+      final keyfile = File('$prefix/keyfile.key');
+      keyfile.writeAsBytesSync(key.bytes);
+
+      final keyinfo = File('$prefix/mykey.keyinfo');
+      keyinfo.writeAsStringSync("data:text/plain;base64,${key.base64}\n"
+          "${keyfile.path}\n");
+      _logger.info(
+        'Generating HLS Playlist ${enteFile.displayName} at $prefix/output.m3u8}',
+      );
+
+      FFmpegSession? session;
+      final codecIsH264 = codec?.contains("h264") ?? false;
+      if (bitrate != null && bitrate <= 4000 * 1000 && codecIsH264) {
+        // create playlist without compression, as is
+        session = await FFmpegKit.execute(
+          '-i "${file.path}" '
+          '-metadata:s:v:0 rotate=0 ' // Adjust metadata if needed
+          '-c:v copy ' // Copy the original video codec
+          '-c:a copy ' // Copy the original audio codec
+          '-f hls -hls_time 10 -hls_flags single_file '
+          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
+          '$prefix/output.m3u8',
         );
-        files.add(enteFile);
+      } else if (bitrate != null &&
+          codec != null &&
+          bitrate <= 2000 * 1000 &&
+          !codecIsH264) {
+        // compress video with crf=21, h264 no change in resolution or frame rate,
+        // just change color scheme
+        session = await FFmpegKit.execute(
+          '-i "${file.path}" '
+          '-metadata:s:v:0 rotate=0 ' // Keep rotation metadata
+          '-vf "format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" ' // Adjust color scheme
+          '-color_primaries bt709 -color_trc bt709 -colorspace bt709 ' // Set color profile to BT.709
+          '-c:v libx264 -crf 21 -preset medium ' // Compress with CRF=21 using H.264
+          '-c:a copy ' // Keep original audio
+          '-f hls -hls_time 10 -hls_flags single_file '
+          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
+          '$prefix/output.m3u8',
+        );
+      }
+
+      session ??= await FFmpegKit.execute(
+        '-i "${file.path}" '
+        '-metadata:s:v:0 rotate=0 '
+        '-vf "scale=-2:720,fps=30,format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" '
+        '-color_primaries bt709 -color_trc bt709 -colorspace bt709 '
+        '-x264-params "colorprim=bt709:transfer=bt709:colormatrix=bt709" '
+        '-c:v libx264 -b:v 2000k -preset medium '
+        '-c:a aac -b:a 128k -f hls -hls_time 10 -hls_flags single_file '
+        '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
+        '$prefix/output.m3u8',
+      );
+
+      final returnCode = await session.getReturnCode();
+
+      String? error;
+
+      if (ReturnCode.isSuccess(returnCode)) {
+        try {
+          _items[enteFile.uploadedFileID!] = PreviewItem(
+            status: PreviewItemStatus.uploading,
+            file: enteFile,
+            collectionID: enteFile.collectionID ?? 0,
+          );
+          Bus.instance.fire(PreviewUpdatedEvent(_items));
+
+          _logger.info('Playlist Generated ${enteFile.displayName}');
+          final playlistFile = File("$prefix/output.m3u8");
+          final previewFile = File("$prefix/output.ts");
+          final result = await _uploadPreviewVideo(enteFile, previewFile);
+          final String objectID = result.$1;
+          final objectSize = result.$2;
+          await _reportVideoPreview(
+            enteFile,
+            playlistFile,
+            objectID: objectID,
+            objectSize: objectSize,
+          );
+
+          FFProbeProps? props2;
+          props2 = await getVideoPropsAsync(playlistFile);
+          FileMagicService.instance.updatePublicMagicMetadata(
+            [enteFile],
+            {
+              previewHeightKey: props2?.height,
+              previewWidthKey: props2?.width,
+              previewSizeKey: objectSize,
+            },
+          ).ignore();
+          _logger.info("Video preview uploaded for $enteFile");
+        } catch (_) {
+          error = "Failed to upload video preview";
+        }
+      } else if (ReturnCode.isCancel(returnCode)) {
+        _logger.warning("FFmpeg command cancelled");
+        error = "FFmpeg command cancelled";
       } else {
+        _logger.severe("FFmpeg command failed with return code $returnCode");
+        if (kDebugMode) {
+          final output = await session.getOutput();
+          _logger.severe(output);
+        }
+        error = "Failed to generate video preview";
+      }
+
+      if (error == null) {
         _items[enteFile.uploadedFileID!] = PreviewItem(
-          status: PreviewItemStatus.failed,
+          status: PreviewItemStatus.uploaded,
           file: enteFile,
           retryCount: _items[enteFile.uploadedFileID!]!.retryCount,
           collectionID: enteFile.collectionID ?? 0,
         );
+      } else {
+        if (_items[enteFile.uploadedFileID!]!.retryCount < 3) {
+          _items[enteFile.uploadedFileID!] = PreviewItem(
+            status: PreviewItemStatus.retry,
+            file: enteFile,
+            retryCount: _items[enteFile.uploadedFileID!]!.retryCount + 1,
+            collectionID: enteFile.collectionID ?? 0,
+          );
+          files.add(enteFile);
+        } else {
+          _items[enteFile.uploadedFileID!] = PreviewItem(
+            status: PreviewItemStatus.failed,
+            file: enteFile,
+            retryCount: _items[enteFile.uploadedFileID!]!.retryCount,
+            collectionID: enteFile.collectionID ?? 0,
+          );
+        }
       }
-    }
-    Bus.instance.fire(PreviewUpdatedEvent(_items));
-
-    isUploading = false;
-    if (files.isNotEmpty) {
-      final file = files.first;
-      files.remove(file);
-      await chunkAndUploadVideo(ctx, file);
+      Bus.instance.fire(PreviewUpdatedEvent(_items));
+    } finally {
+      isUploading = false;
+      if (files.isNotEmpty) {
+        final file = files.first;
+        files.remove(file);
+        await chunkAndUploadVideo(ctx, file);
+      }
     }
   }
 
@@ -498,18 +500,8 @@ class PreviewVideoStore {
     }
 
     final allFiles = files
-        .where(
-          (file) =>
-              file.uploadedFileID != null &&
-              previewIds?[file.uploadedFileID] == null &&
-              file.fileType == FileType.video,
-        )
+        .where((file) => previewIds?[file.uploadedFileID] == null)
         .toList();
-    final file = allFiles.first;
-    allFiles.remove(file);
-
-    this.files.addAll(allFiles);
-    await chunkAndUploadVideo(null, file);
 
     // set all video status to be in queue
     for (final file in allFiles) {
@@ -519,5 +511,13 @@ class PreviewVideoStore {
         collectionID: file.collectionID ?? 0,
       );
     }
+    Bus.instance.fire(PreviewUpdatedEvent(_items));
+
+    final file = allFiles.first;
+    allFiles.remove(file);
+
+    this.files.addAll(allFiles);
+
+    await chunkAndUploadVideo(null, file);
   }
 }

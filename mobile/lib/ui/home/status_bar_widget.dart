@@ -35,7 +35,7 @@ class StatusBarWidget extends StatefulWidget {
 
 class _StatusBarWidgetState extends State<StatusBarWidget> {
   static final _logger = Logger("StatusBarWidget");
-  int previewCount = 0;
+  late int previewCount = 0;
 
   late StreamSubscription<SyncStatusUpdate> _subscription;
   late StreamSubscription<NotificationEvent> _notificationSubscription;
@@ -88,12 +88,11 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
       }
     });
 
-    // visit LinkedHashMap and calculat previewCount
     previewCount = PreviewVideoStore.instance.previews.values
         .where(
           (element) =>
-              element.status == PreviewItemStatus.compressing ||
-              element.status == PreviewItemStatus.uploading,
+              element.status != PreviewItemStatus.uploaded &&
+              element.status != PreviewItemStatus.failed,
         )
         .length;
 
@@ -102,10 +101,11 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
       previewCount = event.items.values
           .where(
             (element) =>
-                element.status == PreviewItemStatus.compressing ||
-                element.status == PreviewItemStatus.uploading,
+                element.status != PreviewItemStatus.uploaded &&
+                element.status != PreviewItemStatus.failed,
           )
           .length;
+      setState(() {});
     });
     super.initState();
   }

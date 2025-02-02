@@ -79,9 +79,9 @@ class _PreviewStatusWidgetState extends State<PreviewStatusWidget> {
         preview?.status == PreviewItemStatus.retry;
     final isFailed = preview?.status == PreviewItemStatus.failed;
 
-    final isBeforeCutoffDate = widget.file.updationTime != null &&
+    final isBeforeCutoffDate = widget.file.creationTime != null &&
             PreviewVideoStore.instance.videoStreamingCutoff != null
-        ? DateTime.fromMillisecondsSinceEpoch(widget.file.updationTime!)
+        ? DateTime.fromMillisecondsSinceEpoch(widget.file.creationTime!)
             .isBefore(
             PreviewVideoStore.instance.videoStreamingCutoff!,
           )
