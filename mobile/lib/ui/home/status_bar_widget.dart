@@ -144,7 +144,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                           forceCustomPageRoute: true,
                         ).ignore();
                       },
-                      child: const Text("Processing Videos"), // TODO: i18n
+                      child: Text(S.of(context).processingVideos),
                     )
                   : const Text("ente", style: brandStyleMedium),
         ),

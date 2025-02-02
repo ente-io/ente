@@ -34,7 +34,7 @@ class PreviewVideoWidget extends StatefulWidget {
 
   const PreviewVideoWidget(
     this.file, {
-    this.autoPlay = false,
+    this.autoPlay = true,
     this.tagPrefix,
     this.playbackCallback,
     this.onStreamChange,

@@ -1387,6 +1387,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "proceed": MessageLookupByLibrary.simpleMessage("Proceed"),
         "processed": MessageLookupByLibrary.simpleMessage("Processed"),
         "processingImport": m55,
+        "processingVideos":
+            MessageLookupByLibrary.simpleMessage("Processing Videos"),
         "publicLinkCreated":
             MessageLookupByLibrary.simpleMessage("Public link created"),
         "publicLinkEnabled":
@@ -1716,6 +1718,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "storageLimitExceeded":
             MessageLookupByLibrary.simpleMessage("Storage limit exceeded"),
         "storageUsageInfo": m73,
+        "streamDetails": MessageLookupByLibrary.simpleMessage("Stream details"),
         "strongStrength": MessageLookupByLibrary.simpleMessage("Strong"),
         "subAlreadyLinkedErrMessage": m74,
         "subWillBeCancelledOn": m75,

@@ -1601,5 +1601,7 @@
   "linkEmail": "Link email",
   "link": "Link",
   "noEnteAccountExclamation": "No Ente account!",
-  "videoStreaming": "Video Streaming"
+  "videoStreaming": "Video Streaming",
+  "processingVideos": "Processing Videos",
+  "streamDetails": "Stream details"
 }
