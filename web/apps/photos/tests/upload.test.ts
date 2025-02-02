@@ -7,10 +7,11 @@ import {
 } from "@/new/photos/services/files";
 import { parseDateFromDigitGroups } from "services/upload/date";
 import {
-    MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
     getClippedMetadataJSONMapKeyForFile,
     getMetadataJSONMapKeyForFile,
     getMetadataJSONMapKeyForJSON,
+    getSupplementaryMetadataJSONMapKeyForFile,
+    getFileNameComponents,
 } from "services/upload/takeout";
 import { getUserDetailsV2 } from "services/userService";
 
@@ -99,6 +100,30 @@ const FILE_NAME_TO_JSON_NAME = [
     {
         filename: "IMG2021021(1)74722(1).jpg",
         jsonFilename: "IMG2021021(1)74722.jpg(1).json",
+    },
+    {
+        filename: "IMG_1159.HEIC",
+        jsonFilename: "IMG_1159.HEIC.supplemental-metadata.json",
+    },
+    {
+        filename: "PXL_20241231_151646544.MP.jpg",
+        jsonFilename: "PXL_20241231_151646544.MP.jpg.supplemental-met.json",
+    },
+    {
+        filename: "PXL_20240827_094331806.PORTRAIT(1).jpg",
+        jsonFilename: "PXL_20240827_094331806.PORTRAIT.jpg.supplement(1).json",
+    },
+    {
+        filename: "PXL_20240506_142610305.LONG_EXPOSURE-01.COVER.jpg",
+        jsonFilename: "PXL_20240506_142610305.LONG_EXPOSURE-01.COVER..json",
+    },
+    {
+        filename: "PXL_20211120_223243932.MOTION-02.ORIGINAL.jpg",
+        jsonFilename: "PXL_20211120_223243932.MOTION-02.ORIGINAL.jpg..json",
+    },
+    {
+        filename: "20220322_205147-edited(1).jpg",
+        jsonFilename: "20220322_205147.jpg.supplemental-metadata(1).json",
     },
 ];
 
@@ -401,14 +426,20 @@ function mappingFileAndJSONFileCheck() {
             0,
             jsonFilename,
         );
-        let fileNameGeneratedKey = getMetadataJSONMapKeyForFile(0, filename);
-        if (
-            fileNameGeneratedKey !== jsonFileNameGeneratedKey &&
-            filename.length > MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT
-        ) {
+
+        // this duplicates somewhat the logic in takeout.ts:matchTakeoutMetadata()
+        const components = getFileNameComponents(filename);
+        let fileNameGeneratedKey = getMetadataJSONMapKeyForFile(0, components);
+        if (fileNameGeneratedKey !== jsonFileNameGeneratedKey) {
             fileNameGeneratedKey = getClippedMetadataJSONMapKeyForFile(
                 0,
-                filename,
+                components,
+            );
+        }
+        if (fileNameGeneratedKey !== jsonFileNameGeneratedKey) {
+            fileNameGeneratedKey = getSupplementaryMetadataJSONMapKeyForFile(
+                0,
+                components,
             );
         }
 
