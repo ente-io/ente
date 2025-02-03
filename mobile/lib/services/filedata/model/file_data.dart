@@ -80,12 +80,6 @@ class FileDataEntity {
         )
       : null;
 
-  RemoteClipEmbedding? get clipEmbedding => remoteRawData[_clipKey] != null
-      ? RemoteClipEmbedding.fromJson(
-          remoteRawData[_clipKey] as Map<String, dynamic>,
-        )
-      : null;
-
   RemoteClipEmbedding? getClipEmbeddingIfCompatible(
     int minClipMlVersion,
   ) {
