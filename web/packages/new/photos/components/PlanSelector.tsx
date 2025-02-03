@@ -1,3 +1,4 @@
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import type { ButtonishProps } from "@/base/components/mui";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
@@ -34,10 +35,7 @@ import {
 import { useAppContext } from "@/new/photos/types/context";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { openURL } from "@/new/photos/utils/web";
-import {
-    FlexWrapper,
-    SpaceBetweenFlex,
-} from "@ente/shared/components/Container";
+import { FlexWrapper } from "@ente/shared/components/Container";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
