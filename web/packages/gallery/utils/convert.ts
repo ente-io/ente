@@ -29,7 +29,7 @@ import { detectFileTypeInfo } from "./detect-type";
  *    desktop app can natively convert to a JPEG (using ffmpeg), do that and
  *    return the resultant JPEG blob.
  *
- * 4. If this is an HEIC file, use our (WASM) HEIC converter and return the
+ * 4. If this is an HEIC file, use our (Wasm) HEIC converter and return the
  *    resultant JPEG blob.
  *
  * 5. Otherwise return the original (with the MIME type if we were able to
@@ -124,7 +124,7 @@ const nativeConvertToJPEG = async (imageBlob: Blob) => {
  *
  * - Otherwise try to convert using FFmpeg. This conversion always happens on
  *   the desktop app, but in the browser the conversion only happens for short
- *   videos since the WASM FFmpeg implementation is much slower. There is also a
+ *   videos since the Wasm FFmpeg implementation is much slower. There is also a
  *   flag to force this conversion regardless.
  */
 export const playableVideoBlob = async (

@@ -198,9 +198,9 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 ## Media
 
 - [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm) is used to run FFmpeg
-  in the browser using WASM. Note that this is substantially slower than native
-  ffmpeg (the desktop app can, and does, bundle the faster native ffmpeg
-  implementation too).
+  in the browser using WebAssembly (Wasm). Note that this is substantially
+  slower than native ffmpeg (the desktop app can, and does, bundle the faster
+  native ffmpeg implementation too).
 
 - [ExifReader](https://github.com/mattiasw/ExifReader) is used for Exif parsing.
 
