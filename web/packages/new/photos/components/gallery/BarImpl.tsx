@@ -254,11 +254,15 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
 
     return (
         <BarWrapper
-            sx={[
-                // Hide the bottom border if we're showing the empty state for people.
-                mode == "people" &&
-                    people.length == 0 && { borderColor: "transparent" },
-            ]}
+            // Hide the bottom border when showing the empty state for people.
+            style={
+                {
+                    "--et-bar-bottom-border-color":
+                        mode == "people" && people.length == 0
+                            ? "transparent"
+                            : "var(--mui-palette-divider)",
+                } as React.CSSProperties
+            }
         >
             <Row1>
                 <ModeIndicator {...{ mode, onChangeMode }} />
@@ -294,16 +298,13 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 };
 
-const BarWrapper = styled("div")(
-    ({ theme }) => `
+const BarWrapper = styled("div")`
     padding-inline: 24px;
     @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
         padding-inline: 4px;
     }
     margin-block-end: 16px;
-    border-block-end: 1px solid ${theme.vars.palette.divider};
-`,
-);
+`;
 
 export const Row1 = styled("div")`
     display: flex;
@@ -317,6 +318,7 @@ export const Row2 = styled("div")`
     display: flex;
     align-items: flex-start;
     gap: 16px;
+    border-block-end: 1px solid var(--et-bar-bottom-border-color);
 `;
 
 const ModeIndicator: React.FC<
@@ -563,7 +565,7 @@ const ActiveIndicator = styled("div")(
     ({ theme }) => `
     height: 3px;
     background-color: ${theme.vars.palette.stroke.base};
-    margin-top: 18px;
+    margin-top: 19px;
     border-radius: 2px;
 `,
 );

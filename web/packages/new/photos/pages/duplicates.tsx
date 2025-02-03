@@ -536,7 +536,7 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
             key={key}
             style={
                 {
-                    "--paddingInline": `${layoutParams.paddingInline}px`,
+                    "--et-padding-inline": `${layoutParams.paddingInline}px`,
                 } as React.CSSProperties
             }
             {...{ height, width, itemData, itemCount, itemSize, itemKey }}
@@ -576,7 +576,7 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                         justifyContent: "space-between",
                         alignItems: "center",
                         marginInline: 1,
-                        paddingInline: "var(--paddingInline)",
+                        paddingInline: "var(--et-padding-inline)",
                         paddingBlock: "24px 0px",
                     }}
                 >

@@ -130,10 +130,13 @@ export const PreviewItemTile = styled(BaseTile)`
 /**
  * A rectangular, TV-ish tile used in the gallery bar.
  */
-export const BarItemTile = styled(BaseTile)`
+export const BarItemTile = styled(BaseTile)(
+    ({ theme }) => `
     width: 90px;
     height: 64px;
-`;
+    color: ${theme.vars.palette.fixed.white};
+`,
+);
 
 /**
  * A square tile used on the duplicates listing.

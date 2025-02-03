@@ -244,15 +244,15 @@ const UsageBarSegment: React.FC<UsageBarSegmentProps> = ({
             position: "absolute",
             left: 0,
             top: 0,
-            width: "max(var(--width), 2px)",
+            width: "max(var(--et-width), 2px)",
             height: "4px",
             borderRadius: "4px",
-            backgroundColor: "var(--background-color)",
+            backgroundColor: "var(--et-background-color)",
         }}
         style={
             {
-                "--width": `${Math.min(usage / storage, 1) * 100}%`,
-                "--background-color": fillColor,
+                "--et-width": `${Math.min(usage / storage, 1) * 100}%`,
+                "--et-background-color": fillColor,
             } as React.CSSProperties
         }
     />
