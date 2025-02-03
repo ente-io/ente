@@ -125,7 +125,7 @@ func (repo *FamilyRepository) GetMemberById(ctx context.Context, id uuid.UUID) (
 
 func (repo *FamilyRepository) convertRowToFamilyMember(row *sql.Row) (ente.FamilyMember, error) {
 	var member ente.FamilyMember
-	err := row.Scan(&member.ID, &member.AdminUserID, &member.MemberUserID, &member.Status)
+	err := row.Scan(&member.ID, &member.AdminUserID, &member.MemberUserID, &member.Status, &member.StorageLimit)
 	if err != nil {
 		return ente.FamilyMember{}, stacktrace.Propagate(err, "")
 	}
@@ -234,7 +234,7 @@ func convertRowsToFamilyMember(rows *sql.Rows) ([]ente.FamilyMember, error) {
 	familyMembers := make([]ente.FamilyMember, 0)
 	for rows.Next() {
 		var member ente.FamilyMember
-		err := rows.Scan(&member.ID, &member.AdminUserID, &member.MemberUserID, &member.Status)
+		err := rows.Scan(&member.ID, &member.AdminUserID, &member.MemberUserID, &member.Status, &member.StorageLimit)
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
