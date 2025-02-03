@@ -380,7 +380,7 @@
     "CONFIRM_REMOVE": "Yes, remove",
     "MANAGE": "Manage",
     "ADDED_AS": "Added as",
-    "COLLABORATOR_RIGHTS": "Collaborators can add photos and videos to the shared album",
+    "collaborator_hint": "Collaborators can add photos and videos to the shared album",
     "remove_participant": "Remove participant",
     "owner": "owner",
     "collaborators": "Collaborators",

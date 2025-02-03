@@ -380,7 +380,7 @@
     "CONFIRM_REMOVE": "是，移除",
     "MANAGE": "管理",
     "ADDED_AS": "已添加为",
-    "COLLABORATOR_RIGHTS": "协作者可以将照片和视频添加到共享相册中",
+    "collaborator_hint": "协作者可以将照片和视频添加到共享相册中",
     "remove_participant": "移除参与者",
     "owner": "所有者",
     "collaborators": "协作者",

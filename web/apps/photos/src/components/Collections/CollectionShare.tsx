@@ -1145,7 +1145,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                             variant="small"
                             sx={{ color: "text.muted", padding: 1 }}
                         >
-                            {t("COLLABORATOR_RIGHTS")}
+                            {t("collaborator_hint")}
                         </Typography>
 
                         <Stack sx={{ py: "30px" }}>

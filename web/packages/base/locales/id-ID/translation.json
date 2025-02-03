@@ -380,7 +380,7 @@
     "CONFIRM_REMOVE": "Ya, hapus",
     "MANAGE": "Atur",
     "ADDED_AS": "",
-    "COLLABORATOR_RIGHTS": "Kolaborator bisa menambahkan foto dan video ke album bersama ini",
+    "collaborator_hint": "Kolaborator bisa menambahkan foto dan video ke album bersama ini",
     "remove_participant": "",
     "owner": "Pemilik",
     "collaborators": "",

@@ -380,7 +380,7 @@
     "CONFIRM_REMOVE": "Có, xóa",
     "MANAGE": "Quản lý",
     "ADDED_AS": "Đã thêm như",
-    "COLLABORATOR_RIGHTS": "Cộng tác viên có thể thêm ảnh và video vào album chia sẻ",
+    "collaborator_hint": "Cộng tác viên có thể thêm ảnh và video vào album chia sẻ",
     "remove_participant": "Xóa người tham gia",
     "owner": "Chủ sở hữu",
     "collaborators": "Cộng tác viên",

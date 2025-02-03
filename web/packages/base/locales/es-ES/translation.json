@@ -380,7 +380,7 @@
     "CONFIRM_REMOVE": "Sí, eliminar",
     "MANAGE": "Administrar",
     "ADDED_AS": "Añadido como",
-    "COLLABORATOR_RIGHTS": "Los colaboradores pueden añadir fotos y videos al álbum compartido",
+    "collaborator_hint": "Los colaboradores pueden añadir fotos y videos al álbum compartido",
     "remove_participant": "Quitar participante",
     "owner": "Propietario",
     "collaborators": "Colaboradores",

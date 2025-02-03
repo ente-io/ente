@@ -380,7 +380,7 @@
     "CONFIRM_REMOVE": "Taip, pašalinti",
     "MANAGE": "Tvarkyti",
     "ADDED_AS": "Pridėta kaip",
-    "COLLABORATOR_RIGHTS": "Bendradarbiai gali pridėti nuotraukų ir vaizdo įrašų į bendrintą albumą",
+    "collaborator_hint": "Bendradarbiai gali pridėti nuotraukų ir vaizdo įrašų į bendrintą albumą",
     "remove_participant": "Pašalinti dalyvį",
     "owner": "Savininkas",
     "collaborators": "Bendradarbiai",

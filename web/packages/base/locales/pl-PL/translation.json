@@ -380,7 +380,7 @@
     "CONFIRM_REMOVE": "Tak, usuń",
     "MANAGE": "Zarządzaj",
     "ADDED_AS": "Dodano jako",
-    "COLLABORATOR_RIGHTS": "Współuczestnicy mogą dodawać zdjęcia i wideo do udostępnionego albumu",
+    "collaborator_hint": "Współuczestnicy mogą dodawać zdjęcia i wideo do udostępnionego albumu",
     "remove_participant": "Usuń uczestnika",
     "owner": "Właściciel",
     "collaborators": "Współuczestnicy",

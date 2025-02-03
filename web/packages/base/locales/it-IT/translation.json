@@ -380,7 +380,7 @@
     "CONFIRM_REMOVE": "Sì, rimuovi",
     "MANAGE": "Gestisci",
     "ADDED_AS": "Aggiunto come",
-    "COLLABORATOR_RIGHTS": "I collaboratori possono aggiungere foto e video all'album condiviso",
+    "collaborator_hint": "I collaboratori possono aggiungere foto e video all'album condiviso",
     "remove_participant": "Rimuovi partecipante",
     "owner": "Proprietario",
     "collaborators": "Collaboratori",

@@ -380,7 +380,7 @@
     "CONFIRM_REMOVE": "",
     "MANAGE": "",
     "ADDED_AS": "",
-    "COLLABORATOR_RIGHTS": "",
+    "collaborator_hint": "",
     "remove_participant": "",
     "owner": "",
     "collaborators": "",
