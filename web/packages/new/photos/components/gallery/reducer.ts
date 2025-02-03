@@ -1232,6 +1232,46 @@ const createCollectionSummaries = (
             }
         }
 
+        // This block of code duplicates the above. Such duplication is needed
+        // until type is completely replaced by attributes.
+        const attributes: CollectionSummaryType[] = [];
+        if (isIncomingShare(collection, user)) {
+            if (isIncomingCollabShare(collection, user)) {
+                attributes.push("incomingShareCollaborator");
+            } else {
+                attributes.push("incomingShareViewer");
+            }
+        }
+        if (isOutgoingShare(collection, user)) {
+            attributes.push("outgoingShare");
+        }
+        if (isSharedOnlyViaLink(collection)) {
+            attributes.push("sharedOnlyViaLink");
+        }
+        if (isArchivedCollection(collection)) {
+            attributes.push("archived");
+        }
+        if (isDefaultHiddenCollection(collection)) {
+            attributes.push("defaultHidden");
+        }
+        if (isPinnedCollection(collection)) {
+            attributes.push("pinned");
+        }
+        switch (collection.type) {
+            case CollectionType.folder:
+                attributes.push("folder");
+                break;
+            case CollectionType.favorites:
+                attributes.push("favorites");
+                break;
+            case CollectionType.album:
+                attributes.push("album");
+                break;
+            case CollectionType.uncategorized:
+                attributes.push("uncategorized");
+                break;
+        }
+
         let name: string;
         if (type == "uncategorized") {
             name = t("section_uncategorized");

@@ -37,8 +37,16 @@ export interface CollectionSummary {
     id: number;
     /**
      * The "UI" type for the collection or pseudo-collection.
+     *
+     * For newer code consider using {@link attributes} instead.
      */
     type: CollectionSummaryType;
+    /**
+     * Various UI related attributes for the collection or pseudo-collection.
+     *
+     * This is meant to replace {@link type} gradually.
+     */
+    attributes: CollectionSummaryType[];
     /**
      * The name of the collection or pseudo-collection.
      */
