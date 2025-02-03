@@ -1,3 +1,4 @@
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import type { ButtonishProps } from "@/base/components/mui";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
@@ -5,6 +6,7 @@ import {
     genericRetriableErrorDialogAttributes,
 } from "@/base/components/utils/dialog";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
+import { wipTheme } from "@/base/components/utils/theme";
 import log from "@/base/log";
 import { useUserDetailsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { useWrapAsyncOperation } from "@/new/photos/components/utils/use-wrap-async";
@@ -34,10 +36,6 @@ import {
 import { useAppContext } from "@/new/photos/types/context";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { openURL } from "@/new/photos/utils/web";
-import {
-    FlexWrapper,
-    SpaceBetweenFlex,
-} from "@ente/shared/components/Container";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
@@ -576,10 +574,23 @@ const PlanRow: React.FC<PlanRowProps> = ({ plan, onPlanSelect, disabled }) => {
     );
 };
 
-const PlanRowContainer = styled(FlexWrapper)(() => ({
-    background:
-        "linear-gradient(268.22deg, rgba(256, 256, 256, 0.08) -3.72%, rgba(256, 256, 256, 0) 85.73%)",
-}));
+const PlanRowContainer = styled("div")(({ theme }) =>
+    wipTheme
+        ? {
+              display: "flex",
+              background:
+                  "linear-gradient(270deg, transparent, rgba(0 0 0 / 0.02), transparent)",
+              ...theme.applyStyles("dark", {
+                  background:
+                      "linear-gradient(270deg, rgba(255 255 255 / 0.08) -3.72%, transparent 85.73%)",
+              }),
+          }
+        : {
+              display: "flex",
+              background:
+                  "linear-gradient(270deg, rgba(255 255 255 / 0.08) -3.72%, transparent 85.73%)",
+          },
+);
 
 const PlanStorage = styled("div")`
     flex: 1;
