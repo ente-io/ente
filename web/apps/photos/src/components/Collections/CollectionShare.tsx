@@ -394,7 +394,7 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
                     <RowButton
                         startIcon={<AddIcon />}
                         onClick={openAddCollab}
-                        label={t("ADD_COLLABORATORS")}
+                        label={t("add_collaborators")}
                     />
                 </RowButtonGroup>
             </Stack>
@@ -542,7 +542,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                     title={
                         type === COLLECTION_ROLE.VIEWER
                             ? t("add_viewers")
-                            : t("ADD_COLLABORATORS")
+                            : t("add_collaborators")
                     }
                     caption={collection.name}
                 />
@@ -555,7 +555,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                     buttonText={
                         type === COLLECTION_ROLE.VIEWER
                             ? t("add_viewers")
-                            : t("ADD_COLLABORATORS")
+                            : t("add_collaborators")
                     }
                     submitButtonProps={{
                         size: "large",
@@ -658,7 +658,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                         {props.hiddenPreInput}
                         <Stack>
                             <RowButtonGroupTitle>
-                                {t("ADD_NEW_EMAIL")}
+                                {t("add_new_email")}
                             </RowButtonGroupTitle>
                             <TextField
                                 sx={{ marginTop: 0 }}
@@ -933,7 +933,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                     label={
                                         collaborators?.length
                                             ? t("add_more")
-                                            : t("ADD_COLLABORATORS")
+                                            : t("add_collaborators")
                                     }
                                 />
                             </RowButtonGroup>
