@@ -932,7 +932,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                     onClick={openAddCollab}
                                     label={
                                         collaborators?.length
-                                            ? t("ADD_MORE")
+                                            ? t("add_more")
                                             : t("ADD_COLLABORATORS")
                                     }
                                 />
@@ -962,7 +962,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                     onClick={openAddViewer}
                                     label={
                                         viewers?.length
-                                            ? t("ADD_MORE")
+                                            ? t("add_more")
                                             : t("ADD_VIEWERS")
                                     }
                                 />
@@ -1153,7 +1153,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                                 variant="small"
                                 sx={{ color: "text.muted", padding: 1 }}
                             >
-                                {t("REMOVE_PARTICIPANT_HEAD")}
+                                {t("remove_participant")}
                             </Typography>
 
                             <RowButtonGroup>
