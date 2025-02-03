@@ -285,17 +285,3 @@ declare module "@mui/material/Typography" {
         tiny: true;
     }
 }
-
-// Tell TypeScript about our custom variants for other components
-//
-// https://mui.com/material-ui/customization/theme-components/#variants
-
-declare module "@mui/material/Backdrop" {
-    interface BackdropPropVariantOverrides {
-        /**
-         * A variant that uses a translucent blur filter over the background of
-         * the backdrop.
-         */
-        blur: true;
-    }
-}

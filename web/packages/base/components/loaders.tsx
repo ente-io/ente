@@ -39,14 +39,19 @@ export const LoadingOverlay: React.FC = () => (
  * An translucent overlay that covers the entire viewport and shows an activity
  * indicator in its center.
  *
- * Used as a overscreen during blocking actions.
+ * Used as a overscreen during blocking actions. The use of this component is
+ * not recommended for new code.
  */
 export const TranslucentLoadingOverlay: React.FC = () => (
     <Backdrop
+        // Specifying open here causes us to lose animations. This is fine since
+        // the use of this is limited to a few interstitial overlays, and if
+        // refactoring consider replacing this entirely with a more localized
+        // activity indicator.
         open={true}
-        variant="blur"
         sx={{
-            // TODO: Why?
+            backdropFilter: "blur(30px) opacity(95%)",
+            // TODO: Why is this zIndex override required? + use a constant.
             zIndex: 9000,
         }}
     >
