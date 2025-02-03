@@ -690,10 +690,9 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                                 </RowButtonGroupTitle>
                                 <RowButtonGroup>
                                     {props.optionsList.map((item, index) => (
-                                        <>
+                                        <React.Fragment key={item}>
                                             <RowButton
                                                 fontWeight="regular"
-                                                key={item}
                                                 onClick={() => {
                                                     if (
                                                         values.selectedOptions.includes(
@@ -735,7 +734,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                                             {index !==
                                                 props.optionsList.length -
                                                     1 && <RowButtonDivider />}
-                                        </>
+                                        </React.Fragment>
                                     ))}
                                 </RowButtonGroup>
                             </Stack>
@@ -914,10 +913,9 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                             </RowButtonGroupTitle>
                             <RowButtonGroup>
                                 {collaborators.map((item) => (
-                                    <>
+                                    <React.Fragment key={item}>
                                         <RowButton
                                             fontWeight="regular"
-                                            key={item}
                                             onClick={() =>
                                                 openManageParticipant(item)
                                             }
@@ -926,7 +924,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                             endIcon={<ChevronRightIcon />}
                                         />
                                         <RowButtonDivider hasIcon />
-                                    </>
+                                    </React.Fragment>
                                 ))}
 
                                 <RowButton
@@ -946,10 +944,9 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                             </RowButtonGroupTitle>
                             <RowButtonGroup>
                                 {viewers.map((item) => (
-                                    <>
+                                    <React.Fragment key={item}>
                                         <RowButton
                                             fontWeight="regular"
-                                            key={item}
                                             onClick={() =>
                                                 openManageParticipant(item)
                                             }
@@ -957,9 +954,8 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                             startIcon={<Avatar email={item} />}
                                             endIcon={<ChevronRightIcon />}
                                         />
-
                                         <RowButtonDivider hasIcon />
-                                    </>
+                                    </React.Fragment>
                                 ))}
                                 <RowButton
                                     startIcon={<AddIcon />}
@@ -1567,10 +1563,9 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                     <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                         <RowButtonGroup>
                             {shareExpireOption.map((item, index) => (
-                                <>
+                                <React.Fragment key={item.value()}>
                                     <RowButton
                                         fontWeight="regular"
-                                        key={item.value()}
                                         onClick={changeShareExpiryValue(
                                             item.value(),
                                         )}
@@ -1579,7 +1574,7 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                                     {index !== shareExpireOption.length - 1 && (
                                         <RowButtonDivider />
                                     )}
-                                </>
+                                </React.Fragment>
                             ))}
                         </RowButtonGroup>
                     </Stack>
