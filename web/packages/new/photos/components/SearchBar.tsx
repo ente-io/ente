@@ -264,7 +264,13 @@ const createSelectStyles = (
     container: (style) => ({ ...style, flex: 1 }),
     control: (style, { isFocused }) => ({
         ...style,
-        backgroundColor: theme.vars.palette.background.paper,
+        /* TODO(LM): Revisit? */
+        /*
+        backgroundColor: isFocused
+            ? theme.vars.palette.background.paper2
+            : theme.vars.palette.background.searchInput,
+            */
+        backgroundColor: theme.vars.palette.background.searchInput,
         borderColor: isFocused ? theme.vars.palette.accent.main : "transparent",
         boxShadow: "none",
         ":hover": {
@@ -474,7 +480,7 @@ const OptionContents = ({ data: option }: { data: SearchOption }) => (
                 </Typography>
             </Box>
 
-            <Stack direction={"row"} sx={{ gap: 1 }}>
+            <Stack direction="row" sx={{ gap: 1 }}>
                 {option.previewFiles.map((file) => (
                     <ItemCard
                         key={file.id}

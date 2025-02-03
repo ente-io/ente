@@ -67,7 +67,7 @@ class MoreCountWidget extends StatelessWidget {
     final enteTextTheme = getEnteTextTheme(context);
     switch (type) {
       case MoreCountType.small:
-        return Tuple2(36.0, enteTextTheme.small);
+        return Tuple2(32.0, enteTextTheme.small);
       case MoreCountType.mini:
         return Tuple2(24.0, enteTextTheme.mini);
       case MoreCountType.tiny:

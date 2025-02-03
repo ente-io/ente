@@ -123,7 +123,7 @@ const AllCollectionsHeader = ({
                     </Typography>
                 </Box>
             </FluidContainer>
-            <Stack direction="row" spacing={1.5}>
+            <Stack direction="row" sx={{ gap: 1.5 }}>
                 <CollectionsSortOptions
                     activeSortBy={collectionsSortBy}
                     onChangeSortBy={onChangeCollectionsSortBy}

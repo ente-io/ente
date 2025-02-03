@@ -13,7 +13,7 @@ import 'package:photos/ui/sharing/user_avator_widget.dart';
 import "package:photos/utils/data_util.dart";
 
 class ThumbnailPlaceHolder extends StatelessWidget {
-  const ThumbnailPlaceHolder({Key? key}) : super(key: key);
+  const ThumbnailPlaceHolder({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class ThumbnailPlaceHolder extends StatelessWidget {
 }
 
 class UnSyncedIcon extends StatelessWidget {
-  const UnSyncedIcon({Key? key}) : super(key: key);
+  const UnSyncedIcon({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,7 @@ class UnSyncedIcon extends StatelessWidget {
 }
 
 class DeviceIcon extends StatelessWidget {
-  const DeviceIcon({Key? key}) : super(key: key);
+  const DeviceIcon({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +50,7 @@ class DeviceIcon extends StatelessWidget {
 }
 
 class CloudOnlyIcon extends StatelessWidget {
-  const CloudOnlyIcon({Key? key}) : super(key: key);
+  const CloudOnlyIcon({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +63,7 @@ class CloudOnlyIcon extends StatelessWidget {
 }
 
 class FavoriteOverlayIcon extends StatelessWidget {
-  const FavoriteOverlayIcon({Key? key}) : super(key: key);
+  const FavoriteOverlayIcon({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +75,7 @@ class FavoriteOverlayIcon extends StatelessWidget {
 }
 
 class ArchiveOverlayIcon extends StatelessWidget {
-  const ArchiveOverlayIcon({Key? key}) : super(key: key);
+  const ArchiveOverlayIcon({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +87,7 @@ class ArchiveOverlayIcon extends StatelessWidget {
 }
 
 class PinOverlayIcon extends StatelessWidget {
-  const PinOverlayIcon({Key? key}) : super(key: key);
+  const PinOverlayIcon({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +100,7 @@ class PinOverlayIcon extends StatelessWidget {
 }
 
 class LivePhotoOverlayIcon extends StatelessWidget {
-  const LivePhotoOverlayIcon({Key? key}) : super(key: key);
+  const LivePhotoOverlayIcon({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +112,7 @@ class LivePhotoOverlayIcon extends StatelessWidget {
 }
 
 class VideoOverlayIcon extends StatelessWidget {
-  const VideoOverlayIcon({Key? key}) : super(key: key);
+  const VideoOverlayIcon({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -126,8 +126,7 @@ class VideoOverlayIcon extends StatelessWidget {
 
 class VideoOverlayDuration extends StatelessWidget {
   final int? duration;
-  const VideoOverlayDuration({Key? key, required this.duration})
-      : super(key: key);
+  const VideoOverlayDuration({super.key, required this.duration});
 
   @override
   Widget build(BuildContext context) {
@@ -200,7 +199,7 @@ class VideoOverlayDuration extends StatelessWidget {
 
 class OwnerAvatarOverlayIcon extends StatelessWidget {
   final User user;
-  const OwnerAvatarOverlayIcon(this.user, {Key? key}) : super(key: key);
+  const OwnerAvatarOverlayIcon(this.user, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -220,7 +219,7 @@ class OwnerAvatarOverlayIcon extends StatelessWidget {
 
 class TrashedFileOverlayText extends StatelessWidget {
   final TrashFile file;
-  const TrashedFileOverlayText(this.file, {Key? key}) : super(key: key);
+  const TrashedFileOverlayText(this.file, {super.key});
   @override
   Widget build(BuildContext context) {
     final int daysLeft =
@@ -234,7 +233,7 @@ class TrashedFileOverlayText extends StatelessWidget {
 
 class FileSizeOverlayText extends StatelessWidget {
   final EnteFile file;
-  const FileSizeOverlayText(this.file, {Key? key}) : super(key: key);
+  const FileSizeOverlayText(this.file, {super.key});
   @override
   Widget build(BuildContext context) {
     if (file.fileSize == null) {
@@ -248,7 +247,7 @@ class FileSizeOverlayText extends StatelessWidget {
 class FileOverlayText extends StatelessWidget {
   final String text;
 
-  const FileOverlayText(this.text, {Key? key}) : super(key: key);
+  const FileOverlayText(this.text, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -292,10 +291,9 @@ class _BottomLeftOverlayIcon extends StatelessWidget {
 
   const _BottomLeftOverlayIcon(
     this.icon, {
-    Key? key,
     this.baseSize = 24,
     this.color = Colors.white, // fixed
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -364,11 +362,10 @@ class _BottomRightOverlayIcon extends StatelessWidget {
 
   const _BottomRightOverlayIcon(
     this.icon, {
-    Key? key,
     this.rotationAngle,
     this.baseSize = 24,
     this.color = Colors.white, // fixed
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
