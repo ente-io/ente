@@ -538,11 +538,17 @@ interface CollectionBarCardIconProps {
 const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     attributes,
 }) => (
+    // Under current scenarios, there are no cases where more than 3 of these
+    // will be true simultaneously even in the rarest of cases (a pinned and
+    // shared album that is also archived), and there is enough space for 3.
     <CollectionBarCardIcon_>
         {attributes.includes("favorites") && <FavoriteRoundedIcon />}
-        {attributes.includes("pinned") && <PushPinIcon />}
-        {attributes.includes("outgoingShare") && <PeopleIcon />}
-        {(attributes.includes("incomingShareViewer") ||
+        {attributes.includes("pinned") && (
+            // Need && to override the 20px set in the container.
+            <PushPinIcon sx={{ "&&": { fontSize: "18px" } }} />
+        )}
+        {(attributes.includes("outgoingShare") ||
+            attributes.includes("incomingShareViewer") ||
             attributes.includes("incomingShareCollaborator")) && <PeopleIcon />}
         {attributes.includes("sharedOnlyViaLink") && <LinkIcon />}
         {attributes.includes("archived") && (
