@@ -108,6 +108,13 @@ class _ContactSearchThumbnailWidgetState
                     return PersonFaceWidget(
                       snapshot.data!,
                       personId: _personID,
+                      onErrorCallback: () {
+                        if (mounted) {
+                          setState(() {
+                            _mostRecentFileOfPerson = null;
+                          });
+                        }
+                      },
                     );
                   } else if (snapshot.connectionState == ConnectionState.done &&
                       snapshot.data == null) {
