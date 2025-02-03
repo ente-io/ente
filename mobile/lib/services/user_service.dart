@@ -1307,6 +1307,7 @@ class UserService {
     final existingEmails = <String>{};
     final int ownerID = Configuration.instance.getUserID()!;
     final String ownerEmail = Configuration.instance.getEmail()!;
+    existingEmails.add(ownerEmail);
 
     for (final c in CollectionsService.instance.getActiveCollections()) {
       // Add collaborators and viewers of collections owned by user
