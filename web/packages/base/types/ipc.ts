@@ -309,8 +309,8 @@ export interface Electron {
      * {@link dataOrPathOrZipItem}.
      *
      * This executes the command using a FFmpeg executable we bundle with our
-     * desktop app. We also have a wasm FFmpeg wasm implementation that we use
-     * when running on the web, which has a sibling function with the same
+     * desktop app. We also have a Wasm FFmpeg implementation that we use when
+     * running on the web, which has a sibling function with the same
      * parameters. See [Note:FFmpeg in Electron].
      *
      * @param command An array of strings, each representing one positional

@@ -1,5 +1,6 @@
 import "package:dotted_border/dotted_border.dart";
 import "package:flutter/material.dart";
+import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
@@ -76,11 +77,16 @@ class SearchableItemWidget extends StatelessWidget {
                   SizedBox(
                     width: 60,
                     height: 60,
-                    child: SearchThumbnailWidget(
-                      searchResult.previewThumbnail(),
-                      heroTagPrefix,
-                      searchResult: searchResult,
-                    ),
+                    child: searchResult.type() == ResultType.shared
+                        ? ContactSearchThumbnailWidget(
+                            heroTagPrefix,
+                            searchResult: searchResult as GenericSearchResult,
+                          )
+                        : SearchThumbnailWidget(
+                            searchResult.previewThumbnail(),
+                            heroTagPrefix,
+                            searchResult: searchResult,
+                          ),
                   ),
                   const SizedBox(width: 12),
                   Flexible(

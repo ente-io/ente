@@ -21,7 +21,7 @@ class PersonService {
   final EntityService entityService;
   final MLDataDB faceMLDataDB;
   final SharedPreferences prefs;
-  final _emailToNameMapCache = <String, String>{};
+  final _emailToPartialPersonDataMapCache = <String, Map<String, String>>{};
 
   PersonService(this.entityService, this.faceMLDataDB, this.prefs);
 
@@ -43,25 +43,28 @@ class PersonService {
     SharedPreferences prefs,
   ) async {
     _instance = PersonService(entityService, faceMLDataDB, prefs);
-    await _instance!._resetEmailToNameCache();
+    await _instance!.resetEmailToPartialPersonDataCache();
   }
 
-  Map<String, String> get emailToNameMapCache => _emailToNameMapCache;
+  Map<String, Map<String, String>> get emailToPartialPersonDataMapCache =>
+      _emailToPartialPersonDataMapCache;
 
   void clearCache() {
-    _emailToNameMapCache.clear();
+    _emailToPartialPersonDataMapCache.clear();
   }
 
-  Future<void> _resetEmailToNameCache() async {
-    _emailToNameMapCache.clear();
+  Future<void> resetEmailToPartialPersonDataCache() async {
+    _emailToPartialPersonDataMapCache.clear();
     await _instance!.getPersons().then((value) {
       for (var person in value) {
         if (person.data.email != null && person.data.email!.isNotEmpty) {
-          _instance!._emailToNameMapCache[person.data.email!] =
-              person.data.name;
+          _instance!._emailToPartialPersonDataMapCache[person.data.email!] = {
+            "person_id": person.remoteID,
+            "name": person.data.name,
+          };
         }
       }
-      logger.info("Email to name cache reset");
+      logger.info("Email to partial person data cache reset");
     });
   }
 
@@ -202,7 +205,7 @@ class PersonService {
       clusterID: clusterID,
     );
     if (data.email != null) {
-      _resetEmailToNameCache().ignore();
+      await resetEmailToPartialPersonDataCache();
     }
     return PersonEntity(result.id, data);
   }
@@ -291,7 +294,7 @@ class PersonService {
       justName.data.logStats();
 
       if (entity.data.email != null) {
-        _resetEmailToNameCache().ignore();
+        await resetEmailToPartialPersonDataCache();
       }
     } else {
       await entityService.deleteEntry(personID);
@@ -299,7 +302,7 @@ class PersonService {
 
       if (entity != null) {
         if (entity.data.email != null) {
-          _resetEmailToNameCache().ignore();
+          await resetEmailToPartialPersonDataCache();
         }
       }
     }
@@ -459,9 +462,8 @@ class PersonService {
         email: email,
       ),
     );
-    await updatePerson(updatedPerson).then((value) {
-      _resetEmailToNameCache();
-    });
+    await updatePerson(updatedPerson);
+    await resetEmailToPartialPersonDataCache();
     return updatedPerson;
   }
 

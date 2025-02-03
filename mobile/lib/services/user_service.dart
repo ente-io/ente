@@ -18,6 +18,7 @@ import 'package:photos/events/user_details_changed_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/account/two_factor.dart";
+import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/api/user/srp.dart";
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/models/key_attributes.dart';
@@ -26,6 +27,8 @@ import 'package:photos/models/sessions.dart';
 import 'package:photos/models/set_keys_request.dart';
 import 'package:photos/models/set_recovery_key_request.dart';
 import 'package:photos/models/user_details.dart';
+import "package:photos/services/collections_service.dart";
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/ui/account/login_page.dart';
 import 'package:photos/ui/account/ott_verification_page.dart';
 import "package:photos/ui/account/passkey_page.dart";
@@ -1288,5 +1291,86 @@ class UserService {
       _logger.severe("Failed to update email mfa", e);
       rethrow;
     }
+  }
+
+  /// Returns Contacts(Users) that are relevant to the account owner.
+  /// Note: "User" refers to the account owner in the points below.
+  /// This includes:
+  /// 	- Collaborators and viewers of collections owned by user
+  ///   - Owners of collections shared to user.
+  ///   - All collaborators of collections in which user is a collaborator or
+  ///     a viewer.
+  ///   - All family members of user.
+  ///   - All contacts linked to a person.
+  List<User> getRelevantContacts() {
+    final List<User> relevantUsers = [];
+    final existingEmails = <String>{};
+    final int ownerID = Configuration.instance.getUserID()!;
+    final String ownerEmail = Configuration.instance.getEmail()!;
+
+    for (final c in CollectionsService.instance.getActiveCollections()) {
+      // Add collaborators and viewers of collections owned by user
+      if (c.owner?.id == ownerID) {
+        for (final User? u in c.sharees ?? []) {
+          if (u != null && u.id != null && u.email.isNotEmpty) {
+            if (!existingEmails.contains(u.email)) {
+              relevantUsers.add(u);
+              existingEmails.add(u.email);
+            }
+          }
+        }
+      } else if (c.owner?.id != null && c.owner!.email.isNotEmpty) {
+        // Add owners of collections shared with user
+        if (!existingEmails.contains(c.owner!.email)) {
+          relevantUsers.add(c.owner!);
+          existingEmails.add(c.owner!.email);
+        }
+        // Add collaborators of collections shared with user where user is a
+        // viewer or a collaborator
+        for (final User? u in c.sharees ?? []) {
+          if (u != null &&
+              u.id != null &&
+              u.email.isNotEmpty &&
+              u.email == ownerEmail &&
+              (u.isCollaborator || u.isViewer)) {
+            for (final User? u in c.sharees ?? []) {
+              if (u != null &&
+                  u.id != null &&
+                  u.email.isNotEmpty &&
+                  u.isCollaborator) {
+                if (!existingEmails.contains(u.email)) {
+                  relevantUsers.add(u);
+                  existingEmails.add(u.email);
+                }
+              }
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    // Add user's family members
+    final cachedUserDetails = getCachedUserDetails();
+    if (cachedUserDetails?.familyData?.members?.isNotEmpty ?? false) {
+      for (final member in cachedUserDetails!.familyData!.members!) {
+        if (!existingEmails.contains(member.email)) {
+          relevantUsers.add(User(email: member.email));
+          existingEmails.add(member.email);
+        }
+      }
+    }
+
+    // Add contacts linked to people
+    final cachedEmailToPartialPersonData =
+        PersonService.instance.emailToPartialPersonDataMapCache;
+    for (final email in cachedEmailToPartialPersonData.keys) {
+      if (!existingEmails.contains(email)) {
+        relevantUsers.add(User(email: email));
+        existingEmails.add(email);
+      }
+    }
+
+    return relevantUsers;
   }
 }

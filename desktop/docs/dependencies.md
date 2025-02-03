@@ -108,7 +108,7 @@ For video conversions and metadata extraction, we use ffmpeg. To bundle a
 [ffmpeg-static](https://github.com/eugeneware/ffmpeg-static).
 
 > There is a significant (~20x) speed difference between using the compiled
-> ffmpeg binary and using the wasm one (that our renderer process already has).
+> FFmpeg binary and using the Wasm one (that our renderer process already has).
 > Which is why we bundle it to speed up operations on the desktop app.
 
 On Linux and Windows, we use `vips` for thumbnail generation and JPEG conversion

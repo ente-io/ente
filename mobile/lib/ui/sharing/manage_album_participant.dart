@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
@@ -58,7 +59,7 @@ class _ManageIndividualParticipantState
                     title: S.of(context).manage,
                   ),
                   Text(
-                    widget.user.email.toString().trim(),
+                    widget.user.displayName ?? widget.user.email,
                     textAlign: TextAlign.left,
                     style:
                         textTheme.small.copyWith(color: colorScheme.textMuted),
@@ -117,7 +118,7 @@ class _ManageIndividualParticipantState
                         body: S
                             .of(context)
                             .cannotAddMorePhotosAfterBecomingViewer(
-                              widget.user.email,
+                              widget.user.displayName ?? widget.user.email,
                             ),
                         isCritical: true,
                       );

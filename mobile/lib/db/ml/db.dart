@@ -418,6 +418,28 @@ class MLDataDB extends IMLDataDB<int> {
     return maps.map((e) => mapRowToFace(e)).toList();
   }
 
+  Future<Map<int, List<Face>>> getFacesForFileIDs(
+    Iterable<int> fileUploadIDs,
+  ) async {
+    final db = await instance.asyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      '''
+      SELECT * FROM $facesTable
+      WHERE $fileIDColumn IN (${fileUploadIDs.map((id) => "'$id'").join(",")})
+    ''',
+    );
+    if (maps.isEmpty) {
+      return {};
+    }
+    final result = <int, List<Face>>{};
+    for (final map in maps) {
+      final face = mapRowToFace(map);
+      final fileID = map[fileIDColumn] as int;
+      result.putIfAbsent(fileID, () => <Face>[]).add(face);
+    }
+    return result;
+  }
+
   @override
   Future<Map<String, Iterable<String>>> getClusterToFaceIDs(
     Set<String> clusterIDs,
@@ -499,6 +521,22 @@ class MLDataDB extends IMLDataDB<int> {
           .putIfAbsent(personID, () => {})
           .putIfAbsent(clusterID, () => {})
           .add(faceID);
+    }
+    return result;
+  }
+
+  Future<Map<String, String>> getFaceIdToPersonIdForFaces(
+    Iterable<String> faceIDs,
+  ) async {
+    final db = await instance.asyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT $faceIDColumn, $personIdColumn FROM $clusterPersonTable '
+      'INNER JOIN $faceClustersTable ON $clusterPersonTable.$clusterIDColumn = $faceClustersTable.$clusterIDColumn '
+      'WHERE $faceIDColumn IN (${faceIDs.map((id) => "'$id'").join(",")})',
+    );
+    final Map<String, String> result = {};
+    for (final map in maps) {
+      result[map[faceIDColumn] as String] = map[personIdColumn] as String;
     }
     return result;
   }
@@ -1162,6 +1200,22 @@ class MLDataDB extends IMLDataDB<int> {
     final db = await instance.asyncDB;
     final results = await db.getAll('SELECT * FROM $clipTable');
     return _convertToVectors(results);
+  }
+
+  @override
+  Future<Map<int, EmbeddingVector>> getClipVectorsForFileIDs(
+    Iterable<int> fileIDs,
+  ) async {
+    final db = await MLDataDB.instance.asyncDB;
+    final results = await db.getAll(
+      'SELECT * FROM $clipTable WHERE $fileIDColumn IN (${fileIDs.join(", ")})',
+    );
+    final Map<int, EmbeddingVector> embeddings = {};
+    for (final result in results) {
+      final embedding = _getVectorFromRow(result);
+      embeddings[embedding.fileID] = embedding;
+    }
+    return embeddings;
   }
 
   // Get indexed FileIDs
