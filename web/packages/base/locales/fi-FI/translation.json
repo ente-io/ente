@@ -205,7 +205,7 @@
     "sharing_already_shared": "",
     "sharing_album_not_allowed": "",
     "sharing_disabled_for_free_accounts": "",
-    "sharing_user_does_not_exist": "",
+    "sharing_user_does_not_exist": "Valitettavasti käyttäjää ei löytynyt tällä sähköpostiosoitteella",
     "search": "",
     "search_results": "",
     "no_results": "",
