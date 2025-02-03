@@ -576,16 +576,6 @@ const components: Components = {
         },
     },
 
-    // MuiDrawer: {
-    //     styleOverrides: {
-    //         root: {
-    //             ".MuiBackdrop-root": {
-    //                 backgroundColor: "var(--mui-palette-backdrop-muted)",
-    //             },
-    //         },
-    //     },
-    // },
-
     MuiDialog: {
         defaultProps: {
             // This is required to prevent console errors about aria-hiding a
