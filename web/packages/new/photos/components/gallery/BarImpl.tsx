@@ -257,7 +257,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             // Hide the bottom border when showing the empty state for people.
             style={
                 {
-                    "--bar-bottom-border-color":
+                    "--et-bar-bottom-border-color":
                         mode == "people" && people.length == 0
                             ? "transparent"
                             : "var(--mui-palette-divider)",
@@ -318,7 +318,7 @@ export const Row2 = styled("div")`
     display: flex;
     align-items: flex-start;
     gap: 16px;
-    border-block-end: 1px solid var(--bar-bottom-border-color);
+    border-block-end: 1px solid var(--et-bar-bottom-border-color);
 `;
 
 const ModeIndicator: React.FC<
