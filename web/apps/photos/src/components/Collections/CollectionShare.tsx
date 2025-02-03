@@ -388,7 +388,7 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
                     <RowButton
                         startIcon={<AddIcon />}
                         onClick={openAddViewer}
-                        label={t("ADD_VIEWERS")}
+                        label={t("add_viewers")}
                     />
                     <RowButtonDivider hasIcon />
                     <RowButton
@@ -541,7 +541,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                     onRootClose={handleRootClose}
                     title={
                         type === COLLECTION_ROLE.VIEWER
-                            ? t("ADD_VIEWERS")
+                            ? t("add_viewers")
                             : t("ADD_COLLABORATORS")
                     }
                     caption={collection.name}
@@ -554,7 +554,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                     fieldType="email"
                     buttonText={
                         type === COLLECTION_ROLE.VIEWER
-                            ? t("ADD_VIEWERS")
+                            ? t("add_viewers")
                             : t("ADD_COLLABORATORS")
                     }
                     submitButtonProps={{
@@ -963,7 +963,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                     label={
                                         viewers?.length
                                             ? t("add_more")
-                                            : t("ADD_VIEWERS")
+                                            : t("add_viewers")
                                     }
                                 />
                             </RowButtonGroup>

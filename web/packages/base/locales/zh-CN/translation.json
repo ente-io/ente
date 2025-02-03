@@ -370,7 +370,7 @@
     "participants_count_zero": "暂无参与者",
     "participants_count_one": "1 名参与者",
     "participants_count": "{{count, number}} 名参与者",
-    "ADD_VIEWERS": "添加查看者",
+    "add_viewers": "添加查看者",
     "CHANGE_PERMISSIONS_TO_VIEWER": "<p>{{selectedEmail}} 将无法向相册添加更多照片</p><p>他们仍然可以删除他们添加的照片</p>",
     "CHANGE_PERMISSIONS_TO_COLLABORATOR": "{{selectedEmail}} 将能够将照片添加到相册",
     "CONVERT_TO_VIEWER": "是的，转换为查看者",

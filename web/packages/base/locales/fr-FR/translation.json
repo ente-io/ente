@@ -370,7 +370,7 @@
     "participants_count_zero": "Aucun participant",
     "participants_count_one": "1 participant",
     "participants_count": "{{count, number}} participants",
-    "ADD_VIEWERS": "Ajouter un observateur",
+    "add_viewers": "Ajouter un observateur",
     "CHANGE_PERMISSIONS_TO_VIEWER": "<p>{{selectedEmail}} ne pourra plus ajouter de photos à l'album</p><p>Il pourra toujours supprimer les photos qu'il a ajoutées</p>",
     "CHANGE_PERMISSIONS_TO_COLLABORATOR": "{{selectedEmail}} pourra ajouter des photos à l'album",
     "CONVERT_TO_VIEWER": "Oui, convertir en observateur",

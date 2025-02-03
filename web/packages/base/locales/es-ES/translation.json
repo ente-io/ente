@@ -370,7 +370,7 @@
     "participants_count_zero": "No hay participantes",
     "participants_count_one": "1 participante",
     "participants_count": "{{count, number}} participantes",
-    "ADD_VIEWERS": "Añadir espectadores",
+    "add_viewers": "Añadir espectadores",
     "CHANGE_PERMISSIONS_TO_VIEWER": "<p>{{selectedEmail}} no podrá añadir más fotos al álbum</p><p>Todavía podrán eliminar fotos añadidas por ellos</p>",
     "CHANGE_PERMISSIONS_TO_COLLABORATOR": "{{selectedEmail}} podrá añadir fotos al álbum",
     "CONVERT_TO_VIEWER": "Sí, convertir a espectador",
