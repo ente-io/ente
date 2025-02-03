@@ -1341,6 +1341,7 @@ class SearchService {
     final searchResults = <GenericSearchResult>[];
     final allFiles = await getAllFilesForSearch();
     final peopleToSharedFiles = <User, List<EnteFile>>{};
+    final existingEmails = <String>{};
     for (EnteFile file in allFiles) {
       if (file.isOwner) continue;
 
@@ -1354,7 +1355,23 @@ class SearchService {
           peopleToSharedFiles[fileOwner]!.add(file);
         } else {
           peopleToSharedFiles[fileOwner] = [file];
+          existingEmails.add(fileOwner.email);
         }
+      }
+    }
+
+    final relevantContactEmails =
+        UserService.instance.getRelevantContacts().map((e) => e.email).toSet();
+
+    final emailsInRelContEmailsAndNotInExistingEmails =
+        relevantContactEmails.difference(existingEmails);
+
+    for (final email in emailsInRelContEmailsAndNotInExistingEmails) {
+      final user = User(email: email);
+      if (user.email.toLowerCase().contains(lowerCaseQuery) ||
+          ((user.displayName?.toLowerCase().contains(lowerCaseQuery)) ??
+              false)) {
+        peopleToSharedFiles[user] = [];
       }
     }
 
@@ -1388,7 +1405,7 @@ class SearchService {
       final searchResults = <GenericSearchResult>[];
       final allFiles = await getAllFilesForSearch();
       final peopleToSharedFiles = <User, List<EnteFile>>{};
-      final userEmails = <String>{};
+      final existingEmails = <String>{};
 
       int peopleCount = 0;
       for (EnteFile file in allFiles) {
@@ -1401,7 +1418,7 @@ class SearchService {
         } else {
           if (limit != null && limit <= peopleCount) continue;
           peopleToSharedFiles[fileOwner] = [file];
-          userEmails.add(fileOwner.email);
+          existingEmails.add(fileOwner.email);
           peopleCount++;
         }
       }
@@ -1412,7 +1429,8 @@ class SearchService {
           .toSet();
 
       int? buffer = limit != null ? limit - peopleCount : null;
-      final emailsWithNoSharedFiles = allRelevantEmails.difference(userEmails);
+      final emailsWithNoSharedFiles =
+          allRelevantEmails.difference(existingEmails);
 
       if (buffer == null) {
         for (final email in emailsWithNoSharedFiles) {
