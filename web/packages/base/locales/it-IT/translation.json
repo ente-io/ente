@@ -66,7 +66,7 @@
         "5": "Backup completato"
     },
     "FILE_NOT_UPLOADED_LIST": "I seguenti file non sono stati caricati",
-    "INITIAL_LOAD_DELAY_WARNING": "Il primo caricamento potrebbe richiedere del tempo",
+    "initial_load_delay_warning": "Il primo caricamento potrebbe richiedere del tempo",
     "USER_DOES_NOT_EXIST": "Purtroppo non abbiamo trovato nessun account con quell'indirizzo e-mail",
     "no_account": "Non ho un account",
     "existing_account": "Ho già un account",

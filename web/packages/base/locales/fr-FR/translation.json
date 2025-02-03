@@ -66,7 +66,7 @@
         "5": "Sauvegarde terminée"
     },
     "FILE_NOT_UPLOADED_LIST": "Les fichiers suivants n'ont pas été chargés",
-    "INITIAL_LOAD_DELAY_WARNING": "La première consultation peut prendre du temps",
+    "initial_load_delay_warning": "La première consultation peut prendre du temps",
     "USER_DOES_NOT_EXIST": "Désolé, impossible de trouver un utilisateur avec cet e-mail",
     "no_account": "Je n'ai pas de compte",
     "existing_account": "J'ai déjà un compte",

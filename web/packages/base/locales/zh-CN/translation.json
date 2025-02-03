@@ -66,7 +66,7 @@
         "5": "备份完成"
     },
     "FILE_NOT_UPLOADED_LIST": "以下文件未上传",
-    "INITIAL_LOAD_DELAY_WARNING": "第一次加载可能需要一些时间",
+    "initial_load_delay_warning": "第一次加载可能需要一些时间",
     "USER_DOES_NOT_EXIST": "抱歉，找不到使用该电子邮件的用户",
     "no_account": "没有账号",
     "existing_account": "已有账号",

@@ -66,7 +66,7 @@
         "5": "Atsarginės kopijos kūrimas baigtas"
     },
     "FILE_NOT_UPLOADED_LIST": "Toliau nurodyti failai nebuvo įkelti",
-    "INITIAL_LOAD_DELAY_WARNING": "Pirmasis įkėlimas gali šiek tiek užtrukti",
+    "initial_load_delay_warning": "Pirmasis įkėlimas gali šiek tiek užtrukti",
     "USER_DOES_NOT_EXIST": "Atsiprašome, nepavyko rasti naudotojo su šiuo el. paštu.",
     "no_account": "Neturiu paskyros",
     "existing_account": "Jau turiu paskyrą",

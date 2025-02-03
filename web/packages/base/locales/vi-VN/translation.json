@@ -66,7 +66,7 @@
         "5": "Sao lưu hoàn tất"
     },
     "FILE_NOT_UPLOADED_LIST": "Các tệp sau không được tải lên",
-    "INITIAL_LOAD_DELAY_WARNING": "Tải lần đầu có thể mất một chút thời gian",
+    "initial_load_delay_warning": "Tải lần đầu có thể mất một chút thời gian",
     "USER_DOES_NOT_EXIST": "Xin lỗi, không tìm thấy người dùng với email đó",
     "no_account": "Không có tài khoản",
     "existing_account": "Đã có tài khoản",

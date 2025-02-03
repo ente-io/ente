@@ -66,7 +66,7 @@
         "5": "バックアップが完了しました"
     },
     "FILE_NOT_UPLOADED_LIST": "次のファイルはアップロードされませんでした",
-    "INITIAL_LOAD_DELAY_WARNING": "",
+    "initial_load_delay_warning": "",
     "USER_DOES_NOT_EXIST": "申し訳ありませんが、そのメールアドレスのユーザーが見つかりませんでした",
     "no_account": "アカウントがありませんか",
     "existing_account": "既にアカウントをお持ちの方",
