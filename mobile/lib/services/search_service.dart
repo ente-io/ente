@@ -1363,10 +1363,7 @@ class SearchService {
     final relevantContactEmails =
         UserService.instance.getEmailIDsOfRelevantContacts();
 
-    final emailsInRelContEmailsAndNotInExistingEmails =
-        relevantContactEmails.difference(existingEmails);
-
-    for (final email in emailsInRelContEmailsAndNotInExistingEmails) {
+    for (final email in relevantContactEmails.difference(existingEmails)) {
       final user = User(email: email);
       if (user.email.toLowerCase().contains(lowerCaseQuery) ||
           ((user.displayName?.toLowerCase().contains(lowerCaseQuery)) ??
@@ -1426,21 +1423,26 @@ class SearchService {
       final allRelevantEmails =
           UserService.instance.getEmailIDsOfRelevantContacts();
 
-      int? buffer = limit != null ? limit - peopleCount : null;
+      int? remainingLimit = limit != null ? limit - peopleCount : null;
+      if (remainingLimit != null) {
+        // limit - peopleCount will never be negative as of writing this.
+        // Just in case if something changes in future, we are handling it here.
+        remainingLimit = max(remainingLimit, 0);
+      }
       final emailsWithNoSharedFiles =
           allRelevantEmails.difference(existingEmails);
 
-      if (buffer == null) {
+      if (remainingLimit == null) {
         for (final email in emailsWithNoSharedFiles) {
           final user = User(email: email);
           peopleToSharedFiles[user] = [];
         }
       } else {
         for (final email in emailsWithNoSharedFiles) {
-          if (buffer == 0) break;
+          if (remainingLimit == 0) break;
           final user = User(email: email);
           peopleToSharedFiles[user] = [];
-          buffer = buffer! - 1;
+          remainingLimit = remainingLimit! - 1;
         }
       }
 
