@@ -100,7 +100,9 @@ class _ContactResultPageState extends State<ContactResultPage> {
       tagPrefix: widget.tagPrefix + widget.searchResult.heroTag(),
       selectedFiles: _selectedFiles,
       enableFileGrouping: widget.enableGrouping,
-      initialFiles: [widget.searchResult.resultFiles().first],
+      initialFiles: widget.searchResult.resultFiles().isNotEmpty
+          ? [widget.searchResult.resultFiles().first]
+          : null,
       header: EmailValidator.validate(_searchResultName)
           ? Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 8),
