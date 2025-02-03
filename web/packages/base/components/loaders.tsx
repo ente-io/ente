@@ -1,5 +1,6 @@
 import { Overlay, Stack100vhCenter } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { Backdrop } from "@mui/material";
 import React from "react";
 
 /**
@@ -38,18 +39,22 @@ export const LoadingOverlay: React.FC = () => (
  * An translucent overlay that covers the entire viewport and shows an activity
  * indicator in its center.
  *
- * Used as a overscreen during blocking actions.
+ * Used as a overscreen during blocking actions. The use of this component is
+ * not recommended for new code.
  */
 export const TranslucentLoadingOverlay: React.FC = () => (
-    <Overlay
+    <Backdrop
+        // Specifying open here causes us to lose animations. This is fine since
+        // the use of this is limited to a few interstitial overlays, and if
+        // refactoring consider replacing this entirely with a more localized
+        // activity indicator.
+        open={true}
         sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            backdropFilter: "blur(30px) opacity(95%)",
+            // TODO: Why is this zIndex override required? + use a constant.
             zIndex: 9000,
-            backgroundColor: "backdrop.muted",
         }}
     >
         <ActivityIndicator />
-    </Overlay>
+    </Backdrop>
 );

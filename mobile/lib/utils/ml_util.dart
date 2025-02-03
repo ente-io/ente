@@ -217,13 +217,14 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
         faces.addAll(facesFromRemoteEmbedding);
         existingInstruction.shouldRunFaces = false;
       }
-      if (fileMl.clipEmbedding != null &&
-          fileMl.clipEmbedding!.version >= clipMlVersion) {
+      final remoteClipEmbedding =
+          fileMl.getClipEmbeddingIfCompatible(clipMlVersion);
+      if (remoteClipEmbedding != null) {
         clipEmbeddings.add(
           ClipEmbedding(
             fileID: fileMl.fileID,
-            embedding: fileMl.clipEmbedding!.embedding,
-            version: fileMl.clipEmbedding!.version,
+            embedding: remoteClipEmbedding.embedding,
+            version: remoteClipEmbedding.version,
           ),
         );
         existingInstruction.shouldRunClip = false;
@@ -235,6 +236,9 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
         pendingIndex[fileMl.fileID] = existingInstruction;
       }
     }
+
+    await mlDataDB.bulkInsertFaces(faces);
+    await mlDataDB.putClip(clipEmbeddings);
     for (final fileID in pendingIndex.keys) {
       final instruction = pendingIndex[fileID]!;
       if (instruction.pendingML) {
@@ -246,8 +250,6 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
         }
       }
     }
-    await mlDataDB.bulkInsertFaces(faces);
-    await mlDataDB.putClip(clipEmbeddings);
   }
   // Yield any remaining instructions
   if (batchToYield.isNotEmpty) {

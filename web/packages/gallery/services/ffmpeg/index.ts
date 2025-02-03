@@ -20,7 +20,7 @@ import {
 import { ffmpegExecWeb } from "./web";
 
 /**
- * Generate a thumbnail for the given video using a wasm FFmpeg running in a web
+ * Generate a thumbnail for the given video using a Wasm FFmpeg running in a web
  * worker.
  *
  * This function is called during upload, when we need to generate thumbnails
@@ -94,7 +94,7 @@ const makeGenThumbnailCommand = (seekTime: number) => [
  *
  * When we're running in the context of our desktop app _and_ we're passed a
  * file path , this uses the native FFmpeg bundled with our desktop app.
- * Otherwise it uses a wasm build of FFmpeg running in a web worker.
+ * Otherwise it uses a Wasm build of FFmpeg running in a web worker.
  *
  * This function is called during upload, when we need to extract the metadata
  * of videos that the user is uploading.
@@ -270,7 +270,7 @@ const convertToMP4Native = async (electron: Electron, blob: Blob) => {
 };
 
 /**
- * Generate a preview variant of for the given video using a wasm FFmpeg running
+ * Generate a preview variant of for the given video using a Wasm FFmpeg running
  * in a web worker.
  *
  * See: [Note: Preview variant of videos].

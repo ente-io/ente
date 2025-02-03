@@ -99,10 +99,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             ) : openRecoveryKey ? (
                 <RecoveryKey
                     open={openRecoveryKey}
-                    onClose={() => {
-                        setOpenRecoveryKey(false);
-                        void router.push(appHomeRoute);
-                    }}
+                    onClose={() => void router.push(appHomeRoute)}
                     showMiniDialog={showMiniDialog}
                 />
             ) : (
