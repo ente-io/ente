@@ -1678,10 +1678,9 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
                     <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                         <RowButtonGroup>
                             {deviceLimitOptions.map((item, index) => (
-                                <>
+                                <React.Fragment key={item.label}>
                                     <RowButton
                                         fontWeight="regular"
-                                        key={item.label}
                                         onClick={changeDeviceLimitValue(
                                             item.value,
                                         )}
@@ -1691,7 +1690,7 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
                                         deviceLimitOptions.length - 1 && (
                                         <RowButtonDivider />
                                     )}
-                                </>
+                                </React.Fragment>
                             ))}
                         </RowButtonGroup>
                     </Stack>
