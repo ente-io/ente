@@ -146,7 +146,9 @@ class NoFaceOrFileContactWidget extends StatelessWidget {
     final enteColorScheme = getEnteColorScheme(context);
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(1),
+        borderRadius: const BorderRadius.horizontal(
+          left: Radius.circular(4),
+        ),
         border: addBorder
             ? Border.all(
                 color: enteColorScheme.strokeFaint,
