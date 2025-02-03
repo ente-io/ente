@@ -965,14 +965,6 @@
   "syncStopped": "Synchronisierung angehalten",
   "syncProgress": "{completed}/{total} Erinnerungsstücke gesichert",
   "uploadingMultipleMemories": "Sichere {count} Erinnerungsstücke...",
-  "@uploadingMultipleMemories": {
-    "description": "Text to tell user how many memories are being preserved",
-    "placeholders": {
-      "count": {
-        "type": "String"
-      }
-    }
-  },
   "uploadingSingleMemory": "Sichere ein Erinnerungsstück...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
@@ -1598,7 +1590,6 @@
   "joinAlbumSubtext": "um deine Fotos anzuzeigen und hinzuzufügen",
   "joinAlbumSubtextViewer": "um dies zu geteilten Alben hinzuzufügen",
   "join": "Beitreten",
-  "linkEmail": "E-Mail-Adresse verknüpfen",
-  "link": "Verknüpfen",
+  "link": "Link",
   "noEnteAccountExclamation": "Kein Ente-Konto!"
 }

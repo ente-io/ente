@@ -962,14 +962,6 @@
   "syncStopped": "Sincronizzazione interrotta",
   "syncProgress": "{completed}/{total} ricordi conservati",
   "uploadingMultipleMemories": "Conservando {count} ricordi...",
-  "@uploadingMultipleMemories": {
-    "description": "Text to tell user how many memories are being preserved",
-    "placeholders": {
-      "count": {
-        "type": "String"
-      }
-    }
-  },
   "uploadingSingleMemory": "Conservando 1 ricordo...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
