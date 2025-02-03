@@ -384,7 +384,7 @@ export default function PublicCollectionGallery() {
             ) {
                 setErrorMessage(
                     parsedError.message === CustomError.TOO_MANY_REQUESTS
-                        ? t("LINK_TOO_MANY_REQUESTS")
+                        ? t("link_request_limit_exceeded")
                         : t("link_expired_message"),
                 );
                 // share has been disabled

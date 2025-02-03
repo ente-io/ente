@@ -181,7 +181,7 @@ function SharingDetails({ collection, type }) {
                 collaborators?.length > 0 && (
                     <Stack>
                         <RowButtonGroupTitle icon={<ModeEditIcon />}>
-                            {t("COLLABORATORS")}
+                            {t("collaborators")}
                         </RowButtonGroupTitle>
                         <RowButtonGroup>
                             {collaborators.map((item, index) => (
@@ -909,7 +909,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                         </Stack>
                         <Stack>
                             <RowButtonGroupTitle icon={<ModeEditIcon />}>
-                                {t("COLLABORATORS")}
+                                {t("collaborators")}
                             </RowButtonGroupTitle>
                             <RowButtonGroup>
                                 {collaborators.map((item) => (
@@ -1471,7 +1471,7 @@ const ManagePublicCollect: React.FC<ManagePublicCollectProps> = ({
         <Stack>
             <RowButtonGroup>
                 <RowSwitch
-                    label={t("PUBLIC_COLLECT")}
+                    label={t("allow_adding_photos")}
                     checked={publicShareProp?.enableCollect}
                     onClick={handleFileDownloadSetting}
                 />
@@ -1744,7 +1744,7 @@ const ManageDownloadAccess: React.FC<ManageDownloadAccessProps> = ({
     };
     return (
         <RowSwitch
-            label={t("FILE_DOWNLOAD")}
+            label={t("allow_downloads")}
             checked={publicShareProp?.enableDownload ?? true}
             onClick={handleFileDownloadSetting}
         />
