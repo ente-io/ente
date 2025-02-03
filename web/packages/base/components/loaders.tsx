@@ -1,5 +1,6 @@
 import { Overlay, Stack100vhCenter } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { Backdrop } from "@mui/material";
 import React from "react";
 
 /**
@@ -41,15 +42,14 @@ export const LoadingOverlay: React.FC = () => (
  * Used as a overscreen during blocking actions.
  */
 export const TranslucentLoadingOverlay: React.FC = () => (
-    <Overlay
+    <Backdrop
+        open={true}
+        variant="blur"
         sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            // TODO: Why?
             zIndex: 9000,
-            backgroundColor: "backdrop.muted",
         }}
     >
         <ActivityIndicator />
-    </Overlay>
+    </Backdrop>
 );

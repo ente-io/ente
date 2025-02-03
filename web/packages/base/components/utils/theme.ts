@@ -498,6 +498,14 @@ const typography: TypographyOptions = {
     },
 };
 
+/**
+ * > [!NOTE]
+ * >
+ * > The theme isn't tree-shakeable, prefer creating new components for heavy
+ * > customization.
+ * >
+ * > https://mui.com/material-ui/customization/theme-components/
+ */
 const components: Components = {
     MuiCssBaseline: {
         styleOverrides: {
@@ -542,15 +550,31 @@ const components: Components = {
         },
     },
 
-    MuiDrawer: {
+    MuiBackdrop: {
         styleOverrides: {
             root: {
-                ".MuiBackdrop-root": {
-                    backgroundColor: "var(--mui-palette-backdrop-muted)",
-                },
+                backgroundColor: "var(--mui-palette-backdrop-muted)",
+                variants: [
+                    {
+                        props: { variant: "blur" },
+                        style: {
+                            backdropFilter: "blur(30px) opacity(95%)",
+                        },
+                    },
+                ],
             },
         },
     },
+
+    // MuiDrawer: {
+    //     styleOverrides: {
+    //         root: {
+    //             ".MuiBackdrop-root": {
+    //                 backgroundColor: "var(--mui-palette-backdrop-muted)",
+    //             },
+    //         },
+    //     },
+    // },
 
     MuiDialog: {
         defaultProps: {
@@ -562,9 +586,6 @@ const components: Components = {
         },
         styleOverrides: {
             root: {
-                ".MuiBackdrop-root": {
-                    backgroundColor: "var(--mui-palette-backdrop-muted)",
-                },
                 // Reset the MUI default paddings to 16px everywhere.
                 //
                 // This is not a great choice either, usually most dialogs, for
