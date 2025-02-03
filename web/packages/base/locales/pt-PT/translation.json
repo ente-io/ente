@@ -386,7 +386,7 @@
     "collaborators": "Colaboradores",
     "add_more": "Adicionar mais",
     "viewers": "Visualizadores",
-    "OR_ADD_EXISTING": "Ou escolher um já existente",
+    "or_add_existing": "Ou escolher um já existente",
     "remove_participant_message": "<p>{{selectedEmail}} será removido do álbum</p><p>Quaisquer fotografias adicionadas por ele também serão removidas do álbum</p>",
     "NOT_FOUND": "404 Página não encontrada",
     "link_expired": "Link expirado",

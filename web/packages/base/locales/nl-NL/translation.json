@@ -386,7 +386,7 @@
     "collaborators": "Samenwerker",
     "add_more": "Meer toevoegen",
     "viewers": "Kijkers",
-    "OR_ADD_EXISTING": "Of kies een bestaande",
+    "or_add_existing": "Of kies een bestaande",
     "remove_participant_message": "<p>{{selectedEmail}} zullen worden verwijderd uit het gedeelde album</p><p>Alle door hen toegevoegde foto's worden ook uit het album verwijderd</p>",
     "NOT_FOUND": "404 - niet gevonden",
     "link_expired": "Link verlopen",

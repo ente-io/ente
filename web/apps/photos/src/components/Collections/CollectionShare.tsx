@@ -686,7 +686,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                         {props.optionsList.length > 0 && (
                             <Stack>
                                 <RowButtonGroupTitle>
-                                    {t("OR_ADD_EXISTING")}
+                                    {t("or_add_existing")}
                                 </RowButtonGroupTitle>
                                 <RowButtonGroup>
                                     {props.optionsList.map((item, index) => (
