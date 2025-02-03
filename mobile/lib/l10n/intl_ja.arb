@@ -946,6 +946,14 @@
   "syncStopped": "同期が停止しました",
   "syncProgress": "{completed}/{total} のメモリが保存されました",
   "uploadingMultipleMemories": "{count} メモリを保存しています...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "uploadingSingleMemory": "1メモリを保存しています...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",

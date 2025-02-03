@@ -965,6 +965,14 @@
   "syncStopped": "Sincronizare oprită",
   "syncProgress": "{completed}/{total} amintiri salvate",
   "uploadingMultipleMemories": "Se salvează {count} amintiri...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "uploadingSingleMemory": "Se salvează o amintire...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",

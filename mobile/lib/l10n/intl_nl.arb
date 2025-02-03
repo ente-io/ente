@@ -965,6 +965,14 @@
   "syncStopped": "Synchronisatie gestopt",
   "syncProgress": "{completed}/{total} herinneringen bewaard",
   "uploadingMultipleMemories": "{count} herinneringen veiligstellen...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "uploadingSingleMemory": "1 herinnering veiligstellen...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
@@ -1589,5 +1597,8 @@
   "joinAlbum": "Deelnemen aan album",
   "joinAlbumSubtext": "om je foto's te bekijken en toe te voegen",
   "joinAlbumSubtextViewer": "om dit aan gedeelde albums toe te voegen",
-  "join": "Deelnemen"
+  "join": "Deelnemen",
+  "linkEmail": "Link email",
+  "link": "Link",
+  "noEnteAccountExclamation": "Geen Ente account!"
 }
