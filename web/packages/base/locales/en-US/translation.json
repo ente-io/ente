@@ -383,7 +383,7 @@
     "remove_participant_title": "Remove?",
     "remove_participant_message": "<p>{{selectedEmail}} will be removed from the album</p><p>Any photos added by them will also be removed from the album</p>",
     "confirm_remove": "Yes, remove",
-    "owner": "owner",
+    "owner": "Owner",
     "collaborators": "Collaborators",
     "viewers": "Viewers",
     "add_more": "Add more",
