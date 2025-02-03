@@ -382,7 +382,7 @@
     "ADDED_AS": "",
     "COLLABORATOR_RIGHTS": "",
     "REMOVE_PARTICIPANT_HEAD": "",
-    "OWNER": "オーナー",
+    "owner": "オーナー",
     "collaborators": "コラボレーター",
     "ADD_MORE": "さらに追加",
     "VIEWERS": "ビューアー",

@@ -382,7 +382,7 @@
     "ADDED_AS": "Đã thêm như",
     "COLLABORATOR_RIGHTS": "Cộng tác viên có thể thêm ảnh và video vào album chia sẻ",
     "REMOVE_PARTICIPANT_HEAD": "Xóa người tham gia",
-    "OWNER": "Chủ sở hữu",
+    "owner": "Chủ sở hữu",
     "collaborators": "Cộng tác viên",
     "ADD_MORE": "Thêm nhiều hơn",
     "VIEWERS": "Người xem",

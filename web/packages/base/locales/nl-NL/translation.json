@@ -382,7 +382,7 @@
     "ADDED_AS": "Toegevoegd als",
     "COLLABORATOR_RIGHTS": "Samenwerkers kunnen foto's en video's toevoegen aan het gedeelde album",
     "REMOVE_PARTICIPANT_HEAD": "Deelnemer verwijderen",
-    "OWNER": "Eigenaar",
+    "owner": "Eigenaar",
     "collaborators": "Samenwerker",
     "ADD_MORE": "Meer toevoegen",
     "VIEWERS": "Kijkers",

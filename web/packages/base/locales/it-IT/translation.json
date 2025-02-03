@@ -382,7 +382,7 @@
     "ADDED_AS": "Aggiunto come",
     "COLLABORATOR_RIGHTS": "I collaboratori possono aggiungere foto e video all'album condiviso",
     "REMOVE_PARTICIPANT_HEAD": "Rimuovi partecipante",
-    "OWNER": "Proprietario",
+    "owner": "Proprietario",
     "collaborators": "Collaboratori",
     "ADD_MORE": "Aggiungi altri",
     "VIEWERS": "Visualizzatori",

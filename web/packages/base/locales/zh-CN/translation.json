@@ -382,7 +382,7 @@
     "ADDED_AS": "已添加为",
     "COLLABORATOR_RIGHTS": "协作者可以将照片和视频添加到共享相册中",
     "REMOVE_PARTICIPANT_HEAD": "移除参与者",
-    "OWNER": "所有者",
+    "owner": "所有者",
     "collaborators": "协作者",
     "ADD_MORE": "添加更多",
     "VIEWERS": "查看者",

@@ -382,7 +382,7 @@
     "ADDED_AS": "Pridėta kaip",
     "COLLABORATOR_RIGHTS": "Bendradarbiai gali pridėti nuotraukų ir vaizdo įrašų į bendrintą albumą",
     "REMOVE_PARTICIPANT_HEAD": "Pašalinti dalyvį",
-    "OWNER": "Savininkas",
+    "owner": "Savininkas",
     "collaborators": "Bendradarbiai",
     "ADD_MORE": "Pridėti daugiau",
     "VIEWERS": "Žiūrėtojai",

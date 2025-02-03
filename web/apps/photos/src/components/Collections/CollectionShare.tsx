@@ -168,7 +168,7 @@ function SharingDetails({ collection, type }) {
         <>
             <Stack>
                 <RowButtonGroupTitle icon={<AdminPanelSettingsIcon />}>
-                    {t("OWNER")}
+                    {t("owner")}
                 </RowButtonGroupTitle>
                 <RowButtonGroup>
                     <RowLabel
@@ -898,7 +898,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                             <RowButtonGroupTitle
                                 icon={<AdminPanelSettingsIcon />}
                             >
-                                {t("OWNER")}
+                                {t("owner")}
                             </RowButtonGroupTitle>
                             <RowButtonGroup>
                                 <RowLabel
