@@ -576,7 +576,11 @@ const PlanRow: React.FC<PlanRowProps> = ({ plan, onPlanSelect, disabled }) => {
 
 const PlanRowContainer = styled(FlexWrapper)(() => ({
     background:
-        "linear-gradient(268.22deg, rgba(256, 256, 256, 0.08) -3.72%, rgba(256, 256, 256, 0) 85.73%)",
+        // "linear-gradient(268.22deg, rgba(256, 256, 256, 0.08) -3.72%, rgba(256, 256, 256, 0) 85.73%)",
+        // "linear-gradient(268.22deg, rgba(255 0 0 / 0.8) -3.72%, rgba(255 0 0
+        // / 0) 85.73%, rgba(255 255 255 / 1) 80%)",
+        "linear-gradient(270deg, transparent, rgba(0 0 0 / 0.02), white)"
+        // ""
 }));
 
 const PlanStorage = styled("div")`
