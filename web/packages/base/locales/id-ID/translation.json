@@ -385,7 +385,7 @@
     "owner": "Pemilik",
     "collaborators": "",
     "add_more": "",
-    "VIEWERS": "",
+    "viewers": "",
     "OR_ADD_EXISTING": "",
     "remove_participant_message": "<p>{{selectedEmail}} akan dikeluarkan dari album ini</p><p>Semua foto yang ia tambahkan juga akan dihapus dari album ini</p>",
     "NOT_FOUND": "404 - tidak ditemukan",

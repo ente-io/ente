@@ -385,7 +385,7 @@
     "owner": "Savininkas",
     "collaborators": "Bendradarbiai",
     "add_more": "Pridėti daugiau",
-    "VIEWERS": "Žiūrėtojai",
+    "viewers": "Žiūrėtojai",
     "OR_ADD_EXISTING": "Arba pasirinkite esamą",
     "remove_participant_message": "<p>{{selectedEmail}} bus pašalintas iš albumo.</p><p>Visos jų pridėtos nuotraukos taip pat bus pašalintos iš albumo</p>",
     "NOT_FOUND": "404 – nerasta.",

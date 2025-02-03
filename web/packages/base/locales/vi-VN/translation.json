@@ -385,7 +385,7 @@
     "owner": "Chủ sở hữu",
     "collaborators": "Cộng tác viên",
     "add_more": "Thêm nhiều hơn",
-    "VIEWERS": "Người xem",
+    "viewers": "Người xem",
     "OR_ADD_EXISTING": "Hoặc chọn một cái có sẵn",
     "remove_participant_message": "<p>{{selectedEmail}} sẽ bị xóa khỏi album</p><p>Các ảnh đã thêm bởi họ cũng sẽ bị xóa khỏi album</p>",
     "NOT_FOUND": "404 - không tìm thấy",

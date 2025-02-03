@@ -385,7 +385,7 @@
     "owner": "Propietario",
     "collaborators": "Colaboradores",
     "add_more": "Añadir más",
-    "VIEWERS": "Espectadores",
+    "viewers": "Espectadores",
     "OR_ADD_EXISTING": "O elige uno existente",
     "remove_participant_message": "<p>{{selectedEmail}} será eliminado del álbum</p><p>Cualquier foto añadida por él también será eliminada del álbum</p>",
     "NOT_FOUND": "404 - No Encontrado",

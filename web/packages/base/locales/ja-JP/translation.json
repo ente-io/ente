@@ -385,7 +385,7 @@
     "owner": "オーナー",
     "collaborators": "コラボレーター",
     "add_more": "さらに追加",
-    "VIEWERS": "ビューアー",
+    "viewers": "ビューアー",
     "OR_ADD_EXISTING": "",
     "remove_participant_message": "",
     "NOT_FOUND": "404 - 見つかりません",

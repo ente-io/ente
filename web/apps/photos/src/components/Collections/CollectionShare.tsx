@@ -202,7 +202,7 @@ function SharingDetails({ collection, type }) {
             {viewers?.length > 0 && (
                 <Stack>
                     <RowButtonGroupTitle icon={<Photo />}>
-                        {t("VIEWERS")}
+                        {t("viewers")}
                     </RowButtonGroupTitle>
                     <RowButtonGroup>
                         {viewers.map((item, index) => (
@@ -940,7 +940,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                         </Stack>
                         <Stack>
                             <RowButtonGroupTitle icon={<Photo />}>
-                                {t("VIEWERS")}
+                                {t("viewers")}
                             </RowButtonGroupTitle>
                             <RowButtonGroup>
                                 {viewers.map((item) => (

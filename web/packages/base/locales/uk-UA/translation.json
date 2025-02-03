@@ -385,7 +385,7 @@
     "owner": "Власник",
     "collaborators": "Співавтори",
     "add_more": "Додати більше",
-    "VIEWERS": "Глядачі",
+    "viewers": "Глядачі",
     "OR_ADD_EXISTING": "Або виберіть наявний",
     "remove_participant_message": "<p>{{selectedEmail}} було видалено з альбому</p><p>Будь-які фото, додані ними, будуть також видалені з альбому</p>",
     "NOT_FOUND": "404: не знайдено",
