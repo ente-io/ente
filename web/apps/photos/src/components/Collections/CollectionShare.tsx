@@ -1289,7 +1289,7 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
                         startIcon={<LinkIcon />}
                         endIcon={<ChevronRightIcon />}
                         onClick={openManageShare}
-                        label={t("MANAGE_LINK")}
+                        label={t("manage_link")}
                     />
                 </RowButtonGroup>
             </Stack>
@@ -1531,7 +1531,7 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                 <RowButton
                     onClick={openShareExpiryOptionsModalView}
                     endIcon={<ChevronRightIcon />}
-                    label={t("LINK_EXPIRY")}
+                    label={t("link_expiry")}
                     color={
                         isLinkExpired(publicShareProp?.validTill)
                             ? "critical"
@@ -1558,7 +1558,7 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                     <Titlebar
                         onClose={closeShareExpiryOptionsModalView}
                         onRootClose={handleRootClose}
-                        title={t("LINK_EXPIRY")}
+                        title={t("link_expiry")}
                     />
                     <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                         <RowButtonGroup>
@@ -1656,10 +1656,10 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
     return (
         <>
             <RowButton
-                label={t("LINK_DEVICE_LIMIT")}
+                label={t("device_limit")}
                 caption={
                     publicShareProp.deviceLimit === 0
-                        ? t("NO_DEVICE_LIMIT")
+                        ? t("none")
                         : publicShareProp.deviceLimit.toString()
                 }
                 onClick={openDeviceLimitChangeModalView}
@@ -1675,7 +1675,7 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
                     <Titlebar
                         onClose={closeDeviceLimitChangeModal}
                         onRootClose={handleRootClose}
-                        title={t("LINK_DEVICE_LIMIT")}
+                        title={t("device_limit")}
                     />
                     <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                         <RowButtonGroup>
