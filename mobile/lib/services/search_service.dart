@@ -1361,7 +1361,7 @@ class SearchService {
     }
 
     final relevantContactEmails =
-        UserService.instance.getRelevantContacts().map((e) => e.email).toSet();
+        UserService.instance.getEmailIDsOfRelevantContacts();
 
     final emailsInRelContEmailsAndNotInExistingEmails =
         relevantContactEmails.difference(existingEmails);
@@ -1423,10 +1423,8 @@ class SearchService {
         }
       }
 
-      final allRelevantEmails = UserService.instance
-          .getRelevantContacts()
-          .map((e) => e.email)
-          .toSet();
+      final allRelevantEmails =
+          UserService.instance.getEmailIDsOfRelevantContacts();
 
       int? buffer = limit != null ? limit - peopleCount : null;
       final emailsWithNoSharedFiles =
