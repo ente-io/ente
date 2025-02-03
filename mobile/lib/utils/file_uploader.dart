@@ -858,7 +858,7 @@ class FileUploader {
   }
 
   bool isPutOrUpdateFileError(Object e) {
-    if (e is DioError) {
+    if (e is DioException) {
       return e.requestOptions.path.contains("/files") ||
           e.requestOptions.path.contains("/files/update");
     }
@@ -1153,7 +1153,7 @@ class FileUploader {
       file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
       file.metadataDecryptionHeader = metadataDecryptionHeader;
       return file;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response?.statusCode == 413) {
         throw FileTooLargeForPlanError();
       } else if (e.response?.statusCode == 426) {
@@ -1221,7 +1221,7 @@ class FileUploader {
       file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
       file.metadataDecryptionHeader = metadataDecryptionHeader;
       return file;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response?.statusCode == 426) {
         _onStorageLimitExceeded();
       } else if (attempt < kMaximumUploadAttempts) {
@@ -1277,7 +1277,7 @@ class FileUploader {
             .map((e) => UploadURL.fromMap(e))
             .toList();
         _uploadURLs.addAll(urls);
-      } on DioError catch (e, s) {
+      } on DioException catch (e, s) {
         if (e.response != null) {
           if (e.response!.statusCode == 402) {
             final error = NoActiveSubscriptionError();
@@ -1327,8 +1327,8 @@ class FileUploader {
       );
 
       return uploadURL.objectKey;
-    } on DioError catch (e) {
-      if (e.message.startsWith("HttpException: Content size")) {
+    } on DioException catch (e) {
+      if (e.message?.startsWith("HttpException: Content size") ?? false) {
         rethrow;
       } else if (attempt < kMaximumUploadAttempts) {
         _logger.info("Upload failed for $fileName, retrying");
