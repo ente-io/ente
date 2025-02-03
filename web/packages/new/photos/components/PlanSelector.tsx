@@ -36,7 +36,6 @@ import {
 import { useAppContext } from "@/new/photos/types/context";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { openURL } from "@/new/photos/utils/web";
-import { FlexWrapper } from "@ente/shared/components/Container";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
@@ -575,9 +574,10 @@ const PlanRow: React.FC<PlanRowProps> = ({ plan, onPlanSelect, disabled }) => {
     );
 };
 
-const PlanRowContainer = styled(FlexWrapper)(({ theme }) =>
+const PlanRowContainer = styled("div")(({ theme }) =>
     wipTheme
         ? {
+              display: "flex",
               background:
                   "linear-gradient(270deg, transparent, rgba(0 0 0 / 0.02), transparent)",
               ...theme.applyStyles("dark", {
@@ -586,6 +586,7 @@ const PlanRowContainer = styled(FlexWrapper)(({ theme }) =>
               }),
           }
         : {
+              display: "flex",
               background:
                   "linear-gradient(270deg, rgba(255 255 255 / 0.08) -3.72%, transparent 85.73%)",
           },
