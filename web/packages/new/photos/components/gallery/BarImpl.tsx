@@ -552,7 +552,7 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
             attributes.includes("incomingShareCollaborator")) && <PeopleIcon />}
         {attributes.includes("sharedOnlyViaLink") && <LinkIcon />}
         {attributes.includes("archived") && (
-            <ArchiveIcon sx={{ color: "fixed.overlayIndicatorMuted" }} />
+            <ArchiveIcon sx={{ opacity: 0.48 }} />
         )}
     </CollectionBarCardIcon_>
 );

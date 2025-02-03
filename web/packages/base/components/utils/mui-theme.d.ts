@@ -151,11 +151,6 @@ declare module "@mui/material/styles" {
              */
             croppedAreaOverlay: string;
             /**
-             * Color of overlaid icons on top of thumbnails. e.g. color of the
-             * "archived" indicator shown on top of albums.
-             */
-            overlayIndicatorMuted: string;
-            /**
              * Color of the total space in the usage bar on the storage card.
              */
             storageCardUsageFill: string;
