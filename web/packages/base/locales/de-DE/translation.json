@@ -201,7 +201,7 @@
     "delete_photos": "Fotos löschen",
     "keep_photos": "Fotos behalten",
     "share_album": "Album teilen",
-    "sharing_with_self": "",
+    "sharing_with_self": "Du kannst nicht mit dir selbst teilen",
     "sharing_already_shared": "",
     "sharing_album_not_allowed": "Albumfreigabe nicht erlaubt",
     "sharing_disabled_for_free_accounts": "Freigabe ist für kostenlose Konten deaktiviert",
