@@ -1388,6 +1388,8 @@ class SearchService {
       final searchResults = <GenericSearchResult>[];
       final allFiles = await getAllFilesForSearch();
       final peopleToSharedFiles = <User, List<EnteFile>>{};
+      final userEmails = <String>{};
+
       int peopleCount = 0;
       for (EnteFile file in allFiles) {
         if (file.isOwner) continue;
@@ -1399,13 +1401,9 @@ class SearchService {
         } else {
           if (limit != null && limit <= peopleCount) continue;
           peopleToSharedFiles[fileOwner] = [file];
+          userEmails.add(fileOwner.email);
           peopleCount++;
         }
-      }
-
-      final userEmails = <String>{};
-      for (final user in peopleToSharedFiles.keys) {
-        userEmails.add(user.email);
       }
 
       final allRelevantEmails = UserService.instance
