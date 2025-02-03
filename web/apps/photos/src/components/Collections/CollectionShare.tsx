@@ -279,17 +279,17 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
     return (
         <Stack>
             <RowButtonGroupTitle icon={<PublicIcon />}>
-                {t("LINK_SHARE_TITLE")}
+                {t("share_link_section_title")}
             </RowButtonGroupTitle>
             <RowButtonGroup>
                 <RowButton
-                    label={t("CREATE_PUBLIC_SHARING")}
+                    label={t("create_public_link")}
                     startIcon={<LinkIcon />}
                     onClick={createSharableURLHelper}
                 />
                 <RowButtonDivider hasIcon />
                 <RowButton
-                    label={t("COLLECT_PHOTOS")}
+                    label={t("collect_photos")}
                     startIcon={<DownloadSharpIcon />}
                     onClick={createCollectPhotoShareableURLHelper}
                 />
@@ -1262,7 +1262,7 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
                     sx={{ color: "text.muted", padding: 1 }}
                 >
                     <PublicIcon style={{ fontSize: 17, marginRight: 8 }} />
-                    {t("PUBLIC_LINK_ENABLED")}
+                    {t("public_link_enabled")}
                 </Typography>
                 <RowButtonGroup>
                     {isLinkExpired(publicShareProp.validTill) ? (
@@ -1430,7 +1430,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                             color="critical"
                             startIcon={<RemoveCircleOutlineIcon />}
                             onClick={disablePublicSharing}
-                            label={t("REMOVE_LINK")}
+                            label={t("remove_link")}
                         />
                     </RowButtonGroup>
                     {sharableLinkError && (
@@ -1475,7 +1475,7 @@ const ManagePublicCollect: React.FC<ManagePublicCollectProps> = ({
                 />
             </RowButtonGroup>
             <RowButtonGroupHint>
-                {t("PUBLIC_COLLECT_SUBTEXT")}
+                {t("allow_adding_photos_hint")}
             </RowButtonGroupHint>
         </Stack>
     );
