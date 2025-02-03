@@ -44,6 +44,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/machine_learning/ml_computer.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/services/user_remote_flag_service.dart";
+import "package:photos/services/user_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";
@@ -1678,6 +1679,7 @@ class SearchService {
     final searchResults = <GenericSearchResult>[];
     final allFiles = await getAllFilesForSearch();
     final peopleToSharedFiles = <User, List<EnteFile>>{};
+    final existingEmails = <String>{};
     for (EnteFile file in allFiles) {
       if (file.isOwner) continue;
 
@@ -1691,7 +1693,20 @@ class SearchService {
           peopleToSharedFiles[fileOwner]!.add(file);
         } else {
           peopleToSharedFiles[fileOwner] = [file];
+          existingEmails.add(fileOwner.email);
         }
+      }
+    }
+
+    final relevantContactEmails =
+        UserService.instance.getEmailIDsOfRelevantContacts();
+
+    for (final email in relevantContactEmails.difference(existingEmails)) {
+      final user = User(email: email);
+      if (user.email.toLowerCase().contains(lowerCaseQuery) ||
+          ((user.displayName?.toLowerCase().contains(lowerCaseQuery)) ??
+              false)) {
+        peopleToSharedFiles[user] = [];
       }
     }
 
@@ -1725,6 +1740,8 @@ class SearchService {
       final searchResults = <GenericSearchResult>[];
       final allFiles = await getAllFilesForSearch();
       final peopleToSharedFiles = <User, List<EnteFile>>{};
+      final existingEmails = <String>{};
+
       int peopleCount = 0;
       for (EnteFile file in allFiles) {
         if (file.isOwner) continue;
@@ -1736,7 +1753,34 @@ class SearchService {
         } else {
           if (limit != null && limit <= peopleCount) continue;
           peopleToSharedFiles[fileOwner] = [file];
+          existingEmails.add(fileOwner.email);
           peopleCount++;
+        }
+      }
+
+      final allRelevantEmails =
+          UserService.instance.getEmailIDsOfRelevantContacts();
+
+      int? remainingLimit = limit != null ? limit - peopleCount : null;
+      if (remainingLimit != null) {
+        // limit - peopleCount will never be negative as of writing this.
+        // Just in case if something changes in future, we are handling it here.
+        remainingLimit = max(remainingLimit, 0);
+      }
+      final emailsWithNoSharedFiles =
+          allRelevantEmails.difference(existingEmails);
+
+      if (remainingLimit == null) {
+        for (final email in emailsWithNoSharedFiles) {
+          final user = User(email: email);
+          peopleToSharedFiles[user] = [];
+        }
+      } else {
+        for (final email in emailsWithNoSharedFiles) {
+          if (remainingLimit == 0) break;
+          final user = User(email: email);
+          peopleToSharedFiles[user] = [];
+          remainingLimit = remainingLimit! - 1;
         }
       }
 

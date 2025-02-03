@@ -1307,6 +1307,7 @@ class UserService {
     final existingEmails = <String>{};
     final int ownerID = Configuration.instance.getUserID()!;
     final String ownerEmail = Configuration.instance.getEmail()!;
+    existingEmails.add(ownerEmail);
 
     for (final c in CollectionsService.instance.getActiveCollections()) {
       // Add collaborators and viewers of collections owned by user
@@ -1372,5 +1373,83 @@ class UserService {
     }
 
     return relevantUsers;
+  }
+
+  /// Returns emails of Users that are relevant to the account owner.
+  /// Note: "User" refers to the account owner in the points below.
+  /// This includes:
+  /// 	- Collaborators and viewers of collections owned by user
+  ///   - Owners of collections shared to user.
+  ///   - All collaborators of collections in which user is a collaborator or
+  ///     a viewer.
+  ///   - All family members of user.
+  ///   - All contacts linked to a person.
+  Set<String> getEmailIDsOfRelevantContacts() {
+    final emailIDs = <String>{};
+
+    final int ownerID = Configuration.instance.getUserID()!;
+    final String ownerEmail = Configuration.instance.getEmail()!;
+
+    for (final c in CollectionsService.instance.getActiveCollections()) {
+      // Add collaborators and viewers of collections owned by user
+      if (c.owner?.id == ownerID) {
+        for (final User? u in c.sharees ?? []) {
+          if (u != null && u.id != null && u.email.isNotEmpty) {
+            if (!emailIDs.contains(u.email)) {
+              emailIDs.add(u.email);
+            }
+          }
+        }
+      } else if (c.owner?.id != null && c.owner!.email.isNotEmpty) {
+        // Add owners of collections shared with user
+        if (!emailIDs.contains(c.owner!.email)) {
+          emailIDs.add(c.owner!.email);
+        }
+        // Add collaborators of collections shared with user where user is a
+        // viewer or a collaborator
+        for (final User? u in c.sharees ?? []) {
+          if (u != null &&
+              u.id != null &&
+              u.email.isNotEmpty &&
+              u.email == ownerEmail &&
+              (u.isCollaborator || u.isViewer)) {
+            for (final User? u in c.sharees ?? []) {
+              if (u != null &&
+                  u.id != null &&
+                  u.email.isNotEmpty &&
+                  u.isCollaborator) {
+                if (!emailIDs.contains(u.email)) {
+                  emailIDs.add(u.email);
+                }
+              }
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    // Add user's family members
+    final cachedUserDetails = getCachedUserDetails();
+    if (cachedUserDetails?.familyData?.members?.isNotEmpty ?? false) {
+      for (final member in cachedUserDetails!.familyData!.members!) {
+        if (!emailIDs.contains(member.email)) {
+          emailIDs.add(member.email);
+        }
+      }
+    }
+
+    // Add contacts linked to people
+    final cachedEmailToPartialPersonData =
+        PersonService.instance.emailToPartialPersonDataMapCache;
+    for (final email in cachedEmailToPartialPersonData.keys) {
+      if (!emailIDs.contains(email)) {
+        emailIDs.add(email);
+      }
+    }
+
+    emailIDs.remove(ownerEmail);
+
+    return emailIDs;
   }
 }

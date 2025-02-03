@@ -33,7 +33,7 @@ class GenericSearchResult extends SearchResult {
 
   @override
   EnteFile? previewThumbnail() {
-    return _files.first;
+    return _files.isEmpty ? null : _files.first;
   }
 
   @override

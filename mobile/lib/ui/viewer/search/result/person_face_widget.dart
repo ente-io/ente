@@ -25,6 +25,7 @@ class PersonFaceWidget extends StatefulWidget {
   final bool thumbnailFallback;
   final bool cannotTrustFile;
   final Uint8List? faceCrop;
+  final VoidCallback? onErrorCallback;
 
   // PersonFaceWidget constructor checks that both personId and clusterID are not null
   // and that the file is not null
@@ -36,6 +37,7 @@ class PersonFaceWidget extends StatefulWidget {
     this.thumbnailFallback = false,
     this.cannotTrustFile = false,
     this.faceCrop,
+    this.onErrorCallback,
     super.key,
   }) : assert(
           personId != null || clusterID != null,
@@ -169,6 +171,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
         e,
         s,
       );
+      widget.onErrorCallback?.call();
       return null;
     }
   }
