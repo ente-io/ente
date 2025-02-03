@@ -387,7 +387,7 @@
     "add_more": "Mehr hinzufügen",
     "VIEWERS": "Zuschauer",
     "OR_ADD_EXISTING": "Oder eine Vorherige auswählen",
-    "REMOVE_PARTICIPANT_MESSAGE": "<p>{{selectedEmail}} wird vom Album entfernt</p><p>Alle Bilder von {{selectedEmail}} werden ebenfalls aus dem Album entfernt</p>",
+    "remove_participant_message": "<p>{{selectedEmail}} wird vom Album entfernt</p><p>Alle Bilder von {{selectedEmail}} werden ebenfalls aus dem Album entfernt</p>",
     "NOT_FOUND": "404 - Nicht gefunden",
     "link_expired": "Link ist abgelaufen",
     "link_expired_message": "",

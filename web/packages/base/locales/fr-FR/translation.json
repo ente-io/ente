@@ -387,7 +387,7 @@
     "add_more": "Ajouter plus",
     "VIEWERS": "Observateurs",
     "OR_ADD_EXISTING": "ou sélectionner un fichier existant",
-    "REMOVE_PARTICIPANT_MESSAGE": "<p>{{selectedEmail}} sera supprimé de l'album</p><p>Toutes les photos ajoutées par cette personne seront également supprimées de l'album</p>",
+    "remove_participant_message": "<p>{{selectedEmail}} sera supprimé de l'album</p><p>Toutes les photos ajoutées par cette personne seront également supprimées de l'album</p>",
     "NOT_FOUND": "404 - non trouvé",
     "link_expired": "Lien expiré",
     "link_expired_message": "Ce lien a soit expiré, soit été supprimé",

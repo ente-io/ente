@@ -387,7 +387,7 @@
     "add_more": "Dodaj więcej",
     "VIEWERS": "Widzowie",
     "OR_ADD_EXISTING": "Lub wybierz istniejący",
-    "REMOVE_PARTICIPANT_MESSAGE": "<p>{{selectedEmail}} zostanie usunięty z albumu</p><p>Wszelkie dodane przez nich zdjęcia zostaną usunięte z albumu</p>",
+    "remove_participant_message": "<p>{{selectedEmail}} zostanie usunięty z albumu</p><p>Wszelkie dodane przez nich zdjęcia zostaną usunięte z albumu</p>",
     "NOT_FOUND": "404 - nie znaleziono",
     "link_expired": "Link wygasł",
     "link_expired_message": "Ten link wygasł lub został wyłączony",

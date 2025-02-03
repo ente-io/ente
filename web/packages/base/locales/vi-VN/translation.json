@@ -387,7 +387,7 @@
     "add_more": "Thêm nhiều hơn",
     "VIEWERS": "Người xem",
     "OR_ADD_EXISTING": "Hoặc chọn một cái có sẵn",
-    "REMOVE_PARTICIPANT_MESSAGE": "<p>{{selectedEmail}} sẽ bị xóa khỏi album</p><p>Các ảnh đã thêm bởi họ cũng sẽ bị xóa khỏi album</p>",
+    "remove_participant_message": "<p>{{selectedEmail}} sẽ bị xóa khỏi album</p><p>Các ảnh đã thêm bởi họ cũng sẽ bị xóa khỏi album</p>",
     "NOT_FOUND": "404 - không tìm thấy",
     "link_expired": "Liên kết đã hết hạn",
     "link_expired_message": "Liên kết này đã hết hạn hoặc đã bị vô hiệu hóa",

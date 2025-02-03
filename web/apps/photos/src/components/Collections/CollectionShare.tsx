@@ -1072,7 +1072,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
             title: t("remove_participant_title"),
             message: (
                 <Trans
-                    i18nKey="REMOVE_PARTICIPANT_MESSAGE"
+                    i18nKey="remove_participant_message"
                     values={{
                         selectedEmail: selectedParticipant.email,
                     }}

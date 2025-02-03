@@ -387,7 +387,7 @@
     "add_more": "Añadir más",
     "VIEWERS": "Espectadores",
     "OR_ADD_EXISTING": "O elige uno existente",
-    "REMOVE_PARTICIPANT_MESSAGE": "<p>{{selectedEmail}} será eliminado del álbum</p><p>Cualquier foto añadida por él también será eliminada del álbum</p>",
+    "remove_participant_message": "<p>{{selectedEmail}} será eliminado del álbum</p><p>Cualquier foto añadida por él también será eliminada del álbum</p>",
     "NOT_FOUND": "404 - No Encontrado",
     "link_expired": "Enlace expirado",
     "link_expired_message": "Este enlace ha caducado o ha sido desactivado",
