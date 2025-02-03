@@ -119,13 +119,18 @@ func (c *Controller) InviteMember(ctx *gin.Context, adminUserID int64, email str
 		return stacktrace.Propagate(err, "")
 	}
 
-	if adminUser.FamilyAdminID != nil {
-		// hardcoded storageLimit
-		// Will ideally come from the request
-		StorageLimit = 1
+	// If storageLimit is greater than 0, set the StorageLimit assigned to the Member
+	// or else set no storage limit for that particular Family member.
+	if StorageLimit != 0 {
 		err := c.FamilyRepo.SetStorageLimit(ctx, StorageLimit, activeInviteToken)
 		if err != nil {
-			return stacktrace.Propagate(err, "failed to update storage limit")
+			return stacktrace.Propagate(err, "failed to Set Storage Limit")
+		}
+	} else {
+		var defaultLimit int64 = 100 * 1024 * 1024 * 1024 * 1024
+		err := c.FamilyRepo.SetStorageLimit(ctx, defaultLimit, activeInviteToken)
+		if err != nil {
+			stacktrace.Propagate(err, "Cannot Set Default Storage Limit")
 		}
 	}
 

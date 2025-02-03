@@ -1,2 +1,2 @@
 ALTER TABLE families
-ADD COLUMN storage INTEGER;
+ADD COLUMN storage BIGINT;
