@@ -56,7 +56,7 @@ class _VideoWidgetState extends State<VideoWidget> {
     final isPreviewVideoPlayable =
         PreviewVideoStore.instance.isVideoStreamingEnabled &&
             widget.file.isUploaded &&
-            // widget.file.localID == null &&
+            widget.file.localID == null &&
             (FileDataService.instance.previewIds
                     ?.containsKey(widget.file.uploadedFileID!) ??
                 false);
