@@ -1117,6 +1117,7 @@ const deriveCollectionSummaries = (
             ...pseudoCollectionOptionsForFiles([]),
             id: DUMMY_UNCATEGORIZED_COLLECTION,
             type: "uncategorized",
+            attributes: ["uncategorized"],
             name: t("section_uncategorized"),
         });
     }
@@ -1126,6 +1127,7 @@ const deriveCollectionSummaries = (
         ...pseudoCollectionOptionsForFiles(allSectionFiles),
         id: ALL_SECTION,
         type: "all",
+        attributes: ["all"],
         name: t("section_all"),
     });
     collectionSummaries.set(TRASH_SECTION, {
@@ -1133,6 +1135,7 @@ const deriveCollectionSummaries = (
         id: TRASH_SECTION,
         name: t("section_trash"),
         type: "trash",
+        attributes: ["trash"],
         coverFile: undefined,
     });
     const archivedFiles = uniqueFilesByID(
@@ -1143,6 +1146,7 @@ const deriveCollectionSummaries = (
         id: ARCHIVE_SECTION,
         name: t("section_archive"),
         type: "archive",
+        attributes: ["archive"],
         coverFile: undefined,
     });
 
@@ -1179,6 +1183,7 @@ const deriveHiddenCollectionSummaries = (
         id: HIDDEN_ITEMS_SECTION,
         name: t("hidden_items"),
         type: "hiddenItems",
+        attributes: ["hiddenItems"],
     });
 
     return hiddenCollectionSummaries;
@@ -1285,6 +1290,7 @@ const createCollectionSummaries = (
         collectionSummaries.set(collection.id, {
             id: collection.id,
             type,
+            attributes,
             name,
             latestFile: collectionFiles?.[0],
             coverFile: coverFiles.get(collection.id),
