@@ -6,6 +6,7 @@ import {
     genericRetriableErrorDialogAttributes,
 } from "@/base/components/utils/dialog";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
+import { wipTheme } from "@/base/components/utils/theme";
 import log from "@/base/log";
 import { useUserDetailsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { useWrapAsyncOperation } from "@/new/photos/components/utils/use-wrap-async";
@@ -574,14 +575,21 @@ const PlanRow: React.FC<PlanRowProps> = ({ plan, onPlanSelect, disabled }) => {
     );
 };
 
-const PlanRowContainer = styled(FlexWrapper)(() => ({
-    background:
-        // "linear-gradient(268.22deg, rgba(256, 256, 256, 0.08) -3.72%, rgba(256, 256, 256, 0) 85.73%)",
-        // "linear-gradient(268.22deg, rgba(255 0 0 / 0.8) -3.72%, rgba(255 0 0
-        // / 0) 85.73%, rgba(255 255 255 / 1) 80%)",
-        "linear-gradient(270deg, transparent, rgba(0 0 0 / 0.02), white)"
-        // ""
-}));
+const PlanRowContainer = styled(FlexWrapper)(({ theme }) =>
+    wipTheme
+        ? {
+              background:
+                  "linear-gradient(270deg, transparent, rgba(0 0 0 / 0.02), transparent)",
+              ...theme.applyStyles("dark", {
+                  background:
+                      "linear-gradient(270deg, rgba(255 255 255 / 0.08) -3.72%, transparent 85.73%)",
+              }),
+          }
+        : {
+              background:
+                  "linear-gradient(270deg, rgba(255 255 255 / 0.08) -3.72%, transparent 85.73%)",
+          },
+);
 
 const PlanStorage = styled("div")`
     flex: 1;
