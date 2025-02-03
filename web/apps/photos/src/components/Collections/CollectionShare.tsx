@@ -315,13 +315,13 @@ const handleSharingErrors = (error) => {
     let errorMessage = "";
     switch (parsedError.message) {
         case CustomError.BAD_REQUEST:
-            errorMessage = t("SHARING_BAD_REQUEST_ERROR");
+            errorMessage = t("sharing_album_not_allowed");
             break;
         case CustomError.SUBSCRIPTION_NEEDED:
-            errorMessage = t("SHARING_DISABLED_FOR_FREE_ACCOUNTS");
+            errorMessage = t("sharing_disabled_for_free_accounts");
             break;
         case CustomError.NOT_FOUND:
-            errorMessage = t("USER_DOES_NOT_EXIST");
+            errorMessage = t("sharing_user_does_not_exist");
             break;
         default:
             errorMessage = `${t("generic_error_retry")} ${parsedError.message}`;
@@ -502,11 +502,11 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
         // and already shared
         if (email) {
             if (email === user.email) {
-                throw new Error(t("SHARE_WITH_SELF"));
+                throw new Error(t("sharing_with_self"));
             } else if (
                 collection?.sharees?.find((value) => value.email === email)
             ) {
-                throw new Error(t("ALREADY_SHARED", { email: email }));
+                throw new Error(t("sharing_already_shared", { email: email }));
             }
             // set emails to array of one email
             emails = [email];
