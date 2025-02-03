@@ -217,13 +217,14 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
         faces.addAll(facesFromRemoteEmbedding);
         existingInstruction.shouldRunFaces = false;
       }
-      if (fileMl.clipEmbedding != null &&
-          fileMl.clipEmbedding!.version >= clipMlVersion) {
+      final remoteClipEmbedding =
+          fileMl.getClipEmbeddingIfCompatible(clipMlVersion);
+      if (remoteClipEmbedding != null) {
         clipEmbeddings.add(
           ClipEmbedding(
             fileID: fileMl.fileID,
-            embedding: fileMl.clipEmbedding!.embedding,
-            version: fileMl.clipEmbedding!.version,
+            embedding: remoteClipEmbedding.embedding,
+            version: remoteClipEmbedding.version,
           ),
         );
         existingInstruction.shouldRunClip = false;
