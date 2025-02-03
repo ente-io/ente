@@ -113,13 +113,13 @@ func (repo *FamilyRepository) AddMemberInvite(ctx context.Context, adminID int64
 
 // GetInvite returns information about family invitation for given token
 func (repo *FamilyRepository) GetInvite(token string) (ente.FamilyMember, error) {
-	row := repo.DB.QueryRow(`SELECT id, admin_id, member_id, status from families WHERE token = $1`, token)
+	row := repo.DB.QueryRow(`SELECT id, admin_id, member_id, status, storage from families WHERE token = $1`, token)
 	return repo.convertRowToFamilyMember(row)
 }
 
 // GetMemberById returns information about a particular member in a family
 func (repo *FamilyRepository) GetMemberById(ctx context.Context, id uuid.UUID) (ente.FamilyMember, error) {
-	row := repo.DB.QueryRowContext(ctx, `SELECT id, admin_id, member_id, status from families WHERE id = $1`, id)
+	row := repo.DB.QueryRowContext(ctx, `SELECT id, admin_id, member_id, status, storage from families WHERE id = $1`, id)
 	return repo.convertRowToFamilyMember(row)
 }
 
