@@ -135,7 +135,7 @@ func (repo *FamilyRepository) convertRowToFamilyMember(row *sql.Row) (ente.Famil
 
 // GetMembersWithStatus returns all the members in a family managed by given inviter
 func (repo *FamilyRepository) GetMembersWithStatus(adminID int64, statuses []ente.MemberStatus) ([]ente.FamilyMember, error) {
-	rows, err := repo.DB.Query(`SELECT id, admin_id, member_id, status from families
+	rows, err := repo.DB.Query(`SELECT id, admin_id, member_id, status, storage from families
 		WHERE admin_id = $1 and status = ANY($2)`, adminID, pq.Array(statuses))
 
 	if err != nil {
@@ -144,7 +144,7 @@ func (repo *FamilyRepository) GetMembersWithStatus(adminID int64, statuses []ent
 	return convertRowsToFamilyMember(rows)
 }
 
-// UpdateStorage will set the value of storage for the given user by the Admin of the family.
+// SetStorage will set the storage limit for a member by the Admin of the family.
 func (repo *FamilyRepository) SetStorageLimit(ctx context.Context, storageLimit int64, token string) error {
 	// Need to ad a check related to admin here
 	_, err := repo.DB.ExecContext(ctx, `UPDATE families SET storage=$1 WHERE token=$2`, storageLimit, token)
