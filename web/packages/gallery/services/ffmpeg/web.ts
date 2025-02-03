@@ -30,11 +30,13 @@ const createFFmpeg = async () => {
 };
 
 /**
- * Run the given FFmpeg command using a wasm FFmpeg running in a web worker.
+ * Run the given FFmpeg command using a Wasm FFmpeg running in a web worker.
  *
- * This is a sibling of {@link ffmpegExec} exposed by the desktop app in `ipc.ts`.
- * As a rough ballpark, currently the native FFmpeg integration in the desktop
- * app is 10-20x faster than the wasm one. See: [Note: FFmpeg in Electron].
+ * This is a sibling of {@link ffmpegExec} exposed by the desktop app in
+ * `ipc.ts`. As a rough ballpark, currently the native FFmpeg integration in the
+ * desktop app is 10-20x faster than the Wasm one.
+ *
+ * See: [Note: FFmpeg in Electron].
  *
  * @param command The FFmpeg command to execute.
  *
