@@ -1,13 +1,23 @@
+import "dart:async";
+
+import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
+import "package:logging/logging.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
-import 'package:photos/theme/colors.dart';
+import "package:photos/models/file/file.dart";
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/viewer/search/result/person_face_widget.dart";
+import "package:photos/utils/debouncer.dart";
 import 'package:tuple/tuple.dart';
 
 enum AvatarType { small, mini, tiny, extra }
 
-class UserAvatarWidget extends StatelessWidget {
+class UserAvatarWidget extends StatefulWidget {
   final User user;
   final AvatarType type;
   final int currentUserID;
@@ -22,44 +32,186 @@ class UserAvatarWidget extends StatelessWidget {
   });
 
   @override
+  State<UserAvatarWidget> createState() => _UserAvatarWidgetState();
+  static const strokeWidth = 1.0;
+}
+
+class _UserAvatarWidgetState extends State<UserAvatarWidget> {
+  Future<String?>? _personID;
+  EnteFile? _faceThumbnail;
+  final _logger = Logger("_UserAvatarWidgetState");
+  late final StreamSubscription<PeopleChangedEvent> _peopleChangedSubscription;
+  final _debouncer = Debouncer(
+    const Duration(milliseconds: 250),
+    executionInterval: const Duration(seconds: 20),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _reload();
+    _peopleChangedSubscription =
+        Bus.instance.on<PeopleChangedEvent>().listen((event) {
+      if (event.type == PeopleEventType.saveOrEditPerson ||
+          event.type == PeopleEventType.syncDone) {
+        _reload();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _peopleChangedSubscription.cancel();
+    _debouncer.cancelDebounceTimer();
+    super.dispose();
+  }
+
+  Future<void> _reload() async {
+    _debouncer.run(() async {
+      setState(() {
+        if (PersonService
+                .instance.emailToPartialPersonDataMapCache[widget.user.email] !=
+            null) {
+          _personID = PersonService.instance.getPersons().then((people) async {
+            final person = people.firstWhereOrNull(
+              (person) => person.data.email == widget.user.email,
+            );
+            if (person != null) {
+              _faceThumbnail =
+                  await PersonService.instance.getRecentFileOfPerson(person);
+            }
+            return person?.remoteID;
+          });
+        } else {
+          _personID = null;
+        }
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final double size = getAvatarSize(widget.type);
+
+    return _personID != null
+        ? Container(
+            padding: const EdgeInsets.all(0.5),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: widget.thumbnailView
+                    ? strokeMutedDark
+                    : getEnteColorScheme(context).strokeMuted,
+                width: UserAvatarWidget.strokeWidth,
+                strokeAlign: BorderSide.strokeAlignOutside,
+              ),
+            ),
+            child: SizedBox(
+              height: size,
+              width: size,
+              child: FutureBuilder(
+                future: _personID,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final personID = snapshot.data as String;
+                    return ClipOval(
+                      child: PersonFaceWidget(
+                        _faceThumbnail!,
+                        personId: personID,
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    _logger.severe("Error loading personID", snapshot.error);
+                    return _FirstLetterAvatar(
+                      user: widget.user,
+                      currentUserID: widget.currentUserID,
+                      thumbnailView: widget.thumbnailView,
+                      type: widget.type,
+                    );
+                  } else if (snapshot.connectionState == ConnectionState.done &&
+                      snapshot.data == null) {
+                    return _FirstLetterAvatar(
+                      user: widget.user,
+                      currentUserID: widget.currentUserID,
+                      thumbnailView: widget.thumbnailView,
+                      type: widget.type,
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          )
+        : _FirstLetterAvatar(
+            user: widget.user,
+            currentUserID: widget.currentUserID,
+            thumbnailView: widget.thumbnailView,
+            type: widget.type,
+          );
+  }
+}
+
+class _FirstLetterAvatar extends StatefulWidget {
+  final User user;
+  final int currentUserID;
+  final bool thumbnailView;
+  final AvatarType type;
+  const _FirstLetterAvatar({
+    required this.user,
+    required this.currentUserID,
+    required this.thumbnailView,
+    required this.type,
+  });
+
+  @override
+  State<_FirstLetterAvatar> createState() => _FirstLetterAvatarState();
+}
+
+class _FirstLetterAvatarState extends State<_FirstLetterAvatar> {
+  @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final displayChar = (user.displayName == null || user.displayName!.isEmpty)
-        ? ((user.email.isEmpty) ? " " : user.email.substring(0, 1))
-        : user.displayName!.substring(0, 1);
+    final displayChar =
+        (widget.user.displayName == null || widget.user.displayName!.isEmpty)
+            ? ((widget.user.email.isEmpty)
+                ? " "
+                : widget.user.email.substring(0, 1))
+            : widget.user.displayName!.substring(0, 1);
     Color decorationColor;
-    if (user.id == null || user.id! <= 0 || user.id == currentUserID) {
+    if (widget.user.id == null ||
+        widget.user.id! <= 0 ||
+        widget.user.id == widget.currentUserID) {
       decorationColor = Colors.black;
     } else {
-      decorationColor = colorScheme
-          .avatarColors[(user.id!).remainder(colorScheme.avatarColors.length)];
+      decorationColor = colorScheme.avatarColors[
+          (widget.user.id!).remainder(colorScheme.avatarColors.length)];
     }
 
-    final avatarStyle = getAvatarStyle(context, type);
+    final avatarStyle = getAvatarStyle(context, widget.type);
     final double size = avatarStyle.item1;
     final TextStyle textStyle = avatarStyle.item2;
     return Container(
-      height: size,
-      width: size,
-      padding: thumbnailView
-          ? const EdgeInsets.only(bottom: 1)
-          : const EdgeInsets.all(2),
-      decoration: thumbnailView
-          ? null
-          : BoxDecoration(
-              shape: BoxShape.circle,
-              color: decorationColor,
-              border: Border.all(
-                color: strokeBaseDark,
-                width: 1.0,
-              ),
-            ),
-      child: CircleAvatar(
-        backgroundColor: decorationColor,
-        child: Text(
-          displayChar.toUpperCase(),
-          // fixed color
-          style: textStyle.copyWith(color: Colors.white),
+      padding: const EdgeInsets.all(0.5),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: widget.thumbnailView
+              ? strokeMutedDark
+              : getEnteColorScheme(context).strokeMuted,
+          width: UserAvatarWidget.strokeWidth,
+          strokeAlign: BorderSide.strokeAlignOutside,
+        ),
+      ),
+      child: SizedBox(
+        height: size,
+        width: size,
+        child: CircleAvatar(
+          backgroundColor: decorationColor,
+          child: Text(
+            displayChar.toUpperCase(),
+            // fixed color
+            style: textStyle.copyWith(color: Colors.white),
+          ),
         ),
       ),
     );
@@ -72,7 +224,7 @@ class UserAvatarWidget extends StatelessWidget {
     final enteTextTheme = getEnteTextTheme(context);
     switch (type) {
       case AvatarType.small:
-        return Tuple2(36.0, enteTextTheme.small);
+        return Tuple2(32.0, enteTextTheme.small);
       case AvatarType.mini:
         return Tuple2(24.0, enteTextTheme.mini);
       case AvatarType.tiny:
@@ -80,5 +232,20 @@ class UserAvatarWidget extends StatelessWidget {
       case AvatarType.extra:
         return Tuple2(18.0, enteTextTheme.tiny);
     }
+  }
+}
+
+double getAvatarSize(
+  AvatarType type,
+) {
+  switch (type) {
+    case AvatarType.small:
+      return 32.0;
+    case AvatarType.mini:
+      return 24.0;
+    case AvatarType.tiny:
+      return 18.0;
+    case AvatarType.extra:
+      return 18.0;
   }
 }

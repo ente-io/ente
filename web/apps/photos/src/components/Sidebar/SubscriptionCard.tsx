@@ -1,79 +1,115 @@
 import { Overlay } from "@/base/components/containers";
 import type { ButtonishProps } from "@/base/components/mui";
+import { UnstyledButton } from "@/new/photos/components/UnstyledButton";
 import type { UserDetails } from "@/new/photos/services/user-details";
 import {
     familyUsage,
     isPartOfFamilyWithOtherMembers,
 } from "@/new/photos/services/user-details";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
-import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CircleIcon from "@mui/icons-material/Circle";
 import {
     Box,
-    LinearProgress,
     Skeleton,
     Stack,
     Typography,
     styled,
-    type LinearProgressProps,
+    useMediaQuery,
 } from "@mui/material";
 import { t } from "i18next";
 import type React from "react";
 
 interface SubscriptionCardProps {
-    userDetails: UserDetails;
+    /**
+     * Details for the logged in user.
+     *
+     * Can be undefined if the fetch has not yet completed.
+     */
+    userDetails: UserDetails | undefined;
+    /**
+     * Called when the user clicks on the card.
+     */
     onClick: () => void;
 }
 
+/**
+ * The card in the sidebar that shows a summary of the user's plan and usage.
+ */
 export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
     userDetails,
     onClick,
-}) => {
-    if (!userDetails) {
-        return (
-            <Skeleton
-                animation="wave"
-                variant="rectangular"
-                height={152}
-                sx={{ borderRadius: "8px" }}
-            />
-        );
-    }
-
-    return (
-        <Box sx={{ position: "relative" }}>
+}) =>
+    !userDetails ? (
+        <Skeleton
+            animation="wave"
+            variant="rectangular"
+            height={152}
+            sx={{ borderRadius: "8px" }}
+        />
+    ) : (
+        <Box sx={{ position: "relative", color: "fixed.white" }}>
             <BackgroundOverlay />
             <SubscriptionCardContentOverlay userDetails={userDetails} />
             <ClickOverlay onClick={onClick} />
         </Box>
     );
-};
 
-const BackgroundOverlay: React.FC = () => {
-    return (
-        <img
-            style={{ aspectRatio: "2/1" }}
-            width="100%"
-            src="/images/subscription-card-background/1x.png"
-            srcSet="/images/subscription-card-background/2x.png 2x,
-                        /images/subscription-card-background/3x.png 3x"
-        />
-    );
-};
+const BackgroundOverlay: React.FC = () => (
+    <img
+        style={{
+            aspectRatio: "2/1",
+            // Remove extra whitespace below the image.
+            verticalAlign: "bottom",
+        }}
+        width="100%"
+        src="/images/subscription-card-background/1x.png"
+        srcSet="/images/subscription-card-background/2x.png 2x, /images/subscription-card-background/3x.png 3x"
+    />
+);
 
 const ClickOverlay: React.FC<ButtonishProps> = ({ onClick }) => (
-    <Overlay
-        sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
-            cursor: "pointer",
-        }}
-        onClick={onClick}
-    >
+    <ClickOverlayButton onClick={onClick}>
         <ChevronRightIcon />
-    </Overlay>
+    </ClickOverlayButton>
+);
+
+/**
+ * The transparent button element offers activation of the subscription card.
+ *
+ * A mixin of {@link FocusVisibleUnstyledButton} and {@link Overlay}, plus
+ * custom styling to place its contents (chevron) at the middle right.
+ */
+const ClickOverlayButton = styled(UnstyledButton)(
+    ({ theme }) => `
+    /* Overlay */
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+
+    /* Position the chevron at the middle right */
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    /* Reset the button color */
+    color: inherit;
+
+    /* FocusVisibleUnstyledButton, but customized to work button with the larger
+       subscription card and its border radii. */
+    &:focus-visible {
+        outline: 1.5px solid ${theme.vars.palette.stroke.base};
+        outline-offset: 2px;
+        border-radius: 3px;
+    }
+    &:active {
+        outline: 2px solid ${theme.vars.palette.stroke.faint};
+        outline-offset: 1px;
+        border-radius: 3px;
+    }
+`,
 );
 
 interface SubscriptionCardContentOverlayProps {
@@ -82,35 +118,30 @@ interface SubscriptionCardContentOverlayProps {
 
 export const SubscriptionCardContentOverlay: React.FC<
     SubscriptionCardContentOverlayProps
-> = ({ userDetails }) => {
-    return (
-        <Overlay>
-            <SpaceBetweenFlex
-                height={"100%"}
-                flexDirection={"column"}
-                padding={"20px 16px"}
-            >
-                {userDetails && isPartOfFamilyWithOtherMembers(userDetails) ? (
-                    <FamilySubscriptionCardContent userDetails={userDetails} />
-                ) : (
-                    <IndividualSubscriptionCardContent
-                        userDetails={userDetails}
-                    />
-                )}
-            </SpaceBetweenFlex>
-        </Overlay>
-    );
-};
+> = ({ userDetails }) => (
+    <Overlay>
+        <Stack
+            sx={{
+                height: "100%",
+                justifyContent: "space-between",
+                padding: "20px 16px",
+            }}
+        >
+            {isPartOfFamilyWithOtherMembers(userDetails) ? (
+                <FamilySubscriptionCardContents userDetails={userDetails} />
+            ) : (
+                <IndividualSubscriptionCardContents userDetails={userDetails} />
+            )}
+        </Stack>
+    </Overlay>
+);
 
-interface IndividualSubscriptionCardContentProps {
-    userDetails: UserDetails;
-}
-
-const IndividualSubscriptionCardContent: React.FC<
-    IndividualSubscriptionCardContentProps
+const IndividualSubscriptionCardContents: React.FC<
+    SubscriptionCardContentOverlayProps
 > = ({ userDetails }) => {
     const totalStorage =
         userDetails.subscription.storage + userDetails.storageBonus;
+
     return (
         <>
             <StorageSection storage={totalStorage} usage={userDetails.usage} />
@@ -123,58 +154,41 @@ const IndividualSubscriptionCardContent: React.FC<
     );
 };
 
-const MobileSmallBox = styled("div")`
-    display: none;
-    @media (max-width: 359px) {
-        display: block;
-    }
-`;
-
-const DefaultBox = styled("div")`
-    display: none;
-    @media (min-width: 360px) {
-        display: block;
-    }
-`;
-
 interface StorageSectionProps {
     usage: number;
     storage: number;
 }
 
 const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
+    const isExtraSmallWidth = useMediaQuery("(width < 360px)");
+    const label = isExtraSmallWidth
+        ? `${bytesInGB(usage)} /  ${bytesInGB(storage)} ${t("storage_unit.gb")} ${t("used")}`
+        : `${formattedStorageByteSize(usage, { round: true })} ${t("of")} ${formattedStorageByteSize(storage)} ${t("used")}`;
+
     return (
-        <Box sx={{ width: "100%" }}>
-            <Typography variant="small" sx={{ color: "text.muted" }}>
+        <Box>
+            <Typography variant="small" sx={{ opacity: 0.7 }}>
                 {t("storage")}
             </Typography>
-            <DefaultBox>
-                <Typography variant="h3">
-                    {`${formattedStorageByteSize(usage, { round: true })} ${t(
-                        "of",
-                    )} ${formattedStorageByteSize(storage)} ${t("used")}`}
-                </Typography>
-            </DefaultBox>
-            <MobileSmallBox>
-                <Typography variant="h3">
-                    {`${bytesInGB(usage)} /  ${bytesInGB(storage)} ${t("storage_unit.gb")} ${t("used")}`}
-                </Typography>
-            </MobileSmallBox>
+            <Typography variant="h3">{label}</Typography>
         </Box>
     );
 };
 
-interface IndividualUsageSectionProps {
+interface UsageStorage {
     usage: number;
-    fileCount: number;
     storage: number;
 }
+
+type IndividualUsageSectionProps = UsageStorage & {
+    fileCount: number;
+};
 
 const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
     usage,
     storage,
     fileCount,
-}) => {
+}) => (
     // [Note: Fallback translation for languages with multiple plurals]
     //
     // Languages like Polish and Arabian have multiple plural forms, and
@@ -186,140 +200,126 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
     // it foo_count (To keep our heads straight, we adopt the convention that
     // all such pluralizable strings use the _count suffix, but that's not a
     // requirement from the library).
-    return (
-        <Box sx={{ width: "100%" }}>
-            <UsageBar used={usage} total={storage} />
-            <SpaceBetweenFlex sx={{ marginTop: 1.5 }}>
-                <Typography variant="mini">{`${formattedStorageByteSize(
-                    storage - usage,
-                )} ${t("free")}`}</Typography>
-                <Typography variant="mini" sx={{ fontWeight: "medium" }}>
-                    {t("photos_count", { count: fileCount ?? 0 })}
-                </Typography>
-            </SpaceBetweenFlex>
-        </Box>
-    );
+
+    <Stack sx={{ gap: 1.5 }}>
+        <UsageBar>
+            <UsageBarSegment
+                {...{ usage, storage }}
+                fillColor="rgba(255 255 255 / 1)"
+            />
+        </UsageBar>
+        <Stack direction="row" sx={{ justifyContent: "space-between" }}>
+            <Typography variant="mini">
+                {`${formattedStorageByteSize(storage - usage)} ${t("free")}`}
+            </Typography>
+            <Typography variant="mini" sx={{ fontWeight: "medium" }}>
+                {t("photos_count", { count: fileCount ?? 0 })}
+            </Typography>
+        </Stack>
+    </Stack>
+);
+
+const UsageBar = styled("div")`
+    position: relative;
+    height: 4px;
+    border-radius: 4px;
+    background-color: rgba(255 255 255 / 0.2);
+`;
+
+type UsageBarSegmentProps = UsageStorage & {
+    /** A CSS color string representing the color that this segment  */
+    fillColor: string;
 };
 
-interface FamilySubscriptionCardContentProps {
-    userDetails: UserDetails;
-}
+/**
+ * A bar inside a UsageContainer.
+ */
+const UsageBarSegment: React.FC<UsageBarSegmentProps> = ({
+    usage,
+    storage,
+    fillColor,
+}) => (
+    <Box
+        sx={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width: "max(var(--width), 2px)",
+            height: "4px",
+            borderRadius: "4px",
+            backgroundColor: "var(--background-color)",
+        }}
+        style={
+            {
+                "--width": `${Math.min(usage / storage, 1) * 100}%`,
+                "--background-color": fillColor,
+            } as React.CSSProperties
+        }
+    />
+);
 
-const FamilySubscriptionCardContent: React.FC<
-    FamilySubscriptionCardContentProps
+const FamilySubscriptionCardContents: React.FC<
+    SubscriptionCardContentOverlayProps
 > = ({ userDetails }) => {
-    const totalUsage = familyUsage(userDetails);
-    const totalStorage =
+    const usage = familyUsage(userDetails);
+    const storage =
         (userDetails.familyData?.storage ?? 0) + userDetails.storageBonus;
 
     return (
         <>
-            <StorageSection storage={totalStorage} usage={totalUsage} />
+            <StorageSection {...{ storage, usage }} />
             <FamilyUsageSection
                 userUsage={userDetails.usage}
                 fileCount={userDetails.fileCount}
-                totalUsage={totalUsage}
-                totalStorage={totalStorage}
+                {...{ storage, usage }}
             />
         </>
     );
 };
 
-interface FamilyUsageSectionProps {
+type FamilyUsageSectionProps = UsageStorage & {
     userUsage: number;
-    totalUsage: number;
     fileCount: number;
-    totalStorage: number;
-}
+};
 
 const FamilyUsageSection: React.FC<FamilyUsageSectionProps> = ({
+    usage,
+    storage,
     userUsage,
-    totalUsage,
     fileCount,
-    totalStorage,
-}) => {
-    return (
-        <Box sx={{ width: "100%" }}>
-            <FamilyUsageBar
-                totalUsage={totalUsage}
-                userUsage={userUsage}
-                totalStorage={totalStorage}
-            />
-            <SpaceBetweenFlex sx={{ marginTop: 1.5 }}>
-                <Stack direction={"row"} spacing={1.5}>
-                    <Legend label={t("you")} color="text.base" />
-                    <Legend label={t("family")} color="text.muted" />
-                </Stack>
-                <Typography variant="mini" sx={{ fontWeight: "medium" }}>
-                    {t("photos_count", { count: fileCount ?? 0 })}
-                </Typography>
-            </SpaceBetweenFlex>
-        </Box>
-    );
-};
-
-interface FamilyUsageBarProps {
-    userUsage: number;
-    totalUsage: number;
-    totalStorage: number;
-}
-
-const FamilyUsageBar: React.FC<FamilyUsageBarProps> = ({
-    userUsage,
-    totalUsage,
-    totalStorage,
 }) => (
-    <Box sx={{ position: "relative", width: "100%" }}>
-        <UsageBar
-            used={userUsage}
-            total={totalStorage}
-            sx={{ backgroundColor: "transparent" }}
-        />
-        <UsageBar
-            used={totalUsage}
-            total={totalStorage}
-            sx={{
-                position: "absolute",
-                top: 0,
-                zIndex: 1,
-                ".MuiLinearProgress-bar ": {
-                    backgroundColor: "text.muted",
-                },
-                width: "100%",
-            }}
-        />
-    </Box>
+    <Stack sx={{ gap: 1.5 }}>
+        <UsageBar>
+            <UsageBarSegment
+                {...{ storage }}
+                usage={userUsage}
+                fillColor="rgba(255 255 255 / 1)"
+            />
+            <UsageBarSegment
+                {...{ usage, storage }}
+                fillColor="rgba(255 255 255 / 0.6)"
+            />
+        </UsageBar>
+        <Stack direction="row" sx={{ justifyContent: "space-between" }}>
+            <Stack direction="row" sx={{ gap: 1.5 }}>
+                <Legend label={t("you")} opacity={1} />
+                <Legend label={t("family")} opacity={0.8} />
+            </Stack>
+            <Typography variant="mini" sx={{ fontWeight: "medium" }}>
+                {t("photos_count", { count: fileCount ?? 0 })}
+            </Typography>
+        </Stack>
+    </Stack>
 );
-
-type UsageBarProps = Pick<LinearProgressProps, "sx"> & {
-    used: number;
-    total: number;
-};
-
-const UsageBar: React.FC<UsageBarProps> = ({ used, total, sx }) => (
-    <UsageBar_
-        variant="determinate"
-        sx={sx}
-        value={Math.min(used / total, 1) * 100}
-    />
-);
-
-const UsageBar_ = styled(LinearProgress)(({ theme }) => ({
-    ".MuiLinearProgress-bar": {
-        borderRadius: "2px",
-    },
-    borderRadius: "2px",
-    backgroundColor: theme.vars.palette.fixed.storageCardUsageFill,
-}));
 
 interface LegendProps {
     label: string;
-    color: string;
+    opacity: number;
 }
 
-const Legend: React.FC<LegendProps> = ({ label, color }) => (
-    <Stack direction="row" sx={{ alignItems: "center" }}>
-        <LegendDot sx={{ color }} />
+const Legend: React.FC<LegendProps> = ({ label, opacity }) => (
+    <Stack direction="row" sx={{ alignItems: "center", opacity }}>
+        <LegendDot />
         <Typography variant="mini" sx={{ fontWeight: "medium" }}>
             {label}
         </Typography>

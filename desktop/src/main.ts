@@ -95,10 +95,10 @@ const main = () => {
     /**
      * Handle an open URL request, but ensuring that we have a mainWindow.
      */
-    const handleOpenURLEnsuringWindow = (url: string) => {
+    const handleOpenEnteURLEnsuringWindow = (url: string) => {
         log.info(`Attempting to handle request to open URL: ${url}`);
         if (mainWindow) handleEnteLinks(mainWindow, url);
-        else setTimeout(() => handleOpenURLEnsuringWindow(url), 1000);
+        else setTimeout(() => handleOpenEnteURLEnsuringWindow(url), 1000);
     };
 
     app.on("second-instance", (_, argv: string[]) => {
@@ -109,9 +109,15 @@ const main = () => {
             mainWindow.focus();
         }
         // On Windows and Linux, this is how we get deeplinks.
+        //
         // See: registerForEnteLinks
-        const url = argv.pop();
-        if (url) handleOpenURLEnsuringWindow(url);
+        //
+        // Note that Chromium reserves the right to fudge with the order of the
+        // command line arguments, including inserting things in arbitrary
+        // places, so we need to go through the args to find the one that is
+        // pertinent to us (if any) instead of looking at a fixed position.
+        const url = argv.find((arg) => arg.startsWith("ente://app"));
+        if (url) handleOpenEnteURLEnsuringWindow(url);
     });
 
     // Emitted once, when Electron has finished initializing.
@@ -170,7 +176,7 @@ const main = () => {
     });
 
     // On macOS, this is how we get deeplinks. See: registerForEnteLinks
-    app.on("open-url", (_, url) => handleOpenURLEnsuringWindow(url));
+    app.on("open-url", (_, url) => handleOpenEnteURLEnsuringWindow(url));
 };
 
 /**
@@ -272,7 +278,7 @@ const handleEnteLinks = (mainWindow: BrowserWindow, url: string) => {
     // - the protocol we're using to serve/ our bundled web app
     //
     // use the same scheme ("ente://"), so the URL can directly be forwarded.
-    mainWindow.webContents.send("openURL", url);
+    mainWindow.webContents.send("openEnteURL", url);
 };
 
 /** Attach handlers to the (node) process. */

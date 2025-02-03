@@ -221,7 +221,7 @@ const UploadProgressTitle: React.FC = () => {
                     <UploadProgressSubtitleText />
                 </Box>
                 <Box>
-                    <Stack direction={"row"} spacing={1}>
+                    <Stack direction="row" sx={{ gap: 1 }}>
                         <FilledIconButton onClick={toggleExpanded}>
                             {expanded ? <UnfoldLessIcon /> : <UnfoldMoreIcon />}
                         </FilledIconButton>

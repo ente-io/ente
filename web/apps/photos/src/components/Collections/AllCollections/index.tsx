@@ -38,7 +38,7 @@ export default function AllCollections(props: AllCollectionsProps) {
         onChangeCollectionsSortBy,
         isInHiddenSection,
     } = props;
-    const isMobile = useMediaQuery("(max-width: 428px)");
+    const fullScreen = useMediaQuery("(max-width: 428px)");
 
     const onCollectionClick = (collectionID: number) => {
         onSelectCollectionID(collectionID);
@@ -47,10 +47,8 @@ export default function AllCollections(props: AllCollectionsProps) {
 
     return (
         <AllCollectionDialog
-            open={open}
-            onClose={onClose}
-            TransitionComponent={SlideUpTransition}
-            fullScreen={isMobile}
+            {...{ open, onClose, fullScreen }}
+            slots={{ transition: SlideUpTransition }}
             fullWidth
         >
             <AllCollectionsHeader
@@ -125,7 +123,7 @@ const AllCollectionsHeader = ({
                     </Typography>
                 </Box>
             </FluidContainer>
-            <Stack direction="row" spacing={1.5}>
+            <Stack direction="row" sx={{ gap: 1.5 }}>
                 <CollectionsSortOptions
                     activeSortBy={collectionsSortBy}
                     onChangeSortBy={onChangeCollectionsSortBy}

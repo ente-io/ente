@@ -56,8 +56,6 @@ export const execAsync = async (command: string | string[]) => {
     const startTime = Date.now();
     const result = await execAsync_(escapedCommand);
     log.debug(() => `${escapedCommand} (${Date.now() - startTime} ms)`);
-    // TODO(MR): Temp for debugging in nightlies; Remove before release.
-    log.info(`${escapedCommand} (${Date.now() - startTime} ms)`);
     return result;
 };
 

@@ -11,7 +11,6 @@ import 'package:photos/data/holidays.dart';
 import 'package:photos/data/months.dart';
 import 'package:photos/data/years.dart';
 import 'package:photos/db/files_db.dart';
-import "package:photos/db/ml/clip_db.dart";
 import "package:photos/db/ml/db.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/extensions/user_extension.dart";
@@ -64,6 +63,7 @@ class SearchService {
   final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
   static const _maximumResultsLimit = 20;
+  late final mlDataDB = MLDataDB.instance;
 
   SearchService._privateConstructor();
 
@@ -767,7 +767,7 @@ class SearchService {
   ) async {
     _logger.info('getClusterFilesForPersonID $personID');
     final Map<int, Set<String>> fileIdToClusterID =
-        await MLDataDB.instance.getFileIdToClusterIDSet(personID);
+        await mlDataDB.getFileIdToClusterIDSet(personID);
     _logger.info('faceDbDone getClusterFilesForPersonID $personID');
     final Map<String, List<EnteFile>> clusterIDToFiles = {};
     final allFiles = await getAllFilesForSearch();
@@ -795,11 +795,10 @@ class SearchService {
     try {
       debugPrint("getting faces");
       final Map<int, Set<String>> fileIdToClusterID =
-          await MLDataDB.instance.getFileIdToClusterIds();
+          await mlDataDB.getFileIdToClusterIds();
       final Map<String, PersonEntity> personIdToPerson =
           await PersonService.instance.getPersonsMap();
-      final clusterIDToPersonID =
-          await MLDataDB.instance.getClusterIDToPersonID();
+      final clusterIDToPersonID = await mlDataDB.getClusterIDToPersonID();
 
       final List<GenericSearchResult> facesResult = [];
       final Map<String, List<EnteFile>> clusterIdToFiles = {};
@@ -923,7 +922,7 @@ class SearchService {
               "`getAllFace`: Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}, deleting the mapping",
               Exception('ClusterID assigned to a person that no longer exists'),
             );
-            await MLDataDB.instance.removeClusterToPerson(
+            await mlDataDB.removeClusterToPerson(
               personID: personID,
               clusterID: clusterId,
             );
@@ -1709,6 +1708,9 @@ class SearchService {
             occurrence: kMostRelevantFilter,
             matchedUploadedIDs: filesToUploadedFileIDs(value),
           ),
+          params: {
+            kPersonParamID: key.linkedPersonID,
+          },
         ),
       );
     });
@@ -1752,6 +1754,9 @@ class SearchService {
               occurrence: kMostRelevantFilter,
               matchedUploadedIDs: filesToUploadedFileIDs(value),
             ),
+            params: {
+              kPersonParamID: key.linkedPersonID,
+            },
           ),
         );
       });

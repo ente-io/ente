@@ -56,7 +56,8 @@ class _LinkContactToPersonSelectionPageState
         PersonService.instance.getPersons().then((persons) async {
       final List<PersonEntityWithThumbnailFile> result = [];
       for (final person in persons) {
-        if (person.data.email != null && person.data.email!.isNotEmpty) {
+        if ((person.data.email != null && person.data.email!.isNotEmpty) ||
+            (person.data.isHidden || person.data.isIgnored)) {
           continue;
         }
         final file = await PersonService.instance.getRecentFileOfPerson(person);
@@ -223,7 +224,8 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
         PersonService.instance.getPersons().then((persons) async {
       final List<PersonEntityWithThumbnailFile> result = [];
       for (final person in persons) {
-        if (person.data.email != null && person.data.email!.isNotEmpty) {
+        if ((person.data.email != null && person.data.email!.isNotEmpty) ||
+            (person.data.isHidden || person.data.isIgnored)) {
           continue;
         }
         final file = await PersonService.instance.getRecentFileOfPerson(person);

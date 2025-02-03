@@ -114,9 +114,9 @@ export interface Electron {
 
     /**
      * Set or clear the callback {@link cb} to invoke whenever the app gets
-     * asked to open a deeplink. This allows the Node.js layer to ask the
-     * renderer to handle deeplinks and redirect itself to a new location if
-     * needed.
+     * asked to open a deeplink that begins with "ente://". This allows the
+     * Node.js layer to ask the renderer to handle deeplinks and redirect itself
+     * to a new location if needed.
      *
      * In particular, this is necessary for handling passkey authentication.
      * See: [Note: Passkey verification in the desktop app]
@@ -127,7 +127,7 @@ export interface Electron {
      * "ente://" URL. The URL string (a.k.a. "deeplink") we were asked to open
      * is passed to the function verbatim.
      */
-    onOpenURL: (cb: ((url: string) => void) | undefined) => void;
+    onOpenEnteURL: (cb: ((url: string) => void) | undefined) => void;
 
     // - App update
 
@@ -272,8 +272,7 @@ export interface Electron {
      * Try to convert an arbitrary image into JPEG using native layer tools.
      *
      * The behaviour is OS dependent. On macOS we use the `sips` utility, while
-     * on Linux and Windows we an ImageMagick executable bundled with our
-     * desktop app.
+     * on Linux and Windows we use a `vips` bundled with our desktop app.
      *
      * @param imageData The raw image data (the contents of the image file).
      *
@@ -285,8 +284,7 @@ export interface Electron {
      * Generate a JPEG thumbnail for the given image.
      *
      * The behaviour is OS dependent. On macOS we use the `sips` utility, while
-     * on Linux and Windows we an ImageMagick executable bundled with our
-     * desktop app.
+     * on Linux and Windows we use a `vips` bundled with our desktop app.
      *
      * @param dataOrPathOrZipItem The file whose thumbnail we want to generate.
      * It can be provided as raw image data (the contents of the image file), or

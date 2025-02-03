@@ -111,10 +111,10 @@ For video conversions and metadata extraction, we use ffmpeg. To bundle a
 > ffmpeg binary and using the wasm one (that our renderer process already has).
 > Which is why we bundle it to speed up operations on the desktop app.
 
-On Linux and Windows, we use ImageMagick for thumbnail generation and JPEG
-conversion of unpreviewable images. A static OS/architecture specific binary of
-this is bundled in our extra resources (`build`) folder by `scripts/magick.sh`
-and/or `scripts/beforeBuild.js`. See "[Note: ImageMagick]" for more details.
+On Linux and Windows, we use `vips` for thumbnail generation and JPEG conversion
+of unpreviewable images. A static OS/architecture specific binary of this is
+bundled in our extra resources (`build`) folder by `scripts/vips.sh` and/or
+`scripts/beforeBuild.js`. See "[Note: vips]" for more details.
 
 On macOS, we use the `sips` CLI tool for these tasks, but that is already
 available on the host machine, and is not bundled with our app.

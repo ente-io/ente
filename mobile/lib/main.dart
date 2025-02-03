@@ -282,7 +282,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("PushService/HomeWidget done $tlog");
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
-    PersonService.init(
+    await PersonService.init(
       entityService,
       MLDataDB.instance,
       preferences,

@@ -181,7 +181,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     final result = await routeToPage(
       context,
       SaveOrEditPerson(
-        person.data.assigned?.first.id ?? "",
+        person.data.assigned.first.id,
         person: person,
         isEditing: true,
       ),
@@ -364,7 +364,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     if (assignName) {
       final result = await showAssignPersonAction(
         context,
-        clusterID: widget.person.data.assigned!.first.id,
+        clusterID: widget.person.data.assigned.first.id,
       );
       Navigator.pop(context);
       if (result != null) {

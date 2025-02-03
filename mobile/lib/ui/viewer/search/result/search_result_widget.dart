@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import "package:intl/intl.dart";
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import 'package:photos/models/search/search_result.dart';
 import "package:photos/models/search/search_types.dart";
@@ -40,11 +41,16 @@ class SearchResultWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SearchThumbnailWidget(
-              searchResult.previewThumbnail(),
-              heroTagPrefix,
-              searchResult: searchResult,
-            ),
+            searchResult.type() == ResultType.shared
+                ? ContactSearchThumbnailWidget(
+                    heroTagPrefix,
+                    searchResult: searchResult as GenericSearchResult,
+                  )
+                : SearchThumbnailWidget(
+                    searchResult.previewThumbnail(),
+                    heroTagPrefix,
+                    searchResult: searchResult,
+                  ),
             const SizedBox(width: 12),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 2),

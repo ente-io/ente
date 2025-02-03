@@ -21,5 +21,9 @@ out
 # electron-builder
 dist/
 
-# We download it on demand, if needed for the particular OS/arch.
+# Legacy, people who checked out main for a brief while in Jan 2025 may have
+# this. Can be removed in the future.
 build/magick*
+
+# We download it on demand, if needed for the particular OS/arch.
+build/vips*

@@ -79,12 +79,17 @@ export const PlanSelector: React.FC<PlanSelectorProps> = ({
     return (
         <Dialog
             {...{ open, onClose, fullScreen }}
-            PaperProps={{
-                sx: (theme) => ({
-                    width: { sm: "391px" },
-                    p: 1,
-                    [theme.breakpoints.down(360)]: { p: 0 },
-                }),
+            slotProps={{
+                paper: {
+                    sx: (theme) => ({
+                        width: { sm: "391px" },
+                        p: 1,
+                        [theme.breakpoints.down(360)]: { p: 0 },
+                    }),
+                },
+                backdrop: {
+                    sx: { backdropFilter: "blur(30px) opacity(95%)" },
+                },
             }}
         >
             <PlanSelectorCard {...{ onClose, setLoading }} />
@@ -310,32 +315,32 @@ const FreeSubscriptionPlanSelectorCard: React.FC<
 }) => (
     <>
         <Typography variant="h3">{t("choose_plan")}</Typography>
-        <Box>
-            <Stack spacing={3}>
-                <Box>
-                    <PeriodToggler
-                        planPeriod={planPeriod}
-                        togglePeriod={togglePeriod}
-                    />
-                    <Typography
-                        variant="small"
-                        sx={{ mt: 0.5, color: "text.muted" }}
-                    >
-                        {t("two_months_free")}
-                    </Typography>
-                </Box>
-                {children}
-                {subscription && addOnBonuses.length > 0 && (
-                    <>
+        <Stack sx={{ gap: 3 }}>
+            <Box>
+                <PeriodToggler
+                    planPeriod={planPeriod}
+                    togglePeriod={togglePeriod}
+                />
+                <Typography
+                    variant="small"
+                    sx={{ p: "8px 2px 0px 2px", color: "text.muted" }}
+                >
+                    {t("two_months_free")}
+                </Typography>
+            </Box>
+            {children}
+            {subscription && addOnBonuses.length > 0 && (
+                <Stack sx={{ gap: 2 }}>
+                    <Stack sx={{ gap: 1.5, p: 0.5 }}>
                         <AddOnBonusRows addOnBonuses={addOnBonuses} />
-                        <ManageSubscription
-                            {...{ onClose, setLoading, subscription }}
-                            hasAddOnBonus={true}
-                        />
-                    </>
-                )}
-            </Stack>
-        </Box>
+                    </Stack>
+                    <ManageSubscription
+                        {...{ onClose, setLoading, subscription }}
+                        hasAddOnBonus={true}
+                    />
+                </Stack>
+            )}
+        </Stack>
     </>
 );
 
@@ -360,8 +365,11 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
     children,
 }) => (
     <>
-        <Box sx={{ pl: 1.5, py: 0.5 }}>
-            <SpaceBetweenFlex>
+        <Stack sx={{ gap: 2 }}>
+            <Stack
+                direction="row"
+                sx={{ pl: 0.5, pt: 0.5, justifyContent: "space-between" }}
+            >
                 <Box>
                     <Typography variant="h5" sx={{ fontWeight: "medium" }}>
                         {t("subscription")}
@@ -374,11 +382,11 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
                 <IconButton onClick={onClose} color="secondary">
                     <CloseIcon />
                 </IconButton>
-            </SpaceBetweenFlex>
-        </Box>
+            </Stack>
 
-        <Box sx={{ px: 1.5 }}>
-            <Typography sx={{ color: "text.muted", fontWeight: "medium" }}>
+            <Typography
+                sx={{ color: "text.muted", px: 0.5, fontWeight: "medium" }}
+            >
                 <Trans
                     i18nKey="current_usage"
                     values={{
@@ -386,7 +394,7 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
                     }}
                 />
             </Typography>
-        </Box>
+        </Stack>
 
         <Box>
             <Stack
@@ -404,7 +412,7 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
                     />
                     <Typography
                         variant="small"
-                        sx={{ mt: 0.5, color: "text.muted" }}
+                        sx={{ p: "8px 2px 0px 2px", color: "text.muted" }}
                     >
                         {t("two_months_free")}
                     </Typography>
@@ -412,7 +420,7 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
                 {children}
             </Stack>
 
-            <Box sx={{ py: 1, px: 1.5 }}>
+            <Stack sx={{ padding: "20px 8px 0px 8px", gap: 2 }}>
                 <Typography sx={{ color: "text.muted" }}>
                     {!isSubscriptionCancelled(subscription)
                         ? t("subscription_status_renewal_active", {
@@ -425,7 +433,7 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
                 {addOnBonuses.length > 0 && (
                     <AddOnBonusRows addOnBonuses={addOnBonuses} />
                 )}
-            </Box>
+            </Stack>
         </Box>
 
         <ManageSubscription
@@ -462,17 +470,17 @@ const CustomToggleButton = styled(ToggleButton)(({ theme }) => ({
     textTransform: "none",
     padding: "12px 16px",
     borderRadius: "4px",
-    width: "97.433px",
+    minWidth: "98px",
     backgroundColor: theme.vars.palette.fill.faint,
-    border: `1px solid transparent`,
+    borderColor: "transparent",
     color: theme.vars.palette.text.faint,
     "&.Mui-selected": {
         backgroundColor: theme.vars.palette.accent.main,
-        color: theme.vars.palette.text.base,
+        color: theme.vars.palette.accent.contrastText,
     },
     "&.Mui-selected:hover": {
         backgroundColor: theme.vars.palette.accent.main,
-        color: theme.vars.palette.text.base,
+        color: theme.vars.palette.accent.contrastText,
     },
 }));
 
@@ -493,7 +501,7 @@ const Plans: React.FC<PlansProps> = ({
     hasAddOnBonus,
     onPlanSelect,
 }) => (
-    <Stack spacing={2}>
+    <Stack sx={{ gap: 2 }}>
         {plansData?.plans
             .filter((plan) => plan.period === planPeriod)
             .map((plan) => (
@@ -554,10 +562,7 @@ const PlanRow: React.FC<PlanRowProps> = ({ plan, onPlanSelect, disabled }) => {
                 >
                     <Box sx={{ textAlign: "right" }}>
                         <Typography variant="h6">{plan.price}</Typography>
-                        <Typography
-                            variant="small"
-                            sx={{ color: "text.muted" }}
-                        >
+                        <Typography variant="small" sx={{ opacity: 0.7 }}>
                             {`/ ${
                                 plan.period === "month"
                                     ? t("month_short")
@@ -636,7 +641,7 @@ interface AddOnBonusRowsProps {
 const AddOnBonusRows: React.FC<AddOnBonusRowsProps> = ({ addOnBonuses }) => (
     <>
         {addOnBonuses.map((bonus, i) => (
-            <Typography key={i} sx={{ color: "text.muted", pt: 1 }}>
+            <Typography key={i} variant="small" sx={{ color: "text.muted" }}>
                 <Trans
                     i18nKey={"add_on_valid_till"}
                     values={{
@@ -676,7 +681,7 @@ function ManageSubscription({
     };
 
     return (
-        <Stack spacing={1}>
+        <Stack sx={{ gap: 1 }}>
             {isSubscriptionStripe(subscription) && (
                 <StripeSubscriptionOptions
                     {...{ onClose, subscription, hasAddOnBonus }}

@@ -36,7 +36,7 @@ export const SingleInputDialog: React.FC<SingleInputDialogProps> = ({
             onClose={onClose}
             maxWidth="xs"
             fullWidth
-            PaperProps={{ sx: { padding: "8px 4px 4px 4px" } }}
+            slotProps={{ paper: { sx: { padding: "8px 4px 4px 4px" } } }}
         >
             <DialogTitle>{title}</DialogTitle>
             <DialogContent sx={{ "&&&": { paddingBlockStart: 0 } }}>

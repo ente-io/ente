@@ -1,12 +1,19 @@
 import { clientPackageName, isDesktop, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
-import { LoadingOverlay } from "@/base/components/loaders";
+import {
+    LoadingOverlay,
+    TranslucentLoadingOverlay,
+} from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import {
     genericErrorDialogAttributes,
     useAttributedMiniDialog,
 } from "@/base/components/utils/dialog";
-import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
+import {
+    useIsRouteChangeInProgress,
+    useSetupI18n,
+    useSetupLogs,
+} from "@/base/components/utils/hooks-app";
 import { photosTheme } from "@/base/components/utils/theme";
 import log from "@/base/log";
 import { logStartupBanner } from "@/base/log-web";
@@ -49,12 +56,12 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
 
     const isI18nReady = useSetupI18n();
+    const isChangingRoute = useIsRouteChangeInProgress();
     const router = useRouter();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
     const { showNotification, notificationProps } = useNotification();
     const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
 
-    const [loading, setLoading] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
 
     useEffect(() => {
@@ -73,7 +80,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         // This is for events that we should listen for always, not just when
         // the user is logged in.
 
-        const handleOpenURL = (url: string) => {
+        const handleOpenEnteURL = (url: string) => {
             if (url.startsWith("ente://app")) router.push(url);
             else log.info(`Ignoring unhandled open request for URL ${url}`);
         };
@@ -96,11 +103,11 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
         if (isMLSupported) initML();
 
-        electron.onOpenURL(handleOpenURL);
+        electron.onOpenEnteURL(handleOpenEnteURL);
         electron.onAppUpdateAvailable(showUpdateDialog);
 
         return () => {
-            electron.onOpenURL(undefined);
+            electron.onOpenEnteURL(undefined);
             electron.onAppUpdateAvailable(undefined);
         };
     }, []);
@@ -115,15 +122,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         if (needsFamilyRedirect && getData(LS_KEYS.USER)?.token)
             redirectToFamilyPortal();
 
-        // TODO: Remove me after instrumenting for a bit.
-        let t = Date.now();
-        router.events.on("routeChangeStart", (url: string) => {
-            t = Date.now();
-            const newPathname = url.split("?")[0];
-            if (window.location.pathname !== newPathname) {
-                setLoading(true);
-            }
-
+        router.events.on("routeChangeStart", () => {
             if (needsFamilyRedirect && getData(LS_KEYS.USER)?.token) {
                 redirectToFamilyPortal();
 
@@ -131,11 +130,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 // eslint-disable-next-line @typescript-eslint/only-throw-error
                 throw "Aborting route change, redirection in process....";
             }
-        });
-
-        router.events.on("routeChangeComplete", () => {
-            log.debug(() => `Route change took ${Date.now() - t} ms`);
-            setLoading(false);
         });
     }, []);
 
@@ -193,8 +187,14 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <Notification {...notificationProps} />
 
                 <AppContext.Provider value={appContext}>
-                    {(loading || !isI18nReady) && <LoadingOverlay />}
-                    {isI18nReady && <Component {...pageProps} />}
+                    {!isI18nReady ? (
+                        <LoadingOverlay />
+                    ) : (
+                        <>
+                            {isChangingRoute && <TranslucentLoadingOverlay />}
+                            <Component {...pageProps} />
+                        </>
+                    )}
                 </AppContext.Provider>
             </ThemeProvider>
         </>

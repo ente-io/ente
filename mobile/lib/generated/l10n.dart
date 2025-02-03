@@ -6811,11 +6811,11 @@ class S {
   }
 
   /// `Preserving {count} memories...`
-  String uploadingMultipleMemories(Object count) {
+  String uploadingMultipleMemories(String count) {
     return Intl.message(
       'Preserving $count memories...',
       name: 'uploadingMultipleMemories',
-      desc: '',
+      desc: 'Text to tell user how many memories are being preserved',
       args: [count],
     );
   }

@@ -94,7 +94,7 @@ class Face {
 
   factory Face.fromJson(Map<String, dynamic> json) {
     final String faceID = json['faceID'] as String;
-    final int fileID = getFileIdFromFaceId(faceID);
+    final int fileID = getFileIdFromFaceId<int>(faceID);
     return Face(
       faceID,
       fileID,

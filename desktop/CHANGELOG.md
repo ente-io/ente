@@ -2,6 +2,7 @@
 
 ## v1.7.9 (Unreleased)
 
+- Faster and more stable thumbnail generation.
 - .
 
 ## v1.7.8

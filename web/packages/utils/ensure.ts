@@ -8,10 +8,10 @@ export const ensureString = (v: unknown): string => {
 };
 
 /**
- * Throw an exception if the given value is not a number.
+ * Throw an exception if the given value is not a number or if it is NaN.
  */
 export const ensureNumber = (v: unknown): number => {
-    if (typeof v != "number")
+    if (typeof v != "number" || Number.isNaN(v))
         throw new Error(`Expected a number, instead found ${String(v)}`);
     return v;
 };

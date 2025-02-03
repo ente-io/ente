@@ -1,6 +1,7 @@
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/account/two_factor.dart';
 import 'package:ente_auth/services/user_service.dart';
+import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/utils/email_util.dart';
 import 'package:flutter/material.dart';
 
@@ -97,7 +98,8 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
                   style: TextStyle(
                     decoration: TextDecoration.underline,
                     fontSize: 12,
-                    color: Colors.white.withOpacity(0.9),
+                    color:
+                        getEnteColorScheme(context).textBase.withOpacity(0.9),
                   ),
                 ),
               ),

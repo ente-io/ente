@@ -21,7 +21,7 @@ class PersonService {
   final EntityService entityService;
   final MLDataDB faceMLDataDB;
   final SharedPreferences prefs;
-  final _emailToNameMapCache = <String, String>{};
+  final _emailToPartialPersonDataMapCache = <String, Map<String, String>>{};
 
   PersonService(this.entityService, this.faceMLDataDB, this.prefs);
 
@@ -37,31 +37,34 @@ class PersonService {
 
   late Logger logger = Logger("PersonService");
 
-  static init(
+  static Future<void> init(
     EntityService entityService,
     MLDataDB faceMLDataDB,
     SharedPreferences prefs,
-  ) {
+  ) async {
     _instance = PersonService(entityService, faceMLDataDB, prefs);
-    _instance!._resetEmailToNameCache();
+    await _instance!.resetEmailToPartialPersonDataCache();
   }
 
-  Map<String, String> get emailToNameMapCache => _emailToNameMapCache;
+  Map<String, Map<String, String>> get emailToPartialPersonDataMapCache =>
+      _emailToPartialPersonDataMapCache;
 
   void clearCache() {
-    _emailToNameMapCache.clear();
+    _emailToPartialPersonDataMapCache.clear();
   }
 
-  void _resetEmailToNameCache() {
-    _emailToNameMapCache.clear();
-    _instance!.getPersons().then((value) {
+  Future<void> resetEmailToPartialPersonDataCache() async {
+    _emailToPartialPersonDataMapCache.clear();
+    await _instance!.getPersons().then((value) {
       for (var person in value) {
         if (person.data.email != null && person.data.email!.isNotEmpty) {
-          _instance!._emailToNameMapCache[person.data.email!] =
-              person.data.name;
+          _instance!._emailToPartialPersonDataMapCache[person.data.email!] = {
+            "person_id": person.remoteID,
+            "name": person.data.name,
+          };
         }
       }
-      logger.info("Email to name cache reset");
+      logger.info("Email to partial person data cache reset");
     });
   }
 
@@ -136,14 +139,14 @@ class PersonService {
     PersonData personData,
     Map<String, Set<String>> dbPersonCluster,
   ) {
-    if ((personData.assigned?.length ?? 0) != dbPersonCluster.length) {
+    if (personData.assigned.length != dbPersonCluster.length) {
       log(
-        "Person ${personData.name} has ${personData.assigned?.length} clusters, but ${dbPersonCluster.length} clusters found in DB",
+        "Person ${personData.name} has ${personData.assigned.length} clusters, but ${dbPersonCluster.length} clusters found in DB",
         name: "PersonService",
       );
       return true;
     } else {
-      for (ClusterInfo info in personData.assigned!) {
+      for (ClusterInfo info in personData.assigned) {
         final dbCluster = dbPersonCluster[info.id];
         if (dbCluster == null) {
           log(
@@ -202,7 +205,7 @@ class PersonService {
       clusterID: clusterID,
     );
     if (data.email != null) {
-      _resetEmailToNameCache();
+      await resetEmailToPartialPersonDataCache();
     }
     return PersonEntity(result.id, data);
   }
@@ -213,20 +216,19 @@ class PersonService {
   }) async {
     final person = (await getPerson(personID))!;
     final personData = person.data;
-    final clusterInfo = personData.assigned!.firstWhere(
+    final clusterInfo = personData.assigned.firstWhere(
       (element) => element.id == clusterID,
       orElse: () => ClusterInfo(id: "noSuchClusterInRemotePerson", faces: {}),
     );
     if (clusterInfo.id == "noSuchClusterInRemotePerson") {
-      await MLDataDB.instance.removeClusterToPerson(
+      await faceMLDataDB.removeClusterToPerson(
         personID: personID,
         clusterID: clusterID,
       );
       return;
     }
-    personData.rejectedFaceIDs ??= [];
-    personData.rejectedFaceIDs!.addAll(clusterInfo.faces);
-    personData.assigned!.removeWhere((element) => element.id == clusterID);
+    personData.rejectedFaceIDs.addAll(clusterInfo.faces);
+    personData.assigned.removeWhere((element) => element.id == clusterID);
     await entityService.addOrUpdate(
       EntityType.cgroup,
       personData.toJson(),
@@ -247,7 +249,7 @@ class PersonService {
 
     // Remove faces from clusters
     final List<String> emptiedClusters = [];
-    for (final cluster in personData.assigned!) {
+    for (final cluster in personData.assigned) {
       cluster.faces.removeWhere((faceID) => faceIDs.contains(faceID));
       if (cluster.faces.isEmpty) {
         emptiedClusters.add(cluster.id);
@@ -256,7 +258,7 @@ class PersonService {
 
     // Safety check to make sure we haven't created an empty cluster now, if so delete it
     for (final emptyClusterID in emptiedClusters) {
-      personData.assigned!
+      personData.assigned
           .removeWhere((element) => element.id != emptyClusterID);
       await faceMLDataDB.removeClusterToPerson(
         personID: person.remoteID,
@@ -265,8 +267,7 @@ class PersonService {
     }
 
     // Add removed faces to rejected faces
-    personData.rejectedFaceIDs ??= [];
-    personData.rejectedFaceIDs!.addAll(faceIDs);
+    personData.rejectedFaceIDs.addAll(faceIDs);
 
     await entityService.addOrUpdate(
       EntityType.cgroup,
@@ -293,7 +294,7 @@ class PersonService {
       justName.data.logStats();
 
       if (entity.data.email != null) {
-        _resetEmailToNameCache();
+        await resetEmailToPartialPersonDataCache();
       }
     } else {
       await entityService.deleteEntry(personID);
@@ -301,7 +302,7 @@ class PersonService {
 
       if (entity != null) {
         if (entity.data.email != null) {
-          _resetEmailToNameCache();
+          await resetEmailToPartialPersonDataCache();
         }
       }
     }
@@ -333,14 +334,13 @@ class PersonService {
     bool shouldCheckRejectedFaces = false;
     for (var e in entities) {
       final personData = PersonData.fromJson(json.decode(e.data));
-      if (personData.rejectedFaceIDs != null &&
-          personData.rejectedFaceIDs!.isNotEmpty) {
+      if (personData.rejectedFaceIDs.isNotEmpty) {
         shouldCheckRejectedFaces = true;
       }
       int faceCount = 0;
 
       // Locally store the assignment of faces to clusters and people
-      for (var cluster in personData.assigned!) {
+      for (var cluster in personData.assigned) {
         faceCount += cluster.faces.length;
         for (var faceId in cluster.faces) {
           if (faceIdToClusterID.containsKey(faceId)) {
@@ -362,7 +362,7 @@ class PersonService {
       }
       if (kDebugMode) {
         logger.info(
-          "Person ${e.id} ${personData.name} has ${personData.assigned!.length} clusters with $faceCount faces",
+          "Person ${e.id} ${personData.name} has ${personData.assigned.length} clusters with $faceCount faces",
         );
       }
     }
@@ -375,11 +375,10 @@ class PersonService {
           await faceMLDataDB.getPersonToClusterIdToFaceIds();
       for (var e in entities) {
         final personData = PersonData.fromJson(json.decode(e.data));
-        if (personData.rejectedFaceIDs != null &&
-            personData.rejectedFaceIDs!.isNotEmpty) {
+        if (personData.rejectedFaceIDs.isNotEmpty) {
           final personFaceIDs =
               dbPeopleClusterInfo[e.id]!.values.expand((e) => e).toSet();
-          final rejectedFaceIDsSet = personData.rejectedFaceIDs!.toSet();
+          final rejectedFaceIDsSet = personData.rejectedFaceIDs.toSet();
           final assignedAndRejectedFaceIDs =
               rejectedFaceIDsSet.intersection(personFaceIDs);
 
@@ -425,7 +424,7 @@ class PersonService {
   }
 
   Future<PersonEntity> updateAvatar(PersonEntity p, EnteFile file) async {
-    final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
+    final Face? face = await faceMLDataDB.getCoverFaceForPerson(
       recentFileID: file.uploadedFileID!,
       personID: p.remoteID,
     );
@@ -463,9 +462,8 @@ class PersonService {
         email: email,
       ),
     );
-    await updatePerson(updatedPerson).then((value) {
-      _resetEmailToNameCache();
-    });
+    await updatePerson(updatedPerson);
+    await resetEmailToPartialPersonDataCache();
     return updatedPerson;
   }
 

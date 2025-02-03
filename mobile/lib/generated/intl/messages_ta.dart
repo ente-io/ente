@@ -48,10 +48,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("தவறான மின்னஞ்சல் முகவரி"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "இந்த தகவலுடன் தயவுசெய்து எங்களுக்கு உதவுங்கள்"),
-        "link": MessageLookupByLibrary.simpleMessage("Link"),
-        "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
-        "noEnteAccountExclamation":
-            MessageLookupByLibrary.simpleMessage("No Ente account!"),
         "verify": MessageLookupByLibrary.simpleMessage("சரிபார்க்கவும்")
       };
 }
