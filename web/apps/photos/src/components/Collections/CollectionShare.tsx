@@ -1043,23 +1043,21 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
         if (newRole === "VIEWER") {
             contentText = (
                 <Trans
-                    i18nKey="CHANGE_PERMISSIONS_TO_VIEWER"
-                    values={{
-                        selectedEmail: `${selectedEmail}`,
-                    }}
+                    i18nKey="change_permission_to_viewer"
+                    values={{ selectedEmail }}
                 />
             );
 
-            buttonText = t("CONVERT_TO_VIEWER");
+            buttonText = t("confirm_convert_to_viewer");
         } else if (newRole === "COLLABORATOR") {
-            contentText = t("CHANGE_PERMISSIONS_TO_COLLABORATOR", {
-                selectedEmail: selectedEmail,
+            contentText = t("change_permission_to_collaborator", {
+                selectedEmail,
             });
-            buttonText = t("CONVERT_TO_COLLABORATOR");
+            buttonText = t("confirm_convert_to_collaborator");
         }
 
         showMiniDialog({
-            title: t("CHANGE_PERMISSION"),
+            title: t("change_permission_title"),
             message: contentText,
             continue: {
                 text: buttonText,
@@ -1071,7 +1069,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
 
     const removeParticipant = () => {
         showMiniDialog({
-            title: t("REMOVE_PARTICIPANT"),
+            title: t("remove_participant_title"),
             message: (
                 <Trans
                     i18nKey="REMOVE_PARTICIPANT_MESSAGE"
@@ -1081,7 +1079,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                 />
             ),
             continue: {
-                text: t("CONFIRM_REMOVE"),
+                text: t("confirm_remove"),
                 color: "critical",
                 action: handleRemove,
             },
