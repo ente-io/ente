@@ -342,11 +342,6 @@ class MLDataDB extends IMLDataDB<int> {
       );
       final clusterIDs =
           clusterRows.map((e) => e[clusterIDColumn] as String).toList();
-      // final List<Map<String, dynamic>> faceMaps = await db.getAll(
-      //   'SELECT * FROM $facesTable where '
-      //   '$faceIDColumn in (SELECT $faceIDColumn from $faceClustersTable where  $clusterIDColumn IN (${clusterIDs.join(",")}))'
-      //   'AND $fileIDColumn in (${fileId.join(",")}) AND $faceScore > $kMinimumQualityFaceScore ORDER BY $faceScore DESC',
-      // );
 
       final List<Map<String, dynamic>> faceMaps = await db.getAll(
         '''
@@ -357,10 +352,9 @@ class MLDataDB extends IMLDataDB<int> {
         WHERE $clusterIDColumn IN (${List.filled(clusterIDs.length, '?').join(',')})
         )
         AND $fileIDColumn IN (${List.filled(fileId.length, '?').join(',')})
-        AND $faceScore > ?
         ORDER BY $faceScore DESC
         ''',
-        [...clusterIDs, ...fileId, kMinimumQualityFaceScore],
+        [...clusterIDs, ...fileId],
       );
       if (faceMaps.isNotEmpty) {
         if (avatarFileId != null) {
