@@ -965,6 +965,14 @@
   "syncStopped": "Synchronisation arrêtée ?",
   "syncProgress": "{completed}/{total} souvenirs conservés",
   "uploadingMultipleMemories": "Sauvegarde {count} souvenirs...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "uploadingSingleMemory": "Sauvegarde 1 souvenir...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",

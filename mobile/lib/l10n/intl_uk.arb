@@ -960,6 +960,14 @@
   "syncStopped": "Синхронізацію зупинено",
   "syncProgress": "{completed} / {total} спогадів збережено",
   "uploadingMultipleMemories": "Збереження {count} спогадів...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "uploadingSingleMemory": "Зберігаємо 1 спогад...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
