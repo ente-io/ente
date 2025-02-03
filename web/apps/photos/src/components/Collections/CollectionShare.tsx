@@ -1099,7 +1099,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
             <Stack sx={{ gap: "4px", py: "12px" }}>
                 <Titlebar
                     onClose={onClose}
-                    title={t("MANAGE")}
+                    title={t("manage")}
                     onRootClose={handleRootClose}
                     caption={selectedParticipant.email}
                 />
@@ -1110,7 +1110,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                             variant="small"
                             sx={{ color: "text.muted", padding: 1 }}
                         >
-                            {t("ADDED_AS")}
+                            {t("added_as")}
                         </Typography>
 
                         <RowButtonGroup>
