@@ -46,11 +46,11 @@ func (c *UsageController) CanUploadFile(ctx context.Context, userID int64, size 
 	var subscriptionUserIDs []int64
 	// if user is part of a family group, validate if subscription of familyAdmin is valid & member's total storage
 	// is less than the storage accordingly to subscription plan of the admin
+	familyMembers, err := c.FamilyRepo.GetMembersWithStatus(*familyAdminID, repo.ActiveFamilyMemberStatus)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to fetch family members")
+	}
 	if familyAdminID != nil {
-		familyMembers, err := c.FamilyRepo.GetMembersWithStatus(*familyAdminID, repo.ActiveFamilyMemberStatus)
-		if err != nil {
-			return stacktrace.Propagate(err, "failed to fetch family members")
-		}
 		subscriptionAdminID = *familyAdminID
 		for _, familyMember := range familyMembers {
 			subscriptionUserIDs = append(subscriptionUserIDs, familyMember.MemberUserID)
@@ -108,19 +108,23 @@ func (c *UsageController) CanUploadFile(ctx context.Context, userID int64, size 
 	// Get particular member's storage and check if the file size is larger than the size of the storage allocated
 	// to the Member and fail if its too large.
 	var memberStorage *int64
+	for _, familyMember := range familyMembers {
+		memberStorage = familyMember.StorageLimit
+		break
+	}
 	if subscriptionAdminID != userID {
-		familyMembers, err := c.FamilyRepo.GetMembersWithStatus(*familyAdminID, repo.ActiveFamilyMemberStatus)
-		if err != nil {
-			stacktrace.Propagate(err, "Failed to Get Family Members")
+		memberUsage, memberUsageErr := c.UsageRepo.GetUsage(userID)
+		if memberUsageErr != nil {
+			stacktrace.Propagate(memberUsageErr, "Couldn't get Members Usage")
 		}
-		for _, familyMember := range familyMembers {
-			if familyMember.MemberUserID == userID {
-				memberStorage = familyMember.StorageLimit
-				break
-			}
+		if size != nil {
+			memberUsage += *size
 		}
+		// Upload fail if memberStorage > memberUsage ((fileSize + total Usage) + StorageOverflowAboveSubscriptionLimit (50mb))
 		if memberStorage != nil {
-			return stacktrace.Propagate(ente.ErrStorageLimitExceeded, "Size of Files is larger than Family Members Allocated Storage")
+			if (memberUsage + StorageOverflowAboveSubscriptionLimit) > *memberStorage {
+				return ente.ErrStorageLimitExceeded
+			}
 		}
 	}
 	return nil
