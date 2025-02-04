@@ -137,14 +137,14 @@ export async function testUpload() {
 
     const jsonString = process.env.NEXT_PUBLIC_ENTE_TEST_EXPECTED_JSON;
     if (!jsonString) {
-        throw Error(
-            "Please specify the NEXT_PUBLIC_ENTE_TEST_EXPECTED_JSON to run the upload tests",
+        console.warn(
+            "Not running upload tests. Please specify the NEXT_PUBLIC_ENTE_TEST_EXPECTED_JSON to run the upload tests",
         );
+        return;
     }
+
     const expectedState = JSON.parse(jsonString);
-    if (!expectedState) {
-        throw Error("upload test failed expectedState missing");
-    }
+    if (!expectedState) throw Error("Invalid JSON");
 
     try {
         await totalCollectionCountCheck(expectedState);
@@ -426,28 +426,26 @@ function parseDateTimeFromFileNameTest() {
 }
 
 const fileNameToJSONMappingTests = () => {
-    fileNameToJSONMappingCases.forEach(({ filename, jsonFilename }) => {
+    for (const { filename, jsonFilename } of fileNameToJSONMappingCases) {
         const jsonKey = metadataJSONMapKeyForJSON(0, jsonFilename);
 
         // This duplicates somewhat the logic in takeout.ts:matchTakeoutMetadata()
         const components = getFileNameComponents(filename);
         let fileKey = getMetadataJSONMapKeyForFile(0, components);
-        if (fileKey !== jsonKey) {
+        if (fileKey != jsonKey) {
             fileKey = getClippedMetadataJSONMapKeyForFile(0, components);
         }
-        if (fileKey !== jsonKey) {
+        if (fileKey != jsonKey) {
             fileKey = getSupplementaryMetadataJSONMapKeyForFile(0, components);
         }
 
-        if (fileKey !== jsonKey) {
+        if (fileKey != jsonKey) {
             throw Error(
-                `mappingFileAndJSONFileCheck failed ❌ ,
-                    for ${filename}
-                    expected: ${jsonKey} got: ${fileKey}`,
+                `fileNameToJSONMappingTests failed ❌ for ${filename} (expected: ${jsonKey} got: ${fileKey})`,
             );
         }
-    });
-    console.log("mappingFileAndJSONFileCheck passed ✅");
+    }
+    console.log("fileNameToJSONMappingTests passed ✅");
 };
 
 // format: YYYY-MM-DD HH:MM:SS
