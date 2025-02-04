@@ -7,10 +7,7 @@ import {
 } from "@/new/photos/services/files";
 import { parseDateFromDigitGroups } from "services/upload/date";
 import {
-    getClippedMetadataJSONMapKeyForFile,
-    getFileNameComponents,
-    getMetadataJSONMapKeyForFile,
-    getSupplementaryMetadataJSONMapKeyForFile,
+    matchTakeoutMetadata,
     metadataJSONMapKeyForJSON,
 } from "services/upload/takeout";
 import { getUserDetailsV2 } from "services/userService";
@@ -429,19 +426,14 @@ const fileNameToJSONMappingTests = () => {
     for (const { filename, jsonFilename } of fileNameToJSONMappingCases) {
         const jsonKey = metadataJSONMapKeyForJSON(0, jsonFilename);
 
-        // This duplicates somewhat the logic in takeout.ts:matchTakeoutMetadata()
-        const components = getFileNameComponents(filename);
-        let fileKey = getMetadataJSONMapKeyForFile(0, components);
-        if (fileKey != jsonKey) {
-            fileKey = getClippedMetadataJSONMapKeyForFile(0, components);
-        }
-        if (fileKey != jsonKey) {
-            fileKey = getSupplementaryMetadataJSONMapKeyForFile(0, components);
-        }
+        // See the docs for the file name matcher as to why it doesn't return
+        // the key but instead indexes into the map for us. To test it, we
+        // construct a placeholder map with a dummy entry for the expected key.
 
-        if (fileKey != jsonKey) {
+        const map = new Map([[jsonKey, {}]]);
+        if (!matchTakeoutMetadata(filename, 0, map)) {
             throw Error(
-                `fileNameToJSONMappingTests failed ❌ for ${filename} (expected: ${jsonKey} got: ${fileKey})`,
+                `fileNameToJSONMappingTests failed ❌ for ${filename} and ${jsonFilename}`,
             );
         }
     }
