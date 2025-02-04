@@ -9,7 +9,7 @@ import {
     LoadingThumbnail,
     StaticThumbnail,
 } from "@/new/photos/components/PlaceholderThumbnails";
-import { BottomTextItemTileOverlay } from "@/new/photos/components/Tiles";
+import { TileBottomTextOverlay } from "@/new/photos/components/Tiles";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
 import useLongPress from "@ente/shared/hooks/useLongPress";
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
@@ -334,11 +334,11 @@ export default function PreviewCard(props: IProps) {
             )}
 
             {props?.activeCollectionID === TRASH_SECTION && file.isTrashed && (
-                <BottomTextItemTileOverlay>
+                <TileBottomTextOverlay>
                     <Typography variant="small">
                         {formattedDateRelative(enteFileDeletionDate(file))}
                     </Typography>
-                </BottomTextItemTileOverlay>
+                </TileBottomTextOverlay>
             )}
         </Cont>
     );
