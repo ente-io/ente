@@ -1739,7 +1739,7 @@ class FilesDB {
       '''
       SELECT * FROM $filesTable WHERE $columnFileType = ? AND $columnCreationTime > ? AND $columnUploadedFileID  != -1 
     ''',
-      [getInt(fileType), beginDate.millisecondsSinceEpoch],
+      [getInt(fileType), beginDate.microsecondsSinceEpoch],
     );
     return convertToFiles(results);
   }
