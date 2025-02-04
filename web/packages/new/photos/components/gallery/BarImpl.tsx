@@ -72,9 +72,9 @@ export interface GalleryBarImplProps {
     onSelectCollectionID: (collectionID: number) => void;
     /**
      * Called when the user selects the option to show a modal with all the
-     * collections.
+     * albums.
      */
-    onShowAllCollections: () => void;
+    onShowAllAlbums: () => void;
     /**
      * The scheme that should be used for sorting the collections in the bar.
      */
@@ -103,7 +103,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     collectionSummaries,
     activeCollectionID,
     onSelectCollectionID,
-    onShowAllCollections,
+    onShowAllAlbums,
     collectionsSortBy,
     onChangeCollectionsSortBy,
     people,
@@ -229,7 +229,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         onChangeSortBy={onChangeCollectionsSortBy}
                         transparentTriggerButtonBackground
                     />
-                    <IconButton onClick={onShowAllCollections}>
+                    <IconButton onClick={onShowAllAlbums}>
                         <ExpandMoreIcon />
                     </IconButton>
                 </>
@@ -246,7 +246,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 activeSortBy={collectionsSortBy}
                 onChangeSortBy={onChangeCollectionsSortBy}
             />
-            <FilledIconButton onClick={onShowAllCollections}>
+            <FilledIconButton onClick={onShowAllAlbums}>
                 <ExpandMoreIcon />
             </FilledIconButton>
         </Stack>

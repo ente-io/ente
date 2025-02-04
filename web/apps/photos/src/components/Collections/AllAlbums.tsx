@@ -31,7 +31,7 @@ import {
     ListChildComponentProps,
 } from "react-window";
 
-interface AllCollectionsProps {
+interface AllAlbums {
     open: boolean;
     onClose: () => void;
     collectionSummaries: CollectionSummary[];
@@ -41,7 +41,10 @@ interface AllCollectionsProps {
     isInHiddenSection: boolean;
 }
 
-export const AllCollections: React.FC<AllCollectionsProps> = ({
+/**
+ * A modal showing the list of all the albums.
+ */
+export const AllAlbums: React.FC<AllAlbums> = ({
     collectionSummaries,
     open,
     onClose,
@@ -58,12 +61,12 @@ export const AllCollections: React.FC<AllCollectionsProps> = ({
     };
 
     return (
-        <AllCollectionDialog
+        <AllAlbumsDialog
             {...{ open, onClose, fullScreen }}
             slots={{ transition: SlideUpTransition }}
             fullWidth
         >
-            <AllCollectionsHeader
+            <Title
                 {...{
                     isInHiddenSection,
                     onClose,
@@ -73,17 +76,17 @@ export const AllCollections: React.FC<AllCollectionsProps> = ({
                 collectionCount={collectionSummaries.length}
             />
             <Divider />
-            <AllCollectionContent
+            <AllAlbumsContent
                 collectionSummaries={collectionSummaries}
                 onCollectionClick={onCollectionClick}
             />
-        </AllCollectionDialog>
+        </AllAlbumsDialog>
     );
 };
 
 export const AllCollectionMobileBreakpoint = 559;
 
-const AllCollectionDialog = styled(Dialog)(({ theme }) => ({
+const AllAlbumsDialog = styled(Dialog)(({ theme }) => ({
     "& .MuiDialog-container": {
         justifyContent: "flex-end",
     },
@@ -107,7 +110,7 @@ const AllCollectionDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-const AllCollectionsHeader = ({
+const Title = ({
     onClose,
     collectionCount,
     collectionsSortBy,
@@ -182,7 +185,7 @@ const createItemData = memoize((collectionRowList, onCollectionClick) => ({
 // Consider using React.memo or shouldComponentUpdate to avoid unnecessary re-renders.
 // https://reactjs.org/docs/react-api.html#reactmemo
 // https://reactjs.org/docs/react-api.html#reactpurecomponent
-const AllCollectionRow = React.memo(
+const AlbumsRow = React.memo(
     ({
         data,
         index,
@@ -195,7 +198,7 @@ const AllCollectionRow = React.memo(
             <div style={style}>
                 <FlexWrapper gap={"4px"} padding={"16px"}>
                     {collectionRow.map((item: any) => (
-                        <CollectionButton
+                        <AlbumCard
                             isScrolling={isScrolling}
                             onCollectionClick={onCollectionClick}
                             collectionSummary={item}
@@ -209,11 +212,12 @@ const AllCollectionRow = React.memo(
     areEqual,
 );
 
-interface AllCollectionContentProps {
+interface AllAlbumsContentProps {
     collectionSummaries: CollectionSummary[];
     onCollectionClick: (id?: number) => void;
 }
-const AllCollectionContent: React.FC<AllCollectionContentProps> = ({
+
+const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
     collectionSummaries,
     onCollectionClick,
 }) => {
@@ -279,19 +283,19 @@ const AllCollectionContent: React.FC<AllCollectionContentProps> = ({
                 itemSize={CollectionRowItemSize}
                 itemData={itemData}
             >
-                {AllCollectionRow}
+                {AlbumsRow}
             </List>
         </DialogContent>
     );
 };
 
-interface AllCollectionCardProps {
+interface AlbumCardProps {
     collectionSummary: CollectionSummary;
     onCollectionClick: (collectionID: number) => void;
     isScrolling?: boolean;
 }
 
-const CollectionButton: React.FC<AllCollectionCardProps> = ({
+const AlbumCard: React.FC<AlbumCardProps> = ({
     onCollectionClick,
     collectionSummary,
     isScrolling,

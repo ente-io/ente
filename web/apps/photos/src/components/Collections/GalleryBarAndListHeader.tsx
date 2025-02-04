@@ -20,7 +20,7 @@ import {
     LS_KEYS,
     removeData,
 } from "@ente/shared/storage/localStorage";
-import { AllCollections } from "components/Collections/AllAlbums";
+import { AllAlbums } from "components/Collections/AllAlbums";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import { CollectionShare } from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
@@ -42,7 +42,7 @@ type CollectionsProps = Omit<
     | "onSelectCollectionID"
     | "collectionsSortBy"
     | "onChangeCollectionsSortBy"
-    | "onShowAllCollections"
+    | "onShowAllAlbums"
 > & {
     /**
      * When `true`, the bar is be hidden altogether.
@@ -93,7 +93,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     filesDownloadProgressAttributesList,
     setFilesDownloadProgressAttributesCreator,
 }) => {
-    const { show: showAllCollections, props: allCollectionsVisibilityProps } =
+    const { show: showAllAlbums, props: allAlbumsVisibilityProps } =
         useModalVisibility();
     const { show: showCollectionShare, props: collectionShareVisibilityProps } =
         useModalVisibility();
@@ -202,14 +202,14 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                 }}
                 onSelectCollectionID={setActiveCollectionID}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
-                onShowAllCollections={showAllCollections}
+                onShowAllAlbums={showAllAlbums}
                 collectionSummaries={sortedCollectionSummaries.filter((x) =>
                     shouldShowOnCollectionBar(x.type),
                 )}
             />
 
-            <AllCollections
-                {...allCollectionsVisibilityProps}
+            <AllAlbums
+                {...allAlbumsVisibilityProps}
                 collectionSummaries={sortedCollectionSummaries.filter(
                     (x) => !isSystemCollection(x.type),
                 )}
