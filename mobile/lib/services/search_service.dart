@@ -1615,6 +1615,8 @@ class SearchService {
           }
         }
         round++;
+        // Extra safety to prevent infinite loops
+        if (round > safeCount) break;
       }
     }
 
