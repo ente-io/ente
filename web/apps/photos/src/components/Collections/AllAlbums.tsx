@@ -1,21 +1,153 @@
+import { FilledIconButton } from "@/base/components/mui";
+import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
+import { SlideUpTransition } from "@/new/photos/components/mui/SlideUpTransition";
 import {
     ItemCard,
     LargeTileButton,
     LargeTileTextOverlay,
 } from "@/new/photos/components/Tiles";
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
-import { FlexWrapper } from "@ente/shared/components/Container";
+import { CollectionsSortBy } from "@/new/photos/services/collection/ui";
+import { FlexWrapper, FluidContainer } from "@ente/shared/components/Container";
 import useWindowSize from "@ente/shared/hooks/useWindowSize";
-import { DialogContent, Typography } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import {
+    Box,
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    Stack,
+    styled,
+    Typography,
+    useMediaQuery,
+} from "@mui/material";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, { useEffect, useRef, useState } from "react";
 import {
+    areEqual,
     FixedSizeList as List,
     ListChildComponentProps,
-    areEqual,
 } from "react-window";
-import { AllCollectionMobileBreakpoint } from ".";
+
+interface AllCollectionsProps {
+    open: boolean;
+    onClose: () => void;
+    collectionSummaries: CollectionSummary[];
+    onSelectCollectionID: (id: number) => void;
+    collectionsSortBy: CollectionsSortBy;
+    onChangeCollectionsSortBy: (by: CollectionsSortBy) => void;
+    isInHiddenSection: boolean;
+}
+
+export const AllCollections: React.FC<AllCollectionsProps> = ({
+    collectionSummaries,
+    open,
+    onClose,
+    onSelectCollectionID,
+    collectionsSortBy,
+    onChangeCollectionsSortBy,
+    isInHiddenSection,
+}) => {
+    const fullScreen = useMediaQuery("(max-width: 428px)");
+
+    const onCollectionClick = (collectionID: number) => {
+        onSelectCollectionID(collectionID);
+        onClose();
+    };
+
+    return (
+        <AllCollectionDialog
+            {...{ open, onClose, fullScreen }}
+            slots={{ transition: SlideUpTransition }}
+            fullWidth
+        >
+            <AllCollectionsHeader
+                {...{
+                    isInHiddenSection,
+                    onClose,
+                    collectionsSortBy,
+                    onChangeCollectionsSortBy,
+                }}
+                collectionCount={collectionSummaries.length}
+            />
+            <Divider />
+            <AllCollectionContent
+                collectionSummaries={collectionSummaries}
+                onCollectionClick={onCollectionClick}
+            />
+        </AllCollectionDialog>
+    );
+};
+
+export const AllCollectionMobileBreakpoint = 559;
+
+const AllCollectionDialog = styled(Dialog)(({ theme }) => ({
+    "& .MuiDialog-container": {
+        justifyContent: "flex-end",
+    },
+    "& .MuiPaper-root": {
+        maxWidth: "494px",
+    },
+    "& .MuiDialogTitle-root": {
+        padding: theme.spacing(2),
+        paddingRight: theme.spacing(1),
+    },
+    "& .MuiDialogContent-root": {
+        padding: theme.spacing(2),
+    },
+    [theme.breakpoints.down(AllCollectionMobileBreakpoint)]: {
+        "& .MuiPaper-root": {
+            width: "324px",
+        },
+        "& .MuiDialogContent-root": {
+            padding: 6,
+        },
+    },
+}));
+
+const AllCollectionsHeader = ({
+    onClose,
+    collectionCount,
+    collectionsSortBy,
+    onChangeCollectionsSortBy,
+    isInHiddenSection,
+}) => (
+    <DialogTitle>
+        <FlexWrapper>
+            <FluidContainer mr={1.5}>
+                <Box>
+                    <Typography variant="h5">
+                        {isInHiddenSection
+                            ? t("all_hidden_albums")
+                            : t("all_albums")}
+                    </Typography>
+                    <Typography
+                        variant="small"
+                        sx={{
+                            color: "text.muted",
+                            // Undo the effects of DialogTitle.
+                            fontWeight: "regular",
+                        }}
+                    >
+                        {t("albums_count", { count: collectionCount })}
+                    </Typography>
+                </Box>
+            </FluidContainer>
+            <Stack direction="row" sx={{ gap: 1.5 }}>
+                <CollectionsSortOptions
+                    activeSortBy={collectionsSortBy}
+                    onChangeSortBy={onChangeCollectionsSortBy}
+                    nestedInDialog
+                />
+                <FilledIconButton onClick={onClose}>
+                    <CloseIcon />
+                </FilledIconButton>
+            </Stack>
+        </FlexWrapper>
+    </DialogTitle>
+);
 
 const MobileColumns = 2;
 const DesktopColumns = 3;
@@ -30,11 +162,6 @@ const getCollectionRowListHeight = (
         collectionRowList.length * CollectionRowItemSize + 32,
         windowSize?.height - 177,
     ) || 0;
-
-interface Iprops {
-    collectionSummaries: CollectionSummary[];
-    onCollectionClick: (id?: number) => void;
-}
 
 interface ItemData {
     collectionRowList: CollectionSummary[][];
@@ -82,10 +209,14 @@ const AllCollectionRow = React.memo(
     areEqual,
 );
 
-export default function AllCollectionContent({
+interface AllCollectionContentProps {
+    collectionSummaries: CollectionSummary[];
+    onCollectionClick: (id?: number) => void;
+}
+const AllCollectionContent: React.FC<AllCollectionContentProps> = ({
     collectionSummaries,
     onCollectionClick,
-}: Iprops) {
+}) => {
     const refreshInProgress = useRef(false);
     const shouldRefresh = useRef(false);
 
@@ -152,7 +283,7 @@ export default function AllCollectionContent({
             </List>
         </DialogContent>
     );
-}
+};
 
 interface AllCollectionCardProps {
     collectionSummary: CollectionSummary;

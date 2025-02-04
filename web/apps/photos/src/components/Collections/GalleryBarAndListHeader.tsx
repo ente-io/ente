@@ -20,7 +20,7 @@ import {
     LS_KEYS,
     removeData,
 } from "@ente/shared/storage/localStorage";
-import AllCollections from "components/Collections/AllCollections";
+import { AllCollections } from "components/Collections/AllAlbums";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import { CollectionShare } from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
