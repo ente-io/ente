@@ -547,28 +547,12 @@ const components: Components = {
         },
     },
 
-    MuiBackdrop: {
+    MuiDrawer: {
         styleOverrides: {
             root: {
-                backgroundColor: "var(--mui-palette-backdrop-muted)",
-                // [Note: Backdrop variant blur]
-                //
-                // What we wish for is this. But as of MUI v6.4, the TypeScript
-                // definition for Backdrop does not contain a variant, causing
-                // tsc to show an error when we try to specify a variant.
-                //
-                // Since the styling is trivial and used only infrequently, for
-                // now we copy paste it. If it gets needed more often, we can
-                // also make it into a palette var.
-                //
-                // variants: [
-                //     {
-                //         props: { variant: "blur" },
-                //         style: {
-                //             backdropFilter: "blur(30px) opacity(95%)",
-                //         },
-                //     },
-                // ],
+                ".MuiBackdrop-root": {
+                    backgroundColor: "var(--mui-palette-backdrop-muted)",
+                },
             },
         },
     },
@@ -583,6 +567,9 @@ const components: Components = {
         },
         styleOverrides: {
             root: {
+                ".MuiBackdrop-root": {
+                    backgroundColor: "var(--mui-palette-backdrop-muted)",
+                },
                 // Reset the MUI default paddings to 16px everywhere.
                 //
                 // This is not a great choice either, usually most dialogs, for

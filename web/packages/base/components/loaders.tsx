@@ -44,12 +44,13 @@ export const LoadingOverlay: React.FC = () => (
  */
 export const TranslucentLoadingOverlay: React.FC = () => (
     <Backdrop
-        // Specifying open here causes us to lose animations. This is fine since
-        // the use of this is limited to a few interstitial overlays, and if
-        // refactoring consider replacing this entirely with a more localized
-        // activity indicator.
+        // Specifying open here causes us to lose animations. This is not
+        // optimal, but fine for now since this the use of this is limited to a
+        // few interstitial overlays, and if refactoring consider replacing this
+        // entirely with a more localized activity indicator.
         open={true}
         sx={{
+            backgroundColor: "var(--mui-palette-backdrop-muted)",
             backdropFilter: "blur(30px) opacity(95%)",
             // TODO: Why is this zIndex override required? + use a constant.
             zIndex: 9000,
