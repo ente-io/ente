@@ -206,7 +206,17 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
             ) : (
                 <ButtonBase component="div" onClick={copyCode}>
                     <OTPDisplay {...{ code, otp, nextOTP }} />
-                    <Snackbar open={openCopied} message={t("copied")} />
+                    <Snackbar
+                        open={openCopied}
+                        message={t("copied")}
+                        ContentProps={{
+                            sx: (theme) => ({
+                                backgroundColor: theme.vars.palette.fill.faint,
+                                color: theme.vars.palette.primary.main,
+                                backdropFilter: "blur(10px)",
+                            }),
+                        }}
+                    />
                 </ButtonBase>
             )}
         </Box>
