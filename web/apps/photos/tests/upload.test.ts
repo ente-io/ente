@@ -7,11 +7,8 @@ import {
 } from "@/new/photos/services/files";
 import { parseDateFromDigitGroups } from "services/upload/date";
 import {
-    getClippedMetadataJSONMapKeyForFile,
-    getMetadataJSONMapKeyForFile,
-    getMetadataJSONMapKeyForJSON,
-    getSupplementaryMetadataJSONMapKeyForFile,
-    getFileNameComponents,
+    matchTakeoutMetadata,
+    metadataJSONMapKeyForJSON,
 } from "services/upload/takeout";
 import { getUserDetailsV2 } from "services/userService";
 
@@ -72,7 +69,7 @@ const DATE_TIME_PARSING_TEST_FILE_NAMES_MUST_FAIL = [
     "Snapchat-100-10-20-19-15-12",
 ];
 
-const FILE_NAME_TO_JSON_NAME = [
+const fileNameToJSONMappingCases = [
     {
         filename: "IMG20210211125718-edited.jpg",
         jsonFilename: "IMG20210211125718.jpg.json",
@@ -128,16 +125,23 @@ const FILE_NAME_TO_JSON_NAME = [
 ];
 
 export async function testUpload() {
+    try {
+        parseDateTimeFromFileNameTest();
+        fileNameToJSONMappingTests();
+    } catch (e) {
+        console.log(e);
+    }
+
     const jsonString = process.env.NEXT_PUBLIC_ENTE_TEST_EXPECTED_JSON;
     if (!jsonString) {
-        throw Error(
-            "Please specify the NEXT_PUBLIC_ENTE_TEST_EXPECTED_JSON to run the upload tests",
+        console.warn(
+            "Not running upload tests. Please specify the NEXT_PUBLIC_ENTE_TEST_EXPECTED_JSON to run the upload tests",
         );
+        return;
     }
+
     const expectedState = JSON.parse(jsonString);
-    if (!expectedState) {
-        throw Error("upload test failed expectedState missing");
-    }
+    if (!expectedState) throw Error("Invalid JSON");
 
     try {
         await totalCollectionCountCheck(expectedState);
@@ -148,8 +152,6 @@ export async function testUpload() {
         await fileDimensionExtractionCheck(expectedState);
         await googleMetadataReadingCheck(expectedState);
         await totalFileCountCheck(expectedState);
-        parseDateTimeFromFileNameTest();
-        mappingFileAndJSONFileCheck();
     } catch (e) {
         console.log(e);
     }
@@ -420,39 +422,23 @@ function parseDateTimeFromFileNameTest() {
     console.log("parseDateTimeFromFileNameTest passed ✅");
 }
 
-function mappingFileAndJSONFileCheck() {
-    FILE_NAME_TO_JSON_NAME.forEach(({ filename, jsonFilename }) => {
-        const jsonFileNameGeneratedKey = getMetadataJSONMapKeyForJSON(
-            0,
-            jsonFilename,
-        );
+const fileNameToJSONMappingTests = () => {
+    for (const { filename, jsonFilename } of fileNameToJSONMappingCases) {
+        const jsonKey = metadataJSONMapKeyForJSON(0, jsonFilename);
 
-        // this duplicates somewhat the logic in takeout.ts:matchTakeoutMetadata()
-        const components = getFileNameComponents(filename);
-        let fileNameGeneratedKey = getMetadataJSONMapKeyForFile(0, components);
-        if (fileNameGeneratedKey !== jsonFileNameGeneratedKey) {
-            fileNameGeneratedKey = getClippedMetadataJSONMapKeyForFile(
-                0,
-                components,
-            );
-        }
-        if (fileNameGeneratedKey !== jsonFileNameGeneratedKey) {
-            fileNameGeneratedKey = getSupplementaryMetadataJSONMapKeyForFile(
-                0,
-                components,
-            );
-        }
+        // See the docs for the file name matcher as to why it doesn't return
+        // the key but instead indexes into the map for us. To test it, we
+        // construct a placeholder map with a dummy entry for the expected key.
 
-        if (fileNameGeneratedKey !== jsonFileNameGeneratedKey) {
+        const map = new Map([[jsonKey, {}]]);
+        if (!matchTakeoutMetadata(filename, 0, map)) {
             throw Error(
-                `mappingFileAndJSONFileCheck failed ❌ ,
-                    for ${filename}
-                    expected: ${jsonFileNameGeneratedKey} got: ${fileNameGeneratedKey}`,
+                `fileNameToJSONMappingTests failed ❌ for ${filename} and ${jsonFilename}`,
             );
         }
-    });
-    console.log("mappingFileAndJSONFileCheck passed ✅");
-}
+    }
+    console.log("fileNameToJSONMappingTests passed ✅");
+};
 
 // format: YYYY-MM-DD HH:MM:SS
 function getFormattedDateTime(date: Date) {
