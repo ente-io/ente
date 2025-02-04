@@ -34,7 +34,17 @@ export const MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT = 46;
 const EDITED_FILE_SUFFIX = "-edited";
 const METADATA_SUFFIX = ".supplemental-metadata";
 
-export const getMetadataJSONMapKeyForJSON = (
+/**
+ * Derive a key for the given {@link jsonFileName} that should be used to index
+ * into the metadata JSON map.
+ *
+ * @param collectionID The collection to which we're uploading.
+ *
+ * @param jsonFileName The file name for the JSON file.
+ *
+ * @returns A key suitable for indexing into the {@link ParsedMetadataJSON} map.
+ */
+export const metadataJSONMapKeyForJSON = (
     collectionID: number,
     jsonFileName: string,
 ) => {

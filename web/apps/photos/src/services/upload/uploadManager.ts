@@ -34,7 +34,7 @@ import {
 import watcher from "services/watch";
 import { getUserOwnedFiles } from "utils/file";
 import {
-    getMetadataJSONMapKeyForJSON,
+    metadataJSONMapKeyForJSON,
     tryParseTakeoutMetadataJSON,
     type ParsedMetadataJSON,
 } from "./takeout";
@@ -522,7 +522,7 @@ class UploadManager {
             const metadataJSON = await tryParseTakeoutMetadataJSON(uploadItem!);
             if (metadataJSON) {
                 this.parsedMetadataJSONMap.set(
-                    getMetadataJSONMapKeyForJSON(collectionID, fileName),
+                    metadataJSONMapKeyForJSON(collectionID, fileName),
                     metadataJSON,
                 );
                 this.uiService.increaseFileUploaded();

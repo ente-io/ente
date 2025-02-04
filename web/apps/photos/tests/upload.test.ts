@@ -10,8 +10,8 @@ import {
     getClippedMetadataJSONMapKeyForFile,
     getFileNameComponents,
     getMetadataJSONMapKeyForFile,
-    getMetadataJSONMapKeyForJSON,
     getSupplementaryMetadataJSONMapKeyForFile,
+    metadataJSONMapKeyForJSON,
 } from "services/upload/takeout";
 import { getUserDetailsV2 } from "services/userService";
 
@@ -427,32 +427,23 @@ function parseDateTimeFromFileNameTest() {
 
 const fileNameToJSONMappingTests = () => {
     fileNameToJSONMappingCases.forEach(({ filename, jsonFilename }) => {
-        const jsonFileNameGeneratedKey = getMetadataJSONMapKeyForJSON(
-            0,
-            jsonFilename,
-        );
+        const jsonKey = metadataJSONMapKeyForJSON(0, jsonFilename);
 
         // This duplicates somewhat the logic in takeout.ts:matchTakeoutMetadata()
         const components = getFileNameComponents(filename);
-        let fileNameGeneratedKey = getMetadataJSONMapKeyForFile(0, components);
-        if (fileNameGeneratedKey !== jsonFileNameGeneratedKey) {
-            fileNameGeneratedKey = getClippedMetadataJSONMapKeyForFile(
-                0,
-                components,
-            );
+        let fileKey = getMetadataJSONMapKeyForFile(0, components);
+        if (fileKey !== jsonKey) {
+            fileKey = getClippedMetadataJSONMapKeyForFile(0, components);
         }
-        if (fileNameGeneratedKey !== jsonFileNameGeneratedKey) {
-            fileNameGeneratedKey = getSupplementaryMetadataJSONMapKeyForFile(
-                0,
-                components,
-            );
+        if (fileKey !== jsonKey) {
+            fileKey = getSupplementaryMetadataJSONMapKeyForFile(0, components);
         }
 
-        if (fileNameGeneratedKey !== jsonFileNameGeneratedKey) {
+        if (fileKey !== jsonKey) {
             throw Error(
                 `mappingFileAndJSONFileCheck failed ❌ ,
                     for ${filename}
-                    expected: ${jsonFileNameGeneratedKey} got: ${fileNameGeneratedKey}`,
+                    expected: ${jsonKey} got: ${fileKey}`,
             );
         }
     });
