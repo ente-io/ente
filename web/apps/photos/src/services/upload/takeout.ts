@@ -68,8 +68,8 @@ export const matchTakeoutMetadata = (
     }
 
     // Trim off a suffix like "(1)" from the name, remembering what we trimmed
-    // since we might need it later.
-    let numberedSuffix: string;
+    // since we might need it suffix it back later in different ways.
+    let numberedSuffix = "";
     const endsWithNumberedSuffixWithBrackets = /\(\d+\)$/.exec(name);
     if (endsWithNumberedSuffixWithBrackets) {
         name = name.slice(0, -1 * endsWithNumberedSuffixWithBrackets[0].length);
@@ -90,13 +90,21 @@ export const matchTakeoutMetadata = (
         extension,
     };
 
-    let key = getMetadataJSONMapKeyForFile(collectionID, components);
-    let takeoutMetadata = parsedMetadataJSONMap.get(key);
+    // Derive a key from the collection name, file name and the suffix if any.
+    const baseFileName = `${name}${extension}`;
+    let key = `${collectionID}-${baseFileName}${numberedSuffix ?? ""}`;
 
-    if (!takeoutMetadata) {
-        key = getClippedMetadataJSONMapKeyForFile(collectionID, components);
-        takeoutMetadata = parsedMetadataJSONMap.get(key);
-    }
+    let takeoutMetadata = parsedMetadataJSONMap.get(key);
+    if (takeoutMetadata) return takeoutMetadata;
+
+    // If the file name is greater than 46 characters, then Google Photos, with
+    // its infinite storage, clips the file name. In such cases we need to use
+    // the clipped file name to get the key.
+    const maxGoogleFileNameLength = 46;
+    key = `${collectionID}-${baseFileName.slice(0, maxGoogleFileNameLength)}${numberedSuffix ?? ""}`;
+
+    takeoutMetadata = parsedMetadataJSONMap.get(key);
+    if (takeoutMetadata) return takeoutMetadata;
 
     if (!takeoutMetadata) {
         key = getSupplementaryMetadataJSONMapKeyForFile(
@@ -107,24 +115,6 @@ export const matchTakeoutMetadata = (
     }
 
     return takeoutMetadata;
-};
-
-const getMetadataJSONMapKeyForFile = (
-    collectionID: number,
-    components: FileNameComponents,
-) => {
-    const baseFileName = `${components.originalName}${components.extension}`;
-    return `${collectionID}-${baseFileName}${components.numberedSuffix ?? ""}`;
-};
-
-// if the file name is greater than MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT(46) , then google photos clips the file name
-// so we need to use the clipped file name to get the metadataJSON file
-const getClippedMetadataJSONMapKeyForFile = (
-    collectionID: number,
-    components: FileNameComponents,
-) => {
-    const baseFileName = `${components.originalName}${components.extension}`;
-    return `${collectionID}-${baseFileName.slice(0, MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT)}${components.numberedSuffix ?? ""}`;
 };
 
 // newer Takeout exports are attaching a ".supplemental-metadata" suffix to the file name of the metadataJSON file,
