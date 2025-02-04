@@ -84,15 +84,9 @@ export const matchTakeoutMetadata = (
         name = name.slice(0, -1 * editedFileSuffix.length);
     }
 
-    const components = {
-        originalName: name,
-        numberedSuffix,
-        extension,
-    };
-
     // Derive a key from the collection name, file name and the suffix if any.
-    const baseFileName = `${name}${extension}`;
-    let key = `${collectionID}-${baseFileName}${numberedSuffix ?? ""}`;
+    let baseFileName = `${name}${extension}`;
+    let key = `${collectionID}-${baseFileName}${numberedSuffix}`;
 
     let takeoutMetadata = parsedMetadataJSONMap.get(key);
     if (takeoutMetadata) return takeoutMetadata;
@@ -101,31 +95,21 @@ export const matchTakeoutMetadata = (
     // its infinite storage, clips the file name. In such cases we need to use
     // the clipped file name to get the key.
     const maxGoogleFileNameLength = 46;
-    key = `${collectionID}-${baseFileName.slice(0, maxGoogleFileNameLength)}${numberedSuffix ?? ""}`;
+    key = `${collectionID}-${baseFileName.slice(0, maxGoogleFileNameLength)}${numberedSuffix}`;
 
     takeoutMetadata = parsedMetadataJSONMap.get(key);
     if (takeoutMetadata) return takeoutMetadata;
 
-    if (!takeoutMetadata) {
-        key = getSupplementaryMetadataJSONMapKeyForFile(
-            collectionID,
-            components,
-        );
-        takeoutMetadata = parsedMetadataJSONMap.get(key);
-    }
+    // Newer Takeout exports are attaching a ".supplemental-metadata" suffix to
+    // the file name of the metadataJSON file, you know, just to cause havoc,
+    // and then clipping the file name if it's too long (ending up with
+    // filenames "very_long_file_name.jpg.supple.json").
+    const supplSuffix = ".supplemental-metadata";
+    baseFileName = `${name}${extension}${supplSuffix}`;
+    key = `${collectionID}-${baseFileName.slice(0, maxGoogleFileNameLength)}${numberedSuffix}`;
 
+    takeoutMetadata = parsedMetadataJSONMap.get(key);
     return takeoutMetadata;
-};
-
-// newer Takeout exports are attaching a ".supplemental-metadata" suffix to the file name of the metadataJSON file,
-// and then clipping the file name if it's too long (ending up with filenames like
-// "very_long_file_name.jpg.supple.json")
-const getSupplementaryMetadataJSONMapKeyForFile = (
-    collectionID: number,
-    components: FileNameComponents,
-) => {
-    const baseFileName = `${components.originalName}${components.extension}${METADATA_SUFFIX}`;
-    return `${collectionID}-${baseFileName.slice(0, MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT)}${components.numberedSuffix ?? ""}`;
 };
 
 /**
