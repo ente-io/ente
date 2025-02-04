@@ -31,7 +31,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   bool useNativeVideoPlayer = true;
   late final StreamSubscription<UseMediaKitForVideo>
       useMediaKitForVideoSubscription;
-  bool selectPreviewForPlay = true;
+  late bool selectPreviewForPlay = widget.file.localID == null;
 
   @override
   void initState() {
@@ -56,7 +56,6 @@ class _VideoWidgetState extends State<VideoWidget> {
     final isPreviewVideoPlayable =
         PreviewVideoStore.instance.isVideoStreamingEnabled &&
             widget.file.isUploaded &&
-            widget.file.localID == null &&
             (FileDataService.instance.previewIds
                     ?.containsKey(widget.file.uploadedFileID!) ??
                 false);

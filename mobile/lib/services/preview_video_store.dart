@@ -259,15 +259,19 @@ class PreviewVideoStore {
             },
           ).ignore();
           _logger.info("Video preview uploaded for $enteFile");
-        } catch (_) {
-          error = "Failed to upload video preview";
+        } catch (err, sT) {
+          error = "Failed to upload video preview\nError: $err";
+          _logger.shout("Video preview uploaded for $enteFile", err, sT);
         }
       } else if (ReturnCode.isCancel(returnCode)) {
         _logger.warning("FFmpeg command cancelled");
         error = "FFmpeg command cancelled";
       } else {
-        _logger.severe("FFmpeg command failed with return code $returnCode");
         final output = await session.getOutput();
+        _logger.shout(
+          "FFmpeg command failed with return code $returnCode",
+          output ?? "Error not found",
+        );
         if (kDebugMode) {
           _logger.severe(output);
         }
