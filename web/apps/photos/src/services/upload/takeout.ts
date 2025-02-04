@@ -36,19 +36,53 @@ const METADATA_SUFFIX = ".supplemental-metadata";
 
 /**
  * Derive a key for the given {@link jsonFileName} that should be used to index
- * into the metadata JSON map.
+ * into the {@link ParsedMetadataJSON} JSON map.
  *
  * @param collectionID The collection to which we're uploading.
  *
  * @param jsonFileName The file name for the JSON file.
  *
- * @returns A key suitable for indexing into the {@link ParsedMetadataJSON} map.
+ * @returns A key suitable for indexing into the metadata JSON map.
  */
 export const metadataJSONMapKeyForJSON = (
     collectionID: number,
     jsonFileName: string,
 ) => {
     return `${collectionID}-${jsonFileName.slice(0, -1 * ".json".length)}`;
+};
+
+/**
+ * Return the matching entry, if any, from {@link parsedMetadataJSONMap} for the
+ * {@link fileName} and {@link collectionID} combination.
+ *
+ * This is the sibling of {@link metadataJSONMapKeyForJSON}, except for deriving
+ * the filename key we might have to try a bunch of different variations, so
+ * this does not return a single key but instead tries the combinations until it
+ * finds an entry in the map, and returns the found entry instead of the key.
+ */
+export const matchTakeoutMetadata = (
+    fileName: string,
+    collectionID: number,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
+) => {
+    const components = getFileNameComponents(fileName);
+    let key = getMetadataJSONMapKeyForFile(collectionID, components);
+    let takeoutMetadata = parsedMetadataJSONMap.get(key);
+
+    if (!takeoutMetadata) {
+        key = getClippedMetadataJSONMapKeyForFile(collectionID, components);
+        takeoutMetadata = parsedMetadataJSONMap.get(key);
+    }
+
+    if (!takeoutMetadata) {
+        key = getSupplementaryMetadataJSONMapKeyForFile(
+            collectionID,
+            components,
+        );
+        takeoutMetadata = parsedMetadataJSONMap.get(key);
+    }
+
+    return takeoutMetadata;
 };
 
 // if the file name is greater than MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT(46) , then google photos clips the file name
@@ -210,32 +244,3 @@ const parseGTLocation = (o: unknown): Location | undefined => {
  */
 const parseGTNonEmptyString = (o: unknown): string | undefined =>
     o && typeof o == "string" ? o : undefined;
-
-/**
- * Return the matching entry (if any) from {@link parsedMetadataJSONMap} for the
- * {@link fileName} and {@link collectionID} combination.
- */
-export const matchTakeoutMetadata = (
-    fileName: string,
-    collectionID: number,
-    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
-) => {
-    const components = getFileNameComponents(fileName);
-    let key = getMetadataJSONMapKeyForFile(collectionID, components);
-    let takeoutMetadata = parsedMetadataJSONMap.get(key);
-
-    if (!takeoutMetadata) {
-        key = getClippedMetadataJSONMapKeyForFile(collectionID, components);
-        takeoutMetadata = parsedMetadataJSONMap.get(key);
-    }
-
-    if (!takeoutMetadata) {
-        key = getSupplementaryMetadataJSONMapKeyForFile(
-            collectionID,
-            components,
-        );
-        takeoutMetadata = parsedMetadataJSONMap.get(key);
-    }
-
-    return takeoutMetadata;
-};
