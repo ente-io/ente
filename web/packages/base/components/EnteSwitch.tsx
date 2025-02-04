@@ -28,10 +28,9 @@ export const EnteSwitch: React.FC<SwitchProps> = styled((props) => (
         },
         "&.Mui-disabled .MuiSwitch-thumb": {
             color: theme.palette.grey[600],
-            // TODO(LM):
-            // ...theme.applyStyles("light", {
-            //     color: theme.palette.grey[100],
-            // }),
+            ...theme.applyStyles("light", {
+                color: theme.palette.grey[100],
+            }),
         },
         "&.Mui-disabled + .MuiSwitch-track": {
             opacity: 0.3,

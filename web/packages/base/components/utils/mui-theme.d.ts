@@ -117,6 +117,10 @@ declare module "@mui/material/styles" {
          * Various ad-hoc fixed colors used by our designs.
          *
          * These do not change with the color scheme.
+         *
+         * Some places in the code also use the grey PaletteColor provided by
+         * MUI whose corresponding color values can be seen at
+         * https://mui.com/material-ui/customization/default-theme/
          */
         fixed: {
             /**
