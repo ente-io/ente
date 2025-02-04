@@ -175,11 +175,8 @@ const _colors = {
         },
         fill: {
             base: "#000",
-            /* TODO: Unused */
-            baseHover: "rgba(0 0 0 / 0.87)",
             muted: "rgba(0 0 0 / 0.12)",
             faint: "rgba(0 0 0 / 0.04)",
-            /** TODO(LM): Needed? */
             faintHover: "rgba(0 0 0 / 0.08)",
             fainter: "rgba(0 0 0 / 0.02)",
         },
@@ -220,7 +217,6 @@ const _colors = {
         },
         fill: {
             base: "#fff",
-            baseHover: "rgba(255 255 255 / 0.90)",
             muted: "rgba(255 255 255 / 0.16)",
             faint: "rgba(255 255 255 / 0.12)",
             faintHover: "rgba(255 255 255 / 0.16)",

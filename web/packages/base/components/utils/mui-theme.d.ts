@@ -97,7 +97,6 @@ declare module "@mui/material/styles" {
          */
         fill: {
             base: string;
-            baseHover: string;
             muted: string;
             faint: string;
             faintHover: string;
