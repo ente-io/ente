@@ -51,6 +51,9 @@ class _BackupItemCardState extends State<BackupItemCard> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final hasError = widget.item.error != null ||
+        widget.preview?.status == PreviewItemStatus.failed;
+
     return Container(
       height: 60,
       margin: const EdgeInsets.symmetric(vertical: 10),
@@ -112,8 +115,8 @@ class _BackupItemCardState extends State<BackupItemCard> {
               ],
             ),
           ),
-          if (widget.item.error != null) const SizedBox(width: 12),
-          if (widget.item.error != null)
+          if (hasError) const SizedBox(width: 12),
+          if (hasError)
             SizedBox(
               height: 48,
               width: 48,
@@ -130,8 +133,10 @@ class _BackupItemCardState extends State<BackupItemCard> {
                         ex.runtimeType.toString() +
                         " - " +
                         ex.toString();
-                  } else {
+                  } else if (widget.item.error != null) {
                     errorMessage = widget.item.error.toString();
+                  } else if (widget.preview?.error != null) {
+                    errorMessage = widget.preview!.error!.toString();
                   }
                   showErrorDialog(
                     context,
@@ -141,7 +146,7 @@ class _BackupItemCardState extends State<BackupItemCard> {
                 },
               ),
             ),
-          if (widget.item.error == null) const SizedBox(width: 12),
+          if (hasError) const SizedBox(width: 12),
           SizedBox(
             height: 48,
             width: 48,

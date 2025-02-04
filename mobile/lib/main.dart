@@ -294,10 +294,12 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       MLDataDB.instance,
       preferences,
     );
-    Future.delayed(
-      const Duration(seconds: 10),
-      PreviewVideoStore.instance.putFilesForPreviewCreation,
-    ).ignore();
+    unawaited(
+      Future.delayed(
+        const Duration(seconds: 10),
+        PreviewVideoStore.instance.putFilesForPreviewCreation,
+      ),
+    );
     initComplete = true;
     _logger.info("Initialization done $tlog");
   } catch (e, s) {

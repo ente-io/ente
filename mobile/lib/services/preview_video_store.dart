@@ -135,6 +135,7 @@ class PreviewVideoStore {
         _items[enteFile.uploadedFileID!] = PreviewItem(
           status: PreviewItemStatus.inQueue,
           file: enteFile,
+          retryCount: _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
           collectionID: enteFile.collectionID ?? 0,
         );
         Bus.instance.fire(PreviewUpdatedEvent(_items));
@@ -144,6 +145,7 @@ class PreviewVideoStore {
       _items[enteFile.uploadedFileID!] = PreviewItem(
         status: PreviewItemStatus.compressing,
         file: enteFile,
+        retryCount: _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
         collectionID: enteFile.collectionID ?? 0,
       );
       Bus.instance.fire(PreviewUpdatedEvent(_items));
@@ -229,6 +231,7 @@ class PreviewVideoStore {
             status: PreviewItemStatus.uploading,
             file: enteFile,
             collectionID: enteFile.collectionID ?? 0,
+            retryCount: _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
           );
           Bus.instance.fire(PreviewUpdatedEvent(_items));
 
@@ -264,11 +267,11 @@ class PreviewVideoStore {
         error = "FFmpeg command cancelled";
       } else {
         _logger.severe("FFmpeg command failed with return code $returnCode");
+        final output = await session.getOutput();
         if (kDebugMode) {
-          final output = await session.getOutput();
           _logger.severe(output);
         }
-        error = "Failed to generate video preview";
+        error = "Failed to generate video preview\nError: $output";
       }
 
       if (error == null) {
@@ -293,6 +296,7 @@ class PreviewVideoStore {
             file: enteFile,
             retryCount: _items[enteFile.uploadedFileID!]!.retryCount,
             collectionID: enteFile.collectionID ?? 0,
+            error: error,
           );
         }
       }
