@@ -231,14 +231,15 @@ export const LargeTilePlusOverlay = styled(ItemTileOverlay)(
 );
 
 /**
- * An {@link ItemTileOverlay} suitable for holding the collection name shown
- * atop the tiles in the duplicates listing.
+ * An {@link ItemTileOverlay} suitable for showing text at the bottom center of
+ * the tile. Used by the tiles in trash (for showing the days until deletion)
+ * and duplicate listing (for showing the collection name).
  */
-export const DuplicateTileTextOverlay = styled(ItemTileOverlay)`
+export const BottomTextItemTileOverlay = styled(ItemTileOverlay)`
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    padding: 4px;
+    padding: 6px;
     background: linear-gradient(transparent 30%, 80%, rgba(0 0 0 / 0.7));
     color: white;
 `;

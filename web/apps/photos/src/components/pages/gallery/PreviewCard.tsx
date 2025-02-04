@@ -4,20 +4,18 @@ import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
 import { enteFileDeletionDate } from "@/media/file";
 import { FileType } from "@/media/file-type";
-import {
-    GAP_BTW_TILES,
-    IMAGE_CONTAINER_MAX_WIDTH,
-} from "@/new/photos/components/PhotoList";
+import { GAP_BTW_TILES } from "@/new/photos/components/PhotoList";
 import {
     LoadingThumbnail,
     StaticThumbnail,
 } from "@/new/photos/components/PlaceholderThumbnails";
+import { BottomTextItemTileOverlay } from "@/new/photos/components/Tiles";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
 import useLongPress from "@ente/shared/hooks/useLongPress";
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
-import { styled } from "@mui/material";
+import { styled, Typography } from "@mui/material";
 import type { DisplayFile } from "components/PhotoFrame";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useRef, useState } from "react";
@@ -128,6 +126,7 @@ const FavOverlay = styled(Overlay)`
     padding-left: 5px;
     padding-bottom: 5px;
     opacity: 0.9;
+    color: white;
 `;
 
 const InSelectRangeOverlay = styled(Overlay)(
@@ -137,30 +136,6 @@ const InSelectRangeOverlay = styled(Overlay)(
     opacity: 0.14;
 `,
 );
-
-const FileAndCollectionNameOverlay = styled("div")`
-    width: 100%;
-    bottom: 0;
-    left: 0;
-    max-height: 40%;
-    width: 100%;
-    background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 2));
-    & > p {
-        max-width: calc(${IMAGE_CONTAINER_MAX_WIDTH}px - 10px);
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        margin: 2px;
-        text-align: center;
-    }
-    padding: 7px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    color: white;
-    position: absolute;
-`;
 
 const SelectedOverlay = styled(Overlay)(
     ({ theme }) => `
@@ -359,9 +334,11 @@ export default function PreviewCard(props: IProps) {
             )}
 
             {props?.activeCollectionID === TRASH_SECTION && file.isTrashed && (
-                <FileAndCollectionNameOverlay>
-                    <p>{formattedDateRelative(enteFileDeletionDate(file))}</p>
-                </FileAndCollectionNameOverlay>
+                <BottomTextItemTileOverlay>
+                    <Typography variant="small">
+                        {formattedDateRelative(enteFileDeletionDate(file))}
+                    </Typography>
+                </BottomTextItemTileOverlay>
             )}
         </Cont>
     );

@@ -41,8 +41,8 @@ import {
     type ListChildComponentProps,
 } from "react-window";
 import {
+    BottomTextItemTileOverlay,
     DuplicateItemTile,
-    DuplicateTileTextOverlay,
     ItemCard,
 } from "../components/Tiles";
 import {
@@ -600,11 +600,11 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                             TileComponent={DuplicateItemTile}
                             coverFile={item.file}
                         >
-                            <DuplicateTileTextOverlay>
+                            <BottomTextItemTileOverlay>
                                 <Ellipsized2LineTypography variant="small">
                                     {item.collectionName}
                                 </Ellipsized2LineTypography>
-                            </DuplicateTileTextOverlay>
+                            </BottomTextItemTileOverlay>
                         </ItemCard>
                     ))}
                 </ItemGrid>
