@@ -1730,6 +1730,20 @@ class FilesDB {
     );
   }
 
+  Future<List<EnteFile>> getAllFilesAfterDate({
+    required FileType fileType,
+    required DateTime beginDate,
+  }) async {
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
+      '''
+      SELECT * FROM $filesTable WHERE $columnFileType = ? AND $columnCreationTime > ? AND $columnUploadedFileID  != -1 
+    ''',
+      [getInt(fileType), beginDate.microsecondsSinceEpoch],
+    );
+    return convertToFiles(results);
+  }
+
   Future<List<EnteFile>> getAllFilesFromDB(
     Set<int> collectionsToIgnore, {
     bool dedupeByUploadId = true,

@@ -12,6 +12,11 @@ allprojects {
             url "${project(':background_fetch').projectDir}/libs"
         }
     }
+    ext {
+        compileSdkVersion   = 34
+        targetSdkVersion    = 34
+        appCompatVersion    = "1.7.0"
+    }
 }
 
 rootProject.buildDir = '../build'

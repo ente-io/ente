@@ -16,6 +16,7 @@ import "package:photos/services/files_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
+import "package:photos/ui/viewer/file/preview_status_widget.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
@@ -26,11 +27,14 @@ class VideoWidgetMediaKitNew extends StatefulWidget {
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
   final bool isFromMemories;
+  final void Function()? onStreamChange;
+
   const VideoWidgetMediaKitNew(
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
     this.isFromMemories = false,
+    this.onStreamChange,
     super.key,
   });
 
@@ -231,11 +235,14 @@ class _VideoWidget extends StatefulWidget {
   final VideoController controller;
   final Function(bool)? playbackCallback;
   final bool isFromMemories;
+  final void Function()? onStreamChange;
+
   const _VideoWidget(
     this.file,
     this.controller,
     this.playbackCallback, {
     required this.isFromMemories,
+    this.onStreamChange,
   });
 
   @override
@@ -361,6 +368,16 @@ class __VideoWidgetState extends State<_VideoWidget> {
                                       ),
                                     )
                                   : const SizedBox.shrink(),
+                              ValueListenableBuilder(
+                                valueListenable: showControlsNotifier,
+                                builder: (context, value, _) {
+                                  return PreviewStatusWidget(
+                                    showControls: value,
+                                    file: widget.file,
+                                    onStreamChange: widget.onStreamChange,
+                                  );
+                                },
+                              ),
                               _SeekBarAndDuration(
                                 controller: widget.controller,
                                 isSeekingNotifier: _isSeekingNotifier,

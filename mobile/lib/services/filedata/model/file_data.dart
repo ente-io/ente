@@ -194,3 +194,14 @@ class FDStatus {
     );
   }
 }
+
+class PreviewInfo {
+  final String objectId;
+  final int objectSize;
+  String? nonce;
+  PreviewInfo({
+    required this.objectId,
+    required this.objectSize,
+    this.nonce,
+  });
+}

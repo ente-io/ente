@@ -3,6 +3,9 @@ import "dart:async";
 import 'package:flutter/material.dart';
 import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
+import "package:photos/models/preview/preview_item.dart";
+import "package:photos/models/preview/preview_item_status.dart";
+import "package:photos/services/preview_video_store.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -12,9 +15,11 @@ class BackupItemCard extends StatefulWidget {
   const BackupItemCard({
     super.key,
     required this.item,
+    required this.preview,
   });
 
   final BackupItem item;
+  final PreviewItem? preview;
 
   @override
   State<BackupItemCard> createState() => _BackupItemCardState();
@@ -47,6 +52,9 @@ class _BackupItemCardState extends State<BackupItemCard> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final hasError = widget.item.error != null ||
+        widget.preview?.status == PreviewItemStatus.failed;
+
     return Container(
       height: 60,
       margin: const EdgeInsets.symmetric(vertical: 10),
@@ -108,8 +116,8 @@ class _BackupItemCardState extends State<BackupItemCard> {
               ],
             ),
           ),
-          if (widget.item.error != null) const SizedBox(width: 12),
-          if (widget.item.error != null)
+          if (hasError) const SizedBox(width: 12),
+          if (hasError)
             SizedBox(
               height: 48,
               width: 48,
@@ -126,8 +134,10 @@ class _BackupItemCardState extends State<BackupItemCard> {
                         ex.runtimeType.toString() +
                         " - " +
                         ex.toString();
-                  } else {
+                  } else if (widget.item.error != null) {
                     errorMessage = widget.item.error.toString();
+                  } else if (widget.preview?.error != null) {
+                    errorMessage = widget.preview!.error!.toString();
                   }
                   showErrorDialog(
                     context,
@@ -137,7 +147,7 @@ class _BackupItemCardState extends State<BackupItemCard> {
                 },
               ),
             ),
-          if (widget.item.error == null) const SizedBox(width: 12),
+          if (hasError) const SizedBox(width: 12),
           SizedBox(
             height: 48,
             width: 48,
@@ -151,14 +161,57 @@ class _BackupItemCardState extends State<BackupItemCard> {
                       color: colorScheme.primary700,
                     ),
                   ),
-                BackupItemStatus.uploaded => const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: Icon(
-                      Icons.check,
-                      color: Color(0xFF00B33C),
-                    ),
-                  ),
+                BackupItemStatus.uploaded => widget.preview != null
+                    ? switch (widget.preview!.status) {
+                        PreviewItemStatus.uploading ||
+                        PreviewItemStatus.compressing =>
+                          SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: Image.asset(
+                              "assets/processing-video.png",
+                            ),
+                          ),
+                        PreviewItemStatus.failed => GestureDetector(
+                            onTap: () =>
+                                PreviewVideoStore.instance.chunkAndUploadVideo(
+                              context,
+                              widget.item.file,
+                              true,
+                            ),
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: Image.asset(
+                                "assets/processing-video-failed.png",
+                              ),
+                            ),
+                          ),
+                        PreviewItemStatus.retry ||
+                        PreviewItemStatus.inQueue =>
+                          SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: Image.asset(
+                              "assets/video-processing-queued.png",
+                            ),
+                          ),
+                        PreviewItemStatus.uploaded => SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: Image.asset(
+                              "assets/processing-video-success.png",
+                            ),
+                          ),
+                      }
+                    : const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: Icon(
+                          Icons.check,
+                          color: Color(0xFF00B33C),
+                        ),
+                      ),
                 BackupItemStatus.inQueue => SizedBox(
                     width: 24,
                     height: 24,
