@@ -15,7 +15,7 @@ const getTheme = (appName: AppName): Theme => {
         : { ...colorSchemes_, light: colorSchemes_.dark };
     return createTheme({
         cssVariables: {
-            colorSchemeSelector: "class"
+            colorSchemeSelector: "class",
         },
         colorSchemes,
         typography,
