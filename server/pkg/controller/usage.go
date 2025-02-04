@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"errors"
+
 	"github.com/ente-io/museum/ente"
 	bonus "github.com/ente-io/museum/ente/storagebonus"
 	"github.com/ente-io/museum/pkg/controller/storagebonus"
@@ -101,6 +102,25 @@ func (c *UsageController) CanUploadFile(ctx context.Context, userID int64, size 
 		var eligibleBonus = bonus.GetUsableBonus(subStorage)
 		if newUsage > (subStorage + eligibleBonus) {
 			return stacktrace.Propagate(ente.ErrStorageLimitExceeded, "")
+		}
+	}
+
+	// Get particular member's storage and check if the file size is larger than the size of the storage allocated
+	// to the Member and fail if its too large.
+	var memberStorage *int64
+	if subscriptionAdminID != userID {
+		familyMembers, err := c.FamilyRepo.GetMembersWithStatus(*familyAdminID, repo.ActiveFamilyMemberStatus)
+		if err != nil {
+			stacktrace.Propagate(err, "Failed to Get Family Members")
+		}
+		for _, familyMember := range familyMembers {
+			if familyMember.MemberUserID == userID {
+				memberStorage = familyMember.StorageLimit
+				break
+			}
+		}
+		if memberStorage != nil {
+			return stacktrace.Propagate(ente.ErrStorageLimitExceeded, "Size of Files is larger than Family Members Allocated Storage")
 		}
 	}
 	return nil
