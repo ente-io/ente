@@ -27,11 +27,9 @@ interface FileNameComponents {
     originalName: string;
     numberedSuffix: string;
     extension: string;
-    isEditedFile: boolean;
 }
 
 const MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT = 46;
-const EDITED_FILE_SUFFIX = "-edited";
 const METADATA_SUFFIX = ".supplemental-metadata";
 
 /**
@@ -63,7 +61,35 @@ export const matchTakeoutMetadata = (
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
 ) => {
-    const components = getFileNameComponents(fileName);
+    // Break the fileName down into its components.
+    let [name, extension] = nameAndExtension(fileName);
+    if (extension) {
+        extension = "." + extension;
+    }
+
+    // Trim off a suffix like "(1)" from the name, remembering what we trimmed
+    // since we might need it later.
+    let numberedSuffix: string;
+    const endsWithNumberedSuffixWithBrackets = /\(\d+\)$/.exec(name);
+    if (endsWithNumberedSuffixWithBrackets) {
+        name = name.slice(0, -1 * endsWithNumberedSuffixWithBrackets[0].length);
+        numberedSuffix = endsWithNumberedSuffixWithBrackets[0];
+    }
+
+    // Removes the "-edited" suffix, if present, so that the edited file can be
+    // associated to the original file's metadataJSON file as edited files don't
+    // have their own metadata files.
+    const editedFileSuffix = "-edited";
+    if (name.endsWith(editedFileSuffix)) {
+        name = name.slice(0, -1 * editedFileSuffix.length);
+    }
+
+    const components = {
+        originalName: name,
+        numberedSuffix,
+        extension,
+    };
+
     let key = getMetadataJSONMapKeyForFile(collectionID, components);
     let takeoutMetadata = parsedMetadataJSONMap.get(key);
 
@@ -81,35 +107,6 @@ export const matchTakeoutMetadata = (
     }
 
     return takeoutMetadata;
-};
-
-/*
-    Get the components of the file name. Also removes the "-edited" suffix, if present, so that the edited file can be
-    associated to the original file's metadataJSON file as edited files don't have their own metadata files.
-*/
-const getFileNameComponents = (fileName: string): FileNameComponents => {
-    let [name, extension] = nameAndExtension(fileName);
-    if (extension) {
-        extension = "." + extension;
-    }
-    let numberedSuffix: string = null;
-
-    const endsWithNumberedSuffixWithBrackets = /\(\d+\)$/.exec(name);
-    if (endsWithNumberedSuffixWithBrackets) {
-        name = name.slice(0, -1 * endsWithNumberedSuffixWithBrackets[0].length);
-        numberedSuffix = endsWithNumberedSuffixWithBrackets[0];
-    }
-    const isEditedFile = name.endsWith(EDITED_FILE_SUFFIX);
-    if (isEditedFile) {
-        name = name.slice(0, -1 * EDITED_FILE_SUFFIX.length);
-    }
-
-    return {
-        originalName: name,
-        numberedSuffix,
-        extension,
-        isEditedFile,
-    };
 };
 
 const getMetadataJSONMapKeyForFile = (
