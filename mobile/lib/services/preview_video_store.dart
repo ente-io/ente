@@ -25,10 +25,9 @@ import "package:photos/models/base/id.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
-import "package:photos/models/metadata/file_magic.dart";
+import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
-import "package:photos/services/file_magic_service.dart";
 import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
@@ -265,23 +264,36 @@ class PreviewVideoStore {
           final result = await _uploadPreviewVideo(enteFile, previewFile);
           final String objectID = result.$1;
           final objectSize = result.$2;
+
+          // Logic to fetch width & height of preview
+          //-allowed_extensions ALL -i "https://example.com/stream.m3u8" -frames:v 1 -c copy frame.ts
+          final FFmpegSession session2 = await FFmpegKit.execute(
+            '-allowed_extensions ALL -i "$prefix/output.m3u8" -frames:v 1 -c copy "$prefix/frame.ts"',
+          );
+          final returnCode2 = await session2.getReturnCode();
+          int? width, height;
+          try {
+            if (ReturnCode.isSuccess(returnCode2)) {
+              FFProbeProps? props2;
+              final file2 = File("$prefix/frame.ts");
+
+              props2 = await getVideoPropsAsync(file2);
+              width = props2?.width;
+              height = props2?.height;
+            }
+          } catch (_) {
+            _logger.warning("Failed to get width and height", _);
+          }
+
           await _reportVideoPreview(
             enteFile,
             playlistFile,
             objectID: objectID,
             objectSize: objectSize,
+            width: width,
+            height: height,
           );
 
-          FFProbeProps? props2;
-          props2 = await getVideoPropsAsync(playlistFile);
-          FileMagicService.instance.updatePublicMagicMetadata(
-            [enteFile],
-            {
-              previewHeightKey: props2?.height,
-              previewWidthKey: props2?.width,
-              previewSizeKey: objectSize,
-            },
-          ).ignore();
           _logger.info("Video preview uploaded for $enteFile");
         } catch (err, sT) {
           error = "Failed to upload video preview\nError: $err";
@@ -346,6 +358,8 @@ class PreviewVideoStore {
     File playlist, {
     required String objectID,
     required int objectSize,
+    required int? width,
+    required int? height,
   }) async {
     _logger.info("Pushing playlist for ${file.uploadedFileID}");
     try {
@@ -355,6 +369,8 @@ class PreviewVideoStore {
         {
           "playlist": playlistContent,
           'type': 'hls_video',
+          'width': width,
+          'height': height,
         },
         encryptionKey,
       );
@@ -411,12 +427,13 @@ class PreviewVideoStore {
     return "video_preview_$objectKey";
   }
 
-  Future<File?> getPlaylist(EnteFile file) async {
+  Future<PlaylistData?> getPlaylist(EnteFile file) async {
     return await _getPlaylist(file);
   }
 
-  Future<File?> _getPlaylist(EnteFile file) async {
+  Future<PlaylistData?> _getPlaylist(EnteFile file) async {
     _logger.info("Getting playlist for $file");
+    int? width, height, size;
     try {
       final objectKey =
           FileDataService.instance.previewIds?[file.uploadedFileID!]?.objectId;
@@ -443,6 +460,11 @@ class PreviewVideoStore {
           header: header,
         );
         finalPlaylist = playlistData["playlist"];
+
+        width = playlistData["width"];
+        height = playlistData["height"];
+        size = response.data["data"]["objectSize"];
+
         if (objectKey != null) {
           unawaited(
             cacheManager.putFile(
@@ -488,7 +510,13 @@ class PreviewVideoStore {
       final playlistFile = File("${tempDir.path}/${file.uploadedFileID}.m3u8");
       await playlistFile.writeAsString(finalPlaylist);
       _logger.info("Writing playlist to ${playlistFile.path}");
-      return playlistFile;
+      final data = PlaylistData(
+        preview: playlistFile,
+        width: width,
+        height: height,
+        size: size,
+      );
+      return data;
     } catch (_) {
       rethrow;
     }

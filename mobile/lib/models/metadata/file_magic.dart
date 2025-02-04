@@ -14,9 +14,6 @@ const latKey = "lat";
 const longKey = "long";
 const motionVideoIndexKey = "mvi";
 const noThumbKey = "noThumb";
-const previewWidthKey = "previewWidth";
-const previewHeightKey = "previewHeight";
-const previewSizeKey = "previewSize";
 
 class MagicMetadata {
   // 0 -> visible
@@ -65,11 +62,6 @@ class PubMagicMetadata {
   // 1 -> panorama
   int? mediaType;
 
-  // preview related metadata for videos
-  int? previewWidth;
-  int? previewHeight;
-  int? previewSize;
-
   PubMagicMetadata({
     this.editedTime,
     this.editedName,
@@ -82,9 +74,6 @@ class PubMagicMetadata {
     this.mvi,
     this.noThumb,
     this.mediaType,
-    this.previewWidth,
-    this.previewHeight,
-    this.previewSize,
   });
 
   factory PubMagicMetadata.fromEncodedJson(String encodedJson) =>
@@ -107,9 +96,6 @@ class PubMagicMetadata {
       mvi: map[motionVideoIndexKey],
       noThumb: map[noThumbKey],
       mediaType: map[mediaTypeKey],
-      previewWidth: map[previewWidthKey],
-      previewHeight: map[previewHeightKey],
-      previewSize: map[previewSizeKey],
     );
   }
 

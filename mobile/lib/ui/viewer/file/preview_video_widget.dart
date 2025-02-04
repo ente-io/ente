@@ -81,7 +81,7 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
   }
 
   Future<void> _checkForPreview() async {
-    final file = await PreviewVideoStore.instance
+    final data = await PreviewVideoStore.instance
         .getPlaylist(widget.file)
         .onError((error, stackTrace) {
       if (!mounted) return;
@@ -90,7 +90,7 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
       return null;
     });
     if (!mounted) return;
-    if (file != null) {
+    if (data != null) {
       if (flagService.internalUser) {
         final d =
             FileDataService.instance.previewIds?[widget.file.uploadedFileID!];
@@ -105,7 +105,7 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
           showShortToast(context, "Playing preview");
         }
       }
-      previewFile = file;
+      previewFile = data.preview;
       _setVideoPlayerController();
     }
   }

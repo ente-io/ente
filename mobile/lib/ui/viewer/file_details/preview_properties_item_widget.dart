@@ -3,6 +3,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
+import "package:photos/services/preview_video_store.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/utils/data_util.dart";
@@ -26,34 +27,43 @@ class PreviewPropertiesItemWidget extends StatefulWidget {
 
 class _PreviewPropertiesItemWidgetState
     extends State<PreviewPropertiesItemWidget> {
+  Widget? child;
+
   @override
-  Widget build(BuildContext context) {
-    return InfoItemWidget(
-      key: const ValueKey("Stream properties"),
-      leadingIcon: Icons.play_circle_outline,
-      title: S.of(context).streamDetails,
-      subtitleSection: _subTitleSection(),
-    );
+  void initState() {
+    super.initState();
+    _getSection();
   }
 
-  Future<List<Widget>> _subTitleSection() async {
+  @override
+  Widget build(BuildContext context) {
+    return child ?? const SizedBox();
+  }
+
+  Future<void> _getSection() async {
     final textStyle = getEnteTextTheme(context).miniMuted;
     final subSectionWidgets = <Widget>[];
 
-    if (widget.file.pubMagicMetadata?.previewWidth != null &&
-        widget.file.pubMagicMetadata?.previewHeight != null) {
+    final data = await PreviewVideoStore.instance
+        .getPlaylist(widget.file)
+        .onError((error, stackTrace) {
+      if (!mounted) return;
+      return null;
+    });
+
+    if (data!.width != null && data.height != null) {
       subSectionWidgets.add(
         Text(
-          "${widget.file.pubMagicMetadata?.previewWidth}x${widget.file.pubMagicMetadata?.previewHeight}",
+          "${data.width!}x${data.height!}",
           style: textStyle,
         ),
       );
     }
 
-    if (widget.file.pubMagicMetadata?.previewSize != null) {
+    if (data.size != null) {
       subSectionWidgets.add(
         Text(
-          formatBytes(widget.file.pubMagicMetadata!.previewSize!),
+          formatBytes(data.size!),
           style: textStyle,
         ),
       );
@@ -61,10 +71,10 @@ class _PreviewPropertiesItemWidgetState
 
     if ((widget.file.fileType == FileType.video) &&
         (widget.file.localID != null || widget.file.duration != 0) &&
-        widget.file.pubMagicMetadata!.previewSize != null) {
+        data.size != null) {
       // show bitrate, i.e. size * 8 / duration formatted
       final result = FFProbeProps.formatBitrate(
-        widget.file.pubMagicMetadata!.previewSize! * 8 / widget.file.duration!,
+        data.size! * 8 / widget.file.duration!,
         "b/s",
       );
       if (result != null) {
@@ -77,6 +87,16 @@ class _PreviewPropertiesItemWidgetState
       }
     }
 
-    return Future.value(subSectionWidgets);
+    if (subSectionWidgets.isEmpty) return;
+
+    child = InfoItemWidget(
+      key: const ValueKey("Stream properties"),
+      leadingIcon: Icons.play_circle_outline,
+      title: S.of(context).streamDetails,
+      subtitleSection: Future.value(subSectionWidgets),
+    );
+    if (mounted) {
+      setState(() {});
+    }
   }
 }
