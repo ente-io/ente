@@ -23,14 +23,14 @@ export interface ParsedMetadataJSON {
     description?: string;
 }
 
-export interface FileNameComponents {
+interface FileNameComponents {
     originalName: string;
     numberedSuffix: string;
     extension: string;
     isEditedFile: boolean;
 }
 
-export const MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT = 46;
+const MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT = 46;
 const EDITED_FILE_SUFFIX = "-edited";
 const METADATA_SUFFIX = ".supplemental-metadata";
 
@@ -85,40 +85,11 @@ export const matchTakeoutMetadata = (
     return takeoutMetadata;
 };
 
-// if the file name is greater than MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT(46) , then google photos clips the file name
-// so we need to use the clipped file name to get the metadataJSON file
-export const getClippedMetadataJSONMapKeyForFile = (
-    collectionID: number,
-    components: FileNameComponents,
-) => {
-    const baseFileName = `${components.originalName}${components.extension}`;
-    return `${collectionID}-${baseFileName.slice(0, MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT)}${components.numberedSuffix ?? ""}`;
-};
-
-// newer Takeout exports are attaching a ".supplemental-metadata" suffix to the file name of the metadataJSON file,
-// and then clipping the file name if it's too long (ending up with filenames like
-// "very_long_file_name.jpg.supple.json")
-export const getSupplementaryMetadataJSONMapKeyForFile = (
-    collectionID: number,
-    components: FileNameComponents,
-) => {
-    const baseFileName = `${components.originalName}${components.extension}${METADATA_SUFFIX}`;
-    return `${collectionID}-${baseFileName.slice(0, MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT)}${components.numberedSuffix ?? ""}`;
-};
-
-export const getMetadataJSONMapKeyForFile = (
-    collectionID: number,
-    components: FileNameComponents,
-) => {
-    const baseFileName = `${components.originalName}${components.extension}`;
-    return `${collectionID}-${baseFileName}${components.numberedSuffix ?? ""}`;
-};
-
 /*
     Get the components of the file name. Also removes the "-edited" suffix, if present, so that the edited file can be
     associated to the original file's metadataJSON file as edited files don't have their own metadata files.
 */
-export const getFileNameComponents = (fileName: string): FileNameComponents => {
+const getFileNameComponents = (fileName: string): FileNameComponents => {
     let [name, extension] = nameAndExtension(fileName);
     if (extension) {
         extension = "." + extension;
@@ -143,7 +114,38 @@ export const getFileNameComponents = (fileName: string): FileNameComponents => {
     };
 };
 
-/** Try to parse the contents of a metadata JSON file from a Google Takeout. */
+const getMetadataJSONMapKeyForFile = (
+    collectionID: number,
+    components: FileNameComponents,
+) => {
+    const baseFileName = `${components.originalName}${components.extension}`;
+    return `${collectionID}-${baseFileName}${components.numberedSuffix ?? ""}`;
+};
+
+// if the file name is greater than MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT(46) , then google photos clips the file name
+// so we need to use the clipped file name to get the metadataJSON file
+const getClippedMetadataJSONMapKeyForFile = (
+    collectionID: number,
+    components: FileNameComponents,
+) => {
+    const baseFileName = `${components.originalName}${components.extension}`;
+    return `${collectionID}-${baseFileName.slice(0, MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT)}${components.numberedSuffix ?? ""}`;
+};
+
+// newer Takeout exports are attaching a ".supplemental-metadata" suffix to the file name of the metadataJSON file,
+// and then clipping the file name if it's too long (ending up with filenames like
+// "very_long_file_name.jpg.supple.json")
+const getSupplementaryMetadataJSONMapKeyForFile = (
+    collectionID: number,
+    components: FileNameComponents,
+) => {
+    const baseFileName = `${components.originalName}${components.extension}${METADATA_SUFFIX}`;
+    return `${collectionID}-${baseFileName.slice(0, MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT)}${components.numberedSuffix ?? ""}`;
+};
+
+/**
+ * Try to parse the contents of a metadata JSON file from a Google Takeout.
+ */
 export const tryParseTakeoutMetadataJSON = async (
     uploadItem: UploadItem,
 ): Promise<ParsedMetadataJSON | undefined> => {
