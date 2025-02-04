@@ -239,6 +239,6 @@ export const DuplicateTileTextOverlay = styled(ItemTileOverlay)`
     justify-content: center;
     align-items: flex-end;
     padding: 4px;
-    background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.7));
+    background: linear-gradient(transparent 30%, 80%, rgba(0 0 0 / 0.7));
     color: white;
 `;
