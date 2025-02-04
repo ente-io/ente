@@ -138,23 +138,19 @@ const FavoriteOverlay = styled(Overlay)`
  * An overlay with a gradient, showing the file type indicator (e.g. live photo,
  * video) at the bottom right.
  */
-const FileTypeIndicatorOverlay = styled(Overlay)(({ theme }) => ({
-    display: "flex",
-    justifyContent: "flex-end",
-    alignItems: "flex-end",
-    padding: "5px",
-    color: "white",
-    // TODO(LM): Ditto the dark one until lm is ready.
-    // background:
-    // "linear-gradient(315deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255,
-    // 255, 0.05) 29.61%, rgba(255, 255, 255, 0) 49.86%)",
-    background:
-        "linear-gradient(315deg, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0.05) 29.61%, rgba(0, 0, 0, 0) 49.86%)",
-    ...theme.applyStyles("dark", {
-        background:
-            "linear-gradient(315deg, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0.05) 29.61%, rgba(0, 0, 0, 0) 49.86%)",
-    }),
-}));
+const FileTypeIndicatorOverlay = styled(Overlay)`
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 5px;
+    color: white;
+    background: linear-gradient(
+        315deg,
+        rgba(0 0 0 / 0.14) 0%,
+        rgba(0 0 0 / 0.05) 30%,
+        transparent 50%
+    );
+`;
 
 const InSelectRangeOverlay = styled(Overlay)(
     ({ theme }) => `
