@@ -1,4 +1,5 @@
 import { Overlay } from "@/base/components/containers";
+import { formatDateRelative } from "@/base/i18n-date";
 import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
 import { FileType } from "@/media/file-type";
@@ -17,7 +18,6 @@ import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { styled } from "@mui/material";
 import type { DisplayFile } from "components/PhotoFrame";
-import i18n from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { shouldShowAvatar } from "utils/file";
@@ -366,6 +366,7 @@ export default function PreviewCard(props: IProps) {
     );
 }
 
+/*
 function formatDateRelative(date: number) {
     const units = {
         year: 24 * 60 * 60 * 1000 * 365,
@@ -389,3 +390,4 @@ function formatDateRelative(date: number) {
                 u as Intl.RelativeTimeFormatUnit,
             );
 }
+*/

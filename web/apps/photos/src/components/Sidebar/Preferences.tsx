@@ -114,8 +114,14 @@ const LanguageSelector = () => {
 
     const updateCurrentLocale = (newLocale: SupportedLocale) => {
         setLocaleInUse(newLocale);
+        // [Note: Changing locale causes a full reload]
+        //
         // A full reload is needed because we use the global `t` instance
         // instead of the useTranslation hook.
+        //
+        // We also rely on this behaviour by caching various formatters in
+        // module static variables that not get updated if the i18n.language
+        // changes unless there is a full reload.
         window.location.reload();
     };
 
