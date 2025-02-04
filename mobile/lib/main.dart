@@ -287,7 +287,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     }
     _logger.info("PushService/HomeWidget done $tlog");
     PreviewVideoStore.instance.init(preferences);
-    PreviewVideoStore.instance.putFilesForPreviewCreation().ignore();
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
     await PersonService.init(
@@ -295,6 +294,10 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       MLDataDB.instance,
       preferences,
     );
+    Future.delayed(
+      const Duration(seconds: 10),
+      PreviewVideoStore.instance.putFilesForPreviewCreation,
+    ).ignore();
     initComplete = true;
     _logger.info("Initialization done $tlog");
   } catch (e, s) {

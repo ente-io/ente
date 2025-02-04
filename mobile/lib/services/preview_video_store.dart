@@ -494,13 +494,8 @@ class PreviewVideoStore {
       fileType: FileType.video,
       beginDate: cutoff,
     );
-    await Future.delayed(const Duration(seconds: 5));
-    var previewIds = FileDataService.instance.previewIds;
-    if (previewIds == null) {
-      await Future.delayed(const Duration(seconds: 15));
-      previewIds = FileDataService.instance.previewIds;
-    }
 
+    final previewIds = FileDataService.instance.previewIds;
     final allFiles = files
         .where((file) => previewIds?[file.uploadedFileID] == null)
         .toList();
