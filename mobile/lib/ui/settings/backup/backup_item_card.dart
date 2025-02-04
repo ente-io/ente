@@ -5,6 +5,7 @@ import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
 import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
+import "package:photos/services/preview_video_store.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -171,11 +172,19 @@ class _BackupItemCardState extends State<BackupItemCard> {
                               "assets/processing-video.png",
                             ),
                           ),
-                        PreviewItemStatus.failed => SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: Image.asset(
-                              "assets/processing-video-failed.png",
+                        PreviewItemStatus.failed => GestureDetector(
+                            onTap: () =>
+                                PreviewVideoStore.instance.chunkAndUploadVideo(
+                              context,
+                              widget.item.file,
+                              true,
+                            ),
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: Image.asset(
+                                "assets/processing-video-failed.png",
+                              ),
                             ),
                           ),
                         PreviewItemStatus.retry ||

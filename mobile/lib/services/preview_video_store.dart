@@ -91,7 +91,11 @@ class PreviewVideoStore {
     return DateTime.fromMillisecondsSinceEpoch(milliseconds);
   }
 
-  Future<void> chunkAndUploadVideo(BuildContext? ctx, EnteFile enteFile) async {
+  Future<void> chunkAndUploadVideo(
+    BuildContext? ctx,
+    EnteFile enteFile, [
+    bool forceUpload = false,
+  ]) async {
     if (!enteFile.isUploaded || !isVideoStreamingEnabled) return;
     final file = await getFile(enteFile, isOrigin: true);
     if (file == null) return;
@@ -135,7 +139,9 @@ class PreviewVideoStore {
         _items[enteFile.uploadedFileID!] = PreviewItem(
           status: PreviewItemStatus.inQueue,
           file: enteFile,
-          retryCount: _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
+          retryCount: forceUpload
+              ? 0
+              : _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
           collectionID: enteFile.collectionID ?? 0,
         );
         Bus.instance.fire(PreviewUpdatedEvent(_items));
@@ -145,7 +151,8 @@ class PreviewVideoStore {
       _items[enteFile.uploadedFileID!] = PreviewItem(
         status: PreviewItemStatus.compressing,
         file: enteFile,
-        retryCount: _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
+        retryCount:
+            forceUpload ? 0 : _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
         collectionID: enteFile.collectionID ?? 0,
       );
       Bus.instance.fire(PreviewUpdatedEvent(_items));
