@@ -504,5 +504,13 @@
   "deselectAll": "Odznacz wszystko",
   "selectAll": "Zaznacz wszystko",
   "deleteDuplicates": "Usuń duplikaty",
-  "plainHTML": "Zwykły HTML"
+  "plainHTML": "Zwykły HTML",
+  "tellUsWhatYouThink": "Wyraź swoją opinię",
+  "dropReview": "Napisz recenzję w App Store/Play Store",
+  "supportEnte": "Wesprzyj <bold-green>ente</bold-green>",
+  "giveUsAStarOnGithub": "Daj nam gwiazdkę na Githubie",
+  "free5GB": "5 GB za darmo na zdjęcia <bold-green>ente</bold-green>",
+  "loginWithAuthAccount": "Zaloguj się przy użyciu konta Auth",
+  "freeStorageOffer": "10% zniżki na zdjęcia <bold-green>ente</bold-green>",
+  "freeStorageOfferDescription": "Użyj kodu „AUTH”, aby uzyskać 10% zniżki na pierwszy rok"
 }

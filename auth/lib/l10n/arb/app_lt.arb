@@ -504,5 +504,6 @@
   "deselectAll": "Naikinti visų pasirinkimą",
   "selectAll": "Pasirinkti viską",
   "deleteDuplicates": "Ištrinti dublikatus",
-  "plainHTML": "Grynasis HTML"
+  "plainHTML": "Grynasis HTML",
+  "freeStorageOfferDescription": "Naudokite kodą „AUTH“, kad gautumėte 10 % nuolaida pirmiesiems metams. "
 }

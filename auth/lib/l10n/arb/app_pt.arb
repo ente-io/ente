@@ -6,7 +6,7 @@
   "@counterAppBarTitle": {
     "description": "Text shown in the AppBar of the Counter Page"
   },
-  "onBoardingBody": "Copie com segurança seus códigos 2FA",
+  "onBoardingBody": "Salve com segurança seus códigos 2FA",
   "onBoardingGetStarted": "Introdução",
   "setupFirstAccount": "Configure sua primeira conta",
   "importScanQrCode": "Escanear QR code",
@@ -19,7 +19,7 @@
   "pleaseVerifyDetails": "Verifique os detalhes e tente novamente",
   "codeIssuerHint": "Emissor",
   "codeSecretKeyHint": "Chave secreta",
-  "secret": "Segredo",
+  "secret": "Chave secreta",
   "all": "Todos",
   "notes": "Notas",
   "notesLengthLimit": "Notas tem um limite de até {count} caracteres",
@@ -504,5 +504,13 @@
   "deselectAll": "Deselecionar tudo",
   "selectAll": "Selecionar tudo",
   "deleteDuplicates": "Excluir duplicados",
-  "plainHTML": "HTML simples"
+  "plainHTML": "HTML simples",
+  "tellUsWhatYouThink": "Diga-nos o que pensa",
+  "dropReview": "Deixe uma avaliação na App/Play Store",
+  "supportEnte": "Apoie o <bold-green>ente.io</bold-green>",
+  "giveUsAStarOnGithub": "Dê-nos uma estrela no Github",
+  "free5GB": "5GB grátis no <bold-green>ente</bold-green> Photos",
+  "loginWithAuthAccount": "Registrar-se com sua conta Auth",
+  "freeStorageOffer": "10% de desconto no <bold-green>ente</bold-green> photos",
+  "freeStorageOfferDescription": "Use o cupom \"AUTH\" para obter 10% de desconto no primeiro ano"
 }
