@@ -57,6 +57,11 @@ class PreviewVideoStore {
 
   void init(SharedPreferences prefs) {
     _prefs = prefs;
+
+    Future.delayed(
+      const Duration(seconds: 10),
+      PreviewVideoStore.instance.putFilesForPreviewCreation,
+    );
   }
 
   late final SharedPreferences _prefs;
