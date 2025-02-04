@@ -1189,11 +1189,32 @@ class SearchService {
     return searchResults;
   }
 
+  Future<List<GenericSearchResult>> getTripsResults(
+    BuildContext context,
+    int? limit,
+  ) async {
+    final List<GenericSearchResult> searchResults = [];
+    final allFiles = await getAllFilesForSearch();
+    if (allFiles.isEmpty) return [];
+
+    // Identify base locations
+
+
+    // Identify trip locations
+
+
+    // Check if there are any trips to surface
+  }
+
   Future<List<GenericSearchResult>> onThisDayOrWeekResults(
     BuildContext context,
     int? limit,
   ) async {
     final List<GenericSearchResult> searchResults = [];
+    final trips = await getTripsResults(context, limit);
+    if (trips.isNotEmpty) {
+      searchResults.addAll(trips);
+    }
     final allFiles = await getAllFilesForSearch();
     if (allFiles.isEmpty) return [];
 
