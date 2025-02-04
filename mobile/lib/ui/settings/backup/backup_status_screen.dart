@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import "dart:async";
 import "dart:collection";
 
 import "package:collection/collection.dart";
@@ -6,10 +7,12 @@ import 'package:flutter/material.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/backup_updated_event.dart";
 import "package:photos/events/file_uploaded_event.dart";
+import "package:photos/events/preview_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
 import "package:photos/models/file/extensions/file_props.dart";
+import "package:photos/services/preview_video_store.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/settings/backup/backup_item_card.dart";
@@ -25,6 +28,10 @@ class BackupStatusScreen extends StatefulWidget {
 class _BackupStatusScreenState extends State<BackupStatusScreen> {
   LinkedHashMap<String, BackupItem> items = FileUploader.instance.allBackups;
   List<BackupItem>? result;
+  var previewResult = PreviewVideoStore.instance.previews;
+  StreamSubscription? _fileUploadedSubscription;
+  StreamSubscription? _backupUpdatedSubscription;
+  StreamSubscription? _previewUpdatedSubscription;
 
   @override
   void initState() {
@@ -53,7 +60,8 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
           (a, b) => (b.file.uploadedFileID!).compareTo(a.file.uploadedFileID!),
         )
         .toList();
-    Bus.instance.on<FileUploadedEvent>().listen((event) {
+    _fileUploadedSubscription =
+        Bus.instance.on<FileUploadedEvent>().listen((event) {
       result!.insert(
         0,
         BackupItem(
@@ -69,8 +77,14 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
   }
 
   void checkBackupUpdatedEvent() {
-    Bus.instance.on<BackupUpdatedEvent>().listen((event) {
+    _backupUpdatedSubscription =
+        Bus.instance.on<BackupUpdatedEvent>().listen((event) {
       items = event.items;
+      safeSetState();
+    });
+    _previewUpdatedSubscription =
+        Bus.instance.on<PreviewUpdatedEvent>().listen((event) {
+      previewResult = event.items;
       safeSetState();
     });
   }
@@ -82,14 +96,42 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
   }
 
   @override
+  void dispose() {
+    _fileUploadedSubscription?.cancel();
+    _backupUpdatedSubscription?.cancel();
+    _previewUpdatedSubscription?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final List<BackupItem> items = this.items.values.toList().sorted(
           (a, b) => a.status.index.compareTo(b.status.index),
         );
 
     final allItems = <BackupItem>[
-      ...items.where((element) => element.status != BackupItemStatus.uploaded),
-      if (result != null) ...result!,
+      ...items.where(
+        (element) => element.status != BackupItemStatus.uploaded,
+      ),
+      if (result != null)
+        ...result!
+            .where(
+              (element) =>
+                  element.file.uploadedFileID != null &&
+                  previewResult[element.file.uploadedFileID] != null,
+            )
+            .sorted(
+              (a, b) =>
+                  previewResult[a.file.uploadedFileID]!.status.index.compareTo(
+                        previewResult[b.file.uploadedFileID]!.status.index,
+                      ),
+            ),
+      if (result != null)
+        ...result!.where(
+          (element) =>
+              element.file.uploadedFileID == null ||
+              previewResult[element.file.uploadedFileID] == null,
+        ),
     ];
 
     return Scaffold(
@@ -145,6 +187,7 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
                   return BackupItemCard(
                     item: allItems[index],
                     key: ValueKey(allItems[index].file.uploadedFileID),
+                    preview: previewResult[allItems[index].file.uploadedFileID],
                   );
                 },
                 itemCount: allItems.length,

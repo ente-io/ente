@@ -1392,7 +1392,7 @@
   "enableMachineLearningBanner": "Activați învățarea automată pentru a folosi căutarea magică și recunoașterea facială",
   "searchDiscoverEmptySection": "Imaginile vor fi afișate aici odată ce procesarea și sincronizarea este completă",
   "searchPersonsEmptySection": "Persoanele vor fi afișate aici odată ce procesarea și sincronizarea este completă",
-  "viewersSuccessfullyAdded": "{count, plural, one {} few {S-au adăugat {count} observatori}=0 {S-au adăugat 0 observatori} =1 {S-a adăugat 1 observator} other {S-au adăugat {count} de observatori}}",
+  "viewersSuccessfullyAdded": "{count, plural, few {S-au adăugat {count} observatori}=0 {S-au adăugat 0 observatori} =1 {S-a adăugat 1 observator} other {S-au adăugat {count} de observatori}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1402,7 +1402,7 @@
     },
     "description": "Number of viewers that were successfully added to an album."
   },
-  "collaboratorsSuccessfullyAdded": "{count, plural, one {} few {S-au adăugat {count} colaboratori}=0 {S-au adăugat 0 colaboratori} =1 {S-a adăugat 1 colaborator} other {S-au adăugat {count} de colaboratori}}",
+  "collaboratorsSuccessfullyAdded": "{count, plural, few {S-au adăugat {count} colaboratori}=0 {S-au adăugat 0 colaboratori} =1 {S-a adăugat 1 colaborator} other {S-au adăugat {count} de colaboratori}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1477,7 +1477,7 @@
   },
   "currentlyRunning": "rulează în prezent",
   "ignored": "ignorat",
-  "photosCount": "{count, plural, one {} few {{count} fotografii}=0 {0 fotografii} =1 {1 fotografie} other {{count} de fotografii}}",
+  "photosCount": "{count, plural, few {{count} fotografii}=0 {0 fotografii} =1 {1 fotografie} other {{count} de fotografii}}",
   "@photosCount": {
     "placeholders": {
       "count": {
