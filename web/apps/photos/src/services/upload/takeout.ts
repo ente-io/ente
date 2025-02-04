@@ -59,7 +59,18 @@ export const matchTakeoutMetadata = (
     }
 
     // Trim off a suffix like "(1)" from the name, remembering what we trimmed
-    // since we might need it suffix it back later in different ways.
+    // since we need to add it back later.
+    //
+    // It needs to be handled separately because of the clipping (see below).
+    // The numbered suffix (if present) is not clipped. It is added at the end
+    // of the clipped ".supplemental-metadata" portion, instead of after the
+    // original filename.
+    //
+    // For example, "IMG_1234(1).jpg" would have a metadata filename of either
+    // "IMG_1234.jpg(1).json" or "IMG_1234.jpg.supplemental-metadata(1).json".
+    // And if the filename is too long, it gets turned into something like
+    // "IMG_1234.jpg.suppl(1).json".
+
     let numberedSuffix = "";
     const endsWithNumberedSuffixWithBrackets = /\(\d+\)$/.exec(name);
     if (endsWithNumberedSuffixWithBrackets) {
@@ -70,6 +81,7 @@ export const matchTakeoutMetadata = (
     // Removes the "-edited" suffix, if present, so that the edited file can be
     // associated to the original file's metadataJSON file as edited files don't
     // have their own metadata files.
+
     const editedFileSuffix = "-edited";
     if (name.endsWith(editedFileSuffix)) {
         name = name.slice(0, -1 * editedFileSuffix.length);
@@ -85,6 +97,7 @@ export const matchTakeoutMetadata = (
     // If the file name is greater than 46 characters, then Google Photos, with
     // its infinite storage, clips the file name. In such cases we need to use
     // the clipped file name to get the key.
+
     const maxGoogleFileNameLength = 46;
     key = `${collectionID}-${baseFileName.slice(0, maxGoogleFileNameLength)}${numberedSuffix}`;
 
@@ -95,6 +108,16 @@ export const matchTakeoutMetadata = (
     // the file name of the metadataJSON file, you know, just to cause havoc,
     // and then clipping the file name if it's too long (ending up with
     // filenames "very_long_file_name.jpg.supple.json").
+    //
+    // Note that If the original filename is longer than 46 characters, then the
+    // ".supplemental-metadata" suffix gets completely removed during the
+    // clipping, along with a portion of the original filename (as before).
+    //
+    // For example, if the original filename is 45 characters long, then
+    // everything except for the "." from ".supplemental-metadata" will get
+    // clipped. So the metadata file ends up with a filename like
+    // "filename_that_is_45_chars_long.jpg..json".
+
     const supplSuffix = ".supplemental-metadata";
     baseFileName = `${name}${extension}${supplSuffix}`;
     key = `${collectionID}-${baseFileName.slice(0, maxGoogleFileNameLength)}${numberedSuffix}`;
