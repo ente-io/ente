@@ -8,10 +8,10 @@ import {
 import { parseDateFromDigitGroups } from "services/upload/date";
 import {
     getClippedMetadataJSONMapKeyForFile,
+    getFileNameComponents,
     getMetadataJSONMapKeyForFile,
     getMetadataJSONMapKeyForJSON,
     getSupplementaryMetadataJSONMapKeyForFile,
-    getFileNameComponents,
 } from "services/upload/takeout";
 import { getUserDetailsV2 } from "services/userService";
 
@@ -128,6 +128,13 @@ const FILE_NAME_TO_JSON_NAME = [
 ];
 
 export async function testUpload() {
+    try {
+        parseDateTimeFromFileNameTest();
+        mappingFileAndJSONFileCheck();
+    } catch (e) {
+        console.log(e);
+    }
+
     const jsonString = process.env.NEXT_PUBLIC_ENTE_TEST_EXPECTED_JSON;
     if (!jsonString) {
         throw Error(
@@ -148,8 +155,6 @@ export async function testUpload() {
         await fileDimensionExtractionCheck(expectedState);
         await googleMetadataReadingCheck(expectedState);
         await totalFileCountCheck(expectedState);
-        parseDateTimeFromFileNameTest();
-        mappingFileAndJSONFileCheck();
     } catch (e) {
         console.log(e);
     }
