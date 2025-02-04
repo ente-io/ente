@@ -264,12 +264,6 @@ const createSelectStyles = (
     container: (style) => ({ ...style, flex: 1 }),
     control: (style, { isFocused }) => ({
         ...style,
-        /* TODO(LM): Revisit? */
-        /*
-        backgroundColor: isFocused
-            ? theme.vars.palette.background.paper2
-            : theme.vars.palette.background.searchInput,
-            */
         backgroundColor: theme.vars.palette.background.searchInput,
         borderColor: isFocused ? theme.vars.palette.accent.main : "transparent",
         boxShadow: "none",
@@ -289,7 +283,7 @@ const createSelectStyles = (
         marginTop: "1px",
         // Give an opaque and elevated surface color to the menu to override the
         // default (transparent).
-        backgroundColor: theme.vars.palette.background.paper,
+        backgroundColor: theme.vars.palette.background.elevatedPaper,
     }),
     option: (style, { isFocused }) => ({
         ...style,
@@ -300,7 +294,7 @@ const createSelectStyles = (
         },
         // Elevate the focused option further.
         "& .option-contents": isFocused
-            ? { backgroundColor: theme.vars.palette.background.paper2 }
+            ? { backgroundColor: theme.vars.palette.fill.fainter }
             : {},
         "&:last-child .MuiDivider-root": {
             display: "none",
