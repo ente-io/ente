@@ -85,6 +85,17 @@ export const PlanSelector: React.FC<PlanSelectorProps> = ({
                         [theme.breakpoints.down(360)]: { p: 0 },
                     }),
                 },
+                // [Note: Backdrop variant blur]
+                //
+                // What we wish for is creating a variant of Backdrop that
+                // instead of specifying the backdrop filter each time. But as
+                // of MUI v6.4, the TypeScript definition for Backdrop does not
+                // contain a variant, causing tsc to show an error when we try
+                // to specify a variant.
+                //
+                // Since the styling is trivial and used only infrequently, for
+                // now we copy paste it. If it gets needed more often, we can
+                // also make it into a palette var.
                 backdrop: {
                     sx: { backdropFilter: "blur(30px) opacity(95%)" },
                 },

@@ -1029,13 +1029,13 @@ const FreehandCropRegion = forwardRef(
     },
 );
 
-const CropOverlayRegionTemplate = styled("div")(({ theme }) => ({
+const CropOverlayRegionTemplate = styled("div")({
     position: "absolute",
-    backgroundColor: theme.vars.palette.fixed.croppedAreaOverlay,
+    backgroundColor: "rgba(0 0 0 / 0.5)",
     pointerEvents: "none",
-}));
+});
 
-const PRESET_ASPECT_RATIOS = [
+const presetAspectRatios = [
     {
         width: 16,
         height: 9,
@@ -1241,7 +1241,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                 />
             </RowButtonGroup>
             <RowButtonGroup sx={{ mb: "1rem" }}>
-                {PRESET_ASPECT_RATIOS.map((ratio, index) => (
+                {presetAspectRatios.map((ratio, index) => (
                     <Fragment key={index}>
                         <RowButton
                             disabled={canvasLoading}
@@ -1252,14 +1252,14 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                                 ratio.height,
                             )}
                         />
-                        {index !== PRESET_ASPECT_RATIOS.length - 1 && (
+                        {index !== presetAspectRatios.length - 1 && (
                             <RowButtonDivider />
                         )}
                     </Fragment>
                 ))}
             </RowButtonGroup>
             <RowButtonGroup sx={{ mb: "1rem" }}>
-                {PRESET_ASPECT_RATIOS.map((ratio, index) => (
+                {presetAspectRatios.map((ratio, index) => (
                     <Fragment key={index}>
                         <RowButton
                             key={index}
@@ -1271,7 +1271,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                                 ratio.width,
                             )}
                         />
-                        {index !== PRESET_ASPECT_RATIOS.length - 1 && (
+                        {index !== presetAspectRatios.length - 1 && (
                             <RowButtonDivider />
                         )}
                     </Fragment>

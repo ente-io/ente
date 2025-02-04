@@ -515,7 +515,7 @@ const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
             onClick={() => onSelectCollectionID(collectionSummary.id)}
         >
             <CardText>{collectionSummary.name}</CardText>
-            <CollectionBarCardIcon type={collectionSummary.type} />
+            <CollectionBarCardIcon attributes={collectionSummary.attributes} />
         </ItemCard>
         {activeCollectionID === collectionSummary.id && <ActiveIndicator />}
     </div>
@@ -532,22 +532,28 @@ const CardText: React.FC<React.PropsWithChildren> = ({ children }) => (
 );
 
 interface CollectionBarCardIconProps {
-    type: CollectionSummaryType;
+    attributes: CollectionSummaryType[];
 }
 
 const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
-    type,
+    attributes,
 }) => (
+    // Under current scenarios, there are no cases where more than 3 of these
+    // will be true simultaneously even in the rarest of cases (a pinned and
+    // shared album that is also archived), and there is enough space for 3.
     <CollectionBarCardIcon_>
-        {type == "favorites" && <FavoriteRoundedIcon />}
-        {type == "archived" && (
-            <ArchiveIcon sx={{ color: "fixed.overlayIndicatorMuted" }} />
+        {attributes.includes("favorites") && <FavoriteRoundedIcon />}
+        {attributes.includes("pinned") && (
+            // Need && to override the 20px set in the container.
+            <PushPinIcon sx={{ "&&": { fontSize: "18px" } }} />
         )}
-        {type == "outgoingShare" && <PeopleIcon />}
-        {(type == "incomingShareViewer" ||
-            type == "incomingShareCollaborator") && <PeopleIcon />}
-        {type == "sharedOnlyViaLink" && <LinkIcon />}
-        {type == "pinned" && <PushPinIcon />}
+        {(attributes.includes("outgoingShare") ||
+            attributes.includes("incomingShareViewer") ||
+            attributes.includes("incomingShareCollaborator")) && <PeopleIcon />}
+        {attributes.includes("sharedOnlyViaLink") && <LinkIcon />}
+        {attributes.includes("archived") && (
+            <ArchiveIcon sx={{ opacity: 0.48 }} />
+        )}
     </CollectionBarCardIcon_>
 );
 
@@ -556,6 +562,7 @@ const CollectionBarCardIcon_ = styled(Overlay)`
     display: flex;
     justify-content: flex-start;
     align-items: flex-end;
+    gap: 4px;
     & > .MuiSvgIcon-root {
         font-size: 20px;
     }
