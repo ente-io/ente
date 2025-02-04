@@ -290,6 +290,9 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             // Override some MUI defaults for styling action elements like
             // buttons and menu items.
             //
+            // Nb: There are more where these came from, currently those don't
+            // affect us, but in the future they might.
+            //
             // https://github.com/mui/material-ui/blob/v6.4.0/packages/mui-material/src/styles/createPalette.js#L68
             action: {
                 // The color of an active action like an icon button.
@@ -300,23 +303,10 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 // from the active color above and this opacity. Use a value
                 // that results in the same result as faintHover.
                 hoverOpacity: 0.08,
-                // TODO(LM): Remove commented.
-                // The color of a selected action.
-                //
-                // Placeholder; not clear how it impacts us.
-                // selected: "#ff0000", //colors.light.stroke.base,
-                // selectedOpacity: 0.08,
                 // The color of a disabled action.
                 disabled: colors.light.text.faint,
-                // disabledOpacity: 0.12,
                 // The background color of a disabled action.
                 disabledBackground: colors.light.fill.faint,
-                // Placeholder; not clear how it impacts us.
-                // focus: "#ff0000", //colors.light.stroke.base,
-                // Placeholder (MUI default); not clear how it impacts us.
-                // focusOpacity: 1,
-                // Placeholder (MUI default); not clear how it impacts us.
-                // activatedOpacity: 0.12,
             },
             // Override some internal MUI defaults that impact the components
             // which we use.
@@ -381,14 +371,8 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 active: colors.dark.stroke.base,
                 hover: colors.dark.fill.faintHover,
                 hoverOpacity: 0.16,
-                // selected: colors.dark.stroke.base,
-                // selectedOpacity: 0.08,
                 disabled: colors.dark.text.faint,
-                // disabledOpacity: 0.12,
                 disabledBackground: colors.dark.fill.faint,
-                // focus: colors.dark.stroke.base,
-                // focusOpacity: 1,
-                // activatedOpacity: 0.12,
             },
             FilledInput: {
                 bg: colors.dark.fill.faint,
