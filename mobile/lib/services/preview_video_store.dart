@@ -1,5 +1,6 @@
 import "dart:async";
 import "dart:collection";
+import "dart:convert";
 import "dart:io";
 
 import "package:collection/collection.dart";
@@ -423,6 +424,10 @@ class PreviewVideoStore {
     return "video_playlist_$objectKey";
   }
 
+  String _getDetailsCacheKey(String objectKey) {
+    return "video_playlist_details_$objectKey";
+  }
+
   String _getVideoPreviewKey(String objectKey) {
     return "video_preview_$objectKey";
   }
@@ -440,9 +445,20 @@ class PreviewVideoStore {
       final FileInfo? playlistCache = (objectKey == null)
           ? null
           : await cacheManager.getFileFromCache(_getCacheKey(objectKey));
+      final detailsCache = (objectKey == null)
+          ? null
+          : await cacheManager.getFileFromCache(
+              _getDetailsCacheKey(objectKey),
+            );
       String finalPlaylist;
       if (playlistCache != null) {
         finalPlaylist = playlistCache.file.readAsStringSync();
+        if (detailsCache != null) {
+          final details = json.decode(detailsCache.file.readAsStringSync());
+          width = details["width"];
+          height = details["height"];
+          size = details["size"];
+        }
       } else {
         final response = await _dio.get(
           "/files/data/fetch/",
@@ -471,6 +487,19 @@ class PreviewVideoStore {
               _getCacheKey(objectKey),
               Uint8List.fromList(
                 (playlistData["playlist"] as String).codeUnits,
+              ),
+            ),
+          );
+          final details = {
+            "width": width,
+            "height": height,
+            "size": size,
+          };
+          unawaited(
+            cacheManager.putFile(
+              _getDetailsCacheKey(objectKey),
+              Uint8List.fromList(
+                json.encode(details).codeUnits,
               ),
             ),
           );
