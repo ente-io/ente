@@ -230,7 +230,8 @@ export const setLocaleInUse = async (locale: SupportedLocale) => {
 
 let _numberFormat: Intl.NumberFormat | undefined;
 /**
- * Lazily created instance of NumberFormat used by {@link formattedNumber}.
+ * Lazily created, cached, instance of NumberFormat used by
+ * {@link formattedNumber}.
  *
  * See: [Note: Changing locale causes a full reload].
  */

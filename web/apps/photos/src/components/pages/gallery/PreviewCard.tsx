@@ -1,5 +1,5 @@
 import { Overlay } from "@/base/components/containers";
-import { formatDateRelative } from "@/base/i18n-date";
+import { formattedDateRelative } from "@/base/i18n-date";
 import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
 import { enteFileDeletionDate } from "@/media/file";
@@ -360,35 +360,9 @@ export default function PreviewCard(props: IProps) {
 
             {props?.activeCollectionID === TRASH_SECTION && file.isTrashed && (
                 <FileAndCollectionNameOverlay>
-                    <p>{formatDateRelative(enteFileDeletionDate(file))}</p>
+                    <p>{formattedDateRelative(enteFileDeletionDate(file))}</p>
                 </FileAndCollectionNameOverlay>
             )}
         </Cont>
     );
 }
-
-/*
-function formatDateRelative(date: number) {
-    const units = {
-        year: 24 * 60 * 60 * 1000 * 365,
-        month: (24 * 60 * 60 * 1000 * 365) / 12,
-        day: 24 * 60 * 60 * 1000,
-        hour: 60 * 60 * 1000,
-        minute: 60 * 1000,
-        second: 1000,
-    };
-    const relativeDateFormat = new Intl.RelativeTimeFormat(i18n.language, {
-        localeMatcher: "best fit",
-        numeric: "always",
-        style: "long",
-    });
-    const elapsed = date - Date.now(); // "Math.abs" accounts for both "past" & "future" scenarios
-
-    for (const u in units)
-        if (Math.abs(elapsed) > units[u] || u === "second")
-            return relativeDateFormat.format(
-                Math.round(elapsed / units[u]),
-                u as Intl.RelativeTimeFormatUnit,
-            );
-}
-*/

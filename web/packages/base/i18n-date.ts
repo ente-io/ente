@@ -6,9 +6,9 @@
  */
 import i18n from "i18next";
 
-let _relativeDateFormat: Intl.RelativeTimeFormat | undefined;
+let _relativeTimeFormat: Intl.RelativeTimeFormat | undefined;
 
-export const formatDateRelative = (date: Date) => {
+export const formattedDateRelative = (date: Date) => {
     const units: [Intl.RelativeTimeFormatUnit, number][] = [
         ["year", 24 * 60 * 60 * 1000 * 365],
         ["month", (24 * 60 * 60 * 1000 * 365) / 12],
@@ -18,20 +18,21 @@ export const formatDateRelative = (date: Date) => {
         ["second", 1000],
     ];
 
-    const relativeDateFormat = (_relativeDateFormat ??=
+    // Math.abs accounts for both past and future scenarios.
+    const elapsed = Math.abs(date.getTime() - Date.now());
+
+    // Lazily created, then cached, instance of RelativeTimeFormat.
+    const relativeTimeFormat = (_relativeTimeFormat ??=
         new Intl.RelativeTimeFormat(i18n.language, {
             localeMatcher: "best fit",
             numeric: "always",
             style: "short",
         }));
 
-    // Math.abs accounts for both past and future scenarios.
-    const elapsed = Math.abs(date.getTime() - Date.now());
-
     for (const [u, d] of units) {
         if (elapsed > d)
-            return relativeDateFormat.format(Math.round(elapsed / d), u);
+            return relativeTimeFormat.format(Math.round(elapsed / d), u);
     }
 
-    return relativeDateFormat.format(Math.round(elapsed / 1000), "second");
+    return relativeTimeFormat.format(Math.round(elapsed / 1000), "second");
 };
