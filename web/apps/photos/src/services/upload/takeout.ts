@@ -23,65 +23,81 @@ export interface ParsedMetadataJSON {
     description?: string;
 }
 
+export interface FileNameComponents {
+    originalName: string;
+    numberedSuffix: string;
+    extension: string;
+    isEditedFile: boolean;
+}
+
 export const MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT = 46;
+const EDITED_FILE_SUFFIX = "-edited";
+const METADATA_SUFFIX = ".supplemental-metadata";
 
 export const getMetadataJSONMapKeyForJSON = (
     collectionID: number,
     jsonFileName: string,
 ) => {
-    let title = jsonFileName.slice(0, -1 * ".json".length);
-    const endsWithNumberedSuffixWithBrackets = /\(\d+\)$/.exec(title);
-    if (endsWithNumberedSuffixWithBrackets) {
-        title = title.slice(
-            0,
-            -1 * endsWithNumberedSuffixWithBrackets[0].length,
-        );
-        const [name, extension] = nameAndExtension(title);
-        return `${collectionID}-${name}${endsWithNumberedSuffixWithBrackets[0]}.${extension}`;
-    }
-    return `${collectionID}-${title}`;
+    return `${collectionID}-${jsonFileName.slice(0, -1 * ".json".length)}`;
 };
 
 // if the file name is greater than MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT(46) , then google photos clips the file name
 // so we need to use the clipped file name to get the metadataJSON file
 export const getClippedMetadataJSONMapKeyForFile = (
     collectionID: number,
-    fileName: string,
+    components: FileNameComponents,
 ) => {
-    return `${collectionID}-${fileName.slice(
-        0,
-        MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
-    )}`;
+    const baseFileName = `${components.originalName}${components.extension}`;
+    return `${collectionID}-${baseFileName.slice(0, MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT)}${components.numberedSuffix ?? ""}`;
+};
+
+// newer Takeout exports are attaching a ".supplemental-metadata" suffix to the file name of the metadataJSON file,
+// and then clipping the file name if it's too long (ending up with filenames like
+// "very_long_file_name.jpg.supple.json")
+export const getSupplementaryMetadataJSONMapKeyForFile = (
+    collectionID: number,
+    components: FileNameComponents,
+) => {
+    const baseFileName = `${components.originalName}${components.extension}${METADATA_SUFFIX}`;
+    return `${collectionID}-${baseFileName.slice(0, MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT)}${components.numberedSuffix ?? ""}`;
 };
 
 export const getMetadataJSONMapKeyForFile = (
     collectionID: number,
-    fileName: string,
+    components: FileNameComponents,
 ) => {
-    return `${collectionID}-${getFileOriginalName(fileName)}`;
+    const baseFileName = `${components.originalName}${components.extension}`;
+    return `${collectionID}-${baseFileName}${components.numberedSuffix ?? ""}`;
 };
 
-const EDITED_FILE_SUFFIX = "-edited";
-
 /*
-    Get the original file name for edited file to associate it to original file's metadataJSON file
-    as edited file doesn't have their own metadata file
+    Get the components of the file name. Also removes the "-edited" suffix, if present, so that the edited file can be
+    associated to the original file's metadataJSON file as edited files don't have their own metadata files.
 */
-function getFileOriginalName(fileName: string) {
-    let originalName: string = null;
-    const [name, extension] = nameAndExtension(fileName);
+export const getFileNameComponents = (fileName: string): FileNameComponents => {
+    let [name, extension] = nameAndExtension(fileName);
+    if (extension) {
+        extension = "." + extension;
+    }
+    let numberedSuffix: string = null;
 
+    const endsWithNumberedSuffixWithBrackets = /\(\d+\)$/.exec(name);
+    if (endsWithNumberedSuffixWithBrackets) {
+        name = name.slice(0, -1 * endsWithNumberedSuffixWithBrackets[0].length);
+        numberedSuffix = endsWithNumberedSuffixWithBrackets[0];
+    }
     const isEditedFile = name.endsWith(EDITED_FILE_SUFFIX);
     if (isEditedFile) {
-        originalName = name.slice(0, -1 * EDITED_FILE_SUFFIX.length);
-    } else {
-        originalName = name;
+        name = name.slice(0, -1 * EDITED_FILE_SUFFIX.length);
     }
-    if (extension) {
-        originalName += "." + extension;
-    }
-    return originalName;
-}
+
+    return {
+        originalName: name,
+        numberedSuffix,
+        extension,
+        isEditedFile,
+    };
+};
 
 /** Try to parse the contents of a metadata JSON file from a Google Takeout. */
 export const tryParseTakeoutMetadataJSON = async (
@@ -194,11 +210,20 @@ export const matchTakeoutMetadata = (
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
 ) => {
-    let key = getMetadataJSONMapKeyForFile(collectionID, fileName);
+    const components = getFileNameComponents(fileName);
+    let key = getMetadataJSONMapKeyForFile(collectionID, components);
     let takeoutMetadata = parsedMetadataJSONMap.get(key);
 
-    if (!takeoutMetadata && key.length > MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT) {
-        key = getClippedMetadataJSONMapKeyForFile(collectionID, fileName);
+    if (!takeoutMetadata) {
+        key = getClippedMetadataJSONMapKeyForFile(collectionID, components);
+        takeoutMetadata = parsedMetadataJSONMap.get(key);
+    }
+
+    if (!takeoutMetadata) {
+        key = getSupplementaryMetadataJSONMapKeyForFile(
+            collectionID,
+            components,
+        );
         takeoutMetadata = parsedMetadataJSONMap.get(key);
     }
 
