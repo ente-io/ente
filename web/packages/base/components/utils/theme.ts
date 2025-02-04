@@ -221,8 +221,8 @@ const _colors = {
             fainter: "rgba(255 255 255 / 0.05)",
         },
         secondary: {
-            main: "#373737",
-            hover: "#444444",
+            main: "#2b2b2b",
+            hover: "#373737",
         },
         stroke: {
             base: "#fff",
