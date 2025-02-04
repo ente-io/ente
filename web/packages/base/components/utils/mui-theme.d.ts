@@ -120,8 +120,6 @@ declare module "@mui/material/styles" {
          * These do not change with the color scheme.
          */
         fixed: {
-            white: string;
-            black: string;
             /**
              * Various fixed shades of gray.
              * TODO(LM) - audit and rename.

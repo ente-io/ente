@@ -999,7 +999,7 @@ const FreehandCropRegion = forwardRef(
                             key={index}
                             sx={{
                                 border: "1px solid",
-                                borderColor: "fixed.white",
+                                borderColor: "white",
                                 boxSizing: "border-box",
                                 pointerEvents: "none",
                             }}
@@ -1011,9 +1011,9 @@ const FreehandCropRegion = forwardRef(
                             position: "absolute",
                             height: "10px",
                             width: "10px",
-                            backgroundColor: "fixed.white",
+                            backgroundColor: "white",
                             border: "1px solid",
-                            borderColor: "fixed.black",
+                            borderColor: "black",
                             right: "-5px",
                             bottom: "-5px",
                             cursor: "se-resize",

@@ -16,7 +16,7 @@ export const EnteSwitch: React.FC<SwitchProps> = styled((props) => (
         transitionDuration: "300ms",
         "&.Mui-checked": {
             transform: "translateX(16px)",
-            color: theme.vars.palette.fixed.white,
+            color: "white",
             "& + .MuiSwitch-track": {
                 opacity: 1,
                 border: 0,

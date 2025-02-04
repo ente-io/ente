@@ -82,7 +82,7 @@ const Check = styled("input")<{ $active: boolean }>(
         content: "";
         background-color: ${theme.vars.palette.accent.main};
         border-color: ${theme.vars.palette.accent.main};
-        color: ${theme.vars.palette.fixed.white};
+        color: white;
     }
     /* checkmark foreground (tick) */
     &:checked::after {
@@ -137,8 +137,7 @@ const InSelectRangeOverlay = styled(Overlay)(
 `,
 );
 
-const FileAndCollectionNameOverlay = styled("div")(
-    ({ theme }) => `
+const FileAndCollectionNameOverlay = styled("div")`
     width: 100%;
     bottom: 0;
     left: 0;
@@ -158,10 +157,9 @@ const FileAndCollectionNameOverlay = styled("div")(
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    color: ${theme.vars.palette.fixed.white};
+    color: white;
     position: absolute;
-`,
-);
+`;
 
 const SelectedOverlay = styled(Overlay)(
     ({ theme }) => `
