@@ -111,40 +111,32 @@ const HoverOverlay = styled("div")<{ checked: boolean }>`
         "background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))"};
 `;
 
+/**
+ * An overlay showing the avatars of the person who shared the item, at the top
+ * right.
+ */
 const AvatarOverlay = styled(Overlay)`
     display: flex;
     justify-content: flex-end;
     align-items: flex-start;
-    padding-right: 5px;
-    padding-top: 5px;
+    padding: 5px;
 `;
 
-const FavOverlay = styled(Overlay)`
+/**
+ * An overlay showing the favorite icon at bottom left.
+ */
+const FavoriteOverlay = styled(Overlay)`
     display: flex;
     justify-content: flex-start;
     align-items: flex-end;
-    padding-left: 5px;
-    padding-bottom: 5px;
-    opacity: 0.9;
+    padding: 5px;
     color: white;
 `;
 
-const InSelectRangeOverlay = styled(Overlay)(
-    ({ theme }) => `
-    outline: none;
-    background: ${theme.vars.palette.accent.main};
-    opacity: 0.14;
-`,
-);
-
-const SelectedOverlay = styled(Overlay)(
-    ({ theme }) => `
-    z-index: 5;
-    border: 2px solid ${theme.vars.palette.accent.main};
-    border-radius: 4px;
-`,
-);
-
+/**
+ * An overlay with a gradient, showing the file type indicator (e.g. live photo,
+ * video) at the bottom right.
+ */
 const FileTypeIndicatorOverlay = styled(Overlay)(({ theme }) => ({
     display: "flex",
     justifyContent: "flex-end",
@@ -161,6 +153,22 @@ const FileTypeIndicatorOverlay = styled(Overlay)(({ theme }) => ({
             "linear-gradient(315deg, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0.05) 29.61%, rgba(0, 0, 0, 0) 49.86%)",
     }),
 }));
+
+const InSelectRangeOverlay = styled(Overlay)(
+    ({ theme }) => `
+    outline: none;
+    background: ${theme.vars.palette.accent.main};
+    opacity: 0.14;
+`,
+);
+
+const SelectedOverlay = styled(Overlay)(
+    ({ theme }) => `
+    z-index: 5;
+    border: 2px solid ${theme.vars.palette.accent.main};
+    border-radius: 4px;
+`,
+);
 
 const Cont = styled("div")<{ disabled: boolean }>`
     display: flex;
@@ -215,6 +223,7 @@ export default function PreviewCard(props: IProps) {
         onRangeSelect,
         isRangeSelectActive,
         isInsSelectRange,
+        isFav,
     } = props;
 
     const [imgSrc, setImgSrc] = useState<string>(file.msrc);
@@ -319,10 +328,12 @@ export default function PreviewCard(props: IProps) {
                     <Avatar file={file} />
                 </AvatarOverlay>
             )}
-            {props.isFav && (
-                <FavOverlay>
-                    <FavoriteRoundedIcon />
-                </FavOverlay>
+            {isFav && (
+                <FavoriteOverlay>
+                    <FavoriteRoundedIcon
+                        sx={{ fontSize: "19px", opacity: 0.6 }}
+                    />
+                </FavoriteOverlay>
             )}
 
             <HoverOverlay
