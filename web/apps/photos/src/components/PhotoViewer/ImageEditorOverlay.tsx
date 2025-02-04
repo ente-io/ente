@@ -1029,11 +1029,11 @@ const FreehandCropRegion = forwardRef(
     },
 );
 
-const CropOverlayRegionTemplate = styled("div")(({ theme }) => ({
+const CropOverlayRegionTemplate = styled("div")({
     position: "absolute",
-    backgroundColor: theme.vars.palette.fixed.croppedAreaOverlay,
+    backgroundColor: "rgba(0 0 0 / 0.5)",
     pointerEvents: "none",
-}));
+});
 
 const PRESET_ASPECT_RATIOS = [
     {

@@ -145,15 +145,6 @@ declare module "@mui/material/styles" {
              * The color of a switch when it is enabled.
              */
             switchOn: string;
-            /**
-             * The transparent overlay on top of the region that will be cropped
-             * during image editing.
-             */
-            croppedAreaOverlay: string;
-            /**
-             * Color of the total space in the usage bar on the storage card.
-             */
-            storageCardUsageFill: string;
         };
         /**
          * MUI as of v6 does not allow customizing shadows easily. This is due
