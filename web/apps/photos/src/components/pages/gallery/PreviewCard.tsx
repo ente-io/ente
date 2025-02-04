@@ -2,6 +2,7 @@ import { Overlay } from "@/base/components/containers";
 import { formatDateRelative } from "@/base/i18n-date";
 import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
+import { enteFileDeletionDate } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import {
     GAP_BTW_TILES,
@@ -359,7 +360,7 @@ export default function PreviewCard(props: IProps) {
 
             {props?.activeCollectionID === TRASH_SECTION && file.isTrashed && (
                 <FileAndCollectionNameOverlay>
-                    <p>{formatDateRelative(file.deleteBy / 1000)}</p>
+                    <p>{formatDateRelative(enteFileDeletionDate(file))}</p>
                 </FileAndCollectionNameOverlay>
             )}
         </Cont>

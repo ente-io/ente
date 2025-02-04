@@ -4,12 +4,11 @@
  * Note that we rely on the current behaviour of a full reload on changing the
  * language. See: [Note: Changing locale causes a full reload].
  */
-
 import i18n from "i18next";
 
 let _relativeDateFormat: Intl.RelativeTimeFormat | undefined;
 
-export const formatDateRelative = (epochMilliseconds: number) => {
+export const formatDateRelative = (date: Date) => {
     const units = {
         year: 24 * 60 * 60 * 1000 * 365,
         month: (24 * 60 * 60 * 1000 * 365) / 12,
@@ -22,11 +21,11 @@ export const formatDateRelative = (epochMilliseconds: number) => {
         new Intl.RelativeTimeFormat(i18n.language, {
             localeMatcher: "best fit",
             numeric: "always",
-            style: "long",
+            style: "short",
         }));
 
     // "Math.abs" accounts for both past and future scenarios.
-    const elapsed = Math.abs(epochMilliseconds - Date.now());
+    const elapsed = Math.abs(date.getTime() - Date.now());
 
     for (const u in units)
         if (elapsed > units[u] || u === "second")
