@@ -494,7 +494,6 @@
     "name_placeholder": "Nama...",
     "root_level_file_with_folder_not_allowed": "",
     "root_level_file_with_folder_not_allowed_message": "",
-    "CHOSE_THEME": "Pilih tema",
     "more_details": "",
     "ml_search": "",
     "ml_search_description": "",
@@ -650,5 +649,9 @@
     "developer_settings": "",
     "server_endpoint": "",
     "more_information": "",
-    "save": ""
+    "save": "",
+    "theme": "",
+    "system": "",
+    "light": "",
+    "dark": ""
 }
