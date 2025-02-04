@@ -1,23 +1,22 @@
 import { Overlay } from "@/base/components/containers";
+import { formattedDateRelative } from "@/base/i18n-date";
 import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
+import { enteFileDeletionDate } from "@/media/file";
 import { FileType } from "@/media/file-type";
-import {
-    GAP_BTW_TILES,
-    IMAGE_CONTAINER_MAX_WIDTH,
-} from "@/new/photos/components/PhotoList";
+import { GAP_BTW_TILES } from "@/new/photos/components/PhotoList";
 import {
     LoadingThumbnail,
     StaticThumbnail,
 } from "@/new/photos/components/PlaceholderThumbnails";
+import { TileBottomTextOverlay } from "@/new/photos/components/Tiles";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
 import useLongPress from "@ente/shared/hooks/useLongPress";
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
-import { styled } from "@mui/material";
+import { styled, Typography } from "@mui/material";
 import type { DisplayFile } from "components/PhotoFrame";
-import i18n from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { shouldShowAvatar } from "utils/file";
@@ -82,7 +81,7 @@ const Check = styled("input")<{ $active: boolean }>(
         content: "";
         background-color: ${theme.vars.palette.accent.main};
         border-color: ${theme.vars.palette.accent.main};
-        color: ${theme.vars.palette.fixed.white};
+        color: white;
     }
     /* checkmark foreground (tick) */
     &:checked::after {
@@ -112,21 +111,45 @@ const HoverOverlay = styled("div")<{ checked: boolean }>`
         "background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))"};
 `;
 
+/**
+ * An overlay showing the avatars of the person who shared the item, at the top
+ * right.
+ */
 const AvatarOverlay = styled(Overlay)`
     display: flex;
     justify-content: flex-end;
     align-items: flex-start;
-    padding-right: 5px;
-    padding-top: 5px;
+    padding: 5px;
 `;
 
-const FavOverlay = styled(Overlay)`
+/**
+ * An overlay showing the favorite icon at bottom left.
+ */
+const FavoriteOverlay = styled(Overlay)`
     display: flex;
     justify-content: flex-start;
     align-items: flex-end;
-    padding-left: 5px;
-    padding-bottom: 5px;
-    opacity: 0.9;
+    padding: 5px;
+    color: white;
+    opacity: 0.6;
+`;
+
+/**
+ * An overlay with a gradient, showing the file type indicator (e.g. live photo,
+ * video) at the bottom right.
+ */
+const FileTypeIndicatorOverlay = styled(Overlay)`
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 5px;
+    color: white;
+    background: linear-gradient(
+        315deg,
+        rgba(0 0 0 / 0.14) 0%,
+        rgba(0 0 0 / 0.05) 30%,
+        transparent 50%
+    );
 `;
 
 const InSelectRangeOverlay = styled(Overlay)(
@@ -137,32 +160,6 @@ const InSelectRangeOverlay = styled(Overlay)(
 `,
 );
 
-const FileAndCollectionNameOverlay = styled("div")(
-    ({ theme }) => `
-    width: 100%;
-    bottom: 0;
-    left: 0;
-    max-height: 40%;
-    width: 100%;
-    background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 2));
-    & > p {
-        max-width: calc(${IMAGE_CONTAINER_MAX_WIDTH}px - 10px);
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        margin: 2px;
-        text-align: center;
-    }
-    padding: 7px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    color: ${theme.vars.palette.fixed.white};
-    position: absolute;
-`,
-);
-
 const SelectedOverlay = styled(Overlay)(
     ({ theme }) => `
     z-index: 5;
@@ -170,23 +167,6 @@ const SelectedOverlay = styled(Overlay)(
     border-radius: 4px;
 `,
 );
-
-const FileTypeIndicatorOverlay = styled(Overlay)(({ theme }) => ({
-    display: "flex",
-    justifyContent: "flex-end",
-    alignItems: "flex-end",
-    padding: "8px",
-    // TODO(LM): Ditto the dark one until lm is ready.
-    // background:
-    // "linear-gradient(315deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255,
-    // 255, 0.05) 29.61%, rgba(255, 255, 255, 0) 49.86%)",
-    background:
-        "linear-gradient(315deg, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0.05) 29.61%, rgba(0, 0, 0, 0) 49.86%)",
-    ...theme.applyStyles("dark", {
-        background:
-            "linear-gradient(315deg, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0.05) 29.61%, rgba(0, 0, 0, 0) 49.86%)",
-    }),
-}));
 
 const Cont = styled("div")<{ disabled: boolean }>`
     display: flex;
@@ -241,6 +221,7 @@ export default function PreviewCard(props: IProps) {
         onRangeSelect,
         isRangeSelectActive,
         isInsSelectRange,
+        isFav,
     } = props;
 
     const [imgSrc, setImgSrc] = useState<string>(file.msrc);
@@ -345,10 +326,10 @@ export default function PreviewCard(props: IProps) {
                     <Avatar file={file} />
                 </AvatarOverlay>
             )}
-            {props.isFav && (
-                <FavOverlay>
+            {isFav && (
+                <FavoriteOverlay>
                     <FavoriteRoundedIcon />
-                </FavOverlay>
+                </FavoriteOverlay>
             )}
 
             <HoverOverlay
@@ -360,34 +341,12 @@ export default function PreviewCard(props: IProps) {
             )}
 
             {props?.activeCollectionID === TRASH_SECTION && file.isTrashed && (
-                <FileAndCollectionNameOverlay>
-                    <p>{formatDateRelative(file.deleteBy / 1000)}</p>
-                </FileAndCollectionNameOverlay>
+                <TileBottomTextOverlay>
+                    <Typography variant="small">
+                        {formattedDateRelative(enteFileDeletionDate(file))}
+                    </Typography>
+                </TileBottomTextOverlay>
             )}
         </Cont>
     );
-}
-
-function formatDateRelative(date: number) {
-    const units = {
-        year: 24 * 60 * 60 * 1000 * 365,
-        month: (24 * 60 * 60 * 1000 * 365) / 12,
-        day: 24 * 60 * 60 * 1000,
-        hour: 60 * 60 * 1000,
-        minute: 60 * 1000,
-        second: 1000,
-    };
-    const relativeDateFormat = new Intl.RelativeTimeFormat(i18n.language, {
-        localeMatcher: "best fit",
-        numeric: "always",
-        style: "long",
-    });
-    const elapsed = date - Date.now(); // "Math.abs" accounts for both "past" & "future" scenarios
-
-    for (const u in units)
-        if (Math.abs(elapsed) > units[u] || u === "second")
-            return relativeDateFormat.format(
-                Math.round(elapsed / units[u]),
-                u as Intl.RelativeTimeFormatUnit,
-            );
 }

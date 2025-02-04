@@ -228,7 +228,15 @@ export const setLocaleInUse = async (locale: SupportedLocale) => {
     return i18n.changeLanguage(locale);
 };
 
-const numberFormatter = new Intl.NumberFormat(i18n.language);
+let _numberFormat: Intl.NumberFormat | undefined;
+/**
+ * Lazily created, cached, instance of NumberFormat used by
+ * {@link formattedNumber}.
+ *
+ * See: [Note: Changing locale causes a full reload].
+ */
+const numberFormat = () =>
+    (_numberFormat ??= new Intl.NumberFormat(i18n.language));
 
 /**
  * Return the given {@link value} formatted for the current language and locale.
@@ -238,7 +246,7 @@ const numberFormatter = new Intl.NumberFormat(i18n.language);
  * However, in some rare cases, we need to format a standalone number. For such
  * scenarios, this function can be used.
  */
-export const formattedNumber = (value: number) => numberFormatter.format(value);
+export const formattedNumber = (value: number) => numberFormat().format(value);
 
 /**
  * A no-op marker for strings that, for various reasons, pending addition to the

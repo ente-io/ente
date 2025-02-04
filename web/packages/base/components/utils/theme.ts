@@ -333,8 +333,10 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             FilledInput: {
                 bg: colors.light.fill.faint,
                 hoverBg: colors.light.fill.faintHover,
-                // We don't use this currently.
-                // disabledBg: colors.light.fill.fainter,
+                // While we don't specifically have disabled inputs, TextInputs
+                // do get disabled when the form is submitting, and this value
+                // comes into play then.
+                disabledBg: colors.light.fill.fainter,
             },
         },
     },
@@ -396,7 +398,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             FilledInput: {
                 bg: colors.dark.fill.faint,
                 hoverBg: colors.dark.fill.faintHover,
-                // disabledBg: colors.dark.fill.faint,
+                disabledBg: colors.dark.fill.fainter,
             },
         },
     },
