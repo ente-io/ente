@@ -222,7 +222,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
     return (
         <Box
             sx={(theme) => ({
-                backgroundColor: theme.vars.palette.background.paper,
+                backgroundColor: theme.vars.palette.background.elevatedPaper,
                 borderRadius: "4px",
                 overflow: "hidden",
             })}

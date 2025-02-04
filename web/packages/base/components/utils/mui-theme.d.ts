@@ -10,11 +10,12 @@ import type {} from "@mui/material/themeCssVarsAugmentation";
 
 declare module "@mui/material/styles" {
     /**
-     * Add "paper2" the "background" color tokens, giving us:
+     * Add new "background" color tokens, giving us:
      *
      * - background.default
      * - background.paper
      * - background.paper2
+     * - background.elevatedPaper
      * - background.searchInput
      */
     interface TypeBackground {
@@ -22,6 +23,16 @@ declare module "@mui/material/styles" {
          * A second level elevation, indicating a paper within a paper.
          */
         paper2: string;
+        /**
+         * The first among background.paper and background.paper2 that is not
+         * the same as the default background.
+         *
+         * In light mode, background.default and background.paper are the same,
+         * while in dark mode background.paper is already elevated. This
+         * property can be used to obtain the first paper that is actually
+         * elevated above the background irrespective of the theme.
+         */
+        elevatedPaper: string;
         /**
          * Background color for the search input area.
          */

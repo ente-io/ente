@@ -242,7 +242,10 @@ const _colors = {
 const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
     light: {
         palette: {
-            background: colors.light.background,
+            background: {
+                ...colors.light.background,
+                elevatedPaper: colors.light.background.paper2,
+            },
             backdrop: colors.light.backdrop,
             primary: {
                 main: colors.fixed.black,
@@ -334,7 +337,10 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
     // -- See the light mode section for comments
     dark: {
         palette: {
-            background: colors.dark.background,
+            background: {
+                ...colors.dark.background,
+                elevatedPaper: colors.dark.background.paper,
+            },
             backdrop: colors.dark.backdrop,
             primary: {
                 main: colors.fixed.white,
