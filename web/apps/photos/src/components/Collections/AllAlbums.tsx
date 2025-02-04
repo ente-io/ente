@@ -308,7 +308,7 @@ const AlbumCard: React.FC<AlbumCardProps> = ({
     >
         <LargeTileTextOverlay>
             <Typography>{collectionSummary.name}</Typography>
-            <Typography variant="small" sx={{ color: "text.muted" }}>
+            <Typography variant="small" sx={{ opacity: 0.7 }}>
                 {t("photos_count", { count: collectionSummary.fileCount })}
             </Typography>
         </LargeTileTextOverlay>

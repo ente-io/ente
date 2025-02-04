@@ -197,6 +197,7 @@ export const TileTextOverlay = styled(Overlay)`
  */
 export const LargeTileTextOverlay = styled(Overlay)`
     padding: 8px;
+    color: white;
     background: linear-gradient(
         0deg,
         rgba(0, 0, 0, 0.1) 0%,
