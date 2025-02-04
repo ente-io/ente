@@ -118,6 +118,14 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                       child: PersonFaceWidget(
                         _faceThumbnail!,
                         personId: personID,
+                        onErrorCallback: () {
+                          if (mounted) {
+                            setState(() {
+                              _personID = null;
+                              _faceThumbnail = null;
+                            });
+                          }
+                        },
                       ),
                     );
                   } else if (snapshot.hasError) {

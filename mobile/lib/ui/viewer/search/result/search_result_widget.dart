@@ -28,108 +28,111 @@ class SearchResultWidget extends StatelessWidget {
     final heroTagPrefix = searchResult.heroTag();
     final textTheme = getEnteTextTheme(context);
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(4)),
-          border: Border.all(
-            color: getEnteColorScheme(context).strokeFainter,
+    return SizedBox(
+      key: ValueKey(searchResult.hashCode),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(4)),
+            border: Border.all(
+              color: getEnteColorScheme(context).strokeFainter,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              searchResult.type() == ResultType.shared
+                  ? ContactSearchThumbnailWidget(
+                      heroTagPrefix,
+                      searchResult: searchResult as GenericSearchResult,
+                    )
+                  : SearchThumbnailWidget(
+                      searchResult.previewThumbnail(),
+                      heroTagPrefix,
+                      searchResult: searchResult,
+                    ),
+              const SizedBox(width: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 220,
+                      child: Text(
+                        searchResult.name(),
+                        style: textTheme.body,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Text(
+                          _resultTypeName(searchResult.type()),
+                          style: textTheme.smallMuted,
+                        ),
+                        FutureBuilder<int>(
+                          future: resultCount ??
+                              Future.value(searchResult.resultFiles().length),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData && snapshot.data! > 0) {
+                              final noOfMemories = snapshot.data;
+
+                              return Text(
+                                " \u2022 " +
+                                    (noOfMemories! > 9999
+                                        ? NumberFormat().format(noOfMemories)
+                                        : noOfMemories.toString()),
+                                style: textTheme.smallMuted,
+                              );
+                            } else {
+                              return const SizedBox.shrink();
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const Spacer(),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Icon(
+                  Icons.chevron_right,
+                  color: Theme.of(context).colorScheme.subTextColor,
+                ),
+              ),
+            ],
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            searchResult.type() == ResultType.shared
-                ? ContactSearchThumbnailWidget(
-                    heroTagPrefix,
-                    searchResult: searchResult as GenericSearchResult,
-                  )
-                : SearchThumbnailWidget(
-                    searchResult.previewThumbnail(),
-                    heroTagPrefix,
-                    searchResult: searchResult,
-                  ),
-            const SizedBox(width: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 220,
-                    child: Text(
-                      searchResult.name(),
-                      style: textTheme.body,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Text(
-                        _resultTypeName(searchResult.type()),
-                        style: textTheme.smallMuted,
-                      ),
-                      FutureBuilder<int>(
-                        future: resultCount ??
-                            Future.value(searchResult.resultFiles().length),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData && snapshot.data! > 0) {
-                            final noOfMemories = snapshot.data;
+        onTap: () {
+          RecentSearches().add(searchResult.name());
 
-                            return Text(
-                              " \u2022 " +
-                                  (noOfMemories! > 9999
-                                      ? NumberFormat().format(noOfMemories)
-                                      : noOfMemories.toString()),
-                              style: textTheme.smallMuted,
-                            );
-                          } else {
-                            return const SizedBox.shrink();
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Icon(
-                Icons.chevron_right,
-                color: Theme.of(context).colorScheme.subTextColor,
-              ),
-            ),
-          ],
-        ),
-      ),
-      onTap: () {
-        RecentSearches().add(searchResult.name());
-
-        if (onResultTap != null) {
-          onResultTap!();
-        } else {
-          if (searchResult.type() == ResultType.shared) {
-            routeToPage(
-              context,
-              ContactResultPage(
-                searchResult,
-              ),
-            );
+          if (onResultTap != null) {
+            onResultTap!();
           } else {
-            routeToPage(
-              context,
-              SearchResultPage(
-                searchResult,
-              ),
-            );
+            if (searchResult.type() == ResultType.shared) {
+              routeToPage(
+                context,
+                ContactResultPage(
+                  searchResult,
+                ),
+              );
+            } else {
+              routeToPage(
+                context,
+                SearchResultPage(
+                  searchResult,
+                ),
+              );
+            }
           }
-        }
-      },
+        },
+      ),
     );
   }
 

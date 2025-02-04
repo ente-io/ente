@@ -190,7 +190,7 @@ async function createCollectionDownloadFolder(
 }
 
 const _intSelectOption = (i: number) => {
-    const label = i === 0 ? t("NO_DEVICE_LIMIT") : i.toString();
+    const label = i === 0 ? t("none") : i.toString();
     return { label, value: i };
 };
 

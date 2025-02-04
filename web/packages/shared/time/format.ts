@@ -1,5 +1,7 @@
 import i18n, { t } from "i18next";
 
+// TODO: Move to @/base/date
+
 const dateTimeFullFormatter1 = new Intl.DateTimeFormat(i18n.language, {
     weekday: "short",
     month: "short",

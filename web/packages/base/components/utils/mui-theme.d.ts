@@ -120,8 +120,6 @@ declare module "@mui/material/styles" {
          * These do not change with the color scheme.
          */
         fixed: {
-            white: string;
-            black: string;
             /**
              * Various fixed shades of gray.
              * TODO(LM) - audit and rename.
@@ -145,20 +143,6 @@ declare module "@mui/material/styles" {
              * The color of a switch when it is enabled.
              */
             switchOn: string;
-            /**
-             * The transparent overlay on top of the region that will be cropped
-             * during image editing.
-             */
-            croppedAreaOverlay: string;
-            /**
-             * Color of overlaid icons on top of thumbnails. e.g. color of the
-             * "archived" indicator shown on top of albums.
-             */
-            overlayIndicatorMuted: string;
-            /**
-             * Color of the total space in the usage bar on the storage card.
-             */
-            storageCardUsageFill: string;
         };
         /**
          * MUI as of v6 does not allow customizing shadows easily. This is due

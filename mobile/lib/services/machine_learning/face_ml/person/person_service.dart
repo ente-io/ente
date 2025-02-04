@@ -27,6 +27,8 @@ class PersonService {
 
   // instance
   static PersonService? _instance;
+  static const kPersonIDKey = "person_id";
+  static const kNameKey = "name";
 
   static PersonService get instance {
     if (_instance == null) {
@@ -59,8 +61,8 @@ class PersonService {
       for (var person in value) {
         if (person.data.email != null && person.data.email!.isNotEmpty) {
           _instance!._emailToPartialPersonDataMapCache[person.data.email!] = {
-            "person_id": person.remoteID,
-            "name": person.data.name,
+            kPersonIDKey: person.remoteID,
+            kNameKey: person.data.name,
           };
         }
       }

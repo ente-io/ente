@@ -159,9 +159,6 @@ const _colors = {
             E: "#ddd",
         },
         switchOn: "#2eca45",
-        croppedAreaOverlay: "rgba(0 0 0 / 0.5)",
-        overlayIndicatorMuted: "rgba(255 255 255 / 0.48)",
-        storageCardUsageFill: "rgba(255 255 255 / 0.2)",
     },
     light: {
         // Keep these solid.
@@ -336,8 +333,10 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             FilledInput: {
                 bg: colors.light.fill.faint,
                 hoverBg: colors.light.fill.faintHover,
-                // We don't use this currently.
-                // disabledBg: colors.light.fill.fainter,
+                // While we don't specifically have disabled inputs, TextInputs
+                // do get disabled when the form is submitting, and this value
+                // comes into play then.
+                disabledBg: colors.light.fill.fainter,
             },
         },
     },
@@ -399,7 +398,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             FilledInput: {
                 bg: colors.dark.fill.faint,
                 hoverBg: colors.dark.fill.faintHover,
-                // disabledBg: colors.dark.fill.faint,
+                disabledBg: colors.dark.fill.fainter,
             },
         },
     },
@@ -498,6 +497,14 @@ const typography: TypographyOptions = {
     },
 };
 
+/**
+ * > [!NOTE]
+ * >
+ * > The theme isn't tree-shakeable, prefer creating new components for heavy
+ * > customization.
+ * >
+ * > https://mui.com/material-ui/customization/theme-components/
+ */
 const components: Components = {
     MuiCssBaseline: {
         styleOverrides: {

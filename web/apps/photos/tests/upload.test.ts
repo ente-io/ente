@@ -7,10 +7,8 @@ import {
 } from "@/new/photos/services/files";
 import { parseDateFromDigitGroups } from "services/upload/date";
 import {
-    MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
-    getClippedMetadataJSONMapKeyForFile,
-    getMetadataJSONMapKeyForFile,
-    getMetadataJSONMapKeyForJSON,
+    matchTakeoutMetadata,
+    metadataJSONMapKeyForJSON,
 } from "services/upload/takeout";
 import { getUserDetailsV2 } from "services/userService";
 
@@ -71,7 +69,7 @@ const DATE_TIME_PARSING_TEST_FILE_NAMES_MUST_FAIL = [
     "Snapchat-100-10-20-19-15-12",
 ];
 
-const FILE_NAME_TO_JSON_NAME = [
+const fileNameToJSONMappingCases = [
     {
         filename: "IMG20210211125718-edited.jpg",
         jsonFilename: "IMG20210211125718.jpg.json",
@@ -100,19 +98,50 @@ const FILE_NAME_TO_JSON_NAME = [
         filename: "IMG2021021(1)74722(1).jpg",
         jsonFilename: "IMG2021021(1)74722.jpg(1).json",
     },
+    {
+        filename: "IMG_1159.HEIC",
+        jsonFilename: "IMG_1159.HEIC.supplemental-metadata.json",
+    },
+    {
+        filename: "PXL_20241231_151646544.MP.jpg",
+        jsonFilename: "PXL_20241231_151646544.MP.jpg.supplemental-met.json",
+    },
+    {
+        filename: "PXL_20240827_094331806.PORTRAIT(1).jpg",
+        jsonFilename: "PXL_20240827_094331806.PORTRAIT.jpg.supplement(1).json",
+    },
+    {
+        filename: "PXL_20240506_142610305.LONG_EXPOSURE-01.COVER.jpg",
+        jsonFilename: "PXL_20240506_142610305.LONG_EXPOSURE-01.COVER..json",
+    },
+    {
+        filename: "PXL_20211120_223243932.MOTION-02.ORIGINAL.jpg",
+        jsonFilename: "PXL_20211120_223243932.MOTION-02.ORIGINAL.jpg..json",
+    },
+    {
+        filename: "20220322_205147-edited(1).jpg",
+        jsonFilename: "20220322_205147.jpg.supplemental-metadata(1).json",
+    },
 ];
 
 export async function testUpload() {
+    try {
+        parseDateTimeFromFileNameTest();
+        fileNameToJSONMappingTests();
+    } catch (e) {
+        console.log(e);
+    }
+
     const jsonString = process.env.NEXT_PUBLIC_ENTE_TEST_EXPECTED_JSON;
     if (!jsonString) {
-        throw Error(
-            "Please specify the NEXT_PUBLIC_ENTE_TEST_EXPECTED_JSON to run the upload tests",
+        console.warn(
+            "Not running upload tests. Please specify the NEXT_PUBLIC_ENTE_TEST_EXPECTED_JSON to run the upload tests",
         );
+        return;
     }
+
     const expectedState = JSON.parse(jsonString);
-    if (!expectedState) {
-        throw Error("upload test failed expectedState missing");
-    }
+    if (!expectedState) throw Error("Invalid JSON");
 
     try {
         await totalCollectionCountCheck(expectedState);
@@ -123,8 +152,6 @@ export async function testUpload() {
         await fileDimensionExtractionCheck(expectedState);
         await googleMetadataReadingCheck(expectedState);
         await totalFileCountCheck(expectedState);
-        parseDateTimeFromFileNameTest();
-        mappingFileAndJSONFileCheck();
     } catch (e) {
         console.log(e);
     }
@@ -395,33 +422,23 @@ function parseDateTimeFromFileNameTest() {
     console.log("parseDateTimeFromFileNameTest passed ✅");
 }
 
-function mappingFileAndJSONFileCheck() {
-    FILE_NAME_TO_JSON_NAME.forEach(({ filename, jsonFilename }) => {
-        const jsonFileNameGeneratedKey = getMetadataJSONMapKeyForJSON(
-            0,
-            jsonFilename,
-        );
-        let fileNameGeneratedKey = getMetadataJSONMapKeyForFile(0, filename);
-        if (
-            fileNameGeneratedKey !== jsonFileNameGeneratedKey &&
-            filename.length > MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT
-        ) {
-            fileNameGeneratedKey = getClippedMetadataJSONMapKeyForFile(
-                0,
-                filename,
-            );
-        }
+const fileNameToJSONMappingTests = () => {
+    for (const { filename, jsonFilename } of fileNameToJSONMappingCases) {
+        const jsonKey = metadataJSONMapKeyForJSON(0, jsonFilename);
 
-        if (fileNameGeneratedKey !== jsonFileNameGeneratedKey) {
+        // See the docs for the file name matcher as to why it doesn't return
+        // the key but instead indexes into the map for us. To test it, we
+        // construct a placeholder map with a dummy entry for the expected key.
+
+        const map = new Map([[jsonKey, {}]]);
+        if (!matchTakeoutMetadata(filename, 0, map)) {
             throw Error(
-                `mappingFileAndJSONFileCheck failed ❌ ,
-                    for ${filename}
-                    expected: ${jsonFileNameGeneratedKey} got: ${fileNameGeneratedKey}`,
+                `fileNameToJSONMappingTests failed ❌ for ${filename} and ${jsonFilename}`,
             );
         }
-    });
-    console.log("mappingFileAndJSONFileCheck passed ✅");
-}
+    }
+    console.log("fileNameToJSONMappingTests passed ✅");
+};
 
 // format: YYYY-MM-DD HH:MM:SS
 function getFormattedDateTime(date: Date) {

@@ -112,12 +112,21 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     List<SearchResult> sectionResults = snapshot.data!;
+
                     if (widget.sectionType.sortByName) {
                       sectionResults.sort(
                         (a, b) =>
-                            compareAsciiLowerCaseNatural(b.name(), a.name()),
+                            compareAsciiLowerCaseNatural(a.name(), b.name()),
                       );
                     }
+
+                    if (widget.sectionType == SectionType.contacts) {
+                      final split = sectionResults.splitMatch(
+                        (e) => e.resultFiles().isNotEmpty,
+                      );
+                      sectionResults = split.matched + split.unmatched;
+                    }
+
                     if (widget.sectionType == SectionType.location) {
                       final result = sectionResults.splitMatch(
                         (e) => e.type() == ResultType.location,

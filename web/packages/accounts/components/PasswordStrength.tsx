@@ -30,9 +30,9 @@ export const PasswordStrengthHint: React.FC<PasswordStrengthHintProps> = ({
                 mt: "8px",
                 alignSelf: "flex-start",
                 whiteSpace: "pre",
-                color: "var(--color)",
+                color: "var(--et-color)",
             }}
-            style={{ "--color": color } as React.CSSProperties}
+            style={{ "--et-color": color } as React.CSSProperties}
         >
             {password
                 ? t("passphrase_strength", { context: passwordStrength })

@@ -168,7 +168,7 @@ function SharingDetails({ collection, type }) {
         <>
             <Stack>
                 <RowButtonGroupTitle icon={<AdminPanelSettingsIcon />}>
-                    {t("OWNER")}
+                    {t("owner")}
                 </RowButtonGroupTitle>
                 <RowButtonGroup>
                     <RowLabel
@@ -181,7 +181,7 @@ function SharingDetails({ collection, type }) {
                 collaborators?.length > 0 && (
                     <Stack>
                         <RowButtonGroupTitle icon={<ModeEditIcon />}>
-                            {t("COLLABORATORS")}
+                            {t("collaborators")}
                         </RowButtonGroupTitle>
                         <RowButtonGroup>
                             {collaborators.map((item, index) => (
@@ -202,7 +202,7 @@ function SharingDetails({ collection, type }) {
             {viewers?.length > 0 && (
                 <Stack>
                     <RowButtonGroupTitle icon={<Photo />}>
-                        {t("VIEWERS")}
+                        {t("viewers")}
                     </RowButtonGroupTitle>
                     <RowButtonGroup>
                         {viewers.map((item, index) => (
@@ -279,17 +279,17 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
     return (
         <Stack>
             <RowButtonGroupTitle icon={<PublicIcon />}>
-                {t("LINK_SHARE_TITLE")}
+                {t("share_link_section_title")}
             </RowButtonGroupTitle>
             <RowButtonGroup>
                 <RowButton
-                    label={t("CREATE_PUBLIC_SHARING")}
+                    label={t("create_public_link")}
                     startIcon={<LinkIcon />}
                     onClick={createSharableURLHelper}
                 />
                 <RowButtonDivider hasIcon />
                 <RowButton
-                    label={t("COLLECT_PHOTOS")}
+                    label={t("collect_photos")}
                     startIcon={<DownloadSharpIcon />}
                     onClick={createCollectPhotoShareableURLHelper}
                 />
@@ -315,13 +315,13 @@ const handleSharingErrors = (error) => {
     let errorMessage = "";
     switch (parsedError.message) {
         case CustomError.BAD_REQUEST:
-            errorMessage = t("SHARING_BAD_REQUEST_ERROR");
+            errorMessage = t("sharing_album_not_allowed");
             break;
         case CustomError.SUBSCRIPTION_NEEDED:
-            errorMessage = t("SHARING_DISABLED_FOR_FREE_ACCOUNTS");
+            errorMessage = t("sharing_disabled_for_free_accounts");
             break;
         case CustomError.NOT_FOUND:
-            errorMessage = t("USER_DOES_NOT_EXIST");
+            errorMessage = t("sharing_user_does_not_exist");
             break;
         default:
             errorMessage = `${t("generic_error_retry")} ${parsedError.message}`;
@@ -388,13 +388,13 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
                     <RowButton
                         startIcon={<AddIcon />}
                         onClick={openAddViewer}
-                        label={t("ADD_VIEWERS")}
+                        label={t("add_viewers")}
                     />
                     <RowButtonDivider hasIcon />
                     <RowButton
                         startIcon={<AddIcon />}
                         onClick={openAddCollab}
-                        label={t("ADD_COLLABORATORS")}
+                        label={t("add_collaborators")}
                     />
                 </RowButtonGroup>
             </Stack>
@@ -502,11 +502,11 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
         // and already shared
         if (email) {
             if (email === user.email) {
-                throw new Error(t("SHARE_WITH_SELF"));
+                throw new Error(t("sharing_with_self"));
             } else if (
                 collection?.sharees?.find((value) => value.email === email)
             ) {
-                throw new Error(t("ALREADY_SHARED", { email: email }));
+                throw new Error(t("sharing_already_shared", { email: email }));
             }
             // set emails to array of one email
             emails = [email];
@@ -541,8 +541,8 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                     onRootClose={handleRootClose}
                     title={
                         type === COLLECTION_ROLE.VIEWER
-                            ? t("ADD_VIEWERS")
-                            : t("ADD_COLLABORATORS")
+                            ? t("add_viewers")
+                            : t("add_collaborators")
                     }
                     caption={collection.name}
                 />
@@ -554,8 +554,8 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                     fieldType="email"
                     buttonText={
                         type === COLLECTION_ROLE.VIEWER
-                            ? t("ADD_VIEWERS")
-                            : t("ADD_COLLABORATORS")
+                            ? t("add_viewers")
+                            : t("add_collaborators")
                     }
                     submitButtonProps={{
                         size: "large",
@@ -658,7 +658,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                         {props.hiddenPreInput}
                         <Stack>
                             <RowButtonGroupTitle>
-                                {t("ADD_NEW_EMAIL")}
+                                {t("add_new_email")}
                             </RowButtonGroupTitle>
                             <TextField
                                 sx={{ marginTop: 0 }}
@@ -686,14 +686,13 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                         {props.optionsList.length > 0 && (
                             <Stack>
                                 <RowButtonGroupTitle>
-                                    {t("OR_ADD_EXISTING")}
+                                    {t("or_add_existing")}
                                 </RowButtonGroupTitle>
                                 <RowButtonGroup>
                                     {props.optionsList.map((item, index) => (
-                                        <>
+                                        <React.Fragment key={item}>
                                             <RowButton
                                                 fontWeight="regular"
-                                                key={item}
                                                 onClick={() => {
                                                     if (
                                                         values.selectedOptions.includes(
@@ -735,7 +734,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                                             {index !==
                                                 props.optionsList.length -
                                                     1 && <RowButtonDivider />}
-                                        </>
+                                        </React.Fragment>
                                     ))}
                                 </RowButtonGroup>
                             </Stack>
@@ -899,7 +898,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                             <RowButtonGroupTitle
                                 icon={<AdminPanelSettingsIcon />}
                             >
-                                {t("OWNER")}
+                                {t("owner")}
                             </RowButtonGroupTitle>
                             <RowButtonGroup>
                                 <RowLabel
@@ -910,14 +909,13 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                         </Stack>
                         <Stack>
                             <RowButtonGroupTitle icon={<ModeEditIcon />}>
-                                {t("COLLABORATORS")}
+                                {t("collaborators")}
                             </RowButtonGroupTitle>
                             <RowButtonGroup>
                                 {collaborators.map((item) => (
-                                    <>
+                                    <React.Fragment key={item}>
                                         <RowButton
                                             fontWeight="regular"
-                                            key={item}
                                             onClick={() =>
                                                 openManageParticipant(item)
                                             }
@@ -926,7 +924,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                             endIcon={<ChevronRightIcon />}
                                         />
                                         <RowButtonDivider hasIcon />
-                                    </>
+                                    </React.Fragment>
                                 ))}
 
                                 <RowButton
@@ -934,22 +932,21 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                     onClick={openAddCollab}
                                     label={
                                         collaborators?.length
-                                            ? t("ADD_MORE")
-                                            : t("ADD_COLLABORATORS")
+                                            ? t("add_more")
+                                            : t("add_collaborators")
                                     }
                                 />
                             </RowButtonGroup>
                         </Stack>
                         <Stack>
                             <RowButtonGroupTitle icon={<Photo />}>
-                                {t("VIEWERS")}
+                                {t("viewers")}
                             </RowButtonGroupTitle>
                             <RowButtonGroup>
                                 {viewers.map((item) => (
-                                    <>
+                                    <React.Fragment key={item}>
                                         <RowButton
                                             fontWeight="regular"
-                                            key={item}
                                             onClick={() =>
                                                 openManageParticipant(item)
                                             }
@@ -957,17 +954,16 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                             startIcon={<Avatar email={item} />}
                                             endIcon={<ChevronRightIcon />}
                                         />
-
                                         <RowButtonDivider hasIcon />
-                                    </>
+                                    </React.Fragment>
                                 ))}
                                 <RowButton
                                     startIcon={<AddIcon />}
                                     onClick={openAddViewer}
                                     label={
                                         viewers?.length
-                                            ? t("ADD_MORE")
-                                            : t("ADD_VIEWERS")
+                                            ? t("add_more")
+                                            : t("add_viewers")
                                     }
                                 />
                             </RowButtonGroup>
@@ -1047,23 +1043,21 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
         if (newRole === "VIEWER") {
             contentText = (
                 <Trans
-                    i18nKey="CHANGE_PERMISSIONS_TO_VIEWER"
-                    values={{
-                        selectedEmail: `${selectedEmail}`,
-                    }}
+                    i18nKey="change_permission_to_viewer"
+                    values={{ selectedEmail }}
                 />
             );
 
-            buttonText = t("CONVERT_TO_VIEWER");
+            buttonText = t("confirm_convert_to_viewer");
         } else if (newRole === "COLLABORATOR") {
-            contentText = t("CHANGE_PERMISSIONS_TO_COLLABORATOR", {
-                selectedEmail: selectedEmail,
+            contentText = t("change_permission_to_collaborator", {
+                selectedEmail,
             });
-            buttonText = t("CONVERT_TO_COLLABORATOR");
+            buttonText = t("confirm_convert_to_collaborator");
         }
 
         showMiniDialog({
-            title: t("CHANGE_PERMISSION"),
+            title: t("change_permission_title"),
             message: contentText,
             continue: {
                 text: buttonText,
@@ -1075,17 +1069,17 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
 
     const removeParticipant = () => {
         showMiniDialog({
-            title: t("REMOVE_PARTICIPANT"),
+            title: t("remove_participant_title"),
             message: (
                 <Trans
-                    i18nKey="REMOVE_PARTICIPANT_MESSAGE"
+                    i18nKey="remove_participant_message"
                     values={{
                         selectedEmail: selectedParticipant.email,
                     }}
                 />
             ),
             continue: {
-                text: t("CONFIRM_REMOVE"),
+                text: t("confirm_remove"),
                 color: "critical",
                 action: handleRemove,
             },
@@ -1105,7 +1099,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
             <Stack sx={{ gap: "4px", py: "12px" }}>
                 <Titlebar
                     onClose={onClose}
-                    title={t("MANAGE")}
+                    title={t("manage")}
                     onRootClose={handleRootClose}
                     caption={selectedParticipant.email}
                 />
@@ -1116,7 +1110,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                             variant="small"
                             sx={{ color: "text.muted", padding: 1 }}
                         >
-                            {t("ADDED_AS")}
+                            {t("added_as")}
                         </Typography>
 
                         <RowButtonGroup>
@@ -1149,7 +1143,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                             variant="small"
                             sx={{ color: "text.muted", padding: 1 }}
                         >
-                            {t("COLLABORATOR_RIGHTS")}
+                            {t("collaborator_hint")}
                         </Typography>
 
                         <Stack sx={{ py: "30px" }}>
@@ -1157,7 +1151,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                                 variant="small"
                                 sx={{ color: "text.muted", padding: 1 }}
                             >
-                                {t("REMOVE_PARTICIPANT_HEAD")}
+                                {t("remove_participant")}
                             </Typography>
 
                             <RowButtonGroup>
@@ -1268,7 +1262,7 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
                     sx={{ color: "text.muted", padding: 1 }}
                 >
                     <PublicIcon style={{ fontSize: 17, marginRight: 8 }} />
-                    {t("PUBLIC_LINK_ENABLED")}
+                    {t("public_link_enabled")}
                 </Typography>
                 <RowButtonGroup>
                     {isLinkExpired(publicShareProp.validTill) ? (
@@ -1293,7 +1287,7 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
                         startIcon={<LinkIcon />}
                         endIcon={<ChevronRightIcon />}
                         onClick={openManageShare}
-                        label={t("MANAGE_LINK")}
+                        label={t("manage_link")}
                     />
                 </RowButtonGroup>
             </Stack>
@@ -1436,7 +1430,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                             color="critical"
                             startIcon={<RemoveCircleOutlineIcon />}
                             onClick={disablePublicSharing}
-                            label={t("REMOVE_LINK")}
+                            label={t("remove_link")}
                         />
                     </RowButtonGroup>
                     {sharableLinkError && (
@@ -1475,13 +1469,13 @@ const ManagePublicCollect: React.FC<ManagePublicCollectProps> = ({
         <Stack>
             <RowButtonGroup>
                 <RowSwitch
-                    label={t("PUBLIC_COLLECT")}
+                    label={t("allow_adding_photos")}
                     checked={publicShareProp?.enableCollect}
                     onClick={handleFileDownloadSetting}
                 />
             </RowButtonGroup>
             <RowButtonGroupHint>
-                {t("PUBLIC_COLLECT_SUBTEXT")}
+                {t("allow_adding_photos_hint")}
             </RowButtonGroupHint>
         </Stack>
     );
@@ -1535,7 +1529,7 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                 <RowButton
                     onClick={openShareExpiryOptionsModalView}
                     endIcon={<ChevronRightIcon />}
-                    label={t("LINK_EXPIRY")}
+                    label={t("link_expiry")}
                     color={
                         isLinkExpired(publicShareProp?.validTill)
                             ? "critical"
@@ -1562,15 +1556,14 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                     <Titlebar
                         onClose={closeShareExpiryOptionsModalView}
                         onRootClose={handleRootClose}
-                        title={t("LINK_EXPIRY")}
+                        title={t("link_expiry")}
                     />
                     <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                         <RowButtonGroup>
                             {shareExpireOption.map((item, index) => (
-                                <>
+                                <React.Fragment key={item.value()}>
                                     <RowButton
                                         fontWeight="regular"
-                                        key={item.value()}
                                         onClick={changeShareExpiryValue(
                                             item.value(),
                                         )}
@@ -1579,7 +1572,7 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                                     {index !== shareExpireOption.length - 1 && (
                                         <RowButtonDivider />
                                     )}
-                                </>
+                                </React.Fragment>
                             ))}
                         </RowButtonGroup>
                     </Stack>
@@ -1661,10 +1654,10 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
     return (
         <>
             <RowButton
-                label={t("LINK_DEVICE_LIMIT")}
+                label={t("device_limit")}
                 caption={
                     publicShareProp.deviceLimit === 0
-                        ? t("NO_DEVICE_LIMIT")
+                        ? t("none")
                         : publicShareProp.deviceLimit.toString()
                 }
                 onClick={openDeviceLimitChangeModalView}
@@ -1680,15 +1673,14 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
                     <Titlebar
                         onClose={closeDeviceLimitChangeModal}
                         onRootClose={handleRootClose}
-                        title={t("LINK_DEVICE_LIMIT")}
+                        title={t("device_limit")}
                     />
                     <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                         <RowButtonGroup>
                             {deviceLimitOptions.map((item, index) => (
-                                <>
+                                <React.Fragment key={item.label}>
                                     <RowButton
                                         fontWeight="regular"
-                                        key={item.label}
                                         onClick={changeDeviceLimitValue(
                                             item.value,
                                         )}
@@ -1698,7 +1690,7 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
                                         deviceLimitOptions.length - 1 && (
                                         <RowButtonDivider />
                                     )}
-                                </>
+                                </React.Fragment>
                             ))}
                         </RowButtonGroup>
                     </Stack>
@@ -1749,7 +1741,7 @@ const ManageDownloadAccess: React.FC<ManageDownloadAccessProps> = ({
     };
     return (
         <RowSwitch
-            label={t("FILE_DOWNLOAD")}
+            label={t("allow_downloads")}
             checked={publicShareProp?.enableDownload ?? true}
             onClick={handleFileDownloadSetting}
         />

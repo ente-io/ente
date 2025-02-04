@@ -131,7 +131,7 @@ const generateVideoThumbnailWeb = async (blob: Blob) => {
         return await ffmpeg.generateVideoThumbnailWeb(blob);
     } catch (e) {
         log.error(
-            `Failed to generate video thumbnail using the wasm FFmpeg web worker, will fallback to canvas`,
+            `Failed to generate video thumbnail using the Wasm FFmpeg web worker, will fallback to canvas`,
             e,
         );
         return generateVideoThumbnailUsingCanvas(blob);

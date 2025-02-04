@@ -1,3 +1,4 @@
+import { Overlay } from "@/base/components/containers";
 import { downloadManager } from "@/gallery/services/download";
 import { type EnteFile } from "@/media/file";
 import {
@@ -99,12 +100,12 @@ export const ItemCard: React.FC<React.PropsWithChildren<ItemCardProps>> = ({
  * A generic "base" tile, meant to be used (after setting dimensions) as the
  * {@link TileComponent} provided to an {@link ItemCard}.
  *
- * Use {@link ItemTileOverlay} (usually via one of its presets) to overlay
- * content on top of the tile.
+ * Use {@link Overlay} (usually via one of its presets) to overlay content on
+ * top of the tile.
  */
 const BaseTile = styled("div")`
     display: flex;
-    /* Act as container for the absolutely positioned ItemTileOverlays. */
+    /* Act as container for the absolutely positioned 'Overlay's. */
     position: relative;
     border-radius: 4px;
     overflow: hidden;
@@ -133,6 +134,7 @@ export const PreviewItemTile = styled(BaseTile)`
 export const BarItemTile = styled(BaseTile)`
     width: 90px;
     height: 64px;
+    color: white;
 `;
 
 /**
@@ -155,7 +157,7 @@ export const BaseTileButton = styled(UnstyledButton)`
     /* Rest of this is mostly verbatim from BaseTile ... */
 
     display: flex;
-    /* Act as container for the absolutely positioned ItemTileOverlays. */
+    /* Act as container for the absolutely positioned 'Overlay's. */
     position: relative;
     border-radius: 4px;
     overflow: hidden;
@@ -177,24 +179,10 @@ export const LargeTileButton = styled(BaseTileButton)`
 `;
 
 /**
- * An empty overlay on top of the nearest relative positioned ancestor.
- *
- * This is meant to be used in tandem with a derivate of {@link BaseTile} or
- * {@link BaseTileButton}.
+ * An {@link Overlay} suitable for hosting textual content at the top left of
+ * small and medium sized tiles.
  */
-export const ItemTileOverlay = styled("div")`
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-`;
-
-/**
- * An {@link ItemTileOverlay} suitable for hosting textual content at the top
- * left of small and medium sized tiles.
- */
-export const TileTextOverlay = styled(ItemTileOverlay)`
+export const TileTextOverlay = styled(Overlay)`
     padding: 4px;
     background: linear-gradient(
         0deg,
@@ -207,7 +195,7 @@ export const TileTextOverlay = styled(ItemTileOverlay)`
  * A variation of {@link TileTextOverlay} for use with larger tiles like the
  * {@link CollectionTile}.
  */
-export const LargeTileTextOverlay = styled(ItemTileOverlay)`
+export const LargeTileTextOverlay = styled(Overlay)`
     padding: 8px;
     background: linear-gradient(
         0deg,
@@ -219,7 +207,7 @@ export const LargeTileTextOverlay = styled(ItemTileOverlay)`
 /**
  * A container for "+", suitable for use with a {@link LargeTileTextOverlay}.
  */
-export const LargeTilePlusOverlay = styled(ItemTileOverlay)(
+export const LargeTilePlusOverlay = styled(Overlay)(
     ({ theme }) => `
     display: flex;
     justify-content: center;
@@ -230,13 +218,15 @@ export const LargeTilePlusOverlay = styled(ItemTileOverlay)(
 );
 
 /**
- * An {@link ItemTileOverlay} suitable for holding the collection name shown
- * atop the tiles in the duplicates listing.
+ * An {@link Overlay} suitable for showing text at the bottom center of the
+ * tile. Used by the tiles in trash (for showing the days until deletion) and
+ * duplicate listing (for showing the collection name).
  */
-export const DuplicateTileTextOverlay = styled(ItemTileOverlay)`
+export const TileBottomTextOverlay = styled(Overlay)`
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    padding: 4px;
-    background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.7));
+    padding: 6px;
+    background: linear-gradient(transparent 30%, 80%, rgba(0 0 0 / 0.7));
+    color: white;
 `;

@@ -46,8 +46,16 @@ export const CenteredFill = styled("div")`
 `;
 
 /**
- * An absolute positioned div that fills the entire nearest relatively
- * positioned ancestor.
+ * An empty overlay on top of the nearest relative positioned ancestor.
+ *
+ * {@link Overlay} is an an absolute positioned div that fills the entire
+ * nearest relatively positioned ancestor. It is usually used in tandem with a
+ * derivate of {@link BaseTile} or {@link BaseTileButton} to show various
+ * indicators on top of thumbnails; but it can be used in any context where we
+ * want to overlay (usually) transparent content on top of a component.
+ *
+ * For filling much larger areas (e.g. showing a translucent overlay on top of
+ * the entire screen), use the MUI {@link Backdrop} instead.
  */
 export const Overlay = styled("div")`
     position: absolute;

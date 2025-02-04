@@ -9,7 +9,7 @@ import {
     makeTempFilePath,
 } from "../utils/temp";
 
-/* Ditto in the web app's code (used by the WASM FFmpeg invocation). */
+/* Ditto in the web app's code (used by the Wasm FFmpeg invocation). */
 const ffmpegPathPlaceholder = "FFMPEG";
 const inputPathPlaceholder = "INPUT";
 const outputPathPlaceholder = "OUTPUT";
@@ -19,7 +19,7 @@ const outputPathPlaceholder = "OUTPUT";
  *
  * [Note: FFmpeg in Electron]
  *
- * There is a wasm build of FFmpeg, but that is currently 10-20 times slower
+ * There is a Wasm build of FFmpeg, but that is currently 10-20 times slower
  * that the native build. That is slow enough to be unusable for our purposes.
  * https://ffmpegwasm.netlify.app/docs/performance
  *

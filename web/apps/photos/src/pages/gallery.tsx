@@ -908,7 +908,7 @@ const Page: React.FC = () => {
                             variant="small"
                             sx={{ color: "text.muted" }}
                         >
-                            {t("INITIAL_LOAD_DELAY_WARNING")}
+                            {t("initial_load_delay_warning")}
                         </Typography>
                     </CenteredFlex>
                 )}

@@ -70,7 +70,7 @@ FFmpeg, as of 2024, partially supports converting HEIC files
   border on the right and bottom (and the orientation is also not respected).
 
 FFmpeg support would be nice since we already bundle it both in the desktop app
-and also as a web WASM build.
+and also as a web Wasm build.
 
 ---
 
@@ -83,6 +83,6 @@ option to swap libde265 with libx265 or kvazaar.
 
 Currently our web app uses
 [heic-convert](https://github.com/catdad-experiments/heic-convert), which
-provides packaged wasm builds of libheif + libde265, and the desktop app uses a
+provides packaged Wasm builds of libheif + libde265, and the desktop app uses a
 [custom build](https://github.com/ente-io/libvips-packaging) of `vips` on Linux
 and Windows, and Apple's `sips` on macOS.

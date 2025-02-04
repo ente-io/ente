@@ -1,6 +1,5 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
-import 'package:photos/core/configuration.dart';
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
@@ -364,7 +363,6 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
   List<User> _getSuggestedUser() {
     final Set<String> existingEmails = {};
-    existingEmails.add(Configuration.instance.getEmail()!);
     for (final User? u in widget.collection.sharees ?? []) {
       if (u != null && u.id != null && u.email.isNotEmpty) {
         existingEmails.add(u.email);
