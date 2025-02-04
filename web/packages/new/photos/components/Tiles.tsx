@@ -1,6 +1,5 @@
 import { CenteredFill, Overlay } from "@/base/components/containers";
 import type { ButtonishProps } from "@/base/components/mui";
-import { wipTheme } from "@/base/components/utils/theme";
 import { downloadManager } from "@/gallery/services/download";
 import { type EnteFile } from "@/media/file";
 import {
@@ -198,19 +197,15 @@ export const TileTextOverlay = styled(Overlay)`
  * A variation of {@link TileTextOverlay} for use with larger tiles like the
  * {@link CollectionTile}.
  */
-export const LargeTileTextOverlay = styled(Overlay)(({ theme }) => ({
-    padding: "8px",
-    color: "white",
-    ...(wipTheme
-        ? {
-              background:
-                  "linear-gradient(0deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.5) 86.46%)",
-          }
-        : {
-              background:
-                  "linear-gradient(0deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.5) 86.46%)",
-          }),
-}));
+export const LargeTileTextOverlay = styled(Overlay)`
+    padding: 8px;
+    color: white;
+    background: linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.1) 0%,
+        rgba(0, 0, 0, 0.5) 86%
+    );
+`;
 
 /**
  * A {@link LargeTileButton} suitable for use as the trigger for creating a new
