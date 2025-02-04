@@ -138,10 +138,8 @@ const _colors = {
     },
     accentAuth: {
         dark: "#8e0fcb",
-        // TODO(LM): Shift up
         main: "#9610d6",
         light: "#8e2de2",
-        lighter: "#984df4" /* TODO(LM) */,
     },
     fixed: {
         white: "#fff",
