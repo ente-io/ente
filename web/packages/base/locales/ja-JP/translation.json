@@ -494,7 +494,6 @@
     "name_placeholder": "名前…",
     "root_level_file_with_folder_not_allowed": "",
     "root_level_file_with_folder_not_allowed_message": "",
-    "CHOSE_THEME": "テーマを選択",
     "more_details": "さらに詳細を表示",
     "ml_search": "機械学習",
     "ml_search_description": "",
@@ -650,5 +649,9 @@
     "developer_settings": "開発者向け設定",
     "server_endpoint": "サーバーエンドポイント",
     "more_information": "詳細情報",
-    "save": "保存"
+    "save": "保存",
+    "theme": "",
+    "system": "",
+    "light": "",
+    "dark": ""
 }

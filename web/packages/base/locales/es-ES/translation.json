@@ -494,7 +494,6 @@
     "name_placeholder": "Nombre...",
     "root_level_file_with_folder_not_allowed": "No se puede crear álbumes de mezcla de archivos/carpetas",
     "root_level_file_with_folder_not_allowed_message": "<p>Has arrastrado y soltado una mezcla de archivos y carpetas.</p><p>Por favor proporcione sólo archivos o carpetas cuando seleccione la opción de crear álbumes separados</p>",
-    "CHOSE_THEME": "Elegir tema",
     "more_details": "Más detalles",
     "ml_search": "Aprendizaje automático",
     "ml_search_description": "Ente soporta aprendizaje automático en el dispositivo para la detección de caras, búsqueda mágica y otras características de búsqueda avanzada",
@@ -650,5 +649,9 @@
     "developer_settings": "Ajustes de desarrollador",
     "server_endpoint": "Extremo del servidor",
     "more_information": "Más información",
-    "save": "Guardar"
+    "save": "Guardar",
+    "theme": "",
+    "system": "",
+    "light": "",
+    "dark": ""
 }

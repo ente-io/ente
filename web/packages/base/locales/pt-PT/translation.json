@@ -494,7 +494,6 @@
     "name_placeholder": "Nome...",
     "root_level_file_with_folder_not_allowed": "Não foi possível criar álbuns a partir da mistura de arquivos/pastas",
     "root_level_file_with_folder_not_allowed_message": "<p>Arrastou e largou uma mistura de ficheiros e pastas.</p><p>Por favor, forneça apenas ficheiros ou apenas pastas quando selecionar a opção para criar álbuns separados</p>",
-    "CHOSE_THEME": "Escolher tema",
     "more_details": "Mais detalhes",
     "ml_search": "Aprendizagem automática",
     "ml_search_description": "O Ente suporta a aprendizagem automática no dispositivo para reconhecimento facial, pesquisa mágica e outras funcionalidades de pesquisa avançadas",
@@ -650,5 +649,9 @@
     "developer_settings": "Configurações de desenvolvedor",
     "server_endpoint": "Endpoint do servidor",
     "more_information": "Mais informações",
-    "save": "Guardar"
+    "save": "Guardar",
+    "theme": "",
+    "system": "",
+    "light": "",
+    "dark": ""
 }
