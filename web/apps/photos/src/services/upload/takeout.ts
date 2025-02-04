@@ -23,15 +23,6 @@ export interface ParsedMetadataJSON {
     description?: string;
 }
 
-interface FileNameComponents {
-    originalName: string;
-    numberedSuffix: string;
-    extension: string;
-}
-
-const MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT = 46;
-const METADATA_SUFFIX = ".supplemental-metadata";
-
 /**
  * Derive a key for the given {@link jsonFileName} that should be used to index
  * into the {@link ParsedMetadataJSON} JSON map.
