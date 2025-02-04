@@ -131,6 +131,7 @@ const FavoriteOverlay = styled(Overlay)`
     align-items: flex-end;
     padding: 5px;
     color: white;
+    opacity: 0.6;
 `;
 
 /**
@@ -141,7 +142,8 @@ const FileTypeIndicatorOverlay = styled(Overlay)(({ theme }) => ({
     display: "flex",
     justifyContent: "flex-end",
     alignItems: "flex-end",
-    padding: "8px",
+    padding: "5px",
+    color: "white",
     // TODO(LM): Ditto the dark one until lm is ready.
     // background:
     // "linear-gradient(315deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255,
@@ -330,9 +332,7 @@ export default function PreviewCard(props: IProps) {
             )}
             {isFav && (
                 <FavoriteOverlay>
-                    <FavoriteRoundedIcon
-                        sx={{ fontSize: "19px", opacity: 0.6 }}
-                    />
+                    <FavoriteRoundedIcon />
                 </FavoriteOverlay>
             )}
 
