@@ -601,7 +601,7 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                             coverFile={item.file}
                         >
                             <DuplicateTileTextOverlay>
-                                <Ellipsized2LineTypography color="text.muted">
+                                <Ellipsized2LineTypography variant="small">
                                     {item.collectionName}
                                 </Ellipsized2LineTypography>
                             </DuplicateTileTextOverlay>
