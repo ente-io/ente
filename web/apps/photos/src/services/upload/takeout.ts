@@ -47,9 +47,7 @@ const METADATA_SUFFIX = ".supplemental-metadata";
 export const metadataJSONMapKeyForJSON = (
     collectionID: number,
     jsonFileName: string,
-) => {
-    return `${collectionID}-${jsonFileName.slice(0, -1 * ".json".length)}`;
-};
+) => `${collectionID}-${jsonFileName.slice(0, -1 * ".json".length)}`;
 
 /**
  * Return the matching entry, if any, from {@link parsedMetadataJSONMap} for the
