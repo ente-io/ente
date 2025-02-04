@@ -72,7 +72,7 @@ const DATE_TIME_PARSING_TEST_FILE_NAMES_MUST_FAIL = [
     "Snapchat-100-10-20-19-15-12",
 ];
 
-const FILE_NAME_TO_JSON_NAME = [
+const fileNameToJSONMappingCases = [
     {
         filename: "IMG20210211125718-edited.jpg",
         jsonFilename: "IMG20210211125718.jpg.json",
@@ -130,7 +130,7 @@ const FILE_NAME_TO_JSON_NAME = [
 export async function testUpload() {
     try {
         parseDateTimeFromFileNameTest();
-        mappingFileAndJSONFileCheck();
+        fileNameToJSONMappingTests();
     } catch (e) {
         console.log(e);
     }
@@ -425,14 +425,14 @@ function parseDateTimeFromFileNameTest() {
     console.log("parseDateTimeFromFileNameTest passed ✅");
 }
 
-function mappingFileAndJSONFileCheck() {
-    FILE_NAME_TO_JSON_NAME.forEach(({ filename, jsonFilename }) => {
+const fileNameToJSONMappingTests = () => {
+    fileNameToJSONMappingCases.forEach(({ filename, jsonFilename }) => {
         const jsonFileNameGeneratedKey = getMetadataJSONMapKeyForJSON(
             0,
             jsonFilename,
         );
 
-        // this duplicates somewhat the logic in takeout.ts:matchTakeoutMetadata()
+        // This duplicates somewhat the logic in takeout.ts:matchTakeoutMetadata()
         const components = getFileNameComponents(filename);
         let fileNameGeneratedKey = getMetadataJSONMapKeyForFile(0, components);
         if (fileNameGeneratedKey !== jsonFileNameGeneratedKey) {
@@ -457,7 +457,7 @@ function mappingFileAndJSONFileCheck() {
         }
     });
     console.log("mappingFileAndJSONFileCheck passed ✅");
-}
+};
 
 // format: YYYY-MM-DD HH:MM:SS
 function getFormattedDateTime(date: Date) {
