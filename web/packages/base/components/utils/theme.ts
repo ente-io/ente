@@ -153,11 +153,6 @@ const _colors = {
             main: "#ea3f3f",
             light: "#ff6565",
         },
-        gray: {
-            A: "#1c1c1e",
-            B: "#333",
-            E: "#ddd",
-        },
         switchOn: "#2eca45",
     },
     light: {

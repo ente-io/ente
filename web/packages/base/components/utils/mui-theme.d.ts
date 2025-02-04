@@ -121,25 +121,6 @@ declare module "@mui/material/styles" {
          */
         fixed: {
             /**
-             * Various fixed shades of gray.
-             * TODO(LM) - audit and rename.
-             */
-            gray: {
-                A: string;
-                /**
-                 * - Color of check on hovering on image thumbnail during
-                 *   selection.
-                 */
-                B: string;
-                /**
-                 * - Background of check on hovering on image thumbnail during
-                 *   selection.
-                 *
-                 * - Color of check on image thumbnail when it is selected.
-                 */
-                E: string;
-            };
-            /**
              * The color of a switch when it is enabled.
              */
             switchOn: string;

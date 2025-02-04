@@ -55,7 +55,7 @@ const Check = styled("input")<{ $active: boolean }>(
         content: "";
         width: 19px;
         height: 19px;
-        background-color: ${theme.vars.palette.fixed.gray.E};
+        background-color: #ddd;
         display: inline-block;
         border-radius: 50%;
         vertical-align: bottom;
@@ -69,8 +69,8 @@ const Check = styled("input")<{ $active: boolean }>(
         position: absolute;
         width: 5px;
         height: 11px;
-        border-right: 2px solid ${theme.vars.palette.fixed.gray.B};
-        border-bottom: 2px solid ${theme.vars.palette.fixed.gray.B};
+        border-right: 2px solid #333;
+        border-bottom: 2px solid #333;
         transition: transform 0.3s ease;
         pointer-events: inherit;
         transform: translate(-18px, 9px) rotate(45deg);
@@ -86,8 +86,8 @@ const Check = styled("input")<{ $active: boolean }>(
     /* checkmark foreground (tick) */
     &:checked::after {
         content: "";
-        border-right: 2px solid ${theme.vars.palette.fixed.gray.E};
-        border-bottom: 2px solid ${theme.vars.palette.fixed.gray.E};
+        border-right: 2px solid #ddd;
+        border-bottom: 2px solid #ddd;
     }
     visibility: hidden;
     ${$active && "visibility: visible; opacity: 0.5;"};
