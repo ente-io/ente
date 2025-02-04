@@ -51,7 +51,7 @@ class PreviewVideoStore {
   final videoCacheManager = VideoCacheManager.instance;
 
   LinkedHashSet<EnteFile> files = LinkedHashSet();
-  bool isUploading = false;
+  int uploadingFileId = -1;
 
   final _dio = NetworkClient.instance.enteDio;
 
@@ -79,10 +79,14 @@ class PreviewVideoStore {
     if (isVideoStreamingEnabled) {
       await putFilesForPreviewCreation();
     } else {
-      _items.clear();
-      Bus.instance.fire(PreviewUpdatedEvent(_items));
-      files.clear();
+      clearQueue();
     }
+  }
+
+  clearQueue() {
+    _items.clear();
+    Bus.instance.fire(PreviewUpdatedEvent(_items));
+    files.clear();
   }
 
   DateTime? get videoStreamingCutoff {
@@ -96,11 +100,16 @@ class PreviewVideoStore {
     EnteFile enteFile, [
     bool forceUpload = false,
   ]) async {
-    if (!enteFile.isUploaded || !isVideoStreamingEnabled) return;
-    final file = await getFile(enteFile, isOrigin: true);
-    if (file == null) return;
+    if (!isVideoStreamingEnabled) {
+      clearQueue();
+      return;
+    }
 
     try {
+      if (!enteFile.isUploaded) return;
+      final file = await getFile(enteFile, isOrigin: true);
+      if (file == null) return;
+
       try {
         // check if playlist already exist
         await getPlaylist(enteFile);
@@ -109,6 +118,8 @@ class PreviewVideoStore {
           showShortToast(ctx, 'Video preview already exists');
         }
         debugPrint("previewUrl $resultUrl");
+        _items.removeWhere((key, value) => value.file == enteFile);
+        Bus.instance.fire(PreviewUpdatedEvent(_items));
         return;
       } catch (e, s) {
         if (e is DioError && e.response?.statusCode == 404) {
@@ -135,7 +146,7 @@ class PreviewVideoStore {
           return;
         }
       }
-      if (isUploading) {
+      if (uploadingFileId >= 0) {
         _items[enteFile.uploadedFileID!] = PreviewItem(
           status: PreviewItemStatus.inQueue,
           file: enteFile,
@@ -148,6 +159,7 @@ class PreviewVideoStore {
         files.add(enteFile);
         return;
       }
+      uploadingFileId = enteFile.uploadedFileID!;
       _items[enteFile.uploadedFileID!] = PreviewItem(
         status: PreviewItemStatus.compressing,
         file: enteFile,
@@ -313,7 +325,9 @@ class PreviewVideoStore {
       }
       Bus.instance.fire(PreviewUpdatedEvent(_items));
     } finally {
-      isUploading = false;
+      if (uploadingFileId == enteFile.uploadedFileID!) {
+        uploadingFileId = -1;
+      }
       if (files.isNotEmpty) {
         final file = files.first;
         files.remove(file);
