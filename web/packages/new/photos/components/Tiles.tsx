@@ -1,4 +1,5 @@
-import { Overlay } from "@/base/components/containers";
+import { CenteredFill, Overlay } from "@/base/components/containers";
+import type { ButtonishProps } from "@/base/components/mui";
 import { wipTheme } from "@/base/components/utils/theme";
 import { downloadManager } from "@/gallery/services/download";
 import { type EnteFile } from "@/media/file";
@@ -6,7 +7,8 @@ import {
     LoadingThumbnail,
     StaticThumbnail,
 } from "@/new/photos/components/PlaceholderThumbnails";
-import { styled } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import { Stack, styled, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { faceCrop } from "../services/ml";
 import { UnstyledButton } from "./UnstyledButton";
@@ -211,16 +213,35 @@ export const LargeTileTextOverlay = styled(Overlay)(({ theme }) => ({
 }));
 
 /**
- * A container for "+", suitable for use with a {@link LargeTileTextOverlay}.
+ * A {@link LargeTileButton} suitable for use as the trigger for creating a new
+ * entry (e.g. creating new album, or a new person).
+ *
+ * It is styled to go well with other {@link LargeTileButton}s that display
+ * existing entries, except this one can allow the user to create a new item.
+ *
+ * The child is expected to be a text, it'll be wrapped in a {@link Typography}
+ * and shown at the top left of the button.
  */
-export const LargeTilePlusOverlay = styled(Overlay)(
-    ({ theme }) => `
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 42px;
-    color: ${theme.vars.palette.stroke.muted};
-`,
+export const LargeTileCreateNewButton: React.FC<
+    React.PropsWithChildren<ButtonishProps>
+> = ({ onClick, children }) => (
+    <LargeTileButton onClick={onClick}>
+        <Stack
+            sx={{
+                flex: 1,
+                height: "100%",
+                border: "1px dashed",
+                borderColor: "stroke.muted",
+                borderRadius: "4px",
+                padding: 1,
+            }}
+        >
+            <Typography>{children}</Typography>
+            <CenteredFill>
+                <AddIcon />
+            </CenteredFill>
+        </Stack>
+    </LargeTileButton>
 );
 
 /**

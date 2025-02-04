@@ -1,10 +1,10 @@
-import { CenteredFill, SpaceBetweenFlex } from "@/base/components/containers";
-import { type ButtonishProps } from "@/base/components/mui";
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import type { Collection } from "@/media/collection";
 import {
     ItemCard,
     LargeTileButton,
+    LargeTileCreateNewButton,
     LargeTileTextOverlay,
 } from "@/new/photos/components/Tiles";
 import {
@@ -14,12 +14,10 @@ import {
     type CollectionSummaries,
     type CollectionSummary,
 } from "@/new/photos/services/collection/ui";
-import AddIcon from "@mui/icons-material/Add";
 import {
     Dialog,
     DialogContent,
     DialogTitle,
-    Stack,
     styled,
     Typography,
     useMediaQuery,
@@ -174,7 +172,9 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             </SpaceBetweenFlex>
 
             <DialogContent_>
-                <AddCollectionButton onClick={onCreateCollection} />
+                <LargeTileCreateNewButton onClick={onCreateCollection}>
+                    {t("create_albums")}
+                </LargeTileCreateNewButton>
                 {filteredCollections.map((collectionSummary) => (
                     <CollectionButton
                         key={collectionSummary.id}
@@ -226,24 +226,4 @@ const CollectionButton: React.FC<CollectionButtonProps> = ({
             <Typography>{collectionSummary.name}</Typography>
         </LargeTileTextOverlay>
     </ItemCard>
-);
-
-const AddCollectionButton: React.FC<ButtonishProps> = ({ onClick }) => (
-    <LargeTileButton onClick={onClick}>
-        <Stack
-            sx={{
-                flex: 1,
-                height: "100%",
-                border: "1px dashed",
-                borderColor: "stroke.muted",
-                borderRadius: "4px",
-                padding: 1,
-            }}
-        >
-            <Typography>{t("create_albums")}</Typography>
-            <CenteredFill>
-                <AddIcon />
-            </CenteredFill>
-        </Stack>
-    </LargeTileButton>
 );
