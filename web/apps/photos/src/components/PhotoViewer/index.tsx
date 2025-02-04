@@ -1035,6 +1035,7 @@ const ConversionFailedNotification: React.FC<
         <Snackbar
             open={open}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            sx={(theme) => ({ boxShadow: theme.vars.palette.boxShadow.menu })}
         >
             <Paper sx={{ width: "320px" }}>
                 <Button

@@ -141,14 +141,15 @@ export const Notification: React.FC<NotificationProps> = ({
                 vertical: vertical ?? "bottom",
             }}
             sx={[
-                {
+                (theme) => ({
                     width: "min(320px, 100vw)",
                     // If the `color` of the button is a translucent one, e.g.
                     // "secondary", then the notification becomes opaque, which
                     // is not what we want. So give the entire snackbar a solid
                     // background color.
                     backgroundColor: "background.default",
-                },
+                    boxShadow: theme.vars.palette.boxShadow.menu,
+                }),
                 ...(sx ? (isSxArray(sx) ? sx : [sx]) : []),
             ]}
         >
