@@ -96,7 +96,7 @@ func (repo *FamilyRepository) AddMemberInvite(ctx context.Context, adminID int64
 	}
 	// on conflict, we should not change the status from 'ACCEPTED' to `INVITED`.
 	// Also, the token should not be updated if the user is already in `INVITED` state.
-	_, err := repo.DB.ExecContext(ctx, `INSERT INTO families(id, admin_id, member_id, status, token, storage) 
+	_, err := repo.DB.ExecContext(ctx, `INSERT INTO families(id, admin_id, member_id, status, token, storage_limit) 
 			VALUES($1, $2, $3, $4, $5, $6) ON CONFLICT (admin_id,member_id) 
 			    DO UPDATE SET(status, token) = ($4, $5) WHERE  NOT (families.status = ANY($7))`,
 		uuid.New(), adminID, memberID, ente.INVITED, inviteToken, storageLimit, pq.Array([]ente.MemberStatus{ente.INVITED, ente.ACCEPTED}))
@@ -113,13 +113,13 @@ func (repo *FamilyRepository) AddMemberInvite(ctx context.Context, adminID int64
 
 // GetInvite returns information about family invitation for given token
 func (repo *FamilyRepository) GetInvite(token string) (ente.FamilyMember, error) {
-	row := repo.DB.QueryRow(`SELECT id, admin_id, member_id, status, storage from families WHERE token = $1`, token)
+	row := repo.DB.QueryRow(`SELECT id, admin_id, member_id, status, storage_limit from families WHERE token = $1`, token)
 	return repo.convertRowToFamilyMember(row)
 }
 
 // GetMemberById returns information about a particular member in a family
 func (repo *FamilyRepository) GetMemberById(ctx context.Context, id uuid.UUID) (ente.FamilyMember, error) {
-	row := repo.DB.QueryRowContext(ctx, `SELECT id, admin_id, member_id, status, storage from families WHERE id = $1`, id)
+	row := repo.DB.QueryRowContext(ctx, `SELECT id, admin_id, member_id, status, storage_limit from families WHERE id = $1`, id)
 	return repo.convertRowToFamilyMember(row)
 }
 
@@ -135,7 +135,7 @@ func (repo *FamilyRepository) convertRowToFamilyMember(row *sql.Row) (ente.Famil
 
 // GetMembersWithStatus returns all the members in a family managed by given inviter
 func (repo *FamilyRepository) GetMembersWithStatus(adminID int64, statuses []ente.MemberStatus) ([]ente.FamilyMember, error) {
-	rows, err := repo.DB.Query(`SELECT id, admin_id, member_id, status, storage from families
+	rows, err := repo.DB.Query(`SELECT id, admin_id, member_id, status, storage_limit from families
 		WHERE admin_id = $1 and status = ANY($2)`, adminID, pq.Array(statuses))
 
 	if err != nil {

@@ -1,2 +1,2 @@
 ALTER TABLE families
-DROP COLUMN storage;
+DROP COLUMN storage_limit;
