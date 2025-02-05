@@ -1601,7 +1601,6 @@
   "linkEmail": "Link email",
   "link": "Link",
   "noEnteAccountExclamation": "No Ente account!",
-<<<<<<< HEAD
   "orPickFromYourContacts": "or pick from your contacts",
   "emailDoesNotHaveEnteAccount": "{email} does not have an Ente account.",
   "@emailDoesNotHaveEnteAccount": {
@@ -1665,10 +1664,8 @@
   "linkPersonCaption": "for better sharing experience",
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
-  }
-=======
+  },
   "videoStreaming": "Video Streaming",
   "processingVideos": "Processing Videos",
   "streamDetails": "Stream details"
->>>>>>> main
 }

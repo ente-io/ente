@@ -10969,16 +10969,6 @@ class S {
     );
   }
 
-  /// `Video Streaming`
-  String get videoStreaming {
-    return Intl.message(
-      'Video Streaming',
-      name: 'videoStreaming',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `{email} does not have an Ente account.`
   String emailDoesNotHaveEnteAccount(String email) {
     return Intl.message(
@@ -11009,31 +10999,11 @@ class S {
     );
   }
 
-  /// `Processing Videos`
-  String get processingVideos {
-    return Intl.message(
-      'Processing Videos',
-      name: 'processingVideos',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Me`
   String get me {
     return Intl.message(
       'Me',
       name: 'me',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Stream details`
-  String get streamDetails {
-    return Intl.message(
-      'Stream details',
-      name: 'streamDetails',
       desc: '',
       args: [],
     );
@@ -11157,6 +11127,36 @@ class S {
       name: 'linkPersonCaption',
       desc:
           'Caption for the \'Link person\' title. It should be a continuation of the \'Link person\' title. Just like how \'Link person\' + \'for better sharing experience\' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages.',
+      args: [],
+    );
+  }
+
+  /// `Video Streaming`
+  String get videoStreaming {
+    return Intl.message(
+      'Video Streaming',
+      name: 'videoStreaming',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Processing Videos`
+  String get processingVideos {
+    return Intl.message(
+      'Processing Videos',
+      name: 'processingVideos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stream details`
+  String get streamDetails {
+    return Intl.message(
+      'Stream details',
+      name: 'streamDetails',
+      desc: '',
       args: [],
     );
   }
