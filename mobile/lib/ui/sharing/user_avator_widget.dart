@@ -3,6 +3,7 @@ import "dart:async";
 import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/user_extension.dart";
@@ -130,7 +131,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                     );
                   } else if (snapshot.hasError) {
                     _logger.severe("Error loading personID", snapshot.error);
-                    return _FirstLetterAvatar(
+                    return _FirstLetterCircularAvatar(
                       user: widget.user,
                       currentUserID: widget.currentUserID,
                       thumbnailView: widget.thumbnailView,
@@ -138,7 +139,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                     );
                   } else if (snapshot.connectionState == ConnectionState.done &&
                       snapshot.data == null) {
-                    return _FirstLetterAvatar(
+                    return _FirstLetterCircularAvatar(
                       user: widget.user,
                       currentUserID: widget.currentUserID,
                       thumbnailView: widget.thumbnailView,
@@ -150,7 +151,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
               ),
             ),
           )
-        : _FirstLetterAvatar(
+        : _FirstLetterCircularAvatar(
             user: widget.user,
             currentUserID: widget.currentUserID,
             thumbnailView: widget.thumbnailView,
@@ -159,12 +160,12 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   }
 }
 
-class _FirstLetterAvatar extends StatefulWidget {
+class _FirstLetterCircularAvatar extends StatefulWidget {
   final User user;
   final int currentUserID;
   final bool thumbnailView;
   final AvatarType type;
-  const _FirstLetterAvatar({
+  const _FirstLetterCircularAvatar({
     required this.user,
     required this.currentUserID,
     required this.thumbnailView,
@@ -172,10 +173,12 @@ class _FirstLetterAvatar extends StatefulWidget {
   });
 
   @override
-  State<_FirstLetterAvatar> createState() => _FirstLetterAvatarState();
+  State<_FirstLetterCircularAvatar> createState() =>
+      _FirstLetterCircularAvatarState();
 }
 
-class _FirstLetterAvatarState extends State<_FirstLetterAvatar> {
+class _FirstLetterCircularAvatarState
+    extends State<_FirstLetterCircularAvatar> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
@@ -186,13 +189,12 @@ class _FirstLetterAvatarState extends State<_FirstLetterAvatar> {
                 : widget.user.email.substring(0, 1))
             : widget.user.displayName!.substring(0, 1);
     Color decorationColor;
-    if (widget.user.id == null ||
-        widget.user.id! <= 0 ||
-        widget.user.id == widget.currentUserID) {
+    if ((widget.user.id != null && widget.user.id! < 0) ||
+        widget.user.email == Configuration.instance.getEmail()) {
       decorationColor = Colors.black;
     } else {
-      decorationColor = colorScheme.avatarColors[
-          (widget.user.id!).remainder(colorScheme.avatarColors.length)];
+      decorationColor = colorScheme.avatarColors[(widget.user.email.length)
+          .remainder(colorScheme.avatarColors.length)];
     }
 
     final avatarStyle = getAvatarStyle(context, widget.type);
@@ -255,5 +257,59 @@ double getAvatarSize(
       return 18.0;
     case AvatarType.extra:
       return 18.0;
+  }
+}
+
+class FirstLetterUserAvatar extends StatefulWidget {
+  final User user;
+  const FirstLetterUserAvatar(this.user, {super.key});
+
+  @override
+  State<FirstLetterUserAvatar> createState() => _FirstLetterUserAvatarState();
+}
+
+class _FirstLetterUserAvatarState extends State<FirstLetterUserAvatar> {
+  final currentUserEmail = Configuration.instance.getEmail();
+  late User user;
+
+  @override
+  void initState() {
+    super.initState();
+    user = widget.user;
+  }
+
+  @override
+  void didUpdateWidget(covariant FirstLetterUserAvatar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.user != widget.user) {
+      setState(() {
+        user = widget.user;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final displayChar = (user.displayName == null || user.displayName!.isEmpty)
+        ? ((user.email.isEmpty) ? " " : user.email.substring(0, 1))
+        : user.displayName!.substring(0, 1);
+    Color decorationColor;
+    if ((widget.user.id != null && widget.user.id! < 0) ||
+        user.email == currentUserEmail) {
+      decorationColor = Colors.black;
+    } else {
+      decorationColor = colorScheme.avatarColors[
+          (user.email.length).remainder(colorScheme.avatarColors.length)];
+    }
+    return Container(
+      color: decorationColor,
+      child: Center(
+        child: Text(
+          displayChar.toUpperCase(),
+          style: getEnteTextTheme(context).small.copyWith(color: Colors.white),
+        ),
+      ),
+    );
   }
 }

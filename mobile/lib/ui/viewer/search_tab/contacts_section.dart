@@ -6,6 +6,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
@@ -14,8 +15,7 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
-import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
-import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/viewer/search/result/contact_result_page.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
@@ -224,43 +224,34 @@ class _ContactRecommendationState extends State<ContactRecommendation> {
                               } else if (snapshot.connectionState ==
                                       ConnectionState.done &&
                                   snapshot.data == null) {
-                                if (widget.contactSearchResult
-                                        .previewThumbnail() !=
-                                    null) {
-                                  return Hero(
-                                    tag: heroTag,
-                                    child: ThumbnailWidget(
-                                      widget.contactSearchResult
-                                          .previewThumbnail()!,
-                                      shouldShowArchiveStatus: false,
-                                      shouldShowSyncStatus: false,
-                                    ),
-                                  );
-                                } else {
-                                  return const NoThumbnailWidget();
-                                }
+                                return FirstLetterUserAvatar(
+                                  User(
+                                    email: widget.contactSearchResult
+                                        .params[kContactEmail],
+                                  ),
+                                );
                               } else if (snapshot.hasError) {
                                 _logger.severe(
                                   "Error loading personID",
                                   snapshot.error,
                                 );
-                                return const NoThumbnailWidget();
+                                return FirstLetterUserAvatar(
+                                  User(
+                                    email: widget.contactSearchResult
+                                        .params[kContactEmail],
+                                  ),
+                                );
                               } else {
                                 return const EnteLoadingWidget();
                               }
                             },
                           )
-                        : widget.contactSearchResult.previewThumbnail() != null
-                            ? Hero(
-                                tag: heroTag,
-                                child: ThumbnailWidget(
-                                  widget.contactSearchResult
-                                      .previewThumbnail()!,
-                                  shouldShowArchiveStatus: false,
-                                  shouldShowSyncStatus: false,
-                                ),
-                              )
-                            : const NoThumbnailWidget(),
+                        : FirstLetterUserAvatar(
+                            User(
+                              email: widget
+                                  .contactSearchResult.params[kContactEmail],
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 10.5),
