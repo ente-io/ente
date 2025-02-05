@@ -144,16 +144,6 @@ func (repo *FamilyRepository) GetMembersWithStatus(adminID int64, statuses []ent
 	return convertRowsToFamilyMember(rows)
 }
 
-// SetStorage will set the storage limit for a member by the Admin of the family.
-func (repo *FamilyRepository) SetStorageLimit(ctx context.Context, storageLimit int64, token string) error {
-	// Need to ad a check related to admin here
-	_, err := repo.DB.ExecContext(ctx, `UPDATE families SET storage=$1 WHERE token=$2`, storageLimit, token)
-	if err != nil {
-		return stacktrace.Propagate(err, "failed to update storage")
-	}
-	return nil
-}
-
 // AcceptInvite change the invitation status in the family db for the given invite token
 func (repo *FamilyRepository) AcceptInvite(ctx context.Context, adminID int64, memberID int64, token string) error {
 	tx, err := repo.DB.BeginTx(ctx, nil)
