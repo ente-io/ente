@@ -63,7 +63,11 @@ func (c *UsageController) CanUploadFile(ctx context.Context, userID int64, size 
 			subscriptionUserIDs = append(subscriptionUserIDs, familyMember.MemberUserID)
 		}
 		for _, familyMember := range familyMembers {
-			memberStorage = familyMember.StorageLimit
+			// MemberUserID has to be equal to userID!
+			if familyMember.MemberUserID == userID {
+				memberStorage = familyMember.StorageLimit
+				break
+			}
 		}
 	}
 
