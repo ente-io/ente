@@ -823,14 +823,12 @@ class FileUploader {
       }
       await UploadLocksDB.instance.deleteMultipartTrack(lockKey);
 
-      if (!_isBackground) {
-        Bus.instance.fire(
-          LocalPhotosUpdatedEvent(
-            [remoteFile],
-            source: "downloadComplete",
-          ),
-        );
-      }
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(
+          [remoteFile],
+          source: "uploadCompleted",
+        ),
+      );
       _logger.info("File upload complete for " + remoteFile.toString());
       uploadCompleted = true;
       Bus.instance.fire(FileUploadedEvent(remoteFile));
