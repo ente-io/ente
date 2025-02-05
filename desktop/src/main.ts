@@ -359,7 +359,7 @@ const createMainWindow = () => {
         //
         // https://www.electronjs.org/docs/latest/tutorial/custom-title-bar#create-a-custom-title-bar
         titleBarStyle: "hidden",
-        ...(process.platform !== "darwin" ? { titleBarOverlay: true } : {}),
+        titleBarOverlay: true,
         // The color to show in the window until the web content gets loaded.
         // https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
         //
