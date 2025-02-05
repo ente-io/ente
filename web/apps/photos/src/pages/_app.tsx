@@ -1,4 +1,9 @@
-import { clientPackageName, isDesktop, staticAppTitle } from "@/base/app";
+import {
+    clientPackageName,
+    isDesktop,
+    staticAppTitle,
+    wipDesktopCustomTitlebar,
+} from "@/base/app";
 import { CenteredFlex } from "@/base/components/containers";
 import { CustomHead } from "@/base/components/Head";
 import {
@@ -187,7 +192,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
                 <Notification {...notificationProps} />
 
-                {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}
+                {wipDesktopCustomTitlebar && (
+                    <WindowTitlebar>{title}</WindowTitlebar>
+                )}
                 <AppContext.Provider value={appContext}>
                     {!isI18nReady ? (
                         <LoadingOverlay />
@@ -210,6 +217,14 @@ const redirectToFamilyPortal = () =>
         window.location.href = url;
     });
 
+const WindowTitlebar: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <WindowTitlebarArea>
+        <Typography variant="small" sx={{ mt: "2px", fontWeight: "bold" }}>
+            {children}
+        </Typography>
+    </WindowTitlebarArea>
+);
+
 // See: [Note: Customize the desktop title bar]
 const WindowTitlebarArea = styled(CenteredFlex)`
     z-index: 10000;
@@ -221,11 +236,3 @@ const WindowTitlebarArea = styled(CenteredFlex)`
     /* Allow using the titlebar to drag the window */
     app-region: drag;
 `;
-
-const WindowTitlebar: React.FC<React.PropsWithChildren> = ({ children }) => (
-    <WindowTitlebarArea>
-        <Typography variant="small" sx={{ mt: "2px", fontWeight: "bold" }}>
-            {children}
-        </Typography>
-    </WindowTitlebarArea>
-);

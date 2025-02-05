@@ -9,16 +9,16 @@
  * https://www.electronjs.org/docs/latest/tutorial/process-model#the-main-process
  */
 
-import { nativeTheme } from "electron";
 import { nativeImage, shell } from "electron/common";
-import type { WebContents } from "electron/main";
 import {
     BrowserWindow,
     Menu,
     Tray,
     app,
     dialog,
+    nativeTheme,
     protocol,
+    type WebContents,
 } from "electron/main";
 import serveNextAt from "next-electron-server";
 import { existsSync } from "node:fs";
@@ -326,6 +326,8 @@ const attachProcessHandlers = () => {
  */
 const waitForRendererDevServer = () => wait(1000);
 
+const wipDesktopCustomTitlebar = process.env.ENTE_WIP_TITLEBAR == "1";
+
 /**
  * Create an return the {@link BrowserWindow} that will form our app's UI.
  *
@@ -362,8 +364,12 @@ const createMainWindow = () => {
         // do it (Step 2) unconditionally (i.e., on macOS too).
         //
         // https://www.electronjs.org/docs/latest/tutorial/custom-title-bar#create-a-custom-title-bar
-        titleBarStyle: "hidden",
-        titleBarOverlay: true,
+        ...(wipDesktopCustomTitlebar
+            ? {
+                  titleBarStyle: "hidden",
+                  titleBarOverlay: true,
+              }
+            : {}),
         // The color to show in the window until the web content gets loaded.
         // https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
         //
