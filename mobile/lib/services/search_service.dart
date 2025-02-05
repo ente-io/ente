@@ -1208,64 +1208,65 @@ class SearchService {
     final Map<String, (List<EnteFile>, Location)> wideRadiusClusters = {};
     // Go through all files and cluster the ones not inside any location tag
     for (EnteFile file in allFiles) {
-      if (file.hasLocation && file.uploadedFileID != null) {
-        // Check if the file is inside any location tag
-        bool hasLocationTag = false;
-        for (LocalEntity<LocationTag> tag in tagToItemsMap.keys) {
+      if (!file.hasLocation || file.uploadedFileID == null || !file.isOwner) {
+        continue;
+      }
+      // Check if the file is inside any location tag
+      bool hasLocationTag = false;
+      for (LocalEntity<LocationTag> tag in tagToItemsMap.keys) {
+        if (isFileInsideLocationTag(
+          tag.item.centerPoint,
+          file.location!,
+          tag.item.radius,
+        )) {
+          hasLocationTag = true;
+          tagToItemsMap[tag]!.add(file);
+        }
+      }
+      // Cluster the files not inside any location tag (incremental clustering)
+      if (!hasLocationTag) {
+        // Small radius clustering for base locations
+        bool foundSmallCluster = false;
+        for (final clusterID in smallRadiusClusters.keys) {
+          final clusterLocation = smallRadiusClusters[clusterID]!.$2;
           if (isFileInsideLocationTag(
-            tag.item.centerPoint,
+            clusterLocation,
             file.location!,
-            tag.item.radius,
+            0.6,
           )) {
-            hasLocationTag = true;
-            tagToItemsMap[tag]!.add(file);
+            smallRadiusClusters[clusterID]!.$1.add(file);
+            foundSmallCluster = true;
+            break;
           }
         }
-        // Cluster the files not inside any location tag (incremental clustering)
-        if (!hasLocationTag) {
-          // Small radius clustering for base locations
-          bool foundSmallCluster = false;
-          for (final clusterID in smallRadiusClusters.keys) {
-            final clusterLocation = smallRadiusClusters[clusterID]!.$2;
-            if (isFileInsideLocationTag(
-              clusterLocation,
-              file.location!,
-              0.6,
-            )) {
-              smallRadiusClusters[clusterID]!.$1.add(file);
-              foundSmallCluster = true;
-              break;
-            }
+        if (!foundSmallCluster) {
+          smallRadiusClusters[newAutoLocationID()] = (
+            [
+              file,
+            ],
+            file.location!
+          );
+        }
+        // Wide radius clustering for trip locations
+        bool foundWideCluster = false;
+        for (final clusterID in wideRadiusClusters.keys) {
+          final clusterLocation = wideRadiusClusters[clusterID]!.$2;
+          if (isFileInsideLocationTag(
+            clusterLocation,
+            file.location!,
+            50.0,
+          )) {
+            wideRadiusClusters[clusterID]!.$1.add(file);
+            foundWideCluster = true;
+            break;
           }
-          if (!foundSmallCluster) {
-            smallRadiusClusters[newAutoLocationID()] = (
+          if (!foundWideCluster) {
+            wideRadiusClusters[newAutoLocationID()] = (
               [
                 file,
               ],
               file.location!
             );
-          }
-          // Wide radius clustering for trip locations
-          bool foundWideCluster = false;
-          for (final clusterID in wideRadiusClusters.keys) {
-            final clusterLocation = wideRadiusClusters[clusterID]!.$2;
-            if (isFileInsideLocationTag(
-              clusterLocation,
-              file.location!,
-              50.0,
-            )) {
-              wideRadiusClusters[clusterID]!.$1.add(file);
-              foundWideCluster = true;
-              break;
-            }
-            if (!foundWideCluster) {
-              wideRadiusClusters[newAutoLocationID()] = (
-                [
-                  file,
-                ],
-                file.location!
-              );
-            }
           }
         }
       }
