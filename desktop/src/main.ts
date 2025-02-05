@@ -348,7 +348,16 @@ const createMainWindow = () => {
         ...(bounds ?? {}),
         // Enforce a minimum size
         ...minimumWindowSize(),
-        // See: [Note: Customize the desktop title bar]
+        // [Note: Customize the desktop title bar]
+        //
+        // 1. Remove the default title bar.
+        // 2. On Linux and Windows, reintroduce the title bar controls (macOS
+        //    always does it).
+        // 3. Show a custom title bar in the renderer using `app-region: drag`
+        //    to allow dragging the window by the title bar, and using the
+        //    Window Controls Overlay CSS variables to determine its dimensions.
+        //
+        // https://www.electronjs.org/docs/latest/tutorial/custom-title-bar#create-a-custom-title-bar
         titleBarStyle: "hidden",
         ...(process.platform !== "darwin" ? { titleBarOverlay: true } : {}),
         // The color to show in the window until the web content gets loaded.

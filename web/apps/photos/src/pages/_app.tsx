@@ -204,6 +204,12 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
 export default App;
 
+const redirectToFamilyPortal = () =>
+    void getFamilyPortalRedirectURL().then((url) => {
+        window.location.href = url;
+    });
+
+// See: [Note: Customize the desktop title bar]
 const WindowTitlebar = styled("div")`
     width: 100%;
     min-height: 30px;
@@ -211,8 +217,3 @@ const WindowTitlebar = styled("div")`
     /* Allow using the titlebar to drag the window */
     app-region: drag;
 `;
-
-const redirectToFamilyPortal = () =>
-    void getFamilyPortalRedirectURL().then((url) => {
-        window.location.href = url;
-    });
