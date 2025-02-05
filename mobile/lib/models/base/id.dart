@@ -15,3 +15,7 @@ String newID(String prefix) {
 String newIsolateTaskID(String task) {
   return "${task}_${customAlphabet(enteWhiteListedAlphabet, clusterIDLength)}";
 }
+
+String newAutoLocationID() {
+  return "cluster_${customAlphabet(enteWhiteListedAlphabet, clusterIDLength)}";
+}
