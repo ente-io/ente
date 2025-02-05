@@ -28,9 +28,9 @@ export const SidebarDrawer = styled(Drawer)(({ theme }) => ({
         padding: theme.spacing(1),
         // Add extra padding on the top to account for our inline title bar.
         // See: [Note: Customize the desktop title bar]
-        //
-        // The specific constant is just something which looks okay-ish.
-        ...(isDesktop ? { paddingTop: "14px" } : {}),
+        ...(isDesktop
+            ? { paddingTop: "calc(env(titlebar-area-height) / 2 + 4px)" }
+            : {}),
     },
 }));
 
