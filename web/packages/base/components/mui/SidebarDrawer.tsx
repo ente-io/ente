@@ -10,6 +10,7 @@ import {
     type DrawerProps,
 } from "@mui/material";
 import React from "react";
+import { wipDesktopCustomTitlebar } from "../../app";
 import type { ModalVisibilityProps } from "../utils/modal";
 
 /**
@@ -25,6 +26,11 @@ export const SidebarDrawer = styled(Drawer)(({ theme }) => ({
         width: "100%",
         scrollbarWidth: "thin",
         padding: theme.spacing(1),
+        // Add extra padding on the top to account for our inline title bar.
+        // See: [Note: Customize the desktop title bar]
+        ...(wipDesktopCustomTitlebar
+            ? { paddingTop: "calc(env(titlebar-area-height) / 2 + 4px)" }
+            : {}),
     },
 }));
 
