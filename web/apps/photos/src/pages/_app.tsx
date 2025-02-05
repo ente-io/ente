@@ -40,7 +40,7 @@ import type { User } from "@ente/shared/user/types";
 import "@fontsource-variable/inter";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { CssBaseline } from "@mui/material";
-import { ThemeProvider } from "@mui/material/styles";
+import { styled, ThemeProvider } from "@mui/material/styles";
 import { useNotification } from "components/utils/hooks-app";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
@@ -186,6 +186,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
                 <Notification {...notificationProps} />
 
+                {isDesktop && <WindowTitlebar />}
                 <AppContext.Provider value={appContext}>
                     {!isI18nReady ? (
                         <LoadingOverlay />
@@ -202,6 +203,12 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 };
 
 export default App;
+
+const WindowTitlebar = styled("div")`
+    width: 100%;
+    min-height: 30px;
+    display: flex;
+`;
 
 const redirectToFamilyPortal = () =>
     void getFamilyPortalRedirectURL().then((url) => {
