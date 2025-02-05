@@ -6,9 +6,12 @@ import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/notification_event.dart';
+import "package:photos/events/preview_updated_event.dart";
 import 'package:photos/events/sync_status_update_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/preview_video_store.dart";
 import 'package:photos/services/sync_service.dart';
 import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -32,9 +35,12 @@ class StatusBarWidget extends StatefulWidget {
 
 class _StatusBarWidgetState extends State<StatusBarWidget> {
   static final _logger = Logger("StatusBarWidget");
+  late int previewCount = 0;
 
   late StreamSubscription<SyncStatusUpdate> _subscription;
   late StreamSubscription<NotificationEvent> _notificationSubscription;
+  late StreamSubscription<PreviewUpdatedEvent> _previewSubscription;
+
   bool _showStatus = false;
   bool _showErrorBanner = false;
   bool _showMlBanner = !userRemoteFlagService
@@ -81,6 +87,26 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
         setState(() {});
       }
     });
+
+    previewCount = PreviewVideoStore.instance.previews.values
+        .where(
+          (element) =>
+              element.status != PreviewItemStatus.uploaded &&
+              element.status != PreviewItemStatus.failed,
+        )
+        .length;
+
+    _previewSubscription =
+        Bus.instance.on<PreviewUpdatedEvent>().listen((event) {
+      previewCount = event.items.values
+          .where(
+            (element) =>
+                element.status != PreviewItemStatus.uploaded &&
+                element.status != PreviewItemStatus.failed,
+          )
+          .length;
+      setState(() {});
+    });
     super.initState();
   }
 
@@ -88,6 +114,8 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   void dispose() {
     _subscription.cancel();
     _notificationSubscription.cancel();
+    _previewSubscription.cancel();
+
     super.dispose();
   }
 
@@ -96,10 +124,19 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
     return Column(
       children: [
         HomeHeaderWidget(
-          centerWidget: _showStatus
-              ? _showErrorBanner
-                  ? const Text("ente", style: brandStyleMedium)
-                  : GestureDetector(
+          centerWidget: _showStatus && !_showErrorBanner
+              ? GestureDetector(
+                  onTap: () {
+                    routeToPage(
+                      context,
+                      const BackupStatusScreen(),
+                      forceCustomPageRoute: true,
+                    ).ignore();
+                  },
+                  child: const SyncStatusWidget(),
+                )
+              : previewCount > 0
+                  ? GestureDetector(
                       onTap: () {
                         routeToPage(
                           context,
@@ -107,9 +144,9 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                           forceCustomPageRoute: true,
                         ).ignore();
                       },
-                      child: const SyncStatusWidget(),
+                      child: Text(S.of(context).processingVideos),
                     )
-              : const Text("ente", style: brandStyleMedium),
+                  : const Text("ente", style: brandStyleMedium),
         ),
         _showErrorBanner
             ? Divider(

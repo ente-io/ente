@@ -251,10 +251,10 @@ Future<void> _saveLivePhotoOnDroid(
 ) async {
   debugPrint("Downloading LivePhoto on Droid");
   AssetEntity? savedAsset = await (PhotoManager.editor
-      .saveImageWithPath(image.path, title: enteFile.title!));
-  if (savedAsset == null) {
+          .saveImageWithPath(image.path, title: enteFile.title!))
+      .catchError((err) {
     throw Exception("Failed to save image of live photo");
-  }
+  });
   IgnoredFile ignoreVideoFile = IgnoredFile(
     savedAsset.id,
     savedAsset.title ?? '',
@@ -267,10 +267,7 @@ Future<void> _saveLivePhotoOnDroid(
   savedAsset = (await (PhotoManager.editor.saveVideo(
     video,
     title: videoTitle,
-  )));
-  if (savedAsset == null) {
-    throw Exception("Failed to save video of live photo");
-  }
+  )).catchError((_) => throw Exception("Failed to save video of live photo")));
 
   ignoreVideoFile = IgnoredFile(
     savedAsset.id,

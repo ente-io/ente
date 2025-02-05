@@ -42,8 +42,8 @@ import {
 } from "react-window";
 import {
     DuplicateItemTile,
-    DuplicateTileTextOverlay,
     ItemCard,
+    TileBottomTextOverlay,
 } from "../components/Tiles";
 import {
     computeThumbnailGridLayoutParams,
@@ -600,11 +600,11 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                             TileComponent={DuplicateItemTile}
                             coverFile={item.file}
                         >
-                            <DuplicateTileTextOverlay>
-                                <Ellipsized2LineTypography color="text.muted">
+                            <TileBottomTextOverlay>
+                                <Ellipsized2LineTypography variant="small">
                                     {item.collectionName}
                                 </Ellipsized2LineTypography>
-                            </DuplicateTileTextOverlay>
+                            </TileBottomTextOverlay>
                         </ItemCard>
                     ))}
                 </ItemGrid>

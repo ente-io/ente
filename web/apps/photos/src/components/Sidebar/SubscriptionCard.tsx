@@ -48,7 +48,7 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
             sx={{ borderRadius: "8px" }}
         />
     ) : (
-        <Box sx={{ position: "relative", color: "fixed.white" }}>
+        <Box sx={{ position: "relative", color: "white" }}>
             <BackgroundOverlay />
             <SubscriptionCardContentOverlay userDetails={userDetails} />
             <ClickOverlay onClick={onClick} />

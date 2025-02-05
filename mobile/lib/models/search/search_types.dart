@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:io";
 
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
@@ -242,7 +241,7 @@ extension SectionTypeExtensions on SectionType {
         return SearchService.instance.getMagicSectionResults(context);
 
       case SectionType.moment:
-        if (flagService.internalUser && Platform.isIOS) {
+        if (flagService.internalUser) {
           return SearchService.instance.onThisDayOrWeekResults(context, limit);
         }
         return SearchService.instance.getRandomMomentsSearchResults(context);

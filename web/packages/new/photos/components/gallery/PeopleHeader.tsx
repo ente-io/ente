@@ -1,6 +1,5 @@
 import { CenteredFill, SpaceBetweenFlex } from "@/base/components/containers";
 import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
-import { type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
@@ -65,7 +64,7 @@ import { SuggestionFaceList } from "../PeopleList";
 import {
     ItemCard,
     LargeTileButton,
-    LargeTilePlusOverlay,
+    LargeTileCreateNewButton,
     LargeTileTextOverlay,
 } from "../Tiles";
 import { useWrapAsyncOperation } from "../utils/use-wrap-async";
@@ -357,7 +356,9 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
                     <DialogCloseIconButton {...{ onClose }} />
                 </SpaceBetweenFlex>
                 <DialogContent_>
-                    <AddPerson onClick={handleAddPerson} />
+                    <LargeTileCreateNewButton onClick={handleAddPerson}>
+                        {t("new_person")}
+                    </LargeTileCreateNewButton>
                     {cgroupPeople.map((person) => (
                         <PersonButton
                             key={person.id}
@@ -407,13 +408,6 @@ const PersonButton: React.FC<PersonButtonProps> = ({
         <LargeTileTextOverlay>
             <Typography>{person.name ?? ""}</Typography>
         </LargeTileTextOverlay>
-    </ItemCard>
-);
-
-const AddPerson: React.FC<ButtonishProps> = ({ onClick }) => (
-    <ItemCard TileComponent={LargeTileButton} onClick={onClick}>
-        <LargeTileTextOverlay>{t("new_person")}</LargeTileTextOverlay>
-        <LargeTilePlusOverlay>+</LargeTilePlusOverlay>
     </ItemCard>
 );
 

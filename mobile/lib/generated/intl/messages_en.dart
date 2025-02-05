@@ -1387,6 +1387,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "proceed": MessageLookupByLibrary.simpleMessage("Proceed"),
         "processed": MessageLookupByLibrary.simpleMessage("Processed"),
         "processingImport": m55,
+        "processingVideos":
+            MessageLookupByLibrary.simpleMessage("Processing Videos"),
         "publicLinkCreated":
             MessageLookupByLibrary.simpleMessage("Public link created"),
         "publicLinkEnabled":
@@ -1716,6 +1718,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "storageLimitExceeded":
             MessageLookupByLibrary.simpleMessage("Storage limit exceeded"),
         "storageUsageInfo": m73,
+        "streamDetails": MessageLookupByLibrary.simpleMessage("Stream details"),
         "strongStrength": MessageLookupByLibrary.simpleMessage("Strong"),
         "subAlreadyLinkedErrMessage": m74,
         "subWillBeCancelledOn": m75,
@@ -1891,6 +1894,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Verifying recovery key..."),
         "videoInfo": MessageLookupByLibrary.simpleMessage("Video Info"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("video"),
+        "videoStreaming":
+            MessageLookupByLibrary.simpleMessage("Video Streaming"),
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("View active sessions"),

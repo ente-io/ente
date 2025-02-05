@@ -132,7 +132,7 @@ class _ClusterPageState extends State<ClusterPage> {
       tagPrefix: widget.tagPrefix + widget.tagPrefix,
       selectedFiles: _selectedFiles,
       enableFileGrouping: widget.enableGrouping,
-      initialFiles: [widget.searchResult.first],
+      initialFiles: widget.searchResult,
       header: widget.showNamingBanner
           ? PeopleBanner(
               type: PeopleBannerType.addName,

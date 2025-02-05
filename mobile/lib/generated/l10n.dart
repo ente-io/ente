@@ -10958,6 +10958,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Video Streaming`
+  String get videoStreaming {
+    return Intl.message(
+      'Video Streaming',
+      name: 'videoStreaming',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Processing Videos`
+  String get processingVideos {
+    return Intl.message(
+      'Processing Videos',
+      name: 'processingVideos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stream details`
+  String get streamDetails {
+    return Intl.message(
+      'Stream details',
+      name: 'streamDetails',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

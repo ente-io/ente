@@ -1488,6 +1488,7 @@ class SearchService {
     if (fileCount <= targetSize) return files;
     final safeFiles =
         files.where((file) => file.uploadedFileID != null).toList();
+    final safeCount = safeFiles.length;
     final fileIDs = safeFiles.map((e) => e.uploadedFileID!).toSet();
     final fileIdToFace = await MLDataDB.instance.getFacesForFileIDs(fileIDs);
     final faceIDs =
@@ -1558,7 +1559,7 @@ class SearchService {
       for (final file in safeFiles.sublist(1)) {
         if (filteredFiles.length >= targetSize) break;
         final clip = fileIdToClip[file.uploadedFileID!];
-        if (clip != null && (fileCount - skipped) > targetSize) {
+        if (clip != null && (safeCount - skipped) > targetSize) {
           for (final filteredFile in filteredFiles) {
             final fClip = fileIdToClip[filteredFile.uploadedFileID!];
             if (fClip == null) continue;
@@ -1575,7 +1576,7 @@ class SearchService {
       // Multiple years, each represented and roughly equally distributed
       if (prefferedSize == null && (allYears.length * 2) > 10) {
         targetSize = allYears.length * 3;
-        if (fileCount < targetSize) return safeFiles;
+        if (safeCount < targetSize) return safeFiles;
       }
 
       // Group files by year and sort each year's list by CLIP then face count
@@ -1607,13 +1608,13 @@ class SearchService {
       int round = 0;
       int skipped = 0;
       whileLoop:
-      while (filteredFiles.length + skipped < fileCount) {
+      while (filteredFiles.length + skipped < safeCount) {
         yearLoop:
         for (final year in years) {
           final yearFiles = yearToFiles[year]!;
           if (yearFiles.isEmpty) continue;
           final newFile = yearFiles.removeAt(0);
-          if (round != 0 && (fileCount - skipped) > targetSize) {
+          if (round != 0 && (safeCount - skipped) > targetSize) {
             // check for filtering
             final clip = fileIdToClip[newFile.uploadedFileID!];
             if (clip != null) {
@@ -1630,11 +1631,13 @@ class SearchService {
           }
           filteredFiles.add(newFile);
           if (filteredFiles.length >= targetSize ||
-              filteredFiles.length + skipped >= fileCount) {
+              filteredFiles.length + skipped >= safeCount) {
             break whileLoop;
           }
         }
         round++;
+        // Extra safety to prevent infinite loops
+        if (round > safeCount) break;
       }
     }
 

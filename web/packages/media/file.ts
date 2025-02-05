@@ -1,4 +1,5 @@
 import { sharedCryptoWorker } from "@/base/crypto";
+import { dateFromEpochMicroseconds } from "@/base/date";
 import log from "@/base/log";
 import { type Metadata, ItemVisibility } from "./file-metadata";
 
@@ -172,7 +173,15 @@ export interface EnteFile
      * But its presence is not guaranteed.
      */
     pubMagicMetadata?: FilePublicMagicMetadata;
+    /**
+     * `true` if this file is in trash (i.e. it has been deleted by the user,
+     * and will be permanently deleted after 30 days of being moved to trash).
+     */
     isTrashed?: boolean;
+    /**
+     * If this is a file in trash, then {@link deleteBy} contains the epoch
+     * microseconds when this file will be permanently deleted.
+     */
     deleteBy?: number;
     /**
      * The base64 representation of the decrypted encryption key associated with
@@ -284,6 +293,16 @@ export const fileLogID = (file: EnteFile) =>
     // TODO: Remove this when file/metadata types have optionality annotations.
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     `file ${file.metadata.title ?? "-"} (${file.id})`;
+
+/**
+ * Return the date when the file will be deleted permanently. Only valid for
+ * files that are in the user's trash.
+ *
+ * This is a convenience wrapper over the {@link deleteBy} property of a file,
+ * converting that epoch microsecond value into a JavaScript date.
+ */
+export const enteFileDeletionDate = (file: EnteFile) =>
+    dateFromEpochMicroseconds(file.deleteBy);
 
 export async function decryptFile(
     file: EncryptedEnteFile,

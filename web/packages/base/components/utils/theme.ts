@@ -14,7 +14,9 @@ const getTheme = (appName: AppName): Theme => {
         ? { ...colorSchemes_ }
         : { ...colorSchemes_, light: colorSchemes_.dark };
     return createTheme({
-        cssVariables: true,
+        cssVariables: {
+            colorSchemeSelector: "class",
+        },
         colorSchemes,
         typography,
         components,
@@ -138,10 +140,8 @@ const _colors = {
     },
     accentAuth: {
         dark: "#8e0fcb",
-        // TODO(LM): Shift up
         main: "#9610d6",
         light: "#8e2de2",
-        lighter: "#984df4" /* TODO(LM) */,
     },
     fixed: {
         white: "#fff",
@@ -153,15 +153,7 @@ const _colors = {
             main: "#ea3f3f",
             light: "#ff6565",
         },
-        gray: {
-            A: "#1c1c1e",
-            B: "#333",
-            E: "#ddd",
-        },
         switchOn: "#2eca45",
-        croppedAreaOverlay: "rgba(0 0 0 / 0.5)",
-        overlayIndicatorMuted: "rgba(255 255 255 / 0.48)",
-        storageCardUsageFill: "rgba(255 255 255 / 0.2)",
     },
     light: {
         // Keep these solid.
@@ -183,11 +175,8 @@ const _colors = {
         },
         fill: {
             base: "#000",
-            /* TODO: Unused */
-            baseHover: "rgba(0 0 0 / 0.87)",
             muted: "rgba(0 0 0 / 0.12)",
             faint: "rgba(0 0 0 / 0.04)",
-            /** TODO(LM): Needed? */
             faintHover: "rgba(0 0 0 / 0.08)",
             fainter: "rgba(0 0 0 / 0.02)",
         },
@@ -228,15 +217,14 @@ const _colors = {
         },
         fill: {
             base: "#fff",
-            baseHover: "rgba(255 255 255 / 0.90)",
             muted: "rgba(255 255 255 / 0.16)",
             faint: "rgba(255 255 255 / 0.12)",
             faintHover: "rgba(255 255 255 / 0.16)",
             fainter: "rgba(255 255 255 / 0.05)",
         },
         secondary: {
-            main: "#1f1f1f",
-            hover: "#292929",
+            main: "#2b2b2b",
+            hover: "#373737",
         },
         stroke: {
             base: "#fff",
@@ -254,7 +242,10 @@ const _colors = {
 const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
     light: {
         palette: {
-            background: colors.light.background,
+            background: {
+                ...colors.light.background,
+                elevatedPaper: colors.light.background.paper2,
+            },
             backdrop: colors.light.backdrop,
             primary: {
                 main: colors.fixed.black,
@@ -301,6 +292,9 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             // Override some MUI defaults for styling action elements like
             // buttons and menu items.
             //
+            // Nb: There are more where these came from, currently those don't
+            // affect us, but in the future they might.
+            //
             // https://github.com/mui/material-ui/blob/v6.4.0/packages/mui-material/src/styles/createPalette.js#L68
             action: {
                 // The color of an active action like an icon button.
@@ -311,23 +305,10 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 // from the active color above and this opacity. Use a value
                 // that results in the same result as faintHover.
                 hoverOpacity: 0.08,
-                // TODO(LM): Remove commented.
-                // The color of a selected action.
-                //
-                // Placeholder; not clear how it impacts us.
-                // selected: "#ff0000", //colors.light.stroke.base,
-                // selectedOpacity: 0.08,
                 // The color of a disabled action.
                 disabled: colors.light.text.faint,
-                // disabledOpacity: 0.12,
                 // The background color of a disabled action.
                 disabledBackground: colors.light.fill.faint,
-                // Placeholder; not clear how it impacts us.
-                // focus: "#ff0000", //colors.light.stroke.base,
-                // Placeholder (MUI default); not clear how it impacts us.
-                // focusOpacity: 1,
-                // Placeholder (MUI default); not clear how it impacts us.
-                // activatedOpacity: 0.12,
             },
             // Override some internal MUI defaults that impact the components
             // which we use.
@@ -336,15 +317,20 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             FilledInput: {
                 bg: colors.light.fill.faint,
                 hoverBg: colors.light.fill.faintHover,
-                // We don't use this currently.
-                // disabledBg: colors.light.fill.fainter,
+                // While we don't specifically have disabled inputs, TextInputs
+                // do get disabled when the form is submitting, and this value
+                // comes into play then.
+                disabledBg: colors.light.fill.fainter,
             },
         },
     },
     // -- See the light mode section for comments
     dark: {
         palette: {
-            background: colors.dark.background,
+            background: {
+                ...colors.dark.background,
+                elevatedPaper: colors.dark.background.paper,
+            },
             backdrop: colors.dark.backdrop,
             primary: {
                 main: colors.fixed.white,
@@ -387,19 +373,13 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 active: colors.dark.stroke.base,
                 hover: colors.dark.fill.faintHover,
                 hoverOpacity: 0.16,
-                // selected: colors.dark.stroke.base,
-                // selectedOpacity: 0.08,
                 disabled: colors.dark.text.faint,
-                // disabledOpacity: 0.12,
                 disabledBackground: colors.dark.fill.faint,
-                // focus: colors.dark.stroke.base,
-                // focusOpacity: 1,
-                // activatedOpacity: 0.12,
             },
             FilledInput: {
                 bg: colors.dark.fill.faint,
                 hoverBg: colors.dark.fill.faintHover,
-                // disabledBg: colors.dark.fill.faint,
+                disabledBg: colors.dark.fill.fainter,
             },
         },
     },
@@ -550,28 +530,12 @@ const components: Components = {
         },
     },
 
-    MuiBackdrop: {
+    MuiDrawer: {
         styleOverrides: {
             root: {
-                backgroundColor: "var(--mui-palette-backdrop-muted)",
-                // [Note: Backdrop variant blur]
-                //
-                // What we wish for is this. But as of MUI v6.4, the TypeScript
-                // definition for Backdrop does not contain a variant, causing
-                // tsc to show an error when we try to specify a variant.
-                //
-                // Since the styling is trivial and used only infrequently, for
-                // now we copy paste it. If it gets needed more often, we can
-                // also make it into a palette var.
-                //
-                // variants: [
-                //     {
-                //         props: { variant: "blur" },
-                //         style: {
-                //             backdropFilter: "blur(30px) opacity(95%)",
-                //         },
-                //     },
-                // ],
+                ".MuiBackdrop-root": {
+                    backgroundColor: "var(--mui-palette-backdrop-muted)",
+                },
             },
         },
     },
@@ -586,6 +550,9 @@ const components: Components = {
         },
         styleOverrides: {
             root: {
+                ".MuiBackdrop-root": {
+                    backgroundColor: "var(--mui-palette-backdrop-muted)",
+                },
                 // Reset the MUI default paddings to 16px everywhere.
                 //
                 // This is not a great choice either, usually most dialogs, for
@@ -821,7 +788,6 @@ const components: Components = {
                 // Set a default border radius for all snackbar's (e.g.
                 // notification popups).
                 borderRadius: "8px",
-                boxShadow: "var(--mui-palette-boxShadow-menu)",
             },
         },
     },

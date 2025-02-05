@@ -21,6 +21,7 @@ import {
     Stack,
     TextField,
     Typography,
+    useTheme,
 } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -205,7 +206,17 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
             ) : (
                 <ButtonBase component="div" onClick={copyCode}>
                     <OTPDisplay {...{ code, otp, nextOTP }} />
-                    <Snackbar open={openCopied} message={t("copied")} />
+                    <Snackbar
+                        open={openCopied}
+                        message={t("copied")}
+                        ContentProps={{
+                            sx: (theme) => ({
+                                backgroundColor: theme.vars.palette.fill.faint,
+                                color: theme.vars.palette.primary.main,
+                                backdropFilter: "blur(10px)",
+                            }),
+                        }}
+                    />
                 </ButtonBase>
             )}
         </Box>
@@ -222,7 +233,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
     return (
         <Box
             sx={(theme) => ({
-                backgroundColor: theme.vars.palette.background.paper,
+                backgroundColor: theme.vars.palette.background.elevatedPaper,
                 borderRadius: "4px",
                 overflow: "hidden",
             })}
@@ -278,6 +289,7 @@ interface CodeValidityBarProps {
 }
 
 const CodeValidityBar: React.FC<CodeValidityBarProps> = ({ code }) => {
+    const theme = useTheme();
     const [progress, setProgress] = useState(code.type == "hotp" ? 1 : 0);
 
     useEffect(() => {
@@ -293,14 +305,17 @@ const CodeValidityBar: React.FC<CodeValidityBarProps> = ({ code }) => {
         return () => ticker && clearInterval(ticker);
     }, [code]);
 
-    const color = progress > 0.4 ? "green" : "orange";
+    const progressColor =
+        progress > 0.4
+            ? theme.vars.palette.accent.light
+            : theme.vars.palette.warning.main;
 
     return (
         <div
             style={{
                 width: `${progress * 100}%`,
                 height: "3px",
-                backgroundColor: color,
+                backgroundColor: progressColor,
             }}
         />
     );
@@ -326,7 +341,7 @@ const UnparseableCode: React.FC<UnparseableCodeProps> = ({
     return (
         <Stack
             sx={(theme) => ({
-                backgroundColor: theme.vars.palette.background.paper,
+                backgroundColor: theme.vars.palette.background.elevatedPaper,
                 borderRadius: "4px",
                 overflow: "hidden",
                 p: "16px 20px",

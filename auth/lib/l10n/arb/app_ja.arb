@@ -88,6 +88,8 @@
   "useRecoveryKey": "回復キーを使用",
   "incorrectPasswordTitle": "パスワードが正しくありません",
   "welcomeBack": "おかえりなさい！",
+  "emailAlreadyRegistered": "メールアドレスはすでに登録されています。",
+  "emailNotRegistered": "メールアドレスはまだ登録されていません。",
   "madeWithLoveAtPrefix": "made with ❤️ at ",
   "supportDevs": "プロジェクト支援のために <bold-green>ente</bold-green> に登録",
   "supportDiscount": "クーポンコード \"AUTH\" の使用で初年度が 10% オフに",
@@ -258,6 +260,10 @@
   "areYouSureYouWantToLogout": "本当にログアウトしてよろしいですか？",
   "yesLogout": "はい、ログアウトします",
   "exit": "やめる",
+  "theme": "テーマ",
+  "lightTheme": "ライト",
+  "darkTheme": "ダーク",
+  "systemTheme": "システム",
   "verifyingRecoveryKey": "回復キーを確認中...",
   "recoveryKeyVerified": "回復キーが確認されました",
   "recoveryKeySuccessBody": "素晴らしい！回復キーは有効です。ご確認いただきありがとうございます。\n\n回復キーを安全にバックアップしておいてください。",
@@ -490,5 +496,10 @@
   "appLockNotEnabled": "アプリロックが有効になっていません",
   "appLockNotEnabledDescription": "セキュリティ > アプリロック からアプリロックを有効化してください",
   "authToViewPasskey": "パスキーを見るには認証してください",
-  "appLockOfflineModeWarning": "バックアップなしで進むことを選択しました。アプリロックを忘れると、データにアクセスできなくなります。"
+  "appLockOfflineModeWarning": "バックアップなしで進むことを選択しました。アプリロックを忘れると、データにアクセスできなくなります。",
+  "duplicateCodes": "重複コード",
+  "noDuplicates": "✨ 重複なし",
+  "plainHTML": "Plain HTML",
+  "tellUsWhatYouThink": "ご意見をお聞かせください",
+  "loginWithAuthAccount": "認証アカウントでログイン"
 }
