@@ -33,6 +33,11 @@ class GenericSearchResult extends SearchResult {
 
   @override
   EnteFile? previewThumbnail() {
+    if (type() == ResultType.shared) {
+      throw Exception(
+        "Do not use first file as thumbnail. Use user avatar instead.",
+      );
+    }
     return _files.isEmpty ? null : _files.first;
   }
 

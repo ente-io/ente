@@ -171,8 +171,6 @@ class _ContactRecommendationState extends State<ContactRecommendation> {
 
   @override
   Widget build(BuildContext context) {
-    final heroTag = widget.contactSearchResult.heroTag() +
-        (widget.contactSearchResult.previewThumbnail()?.tag ?? "");
     final enteTextTheme = getEnteTextTheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2.5),
