@@ -347,6 +347,13 @@ const createMainWindow = () => {
         ...(bounds ?? {}),
         // Enforce a minimum size
         ...minimumWindowSize(),
+        // Remove the default titlebar, we will render our own that better with
+        // the theme. This is also a prerequisite to have a transparent
+        // backgoundColor of the window during loading (we cannot use a fixed
+        // color because it is theme dependent, and information about the
+        // currently applicable theme is not available at this point).
+        titleBarStyle: "hidden",
+        ...(process.platform !== "darwin" ? { titleBarOverlay: true } : {}),
         // The color to show in the window until the web content gets loaded.
         // See: https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
         backgroundColor: "black",
