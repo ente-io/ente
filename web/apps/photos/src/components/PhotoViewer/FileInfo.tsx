@@ -393,9 +393,6 @@ const FileInfoSidebar = styled(
     ),
 )({
     zIndex: fileInfoDrawerZIndex,
-    "& .MuiPaper-root": {
-        padding: 8,
-    },
 });
 
 interface InfoItemProps {
