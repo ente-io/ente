@@ -1363,6 +1363,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ou fusionner avec une personne existante"),
         "orPickAnExistingOne": MessageLookupByLibrary.simpleMessage(
             "Ou sélectionner un email existant"),
+        "orPickFromYourContacts":
+            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "pair": MessageLookupByLibrary.simpleMessage("Associer"),
         "pairWithPin":
             MessageLookupByLibrary.simpleMessage("Appairer avec le code PIN"),

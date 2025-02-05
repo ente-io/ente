@@ -1313,6 +1313,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Або об\'єднати з наявними"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Або виберіть наявну"),
+        "orPickFromYourContacts":
+            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "pair": MessageLookupByLibrary.simpleMessage("Створити пару"),
         "pairWithPin":
             MessageLookupByLibrary.simpleMessage("Під’єднатися через PIN-код"),

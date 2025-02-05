@@ -1591,5 +1591,6 @@
   "joinAlbumSubtextViewer": "um dies zu geteilten Alben hinzuzufügen",
   "join": "Beitreten",
   "link": "Link",
-  "noEnteAccountExclamation": "Kein Ente-Konto!"
+  "noEnteAccountExclamation": "Kein Ente-Konto!",
+  "orPickFromYourContacts": "or pick from your contacts"
 }

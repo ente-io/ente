@@ -1589,5 +1589,6 @@
   "joinAlbum": "Rejoindre l'album",
   "joinAlbumSubtext": "pour afficher et ajouter vos photos",
   "joinAlbumSubtextViewer": "pour ajouter ceci aux albums partagés",
-  "join": "Rejoindre"
+  "join": "Rejoindre",
+  "orPickFromYourContacts": "or pick from your contacts"
 }

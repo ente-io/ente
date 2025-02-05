@@ -20,6 +20,8 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
+  static String m89(title) => "${title} (Me)";
+
   static String m9(count) =>
       "${Intl.plural(count, zero: 'Add collaborator', one: 'Add collaborator', other: 'Add collaborators')}";
 
@@ -93,6 +95,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m32(newEmail) => "Email changed to ${newEmail}";
 
+  static String m90(email) => "${email} does not have an Ente account.";
+
   static String m33(email) =>
       "${email} does not have an Ente account.\n\nSend them an invite to share photos.";
 
@@ -128,6 +132,11 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m44(expiryTime) => "Link will expire on ${expiryTime}";
 
+  static String m91(email) => "Link person to ${email}";
+
+  static String m92(personName, email) =>
+      "This will link ${personName} to ${email}";
+
   static String m5(count, formattedCount) =>
       "${Intl.plural(count, zero: 'no memories', one: '${formattedCount} memory', other: '${formattedCount} memories')}";
 
@@ -162,6 +171,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m55(folderName) => "Processing ${folderName}...";
 
   static String m56(storeName) => "Rate us on ${storeName}";
+
+  static String m93(name) => "Reassigned you to ${name}";
 
   static String m57(days, email) =>
       "You can access the account after ${days} days. A notification will be sent to ${email}.";
@@ -273,6 +284,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "account": MessageLookupByLibrary.simpleMessage("Account"),
         "accountIsAlreadyConfigured": MessageLookupByLibrary.simpleMessage(
             "Account is already configured."),
+        "accountOwnerPersonAppbarTitle": m89,
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Welcome back!"),
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
@@ -770,6 +782,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Do you want to discard the edits you have made?"),
         "done": MessageLookupByLibrary.simpleMessage("Done"),
+        "dontSave": MessageLookupByLibrary.simpleMessage("Don\'t save"),
         "doubleYourStorage":
             MessageLookupByLibrary.simpleMessage("Double your storage"),
         "download": MessageLookupByLibrary.simpleMessage("Download"),
@@ -793,6 +806,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "emailAlreadyRegistered":
             MessageLookupByLibrary.simpleMessage("Email already registered."),
         "emailChangedTo": m32,
+        "emailDoesNotHaveEnteAccount": m90,
         "emailNoEnteAccount": m33,
         "emailNotRegistered":
             MessageLookupByLibrary.simpleMessage("Email not registered."),
@@ -1079,6 +1093,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Link copied to clipboard"),
         "linkDeviceLimit": MessageLookupByLibrary.simpleMessage("Device limit"),
         "linkEmail": MessageLookupByLibrary.simpleMessage("Link email"),
+        "linkEmailToContactBannerCaption":
+            MessageLookupByLibrary.simpleMessage("for faster sharing"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Enabled"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Expired"),
         "linkExpiresOn": m44,
@@ -1086,6 +1102,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "linkHasExpired":
             MessageLookupByLibrary.simpleMessage("Link has expired"),
         "linkNeverExpires": MessageLookupByLibrary.simpleMessage("Never"),
+        "linkPerson": MessageLookupByLibrary.simpleMessage("Link person"),
+        "linkPersonCaption": MessageLookupByLibrary.simpleMessage(
+            "for better sharing experience"),
+        "linkPersonToEmail": m91,
+        "linkPersonToEmailConfirmation": m92,
         "livePhotos": MessageLookupByLibrary.simpleMessage("Live Photos"),
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "You can share your subscription with your family"),
@@ -1169,6 +1190,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "maps": MessageLookupByLibrary.simpleMessage("Maps"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
+        "me": MessageLookupByLibrary.simpleMessage("Me"),
         "memoryCount": m5,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
         "mergeWithExisting":
@@ -1287,6 +1309,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Or merge with existing"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Or pick an existing one"),
+        "orPickFromYourContacts":
+            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "pair": MessageLookupByLibrary.simpleMessage("Pair"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Pair with PIN"),
         "pairingComplete":
@@ -1397,6 +1421,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "rateTheApp": MessageLookupByLibrary.simpleMessage("Rate the app"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Rate us"),
         "rateUsOnStore": m56,
+        "reassignMe": MessageLookupByLibrary.simpleMessage("Reassign \"Me\""),
+        "reassignedToName": m93,
+        "reassigningLoading":
+            MessageLookupByLibrary.simpleMessage("Reassigning..."),
         "recover": MessageLookupByLibrary.simpleMessage("Recover"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Recover account"),
@@ -1518,6 +1546,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateRight": MessageLookupByLibrary.simpleMessage("Rotate right"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("Safely stored"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
+        "saveChangesBeforeLeavingQuestion":
+            MessageLookupByLibrary.simpleMessage(
+                "Save changes before leaving?"),
         "saveCollage": MessageLookupByLibrary.simpleMessage("Save collage"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("Save copy"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Save key"),
@@ -1587,7 +1618,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Select mail app"),
         "selectMorePhotos":
             MessageLookupByLibrary.simpleMessage("Select more photos"),
+        "selectPersonToLink":
+            MessageLookupByLibrary.simpleMessage("Select person to link"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Select reason"),
+        "selectYourFace":
+            MessageLookupByLibrary.simpleMessage("Select your face"),
         "selectYourPlan":
             MessageLookupByLibrary.simpleMessage("Select your plan"),
         "selectedFilesAreNotOnEnte": MessageLookupByLibrary.simpleMessage(
@@ -1783,6 +1818,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "This email is already in use"),
         "thisImageHasNoExifData":
             MessageLookupByLibrary.simpleMessage("This image has no exif data"),
+        "thisIsMeExclamation":
+            MessageLookupByLibrary.simpleMessage("This is me!"),
         "thisIsPersonVerificationId": m78,
         "thisIsYourVerificationId": MessageLookupByLibrary.simpleMessage(
             "This is your Verification ID"),

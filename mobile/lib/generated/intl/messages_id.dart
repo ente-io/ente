@@ -966,6 +966,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Opsional, pendek pun tak apa..."),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Atau pilih yang sudah ada"),
+        "orPickFromYourContacts":
+            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "pair": MessageLookupByLibrary.simpleMessage("Tautkan"),
         "pairWithPin":
             MessageLookupByLibrary.simpleMessage("Tautkan dengan PIN"),

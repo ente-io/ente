@@ -1302,6 +1302,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("O unisci con esistente"),
         "orPickAnExistingOne": MessageLookupByLibrary.simpleMessage(
             "Oppure scegline una esistente"),
+        "orPickFromYourContacts":
+            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "pair": MessageLookupByLibrary.simpleMessage("Abbina"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Associa con PIN"),
         "pairingComplete":

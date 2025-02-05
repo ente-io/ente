@@ -1347,5 +1347,6 @@
   "join": "Jungtis",
   "linkEmail": "Susieti el. paštą",
   "link": "Susieti",
-  "noEnteAccountExclamation": "Nėra „Ente“ paskyros!"
+  "noEnteAccountExclamation": "Nėra „Ente“ paskyros!",
+  "orPickFromYourContacts": "or pick from your contacts"
 }

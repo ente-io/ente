@@ -1351,6 +1351,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "O combinar con persona existente"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("O elige uno existente"),
+        "orPickFromYourContacts":
+            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "pair": MessageLookupByLibrary.simpleMessage("Emparejar"),
         "pairWithPin":
             MessageLookupByLibrary.simpleMessage("Emparejar con PIN"),
