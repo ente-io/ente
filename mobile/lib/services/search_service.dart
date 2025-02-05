@@ -1230,7 +1230,7 @@ class SearchService {
             if (isFileInsideLocationTag(
               clusterLocation,
               file.location!,
-              1.0,
+              0.6,
             )) {
               smallRadiusClusters[clusterID]!.$1.add(file);
               foundSmallCluster = true;
@@ -1278,13 +1278,18 @@ class SearchService {
       final location = smallRadiusClusters[clusterID]!.$2;
       // Check that the photos are distributed over a longer time range (3+ months)
       final creationTimes = <int>[];
+      final Set<int> uniqueDays = {};
       for (final file in files) {
         if (file.creationTime != null) {
           creationTimes.add(file.creationTime!);
+          final date = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+          final dayStamp =
+              DateTime(date.year, date.month, date.day).microsecondsSinceEpoch;
+          uniqueDays.add(dayStamp);
         }
       }
       creationTimes.sort();
-      if (creationTimes.length < 2) continue;
+      if (creationTimes.length < 10) continue;
       final firstCreationTime = DateTime.fromMicrosecondsSinceEpoch(
         creationTimes.first,
       );
@@ -1294,6 +1299,9 @@ class SearchService {
       if (lastCreationTime.difference(firstCreationTime).inDays < 90) {
         continue;
       }
+      // Check for a minimum average number of days photos are clicked in range
+      final daysRange = lastCreationTime.difference(firstCreationTime).inDays;
+      if (uniqueDays.length < daysRange * 0.1) continue;
       // Check if it's a current or old base location
       final bool current = lastCreationTime.isAfter(
         DateTime.now().subtract(
