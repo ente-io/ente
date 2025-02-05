@@ -187,7 +187,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
                 <Notification {...notificationProps} />
 
-                {isDesktop && <WindowTitlebar />}
+                {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}
                 <AppContext.Provider value={appContext}>
                     {!isI18nReady ? (
                         <LoadingOverlay />
@@ -219,12 +219,10 @@ const WindowTitlebarArea = styled(CenteredFlex)`
     app-region: drag;
 `;
 
-const WindowTitlebar: React.FC = () => {
-    return (
-        <WindowTitlebarArea>
-            <Typography variant="small" sx={{ mt: "2px", fontWeight: "bold" }}>
-                Ente Photos
-            </Typography>
-        </WindowTitlebarArea>
-    );
-};
+const WindowTitlebar: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <WindowTitlebarArea>
+        <Typography variant="small" sx={{ mt: "2px", fontWeight: "bold" }}>
+            {children}
+        </Typography>
+    </WindowTitlebarArea>
+);
