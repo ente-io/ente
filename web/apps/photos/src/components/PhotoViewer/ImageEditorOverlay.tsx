@@ -12,7 +12,7 @@ import log from "@/base/log";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { downloadManager } from "@/gallery/services/download";
 import { EnteFile } from "@/media/file";
-import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
+import { photosDialogZ } from "@/new/photos/components/utils/z-index";
 import { getLocalCollections } from "@/new/photos/services/collections";
 import { AppContext } from "@/new/photos/types/context";
 import { CenteredFlex } from "@ente/shared/components/Container";
@@ -525,7 +525,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
         <Backdrop
             sx={{
                 backgroundColor: "background.default" /* Opaque */,
-                zIndex: photosDialogZIndex,
+                zIndex: photosDialogZ,
                 width: "100%",
             }}
             open

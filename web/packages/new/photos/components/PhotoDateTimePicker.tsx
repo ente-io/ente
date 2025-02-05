@@ -6,7 +6,7 @@ import {
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useState } from "react";
-import { fileInfoDrawerZIndex } from "./utils/z-index";
+import { fileInfoDrawerZ } from "./utils/z-index";
 
 interface PhotoDateTimePickerProps {
     /**
@@ -105,7 +105,7 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
                        photo viewer and the info drawer */
                     dialog: {
                         sx: {
-                            zIndex: fileInfoDrawerZIndex + 1,
+                            zIndex: fileInfoDrawerZ + 1,
                         },
                     },
                 }}
