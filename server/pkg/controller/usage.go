@@ -44,20 +44,24 @@ func (c *UsageController) CanUploadFile(ctx context.Context, userID int64, size 
 	}
 	var subscriptionAdminID int64
 	var subscriptionUserIDs []int64
+
+	if familyAdminID == nil {
+		subscriptionAdminID = userID
+		subscriptionUserIDs = []int64{userID}
+	}
 	// if user is part of a family group, validate if subscription of familyAdmin is valid & member's total storage
 	// is less than the storage accordingly to subscription plan of the admin
-	familyMembers, err := c.FamilyRepo.GetMembersWithStatus(*familyAdminID, repo.ActiveFamilyMemberStatus)
-	if err != nil {
-		return stacktrace.Propagate(err, "failed to fetch family members")
-	}
+	var familyMembers []ente.FamilyMember
 	if familyAdminID != nil {
+		familyMembers, err = c.FamilyRepo.GetMembersWithStatus(*familyAdminID, repo.ActiveFamilyMemberStatus)
+		if err != nil {
+			return stacktrace.Propagate(err, "failed to fetch family members")
+		}
 		subscriptionAdminID = *familyAdminID
 		for _, familyMember := range familyMembers {
 			subscriptionUserIDs = append(subscriptionUserIDs, familyMember.MemberUserID)
 		}
-	} else {
-		subscriptionAdminID = userID
-		subscriptionUserIDs = []int64{userID}
+
 	}
 
 	var subStorage int64
@@ -112,6 +116,7 @@ func (c *UsageController) CanUploadFile(ctx context.Context, userID int64, size 
 		memberStorage = familyMember.StorageLimit
 		break
 	}
+
 	if subscriptionAdminID != userID {
 		memberUsage, memberUsageErr := c.UsageRepo.GetUsage(userID)
 		if memberUsageErr != nil {
@@ -119,6 +124,9 @@ func (c *UsageController) CanUploadFile(ctx context.Context, userID int64, size 
 		}
 		if size != nil {
 			memberUsage += *size
+		}
+		if memberStorage == nil {
+			memberStorage = &sub.Storage
 		}
 		// Upload fail if memberStorage > memberUsage ((fileSize + total Usage) + StorageOverflowAboveSubscriptionLimit (50mb))
 		if memberStorage != nil {
