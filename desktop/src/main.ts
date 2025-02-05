@@ -351,11 +351,15 @@ const createMainWindow = () => {
         // [Note: Customize the desktop title bar]
         //
         // 1. Remove the default title bar.
-        // 2. On Linux and Windows, reintroduce the title bar controls (macOS
-        //    always does it).
-        // 3. Show a custom title bar in the renderer using `app-region: drag`
-        //    to allow dragging the window by the title bar, and using the
-        //    Window Controls Overlay CSS variables to determine its dimensions.
+        // 2. Reintroduce the title bar controls.
+        // 3. Show a custom title bar in the renderer.
+        //
+        // For step 3, we use `app-region: drag` to allow dragging the window by
+        // the title bar, and use the Window Controls Overlay CSS environment
+        // variables to determine its dimensions. Note that these overlay CSS
+        // environment vars are only available when titleBarOverlay is true, so
+        // unlike the tutorial which enables it only for Windows and Linux, we
+        // do it (Step 2) unconditionally (i.e., on macOS too).
         //
         // https://www.electronjs.org/docs/latest/tutorial/custom-title-bar#create-a-custom-title-bar
         titleBarStyle: "hidden",

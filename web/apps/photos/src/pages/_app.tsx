@@ -212,8 +212,7 @@ const redirectToFamilyPortal = () =>
 // See: [Note: Customize the desktop title bar]
 const WindowTitlebar = styled("div")`
     width: 100%;
-    --fallback-title-bar-height: 30px;
-    height: env(titlebar-area-height, var(--fallback-title-bar-height));
+    height: env(titlebar-area-height, 30px /* fallback */);
     display: flex;
     /* Allow using the titlebar to drag the window */
     app-region: drag;
