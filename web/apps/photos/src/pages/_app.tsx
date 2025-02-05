@@ -227,9 +227,6 @@ const WindowTitlebar: React.FC<React.PropsWithChildren> = ({ children }) => (
 
 // See: [Note: Customize the desktop title bar]
 const WindowTitlebarArea = styled(CenteredFlex)`
-    // z-index: 10000;
-    // background-color: var(--mui-palette-backdrop-muted);
-    // backdrop-filter: blur(3px);
     width: 100%;
     height: env(titlebar-area-height, 30px /* fallback */);
     display: flex;

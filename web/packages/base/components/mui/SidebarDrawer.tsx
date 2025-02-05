@@ -51,7 +51,8 @@ export const SidebarDrawer: React.FC<DrawerProps> = ({ children, ...rest }) => (
                     left: 0,
                     width: "100%",
                     minHeight: "env(titlebar-area-height, 30px)",
-                    bgcolor: "background.default",
+                    bgcolor: "var(--mui-palette-backdrop-muted)",
+                    backdropFilter: "blur(3px)",
                     zIndex: 10000,
                 }}
             />
