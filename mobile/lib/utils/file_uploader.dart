@@ -82,7 +82,6 @@ class FileUploader {
   int _uploadCounter = 0;
   int _videoUploadCounter = 0;
   late ProcessType _processType;
-  late bool _isBackground;
   late SharedPreferences _prefs;
 
   // _hasInitiatedForceUpload is used to track if user attempted force upload
@@ -104,7 +103,6 @@ class FileUploader {
 
   Future<void> init(SharedPreferences preferences, bool isBackground) async {
     _prefs = preferences;
-    _isBackground = isBackground;
     _processType =
         isBackground ? ProcessType.background : ProcessType.foreground;
     final currentTime = DateTime.now().microsecondsSinceEpoch;
