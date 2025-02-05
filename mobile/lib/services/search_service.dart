@@ -1260,14 +1260,14 @@ class SearchService {
             foundWideCluster = true;
             break;
           }
-          if (!foundWideCluster) {
-            wideRadiusClusters[newAutoLocationID()] = (
-              [
-                file,
-              ],
-              file.location!
-            );
-          }
+        }
+        if (!foundWideCluster) {
+          wideRadiusClusters[newAutoLocationID()] = (
+            [
+              file,
+            ],
+            file.location!
+          );
         }
       }
     }
@@ -1393,7 +1393,6 @@ class SearchService {
     // For now for testing let's just surface all base and trip locations
     for (final baseLocation in baseLocations.values) {
       final files = baseLocation.$1; // TODO: lau: take best selection only
-      final location = baseLocation.$2;
       final current = baseLocation.$3;
       final name = "Base (${current ? 'current' : 'old'})";
       searchResults.add(
