@@ -1,5 +1,5 @@
 import { EnteLogo } from "@/base/components/EnteLogo";
-import { CenteredFlex, FlexWrapper } from "@ente/shared/components/Container";
+import { FlexWrapper } from "@ente/shared/components/Container";
 import { styled } from "@mui/material";
 import React from "react";
 
@@ -8,7 +8,9 @@ import React from "react";
  *
  * Usually this area contains the App's main navigation bar ({@link AppNavbar}),
  * but depending on the context it can also show the {@link SelectionBar}.
- * */
+ *
+ * TODO: Deprecated. Use NavbarBaseNormalFlow instead.
+ */
 export const NavbarBase = styled(FlexWrapper)(
     ({ theme }) => `
     min-height: 64px;
@@ -25,17 +27,6 @@ export const NavbarBase = styled(FlexWrapper)(
     }
 `,
 );
-
-// TODO: Prune
-export const AppNavbar: React.FC = () => {
-    return (
-        <NavbarBase>
-            <CenteredFlex>
-                <EnteLogo />
-            </CenteredFlex>
-        </NavbarBase>
-    );
-};
 
 export const NavbarBaseNormalFlow = styled("div")(
     ({ theme }) => `

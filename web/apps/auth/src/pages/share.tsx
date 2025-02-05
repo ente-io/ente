@@ -142,9 +142,7 @@ const Page: React.FC = () => {
                 {timeStatus === 0 && (
                     <Box
                         sx={(theme) => ({
-                            backgroundColor: "#1c1c1e",
-                            // TODO(LM): Uncomment
-                            // backgroundColor: "background.elevatedPaper",
+                            backgroundColor: "background.elevatedPaper",
                             ...theme.applyStyles("dark", {
                                 backgroundColor: "#1c1c1e",
                             }),
@@ -157,9 +155,7 @@ const Page: React.FC = () => {
                             sx={(theme) => ({
                                 width: "100%",
                                 height: "4px",
-                                backgroundColor: "#333",
-                                // TODO(LM): Uncomment
-                                // backgroundColor: "#eee",
+                                backgroundColor: "#eee",
                                 ...theme.applyStyles("dark", {
                                     backgroundColor: "#333",
                                 }),

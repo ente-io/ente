@@ -4,15 +4,12 @@ import { createTheme } from "@mui/material";
 import type { Components } from "@mui/material/styles/components";
 import type { TypographyOptions } from "@mui/material/styles/createTypography";
 
-export const wipTheme = !!process.env.NEXT_PUBLIC_ENTE_WIP_THEME;
-
 const getTheme = (appName: AppName): Theme => {
     const colors = getColors(appName);
-    const colorSchemes_ = getColorSchemes(colors);
-    // TODO(LM): Temp
-    const colorSchemes = wipTheme
-        ? { ...colorSchemes_ }
-        : { ...colorSchemes_, light: colorSchemes_.dark };
+    const cs = getColorSchemes(colors);
+    // Cast app should always be shown in dark.
+    const colorSchemes =
+        appName == "cast" ? { ...cs, light: cs.dark } : { ...cs };
     return createTheme({
         cssVariables: {
             colorSchemeSelector: "class",
@@ -191,6 +188,7 @@ const _colors = {
             base: "#000",
             muted: "rgba(0 0 0 / 0.24)",
             faint: "rgba(0 0 0 / 0.12)",
+            fainter: "rgba(0 0 0 / 0.06)",
         },
         boxShadow: {
             paper: "0px 0px 10px rgba(0 0 0 / 0.25)",
@@ -230,6 +228,7 @@ const _colors = {
             base: "#fff",
             muted: "rgba(255 255 255 / 0.24)",
             faint: "rgba(255 255 255 / 0.16)",
+            fainter: "rgba(255 255 255 / 0.12)",
         },
         boxShadow: {
             paper: "0px 2px 12px rgba(0 0 0 / 0.75)",
@@ -675,26 +674,6 @@ const components: Components = {
         },
     },
 
-    MuiFilledInput: {
-        styleOverrides: {
-            input: {
-                // Set the background color for text fields when they get
-                // autofilled by the user agent.
-                //
-                // TODO(LM): Right now we need to set it until the light mode is
-                // fully independent. Post that, see if we really need to
-                // override the user agent defaults. Also note that MUI does
-                // overwrite the UA defaults, so we might need to too.
-                //
-                // https://github.com/search?q=repo%3Amui%2Fmaterial-ui%20path%3A%2F%5Epackages%5C%2Fmui-material%5C%2Fsrc%5C%2F%2F%20WebkitBoxShadow&type=code
-                "&:autofill": {
-                    boxShadow: "0 0 0 100px #266798 inset",
-                    WebkitTextFillColor: "var(--mui-palette-fixed-white)",
-                },
-            },
-        },
-    },
-
     MuiTextField: {
         defaultProps: {
             // The MUI default variant is "outlined", override it to use the
@@ -807,3 +786,10 @@ export const photosTheme = getTheme("photos");
  * The MUI {@link Theme} to use for the auth app.
  */
 export const authTheme = getTheme("auth");
+
+/**
+ * The MUI {@link Theme} to use for the cast app.
+ *
+ * This is the same as the dark theme for the photos app.
+ */
+export const castTheme = getTheme("cast");

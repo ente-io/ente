@@ -10,6 +10,7 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
+    Stack,
     Typography,
     styled,
 } from "@mui/material";
@@ -43,8 +44,11 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
             fullWidth
         >
             <Box sx={{ m: 1 }}>
-                <DialogTitle mt={2}>
-                    <Typography variant="h4" sx={{ color: "text.muted" }}>
+                <DialogTitle sx={{ mt: 2, mb: 0 }}>
+                    <Typography
+                        variant="body"
+                        sx={{ color: "text.faint", fontWeight: "regular" }}
+                    >
                         {ut("What's new")}
                     </Typography>
                 </DialogTitle>
@@ -73,35 +77,16 @@ const ChangelogContent: React.FC = () => {
     // below.
 
     return (
-        <StyledUL>
-            <li>
-                <Typography>{ut("Improved date search")}</Typography>
-                <Typography sx={{ color: "text.muted" }}>
-                    Search for photos by day of week (<i>Wednesday</i>) or hour
-                    of day (<i>8 pm</i>) in addition to the existing search by
-                    partial dates (<i>20 July</i>, or even <i>2021</i>) and
-                    relative dates (<i>Last month</i>,<i>Yesterday</i>).
-                </Typography>
-            </li>
-            <li>
-                <Typography>{ut("Faster magic search")}</Typography>
-                <Typography sx={{ color: "text.muted" }}>
-                    {ut(
-                        "The magic search beta, where you can search for photos just by typing whatever is in them, just got faster.",
-                    )}
-                </Typography>
-            </li>
-        </StyledUL>
+        <Stack sx={{ gap: 2, mb: 1 }}>
+            <Typography variant="h6">{ut("Light mode ✨")}</Typography>
+            <Typography sx={{ color: "text.muted" }}>
+                {ut(
+                    "The much requested light mode is here. The app will automatically switch between the light and dark theme based on your OS settings. You can manually override this is Preferences.",
+                )}
+            </Typography>
+        </Stack>
     );
 };
-
-const StyledUL = styled("ul")`
-    padding-inline: 1rem;
-
-    li {
-        margin-block: 2rem;
-    }
-`;
 
 const ButtonContents = styled("div")`
     /* Make the button text fill the entire space so the endIcon shows at the

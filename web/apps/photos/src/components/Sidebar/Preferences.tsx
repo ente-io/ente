@@ -25,7 +25,6 @@ import {
 import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { isMLSupported } from "@/new/photos/services/ml";
 import {
-    isInternalUser,
     syncSettings,
     updateCFProxyDisabledPreference,
     updateMapEnabled,
@@ -69,7 +68,7 @@ export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 />
                 <Stack sx={{ px: "16px", py: "8px", gap: "24px" }}>
                     <LanguageSelector />
-                    {isInternalUser() && <ThemeSelector />}
+                    <ThemeSelector />
                     <Divider sx={{ my: "2px", opacity: 0.1 }} />
                     {isMLSupported && (
                         <RowButtonGroup>
@@ -185,7 +184,6 @@ const ThemeSelector = () => {
     // During SSR, mode is always undefined.
     if (!mode) return null;
 
-    // TODO(LM): Enable for all
     return (
         <Stack sx={{ gap: 1 }}>
             <Typography variant="small" sx={{ px: 1, color: "text.muted" }}>
