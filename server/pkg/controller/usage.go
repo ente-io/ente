@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/ente-io/museum/ente"
 	bonus "github.com/ente-io/museum/ente/storagebonus"
@@ -45,30 +46,24 @@ func (c *UsageController) CanUploadFile(ctx context.Context, userID int64, size 
 	var subscriptionAdminID int64
 	var subscriptionUserIDs []int64
 
-	if familyAdminID == nil {
-		subscriptionAdminID = userID
-		subscriptionUserIDs = []int64{userID}
-	}
 	// if user is part of a family group, validate if subscription of familyAdmin is valid & member's total storage
 	// is less than the storage accordingly to subscription plan of the admin
-	var familyMembers []ente.FamilyMember
-	var memberStorage *int64
+	var memberStorageLimit *int64
 	if familyAdminID != nil {
-		familyMembers, err = c.FamilyRepo.GetMembersWithStatus(*familyAdminID, repo.ActiveFamilyMemberStatus)
+		familyMembers, err := c.FamilyRepo.GetMembersWithStatus(*familyAdminID, repo.ActiveFamilyMemberStatus)
 		if err != nil {
 			return stacktrace.Propagate(err, "failed to fetch family members")
 		}
 		subscriptionAdminID = *familyAdminID
 		for _, familyMember := range familyMembers {
 			subscriptionUserIDs = append(subscriptionUserIDs, familyMember.MemberUserID)
-		}
-		for _, familyMember := range familyMembers {
-			// MemberUserID has to be equal to userID!
-			if familyMember.MemberUserID == userID {
-				memberStorage = familyMember.StorageLimit
-				break
+			if familyMember.MemberUserID == userID && familyMember.MemberUserID != *familyAdminID {
+				memberStorageLimit = familyMember.StorageLimit
 			}
 		}
+	} else {
+		subscriptionAdminID = userID
+		subscriptionUserIDs = []int64{userID}
 	}
 
 	var subStorage int64
@@ -119,22 +114,18 @@ func (c *UsageController) CanUploadFile(ctx context.Context, userID int64, size 
 	// Get particular member's storage and check if the file size is larger than the size of the storage allocated
 	// to the Member and fail if its too large.
 
-	if subscriptionAdminID != userID {
+	if subscriptionAdminID != userID && memberStorageLimit != nil {
 		memberUsage, memberUsageErr := c.UsageRepo.GetUsage(userID)
 		if memberUsageErr != nil {
-			stacktrace.Propagate(memberUsageErr, "Couldn't get Members Usage")
+			return stacktrace.Propagate(memberUsageErr, "Couldn't get Members Usage")
 		}
 		if size != nil {
 			memberUsage += *size
 		}
-		if memberStorage == nil {
-			memberStorage = &sub.Storage
-		}
-		// Upload fail if memberStorage > memberUsage ((fileSize + total Usage) + StorageOverflowAboveSubscriptionLimit (50mb))
-		if memberStorage != nil {
-			if (memberUsage + StorageOverflowAboveSubscriptionLimit) > *memberStorage {
-				return ente.ErrStorageLimitExceeded
-			}
+		// Upload fail if memberStorageLimit > memberUsage ((fileSize + total Usage) + StorageOverflowAboveSubscriptionLimit (50mb))
+		if memberUsage > (*memberStorageLimit + StorageOverflowAboveSubscriptionLimit) {
+			return stacktrace.Propagate(ente.ErrStorageLimitExceeded, fmt.Sprintf("member Storage Limit Exceeded (limit %d, usage %d)", *memberStorageLimit, memberUsage))
+
 		}
 	}
 	return nil

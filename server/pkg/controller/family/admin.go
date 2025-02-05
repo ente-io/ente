@@ -118,7 +118,6 @@ func (c *Controller) InviteMember(ctx *gin.Context, adminUserID int64, email str
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-
 	go func(token string) {
 		notificationErr := c.sendNotification(ctx, adminUserID, potentialMemberID, ente.INVITED, &token)
 		if notificationErr != nil {
