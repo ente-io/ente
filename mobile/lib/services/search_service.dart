@@ -1728,6 +1728,7 @@ class SearchService {
           ),
           params: {
             kPersonParamID: key.linkedPersonID,
+            kContactEmail: key.email,
           },
         ),
       );
@@ -1803,6 +1804,7 @@ class SearchService {
             ),
             params: {
               kPersonParamID: key.linkedPersonID,
+              kContactEmail: key.email,
             },
           ),
         );
