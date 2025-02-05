@@ -228,7 +228,7 @@ const _colors = {
             base: "#fff",
             muted: "rgba(255 255 255 / 0.24)",
             faint: "rgba(255 255 255 / 0.16)",
-            fainter: "rgba(255 255 255 / 0.10)",
+            fainter: "rgba(255 255 255 / 0.12)",
         },
         boxShadow: {
             paper: "0px 2px 12px rgba(0 0 0 / 0.75)",

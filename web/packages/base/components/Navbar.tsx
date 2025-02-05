@@ -1,5 +1,5 @@
 import { EnteLogo } from "@/base/components/EnteLogo";
-import { CenteredFlex, FlexWrapper } from "@ente/shared/components/Container";
+import { FlexWrapper } from "@ente/shared/components/Container";
 import { styled } from "@mui/material";
 import React from "react";
 
@@ -8,7 +8,9 @@ import React from "react";
  *
  * Usually this area contains the App's main navigation bar ({@link AppNavbar}),
  * but depending on the context it can also show the {@link SelectionBar}.
- * */
+ *
+ * TODO: Deprecated. Use NavbarBaseNormalFlow instead.
+ */
 export const NavbarBase = styled(FlexWrapper)(
     ({ theme }) => `
     min-height: 64px;
@@ -16,7 +18,7 @@ export const NavbarBase = styled(FlexWrapper)(
     top: 0;
     left: 0;
     z-index: 10;
-    border-bottom: 1px solid ${theme.vars.palette.stroke.fainter};
+    border-bottom: 1px solid ${theme.vars.palette.divider};
     background-color: ${theme.vars.palette.background.default};
     margin-bottom: 16px;
     padding: 0 24px;
@@ -26,24 +28,13 @@ export const NavbarBase = styled(FlexWrapper)(
 `,
 );
 
-// TODO: Prune
-export const AppNavbar: React.FC = () => {
-    return (
-        <NavbarBase>
-            <CenteredFlex>
-                <EnteLogo />
-            </CenteredFlex>
-        </NavbarBase>
-    );
-};
-
 export const NavbarBaseNormalFlow = styled("div")(
     ({ theme }) => `
     flex: 0 0 64px;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-bottom: 1px solid ${theme.vars.palette.stroke.fainter};
+    border-bottom: 1px solid ${theme.vars.palette.divider};
 `,
 );
 
