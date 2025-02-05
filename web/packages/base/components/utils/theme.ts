@@ -4,15 +4,12 @@ import { createTheme } from "@mui/material";
 import type { Components } from "@mui/material/styles/components";
 import type { TypographyOptions } from "@mui/material/styles/createTypography";
 
-export const wipTheme = !!process.env.NEXT_PUBLIC_ENTE_WIP_THEME;
-
 const getTheme = (appName: AppName): Theme => {
     const colors = getColors(appName);
-    const colorSchemes_ = getColorSchemes(colors);
-    // TODO(LM): Temp
-    const colorSchemes = wipTheme
-        ? { ...colorSchemes_ }
-        : { ...colorSchemes_, light: colorSchemes_.dark };
+    const cs = getColorSchemes(colors);
+    // Cast app should always be shown in dark.
+    const colorSchemes =
+        appName == "cast" ? { ...cs, light: cs.dark } : { ...cs };
     return createTheme({
         cssVariables: {
             colorSchemeSelector: "class",
