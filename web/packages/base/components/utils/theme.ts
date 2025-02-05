@@ -786,3 +786,10 @@ export const photosTheme = getTheme("photos");
  * The MUI {@link Theme} to use for the auth app.
  */
 export const authTheme = getTheme("auth");
+
+/**
+ * The MUI {@link Theme} to use for the cast app.
+ *
+ * This is the same as the dark theme for the photos app.
+ */
+export const castTheme = getTheme("cast");
