@@ -1,4 +1,5 @@
 import { clientPackageName, isDesktop, staticAppTitle } from "@/base/app";
+import { CenteredFlex } from "@/base/components/containers";
 import { CustomHead } from "@/base/components/Head";
 import {
     LoadingOverlay,
@@ -39,7 +40,7 @@ import {
 import type { User } from "@ente/shared/user/types";
 import "@fontsource-variable/inter";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { CssBaseline } from "@mui/material";
+import { CssBaseline, Typography } from "@mui/material";
 import { styled, ThemeProvider } from "@mui/material/styles";
 import { useNotification } from "components/utils/hooks-app";
 import { t } from "i18next";
@@ -210,10 +211,20 @@ const redirectToFamilyPortal = () =>
     });
 
 // See: [Note: Customize the desktop title bar]
-const WindowTitlebar = styled("div")`
+const WindowTitlebarArea = styled(CenteredFlex)`
     width: 100%;
     height: env(titlebar-area-height, 30px /* fallback */);
     display: flex;
     /* Allow using the titlebar to drag the window */
     app-region: drag;
 `;
+
+const WindowTitlebar: React.FC = () => {
+    return (
+        <WindowTitlebarArea>
+            <Typography variant="small" sx={{ mt: "2px", fontWeight: "bold" }}>
+                Ente Photos
+            </Typography>
+        </WindowTitlebarArea>
+    );
+};
