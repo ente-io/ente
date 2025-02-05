@@ -87,12 +87,14 @@ declare module "@mui/material/styles" {
          * These change with the color scheme.
          *
          * They come in three strengths which are meant to play nicely with the
-         * corresponding strengths of "text.*" and "fill.*".
+         * corresponding strengths of "text.*" and "fill.*", and an extra
+         * "fainter" variant for ad-hoc uses.
          */
         stroke: {
             base: string;
             muted: string;
             faint: string;
+            fainter: string;
         };
         /**
          * Neutral transparent colors for filling small areas like icon or

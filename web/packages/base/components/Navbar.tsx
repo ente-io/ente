@@ -16,7 +16,7 @@ export const NavbarBase = styled(FlexWrapper)(
     top: 0;
     left: 0;
     z-index: 10;
-    border-bottom: 1px solid ${theme.vars.palette.divider};
+    border-bottom: 1px solid ${theme.vars.palette.stroke.fainter};
     background-color: ${theme.vars.palette.background.default};
     margin-bottom: 16px;
     padding: 0 24px;
@@ -43,7 +43,7 @@ export const NavbarBaseNormalFlow = styled("div")(
     display: flex;
     justify-content: center;
     align-items: center;
-    border-bottom: 1px solid ${theme.vars.palette.divider};
+    border-bottom: 1px solid ${theme.vars.palette.stroke.fainter};
 `,
 );
 
