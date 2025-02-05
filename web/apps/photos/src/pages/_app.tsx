@@ -32,8 +32,8 @@ import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
 import { AppContext } from "@/new/photos/types/context";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
-    LS_KEYS,
     getData,
+    LS_KEYS,
     migrateKVToken,
 } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
@@ -208,6 +208,8 @@ const WindowTitlebar = styled("div")`
     width: 100%;
     min-height: 30px;
     display: flex;
+    /* Allow using the titlebar to drag the window */
+    app-region: drag;
 `;
 
 const redirectToFamilyPortal = () =>
