@@ -10,6 +10,7 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
+    Stack,
     Typography,
     styled,
 } from "@mui/material";
@@ -43,8 +44,11 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
             fullWidth
         >
             <Box sx={{ m: 1 }}>
-                <DialogTitle mt={2}>
-                    <Typography variant="h4" sx={{ color: "text.muted" }}>
+                <DialogTitle sx={{ mt: 2, mb: 0 }}>
+                    <Typography
+                        variant="body"
+                        sx={{ color: "text.faint", fontWeight: "regular" }}
+                    >
                         {ut("What's new")}
                     </Typography>
                 </DialogTitle>
@@ -73,26 +77,16 @@ const ChangelogContent: React.FC = () => {
     // below.
 
     return (
-        <StyledUL>
-            <li>
-                <Typography>{ut("Light mode")}</Typography>
-                <Typography sx={{ color: "text.muted" }}>
-                    {ut(
-                        "The much requested light mode is here. The app will automatically switch between light and dark mode based on your OS settings (You can manually override this is Preferences).",
-                    )}
-                </Typography>
-            </li>
-        </StyledUL>
+        <Stack sx={{ gap: 2, mb: 1 }}>
+            <Typography variant="h6">{ut("Light mode ✨")}</Typography>
+            <Typography sx={{ color: "text.muted" }}>
+                {ut(
+                    "The much requested light mode is here. The app will automatically switch between the light and dark theme based on your OS settings. You can manually override this is Preferences.",
+                )}
+            </Typography>
+        </Stack>
     );
 };
-
-const StyledUL = styled("ul")`
-    padding-inline: 1rem;
-
-    li {
-        margin-block: 2rem;
-    }
-`;
 
 const ButtonContents = styled("div")`
     /* Make the button text fill the entire space so the endIcon shows at the
