@@ -10,6 +10,6 @@
         "eslint-plugin-react-refresh": "^0.4.18",
         "prettier-plugin-organize-imports": "^4.1.0",
         "prettier-plugin-packagejson": "^2.5.8",
-        "typescript-eslint": "^8.22.0"
+        "typescript-eslint": "^8.23.0"
     }
 }

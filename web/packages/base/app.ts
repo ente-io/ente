@@ -40,6 +40,9 @@ export const appName: AppName = process.env.appName as AppName;
  */
 export const isDesktop = process.env.isDesktop == "1";
 
+export const wipDesktopCustomTitlebar =
+    isDesktop && process.env.NEXT_PUBLIC_ENTE_WIP_TITLEBAR == "1";
+
 /**
  * Version of the desktop app.
  *

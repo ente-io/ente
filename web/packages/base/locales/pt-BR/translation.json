@@ -383,7 +383,7 @@
     "remove_participant_title": "Remover?",
     "remove_participant_message": "</p>{{selectedEmail}} será removido deste álbum compartilhado</p><p>Quaisquer fotos adicionadas por eles também serão removidas do álbum</p>",
     "confirm_remove": "Sim, remover",
-    "owner": "proprietário",
+    "owner": "Proprietário",
     "collaborators": "Colaboradores",
     "viewers": "Visualizadores",
     "add_more": "Adicionar mais",
@@ -494,7 +494,6 @@
     "name_placeholder": "Nome...",
     "root_level_file_with_folder_not_allowed": "Não pode criar álbuns a partir da mistura de arquivos e pastas",
     "root_level_file_with_folder_not_allowed_message": "<p>Você arrastou e moveu uma mistura de arquivos e pastas.</p><p>Forneça ou somente arquivos, ou somente pastas quando selecionar a opção para criar álbuns separados.</p>",
-    "CHOSE_THEME": "Escolher tema",
     "more_details": "Mais detalhes",
     "ml_search": "Aprendizagem automática",
     "ml_search_description": "Ente suporta aprendizado de máquina no dispositivo para reconhecimento facial, busca mágica e outros recursos avançados de busca",
@@ -650,5 +649,9 @@
     "developer_settings": "Configurações de desenvolvedor",
     "server_endpoint": "Endpoint do servidor",
     "more_information": "Mais informações",
-    "save": "Salvar"
+    "save": "Salvar",
+    "theme": "",
+    "system": "",
+    "light": "",
+    "dark": ""
 }

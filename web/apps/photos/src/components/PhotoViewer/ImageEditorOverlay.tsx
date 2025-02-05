@@ -12,7 +12,7 @@ import log from "@/base/log";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { downloadManager } from "@/gallery/services/download";
 import { EnteFile } from "@/media/file";
-import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
+import { photosDialogZ } from "@/new/photos/components/utils/z-index";
 import { getLocalCollections } from "@/new/photos/services/collections";
 import { AppContext } from "@/new/photos/types/context";
 import { CenteredFlex } from "@ente/shared/components/Container";
@@ -525,7 +525,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
         <Backdrop
             sx={{
                 backgroundColor: "background.default" /* Opaque */,
-                zIndex: photosDialogZIndex,
+                zIndex: photosDialogZ,
                 width: "100%",
             }}
             open
@@ -999,7 +999,7 @@ const FreehandCropRegion = forwardRef(
                             key={index}
                             sx={{
                                 border: "1px solid",
-                                borderColor: "fixed.white",
+                                borderColor: "white",
                                 boxSizing: "border-box",
                                 pointerEvents: "none",
                             }}
@@ -1011,9 +1011,9 @@ const FreehandCropRegion = forwardRef(
                             position: "absolute",
                             height: "10px",
                             width: "10px",
-                            backgroundColor: "fixed.white",
+                            backgroundColor: "white",
                             border: "1px solid",
-                            borderColor: "fixed.black",
+                            borderColor: "black",
                             right: "-5px",
                             bottom: "-5px",
                             cursor: "se-resize",

@@ -10969,6 +10969,16 @@ class S {
     );
   }
 
+  /// `Video Streaming`
+  String get videoStreaming {
+    return Intl.message(
+      'Video Streaming',
+      name: 'videoStreaming',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{email} does not have an Ente account.`
   String emailDoesNotHaveEnteAccount(String email) {
     return Intl.message(
@@ -10999,11 +11009,31 @@ class S {
     );
   }
 
+  /// `Processing Videos`
+  String get processingVideos {
+    return Intl.message(
+      'Processing Videos',
+      name: 'processingVideos',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Me`
   String get me {
     return Intl.message(
       'Me',
       name: 'me',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stream details`
+  String get streamDetails {
+    return Intl.message(
+      'Stream details',
+      name: 'streamDetails',
       desc: '',
       args: [],
     );

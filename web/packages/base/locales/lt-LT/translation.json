@@ -494,7 +494,6 @@
     "name_placeholder": "Pavadinimas...",
     "root_level_file_with_folder_not_allowed": "Negalima sukurti albumų iš failų / aplankų mišinio",
     "root_level_file_with_folder_not_allowed_message": "<p>Nutempėte failų ir aplankų mišinį.</p><p>Pasirinkdami atskirų albumų kūrimo parinktį pateikite tik failus arba tik aplankus</p>",
-    "CHOSE_THEME": "Pasirinkite temą",
     "more_details": "Daugiau išsamios informacijos",
     "ml_search": "Mašininis mokymasis",
     "ml_search_description": "„Ente“ palaiko įrenginyje mašininį mokymąsi, skirtą veidų atpažinimui, magiškai paieškai ir kitoms išplėstinėms paieškos funkcijoms",
@@ -650,5 +649,9 @@
     "developer_settings": "Kūrėjo nustatymai",
     "server_endpoint": "Serverio galutinis taškas",
     "more_information": "Daugiau informacijos",
-    "save": "Išsaugoti"
+    "save": "Išsaugoti",
+    "theme": "",
+    "system": "",
+    "light": "",
+    "dark": ""
 }

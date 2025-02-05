@@ -18,6 +18,7 @@ import "package:photos/models/location/location.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/file_magic_service.dart";
+import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/user_remote_flag_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
@@ -32,6 +33,7 @@ import 'package:photos/ui/viewer/file_details/exif_item_widgets.dart';
 import "package:photos/ui/viewer/file_details/faces_item_widget.dart";
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/location_tags_widget.dart";
+import "package:photos/ui/viewer/file_details/preview_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/video_exif_item.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
@@ -177,6 +179,21 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         ),
       ),
       const FileDetailsDivider(),
+      if (widget.file.uploadedFileID != null &&
+          (FileDataService.instance.previewIds
+                  ?.containsKey(widget.file.uploadedFileID) ??
+              false)) ...[
+        ValueListenableBuilder(
+          valueListenable: _exifNotifier,
+          builder: (context, _, __) => PreviewPropertiesItemWidget(
+            file,
+            _isImage,
+            _exifData,
+            _currentUserID,
+          ),
+        ),
+        const FileDetailsDivider(),
+      ],
     ]);
     fileDetailsTiles.add(
       ValueListenableBuilder(

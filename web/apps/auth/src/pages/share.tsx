@@ -141,20 +141,26 @@ const Page: React.FC = () => {
                 {timeStatus === 1 && <Message>The code has expired.</Message>}
                 {timeStatus === 0 && (
                     <Box
-                        sx={{
-                            backgroundColor: "fixed.gray.A",
+                        sx={(theme) => ({
+                            backgroundColor: "background.elevatedPaper",
+                            ...theme.applyStyles("dark", {
+                                backgroundColor: "#1c1c1e",
+                            }),
                             borderRadius: "10px",
                             paddingBottom: "20px",
                             position: "relative",
-                        }}
+                        })}
                     >
                         <Box
-                            sx={{
+                            sx={(theme) => ({
                                 width: "100%",
                                 height: "4px",
-                                backgroundColor: "fixed.gray.B",
+                                backgroundColor: "#eee",
+                                ...theme.applyStyles("dark", {
+                                    backgroundColor: "#333",
+                                }),
                                 borderRadius: "2px",
-                            }}
+                            })}
                         >
                             <div
                                 style={{

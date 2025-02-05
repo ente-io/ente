@@ -1,11 +1,10 @@
 import { SpaceBetweenFlex } from "@/base/components/containers";
-import { type ButtonishProps } from "@/base/components/mui";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import type { Collection } from "@/media/collection";
 import {
     ItemCard,
     LargeTileButton,
-    LargeTilePlusOverlay,
+    LargeTileCreateNewButton,
     LargeTileTextOverlay,
 } from "@/new/photos/components/Tiles";
 import {
@@ -173,7 +172,9 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             </SpaceBetweenFlex>
 
             <DialogContent_>
-                <AddCollectionButton onClick={onCreateCollection} />
+                <LargeTileCreateNewButton onClick={onCreateCollection}>
+                    {t("create_albums")}
+                </LargeTileCreateNewButton>
                 {filteredCollections.map((collectionSummary) => (
                     <CollectionButton
                         key={collectionSummary.id}
@@ -224,14 +225,5 @@ const CollectionButton: React.FC<CollectionButtonProps> = ({
         <LargeTileTextOverlay>
             <Typography>{collectionSummary.name}</Typography>
         </LargeTileTextOverlay>
-    </ItemCard>
-);
-
-const AddCollectionButton: React.FC<ButtonishProps> = ({ onClick }) => (
-    <ItemCard TileComponent={LargeTileButton} onClick={onClick}>
-        <LargeTileTextOverlay>
-            <Typography>{t("create_albums")}</Typography>
-        </LargeTileTextOverlay>
-        <LargeTilePlusOverlay>+</LargeTilePlusOverlay>
     </ItemCard>
 );

@@ -11,6 +11,7 @@ export default [
              * "This rule requires the `strictNullChecks` compiler option to be
              * turned on to function correctly"
              */
+            "@typescript-eslint/no-unnecessary-boolean-literal-compare": "off",
             "@typescript-eslint/prefer-nullish-coalescing": "off",
             "@typescript-eslint/no-unnecessary-condition": "off",
             "@typescript-eslint/no-unsafe-assignment": "off",

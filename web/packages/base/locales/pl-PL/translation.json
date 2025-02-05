@@ -494,7 +494,6 @@
     "name_placeholder": "Nazwa...",
     "root_level_file_with_folder_not_allowed": "Nie można utworzyć albumów z mieszanki plików/folderów",
     "root_level_file_with_folder_not_allowed_message": "<p>Przeciągnąłeś i upuściłeś mieszankę plików i folderów.</p><p>Prosimy podać tylko pliki lub tylko foldery podczas wybierania opcji tworzenia oddzielnych albumów</p>",
-    "CHOSE_THEME": "Wybierz motyw",
     "more_details": "Więcej szczegółów",
     "ml_search": "Nauczanie maszynowe",
     "ml_search_description": "Ente obsługuje nauczanie maszynowe na urządzeniu dla rozpoznawania twarzy, wyszukiwania magicznego i innych zaawansowanych funkcji wyszukiwania",
@@ -650,5 +649,9 @@
     "developer_settings": "Ustawienia dla programistów",
     "server_endpoint": "Punkt końcowy serwera",
     "more_information": "Więcej informacji",
-    "save": "Zapisz"
+    "save": "Zapisz",
+    "theme": "",
+    "system": "",
+    "light": "",
+    "dark": ""
 }

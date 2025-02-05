@@ -982,16 +982,17 @@ const defaultLivePhotoDefaultOptions = {
     visible: false,
 };
 
-const CaptionContainer = styled("div")(({ theme }) => ({
-    padding: theme.spacing(2),
-    wordBreak: "break-word",
-    textAlign: "right",
-    maxWidth: "375px",
-    fontSize: "14px",
-    lineHeight: "17px",
-    backgroundColor: theme.vars.palette.backdrop.faint,
-    backdropFilter: "blur(96px)",
-}));
+const CaptionContainer = styled((props) => (
+    <Typography variant="small" {...props} />
+))(`
+    padding: 16px;
+    word-break: break-word;
+    text-align: right;
+    max-width: 375px;
+    background-color: rgba(0 0 0 / 0.20);
+    color: white;
+    backdrop-filter: blur(60px);
+`);
 
 const CircularProgressWithLabel: React.FC<
     Pick<CircularProgressProps, "value">
@@ -1034,6 +1035,7 @@ const ConversionFailedNotification: React.FC<
         <Snackbar
             open={open}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            sx={(theme) => ({ boxShadow: theme.vars.palette.boxShadow.menu })}
         >
             <Paper sx={{ width: "320px" }}>
                 <Button

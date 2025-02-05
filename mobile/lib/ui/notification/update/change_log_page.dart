@@ -100,16 +100,18 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        "Advanced Search ✨",
-        "Filter down memories by adding suggested filters on search results, albums etc.",
+        "Deep Links",
+        "We have made public links even more powerful. Open links for Ente album directly in the app.\n\n"
+            "Join the album as a viewer or collaborator, and experience it like any other shared album.",
       ),
       ChangeLogEntry(
-        "Links in App ✨",
-        "Public links tapped from outside the app now opens in-app.",
-      ),
+          "Search Shared Files",
+          "Indexes will now be shared along with shared memories.\n\n"
+              "Which means you can now search for them using semantic search and label the people in shared photos. "),
       ChangeLogEntry(
-        "ML out of Beta ✨",
-        "ML feaures are now out of beta.",
+        "Link Contact with people",
+        "You dont have to deal with email addresses while sharing anymore.\n\n"
+            "Connect a contact with a face and name. Go to the contact or people section to get started.",
       ),
     ]);
 

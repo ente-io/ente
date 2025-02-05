@@ -29,8 +29,8 @@ import {
 } from "@/new/photos/components/utils/dialog";
 import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import {
-    fileInfoDrawerZIndex,
-    photosDialogZIndex,
+    fileInfoDrawerZ,
+    photosDialogZ,
 } from "@/new/photos/components/utils/z-index";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import {
@@ -392,10 +392,7 @@ const FileInfoSidebar = styled(
         <SidebarDrawer {...props} anchor="right" />
     ),
 )({
-    zIndex: fileInfoDrawerZIndex,
-    "& .MuiPaper-root": {
-        padding: 8,
-    },
+    zIndex: fileInfoDrawerZ,
 });
 
 interface InfoItemProps {
@@ -804,7 +801,7 @@ const FileNameEditDialog = ({
     };
     return (
         <TitledMiniDialog
-            sx={{ zIndex: photosDialogZIndex }}
+            sx={{ zIndex: photosDialogZ }}
             open={isInEditMode}
             onClose={closeEditMode}
             title={t("rename_file")}

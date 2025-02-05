@@ -12,7 +12,6 @@ import {
 import { useModalVisibility } from "@/base/components/utils/modal";
 import {
     getLocaleInUse,
-    pt,
     setLocaleInUse,
     supportedLocales,
     type SupportedLocale,
@@ -26,7 +25,6 @@ import {
 import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { isMLSupported } from "@/new/photos/services/ml";
 import {
-    isInternalUser,
     syncSettings,
     updateCFProxyDisabledPreference,
     updateMapEnabled,
@@ -70,7 +68,7 @@ export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 />
                 <Stack sx={{ px: "16px", py: "8px", gap: "24px" }}>
                     <LanguageSelector />
-                    {isInternalUser() && <ThemeSelector />}
+                    <ThemeSelector />
                     <Divider sx={{ my: "2px", opacity: 0.1 }} />
                     {isMLSupported && (
                         <RowButtonGroup>
@@ -114,8 +112,14 @@ const LanguageSelector = () => {
 
     const updateCurrentLocale = (newLocale: SupportedLocale) => {
         setLocaleInUse(newLocale);
+        // [Note: Changing locale causes a full reload]
+        //
         // A full reload is needed because we use the global `t` instance
         // instead of the useTranslation hook.
+        //
+        // We also rely on this behaviour by caching various formatters in
+        // module static variables that not get updated if the i18n.language
+        // changes unless there is a full reload.
         window.location.reload();
     };
 
@@ -180,17 +184,16 @@ const ThemeSelector = () => {
     // During SSR, mode is always undefined.
     if (!mode) return null;
 
-    // TODO(LM): Use translations, also remove unused t("CHOSE_THEME")
     return (
         <Stack sx={{ gap: 1 }}>
             <Typography variant="small" sx={{ px: 1, color: "text.muted" }}>
-                {pt("Theme")}
+                {t("theme")}
             </Typography>
             <DropdownInput
                 options={[
-                    { label: pt("System"), value: "system" },
-                    { label: pt("Light"), value: "light" },
-                    { label: pt("Dark"), value: "dark" },
+                    { label: t("system"), value: "system" },
+                    { label: t("light"), value: "light" },
+                    { label: t("dark"), value: "dark" },
                 ]}
                 selected={mode}
                 onSelect={setMode}
