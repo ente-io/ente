@@ -36,4 +36,4 @@ export const fileInfoDrawerZ = photoSwipeZ + 1;
  * are visible above the drawer in case they are shown in response to some
  * action taken in the file info drawer.
  */
-export const photosDialogZ = 1600;
+export const aboveGalleryContentZ = fileInfoDrawerZ + 1;

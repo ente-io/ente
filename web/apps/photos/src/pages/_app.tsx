@@ -31,7 +31,7 @@ import {
     updateReadyToInstallDialogAttributes,
 } from "@/new/photos/components/utils/download";
 import { useLoadingBar } from "@/new/photos/components/utils/use-loading-bar";
-import { photosDialogZ } from "@/new/photos/components/utils/z-index";
+import { aboveGalleryContentZ } from "@/new/photos/components/utils/z-index";
 import { runMigrations } from "@/new/photos/services/migration";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
@@ -186,7 +186,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <ThemedLoadingBar ref={loadingBarRef} />
 
                 <AttributedMiniDialog
-                    sx={{ zIndex: photosDialogZ }}
+                    sx={{ zIndex: aboveGalleryContentZ }}
                     {...miniDialogProps}
                 />
 
