@@ -7,7 +7,7 @@ import {
 import { CenteredFlex } from "@/base/components/containers";
 import { CustomHead } from "@/base/components/Head";
 import {
-    LoadingOverlay,
+    LoadingIndicator,
     TranslucentLoadingOverlay,
 } from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
@@ -197,7 +197,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 )}
                 <AppContext.Provider value={appContext}>
                     {!isI18nReady ? (
-                        <LoadingOverlay />
+                        <LoadingIndicator />
                     ) : (
                         <>
                             {isChangingRoute && <TranslucentLoadingOverlay />}
