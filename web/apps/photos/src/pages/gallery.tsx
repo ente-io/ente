@@ -855,6 +855,9 @@ const Page: React.FC = () => {
         [],
     );
 
+    const showSelectionBar =
+        selected.count > 0 && selected.collectionID === activeCollectionID;
+
     if (!user) {
         // Don't render until we dispatch "mount" with the logged in user.
         return <div></div>;
@@ -932,14 +935,16 @@ const Page: React.FC = () => {
                     files={fixCreationTimeFiles}
                 />
                 <NavbarBase
-                    sx={{
-                        mb: "12px",
-                        px: "24px",
-                        "@media (width < 720px)": { px: "4px" },
-                    }}
+                    sx={[
+                        {
+                            mb: "12px",
+                            px: "24px",
+                            "@media (width < 720px)": { px: "4px" },
+                        },
+                        showSelectionBar && { borderColor: "accent.main" },
+                    ]}
                 >
-                    {selected.count > 0 &&
-                    selected.collectionID === activeCollectionID ? (
+                    {showSelectionBar ? (
                         <SelectedFileOptions
                             handleCollectionOps={collectionOpsHelper}
                             handleFileOps={fileOpsHelper}
