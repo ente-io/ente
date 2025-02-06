@@ -174,7 +174,7 @@ const SelectedFileOptions = ({
     };
 
     return (
-        <NavbarBaseNormalFlow>
+        <>
             <FluidContainer>
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />
@@ -417,7 +417,7 @@ const SelectedFileOptions = ({
                     </>
                 )}
             </Stack>
-        </NavbarBaseNormalFlow>
+        </>
     );
 };
 

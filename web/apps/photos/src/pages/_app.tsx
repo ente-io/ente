@@ -229,6 +229,8 @@ const WindowTitlebar: React.FC<React.PropsWithChildren> = ({ children }) => (
 const WindowTitlebarArea = styled(CenteredRow)`
     width: 100%;
     height: env(titlebar-area-height, 30px /* fallback */);
-    /* Allow using the titlebar to drag the window */
+    /* LoadingIndicator is 100vh, so resist shrinking when shown with it. */
+    flex-shrink: 0;
+    /* Allow using the titlebar to drag the window. */
     app-region: drag;
 `;

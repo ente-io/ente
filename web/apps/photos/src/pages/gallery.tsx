@@ -948,29 +948,8 @@ const Page: React.FC = () => {
                         "@media (width < 720px)": { px: "4px" },
                     }}
                 >
-                    {barMode == "hidden-albums" ? (
-                        <HiddenSectionNavbarContents
-                            onBack={() => dispatch({ type: "showAlbums" })}
-                        />
-                    ) : (
-                        <NormalNavbarContents
-                            {...{
-                                openSidebar,
-                                openUploader,
-                                isInSearchMode,
-                                onShowSearchInput: () =>
-                                    dispatch({ type: "enterSearchMode" }),
-                                onSelectSearchOption: handleSelectSearchOption,
-                                onSelectPeople: () =>
-                                    dispatch({ type: "showPeople" }),
-                                onSelectPerson: (personID) =>
-                                    dispatch({ type: "showPerson", personID }),
-                            }}
-                        />
-                    )}
-                </NavbarBaseNormalFlow>
-                {selected.count > 0 &&
-                    selected.collectionID === activeCollectionID && (
+                    {selected.count > 0 &&
+                    selected.collectionID === activeCollectionID ? (
                         <SelectedFileOptions
                             handleCollectionOps={collectionOpsHelper}
                             handleFileOps={fileOpsHelper}
@@ -1006,7 +985,31 @@ const Page: React.FC = () => {
                             isInSearchMode={isInSearchMode}
                             isInHiddenSection={barMode == "hidden-albums"}
                         />
+                    ) : barMode == "hidden-albums" ? (
+                        <HiddenSectionNavbarContents
+                            onBack={() => dispatch({ type: "showAlbums" })}
+                        />
+                    ) : (
+                        <NormalNavbarContents
+                            {...{
+                                openSidebar,
+                                openUploader,
+                                isInSearchMode,
+                                onShowSearchInput: () =>
+                                    dispatch({ type: "enterSearchMode" }),
+                                onSelectSearchOption: handleSelectSearchOption,
+                                onSelectPeople: () =>
+                                    dispatch({ type: "showPeople" }),
+                                onSelectPerson: (personID) =>
+                                    dispatch({
+                                        type: "showPerson",
+                                        personID,
+                                    }),
+                            }}
+                        />
                     )}
+                </NavbarBaseNormalFlow>
+
                 {isOffline && <OfflineMessage />}
 
                 <GalleryBarAndListHeader
