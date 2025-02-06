@@ -17,7 +17,6 @@ import { ConfirmDeleteFileDialog } from "@/new/photos/components/FileViewer";
 import { moveToTrash } from "@/new/photos/services/collection";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import { AppContext } from "@/new/photos/types/context";
-import { FlexWrapper } from "@ente/shared/components/Container";
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -39,6 +38,7 @@ import {
     CircularProgress,
     Paper,
     Snackbar,
+    Stack,
     styled,
     Typography,
     type ButtonProps,
@@ -744,16 +744,20 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                     {livePhotoBtnOptions.visible && (
                         <LivePhotoBtnContainer>
                             <Button
+                                // variant="text"
                                 color="secondary"
                                 onClick={livePhotoBtnOptions.click}
                                 onMouseEnter={livePhotoBtnOptions.show}
                                 onMouseLeave={livePhotoBtnOptions.hide}
                                 disabled={livePhotoBtnOptions.loading}
                             >
-                                <FlexWrapper gap={"4px"}>
-                                    {<AlbumOutlinedIcon />}{" "}
+                                <Stack
+                                    direction="row"
+                                    sx={{ alignItems: "center", gap: "6px" }}
+                                >
+                                    <AlbumOutlinedIcon />
                                     {t("live_photo_indicator")}
-                                </FlexWrapper>
+                                </Stack>
                             </Button>
                         </LivePhotoBtnContainer>
                     )}
