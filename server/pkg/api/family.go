@@ -41,8 +41,8 @@ func (h *FamilyHandler) InviteMember(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, "Could not bind request params"))
 		return
 	}
-	err := h.Controller.InviteMember(c, auth.GetUserID(c.Request.Header), request.Email)
 
+	err := h.Controller.InviteMember(c, auth.GetUserID(c.Request.Header), request.Email, request.StorageLimit)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
