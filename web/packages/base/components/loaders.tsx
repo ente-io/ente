@@ -35,7 +35,7 @@ export const TranslucentLoadingOverlay: React.FC = () => (
             // This is `aboveFileViewerContentZ + delta`. Cannot use a constant
             // here since this is used outside photos too. Eventually just get
             // rid of this component, merging it to specific uses.
-            zIndex: 2000,
+            zIndex: 2000 /* aboveFileViewerContentZ + delta */,
         }}
     >
         <ActivityIndicator />

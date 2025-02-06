@@ -80,8 +80,7 @@ const DropZoneOverlay = styled(Stack)(
     border-style: solid;
     border-color: ${theme.vars.palette.accent.light};
     background-color: ${theme.vars.palette.backdrop.base};
-    /* aboveFileViewerContentZ + delta */
-    z-index: 2000;
+    z-index: 2000; /* aboveFileViewerContentZ + delta */
 `,
 );
 
