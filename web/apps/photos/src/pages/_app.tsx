@@ -1,9 +1,4 @@
-import {
-    clientPackageName,
-    isDesktop,
-    staticAppTitle,
-    wipDesktopCustomTitlebar,
-} from "@/base/app";
+import { clientPackageName, isDesktop, staticAppTitle } from "@/base/app";
 import { CenteredRow } from "@/base/components/containers";
 import { CustomHead } from "@/base/components/Head";
 import {
@@ -192,9 +187,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
                 <Notification {...notificationProps} />
 
-                {wipDesktopCustomTitlebar && (
-                    <WindowTitlebar>{title}</WindowTitlebar>
-                )}
+                {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}
                 <AppContext.Provider value={appContext}>
                     {!isI18nReady ? (
                         <LoadingIndicator />
