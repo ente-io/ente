@@ -1,4 +1,3 @@
-import { CopyButton } from "@/base/components/CopyButton";
 import { LinkButtonUndecorated } from "@/base/components/LinkButton";
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { type ButtonishProps } from "@/base/components/mui";
@@ -20,6 +19,7 @@ import {
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
+import { CopyButton } from "@/new/photos/components/FileInfo";
 import { ChipButton } from "@/new/photos/components/mui/ChipButton";
 import { FilePeopleList } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
