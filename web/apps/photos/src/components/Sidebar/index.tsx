@@ -4,7 +4,7 @@ import { isDesktop } from "@/base/app";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { LinkButton } from "@/base/components/LinkButton";
 import { RowButton } from "@/base/components/RowButton";
-import { SpaceBetweenFlex } from "@/base/components/containers";
+import { SpacedRow } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
@@ -133,9 +133,7 @@ interface HeaderSectionProps {
 
 const HeaderSection: React.FC<HeaderSectionProps> = ({ closeSidebar }) => {
     return (
-        <SpaceBetweenFlex
-            sx={{ marginBlock: "4px 4px", paddingInlineStart: "12px" }}
-        >
+        <SpacedRow sx={{ my: "4px 4px", pl: "12px" }}>
             <EnteLogo />
             <IconButton
                 aria-label={t("close")}
@@ -144,7 +142,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({ closeSidebar }) => {
             >
                 <CloseIcon fontSize="small" />
             </IconButton>
-        </SpaceBetweenFlex>
+        </SpacedRow>
     );
 };
 
@@ -345,7 +343,7 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
 
     return (
         <Dialog {...{ open, onClose, fullScreen }} maxWidth="xs" fullWidth>
-            <SpaceBetweenFlex sx={{ p: "20px 8px 12px 16px" }}>
+            <SpacedRow sx={{ p: "20px 8px 12px 16px" }}>
                 <Stack>
                     <Typography variant="h3">{t("subscription")}</Typography>
                     <Typography sx={{ color: "text.muted" }}>
@@ -353,7 +351,7 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
                     </Typography>
                 </Stack>
                 <DialogCloseIconButton {...{ onClose }} />
-            </SpaceBetweenFlex>
+            </SpacedRow>
             <DialogContent>
                 <VerticallyCentered>
                     <Box sx={{ mb: 4 }}>

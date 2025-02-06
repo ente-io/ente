@@ -35,6 +35,25 @@ body {
     object-fit: contain;
 }
 
+/* Need this in CSS instead of as an inline style to increase specificity. */
+.pswp__top-bar.pswp__top-bar {
+    top: var(--ente-pswp-top-bar-top, 0px);
+}
+
+/* Shift the top bar by --ente-pswp-top-bar-top, and add a before pseudo element
+   with the same color to fill in the custom app title bar.
+
+   See: [Note: Customize the desktop title bar] */
+.pswp__top-bar::before {
+    content: "";
+    position: absolute;
+    top: calc(-1 * var(--ente-pswp-top-bar-top, 0px));
+    left: 0;
+    height: var(--ente-pswp-top-bar-top, 0px);
+    width: 100%;
+    background-color: rgba(0 0 0 / 0.3);
+}
+
 .pswp-item-container > * {
     position: absolute;
     transition: opacity 1s ease;

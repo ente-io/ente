@@ -1,5 +1,5 @@
 import { useRedirectIfNeedsCredentials } from "@/accounts/components/utils/use-redirect";
-import { CenteredFill } from "@/base/components/containers";
+import { CenteredFill, SpacedRow } from "@/base/components/containers";
 import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
@@ -570,12 +570,9 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                     checked ? { opacity: 1 } : { opacity: 0.8 },
                 ]}
             >
-                <Stack
-                    direction="row"
+                <SpacedRow
                     sx={{
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        marginInline: 1,
+                        mx: 1,
                         paddingInline: "var(--et-padding-inline)",
                         paddingBlock: "24px 0px",
                     }}
@@ -585,7 +582,7 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                     </Typography>
                     {/* The size of this Checkbox is 42px. */}
                     <Checkbox {...{ checked, onChange }} />
-                </Stack>
+                </SpacedRow>
                 <Divider
                     variant="middle"
                     sx={[

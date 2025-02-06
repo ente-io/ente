@@ -1,13 +1,8 @@
-import {
-    clientPackageName,
-    isDesktop,
-    staticAppTitle,
-    wipDesktopCustomTitlebar,
-} from "@/base/app";
-import { CenteredFlex } from "@/base/components/containers";
+import { clientPackageName, isDesktop, staticAppTitle } from "@/base/app";
+import { CenteredRow } from "@/base/components/containers";
 import { CustomHead } from "@/base/components/Head";
 import {
-    LoadingOverlay,
+    LoadingIndicator,
     TranslucentLoadingOverlay,
 } from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
@@ -31,7 +26,7 @@ import {
     updateReadyToInstallDialogAttributes,
 } from "@/new/photos/components/utils/download";
 import { useLoadingBar } from "@/new/photos/components/utils/use-loading-bar";
-import { aboveGalleryContentZ } from "@/new/photos/components/utils/z-index";
+import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
 import { runMigrations } from "@/new/photos/services/migration";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
@@ -186,18 +181,16 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <ThemedLoadingBar ref={loadingBarRef} />
 
                 <AttributedMiniDialog
-                    sx={{ zIndex: aboveGalleryContentZ }}
+                    sx={{ zIndex: aboveFileViewerContentZ }}
                     {...miniDialogProps}
                 />
 
                 <Notification {...notificationProps} />
 
-                {wipDesktopCustomTitlebar && (
-                    <WindowTitlebar>{title}</WindowTitlebar>
-                )}
+                {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}
                 <AppContext.Provider value={appContext}>
                     {!isI18nReady ? (
-                        <LoadingOverlay />
+                        <LoadingIndicator />
                     ) : (
                         <>
                             {isChangingRoute && <TranslucentLoadingOverlay />}
@@ -226,10 +219,11 @@ const WindowTitlebar: React.FC<React.PropsWithChildren> = ({ children }) => (
 );
 
 // See: [Note: Customize the desktop title bar]
-const WindowTitlebarArea = styled(CenteredFlex)`
+const WindowTitlebarArea = styled(CenteredRow)`
     width: 100%;
     height: env(titlebar-area-height, 30px /* fallback */);
-    display: flex;
-    /* Allow using the titlebar to drag the window */
+    /* LoadingIndicator is 100vh, so resist shrinking when shown with it. */
+    flex-shrink: 0;
+    /* Allow using the titlebar to drag the window. */
     app-region: drag;
 `;
