@@ -112,7 +112,6 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                         stripeAccountCountry: userDataResponse.subscription.attributes.stripeAccountCountry || ""
                     }
                 });
-                console.log(userDataResponse)
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
