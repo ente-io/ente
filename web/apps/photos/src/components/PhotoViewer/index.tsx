@@ -1069,7 +1069,7 @@ const LivePhotoBtnContainer = styled(Paper)`
     position: absolute;
     bottom: 10vh;
     right: 6vh;
-    z-index: 10;
+    z-index: 1;
 `;
 
 export async function playVideo(livePhotoVideo, livePhotoImage) {
