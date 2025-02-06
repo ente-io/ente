@@ -588,18 +588,16 @@ const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
             "@media (width < 720px)": { px: "4px" },
         }}
     >
-        <Stack direction="row" sx={{ flex: 1 }}>
-            <FluidContainer>
-                <EnteLogoLink href="https://ente.io">
-                    <EnteLogo height={15} />
-                </EnteLogoLink>
-            </FluidContainer>
+        <SpaceBetweenFlex sx={{ flex: 1 }}>
+            <EnteLogoLink href="https://ente.io">
+                <EnteLogo height={15} />
+            </EnteLogoLink>
             {onAddPhotos ? (
                 <AddPhotosButton onClick={onAddPhotos} />
             ) : (
                 <GoToEnte />
             )}
-        </Stack>
+        </SpaceBetweenFlex>
     </NavbarBaseNormalFlow>
 );
 
