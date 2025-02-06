@@ -521,13 +521,6 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
         needUpdate.current = true;
     };
 
-    const trashFile = async (file: DisplayFile) => {
-        await moveToTrash([file]);
-        markTempDeleted?.([file]);
-        updateItems(items.filter((item) => item.id !== file.id));
-        needUpdate.current = true;
-    };
-
     const confirmDeleteFile = (file: EnteFile) => {
         if (!file || !isOwnFile || isTrashCollection) {
             return;
@@ -537,8 +530,12 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
     };
 
     const handleDeleteFile = async () => {
-        await trashFile(fileToDelete!);
+        const file = fileToDelete!;
+        await moveToTrash([file]);
+        markTempDeleted?.([file]);
+        updateItems(items.filter((item) => item.id !== file.id));
         setFileToDelete(undefined);
+        needUpdate.current = true;
     };
 
     const handleArrowClick = (
