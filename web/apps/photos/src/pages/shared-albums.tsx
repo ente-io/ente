@@ -10,7 +10,7 @@ import {
 } from "@/base/components/loaders";
 import type { ButtonishProps } from "@/base/components/mui";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { NavbarBaseNormalFlow } from "@/base/components/Navbar";
+import { NavbarBase } from "@/base/components/Navbar";
 import {
     OverflowMenu,
     OverflowMenuOption,
@@ -515,7 +515,7 @@ export default function PublicCollectionGallery() {
                         getFolderSelectorInputProps,
                     }}
                 />
-                <NavbarBaseNormalFlow
+                <NavbarBase
                     sx={{
                         mb: "16px",
                         px: "24px",
@@ -540,7 +540,7 @@ export default function PublicCollectionGallery() {
                             )}
                         </SpacedRow>
                     )}
-                </NavbarBaseNormalFlow>
+                </NavbarBase>
 
                 <PhotoFrame
                     files={publicFiles}

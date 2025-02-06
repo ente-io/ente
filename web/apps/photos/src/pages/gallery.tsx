@@ -1,7 +1,7 @@
 import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { stashRedirect } from "@/accounts/services/redirect";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
-import { NavbarBaseNormalFlow } from "@/base/components/Navbar";
+import { NavbarBase } from "@/base/components/Navbar";
 import { TranslucentLoadingOverlay } from "@/base/components/loaders";
 import type { ButtonishProps } from "@/base/components/mui";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
@@ -941,7 +941,7 @@ const Page: React.FC = () => {
                     files={fixCreationTimeFiles}
                 />
 
-                <NavbarBaseNormalFlow
+                <NavbarBase
                     sx={{
                         mb: "12px",
                         px: "24px",
@@ -1008,7 +1008,7 @@ const Page: React.FC = () => {
                             }}
                         />
                     )}
-                </NavbarBaseNormalFlow>
+                </NavbarBase>
 
                 {isOffline && <OfflineMessage />}
 
