@@ -39,10 +39,7 @@ import {
 } from "@/new/photos/services/collection";
 import { sortFiles } from "@/new/photos/services/files";
 import { useAppContext } from "@/new/photos/types/context";
-import {
-    CenteredFlex,
-    FluidContainer,
-} from "@ente/shared/components/Container";
+import { CenteredFlex } from "@ente/shared/components/Container";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -657,27 +654,24 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     downloadFilesHelper,
     count,
     clearSelection,
-}) => {
-    return (
-        <>
-            <FluidContainer>
-                <IconButton onClick={clearSelection}>
-                    <CloseIcon />
-                </IconButton>
-                <Box sx={{ ml: 1.5 }}>
-                    {t("selected_count", { selected: count })}
-                </Box>
-            </FluidContainer>
-            <Stack direction="row" sx={{ gap: 2, mr: 2 }}>
-                <Tooltip title={t("download")}>
-                    <IconButton onClick={downloadFilesHelper}>
-                        <DownloadIcon />
-                    </IconButton>
-                </Tooltip>
-            </Stack>
-        </>
-    );
-};
+}) => (
+    <Stack
+        direction="row"
+        sx={{ flex: 1, gap: 2, alignItems: "center", mr: 1 }}
+    >
+        <IconButton onClick={clearSelection}>
+            <CloseIcon />
+        </IconButton>
+        <Typography sx={{ mr: "auto" }}>
+            {t("selected_count", { selected: count })}
+        </Typography>
+        <Tooltip title={t("download")}>
+            <IconButton onClick={downloadFilesHelper}>
+                <DownloadIcon />
+            </IconButton>
+        </Tooltip>
+    </Stack>
+);
 
 interface ListHeaderProps {
     publicCollection: Collection;
