@@ -805,6 +805,17 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                         <div className="pswp__item" />
                     </div>
                     <div className="pswp__ui pswp__ui--hidden">
+                        {/* {wipDesktopCustomTitlebar && (
+                            <div
+                                style={{
+                                    // Same as pswp__top-bar
+                                    backgroundColor: "red",
+                                    zIndex: 7600,
+                                    width: "100%",
+                                    height: "env(titlebar-area-height, 30px)",
+                                }}
+                            />
+                        )} */}
                         <div
                             className="pswp__top-bar"
                             {...(wipDesktopCustomTitlebar
