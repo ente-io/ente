@@ -999,16 +999,7 @@ const Page: React.FC = () => {
                         />
                     )}
                 </NavbarBase>
-                {isFirstLoad && (
-                    <CenteredRow>
-                        <Typography
-                            variant="small"
-                            sx={{ color: "text.muted" }}
-                        >
-                            {t("initial_load_delay_warning")}
-                        </Typography>
-                    </CenteredRow>
-                )}
+                {isFirstLoad && <FirstLoadMessage />}
                 {isOffline && <OfflineMessage />}
 
                 <GalleryBarAndListHeader
@@ -1140,6 +1131,14 @@ const Page: React.FC = () => {
 };
 
 export default Page;
+
+const FirstLoadMessage: React.FC = () => (
+    <CenteredRow>
+        <Typography variant="small" sx={{ color: "text.muted" }}>
+            {t("initial_load_delay_warning")}
+        </Typography>
+    </CenteredRow>
+);
 
 const OfflineMessage: React.FC = () => (
     <Typography
