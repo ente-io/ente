@@ -1,7 +1,7 @@
 import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { stashRedirect } from "@/accounts/services/redirect";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
-import { AppNavbar, NavbarBase } from "@/base/components/Navbar";
+import { NavbarBaseNormalFlow } from "@/base/components/Navbar";
 import { TranslucentLoadingOverlay } from "@/base/components/loaders";
 import type { ButtonishProps } from "@/base/components/mui";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
@@ -900,7 +900,6 @@ const Page: React.FC = () => {
                         getZipFileSelectorInputProps,
                     }}
                 />
-                <AppNavbar />
                 {blockingLoad && <TranslucentLoadingOverlay />}
                 {isFirstLoad && (
                     <CenteredFlex>
@@ -908,7 +907,7 @@ const Page: React.FC = () => {
                             variant="small"
                             sx={{ color: "text.muted" }}
                         >
-                            {t("INITIAL_LOAD_DELAY_WARNING")}
+                            {t("initial_load_delay_warning")}
                         </Typography>
                     </CenteredFlex>
                 )}
@@ -942,12 +941,11 @@ const Page: React.FC = () => {
                     files={fixCreationTimeFiles}
                 />
 
-                <NavbarBase
+                <NavbarBaseNormalFlow
                     sx={{
-                        background: "transparent",
-                        position: "absolute",
-                        // Override the default 16px we get from NavbarBase
-                        marginBottom: "12px",
+                        mb: "12px",
+                        px: "24px",
+                        "@media (width < 720px)": { px: "4px" },
                     }}
                 >
                     {barMode == "hidden-albums" ? (
@@ -970,7 +968,7 @@ const Page: React.FC = () => {
                             }}
                         />
                     )}
-                </NavbarBase>
+                </NavbarBaseNormalFlow>
                 {isOffline && <OfflineMessage />}
 
                 <GalleryBarAndListHeader

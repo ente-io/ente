@@ -950,6 +950,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "İsteğe bağlı, istediğiniz kadar kısa..."),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Veya mevcut birini seçiniz"),
+        "orPickFromYourContacts":
+            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "pair": MessageLookupByLibrary.simpleMessage("Eşleştir"),
         "passkey": MessageLookupByLibrary.simpleMessage("Parola Anahtarı"),
         "passkeyAuthTitle":

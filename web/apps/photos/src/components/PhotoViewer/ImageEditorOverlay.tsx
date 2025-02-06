@@ -12,7 +12,7 @@ import log from "@/base/log";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { downloadManager } from "@/gallery/services/download";
 import { EnteFile } from "@/media/file";
-import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
+import { aboveGalleryContentZ } from "@/new/photos/components/utils/z-index";
 import { getLocalCollections } from "@/new/photos/services/collections";
 import { AppContext } from "@/new/photos/types/context";
 import { CenteredFlex } from "@ente/shared/components/Container";
@@ -525,7 +525,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
         <Backdrop
             sx={{
                 backgroundColor: "background.default" /* Opaque */,
-                zIndex: photosDialogZIndex,
+                zIndex: aboveGalleryContentZ,
                 width: "100%",
             }}
             open
@@ -999,7 +999,7 @@ const FreehandCropRegion = forwardRef(
                             key={index}
                             sx={{
                                 border: "1px solid",
-                                borderColor: "fixed.white",
+                                borderColor: "white",
                                 boxSizing: "border-box",
                                 pointerEvents: "none",
                             }}
@@ -1011,9 +1011,9 @@ const FreehandCropRegion = forwardRef(
                             position: "absolute",
                             height: "10px",
                             width: "10px",
-                            backgroundColor: "fixed.white",
+                            backgroundColor: "white",
                             border: "1px solid",
-                            borderColor: "fixed.black",
+                            borderColor: "black",
                             right: "-5px",
                             bottom: "-5px",
                             cursor: "se-resize",
@@ -1029,13 +1029,13 @@ const FreehandCropRegion = forwardRef(
     },
 );
 
-const CropOverlayRegionTemplate = styled("div")(({ theme }) => ({
+const CropOverlayRegionTemplate = styled("div")({
     position: "absolute",
-    backgroundColor: theme.vars.palette.fixed.croppedAreaOverlay,
+    backgroundColor: "rgba(0 0 0 / 0.5)",
     pointerEvents: "none",
-}));
+});
 
-const PRESET_ASPECT_RATIOS = [
+const presetAspectRatios = [
     {
         width: 16,
         height: 9,
@@ -1241,7 +1241,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                 />
             </RowButtonGroup>
             <RowButtonGroup sx={{ mb: "1rem" }}>
-                {PRESET_ASPECT_RATIOS.map((ratio, index) => (
+                {presetAspectRatios.map((ratio, index) => (
                     <Fragment key={index}>
                         <RowButton
                             disabled={canvasLoading}
@@ -1252,14 +1252,14 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                                 ratio.height,
                             )}
                         />
-                        {index !== PRESET_ASPECT_RATIOS.length - 1 && (
+                        {index !== presetAspectRatios.length - 1 && (
                             <RowButtonDivider />
                         )}
                     </Fragment>
                 ))}
             </RowButtonGroup>
             <RowButtonGroup sx={{ mb: "1rem" }}>
-                {PRESET_ASPECT_RATIOS.map((ratio, index) => (
+                {presetAspectRatios.map((ratio, index) => (
                     <Fragment key={index}>
                         <RowButton
                             key={index}
@@ -1271,7 +1271,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
                                 ratio.width,
                             )}
                         />
-                        {index !== PRESET_ASPECT_RATIOS.length - 1 && (
+                        {index !== presetAspectRatios.length - 1 && (
                             <RowButtonDivider />
                         )}
                     </Fragment>

@@ -93,7 +93,9 @@ class _SearchResultPageState extends State<SearchResultPage> {
       tagPrefix: widget.tagPrefix + widget.searchResult.heroTag(),
       selectedFiles: _selectedFiles,
       enableFileGrouping: widget.enableGrouping,
-      initialFiles: [widget.searchResult.resultFiles().first],
+      initialFiles: widget.searchResult.resultFiles().isNotEmpty
+          ? [widget.searchResult.resultFiles().first]
+          : null,
     );
 
     return GalleryFilesState(

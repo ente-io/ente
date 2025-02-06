@@ -1,4 +1,10 @@
-import { clientPackageName, isDesktop, staticAppTitle } from "@/base/app";
+import {
+    clientPackageName,
+    isDesktop,
+    staticAppTitle,
+    wipDesktopCustomTitlebar,
+} from "@/base/app";
+import { CenteredFlex } from "@/base/components/containers";
 import { CustomHead } from "@/base/components/Head";
 import {
     LoadingOverlay,
@@ -25,22 +31,22 @@ import {
     updateReadyToInstallDialogAttributes,
 } from "@/new/photos/components/utils/download";
 import { useLoadingBar } from "@/new/photos/components/utils/use-loading-bar";
-import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
+import { aboveGalleryContentZ } from "@/new/photos/components/utils/z-index";
 import { runMigrations } from "@/new/photos/services/migration";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
 import { AppContext } from "@/new/photos/types/context";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
-    LS_KEYS,
     getData,
+    LS_KEYS,
     migrateKVToken,
 } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import "@fontsource-variable/inter";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { CssBaseline } from "@mui/material";
-import { ThemeProvider } from "@mui/material/styles";
+import { CssBaseline, Typography } from "@mui/material";
+import { styled, ThemeProvider } from "@mui/material/styles";
 import { useNotification } from "components/utils/hooks-app";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
@@ -180,12 +186,15 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <ThemedLoadingBar ref={loadingBarRef} />
 
                 <AttributedMiniDialog
-                    sx={{ zIndex: photosDialogZIndex }}
+                    sx={{ zIndex: aboveGalleryContentZ }}
                     {...miniDialogProps}
                 />
 
                 <Notification {...notificationProps} />
 
+                {wipDesktopCustomTitlebar && (
+                    <WindowTitlebar>{title}</WindowTitlebar>
+                )}
                 <AppContext.Provider value={appContext}>
                     {!isI18nReady ? (
                         <LoadingOverlay />
@@ -207,3 +216,20 @@ const redirectToFamilyPortal = () =>
     void getFamilyPortalRedirectURL().then((url) => {
         window.location.href = url;
     });
+
+const WindowTitlebar: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <WindowTitlebarArea>
+        <Typography variant="small" sx={{ mt: "2px", fontWeight: "bold" }}>
+            {children}
+        </Typography>
+    </WindowTitlebarArea>
+);
+
+// See: [Note: Customize the desktop title bar]
+const WindowTitlebarArea = styled(CenteredFlex)`
+    width: 100%;
+    height: env(titlebar-area-height, 30px /* fallback */);
+    display: flex;
+    /* Allow using the titlebar to drag the window */
+    app-region: drag;
+`;

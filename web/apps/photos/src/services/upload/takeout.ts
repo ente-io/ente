@@ -23,67 +23,112 @@ export interface ParsedMetadataJSON {
     description?: string;
 }
 
-export const MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT = 46;
-
-export const getMetadataJSONMapKeyForJSON = (
+/**
+ * Derive a key for the given {@link jsonFileName} that should be used to index
+ * into the {@link ParsedMetadataJSON} JSON map.
+ *
+ * @param collectionID The collection to which we're uploading.
+ *
+ * @param jsonFileName The file name for the JSON file.
+ *
+ * @returns A key suitable for indexing into the metadata JSON map.
+ */
+export const metadataJSONMapKeyForJSON = (
     collectionID: number,
     jsonFileName: string,
-) => {
-    let title = jsonFileName.slice(0, -1 * ".json".length);
-    const endsWithNumberedSuffixWithBrackets = /\(\d+\)$/.exec(title);
-    if (endsWithNumberedSuffixWithBrackets) {
-        title = title.slice(
-            0,
-            -1 * endsWithNumberedSuffixWithBrackets[0].length,
-        );
-        const [name, extension] = nameAndExtension(title);
-        return `${collectionID}-${name}${endsWithNumberedSuffixWithBrackets[0]}.${extension}`;
-    }
-    return `${collectionID}-${title}`;
-};
+) => `${collectionID}-${jsonFileName.slice(0, -1 * ".json".length)}`;
 
-// if the file name is greater than MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT(46) , then google photos clips the file name
-// so we need to use the clipped file name to get the metadataJSON file
-export const getClippedMetadataJSONMapKeyForFile = (
-    collectionID: number,
+/**
+ * Return the matching entry, if any, from {@link parsedMetadataJSONMap} for the
+ * {@link fileName} and {@link collectionID} combination.
+ *
+ * This is the sibling of {@link metadataJSONMapKeyForJSON}, except for deriving
+ * the filename key we might have to try a bunch of different variations, so
+ * this does not return a single key but instead tries the combinations until it
+ * finds an entry in the map, and returns the found entry instead of the key.
+ */
+export const matchTakeoutMetadata = (
     fileName: string,
-) => {
-    return `${collectionID}-${fileName.slice(
-        0,
-        MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
-    )}`;
-};
-
-export const getMetadataJSONMapKeyForFile = (
     collectionID: number,
-    fileName: string,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
 ) => {
-    return `${collectionID}-${getFileOriginalName(fileName)}`;
-};
-
-const EDITED_FILE_SUFFIX = "-edited";
-
-/*
-    Get the original file name for edited file to associate it to original file's metadataJSON file
-    as edited file doesn't have their own metadata file
-*/
-function getFileOriginalName(fileName: string) {
-    let originalName: string = null;
-    const [name, extension] = nameAndExtension(fileName);
-
-    const isEditedFile = name.endsWith(EDITED_FILE_SUFFIX);
-    if (isEditedFile) {
-        originalName = name.slice(0, -1 * EDITED_FILE_SUFFIX.length);
-    } else {
-        originalName = name;
-    }
+    // Break the fileName down into its components.
+    let [name, extension] = nameAndExtension(fileName);
     if (extension) {
-        originalName += "." + extension;
+        extension = "." + extension;
     }
-    return originalName;
-}
 
-/** Try to parse the contents of a metadata JSON file from a Google Takeout. */
+    // Trim off a suffix like "(1)" from the name, remembering what we trimmed
+    // since we need to add it back later.
+    //
+    // It needs to be handled separately because of the clipping (see below).
+    // The numbered suffix (if present) is not clipped. It is added at the end
+    // of the clipped ".supplemental-metadata" portion, instead of after the
+    // original filename.
+    //
+    // For example, "IMG_1234(1).jpg" would have a metadata filename of either
+    // "IMG_1234.jpg(1).json" or "IMG_1234.jpg.supplemental-metadata(1).json".
+    // And if the filename is too long, it gets turned into something like
+    // "IMG_1234.jpg.suppl(1).json".
+
+    let numberedSuffix = "";
+    const endsWithNumberedSuffixWithBrackets = /\(\d+\)$/.exec(name);
+    if (endsWithNumberedSuffixWithBrackets) {
+        name = name.slice(0, -1 * endsWithNumberedSuffixWithBrackets[0].length);
+        numberedSuffix = endsWithNumberedSuffixWithBrackets[0];
+    }
+
+    // Removes the "-edited" suffix, if present, so that the edited file can be
+    // associated to the original file's metadataJSON file as edited files don't
+    // have their own metadata files.
+
+    const editedFileSuffix = "-edited";
+    if (name.endsWith(editedFileSuffix)) {
+        name = name.slice(0, -1 * editedFileSuffix.length);
+    }
+
+    // Derive a key from the collection name, file name and the suffix if any.
+    let baseFileName = `${name}${extension}`;
+    let key = `${collectionID}-${baseFileName}${numberedSuffix}`;
+
+    let takeoutMetadata = parsedMetadataJSONMap.get(key);
+    if (takeoutMetadata) return takeoutMetadata;
+
+    // If the file name is greater than 46 characters, then Google Photos, with
+    // its infinite storage, clips the file name. In such cases we need to use
+    // the clipped file name to get the key.
+
+    const maxGoogleFileNameLength = 46;
+    key = `${collectionID}-${baseFileName.slice(0, maxGoogleFileNameLength)}${numberedSuffix}`;
+
+    takeoutMetadata = parsedMetadataJSONMap.get(key);
+    if (takeoutMetadata) return takeoutMetadata;
+
+    // Newer Takeout exports are attaching a ".supplemental-metadata" suffix to
+    // the file name of the metadataJSON file, you know, just to cause havoc,
+    // and then clipping the file name if it's too long (ending up with
+    // filenames "very_long_file_name.jpg.supple.json").
+    //
+    // Note that If the original filename is longer than 46 characters, then the
+    // ".supplemental-metadata" suffix gets completely removed during the
+    // clipping, along with a portion of the original filename (as before).
+    //
+    // For example, if the original filename is 45 characters long, then
+    // everything except for the "." from ".supplemental-metadata" will get
+    // clipped. So the metadata file ends up with a filename like
+    // "filename_that_is_45_chars_long.jpg..json".
+
+    const supplSuffix = ".supplemental-metadata";
+    baseFileName = `${name}${extension}${supplSuffix}`;
+    key = `${collectionID}-${baseFileName.slice(0, maxGoogleFileNameLength)}${numberedSuffix}`;
+
+    takeoutMetadata = parsedMetadataJSONMap.get(key);
+    return takeoutMetadata;
+};
+
+/**
+ * Try to parse the contents of a metadata JSON file from a Google Takeout.
+ */
 export const tryParseTakeoutMetadataJSON = async (
     uploadItem: UploadItem,
 ): Promise<ParsedMetadataJSON | undefined> => {
@@ -184,23 +229,3 @@ const parseGTLocation = (o: unknown): Location | undefined => {
  */
 const parseGTNonEmptyString = (o: unknown): string | undefined =>
     o && typeof o == "string" ? o : undefined;
-
-/**
- * Return the matching entry (if any) from {@link parsedMetadataJSONMap} for the
- * {@link fileName} and {@link collectionID} combination.
- */
-export const matchTakeoutMetadata = (
-    fileName: string,
-    collectionID: number,
-    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
-) => {
-    let key = getMetadataJSONMapKeyForFile(collectionID, fileName);
-    let takeoutMetadata = parsedMetadataJSONMap.get(key);
-
-    if (!takeoutMetadata && key.length > MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT) {
-        key = getClippedMetadataJSONMapKeyForFile(collectionID, fileName);
-        takeoutMetadata = parsedMetadataJSONMap.get(key);
-    }
-
-    return takeoutMetadata;
-};

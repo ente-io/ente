@@ -1342,6 +1342,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Oder mit existierenden zusammenführen"),
         "orPickAnExistingOne": MessageLookupByLibrary.simpleMessage(
             "Oder eine vorherige auswählen"),
+        "orPickFromYourContacts":
+            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "pair": MessageLookupByLibrary.simpleMessage("Koppeln"),
         "pairWithPin":
             MessageLookupByLibrary.simpleMessage("Mit PIN verbinden"),

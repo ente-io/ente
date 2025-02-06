@@ -6,6 +6,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/l10n/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
@@ -241,7 +242,8 @@ class _PeoplePageState extends State<PeoplePage> {
                   ],
                 );
               } else if (snapshot.hasError) {
-                _logger.severe("Error: ${snapshot.error} ${snapshot.stackTrace}}");
+                _logger
+                    .severe("Error: ${snapshot.error} ${snapshot.stackTrace}}");
                 //Need to show an error on the UI here
                 return const SizedBox.shrink();
               } else {
@@ -307,8 +309,8 @@ class _Gallery extends StatelessWidget {
               : Padding(
                   padding: const EdgeInsets.only(top: 12, bottom: 8),
                   child: EndToEndBanner(
-                    title: "Link email",
-                    caption: "for faster sharing",
+                    title: context.l10n.linkEmail,
+                    caption: context.l10n.linkEmailToContactBannerCaption,
                     leadingIcon: Icons.email_outlined,
                     onTap: () async {
                       await routeToPage(

@@ -4,10 +4,11 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 extension UserExtension on User {
   //Some initial users have name in name field.
   String? get displayName =>
-      PersonService.instance.emailToPartialPersonDataMapCache[email]?["name"] ??
+      PersonService.instance.emailToPartialPersonDataMapCache[email]
+          ?[PersonService.kNameKey] ??
       ((name?.isEmpty ?? true) ? null : name);
 
   String? get linkedPersonID =>
       PersonService.instance.emailToPartialPersonDataMapCache[email]
-          ?["person_id"];
+          ?[PersonService.kPersonIDKey];
 }

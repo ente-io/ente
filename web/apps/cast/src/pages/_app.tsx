@@ -1,7 +1,7 @@
 import { staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
 import { useSetupLogs } from "@/base/components/utils/hooks-app";
-import { photosTheme } from "@/base/components/utils/theme";
+import { castTheme } from "@/base/components/utils/theme";
 import "@fontsource-variable/inter";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import type { AppProps } from "next/app";
@@ -14,7 +14,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         <>
             <CustomHead title={staticAppTitle} />
 
-            <ThemeProvider theme={photosTheme}>
+            <ThemeProvider theme={castTheme}>
                 <CssBaseline enableColorScheme />
                 <Component {...pageProps} />
             </ThemeProvider>

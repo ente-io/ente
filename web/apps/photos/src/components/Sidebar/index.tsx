@@ -9,6 +9,7 @@ import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { isDevBuild } from "@/base/env";
 import { ut } from "@/base/i18n";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
@@ -682,7 +683,7 @@ const DebugSection: React.FC = () => {
 
     return (
         <>
-            {isInternalUser() && (
+            {isInternalUser() && isDevBuild && (
                 <RowButton
                     variant="secondary"
                     label={ut("Test Upload")}

@@ -3,6 +3,7 @@ import 'package:photos/services/machine_learning/face_ml/face_filtering/face_fil
 
 const facesTable = 'faces';
 const fileIDColumn = 'file_id';
+const objectIdColumn = 'obj_id';
 const faceIDColumn = 'face_id';
 const faceDetectionColumn = 'detection';
 const embeddingColumn = 'embedding';
@@ -114,7 +115,7 @@ CREATE TABLE IF NOT EXISTS $fileDataTable (
   user_id INTEGER NOT NULL,
   type TEXT NOT NULL,
   size INTEGER NOT NULL,
-  obj_id TEXT,
+  $objectIdColumn TEXT,
   obj_nonce TEXT,
   updated_at INTEGER NOT NULL,
   PRIMARY KEY ($fileIDColumn, type)

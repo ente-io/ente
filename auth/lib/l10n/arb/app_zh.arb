@@ -504,5 +504,13 @@
   "deselectAll": "取消全选",
   "selectAll": "全选",
   "deleteDuplicates": "删除重复项",
-  "plainHTML": "Plain HTML"
+  "plainHTML": "Plain HTML",
+  "tellUsWhatYouThink": "告诉我们您的想法",
+  "dropReview": "在 App Store/Play 商店上发表评测",
+  "supportEnte": "支持 <bold-green>ente</bold-green>",
+  "giveUsAStarOnGithub": "在 Github 上给我们一个星标",
+  "free5GB": "<bold-green>ente</bold-green> Photos 上 5GB 可用空间",
+  "loginWithAuthAccount": "使用您的认证账户登录",
+  "freeStorageOffer": "购买 <bold-green>ente</bold-green> Photos 可享受 10% 优惠",
+  "freeStorageOfferDescription": "使用优惠码“AUTH”可享受首年 10% 折扣"
 }

@@ -75,8 +75,8 @@ import 'package:uni_links/uni_links.dart';
 
 class HomeWidget extends StatefulWidget {
   const HomeWidget({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<StatefulWidget> createState() => _HomeWidgetState();
@@ -229,6 +229,9 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
     });
 
+    // MediaExtension plugin handles the deeplink for android
+    // [todo 4/Feb/2025]We need to validate if calling this method doesn't break
+    // android deep linking
     Platform.isIOS ? _initDeepLinkSubscriptionForPublicAlbums() : null;
 
     // For sharing images coming from outside the app
@@ -426,7 +429,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     _collectionUpdatedEvent.cancel();
     isOnSearchTabNotifier.dispose();
     _pageController.dispose();
-    _publicAlbumLinkSubscription.cancel();
+    if (Platform.isIOS) {
+      _publicAlbumLinkSubscription.cancel();
+    }
     super.dispose();
   }
 
@@ -498,7 +503,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         .getInitialMedia()
         .then((List<SharedMediaFile> value) {
       if (mounted) {
-        if (value[0].path.contains("albums.ente.io")) {
+        if (value.isNotEmpty && value[0].path.contains("albums.ente.io")) {
           final uri = Uri.parse(value[0].path);
           _handlePublicAlbumLink(uri);
           return;

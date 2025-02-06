@@ -29,8 +29,8 @@ import {
 } from "@/new/photos/components/utils/dialog";
 import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import {
-    fileInfoDrawerZIndex,
-    photosDialogZIndex,
+    aboveGalleryContentZ,
+    fileInfoDrawerZ,
 } from "@/new/photos/components/utils/z-index";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import {
@@ -391,12 +391,24 @@ const FileInfoSidebar = styled(
     (props: Pick<DialogProps, "open" | "onClose" | "children">) => (
         <SidebarDrawer {...props} anchor="right" />
     ),
-)({
-    zIndex: fileInfoDrawerZIndex,
-    "& .MuiPaper-root": {
-        padding: 8,
-    },
-});
+)(({ theme }) => ({
+    zIndex: fileInfoDrawerZ,
+    // [Note: Lighter backdrop for overlays on photo viewer]
+    //
+    // The default backdrop color we use for the drawer in light mode is too
+    // "white" when used in the image gallery because unlike the rest of the app
+    // the gallery retains a black background irrespective of the mode. So use a
+    // lighter scrim when overlaying content directly atop the image gallery.
+    //
+    // We don't need to add this special casing for nested overlays (e.g.
+    // dialogs initiated from the file info drawer itself) since now there is
+    // enough "white" on the screen to warrant the stronger (default) backdrop.
+    ...theme.applyStyles("light", {
+        ".MuiBackdrop-root": {
+            backgroundColor: theme.vars.palette.backdrop.faint,
+        },
+    }),
+}));
 
 interface InfoItemProps {
     /**
@@ -804,7 +816,7 @@ const FileNameEditDialog = ({
     };
     return (
         <TitledMiniDialog
-            sx={{ zIndex: photosDialogZIndex }}
+            sx={{ zIndex: aboveGalleryContentZ }}
             open={isInEditMode}
             onClose={closeEditMode}
             title={t("rename_file")}

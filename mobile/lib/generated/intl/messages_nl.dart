@@ -1337,6 +1337,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Of samenvoegen met bestaande"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Of kies een bestaande"),
+        "orPickFromYourContacts":
+            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "pair": MessageLookupByLibrary.simpleMessage("Koppelen"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Koppelen met PIN"),
         "pairingComplete":

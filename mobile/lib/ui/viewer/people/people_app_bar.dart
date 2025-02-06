@@ -8,6 +8,7 @@ import 'package:photos/core/event_bus.dart';
 import "package:photos/events/people_changed_event.dart";
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
@@ -79,37 +80,48 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     };
 
     widget.selectedFiles.addListener(_selectedFilesListener);
-
-    if (person.data.email == Configuration.instance.getEmail()) {
-      _appBarTitle = "${widget.title} (Me)";
-    } else {
-      _appBarTitle = widget.title;
-    }
-
     _userAuthEventSubscription =
         Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       setState(() {});
     });
 
-    _peopleChangedEventSubscription =
-        Bus.instance.on<PeopleChangedEvent>().listen(
-      (event) {
-        if (event.person != null &&
-            event.type == PeopleEventType.saveOrEditPerson &&
-            widget.person.remoteID == event.person!.remoteID &&
-            (event.source == "linkEmailToPerson" ||
-                event.source == "reassignMe")) {
-          person = event.person!;
-
-          if (person.data.email == Configuration.instance.getEmail()) {
-            _appBarTitle = "${person.data.name} (Me)";
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        if (person.data.email == Configuration.instance.getEmail()) {
+          // Don't know of any case where this will be null but just being safe
+          if (widget.title == null) {
+            _appBarTitle = "Me";
           } else {
-            _appBarTitle = person.data.name;
+            _appBarTitle =
+                context.l10n.accountOwnerPersonAppbarTitle(widget.title!);
           }
-          setState(() {});
+        } else {
+          _appBarTitle = widget.title;
         }
-      },
-    );
+
+        _peopleChangedEventSubscription =
+            Bus.instance.on<PeopleChangedEvent>().listen(
+          (event) {
+            if (event.person != null &&
+                event.type == PeopleEventType.saveOrEditPerson &&
+                widget.person.remoteID == event.person!.remoteID &&
+                (event.source == "linkEmailToPerson" ||
+                    event.source == "reassignMe")) {
+              person = event.person!;
+
+              if (person.data.email == Configuration.instance.getEmail()) {
+                _appBarTitle = context.l10n.accountOwnerPersonAppbarTitle(
+                  person.data.name,
+                );
+              } else {
+                _appBarTitle = person.data.name;
+              }
+              setState(() {});
+            }
+          },
+        );
+      });
+    });
   }
 
   @override
@@ -145,7 +157,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                         child: AppliedFiltersForAppbar(),
                       )
                     : Text(
-                        _appBarTitle!,
+                        _appBarTitle ?? "",
                         style: Theme.of(context)
                             .textTheme
                             .headlineSmall!
@@ -165,7 +177,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
             elevation: 0,
             centerTitle: false,
             title: Text(
-              _appBarTitle!,
+              _appBarTitle ?? "",
               style: Theme.of(context)
                   .textTheme
                   .headlineSmall!
@@ -263,7 +275,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                     padding: EdgeInsets.all(8),
                   ),
                   Text(
-                    "Reassign \"Me\"",
+                    context.l10n.reassignMe,
                     style: textTheme.bodyBold,
                   ),
                 ],

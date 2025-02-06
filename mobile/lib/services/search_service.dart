@@ -44,6 +44,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/machine_learning/ml_computer.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/services/user_remote_flag_service.dart";
+import "package:photos/services/user_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";
@@ -1466,6 +1467,7 @@ class SearchService {
     if (fileCount <= targetSize) return files;
     final safeFiles =
         files.where((file) => file.uploadedFileID != null).toList();
+    final safeCount = safeFiles.length;
     final fileIDs = safeFiles.map((e) => e.uploadedFileID!).toSet();
     final fileIdToFace = await MLDataDB.instance.getFacesForFileIDs(fileIDs);
     final faceIDs =
@@ -1536,7 +1538,7 @@ class SearchService {
       for (final file in safeFiles.sublist(1)) {
         if (filteredFiles.length >= targetSize) break;
         final clip = fileIdToClip[file.uploadedFileID!];
-        if (clip != null && (fileCount - skipped) > targetSize) {
+        if (clip != null && (safeCount - skipped) > targetSize) {
           for (final filteredFile in filteredFiles) {
             final fClip = fileIdToClip[filteredFile.uploadedFileID!];
             if (fClip == null) continue;
@@ -1553,7 +1555,7 @@ class SearchService {
       // Multiple years, each represented and roughly equally distributed
       if (prefferedSize == null && (allYears.length * 2) > 10) {
         targetSize = allYears.length * 3;
-        if (fileCount < targetSize) return safeFiles;
+        if (safeCount < targetSize) return safeFiles;
       }
 
       // Group files by year and sort each year's list by CLIP then face count
@@ -1585,13 +1587,13 @@ class SearchService {
       int round = 0;
       int skipped = 0;
       whileLoop:
-      while (filteredFiles.length + skipped < fileCount) {
+      while (filteredFiles.length + skipped < safeCount) {
         yearLoop:
         for (final year in years) {
           final yearFiles = yearToFiles[year]!;
           if (yearFiles.isEmpty) continue;
           final newFile = yearFiles.removeAt(0);
-          if (round != 0 && (fileCount - skipped) > targetSize) {
+          if (round != 0 && (safeCount - skipped) > targetSize) {
             // check for filtering
             final clip = fileIdToClip[newFile.uploadedFileID!];
             if (clip != null) {
@@ -1608,11 +1610,13 @@ class SearchService {
           }
           filteredFiles.add(newFile);
           if (filteredFiles.length >= targetSize ||
-              filteredFiles.length + skipped >= fileCount) {
+              filteredFiles.length + skipped >= safeCount) {
             break whileLoop;
           }
         }
         round++;
+        // Extra safety to prevent infinite loops
+        if (round > safeCount) break;
       }
     }
 
@@ -1678,6 +1682,7 @@ class SearchService {
     final searchResults = <GenericSearchResult>[];
     final allFiles = await getAllFilesForSearch();
     final peopleToSharedFiles = <User, List<EnteFile>>{};
+    final existingEmails = <String>{};
     for (EnteFile file in allFiles) {
       if (file.isOwner) continue;
 
@@ -1691,7 +1696,20 @@ class SearchService {
           peopleToSharedFiles[fileOwner]!.add(file);
         } else {
           peopleToSharedFiles[fileOwner] = [file];
+          existingEmails.add(fileOwner.email);
         }
+      }
+    }
+
+    final relevantContactEmails =
+        UserService.instance.getEmailIDsOfRelevantContacts();
+
+    for (final email in relevantContactEmails.difference(existingEmails)) {
+      final user = User(email: email);
+      if (user.email.toLowerCase().contains(lowerCaseQuery) ||
+          ((user.displayName?.toLowerCase().contains(lowerCaseQuery)) ??
+              false)) {
+        peopleToSharedFiles[user] = [];
       }
     }
 
@@ -1710,6 +1728,7 @@ class SearchService {
           ),
           params: {
             kPersonParamID: key.linkedPersonID,
+            kContactEmail: key.email,
           },
         ),
       );
@@ -1725,6 +1744,8 @@ class SearchService {
       final searchResults = <GenericSearchResult>[];
       final allFiles = await getAllFilesForSearch();
       final peopleToSharedFiles = <User, List<EnteFile>>{};
+      final existingEmails = <String>{};
+
       int peopleCount = 0;
       for (EnteFile file in allFiles) {
         if (file.isOwner) continue;
@@ -1736,7 +1757,34 @@ class SearchService {
         } else {
           if (limit != null && limit <= peopleCount) continue;
           peopleToSharedFiles[fileOwner] = [file];
+          existingEmails.add(fileOwner.email);
           peopleCount++;
+        }
+      }
+
+      final allRelevantEmails =
+          UserService.instance.getEmailIDsOfRelevantContacts();
+
+      int? remainingLimit = limit != null ? limit - peopleCount : null;
+      if (remainingLimit != null) {
+        // limit - peopleCount will never be negative as of writing this.
+        // Just in case if something changes in future, we are handling it here.
+        remainingLimit = max(remainingLimit, 0);
+      }
+      final emailsWithNoSharedFiles =
+          allRelevantEmails.difference(existingEmails);
+
+      if (remainingLimit == null) {
+        for (final email in emailsWithNoSharedFiles) {
+          final user = User(email: email);
+          peopleToSharedFiles[user] = [];
+        }
+      } else {
+        for (final email in emailsWithNoSharedFiles) {
+          if (remainingLimit == 0) break;
+          final user = User(email: email);
+          peopleToSharedFiles[user] = [];
+          remainingLimit = remainingLimit! - 1;
         }
       }
 
@@ -1756,6 +1804,7 @@ class SearchService {
             ),
             params: {
               kPersonParamID: key.linkedPersonID,
+              kContactEmail: key.email,
             },
           ),
         );

@@ -4,7 +4,6 @@ import { CenteredFill, CenteredFlex } from "@/base/components/containers";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { wipTheme } from "@/base/components/utils/theme";
 import log from "@/base/log";
 import { albumsAppOrigin, customAPIHost } from "@/base/origins";
 import { DevSettings } from "@/new/photos/components/DevSettings";
@@ -137,11 +136,7 @@ const Page: React.FC = () => {
                     </MobileBox>
                     <DesktopBox
                         sx={[
-                            {
-                                bgcolor: wipTheme
-                                    ? "background.default"
-                                    : "background.paper2",
-                            },
+                            { bgcolor: "background.default" },
                             (theme) =>
                                 theme.applyStyles("dark", {
                                     bgcolor: "background.paper2",
@@ -219,9 +214,7 @@ const TappableContainer: React.FC<
         <CenteredFill
             sx={[
                 {
-                    bgcolor: wipTheme
-                        ? "background.paper2"
-                        : "background.default",
+                    bgcolor: "background.paper2",
                     "@media (width <= 1024px)": {
                         flexDirection: "column",
                     },

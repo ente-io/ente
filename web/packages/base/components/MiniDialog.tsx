@@ -338,8 +338,7 @@ export const AttributedMiniDialog: React.FC<
     );
 };
 
-type TitledMiniDialogProps = Pick<DialogProps, "open" | "sx"> & {
-    onClose: () => void;
+type TitledMiniDialogProps = Pick<DialogProps, "open" | "onClose" | "sx"> & {
     /**
      * The dialog's title.
      */

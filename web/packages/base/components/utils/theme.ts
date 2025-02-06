@@ -4,17 +4,16 @@ import { createTheme } from "@mui/material";
 import type { Components } from "@mui/material/styles/components";
 import type { TypographyOptions } from "@mui/material/styles/createTypography";
 
-export const wipTheme = !!process.env.NEXT_PUBLIC_ENTE_WIP_THEME;
-
 const getTheme = (appName: AppName): Theme => {
     const colors = getColors(appName);
-    const colorSchemes_ = getColorSchemes(colors);
-    // TODO(LM): Temp
-    const colorSchemes = wipTheme
-        ? { ...colorSchemes_ }
-        : { ...colorSchemes_, light: colorSchemes_.dark };
+    const cs = getColorSchemes(colors);
+    // Cast app should always be shown in dark.
+    const colorSchemes =
+        appName == "cast" ? { ...cs, light: cs.dark } : { ...cs };
     return createTheme({
-        cssVariables: true,
+        cssVariables: {
+            colorSchemeSelector: "class",
+        },
         colorSchemes,
         typography,
         components,
@@ -138,10 +137,8 @@ const _colors = {
     },
     accentAuth: {
         dark: "#8e0fcb",
-        // TODO(LM): Shift up
         main: "#9610d6",
         light: "#8e2de2",
-        lighter: "#984df4" /* TODO(LM) */,
     },
     fixed: {
         white: "#fff",
@@ -153,15 +150,7 @@ const _colors = {
             main: "#ea3f3f",
             light: "#ff6565",
         },
-        gray: {
-            A: "#1c1c1e",
-            B: "#333",
-            E: "#ddd",
-        },
         switchOn: "#2eca45",
-        croppedAreaOverlay: "rgba(0 0 0 / 0.5)",
-        overlayIndicatorMuted: "rgba(255 255 255 / 0.48)",
-        storageCardUsageFill: "rgba(255 255 255 / 0.2)",
     },
     light: {
         // Keep these solid.
@@ -183,11 +172,8 @@ const _colors = {
         },
         fill: {
             base: "#000",
-            /* TODO: Unused */
-            baseHover: "rgba(0 0 0 / 0.87)",
             muted: "rgba(0 0 0 / 0.12)",
             faint: "rgba(0 0 0 / 0.04)",
-            /** TODO(LM): Needed? */
             faintHover: "rgba(0 0 0 / 0.08)",
             fainter: "rgba(0 0 0 / 0.02)",
         },
@@ -202,6 +188,7 @@ const _colors = {
             base: "#000",
             muted: "rgba(0 0 0 / 0.24)",
             faint: "rgba(0 0 0 / 0.12)",
+            fainter: "rgba(0 0 0 / 0.06)",
         },
         boxShadow: {
             paper: "0px 0px 10px rgba(0 0 0 / 0.25)",
@@ -228,20 +215,20 @@ const _colors = {
         },
         fill: {
             base: "#fff",
-            baseHover: "rgba(255 255 255 / 0.90)",
             muted: "rgba(255 255 255 / 0.16)",
             faint: "rgba(255 255 255 / 0.12)",
             faintHover: "rgba(255 255 255 / 0.16)",
             fainter: "rgba(255 255 255 / 0.05)",
         },
         secondary: {
-            main: "#1f1f1f",
-            hover: "#292929",
+            main: "#2b2b2b",
+            hover: "#373737",
         },
         stroke: {
             base: "#fff",
             muted: "rgba(255 255 255 / 0.24)",
             faint: "rgba(255 255 255 / 0.16)",
+            fainter: "rgba(255 255 255 / 0.12)",
         },
         boxShadow: {
             paper: "0px 2px 12px rgba(0 0 0 / 0.75)",
@@ -254,7 +241,10 @@ const _colors = {
 const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
     light: {
         palette: {
-            background: colors.light.background,
+            background: {
+                ...colors.light.background,
+                elevatedPaper: colors.light.background.paper2,
+            },
             backdrop: colors.light.backdrop,
             primary: {
                 main: colors.fixed.black,
@@ -301,6 +291,9 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             // Override some MUI defaults for styling action elements like
             // buttons and menu items.
             //
+            // Nb: There are more where these came from, currently those don't
+            // affect us, but in the future they might.
+            //
             // https://github.com/mui/material-ui/blob/v6.4.0/packages/mui-material/src/styles/createPalette.js#L68
             action: {
                 // The color of an active action like an icon button.
@@ -311,23 +304,10 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 // from the active color above and this opacity. Use a value
                 // that results in the same result as faintHover.
                 hoverOpacity: 0.08,
-                // TODO(LM): Remove commented.
-                // The color of a selected action.
-                //
-                // Placeholder; not clear how it impacts us.
-                // selected: "#ff0000", //colors.light.stroke.base,
-                // selectedOpacity: 0.08,
                 // The color of a disabled action.
                 disabled: colors.light.text.faint,
-                // disabledOpacity: 0.12,
                 // The background color of a disabled action.
                 disabledBackground: colors.light.fill.faint,
-                // Placeholder; not clear how it impacts us.
-                // focus: "#ff0000", //colors.light.stroke.base,
-                // Placeholder (MUI default); not clear how it impacts us.
-                // focusOpacity: 1,
-                // Placeholder (MUI default); not clear how it impacts us.
-                // activatedOpacity: 0.12,
             },
             // Override some internal MUI defaults that impact the components
             // which we use.
@@ -336,15 +316,20 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             FilledInput: {
                 bg: colors.light.fill.faint,
                 hoverBg: colors.light.fill.faintHover,
-                // We don't use this currently.
-                // disabledBg: colors.light.fill.fainter,
+                // While we don't specifically have disabled inputs, TextInputs
+                // do get disabled when the form is submitting, and this value
+                // comes into play then.
+                disabledBg: colors.light.fill.fainter,
             },
         },
     },
     // -- See the light mode section for comments
     dark: {
         palette: {
-            background: colors.dark.background,
+            background: {
+                ...colors.dark.background,
+                elevatedPaper: colors.dark.background.paper,
+            },
             backdrop: colors.dark.backdrop,
             primary: {
                 main: colors.fixed.white,
@@ -387,19 +372,13 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 active: colors.dark.stroke.base,
                 hover: colors.dark.fill.faintHover,
                 hoverOpacity: 0.16,
-                // selected: colors.dark.stroke.base,
-                // selectedOpacity: 0.08,
                 disabled: colors.dark.text.faint,
-                // disabledOpacity: 0.12,
                 disabledBackground: colors.dark.fill.faint,
-                // focus: colors.dark.stroke.base,
-                // focusOpacity: 1,
-                // activatedOpacity: 0.12,
             },
             FilledInput: {
                 bg: colors.dark.fill.faint,
                 hoverBg: colors.dark.fill.faintHover,
-                // disabledBg: colors.dark.fill.faint,
+                disabledBg: colors.dark.fill.fainter,
             },
         },
     },
@@ -498,6 +477,14 @@ const typography: TypographyOptions = {
     },
 };
 
+/**
+ * > [!NOTE]
+ * >
+ * > The theme isn't tree-shakeable, prefer creating new components for heavy
+ * > customization.
+ * >
+ * > https://mui.com/material-ui/customization/theme-components/
+ */
 const components: Components = {
     MuiCssBaseline: {
         styleOverrides: {
@@ -687,26 +674,6 @@ const components: Components = {
         },
     },
 
-    MuiFilledInput: {
-        styleOverrides: {
-            input: {
-                // Set the background color for text fields when they get
-                // autofilled by the user agent.
-                //
-                // TODO(LM): Right now we need to set it until the light mode is
-                // fully independent. Post that, see if we really need to
-                // override the user agent defaults. Also note that MUI does
-                // overwrite the UA defaults, so we might need to too.
-                //
-                // https://github.com/search?q=repo%3Amui%2Fmaterial-ui%20path%3A%2F%5Epackages%5C%2Fmui-material%5C%2Fsrc%5C%2F%2F%20WebkitBoxShadow&type=code
-                "&:autofill": {
-                    boxShadow: "0 0 0 100px #266798 inset",
-                    WebkitTextFillColor: "var(--mui-palette-fixed-white)",
-                },
-            },
-        },
-    },
-
     MuiTextField: {
         defaultProps: {
             // The MUI default variant is "outlined", override it to use the
@@ -800,7 +767,6 @@ const components: Components = {
                 // Set a default border radius for all snackbar's (e.g.
                 // notification popups).
                 borderRadius: "8px",
-                boxShadow: "var(--mui-palette-boxShadow-menu)",
             },
         },
     },
@@ -820,3 +786,10 @@ export const photosTheme = getTheme("photos");
  * The MUI {@link Theme} to use for the auth app.
  */
 export const authTheme = getTheme("auth");
+
+/**
+ * The MUI {@link Theme} to use for the cast app.
+ *
+ * This is the same as the dark theme for the photos app.
+ */
+export const castTheme = getTheme("cast");

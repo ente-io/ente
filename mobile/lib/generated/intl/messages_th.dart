@@ -231,6 +231,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ผู้มีส่วนร่วม OpenStreetMap"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("หรือเลือกที่มีอยู่แล้ว"),
+        "orPickFromYourContacts":
+            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "password": MessageLookupByLibrary.simpleMessage("รหัสผ่าน"),
         "passwordChangedSuccessfully":
             MessageLookupByLibrary.simpleMessage("เปลี่ยนรหัสผ่านสำเร็จ"),

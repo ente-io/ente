@@ -72,9 +72,9 @@ export interface GalleryBarImplProps {
     onSelectCollectionID: (collectionID: number) => void;
     /**
      * Called when the user selects the option to show a modal with all the
-     * collections.
+     * albums.
      */
-    onShowAllCollections: () => void;
+    onShowAllAlbums: () => void;
     /**
      * The scheme that should be used for sorting the collections in the bar.
      */
@@ -103,7 +103,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     collectionSummaries,
     activeCollectionID,
     onSelectCollectionID,
-    onShowAllCollections,
+    onShowAllAlbums,
     collectionsSortBy,
     onChangeCollectionsSortBy,
     people,
@@ -229,7 +229,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         onChangeSortBy={onChangeCollectionsSortBy}
                         transparentTriggerButtonBackground
                     />
-                    <IconButton onClick={onShowAllCollections}>
+                    <IconButton onClick={onShowAllAlbums}>
                         <ExpandMoreIcon />
                     </IconButton>
                 </>
@@ -246,7 +246,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 activeSortBy={collectionsSortBy}
                 onChangeSortBy={onChangeCollectionsSortBy}
             />
-            <FilledIconButton onClick={onShowAllCollections}>
+            <FilledIconButton onClick={onShowAllAlbums}>
                 <ExpandMoreIcon />
             </FilledIconButton>
         </Stack>
@@ -254,11 +254,15 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
 
     return (
         <BarWrapper
-            sx={[
-                // Hide the bottom border if we're showing the empty state for people.
-                mode == "people" &&
-                    people.length == 0 && { borderColor: "transparent" },
-            ]}
+            // Hide the bottom border when showing the empty state for people.
+            style={
+                {
+                    "--et-bar-bottom-border-color":
+                        mode == "people" && people.length == 0
+                            ? "transparent"
+                            : "var(--mui-palette-divider)",
+                } as React.CSSProperties
+            }
         >
             <Row1>
                 <ModeIndicator {...{ mode, onChangeMode }} />
@@ -294,16 +298,13 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 };
 
-const BarWrapper = styled("div")(
-    ({ theme }) => `
+const BarWrapper = styled("div")`
     padding-inline: 24px;
     @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
         padding-inline: 4px;
     }
     margin-block-end: 16px;
-    border-block-end: 1px solid ${theme.vars.palette.divider};
-`,
-);
+`;
 
 export const Row1 = styled("div")`
     display: flex;
@@ -317,6 +318,7 @@ export const Row2 = styled("div")`
     display: flex;
     align-items: flex-start;
     gap: 16px;
+    border-block-end: 1px solid var(--et-bar-bottom-border-color);
 `;
 
 const ModeIndicator: React.FC<
@@ -513,7 +515,7 @@ const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
             onClick={() => onSelectCollectionID(collectionSummary.id)}
         >
             <CardText>{collectionSummary.name}</CardText>
-            <CollectionBarCardIcon type={collectionSummary.type} />
+            <CollectionBarCardIcon attributes={collectionSummary.attributes} />
         </ItemCard>
         {activeCollectionID === collectionSummary.id && <ActiveIndicator />}
     </div>
@@ -530,22 +532,28 @@ const CardText: React.FC<React.PropsWithChildren> = ({ children }) => (
 );
 
 interface CollectionBarCardIconProps {
-    type: CollectionSummaryType;
+    attributes: CollectionSummaryType[];
 }
 
 const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
-    type,
+    attributes,
 }) => (
+    // Under current scenarios, there are no cases where more than 3 of these
+    // will be true simultaneously even in the rarest of cases (a pinned and
+    // shared album that is also archived), and there is enough space for 3.
     <CollectionBarCardIcon_>
-        {type == "favorites" && <FavoriteRoundedIcon />}
-        {type == "archived" && (
-            <ArchiveIcon sx={{ color: "fixed.overlayIndicatorMuted" }} />
+        {attributes.includes("favorites") && <FavoriteRoundedIcon />}
+        {attributes.includes("pinned") && (
+            // Need && to override the 20px set in the container.
+            <PushPinIcon sx={{ "&&": { fontSize: "18px" } }} />
         )}
-        {type == "outgoingShare" && <PeopleIcon />}
-        {(type == "incomingShareViewer" ||
-            type == "incomingShareCollaborator") && <PeopleIcon />}
-        {type == "sharedOnlyViaLink" && <LinkIcon />}
-        {type == "pinned" && <PushPinIcon />}
+        {(attributes.includes("outgoingShare") ||
+            attributes.includes("incomingShareViewer") ||
+            attributes.includes("incomingShareCollaborator")) && <PeopleIcon />}
+        {attributes.includes("sharedOnlyViaLink") && <LinkIcon />}
+        {attributes.includes("archived") && (
+            <ArchiveIcon sx={{ opacity: 0.48 }} />
+        )}
     </CollectionBarCardIcon_>
 );
 
@@ -554,6 +562,7 @@ const CollectionBarCardIcon_ = styled(Overlay)`
     display: flex;
     justify-content: flex-start;
     align-items: flex-end;
+    gap: 4px;
     & > .MuiSvgIcon-root {
         font-size: 20px;
     }
@@ -563,7 +572,7 @@ const ActiveIndicator = styled("div")(
     ({ theme }) => `
     height: 3px;
     background-color: ${theme.vars.palette.stroke.base};
-    margin-top: 18px;
+    margin-top: 19px;
     border-radius: 2px;
 `,
 );
