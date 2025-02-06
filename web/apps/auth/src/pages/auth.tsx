@@ -3,7 +3,7 @@ import { stashRedirect } from "@/accounts/services/redirect";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { LoadingIndicator } from "@/base/components/loaders";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { NavbarBase } from "@/base/components/Navbar";
+import { NavbarBaseNormalFlow } from "@/base/components/Navbar";
 import {
     OverflowMenu,
     OverflowMenuOption,
@@ -134,11 +134,19 @@ const AuthNavbar: React.FC = () => {
     const { logout } = useAppContext();
 
     return (
-        <NavbarBase>
-            <Stack direction="row" sx={{ flex: 1, justifyContent: "center" }}>
-                <EnteLogo />
-            </Stack>
-            <Stack direction="row" sx={{ position: "absolute", right: "24px" }}>
+        <NavbarBaseNormalFlow
+            sx={{
+                position: "sticky",
+                top: 0,
+                left: 0,
+                mb: 2,
+                zIndex: 1,
+                backgroundColor: "backdrop.muted",
+                backdropFilter: "blur(7px)",
+            }}
+        >
+            <EnteLogo />
+            <Box sx={{ position: "absolute", right: "24px" }}>
                 <OverflowMenu ariaID="auth-options">
                     <OverflowMenuOption
                         color="critical"
@@ -148,8 +156,8 @@ const AuthNavbar: React.FC = () => {
                         {t("logout")}
                     </OverflowMenuOption>
                 </OverflowMenu>
-            </Stack>
-        </NavbarBase>
+            </Box>
+        </NavbarBaseNormalFlow>
     );
 };
 
