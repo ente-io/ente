@@ -19,10 +19,11 @@ interface CopyButtonProps {
 export const CopyButton: React.FC<CopyButtonProps> = ({ text, size }) => {
     const [copied, setCopied] = useState(false);
 
-    const handleClick = void navigator.clipboard.writeText(text).then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1000);
-    });
+    const handleClick = () =>
+        void navigator.clipboard.writeText(text).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1000);
+        });
 
     const Icon = copied ? DoneIcon : ContentCopyIcon;
 
