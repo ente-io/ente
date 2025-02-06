@@ -48,7 +48,7 @@ export const ConfirmDeleteFileDialog: React.FC<
     };
     const handleClose: ModalProps["onClose"] = (_, reason) => {
         // Ignore backdrop clicks when we're processing the user request.
-        if (phase == "loading") return;
+        if (reason == "backdropClick" && phase == "loading") return;
         resetPhaseAndClose();
     };
 
