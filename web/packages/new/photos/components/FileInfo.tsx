@@ -2,41 +2,27 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DoneIcon from "@mui/icons-material/Done";
 import { IconButton, Tooltip, type SvgIconProps } from "@mui/material";
 import { t } from "i18next";
-import { useCallback, useState } from "react";
+import { useState } from "react";
+import { aboveGalleryContentZ } from "./utils/z-index";
 
 interface CopyButtonProps {
     /**
-     * The code to copy when the button is clicked.
+     * The text to copy when the button is clicked.
      */
-    code: string;
-    /**
-     * The button color.
-     *
-     * - "secondary" maps to the normal "secondary" for icon buttons.
-     * - "accentContrastText" is for use over an accented background.
-     */
-    color: "secondary" | "accentContrastText";
+    text: string;
     /**
      * The size of the icon.
-     *
-     * Default: "small"
      */
     size?: SvgIconProps["fontSize"];
 }
 
-export const CopyButton: React.FC<CopyButtonProps> = ({
-    code,
-    color,
-    size = "small",
-}) => {
+export const CopyButton: React.FC<CopyButtonProps> = ({ text, size }) => {
     const [copied, setCopied] = useState(false);
 
-    const handleClick = useCallback(() => {
-        void navigator.clipboard.writeText(code).then(() => {
-            setCopied(true);
-            setTimeout(() => setCopied(false), 1000);
-        });
-    }, [code]);
+    const handleClick = void navigator.clipboard.writeText(text).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1000);
+    });
 
     const Icon = copied ? DoneIcon : ContentCopyIcon;
 
@@ -45,20 +31,10 @@ export const CopyButton: React.FC<CopyButtonProps> = ({
             arrow
             open={copied}
             title={t("copied")}
-            slotProps={{ popper: { sx: { zIndex: 2000 } } }}
+            slotProps={{ popper: { sx: { zIndex: aboveGalleryContentZ } } }}
         >
-            <IconButton
-                onClick={handleClick}
-                {...(color == "secondary" ? { color } : {})}
-            >
-                <Icon
-                    sx={[
-                        color == "accentContrastText" && {
-                            color: "accent.contrastText",
-                        },
-                    ]}
-                    fontSize={size}
-                />
+            <IconButton onClick={handleClick} color="secondary">
+                <Icon fontSize={size} />
             </IconButton>
         </Tooltip>
     );

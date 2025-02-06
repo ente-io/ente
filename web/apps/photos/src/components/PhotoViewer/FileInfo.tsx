@@ -259,9 +259,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             }
                             trailingButton={
                                 <CopyButton
-                                    code={openStreetMapLink(location)}
-                                    color="secondary"
                                     size="medium"
+                                    text={openStreetMapLink(location)}
                                 />
                             }
                         />
@@ -976,7 +975,7 @@ const RawExif: React.FC<RawExifProps> = ({
                 caption={fileName}
                 onRootClose={handleRootClose}
                 actionButton={
-                    <CopyButton code={JSON.stringify(tags)} color="secondary" />
+                    <CopyButton size="small" text={JSON.stringify(tags)} />
                 }
             />
             <Stack sx={{ gap: 2, py: 3, px: 1 }}>
