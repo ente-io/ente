@@ -744,12 +744,18 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                     {livePhotoBtnOptions.visible && (
                         <LivePhotoBtnContainer>
                             <Button
-                                // variant="text"
-                                color="secondary"
+                                variant="text"
                                 onClick={livePhotoBtnOptions.click}
                                 onMouseEnter={livePhotoBtnOptions.show}
                                 onMouseLeave={livePhotoBtnOptions.hide}
                                 disabled={livePhotoBtnOptions.loading}
+                                sx={{
+                                    color: "white",
+                                    "&.Mui-disabled": {
+                                        color: "white",
+                                        opacity: 0.4,
+                                    },
+                                }}
                             >
                                 <Stack
                                     direction="row"
@@ -1068,11 +1074,13 @@ const ConversionFailedNotification: React.FC<
     );
 };
 
-const LivePhotoBtnContainer = styled(Paper)`
+const LivePhotoBtnContainer = styled("div")`
     border-radius: 4px;
     position: absolute;
     bottom: 10vh;
     right: 6vh;
+    background-color: rgba(255 255 255 / 0.15);
+    backdrop-filter: blur(3px);
     z-index: 1;
 `;
 
