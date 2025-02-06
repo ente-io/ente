@@ -1,4 +1,4 @@
-import { isDesktop, wipDesktopCustomTitlebar } from "@/base/app";
+import { isDesktop } from "@/base/app";
 import { assertionFailed } from "@/base/assert";
 import { Overlay } from "@/base/components/containers";
 import { FilledIconButton, type ButtonishProps } from "@/base/components/mui";
@@ -805,27 +805,16 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                         <div className="pswp__item" />
                     </div>
                     <div className="pswp__ui pswp__ui--hidden">
-                        {/* {wipDesktopCustomTitlebar && (
-                            <div
-                                style={{
-                                    // Same as pswp__top-bar
-                                    backgroundColor: "red",
-                                    zIndex: 7600,
-                                    width: "100%",
-                                    height: "env(titlebar-area-height, 30px)",
-                                }}
-                            />
-                        )} */}
                         <div
                             className="pswp__top-bar"
-                            {...(wipDesktopCustomTitlebar
-                                ? {
-                                      style: {
+                            style={
+                                isDesktop
+                                    ? ({
                                           "--ente-pswp-top-bar-top":
                                               "env(titlebar-area-height, 30px)",
-                                      } as React.CSSProperties,
-                                  }
-                                : {})}
+                                      } as React.CSSProperties)
+                                    : {}
+                            }
                         >
                             <div className="pswp__counter" />
 
