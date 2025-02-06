@@ -1589,5 +1589,6 @@
   "joinAlbum": "加入相册",
   "joinAlbumSubtext": "来查看和添加您的照片",
   "joinAlbumSubtextViewer": "来将其添加到共享相册",
-  "join": "加入"
+  "join": "加入",
+  "orPickFromYourContacts": "or pick from your contacts"
 }

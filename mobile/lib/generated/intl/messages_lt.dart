@@ -1123,6 +1123,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Arba sujunkite su esamais"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Arba pasirinkite esamą"),
+        "orPickFromYourContacts":
+            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "pair": MessageLookupByLibrary.simpleMessage("Susieti"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Susieti su PIN"),
         "pairingComplete":

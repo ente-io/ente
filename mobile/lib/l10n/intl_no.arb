@@ -370,5 +370,6 @@
   "advanced": "Avansert",
   "general": "Generelt",
   "security": "Sikkerhet",
-  "authToViewYourRecoveryKey": "Vennligst autentiser deg for å se gjennopprettingsnøkkelen din"
+  "authToViewYourRecoveryKey": "Vennligst autentiser deg for å se gjennopprettingsnøkkelen din",
+  "orPickFromYourContacts": "or pick from your contacts"
 }

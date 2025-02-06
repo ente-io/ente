@@ -6,6 +6,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
@@ -123,8 +124,8 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
               child: Column(
                 children: [
                   _filteredUsers.isNotEmpty
-                      ? const MenuSectionTitle(
-                          title: "Or pick from your contacts",
+                      ? MenuSectionTitle(
+                          title: S.of(context).orPickFromYourContacts,
                         )
                       : const SizedBox.shrink(),
                   Expanded(
@@ -274,7 +275,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
       await showDialogWidget(
         context: context,
         title: S.of(context).noEnteAccountExclamation,
-        body: "$email does not have an ente account.",
+        body: context.l10n.emailDoesNotHaveEnteAccount(email),
         icon: Icons.info_outline,
         isDismissible: true,
         buttons: [
@@ -327,7 +328,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
     if (publicKey == null || publicKey == '') {
       await showDialogWidget(
         context: context,
-        title: "No Ente account!",
+        title: S.of(context).noEnteAccountExclamation,
         icon: Icons.info_outline,
         body: S.of(context).emailNoEnteAccount(email),
         isDismissible: true,

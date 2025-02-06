@@ -1314,6 +1314,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Lub złącz z istniejącymi"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Lub wybierz istniejący"),
+        "orPickFromYourContacts":
+            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "pair": MessageLookupByLibrary.simpleMessage("Sparuj"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Sparuj kodem PIN"),
         "pairingComplete":
