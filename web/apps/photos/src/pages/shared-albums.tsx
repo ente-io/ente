@@ -13,7 +13,7 @@ import {
 } from "@/base/components/loaders";
 import type { ButtonishProps } from "@/base/components/mui";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
+import { NavbarBaseNormalFlow, SelectionBar } from "@/base/components/Navbar";
 import {
     OverflowMenu,
     OverflowMenuOption,
@@ -581,14 +581,26 @@ interface SharedAlbumNavbarProps {
 const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
     onAddPhotos,
 }) => (
-    <NavbarBase>
-        <FluidContainer>
-            <EnteLogoLink href="https://ente.io">
-                <EnteLogo height={15} />
-            </EnteLogoLink>
-        </FluidContainer>
-        {onAddPhotos ? <AddPhotosButton onClick={onAddPhotos} /> : <GoToEnte />}
-    </NavbarBase>
+    <NavbarBaseNormalFlow
+        sx={{
+            mb: "16px",
+            px: "24px",
+            "@media (width < 720px)": { px: "4px" },
+        }}
+    >
+        <Stack direction="row" sx={{ flex: 1 }}>
+            <FluidContainer>
+                <EnteLogoLink href="https://ente.io">
+                    <EnteLogo height={15} />
+                </EnteLogoLink>
+            </FluidContainer>
+            {onAddPhotos ? (
+                <AddPhotosButton onClick={onAddPhotos} />
+            ) : (
+                <GoToEnte />
+            )}
+        </Stack>
+    </NavbarBaseNormalFlow>
 );
 
 const EnteLogoLink = styled("a")(({ theme }) => ({

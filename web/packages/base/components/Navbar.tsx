@@ -11,7 +11,7 @@ import React from "react";
  *
  * TODO: Deprecated. Use NavbarBaseNormalFlow instead.
  */
-export const NavbarBase = styled(FlexWrapper)(
+export const NavbarBase2 = styled(FlexWrapper)(
     ({ theme }) => `
     min-height: 64px;
     position: sticky;
@@ -38,6 +38,16 @@ export const NavbarBaseNormalFlow = styled("div")(
 `,
 );
 
+export const NavbarBase = styled(NavbarBaseNormalFlow)(({ theme }) => ({
+    position: "sticky",
+    top: 0,
+    left: 0,
+    mb: theme.spacing(2),
+    zIndex: 1,
+    backgroundColor: "transparent",
+    // backdropFilter: "blur(7px)",
+}));
+
 /**
  * A variant of AppNavbar that places itself normally in the document flow
  * instead of using a fixed positioning.
@@ -48,7 +58,7 @@ export const AppNavbarNormalFlow: React.FC = () => (
     </NavbarBaseNormalFlow>
 );
 
-export const SelectionBar = styled(NavbarBase)`
+export const SelectionBar = styled(NavbarBase2)`
     position: fixed;
     z-index: 12;
 `;
