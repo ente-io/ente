@@ -2,6 +2,7 @@ import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dial
 import { stashRedirect } from "@/accounts/services/redirect";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { NavbarBase } from "@/base/components/Navbar";
+import { CenteredRow } from "@/base/components/containers";
 import { TranslucentLoadingOverlay } from "@/base/components/loaders";
 import type { ButtonishProps } from "@/base/components/mui";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
@@ -66,7 +67,7 @@ import {
 } from "@/new/photos/services/user-details";
 import { useAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
-import { CenteredFlex, FlexWrapper } from "@ente/shared/components/Container";
+import { FlexWrapper } from "@ente/shared/components/Container";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
@@ -999,14 +1000,14 @@ const Page: React.FC = () => {
                     )}
                 </NavbarBase>
                 {isFirstLoad && (
-                    <CenteredFlex>
+                    <CenteredRow>
                         <Typography
                             variant="small"
                             sx={{ color: "text.muted" }}
                         >
                             {t("initial_load_delay_warning")}
                         </Typography>
-                    </CenteredFlex>
+                    </CenteredRow>
                 )}
                 {isOffline && <OfflineMessage />}
 
