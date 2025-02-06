@@ -3,7 +3,7 @@ import { stashRedirect } from "@/accounts/services/redirect";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { LoadingIndicator } from "@/base/components/loaders";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { NavbarBaseNormalFlow } from "@/base/components/Navbar";
+import { NavbarBase } from "@/base/components/Navbar";
 import {
     OverflowMenu,
     OverflowMenuOption,
@@ -134,7 +134,7 @@ const AuthNavbar: React.FC = () => {
     const { logout } = useAppContext();
 
     return (
-        <NavbarBaseNormalFlow
+        <NavbarBase
             sx={{
                 position: "sticky",
                 top: 0,
@@ -157,7 +157,7 @@ const AuthNavbar: React.FC = () => {
                     </OverflowMenuOption>
                 </OverflowMenu>
             </Box>
-        </NavbarBaseNormalFlow>
+        </NavbarBase>
     );
 };
 
