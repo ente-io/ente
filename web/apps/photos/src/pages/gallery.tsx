@@ -901,16 +901,6 @@ const Page: React.FC = () => {
                     }}
                 />
                 {blockingLoad && <TranslucentLoadingOverlay />}
-                {isFirstLoad && (
-                    <CenteredFlex>
-                        <Typography
-                            variant="small"
-                            sx={{ color: "text.muted" }}
-                        >
-                            {t("initial_load_delay_warning")}
-                        </Typography>
-                    </CenteredFlex>
-                )}
                 <PlanSelector
                     {...planSelectorVisibilityProps}
                     setLoading={(v) => setBlockingLoad(v)}
@@ -940,7 +930,6 @@ const Page: React.FC = () => {
                     {...fixCreationTimeVisibilityProps}
                     files={fixCreationTimeFiles}
                 />
-
                 <NavbarBase
                     sx={{
                         mb: "12px",
@@ -1009,7 +998,16 @@ const Page: React.FC = () => {
                         />
                     )}
                 </NavbarBase>
-
+                {isFirstLoad && (
+                    <CenteredFlex>
+                        <Typography
+                            variant="small"
+                            sx={{ color: "text.muted" }}
+                        >
+                            {t("initial_load_delay_warning")}
+                        </Typography>
+                    </CenteredFlex>
+                )}
                 {isOffline && <OfflineMessage />}
 
                 <GalleryBarAndListHeader
