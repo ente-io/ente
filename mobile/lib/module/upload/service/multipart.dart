@@ -132,7 +132,7 @@ class MultiPartUploader {
       // upload individual parts and get their etags
       try {
         etags = await _uploadParts(multipartInfo, encryptedFile);
-      } on DioError catch (e) {
+      } on DioException catch (e) {
         if (e.response?.statusCode == 404) {
           _logger.severe(
             "Multipart upload not found for key ${multipartInfo.urls.objectKey}",
@@ -157,7 +157,7 @@ class MultiPartUploader {
           etags,
           multipartInfo.urls.completeURL,
         );
-      } on DioError catch (e) {
+      } on DioException catch (e) {
         if (e.response?.statusCode == 404) {
           _logger.severe(
             "Multipart upload not found for key ${multipartInfo.urls.objectKey}",

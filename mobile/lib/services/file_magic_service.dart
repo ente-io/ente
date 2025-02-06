@@ -117,7 +117,7 @@ class FileMagicService {
       // should be eventually synced after remote sync has completed
       await _filesDB.insertMultiple(files);
       RemoteSyncService.instance.sync(silently: true).ignore();
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null && e.response!.statusCode == 409) {
         RemoteSyncService.instance.sync(silently: true).ignore();
       }
@@ -185,7 +185,7 @@ class FileMagicService {
       // update the state of the selected file. Same file in other collection
       // should be eventually synced after remote sync has completed
       RemoteSyncService.instance.sync(silently: true).ignore();
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null && e.response!.statusCode == 409) {
         RemoteSyncService.instance.sync(silently: true).ignore();
       }

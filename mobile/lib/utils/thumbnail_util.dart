@@ -192,7 +192,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
           .data;
     }
   } catch (e) {
-    if (e is DioError && CancelToken.isCancel(e)) {
+    if (e is DioException && CancelToken.isCancel(e)) {
       return;
     }
     rethrow;

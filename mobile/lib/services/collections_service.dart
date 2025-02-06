@@ -553,7 +553,7 @@ class CollectionsService {
       unawaited(_db.insert([_collectionIDToCollections[collectionID]!]));
       RemoteSyncService.instance.sync(silently: true).ignore();
       return sharees;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response?.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
       }
@@ -641,7 +641,7 @@ class CollectionsService {
       } else {
         await _handleCollectionDeletion(collection);
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null) {
         debugPrint("Error " + e.response!.toString());
       }
@@ -808,7 +808,7 @@ class CollectionsService {
 
       // trigger sync to fetch the latest collection state from server
       sync().ignore();
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null && e.response?.statusCode == 409) {
         _logger.severe('collection magic data out of sync');
         sync().ignore();
@@ -867,7 +867,7 @@ class CollectionsService {
       _cacheLocalPathAndCollection(collection);
       // trigger sync to fetch the latest collection state from server
       sync().ignore();
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null && e.response?.statusCode == 409) {
         _logger.severe('collection magic data out of sync');
         sync().ignore();
@@ -927,7 +927,7 @@ class CollectionsService {
       _cacheLocalPathAndCollection(collection);
       // trigger sync to fetch the latest collection state from server
       sync().ignore();
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null && e.response?.statusCode == 409) {
         _logger.severe('collection magic data out of sync');
         sync().ignore();
@@ -958,7 +958,7 @@ class CollectionsService {
       Bus.instance.fire(
         CollectionUpdatedEvent(collection.id, <EnteFile>[], "shareUrL"),
       );
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response?.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
       }
@@ -987,7 +987,7 @@ class CollectionsService {
       Bus.instance.fire(
         CollectionUpdatedEvent(collection.id, <EnteFile>[], "updateUrl"),
       );
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response?.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
       }
@@ -1013,7 +1013,7 @@ class CollectionsService {
           "disableShareUrl",
         ),
       );
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       _logger.info(e);
       rethrow;
     }
@@ -1038,7 +1038,7 @@ class CollectionsService {
       return collections;
     } catch (e, s) {
       _logger.warning(e, s);
-      if (e is DioError && e.response?.statusCode == 401) {
+      if (e is DioException && e.response?.statusCode == 401) {
         throw UnauthorizedError();
       }
       rethrow;
@@ -1091,7 +1091,7 @@ class CollectionsService {
     } catch (e, s) {
       _logger.warning(e, s);
       _logger.severe("Failed to fetch public collection");
-      if (e is DioError && e.response?.statusCode == 410) {
+      if (e is DioException && e.response?.statusCode == 410) {
         await showInfoDialog(
           context,
           title: S.of(context).linkExpired,
@@ -1100,7 +1100,7 @@ class CollectionsService {
         throw UnauthorizedError();
       }
       await showGenericErrorDialog(context: context, error: e);
-      if (e is DioError && e.response?.statusCode == 401) {
+      if (e is DioException && e.response?.statusCode == 401) {
         throw UnauthorizedError();
       }
       rethrow;
@@ -1300,7 +1300,7 @@ class CollectionsService {
       _cacheLocalPathAndCollection(collection);
       return collection;
     } catch (e) {
-      if (e is DioError && e.response?.statusCode == 401) {
+      if (e is DioException && e.response?.statusCode == 401) {
         throw UnauthorizedError();
       }
       _logger.severe('failed to fetch collection: $collectionID', e);
