@@ -969,6 +969,44 @@ const Page: React.FC = () => {
                         />
                     )}
                 </NavbarBaseNormalFlow>
+                {selected.count > 0 &&
+                    selected.collectionID === activeCollectionID && (
+                        <SelectedFileOptions
+                            handleCollectionOps={collectionOpsHelper}
+                            handleFileOps={fileOpsHelper}
+                            showCreateCollectionModal={
+                                showCreateCollectionModal
+                            }
+                            onOpenCollectionSelector={
+                                handleOpenCollectionSelector
+                            }
+                            count={selected.count}
+                            ownCount={selected.ownCount}
+                            clearSelection={clearSelection}
+                            barMode={barMode}
+                            activeCollectionID={activeCollectionID}
+                            selectedCollection={getSelectedCollection(
+                                selected.collectionID,
+                                collections,
+                            )}
+                            isFavoriteCollection={
+                                collectionSummaries.get(activeCollectionID)
+                                    ?.type == "favorites"
+                            }
+                            isUncategorizedCollection={
+                                collectionSummaries.get(activeCollectionID)
+                                    ?.type == "uncategorized"
+                            }
+                            isIncomingSharedCollection={
+                                collectionSummaries.get(activeCollectionID)
+                                    ?.type == "incomingShareCollaborator" ||
+                                collectionSummaries.get(activeCollectionID)
+                                    ?.type == "incomingShareViewer"
+                            }
+                            isInSearchMode={isInSearchMode}
+                            isInHiddenSection={barMode == "hidden-albums"}
+                        />
+                    )}
                 {isOffline && <OfflineMessage />}
 
                 <GalleryBarAndListHeader
@@ -1085,44 +1123,6 @@ const Page: React.FC = () => {
                         }}
                     />
                 )}
-                {selected.count > 0 &&
-                    selected.collectionID === activeCollectionID && (
-                        <SelectedFileOptions
-                            handleCollectionOps={collectionOpsHelper}
-                            handleFileOps={fileOpsHelper}
-                            showCreateCollectionModal={
-                                showCreateCollectionModal
-                            }
-                            onOpenCollectionSelector={
-                                handleOpenCollectionSelector
-                            }
-                            count={selected.count}
-                            ownCount={selected.ownCount}
-                            clearSelection={clearSelection}
-                            barMode={barMode}
-                            activeCollectionID={activeCollectionID}
-                            selectedCollection={getSelectedCollection(
-                                selected.collectionID,
-                                collections,
-                            )}
-                            isFavoriteCollection={
-                                collectionSummaries.get(activeCollectionID)
-                                    ?.type == "favorites"
-                            }
-                            isUncategorizedCollection={
-                                collectionSummaries.get(activeCollectionID)
-                                    ?.type == "uncategorized"
-                            }
-                            isIncomingSharedCollection={
-                                collectionSummaries.get(activeCollectionID)
-                                    ?.type == "incomingShareCollaborator" ||
-                                collectionSummaries.get(activeCollectionID)
-                                    ?.type == "incomingShareViewer"
-                            }
-                            isInSearchMode={isInSearchMode}
-                            isInHiddenSection={barMode == "hidden-albums"}
-                        />
-                    )}
                 <Export
                     {...exportVisibilityProps}
                     collectionNameMap={state.allCollectionNameByID}
