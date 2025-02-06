@@ -4,7 +4,7 @@ import {
     staticAppTitle,
     wipDesktopCustomTitlebar,
 } from "@/base/app";
-import { CenteredFlex } from "@/base/components/containers";
+import { CenteredRow } from "@/base/components/containers";
 import { CustomHead } from "@/base/components/Head";
 import {
     LoadingIndicator,
@@ -226,10 +226,9 @@ const WindowTitlebar: React.FC<React.PropsWithChildren> = ({ children }) => (
 );
 
 // See: [Note: Customize the desktop title bar]
-const WindowTitlebarArea = styled(CenteredFlex)`
+const WindowTitlebarArea = styled(CenteredRow)`
     width: 100%;
     height: env(titlebar-area-height, 30px /* fallback */);
-    display: flex;
     /* Allow using the titlebar to drag the window */
     app-region: drag;
 `;

@@ -2,10 +2,7 @@ import {
     AccountsPageContents,
     AccountsPageTitle,
 } from "@/accounts/components/layouts/centered-paper";
-import {
-    SpaceBetweenFlex,
-    Stack100vhCenter,
-} from "@/base/components/containers";
+import { SpacedRow, Stack100vhCenter } from "@/base/components/containers";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import {
     LoadingIndicator,
@@ -588,7 +585,7 @@ const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
             "@media (width < 720px)": { px: "4px" },
         }}
     >
-        <SpaceBetweenFlex sx={{ flex: 1 }}>
+        <SpacedRow sx={{ flex: 1 }}>
             <EnteLogoLink href="https://ente.io">
                 <EnteLogo height={15} />
             </EnteLogoLink>
@@ -597,7 +594,7 @@ const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
             ) : (
                 <GoToEnte />
             )}
-        </SpaceBetweenFlex>
+        </SpacedRow>
     </NavbarBaseNormalFlow>
 );
 
@@ -724,7 +721,7 @@ const ListHeader: React.FC<ListHeaderProps> = ({
 
     return (
         <GalleryItemsHeaderAdapter>
-            <SpaceBetweenFlex>
+            <SpacedRow>
                 <GalleryItemsSummary
                     name={publicCollection.name}
                     fileCount={publicFiles.length}
@@ -739,7 +736,7 @@ const ListHeader: React.FC<ListHeaderProps> = ({
                         </OverflowMenuOption>
                     </OverflowMenu>
                 )}
-            </SpaceBetweenFlex>
+            </SpacedRow>
         </GalleryItemsHeaderAdapter>
     );
 };

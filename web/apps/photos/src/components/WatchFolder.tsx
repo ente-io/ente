@@ -1,4 +1,4 @@
-import { CenteredFlex, SpaceBetweenFlex } from "@/base/components/containers";
+import { CenteredFill, SpacedRow } from "@/base/components/containers";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     OverflowMenu,
@@ -122,12 +122,12 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
                     paper: { sx: { height: "448px", maxWidth: "444px" } },
                 }}
             >
-                <SpaceBetweenFlex sx={{ p: "16px 8px 0px 8px" }}>
+                <SpacedRow sx={{ p: "16px 8px 0px 8px" }}>
                     <DialogTitle variant="h3">
                         {t("watched_folders")}
                     </DialogTitle>
                     <DialogCloseIconButton {...{ onClose }} />
-                </SpaceBetweenFlex>
+                </SpacedRow>
                 <DialogContent sx={{ flex: 1 }}>
                     <Stack sx={{ gap: 1, p: 1.5, height: "100%" }}>
                         <WatchList {...{ watches, removeWatch }} />
@@ -170,30 +170,28 @@ const WatchList: React.FC<WatchList> = ({ watches, removeWatch }) =>
         </Stack>
     );
 
-const NoWatches: React.FC = () => {
-    return (
-        <CenteredFlex sx={{ flex: 1, mb: 4 }}>
-            <Stack sx={{ gap: 1.5 }}>
-                <Typography variant="h6">{t("no_folders_added")}</Typography>
-                <Typography variant="small" sx={{ py: 1, color: "text.muted" }}>
-                    {t("watch_folders_hint_1")}
-                </Typography>
-                <Typography variant="small" sx={{ color: "text.muted" }}>
-                    <Stack direction="row" sx={{ gap: 1 }}>
-                        <Check />
-                        {t("watch_folders_hint_2")}
-                    </Stack>
-                </Typography>
-                <Typography variant="small" sx={{ color: "text.muted" }}>
-                    <Stack direction="row" sx={{ gap: 1 }}>
-                        <Check />
-                        {t("watch_folders_hint_3")}
-                    </Stack>
-                </Typography>
-            </Stack>
-        </CenteredFlex>
-    );
-};
+const NoWatches: React.FC = () => (
+    <CenteredFill sx={{ mb: 4 }}>
+        <Stack sx={{ gap: 1.5 }}>
+            <Typography variant="h6">{t("no_folders_added")}</Typography>
+            <Typography variant="small" sx={{ py: 1, color: "text.muted" }}>
+                {t("watch_folders_hint_1")}
+            </Typography>
+            <Typography variant="small" sx={{ color: "text.muted" }}>
+                <Stack direction="row" sx={{ gap: 1 }}>
+                    <Check />
+                    {t("watch_folders_hint_2")}
+                </Stack>
+            </Typography>
+            <Typography variant="small" sx={{ color: "text.muted" }}>
+                <Stack direction="row" sx={{ gap: 1 }}>
+                    <Check />
+                    {t("watch_folders_hint_3")}
+                </Stack>
+            </Typography>
+        </Stack>
+    </CenteredFill>
+);
 
 const Check: React.FC = () => (
     <CheckIcon
@@ -222,7 +220,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
     };
 
     return (
-        <SpaceBetweenFlex sx={{ overflow: "hidden", flexShrink: 0 }}>
+        <SpacedRow sx={{ overflow: "hidden", flexShrink: 0 }}>
             <Stack direction="row" sx={{ overflow: "hidden", gap: 1.5 }}>
                 {watch.collectionMapping === "root" ? (
                     <Tooltip title={t("uploaded_to_single_collection")}>
@@ -239,7 +237,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
                 </Stack>
             </Stack>
             <EntryOptions {...{ confirmStopWatching }} />
-        </SpaceBetweenFlex>
+        </SpacedRow>
     );
 };
 

@@ -1,4 +1,4 @@
-import { CenteredFlex } from "@/base/components/containers";
+import { CenteredRow } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DoneIcon from "@mui/icons-material/Done";
@@ -22,9 +22,9 @@ interface CodeBlockProps {
 export const CodeBlock: React.FC<CodeBlockProps> = ({ code }) => {
     if (!code) {
         return (
-            <CenteredFlex sx={{ minHeight: "80px" }}>
+            <CenteredRow sx={{ minHeight: "80px" }}>
                 <ActivityIndicator />
-            </CenteredFlex>
+            </CenteredRow>
         );
     }
 
