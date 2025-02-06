@@ -522,19 +522,10 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
     };
 
     const trashFile = async (file: DisplayFile) => {
-        try {
-            showLoadingBar();
-            try {
-                await moveToTrash([file]);
-            } finally {
-                hideLoadingBar();
-            }
-            markTempDeleted?.([file]);
-            updateItems(items.filter((item) => item.id !== file.id));
-            needUpdate.current = true;
-        } catch (e) {
-            log.error("trashFile failed", e);
-        }
+        await moveToTrash([file]);
+        markTempDeleted?.([file]);
+        updateItems(items.filter((item) => item.id !== file.id));
+        needUpdate.current = true;
     };
 
     const confirmDeleteFile = (file: EnteFile) => {
