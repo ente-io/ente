@@ -31,7 +31,7 @@ import {
     updateReadyToInstallDialogAttributes,
 } from "@/new/photos/components/utils/download";
 import { useLoadingBar } from "@/new/photos/components/utils/use-loading-bar";
-import { photosDialogZ } from "@/new/photos/components/utils/z-index";
+import { aboveGalleryContentZ } from "@/new/photos/components/utils/z-index";
 import { runMigrations } from "@/new/photos/services/migration";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
@@ -186,7 +186,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <ThemedLoadingBar ref={loadingBarRef} />
 
                 <AttributedMiniDialog
-                    sx={{ zIndex: photosDialogZ }}
+                    sx={{ zIndex: aboveGalleryContentZ }}
                     {...miniDialogProps}
                 />
 
@@ -227,9 +227,6 @@ const WindowTitlebar: React.FC<React.PropsWithChildren> = ({ children }) => (
 
 // See: [Note: Customize the desktop title bar]
 const WindowTitlebarArea = styled(CenteredFlex)`
-    z-index: 10000;
-    background-color: var(--mui-palette-backdrop-muted);
-    backdrop-filter: blur(3px);
     width: 100%;
     height: env(titlebar-area-height, 30px /* fallback */);
     display: flex;

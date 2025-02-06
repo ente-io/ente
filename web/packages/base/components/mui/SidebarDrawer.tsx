@@ -19,19 +19,46 @@ import type { ModalVisibilityProps } from "../utils/modal";
  *
  * It is width limited to 375px, and always at full width. It also has a default
  * padding.
+ *
+ * It also does some trickery with a sticky opaque bar to ensure that the
+ * content scrolls below our inline title bar on desktop.
  */
-export const SidebarDrawer = styled(Drawer)(({ theme }) => ({
-    "& .MuiPaper-root": {
-        maxWidth: "375px",
-        width: "100%",
-        scrollbarWidth: "thin",
-        padding: theme.spacing(1),
-        // Add extra padding on the top to account for our inline title bar.
-        // See: [Note: Customize the desktop title bar]
-        ...(wipDesktopCustomTitlebar
-            ? { paddingTop: "calc(env(titlebar-area-height) / 2 + 4px)" }
-            : {}),
-    },
+export const SidebarDrawer: React.FC<DrawerProps> = ({ children, ...rest }) => (
+    <Drawer
+        {...rest}
+        PaperProps={{
+            sx: {
+                maxWidth: "375px",
+                width: "100%",
+                scrollbarWidth: "thin",
+                // Need to increase specificity to override inherited padding.
+                "&&": { padding: 0 },
+            },
+        }}
+    >
+        {wipDesktopCustomTitlebar && <AppTitlebarBackdrop />}
+        <Box sx={{ p: 1 }}>{children}</Box>
+    </Drawer>
+);
+
+/**
+ * When running on desktop, we adds a sticky opaque bar at the top of the
+ * sidebar with a z-index greater than the expected sidebar contents. This
+ * ensures that any title bar overlays added by the system (e.g. the traffic
+ * lights on macOS) have a opaque-ish background and the sidebar contents scroll
+ * underneath them.
+ *
+ * See: [Note: Customize the desktop title bar]
+ */
+const AppTitlebarBackdrop = styled("div")(({ theme }) => ({
+    position: "sticky",
+    top: 0,
+    left: 0,
+    width: "100%",
+    minHeight: "env(titlebar-area-height, 30px)",
+    bgcolor: theme.vars.palette.backdrop.muted,
+    backdropFilter: "blur(3px)",
+    zIndex: 10000,
 }));
 
 /**
