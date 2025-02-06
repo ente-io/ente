@@ -10,7 +10,7 @@ import {
 } from "@/base/components/loaders";
 import type { ButtonishProps } from "@/base/components/mui";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { NavbarBaseNormalFlow, SelectionBar } from "@/base/components/Navbar";
+import { NavbarBaseNormalFlow } from "@/base/components/Navbar";
 import {
     OverflowMenu,
     OverflowMenuOption,
@@ -515,7 +515,33 @@ export default function PublicCollectionGallery() {
                         getFolderSelectorInputProps,
                     }}
                 />
-                <SharedAlbumNavbar onAddPhotos={onAddPhotos} />
+                <NavbarBaseNormalFlow
+                    sx={{
+                        mb: "16px",
+                        px: "24px",
+                        "@media (width < 720px)": { px: "4px" },
+                    }}
+                >
+                    {selected.count > 0 ? (
+                        <SelectedFileOptions
+                            downloadFilesHelper={downloadFilesHelper}
+                            clearSelection={clearSelection}
+                            count={selected.count}
+                        />
+                    ) : (
+                        <SpacedRow sx={{ flex: 1 }}>
+                            <EnteLogoLink href="https://ente.io">
+                                <EnteLogo height={15} />
+                            </EnteLogoLink>
+                            {onAddPhotos ? (
+                                <AddPhotosButton onClick={onAddPhotos} />
+                            ) : (
+                                <GoToEnte />
+                            )}
+                        </SpacedRow>
+                    )}
+                </NavbarBaseNormalFlow>
+
                 <PhotoFrame
                     files={publicFiles}
                     syncWithRemote={syncWithRemote}
@@ -555,48 +581,10 @@ export default function PublicCollectionGallery() {
                     attributesList={filesDownloadProgressAttributesList}
                     setAttributesList={setFilesDownloadProgressAttributesList}
                 />
-                {selected.count > 0 && (
-                    <SelectedFileOptions
-                        downloadFilesHelper={downloadFilesHelper}
-                        clearSelection={clearSelection}
-                        count={selected.count}
-                    />
-                )}
             </FullScreenDropZone>
         </PublicCollectionGalleryContext.Provider>
     );
 }
-
-interface SharedAlbumNavbarProps {
-    /**
-     * If provided, then an "Add Photos" button will be shown in the navbar, and
-     * this function will be called when it is clicked.
-     */
-    onAddPhotos: (() => void) | undefined;
-}
-
-const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
-    onAddPhotos,
-}) => (
-    <NavbarBaseNormalFlow
-        sx={{
-            mb: "16px",
-            px: "24px",
-            "@media (width < 720px)": { px: "4px" },
-        }}
-    >
-        <SpacedRow sx={{ flex: 1 }}>
-            <EnteLogoLink href="https://ente.io">
-                <EnteLogo height={15} />
-            </EnteLogoLink>
-            {onAddPhotos ? (
-                <AddPhotosButton onClick={onAddPhotos} />
-            ) : (
-                <GoToEnte />
-            )}
-        </SpacedRow>
-    </NavbarBaseNormalFlow>
-);
 
 const EnteLogoLink = styled("a")(({ theme }) => ({
     // Remove the excess space at the top.
@@ -671,7 +659,7 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     clearSelection,
 }) => {
     return (
-        <SelectionBar>
+        <>
             <FluidContainer>
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />
@@ -687,7 +675,7 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     </IconButton>
                 </Tooltip>
             </Stack>
-        </SelectionBar>
+        </>
     );
 };
 
