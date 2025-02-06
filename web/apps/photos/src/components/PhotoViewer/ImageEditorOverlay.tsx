@@ -990,7 +990,6 @@ const FreehandCropRegion = forwardRef(
                         gridTemplateColumns: "1fr 1fr 1fr",
                         gridTemplateRows: "1fr 1fr 1fr",
                         gap: "0px",
-                        zIndex: 30, // make sure the crop box is above the overlays
                     }}
                     ref={ref}
                 >
