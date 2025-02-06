@@ -1369,25 +1369,50 @@ class SearchService {
     }
 
     // Check if any trip locations should be merged
-    // bool merged = false;
-    //   String? mergeID;
-    //   for (final tripLocation in tripLocations.values) {
-    //     final otherTripFirstTime = DateTime.fromMicrosecondsSinceEpoch(
-    //       tripLocation.$3,
-    //     );
-    //     final otherTripLastTime = DateTime.fromMicrosecondsSinceEpoch(
-    //       tripLocation.$4,
-    //     );
-    // final bool tripsMatch = firstCreationTime.isBefore(
-    //           otherTripLastTime.add(
-    //             const Duration(days: 1),
-    //           ),
-    //         ) ||
-    //         lastCreationTime.isAfter(
-    //           otherTripFirstTime.subtract(
-    //             const Duration(days: 1),
-    //           ),
-    //         );
+    final Map<String, (List<EnteFile>, int, int)> mergedTrips = {};
+    for (final tripID in tripLocations.keys) {
+      final trip = tripLocations[tripID]!;
+      final tripFirstTime = DateTime.fromMicrosecondsSinceEpoch(
+        trip.$3,
+      );
+      final tripLastTime = DateTime.fromMicrosecondsSinceEpoch(
+        trip.$4,
+      );
+      bool merged = false;
+      for (final otherTripID in mergedTrips.keys) {
+        final otherTrip = mergedTrips[otherTripID]!;
+        final otherTripFirstTime = DateTime.fromMicrosecondsSinceEpoch(
+          otherTrip.$2,
+        );
+        final otherTripLastTime = DateTime.fromMicrosecondsSinceEpoch(
+          otherTrip.$3,
+        );
+        final bool overlapBeginning = tripFirstTime.isBefore(
+              otherTripLastTime.add(
+                const Duration(days: 1),
+              ),
+            ) &&
+            tripFirstTime.isAfter(otherTripFirstTime);
+        final bool overlapEnd = tripLastTime.isAfter(
+              otherTripFirstTime.subtract(
+                const Duration(days: 1),
+              ),
+            ) &&
+            tripLastTime.isBefore(otherTripLastTime);
+        if (overlapBeginning || overlapEnd) {
+          mergedTrips[otherTripID] = (
+            otherTrip.$1 + trip.$1,
+            min(otherTrip.$2, trip.$3),
+            max(otherTrip.$3, trip.$4),
+          );
+          _logger.info('Merged two trip locations');
+          merged = true;
+          break;
+        }
+      }
+      if (merged) continue;
+      mergedTrips[tripID] = (trip.$1, trip.$3, trip.$4);
+    }
 
     // TODO: lau: Check if there are any trips to surface
     // For now for testing let's just surface all base and trip locations
@@ -1410,10 +1435,10 @@ class SearchService {
         ),
       );
     }
-    for (final tripLocation in tripLocations.values) {
-      final files = tripLocation.$1; // TODO: lau: take best selection only
-      // final location = tripLocation.$2;
-      const name = "Trip!";
+    for (final finalTrip in mergedTrips.values) {
+      final files = finalTrip.$1; // TODO: lau: take best selection only
+      final year = DateTime.fromMicrosecondsSinceEpoch((finalTrip.$2 + finalTrip.$2) ~/ 2).year;
+      final name = "Trip! ($year)";
       searchResults.add(
         GenericSearchResult(
           ResultType.event,
