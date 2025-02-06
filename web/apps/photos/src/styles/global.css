@@ -35,6 +35,11 @@ body {
     object-fit: contain;
 }
 
+/* Need this in CSS instead of as an inline style to increase specificity. */
+.pswp__top-bar.pswp__top-bar {
+    top: var(--ente-pswp-top-bar-top, 0px);
+}
+
 .pswp-item-container > * {
     position: absolute;
     transition: opacity 1s ease;
