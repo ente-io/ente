@@ -13,7 +13,7 @@ import { downloadManager } from "@/gallery/services/download";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
-import { ConfirmDeleteFileDialog } from "@/new/photos/components/PhotoViewer";
+import { ConfirmDeleteFileDialog } from "@/new/photos/components/FileViewer";
 import { moveToTrash } from "@/new/photos/services/collection";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import { AppContext } from "@/new/photos/types/context";
