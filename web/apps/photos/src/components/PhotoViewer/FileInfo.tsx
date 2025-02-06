@@ -393,7 +393,7 @@ const FileInfoSidebar = styled(
     ),
 )(({ theme }) => ({
     zIndex: fileInfoDrawerZ,
-    // [Note: Lighter backdrop for dialog contents on image gallery]
+    // [Note: Lighter backdrop for overlays on photo viewer]
     //
     // The default backdrop color we use for the drawer in light mode is too
     // "white" when used in the image gallery because unlike the rest of the app

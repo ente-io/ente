@@ -1,6 +1,7 @@
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
+import { t } from "i18next";
 import { aboveGalleryContentZ } from "./utils/z-index";
 
 // const confirmTrashFile = (file: EnteFile) => {
@@ -8,7 +9,7 @@ import { aboveGalleryContentZ } from "./utils/z-index";
 //         return;
 //     }
 //     showMiniDialog({
-//         title: t("trash_file_title"),
+//
 //         message: t("trash_file_message"),
 //         continue: {
 //             text: t("move_to_trash"),
@@ -41,7 +42,16 @@ export const ConfirmDeleteFileDialog: React.FC<
 > = ({ onConfirm, ...visibilityProps }) => (
     <TitledMiniDialog
         {...visibilityProps}
-        sx={{ zIndex: aboveGalleryContentZ }}
+        title={t("trash_file_title")}
+        sx={(theme) => ({
+            zIndex: aboveGalleryContentZ,
+            // See: [Note: Lighter backdrop for overlays on photo viewer]
+            ...theme.applyStyles("light", {
+                ".MuiBackdrop-root": {
+                    backgroundColor: theme.vars.palette.backdrop.faint,
+                },
+            }),
+        })}
     >
         <FocusVisibleButton fullWidth onClick={onConfirm}>
             {"Test"}
