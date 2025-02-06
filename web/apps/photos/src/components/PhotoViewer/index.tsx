@@ -772,7 +772,8 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                             position: "absolute",
                             top: "10vh",
                             right: "2vh",
-                            zIndex: 10,
+                            // Position atop the viewer contents
+                            zIndex: 1,
                         }}
                     >
                         {fileDownloadProgress.has(
