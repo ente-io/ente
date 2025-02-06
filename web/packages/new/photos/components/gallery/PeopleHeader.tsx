@@ -744,11 +744,7 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
         {items.map((item) => (
             <ListItem
                 key={item.id}
-                sx={{
-                    paddingInline: 0,
-                    paddingBlockEnd: "24px",
-                    justifyContent: "space-between",
-                }}
+                sx={{ px: 0, pb: "24px", justifyContent: "space-between" }}
             >
                 <Stack sx={{ gap: "10px" }}>
                     <Typography variant="small" sx={{ color: "text.muted" }}>

@@ -71,7 +71,7 @@ export const ConfirmDeleteFileDialog: React.FC<
             <Typography sx={{ color: "text.muted" }}>
                 {t("trash_file_message")}
             </Typography>
-            <Stack sx={{ paddingBlockStart: "24px", gap: "8px" }}>
+            <Stack sx={{ pt: 3, gap: 1 }}>
                 {phase == "failed" && <InlineErrorIndicator />}
                 <LoadingButton
                     loading={phase == "loading"}
