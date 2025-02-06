@@ -29,7 +29,7 @@ import {
 } from "@/new/photos/components/utils/dialog";
 import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import {
-    aboveGalleryContentZ,
+    aboveFileViewerContentZ,
     fileInfoDrawerZ,
 } from "@/new/photos/components/utils/z-index";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
@@ -815,7 +815,7 @@ const FileNameEditDialog = ({
     };
     return (
         <TitledMiniDialog
-            sx={{ zIndex: aboveGalleryContentZ }}
+            sx={{ zIndex: aboveFileViewerContentZ }}
             open={isInEditMode}
             onClose={closeEditMode}
             title={t("rename_file")}

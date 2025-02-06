@@ -3,7 +3,7 @@ import DoneIcon from "@mui/icons-material/Done";
 import { IconButton, Tooltip, type SvgIconProps } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";
-import { aboveGalleryContentZ } from "./utils/z-index";
+import { aboveFileViewerContentZ } from "./utils/z-index";
 
 interface CopyButtonProps {
     /**
@@ -31,7 +31,7 @@ export const CopyButton: React.FC<CopyButtonProps> = ({ text, size }) => {
             arrow
             open={copied}
             title={t("copied")}
-            slotProps={{ popper: { sx: { zIndex: aboveGalleryContentZ } } }}
+            slotProps={{ popper: { sx: { zIndex: aboveFileViewerContentZ } } }}
         >
             <IconButton onClick={handleClick} color="secondary">
                 <Icon fontSize={size} />

@@ -7,7 +7,7 @@ import log from "@/base/log";
 import { Stack, Typography, type ModalProps } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";
-import { aboveGalleryContentZ } from "./utils/z-index";
+import { aboveFileViewerContentZ } from "./utils/z-index";
 
 type ConfirmDeleteFileDialogProps = ModalVisibilityProps & {
     /**
@@ -46,6 +46,7 @@ export const ConfirmDeleteFileDialog: React.FC<
             setPhase("failed");
         }
     };
+
     const handleClose: ModalProps["onClose"] = (_, reason) => {
         // Ignore backdrop clicks when we're processing the user request.
         if (reason == "backdropClick" && phase == "loading") return;
@@ -58,7 +59,7 @@ export const ConfirmDeleteFileDialog: React.FC<
             onClose={handleClose}
             title={t("trash_file_title")}
             sx={(theme) => ({
-                zIndex: aboveGalleryContentZ,
+                zIndex: aboveFileViewerContentZ,
                 // See: [Note: Lighter backdrop for overlays on photo viewer]
                 ...theme.applyStyles("light", {
                     ".MuiBackdrop-root": {
