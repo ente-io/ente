@@ -3,6 +3,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/preview_updated_event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
@@ -110,7 +111,7 @@ class _PreviewStatusWidgetState extends State<PreviewStatusWidget> {
                 preview == null || preview!.status == PreviewItemStatus.uploaded
                     ? widget.onStreamChange
                     : () {
-                        Navigator.push(
+                        Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                             builder: (_) => const BackupStatusScreen(),
@@ -165,16 +166,16 @@ class _PreviewStatusWidgetState extends State<PreviewStatusWidget> {
                   ),
                   Text(
                     isInProgress
-                        ? "Processing"
+                        ? S.of(context).processing
                         : isInQueue
-                            ? "Queued"
+                            ? S.of(context).queued
                             : isBeforeCutoffDate
-                                ? "Ineligible"
+                                ? S.of(context).ineligible
                                 : isFailed
-                                    ? "Failed"
+                                    ? S.of(context).failed
                                     : widget.isPreviewPlayer
-                                        ? "Play original"
-                                        : "Play stream",
+                                        ? S.of(context).playOriginal
+                                        : S.of(context).playStream,
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,

@@ -63,6 +63,7 @@ class _BackupItemCardState extends State<BackupItemCard> {
           context,
           FileWidget(
             widget.item.file,
+            tagPrefix: "backups",
           ),
           forceCustomPageRoute: true,
         );

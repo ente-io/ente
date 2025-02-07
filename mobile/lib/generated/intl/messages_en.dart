@@ -894,6 +894,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Face recognition"),
         "faces": MessageLookupByLibrary.simpleMessage("Faces"),
+        "failed": MessageLookupByLibrary.simpleMessage("Failed"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Failed to apply code"),
         "failedToCancel":
@@ -1030,6 +1031,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "indexedItems": MessageLookupByLibrary.simpleMessage("Indexed items"),
         "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
             "Indexing is paused. It will automatically resume when device is ready."),
+        "ineligible": MessageLookupByLibrary.simpleMessage("Ineligible"),
         "info": MessageLookupByLibrary.simpleMessage("Info"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Insecure device"),
@@ -1363,7 +1365,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "pinAlbum": MessageLookupByLibrary.simpleMessage("Pin album"),
         "pinLock": MessageLookupByLibrary.simpleMessage("PIN lock"),
         "playOnTv": MessageLookupByLibrary.simpleMessage("Play album on TV"),
+        "playOriginal": MessageLookupByLibrary.simpleMessage("Play original"),
         "playStoreFreeTrialValidTill": m52,
+        "playStream": MessageLookupByLibrary.simpleMessage("Play stream"),
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("PlayStore subscription"),
         "pleaseCheckYourInternetConnectionAndTryAgain":
@@ -1410,13 +1414,15 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Private sharing"),
         "proceed": MessageLookupByLibrary.simpleMessage("Proceed"),
         "processed": MessageLookupByLibrary.simpleMessage("Processed"),
+        "processing": MessageLookupByLibrary.simpleMessage("Processing"),
         "processingImport": m55,
         "processingVideos":
-            MessageLookupByLibrary.simpleMessage("Processing Videos"),
+            MessageLookupByLibrary.simpleMessage("Processing videos"),
         "publicLinkCreated":
             MessageLookupByLibrary.simpleMessage("Public link created"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Public link enabled"),
+        "queued": MessageLookupByLibrary.simpleMessage("Queued"),
         "quickLinks": MessageLookupByLibrary.simpleMessage("Quick links"),
         "radius": MessageLookupByLibrary.simpleMessage("Radius"),
         "raiseTicket": MessageLookupByLibrary.simpleMessage("Raise ticket"),
@@ -1932,7 +1938,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoInfo": MessageLookupByLibrary.simpleMessage("Video Info"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("video"),
         "videoStreaming":
-            MessageLookupByLibrary.simpleMessage("Video Streaming"),
+            MessageLookupByLibrary.simpleMessage("Video streaming"),
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("View active sessions"),
