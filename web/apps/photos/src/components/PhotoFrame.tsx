@@ -518,7 +518,7 @@ const PhotoFrame = ({
                     />
                 )}
             </AutoSizer>
-            {process.env.NEXT_ENTE_WIP_PS5 && <FileViewer />}
+            {process.env.NEXT_PUBLIC_ENTE_WIP_PS5 && <FileViewer />}
             <PhotoViewer
                 isOpen={open}
                 items={displayFiles}
