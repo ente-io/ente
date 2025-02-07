@@ -149,7 +149,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <HelpSection closeSidebar={closeSidebar} />
             <Divider />
             <ExitSection />
-            <Divider />
             <InfoSection />
         </Stack>
     </RootSidebarDrawer>
@@ -600,9 +599,6 @@ const HelpSection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
 const ExitSection: React.FC = () => {
     const { showMiniDialog, logout } = useContext(AppContext);
 
-    const { show: showDeleteAccount, props: deleteAccountVisibilityProps } =
-        useModalVisibility();
-
     const handleLogout = () =>
         showMiniDialog({
             message: t("logout_message"),
@@ -618,13 +614,6 @@ const ExitSection: React.FC = () => {
                 label={t("logout")}
                 onClick={handleLogout}
             />
-            <RowButton
-                variant="secondary"
-                color="critical"
-                onClick={showDeleteAccount}
-                label={t("delete_account")}
-            />
-            <DeleteAccountModal {...deleteAccountVisibilityProps} />
         </>
     );
 };
@@ -642,9 +631,8 @@ const InfoSection: React.FC = () => {
         <>
             <Stack
                 sx={{
-                    p: "32px 16px 16px 16px",
-                    px: "16px",
-                    gap: "32px",
+                    p: "24px 18px 16px 18px",
+                    gap: "24px",
                     color: "text.muted",
                 }}
             >
@@ -669,6 +657,8 @@ const Account: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     const { show: showRecoveryKey, props: recoveryKeyVisibilityProps } =
         useModalVisibility();
     const { show: showTwoFactor, props: twoFactorVisibilityProps } =
+        useModalVisibility();
+    const { show: showDeleteAccount, props: deleteAccountVisibilityProps } =
         useModalVisibility();
 
     const handleRootClose = () => {
@@ -721,10 +711,16 @@ const Account: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                             onClick={handleChangePassword}
                         />
                         <RowButtonDivider />
-
                         <RowButton
                             label={t("change_email")}
                             onClick={handleChangeEmail}
+                        />
+                    </RowButtonGroup>
+                    <RowButtonGroup>
+                        <RowButton
+                            color="critical"
+                            label={t("delete_account")}
+                            onClick={showDeleteAccount}
                         />
                     </RowButtonGroup>
                 </Stack>
@@ -737,6 +733,7 @@ const Account: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 {...twoFactorVisibilityProps}
                 onRootClose={onRootClose}
             />
+            <DeleteAccountModal {...deleteAccountVisibilityProps} />
         </NestedSidebarDrawer>
     );
 };
