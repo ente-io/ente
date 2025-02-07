@@ -125,7 +125,14 @@ bool? checkPanoramaFromEXIF(File? file, Map<String, IfdTag>? exifData) {
   return element?.printable == "6";
 }
 
-Future<DateTime?> getCreationTimeFromEXIF(
+class ParsedExifDateTime {
+  final DateTime? time;
+  final String? dateTime;
+  final String? offsetTime;
+  ParsedExifDateTime(this.time, this.dateTime, this.offsetTime);
+}
+
+Future<ParsedExifDateTime?> tryParseExifDateTime(
   File? file,
   Map<String, IfdTag>? exifData,
 ) async {
@@ -153,28 +160,38 @@ Future<DateTime?> getCreationTimeFromEXIF(
   return null;
 }
 
-DateTime getDateTimeInDeviceTimezone(String exifTime, String? offsetString) {
+ParsedExifDateTime getDateTimeInDeviceTimezone(
+  String exifTime,
+  String? offsetString,
+) {
   final shouldParseDateInUTCTimeZone = offsetString != null;
   final DateTime result = DateFormat(kExifDateTimePattern)
       .parse(exifTime, shouldParseDateInUTCTimeZone);
-  if (offsetString == null) {
-    return result;
+  if (offsetString != null && (offsetString ?? '').toUpperCase() != "Z") {
+    try {
+      final List<String> splitHHMM = offsetString.split(":");
+      final int offsetHours = int.parse(splitHHMM[0]);
+      final int offsetMinutes =
+          int.parse(splitHHMM[1]) * (offsetHours.isNegative ? -1 : 1);
+      // Adjust the date for the offset to get the photo's correct UTC time
+      final photoUtcDate =
+          result.add(Duration(hours: -offsetHours, minutes: -offsetMinutes));
+      // Convert the UTC time to the device's local time
+      final deviceLocalTime = photoUtcDate.toLocal();
+      return ParsedExifDateTime(
+        deviceLocalTime,
+        result.toIso8601String(),
+        offsetString,
+      );
+    } catch (e, s) {
+      _logger.severe("tz offset adjust failed $offsetString", e, s);
+    }
   }
-  try {
-    final List<String> splitHHMM = offsetString.split(":");
-    final int offsetHours = int.parse(splitHHMM[0]);
-    final int offsetMinutes =
-        int.parse(splitHHMM[1]) * (offsetHours.isNegative ? -1 : 1);
-    // Adjust the date for the offset to get the photo's correct UTC time
-    final photoUtcDate =
-        result.add(Duration(hours: -offsetHours, minutes: -offsetMinutes));
-    // Convert the UTC time to the device's local time
-    final deviceLocalTime = photoUtcDate.toLocal();
-    return deviceLocalTime;
-  } catch (e, s) {
-    _logger.severe("tz offset adjust failed $offsetString", e, s);
-  }
-  return result;
+  return ParsedExifDateTime(
+    result,
+    result.toIso8601String(),
+    (offsetString ?? '').toUpperCase() == 'Z' ? 'Z' : null,
+  );
 }
 
 Location? locationFromExif(Map<String, IfdTag> exif) {

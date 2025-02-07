@@ -175,10 +175,10 @@ class EnteFile {
       final exifData = await getExifFromSourceFile(mediaUploadData.sourceFile!);
       if (exifData != null) {
         if (fileType == FileType.image) {
-          final exifTime = await getCreationTimeFromEXIF(null, exifData);
-          if (exifTime != null) {
+          final dateResult = await tryParseExifDateTime(null, exifData);
+          if (dateResult != null && dateResult.time != null) {
             hasExifTime = true;
-            creationTime = exifTime.microsecondsSinceEpoch;
+            creationTime = dateResult.time!.microsecondsSinceEpoch;
           }
           mediaUploadData.isPanorama = checkPanoramaFromEXIF(null, exifData);
 
