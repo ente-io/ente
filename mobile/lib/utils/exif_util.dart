@@ -47,7 +47,7 @@ Future<Map<String, IfdTag>> getExif(EnteFile file) async {
   }
 }
 
-Future<Map<String, IfdTag>?> getExifFromSourceFile(File originFile) async {
+Future<Map<String, IfdTag>?> tryExifFromFile(File originFile) async {
   try {
     final exif = await readExifAsync(originFile);
     return exif;

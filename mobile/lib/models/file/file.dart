@@ -172,7 +172,7 @@ class EnteFile {
     bool hasExifTime = false;
     if ((fileType == FileType.image || fileType == FileType.video) &&
         mediaUploadData.sourceFile != null) {
-      final exifData = await getExifFromSourceFile(mediaUploadData.sourceFile!);
+      final exifData = await tryExifFromFile(mediaUploadData.sourceFile!);
       if (exifData != null) {
         if (fileType == FileType.image) {
           final dateResult = await tryParseExifDateTime(null, exifData);
