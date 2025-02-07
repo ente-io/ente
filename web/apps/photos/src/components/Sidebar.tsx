@@ -93,7 +93,8 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import NorthEastIcon from "@mui/icons-material/NorthEast";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
-    Box,    Button,
+    Box,
+    Button,
     Dialog,
     DialogContent,
     Divider,
@@ -986,29 +987,27 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         onRootClose();
     };
 
-    const handleHelp = () =>
-        openURL("https://help.ente.io/photos/");
+    const handleHelp = () => openURL("https://help.ente.io/photos/");
 
-    const handleProductUpdates = () =>
-        openURL("https://ente.io/blog/");
+    const handleProductUpdates = () => openURL("https://ente.io/blog/");
 
     const handleRequestFeature = () =>
         openURL("https://github.com/ente-io/ente/discussions");
 
     const handleSupport = () => initiateEmail("support@ente.io");
 
-    const confirmLogDownload = () =>
+    const confirmViewLogs = () =>
         showMiniDialog({
-            title: t("download_logs"),
-            message: <Trans i18nKey={"download_logs_message"} />,
+            title: t("view_logs"),
+            message: <Trans i18nKey={"view_logs_message"} />,
             continue: {
-                text: t("download"),
-                action: downloadLogs,
+                text: t("view_logs"),
+                action: viewLogs,
             },
         });
 
-    const downloadLogs = () => {
-        log.info("Downloading logs");
+    const viewLogs = () => {
+        log.info("Viewing logs");
         const electron = globalThis.electron;
         if (electron) electron.openLogDirectory();
         else downloadString(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
@@ -1065,7 +1064,7 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                                 {t("view_logs")}
                             </Typography>
                         }
-                        onClick={confirmLogDownload}
+                        onClick={confirmViewLogs}
                     />
                 </Stack>
             </Stack>
