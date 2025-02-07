@@ -938,11 +938,16 @@ const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
 
     const electron = globalThis.electron;
 
-    useEffect(() => {
-        void electron
+    const refreshAutoLaunchEnabled = useCallback(async () => {
+        return electron
             ?.isAutoLaunchEnabled()
             .then((enabled) => setIsAutoLaunchEnabled(enabled));
     }, [electron]);
+
+    useEffect(
+        () => void refreshAutoLaunchEnabled(),
+        [refreshAutoLaunchEnabled],
+    );
 
     const handleRootClose = () => {
         onClose();
@@ -952,7 +957,8 @@ const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     const toggleProxy = () =>
         void updateCFProxyDisabledPreference(!cfUploadProxyDisabled);
 
-    const toggleAutoLaunch = () => void electron?.toggleAutoLaunch();
+    const toggleAutoLaunch = () =>
+        void electron?.toggleAutoLaunch().then(refreshAutoLaunchEnabled);
 
     return (
         <NestedSidebarDrawer
