@@ -7,27 +7,20 @@ import {
 } from "electron";
 import { allowWindowClose } from "../main";
 import { forceCheckForAppUpdates } from "./services/app-update";
-import autoLauncher from "./services/auto-launcher";
 import { userPreferences } from "./stores/user-preferences";
 
 /** Create and return the entries in the app's main menu bar */
-export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
+export const createApplicationMenu = (mainWindow: BrowserWindow) => {
     // The state of checkboxes
     //
     // Whenever the menu is redrawn the current value of these variables is used
     // to set the checked state for the various settings checkboxes.
-    let isAutoLaunchEnabled = await autoLauncher.isEnabled();
     let shouldHideDockIcon = !!userPreferences.get("hideDockIcon");
 
     const macOSOnly = (options: MenuItemConstructorOptions[]) =>
         process.platform == "darwin" ? options : [];
 
     const handleCheckForUpdates = () => forceCheckForAppUpdates(mainWindow);
-
-    const toggleAutoLaunch = () => {
-        void autoLauncher.toggleAutoLaunch();
-        isAutoLaunchEnabled = !isAutoLaunchEnabled;
-    };
 
     const toggleHideDockIcon = () => {
         // Persist
@@ -56,25 +49,19 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
                 },
                 { type: "separator" },
 
-                {
-                    label: "Preferences",
-                    submenu: [
-                        {
-                            label: "Open Ente on Startup",
-                            type: "checkbox",
-                            checked: isAutoLaunchEnabled,
-                            click: toggleAutoLaunch,
-                        },
-                        ...macOSOnly([
+                ...macOSOnly([
+                    {
+                        label: "Preferences",
+                        submenu: [
                             {
                                 label: "Hide Dock Icon",
                                 type: "checkbox",
                                 checked: shouldHideDockIcon,
                                 click: toggleHideDockIcon,
                             },
-                        ]),
-                    ],
-                },
+                        ],
+                    },
+                ]),
 
                 { type: "separator" },
                 ...macOSOnly([

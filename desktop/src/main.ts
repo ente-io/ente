@@ -152,7 +152,7 @@ const main = () => {
             void mainWindow.loadURL(rendererURL);
 
             // Continue on with the rest of the startup sequence.
-            Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
+            Menu.setApplicationMenu(createApplicationMenu(mainWindow));
             setupTrayItem(mainWindow);
             setupAutoUpdater(mainWindow);
 
