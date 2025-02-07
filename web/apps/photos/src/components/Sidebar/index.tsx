@@ -676,7 +676,7 @@ const DebugSection: React.FC = () => {
     const downloadLogs = () => {
         log.info("Downloading logs");
         if (electron) electron.openLogDirectory();
-        else downloadString(savedLogs(), `debug_logs_${Date.now()}.txt`);
+        else downloadString(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
     };
 
     return (
@@ -692,7 +692,7 @@ const DebugSection: React.FC = () => {
                 variant="secondary"
                 label={
                     <Typography variant="mini" color="text.muted">
-                        {t("debug_logs")}
+                        {t("view_logs")}
                     </Typography>
                 }
                 onClick={confirmLogDownload}

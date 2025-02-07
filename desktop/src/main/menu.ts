@@ -8,7 +8,6 @@ import {
 import { allowWindowClose } from "../main";
 import { forceCheckForAppUpdates } from "./services/app-update";
 import autoLauncher from "./services/auto-launcher";
-import { openLogDirectory } from "./services/dir";
 import { userPreferences } from "./stores/user-preferences";
 
 /** Create and return the entries in the app's main menu bar */
@@ -49,8 +48,6 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
         void shell.openExternal("mailto:support@ente.io");
 
     const handleBlog = () => void shell.openExternal("https://ente.io/blog/");
-
-    const handleViewLogs = () => void openLogDirectory();
 
     return Menu.buildFromTemplate([
         {
@@ -177,11 +174,6 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
                 {
                     label: "Product Updates",
                     click: handleBlog,
-                },
-                { type: "separator" },
-                {
-                    label: "View Logs",
-                    click: handleViewLogs,
                 },
             ],
         },
