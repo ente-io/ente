@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import "package:archive/archive_io.dart";
 import "package:computer/computer.dart";
+import "package:exif/exif.dart";
 import 'package:logging/logging.dart';
 import "package:motion_photos/motion_photos.dart";
 import 'package:motionphoto/motionphoto.dart';
@@ -44,6 +45,8 @@ class MediaUploadData {
   // For iOS, this value will be always null.
   final int? motionPhotoStartIndex;
 
+  final Map<String, IfdTag>? exifData;
+
   bool? isPanorama;
 
   MediaUploadData(
@@ -55,6 +58,7 @@ class MediaUploadData {
     this.width,
     this.motionPhotoStartIndex,
     this.isPanorama,
+    this.exifData,
   });
 }
 
@@ -69,20 +73,27 @@ class FileHashData {
   FileHashData(this.fileHash, {this.zipHash});
 }
 
-Future<MediaUploadData> getUploadDataFromEnteFile(EnteFile file) async {
+Future<MediaUploadData> getUploadDataFromEnteFile(
+  EnteFile file, {
+  bool parseExif = false,
+}) async {
   if (file.isSharedMediaToAppSandbox) {
-    return await _getMediaUploadDataFromAppCache(file);
+    return await _getMediaUploadDataFromAppCache(file, parseExif);
   } else {
-    return await _getMediaUploadDataFromAssetFile(file);
+    return await _getMediaUploadDataFromAssetFile(file, parseExif);
   }
 }
 
-Future<MediaUploadData> _getMediaUploadDataFromAssetFile(EnteFile file) async {
+Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
+  EnteFile file,
+  bool parseExif,
+) async {
   File? sourceFile;
   Uint8List? thumbnailData;
   bool isDeleted;
   String? zipHash;
   String fileHash;
+  Map<String, IfdTag>? exifData;
 
   // The timeouts are to safeguard against https://github.com/CaiJingLong/flutter_photo_manager/issues/467
   final asset = await file.getAsset
@@ -114,6 +125,9 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(EnteFile file) async {
       "id: ${file.localID}",
       InvalidReason.sourceFileMissing,
     );
+  }
+  if (parseExif) {
+    exifData = await tryExifFromFile(sourceFile);
   }
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
   await _decorateEnteFileData(file, asset, sourceFile);
@@ -177,6 +191,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(EnteFile file) async {
     height: h,
     width: w,
     motionPhotoStartIndex: motionPhotoStartingIndex,
+    exifData: exifData,
   );
 }
 
@@ -330,9 +345,11 @@ Future<MetadataRequest> getPubMetadataRequest(
   );
 }
 
-Future<MediaUploadData> _getMediaUploadDataFromAppCache(EnteFile file) async {
+Future<MediaUploadData> _getMediaUploadDataFromAppCache(
+    EnteFile file, bool parseExif) async {
   File sourceFile;
   Uint8List? thumbnailData;
+  Map<String, IfdTag>? exifData;
   const bool isDeleted = false;
   final localPath = getSharedMediaFilePath(file);
   sourceFile = File(localPath);
@@ -350,6 +367,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(EnteFile file) async {
     Map<String, int>? dimensions;
     if (file.fileType == FileType.image) {
       dimensions = await getImageHeightAndWith(imagePath: localPath);
+      exifData = await tryExifFromFile(sourceFile);
     } else if (thumbnailData != null) {
       // the thumbnail null check is to ensure that we are able to generate thum
       // for video, we need to use the thumbnail data with any max width/height
