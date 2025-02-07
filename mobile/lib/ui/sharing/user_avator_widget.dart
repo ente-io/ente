@@ -45,6 +45,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   final _debouncer = Debouncer(
     const Duration(milliseconds: 250),
     executionInterval: const Duration(seconds: 20),
+    leading: true,
   );
 
   @override
