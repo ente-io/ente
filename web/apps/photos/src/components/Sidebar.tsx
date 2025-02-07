@@ -3,29 +3,62 @@ import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import { isDesktop } from "@/base/app";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { LinkButton } from "@/base/components/LinkButton";
-import { RowButton } from "@/base/components/RowButton";
+import {
+    RowButton,
+    RowButtonDivider,
+    RowButtonGroup,
+    RowButtonGroupHint,
+    RowSwitch,
+} from "@/base/components/RowButton";
 import { SpacedRow } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
+import {
+    NestedSidebarDrawer,
+    SidebarDrawer,
+    SidebarDrawerTitlebar,
+    type NestedSidebarDrawerVisibilityProps,
+} from "@/base/components/mui/SidebarDrawer";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import { isDevBuild } from "@/base/env";
-import { pt, ut } from "@/base/i18n";
+import {
+    getLocaleInUse,
+    pt,
+    setLocaleInUse,
+    supportedLocales,
+    ut,
+    type SupportedLocale,
+} from "@/base/i18n";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
 import { downloadString } from "@/base/utils/web";
+import { DropdownInput } from "@/new/photos/components/DropdownInput";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
+import { MLSettings } from "@/new/photos/components/sidebar/MLSettings";
 import { TwoFactorSettings } from "@/new/photos/components/sidebar/TwoFactorSettings";
+import {
+    confirmDisableMapsDialogAttributes,
+    confirmEnableMapsDialogAttributes,
+} from "@/new/photos/components/utils/dialog";
 import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
-import { useUserDetailsSnapshot } from "@/new/photos/components/utils/use-snapshot";
+import {
+    useSettingsSnapshot,
+    useUserDetailsSnapshot,
+} from "@/new/photos/components/utils/use-snapshot";
 import {
     ARCHIVE_SECTION,
     DUMMY_UNCATEGORIZED_COLLECTION,
     TRASH_SECTION,
 } from "@/new/photos/services/collection";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
-import { isInternalUser } from "@/new/photos/services/settings";
+import { isMLSupported } from "@/new/photos/services/ml";
+import {
+    isInternalUser,
+    syncSettings,
+    updateCFProxyDisabledPreference,
+    updateMapEnabled,
+} from "@/new/photos/services/settings";
 import {
     familyAdminEmail,
     hasExceededStorageQuota,
@@ -52,13 +85,15 @@ import {
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import NorthEastIcon from "@mui/icons-material/NorthEast";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
-    Box,
-    Button,
+    Box,    Button,
     Dialog,
     DialogContent,
     Divider,
@@ -67,6 +102,7 @@ import {
     Stack,
     styled,
     Tooltip,
+    useColorScheme,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
@@ -76,6 +112,7 @@ import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import React, {
     MouseEventHandler,
+    useCallback,
     useContext,
     useEffect,
     useMemo,
@@ -86,39 +123,6 @@ import { getUncategorizedCollection } from "services/collectionService";
 import exportService from "services/export";
 import { testUpload } from "../../tests/upload.test";
 import { SubscriptionCard } from "./SubscriptionCard";
-
-import {
-    RowButtonGroup,
-    RowButtonGroupHint,
-    RowSwitch,
-} from "@/base/components/RowButton";
-import {
-    NestedSidebarDrawer,
-    SidebarDrawerTitlebar,
-    type NestedSidebarDrawerVisibilityProps,
-} from "@/base/components/mui/SidebarDrawer";
-import {
-    getLocaleInUse,
-    setLocaleInUse,
-    supportedLocales,
-    type SupportedLocale,
-} from "@/base/i18n";
-import { DropdownInput } from "@/new/photos/components/DropdownInput";
-import { MLSettings } from "@/new/photos/components/sidebar/MLSettings";
-import {
-    confirmDisableMapsDialogAttributes,
-    confirmEnableMapsDialogAttributes,
-} from "@/new/photos/components/utils/dialog";
-import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
-import { isMLSupported } from "@/new/photos/services/ml";
-import {
-    syncSettings,
-    updateCFProxyDisabledPreference,
-    updateMapEnabled,
-} from "@/new/photos/services/settings";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { useColorScheme } from "@mui/material";
-import { useCallback } from "react";
 
 interface SidebarProps {
     collectionSummaries: CollectionSummaries;
@@ -982,10 +986,16 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         onRootClose();
     };
 
-    const requestFeature = () =>
+    const handleHelp = () =>
+        openURL("https://help.ente.io/photos/");
+
+    const handleProductUpdates = () =>
+        openURL("https://ente.io/blog/");
+
+    const handleRequestFeature = () =>
         openURL("https://github.com/ente-io/ente/discussions");
 
-    const contactSupport = () => initiateEmail("support@ente.io");
+    const handleSupport = () => initiateEmail("support@ente.io");
 
     const confirmLogDownload = () =>
         showMiniDialog({
@@ -1013,22 +1023,41 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                     onRootClose={handleRootClose}
                 />
                 <Stack sx={{ px: "16px", py: "8px", gap: "24px" }}>
-                    <RowButton
-                        endIcon={<ChevronRightIcon />}
-                        label={t("request_feature")}
-                        onClick={requestFeature}
-                    />
-                    <RowButton
-                        endIcon={<ChevronRightIcon />}
-                        label={
-                            <Tooltip title="support@ente.io">
-                                <Typography sx={{ fontWeight: "medium" }}>
-                                    {t("support")}
-                                </Typography>
-                            </Tooltip>
-                        }
-                        onClick={contactSupport}
-                    />
+                    <RowButtonGroup>
+                        <RowButton
+                            endIcon={<InfoOutlinedIcon />}
+                            label={pt("Ente Help")}
+                            onClick={handleHelp}
+                        />
+                    </RowButtonGroup>
+                    <RowButtonGroup>
+                        <RowButton
+                            endIcon={<NorthEastIcon />}
+                            label={pt("Product updates")}
+                            onClick={handleProductUpdates}
+                        />
+                        <RowButtonDivider />
+                        <RowButton
+                            endIcon={<NorthEastIcon />}
+                            label={t("request_feature")}
+                            onClick={handleRequestFeature}
+                        />
+                    </RowButtonGroup>
+                    <RowButtonGroup>
+                        <RowButton
+                            endIcon={<ChevronRightIcon />}
+                            label={
+                                <Tooltip title="support@ente.io">
+                                    <Typography sx={{ fontWeight: "medium" }}>
+                                        {t("support")}
+                                    </Typography>
+                                </Tooltip>
+                            }
+                            onClick={handleSupport}
+                        />
+                    </RowButtonGroup>
+                </Stack>
+                <Stack sx={{ px: "16px" }}>
                     <RowButton
                         variant="secondary"
                         label={

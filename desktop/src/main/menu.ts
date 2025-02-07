@@ -24,11 +24,6 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
 
     const handleCheckForUpdates = () => forceCheckForAppUpdates(mainWindow);
 
-    const handleViewChangelog = () =>
-        void shell.openExternal(
-            "https://github.com/ente-io/ente/blob/main/desktop/CHANGELOG.md",
-        );
-
     const toggleAutoLaunch = () => {
         void autoLauncher.toggleAutoLaunch();
         isAutoLaunchEnabled = !isAutoLaunchEnabled;
@@ -44,11 +39,6 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
     const handleHelp = () =>
         void shell.openExternal("https://help.ente.io/photos/");
 
-    const handleSupport = () =>
-        void shell.openExternal("mailto:support@ente.io");
-
-    const handleBlog = () => void shell.openExternal("https://ente.io/blog/");
-
     return Menu.buildFromTemplate([
         {
             label: "Ente Photos",
@@ -63,10 +53,6 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
                 {
                     label: "Check for Updates...",
                     click: handleCheckForUpdates,
-                },
-                {
-                    label: "View Changelog",
-                    click: handleViewChangelog,
                 },
                 { type: "separator" },
 
@@ -165,15 +151,6 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
                 {
                     label: "Ente Help",
                     click: handleHelp,
-                },
-                { type: "separator" },
-                {
-                    label: "Support",
-                    click: handleSupport,
-                },
-                {
-                    label: "Product Updates",
-                    click: handleBlog,
                 },
             ],
         },
