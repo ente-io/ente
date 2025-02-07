@@ -36,7 +36,7 @@ class _AllSectionsExamplesProviderState
   late StreamSubscription<TabChangedEvent> _tabChangeEvent;
   bool hasPendingUpdate = false;
   bool isOnSearchTab = false;
-  bool firstLoadInProgressOrComplete = false;
+  bool _firstLoadInProgressOrComplete = false;
   final _logger = Logger("AllSectionsExamplesProvider");
 
   final _debouncer = Debouncer(
@@ -70,7 +70,7 @@ class _AllSectionsExamplesProviderState
     });
 
     Future.delayed(const Duration(seconds: 3), () {
-      if (!firstLoadInProgressOrComplete) {
+      if (!_firstLoadInProgressOrComplete) {
         reloadAllSections();
       }
     });
@@ -89,7 +89,7 @@ class _AllSectionsExamplesProviderState
   }
 
   void reloadAllSections() {
-    firstLoadInProgressOrComplete = true;
+    _firstLoadInProgressOrComplete = true;
     _logger.info('queue reload all sections');
     _debouncer.run(() async {
       setState(() {
