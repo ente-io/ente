@@ -126,10 +126,21 @@ bool? checkPanoramaFromEXIF(File? file, Map<String, IfdTag>? exifData) {
 }
 
 class ParsedExifDateTime {
-  final DateTime? time;
-  final String? dateTime;
-  final String? offsetTime;
-  ParsedExifDateTime(this.time, this.dateTime, this.offsetTime);
+  late final DateTime? time;
+  late final String? dateTime;
+  late final String? offsetTime;
+  ParsedExifDateTime(DateTime this.time, String? dateTime, this.offsetTime) {
+    if (dateTime != null && dateTime.endsWith('Z')) {
+      this.dateTime = dateTime.substring(0, dateTime.length - 1);
+    } else {
+      this.dateTime = dateTime;
+    }
+  }
+
+  @override
+  String toString() {
+    return "ParsedExifDateTime{time: $time, dateTime: $dateTime, offsetTime: $offsetTime}";
+  }
 }
 
 Future<ParsedExifDateTime?> tryParseExifDateTime(
@@ -144,16 +155,17 @@ Future<ParsedExifDateTime?> tryParseExifDateTime(
         : exif.containsKey(kImageDateTime)
             ? exif[kImageDateTime]!.printable
             : null;
-    if (exifTime != null && exifTime != kEmptyExifDateTime) {
-      String? exifOffsetTime;
-      for (final key in kExifOffSetKeys) {
-        if (exif.containsKey(key)) {
-          exifOffsetTime = exif[key]!.printable;
-          break;
-        }
-      }
-      return getDateTimeInDeviceTimezone(exifTime, exifOffsetTime);
+    if (exifTime == null || exifTime == kEmptyExifDateTime) {
+      return null;
     }
+    String? exifOffsetTime;
+    for (final key in kExifOffSetKeys) {
+      if (exif.containsKey(key)) {
+        exifOffsetTime = exif[key]!.printable;
+        break;
+      }
+    }
+    return getDateTimeInDeviceTimezone(exifTime, exifOffsetTime);
   } catch (e) {
     _logger.severe("failed to getCreationTimeFromEXIF", e);
   }
@@ -164,10 +176,10 @@ ParsedExifDateTime getDateTimeInDeviceTimezone(
   String exifTime,
   String? offsetString,
 ) {
-  final shouldParseDateInUTCTimeZone = offsetString != null;
-  final DateTime result = DateFormat(kExifDateTimePattern)
-      .parse(exifTime, shouldParseDateInUTCTimeZone);
-  if (offsetString != null && (offsetString ?? '').toUpperCase() != "Z") {
+  final hasOffset = (offsetString ?? '') != '';
+  final DateTime result =
+      DateFormat(kExifDateTimePattern).parse(exifTime, hasOffset);
+  if (hasOffset && offsetString!.toUpperCase() != "Z") {
     try {
       final List<String> splitHHMM = offsetString.split(":");
       final int offsetHours = int.parse(splitHHMM[0]);
@@ -184,7 +196,7 @@ ParsedExifDateTime getDateTimeInDeviceTimezone(
         offsetString,
       );
     } catch (e, s) {
-      _logger.severe("tz offset adjust failed $offsetString", e, s);
+      _logger.severe("offset parsing failed $exifTime &&  $offsetString", e, s);
     }
   }
   return ParsedExifDateTime(
