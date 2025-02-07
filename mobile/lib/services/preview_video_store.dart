@@ -388,6 +388,7 @@ class PreviewVideoStore {
           'type': 'hls_video',
           'width': width,
           'height': height,
+          'size': objectSize,
         },
         encryptionKey,
       );
@@ -495,7 +496,7 @@ class PreviewVideoStore {
 
         width = playlistData["width"];
         height = playlistData["height"];
-        size = response.data["data"]["objectSize"];
+        size = playlistData["size"];
 
         if (objectKey != null) {
           unawaited(
