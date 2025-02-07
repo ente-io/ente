@@ -150,7 +150,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <Divider />
             <ExitSection />
             <Divider />
-            <DebugSection />
+            <InfoSection />
         </Stack>
     </RootSidebarDrawer>
 );
@@ -672,7 +672,7 @@ const ExitSection: React.FC = () => {
     );
 };
 
-const DebugSection: React.FC = () => {
+const InfoSection: React.FC = () => {
     const [appVersion, setAppVersion] = useState<string | undefined>();
     const [host, setHost] = useState<string | undefined>();
 
@@ -683,13 +683,6 @@ const DebugSection: React.FC = () => {
 
     return (
         <>
-            {isInternalUser() && isDevBuild && (
-                <RowButton
-                    variant="secondary"
-                    label={ut("Test upload")}
-                    onClick={testUpload}
-                />
-            )}
             <Stack
                 sx={{
                     p: "32px 16px 16px 16px",
@@ -1090,6 +1083,17 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         }
                         onClick={confirmViewLogs}
                     />
+                    {isInternalUser() && isDevBuild && (
+                        <RowButton
+                            variant="secondary"
+                            label={
+                                <Typography variant="mini" color="text.muted">
+                                    {ut("Test upload")}
+                                </Typography>
+                            }
+                            onClick={testUpload}
+                        />
+                    )}
                 </Stack>
             </Stack>
         </NestedSidebarDrawer>
