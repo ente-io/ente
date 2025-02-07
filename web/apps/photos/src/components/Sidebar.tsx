@@ -145,9 +145,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 collectionSummaries={collectionSummaries}
             />
             <UtilitySection closeSidebar={closeSidebar} />
-            <Divider />
             <HelpSection closeSidebar={closeSidebar} />
-            <Divider />
+            <Divider sx={{my: 1}}/>
             <ExitSection />
             <InfoSection />
         </Stack>
