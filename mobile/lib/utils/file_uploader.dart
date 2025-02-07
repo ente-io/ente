@@ -777,22 +777,9 @@ class FileUploader {
             CryptoUtil.bin2base64(encryptedFileKeyData.encryptedData!);
         final keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedFileKeyData.nonce!);
-        final Map<String, dynamic> pubMetadata = {};
+        final Map<String, dynamic> pubMetadata =
+            _buildPublicMagicData(mediaUploadData, exifTime);
         MetadataRequest? pubMetadataRequest;
-        if ((mediaUploadData.height ?? 0) != 0 &&
-            (mediaUploadData.width ?? 0) != 0) {
-          pubMetadata[heightKey] = mediaUploadData.height;
-          pubMetadata[widthKey] = mediaUploadData.width;
-          pubMetadata[mediaTypeKey] =
-              mediaUploadData.isPanorama == true ? 1 : 0;
-        }
-        if (mediaUploadData.motionPhotoStartIndex != null) {
-          pubMetadata[motionVideoIndexKey] =
-              mediaUploadData.motionPhotoStartIndex;
-        }
-        if (mediaUploadData.thumbnail == null) {
-          pubMetadata[noThumbKey] = true;
-        }
         if (pubMetadata.isNotEmpty) {
           pubMetadataRequest = await getPubMetadataRequest(
             file,
@@ -872,6 +859,34 @@ class FileUploader {
         isMultiPartUpload: isMultipartUpload,
       );
     }
+  }
+
+  Map<String, dynamic> _buildPublicMagicData(
+    MediaUploadData mediaUploadData,
+    ParsedExifDateTime? exifTime,
+  ) {
+    final Map<String, dynamic> pubMetadata = {};
+    if ((mediaUploadData.height ?? 0) != 0 &&
+        (mediaUploadData.width ?? 0) != 0) {
+      pubMetadata[heightKey] = mediaUploadData.height;
+      pubMetadata[widthKey] = mediaUploadData.width;
+      pubMetadata[mediaTypeKey] = mediaUploadData.isPanorama == true ? 1 : 0;
+    }
+    if (mediaUploadData.motionPhotoStartIndex != null) {
+      pubMetadata[motionVideoIndexKey] = mediaUploadData.motionPhotoStartIndex;
+    }
+    if (mediaUploadData.thumbnail == null) {
+      pubMetadata[noThumbKey] = true;
+    }
+    if (exifTime != null) {
+      if (exifTime.dateTime != null) {
+        pubMetadata[dateTimeKey] = exifTime.dateTime;
+      }
+      if (exifTime.offsetTime != null) {
+        pubMetadata[offsetTimeKey] = exifTime.offsetTime;
+      }
+    }
+    return pubMetadata;
   }
 
   bool isPutOrUpdateFileError(Object e) {
