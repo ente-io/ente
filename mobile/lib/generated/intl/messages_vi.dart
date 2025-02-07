@@ -1305,6 +1305,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Hoặc hợp nhất với hiện có"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Hoặc chọn một cái có sẵn"),
+        "orPickFromYourContacts":
+            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "pair": MessageLookupByLibrary.simpleMessage("Ghép nối"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Ghép nối với PIN"),
         "pairingComplete":

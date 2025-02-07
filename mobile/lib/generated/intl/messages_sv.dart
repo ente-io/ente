@@ -378,6 +378,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "oops": MessageLookupByLibrary.simpleMessage("Hoppsan"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Eller välj en befintlig"),
+        "orPickFromYourContacts":
+            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "passkey": MessageLookupByLibrary.simpleMessage("Nyckel"),
         "password": MessageLookupByLibrary.simpleMessage("Lösenord"),
         "passwordChangedSuccessfully":

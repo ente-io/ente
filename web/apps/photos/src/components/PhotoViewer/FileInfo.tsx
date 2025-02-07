@@ -1,4 +1,3 @@
-import { CopyButton } from "@/base/components/CopyButton";
 import { LinkButtonUndecorated } from "@/base/components/LinkButton";
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { type ButtonishProps } from "@/base/components/mui";
@@ -20,6 +19,7 @@ import {
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
+import { CopyButton } from "@/new/photos/components/FileInfo";
 import { ChipButton } from "@/new/photos/components/mui/ChipButton";
 import { FilePeopleList } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
@@ -29,8 +29,8 @@ import {
 } from "@/new/photos/components/utils/dialog";
 import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import {
-    fileInfoDrawerZIndex,
-    photosDialogZIndex,
+    aboveFileViewerContentZ,
+    fileInfoDrawerZ,
 } from "@/new/photos/components/utils/z-index";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import {
@@ -259,9 +259,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             }
                             trailingButton={
                                 <CopyButton
-                                    code={openStreetMapLink(location)}
-                                    color="secondary"
                                     size="medium"
+                                    text={openStreetMapLink(location)}
                                 />
                             }
                         />
@@ -391,12 +390,24 @@ const FileInfoSidebar = styled(
     (props: Pick<DialogProps, "open" | "onClose" | "children">) => (
         <SidebarDrawer {...props} anchor="right" />
     ),
-)({
-    zIndex: fileInfoDrawerZIndex,
-    "& .MuiPaper-root": {
-        padding: 8,
-    },
-});
+)(({ theme }) => ({
+    zIndex: fileInfoDrawerZ,
+    // [Note: Lighter backdrop for overlays on photo viewer]
+    //
+    // The default backdrop color we use for the drawer in light mode is too
+    // "white" when used in the image gallery because unlike the rest of the app
+    // the gallery retains a black background irrespective of the mode. So use a
+    // lighter scrim when overlaying content directly atop the image gallery.
+    //
+    // We don't need to add this special casing for nested overlays (e.g.
+    // dialogs initiated from the file info drawer itself) since now there is
+    // enough "white" on the screen to warrant the stronger (default) backdrop.
+    ...theme.applyStyles("light", {
+        ".MuiBackdrop-root": {
+            backgroundColor: theme.vars.palette.backdrop.faint,
+        },
+    }),
+}));
 
 interface InfoItemProps {
     /**
@@ -804,7 +815,7 @@ const FileNameEditDialog = ({
     };
     return (
         <TitledMiniDialog
-            sx={{ zIndex: photosDialogZIndex }}
+            sx={{ zIndex: aboveFileViewerContentZ }}
             open={isInEditMode}
             onClose={closeEditMode}
             title={t("rename_file")}
@@ -964,7 +975,7 @@ const RawExif: React.FC<RawExifProps> = ({
                 caption={fileName}
                 onRootClose={handleRootClose}
                 actionButton={
-                    <CopyButton code={JSON.stringify(tags)} color="secondary" />
+                    <CopyButton size="small" text={JSON.stringify(tags)} />
                 }
             />
             <Stack sx={{ gap: 2, py: 3, px: 1 }}>

@@ -43,7 +43,8 @@ const Check = styled("input")<{ $active: boolean }>(
     ({ theme, $active }) => `
     appearance: none;
     position: absolute;
-    z-index: 10;
+    /* Increase z-index in stacking order to capture clicks */
+    z-index: 1;
     left: 0;
     outline: none;
     cursor: pointer;
@@ -162,7 +163,6 @@ const InSelectRangeOverlay = styled(Overlay)(
 
 const SelectedOverlay = styled(Overlay)(
     ({ theme }) => `
-    z-index: 5;
     border: 2px solid ${theme.vars.palette.accent.main};
     border-radius: 4px;
 `,

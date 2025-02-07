@@ -3,17 +3,20 @@ import { assertionFailed } from "@/base/assert";
 import { Overlay } from "@/base/components/containers";
 import { FilledIconButton, type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { type ModalVisibilityProps } from "@/base/components/utils/modal";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "@/base/components/utils/modal";
 import { lowercaseExtension } from "@/base/file-name";
 import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
+import { ConfirmDeleteFileDialog } from "@/new/photos/components/FileViewer";
 import { moveToTrash } from "@/new/photos/services/collection";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import { AppContext } from "@/new/photos/types/context";
-import { FlexWrapper } from "@ente/shared/components/Container";
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -35,6 +38,7 @@ import {
     CircularProgress,
     Paper,
     Snackbar,
+    Stack,
     styled,
     Typography,
     type ButtonProps,
@@ -134,8 +138,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
     onSelectPerson,
 }) => {
     const galleryContext = useContext(GalleryContext);
-    const { showLoadingBar, hideLoadingBar, showMiniDialog } =
-        useContext(AppContext);
+    const { showLoadingBar, hideLoadingBar } = useContext(AppContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
     );
@@ -183,6 +186,12 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
         () => downloadManager.fileDownloadProgressSnapshot(),
     );
 
+    const {
+        show: showConfirmDeleteFile,
+        props: confirmDeleteFileVisibilityProps,
+    } = useModalVisibility();
+    const [fileToDelete, setFileToDelete] = useState<EnteFile | undefined>();
+
     useEffect(() => {
         if (!pswpElement.current) return;
         if (isOpen) {
@@ -227,7 +236,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                     break;
                 case "Backspace":
                 case "Delete":
-                    confirmTrashFile(photoSwipe?.currItem as EnteFile);
+                    confirmDeleteFile(photoSwipe?.currItem as EnteFile);
                     break;
                 case "d":
                 case "D":
@@ -512,36 +521,21 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
         needUpdate.current = true;
     };
 
-    const trashFile = async (file: DisplayFile) => {
-        try {
-            showLoadingBar();
-            try {
-                await moveToTrash([file]);
-            } finally {
-                hideLoadingBar();
-            }
-            markTempDeleted?.([file]);
-            updateItems(items.filter((item) => item.id !== file.id));
-            needUpdate.current = true;
-        } catch (e) {
-            log.error("trashFile failed", e);
-        }
-    };
-
-    const confirmTrashFile = (file: EnteFile) => {
+    const confirmDeleteFile = (file: EnteFile) => {
         if (!file || !isOwnFile || isTrashCollection) {
             return;
         }
-        showMiniDialog({
-            title: t("trash_file_title"),
-            message: t("trash_file_message"),
-            continue: {
-                text: t("move_to_trash"),
-                color: "critical",
-                action: () => trashFile(file),
-                autoFocus: true,
-            },
-        });
+        setFileToDelete(file);
+        showConfirmDeleteFile();
+    };
+
+    const handleDeleteFile = async () => {
+        const file = fileToDelete!;
+        await moveToTrash([file]);
+        markTempDeleted?.([file]);
+        updateItems(items.filter((item) => item.id !== file.id));
+        setFileToDelete(undefined);
+        needUpdate.current = true;
     };
 
     const handleArrowClick = (
@@ -750,16 +744,26 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                     {livePhotoBtnOptions.visible && (
                         <LivePhotoBtnContainer>
                             <Button
-                                color="secondary"
+                                variant="text"
                                 onClick={livePhotoBtnOptions.click}
                                 onMouseEnter={livePhotoBtnOptions.show}
                                 onMouseLeave={livePhotoBtnOptions.hide}
                                 disabled={livePhotoBtnOptions.loading}
+                                sx={{
+                                    color: "white",
+                                    "&.Mui-disabled": {
+                                        color: "white",
+                                        opacity: 0.4,
+                                    },
+                                }}
                             >
-                                <FlexWrapper gap={"4px"}>
-                                    {<AlbumOutlinedIcon />}{" "}
+                                <Stack
+                                    direction="row"
+                                    sx={{ alignItems: "center", gap: "6px" }}
+                                >
+                                    <AlbumOutlinedIcon />
                                     {t("live_photo_indicator")}
-                                </FlexWrapper>
+                                </Stack>
                             </Button>
                         </LivePhotoBtnContainer>
                     )}
@@ -778,7 +782,8 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                             position: "absolute",
                             top: "10vh",
                             right: "2vh",
-                            zIndex: 10,
+                            // Position atop the viewer contents
+                            zIndex: 1,
                         }}
                     >
                         {fileDownloadProgress.has(
@@ -800,7 +805,17 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                         <div className="pswp__item" />
                     </div>
                     <div className="pswp__ui pswp__ui--hidden">
-                        <div className="pswp__top-bar">
+                        <div
+                            className="pswp__top-bar"
+                            style={
+                                isDesktop
+                                    ? ({
+                                          "--ente-pswp-top-bar-top":
+                                              "env(titlebar-area-height, 30px)",
+                                      } as React.CSSProperties)
+                                    : {}
+                            }
+                        >
                             <div className="pswp__counter" />
 
                             <button
@@ -842,7 +857,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                                     className="pswp__button pswp__button--custom"
                                     title={t("delete_key")}
                                     onClick={() => {
-                                        confirmTrashFile(
+                                        confirmDeleteFile(
                                             photoSwipe?.currItem as EnteFile,
                                         );
                                     }}
@@ -942,6 +957,10 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                     </div>
                 </div>
             </div>
+            <ConfirmDeleteFileDialog
+                {...confirmDeleteFileVisibilityProps}
+                onConfirm={handleDeleteFile}
+            />
             <FileInfo
                 showInfo={showInfo}
                 handleCloseInfo={handleCloseInfo}
@@ -1065,12 +1084,14 @@ const ConversionFailedNotification: React.FC<
     );
 };
 
-const LivePhotoBtnContainer = styled(Paper)`
+const LivePhotoBtnContainer = styled("div")`
     border-radius: 4px;
     position: absolute;
     bottom: 10vh;
     right: 6vh;
-    z-index: 10;
+    background-color: rgba(255 255 255 / 0.15);
+    backdrop-filter: blur(3px);
+    z-index: 1;
 `;
 
 export async function playVideo(livePhotoVideo, livePhotoImage) {

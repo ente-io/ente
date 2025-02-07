@@ -1015,6 +1015,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("既存のものと統合する"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("または既存のものを選択"),
+        "orPickFromYourContacts":
+            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "pair": MessageLookupByLibrary.simpleMessage("ペアリング"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("PINを使ってペアリングする"),
         "pairingComplete": MessageLookupByLibrary.simpleMessage("ペアリング完了"),

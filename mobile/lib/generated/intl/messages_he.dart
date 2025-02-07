@@ -606,6 +606,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("אופציונלי, קצר ככל שתרצה..."),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("או בחר באחד קיים"),
+        "orPickFromYourContacts":
+            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "password": MessageLookupByLibrary.simpleMessage("סיסמא"),
         "passwordChangedSuccessfully":
             MessageLookupByLibrary.simpleMessage("הססמה הוחלפה בהצלחה"),

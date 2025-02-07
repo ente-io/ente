@@ -1592,5 +1592,6 @@
   "join": "Unir-se",
   "linkEmail": "Vincular e-mail",
   "link": "Vincular",
-  "noEnteAccountExclamation": "Nenhuma conta Ente!"
+  "noEnteAccountExclamation": "Nenhuma conta Ente!",
+  "orPickFromYourContacts": "or pick from your contacts"
 }

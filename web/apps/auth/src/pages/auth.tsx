@@ -134,11 +134,19 @@ const AuthNavbar: React.FC = () => {
     const { logout } = useAppContext();
 
     return (
-        <NavbarBase>
-            <Stack direction="row" sx={{ flex: 1, justifyContent: "center" }}>
-                <EnteLogo />
-            </Stack>
-            <Stack direction="row" sx={{ position: "absolute", right: "24px" }}>
+        <NavbarBase
+            sx={{
+                position: "sticky",
+                top: 0,
+                left: 0,
+                mb: 2,
+                zIndex: 1,
+                backgroundColor: "backdrop.muted",
+                backdropFilter: "blur(7px)",
+            }}
+        >
+            <EnteLogo />
+            <Box sx={{ position: "absolute", right: "24px" }}>
                 <OverflowMenu ariaID="auth-options">
                     <OverflowMenuOption
                         color="critical"
@@ -148,7 +156,7 @@ const AuthNavbar: React.FC = () => {
                         {t("logout")}
                     </OverflowMenuOption>
                 </OverflowMenu>
-            </Stack>
+            </Box>
         </NavbarBase>
     );
 };

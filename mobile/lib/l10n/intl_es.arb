@@ -1592,5 +1592,6 @@
   "join": "Unir",
   "linkEmail": "Vincular correo electrónico",
   "link": "Enlace",
-  "noEnteAccountExclamation": "¡No existe una cuenta de Ente!"
+  "noEnteAccountExclamation": "¡No existe una cuenta de Ente!",
+  "orPickFromYourContacts": "or pick from your contacts"
 }

@@ -6,6 +6,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/typedefs.dart";
@@ -76,8 +77,8 @@ class _LinkContactToPersonSelectionPageState
     const gridPadding = 16.0;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Select person to link",
+        title: Text(
+          context.l10n.selectPersonToLink,
         ),
         centerTitle: false,
       ),
@@ -157,15 +158,15 @@ class _LinkContactToPersonSelectionPageState
     PersonEntity? updatedPerson;
     final result = await showDialogWidget(
       context: context,
-      title: "Link person to $emailToLink",
+      title: context.l10n.linkPersonToEmail(emailToLink),
       icon: Icons.info_outline,
-      body: "This will link $personName to $emailToLink",
+      body: context.l10n.linkPersonToEmailConfirmation(personName, emailToLink),
       isDismissible: true,
       buttons: [
         ButtonWidget(
           buttonAction: ButtonAction.first,
           buttonType: ButtonType.neutral,
-          labelText: "Link",
+          labelText: context.l10n.link,
           isInAlert: true,
           onTap: () async {
             updatedPerson = await PersonService.instance
@@ -244,8 +245,8 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
     const gridPadding = 16.0;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Select your face",
+        title: Text(
+          context.l10n.selectYourFace,
         ),
         centerTitle: false,
       ),
@@ -286,8 +287,10 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
               itemBuilder: (context, index) {
                 return _RoundedPersonFaceWidget(
                   onTap: () async {
-                    final dialog =
-                        createProgressDialog(context, "Reassigning...");
+                    final dialog = createProgressDialog(
+                      context,
+                      context.l10n.reassigningLoading,
+                    );
                     unawaited(dialog.show());
                     try {
                       await reassignMe(
@@ -296,7 +299,8 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
                       );
                       showToast(
                         context,
-                        "Reassigned you to ${results[index].person.data.name}",
+                        context.l10n
+                            .reassignedToName(results[index].person.data.name),
                       );
                       await Future.delayed(const Duration(milliseconds: 1250));
                       unawaited(dialog.hide());

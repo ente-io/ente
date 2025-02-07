@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/l10n/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
@@ -107,8 +108,8 @@ class _ContactResultPageState extends State<ContactResultPage> {
           ? Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 8),
               child: EndToEndBanner(
-                title: "Link person",
-                caption: "for better sharing experience",
+                title: context.l10n.linkPerson,
+                caption: context.l10n.linkPersonCaption,
                 leadingIcon: Icons.person,
                 onTap: () async {
                   final PersonEntity? updatedPerson = await routeToPage(

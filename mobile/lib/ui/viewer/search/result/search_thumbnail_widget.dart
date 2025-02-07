@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/search_constants.dart";
@@ -8,6 +9,7 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/sharing/user_avator_widget.dart";
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/search/result/person_face_widget.dart';
@@ -73,14 +75,14 @@ class _ContactSearchThumbnailWidgetState
     extends State<ContactSearchThumbnailWidget> {
   Future<EnteFile?>? _mostRecentFileOfPerson;
   late String? _personID;
+  late String _email;
   final _logger = Logger("_ContactSearchThumbnailWidgetState");
-  late final EnteFile? _previewThumbnail;
 
   @override
   void initState() {
     super.initState();
-    _previewThumbnail = widget.searchResult.previewThumbnail();
     _personID = widget.searchResult.params[kPersonParamID];
+    _email = widget.searchResult.params[kContactEmail];
     if (_personID != null) {
       _mostRecentFileOfPerson =
           PersonService.instance.getPerson(_personID!).then((person) {
@@ -118,35 +120,38 @@ class _ContactSearchThumbnailWidgetState
                     );
                   } else if (snapshot.connectionState == ConnectionState.done &&
                       snapshot.data == null) {
-                    return _previewThumbnail != null
-                        ? ThumbnailWidget(
-                            _previewThumbnail!,
-                          )
-                        : const NoFaceOrFileContactWidget();
+                    return NoFaceForContactWidget(
+                      user: User(email: _email),
+                    );
                   } else if (snapshot.hasError) {
                     _logger.severe(
                       "Error loading personID",
                       snapshot.error,
                     );
-                    return const NoFaceOrFileContactWidget();
+                    return NoFaceForContactWidget(
+                      user: User(email: _email),
+                    );
                   } else {
                     return const EnteLoadingWidget();
                   }
                 },
               )
-            : _previewThumbnail != null
-                ? ThumbnailWidget(
-                    _previewThumbnail!,
-                  )
-                : const NoFaceOrFileContactWidget(),
+            : NoFaceForContactWidget(
+                user: User(email: _email),
+              ),
       ),
     );
   }
 }
 
-class NoFaceOrFileContactWidget extends StatelessWidget {
+class NoFaceForContactWidget extends StatelessWidget {
+  final User user;
   final bool addBorder;
-  const NoFaceOrFileContactWidget({this.addBorder = true, super.key});
+  const NoFaceForContactWidget({
+    this.addBorder = true,
+    required this.user,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -164,13 +169,7 @@ class NoFaceOrFileContactWidget extends StatelessWidget {
             : null,
         color: enteColorScheme.fillFaint,
       ),
-      child: Center(
-        child: Icon(
-          Icons.person_2_outlined,
-          color: enteColorScheme.strokeMuted,
-          size: 24,
-        ),
-      ),
+      child: Center(child: FirstLetterUserAvatar(user)),
     );
   }
 }

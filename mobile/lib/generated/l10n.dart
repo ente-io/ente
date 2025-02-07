@@ -10959,6 +10959,178 @@ class S {
     );
   }
 
+  /// `or pick from your contacts`
+  String get orPickFromYourContacts {
+    return Intl.message(
+      'or pick from your contacts',
+      name: 'orPickFromYourContacts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{email} does not have an Ente account.`
+  String emailDoesNotHaveEnteAccount(String email) {
+    return Intl.message(
+      '$email does not have an Ente account.',
+      name: 'emailDoesNotHaveEnteAccount',
+      desc: 'Shown when email doesn\'t have an Ente account',
+      args: [email],
+    );
+  }
+
+  /// `{title} (Me)`
+  String accountOwnerPersonAppbarTitle(String title) {
+    return Intl.message(
+      '$title (Me)',
+      name: 'accountOwnerPersonAppbarTitle',
+      desc: 'Title of appbar for account owner person',
+      args: [title],
+    );
+  }
+
+  /// `Reassign "Me"`
+  String get reassignMe {
+    return Intl.message(
+      'Reassign "Me"',
+      name: 'reassignMe',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Me`
+  String get me {
+    return Intl.message(
+      'Me',
+      name: 'me',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `for faster sharing`
+  String get linkEmailToContactBannerCaption {
+    return Intl.message(
+      'for faster sharing',
+      name: 'linkEmailToContactBannerCaption',
+      desc:
+          'Caption for the \'Link email\' title. It should be a continuation of the \'Link email\' title. Just like how \'Link email\' + \'for faster sharing\' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages.',
+      args: [],
+    );
+  }
+
+  /// `Select person to link`
+  String get selectPersonToLink {
+    return Intl.message(
+      'Select person to link',
+      name: 'selectPersonToLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Link person to {email}`
+  String linkPersonToEmail(String email) {
+    return Intl.message(
+      'Link person to $email',
+      name: 'linkPersonToEmail',
+      desc: '',
+      args: [email],
+    );
+  }
+
+  /// `This will link {personName} to {email}`
+  String linkPersonToEmailConfirmation(String personName, String email) {
+    return Intl.message(
+      'This will link $personName to $email',
+      name: 'linkPersonToEmailConfirmation',
+      desc: 'Confirmation message when linking a person to an email',
+      args: [personName, email],
+    );
+  }
+
+  /// `Select your face`
+  String get selectYourFace {
+    return Intl.message(
+      'Select your face',
+      name: 'selectYourFace',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reassigning...`
+  String get reassigningLoading {
+    return Intl.message(
+      'Reassigning...',
+      name: 'reassigningLoading',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reassigned you to {name}`
+  String reassignedToName(String name) {
+    return Intl.message(
+      'Reassigned you to $name',
+      name: 'reassignedToName',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Save changes before leaving?`
+  String get saveChangesBeforeLeavingQuestion {
+    return Intl.message(
+      'Save changes before leaving?',
+      name: 'saveChangesBeforeLeavingQuestion',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Don't save`
+  String get dontSave {
+    return Intl.message(
+      'Don\'t save',
+      name: 'dontSave',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This is me!`
+  String get thisIsMeExclamation {
+    return Intl.message(
+      'This is me!',
+      name: 'thisIsMeExclamation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Link person`
+  String get linkPerson {
+    return Intl.message(
+      'Link person',
+      name: 'linkPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `for better sharing experience`
+  String get linkPersonCaption {
+    return Intl.message(
+      'for better sharing experience',
+      name: 'linkPersonCaption',
+      desc:
+          'Caption for the \'Link person\' title. It should be a continuation of the \'Link person\' title. Just like how \'Link person\' + \'for better sharing experience\' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages.',
+      args: [],
+    );
+  }
+
   /// `Video Streaming`
   String get videoStreaming {
     return Intl.message(

@@ -144,7 +144,7 @@ export const OverflowMenuOption: React.FC<
                     // Fill our container.
                     width: "100%",
                     // MUI has responsive padding, use a static value instead.
-                    paddingBlock: 1,
+                    py: 1,
                 }}
             >
                 {startIcon}

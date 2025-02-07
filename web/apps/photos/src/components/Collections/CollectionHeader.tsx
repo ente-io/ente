@@ -1,5 +1,5 @@
 import { assertionFailed } from "@/base/assert";
-import { SpaceBetweenFlex } from "@/base/components/containers";
+import { SpacedRow } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import {
     OverflowMenu,
@@ -103,14 +103,14 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
 
     return (
         <GalleryItemsHeaderAdapter>
-            <SpaceBetweenFlex>
+            <SpacedRow>
                 <GalleryItemsSummary
                     name={name}
                     fileCount={fileCount}
                     endIcon={<EndIcon type={type} />}
                 />
                 {shouldShowOptions(type) && <CollectionOptions {...props} />}
-            </SpaceBetweenFlex>
+            </SpacedRow>
         </GalleryItemsHeaderAdapter>
     );
 };

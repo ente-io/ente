@@ -1344,6 +1344,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sau îmbinați cu cele existente"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Sau alegeți unul existent"),
+        "orPickFromYourContacts":
+            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "pair": MessageLookupByLibrary.simpleMessage("Asociere"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Asociere cu PIN"),
         "pairingComplete":

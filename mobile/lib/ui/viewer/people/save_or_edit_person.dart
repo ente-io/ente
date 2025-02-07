@@ -385,7 +385,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     PersonEntity? updatedPersonEntity;
     return await showActionSheet(
       useRootNavigator: Platform.isIOS ? true : false,
-      body: "Save changes before leaving?",
+      body: context.l10n.saveChangesBeforeLeavingQuestion,
       context: context,
       buttons: [
         ButtonWidget(
@@ -412,9 +412,9 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
             }
           },
         ),
-        const ButtonWidget(
+        ButtonWidget(
           buttonType: ButtonType.secondary,
-          labelText: "Don't save",
+          labelText: context.l10n.dontSave,
           isInAlert: true,
           buttonAction: ButtonAction.second,
           shouldStickToDarkTheme: true,
@@ -447,7 +447,9 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
         stream: _getPersonsWithRecentFileStream(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            _logger.severe("Error in _getPersonItems: ${snapshot.error} ${snapshot.stackTrace}}");
+            _logger.severe(
+              "Error in _getPersonItems: ${snapshot.error} ${snapshot.stackTrace}}",
+            );
             if (kDebugMode) {
               return Column(
                 mainAxisSize: MainAxisSize.min,
@@ -854,7 +856,7 @@ class _EmailSectionState extends State<_EmailSection> {
                               Expanded(
                                 child: ButtonWidget(
                                   buttonType: ButtonType.secondary,
-                                  labelText: "This is me!",
+                                  labelText: context.l10n.thisIsMeExclamation,
                                   onTap: () async {
                                     _updateEmailField(
                                       Configuration.instance.getEmail(),
@@ -866,7 +868,7 @@ class _EmailSectionState extends State<_EmailSection> {
                               Expanded(
                                 child: ButtonWidget(
                                   buttonType: ButtonType.primary,
-                                  labelText: "Link email",
+                                  labelText: context.l10n.linkEmail,
                                   shouldSurfaceExecutionStates: false,
                                   onTap: () async {
                                     final newEmail = await routeToPage(
@@ -887,7 +889,7 @@ class _EmailSectionState extends State<_EmailSection> {
                         } else {
                           return ButtonWidget(
                             buttonType: ButtonType.primary,
-                            labelText: "Link email",
+                            labelText: context.l10n.linkEmail,
                             shouldSurfaceExecutionStates: false,
                             onTap: () async {
                               final newEmail = await routeToPage(
