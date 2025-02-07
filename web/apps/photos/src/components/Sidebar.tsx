@@ -669,47 +669,28 @@ const ExitSection: React.FC = () => {
 };
 
 const DebugSection: React.FC = () => {
-    const { showMiniDialog } = useAppContext();
     const [appVersion, setAppVersion] = useState<string | undefined>();
     const [host, setHost] = useState<string | undefined>();
 
-    const electron = globalThis.electron;
-
     useEffect(() => {
-        void electron?.appVersion().then(setAppVersion);
+        void globalThis.electron?.appVersion().then(setAppVersion);
         void customAPIHost().then(setHost);
     });
-
-    const confirmLogDownload = () =>
-        showMiniDialog({
-            title: t("download_logs"),
-            message: <Trans i18nKey={"download_logs_message"} />,
-            continue: {
-                text: t("download"),
-                action: downloadLogs,
-            },
-        });
-
-    const downloadLogs = () => {
-        log.info("Downloading logs");
-        if (electron) electron.openLogDirectory();
-        else downloadString(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
-    };
 
     return (
         <>
             {isInternalUser() && isDevBuild && (
                 <RowButton
                     variant="secondary"
-                    label={ut("Test Upload")}
+                    label={ut("Test upload")}
                     onClick={testUpload}
                 />
             )}
             <Stack
                 sx={{
-                    py: "14px",
+                    p: "32px 16px 16px 16px",
                     px: "16px",
-                    gap: "24px",
+                    gap: "32px",
                     color: "text.muted",
                 }}
             >
