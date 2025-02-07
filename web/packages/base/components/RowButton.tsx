@@ -51,29 +51,17 @@ export const RowButtonGroupHint: React.FC<React.PropsWithChildren> = ({
 }) => (
     <Typography
         variant="small"
-        sx={{ color: "text.muted", px: "8px", py: "6px" }}
+        sx={{ color: "text.faint", px: "16px", py: "6px" }}
     >
         {children}
     </Typography>
 );
 
-interface RowButtonDividerProps {
-    /**
-     * If true, then the divider leaves the leading edge hanging which visually
-     * looks better when used to separate buttons which have leading icons.
-     */
-    hasIcon?: boolean;
-}
-
 /**
  * A divider for buttons in a {@link RowButtonGroup}.
  */
-export const RowButtonDivider: React.FC<RowButtonDividerProps> = ({
-    hasIcon,
-}) => (
-    <Divider
-        sx={[{ "&&&": { my: 0 } }, hasIcon ? { ml: "48px" } : { ml: "16px" }]}
-    />
+export const RowButtonDivider = () => (
+    <Divider sx={{ "&&&": { mttty: 0 }, opacity: 0.4 }} />
 );
 
 /**
