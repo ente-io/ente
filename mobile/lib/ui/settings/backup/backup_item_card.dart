@@ -7,7 +7,7 @@ import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/services/preview_video_store.dart";
 import 'package:photos/theme/ente_theme.dart';
-import "package:photos/ui/viewer/file/file_widget.dart";
+import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_uploader.dart";
@@ -61,9 +61,12 @@ class _BackupItemCardState extends State<BackupItemCard> {
       onTap: () {
         routeToPage(
           context,
-          FileWidget(
-            widget.item.file,
-            tagPrefix: "backups",
+          DetailPage(
+            DetailPageConfiguration(
+              List.unmodifiable([widget.item.file]),
+              0,
+              "collection",
+            ),
           ),
           forceCustomPageRoute: true,
         );
