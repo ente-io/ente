@@ -137,7 +137,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => (
     <RootSidebarDrawer open={sidebarView} onClose={closeSidebar}>
         <HeaderSection closeSidebar={closeSidebar} />
-        <Divider />
         <UserDetailsSection sidebarView={sidebarView} />
         <Stack sx={{ gap: 0.5, mb: 3 }}>
             <ShortcutSection
@@ -146,7 +145,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             />
             <UtilitySection closeSidebar={closeSidebar} />
             <HelpSection closeSidebar={closeSidebar} />
-            <Divider sx={{my: 1}}/>
+            <Divider sx={{ my: "2px" }} />
             <ExitSection />
             <InfoSection />
         </Stack>
