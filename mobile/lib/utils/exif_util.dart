@@ -154,24 +154,22 @@ Future<DateTime?> getCreationTimeFromEXIF(
 }
 
 DateTime getDateTimeInDeviceTimezone(String exifTime, String? offsetString) {
-  final DateTime result = DateFormat(kExifDateTimePattern).parse(exifTime);
+  final shouldParseDateInUTCTimeZone = offsetString != null;
+  final DateTime result = DateFormat(kExifDateTimePattern)
+      .parse(exifTime, shouldParseDateInUTCTimeZone);
   if (offsetString == null) {
     return result;
   }
   try {
     final List<String> splitHHMM = offsetString.split(":");
-    // Parse the offset from the photo's time zone
     final int offsetHours = int.parse(splitHHMM[0]);
     final int offsetMinutes =
         int.parse(splitHHMM[1]) * (offsetHours.isNegative ? -1 : 1);
     // Adjust the date for the offset to get the photo's correct UTC time
     final photoUtcDate =
         result.add(Duration(hours: -offsetHours, minutes: -offsetMinutes));
-    // Getting the current device's time zone offset from UTC
-    final now = DateTime.now();
-    final localOffset = now.timeZoneOffset;
-    // Adjusting the photo's UTC time to the device's local time
-    final deviceLocalTime = photoUtcDate.add(localOffset);
+    // Convert the UTC time to the device's local time
+    final deviceLocalTime = photoUtcDate.toLocal();
     return deviceLocalTime;
   } catch (e, s) {
     _logger.severe("tz offset adjust failed $offsetString", e, s);
