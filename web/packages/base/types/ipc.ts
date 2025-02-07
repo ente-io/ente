@@ -129,6 +129,35 @@ export interface Electron {
      */
     onOpenEnteURL: (cb: ((url: string) => void) | undefined) => void;
 
+    /**
+     * Get the persisted version for the last shown changelog.
+     *
+     * See: [Note: Conditions for showing "What's new"]
+     */
+    lastShownChangelogVersion: () => Promise<number | undefined>;
+
+    /**
+     * Save the given {@link version} to disk as the version of the last shown
+     * changelog.
+     *
+     * The value is saved to a store which is not cleared during logout.
+     *
+     * @see {@link lastShownChangelogVersion}
+     */
+    setLastShownChangelogVersion: (version: number) => Promise<void>;
+
+    /**
+     * Return true if the auto launch on system startup is enabled.
+     */
+    isAutoLaunchEnabled: () => Promise<boolean>;
+
+    /**
+     * Toggle the auto launch on system startup behaviour.
+     *
+     * @see {@link isAutoLaunchEnabled}
+     */
+    toggleAutoLaunch: () => Promise<void>;
+
     // - App update
 
     /**
@@ -165,35 +194,6 @@ export interface Electron {
      * been marked as skipped so that we don't prompt the user again.
      */
     skipAppUpdate: (version: string) => void;
-
-    /**
-     * Get the persisted version for the last shown changelog.
-     *
-     * See: [Note: Conditions for showing "What's new"]
-     */
-    lastShownChangelogVersion: () => Promise<number | undefined>;
-
-    /**
-     * Save the given {@link version} to disk as the version of the last shown
-     * changelog.
-     *
-     * The value is saved to a store which is not cleared during logout.
-     *
-     * @see {@link lastShownChangelogVersion}
-     */
-    setLastShownChangelogVersion: (version: number) => Promise<void>;
-
-    /**
-     * Return true if the auto launch on system startup is enabled.
-     */
-    isAutoLaunchEnabled: () => Promise<boolean>;
-
-    /**
-     * Toggle the auto launch on system startup behaviour.
-     *
-     * @see {@link isAutoLaunchEnabled}
-     */
-    toggleAutoLaunch: () => Promise<void>;
 
     // - FS
 
