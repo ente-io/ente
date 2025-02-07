@@ -10,7 +10,7 @@ import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import { isDevBuild } from "@/base/env";
-import { ut } from "@/base/i18n";
+import { pt, ut } from "@/base/i18n";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
@@ -142,7 +142,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             />
             <UtilitySection closeSidebar={closeSidebar} />
             <Divider />
-            <HelpSection />
+            <HelpSection closeSidebar={closeSidebar} />
             <Divider />
             <ExitSection />
             <Divider />
@@ -503,11 +503,9 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     );
 };
 
-interface UtilitySectionProps {
-    closeSidebar: () => void;
-}
-
-const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
+const UtilitySection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
+    closeSidebar,
+}) => {
     const router = useRouter();
     const { watchFolderView, setWatchFolderView, showMiniDialog } =
         useAppContext();
@@ -603,14 +601,13 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
     );
 };
 
-const HelpSection: React.FC = () => {
+const HelpSection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
+    closeSidebar,
+}) => {
     const { showMiniDialog } = useContext(AppContext);
     const { openExportModal } = useContext(GalleryContext);
 
-    const requestFeature = () =>
-        openURL("https://github.com/ente-io/ente/discussions");
-
-    const contactSupport = () => initiateEmail("support@ente.io");
+    const { show: showHelp, props: helpVisibilityProps } = useModalVisibility();
 
     const handleExport = () =>
         isDesktop
@@ -621,19 +618,8 @@ const HelpSection: React.FC = () => {
         <>
             <RowButton
                 variant="secondary"
-                label={t("request_feature")}
-                onClick={requestFeature}
-            />
-            <RowButton
-                variant="secondary"
-                label={
-                    <Tooltip title="support@ente.io">
-                        <Typography sx={{ fontWeight: "medium" }}>
-                            {t("support")}
-                        </Typography>
-                    </Tooltip>
-                }
-                onClick={contactSupport}
+                label={pt("Help")}
+                onClick={showHelp}
             />
             <RowButton
                 variant="secondary"
@@ -645,6 +631,7 @@ const HelpSection: React.FC = () => {
                 }
                 onClick={handleExport}
             />
+            <Help {...helpVisibilityProps} onRootClose={closeSidebar} />
         </>
     );
 };
@@ -718,15 +705,6 @@ const DebugSection: React.FC = () => {
                     onClick={testUpload}
                 />
             )}
-            <RowButton
-                variant="secondary"
-                label={
-                    <Typography variant="mini" color="text.muted">
-                        {t("view_logs")}
-                    </Typography>
-                }
-                onClick={confirmLogDownload}
-            />
             <Stack
                 sx={{
                     py: "14px",
@@ -1005,6 +983,80 @@ const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                             {t("faster_upload_description")}
                         </RowButtonGroupHint>
                     </Stack>
+                </Stack>
+            </Stack>
+        </NestedSidebarDrawer>
+    );
+};
+
+const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
+    open,
+    onClose,
+    onRootClose,
+}) => {
+    const { showMiniDialog } = useAppContext();
+
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
+    };
+
+    const requestFeature = () =>
+        openURL("https://github.com/ente-io/ente/discussions");
+
+    const contactSupport = () => initiateEmail("support@ente.io");
+
+    const confirmLogDownload = () =>
+        showMiniDialog({
+            title: t("download_logs"),
+            message: <Trans i18nKey={"download_logs_message"} />,
+            continue: {
+                text: t("download"),
+                action: downloadLogs,
+            },
+        });
+
+    const downloadLogs = () => {
+        log.info("Downloading logs");
+        const electron = globalThis.electron;
+        if (electron) electron.openLogDirectory();
+        else downloadString(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
+    };
+
+    return (
+        <NestedSidebarDrawer {...{ open, onClose }} onRootClose={onRootClose}>
+            <Stack sx={{ gap: "4px", py: "12px" }}>
+                <SidebarDrawerTitlebar
+                    onClose={onClose}
+                    title={pt("Help")}
+                    onRootClose={handleRootClose}
+                />
+                <Stack sx={{ px: "16px", py: "8px", gap: "24px" }}>
+                    <RowButton
+                        endIcon={<ChevronRightIcon />}
+                        label={t("request_feature")}
+                        onClick={requestFeature}
+                    />
+                    <RowButton
+                        endIcon={<ChevronRightIcon />}
+                        label={
+                            <Tooltip title="support@ente.io">
+                                <Typography sx={{ fontWeight: "medium" }}>
+                                    {t("support")}
+                                </Typography>
+                            </Tooltip>
+                        }
+                        onClick={contactSupport}
+                    />
+                    <RowButton
+                        variant="secondary"
+                        label={
+                            <Typography variant="mini" color="text.muted">
+                                {t("view_logs")}
+                            </Typography>
+                        }
+                        onClick={confirmLogDownload}
+                    />
                 </Stack>
             </Stack>
         </NestedSidebarDrawer>
