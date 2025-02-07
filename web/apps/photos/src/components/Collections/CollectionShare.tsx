@@ -287,7 +287,7 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
                     startIcon={<LinkIcon />}
                     onClick={createSharableURLHelper}
                 />
-                <RowButtonDivider hasIcon />
+                <RowButtonDivider />
                 <RowButton
                     label={t("collect_photos")}
                     startIcon={<DownloadSharpIcon />}
@@ -382,7 +382,7 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
                                 endIcon={<ChevronRightIcon />}
                                 onClick={openManageEmailShare}
                             />
-                            <RowButtonDivider hasIcon />
+                            <RowButtonDivider />
                         </>
                     ) : null}
                     <RowButton
@@ -390,7 +390,7 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
                         onClick={openAddViewer}
                         label={t("add_viewers")}
                     />
-                    <RowButtonDivider hasIcon />
+                    <RowButtonDivider />
                     <RowButton
                         startIcon={<AddIcon />}
                         onClick={openAddCollab}
@@ -923,7 +923,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                             startIcon={<Avatar email={item} />}
                                             endIcon={<ChevronRightIcon />}
                                         />
-                                        <RowButtonDivider hasIcon />
+                                        <RowButtonDivider />
                                     </React.Fragment>
                                 ))}
 
@@ -954,7 +954,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                             startIcon={<Avatar email={item} />}
                                             endIcon={<ChevronRightIcon />}
                                         />
-                                        <RowButtonDivider hasIcon />
+                                        <RowButtonDivider />
                                     </React.Fragment>
                                 ))}
                                 <RowButton
@@ -1124,7 +1124,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                                         "COLLABORATOR" && <DoneIcon />
                                 }
                             />
-                            <RowButtonDivider hasIcon />
+                            <RowButtonDivider />
 
                             <RowButton
                                 fontWeight="regular"
@@ -1281,8 +1281,7 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
                             label={t("copy_link")}
                         />
                     )}
-
-                    <RowButtonDivider hasIcon={true} />
+                    <RowButtonDivider />
                     <RowButton
                         startIcon={<LinkIcon />}
                         endIcon={<ChevronRightIcon />}
