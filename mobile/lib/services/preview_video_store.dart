@@ -202,7 +202,10 @@ class PreviewVideoStore {
       );
 
       FFmpegSession? session;
+      final colorSpace = videoData["color_space"]?.toString().toLowerCase();
+      final isColorGood = colorSpace == "bt709";
       final codecIsH264 = codec?.contains("h264") ?? false;
+
       if (bitrate != null && bitrate <= 4000 * 1000 && codecIsH264) {
         // create playlist without compression, as is
         session = await FFmpegKit.execute(
@@ -228,6 +231,18 @@ class PreviewVideoStore {
           '-c:v libx264 -crf 21 -preset medium ' // Compress with CRF=21 using H.264
           '-c:a copy ' // Keep original audio
           '-f hls -hls_time 10 -hls_flags single_file '
+          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
+          '$prefix/output.m3u8',
+        );
+      }
+
+      if (codecIsH264 && (colorSpace == null || isColorGood)) {
+        session ??= await FFmpegKit.execute(
+          '-i "${file.path}" '
+          '-metadata:s:v:0 rotate=0 '
+          '-vf "scale=-2:720,fps=30" '
+          '-c:v libx264 -b:v 2000k -preset medium '
+          '-c:a aac -b:a 128k -f hls -hls_time 10 -hls_flags single_file '
           '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
           '$prefix/output.m3u8',
         );

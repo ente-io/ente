@@ -1741,7 +1741,7 @@ class FilesDB {
       WHERE $columnFileType = ?
       AND $columnCreationTime > ?
       AND $columnUploadedFileID  != -1
-      SORT BY $columnCreationTime DESC
+      ORDER BY $columnCreationTime DESC
     ''',
       [getInt(fileType), beginDate.microsecondsSinceEpoch],
     );
