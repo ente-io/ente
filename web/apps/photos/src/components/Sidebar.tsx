@@ -23,7 +23,6 @@ import { useModalVisibility } from "@/base/components/utils/modal";
 import { isDevBuild } from "@/base/env";
 import {
     getLocaleInUse,
-    pt,
     setLocaleInUse,
     supportedLocales,
     ut,
@@ -623,7 +622,7 @@ const HelpSection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
         <>
             <RowButton
                 variant="secondary"
-                label={pt("Help")}
+                label={t("Help")}
                 onClick={showHelp}
             />
             <RowButton
@@ -989,7 +988,7 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
 
     const handleHelp = () => openURL("https://help.ente.io/photos/");
 
-    const handleProductUpdates = () => openURL("https://ente.io/blog/");
+    const handleBlog = () => openURL("https://ente.io/blog/");
 
     const handleRequestFeature = () =>
         openURL("https://github.com/ente-io/ente/discussions");
@@ -1018,22 +1017,22 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
             <Stack sx={{ gap: "4px", py: "12px" }}>
                 <SidebarDrawerTitlebar
                     onClose={onClose}
-                    title={pt("Help")}
+                    title={t("help")}
                     onRootClose={handleRootClose}
                 />
                 <Stack sx={{ px: "16px", py: "8px", gap: "24px" }}>
                     <RowButtonGroup>
                         <RowButton
                             endIcon={<InfoOutlinedIcon />}
-                            label={pt("Ente Help")}
+                            label={t("ente_help")}
                             onClick={handleHelp}
                         />
                     </RowButtonGroup>
                     <RowButtonGroup>
                         <RowButton
                             endIcon={<NorthEastIcon />}
-                            label={pt("Product updates")}
-                            onClick={handleProductUpdates}
+                            label={t("blog")}
+                            onClick={handleBlog}
                         />
                         <RowButtonDivider />
                         <RowButton
