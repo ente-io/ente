@@ -15,12 +15,24 @@ class Debouncer {
   /// This is useful for example when you want to execute a callback every 5 seconds
   final Duration? executionInterval;
   Timer? _debounceTimer;
+  final bool leading;
 
-  Debouncer(this._duration, {this.executionInterval});
+  Debouncer(this._duration, {this.executionInterval, this.leading = false});
 
   final Stopwatch _stopwatch = Stopwatch();
 
   void run(FutureVoidCallback fn) {
+    if (leading && !isActive()) {
+      _stopwatch.stop();
+      _stopwatch.reset();
+      fn();
+      _debounceTimer = Timer(_duration, () {
+        _debounceActiveNotifier.value = false;
+      });
+      _debounceActiveNotifier.value = true;
+      return;
+    }
+
     bool shouldRunImmediately = false;
     if (executionInterval != null) {
       // ensure the stop watch is running
