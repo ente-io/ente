@@ -236,7 +236,7 @@ class PreviewVideoStore {
         );
       }
 
-      if (codecIsH264 && (colorSpace == null || isColorGood)) {
+      if (colorSpace != null && isColorGood) {
         session ??= await FFmpegKit.execute(
           '-i "${file.path}" '
           '-metadata:s:v:0 rotate=0 '
