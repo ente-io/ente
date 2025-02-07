@@ -51,7 +51,7 @@ export const RowButtonGroupHint: React.FC<React.PropsWithChildren> = ({
 }) => (
     <Typography
         variant="small"
-        sx={{ color: "text.muted", px: "8px", py: "6px" }}
+        sx={{ color: "text.faint", px: "16px", py: "6px" }}
     >
         {children}
     </Typography>

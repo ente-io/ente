@@ -183,6 +183,18 @@ export interface Electron {
      */
     setLastShownChangelogVersion: (version: number) => Promise<void>;
 
+    /**
+     * Return true if the auto launch on system startup is enabled.
+     */
+    isAutoLaunchEnabled: () => Promise<boolean>;
+
+    /**
+     * Toggle the auto launch on system startup behaviour.
+     *
+     * @see {@link isAutoLaunchEnabled}
+     */
+    toggleAutoLaunch: () => Promise<void>;
+
     // - FS
 
     /**

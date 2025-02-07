@@ -955,8 +955,8 @@ const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                     title={t("advanced")}
                 />
 
-                <Stack sx={{ px: "16px", py: "20px" }}>
-                    <Stack sx={{ gap: "4px" }}>
+                <Stack sx={{ px: "16px", py: "20px", gap: "24px" }}>
+                    <Stack >
                         <RowButtonGroup>
                             <RowSwitch
                                 label={t("faster_upload")}
@@ -968,6 +968,13 @@ const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                             {t("faster_upload_description")}
                         </RowButtonGroupHint>
                     </Stack>
+                    <RowButtonGroup>
+                        <RowSwitch
+                            label={t("open_ente_on_startup")}
+                            checked={!cfUploadProxyDisabled}
+                            onClick={toggle}
+                        />
+                    </RowButtonGroup>
                 </Stack>
             </Stack>
         </NestedSidebarDrawer>
