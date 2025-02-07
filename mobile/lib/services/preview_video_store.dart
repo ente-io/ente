@@ -82,7 +82,7 @@ class PreviewVideoStore {
     Bus.instance.fire(VideoStreamingChanged());
 
     if (isVideoStreamingEnabled) {
-      await putFilesForPreviewCreation();
+      putFilesForPreviewCreation().ignore();
     } else {
       clearQueue();
     }
@@ -316,6 +316,7 @@ class PreviewVideoStore {
       }
 
       if (error == null) {
+        FileDataService.instance.syncFDStatus().ignore();
         _items[enteFile.uploadedFileID!] = PreviewItem(
           status: PreviewItemStatus.uploaded,
           file: enteFile,
