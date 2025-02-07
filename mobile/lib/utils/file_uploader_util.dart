@@ -130,7 +130,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
     exifData = await tryExifFromFile(sourceFile);
   }
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
-  await _decorateEnteFileData(file, asset, sourceFile);
+  await _decorateEnteFileData(file, asset, sourceFile, exifData);
   fileHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
 
   if (file.fileType == FileType.livePhoto && Platform.isIOS) {
@@ -299,6 +299,7 @@ Future<void> _decorateEnteFileData(
   EnteFile file,
   AssetEntity asset,
   File sourceFile,
+  Map<String, IfdTag>? exifData,
 ) async {
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
   if (file.location == null ||
@@ -311,6 +312,13 @@ Future<void> _decorateEnteFileData(
     final FFProbeProps? props = await getVideoPropsAsync(sourceFile);
     if (props != null && props.location != null) {
       file.location = props.location;
+    }
+  }
+  if (Platform.isAndroid && exifData != null) {
+    //Fix for missing location data in lower android versions.
+    final Location? exifLocation = locationFromExif(exifData);
+    if (Location.isValidLocation(exifLocation)) {
+      file.location = exifLocation;
     }
   }
   if (file.title == null || file.title!.isEmpty) {
