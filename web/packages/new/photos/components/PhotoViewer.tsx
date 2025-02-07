@@ -9,6 +9,17 @@ import { t } from "i18next";
 import { useState } from "react";
 import { aboveGalleryContentZ } from "./utils/z-index";
 
+// TODO(PS)
+import dynamic from "next/dynamic";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+const FV5 = dynamic(() => import("./FileViewer5"));
+const FVD = () => <></>;
+
+export const FileViewer: React.FC = (props) => {
+    return process.env.NEXT_ENTE_WIP_PS5 ? <FV5 {...props} /> : <FVD />;
+};
+
 type ConfirmDeleteFileDialogProps = ModalVisibilityProps & {
     /**
      * Called when the user confirms the deletion.

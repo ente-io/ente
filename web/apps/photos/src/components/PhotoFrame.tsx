@@ -7,6 +7,7 @@ import {
 } from "@/gallery/services/download";
 import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
+import { FileViewer } from "@/new/photos/components/FileViewer";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
 import { styled } from "@mui/material";
@@ -517,6 +518,7 @@ const PhotoFrame = ({
                     />
                 )}
             </AutoSizer>
+            {process.env.NEXT_ENTE_WIP_PS5 && <FileViewer />}
             <PhotoViewer
                 isOpen={open}
                 items={displayFiles}
