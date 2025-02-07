@@ -150,7 +150,6 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
  */
 export const createTrayContextMenu = (mainWindow: BrowserWindow) => {
     const handleOpen = () => {
-        mainWindow.maximize();
         mainWindow.show();
     };
 
