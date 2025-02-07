@@ -41,6 +41,7 @@ import 'package:photos/services/sync_service.dart';
 import "package:photos/services/user_service.dart";
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/data_util.dart';
+import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/file_util.dart";
@@ -728,8 +729,13 @@ class FileUploader {
           encThumbSize,
         );
       }
+      final ParsedExifDateTime? exifTime = await tryParseExifDateTime(
+        null,
+        mediaUploadData.exifData,
+      );
+      final metadata =
+          await file.getMetadataForUpload(mediaUploadData, exifTime);
 
-      final metadata = await file.getMetadataForUpload(mediaUploadData);
       final encryptedMetadataResult = await CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(metadata)),
         fileAttributes.key!,
