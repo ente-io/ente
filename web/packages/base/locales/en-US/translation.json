@@ -112,6 +112,7 @@
     "password_changed_elsewhere": "Password changed elsewhere",
     "password_changed_elsewhere_message": "Please login again on this device to use your new password to authenticate.",
     "go_back": "Go back",
+    "account": "Account",
     "recovery_key": "Recovery key",
     "do_this_later": "Do this later",
     "save_key": "Save Key",

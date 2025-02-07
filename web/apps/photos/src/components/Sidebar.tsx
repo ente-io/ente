@@ -23,7 +23,6 @@ import { useModalVisibility } from "@/base/components/utils/modal";
 import { isDevBuild } from "@/base/env";
 import {
     getLocaleInUse,
-    pt,
     setLocaleInUse,
     supportedLocales,
     ut,
@@ -87,6 +86,7 @@ import CategoryIcon from "@mui/icons-material/Category";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import NorthEastIcon from "@mui/icons-material/NorthEast";
@@ -527,7 +527,7 @@ const UtilitySection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
         <>
             <RowButton
                 variant="secondary"
-                label={pt("Account")}
+                label={t("account")}
                 onClick={showAccount}
             />
             {isDesktop && (
@@ -689,29 +689,40 @@ const Account: React.FC<NestedSidebarDrawerVisibilityProps> = ({
             <Stack sx={{ gap: "4px", py: "12px" }}>
                 <SidebarDrawerTitlebar
                     onClose={onClose}
-                    title={t("help")}
+                    title={t("account")}
                     onRootClose={handleRootClose}
                 />
                 <Stack sx={{ px: "16px", py: "8px", gap: "24px" }}>
                     <RowButtonGroup>
                         <RowButton
+                            endIcon={
+                                <HealthAndSafetyIcon
+                                    sx={{ color: "accent.main" }}
+                                />
+                            }
                             label={t("recovery_key")}
                             onClick={showRecoveryKey}
                         />
+                    </RowButtonGroup>
+                    <RowButtonGroup>
                         <RowButton
                             label={t("two_factor")}
                             onClick={showTwoFactor}
                         />
+                        <RowButtonDivider />
                         <RowButton
                             label={t("passkeys")}
                             onClick={handlePasskeys}
                         />
+                    </RowButtonGroup>
+                    <RowButtonGroup>
                         <RowButton
                             label={t("change_password")}
                             onClick={handleChangePassword}
                         />
+                        <RowButtonDivider />
+
                         <RowButton
-                            endIcon={<InfoOutlinedIcon />}
                             label={t("change_email")}
                             onClick={handleChangeEmail}
                         />
