@@ -23,6 +23,7 @@ import { useModalVisibility } from "@/base/components/utils/modal";
 import { isDevBuild } from "@/base/env";
 import {
     getLocaleInUse,
+    pt,
     setLocaleInUse,
     supportedLocales,
     ut,
@@ -81,7 +82,6 @@ import {
     FlexWrapper,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -511,12 +511,9 @@ const UtilitySection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
     closeSidebar,
 }) => {
     const router = useRouter();
-    const { watchFolderView, setWatchFolderView, showMiniDialog } =
-        useAppContext();
+    const { watchFolderView, setWatchFolderView } = useAppContext();
 
-    const { show: showRecoveryKey, props: recoveryKeyVisibilityProps } =
-        useModalVisibility();
-    const { show: showTwoFactor, props: twoFactorVisibilityProps } =
+    const { show: showAccount, props: accountVisibilityProps } =
         useModalVisibility();
     const { show: showPreferences, props: preferencesVisibilityProps } =
         useModalVisibility();
@@ -524,22 +521,15 @@ const UtilitySection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
     const showWatchFolder = () => setWatchFolderView(true);
     const handleCloseWatchFolder = () => setWatchFolderView(false);
 
-    const redirectToChangePasswordPage = () => {
-        closeSidebar();
-        router.push(PAGES.CHANGE_PASSWORD);
-    };
-
-    const handleChangeEmail = () => router.push("/change-email");
-
-    const redirectToAccountsPage = async () => {
-        closeSidebar();
-        await openAccountsManagePasskeysPage();
-    };
-
     const handleDeduplicate = () => router.push("/duplicates");
 
     return (
         <>
+            <RowButton
+                variant="secondary"
+                label={pt("Account")}
+                onClick={showAccount}
+            />
             {isDesktop && (
                 <RowButton
                     variant="secondary"
@@ -547,31 +537,6 @@ const UtilitySection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
                     onClick={showWatchFolder}
                 />
             )}
-            <RowButton
-                variant="secondary"
-                label={t("recovery_key")}
-                onClick={showRecoveryKey}
-            />
-            <RowButton
-                variant="secondary"
-                label={t("two_factor")}
-                onClick={showTwoFactor}
-            />
-            <RowButton
-                variant="secondary"
-                label={t("passkeys")}
-                onClick={redirectToAccountsPage}
-            />
-            <RowButton
-                variant="secondary"
-                label={t("change_password")}
-                onClick={redirectToChangePasswordPage}
-            />
-            <RowButton
-                variant="secondary"
-                label={t("change_email")}
-                onClick={handleChangeEmail}
-            />
             <RowButton
                 variant="secondary"
                 label={t("deduplicate_files")}
@@ -582,21 +547,13 @@ const UtilitySection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
                 label={t("preferences")}
                 onClick={showPreferences}
             />
-
-            <RecoveryKey
-                {...recoveryKeyVisibilityProps}
-                {...{ showMiniDialog }}
-            />
-            <TwoFactorSettings
-                {...twoFactorVisibilityProps}
-                onRootClose={closeSidebar}
-            />
             {isDesktop && (
                 <WatchFolder
                     open={watchFolderView}
                     onClose={handleCloseWatchFolder}
                 />
             )}
+            <Account {...accountVisibilityProps} onRootClose={closeSidebar} />
             <Preferences
                 {...preferencesVisibilityProps}
                 onRootClose={closeSidebar}
@@ -697,6 +654,79 @@ const InfoSection: React.FC = () => {
                 {host && <Typography variant="mini">{host}</Typography>}
             </Stack>
         </>
+    );
+};
+
+const Account: React.FC<NestedSidebarDrawerVisibilityProps> = ({
+    open,
+    onClose,
+    onRootClose,
+}) => {
+    const { showMiniDialog } = useAppContext();
+
+    const router = useRouter();
+
+    const { show: showRecoveryKey, props: recoveryKeyVisibilityProps } =
+        useModalVisibility();
+    const { show: showTwoFactor, props: twoFactorVisibilityProps } =
+        useModalVisibility();
+
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
+    };
+
+    const handleChangePassword = () => router.push("/change-password");
+    const handleChangeEmail = () => router.push("/change-email");
+
+    const handlePasskeys = async () => {
+        onRootClose();
+        await openAccountsManagePasskeysPage();
+    };
+
+    return (
+        <NestedSidebarDrawer {...{ open, onClose }} onRootClose={onRootClose}>
+            <Stack sx={{ gap: "4px", py: "12px" }}>
+                <SidebarDrawerTitlebar
+                    onClose={onClose}
+                    title={t("help")}
+                    onRootClose={handleRootClose}
+                />
+                <Stack sx={{ px: "16px", py: "8px", gap: "24px" }}>
+                    <RowButtonGroup>
+                        <RowButton
+                            label={t("recovery_key")}
+                            onClick={showRecoveryKey}
+                        />
+                        <RowButton
+                            label={t("two_factor")}
+                            onClick={showTwoFactor}
+                        />
+                        <RowButton
+                            label={t("passkeys")}
+                            onClick={handlePasskeys}
+                        />
+                        <RowButton
+                            label={t("change_password")}
+                            onClick={handleChangePassword}
+                        />
+                        <RowButton
+                            endIcon={<InfoOutlinedIcon />}
+                            label={t("change_email")}
+                            onClick={handleChangeEmail}
+                        />
+                    </RowButtonGroup>
+                </Stack>
+            </Stack>
+            <RecoveryKey
+                {...recoveryKeyVisibilityProps}
+                {...{ showMiniDialog }}
+            />
+            <TwoFactorSettings
+                {...twoFactorVisibilityProps}
+                onRootClose={onRootClose}
+            />
+        </NestedSidebarDrawer>
     );
 };
 
