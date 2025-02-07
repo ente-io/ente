@@ -934,14 +934,25 @@ const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     onRootClose,
 }) => {
     const { cfUploadProxyDisabled } = useSettingsSnapshot();
+    const [isAutoLaunchEnabled, setIsAutoLaunchEnabled] = useState(false);
+
+    const electron = globalThis.electron;
+
+    useEffect(() => {
+        void electron
+            ?.isAutoLaunchEnabled()
+            .then((enabled) => setIsAutoLaunchEnabled(enabled));
+    }, [electron]);
 
     const handleRootClose = () => {
         onClose();
         onRootClose();
     };
 
-    const toggle = () =>
+    const toggleProxy = () =>
         void updateCFProxyDisabledPreference(!cfUploadProxyDisabled);
+
+    const toggleAutoLaunch = () => void electron?.toggleAutoLaunch();
 
     return (
         <NestedSidebarDrawer
@@ -954,27 +965,28 @@ const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                     onRootClose={handleRootClose}
                     title={t("advanced")}
                 />
-
                 <Stack sx={{ px: "16px", py: "20px", gap: "24px" }}>
-                    <Stack >
+                    <Stack>
                         <RowButtonGroup>
                             <RowSwitch
                                 label={t("faster_upload")}
                                 checked={!cfUploadProxyDisabled}
-                                onClick={toggle}
+                                onClick={toggleProxy}
                             />
                         </RowButtonGroup>
                         <RowButtonGroupHint>
                             {t("faster_upload_description")}
                         </RowButtonGroupHint>
                     </Stack>
-                    <RowButtonGroup>
-                        <RowSwitch
-                            label={t("open_ente_on_startup")}
-                            checked={!cfUploadProxyDisabled}
-                            onClick={toggle}
-                        />
-                    </RowButtonGroup>
+                    {electron && (
+                        <RowButtonGroup>
+                            <RowSwitch
+                                label={t("open_ente_on_startup")}
+                                checked={isAutoLaunchEnabled}
+                                onClick={toggleAutoLaunch}
+                            />
+                        </RowButtonGroup>
+                    )}
                 </Stack>
             </Stack>
         </NestedSidebarDrawer>
