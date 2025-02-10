@@ -1439,6 +1439,14 @@ class SearchService {
       mergedTrips[tripID] = (trip.$1, trip.$3, trip.$4);
     }
 
+    // Remove too small trips
+    for (final tripID in mergedTrips.keys.toList()) {
+      final filesAmount = mergedTrips[tripID]!.$1.length;
+      if (filesAmount < 20) {
+        mergedTrips.remove(tripID);
+      }
+    }
+
     // TODO: lau: Check if there are any trips to surface
     // For now for testing let's just surface all base and trip locations
     for (final baseLocation in baseLocations.values) {
