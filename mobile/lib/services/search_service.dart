@@ -1208,7 +1208,10 @@ class SearchService {
     final Map<String, (List<EnteFile>, Location)> wideRadiusClusters = {};
     // Go through all files and cluster the ones not inside any location tag
     for (EnteFile file in allFiles) {
-      if (!file.hasLocation || file.uploadedFileID == null || !file.isOwner) {
+      if (!file.hasLocation ||
+          file.uploadedFileID == null ||
+          !file.isOwner ||
+          file.creationTime == null) {
         continue;
       }
       // Check if the file is inside any location tag
@@ -1281,13 +1284,11 @@ class SearchService {
       final creationTimes = <int>[];
       final Set<int> uniqueDays = {};
       for (final file in files) {
-        if (file.creationTime != null) {
-          creationTimes.add(file.creationTime!);
-          final date = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
-          final dayStamp =
-              DateTime(date.year, date.month, date.day).microsecondsSinceEpoch;
-          uniqueDays.add(dayStamp);
-        }
+        creationTimes.add(file.creationTime!);
+        final date = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+        final dayStamp =
+            DateTime(date.year, date.month, date.day).microsecondsSinceEpoch;
+        uniqueDays.add(dayStamp);
       }
       creationTimes.sort();
       if (creationTimes.length < 10) continue;
@@ -1341,17 +1342,14 @@ class SearchService {
         }
       }
       if (tooClose) continue;
-      
-      // Check that the photos are distributed over a short time range (2-30 days)
+
+      // Check that the photos are distributed over a short time range (2-30 days) or multiple short time ranges only
       final creationTimes = <int>[];
       for (final file in files) {
-        if (file.creationTime != null) {
-          creationTimes.add(file.creationTime!);
-        }
+        creationTimes.add(file.creationTime!);
       }
       if (creationTimes.length < 2) continue;
       creationTimes.sort();
-      
       final firstCreationTime = DateTime.fromMicrosecondsSinceEpoch(
         creationTimes.first,
       );
@@ -1362,7 +1360,7 @@ class SearchService {
       if (days < 2 || days > 30) {
         continue;
       }
-      
+
       tripLocations[clusterID] = (
         files,
         location,
