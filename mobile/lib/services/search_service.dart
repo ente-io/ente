@@ -1414,13 +1414,13 @@ class SearchService {
         );
         final bool overlapBeginning = tripFirstTime.isBefore(
               otherTripLastTime.add(
-                const Duration(days: 1),
+                const Duration(days: 3),
               ),
             ) &&
             tripFirstTime.isAfter(otherTripFirstTime);
         final bool overlapEnd = tripLastTime.isAfter(
               otherTripFirstTime.subtract(
-                const Duration(days: 1),
+                const Duration(days: 3),
               ),
             ) &&
             tripLastTime.isBefore(otherTripLastTime);
