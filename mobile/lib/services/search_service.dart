@@ -1254,7 +1254,7 @@ class SearchService {
           if (isFileInsideLocationTag(
             clusterLocation,
             file.location!,
-            50.0,
+            100.0,
           )) {
             wideRadiusClusters[clusterID]!.$1.add(file);
             foundWideCluster = true;
@@ -1437,7 +1437,9 @@ class SearchService {
     }
     for (final finalTrip in mergedTrips.values) {
       final files = finalTrip.$1; // TODO: lau: take best selection only
-      final year = DateTime.fromMicrosecondsSinceEpoch((finalTrip.$2 + finalTrip.$2) ~/ 2).year;
+      final year = DateTime.fromMicrosecondsSinceEpoch(
+        (finalTrip.$2 + finalTrip.$2) ~/ 2,
+      ).year;
       final name = "Trip! ($year)";
       searchResults.add(
         GenericSearchResult(
