@@ -943,7 +943,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 		}
 	})
 
-	schedule(c, "@every 10m", func() {
+	schedule(c, "@every 8m", func() {
 		fileController.CleanupDeletedFiles()
 	})
 	schedule(c, "@every 101s", func() {
