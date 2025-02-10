@@ -19,17 +19,18 @@ import PhotoSwipeLightBox from "./ps5/dist/photoswipe-lightbox.esm.js";
 import PhotoSwipe from "./ps5/dist/photoswipe.esm.js";
 
 const FileViewer: React.FC = () => {
+    const pswpRef = useRef<PhotoSwipe | undefined>();
     console.log(PhotoSwipeLightBox);
     useEffect(() => {
-        const lightbox = new PhotoSwipeLightBox({
-            gallery: "#test-gallery",
-            mainClass: "our-extra-pswp-main-class",
-            pswpModule: PhotoSwipe,
+        const pswp = new PhotoSwipe({
+            // mainClass: "our-extra-pswp-main-class",
         });
-        lightbox.init();
+        pswp.init();
+        pswpRef.current = pswp;
 
         return () => {
-            lightbox.destroy();
+            pswp.destroy();
+            pswpRef.current = undefined;
         };
     }, []);
     return (
