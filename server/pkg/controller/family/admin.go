@@ -190,6 +190,37 @@ func (c *Controller) CloseFamily(ctx context.Context, adminID int64) error {
 	return nil
 }
 
+// ModifyMemberStorage allows admin user to update the storageLimit for a member in the family
+func (c *Controller) ModifyMemberStorage(ctx context.Context, adminID int64, id uuid.UUID, storageLimit *int64) error {
+	familyAdminID, err := c.UserRepo.GetFamilyAdminID(adminID)
+	if err != nil {
+		stacktrace.Propagate(err, "Could not get family admin ID")
+	}
+
+	member, err := c.FamilyRepo.GetMemberById(ctx, id)
+	if err != nil {
+		stacktrace.Propagate(err, "Couldn't fetch Family Member")
+	}
+
+	// get admin subscription in order to get the size of total storage quota
+	// available in that family. and let the user chose storage of outw of the whole
+	// storage quota or maximum limit.
+	activeSub, err := c.BillingCtrl.GetActiveSubscription(adminID)
+	if err != nil {
+		stacktrace.Propagate(err, "couldn't get active subscription")
+	}
+
+	if adminID == *familyAdminID && id == member.ID {
+		if storageLimit != nil && *storageLimit > activeSub.Storage {
+			err := c.FamilyRepo.ModifyMemberStorage(ctx, adminID, member.ID, storageLimit)
+			if err != nil {
+				stacktrace.Propagate(err, "Couldn't Modify Members Storage")
+			}
+		}
+	}
+	return nil
+}
+
 func (c *Controller) sendNotification(ctx context.Context, adminUserID int64, memberUserID int64, newStatus ente.MemberStatus, inviteToken *string) error {
 	adminUser, err := c.UserRepo.Get(adminUserID)
 	if err != nil {

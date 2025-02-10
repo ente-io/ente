@@ -120,6 +120,21 @@ func (h *FamilyHandler) AcceptInvite(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// ModifyStorageLimit allows adminUser to Modify the storage for a member in the Family.
+func (h *FamilyHandler) ModifyStorageLimit(c *gin.Context) {
+	var request ente.FamilyMember
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "Could not bind request params"))
+		return
+	}
+
+	err := h.Controller.ModifyMemberStorage(c, auth.GetUserID(c.Request.Header), request.ID, request.StorageLimit)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+	}
+	c.JSON(http.StatusOK, nil)
+}
+
 // GetInviteInfo returns basic information about invitor/admin as long as the invite is valid
 func (h *FamilyHandler) GetInviteInfo(c *gin.Context) {
 	inviteToken := c.Param("token")
