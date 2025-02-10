@@ -354,7 +354,9 @@ Future<MetadataRequest> getPubMetadataRequest(
 }
 
 Future<MediaUploadData> _getMediaUploadDataFromAppCache(
-    EnteFile file, bool parseExif) async {
+  EnteFile file,
+  bool parseExif,
+) async {
   File sourceFile;
   Uint8List? thumbnailData;
   Map<String, IfdTag>? exifData;
@@ -394,6 +396,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
       FileHashData(fileHash),
       height: dimensions?['height'],
       width: dimensions?['width'],
+      exifData: exifData,
     );
   } catch (e, s) {
     _logger.warning("failed to generate thumbnail", e, s);
