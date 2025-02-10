@@ -14,7 +14,6 @@ import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/model/tag_enums.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
-import 'package:ente_auth/services/auth_feature_flag.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
@@ -40,7 +39,6 @@ import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/lock_screen_settings.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -48,7 +46,6 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
-import 'package:scan/scan.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -93,8 +90,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _textController.addListener(_applyFilteringAndRefresh);
     _codeSortKey = PreferenceService.instance.codeSortKey();
+    _textController.addListener(_applyFilteringAndRefresh);
     _loadCodes();
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
       _loadCodes();
@@ -274,7 +271,6 @@ class _HomePageState extends State<HomePage> {
         );
         break;
       case CodeSortKey.manual:
-      default:
         codes.sort((a, b) => a.display.position.compareTo(b.display.position));
         break;
     }
@@ -483,7 +479,6 @@ class _HomePageState extends State<HomePage> {
         return HomeEmptyStateWidget(
           onScanTap: _redirectToScannerPage,
           onManuallySetupTap: _redirectToManualEntryPage,
-          onImportFromGallery: _importFromGallery,
         );
       } else {
         final anyCodeHasError =
@@ -585,7 +580,7 @@ class _HomePageState extends State<HomePage> {
 
                   return ClipRect(
                     child: CodeWidget(
-                      key: ValueKey('${code.hashCode}_$newIndex'),
+                      key: ValueKey('${code.hashCode}_${newIndex}_$_codeSortKey'),
                       code,
                       isCompactMode: isCompactMode,
                       sortKey: _codeSortKey,
@@ -621,6 +616,7 @@ class _HomePageState extends State<HomePage> {
                             key: ValueKey('${codeState.hashCode}_$index'),
                             codeState,
                             isCompactMode: isCompactMode,
+                            sortKey: _codeSortKey,
                           );
                         }),
                         itemCount: _filteredCodes.length,
@@ -671,16 +667,24 @@ class _HomePageState extends State<HomePage> {
     }
     return false;
   }
-
+  int lastScanTime = DateTime.now().millisecondsSinceEpoch - 1000;
   void _handleDeeplink(BuildContext context, String? link) {
-    if (!Configuration.instance.hasConfiguredAccount() || link == null) {
+    bool isAccountConfigured = Configuration.instance.hasConfiguredAccount();
+    bool isOfflineModeEnabled = Configuration.instance.hasOptedForOfflineMode() &&
+        Configuration.instance.getOfflineSecretKey() != null;
+    if (!(isAccountConfigured || isOfflineModeEnabled) || link == null) {
       return;
     }
+    if (DateTime.now().millisecondsSinceEpoch - lastScanTime < 1000) {
+      _logger.info("Ignoring potential event for same deeplink");
+      return;
+    }
+    lastScanTime = DateTime.now().millisecondsSinceEpoch;
     if (mounted && link.toLowerCase().startsWith("otpauth://")) {
       try {
         final newCode = Code.fromOTPAuthUrl(link);
         getNextTotp(newCode);
-        CodeStore.instance.addCode(newCode);
+        CodeStore.instance.addCode(newCode, shouldSync: false);
         _focusNewCode(newCode);
       } catch (e, s) {
         showGenericErrorDialog(
@@ -697,29 +701,6 @@ class _HomePageState extends State<HomePage> {
     _textController.text = newCode.account;
     _searchText = newCode.account;
     _applyFilteringAndRefresh();
-  }
-
-  Future<void> _importFromGallery() async {
-    try {
-      final FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-        allowMultiple: false,
-      );
-      if (result != null) {
-        final path = result.files.single.path!;
-        String? res = await Scan.parse(path);
-        final Code? code = res != null ? Code.fromOTPAuthUrl(res) : null;
-        if (code != null) {
-          await CodeStore.instance.addCode(code);
-          if ((_allCodes?.where((e) => !e.hasError).length ?? 0) > 2) {
-            _focusNewCode(code);
-          }
-        }
-      }
-    } catch (e, s) {
-      await showGenericErrorDialog(context: context, error: e);
-      _logger.severe("Error while importing from gallery", e, s);
-    }
   }
 
   Widget _getFab() {
@@ -752,15 +733,6 @@ class _HomePageState extends State<HomePage> {
           labelWidget: SpeedDialLabelWidget(context.l10n.scanAQrCode),
           onTap: _redirectToScannerPage,
         ),
-        if (PlatformUtil.isMobile() &&
-            FeatureFlagService.instance.isInternalUserOrDebugBuild())
-          SpeedDialChild(
-            child: const Icon(Icons.image),
-            foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
-            backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
-            labelWidget: const SpeedDialLabelWidget("Import from gallery"),
-            onTap: _importFromGallery,
-          ),
         SpeedDialChild(
           child: const Icon(Icons.keyboard),
           foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,

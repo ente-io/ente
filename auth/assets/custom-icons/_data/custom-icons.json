@@ -22,6 +22,11 @@
       "hex": "000000"
     },
     {
+      "title": "AJ Bell",
+      "slug": "aj_bell",
+      "hex": "c41230"
+    },
+    {
       "title": "aliyun",
       "altNames": [
         "阿里云"
@@ -54,6 +59,14 @@
     {
       "title": "AzurWare",
       "slug": "azuware"
+    },
+    {
+      "title": "Badlion",
+      "slug": "badlion",
+      "altNames": [
+        "Badlion Client",
+        "BadlionClient"
+      ]
     },
     {
       "title": "BaiduCloud",
@@ -250,7 +263,14 @@
       ]
     },
     {
+      "title": "CSAM"
+    },
+    {
       "title": "CSFloat"
+    },
+    {
+      "title": "CSGORoll",
+      "slug": "csgoroll"
     },
     {
       "title": "DCS",
@@ -279,6 +299,9 @@
     },
     {
       "title": "DMarket"
+    },
+    {
+      "title": "DocuSeal"
     },
     {
       "title": "Doppler"
@@ -330,8 +353,7 @@
       "title": "Estateguru"
     },
     {
-      "title": "Fastmail",
-      "hex": "0067B9"
+      "title": "Fastmail"
     },
     {
       "title": "Fidelity",
@@ -342,6 +364,10 @@
     },
     {
       "title": "Filen"
+    },
+    {
+      "title": "Finanzfluss",
+      "slug": "finanzfluss"
     },
     {
       "title": "Firefox",
@@ -361,6 +387,14 @@
     },
     {
       "title": "GMX"
+    },
+    {
+      "title": "GommeHD.net",
+      "slug": "gommehd",
+      "altNames": [
+        "GommeHD",
+        "GommeHDnet"
+      ]
     },
     {
       "title": "Google"
@@ -464,6 +498,12 @@
       "title": "Kagi"
     },
     {
+      "title": "Keygen",
+      "altNames": [
+        "keygen.sh"
+      ]
+    },
+    {
       "title": "Kick"
     },
     {
@@ -506,6 +546,10 @@
     {
       "title": "La Poste",
       "slug": "laposte"
+    },
+    {
+      "title": "LabyMod",
+      "slug": "labymod"
     },
     {
       "title": "Lark",
@@ -623,6 +667,10 @@
       "slug": "name_com"
     },
     {
+      "title": "Nextcloud",
+      "slug": "nextcloud"
+    },
+    {
       "title": "NeteaseMail",
       "slug": "netease_mail",
       "altNames": [
@@ -646,6 +694,22 @@
     {
       "title": "ngrok",
       "hex": "858585"
+    },
+    {
+      "title": "NekoHosting",
+      "slug": "nekohosting",
+      "altNames": [
+        "NekoHosting Billing",
+        "NekoHosting Dashboard"
+      ]
+    },
+    {
+      "title": "NekoHosting Gaming Panel",
+      "slug": "nekohosting_gp",
+      "altNames": [
+        "NekoHosting Game Panel",
+        "NekoHosting GamePanel"
+      ]
     },
     {
       "title": "Nelnet"
@@ -696,6 +760,10 @@
       "altNames": [
         "欧易"
       ]
+    },
+    {
+      "title": "Parqet",
+      "slug": "parqet"
     },
     {
       "title": "Parsec"
@@ -799,6 +867,9 @@
       ]
     },
     {
+      "title": "reMarkable"
+    },
+    {
       "title": "Restorecord"
     },
     {
@@ -881,6 +952,19 @@
       "slug": "standardnotes"
     },
     {
+      "title": "Starbreeze",
+      "altNames": [
+        "Starbreeze Nebula",
+        "Starbreeze Account",
+        "PAYDAY",
+        "PAYDAY 3"
+      ]
+    },
+    {
+      "title": "STRATO",
+      "hex": "FF8800"
+    },
+    {
       "title": "Surfshark"
     },
     {
@@ -940,13 +1024,16 @@
       "hex": "858585"
     },
     {
-      "title": "Titan"
-    },
-    {
       "title": "tianyiyun",
       "altNames": [
         "天翼云"
       ]
+    },
+    {
+      "title": "TikTok"
+    },
+    {
+      "title": "Titan"
     },
     {
       "title": "TorGuard"
@@ -1043,8 +1130,7 @@
       "title": "WHMCS"
     },
     {
-      "title": "Windscribe",
-      "hex": "858585"
+      "title": "Windscribe"
     },
     {
       "title": "Wise"
@@ -1059,10 +1145,23 @@
       ]
     },
     {
+      "title": "World Cube Association",
+      "slug": "wca",
+      "altNames": [
+        "WCA",
+        "worldcubeassociation"
+      ]
+    },
+    {
       "title": "WYZE"
     },
     {
-      "title": "yahoo"
+      "title": "Xbox",
+      "hex": "107C10"
+    },
+    {
+      "title": "Yahoo",
+      "hex": "5F01D2"
     },
     {
       "title": "Yandex",
@@ -1077,6 +1176,9 @@
       "altNames": [
         "You Need A Budget"
       ]
+    },
+    {
+      "title": "Zoom"
     }
   ]
 }

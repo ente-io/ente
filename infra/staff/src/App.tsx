@@ -227,68 +227,77 @@ const App: React.FC = () => {
 
     const handleTabChange = (
         _event: React.SyntheticEvent,
+
         newValue: number,
     ) => {
         setTabValue(newValue);
     };
+    useEffect(() => {
+        const searchParam = new URLSearchParams(window.location.search);
+        const userToken = searchParam.get("token");
+
+        if (userToken) {
+            setLocalToken(userToken);
+            setToken(userToken);
+        }
+    }, []);
 
     return (
         <div className="container">
-            <form className="input-form" onKeyPress={handleKeyPress}>
-                <div className="horizontal-group">
-                    <a
-                        href="https://staff.ente.sh"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="link-text"
-                    >
-                        staff.ente.sh
-                    </a>
-
-                    <TextField
-                        label="Token"
-                        value={localToken}
-                        onChange={(e) => {
-                            setLocalToken(e.target.value);
-                            setToken(e.target.value);
-                        }}
-                        size="medium"
-                        className="text-field-token"
-                        style={{ width: "350px" }}
-                    />
-                    <TextField
-                        label="Email"
-                        value={localEmail}
-                        onChange={(e) => {
-                            setLocalEmail(e.target.value);
-                            setEmail(e.target.value);
-                        }}
-                        size="medium"
-                        className="text-field-email"
-                        style={{ width: "350px" }}
-                    />
-                    <div className="fetch-button-container">
-                        <Button
-                            variant="contained"
-                            onClick={() => {
-                                fetchData().catch((error: unknown) =>
-                                    console.error("Fetch data error:", error),
-                                );
-                            }}
-                            className="fetch-button"
-                            style={{
-                                padding: "0 16px",
-                            }}
+            <div>
+                <form className="input-form" onKeyPress={handleKeyPress}>
+                    <div className="horizontal-group">
+                        <a
+                            href="https://staff.ente.sh"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="link-text"
                         >
-                            FETCH
-                        </Button>
+                            staff.ente.io
+                        </a>
+                        <div className="text-fields">
+                            <TextField
+                                label="Email"
+                                value={localEmail}
+                                onChange={(e) => {
+                                    setLocalEmail(e.target.value);
+                                    setEmail(e.target.value);
+                                }}
+                                size="medium"
+                                className="text-field-email"
+                                style={{ width: "parent" }}
+                            />
+                        </div>
+                        <div className="fetch-button-container">
+                            <Button
+                                variant="contained"
+                                onClick={() => {
+                                    fetchData().catch((error: unknown) =>
+                                        console.error(
+                                            "Fetch data error:",
+                                            error,
+                                        ),
+                                    );
+                                }}
+                                className="fetch-button"
+                                style={{
+                                    padding: "0 16px",
+                                }}
+                            >
+                                FETCH
+                            </Button>
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
             <div className="content-container">
                 {loading ? (
                     <CircularProgress
-                        sx={{ color: "black", marginTop: "200px" }}
+                        sx={{
+                            color: "black",
+                            top: "200px",
+                            position: "fixed",
+                        }}
                     />
                 ) : error ? (
                     <div className="error-message">{error}</div>

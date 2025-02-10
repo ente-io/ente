@@ -342,14 +342,14 @@
 				"${BUILT_PRODUCTS_DIR}/video_thumbnail/video_thumbnail.framework",
 				"${BUILT_PRODUCTS_DIR}/volume_controller/volume_controller.framework",
 				"${BUILT_PRODUCTS_DIR}/wakelock_plus/wakelock_plus.framework",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ffmpeg-kit-ios-min/ffmpegkit.framework/ffmpegkit",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ffmpeg-kit-ios-min/libavcodec.framework/libavcodec",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ffmpeg-kit-ios-min/libavdevice.framework/libavdevice",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ffmpeg-kit-ios-min/libavfilter.framework/libavfilter",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ffmpeg-kit-ios-min/libavformat.framework/libavformat",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ffmpeg-kit-ios-min/libavutil.framework/libavutil",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ffmpeg-kit-ios-min/libswresample.framework/libswresample",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ffmpeg-kit-ios-min/libswscale.framework/libswscale",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ffmpeg-kit-ios-full-gpl/ffmpegkit.framework/ffmpegkit",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ffmpeg-kit-ios-full-gpl/libavcodec.framework/libavcodec",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ffmpeg-kit-ios-full-gpl/libavdevice.framework/libavdevice",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ffmpeg-kit-ios-full-gpl/libavfilter.framework/libavfilter",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ffmpeg-kit-ios-full-gpl/libavformat.framework/libavformat",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ffmpeg-kit-ios-full-gpl/libavutil.framework/libavutil",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ffmpeg-kit-ios-full-gpl/libswresample.framework/libswresample",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ffmpeg-kit-ios-full-gpl/libswscale.framework/libswscale",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/media_kit_libs_ios_video/Ass.framework/Ass",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/media_kit_libs_ios_video/Avcodec.framework/Avcodec",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/media_kit_libs_ios_video/Avfilter.framework/Avfilter",
@@ -608,6 +608,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
+				APP_DISPLAY_NAME = "Ente Profile";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
@@ -770,6 +771,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 			buildSettings = {
+				APP_DISPLAY_NAME = "Ente Debug";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
@@ -794,7 +796,7 @@
 					"$(PROJECT_DIR)/Flutter",
 				);
 				MARKETING_VERSION = 0.0.11;
-				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.debug;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -809,6 +811,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
+				APP_DISPLAY_NAME = "Ente Photos";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;

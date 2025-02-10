@@ -3,6 +3,10 @@ import "dart:convert";
 class User {
   int? id;
   String email;
+  @Deprecated(
+    "Use displayName() extension method instead. Note: Some early users have"
+    " value in name field.",
+  )
   String? name;
   String? role;
 

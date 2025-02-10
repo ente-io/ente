@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:developer";
 
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
@@ -7,6 +6,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/l10n/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
@@ -16,6 +16,7 @@ import 'package:photos/models/selected_files.dart';
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/ui/components/end_to_end_banner.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
@@ -23,9 +24,12 @@ import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.da
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
+import "package:photos/ui/viewer/people/link_email_screen.dart";
+
 import "package:photos/ui/viewer/people/people_app_bar.dart";
 import "package:photos/ui/viewer/people/people_banner.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class PeoplePage extends StatefulWidget {
   final String tagPrefix;
@@ -52,6 +56,7 @@ class _PeoplePageState extends State<PeoplePage> {
   List<EnteFile>? files;
   int? smallestClusterSize;
   Future<List<EnteFile>> filesFuture = Future.value([]);
+  late PersonEntity _person;
 
   bool get showSuggestionBanner => (!userDismissedSuggestionBanner &&
       smallestClusterSize != null &&
@@ -67,9 +72,17 @@ class _PeoplePageState extends State<PeoplePage> {
   @override
   void initState() {
     super.initState();
+    _person = widget.person;
     ClusterFeedbackService.resetLastViewedClusterID();
     _peopleChangedEvent = Bus.instance.on<PeopleChangedEvent>().listen((event) {
-      setState(() {});
+      setState(() {
+        if (event.type == PeopleEventType.saveOrEditPerson) {
+          if (event.person != null &&
+              event.person!.remoteID == _person.remoteID) {
+            _person = event.person!;
+          }
+        }
+      });
     });
 
     filesFuture = loadPersonFiles();
@@ -89,12 +102,11 @@ class _PeoplePageState extends State<PeoplePage> {
   }
 
   Future<List<EnteFile>> loadPersonFiles() async {
-    log("loadPersonFiles");
     final result = await SearchService.instance
-        .getClusterFilesForPersonID(widget.person.remoteID);
+        .getClusterFilesForPersonID(_person.remoteID);
     if (result.isEmpty) {
       _logger.severe(
-        "No files found for person with id ${widget.person.remoteID}, can't load files",
+        "No files found for person with id ${_person.remoteID}, can't load files",
       );
       return [];
     }
@@ -121,7 +133,7 @@ class _PeoplePageState extends State<PeoplePage> {
 
   @override
   Widget build(BuildContext context) {
-    _logger.info("Building for ${widget.person.data.name}");
+    _logger.info("Building for ${_person.data.name}");
     return GalleryFilesState(
       child: InheritedSearchFilterDataWrapper(
         searchFilterDataProvider: widget.searchResult != null
@@ -136,9 +148,9 @@ class _PeoplePageState extends State<PeoplePage> {
                 Size.fromHeight(widget.searchResult != null ? 90.0 : 50.0),
             child: PeopleAppBar(
               GalleryType.peopleTag,
-              widget.person.data.name,
+              _person.data.name,
               _selectedFiles,
-              widget.person,
+              _person,
             ),
           ),
           body: FutureBuilder<List<EnteFile>>(
@@ -177,6 +189,7 @@ class _PeoplePageState extends State<PeoplePage> {
                                               selectedFiles: _selectedFiles,
                                               personFiles: personFiles,
                                               loadPersonFiles: loadPersonFiles,
+                                              personEntity: _person,
                                             );
                                     },
                                   )
@@ -185,11 +198,12 @@ class _PeoplePageState extends State<PeoplePage> {
                                     selectedFiles: _selectedFiles,
                                     personFiles: personFiles,
                                     loadPersonFiles: loadPersonFiles,
+                                    personEntity: _person,
                                   ),
                             FileSelectionOverlayBar(
                               PeoplePage.overlayType,
                               _selectedFiles,
-                              person: widget.person,
+                              person: _person,
                             ),
                           ],
                         ),
@@ -216,7 +230,7 @@ class _PeoplePageState extends State<PeoplePage> {
                                     MaterialPageRoute(
                                       builder: (context) =>
                                           PersonReviewClusterSuggestion(
-                                        widget.person,
+                                        _person,
                                       ),
                                     ),
                                   ),
@@ -228,7 +242,8 @@ class _PeoplePageState extends State<PeoplePage> {
                   ],
                 );
               } else if (snapshot.hasError) {
-                log("Error: ${snapshot.error} ${snapshot.stackTrace}}");
+                _logger
+                    .severe("Error: ${snapshot.error} ${snapshot.stackTrace}}");
                 //Need to show an error on the UI here
                 return const SizedBox.shrink();
               } else {
@@ -249,12 +264,14 @@ class _Gallery extends StatelessWidget {
   final SelectedFiles selectedFiles;
   final List<EnteFile> personFiles;
   final Future<List<EnteFile>> Function() loadPersonFiles;
+  final PersonEntity personEntity;
 
   const _Gallery({
     required this.tagPrefix,
     required this.selectedFiles,
     required this.personFiles,
     required this.loadPersonFiles,
+    required this.personEntity,
   });
 
   @override
@@ -286,6 +303,23 @@ class _Gallery extends StatelessWidget {
       tagPrefix: tagPrefix + tagPrefix,
       selectedFiles: selectedFiles,
       initialFiles: personFiles.isNotEmpty ? [personFiles.first] : [],
+      header:
+          personEntity.data.email != null && personEntity.data.email!.isNotEmpty
+              ? const SizedBox.shrink()
+              : Padding(
+                  padding: const EdgeInsets.only(top: 12, bottom: 8),
+                  child: EndToEndBanner(
+                    title: context.l10n.linkEmail,
+                    caption: context.l10n.linkEmailToContactBannerCaption,
+                    leadingIcon: Icons.email_outlined,
+                    onTap: () async {
+                      await routeToPage(
+                        context,
+                        LinkEmailScreen(personEntity.remoteID),
+                      );
+                    },
+                  ),
+                ),
     );
   }
 }

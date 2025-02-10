@@ -50,11 +50,12 @@ class PersonData {
   final String name;
   final bool isHidden;
   String? avatarFaceID;
-  List<ClusterInfo>? assigned = List<ClusterInfo>.empty();
-  List<String>? rejectedFaceIDs = List<String>.empty();
+  List<ClusterInfo> assigned = List<ClusterInfo>.empty();
+  List<String> rejectedFaceIDs = List<String>.empty();
   final String? birthDate;
-  // email should be always looked via userID as user might have changed
-  // their email ids.
+
+  /// email should be always looked via userID as user might have changed
+  /// their email ids.
   final String? email;
   final int? userID;
 
@@ -65,8 +66,8 @@ class PersonData {
 
   PersonData({
     required this.name,
-    this.assigned,
-    this.rejectedFaceIDs,
+    this.assigned = const <ClusterInfo>[],
+    this.rejectedFaceIDs = const <String>[],
     this.avatarFaceID,
     this.isHidden = false,
     this.birthDate,
@@ -101,15 +102,13 @@ class PersonData {
     final StringBuffer sb = StringBuffer();
     sb.writeln('Person: $name');
     int assignedCount = 0;
-    for (final a in (assigned ?? <ClusterInfo>[])) {
+    for (final a in assigned) {
       assignedCount += a.faces.length;
     }
-    sb.writeln('Assigned: ${assigned?.length} withFaces $assignedCount');
-    sb.writeln('Rejected faceIDs: ${rejectedFaceIDs?.length}');
-    if (assigned != null) {
-      for (var cluster in assigned!) {
-        sb.writeln('Cluster: ${cluster.id} - ${cluster.faces.length}');
-      }
+    sb.writeln('Assigned: ${assigned.length} withFaces $assignedCount');
+    sb.writeln('Rejected faceIDs: ${rejectedFaceIDs.length}');
+    for (var cluster in assigned) {
+      sb.writeln('Cluster: ${cluster.id} - ${cluster.faces.length}');
     }
     debugPrint(sb.toString());
   }
@@ -117,7 +116,7 @@ class PersonData {
   // toJson
   Map<String, dynamic> toJson() => {
         'name': name,
-        'assigned': assigned?.map((e) => e.toJson()).toList(),
+        'assigned': assigned.map((e) => e.toJson()).toList(),
         'rejectedFaceIDs': rejectedFaceIDs,
         'avatarFaceID': avatarFaceID,
         'isHidden': isHidden,

@@ -10,14 +10,15 @@
  */
 
 import { nativeImage, shell } from "electron/common";
-import type { WebContents } from "electron/main";
 import {
     BrowserWindow,
     Menu,
     Tray,
     app,
     dialog,
+    nativeTheme,
     protocol,
+    type WebContents,
 } from "electron/main";
 import serveNextAt from "next-electron-server";
 import { existsSync } from "node:fs";
@@ -95,10 +96,10 @@ const main = () => {
     /**
      * Handle an open URL request, but ensuring that we have a mainWindow.
      */
-    const handleOpenURLEnsuringWindow = (url: string) => {
+    const handleOpenEnteURLEnsuringWindow = (url: string) => {
         log.info(`Attempting to handle request to open URL: ${url}`);
         if (mainWindow) handleEnteLinks(mainWindow, url);
-        else setTimeout(() => handleOpenURLEnsuringWindow(url), 1000);
+        else setTimeout(() => handleOpenEnteURLEnsuringWindow(url), 1000);
     };
 
     app.on("second-instance", (_, argv: string[]) => {
@@ -109,9 +110,15 @@ const main = () => {
             mainWindow.focus();
         }
         // On Windows and Linux, this is how we get deeplinks.
+        //
         // See: registerForEnteLinks
-        const url = argv.pop();
-        if (url) handleOpenURLEnsuringWindow(url);
+        //
+        // Note that Chromium reserves the right to fudge with the order of the
+        // command line arguments, including inserting things in arbitrary
+        // places, so we need to go through the args to find the one that is
+        // pertinent to us (if any) instead of looking at a fixed position.
+        const url = argv.find((arg) => arg.startsWith("ente://app"));
+        if (url) handleOpenEnteURLEnsuringWindow(url);
     });
 
     // Emitted once, when Electron has finished initializing.
@@ -145,7 +152,7 @@ const main = () => {
             void mainWindow.loadURL(rendererURL);
 
             // Continue on with the rest of the startup sequence.
-            Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
+            Menu.setApplicationMenu(createApplicationMenu(mainWindow));
             setupTrayItem(mainWindow);
             setupAutoUpdater(mainWindow);
 
@@ -170,7 +177,7 @@ const main = () => {
     });
 
     // On macOS, this is how we get deeplinks. See: registerForEnteLinks
-    app.on("open-url", (_, url) => handleOpenURLEnsuringWindow(url));
+    app.on("open-url", (_, url) => handleOpenEnteURLEnsuringWindow(url));
 };
 
 /**
@@ -272,7 +279,7 @@ const handleEnteLinks = (mainWindow: BrowserWindow, url: string) => {
     // - the protocol we're using to serve/ our bundled web app
     //
     // use the same scheme ("ente://"), so the URL can directly be forwarded.
-    mainWindow.webContents.send("openURL", url);
+    mainWindow.webContents.send("openEnteURL", url);
 };
 
 /** Attach handlers to the (node) process. */
@@ -341,9 +348,31 @@ const createMainWindow = () => {
         ...(bounds ?? {}),
         // Enforce a minimum size
         ...minimumWindowSize(),
+        // [Note: Customize the desktop title bar]
+        //
+        // 1. Remove the default title bar.
+        // 2. Reintroduce the title bar controls.
+        // 3. Show a custom title bar in the renderer.
+        //
+        // For step 3, we use `app-region: drag` to allow dragging the window by
+        // the title bar, and use the Window Controls Overlay CSS environment
+        // variables to determine its dimensions. Note that these overlay CSS
+        // environment vars are only available when titleBarOverlay is true, so
+        // unlike the tutorial which enables it only for Windows and Linux, we
+        // do it (Step 2) unconditionally (i.e., on macOS too).
+        //
+        // https://www.electronjs.org/docs/latest/tutorial/custom-title-bar#create-a-custom-title-bar
+        titleBarStyle: "hidden",
+        titleBarOverlay: true,
         // The color to show in the window until the web content gets loaded.
-        // See: https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
-        backgroundColor: "black",
+        // https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
+        //
+        // To avoid a flash, we want to use the same background color as the
+        // theme of their choice. Unless the user has modified their preference
+        // to not follow the system, we can deduce it from the current OS theme.
+        //
+        // See: https://www.electronjs.org/docs/latest/tutorial/dark-mode
+        backgroundColor: nativeTheme.shouldUseDarkColors ? "black" : "white",
         // We'll show it conditionally depending on `wasAutoLaunched` later.
         show: false,
     });

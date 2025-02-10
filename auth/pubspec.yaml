@@ -1,7 +1,7 @@
 
 name: ente_auth
 description: ente two-factor authenticator
-version: 4.2.7+427
+version: 4.3.2+432
 publish_to: none
 
 environment:
@@ -82,8 +82,7 @@ dependencies:
   privacy_screen: ^0.0.6
   protobuf: ^3.0.0
   qr_code_scanner: ^1.0.1
-  qr_flutter: ^4.1.0
-  scan: ^1.6.0
+  qr_flutter: ^4.1.0 
   sentry: ^8.7.0
   sentry_flutter: ^8.7.0
   share_plus: ^10.0.2

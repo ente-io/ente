@@ -130,6 +130,10 @@ export const deduceDuplicates = async () => {
     const collectionIDsByFileID = new Map<number, Set<number>>();
     const filesByHash = new Map<string, EnteFile[]>();
     for (const file of filteredCollectionFiles) {
+        // User cannot delete files that are not owned by the user even if they
+        // are in an album owned by the user.
+        if (file.ownerID != userID) continue;
+
         const hash = metadataHash(file.metadata);
         if (!hash) {
             // Some very old files uploaded by ancient versions of Ente might

@@ -965,6 +965,14 @@
   "syncStopped": "Sync stopped",
   "syncProgress": "{completed}/{total} memories preserved",
   "uploadingMultipleMemories": "Preserving {count} memories...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "uploadingSingleMemory": "Preserving 1 memory...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
@@ -1589,6 +1597,81 @@
   "joinAlbum": "Join album",
   "joinAlbumSubtext": "to view and add your photos",
   "joinAlbumSubtextViewer": "to add this to shared albums",
-  "join": "Join"
-  
+  "join": "Join",
+  "linkEmail": "Link email",
+  "link": "Link",
+  "noEnteAccountExclamation": "No Ente account!",
+  "orPickFromYourContacts": "or pick from your contacts",
+  "emailDoesNotHaveEnteAccount": "{email} does not have an Ente account.",
+  "@emailDoesNotHaveEnteAccount": {
+    "description": "Shown when email doesn't have an Ente account",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountOwnerPersonAppbarTitle": "{title} (Me)",
+  "@accountOwnerPersonAppbarTitle": {
+    "description": "Title of appbar for account owner person",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reassignMe": "Reassign \"Me\"",
+  "me": "Me",
+  "linkEmailToContactBannerCaption" : "for faster sharing",
+  "@linkEmailToContactBannerCaption": {
+    "description": "Caption for the 'Link email' title. It should be a continuation of the 'Link email' title. Just like how 'Link email' + 'for faster sharing' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "selectPersonToLink": "Select person to link",
+  "linkPersonToEmail": "Link person to {email}",
+  "@linkPersonToEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"  
+      }
+    }
+  },
+  "linkPersonToEmailConfirmation": "This will link {personName} to {email}",
+  "@linkPersonToEmailConfirmation": {
+    "description": "Confirmation message when linking a person to an email",
+    "placeholders": {
+      "personName": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "selectYourFace": "Select your face",
+  "reassigningLoading": "Reassigning...",
+  "reassignedToName": "Reassigned you to {name}",
+  "@reassignedToName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "saveChangesBeforeLeavingQuestion": "Save changes before leaving?",
+  "dontSave": "Don't save",
+  "thisIsMeExclamation": "This is me!",
+  "linkPerson": "Link person",
+  "linkPersonCaption": "for better sharing experience",
+  "@linkPersonCaption": {
+    "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "videoStreaming": "Video streaming",
+  "processingVideos": "Processing videos",
+  "streamDetails": "Stream details",
+  "processing": "Processing",
+  "queued": "Queued",
+  "ineligible": "Ineligible",
+  "failed": "Failed",
+  "playStream": "Play stream",
+  "playOriginal": "Play original"
 }

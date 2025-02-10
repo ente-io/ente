@@ -114,9 +114,9 @@ export interface Electron {
 
     /**
      * Set or clear the callback {@link cb} to invoke whenever the app gets
-     * asked to open a deeplink. This allows the Node.js layer to ask the
-     * renderer to handle deeplinks and redirect itself to a new location if
-     * needed.
+     * asked to open a deeplink that begins with "ente://". This allows the
+     * Node.js layer to ask the renderer to handle deeplinks and redirect itself
+     * to a new location if needed.
      *
      * In particular, this is necessary for handling passkey authentication.
      * See: [Note: Passkey verification in the desktop app]
@@ -127,7 +127,36 @@ export interface Electron {
      * "ente://" URL. The URL string (a.k.a. "deeplink") we were asked to open
      * is passed to the function verbatim.
      */
-    onOpenURL: (cb: ((url: string) => void) | undefined) => void;
+    onOpenEnteURL: (cb: ((url: string) => void) | undefined) => void;
+
+    /**
+     * Get the persisted version for the last shown changelog.
+     *
+     * See: [Note: Conditions for showing "What's new"]
+     */
+    lastShownChangelogVersion: () => Promise<number | undefined>;
+
+    /**
+     * Save the given {@link version} to disk as the version of the last shown
+     * changelog.
+     *
+     * The value is saved to a store which is not cleared during logout.
+     *
+     * @see {@link lastShownChangelogVersion}
+     */
+    setLastShownChangelogVersion: (version: number) => Promise<void>;
+
+    /**
+     * Return true if the auto launch on system startup is enabled.
+     */
+    isAutoLaunchEnabled: () => Promise<boolean>;
+
+    /**
+     * Toggle the auto launch on system startup behaviour.
+     *
+     * @see {@link isAutoLaunchEnabled}
+     */
+    toggleAutoLaunch: () => Promise<void>;
 
     // - App update
 
@@ -165,23 +194,6 @@ export interface Electron {
      * been marked as skipped so that we don't prompt the user again.
      */
     skipAppUpdate: (version: string) => void;
-
-    /**
-     * Get the persisted version for the last shown changelog.
-     *
-     * See: [Note: Conditions for showing "What's new"]
-     */
-    lastShownChangelogVersion: () => Promise<number | undefined>;
-
-    /**
-     * Save the given {@link version} to disk as the version of the last shown
-     * changelog.
-     *
-     * The value is saved to a store which is not cleared during logout.
-     *
-     * @see {@link lastShownChangelogVersion}
-     */
-    setLastShownChangelogVersion: (version: number) => Promise<void>;
 
     // - FS
 
@@ -271,13 +283,8 @@ export interface Electron {
     /**
      * Try to convert an arbitrary image into JPEG using native layer tools.
      *
-     * The behaviour is OS dependent. On macOS we use the `sips` utility, and on
-     * some Linux architectures we use an ImageMagick executable bundled with
-     * our desktop app.
-     *
-     * In other cases (primarily Windows), where native JPEG conversion is not
-     * yet possible, this function will throw an error with the
-     * {@link CustomErrorMessage.NotAvailable} message.
+     * The behaviour is OS dependent. On macOS we use the `sips` utility, while
+     * on Linux and Windows we use a `vips` bundled with our desktop app.
      *
      * @param imageData The raw image data (the contents of the image file).
      *
@@ -288,13 +295,8 @@ export interface Electron {
     /**
      * Generate a JPEG thumbnail for the given image.
      *
-     * The behaviour is OS dependent. On macOS we use the `sips` utility, and on
-     * some Linux architectures we use an ImageMagick executable bundled with
-     * our desktop app.
-     *
-     * In other cases (primarily Windows), where native thumbnail generation is
-     * not yet possible, this function will throw an error with the
-     * {@link CustomErrorMessage.NotAvailable} message.
+     * The behaviour is OS dependent. On macOS we use the `sips` utility, while
+     * on Linux and Windows we use a `vips` bundled with our desktop app.
      *
      * @param dataOrPathOrZipItem The file whose thumbnail we want to generate.
      * It can be provided as raw image data (the contents of the image file), or
@@ -319,8 +321,8 @@ export interface Electron {
      * {@link dataOrPathOrZipItem}.
      *
      * This executes the command using a FFmpeg executable we bundle with our
-     * desktop app. We also have a wasm FFmpeg wasm implementation that we use
-     * when running on the web, which has a sibling function with the same
+     * desktop app. We also have a Wasm FFmpeg implementation that we use when
+     * running on the web, which has a sibling function with the same
      * parameters. See [Note:FFmpeg in Electron].
      *
      * @param command An array of strings, each representing one positional
@@ -609,26 +611,6 @@ export interface ElectronMLWorker {
      */
     computeFaceEmbeddings: (input: Float32Array) => Promise<Float32Array>;
 }
-
-/**
- * Errors that have special semantics on the web side.
- *
- * [Note: Custom errors across Electron/Renderer boundary]
- *
- * If we need to identify errors thrown by the main process when invoked from
- * the renderer process, we can only use the `message` field because:
- *
- * > Errors thrown throw `handle` in the main process are not transparent as
- * > they are serialized and only the `message` property from the original error
- * > is provided to the renderer process.
- * >
- * > - https://www.electronjs.org/docs/latest/tutorial/ipc
- * >
- * > Ref: https://github.com/electron/electron/issues/24427
- */
-export const CustomErrorMessage = {
-    NotAvailable: "This feature in not available on the current OS/arch",
-};
 
 /**
  * Data passed across the IPC bridge when an app update is available.

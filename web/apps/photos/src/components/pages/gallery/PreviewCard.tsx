@@ -1,23 +1,22 @@
 import { Overlay } from "@/base/components/containers";
+import { formattedDateRelative } from "@/base/i18n-date";
 import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
+import { enteFileDeletionDate } from "@/media/file";
 import { FileType } from "@/media/file-type";
-import {
-    GAP_BTW_TILES,
-    IMAGE_CONTAINER_MAX_WIDTH,
-} from "@/new/photos/components/PhotoList";
+import { GAP_BTW_TILES } from "@/new/photos/components/PhotoList";
 import {
     LoadingThumbnail,
     StaticThumbnail,
 } from "@/new/photos/components/PlaceholderThumbnails";
+import { TileBottomTextOverlay } from "@/new/photos/components/Tiles";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
 import useLongPress from "@ente/shared/hooks/useLongPress";
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
-import { styled } from "@mui/material";
+import { styled, Typography } from "@mui/material";
 import type { DisplayFile } from "components/PhotoFrame";
-import i18n from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { shouldShowAvatar } from "utils/file";
@@ -40,10 +39,12 @@ interface IProps {
     isFav: boolean;
 }
 
-const Check = styled("input")<{ $active: boolean }>`
+const Check = styled("input")<{ $active: boolean }>(
+    ({ theme, $active }) => `
     appearance: none;
     position: absolute;
-    z-index: 10;
+    /* Increase z-index in stacking order to capture clicks */
+    z-index: 1;
     left: 0;
     outline: none;
     cursor: pointer;
@@ -53,54 +54,52 @@ const Check = styled("input")<{ $active: boolean }>`
 
     &::before {
         content: "";
-        width: 16px;
-        height: 16px;
-        border: 2px solid #fff;
+        width: 19px;
+        height: 19px;
         background-color: #ddd;
         display: inline-block;
         border-radius: 50%;
         vertical-align: bottom;
-        margin: 8px 8px;
-        text-align: center;
-        line-height: 16px;
+        margin: 6px 6px;
         transition: background-color 0.3s ease;
         pointer-events: inherit;
-        color: #aaa;
+
     }
     &::after {
         content: "";
+        position: absolute;
         width: 5px;
-        height: 10px;
+        height: 11px;
         border-right: 2px solid #333;
         border-bottom: 2px solid #333;
-        transform: translate(-18px, 8px);
         transition: transform 0.3s ease;
-        position: absolute;
         pointer-events: inherit;
-        transform: translate(-18px, 10px) rotate(45deg);
+        transform: translate(-18px, 9px) rotate(45deg);
     }
 
-    /** checked */
+    /* checkmark background (filled circle) */
     &:checked::before {
         content: "";
-        background-color: #51cd7c;
-        border-color: #51cd7c;
-        color: #fff;
+        background-color: ${theme.vars.palette.accent.main};
+        border-color: ${theme.vars.palette.accent.main};
+        color: white;
     }
+    /* checkmark foreground (tick) */
     &:checked::after {
         content: "";
         border-right: 2px solid #ddd;
         border-bottom: 2px solid #ddd;
     }
     visibility: hidden;
-    ${(props) => props.$active && "visibility: visible; opacity: 0.5;"};
+    ${$active && "visibility: visible; opacity: 0.5;"};
     &:checked {
         visibility: visible;
         opacity: 1 !important;
     }
-`;
+`,
+);
 
-export const HoverOverlay = styled("div")<{ checked: boolean }>`
+const HoverOverlay = styled("div")<{ checked: boolean }>`
     opacity: 0;
     left: 0;
     top: 0;
@@ -113,81 +112,61 @@ export const HoverOverlay = styled("div")<{ checked: boolean }>`
         "background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))"};
 `;
 
-export const AvatarOverlay = styled(Overlay)`
+/**
+ * An overlay showing the avatars of the person who shared the item, at the top
+ * right.
+ */
+const AvatarOverlay = styled(Overlay)`
     display: flex;
     justify-content: flex-end;
     align-items: flex-start;
-    padding-right: 5px;
-    padding-top: 5px;
+    padding: 5px;
 `;
 
-export const FavOverlay = styled(Overlay)`
+/**
+ * An overlay showing the favorite icon at bottom left.
+ */
+const FavoriteOverlay = styled(Overlay)`
     display: flex;
     justify-content: flex-start;
     align-items: flex-end;
-    padding-left: 5px;
-    padding-bottom: 5px;
-    opacity: 0.9;
+    padding: 5px;
+    color: white;
+    opacity: 0.6;
 `;
 
-export const InSelectRangeOverLay = styled("div")<{ $active: boolean }>`
-    opacity: ${(props) => (!props.$active ? 0 : 1)};
-    left: 0;
-    top: 0;
-    outline: none;
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    ${(props) => props.$active && "background:rgba(81, 205, 124, 0.25)"};
-`;
-
-export const FileAndCollectionNameOverlay = styled("div")`
-    width: 100%;
-    bottom: 0;
-    left: 0;
-    max-height: 40%;
-    width: 100%;
-    background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 2));
-    & > p {
-        max-width: calc(${IMAGE_CONTAINER_MAX_WIDTH}px - 10px);
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        margin: 2px;
-        text-align: center;
-    }
-    padding: 7px;
+/**
+ * An overlay with a gradient, showing the file type indicator (e.g. live photo,
+ * video) at the bottom right.
+ */
+const FileTypeIndicatorOverlay = styled(Overlay)`
     display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    color: #fff;
-    position: absolute;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 5px;
+    color: white;
+    background: linear-gradient(
+        315deg,
+        rgba(0 0 0 / 0.14) 0%,
+        rgba(0 0 0 / 0.05) 30%,
+        transparent 50%
+    );
 `;
 
-export const SelectedOverlay = styled("div")<{ selected: boolean }>`
-    z-index: 5;
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 100%;
-    ${(props) => props.selected && "border: 5px solid #51cd7c;"}
+const InSelectRangeOverlay = styled(Overlay)(
+    ({ theme }) => `
+    outline: none;
+    background: ${theme.vars.palette.accent.main};
+    opacity: 0.14;
+`,
+);
+
+const SelectedOverlay = styled(Overlay)(
+    ({ theme }) => `
+    border: 2px solid ${theme.vars.palette.accent.main};
     border-radius: 4px;
-`;
-
-export const FileTypeIndicatorOverlay = styled(Overlay)(({ theme }) => ({
-    display: "flex",
-    justifyContent: "flex-end",
-    alignItems: "flex-end",
-    padding: "8px",
-    background:
-        "linear-gradient(315deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.05) 29.61%, rgba(255, 255, 255, 0) 49.86%)",
-    ...theme.applyStyles("dark", {
-        background:
-            "linear-gradient(315deg, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0.05) 29.61%, rgba(0, 0, 0, 0) 49.86%)",
-    }),
-}));
+`,
+);
 
 const Cont = styled("div")<{ disabled: boolean }>`
     display: flex;
@@ -242,6 +221,7 @@ export default function PreviewCard(props: IProps) {
         onRangeSelect,
         isRangeSelectActive,
         isInsSelectRange,
+        isFav,
     } = props;
 
     const [imgSrc, setImgSrc] = useState<string>(file.msrc);
@@ -340,54 +320,33 @@ export default function PreviewCard(props: IProps) {
                     </FileTypeIndicatorOverlay>
                 )
             )}
-            <SelectedOverlay selected={selected} />
+            {selected && <SelectedOverlay />}
             {shouldShowAvatar(file, galleryContext.user) && (
                 <AvatarOverlay>
                     <Avatar file={file} />
                 </AvatarOverlay>
             )}
-            {props.isFav && (
-                <FavOverlay>
+            {isFav && (
+                <FavoriteOverlay>
                     <FavoriteRoundedIcon />
-                </FavOverlay>
+                </FavoriteOverlay>
             )}
 
             <HoverOverlay
                 className="preview-card-hover-overlay"
                 checked={selected}
             />
-            <InSelectRangeOverLay
-                $active={isRangeSelectActive && isInsSelectRange}
-            />
+            {isRangeSelectActive && isInsSelectRange && (
+                <InSelectRangeOverlay />
+            )}
+
             {props?.activeCollectionID === TRASH_SECTION && file.isTrashed && (
-                <FileAndCollectionNameOverlay>
-                    <p>{formatDateRelative(file.deleteBy / 1000)}</p>
-                </FileAndCollectionNameOverlay>
+                <TileBottomTextOverlay>
+                    <Typography variant="small">
+                        {formattedDateRelative(enteFileDeletionDate(file))}
+                    </Typography>
+                </TileBottomTextOverlay>
             )}
         </Cont>
     );
-}
-
-function formatDateRelative(date: number) {
-    const units = {
-        year: 24 * 60 * 60 * 1000 * 365,
-        month: (24 * 60 * 60 * 1000 * 365) / 12,
-        day: 24 * 60 * 60 * 1000,
-        hour: 60 * 60 * 1000,
-        minute: 60 * 1000,
-        second: 1000,
-    };
-    const relativeDateFormat = new Intl.RelativeTimeFormat(i18n.language, {
-        localeMatcher: "best fit",
-        numeric: "always",
-        style: "long",
-    });
-    const elapsed = date - Date.now(); // "Math.abs" accounts for both "past" & "future" scenarios
-
-    for (const u in units)
-        if (Math.abs(elapsed) > units[u] || u === "second")
-            return relativeDateFormat.format(
-                Math.round(elapsed / units[u]),
-                u as Intl.RelativeTimeFormatUnit,
-            );
 }

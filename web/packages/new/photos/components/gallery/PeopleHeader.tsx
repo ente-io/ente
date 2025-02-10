@@ -1,6 +1,5 @@
-import { CenteredFill, SpaceBetweenFlex } from "@/base/components/containers";
+import { CenteredFill, SpacedRow } from "@/base/components/containers";
 import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
-import { type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
@@ -65,7 +64,7 @@ import { SuggestionFaceList } from "../PeopleList";
 import {
     ItemCard,
     LargeTileButton,
-    LargeTilePlusOverlay,
+    LargeTileCreateNewButton,
     LargeTileTextOverlay,
 } from "../Tiles";
 import { useWrapAsyncOperation } from "../utils/use-wrap-async";
@@ -86,7 +85,7 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
 }) => {
     return (
         <GalleryItemsHeaderAdapter>
-            <SpaceBetweenFlex>
+            <SpacedRow>
                 {person.type == "cgroup" ? (
                     person.isHidden ? (
                         <IgnoredPersonHeader person={person} />
@@ -99,7 +98,7 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
                         {...{ people, onSelectPerson }}
                     />
                 )}
-            </SpaceBetweenFlex>
+            </SpacedRow>
         </GalleryItemsHeaderAdapter>
     );
 };
@@ -350,14 +349,16 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
                 {...{ open, onClose }}
                 fullWidth
                 fullScreen={isFullScreen}
-                PaperProps={{ sx: { maxWidth: "490px" } }}
+                slotProps={{ paper: { sx: { maxWidth: "490px" } } }}
             >
-                <SpaceBetweenFlex sx={{ padding: "10px 8px 6px 0" }}>
+                <SpacedRow sx={{ padding: "10px 8px 6px 0" }}>
                     <DialogTitle variant="h3">{t("add_name")}</DialogTitle>
                     <DialogCloseIconButton {...{ onClose }} />
-                </SpaceBetweenFlex>
+                </SpacedRow>
                 <DialogContent_>
-                    <AddPerson onClick={handleAddPerson} />
+                    <LargeTileCreateNewButton onClick={handleAddPerson}>
+                        {t("new_person")}
+                    </LargeTileCreateNewButton>
                     {cgroupPeople.map((person) => (
                         <PersonButton
                             key={person.id}
@@ -407,13 +408,6 @@ const PersonButton: React.FC<PersonButtonProps> = ({
         <LargeTileTextOverlay>
             <Typography>{person.name ?? ""}</Typography>
         </LargeTileTextOverlay>
-    </ItemCard>
-);
-
-const AddPerson: React.FC<ButtonishProps> = ({ onClick }) => (
-    <ItemCard TileComponent={LargeTileButton} onClick={onClick}>
-        <LargeTileTextOverlay>{t("new_person")}</LargeTileTextOverlay>
-        <LargeTilePlusOverlay>+</LargeTilePlusOverlay>
     </ItemCard>
 );
 
@@ -630,15 +624,15 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             maxWidth="sm"
             fullWidth
             fullScreen={isSmallWidth}
-            PaperProps={{ sx: { minHeight: "80svh" } }}
+            slotProps={{ paper: { sx: { minHeight: "80svh" } } }}
         >
-            <SpaceBetweenFlex
-                sx={{
-                    padding: "20px 16px 16px 16px",
-                    backgroundColor: state.showChoices
-                        ? (theme) => theme.colors.fill.faint
-                        : "transparent",
-                }}
+            <SpacedRow
+                sx={[
+                    { padding: "20px 16px 16px 16px" },
+                    state.showChoices
+                        ? { backgroundColor: "fill.faint" }
+                        : { backgroundColor: "transparent" },
+                ]}
             >
                 <Stack sx={{ gap: "8px" }}>
                     <DialogTitle sx={{ "&&&": { p: 0 } }}>
@@ -659,16 +653,16 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                                 ? t("saved_choices")
                                 : t("review_suggestions")
                         }
-                        sx={{
-                            backgroundColor: state.showChoices
-                                ? (theme) => theme.colors.fill.muted
-                                : "transparent",
-                        }}
+                        sx={[
+                            state.showChoices
+                                ? { backgroundColor: "fill.muted" }
+                                : { backgroundColor: "transparent" },
+                        ]}
                     >
                         <RestoreIcon />
                     </IconButton>
                 )}
-            </SpaceBetweenFlex>
+            </SpacedRow>
             <DialogContent
                 /* Reset scroll position on switching view */
                 key={`${state.showChoices}`}
@@ -721,7 +715,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                     fullWidth
                     disabled={!hasUnsavedChanges}
                     loading={state.activity == "saving"}
-                    color={"accent"}
+                    color="accent"
                     onClick={handleSave}
                 >
                     {t("save")}
@@ -750,11 +744,7 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
         {items.map((item) => (
             <ListItem
                 key={item.id}
-                sx={{
-                    paddingInline: 0,
-                    paddingBlockEnd: "24px",
-                    justifyContent: "space-between",
-                }}
+                sx={{ px: 0, pb: "24px", justifyContent: "space-between" }}
             >
                 <Stack sx={{ gap: "10px" }}>
                     <Typography variant="small" sx={{ color: "text.muted" }}>

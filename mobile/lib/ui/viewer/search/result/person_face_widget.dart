@@ -1,7 +1,7 @@
-import "dart:developer";
 import "dart:typed_data";
 
 import 'package:flutter/widgets.dart';
+import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import 'package:photos/models/file/file.dart';
@@ -15,6 +15,8 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/face/face_box_crop.dart";
 
+final _logger = Logger("PersonFaceWidget");
+
 class PersonFaceWidget extends StatefulWidget {
   final EnteFile file;
   final String? personId;
@@ -23,6 +25,7 @@ class PersonFaceWidget extends StatefulWidget {
   final bool thumbnailFallback;
   final bool cannotTrustFile;
   final Uint8List? faceCrop;
+  final VoidCallback? onErrorCallback;
 
   // PersonFaceWidget constructor checks that both personId and clusterID are not null
   // and that the file is not null
@@ -34,6 +37,7 @@ class PersonFaceWidget extends StatefulWidget {
     this.thumbnailFallback = false,
     this.cannotTrustFile = false,
     this.faceCrop,
+    this.onErrorCallback,
     super.key,
   }) : assert(
           personId != null || clusterID != null,
@@ -46,6 +50,7 @@ class PersonFaceWidget extends StatefulWidget {
 
 class _PersonFaceWidgetState extends State<PersonFaceWidget> {
   Future<Uint8List?>? faceCropFuture;
+  late final mlDataDB = MLDataDB.instance;
 
   @override
   void initState() {
@@ -73,7 +78,9 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
           );
         } else {
           if (snapshot.hasError) {
-            log('Error getting cover face for person: ${snapshot.error}');
+            _logger.severe(
+              "Error getting cover face for person: ${snapshot.error} ${snapshot.stackTrace}}",
+            );
           }
           return widget.thumbnailFallback
               ? ThumbnailWidget(widget.file)
@@ -101,16 +108,15 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
             if (tryCache != null) return tryCache;
           }
           if (personAvatarFaceID == null && widget.cannotTrustFile) {
-            allFaces =
-                await MLDataDB.instance.getFaceIDsForPerson(widget.personId!);
+            allFaces = await mlDataDB.getFaceIDsForPerson(widget.personId!);
           }
         }
       } else if (widget.clusterID != null && widget.cannotTrustFile) {
-        allFaces =
-            await MLDataDB.instance.getFaceIDsForCluster(widget.clusterID!);
+        allFaces = await mlDataDB.getFaceIDsForCluster(widget.clusterID!);
       }
       if (allFaces != null) {
-        final allFileIDs = allFaces.map((e) => getFileIdFromFaceId(e)).toSet();
+        final allFileIDs =
+            allFaces.map((e) => getFileIdFromFaceId<int>(e)).toSet();
         final hiddenFileIDs = await SearchService.instance
             .getHiddenFiles()
             .then((onValue) => onValue.map((e) => e.uploadedFileID));
@@ -136,7 +142,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
         }
       }
 
-      final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
+      final Face? face = await mlDataDB.getCoverFaceForPerson(
         recentFileID: fileForFaceCrop.uploadedFileID!,
         avatarFaceId: personAvatarFaceID,
         personID: widget.personId,
@@ -160,11 +166,12 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
       );
       return cropMap?[face.faceID];
     } catch (e, s) {
-      log(
+      _logger.severe(
         "Error getting cover face for person: ${widget.personId} and cluster ${widget.clusterID}",
-        error: e,
-        stackTrace: s,
+        e,
+        s,
       );
+      widget.onErrorCallback?.call();
       return null;
     }
   }

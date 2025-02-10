@@ -1,3 +1,4 @@
+import { LinkButton } from "@/base/components/LinkButton";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { formattedNumber } from "@/base/i18n";
 import { EnteFile } from "@/media/file";
@@ -7,7 +8,6 @@ import { DialogActions, DialogContent, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";
 import ExportPendingList from "./ExportPendingList";
-import LinkButton from "./pages/gallery/LinkButton";
 
 interface Props {
     pendingExports: EnteFile[];

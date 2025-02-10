@@ -100,10 +100,10 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(EnteFile file) async {
   }
   _assertFileType(asset, file);
   sourceFile = await asset.originFile
-      .timeout(const Duration(seconds: 3))
+      .timeout(const Duration(seconds: 15))
       .catchError((e) async {
     if (e is TimeoutException) {
-      _logger.info("Origin file fetch timed out for " + file.toString());
+      _logger.info("Origin file fetch timed out for " + file.tag);
       return await asset.originFile;
     } else {
       throw e;
@@ -135,7 +135,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(EnteFile file) async {
     // .elp -> ente live photo
     final uniqueId = const Uuid().v4().toString();
     final livePhotoPath = tempPath + uniqueId + "_${file.generatedID}.elp";
-    _logger.fine("Creating zip for live photo from " + livePhotoPath);
+    _logger.fine("Creating zip for live photo from " + basename(livePhotoPath));
     await zip(
       zipPath: livePhotoPath,
       imagePath: sourceFile.path,

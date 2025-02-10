@@ -2,12 +2,10 @@
 
 import "dart:developer";
 
-import "package:collection/collection.dart";
 import "package:intl/intl.dart";
 import "package:photos/models/ffmpeg/channel_layouts.dart";
 import "package:photos/models/ffmpeg/codecs.dart";
 import "package:photos/models/ffmpeg/ffprobe_keys.dart";
-import "package:photos/models/ffmpeg/language.dart";
 import "package:photos/models/ffmpeg/mp4.dart";
 import "package:photos/models/location/location.dart";
 
@@ -21,6 +19,7 @@ class FFProbeProps {
   String? _width;
   String? _height;
   int? _rotation;
+  Duration? duration;
 
   // dot separated bitrate, fps, codecWidth, codecHeight. Ignore null value
   String get videoInfo {
@@ -106,7 +105,7 @@ class FFProbeProps {
       switch (stringKey) {
         case FFProbeKeys.bitrate:
         case FFProbeKeys.bps:
-          result.bitrate = _formatMetric(json[key], 'b/s');
+          result.bitrate = formatBitrate(json[key], 'b/s');
           parsedData[stringKey] = result.bitrate;
           break;
         case FFProbeKeys.byteCount:
@@ -136,6 +135,7 @@ class FFProbeProps {
           break;
         case FFProbeKeys.duration:
           parsedData[stringKey] = _formatDuration(json[key]);
+          result.duration = _parseDuration(json[key]);
         case FFProbeKeys.location:
           result.location = _formatLocation(json[key]);
           if (result.location != null) {
@@ -344,12 +344,6 @@ class FFProbeProps {
     return value;
   }
 
-  static String _formatLanguage(String value) {
-    final language = Language.living639_2
-        .firstWhereOrNull((language) => language.iso639_2 == value);
-    return language?.native ?? value;
-  }
-
   static final _durationHmsmPattern = RegExp(r'(\d+):(\d+):(\d+)(.\d+)');
   static final _durationSmPattern = RegExp(r'(\d+)(.\d+)');
   static final _locationPattern = RegExp(r'([+-][.0-9]+)');
@@ -375,7 +369,7 @@ class FFProbeProps {
     return null;
   }
 
-  static String? _formatMetric(dynamic size, String unit, {int round = 2}) {
+  static String? formatBitrate(dynamic size, String unit, {int round = 2}) {
     if (size == null) return null;
     if (size is String) {
       final parsed = int.tryParse(size);

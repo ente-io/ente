@@ -38,6 +38,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("Visszajelzés"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Érvénytelen e-mail cím"),
+        "orPickFromYourContacts":
+            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "verify": MessageLookupByLibrary.simpleMessage("Hitelesítés")
       };
 }

@@ -9,14 +9,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "72.0.0"
-  _flutterfire_internals:
-    dependency: transitive
-    description:
-      name: _flutterfire_internals
-      sha256: "5534e701a2c505fed1f0799e652dd6ae23bd4d2c4cf797220e5ced5764a7c1c2"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.3.44"
   _macros:
     dependency: transitive
     description: dart
@@ -94,6 +86,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.5.0"
+  asn1lib:
+    dependency: transitive
+    description:
+      name: asn1lib
+      sha256: "4bae5ae63e6d6dd17c4aac8086f3dec26c0236f6a0f03416c6c19d830c367cf5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.8"
   async:
     dependency: transitive
     description:
@@ -457,6 +457,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.17"
+  encrypt:
+    dependency: "direct main"
+    description:
+      name: encrypt
+      sha256: "62d9aa4670cc2a8798bab89b39fc71b6dfbacf615de6cf5001fb39f7e4a996a2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.3"
   ente_cast:
     dependency: "direct main"
     description:
@@ -566,11 +574,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-  ffmpeg_kit_flutter_min:
+  ffmpeg_kit_flutter_full_gpl:
     dependency: "direct main"
     description:
-      name: ffmpeg_kit_flutter_min
-      sha256: "123bfbc0e0b9e7cf6d32d8ba8e08b666d66af0f52c07683dd2305fbfc13f494a"
+      name: ffmpeg_kit_flutter_full_gpl
+      sha256: "4f269bcb636bfcb544e5b4d65c706a3d311839970cb42638e72406410c1b5b7b"
       url: "https://pub.dev"
     source: hosted
     version: "6.0.3"
@@ -647,6 +655,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  fk_user_agent:
+    dependency: "direct main"
+    description:
+      name: fk_user_agent
+      sha256: fd6c94e120786985a292d12f61422a581f4e851148d5940af38b819357b8ad0d
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -1121,18 +1137,18 @@ packages:
     dependency: "direct main"
     description:
       name: image_editor
-      sha256: "0fe70befea0dbaf24a7cacc32c28311a65118f66637997ad072e9063f59efdd8"
+      sha256: "38070067264fd9fea4328ca630d2ff7bd65ebe6aa4ed375d983b732d2ae7146b"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.1"
+    version: "1.6.0"
   image_editor_common:
     dependency: transitive
     description:
       name: image_editor_common
-      sha256: d141c0847148a7da573a5be5ca02e70d381e61cb6484ebef52a230ca1d6c56ab
+      sha256: "93d2f5c8b636f862775dd62a9ec20d09c8272598daa02f935955a4640e1844ee"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.2"
+    version: "1.2.0"
   image_editor_ohos:
     dependency: transitive
     description:
@@ -1460,7 +1476,7 @@ packages:
     source: hosted
     version: "1.3.6"
   media_kit_libs_ios_video:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: media_kit_libs_ios_video
       sha256: b5382994eb37a4564c368386c154ad70ba0cc78dacdd3fb0cd9f30db6d837991
@@ -1860,10 +1876,10 @@ packages:
     dependency: "direct main"
     description:
       name: photo_manager
-      sha256: "32a1ce1095aeaaa792a29f28c1f74613aa75109f21c2d4ab85be3ad9964230a4"
+      sha256: "0bc7548fd3111eb93a3b0abf1c57364e40aeda32512c100085a48dade60e574f"
       url: "https://pub.dev"
     source: hosted
-    version: "3.5.0"
+    version: "3.6.4"
   photo_manager_image_provider:
     dependency: transitive
     description:
@@ -2703,6 +2719,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.6.2"
+  video_player_media_kit:
+    dependency: "direct main"
+    description:
+      name: video_player_media_kit
+      sha256: eadf78b85d0ecc6f65bb5ca84c5ad9546a8609c6c0ee207e81673f7969461f3b
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.5"
   video_player_platform_interface:
     dependency: transitive
     description:

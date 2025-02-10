@@ -58,9 +58,7 @@ const ExportPendingList = (props: Iprops) => {
         <TitledMiniDialog
             open={props.isOpen}
             onClose={props.onClose}
-            PaperProps={{
-                sx: { maxWidth: "444px" },
-            }}
+            paperMaxWidth="444px"
             title={t("PENDING_ITEMS")}
         >
             <ItemList
@@ -73,7 +71,7 @@ const ExportPendingList = (props: Iprops) => {
             />
             <FocusVisibleButton
                 fullWidth
-                color={"secondary"}
+                color="secondary"
                 onClick={props.onClose}
             >
                 {t("close")}

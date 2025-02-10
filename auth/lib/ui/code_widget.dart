@@ -33,12 +33,14 @@ class CodeWidget extends StatefulWidget {
   final Code code;
   final bool isCompactMode;
   final CodeSortKey? sortKey;
+  final bool isReordering;
 
   const CodeWidget(
     this.code, {
     super.key,
     required this.isCompactMode,
     this.sortKey,
+    this.isReordering = false,
   });
 
   @override
@@ -100,7 +102,7 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    ignorePin = widget.sortKey == null || widget.sortKey == CodeSortKey.manual;
+    ignorePin = widget.sortKey != null && widget.sortKey == CodeSortKey.manual;
     final colorScheme = getEnteColorScheme(context);
     if (isMaskingEnabled != PreferenceService.instance.shouldHideCodes()) {
       isMaskingEnabled = PreferenceService.instance.shouldHideCodes();
@@ -222,25 +224,27 @@ class _CodeWidgetState extends State<CodeWidget> {
                       );
                     }
                   : null,
-              onLongPress: () {
-                showModalBottomSheet(
-                  context: context,
-                  builder: (_) {
-                    return BottomActionBarWidget(
-                      code: widget.code,
-                      showPin: !ignorePin,
-                      onEdit: () => _onEditPressed(true),
-                      onShare: () => _onSharePressed(true),
-                      onPin: () => _onPinPressed(true),
-                      onTrashed: () => _onTrashPressed(true),
-                      onDelete: () => _onDeletePressed(true),
-                      onRestore: () => _onRestoreClicked(true),
-                      onShowQR: () => _onShowQrPressed(true),
-                      onCancel: () => Navigator.of(context).pop(),
-                    );
-                  },
-                );
-              },
+              onLongPress: widget.isReordering
+                  ? null
+                  : () {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (_) {
+                          return BottomActionBarWidget(
+                            code: widget.code,
+                            showPin: !ignorePin,
+                            onEdit: () => _onEditPressed(true),
+                            onShare: () => _onSharePressed(true),
+                            onPin: () => _onPinPressed(true),
+                            onTrashed: () => _onTrashPressed(true),
+                            onDelete: () => _onDeletePressed(true),
+                            onRestore: () => _onRestoreClicked(true),
+                            onShowQR: () => _onShowQrPressed(true),
+                            onCancel: () => Navigator.of(context).pop(),
+                          );
+                        },
+                      );
+                    },
               child: getCardContents(l10n),
             ),
           ),
@@ -645,7 +649,12 @@ class _CodeWidgetState extends State<CodeWidget> {
       firstButtonLabel: l10n.delete,
       isCritical: true,
       firstButtonOnTap: () async {
-        await CodeStore.instance.removeCode(widget.code);
+        try {
+          await CodeStore.instance.removeCode(widget.code);
+        } catch (e, s) {
+          logger.severe('Failed to delete code', e, s);
+          showGenericErrorDialog(context: context, error: e).ignore();
+        }
       },
     );
   }

@@ -4,10 +4,7 @@ import {
     type UploadPhase,
 } from "@/new/photos/services/upload/types";
 import { useAppContext } from "@/new/photos/types/context";
-import {
-    SpaceBetweenFlex,
-    VerticallyCenteredFlex,
-} from "@ente/shared/components/Container";
+import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
@@ -151,7 +148,11 @@ const UploadProgressContext = createContext<UploadProgressContextT>({
 });
 
 const MinimizedUploadProgress: React.FC = () => (
-    <Snackbar open anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+    <Snackbar
+        open
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        sx={(theme) => ({ boxShadow: theme.vars.palette.boxShadow.menu })}
+    >
         <Paper sx={{ width: "min(360px, 100svw)" }}>
             <UploadProgressHeader />
         </Paper>
@@ -182,7 +183,7 @@ function UploadProgressSubtitleText() {
         <Typography
             variant="body"
             sx={{
-                fontWeight: "normal",
+                fontWeight: "regular",
                 color: "text.muted",
                 marginTop: "4px",
             }}
@@ -224,7 +225,7 @@ const UploadProgressTitle: React.FC = () => {
                     <UploadProgressSubtitleText />
                 </Box>
                 <Box>
-                    <Stack direction={"row"} spacing={1}>
+                    <Stack direction="row" sx={{ gap: 1 }}>
                         <FilledIconButton onClick={toggleExpanded}>
                             {expanded ? <UnfoldLessIcon /> : <UnfoldMoreIcon />}
                         </FilledIconButton>
@@ -428,13 +429,17 @@ const InProgressItemContainer = styled("div")`
 const SectionAccordion = styled((props: AccordionProps) => (
     <Accordion disableGutters elevation={0} square {...props} />
 ))(({ theme }) => ({
-    borderTop: `1px solid ${theme.palette.divider}`,
+    borderTop: `1px solid ${theme.vars.palette.divider}`,
     "&:before": { display: "none" },
-    "&:last-child": { borderBottom: `1px solid ${theme.palette.divider}` },
+    "&:last-child": { borderBottom: `1px solid ${theme.vars.palette.divider}` },
 }));
 
-const SectionAccordionSummary = styled(AccordionSummary)(() => ({
-    backgroundColor: "rgba(255, 255, 255, .05)",
+const SectionAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
+    backgroundColor: theme.vars.palette.fill.fainter,
+    // AccordionSummary is a button, and for a reasons to do with MUI internal
+    // that I didn't explore further, the user agent default font family is
+    // getting applied in this case.
+    fontFamily: "inherit",
 }));
 
 const SectionAccordionDetails = styled(AccordionDetails)(({ theme }) => ({
@@ -456,8 +461,8 @@ const SectionInfo: React.FC<React.PropsWithChildren> = ({ children }) => (
 const NotUploadSectionHeader = styled("div")(
     ({ theme }) => `
     text-align: center;
-    color: ${theme.palette.critical.main};
-    border-bottom: 1px solid ${theme.palette.critical.main};
+    color: ${theme.vars.palette.critical.main};
+    border-bottom: 1px solid ${theme.vars.palette.critical.main};
     margin:${theme.spacing(3, 2, 1)}
 `,
 );
@@ -534,7 +539,12 @@ interface TitleTextProps {
 }
 
 const TitleText: React.FC<TitleTextProps> = ({ title, count }) => (
-    <VerticallyCenteredFlex gap={"4px"}>
+    <Stack
+        direction="row"
+        // Need to reset the font weight since it gets reset by the
+        // AccordionSummary (see SectionAccordionSummary).
+        sx={{ gap: 1, fontWeight: "regular", alignItems: "baseline" }}
+    >
         <Typography>{title}</Typography>
         <Typography variant="small" sx={{ color: "text.faint" }}>
             {"•"}
@@ -542,7 +552,7 @@ const TitleText: React.FC<TitleTextProps> = ({ title, count }) => (
         <Typography variant="small" sx={{ color: "text.faint" }}>
             {count ?? 0}
         </Typography>
-    </VerticallyCenteredFlex>
+    </Stack>
 );
 
 const DoneFooter: React.FC = () => {

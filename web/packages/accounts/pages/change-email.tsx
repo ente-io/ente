@@ -5,11 +5,11 @@ import {
 } from "@/accounts/components/layouts/centered-paper";
 import { appHomeRoute } from "@/accounts/services/redirect";
 import { changeEmail, sendOTT } from "@/accounts/services/user";
+import { LinkButton } from "@/base/components/LinkButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { isHTTPErrorWithStatus } from "@/base/http";
 import log from "@/base/log";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import LinkButton from "@ente/shared/components/LinkButton";
 import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Alert, Box, TextField } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";

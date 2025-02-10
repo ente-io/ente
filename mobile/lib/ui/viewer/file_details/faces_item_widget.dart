@@ -38,14 +38,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       subtitleSection: _faceWidgets(context, widget.file, editMode),
       hasChipButtons: true,
       biggerSpinner: true,
-      // editOnTap: _toggleEditMode, // TODO: re-enable at later time when the UI is less ugly
     );
-  }
-
-  void _toggleEditMode() {
-    setState(() {
-      editMode = !editMode;
-    });
   }
 
   Future<List<Widget>> _faceWidgets(
@@ -53,6 +46,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     EnteFile file,
     bool editMode,
   ) async {
+    late final mlDataDB = MLDataDB.instance;
     try {
       if (file.uploadedFileID == null) {
         return [
@@ -64,7 +58,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       }
 
       final List<Face>? faces =
-          await MLDataDB.instance.getFacesForGivenFileID(file.uploadedFileID!);
+          await mlDataDB.getFacesForGivenFileID(file.uploadedFileID!);
       if (faces == null) {
         return [
           ChipButtonWidget(
@@ -90,12 +84,11 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         ];
       }
 
-      final faceIdsToClusterIds = await MLDataDB.instance
+      final faceIdsToClusterIds = await mlDataDB
           .getFaceIdsToClusterIds(faces.map((face) => face.faceID));
       final Map<String, PersonEntity> persons =
           await PersonService.instance.getPersonsMap();
-      final clusterIDToPerson =
-          await MLDataDB.instance.getClusterIDToPersonID();
+      final clusterIDToPerson = await mlDataDB.getClusterIDToPersonID();
 
       // Sort faces by name and score
       final faceIdToPersonID = <String, String>{};

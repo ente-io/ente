@@ -65,7 +65,7 @@ type AlbumFileEntry struct {
 func SortAlbumFileEntry(entries []*AlbumFileEntry) {
 	sort.Slice(entries, func(i, j int) bool {
 		if entries[i].IsDeleted != entries[j].IsDeleted {
-			return !entries[i].IsDeleted && entries[j].IsDeleted
+			return entries[i].IsDeleted && !entries[j].IsDeleted
 		}
 		return entries[i].AlbumID < entries[j].AlbumID
 	})

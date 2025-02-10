@@ -23,4 +23,5 @@ enum PeopleEventType {
   defaultType,
   removedFilesFromCluster,
   syncDone,
+  saveOrEditPerson,
 }

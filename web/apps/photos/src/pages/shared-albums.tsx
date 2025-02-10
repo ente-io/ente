@@ -2,14 +2,15 @@ import {
     AccountsPageContents,
     AccountsPageTitle,
 } from "@/accounts/components/layouts/centered-paper";
+import { SpacedRow, Stack100vhCenter } from "@/base/components/containers";
+import { EnteLogo } from "@/base/components/EnteLogo";
 import {
-    SpaceBetweenFlex,
-    Stack100vhCenter,
-} from "@/base/components/containers";
-import { EnteLogoSVG } from "@/base/components/EnteLogo";
-import { LoadingIndicator } from "@/base/components/loaders";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
+    LoadingIndicator,
+    TranslucentLoadingOverlay,
+} from "@/base/components/loaders";
+import type { ButtonishProps } from "@/base/components/mui";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { NavbarBase } from "@/base/components/Navbar";
 import {
     OverflowMenu,
     OverflowMenuOption,
@@ -38,10 +39,7 @@ import {
 } from "@/new/photos/services/collection";
 import { sortFiles } from "@/new/photos/services/files";
 import { useAppContext } from "@/new/photos/types/context";
-import {
-    CenteredFlex,
-    FluidContainer,
-} from "@ente/shared/components/Container";
+import { CenteredFlex } from "@ente/shared/components/Container";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -51,14 +49,12 @@ import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternate
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
 } from "components/FilesDownloadProgress";
-import { GalleryLoadingOverlay } from "components/GalleryLoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import Uploader from "components/Upload/Uploader";
@@ -382,7 +378,7 @@ export default function PublicCollectionGallery() {
             ) {
                 setErrorMessage(
                     parsedError.message === CustomError.TOO_MANY_REQUESTS
-                        ? t("LINK_TOO_MANY_REQUESTS")
+                        ? t("link_request_limit_exceeded")
                         : t("link_expired_message"),
                 );
                 // share has been disabled
@@ -516,7 +512,33 @@ export default function PublicCollectionGallery() {
                         getFolderSelectorInputProps,
                     }}
                 />
-                <SharedAlbumNavbar onAddPhotos={onAddPhotos} />
+                <NavbarBase
+                    sx={{
+                        mb: "16px",
+                        px: "24px",
+                        "@media (width < 720px)": { px: "4px" },
+                    }}
+                >
+                    {selected.count > 0 ? (
+                        <SelectedFileOptions
+                            downloadFilesHelper={downloadFilesHelper}
+                            clearSelection={clearSelection}
+                            count={selected.count}
+                        />
+                    ) : (
+                        <SpacedRow sx={{ flex: 1 }}>
+                            <EnteLogoLink href="https://ente.io">
+                                <EnteLogo height={15} />
+                            </EnteLogoLink>
+                            {onAddPhotos ? (
+                                <AddPhotosButton onClick={onAddPhotos} />
+                            ) : (
+                                <GoToEnte />
+                            )}
+                        </SpacedRow>
+                    )}
+                </NavbarBase>
+
                 <PhotoFrame
                     files={publicFiles}
                     syncWithRemote={syncWithRemote}
@@ -531,11 +553,7 @@ export default function PublicCollectionGallery() {
                     }
                     selectable={downloadEnabled}
                 />
-                {blockingLoad && (
-                    <GalleryLoadingOverlay>
-                        <ActivityIndicator />
-                    </GalleryLoadingOverlay>
-                )}
+                {blockingLoad && <TranslucentLoadingOverlay />}
                 <Uploader
                     syncWithRemote={syncWithRemote}
                     uploadCollection={publicCollection}
@@ -560,47 +578,21 @@ export default function PublicCollectionGallery() {
                     attributesList={filesDownloadProgressAttributesList}
                     setAttributesList={setFilesDownloadProgressAttributesList}
                 />
-                {selected.count > 0 && (
-                    <SelectedFileOptions
-                        downloadFilesHelper={downloadFilesHelper}
-                        clearSelection={clearSelection}
-                        count={selected.count}
-                    />
-                )}
             </FullScreenDropZone>
         </PublicCollectionGalleryContext.Provider>
     );
 }
 
-interface SharedAlbumNavbarProps {
-    /**
-     * If provided, then an "Add Photos" button will be shown in the navbar.
-     */
-    onAddPhotos: React.MouseEventHandler<HTMLButtonElement> | undefined;
-}
-const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
-    onAddPhotos,
-}) => (
-    <NavbarBase>
-        <FluidContainer>
-            <EnteLogoLink href="https://ente.io">
-                <EnteLogoSVG height={15} />
-            </EnteLogoLink>
-        </FluidContainer>
-        {onAddPhotos ? <AddPhotosButton onClick={onAddPhotos} /> : <GoToEnte />}
-    </NavbarBase>
-);
-
 const EnteLogoLink = styled("a")(({ theme }) => ({
     // Remove the excess space at the top.
     svg: { verticalAlign: "middle" },
-    color: theme.colors.text.base,
+    color: theme.vars.palette.text.base,
     ":hover": {
-        color: theme.palette.accent.main,
+        color: theme.vars.palette.accent.main,
     },
 }));
 
-const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
+const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
     const isSmallWidth = useIsSmallWidth();
 
@@ -609,18 +601,15 @@ const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
     return (
         <Box>
             {isSmallWidth ? (
-                <IconButton {...props} disabled={disabled}>
-                    {icon}
-                </IconButton>
+                <IconButton {...{ onClick, disabled }}>{icon}</IconButton>
             ) : (
-                <Button
-                    {...props}
-                    disabled={disabled}
-                    color={"secondary"}
+                <FocusVisibleButton
+                    color="secondary"
                     startIcon={icon}
+                    {...{ onClick, disabled }}
                 >
                     {t("add_photos")}
-                </Button>
+                </FocusVisibleButton>
             )}
         </Box>
     );
@@ -630,19 +619,17 @@ const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
  * A visually different variation of {@link AddPhotosButton}. It also does not
  * shrink on mobile sized screens.
  */
-const AddMorePhotosButton: React.FC<ButtonProps> = (props) => {
+const AddMorePhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
+
     return (
-        <Box>
-            <Button
-                {...props}
-                disabled={disabled}
-                color={"accent"}
-                startIcon={<AddPhotoAlternateOutlinedIcon />}
-            >
-                {t("add_more_photos")}
-            </Button>
-        </Box>
+        <FocusVisibleButton
+            color="accent"
+            startIcon={<AddPhotoAlternateOutlinedIcon />}
+            {...{ onClick, disabled }}
+        >
+            {t("add_more_photos")}
+        </FocusVisibleButton>
     );
 };
 
@@ -667,27 +654,24 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     downloadFilesHelper,
     count,
     clearSelection,
-}) => {
-    return (
-        <SelectionBar>
-            <FluidContainer>
-                <IconButton onClick={clearSelection}>
-                    <CloseIcon />
-                </IconButton>
-                <Box sx={{ ml: 1.5 }}>
-                    {t("selected_count", { selected: count })}
-                </Box>
-            </FluidContainer>
-            <Stack direction="row" sx={{ gap: 2, mr: 2 }}>
-                <Tooltip title={t("download")}>
-                    <IconButton onClick={downloadFilesHelper}>
-                        <DownloadIcon />
-                    </IconButton>
-                </Tooltip>
-            </Stack>
-        </SelectionBar>
-    );
-};
+}) => (
+    <Stack
+        direction="row"
+        sx={{ flex: 1, gap: 2, alignItems: "center", mr: 1 }}
+    >
+        <IconButton onClick={clearSelection}>
+            <CloseIcon />
+        </IconButton>
+        <Typography sx={{ mr: "auto" }}>
+            {t("selected_count", { selected: count })}
+        </Typography>
+        <Tooltip title={t("download")}>
+            <IconButton onClick={downloadFilesHelper}>
+                <DownloadIcon />
+            </IconButton>
+        </Tooltip>
+    </Stack>
+);
 
 interface ListHeaderProps {
     publicCollection: Collection;
@@ -719,7 +703,7 @@ const ListHeader: React.FC<ListHeaderProps> = ({
 
     return (
         <GalleryItemsHeaderAdapter>
-            <SpaceBetweenFlex>
+            <SpacedRow>
                 <GalleryItemsSummary
                     name={publicCollection.name}
                     fileCount={publicFiles.length}
@@ -734,7 +718,7 @@ const ListHeader: React.FC<ListHeaderProps> = ({
                         </OverflowMenuOption>
                     </OverflowMenu>
                 )}
-            </SpaceBetweenFlex>
+            </SpacedRow>
         </GalleryItemsHeaderAdapter>
     );
 };

@@ -387,7 +387,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: e2e66ffd03f23bef5e0bb138b5f01b32d8e9b7bb
+      resolved-ref: f91e1545f8263df127762240c4da54a0c42835b2
       url: "https://github.com/ente-io/ente_crypto_dart.git"
     source: git
     version: "1.0.0"
@@ -1301,14 +1301,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.0"
-  scan:
-    dependency: "direct main"
-    description:
-      name: scan
-      sha256: b343ec36f863a88d41eb4c174b810c055c6bd1f1822b2188ab31aab684fb7cdb
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.6.0"
   screen_retriever:
     dependency: transitive
     description:

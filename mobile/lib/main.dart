@@ -39,6 +39,7 @@ import 'package:photos/services/machine_learning/semantic_search/semantic_search
 import 'package:photos/services/memories_service.dart';
 import "package:photos/services/notification_service.dart";
 // import 'package:photos/services/push_service.dart';
+import "package:photos/services/preview_video_store.dart";
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
 import "package:photos/services/sync_service.dart";
@@ -50,6 +51,7 @@ import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
+import "package:video_player_media_kit/video_player_media_kit.dart";
 
 final _logger = Logger("main");
 
@@ -235,6 +237,10 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     ServiceLocator.instance
         .init(preferences, NetworkClient.instance.enteDio, packageInfo);
 
+    if (!isBackground && flagService.internalUser) {
+      VideoPlayerMediaKit.ensureInitialized(iOS: true);
+    }
+
     _logger.info("UserService init $tlog");
     await UserService.instance.init();
     _logger.info("UserService init done $tlog");
@@ -244,6 +250,10 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("CollectionsService init done $tlog");
 
     FavoritesService.instance.initFav().ignore();
+    MemoriesService.instance.init(preferences);
+    LocalFileUpdateService.instance.init(preferences);
+    SearchService.instance.init();
+    FileDataService.instance.init(preferences);
 
     _logger.info("FileUploader init $tlog");
     await FileUploader.instance.init(preferences, isBackground);
@@ -259,10 +269,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done $tlog");
 
-    MemoriesService.instance.init(preferences);
-    LocalFileUpdateService.instance.init(preferences);
-    SearchService.instance.init();
-    FileDataService.instance.init(preferences);
     _logger.info("RemoteFileMLService done $tlog");
     if (!isBackground &&
         Platform.isAndroid &&
@@ -279,9 +285,10 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       // });
     }
     _logger.info("PushService/HomeWidget done $tlog");
+    PreviewVideoStore.instance.init(preferences);
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
-    PersonService.init(
+    await PersonService.init(
       entityService,
       MLDataDB.instance,
       preferences,

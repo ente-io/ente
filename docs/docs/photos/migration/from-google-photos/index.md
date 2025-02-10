@@ -46,7 +46,7 @@ it with Ente.
 > While the app supports uploading multiple ZIPs too, we recommend unzipping
 > them all into a single folder and uploading that folder instead so that your
 > photo dates are imported properly
-> ([details](/photos/faq/photo-dates#importing-from-google-takeout)).
+> ([details](/photos/faq/metadata#importing-from-google-takeout)).
 >
 > <br />
 >

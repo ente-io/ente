@@ -2,13 +2,13 @@ import { PAGES } from "@/accounts/constants/pages";
 import { generateKeyAndSRPAttributes } from "@/accounts/services/srp";
 import { sendOTT } from "@/accounts/services/user";
 import { isWeakPassword } from "@/accounts/utils/password";
+import { LinkButton } from "@/base/components/LinkButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { isMuseumHTTPError } from "@/base/http";
 import log from "@/base/log";
 import { LS_KEYS, setLSUser } from "@ente/shared//storage/localStorage";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
-import LinkButton from "@ente/shared/components/LinkButton";
 import {
     generateAndSaveIntermediateKeyAttributes,
     saveKeyInSessionStore,
@@ -23,6 +23,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Box,
     Checkbox,
+    Divider,
     FormControlLabel,
     FormGroup,
     IconButton,
@@ -158,7 +159,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                 handleSubmit,
             }): React.JSX.Element => (
                 <form noValidate onSubmit={handleSubmit}>
-                    <VerticallyCentered sx={{ mb: 1 }}>
+                    <VerticallyCentered sx={{ mb: 2 }}>
                         <TextField
                             fullWidth
                             id="email"
@@ -303,7 +304,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                             />
                         </FormGroup>
                     </VerticallyCentered>
-                    <Box sx={{ mb: 3 }}>
+                    <Box sx={{ mb: 1 }}>
                         <LoadingButton
                             fullWidth
                             color="accent"
@@ -338,17 +339,17 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
         <>
             <AccountsPageTitle>{t("sign_up")}</AccountsPageTitle>
             {form}
+            <Divider />
             <AccountsPageFooter>
                 <Stack sx={{ gap: 3, textAlign: "center" }}>
                     <LinkButton onClick={onLogin}>
                         {t("existing_account")}
                     </LinkButton>
-                    <Typography
-                        variant="mini"
-                        sx={{ color: "text.faint", minHeight: "16px" }}
-                    >
-                        {host ?? "" /* prevent layout shift with a minHeight */}
-                    </Typography>
+                    {host && (
+                        <Typography variant="mini" sx={{ color: "text.faint" }}>
+                            {host}
+                        </Typography>
+                    )}
                 </Stack>
             </AccountsPageFooter>
         </>

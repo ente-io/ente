@@ -122,14 +122,18 @@ const lastShownChangelogVersion = () =>
 const setLastShownChangelogVersion = (version: number) =>
     ipcRenderer.invoke("setLastShownChangelogVersion", version);
 
+const isAutoLaunchEnabled = () => ipcRenderer.invoke("isAutoLaunchEnabled");
+
+const toggleAutoLaunch = () => ipcRenderer.invoke("toggleAutoLaunch");
+
 const onMainWindowFocus = (cb: (() => void) | undefined) => {
     ipcRenderer.removeAllListeners("mainWindowFocus");
     if (cb) ipcRenderer.on("mainWindowFocus", cb);
 };
 
-const onOpenURL = (cb: ((url: string) => void) | undefined) => {
-    ipcRenderer.removeAllListeners("openURL");
-    if (cb) ipcRenderer.on("openURL", (_, url: string) => cb(url));
+const onOpenEnteURL = (cb: ((url: string) => void) | undefined) => {
+    ipcRenderer.removeAllListeners("openEnteURL");
+    if (cb) ipcRenderer.on("openEnteURL", (_, url: string) => cb(url));
 };
 
 // - App update
@@ -347,8 +351,10 @@ contextBridge.exposeInMainWorld("electron", {
     saveMasterKeyB64,
     lastShownChangelogVersion,
     setLastShownChangelogVersion,
+    isAutoLaunchEnabled,
+    toggleAutoLaunch,
     onMainWindowFocus,
-    onOpenURL,
+    onOpenEnteURL,
 
     // - App update
 

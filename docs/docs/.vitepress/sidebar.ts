@@ -119,6 +119,10 @@ export const sidebar = [
                         link: "/photos/faq/export",
                     },
                     {
+                        text: "Metadata",
+                        link: "/photos/faq/metadata",
+                    },
+                    {
                         text: "Security and privacy",
                         link: "/photos/faq/security-and-privacy",
                     },
@@ -129,10 +133,6 @@ export const sidebar = [
                     {
                         text: "Hide vs archive",
                         link: "/photos/faq/hidden-and-archive",
-                    },
-                    {
-                        text: "Photo dates",
-                        link: "/photos/faq/photo-dates",
                     },
                     {
                         text: "Machine Learning",
@@ -248,15 +248,6 @@ export const sidebar = [
                         link: "/self-hosting/guides/web-app",
                     },
                     {
-                        text: "Administering your server",
-                        link: "/self-hosting/guides/admin",
-                    },
-
-                    {
-                        text: "Mobile build",
-                        link: "/self-hosting/guides/mobile-build",
-                    },
-                    {
                         text: "Configuring S3",
                         link: "/self-hosting/guides/configuring-s3",
                     },
@@ -275,6 +266,15 @@ export const sidebar = [
                     {
                         text: "Configure CLI for Self Hosted Instance",
                         link: "/self-hosting/guides/selfhost-cli",
+                    },
+                    {
+                        text: "Administering your server",
+                        link: "/self-hosting/guides/admin",
+                    },
+
+                    {
+                        text: "Mobile build",
+                        link: "/self-hosting/guides/mobile-build",
                     },
                 ],
             },

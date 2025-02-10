@@ -15,9 +15,9 @@
     },
     "devDependencies": {
         "@/build-config": "*",
-        "@types/react": "^19.0.4",
-        "@types/react-dom": "^19.0.2",
+        "@types/react": "^19.0.8",
+        "@types/react-dom": "^19.0.3",
         "@vitejs/plugin-react": "^4.3.4",
-        "vite": "^6.0.7"
+        "vite": "^6.0.11"
     }
 }

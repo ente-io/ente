@@ -119,9 +119,9 @@ const IndividualInput = styled("input")(
     width: 40px !important;
     aspect-ratio: 1;
     margin-inline: 6px;
-    border: 1px solid ${theme.palette.accent.main};
+    border: 1px solid ${theme.vars.palette.accent.main};
     border-radius: 1px;
-    outline-color: ${theme.palette.accent.light};
+    outline-color: ${theme.vars.palette.accent.light};
     transition: 0.5s;
     ${theme.breakpoints.down("sm")} {
         font-size: 1rem;

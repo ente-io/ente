@@ -1,24 +1,19 @@
-Ente Auth helps you generate and store 2 step verification (2FA)
-tokens on your mobile devices.
+Ente Auth helps you generate and store 2 step verification (2FA) tokens on your mobile devices.
 
 
 FEATURES
 
 - Secure Backups
-Auth provides end-to-end encrypted cloud backups so that you don't have to worry
-about losing your tokens. We use the same protocols Ente Photos uses to encrypt
-and preserve your data.
+Auth provides end-to-end encrypted cloud backups so that you don't have to worry about losing your tokens. We use the same protocols Ente Photos uses to encrypt and preserve your data.
 
 - Multi Device Synchronization
-Auth will automatically sync the 2FA tokens you add to your account, across all
-your devices. Every new device you sign into will have access to these tokens.
+Auth will automatically sync the 2FA tokens you add to your account, across all your devices. Every new device you sign into will have access to these tokens.
 
 - Web access
 You can access your 2FA code from any web browser by visiting https://auth.ente.io .
 
 - Offline Mode
-Auth generates 2FA tokens offline, so your network connectivity will not get in
-the way of your workflow.
+Auth generates 2FA tokens offline, so your network connectivity will not get in the way of your workflow.
 
 - Import and Export Tokens
 You can add tokens to Auth by one of the following methods: 
@@ -30,8 +25,7 @@ otpauth://totp/provider.com:you@email.com?secret=YOUR_SECRET
 
 The codes maybe separated by new lines or commas.
 
-You can also export the codes you have added to Auth, to an **unencrypted** text
-file, that adheres to the above format.
+You can also export the codes you have added to Auth, to an **unencrypted** text file, that adheres to the above format.
 
 
 SUPPORT

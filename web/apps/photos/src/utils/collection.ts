@@ -13,6 +13,7 @@ import { EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
 import {
     DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
+    HIDDEN_ITEMS_SECTION,
     addToCollection,
     findDefaultHiddenCollectionIDs,
     isHiddenCollection,
@@ -38,7 +39,10 @@ import {
     updatePublicCollectionMagicMetadata,
     updateSharedCollectionMagicMetadata,
 } from "services/collectionService";
-import { SetFilesDownloadProgressAttributes } from "types/gallery";
+import {
+    SetFilesDownloadProgressAttributes,
+    type SetFilesDownloadProgressAttributesCreator,
+} from "types/gallery";
 import { downloadFilesWithProgress } from "utils/file";
 
 export enum COLLECTION_OPS_TYPE {
@@ -113,7 +117,7 @@ export async function downloadCollectionHelper(
 }
 
 export async function downloadDefaultHiddenCollectionHelper(
-    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes,
+    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,
 ) {
     try {
         const hiddenCollections = await getLocalCollections("hidden");
@@ -123,6 +127,13 @@ export async function downloadDefaultHiddenCollectionHelper(
         const defaultHiddenCollectionFiles = hiddenFiles.filter((file) =>
             defaultHiddenCollectionsIds.has(file.collectionID),
         );
+        const setFilesDownloadProgressAttributes =
+            setFilesDownloadProgressAttributesCreator(
+                DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
+                HIDDEN_ITEMS_SECTION,
+                true,
+            );
+
         await downloadCollectionFiles(
             DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
             defaultHiddenCollectionFiles,
@@ -179,7 +190,7 @@ async function createCollectionDownloadFolder(
 }
 
 const _intSelectOption = (i: number) => {
-    const label = i === 0 ? t("NO_DEVICE_LIMIT") : i.toString();
+    const label = i === 0 ? t("none") : i.toString();
     return { label, value: i };
 };
 

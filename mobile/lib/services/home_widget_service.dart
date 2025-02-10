@@ -71,6 +71,12 @@ class HomeWidgetService {
             element.fileType == FileType.image,
       );
 
+      if (files.isEmpty) {
+        await clearHomeWidget();
+        _logger.info("No images found");
+        return;
+      }
+
       final randomNumber = Random().nextInt(files.length);
       final randomFile = files.elementAt(randomNumber);
       final fullImage = await getFileFromServer(randomFile);

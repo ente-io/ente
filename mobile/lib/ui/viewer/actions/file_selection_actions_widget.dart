@@ -698,49 +698,60 @@ class _FileSelectionActionsWidgetState
 
   Future<void> _setPersonCover() async {
     final EnteFile file = widget.selectedFiles.files.first;
-    await PersonService.instance.updateAvatar(widget.person!, file);
+    final updatedPerson =
+        await PersonService.instance.updateAvatar(widget.person!, file);
     widget.selectedFiles.clearAll();
     if (mounted) {
       setState(() => {});
     }
-    Bus.instance.fire(PeopleChangedEvent());
+    Bus.instance.fire(
+      PeopleChangedEvent(
+        type: PeopleEventType.saveOrEditPerson,
+        source: "setPersonCover",
+        person: updatedPerson,
+      ),
+    );
   }
 
   Future<void> _onNotpersonClicked() async {
-    final actionResult = await showActionSheet(
-      context: context,
-      buttons: [
-        ButtonWidget(
-          labelText: S.of(context).yesRemove,
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          isInAlert: true,
-        ),
-        ButtonWidget(
-          labelText: S.of(context).cancel,
-          buttonType: ButtonType.secondary,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.second,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-        ),
-      ],
-      title: "Remove these photos for ${widget.person!.data.name}?",
-      actionSheetType: ActionSheetType.defaultActionSheet,
-    );
-    if (actionResult?.action != null) {
-      if (actionResult!.action == ButtonAction.first) {
-        await ClusterFeedbackService.instance.removeFilesFromPerson(
-          widget.selectedFiles.files.toList(),
-          widget.person!,
-        );
+    try {
+      final actionResult = await showActionSheet(
+        context: context,
+        buttons: [
+          ButtonWidget(
+            labelText: S.of(context).yesRemove,
+            buttonType: ButtonType.neutral,
+            buttonSize: ButtonSize.large,
+            shouldStickToDarkTheme: true,
+            buttonAction: ButtonAction.first,
+            isInAlert: true,
+          ),
+          ButtonWidget(
+            labelText: S.of(context).cancel,
+            buttonType: ButtonType.secondary,
+            buttonSize: ButtonSize.large,
+            buttonAction: ButtonAction.second,
+            shouldStickToDarkTheme: true,
+            isInAlert: true,
+          ),
+        ],
+        title: "Remove these photos for ${widget.person!.data.name}?",
+        actionSheetType: ActionSheetType.defaultActionSheet,
+      );
+      if (actionResult?.action != null) {
+        if (actionResult!.action == ButtonAction.first) {
+          await ClusterFeedbackService.instance.removeFilesFromPerson(
+            widget.selectedFiles.files.toList(),
+            widget.person!,
+          );
+        }
       }
-    }
-    widget.selectedFiles.clearAll();
-    if (mounted) {
-      setState(() => {});
+      widget.selectedFiles.clearAll();
+      if (mounted) {
+        setState(() => {});
+      }
+    } catch (e, s) {
+      _logger.severe("Failed to initiate `notPersonLabel`", e, s);
     }
   }
 

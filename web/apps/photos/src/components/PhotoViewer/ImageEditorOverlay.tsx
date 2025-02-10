@@ -1,20 +1,21 @@
-import {
-    MenuItemDivider,
-    MenuItemGroup,
-    MenuSectionTitle,
-} from "@/base/components/Menu";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
+import {
+    RowButton,
+    RowButtonDivider,
+    RowButtonGroup,
+    RowButtonGroupTitle,
+    RowSwitch,
+} from "@/base/components/RowButton";
 import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { downloadManager } from "@/gallery/services/download";
 import { EnteFile } from "@/media/file";
-import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
+import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
 import { getLocalCollections } from "@/new/photos/services/collections";
 import { AppContext } from "@/new/photos/types/context";
 import { CenteredFlex } from "@ente/shared/components/Container";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
@@ -36,6 +37,7 @@ import {
     IconButton,
     Slider,
     Stack,
+    styled,
     Tab,
     Tabs,
     Typography,
@@ -520,225 +522,212 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
     };
 
     return (
-        <>
-            <Backdrop
+        <Backdrop
+            sx={{
+                backgroundColor: "background.default" /* Opaque */,
+                zIndex: aboveFileViewerContentZ,
+                width: "100%",
+            }}
+            open
+        >
+            <Box
                 sx={{
-                    background: "#000",
-                    zIndex: photosDialogZIndex,
+                    padding: "1rem",
                     width: "100%",
+                    height: "100%",
                 }}
-                open
             >
-                <Box
+                <Stack
+                    direction="row"
                     sx={{
-                        padding: "1rem",
-                        width: "100%",
-                        height: "100%",
+                        justifyContent: "space-between",
+                        alignItems: "center",
                     }}
                 >
-                    <Stack
-                        direction="row"
-                        sx={{
-                            justifyContent: "space-between",
-                            alignItems: "center",
+                    <Typography variant="h2" sx={{ fontWeight: "medium" }}>
+                        {t("photo_editor")}
+                    </Typography>
+                    <IconButton
+                        onClick={() => {
+                            setShowControlsDrawer(true);
                         }}
                     >
-                        <Typography variant="h2" sx={{ fontWeight: "medium" }}>
-                            {t("photo_editor")}
-                        </Typography>
-                        <IconButton
-                            onClick={() => {
-                                setShowControlsDrawer(true);
-                            }}
-                        >
-                            <MenuIcon />
-                        </IconButton>
-                    </Stack>
-                    <Stack
-                        direction="row"
-                        onMouseUp={handleDragEnd}
-                        onMouseMove={isDragging ? handleDrag : null}
-                        onMouseDown={handleDragStart}
+                        <MenuIcon />
+                    </IconButton>
+                </Stack>
+                <Stack
+                    direction="row"
+                    onMouseUp={handleDragEnd}
+                    onMouseMove={isDragging ? handleDrag : null}
+                    onMouseDown={handleDragStart}
+                    sx={{
+                        width: "100%",
+                        height: "100%",
+                        overflow: "hidden",
+                        boxSizing: "border-box",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        position: "relative",
+                    }}
+                >
+                    <Box
                         sx={{
+                            position: "relative",
                             width: "100%",
                             height: "100%",
-                            overflow: "hidden",
-                            boxSizing: "border-box",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            position: "relative",
                         }}
                     >
-                        <Box
+                        <Stack
+                            ref={parentRef}
+                            direction="row"
                             sx={{
-                                position: "relative",
+                                height: "88%",
                                 width: "100%",
-                                height: "100%",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                position: "relative",
                             }}
                         >
-                            <Stack
-                                ref={parentRef}
-                                direction="row"
-                                sx={{
-                                    height: "88%",
-                                    width: "100%",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    position: "relative",
-                                }}
-                            >
-                                {(fileURL === null || canvasLoading) && (
-                                    <CircularProgress />
-                                )}
-
-                                <canvas
-                                    ref={canvasRef}
-                                    style={{
-                                        objectFit: "contain",
-                                        display:
-                                            fileURL === null || canvasLoading
-                                                ? "none"
-                                                : "block",
-                                        position: "absolute",
-                                    }}
-                                />
-                                <canvas
-                                    ref={originalSizeCanvasRef}
-                                    style={{
-                                        display: "none",
-                                    }}
-                                />
-
-                                {currentTab === "crop" && (
-                                    <FreehandCropRegion
-                                        cropBox={cropBox}
-                                        ref={cropBoxRef}
-                                        setIsDragging={setIsDragging}
-                                    />
-                                )}
-                            </Stack>
-                            {currentTab === "crop" && (
-                                <CenteredFlex marginTop="1rem">
-                                    <Button
-                                        color="accent"
-                                        startIcon={<CropIcon />}
-                                        onClick={applyCrop}
-                                    >
-                                        {t("apply_crop")}
-                                    </Button>
-                                </CenteredFlex>
+                            {(fileURL === null || canvasLoading) && (
+                                <CircularProgress />
                             )}
-                        </Box>
-                    </Stack>
-                </Box>
-                <SidebarDrawer
-                    variant="persistent"
-                    anchor="right"
-                    open={showControlsDrawer}
-                    onClose={handleCloseWithConfirmation}
-                >
-                    <Stack
-                        direction="row"
-                        sx={{ justifyContent: "space-between" }}
-                    >
-                        <IconButton
-                            onClick={() => {
-                                setShowControlsDrawer(false);
-                            }}
-                        >
-                            <ChevronRightIcon />
-                        </IconButton>
-                        <IconButton onClick={handleCloseWithConfirmation}>
-                            <CloseIcon />
-                        </IconButton>
-                    </Stack>
-                    <Stack
-                        direction="row"
-                        sx={{
-                            gap: "0.5rem",
-                            marginBottom: "1rem",
+
+                            <canvas
+                                ref={canvasRef}
+                                style={{
+                                    objectFit: "contain",
+                                    display:
+                                        fileURL === null || canvasLoading
+                                            ? "none"
+                                            : "block",
+                                    position: "absolute",
+                                }}
+                            />
+                            <canvas
+                                ref={originalSizeCanvasRef}
+                                style={{
+                                    display: "none",
+                                }}
+                            />
+
+                            {currentTab === "crop" && (
+                                <FreehandCropRegion
+                                    cropBox={cropBox}
+                                    ref={cropBoxRef}
+                                    setIsDragging={setIsDragging}
+                                />
+                            )}
+                        </Stack>
+                        {currentTab === "crop" && (
+                            <CenteredFlex marginTop="1rem">
+                                <Button
+                                    color="accent"
+                                    startIcon={<CropIcon />}
+                                    onClick={applyCrop}
+                                >
+                                    {t("apply_crop")}
+                                </Button>
+                            </CenteredFlex>
+                        )}
+                    </Box>
+                </Stack>
+            </Box>
+            <SidebarDrawer
+                variant="persistent"
+                anchor="right"
+                open={showControlsDrawer}
+                onClose={handleCloseWithConfirmation}
+            >
+                <Stack direction="row" sx={{ justifyContent: "space-between" }}>
+                    <IconButton
+                        onClick={() => {
+                            setShowControlsDrawer(false);
                         }}
                     >
-                        <Tabs
-                            value={currentTab}
-                            onChange={(_, value) => {
-                                setCurrentTab(value);
-                            }}
-                        >
-                            <Tab label={t("crop")} value="crop" />
-                            <Tab label={t("transform")} value="transform" />
-                            <Tab
-                                label={t("colors")}
-                                value="colors"
-                                disabled={transformationPerformed}
-                            />
-                        </Tabs>
-                    </Stack>
-                    <MenuSectionTitle title={t("reset")} />
-                    <MenuItemGroup sx={{ mb: "0.5rem" }}>
-                        <EnteMenuItem
-                            disabled={canvasLoading}
-                            startIcon={<CropOriginalIcon />}
-                            onClick={() => {
-                                loadCanvas();
-                            }}
-                            label={t("restore_original")}
+                        <ChevronRightIcon />
+                    </IconButton>
+                    <IconButton onClick={handleCloseWithConfirmation}>
+                        <CloseIcon />
+                    </IconButton>
+                </Stack>
+                <Stack
+                    direction="row"
+                    sx={{
+                        gap: "0.5rem",
+                        marginBottom: "1rem",
+                    }}
+                >
+                    <Tabs
+                        value={currentTab}
+                        onChange={(_, value) => {
+                            setCurrentTab(value);
+                        }}
+                    >
+                        <Tab label={t("crop")} value="crop" />
+                        <Tab label={t("transform")} value="transform" />
+                        <Tab
+                            label={t("colors")}
+                            value="colors"
+                            disabled={transformationPerformed}
                         />
-                    </MenuItemGroup>
-                    {currentTab === "crop" && (
-                        <CropMenu
-                            {...menuProps}
-                            previewScale={previewCanvasScale}
-                            cropBoxProps={cropBox}
-                            cropBoxRef={cropBoxRef}
-                            resetCropBox={resetCropBox}
-                        />
-                    )}
-                    {currentTab === "transform" && (
-                        <TransformMenu {...menuProps} />
-                    )}
-                    {currentTab === "colors" && (
-                        <ColoursMenu
-                            brightness={brightness}
-                            contrast={contrast}
-                            saturation={saturation}
-                            blur={blur}
-                            invert={invert}
-                            setBrightness={setBrightness}
-                            setContrast={setContrast}
-                            setSaturation={setSaturation}
-                            setBlur={setBlur}
-                            setInvert={setInvert}
-                        />
-                    )}
-                    <MenuSectionTitle title={t("export_data")} />
-                    <MenuItemGroup>
-                        <EnteMenuItem
-                            startIcon={<DownloadIcon />}
-                            onClick={downloadEditedPhoto}
-                            label={t("download_edited")}
-                            disabled={
-                                !transformationPerformed && !coloursAdjusted
-                            }
-                        />
-                        <MenuItemDivider />
-                        <EnteMenuItem
-                            startIcon={<CloudUploadIcon />}
-                            onClick={saveCopyToEnte}
-                            label={t("save_a_copy_to_ente")}
-                            disabled={
-                                !transformationPerformed && !coloursAdjusted
-                            }
-                        />
-                    </MenuItemGroup>
-                    {!transformationPerformed && !coloursAdjusted && (
-                        <MenuSectionTitle
-                            title={t("photo_edit_required_to_save")}
-                        />
-                    )}
-                </SidebarDrawer>
-            </Backdrop>
-        </>
+                    </Tabs>
+                </Stack>
+                <RowButtonGroupTitle>{t("reset")}</RowButtonGroupTitle>
+                <RowButtonGroup sx={{ mb: "0.5rem" }}>
+                    <RowButton
+                        disabled={canvasLoading}
+                        startIcon={<CropOriginalIcon />}
+                        label={t("restore_original")}
+                        onClick={() => void loadCanvas()}
+                    />
+                </RowButtonGroup>
+                {currentTab === "crop" && (
+                    <CropMenu
+                        {...menuProps}
+                        previewScale={previewCanvasScale}
+                        cropBoxProps={cropBox}
+                        cropBoxRef={cropBoxRef}
+                        resetCropBox={resetCropBox}
+                    />
+                )}
+                {currentTab === "transform" && <TransformMenu {...menuProps} />}
+                {currentTab === "colors" && (
+                    <ColoursMenu
+                        brightness={brightness}
+                        contrast={contrast}
+                        saturation={saturation}
+                        blur={blur}
+                        invert={invert}
+                        setBrightness={setBrightness}
+                        setContrast={setContrast}
+                        setSaturation={setSaturation}
+                        setBlur={setBlur}
+                        setInvert={setInvert}
+                    />
+                )}
+                <RowButtonGroupTitle>{t("export_data")}</RowButtonGroupTitle>
+                <RowButtonGroup>
+                    <RowButton
+                        disabled={!transformationPerformed && !coloursAdjusted}
+                        startIcon={<DownloadIcon />}
+                        label={t("download_edited")}
+                        onClick={downloadEditedPhoto}
+                    />
+                    <RowButtonDivider />
+                    <RowButton
+                        disabled={!transformationPerformed && !coloursAdjusted}
+                        startIcon={<CloudUploadIcon />}
+                        label={t("save_a_copy_to_ente")}
+                        onClick={saveCopyToEnte}
+                    />
+                </RowButtonGroup>
+                {!transformationPerformed && !coloursAdjusted && (
+                    <RowButtonGroupTitle>
+                        {t("photo_edit_required_to_save")}
+                    </RowButtonGroupTitle>
+                )}
+            </SidebarDrawer>
+        </Backdrop>
     );
 };
 
@@ -834,11 +823,12 @@ const CropMenu: React.FC<CropMenuProps> = (props) => {
 
     return (
         <>
-            <MenuSectionTitle title={t("freehand")} />
-            <MenuItemGroup sx={{ mb: "0.5rem" }}>
-                <EnteMenuItem
+            <RowButtonGroupTitle>{t("freehand")}</RowButtonGroupTitle>
+            <RowButtonGroup sx={{ mb: "0.5rem" }}>
+                <RowButton
                     disabled={canvasLoading}
                     startIcon={<CropIcon />}
+                    label={t("apply_crop")}
                     onClick={() => {
                         if (!props.cropBoxRef.current || !canvasRef.current)
                             return;
@@ -862,9 +852,8 @@ const CropMenu: React.FC<CropMenuProps> = (props) => {
 
                         setCurrentTab("transform");
                     }}
-                    label={t("apply_crop")}
                 />
-            </MenuItemGroup>
+            </RowButtonGroup>
         </>
     );
 };
@@ -947,56 +936,47 @@ const FreehandCropRegion = forwardRef(
         return (
             <>
                 {/* Top overlay */}
-                <div
-                    style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: cropBox.y + "px", // height up to the top of the crop box
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                        pointerEvents: "none",
-                    }}
-                ></div>
+                <CropOverlayRegionTemplate
+                    // Height up to the top of the crop box.
+                    sx={{ top: 0, left: 0, right: 0, height: cropBox.y + "px" }}
+                />
 
                 {/* Bottom overlay */}
-                <div
-                    style={{
-                        position: "absolute",
+                <CropOverlayRegionTemplate
+                    // Height from the bottom of the crop box to the bottom of
+                    // the canvas.
+                    sx={{
                         bottom: 0,
                         left: 0,
                         right: 0,
-                        height: `calc(100% - ${cropBox.y + cropBox.height}px)`, // height from the bottom of the crop box to the bottom of the canvas
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                        pointerEvents: "none",
+                        height: `calc(100% - ${cropBox.y + cropBox.height}px)`,
                     }}
-                ></div>
+                />
 
                 {/* Left overlay */}
-                <div
-                    style={{
-                        position: "absolute",
+                <CropOverlayRegionTemplate
+                    sx={{
                         top: cropBox.y + "px",
                         left: 0,
-                        width: cropBox.x + "px", // width up to the left side of the crop box
-                        height: cropBox.height + "px", // same height as the crop box
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                        pointerEvents: "none",
+                        // Width up to the left side of the crop box.
+                        width: cropBox.x + "px",
+                        // Same height as the crop box.
+                        height: cropBox.height + "px",
                     }}
-                ></div>
+                />
 
                 {/* Right overlay */}
-                <div
-                    style={{
-                        position: "absolute",
+                <CropOverlayRegionTemplate
+                    sx={{
                         top: cropBox.y + "px",
                         right: 0,
-                        width: `calc(100% - ${cropBox.x + cropBox.width}px)`, // width from the right side of the crop box to the right side of the canvas
-                        height: cropBox.height + "px", // same height as the crop box
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                        pointerEvents: "none",
+                        // Width from the right side of the crop box to the
+                        // right side of the canvas.
+                        width: `calc(100% - ${cropBox.x + cropBox.width}px)`,
+                        // Same height as the crop box.
+                        height: cropBox.height + "px",
                     }}
-                ></div>
+                />
 
                 <div
                     style={{
@@ -1010,28 +990,29 @@ const FreehandCropRegion = forwardRef(
                         gridTemplateColumns: "1fr 1fr 1fr",
                         gridTemplateRows: "1fr 1fr 1fr",
                         gap: "0px",
-                        zIndex: 30, // make sure the crop box is above the overlays
                     }}
                     ref={ref}
                 >
                     {Array.from({ length: 9 }).map((_, index) => (
-                        <div
+                        <Box
                             key={index}
-                            style={{
-                                border: "1px solid white",
+                            sx={{
+                                border: "1px solid",
+                                borderColor: "white",
                                 boxSizing: "border-box",
                                 pointerEvents: "none",
                             }}
-                        ></div>
+                        ></Box>
                     ))}
 
-                    <div
-                        style={{
+                    <Box
+                        sx={{
                             position: "absolute",
                             height: "10px",
                             width: "10px",
                             backgroundColor: "white",
-                            border: "1px solid black",
+                            border: "1px solid",
+                            borderColor: "black",
                             right: "-5px",
                             bottom: "-5px",
                             cursor: "se-resize",
@@ -1040,14 +1021,20 @@ const FreehandCropRegion = forwardRef(
                             e.preventDefault();
                             setIsDragging(true);
                         }}
-                    ></div>
+                    ></Box>
                 </div>
             </>
         );
     },
 );
 
-const PRESET_ASPECT_RATIOS = [
+const CropOverlayRegionTemplate = styled("div")({
+    position: "absolute",
+    backgroundColor: "rgba(0 0 0 / 0.5)",
+    pointerEvents: "none",
+});
+
+const presetAspectRatios = [
     {
         width: 16,
         height: 9,
@@ -1243,86 +1230,86 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
 
     return (
         <>
-            <MenuSectionTitle title={t("aspect_ratio")} />
-            <MenuItemGroup sx={{ mb: "0.5rem" }}>
-                <EnteMenuItem
+            <RowButtonGroupTitle>{t("aspect_ratio")}</RowButtonGroupTitle>
+            <RowButtonGroup sx={{ mb: "0.5rem" }}>
+                <RowButton
                     disabled={canvasLoading}
                     startIcon={<CropSquareIcon />}
-                    onClick={createCropHandler(1, 1)}
                     label={t("square") + " (1:1)"}
+                    onClick={createCropHandler(1, 1)}
                 />
-            </MenuItemGroup>
-            <MenuItemGroup sx={{ mb: "1rem" }}>
-                {PRESET_ASPECT_RATIOS.map((ratio, index) => (
+            </RowButtonGroup>
+            <RowButtonGroup sx={{ mb: "1rem" }}>
+                {presetAspectRatios.map((ratio, index) => (
                     <Fragment key={index}>
-                        <EnteMenuItem
+                        <RowButton
                             disabled={canvasLoading}
                             startIcon={ratio.icon}
-                            onClick={createCropHandler(
-                                ratio.width,
-                                ratio.height,
-                            )}
                             label={`${ratio.width}:${ratio.height}`}
+                            onClick={createCropHandler(
+                                ratio.width,
+                                ratio.height,
+                            )}
                         />
-                        {index !== PRESET_ASPECT_RATIOS.length - 1 && (
-                            <MenuItemDivider />
+                        {index !== presetAspectRatios.length - 1 && (
+                            <RowButtonDivider />
                         )}
                     </Fragment>
                 ))}
-            </MenuItemGroup>
-            <MenuItemGroup sx={{ mb: "1rem" }}>
-                {PRESET_ASPECT_RATIOS.map((ratio, index) => (
+            </RowButtonGroup>
+            <RowButtonGroup sx={{ mb: "1rem" }}>
+                {presetAspectRatios.map((ratio, index) => (
                     <Fragment key={index}>
-                        <EnteMenuItem
-                            disabled={canvasLoading}
+                        <RowButton
                             key={index}
+                            disabled={canvasLoading}
                             startIcon={ratio.icon}
+                            label={`${ratio.height}:${ratio.width}`}
                             onClick={createCropHandler(
                                 ratio.height,
                                 ratio.width,
                             )}
-                            label={`${ratio.height}:${ratio.width}`}
                         />
-                        {index !== PRESET_ASPECT_RATIOS.length - 1 && (
-                            <MenuItemDivider />
+                        {index !== presetAspectRatios.length - 1 && (
+                            <RowButtonDivider />
                         )}
                     </Fragment>
                 ))}
-            </MenuItemGroup>
-            <MenuSectionTitle title={t("rotation")} />
-            <MenuItemGroup sx={{ mb: "1rem" }}>
-                <EnteMenuItem
+            </RowButtonGroup>
+            <RowButtonGroupTitle>{t("rotation")}</RowButtonGroupTitle>
+            <RowButtonGroup sx={{ mb: "1rem" }}>
+                <RowButton
                     disabled={canvasLoading}
                     startIcon={<RotateLeftIcon />}
-                    onClick={createRotationHandler("left")}
                     label={t("rotate_left") + " 90˚"}
+                    onClick={createRotationHandler("left")}
                 />
-                <MenuItemDivider />
-                <EnteMenuItem
+                <RowButtonDivider />
+                <RowButton
                     disabled={canvasLoading}
                     startIcon={<RotateRightIcon />}
-                    onClick={createRotationHandler("right")}
                     label={t("rotate_right") + " 90˚"}
+                    onClick={createRotationHandler("right")}
                 />
-            </MenuItemGroup>
-            <MenuSectionTitle title={t("flip")} />
-            <MenuItemGroup sx={{ mb: "1rem" }}>
-                <EnteMenuItem
+            </RowButtonGroup>
+            <RowButtonGroupTitle>{t("flip")}</RowButtonGroupTitle>
+            <RowButtonGroup sx={{ mb: "1rem" }}>
+                <RowButton
                     disabled={canvasLoading}
                     startIcon={
                         <FlipIcon style={{ transform: "rotateZ(90deg)" }} />
                     }
-                    onClick={createFlipCanvasHandler("vertical")}
                     label={t("flip_vertically")}
+                    onClick={createFlipCanvasHandler("vertical")}
                 />
-                <MenuItemDivider />
-                <EnteMenuItem
+                <RowButtonDivider />
+                <RowButton
                     disabled={canvasLoading}
                     startIcon={<FlipIcon />}
-                    onClick={createFlipCanvasHandler("horizontal")}
                     label={t("flip_horizontally")}
+                    onClick={createFlipCanvasHandler("horizontal")}
                 />
-            </MenuItemGroup>
+            </RowButtonGroup>
         </>
     );
 };
@@ -1343,7 +1330,7 @@ interface ColoursMenuProps {
 const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
     <>
         <Box sx={{ px: "8px" }}>
-            <MenuSectionTitle title={t("brightness")} />
+            <RowButtonGroupTitle>{t("brightness")}</RowButtonGroupTitle>
             <Slider
                 min={0}
                 max={200}
@@ -1361,7 +1348,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                     props.setBrightness(value as number);
                 }}
             />
-            <MenuSectionTitle title={t("contrast")} />
+            <RowButtonGroupTitle>{t("contrast")}</RowButtonGroupTitle>
             <Slider
                 min={0}
                 max={200}
@@ -1379,7 +1366,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                     },
                 ]}
             />
-            <MenuSectionTitle title={t("blur")} />
+            <RowButtonGroupTitle>{t("blur")}</RowButtonGroupTitle>
             <Slider
                 min={0}
                 max={10}
@@ -1391,7 +1378,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                     props.setBlur(value as number);
                 }}
             />
-            <MenuSectionTitle title={t("saturation")} />
+            <RowButtonGroupTitle>{t("saturation")}</RowButtonGroupTitle>
             <Slider
                 min={0}
                 max={200}
@@ -1402,23 +1389,17 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                 onChange={(_, value) => {
                     props.setSaturation(value as number);
                 }}
-                marks={[
-                    {
-                        value: 100,
-                        label: "100%",
-                    },
-                ]}
+                marks={[{ value: 100, label: "100%" }]}
             />
         </Box>
-        <MenuItemGroup sx={{ mb: "0.5rem" }}>
-            <EnteMenuItem
-                variant="toggle"
+        <RowButtonGroup sx={{ mb: "0.5rem" }}>
+            <RowSwitch
                 checked={props.invert}
                 label={t("invert_colors")}
                 onClick={() => {
                     props.setInvert(!props.invert);
                 }}
             />
-        </MenuItemGroup>
+        </RowButtonGroup>
     </>
 );

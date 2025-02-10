@@ -364,12 +364,13 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
           widget.code?.display.copyWith(tags: selectedTags) ??
               CodeDisplay(tags: selectedTags);
       display.note = notes;
-
-      if (widget.code!.issuer != issuer) {
-        display.iconID = issuer.toLowerCase();
-      }
-      if (widget.code!.display.iconID != _customIconID.toLowerCase()) {
-        display.iconID = _customIconID.toLowerCase();
+      if (widget.code != null) {
+        if (widget.code!.issuer != issuer) {
+          display.iconID = issuer.toLowerCase();
+        }
+        if (widget.code!.display.iconID != _customIconID.toLowerCase()) {
+          display.iconID = _customIconID.toLowerCase();
+        }
       }
 
       display.iconSrc =

@@ -504,5 +504,13 @@
   "deselectAll": "Deselect all",
   "selectAll": "Select all",
   "deleteDuplicates": "Delete duplicates",
-  "plainHTML": "Plain HTML"
+  "plainHTML": "Plain HTML",
+  "tellUsWhatYouThink": "Tell us what you think",
+  "dropReview": "Drop a review on the App/Play Store",
+  "supportEnte": "Support <bold-green>ente</bold-green>",
+  "giveUsAStarOnGithub": "Give us a star on Github",
+  "free5GB": "5GB free on <bold-green>ente</bold-green> Photos",
+  "loginWithAuthAccount": "Login with your Auth account",
+  "freeStorageOffer": "10% off on <bold-green>ente</bold-green> photos",
+  "freeStorageOfferDescription": "Use code \"AUTH\" to get 10% off first year"
 }

@@ -1,5 +1,6 @@
 import { LoginContents } from "@/accounts/components/LoginContents";
 import { SignUpContents } from "@/accounts/components/SignUpContents";
+import { CenteredFill, CenteredRow } from "@/base/components/containers";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
@@ -24,7 +25,7 @@ const Page: React.FC = () => {
 
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(true);
-    const [host, setHost] = useState<string | undefined>();
+    const [host, setHost] = useState<string | undefined>(undefined);
 
     const router = useRouter();
 
@@ -133,7 +134,15 @@ const Page: React.FC = () => {
                         </FocusVisibleButton>
                         <MobileBoxFooter {...{ host }} />
                     </MobileBox>
-                    <DesktopBox>
+                    <DesktopBox
+                        sx={[
+                            { bgcolor: "background.default" },
+                            (theme) =>
+                                theme.applyStyles("dark", {
+                                    bgcolor: "background.paper2",
+                                }),
+                        ]}
+                    >
                         <Stack sx={{ width: "320px", py: 4, gap: 4 }}>
                             {showLogin ? (
                                 <LoginContents
@@ -202,27 +211,26 @@ const TappableContainer: React.FC<
     };
 
     return (
-        <TappableContainer_ onClick={handleClick}>
-            <>
-                <DevSettings open={showDevSettings} onClose={handleClose} />
-                {children}
-            </>
-        </TappableContainer_>
+        <CenteredFill
+            sx={[
+                {
+                    bgcolor: "background.paper2",
+                    "@media (width <= 1024px)": {
+                        flexDirection: "column",
+                    },
+                },
+                (theme) =>
+                    theme.applyStyles("dark", {
+                        bgcolor: "background.default",
+                    }),
+            ]}
+            onClick={handleClick}
+        >
+            <DevSettings open={showDevSettings} onClose={handleClose} />
+            {children}
+        </CenteredFill>
     );
 };
-
-const TappableContainer_ = styled("div")`
-    flex: 1;
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-    background-color: #000;
-
-    @media (width <= 1024px) {
-        flex-direction: column;
-    }
-`;
 
 /**
  * Disable the ability to set the custom server when we're running on our own
@@ -292,17 +300,13 @@ const MobileBoxFooter: React.FC<MobileBoxFooterProps> = ({ host }) => {
     );
 };
 
-const DesktopBox = styled("div")`
+const DesktopBox = styled(CenteredRow)`
     flex-shrink: 0;
     flex-grow: 2;
     flex-basis: auto;
 
     height: 100%;
     padding-inline: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #242424;
 
     @media (width <= 1024px) {
         display: none;

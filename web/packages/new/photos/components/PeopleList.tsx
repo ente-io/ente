@@ -63,7 +63,7 @@ const SearchPersonButton = styled(UnstyledButton)(
         height: 100%;
     }
     :hover {
-        outline: 1px solid ${theme.colors.stroke.faint};
+        outline: 1px solid ${theme.vars.palette.stroke.faint};
         outline-offset: 2px;
     }
 `,
@@ -127,7 +127,7 @@ const AnnotatedFaceButton = styled(UnstyledButton)(
         height: 100%;
     }
     :hover {
-        outline: 1px solid ${theme.colors.stroke.faint};
+        outline: 1px solid ${theme.vars.palette.stroke.faint};
         outline-offset: 2px;
     }
 `,

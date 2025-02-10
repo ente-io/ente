@@ -1,12 +1,16 @@
-import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
+import { EnteLogo } from "@/base/components/EnteLogo";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
-import { AppNavbarNormalFlow } from "@/base/components/Navbar";
+import { NavbarBase } from "@/base/components/Navbar";
+import {
+    RowButton,
+    RowButtonDivider,
+    RowButtonGroup,
+} from "@/base/components/RowButton";
 import { SingleInputDialog } from "@/base/components/SingleInputDialog";
 import { Titlebar } from "@/base/components/Titlebar";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
 import { formatDateTimeFull } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -113,7 +117,9 @@ const Page: React.FC = () => {
 
     return (
         <Stack sx={{ minHeight: "100svh" }}>
-            <AppNavbarNormalFlow />
+            <NavbarBase>
+                <EnteLogo />
+            </NavbarBase>
             <Stack
                 sx={{ alignSelf: "center", m: 3, maxWidth: "375px", gap: 3 }}
             >
@@ -163,17 +169,17 @@ const PasskeysList: React.FC<PasskeysListProps> = ({
     onSelectPasskey,
 }) => {
     return (
-        <MenuItemGroup>
+        <RowButtonGroup>
             {passkeys.map((passkey, i) => (
                 <React.Fragment key={passkey.id}>
                     <PasskeyListItem
                         passkey={passkey}
                         onClick={onSelectPasskey}
                     />
-                    {i < passkeys.length - 1 && <MenuItemDivider />}
+                    {i < passkeys.length - 1 && <RowButtonDivider />}
                 </React.Fragment>
             ))}
-        </MenuItemGroup>
+        </RowButtonGroup>
     );
 };
 
@@ -191,23 +197,20 @@ interface PasskeyListItemProps {
 const PasskeyListItem: React.FC<PasskeyListItemProps> = ({
     passkey,
     onClick,
-}) => {
-    const labelComponent = (
-        <PasskeyLabel>
-            <Typography sx={{ fontWeight: "medium" }}>
-                {passkey.friendlyName}
-            </Typography>
-        </PasskeyLabel>
-    );
-    return (
-        <EnteMenuItem
-            onClick={() => onClick(passkey)}
-            startIcon={<KeyIcon />}
-            endIcon={<ChevronRightIcon />}
-            labelComponent={labelComponent}
-        />
-    );
-};
+}) => (
+    <RowButton
+        startIcon={<KeyIcon />}
+        endIcon={<ChevronRightIcon />}
+        label={
+            <PasskeyLabel>
+                <Typography sx={{ fontWeight: "medium" }}>
+                    {passkey.friendlyName}
+                </Typography>
+            </PasskeyLabel>
+        }
+        onClick={() => onClick(passkey)}
+    />
+);
 
 const PasskeyLabel = styled("div")`
     /* If the name of the passkey does not fit in one line, break the text into
@@ -292,20 +295,20 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                         <CreatedAtEntry>
                             {formatDateTimeFull(passkey.createdAt / 1000)}
                         </CreatedAtEntry>
-                        <MenuItemGroup>
-                            <EnteMenuItem
-                                onClick={showRenameDialog}
+                        <RowButtonGroup>
+                            <RowButton
                                 startIcon={<EditIcon />}
                                 label={t("rename_passkey")}
+                                onClick={showRenameDialog}
                             />
-                            <MenuItemDivider />
-                            <EnteMenuItem
-                                onClick={showDeleteConfirmationDialog}
+                            <RowButtonDivider />
+                            <RowButton
+                                color="critical"
                                 startIcon={<DeleteIcon />}
                                 label={t("delete_passkey")}
-                                color="critical"
+                                onClick={showDeleteConfirmationDialog}
                             />
-                        </MenuItemGroup>
+                        </RowButtonGroup>
                     </Stack>
                 )}
             </SidebarDrawer>

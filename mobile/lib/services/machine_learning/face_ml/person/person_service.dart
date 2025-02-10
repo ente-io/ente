@@ -13,17 +13,22 @@ import 'package:photos/models/ml/face/face.dart';
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/entity_service.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/services/search_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class PersonService {
   final EntityService entityService;
   final MLDataDB faceMLDataDB;
   final SharedPreferences prefs;
+  final _emailToPartialPersonDataMapCache = <String, Map<String, String>>{};
 
   PersonService(this.entityService, this.faceMLDataDB, this.prefs);
 
   // instance
   static PersonService? _instance;
+  static const kPersonIDKey = "person_id";
+  static const kNameKey = "name";
 
   static PersonService get instance {
     if (_instance == null) {
@@ -34,12 +39,35 @@ class PersonService {
 
   late Logger logger = Logger("PersonService");
 
-  static init(
+  static Future<void> init(
     EntityService entityService,
     MLDataDB faceMLDataDB,
     SharedPreferences prefs,
-  ) {
+  ) async {
     _instance = PersonService(entityService, faceMLDataDB, prefs);
+    await _instance!.resetEmailToPartialPersonDataCache();
+  }
+
+  Map<String, Map<String, String>> get emailToPartialPersonDataMapCache =>
+      _emailToPartialPersonDataMapCache;
+
+  void clearCache() {
+    _emailToPartialPersonDataMapCache.clear();
+  }
+
+  Future<void> resetEmailToPartialPersonDataCache() async {
+    _emailToPartialPersonDataMapCache.clear();
+    await _instance!.getPersons().then((value) {
+      for (var person in value) {
+        if (person.data.email != null && person.data.email!.isNotEmpty) {
+          _instance!._emailToPartialPersonDataMapCache[person.data.email!] = {
+            kPersonIDKey: person.remoteID,
+            kNameKey: person.data.name,
+          };
+        }
+      }
+      logger.info("Email to partial person data cache reset");
+    });
   }
 
   Future<List<PersonEntity>> getPersons() async {
@@ -113,14 +141,14 @@ class PersonService {
     PersonData personData,
     Map<String, Set<String>> dbPersonCluster,
   ) {
-    if ((personData.assigned?.length ?? 0) != dbPersonCluster.length) {
+    if (personData.assigned.length != dbPersonCluster.length) {
       log(
-        "Person ${personData.name} has ${personData.assigned?.length} clusters, but ${dbPersonCluster.length} clusters found in DB",
+        "Person ${personData.name} has ${personData.assigned.length} clusters, but ${dbPersonCluster.length} clusters found in DB",
         name: "PersonService",
       );
       return true;
     } else {
-      for (ClusterInfo info in personData.assigned!) {
+      for (ClusterInfo info in personData.assigned) {
         final dbCluster = dbPersonCluster[info.id];
         if (dbCluster == null) {
           log(
@@ -150,10 +178,12 @@ class PersonService {
     return false;
   }
 
-  Future<PersonEntity> addPerson(
-    String name,
-    String clusterID, {
+  Future<PersonEntity> addPerson({
+    required String name,
+    required String clusterID,
     bool isHidden = false,
+    String? birthdate,
+    String? email,
   }) async {
     final faceIds = await faceMLDataDB.getFaceIDsForCluster(clusterID);
     final data = PersonData(
@@ -165,6 +195,8 @@ class PersonService {
         ),
       ],
       isHidden: isHidden,
+      birthDate: birthdate,
+      email: email,
     );
     final result = await entityService.addOrUpdate(
       EntityType.cgroup,
@@ -174,6 +206,9 @@ class PersonService {
       personID: result.id,
       clusterID: clusterID,
     );
+    if (data.email != null) {
+      await resetEmailToPartialPersonDataCache();
+    }
     return PersonEntity(result.id, data);
   }
 
@@ -183,20 +218,19 @@ class PersonService {
   }) async {
     final person = (await getPerson(personID))!;
     final personData = person.data;
-    final clusterInfo = personData.assigned!.firstWhere(
+    final clusterInfo = personData.assigned.firstWhere(
       (element) => element.id == clusterID,
       orElse: () => ClusterInfo(id: "noSuchClusterInRemotePerson", faces: {}),
     );
     if (clusterInfo.id == "noSuchClusterInRemotePerson") {
-      await MLDataDB.instance.removeClusterToPerson(
+      await faceMLDataDB.removeClusterToPerson(
         personID: personID,
         clusterID: clusterID,
       );
       return;
     }
-    personData.rejectedFaceIDs ??= [];
-    personData.rejectedFaceIDs!.addAll(clusterInfo.faces);
-    personData.assigned!.removeWhere((element) => element.id == clusterID);
+    personData.rejectedFaceIDs.addAll(clusterInfo.faces);
+    personData.assigned.removeWhere((element) => element.id == clusterID);
     await entityService.addOrUpdate(
       EntityType.cgroup,
       personData.toJson(),
@@ -217,7 +251,7 @@ class PersonService {
 
     // Remove faces from clusters
     final List<String> emptiedClusters = [];
-    for (final cluster in personData.assigned!) {
+    for (final cluster in personData.assigned) {
       cluster.faces.removeWhere((faceID) => faceIDs.contains(faceID));
       if (cluster.faces.isEmpty) {
         emptiedClusters.add(cluster.id);
@@ -226,7 +260,7 @@ class PersonService {
 
     // Safety check to make sure we haven't created an empty cluster now, if so delete it
     for (final emptyClusterID in emptiedClusters) {
-      personData.assigned!
+      personData.assigned
           .removeWhere((element) => element.id != emptyClusterID);
       await faceMLDataDB.removeClusterToPerson(
         personID: person.remoteID,
@@ -235,8 +269,7 @@ class PersonService {
     }
 
     // Add removed faces to rejected faces
-    personData.rejectedFaceIDs ??= [];
-    personData.rejectedFaceIDs!.addAll(faceIDs);
+    personData.rejectedFaceIDs.addAll(faceIDs);
 
     await entityService.addOrUpdate(
       EntityType.cgroup,
@@ -247,8 +280,8 @@ class PersonService {
   }
 
   Future<void> deletePerson(String personID, {bool onlyMapping = false}) async {
+    final entity = await getPerson(personID);
     if (onlyMapping) {
-      final PersonEntity? entity = await getPerson(personID);
       if (entity == null) {
         return;
       }
@@ -261,9 +294,19 @@ class PersonService {
       );
       await faceMLDataDB.removePerson(personID);
       justName.data.logStats();
+
+      if (entity.data.email != null) {
+        await resetEmailToPartialPersonDataCache();
+      }
     } else {
       await entityService.deleteEntry(personID);
       await faceMLDataDB.removePerson(personID);
+
+      if (entity != null) {
+        if (entity.data.email != null) {
+          await resetEmailToPartialPersonDataCache();
+        }
+      }
     }
 
     // fire PeopleChangeEvent
@@ -293,14 +336,13 @@ class PersonService {
     bool shouldCheckRejectedFaces = false;
     for (var e in entities) {
       final personData = PersonData.fromJson(json.decode(e.data));
-      if (personData.rejectedFaceIDs != null &&
-          personData.rejectedFaceIDs!.isNotEmpty) {
+      if (personData.rejectedFaceIDs.isNotEmpty) {
         shouldCheckRejectedFaces = true;
       }
       int faceCount = 0;
 
       // Locally store the assignment of faces to clusters and people
-      for (var cluster in personData.assigned!) {
+      for (var cluster in personData.assigned) {
         faceCount += cluster.faces.length;
         for (var faceId in cluster.faces) {
           if (faceIdToClusterID.containsKey(faceId)) {
@@ -322,7 +364,7 @@ class PersonService {
       }
       if (kDebugMode) {
         logger.info(
-          "Person ${e.id} ${personData.name} has ${personData.assigned!.length} clusters with $faceCount faces",
+          "Person ${e.id} ${personData.name} has ${personData.assigned.length} clusters with $faceCount faces",
         );
       }
     }
@@ -335,11 +377,10 @@ class PersonService {
           await faceMLDataDB.getPersonToClusterIdToFaceIds();
       for (var e in entities) {
         final personData = PersonData.fromJson(json.decode(e.data));
-        if (personData.rejectedFaceIDs != null &&
-            personData.rejectedFaceIDs!.isNotEmpty) {
+        if (personData.rejectedFaceIDs.isNotEmpty) {
           final personFaceIDs =
               dbPeopleClusterInfo[e.id]!.values.expand((e) => e).toSet();
-          final rejectedFaceIDsSet = personData.rejectedFaceIDs!.toSet();
+          final rejectedFaceIDsSet = personData.rejectedFaceIDs.toSet();
           final assignedAndRejectedFaceIDs =
               rejectedFaceIDsSet.intersection(personFaceIDs);
 
@@ -385,7 +426,7 @@ class PersonService {
   }
 
   Future<PersonEntity> updateAvatar(PersonEntity p, EnteFile file) async {
-    final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
+    final Face? face = await faceMLDataDB.getCoverFaceForPerson(
       recentFileID: file.uploadedFileID!,
       personID: p.remoteID,
     );
@@ -410,6 +451,7 @@ class PersonService {
     bool? isHidden,
     int? version,
     String? birthDate,
+    String? email,
   }) async {
     final person = (await getPerson(id))!;
     final updatedPerson = person.copyWith(
@@ -419,9 +461,11 @@ class PersonService {
         isHidden: isHidden,
         version: version,
         birthDate: birthDate,
+        email: email,
       ),
     );
     await updatePerson(updatedPerson);
+    await resetEmailToPartialPersonDataCache();
     return updatedPerson;
   }
 
@@ -437,5 +481,39 @@ class PersonService {
       logger.severe("Failed to update person", e, s);
       rethrow;
     }
+  }
+
+  Future<EnteFile> getRecentFileOfPerson(
+    PersonEntity person,
+  ) async {
+    final clustersToFiles =
+        await SearchService.instance.getClusterFilesForPersonID(
+      person.remoteID,
+    );
+    int? avatarFileID;
+    if (person.data.hasAvatar()) {
+      avatarFileID = tryGetFileIdFromFaceId(person.data.avatarFaceID!);
+    }
+    EnteFile? resultFile;
+    // iterate over all clusters and get the first file
+    for (final clusterFiles in clustersToFiles.values) {
+      for (final file in clusterFiles) {
+        if (avatarFileID != null && file.uploadedFileID! == avatarFileID) {
+          resultFile = file;
+          break;
+        }
+        resultFile ??= file;
+        if (resultFile.creationTime! < file.creationTime!) {
+          resultFile = file;
+        }
+      }
+    }
+    if (resultFile == null) {
+      debugPrint(
+        "Person ${kDebugMode ? person.data.name : person.remoteID} has no files",
+      );
+      return EnteFile();
+    }
+    return resultFile;
   }
 }

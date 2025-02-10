@@ -32,7 +32,7 @@ interface OverflowMenuProps {
     /**
      * Optional additional properties for the trigger icon button.
      */
-    triggerButtonProps?: Partial<IconButtonProps>;
+    triggerButtonSxProps?: IconButtonProps["sx"];
     /**
      * Optional additional sx props for the MUI {@link Paper} that underlies the
      * {@link Menu}.
@@ -49,7 +49,7 @@ export const OverflowMenu: React.FC<
 > = ({
     ariaID,
     triggerButtonIcon,
-    triggerButtonProps,
+    triggerButtonSxProps,
     menuPaperSxProps,
     children,
 }) => {
@@ -65,7 +65,7 @@ export const OverflowMenu: React.FC<
                 aria-controls={anchorEl ? ariaID : undefined}
                 aria-haspopup="true"
                 aria-expanded={anchorEl ? "true" : undefined}
-                {...triggerButtonProps}
+                sx={triggerButtonSxProps}
             >
                 {triggerButtonIcon ?? <MoreHorizIcon />}
             </IconButton>
@@ -128,7 +128,7 @@ export const OverflowMenuOption: React.FC<
             onClick={handleClick}
             sx={(theme) => ({
                 minWidth: 220,
-                color: theme.palette[color].main,
+                color: theme.vars.palette[color].main,
                 // Reduce the size of the icons a bit to make it fit better with
                 // the text.
                 "& .MuiSvgIcon-root": {
@@ -144,7 +144,7 @@ export const OverflowMenuOption: React.FC<
                     // Fill our container.
                     width: "100%",
                     // MUI has responsive padding, use a static value instead.
-                    paddingBlock: 1,
+                    py: 1,
                 }}
             >
                 {startIcon}

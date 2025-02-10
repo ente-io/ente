@@ -32,13 +32,3 @@ export interface PendingUploads {
     filePaths: string[];
     zipItems: ZipItem[];
 }
-
-/**
- * See: [Note: Custom errors across Electron/Renderer boundary]
- *
- * Note: this is not a type, and cannot be used in preload.js; it is only meant
- * for use in the main process code.
- */
-export const CustomErrorMessage = {
-    NotAvailable: "This feature in not available on the current OS/arch",
-};

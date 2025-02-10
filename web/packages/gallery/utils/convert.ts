@@ -1,20 +1,10 @@
 import { isDesktop } from "@/base/app";
 import log from "@/base/log";
-import { CustomErrorMessage } from "@/base/types/ipc";
 import { workerBridge } from "@/base/worker/worker-bridge";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
 import { convertToMP4 } from "../services/ffmpeg";
 import { detectFileTypeInfo } from "./detect-type";
-
-/**
- * This will be set to false if we get an error from the Node.js side of our
- * desktop app telling us that native JPEG conversion is not available for the
- * current OS/arch combination.
- *
- * That way, we can stop pestering it again and again, saving an IPC round-trip.
- */
-let _isNativeJPEGConversionAvailable = true;
 
 /**
  * Return a new {@link Blob} containing an image's data in a format that the
@@ -39,7 +29,7 @@ let _isNativeJPEGConversionAvailable = true;
  *    desktop app can natively convert to a JPEG (using ffmpeg), do that and
  *    return the resultant JPEG blob.
  *
- * 4. If this is an HEIC file, use our (WASM) HEIC converter and return the
+ * 4. If this is an HEIC file, use our (Wasm) HEIC converter and return the
  *    resultant JPEG blob.
  *
  * 5. Otherwise return the original (with the MIME type if we were able to
@@ -62,18 +52,11 @@ export const renderableImageBlob = async (
             // If we're running in our desktop app, see if our Node.js layer can
             // convert this into a JPEG using native tools.
 
-            if (isDesktop && _isNativeJPEGConversionAvailable) {
+            if (isDesktop) {
                 try {
                     return await nativeConvertToJPEG(imageBlob);
                 } catch (e) {
-                    if (
-                        e instanceof Error &&
-                        e.message.endsWith(CustomErrorMessage.NotAvailable)
-                    ) {
-                        _isNativeJPEGConversionAvailable = false;
-                    } else {
-                        log.error("Native conversion to JPEG failed", e);
-                    }
+                    log.error("Native conversion to JPEG failed", e);
                 }
             }
 
@@ -141,7 +124,7 @@ const nativeConvertToJPEG = async (imageBlob: Blob) => {
  *
  * - Otherwise try to convert using FFmpeg. This conversion always happens on
  *   the desktop app, but in the browser the conversion only happens for short
- *   videos since the WASM FFmpeg implementation is much slower. There is also a
+ *   videos since the Wasm FFmpeg implementation is much slower. There is also a
  *   flag to force this conversion regardless.
  */
 export const playableVideoBlob = async (

@@ -119,6 +119,13 @@ const nextConfig = {
         desktopAppVersion,
     },
 
+    // Ask Next to use a separate dist directory for the desktop during
+    // development. This allows us run dev servers simulataneously for both web
+    // and desktop code without them stepping on each others toes.
+    ...(process.env.NODE_ENV != "production" && isDesktop
+        ? { distDir: ".next-desktop" }
+        : {}),
+
     // Customize the webpack configuration used by Next.js.
     webpack: (config, { isServer }) => {
         // https://dev.to/marcinwosinek/how-to-add-resolve-fallback-to-webpack-5-in-nextjs-10-i6j

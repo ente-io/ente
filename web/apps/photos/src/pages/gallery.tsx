@@ -1,8 +1,11 @@
 import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { stashRedirect } from "@/accounts/services/redirect";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
-import { AppNavbar, NavbarBase } from "@/base/components/Navbar";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { NavbarBase } from "@/base/components/Navbar";
+import { CenteredRow } from "@/base/components/containers";
+import { TranslucentLoadingOverlay } from "@/base/components/loaders";
+import type { ButtonishProps } from "@/base/components/mui";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
@@ -64,7 +67,7 @@ import {
 } from "@/new/photos/services/user-details";
 import { useAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
-import { CenteredFlex, FlexWrapper } from "@ente/shared/components/Container";
+import { FlexWrapper } from "@ente/shared/components/Container";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
@@ -84,8 +87,7 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
-import type { ButtonProps, IconButtonProps } from "@mui/material";
-import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
+import { IconButton, Stack, Typography } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import CollectionNamer, {
     CollectionNamerAttributes,
@@ -98,10 +100,9 @@ import {
 } from "components/FilesDownloadProgress";
 import { FixCreationTime } from "components/FixCreationTime";
 import GalleryEmptyState from "components/GalleryEmptyState";
-import { GalleryLoadingOverlay } from "components/GalleryLoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import Sidebar from "components/Sidebar";
+import { Sidebar } from "components/Sidebar";
 import { type UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
 import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
@@ -854,6 +855,9 @@ const Page: React.FC = () => {
         [],
     );
 
+    const showSelectionBar =
+        selected.count > 0 && selected.collectionID === activeCollectionID;
+
     if (!user) {
         // Don't render until we dispatch "mount" with the logged in user.
         return <div></div>;
@@ -900,22 +904,7 @@ const Page: React.FC = () => {
                         getZipFileSelectorInputProps,
                     }}
                 />
-                <AppNavbar />
-                {blockingLoad && (
-                    <GalleryLoadingOverlay>
-                        <ActivityIndicator />
-                    </GalleryLoadingOverlay>
-                )}
-                {isFirstLoad && (
-                    <CenteredFlex>
-                        <Typography
-                            variant="small"
-                            sx={{ color: "text.muted" }}
-                        >
-                            {t("INITIAL_LOAD_DELAY_WARNING")}
-                        </Typography>
-                    </CenteredFlex>
-                )}
+                {blockingLoad && <TranslucentLoadingOverlay />}
                 <PlanSelector
                     {...planSelectorVisibilityProps}
                     setLoading={(v) => setBlockingLoad(v)}
@@ -945,16 +934,53 @@ const Page: React.FC = () => {
                     {...fixCreationTimeVisibilityProps}
                     files={fixCreationTimeFiles}
                 />
-
                 <NavbarBase
-                    sx={{
-                        background: "transparent",
-                        position: "absolute",
-                        // Override the default 16px we get from NavbarBase
-                        marginBottom: "12px",
-                    }}
+                    sx={[
+                        {
+                            mb: "12px",
+                            px: "24px",
+                            "@media (width < 720px)": { px: "4px" },
+                        },
+                        showSelectionBar && { borderColor: "accent.main" },
+                    ]}
                 >
-                    {barMode == "hidden-albums" ? (
+                    {showSelectionBar ? (
+                        <SelectedFileOptions
+                            handleCollectionOps={collectionOpsHelper}
+                            handleFileOps={fileOpsHelper}
+                            showCreateCollectionModal={
+                                showCreateCollectionModal
+                            }
+                            onOpenCollectionSelector={
+                                handleOpenCollectionSelector
+                            }
+                            count={selected.count}
+                            ownCount={selected.ownCount}
+                            clearSelection={clearSelection}
+                            barMode={barMode}
+                            activeCollectionID={activeCollectionID}
+                            selectedCollection={getSelectedCollection(
+                                selected.collectionID,
+                                collections,
+                            )}
+                            isFavoriteCollection={
+                                collectionSummaries.get(activeCollectionID)
+                                    ?.type == "favorites"
+                            }
+                            isUncategorizedCollection={
+                                collectionSummaries.get(activeCollectionID)
+                                    ?.type == "uncategorized"
+                            }
+                            isIncomingSharedCollection={
+                                collectionSummaries.get(activeCollectionID)
+                                    ?.type == "incomingShareCollaborator" ||
+                                collectionSummaries.get(activeCollectionID)
+                                    ?.type == "incomingShareViewer"
+                            }
+                            isInSearchMode={isInSearchMode}
+                            isInHiddenSection={barMode == "hidden-albums"}
+                        />
+                    ) : barMode == "hidden-albums" ? (
                         <HiddenSectionNavbarContents
                             onBack={() => dispatch({ type: "showAlbums" })}
                         />
@@ -970,11 +996,15 @@ const Page: React.FC = () => {
                                 onSelectPeople: () =>
                                     dispatch({ type: "showPeople" }),
                                 onSelectPerson: (personID) =>
-                                    dispatch({ type: "showPerson", personID }),
+                                    dispatch({
+                                        type: "showPerson",
+                                        personID,
+                                    }),
                             }}
                         />
                     )}
                 </NavbarBase>
+                {isFirstLoad && <FirstLoadMessage />}
                 {isOffline && <OfflineMessage />}
 
                 <GalleryBarAndListHeader
@@ -1091,44 +1121,6 @@ const Page: React.FC = () => {
                         }}
                     />
                 )}
-                {selected.count > 0 &&
-                    selected.collectionID === activeCollectionID && (
-                        <SelectedFileOptions
-                            handleCollectionOps={collectionOpsHelper}
-                            handleFileOps={fileOpsHelper}
-                            showCreateCollectionModal={
-                                showCreateCollectionModal
-                            }
-                            onOpenCollectionSelector={
-                                handleOpenCollectionSelector
-                            }
-                            count={selected.count}
-                            ownCount={selected.ownCount}
-                            clearSelection={clearSelection}
-                            barMode={barMode}
-                            activeCollectionID={activeCollectionID}
-                            selectedCollection={getSelectedCollection(
-                                selected.collectionID,
-                                collections,
-                            )}
-                            isFavoriteCollection={
-                                collectionSummaries.get(activeCollectionID)
-                                    ?.type == "favorites"
-                            }
-                            isUncategorizedCollection={
-                                collectionSummaries.get(activeCollectionID)
-                                    ?.type == "uncategorized"
-                            }
-                            isIncomingSharedCollection={
-                                collectionSummaries.get(activeCollectionID)
-                                    ?.type == "incomingShareCollaborator" ||
-                                collectionSummaries.get(activeCollectionID)
-                                    ?.type == "incomingShareViewer"
-                            }
-                            isInSearchMode={isInSearchMode}
-                            isInHiddenSection={barMode == "hidden-albums"}
-                        />
-                    )}
                 <Export
                     {...exportVisibilityProps}
                     collectionNameMap={state.allCollectionNameByID}
@@ -1144,6 +1136,14 @@ const Page: React.FC = () => {
 };
 
 export default Page;
+
+const FirstLoadMessage: React.FC = () => (
+    <CenteredRow>
+        <Typography variant="small" sx={{ color: "text.muted" }}>
+            {t("initial_load_delay_warning")}
+        </Typography>
+    </CenteredRow>
+);
 
 const OfflineMessage: React.FC = () => (
     <Typography
@@ -1180,35 +1180,32 @@ const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
     </>
 );
 
-const SidebarButton: React.FC<IconButtonProps> = (props) => (
-    <IconButton {...props}>
+const SidebarButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <IconButton {...{ onClick }}>
         <MenuIcon />
     </IconButton>
 );
 
-const UploadButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
+const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
     const isSmallWidth = useIsSmallWidth();
 
     const icon = <FileUploadOutlinedIcon />;
 
     return (
-        <Box>
+        <>
             {isSmallWidth ? (
-                <IconButton {...props} disabled={disabled}>
-                    {icon}
-                </IconButton>
+                <IconButton {...{ onClick, disabled }}>{icon}</IconButton>
             ) : (
-                <Button
-                    {...props}
-                    disabled={disabled}
-                    color={"secondary"}
+                <FocusVisibleButton
+                    color="secondary"
                     startIcon={icon}
+                    {...{ onClick, disabled }}
                 >
                     {t("upload")}
-                </Button>
+                </FocusVisibleButton>
             )}
-        </Box>
+        </>
     );
 };
 
@@ -1224,7 +1221,7 @@ const HiddenSectionNavbarContents: React.FC<
         sx={(theme) => ({
             gap: "24px",
             width: "100%",
-            background: theme.palette.background.default,
+            background: theme.vars.palette.background.default,
         })}
     >
         <IconButton onClick={onBack}>

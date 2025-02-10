@@ -1,3 +1,4 @@
+import { LinkButtonUndecorated } from "@/base/components/LinkButton";
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
@@ -18,6 +19,7 @@ import {
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
+import { CopyButton } from "@/new/photos/components/FileInfo";
 import { ChipButton } from "@/new/photos/components/mui/ChipButton";
 import { FilePeopleList } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
@@ -27,8 +29,8 @@ import {
 } from "@/new/photos/components/utils/dialog";
 import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import {
-    fileInfoDrawerZIndex,
-    photosDialogZIndex,
+    aboveFileViewerContentZ,
+    fileInfoDrawerZ,
 } from "@/new/photos/components/utils/z-index";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import {
@@ -40,7 +42,6 @@ import { updateMapEnabled } from "@/new/photos/services/settings";
 import { AppContext } from "@/new/photos/types/context";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import CopyButton from "@ente/shared/components/CopyButton";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -68,7 +69,6 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import LinkButton from "components/pages/gallery/LinkButton";
 import type { DisplayFile } from "components/PhotoFrame";
 import { Formik } from "formik";
 import { t } from "i18next";
@@ -198,13 +198,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
             <Titlebar onClose={handleCloseInfo} title={t("info")} backIsClose />
-            <Stack
-                spacing={"20px"}
-                sx={{
-                    pt: 1,
-                    pb: 3,
-                }}
-            >
+            <Stack sx={{ pt: 1, pb: 3, gap: "20px" }}>
                 <RenderCaption
                     {...{
                         file,
@@ -254,25 +248,19 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                         {t("view_on_map")}
                                     </Link>
                                 ) : (
-                                    <LinkButton
+                                    <LinkButtonUndecorated
                                         onClick={
                                             openDisableMapConfirmationDialog
                                         }
-                                        sx={{
-                                            textDecoration: "none",
-                                            color: "text.muted",
-                                            fontWeight: "medium",
-                                        }}
                                     >
                                         {t("disable_map")}
-                                    </LinkButton>
+                                    </LinkButtonUndecorated>
                                 )
                             }
                             trailingButton={
                                 <CopyButton
-                                    code={openStreetMapLink(location)}
-                                    color="secondary"
                                     size="medium"
+                                    text={openStreetMapLink(location)}
                                 />
                             }
                         />
@@ -296,16 +284,9 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         ) : !exif.tags ? (
                             t("no_exif")
                         ) : (
-                            <LinkButton
-                                onClick={showRawExif}
-                                sx={{
-                                    textDecoration: "none",
-                                    color: "text.muted",
-                                    fontWeight: "medium",
-                                }}
-                            >
+                            <LinkButtonUndecorated onClick={showRawExif}>
                                 {t("view_exif")}
-                            </LinkButton>
+                            </LinkButtonUndecorated>
                         )
                     }
                 />
@@ -405,14 +386,28 @@ const parseExifInfo = (
     return info;
 };
 
-const FileInfoSidebar = styled((props: DialogProps) => (
-    <SidebarDrawer {...props} anchor="right" />
-))({
-    zIndex: fileInfoDrawerZIndex,
-    "& .MuiPaper-root": {
-        padding: 8,
-    },
-});
+const FileInfoSidebar = styled(
+    (props: Pick<DialogProps, "open" | "onClose" | "children">) => (
+        <SidebarDrawer {...props} anchor="right" />
+    ),
+)(({ theme }) => ({
+    zIndex: fileInfoDrawerZ,
+    // [Note: Lighter backdrop for overlays on photo viewer]
+    //
+    // The default backdrop color we use for the drawer in light mode is too
+    // "white" when used in the image gallery because unlike the rest of the app
+    // the gallery retains a black background irrespective of the mode. So use a
+    // lighter scrim when overlaying content directly atop the image gallery.
+    //
+    // We don't need to add this special casing for nested overlays (e.g.
+    // dialogs initiated from the file info drawer itself) since now there is
+    // enough "white" on the screen to warrant the stronger (default) backdrop.
+    ...theme.applyStyles("light", {
+        ".MuiBackdrop-root": {
+            backgroundColor: theme.vars.palette.backdrop.faint,
+        },
+    }),
+}));
 
 interface InfoItemProps {
     /**
@@ -484,7 +479,7 @@ const InfoItemIconContainer = styled("div")(
     display: flex;
     justify-content: center;
     align-items: center;
-    color: ${theme.colors.stroke.muted}
+    color: ${theme.vars.palette.stroke.muted}
 `,
 );
 
@@ -820,7 +815,7 @@ const FileNameEditDialog = ({
     };
     return (
         <TitledMiniDialog
-            sx={{ zIndex: photosDialogZIndex }}
+            sx={{ zIndex: aboveFileViewerContentZ }}
             open={isInEditMode}
             onClose={closeEditMode}
             title={t("rename_file")}
@@ -913,13 +908,15 @@ const MapBoxContainer = styled("div")`
     width: 100%;
 `;
 
-const MapBoxEnableContainer = styled(MapBoxContainer)`
+const MapBoxEnableContainer = styled(MapBoxContainer)(
+    ({ theme }) => `
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.09);
-`;
+    background-color: ${theme.vars.palette.fill.fainter};
+`,
+);
 
 interface RawExifProps {
     open: boolean;
@@ -978,10 +975,7 @@ const RawExif: React.FC<RawExifProps> = ({
                 caption={fileName}
                 onRootClose={handleRootClose}
                 actionButton={
-                    <CopyButton
-                        code={JSON.stringify(tags)}
-                        color={"secondary"}
-                    />
+                    <CopyButton size="small" text={JSON.stringify(tags)} />
                 }
             />
             <Stack sx={{ gap: 2, py: 3, px: 1 }}>

@@ -13,6 +13,7 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import "package:move_to_background/move_to_background.dart";
 import "package:package_info_plus/package_info_plus.dart";
 import 'package:photos/core/configuration.dart';
+import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/account_configured_event.dart';
@@ -35,6 +36,7 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/local_sync_service.dart';
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/remote_sync_service.dart";
 import 'package:photos/services/user_service.dart';
@@ -73,8 +75,8 @@ import 'package:uni_links/uni_links.dart';
 
 class HomeWidget extends StatefulWidget {
   const HomeWidget({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<StatefulWidget> createState() => _HomeWidgetState();
@@ -227,6 +229,9 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
     });
 
+    // MediaExtension plugin handles the deeplink for android
+    // [todo 4/Feb/2025]We need to validate if calling this method doesn't break
+    // android deep linking
     Platform.isIOS ? _initDeepLinkSubscriptionForPublicAlbums() : null;
 
     // For sharing images coming from outside the app
@@ -246,7 +251,9 @@ class _HomeWidgetState extends State<HomeWidget> {
 
     if (Platform.isAndroid &&
         !localSettings.hasConfiguredInAppLinkPermissions() &&
-        RemoteSyncService.instance.isFirstRemoteSyncDone()) {
+        RemoteSyncService.instance.isFirstRemoteSyncDone() &&
+        Configuration.instance.getHttpEndpoint() ==
+            kDefaultProductionEndpoint) {
       PackageInfo.fromPlatform().then((packageInfo) {
         final packageName = packageInfo.packageName;
         if (packageName == 'io.ente.photos.independent' ||
@@ -422,7 +429,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     _collectionUpdatedEvent.cancel();
     isOnSearchTabNotifier.dispose();
     _pageController.dispose();
-    _publicAlbumLinkSubscription.cancel();
+    if (Platform.isIOS) {
+      _publicAlbumLinkSubscription.cancel();
+    }
     super.dispose();
   }
 
@@ -431,7 +440,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _intentDataStreamSubscription =
         ReceiveSharingIntent.instance.getMediaStream().listen(
       (List<SharedMediaFile> value) {
-        if (value[0].path.contains("albums.ente.io")) {
+        if (value.isNotEmpty && value[0].path.contains("albums.ente.io")) {
           final uri = Uri.parse(value[0].path);
           _handlePublicAlbumLink(uri);
           return;
@@ -494,7 +503,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         .getInitialMedia()
         .then((List<SharedMediaFile> value) {
       if (mounted) {
-        if (value[0].path.contains("albums.ente.io")) {
+        if (value.isNotEmpty && value[0].path.contains("albums.ente.io")) {
           final uri = Uri.parse(value[0].path);
           _handlePublicAlbumLink(uri);
           return;
@@ -635,7 +644,9 @@ class _HomeWidgetState extends State<HomeWidget> {
       return const LandingPageWidget();
     }
     if (!LocalSyncService.instance.hasGrantedPermissions()) {
-      entityService.syncEntities();
+      entityService.syncEntities().then((_) {
+        PersonService.instance.resetEmailToPartialPersonDataCache();
+      });
       return const GrantPermissionsWidget();
     }
     if (!LocalSyncService.instance.hasCompletedFirstImport()) {

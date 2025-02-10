@@ -1,5 +1,5 @@
 import { useRedirectIfNeedsCredentials } from "@/accounts/components/utils/use-redirect";
-import { CenteredFill } from "@/base/components/containers";
+import { CenteredFill, SpacedRow } from "@/base/components/containers";
 import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
@@ -42,8 +42,8 @@ import {
 } from "react-window";
 import {
     DuplicateItemTile,
-    DuplicateTileTextOverlay,
     ItemCard,
+    TileBottomTextOverlay,
 } from "../components/Tiles";
 import {
     computeThumbnailGridLayoutParams,
@@ -350,7 +350,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "8px 4px",
-                borderBottom: `1px solid ${theme.palette.divider}`,
+                borderBottom: `1px solid ${theme.vars.palette.divider}`,
             })}
         >
             <Box sx={{ minWidth: "100px" /* 2 icons + gap */ }}>
@@ -536,7 +536,7 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
             key={key}
             style={
                 {
-                    "--paddingInline": `${layoutParams.paddingInline}px`,
+                    "--et-padding-inline": `${layoutParams.paddingInline}px`,
                 } as React.CSSProperties
             }
             {...{ height, width, itemData, itemCount, itemSize, itemKey }}
@@ -570,13 +570,10 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                     checked ? { opacity: 1 } : { opacity: 0.8 },
                 ]}
             >
-                <Stack
-                    direction="row"
+                <SpacedRow
                     sx={{
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        marginInline: 1,
-                        paddingInline: "var(--paddingInline)",
+                        mx: 1,
+                        paddingInline: "var(--et-padding-inline)",
                         paddingBlock: "24px 0px",
                     }}
                 >
@@ -585,7 +582,7 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                     </Typography>
                     {/* The size of this Checkbox is 42px. */}
                     <Checkbox {...{ checked, onChange }} />
-                </Stack>
+                </SpacedRow>
                 <Divider
                     variant="middle"
                     sx={[
@@ -600,11 +597,11 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                             TileComponent={DuplicateItemTile}
                             coverFile={item.file}
                         >
-                            <DuplicateTileTextOverlay>
-                                <Ellipsized2LineTypography color="text.muted">
+                            <TileBottomTextOverlay>
+                                <Ellipsized2LineTypography variant="small">
                                     {item.collectionName}
                                 </Ellipsized2LineTypography>
-                            </DuplicateTileTextOverlay>
+                            </TileBottomTextOverlay>
                         </ItemCard>
                     ))}
                 </ItemGrid>
@@ -672,7 +669,7 @@ const DeduplicateButton: React.FC<DeduplicateButtonProps> = ({
                             count: prunableCount,
                         })}
                     </Typography>
-                    <Typography variant="small" fontWeight={"normal"}>
+                    <Typography variant="small" fontWeight="regular">
                         {formattedByteSize(prunableSize)}
                     </Typography>
                 </>

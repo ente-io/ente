@@ -1,3 +1,5 @@
+import { isDesktop } from "@/base/app";
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -10,8 +12,6 @@ import {
     type DrawerProps,
 } from "@mui/material";
 import React from "react";
-import { SpaceBetweenFlex } from "../containers";
-import type { ModalVisibilityProps } from "../utils/modal";
 
 /**
  * A MUI {@link Drawer} with a standard set of styling that we use for our left
@@ -19,14 +19,46 @@ import type { ModalVisibilityProps } from "../utils/modal";
  *
  * It is width limited to 375px, and always at full width. It also has a default
  * padding.
+ *
+ * It also does some trickery with a sticky opaque bar to ensure that the
+ * content scrolls below our inline title bar on desktop.
  */
-export const SidebarDrawer = styled(Drawer)(({ theme }) => ({
-    "& .MuiPaper-root": {
-        maxWidth: "375px",
-        width: "100%",
-        scrollbarWidth: "thin",
-        padding: theme.spacing(1),
-    },
+export const SidebarDrawer: React.FC<DrawerProps> = ({ children, ...rest }) => (
+    <Drawer
+        {...rest}
+        PaperProps={{
+            sx: {
+                maxWidth: "375px",
+                width: "100%",
+                scrollbarWidth: "thin",
+                // Need to increase specificity to override inherited padding.
+                "&&": { padding: 0 },
+            },
+        }}
+    >
+        {isDesktop && <AppTitlebarBackdrop />}
+        <Box sx={{ p: 1 }}>{children}</Box>
+    </Drawer>
+);
+
+/**
+ * When running on desktop, we adds a sticky opaque bar at the top of the
+ * sidebar with a z-index greater than the expected sidebar contents. This
+ * ensures that any title bar overlays added by the system (e.g. the traffic
+ * lights on macOS) have a opaque-ish background and the sidebar contents scroll
+ * underneath them.
+ *
+ * See: [Note: Customize the desktop title bar]
+ */
+const AppTitlebarBackdrop = styled("div")(({ theme }) => ({
+    position: "sticky",
+    top: 0,
+    left: 0,
+    width: "100%",
+    minHeight: "env(titlebar-area-height, 30px)",
+    zIndex: 1,
+    backgroundColor: theme.vars.palette.backdrop.muted,
+    backdropFilter: "blur(12px)",
 }));
 
 /**
@@ -114,17 +146,17 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
     actionButton,
 }) => (
     <Stack sx={{ gap: "4px" }}>
-        <SpaceBetweenFlex sx={{ minHeight: "48px" }}>
-            <IconButton onClick={onClose} color={"primary"}>
+        <Stack direction="row" sx={{ justifyContent: "space-between" }}>
+            <IconButton onClick={onClose} color="primary">
                 <ArrowBackIcon />
             </IconButton>
             <Stack direction="row" sx={{ gap: "4px" }}>
                 {actionButton && actionButton}
-                <IconButton onClick={onRootClose} color={"secondary"}>
+                <IconButton onClick={onRootClose} color="secondary">
                     <CloseIcon />
                 </IconButton>
             </Stack>
-        </SpaceBetweenFlex>
+        </Stack>
         <Box sx={{ px: "16px", py: "4px" }}>
             <Typography variant="h3">{title}</Typography>
             <Typography

@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WindowListenerService {
-  static const double minWindowHeight = 600.0;
+  static const double minWindowHeight = 320.0;
   static const double minWindowWidth = 800.0;
   static const double maxWindowHeight = 8192.0;
   static const double maxWindowWidth = 8192.0;
@@ -25,21 +26,16 @@ class WindowListenerService {
         _preferences.getDouble('windowWidth') ?? minWindowWidth;
     final double windowHeight =
         _preferences.getDouble('windowHeight') ?? minWindowHeight;
-    return Size(
-      windowWidth.clamp(minWindowWidth, maxWindowWidth),
-      windowHeight.clamp(minWindowHeight, maxWindowHeight),
-    );
+    final w = windowWidth.clamp(200.0, maxWindowWidth);
+    final h = windowHeight.clamp(400.0, maxWindowHeight);
+    return Size(w, h);
   }
 
   Future<void> onWindowResize() async {
+    final width = (await windowManager.getSize()).width;
+    final height = (await windowManager.getSize()).height;
     // Save the window size to shared preferences
-    await _preferences.setDouble(
-      'windowWidth',
-      (await windowManager.getSize()).width,
-    );
-    await _preferences.setDouble(
-      'windowHeight',
-      (await windowManager.getSize()).height,
-    );
+    await _preferences.setDouble('windowWidth', width);
+    await _preferences.setDouble('windowHeight', height);
   }
 }

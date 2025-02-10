@@ -474,6 +474,7 @@ func main() {
 		UserRepo:          userRepo,
 		UserCtrl:          userController,
 		PasskeyController: passkeyCtrl,
+		LockCtrl:          lockController,
 	}
 	userHandler := &api.UserHandler{
 		UserController:      userController,
@@ -495,7 +496,6 @@ func main() {
 	privateAPI.POST("/users/two-factor/disable", userHandler.DisableTwoFactor)
 	privateAPI.PUT("/users/attributes", userHandler.SetAttributes)
 	privateAPI.PUT("/users/email-mfa", userHandler.UpdateEmailMFA)
-	privateAPI.PUT("/users/keys", userHandler.UpdateKeys)
 	privateAPI.POST("/users/srp/setup", userHandler.SetupSRP)
 	privateAPI.POST("/users/srp/complete", userHandler.CompleteSRPSetup)
 	privateAPI.POST("/users/srp/update", userHandler.UpdateSrpAndKeyAttributes)
@@ -766,7 +766,7 @@ func main() {
 	setupAndStartBackgroundJobs(objectCleanupController, replicationController3, fileDataCtrl)
 	setupAndStartCrons(
 		userAuthRepo, publicCollectionRepo, twoFactorRepo, passkeysRepo, fileController, taskLockingRepo, emailNotificationCtrl,
-		trashController, pushController, objectController, dataCleanupController, storageBonusCtrl,
+		trashController, pushController, objectController, dataCleanupController, storageBonusCtrl, emergencyCtrl,
 		embeddingController, healthCheckHandler, kexCtrl, castDb)
 
 	// Create a new collector, the name will be used as a label on the metrics
@@ -901,6 +901,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 	objectController *controller.ObjectController,
 	dataCleanupCtrl *dataCleanupCtrl.DeleteUserCleanupController,
 	storageBonusCtrl *storagebonus.Controller,
+	emergencyCtrl *emergency.Controller,
 	embeddingCtrl *embeddingCtrl.Controller,
 	healthCheckHandler *api.HealthCheckHandler,
 	kexCtrl *kexCtrl.Controller,
@@ -994,6 +995,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 	})
 
 	scheduleAndRun(c, "@every 60m", func() {
+		emergencyCtrl.SendRecoveryReminder()
 		kexCtrl.DeleteOldKeys()
 	})
 

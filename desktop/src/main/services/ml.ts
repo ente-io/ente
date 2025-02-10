@@ -20,7 +20,7 @@ let _child: UtilityProcess | undefined;
  * [Note: ML IPC]
  *
  * The primary reason for doing ML tasks in the Node.js layer is so that we can
- * use the binary ONNX runtime, which is 10-20x faster than the WASM one that
+ * use the binary ONNX runtime, which is 10-20x faster than the Wasm one that
  * can be used directly on the web layer.
  *
  * For this to work, the main and renderer process need to communicate with each

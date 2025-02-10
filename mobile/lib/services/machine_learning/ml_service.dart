@@ -43,22 +43,25 @@ class MLService {
 
   bool get isInitialized => _isInitialized;
 
-  bool get showClusteringIsHappening => _showClusteringIsHappening;
+  bool get showClusteringIsHappening => _clusteringIsHappening;
 
   bool debugIndexingDisabled = false;
-  bool _showClusteringIsHappening = false;
+  bool _clusteringIsHappening = false;
   bool _mlControllerStatus = false;
   bool _isIndexingOrClusteringRunning = false;
   bool _isRunningML = false;
   bool _shouldPauseIndexingAndClustering = false;
 
   static const _kForceClusteringFaceCount = 8000;
+  late final mlDataDB = MLDataDB.instance;
 
   /// Only call this function once at app startup, after that you can directly call [runAllML]
   Future<void> init() async {
     if (_isInitialized) return;
     if (!userRemoteFlagService
-        .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) return;
+        .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) {
+      return;
+    }
     _logger.info("init called");
 
     // Check if the device has enough RAM to run local indexing
@@ -72,7 +75,9 @@ class MLService {
     // Listen on MachineLearningController
     Bus.instance.on<MachineLearningControlEvent>().listen((event) {
       if (!userRemoteFlagService
-          .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) return;
+          .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) {
+        return;
+      }
 
       _mlControllerStatus = event.shouldRun;
       if (_mlControllerStatus) {
@@ -123,12 +128,12 @@ class MLService {
       if (force) {
         _mlControllerStatus = true;
       }
-      if (_cannotRunMLFunction() && !force) return;
+      if (!_canRunMLFunction(function: "AllML") && !force) return;
       _isRunningML = true;
       await sync();
 
       final int unclusteredFacesCount =
-          await MLDataDB.instance.getUnclusteredFaceCount();
+          await mlDataDB.getUnclusteredFaceCount();
       if (unclusteredFacesCount > _kForceClusteringFaceCount) {
         _logger.info(
           "There are $unclusteredFacesCount unclustered faces, doing clustering first",
@@ -142,7 +147,7 @@ class MLService {
       if (canFetch()) {
         await fetchAndIndexAllImages();
       }
-      if ((await MLDataDB.instance.getUnclusteredFaceCount()) > 0) {
+      if ((await mlDataDB.getUnclusteredFaceCount()) > 0) {
         await clusterAllImages();
       }
       if (_mlControllerStatus == true) {
@@ -182,7 +187,7 @@ class MLService {
   /// This function first fetches from remote and checks if the image has already been analyzed
   /// with the lastest faceMlVersion and stored on remote or local database. If so, it skips the image.
   Future<void> fetchAndIndexAllImages() async {
-    if (_cannotRunMLFunction()) return;
+    if (!_canRunMLFunction(function: "Indexing")) return;
 
     try {
       _isIndexingOrClusteringRunning = true;
@@ -237,11 +242,19 @@ class MLService {
     }
   }
 
-  Future<void> clusterAllImages({bool clusterInBuckets = true}) async {
-    if (_cannotRunMLFunction()) return;
+  Future<void> clusterAllImages({
+    bool clusterInBuckets = true,
+    bool force = false,
+  }) async {
+    if (!_canRunMLFunction(function: "Clustering") && !force) return;
+    if (_clusteringIsHappening) {
+      _logger.info("clusterAllImages() is already running, returning");
+      return;
+    }
 
     _logger.info("`clusterAllImages()` called");
     _isIndexingOrClusteringRunning = true;
+    _clusteringIsHappening = true;
     final clusterAllImagesTime = DateTime.now();
 
     _logger.info('Pulling remote feedback before actually clustering');
@@ -249,28 +262,22 @@ class MLService {
     final persons = await PersonService.instance.getPersons();
     final faceIdNotToCluster = <String, List<String>>{};
     for (final person in persons) {
-      if (person.data.rejectedFaceIDs != null &&
-          person.data.rejectedFaceIDs!.isNotEmpty) {
-        final personClusters = person.data.assigned?.map((e) => e.id).toList();
-        if (personClusters != null) {
-          for (final faceID in person.data.rejectedFaceIDs!) {
-            faceIdNotToCluster[faceID] = personClusters;
-          }
+      if (person.data.rejectedFaceIDs.isNotEmpty) {
+        final personClusters = person.data.assigned.map((e) => e.id).toList();
+        for (final faceID in person.data.rejectedFaceIDs) {
+          faceIdNotToCluster[faceID] = personClusters;
         }
       }
     }
 
     try {
-      _showClusteringIsHappening = true;
-
       // Get a sense of the total number of faces in the database
-      final int totalFaces =
-          await MLDataDB.instance.getTotalFaceCount();
+      final int totalFaces = await mlDataDB.getTotalFaceCount();
       final fileIDToCreationTime =
           await FilesDB.instance.getFileIDToCreationTime();
       final startEmbeddingFetch = DateTime.now();
       // read all embeddings
-      final result = await MLDataDB.instance.getFaceInfoForClustering(
+      final result = await mlDataDB.getFaceInfoForClustering(
         maxFaces: totalFaces,
       );
       final Set<int> missingFileIDs = {};
@@ -297,7 +304,7 @@ class MLService {
 
       // Get the current cluster statistics
       final Map<String, (Uint8List, int)> oldClusterSummaries =
-          await MLDataDB.instance.getAllClusterSummary();
+          await mlDataDB.getAllClusterSummary();
 
       if (clusterInBuckets) {
         const int bucketSize = 10000;
@@ -356,9 +363,9 @@ class MLService {
             return;
           }
 
-          await MLDataDB.instance
+          await mlDataDB
               .updateFaceIdToClusterId(clusteringResult.newFaceIdToCluster);
-          await MLDataDB.instance
+          await mlDataDB
               .clusterSummaryUpdate(clusteringResult.newClusterSummaries);
           Bus.instance.fire(PeopleChangedEvent());
           for (final faceInfo in faceInfoForClustering) {
@@ -401,9 +408,9 @@ class MLService {
         _logger.info(
           'Updating ${clusteringResult.newFaceIdToCluster.length} FaceIDs with clusterIDs in the DB',
         );
-        await MLDataDB.instance
+        await mlDataDB
             .updateFaceIdToClusterId(clusteringResult.newFaceIdToCluster);
-        await MLDataDB.instance
+        await mlDataDB
             .clusterSummaryUpdate(clusteringResult.newClusterSummaries);
         Bus.instance.fire(PeopleChangedEvent());
         _logger.info('Done updating FaceIDs with clusterIDs in the DB, in '
@@ -414,7 +421,7 @@ class MLService {
     } catch (e, s) {
       _logger.severe("`clusterAllImages` failed", e, s);
     } finally {
-      _showClusteringIsHappening = false;
+      _clusteringIsHappening = false;
       _isIndexingOrClusteringRunning = false;
       _cancelPauseIndexingAndClustering();
     }
@@ -492,9 +499,9 @@ class MLService {
       );
       _logger.info("ML results for fileID ${result.fileId} stored on remote");
       // Storing results locally
-      if (result.facesRan) await MLDataDB.instance.bulkInsertFaces(faces);
+      if (result.facesRan) await mlDataDB.bulkInsertFaces(faces);
       if (result.clipRan) {
-        await SemanticSearchService.storeClipImageResult(
+        await SemanticSearchService.instance.storeClipImageResult(
           result.clip!,
         );
       }
@@ -515,10 +522,10 @@ class MLService {
           e,
           s,
         );
-        await MLDataDB.instance.bulkInsertFaces(
+        await mlDataDB.bulkInsertFaces(
           [Face.empty(instruction.file.uploadedFileID!, error: true)],
         );
-        await SemanticSearchService.storeEmptyClipImageResult(
+        await SemanticSearchService.instance.storeEmptyClipImageResult(
           instruction.file,
         );
         return true;
@@ -532,30 +539,30 @@ class MLService {
     }
   }
 
-  bool _cannotRunMLFunction({String function = ""}) {
+  bool _canRunMLFunction({required String function}) {
     if (kDebugMode && Platform.isIOS && !_isIndexingOrClusteringRunning) {
-      return false;
+      return true;
     }
     if (_isIndexingOrClusteringRunning) {
       _logger.info(
         "Cannot run $function because indexing or clustering is already running",
       );
       _logStatus();
-      return true;
+      return false;
     }
     if (_mlControllerStatus == false) {
       _logger.info(
         "Cannot run $function because MLController does not allow it",
       );
       _logStatus();
-      return true;
+      return false;
     }
     if (debugIndexingDisabled) {
       _logger.info(
         "Cannot run $function because debugIndexingDisabled is true",
       );
       _logStatus();
-      return true;
+      return false;
     }
     if (_shouldPauseIndexingAndClustering) {
       // This should ideally not be triggered, because one of the above should be triggered instead.
@@ -563,9 +570,9 @@ class MLService {
         "Cannot run $function because indexing and clustering is being paused",
       );
       _logStatus();
-      return true;
+      return false;
     }
-    return false;
+    return true;
   }
 
   void _logStatus() {

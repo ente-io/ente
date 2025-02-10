@@ -18,7 +18,7 @@ body {
     height: 48px;
     background: none !important;
     background-image: none !important;
-    color: #fff;
+    color: white;
 }
 
 .pswp__item video {
@@ -33,6 +33,25 @@ body {
     align-items: center;
     justify-content: center;
     object-fit: contain;
+}
+
+/* Need this in CSS instead of as an inline style to increase specificity. */
+.pswp__top-bar.pswp__top-bar {
+    top: var(--ente-pswp-top-bar-top, 0px);
+}
+
+/* Shift the top bar by --ente-pswp-top-bar-top, and add a before pseudo element
+   with the same color to fill in the custom app title bar.
+
+   See: [Note: Customize the desktop title bar] */
+.pswp__top-bar::before {
+    content: "";
+    position: absolute;
+    top: calc(-1 * var(--ente-pswp-top-bar-top, 0px));
+    left: 0;
+    height: var(--ente-pswp-top-bar-top, 0px);
+    width: 100%;
+    background-color: rgba(0 0 0 / 0.3);
 }
 
 .pswp-item-container > * {
@@ -65,8 +84,8 @@ body {
 
 .pswp__button--arrow--left,
 .pswp__button--arrow--right {
-    color: #fff;
-    background-color: #333333 !important;
+    color: white;
+    background-color: rgba(37 37 37 / 0.65) !important;
     border-radius: 50%;
     width: 56px;
     height: 56px;

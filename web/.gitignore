@@ -18,5 +18,6 @@ dist
 
 # Next.js
 .next/
+.next-desktop/
 out/
 next-env.d.ts

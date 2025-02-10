@@ -88,6 +88,8 @@
   "useRecoveryKey": "Herstelsleutel gebruiken",
   "incorrectPasswordTitle": "Onjuist wachtwoord",
   "welcomeBack": "Welkom terug!",
+  "emailAlreadyRegistered": "E-mail is al geregistreerd.",
+  "emailNotRegistered": "E-mail niet geregistreerd.",
   "madeWithLoveAtPrefix": "met ❤️ gemaakt door",
   "supportDevs": "Abonneer u op <bold-green>ente</bold-green> om ons te steunen",
   "supportDiscount": "Gebruik couponcode \"AUTH\" om het eerste jaar 10% korting te krijgen",
@@ -502,5 +504,13 @@
   "deselectAll": "Alles deselecteren",
   "selectAll": "Alles selecteren",
   "deleteDuplicates": "Dubbelen verwijderen",
-  "plainHTML": "Alleen HTML"
+  "plainHTML": "Alleen HTML",
+  "tellUsWhatYouThink": "Vertel ons wat je vindt",
+  "dropReview": "Laat een beoordeling achter in de App/Play Store",
+  "supportEnte": "Steun <bold-green>ente</bold-green>",
+  "giveUsAStarOnGithub": "Geef ons een ster op Github",
+  "free5GB": "5GB gratis op <bold-green>ente</bold-green> Photos",
+  "loginWithAuthAccount": "Log in met je Auth account",
+  "freeStorageOffer": "10% korting op <bold-green>ente</bold-green> photos",
+  "freeStorageOfferDescription": "Gebruik de code \"AUTH\" voor 10% korting op je eerste jaar"
 }

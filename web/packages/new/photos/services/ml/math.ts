@@ -46,7 +46,7 @@ export const clamp = (value: number, min: number, max: number) =>
  *
  * [Note: Dot product performance]
  *
- * In theory, WASM SIMD instructions should give us a huge boost for computing
+ * In theory, Wasm SIMD instructions should give us a huge boost for computing
  * dot products. In practice, we can get to roughly around the same performance
  * by using Float32Arrays instead of number[], and letting the JS JIT do the
  * optimizations for us (This assertion was made on Chrome on macOS on Sep 2023,
@@ -54,7 +54,7 @@ export const clamp = (value: number, min: number, max: number) =>
  *
  * We can get a further 2x speedup over this by using some library that directly
  * uses the SIMD intrinsics provided by the architecture instead of limiting
- * itself to WASM's set. But that'll require bundling native code, so as a
+ * itself to Wasm's set. But that'll require bundling native code, so as a
  * tradeoff to avoid complexity we currently leave that 1x on the table.
  */
 export const dotProduct = (v1: Float32Array, v2: Float32Array) => {

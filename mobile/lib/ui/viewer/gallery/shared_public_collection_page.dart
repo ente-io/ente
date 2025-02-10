@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/collection_meta_event.dart";
 import "package:photos/events/collection_updated_event.dart";
@@ -11,12 +12,11 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/remote_sync_service.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/end_to_end_banner.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import "package:photos/ui/components/notification_widget.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
@@ -96,25 +96,24 @@ class _SharedPublicCollectionPageState
       selectedFiles: _selectedFiles,
       initialFiles: initialFiles,
       albumName: widget.c.collection.displayName,
-      header: widget.c.collection.isJoinEnabled && flagService.internalUser
+      header: widget.c.collection.isJoinEnabled &&
+              Configuration.instance.isLoggedIn()
           ? Padding(
               padding: const EdgeInsets.all(8.0),
-              child: NotificationWidget(
-                startIcon: Icons.people_outline,
-                actionIcon: null,
-                actionWidget: ButtonWidget(
+              child: EndToEndBanner(
+                leadingIcon: Icons.people_outlined,
+                title: context.l10n.joinAlbum,
+                caption: widget.c.collection.isCollectEnabledForPublicLink()
+                    ? context.l10n.joinAlbumSubtext
+                    : context.l10n.joinAlbumSubtextViewer,
+                trailingWidget: ButtonWidget(
                   buttonType: ButtonType.primary,
-                  labelText: context.l10n.join,
                   buttonSize: ButtonSize.small,
+                  icon: null,
+                  labelText: context.l10n.join,
                   shouldSurfaceExecutionStates: false,
                   onTap: _joinAlbum,
                 ),
-                text: context.l10n.joinAlbum,
-                subText: widget.c.collection.isCollectEnabledForPublicLink()
-                    ? context.l10n.joinAlbumSubtext
-                    : context.l10n.joinAlbumSubtextViewer,
-                type: NotificationType.notice,
-                onTap: () async {},
               ),
             )
           : null,

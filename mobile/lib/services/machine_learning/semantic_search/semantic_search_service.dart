@@ -10,7 +10,6 @@ import "package:ml_linalg/vector.dart";
 import "package:photos/core/cache/lru_map.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/db/ml/clip_db.dart";
 import "package:photos/db/ml/db.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/models/file/file.dart";
@@ -35,6 +34,7 @@ class SemanticSearchService {
   static final Computer _computer = Computer.shared();
   final LRUMap<String, List<double>> _queryEmbeddingCache = LRUMap(20);
   static const kMinimumSimilarityThreshold = 0.175;
+  late final mlDataDB = MLDataDB.instance;
 
   bool _hasInitialized = false;
   bool _textModelIsLoaded = false;
@@ -68,7 +68,8 @@ class SemanticSearchService {
 
   bool isMagicSearchEnabledAndReady() {
     return userRemoteFlagService
-        .getCachedBoolValue(UserRemoteFlagService.mlEnabled) && _textModelIsLoaded;
+            .getCachedBoolValue(UserRemoteFlagService.mlEnabled) &&
+        _textModelIsLoaded;
   }
 
   // searchScreenQuery should only be used for the user initiate query on the search screen.
@@ -77,8 +78,7 @@ class SemanticSearchService {
     if (!isMagicSearchEnabledAndReady()) {
       if (flagService.internalUser) {
         _logger.info(
-          "ML global consent: ${userRemoteFlagService
-        .getCachedBoolValue(UserRemoteFlagService.mlEnabled)}, loaded: $_textModelIsLoaded ",
+          "ML global consent: ${userRemoteFlagService.getCachedBoolValue(UserRemoteFlagService.mlEnabled)}, loaded: $_textModelIsLoaded ",
         );
       }
       return (query, <EnteFile>[]);
@@ -106,7 +106,7 @@ class SemanticSearchService {
   }
 
   Future<void> clearIndexes() async {
-    await MLDataDB.instance.deleteClipIndexes();
+    await mlDataDB.deleteClipIndexes();
     final preferences = await SharedPreferences.getInstance();
     await preferences.remove("sync_time_embeddings_v3");
     _logger.info("Indexes cleared");
@@ -116,7 +116,7 @@ class SemanticSearchService {
     if (_cachedImageEmbeddingVectors != null) {
       return _cachedImageEmbeddingVectors!;
     }
-    _cachedImageEmbeddingVectors ??= MLDataDB.instance.getAllClipVectors();
+    _cachedImageEmbeddingVectors ??= mlDataDB.getAllClipVectors();
     _logger.info("read all embeddings from DB");
 
     return _cachedImageEmbeddingVectors!;
@@ -181,7 +181,7 @@ class SemanticSearchService {
     _logger.info(results.length.toString() + " results");
 
     if (deletedEntries.isNotEmpty) {
-      unawaited(MLDataDB.instance.deleteClipEmbeddings(deletedEntries));
+      unawaited(mlDataDB.deleteClipEmbeddings(deletedEntries));
     }
 
     return results;
@@ -215,18 +215,18 @@ class SemanticSearchService {
     _logger.info("Clip text model loaded");
   }
 
-  static Future<void> storeClipImageResult(ClipResult clipResult) async {
+  Future<void> storeClipImageResult(ClipResult clipResult) async {
     final embedding = ClipEmbedding(
       fileID: clipResult.fileID,
       embedding: clipResult.embedding,
       version: clipMlVersion,
     );
-    await MLDataDB.instance.put(embedding);
+    await mlDataDB.putClip([embedding]);
   }
 
-  static Future<void> storeEmptyClipImageResult(EnteFile entefile) async {
+  Future<void> storeEmptyClipImageResult(EnteFile entefile) async {
     final embedding = ClipEmbedding.empty(entefile.uploadedFileID!);
-    await MLDataDB.instance.put(embedding);
+    await mlDataDB.putClip([embedding]);
   }
 
   Future<List<double>> _getTextEmbedding(String query) async {
