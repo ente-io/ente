@@ -1317,25 +1317,7 @@ class SearchService {
     for (final clusterID in wideRadiusClusters.keys) {
       final files = wideRadiusClusters[clusterID]!.$1;
       final location = wideRadiusClusters[clusterID]!.$2;
-      // Check that the photos are distributed over a short time range (2-30 days)
-      final creationTimes = <int>[];
-      for (final file in files) {
-        if (file.creationTime != null) {
-          creationTimes.add(file.creationTime!);
-        }
-      }
-      creationTimes.sort();
-      if (creationTimes.length < 2) continue;
-      final firstCreationTime = DateTime.fromMicrosecondsSinceEpoch(
-        creationTimes.first,
-      );
-      final lastCreationTime = DateTime.fromMicrosecondsSinceEpoch(
-        creationTimes.last,
-      );
-      final days = lastCreationTime.difference(firstCreationTime).inDays;
-      if (days < 2 || days > 30) {
-        continue;
-      }
+
       // Check that it's at least 10km away from any base or tag location
       bool tooClose = false;
       for (final baseLocation in baseLocations.values) {
@@ -1348,7 +1330,6 @@ class SearchService {
           break;
         }
       }
-      if (tooClose) continue;
       for (final tag in tagToItemsMap.keys) {
         if (isFileInsideLocationTag(
           tag.item.centerPoint,
@@ -1360,6 +1341,28 @@ class SearchService {
         }
       }
       if (tooClose) continue;
+      
+      // Check that the photos are distributed over a short time range (2-30 days)
+      final creationTimes = <int>[];
+      for (final file in files) {
+        if (file.creationTime != null) {
+          creationTimes.add(file.creationTime!);
+        }
+      }
+      if (creationTimes.length < 2) continue;
+      creationTimes.sort();
+      
+      final firstCreationTime = DateTime.fromMicrosecondsSinceEpoch(
+        creationTimes.first,
+      );
+      final lastCreationTime = DateTime.fromMicrosecondsSinceEpoch(
+        creationTimes.last,
+      );
+      final days = lastCreationTime.difference(firstCreationTime).inDays;
+      if (days < 2 || days > 30) {
+        continue;
+      }
+      
       tripLocations[clusterID] = (
         files,
         location,
