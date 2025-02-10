@@ -123,7 +123,7 @@ export interface PhotoFrameProps {
 }
 
 /**
- * TODO: Rename me to FileListWithViewer
+ * TODO: Rename me to FileListWithViewer (or Gallery?)
  */
 const PhotoFrame = ({
     mode,
@@ -503,7 +503,10 @@ const PhotoFrame = ({
 
     return (
         <Container>
-            {process.env.NEXT_PUBLIC_ENTE_WIP_PS5 && <FileViewer />}
+            {process.env.NEXT_PUBLIC_ENTE_WIP_PS5 && (
+                /* @ts-expect-error TODO(PS): test */
+                <FileViewer files={files} index={currentIndex} />
+            )}
             <AutoSizer>
                 {({ height, width }) => (
                     <PhotoList

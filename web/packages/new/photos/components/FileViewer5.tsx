@@ -13,10 +13,34 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
     throw new Error("Whoa");
 }
 
+import type { EnteFile } from "@/media/file.js";
 import { Button, styled } from "@mui/material";
 import { useEffect, useRef } from "react";
-import PhotoSwipeLightBox from "./ps5/dist/photoswipe-lightbox.esm.js";
 import PhotoSwipe from "./ps5/dist/photoswipe.esm.js";
+
+interface FileViewerProps {
+    /**
+     * The list of files that are currently being displayed.
+     *
+     * Although the file viewer itself is called on to display a particular file
+     * (specified by the {@link index} prop), the viewer is always used in the
+     * context of a an album, or search results, or some other arbitrary list of
+     * files. The {@link files} prop sets this underlying list of files.
+     *
+     * The user can also navigate through them from within the viewer by using
+     * the arrow buttons.
+     */
+    files: EnteFile[];
+    /**
+     * The index from within {@link files} that should be, or is, currently
+     * being displayed.
+     *
+     * It is set externally when the user activates a particular thumbnail in
+     * the gallery. It is set internally (by the file viewer itself) when the
+     * user scrolls through the files by using the arrow buttons.
+     */
+    index: number;
+}
 
 /**
  * The {@link FileViewer} is our PhotoSwipe based image and video viewer.
@@ -38,12 +62,16 @@ import PhotoSwipe from "./ps5/dist/photoswipe.esm.js";
  *
  * The documentation for PhotoSwipe is at https://photoswipe.com/.
  */
-const FileViewer: React.FC = () => {
+const FileViewer: React.FC<FileViewerProps> = ({ files, index }) => {
     const pswpRef = useRef<PhotoSwipe | undefined>();
-    console.log(PhotoSwipeLightBox);
+
     useEffect(() => {
         const pswp = new PhotoSwipe({
-            // mainClass: "our-extra-pswp-main-class",
+            // Opaque background.
+            bgOpacity: 1,
+            // TODO(PS): padding option? for handling custom title bar.
+            // TODO(PS): will we need this?
+            mainClass: "our-extra-pswp-main-class",
         });
         // Provide data about slides to PhotoSwipe via callbacks
         // https://photoswipe.com/data-sources/#dynamically-generated-data
@@ -58,6 +86,7 @@ const FileViewer: React.FC = () => {
                 height: 100,
             };
         });
+        // initializing PhotoSwipe Core adds it to the DOM.
         pswp.init();
         pswpRef.current = pswp;
 
@@ -66,6 +95,7 @@ const FileViewer: React.FC = () => {
             pswpRef.current = undefined;
         };
     }, []);
+
     return (
         <Container>
             <Button>Test</Button>
