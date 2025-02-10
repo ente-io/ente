@@ -18,6 +18,26 @@ import { useEffect } from "react";
 import PhotoSwipeLightBox from "./ps5/dist/photoswipe-lightbox.esm.js";
 import PhotoSwipe from "./ps5/dist/photoswipe.esm.js";
 
+/**
+ * The {@link FileViewer} is our PhotoSwipe based image and video viewer.
+ *
+ * ---
+ *
+ * [Note: PhotoSwipe]
+ *
+ * PhotoSwipe is a library that behaves similarly to the OG "lightbox" image
+ * gallery JavaScript component from the middle ages.
+ *
+ * We don't need the lightbox functionality since we already have our own
+ * thumbnail list (the "gallery"), so we only use the "Core" PhotoSwipe module
+ * as our image viewer component.
+ *
+ * When the user clicks on one of the thumbnails in our gallery, we make the
+ * root PhotoSwipe component visible. Within the DOM this is a dialog that takes
+ * up the entire viewport, and shows the image etc, and various controls.
+ *
+ * The documentation for PhotoSwipe is at https://photoswipe.com/.
+ */
 const FileViewer: React.FC = () => {
     const pswpRef = useRef<PhotoSwipe | undefined>();
     console.log(PhotoSwipeLightBox);
