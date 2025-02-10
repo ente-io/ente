@@ -14,7 +14,7 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
 }
 
 import { Button, styled } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import PhotoSwipeLightBox from "./ps5/dist/photoswipe-lightbox.esm.js";
 import PhotoSwipe from "./ps5/dist/photoswipe.esm.js";
 
@@ -44,6 +44,19 @@ const FileViewer: React.FC = () => {
     useEffect(() => {
         const pswp = new PhotoSwipe({
             // mainClass: "our-extra-pswp-main-class",
+        });
+        // Provide data about slides to PhotoSwipe via callbacks
+        // https://photoswipe.com/data-sources/#dynamically-generated-data
+        pswp.addFilter("numItems", () => {
+            return 2;
+        });
+        pswp.addFilter("itemData", (itemData, index) => {
+            console.log({ itemData, index });
+            return {
+                src: `https://dummyimage.com/100/777/fff/?text=i${index}`,
+                width: 100,
+                height: 100,
+            };
         });
         pswp.init();
         pswpRef.current = pswp;
