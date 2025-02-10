@@ -1315,6 +1315,7 @@ class SearchService {
 
     // Identify trip locations
     final Map<String, (List<EnteFile>, Location, int, int)> tripLocations = {};
+    clusteredLocations:
     for (final clusterID in wideRadiusClusters.keys) {
       final files = wideRadiusClusters[clusterID]!.$1;
       final location = wideRadiusClusters[clusterID]!.$2;
@@ -1341,32 +1342,55 @@ class SearchService {
           break;
         }
       }
-      if (tooClose) continue;
+      if (tooClose) continue clusteredLocations;
 
       // Check that the photos are distributed over a short time range (2-30 days) or multiple short time ranges only
-      final creationTimes = <int>[];
-      for (final file in files) {
-        creationTimes.add(file.creationTime!);
-      }
-      if (creationTimes.length < 2) continue;
-      creationTimes.sort();
-      final firstCreationTime = DateTime.fromMicrosecondsSinceEpoch(
-        creationTimes.first,
-      );
-      final lastCreationTime = DateTime.fromMicrosecondsSinceEpoch(
-        creationTimes.last,
-      );
-      final days = lastCreationTime.difference(firstCreationTime).inDays;
-      if (days < 2 || days > 30) {
-        continue;
-      }
+      files.sort((a, b) => a.creationTime!.compareTo(b.creationTime!));
+      // Find distinct time blocks (potential trips)
+      List<EnteFile> currentBlockFiles = [files.first];
+      int blockStart = files.first.creationTime!;
+      int lastTime = files.first.creationTime!;
+      DateTime lastDateTime = DateTime.fromMicrosecondsSinceEpoch(lastTime);
 
-      tripLocations[clusterID] = (
-        files,
-        location,
-        firstCreationTime.microsecondsSinceEpoch,
-        lastCreationTime.microsecondsSinceEpoch
-      );
+      for (int i = 1; i < files.length; i++) {
+        final currentFile = files[i];
+        final currentTime = currentFile.creationTime!;
+        final gap = DateTime.fromMicrosecondsSinceEpoch(currentTime)
+            .difference(lastDateTime)
+            .inDays;
+
+        // If gap is too large, end current block and check if it's a valid trip
+        if (gap > 15) {
+          // 10 days gap to separate trips. If gap is small, it's likely not a trip
+          if (gap < 90) continue clusteredLocations;
+
+          final blockDuration = lastDateTime
+              .difference(DateTime.fromMicrosecondsSinceEpoch(blockStart))
+              .inDays;
+
+          // Check if current block is a valid trip (2-30 days)
+          if (blockDuration >= 2 && blockDuration <= 30) {
+            tripLocations[newAutoLocationID()] =
+                (List.from(currentBlockFiles), location, blockStart, lastTime);
+          }
+
+          // Start new block
+          currentBlockFiles = [];
+          blockStart = currentTime;
+        }
+
+        currentBlockFiles.add(currentFile);
+        lastTime = currentTime;
+        lastDateTime = DateTime.fromMicrosecondsSinceEpoch(lastTime);
+      }
+      // Check final block
+      final lastBlockDuration = lastDateTime
+          .difference(DateTime.fromMicrosecondsSinceEpoch(blockStart))
+          .inDays;
+      if (lastBlockDuration >= 2 && lastBlockDuration <= 30) {
+        tripLocations[newAutoLocationID()] =
+            (List.from(currentBlockFiles), location, blockStart, lastTime);
+      }
     }
 
     // Check if any trip locations should be merged
