@@ -1,3 +1,6 @@
+/* eslint-disable */
+// @ts-nocheck
+
 // TODO(PS): WIP gallery using upstream photoswipe
 //
 // Needs (not committed yet):
@@ -10,18 +13,52 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
     throw new Error("Whoa");
 }
 
-import { Button } from "@mui/material";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+import { Button, styled } from "@mui/material";
+import { useEffect } from "react";
 import PhotoSwipeLightBox from "./ps5/dist/photoswipe-lightbox.esm.js";
+import PhotoSwipe from "./ps5/dist/photoswipe.esm.js";
 
 const FileViewer: React.FC = () => {
     console.log(PhotoSwipeLightBox);
+    useEffect(() => {
+        const lightbox = new PhotoSwipeLightBox({
+            gallery: "#test-gallery",
+            mainClass: "our-extra-pswp-main-class",
+            pswpModule: PhotoSwipe,
+        });
+        lightbox.init();
+
+        return () => {
+            lightbox.destroy();
+        };
+    }, []);
     return (
-        <div>
-            Hello<Button>Test</Button>
-        </div>
+        <Container>
+            <Button>Test</Button>
+            <div id="test-gallery">
+                <a
+                    href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-2500.jpg"
+                    data-pswp-width="1669"
+                    data-pswp-height="2500"
+                    target="_blank"
+                >
+                    <img
+                        src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-200.jpg"
+                        alt=""
+                    />
+                </a>
+            </div>
+        </Container>
     );
 };
+
+const Container = styled("div")`
+    border: 1px solid red;
+
+    #test-gallery {
+        border: 1px solid red;
+        min-height: 10px;
+    }
+`;
 
 export default FileViewer;

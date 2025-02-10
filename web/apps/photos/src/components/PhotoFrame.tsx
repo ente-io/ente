@@ -503,6 +503,7 @@ const PhotoFrame = ({
 
     return (
         <Container>
+            {process.env.NEXT_PUBLIC_ENTE_WIP_PS5 && <FileViewer />}
             <AutoSizer>
                 {({ height, width }) => (
                     <PhotoList
@@ -518,7 +519,6 @@ const PhotoFrame = ({
                     />
                 )}
             </AutoSizer>
-            {process.env.NEXT_PUBLIC_ENTE_WIP_PS5 && <FileViewer />}
             <PhotoViewer
                 isOpen={open}
                 items={displayFiles}
