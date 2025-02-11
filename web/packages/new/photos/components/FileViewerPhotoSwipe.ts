@@ -139,17 +139,29 @@ export class FileViewerPhotoSwipe {
         const pswp = new PhotoSwipe({
             // Opaque background.
             bgOpacity: 1,
-            // Don't close PhotoSwipe on click if the image is small and cannot
-            // be zoomed into further (this is common when just the thumbnail
-            // has been loaded).
+            // The default imageClickAction is "zoom-or-close". When the image
+            // is small and cannot be zoomed into further (which is common when
+            // just the thumbnail has been loaded), this causes PhotoSwipe to
+            // close. Disable this behaviour.
             clickToCloseNonZoomable: false,
-            // Disable closing on background taps otherwise accidental closes
+            // The default bgClickAction is "close", but it is not always
+            // apparent where the background is and where the controls are,
+            // since everything is black, and so accidentally closing PhotoSwipe
+            // is easy. Disable this behaviour, instead
+            // accidental closes
             // are irritatingly easy.
             bgClickAction: () => {
-                /* nop */
+                /* no-op */
             },
-            // The default (ctrl + zoom) is cumbersome, allow zooming just by
-            // using the wheel / trackpad zoom gesture.
+            // At least on macOS, manual zooming with the trackpad is very
+            // cumbersome (possibly because of the small multiplier in the
+            // PhotoSwipe source, but I'm not sure). The other option to do a
+            // manual zoom is to scroll (e.g. with the trackpad) but with the
+            // CTRL key pressed, however on macOS this invokes the system zoom
+            // if enabled in accessibility settings.
+            //
+            // Taking a step back though, the PhotoSwipe viewport is fixed, so
+            // we can just directly map wheel / trackpad scrolls to zooming.
             wheelToZoom: true,
             // Set the index within files that we should open to. Subsequent
             // updates to the index will be tracked by PhotoSwipe internally.

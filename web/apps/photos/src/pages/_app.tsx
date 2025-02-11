@@ -51,10 +51,12 @@ import { useNotification } from "components/utils/hooks-app";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import "photoswipe/dist/photoswipe.css";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
+
+import "photoswipe/dist/photoswipe.css";
+// import "../../../../packages/new/photos/components/ps5/dist/photoswipe.css";
 
 import "styles/global.css";
 
