@@ -41,6 +41,7 @@ import 'package:photos/services/sync_service.dart';
 import "package:photos/services/user_service.dart";
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/data_util.dart';
+import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/file_util.dart";
@@ -536,7 +537,7 @@ class FileUploader {
 
     MediaUploadData? mediaUploadData;
     try {
-      mediaUploadData = await getUploadDataFromEnteFile(file);
+      mediaUploadData = await getUploadDataFromEnteFile(file, parseExif: true);
     } catch (e) {
       // This additional try catch block is added because for resumable upload,
       // we need to compute the hash before the next step. Previously, this
@@ -728,8 +729,13 @@ class FileUploader {
           encThumbSize,
         );
       }
+      final ParsedExifDateTime? exifTime = await tryParseExifDateTime(
+        null,
+        mediaUploadData.exifData,
+      );
+      final metadata =
+          await file.getMetadataForUpload(mediaUploadData, exifTime);
 
-      final metadata = await file.getMetadataForUpload(mediaUploadData);
       final encryptedMetadataResult = await CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(metadata)),
         fileAttributes.key!,
@@ -771,22 +777,9 @@ class FileUploader {
             CryptoUtil.bin2base64(encryptedFileKeyData.encryptedData!);
         final keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedFileKeyData.nonce!);
-        final Map<String, dynamic> pubMetadata = {};
+        final Map<String, dynamic> pubMetadata =
+            _buildPublicMagicData(mediaUploadData, exifTime);
         MetadataRequest? pubMetadataRequest;
-        if ((mediaUploadData.height ?? 0) != 0 &&
-            (mediaUploadData.width ?? 0) != 0) {
-          pubMetadata[heightKey] = mediaUploadData.height;
-          pubMetadata[widthKey] = mediaUploadData.width;
-          pubMetadata[mediaTypeKey] =
-              mediaUploadData.isPanorama == true ? 1 : 0;
-        }
-        if (mediaUploadData.motionPhotoStartIndex != null) {
-          pubMetadata[motionVideoIndexKey] =
-              mediaUploadData.motionPhotoStartIndex;
-        }
-        if (mediaUploadData.thumbnail == null) {
-          pubMetadata[noThumbKey] = true;
-        }
         if (pubMetadata.isNotEmpty) {
           pubMetadataRequest = await getPubMetadataRequest(
             file,
@@ -866,6 +859,34 @@ class FileUploader {
         isMultiPartUpload: isMultipartUpload,
       );
     }
+  }
+
+  Map<String, dynamic> _buildPublicMagicData(
+    MediaUploadData mediaUploadData,
+    ParsedExifDateTime? exifTime,
+  ) {
+    final Map<String, dynamic> pubMetadata = {};
+    if ((mediaUploadData.height ?? 0) != 0 &&
+        (mediaUploadData.width ?? 0) != 0) {
+      pubMetadata[heightKey] = mediaUploadData.height;
+      pubMetadata[widthKey] = mediaUploadData.width;
+      pubMetadata[mediaTypeKey] = mediaUploadData.isPanorama == true ? 1 : 0;
+    }
+    if (mediaUploadData.motionPhotoStartIndex != null) {
+      pubMetadata[motionVideoIndexKey] = mediaUploadData.motionPhotoStartIndex;
+    }
+    if (mediaUploadData.thumbnail == null) {
+      pubMetadata[noThumbKey] = true;
+    }
+    if (exifTime != null) {
+      if (exifTime.dateTime != null) {
+        pubMetadata[dateTimeKey] = exifTime.dateTime;
+      }
+      if (exifTime.offsetTime != null) {
+        pubMetadata[offsetTimeKey] = exifTime.offsetTime;
+      }
+    }
+    return pubMetadata;
   }
 
   bool isPutOrUpdateFileError(Object e) {
