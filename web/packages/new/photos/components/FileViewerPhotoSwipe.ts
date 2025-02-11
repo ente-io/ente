@@ -3,7 +3,10 @@
 
 import { assertionFailed } from "@/base/assert";
 import log from "@/base/log";
-import { downloadManager } from "@/gallery/services/download";
+import {
+    downloadManager,
+    type RenderableSourceURLs,
+} from "@/gallery/services/download";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 
@@ -216,8 +219,25 @@ export class FileViewerPhotoSwipe {
                 break;
             }
 
+            case FileType.video:
+                {
+                    const sourceURLs =
+                        await downloadManager.renderableSourceURLs(file);
+                    update({
+                        html: videoHTML(sourceURLs),
+                    });
+                    break;
+                }
+                break;
+
             default:
                 break;
         }
     }
 }
+
+const videoHTML = ({ url }: RenderableSourceURLs) => `
+<video controls>
+  <source src="${url}" />
+</video>
+`;
