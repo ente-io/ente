@@ -49,6 +49,11 @@ type FamilyMember struct {
 	AdminUserID  int64 `json:"-"` // for internal use only, ignore from json response
 }
 
+type ModifyMemberStorage struct {
+	ID           uuid.UUID `json:"id" binding:"required"`
+	StorageLimit *int64    `json:"storageLimit" binding:"required"`
+}
+
 type FamilyMemberResponse struct {
 	Members []FamilyMember `json:"members" binding:"required"`
 	// Family admin subscription storage capacity. This excludes add-on and any other bonus storage
