@@ -124,7 +124,7 @@ class UserService {
       } else {
         throw Exception("send-ott action failed, non-200");
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       await dialog.hide();
       _logger.info(e);
       final String? enteErrCode = e.response?.data["code"];
@@ -185,7 +185,7 @@ class UserService {
       );
       final publicKey = response.data["publicKey"];
       return publicKey;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null && e.response?.statusCode == 404) {
         return null;
       }
@@ -221,7 +221,7 @@ class UserService {
         }
       }
       return userDetails;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       _logger.info(e);
       rethrow;
     }
@@ -231,7 +231,7 @@ class UserService {
     try {
       final response = await _enteDio.get("/users/sessions");
       return Sessions.fromMap(response.data);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       _logger.info(e);
       rethrow;
     }
@@ -245,7 +245,7 @@ class UserService {
           "token": token,
         },
       );
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       _logger.info(e);
       rethrow;
     }
@@ -254,7 +254,7 @@ class UserService {
   Future<void> leaveFamilyPlan() async {
     try {
       await _enteDio.delete("/family/leave");
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       _logger.warning('failed to leave family plan', e);
       rethrow;
     }
@@ -271,7 +271,7 @@ class UserService {
       }
     } catch (e) {
       // check if token is already invalid
-      if (e is DioError && e.response?.statusCode == 401) {
+      if (e is DioException && e.response?.statusCode == 401) {
         await Configuration.instance.logout();
         Navigator.of(context).popUntil((route) => route.isFirst);
         return;
@@ -342,7 +342,7 @@ class UserService {
         },
       );
       return response.data;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null) {
         if (e.response!.statusCode == 404 || e.response!.statusCode == 410) {
           throw PassKeySessionExpiredError();
@@ -460,7 +460,7 @@ class UserService {
         // should never reach here
         throw Exception("unexpected response during email verification");
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       _logger.info(e);
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 410) {
@@ -532,7 +532,7 @@ class UserService {
         S.of(context).oops,
         S.of(context).verificationFailedPleaseTryAgain,
       );
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 403) {
         // ignore: unawaited_futures
@@ -592,7 +592,7 @@ class UserService {
       } else {
         throw Exception("get-srp-attributes action failed");
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null && e.response!.statusCode == 404) {
         throw SrpSetupNotCompleteError();
       }
@@ -865,7 +865,7 @@ class UserService {
           (route) => route.isFirst,
         );
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       await dialog.hide();
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
@@ -932,7 +932,7 @@ class UserService {
           (route) => route.isFirst,
         );
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       await dialog.hide();
       _logger.severe('error while recovery 2fa', e);
       if (e.response != null && e.response!.statusCode == 404) {
@@ -1031,7 +1031,7 @@ class UserService {
           (route) => route.isFirst,
         );
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       await dialog.hide();
       _logger.severe("error during recovery", e);
       if (e.response != null && e.response!.statusCode == 404) {
@@ -1126,7 +1126,7 @@ class UserService {
     } catch (e, s) {
       await dialog.hide();
       _logger.severe(e, s);
-      if (e is DioError) {
+      if (e is DioException) {
         if (e.response != null && e.response!.statusCode == 401) {
           // ignore: unawaited_futures
           showErrorDialog(

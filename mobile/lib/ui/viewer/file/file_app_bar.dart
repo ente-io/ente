@@ -296,26 +296,7 @@ class FileAppBarState extends State<FileAppBar> {
         );
       }
     }
-    if (flagService.internalUser &&
-        PreviewVideoStore.instance.isVideoStreamingEnabled) {
-      items.add(
-        PopupMenuItem(
-          value: 99,
-          child: Row(
-            children: [
-              Icon(
-                Icons.video_collection,
-                color: Theme.of(context).iconTheme.color,
-              ),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              const Text("Cache Preview"),
-            ],
-          ),
-        ),
-      );
-    }
+
     items.add(
       PopupMenuItem(
         value: 6,

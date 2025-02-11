@@ -11,32 +11,33 @@ export const Stack100vhCenter = styled(Stack)`
 `;
 
 /**
- * A flexbox with justify content set to space-between and center alignment.
+ * A flexbox with justify content set to space-between and item alignment set to
+ * center.
  *
  * There is also another SpaceBetweenFlex in the old shared package, but that
  * one also sets width: 100%. As such, that one should be considered deprecated
  * and its uses moved to this one when possible (so that we can then see where
  * the width: 100% is essential).
  */
-export const SpaceBetweenFlex = styled("div")`
+export const SpacedRow = styled("div")`
     display: flex;
     justify-content: space-between;
     align-items: center;
 `;
 
 /**
- * A flex child that shows its children after centering them both vertically and
+ * A flexbox that shows its children after centering them both vertically and
  * horizontally.
  */
-export const CenteredFlex = styled("div")`
+export const CenteredRow = styled("div")`
     display: flex;
     justify-content: center;
     align-items: center;
 `;
 
 /**
- * A flex child that fills the entire flex direction, and shows its children
- * after centering them both vertically and horizontally.
+ * A flexbox that fills the entire flex direction, and shows its children after
+ * centering them both vertically and horizontally.
  */
 export const CenteredFill = styled("div")`
     flex: 1;

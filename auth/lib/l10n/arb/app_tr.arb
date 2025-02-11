@@ -88,6 +88,8 @@
   "useRecoveryKey": "Kurtarma anahtarını kullan",
   "incorrectPasswordTitle": "Yanlış şifre",
   "welcomeBack": "Tekrar hoş geldiniz!",
+  "emailAlreadyRegistered": "E-posta zaten kayıtlı.",
+  "emailNotRegistered": "E-posta kayıtlı değil.",
   "madeWithLoveAtPrefix": "❤️ ile şurada yapılmıştır ",
   "supportDevs": "Bu projeyi desteklemek için <bold-green>ente</bold-green> kanalına abone olun",
   "supportDiscount": "İlk yılda %10 indirim için \"AUTH\" kupon kodunu kullanın",
@@ -333,6 +335,7 @@
     }
   },
   "manualSort": "Özel",
+  "editOrder": "Sıralamayı düzenle",
   "mostFrequentlyUsed": "Sık kullanılan",
   "mostRecentlyUsed": "Son kullanılan",
   "activeSessions": "Aktif oturumlar",
@@ -501,5 +504,6 @@
   "deselectAll": "Tümünün seçimini kaldır",
   "selectAll": "Tümünü seç",
   "deleteDuplicates": "Yinelenenleri sil",
-  "plainHTML": "Sade HTML"
+  "plainHTML": "Sade HTML",
+  "supportEnte": "<bold-Green>Ente</bold-Green>'yi destekle"
 }

@@ -40,6 +40,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   final _debouncer = Debouncer(
     const Duration(seconds: 2),
     executionInterval: const Duration(seconds: 5),
+    leading: true,
   );
   static const heroTagPrefix = "outgoing_collection";
 

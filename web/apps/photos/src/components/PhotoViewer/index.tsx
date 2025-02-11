@@ -13,11 +13,10 @@ import { downloadManager } from "@/gallery/services/download";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
-import { ConfirmDeleteFileDialog } from "@/new/photos/components/PhotoViewer";
+import { ConfirmDeleteFileDialog } from "@/new/photos/components/FileViewer";
 import { moveToTrash } from "@/new/photos/services/collection";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import { AppContext } from "@/new/photos/types/context";
-import { FlexWrapper } from "@ente/shared/components/Container";
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -39,6 +38,7 @@ import {
     CircularProgress,
     Paper,
     Snackbar,
+    Stack,
     styled,
     Typography,
     type ButtonProps,
@@ -744,16 +744,26 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                     {livePhotoBtnOptions.visible && (
                         <LivePhotoBtnContainer>
                             <Button
-                                color="secondary"
+                                variant="text"
                                 onClick={livePhotoBtnOptions.click}
                                 onMouseEnter={livePhotoBtnOptions.show}
                                 onMouseLeave={livePhotoBtnOptions.hide}
                                 disabled={livePhotoBtnOptions.loading}
+                                sx={{
+                                    color: "white",
+                                    "&.Mui-disabled": {
+                                        color: "white",
+                                        opacity: 0.4,
+                                    },
+                                }}
                             >
-                                <FlexWrapper gap={"4px"}>
-                                    {<AlbumOutlinedIcon />}{" "}
+                                <Stack
+                                    direction="row"
+                                    sx={{ alignItems: "center", gap: "6px" }}
+                                >
+                                    <AlbumOutlinedIcon />
                                     {t("live_photo_indicator")}
-                                </FlexWrapper>
+                                </Stack>
                             </Button>
                         </LivePhotoBtnContainer>
                     )}
@@ -772,7 +782,8 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                             position: "absolute",
                             top: "10vh",
                             right: "2vh",
-                            zIndex: 10,
+                            // Position atop the viewer contents
+                            zIndex: 1,
                         }}
                     >
                         {fileDownloadProgress.has(
@@ -794,7 +805,17 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                         <div className="pswp__item" />
                     </div>
                     <div className="pswp__ui pswp__ui--hidden">
-                        <div className="pswp__top-bar">
+                        <div
+                            className="pswp__top-bar"
+                            style={
+                                isDesktop
+                                    ? ({
+                                          "--ente-pswp-top-bar-top":
+                                              "env(titlebar-area-height, 30px)",
+                                      } as React.CSSProperties)
+                                    : {}
+                            }
+                        >
                             <div className="pswp__counter" />
 
                             <button
@@ -1063,12 +1084,14 @@ const ConversionFailedNotification: React.FC<
     );
 };
 
-const LivePhotoBtnContainer = styled(Paper)`
+const LivePhotoBtnContainer = styled("div")`
     border-radius: 4px;
     position: absolute;
     bottom: 10vh;
     right: 6vh;
-    z-index: 10;
+    background-color: rgba(255 255 255 / 0.15);
+    backdrop-filter: blur(3px);
+    z-index: 1;
 `;
 
 export async function playVideo(livePhotoVideo, livePhotoImage) {

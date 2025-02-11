@@ -16,12 +16,16 @@ export const FlexWrapper = styled(Box)`
     align-items: center;
 `;
 
+/**
+ * Deprecated, use {@link SpacedRow} from @/base/components/mui/container
+ * instead
+ */
 export const SpaceBetweenFlex = styled(FlexWrapper)`
     justify-content: space-between;
 `;
 
 /**
- * Deprecated, use {@link CenteredFlex} from @/base/components/mui/container
+ * Deprecated, use {@link CenteredRow} from @/base/components/mui/container
  * instead
  */
 export const CenteredFlex = styled(FlexWrapper)`
