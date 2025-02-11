@@ -139,6 +139,10 @@ export class FileViewerPhotoSwipe {
         const pswp = new PhotoSwipe({
             // Opaque background.
             bgOpacity: 1,
+            // Don't close PhotoSwipe on click if the image is small and cannot
+            // be zoomed into further (this is common when just the thumbnail
+            // has been loaded).
+            clickToCloseNonZoomable: false,
             // Set the index within files that we should open to. Subsequent
             // updates to the index will be tracked by PhotoSwipe internally.
             index: initialIndex,
@@ -199,7 +203,7 @@ export class FileViewerPhotoSwipe {
                 // vid.innerText = "Test 2";
                 containerEl.appendChild(vid);
                 vid.style =
-                    "position: absolute; left: 0; right: 0; width: 50%; height: 50%; background-color: blue; z-index: 100;";
+                    "position: absolute; left: 0; right: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;";
             }
         });
         pswp.on("close", () => {
