@@ -1199,6 +1199,9 @@ class SearchService {
     final Iterable<LocalEntity<LocationTag>> locationTagEntities =
         (await locationService.getLocationTags());
     if (allFiles.isEmpty) return [];
+    final currentTime = DateTime.now().toLocal();
+    final currentMonth = currentTime.month;
+    final cutOffTime = currentTime.subtract(const Duration(days: 365));
 
     final Map<LocalEntity<LocationTag>, List<EnteFile>> tagToItemsMap = {};
     for (int i = 0; i < locationTagEntities.length; i++) {
@@ -1211,6 +1214,7 @@ class SearchService {
       if (!file.hasLocation ||
           file.uploadedFileID == null ||
           !file.isOwner ||
+          file.creationTime! > cutOffTime.microsecondsSinceEpoch ||
           file.creationTime == null) {
         continue;
       }
@@ -1437,10 +1441,9 @@ class SearchService {
       }
     }
 
-    // TODO: lau: Check if there are any trips to surface
-    // For now for testing let's just surface all base and trip locations
+    // For now for testing let's just surface all base locations
     for (final baseLocation in baseLocations.values) {
-      final files = baseLocation.$1; // TODO: lau: take best selection only
+      final files = baseLocation.$1;
       final current = baseLocation.$3;
       final name = "Base (${current ? 'current' : 'old'})";
       searchResults.add(
@@ -1458,26 +1461,103 @@ class SearchService {
         ),
       );
     }
-    for (final finalTrip in mergedTrips.values) {
-      final files = finalTrip.$1; // TODO: lau: take best selection only
-      final year = DateTime.fromMicrosecondsSinceEpoch(
-        (finalTrip.$2 + finalTrip.$2) ~/ 2,
-      ).year;
-      final name = "Trip! ($year)";
-      searchResults.add(
-        GenericSearchResult(
-          ResultType.event,
-          name,
-          files,
-          hierarchicalSearchFilter: TopLevelGenericFilter(
-            filterName: name,
-            occurrence: kMostRelevantFilter,
-            filterResultType: ResultType.event,
-            matchedUploadedIDs: filesToUploadedFileIDs(files),
-            filterIcon: Icons.event_outlined,
+
+    // For now we surface the two most recent trips of current month, and if none, the earliest upcoming redundant trip
+    // Group the trips per month and then year
+    final Map<int, Map<int, List<(List<EnteFile>, int, int)>>>
+        tripsByMonthYear = {};
+    for (final trip in mergedTrips.values) {
+      final int avgMicros = (trip.$2 + trip.$3) ~/ 2;
+      final tripDate = DateTime.fromMicrosecondsSinceEpoch(avgMicros);
+      tripsByMonthYear
+          .putIfAbsent(tripDate.month, () => {})
+          .putIfAbsent(tripDate.year, () => [])
+          .add(trip);
+    }
+
+    // Flatten trips for the current month and annotate with their average date.
+    final List<(List<EnteFile>, int, int, DateTime)> currentMonthTrips = [];
+    if (tripsByMonthYear.containsKey(currentMonth)) {
+      for (final trips in tripsByMonthYear[currentMonth]!.values) {
+        for (final trip in trips) {
+          final int avgMicros = (trip.$2 + trip.$3) ~/ 2;
+          final tripDate = DateTime.fromMicrosecondsSinceEpoch(avgMicros);
+          currentMonthTrips.add((trip.$1, trip.$2, trip.$3, tripDate));
+        }
+      }
+    }
+
+    // If there are past trips this month, show the one or two most recent ones.
+    if (currentMonthTrips.isNotEmpty) {
+      currentMonthTrips.sort((a, b) => b.$4.compareTo(a.$4));
+      final tripsToShow = currentMonthTrips.take(2);
+      for (final trip in tripsToShow) {
+        final year = trip.$4.year;
+        String name = "Trip in $year!";
+        if (year == currentTime.year - 1) {
+          name = "Last year's trip!";
+        }
+        final photoSelection = await _bestSelection(trip.$1);
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.event,
+            name,
+            photoSelection,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: name,
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.event,
+              matchedUploadedIDs: filesToUploadedFileIDs(trip.$1),
+              filterIcon: Icons.event_outlined,
+            ),
           ),
-        ),
-      );
+        );
+      }
+    }
+    // Otherwise, if no trips happened in the current month,
+    // look for the earliest upcoming trip in another month that has 3+ trips.
+    else {
+      final sortedUpcomingMonths =
+          List<int>.generate(12, (i) => ((currentMonth + i) % 12) + 1);
+      checkUpcomingMonths:
+      for (final month in sortedUpcomingMonths) {
+        if (tripsByMonthYear.containsKey(month)) {
+          final List<(List<EnteFile>, int, int, DateTime)> thatMonthTrips = [];
+          for (final trips in tripsByMonthYear[month]!.values) {
+            for (final trip in trips) {
+              final int avgMicros = (trip.$2 + trip.$3) ~/ 2;
+              final tripDate = DateTime.fromMicrosecondsSinceEpoch(avgMicros);
+              thatMonthTrips.add((trip.$1, trip.$2, trip.$3, tripDate));
+            }
+          }
+          if (thatMonthTrips.length >= 3) {
+            // take and use the third earliest trip
+            thatMonthTrips.sort((a, b) => a.$4.compareTo(b.$4));
+            final trip = thatMonthTrips[2];
+            final year = trip.$4.year;
+            String name = "Trip in $year!";
+            if (year == currentTime.year - 1) {
+              name = "Last year's trip!";
+            }
+            final photoSelection = await _bestSelection(trip.$1);
+            searchResults.add(
+              GenericSearchResult(
+                ResultType.event,
+                name,
+                photoSelection,
+                hierarchicalSearchFilter: TopLevelGenericFilter(
+                  filterName: name,
+                  occurrence: kMostRelevantFilter,
+                  filterResultType: ResultType.event,
+                  matchedUploadedIDs: filesToUploadedFileIDs(trip.$1),
+                  filterIcon: Icons.event_outlined,
+                ),
+              ),
+            );
+            break checkUpcomingMonths;
+          }
+        }
+      }
     }
     return searchResults; // TODO: lau: take [limit] into account
   }
