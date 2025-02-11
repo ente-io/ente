@@ -156,7 +156,6 @@ class _DetailPageState extends State<DetailPage> {
               return FileAppBar(
                 _files![selectedIndex],
                 _onFileRemoved,
-                100,
                 widget.config.mode == DetailPageMode.full,
                 enableFullScreenNotifier: _enableFullScreenNotifier,
               );
