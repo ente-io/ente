@@ -62,7 +62,7 @@ interface FileViewerProps {
  *
  * The documentation for PhotoSwipe is at https://photoswipe.com/.
  */
-const FileViewer: React.FC<FileViewerProps> = ({ files, index }) => {
+const FileViewer: React.FC<FileViewerProps> = ({ open, files, index }) => {
     const pswpRef = useRef<PhotoSwipe | undefined>();
 
     useEffect(() => {
@@ -86,15 +86,29 @@ const FileViewer: React.FC<FileViewerProps> = ({ files, index }) => {
                 height: 100,
             };
         });
-        // initializing PhotoSwipe Core adds it to the DOM.
-        pswp.init();
         pswpRef.current = pswp;
 
         return () => {
-            pswp.destroy();
+            if (pswpRef.current.isOpen) pswpRef.current.destroy();
             pswpRef.current = undefined;
         };
     }, []);
+
+    useEffect(() => {
+        const pswp = pswpRef.current!;
+        if (open) {
+            if (!pswp.isOpen) {
+                // Initializing PhotoSwipe adds it to the DOM as a "dialog" div
+                // with the class "pswp" (and others).
+                pswp.init();
+            }
+        } else {
+            if (pswp.isOpen) {
+                // Closing PhotoSwipe removes it from the DOM.
+                pswp.close();
+            }
+        }
+    }, [open]);
 
     return (
         <Container>

@@ -1,3 +1,4 @@
+import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import {
     downloadManager,
@@ -159,6 +160,9 @@ const PhotoFrame = ({
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
     const router = useRouter();
 
+    const { show: showPhotoSwipe, props: photoSwipeVisibilityProps } =
+        useModalVisibility();
+
     const [displayFiles, setDisplayFiles] = useState<DisplayFile[] | undefined>(
         undefined,
     );
@@ -262,8 +266,12 @@ const PhotoFrame = ({
 
     const onThumbnailClick = (index: number) => () => {
         setCurrentIndex(index);
-        setOpen(true);
-        setIsPhotoSwipeOpen?.(true);
+        if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
+            showPhotoSwipe();
+        } else {
+            setOpen(true);
+            setIsPhotoSwipeOpen?.(true);
+        }
     };
 
     const handleSelect = handleSelectCreator(
@@ -504,8 +512,12 @@ const PhotoFrame = ({
     return (
         <Container>
             {process.env.NEXT_PUBLIC_ENTE_WIP_PS5 && (
-                /* @ts-expect-error TODO(PS): test */
-                <FileViewer files={files} index={currentIndex} />
+                <FileViewer
+                    {...photoSwipeVisibilityProps}
+                    /* @ts-expect-error TODO(PS): test */
+                    files={files}
+                    index={currentIndex}
+                />
             )}
             <AutoSizer>
                 {({ height, width }) => (
