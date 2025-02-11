@@ -182,12 +182,24 @@ export class FileViewerPhotoSwipe {
             return itemData ?? {};
         });
         pswp.on("contentLoad", (e) => {
-            console.log(e);
+            console.log("contentLoad", e);
             if (e.content.data.videoURL) {
                 const holderEl = e.content.slide.holderElement;
                 const vid = document.createElement("h1");
-                vid.innerText = "Test";
+                vid.innerText = "Test 1";
                 holderEl.appendChild(vid);
+            }
+        });
+        pswp.on("contentAppend", (e) => {
+            const containerEl = e.content.slide.container;
+            console.log("contentAppend", containerEl);
+            if (e.content.data.videoURL) {
+                const vid = document.createElement("div");
+                vid.innerHTML = livePhotoVideoHTML(e.content.data.videoURL);
+                // vid.innerText = "Test 2";
+                containerEl.appendChild(vid);
+                vid.style =
+                    "position: absolute; left: 0; right: 0; width: 50%; height: 50%; background-color: blue; z-index: 100;";
             }
         });
         pswp.on("close", () => {
