@@ -136,9 +136,14 @@ export class FileViewerPhotoSwipe {
      * {@link autoHideCheckIntervalId} to implement the auto hiding of controls
      * when the user stops moving the pointer for a while.
      *
-     * This will be "hidden" if controls have already been hidden.
+     * Apart from a date, this can also be:
+     *
+     * - "already-hidden" if controls have already been hidden, say by a
+     *   bgClickAction.
+     *
+     * - "auto-hidden" if controls were hidden by us because of inactivity.
      */
-    private lastActivityDate: Date | "hidden";
+    private lastActivityDate: Date | "auto-hidden" | "already-hidden";
 
     constructor({
         files,
@@ -221,7 +226,8 @@ export class FileViewerPhotoSwipe {
             log.debug(() => ["[ps]", { itemData, index, file, itemData }]);
             if (!file) assertionFailed();
 
-            this.lastActivityDate = new Date();
+            if (this.lastActivityDate != "already-hidden")
+                this.lastActivityDate = new Date();
 
             return itemData ?? {};
         });
@@ -233,11 +239,6 @@ export class FileViewerPhotoSwipe {
             this.onPointerActivity();
             return originalResult;
         });
-
-        // TODO(PS): Fix interaction between click hide and auto hide.
-        // pswp.on("bgClickAction", () => {
-        //     this.lastActivityDate == "hidden";
-        // });
 
         pswp.on("contentLoad", (e) => {
             console.log("contentLoad", e);
@@ -312,16 +313,26 @@ export class FileViewerPhotoSwipe {
     }
 
     private onPointerActivity() {
-        if (this.lastActivityDate == "hidden") this.showUIControls();
+        if (this.lastActivityDate == "already-hidden") return;
+        if (this.lastActivityDate == "auto-hidden") this.showUIControls();
         this.lastActivityDate = new Date();
     }
 
     private autoHideIfInactive() {
-        if (this.lastActivityDate == "hidden") return;
+        if (this.lastActivityDate == "already-hidden") return;
+        if (this.lastActivityDate == "auto-hidden") return;
         if (Date.now() - this.lastActivityDate.getTime() > 3000) {
-            this.hideUIControls();
-            this.lastActivityDate = "hidden";
+            if (this.areUIControlsVisible()) {
+                this.hideUIControls();
+                this.lastActivityDate = "auto-hidden";
+            } else {
+                this.lastActivityDate = "already-hidden";
+            }
         }
+    }
+
+    private areUIControlsVisible() {
+        return this.pswp.element.classList.contains("pswp--ui-visible");
     }
 
     private showUIControls() {
