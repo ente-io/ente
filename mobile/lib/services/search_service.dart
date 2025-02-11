@@ -1406,31 +1406,21 @@ class SearchService {
       bool merged = false;
       for (final otherTripID in mergedTrips.keys) {
         final otherTrip = mergedTrips[otherTripID]!;
-        final otherTripFirstTime = DateTime.fromMicrosecondsSinceEpoch(
-          otherTrip.$2,
-        );
-        final otherTripLastTime = DateTime.fromMicrosecondsSinceEpoch(
-          otherTrip.$3,
-        );
-        final bool overlapBeginning = tripFirstTime.isBefore(
-              otherTripLastTime.add(
-                const Duration(days: 3),
-              ),
-            ) &&
-            tripFirstTime.isAfter(otherTripFirstTime);
-        final bool overlapEnd = tripLastTime.isAfter(
-              otherTripFirstTime.subtract(
-                const Duration(days: 3),
-              ),
-            ) &&
-            tripLastTime.isBefore(otherTripLastTime);
-        if (overlapBeginning || overlapEnd) {
+        final otherTripFirstTime =
+            DateTime.fromMicrosecondsSinceEpoch(otherTrip.$2);
+        final otherTripLastTime =
+            DateTime.fromMicrosecondsSinceEpoch(otherTrip.$3);
+        if (tripFirstTime
+                .isBefore(otherTripLastTime.add(const Duration(days: 3))) &&
+            tripLastTime.isAfter(
+              otherTripFirstTime.subtract(const Duration(days: 3)),
+            )) {
           mergedTrips[otherTripID] = (
             otherTrip.$1 + trip.$1,
             min(otherTrip.$2, trip.$3),
             max(otherTrip.$3, trip.$4),
           );
-          _logger.info('Merged two trip locations');
+          _logger.finest('Merged two trip locations');
           merged = true;
           break;
         }
