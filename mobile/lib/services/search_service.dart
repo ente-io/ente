@@ -1512,6 +1512,7 @@ class SearchService {
             ),
           ),
         );
+        if (limit != null && searchResults.length >= limit) return searchResults;
       }
     }
     // Otherwise, if no trips happened in the current month,
@@ -1559,7 +1560,7 @@ class SearchService {
         }
       }
     }
-    return searchResults; // TODO: lau: take [limit] into account
+    return searchResults;
   }
 
   Future<List<GenericSearchResult>> onThisDayOrWeekResults(
