@@ -157,15 +157,17 @@ export class FileViewerPhotoSwipe {
             // just the thumbnail has been loaded), this causes PhotoSwipe to
             // close. Disable this behaviour.
             clickToCloseNonZoomable: false,
-            // The default bgClickAction is "close", but it is not always
+            // The default `bgClickAction` is "close", but it is not always
             // apparent where the background is and where the controls are,
             // since everything is black, and so accidentally closing PhotoSwipe
-            // is easy. Disable this behaviour, instead
-            // accidental closes
-            // are irritatingly easy.
-            bgClickAction: () => {
-                /* no-op */
-            },
+            // is easy.
+            //
+            // Disable this behaviour, instead repurposing this action to behave
+            // the same as the `tapAction` ("tap on PhotoSwipe viewport
+            // content") and toggle the visibility of UI controls (We also have
+            // auto hide based on mouse activity, but that would not have any
+            // effect on touch devices)
+            bgClickAction: "toggle-controls",
             // At least on macOS, manual zooming with the trackpad is very
             // cumbersome (possibly because of the small multiplier in the
             // PhotoSwipe source, but I'm not sure). The other option to do a
@@ -231,6 +233,11 @@ export class FileViewerPhotoSwipe {
             this.onPointerActivity();
             return originalResult;
         });
+
+        // TODO(PS): Fix interaction between click hide and auto hide.
+        // pswp.on("bgClickAction", () => {
+        //     this.lastActivityDate == "hidden";
+        // });
 
         pswp.on("contentLoad", (e) => {
             console.log("contentLoad", e);
