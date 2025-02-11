@@ -25,7 +25,8 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
 
 let PhotoSwipe;
 if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
-    PhotoSwipe = require("./ps5/dist/photoswipe.esm.js").default;
+    // TODO(PS): Comment me before merging into main.
+    // PhotoSwipe = require("./ps5/dist/photoswipe.esm.js").default;
 }
 // TODO(PS):
 //import { type SlideData } from "./ps5/dist/types/slide/"
