@@ -368,6 +368,14 @@
   "theRecoveryKeyYouEnteredIsIncorrect": "Återställningsnyckeln du angav är felaktig",
   "twofactorAuthenticationHasBeenDisabled": "Tvåfaktorsautentisering har inaktiverats",
   "uploadingMultipleMemories": "Bevarar {count} minnen...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "uploadingSingleMemory": "Bevarar 1 minne...",
   "viewLogs": "Visa loggar",
   "copyEmailAddress": "Kopiera e-postadress",
@@ -445,6 +453,5 @@
   "sort": "Sortera",
   "newPerson": "Ny person",
   "addName": "Lägg till namn",
-  "add": "Lägg till",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "add": "Lägg till"
 }

@@ -965,6 +965,14 @@
   "syncStopped": "同步已停止",
   "syncProgress": "已保存的回忆 {completed}/共 {total}",
   "uploadingMultipleMemories": "正在保存 {count} 个回忆...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "uploadingSingleMemory": "正在保存 1 个回忆...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
@@ -1589,6 +1597,5 @@
   "joinAlbum": "加入相册",
   "joinAlbumSubtext": "来查看和添加您的照片",
   "joinAlbumSubtextViewer": "来将其添加到共享相册",
-  "join": "加入",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "join": "加入"
 }

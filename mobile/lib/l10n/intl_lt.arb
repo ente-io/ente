@@ -1348,5 +1348,7 @@
   "linkEmail": "Susieti el. paštą",
   "link": "Susieti",
   "noEnteAccountExclamation": "Nėra „Ente“ paskyros!",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "videoStreaming": "Vaizdo įrašų srautinis perdavimas",
+  "processingVideos": "Apdorojami vaizdo įrašai",
+  "streamDetails": "Srautinio perdavimo išsami informacija"
 }
