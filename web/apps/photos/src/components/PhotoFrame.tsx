@@ -1,4 +1,3 @@
-import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import {
     downloadManager,
@@ -160,8 +159,9 @@ const PhotoFrame = ({
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
     const router = useRouter();
 
-    const { show: showPhotoSwipe, props: photoSwipeVisibilityProps } =
-        useModalVisibility();
+    // const { show: showPhotoSwipe, props: photoSwipeVisibilityProps } =
+    //     useModalVisibility();
+    const [open5, setOpen5] = useState(false);
 
     const [displayFiles, setDisplayFiles] = useState<DisplayFile[] | undefined>(
         undefined,
@@ -259,15 +259,20 @@ const PhotoFrame = ({
         };
 
     const handleClose = (needUpdate) => {
-        setOpen(false);
-        needUpdate && syncWithRemote();
-        setIsPhotoSwipeOpen?.(false);
+        if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
+            setOpen5(false);
+        } else {
+            setOpen(false);
+            needUpdate && syncWithRemote();
+            setIsPhotoSwipeOpen?.(false);
+        }
     };
 
     const onThumbnailClick = (index: number) => () => {
         setCurrentIndex(index);
         if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
-            showPhotoSwipe();
+            // showPhotoSwipe();
+            setOpen5(true);
         } else {
             setOpen(true);
             setIsPhotoSwipeOpen?.(true);
@@ -513,8 +518,9 @@ const PhotoFrame = ({
         <Container>
             {process.env.NEXT_PUBLIC_ENTE_WIP_PS5 && (
                 <FileViewer
-                    {...photoSwipeVisibilityProps}
                     /* @ts-expect-error TODO(PS): test */
+                    open={open5}
+                    onClose={handleClose}
                     files={files}
                     index={currentIndex}
                 />
