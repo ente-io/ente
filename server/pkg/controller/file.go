@@ -6,13 +6,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller/discord"
+	"github.com/ente-io/museum/pkg/utils/network"
 	"runtime/debug"
 	"strconv"
 	"strings"
-	"sync"
-
-	"github.com/ente-io/museum/pkg/controller/discord"
-	"github.com/ente-io/museum/pkg/utils/network"
 
 	"github.com/ente-io/museum/pkg/controller/email"
 	"github.com/ente-io/museum/pkg/controller/lock"
@@ -697,38 +695,14 @@ func (c *FileController) CleanupDeletedFiles() {
 	defer func() {
 		c.LockController.ReleaseLock(DeletedObjectQueueLock)
 	}()
-	items, err := c.QueueRepo.GetItemsReadyForDeletion(repo.DeleteObjectQueue, 5000)
+	items, err := c.QueueRepo.GetItemsReadyForDeletion(repo.DeleteObjectQueue, 1500)
 	if err != nil {
 		log.WithError(err).Error("Failed to fetch items from queue")
 		return
 	}
-	var wg sync.WaitGroup
-	itemChan := make(chan repo.QueueItem, len(items))
-
-	// Start worker goroutines
-	for w := 0; w < 4; w++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for item := range itemChan {
-				func(item repo.QueueItem) {
-					defer func() {
-						if r := recover(); r != nil {
-							log.WithField("item", item.Item).Errorf("Recovered from panic: %v", r)
-						}
-					}()
-					c.cleanupDeletedFile(item)
-				}(item)
-			}
-		}()
+	for _, i := range items {
+		c.cleanupDeletedFile(i)
 	}
-	// Send items to the channel
-	for _, item := range items {
-		itemChan <- item
-	}
-	close(itemChan)
-	// Wait for all workers to finish
-	wg.Wait()
 }
 
 func (c *FileController) GetTotalFileCount() (int64, error) {

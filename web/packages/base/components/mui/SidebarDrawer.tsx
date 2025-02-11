@@ -1,5 +1,3 @@
-import { isDesktop } from "@/base/app";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -12,6 +10,8 @@ import {
     type DrawerProps,
 } from "@mui/material";
 import React from "react";
+import { wipDesktopCustomTitlebar } from "../../app";
+import type { ModalVisibilityProps } from "../utils/modal";
 
 /**
  * A MUI {@link Drawer} with a standard set of styling that we use for our left
@@ -36,7 +36,7 @@ export const SidebarDrawer: React.FC<DrawerProps> = ({ children, ...rest }) => (
             },
         }}
     >
-        {isDesktop && <AppTitlebarBackdrop />}
+        {wipDesktopCustomTitlebar && <AppTitlebarBackdrop />}
         <Box sx={{ p: 1 }}>{children}</Box>
     </Drawer>
 );
@@ -56,9 +56,9 @@ const AppTitlebarBackdrop = styled("div")(({ theme }) => ({
     left: 0,
     width: "100%",
     minHeight: "env(titlebar-area-height, 30px)",
-    zIndex: 1,
-    backgroundColor: theme.vars.palette.backdrop.muted,
-    backdropFilter: "blur(12px)",
+    bgcolor: theme.vars.palette.backdrop.muted,
+    backdropFilter: "blur(3px)",
+    zIndex: 10000,
 }));
 
 /**

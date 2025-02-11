@@ -12,7 +12,7 @@ import log from "@/base/log";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { downloadManager } from "@/gallery/services/download";
 import { EnteFile } from "@/media/file";
-import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
+import { aboveGalleryContentZ } from "@/new/photos/components/utils/z-index";
 import { getLocalCollections } from "@/new/photos/services/collections";
 import { AppContext } from "@/new/photos/types/context";
 import { CenteredFlex } from "@ente/shared/components/Container";
@@ -525,7 +525,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
         <Backdrop
             sx={{
                 backgroundColor: "background.default" /* Opaque */,
-                zIndex: aboveFileViewerContentZ,
+                zIndex: aboveGalleryContentZ,
                 width: "100%",
             }}
             open
@@ -990,6 +990,7 @@ const FreehandCropRegion = forwardRef(
                         gridTemplateColumns: "1fr 1fr 1fr",
                         gridTemplateRows: "1fr 1fr 1fr",
                         gap: "0px",
+                        zIndex: 30, // make sure the crop box is above the overlays
                     }}
                     ref={ref}
                 >

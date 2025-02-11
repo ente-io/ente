@@ -147,7 +147,7 @@ const Page: React.FC = () => {
                                 backgroundColor: "#1c1c1e",
                             }),
                             borderRadius: "10px",
-                            pb: "20px",
+                            paddingBottom: "20px",
                             position: "relative",
                         })}
                     >

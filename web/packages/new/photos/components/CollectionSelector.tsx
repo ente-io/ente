@@ -1,4 +1,4 @@
-import { SpacedRow } from "@/base/components/containers";
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import type { Collection } from "@/media/collection";
 import {
@@ -166,10 +166,10 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             fullScreen={isFullScreen}
             slotProps={{ paper: { sx: { maxWidth: "490px" } } }}
         >
-            <SpacedRow sx={{ padding: "10px 8px 6px 0" }}>
+            <SpaceBetweenFlex sx={{ padding: "10px 8px 6px 0" }}>
                 <DialogTitle variant="h3">{titleForAction(action)}</DialogTitle>
                 <DialogCloseIconButton onClose={handleClose} />
-            </SpacedRow>
+            </SpaceBetweenFlex>
 
             <DialogContent_>
                 <LargeTileCreateNewButton onClick={onCreateCollection}>

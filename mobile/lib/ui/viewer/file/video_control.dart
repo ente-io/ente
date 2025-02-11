@@ -33,21 +33,12 @@ class _VideoControlsState extends State<VideoControls> {
   Timer? _showAfterExpandCollapseTimer;
   bool _dragging = false;
   bool _displayTapped = false;
-  Timer? _bufferingDisplayTimer;
-  bool _displayBufferingIndicator = false;
 
   final barHeight = 120.0;
   final marginSize = 5.0;
 
   late VideoPlayerController controller;
   ChewieController? chewieController;
-
-  void _bufferingTimerTimeout() {
-    _displayBufferingIndicator = true;
-    if (mounted) {
-      setState(() {});
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,9 +68,8 @@ class _VideoControlsState extends State<VideoControls> {
           child: Stack(
             children: <Widget>[
               if (_latestValue != null &&
-                      !_latestValue!.isPlaying &&
-                      _latestValue!.isBuffering ||
-                  _displayBufferingIndicator)
+                  !_latestValue!.isPlaying &&
+                  _latestValue!.isBuffering)
                 const Align(
                   alignment: Alignment.center,
                   child: Center(
@@ -263,21 +253,6 @@ class _VideoControlsState extends State<VideoControls> {
   }
 
   void _updateState() {
-    // display the progress bar indicator only after the buffering delay if it has been set
-    if (chewieController?.progressIndicatorDelay != null) {
-      if (controller.value.isBuffering) {
-        _bufferingDisplayTimer ??= Timer(
-          chewieController!.progressIndicatorDelay!,
-          _bufferingTimerTimeout,
-        );
-      } else {
-        _bufferingDisplayTimer?.cancel();
-        _bufferingDisplayTimer = null;
-        _displayBufferingIndicator = false;
-      }
-    } else {
-      _displayBufferingIndicator = controller.value.isBuffering;
-    }
     setState(() {
       _latestValue = controller.value;
     });

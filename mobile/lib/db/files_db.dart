@@ -1737,11 +1737,7 @@ class FilesDB {
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll(
       '''
-      SELECT * FROM $filesTable
-      WHERE $columnFileType = ?
-      AND $columnCreationTime > ?
-      AND $columnUploadedFileID  != -1
-      ORDER BY $columnCreationTime DESC
+      SELECT * FROM $filesTable WHERE $columnFileType = ? AND $columnCreationTime > ? AND $columnUploadedFileID  != -1 
     ''',
       [getInt(fileType), beginDate.microsecondsSinceEpoch],
     );

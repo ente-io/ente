@@ -122,10 +122,6 @@ const lastShownChangelogVersion = () =>
 const setLastShownChangelogVersion = (version: number) =>
     ipcRenderer.invoke("setLastShownChangelogVersion", version);
 
-const isAutoLaunchEnabled = () => ipcRenderer.invoke("isAutoLaunchEnabled");
-
-const toggleAutoLaunch = () => ipcRenderer.invoke("toggleAutoLaunch");
-
 const onMainWindowFocus = (cb: (() => void) | undefined) => {
     ipcRenderer.removeAllListeners("mainWindowFocus");
     if (cb) ipcRenderer.on("mainWindowFocus", cb);
@@ -351,8 +347,6 @@ contextBridge.exposeInMainWorld("electron", {
     saveMasterKeyB64,
     lastShownChangelogVersion,
     setLastShownChangelogVersion,
-    isAutoLaunchEnabled,
-    toggleAutoLaunch,
     onMainWindowFocus,
     onOpenEnteURL,
 

@@ -32,7 +32,7 @@ class _PreviewPropertiesItemWidgetState
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => _getSection());
+    _getSection();
   }
 
   @override

@@ -1,6 +1,6 @@
 import { staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
-import { LoadingIndicator } from "@/base/components/loaders";
+import { LoadingOverlay } from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
 import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
@@ -32,7 +32,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <AttributedMiniDialog {...miniDialogProps} />
 
                 <AppContext.Provider value={appContext}>
-                    {!isI18nReady && <LoadingIndicator />}
+                    {!isI18nReady && <LoadingOverlay />}
                     {isI18nReady && <Component {...pageProps} />}
                 </AppContext.Provider>
             </ThemeProvider>

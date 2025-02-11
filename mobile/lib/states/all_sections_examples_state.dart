@@ -36,13 +36,11 @@ class _AllSectionsExamplesProviderState
   late StreamSubscription<TabChangedEvent> _tabChangeEvent;
   bool hasPendingUpdate = false;
   bool isOnSearchTab = false;
-  bool _firstLoadInProgressOrComplete = false;
   final _logger = Logger("AllSectionsExamplesProvider");
 
   final _debouncer = Debouncer(
     const Duration(seconds: 3),
     executionInterval: const Duration(seconds: 12),
-    leading: true,
   );
 
   @override
@@ -68,12 +66,7 @@ class _AllSectionsExamplesProviderState
         isOnSearchTab = false;
       }
     });
-
-    Future.delayed(const Duration(seconds: 3), () {
-      if (!_firstLoadInProgressOrComplete) {
-        reloadAllSections();
-      }
-    });
+    reloadAllSections();
   }
 
   void onDataUpdate() {
@@ -89,7 +82,6 @@ class _AllSectionsExamplesProviderState
   }
 
   void reloadAllSections() {
-    _firstLoadInProgressOrComplete = true;
     _logger.info('queue reload all sections');
     _debouncer.run(() async {
       setState(() {

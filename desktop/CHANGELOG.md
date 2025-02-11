@@ -1,14 +1,11 @@
 # CHANGELOG
 
-## v1.7.10 (Unreleased)
-
-- .
-
-## v1.7.9
+## v1.7.9 (Unreleased)
 
 - Light mode.
 - Faster and more stable thumbnail generation.
 - Support `.supplemental-metadata` JSON files in Google Takeout.
+- .
 
 ## v1.7.8
 

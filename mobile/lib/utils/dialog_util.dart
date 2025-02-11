@@ -76,7 +76,7 @@ Future<ButtonResult?> showErrorDialogForException({
 }) async {
   String errorMessage =
       message ?? S.of(context).tempErrorContactSupportIfPersists;
-  if (exception is DioException &&
+  if (exception is DioError &&
       exception.response != null &&
       exception.response!.data["code"] != null) {
     errorMessage =
@@ -107,12 +107,9 @@ String parseErrorForUI(
   if (error == null) {
     return genericError;
   }
-  if (error is DioException) {
-    final DioException dioError = error;
-    if (dioError.type == DioExceptionType.receiveTimeout ||
-        dioError.type == DioExceptionType.connectionError ||
-        dioError.type == DioExceptionType.sendTimeout ||
-        dioError.type == DioExceptionType.cancel) {
+  if (error is DioError) {
+    final DioError dioError = error;
+    if (dioError.type == DioErrorType.other) {
       if (dioError.error.toString().contains('Failed host lookup')) {
         return S.of(context).networkHostLookUpErr;
       } else if (dioError.error.toString().contains('SocketException')) {
@@ -125,15 +122,15 @@ String parseErrorForUI(
     return genericError;
   }
   String errorInfo = "";
-  if (error is DioException) {
-    final DioException dioError = error;
-    if (dioError.type == DioExceptionType.badResponse) {
+  if (error is DioError) {
+    final DioError dioError = error;
+    if (dioError.type == DioErrorType.response) {
       if (dioError.response?.data["code"] != null) {
         errorInfo = "Reason: " + dioError.response!.data["code"];
       } else {
         errorInfo = "Reason: " + dioError.response!.data.toString();
       }
-    } else if (dioError.type == DioExceptionType.badCertificate) {
+    } else if (dioError.type == DioErrorType.other) {
       errorInfo = "Reason: " + dioError.error.toString();
     } else {
       errorInfo = "Reason: " + dioError.type.toString();

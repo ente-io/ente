@@ -236,7 +236,7 @@ class SuperLogging {
   }
 
   static _shouldSkipSentry(Object error) {
-    if (error is DioException) {
+    if (error is DioError) {
       return true;
     }
     final bool result = error is StorageLimitExceededError ||

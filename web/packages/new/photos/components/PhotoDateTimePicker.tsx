@@ -6,7 +6,7 @@ import {
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useState } from "react";
-import { aboveFileViewerContentZ } from "./utils/z-index";
+import { fileInfoDrawerZ } from "./utils/z-index";
 
 interface PhotoDateTimePickerProps {
     /**
@@ -100,11 +100,14 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
                             },
                         },
                     },
-
                     /* We also get opened from the info drawer in the photo
                        viewer, so give our dialog a higher z-index than both the
                        photo viewer and the info drawer */
-                    dialog: { sx: { zIndex: aboveFileViewerContentZ } },
+                    dialog: {
+                        sx: {
+                            zIndex: fileInfoDrawerZ + 1,
+                        },
+                    },
                 }}
             />
         </LocalizationProvider>

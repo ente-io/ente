@@ -1,4 +1,4 @@
-import { SpacedRow } from "@/base/components/containers";
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import type { ButtonishProps } from "@/base/components/mui";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
@@ -641,7 +641,7 @@ const FreePlanRow: React.FC<FreePlanRowProps> = ({ onClose, storage }) => (
     </FreePlanRow_>
 );
 
-const FreePlanRow_ = styled(SpacedRow)(({ theme }) => ({
+const FreePlanRow_ = styled(SpaceBetweenFlex)(({ theme }) => ({
     gap: theme.spacing(1.5),
     padding: theme.spacing(1.5, 1),
     cursor: "pointer",

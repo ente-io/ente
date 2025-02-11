@@ -1,4 +1,4 @@
-import { SpacedRow } from "@/base/components/containers";
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { RowButton } from "@/base/components/RowButton";
 import { useIsTouchscreen } from "@/base/components/utils/hooks";
@@ -165,7 +165,7 @@ const DefaultOptions: React.FC<OptionsProps> = ({
 }) => {
     return (
         <>
-            <SpacedRow>
+            <SpaceBetweenFlex>
                 <DialogTitle variant="h5">
                     {intent == "collect"
                         ? t("select_photos")
@@ -174,7 +174,7 @@ const DefaultOptions: React.FC<OptionsProps> = ({
                           : t("upload")}
                 </DialogTitle>
                 <DialogCloseIconButton {...{ onClose }} />
-            </SpacedRow>
+            </SpaceBetweenFlex>
             <Box sx={{ p: "12px", pt: "16px" }}>
                 <Stack sx={{ gap: 0.5 }}>
                     {intent != "import" && (
@@ -221,10 +221,10 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
 }) => {
     return (
         <>
-            <SpacedRow>
+            <SpaceBetweenFlex>
                 <DialogTitle variant="h5">{t("google_takeout")}</DialogTitle>
                 <DialogCloseIconButton {...{ onClose }} />
-            </SpacedRow>
+            </SpaceBetweenFlex>
             <Stack sx={{ padding: "18px 12px 20px 12px", gap: "16px" }}>
                 <Stack sx={{ gap: "8px" }}>
                     <FocusVisibleButton

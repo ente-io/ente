@@ -43,7 +43,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           await userRemoteFlagService.markRecoveryVerificationAsDone();
         } catch (e) {
           await dialog.hide();
-          if (e is DioException && e.type == DioExceptionType.connectionError) {
+          if (e is DioError && e.type == DioErrorType.other) {
             await showErrorDialog(
               context,
               S.of(context).noInternetConnection,

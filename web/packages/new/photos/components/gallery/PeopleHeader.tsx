@@ -1,4 +1,4 @@
-import { CenteredFill, SpacedRow } from "@/base/components/containers";
+import { CenteredFill, SpaceBetweenFlex } from "@/base/components/containers";
 import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
@@ -85,7 +85,7 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
 }) => {
     return (
         <GalleryItemsHeaderAdapter>
-            <SpacedRow>
+            <SpaceBetweenFlex>
                 {person.type == "cgroup" ? (
                     person.isHidden ? (
                         <IgnoredPersonHeader person={person} />
@@ -98,7 +98,7 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
                         {...{ people, onSelectPerson }}
                     />
                 )}
-            </SpacedRow>
+            </SpaceBetweenFlex>
         </GalleryItemsHeaderAdapter>
     );
 };
@@ -351,10 +351,10 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
                 fullScreen={isFullScreen}
                 slotProps={{ paper: { sx: { maxWidth: "490px" } } }}
             >
-                <SpacedRow sx={{ padding: "10px 8px 6px 0" }}>
+                <SpaceBetweenFlex sx={{ padding: "10px 8px 6px 0" }}>
                     <DialogTitle variant="h3">{t("add_name")}</DialogTitle>
                     <DialogCloseIconButton {...{ onClose }} />
-                </SpacedRow>
+                </SpaceBetweenFlex>
                 <DialogContent_>
                     <LargeTileCreateNewButton onClick={handleAddPerson}>
                         {t("new_person")}
@@ -626,7 +626,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             fullScreen={isSmallWidth}
             slotProps={{ paper: { sx: { minHeight: "80svh" } } }}
         >
-            <SpacedRow
+            <SpaceBetweenFlex
                 sx={[
                     { padding: "20px 16px 16px 16px" },
                     state.showChoices
@@ -662,7 +662,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                         <RestoreIcon />
                     </IconButton>
                 )}
-            </SpacedRow>
+            </SpaceBetweenFlex>
             <DialogContent
                 /* Reset scroll position on switching view */
                 key={`${state.showChoices}`}
@@ -744,7 +744,11 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
         {items.map((item) => (
             <ListItem
                 key={item.id}
-                sx={{ px: 0, pb: "24px", justifyContent: "space-between" }}
+                sx={{
+                    paddingInline: 0,
+                    paddingBlockEnd: "24px",
+                    justifyContent: "space-between",
+                }}
             >
                 <Stack sx={{ gap: "10px" }}>
                     <Typography variant="small" sx={{ color: "text.muted" }}>

@@ -1,4 +1,4 @@
-import { Stack100vhCenter } from "@/base/components/containers";
+import { Overlay, Stack100vhCenter } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Backdrop } from "@mui/material";
 import React from "react";
@@ -16,11 +16,31 @@ export const LoadingIndicator: React.FC = () => (
 );
 
 /**
+ * An opaque overlay that covers the entire viewport and shows an activity
+ * indicator in its center.
+ *
+ * Useful as a top level "blocking" overscreen while the app is being loaded.
+ */
+export const LoadingOverlay: React.FC = () => (
+    <Overlay
+        sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 2000,
+            backgroundColor: "background.default",
+        }}
+    >
+        <ActivityIndicator />
+    </Overlay>
+);
+
+/**
  * An translucent overlay that covers the entire viewport and shows an activity
  * indicator in its center.
  *
- * Used as a overlay during blocking actions. The use of this component is not
- * recommended for new code.
+ * Used as a overscreen during blocking actions. The use of this component is
+ * not recommended for new code.
  */
 export const TranslucentLoadingOverlay: React.FC = () => (
     <Backdrop
@@ -32,10 +52,8 @@ export const TranslucentLoadingOverlay: React.FC = () => (
         sx={{
             backgroundColor: "var(--mui-palette-backdrop-muted)",
             backdropFilter: "blur(30px) opacity(95%)",
-            // This is `aboveFileViewerContentZ + delta`. Cannot use a constant
-            // here since this is used outside photos too. Eventually just get
-            // rid of this component, merging it to specific uses.
-            zIndex: 2000 /* aboveFileViewerContentZ + delta */,
+            // TODO: Why is this zIndex override required? + use a constant.
+            zIndex: 9000,
         }}
     >
         <ActivityIndicator />

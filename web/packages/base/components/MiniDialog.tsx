@@ -316,7 +316,7 @@ export const AttributedMiniDialog: React.FC<
                 )}
                 {children}
                 <Stack
-                    sx={{ pt: 3, gap: 1 }}
+                    sx={{ paddingBlockStart: "24px", gap: "8px" }}
                     direction={attributes.buttonDirection ?? "column"}
                 >
                     {phase == "failed" && <InlineErrorIndicator />}

@@ -3,14 +3,12 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/preview_updated_event.dart";
-import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/preview_video_store.dart";
 import "package:photos/theme/colors.dart";
-import "package:photos/ui/settings/backup/backup_status_screen.dart";
 
 class PreviewStatusWidget extends StatefulWidget {
   const PreviewStatusWidget({
@@ -110,14 +108,7 @@ class _PreviewStatusWidgetState extends State<PreviewStatusWidget> {
             onTap:
                 preview == null || preview!.status == PreviewItemStatus.uploaded
                     ? widget.onStreamChange
-                    : () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const BackupStatusScreen(),
-                          ),
-                        );
-                      },
+                    : null,
             child: Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: 8,
@@ -166,16 +157,16 @@ class _PreviewStatusWidgetState extends State<PreviewStatusWidget> {
                   ),
                   Text(
                     isInProgress
-                        ? S.of(context).processing
+                        ? "Processing"
                         : isInQueue
-                            ? S.of(context).queued
+                            ? "Queued"
                             : isBeforeCutoffDate
-                                ? S.of(context).ineligible
+                                ? "Ineligible"
                                 : isFailed
-                                    ? S.of(context).failed
+                                    ? "Failed"
                                     : widget.isPreviewPlayer
-                                        ? S.of(context).playOriginal
-                                        : S.of(context).playStream,
+                                        ? "Play original"
+                                        : "Play stream",
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,

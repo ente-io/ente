@@ -32,7 +32,7 @@ class EntityGateway {
         },
       );
       return EntityKey.fromMap(response.data);
-    } on DioException catch (e) {
+    } on DioError catch (e) {
       if (e.response != null && (e.response!.statusCode ?? 0) == 404) {
         throw EntityKeyNotFound();
       } else {

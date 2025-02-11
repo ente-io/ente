@@ -113,7 +113,7 @@ class _LoginPasswordVerificationPageState
         password,
         dialog,
       );
-    } on DioException catch (e, s) {
+    } on DioError catch (e, s) {
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 401) {
         _logger.severe('server reject, failed verify SRP login', e, s);
@@ -123,10 +123,8 @@ class _LoginPasswordVerificationPageState
           S.of(context).pleaseTryAgain,
         );
       } else {
-        _logger.severe('API failure during SRP login ${e.type}', e, s);
-        if (e.type == DioExceptionType.connectionTimeout ||
-            e.type == DioExceptionType.receiveTimeout ||
-            e.type == DioExceptionType.sendTimeout) {
+        _logger.severe('API failure during SRP login', e, s);
+        if (e.type == DioErrorType.other) {
           await _showContactSupportDialog(
             context,
             S.of(context).noInternetConnection,

@@ -4,7 +4,7 @@ import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
-import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
+import { aboveGalleryContentZ } from "@/new/photos/components/utils/z-index";
 import {
     publishCastPayload,
     revokeAllCastTokens,
@@ -134,7 +134,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
             open={open}
             onClose={onClose}
             title={t("cast_album_to_tv")}
-            sx={{ zIndex: aboveFileViewerContentZ }}
+            sx={{ zIndex: aboveGalleryContentZ }}
         >
             {view == "choose" && (
                 <Stack sx={{ py: 1, gap: 4 }}>

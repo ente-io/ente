@@ -48,7 +48,6 @@
   "nextTotpTitle": "التالي",
   "deleteCodeTitle": "حذف الرمز؟",
   "deleteCodeMessage": "هل أنت متأكد من أنك تريد حذف هذه الشيفرة؟ هذا الإجراء لا رجعة فيه.",
-  "trash": "سلة المهملات",
   "viewLogsAction": "عرض السجلات",
   "sendLogsDescription": "سوف يُرسل هذا السجلات لنا لمساعدتنا على تصحيح مشكلتك. بينما نتخذ الاحتياطات لضمان عدم تسجيل المعلومات الحساسة، نشجعك على رؤية هذه السجلات قبل مشاركتها.",
   "preparingLogsTitle": "جارٍ إعداد السجلات...",
@@ -198,8 +197,6 @@
   "enterDetailsManually": "أدخل التفاصيل يدوياً",
   "edit": "تعديل",
   "share": "مشاركة",
-  "shareCodes": "شارك الرموز",
-  "restore": "استعادة",
   "copiedToClipboard": "تم النسخ إلى الحافظة",
   "copiedNextToClipboard": "تم نسخ الرموز التالية إلى الحافظة",
   "error": "خطأ",
@@ -251,10 +248,6 @@
   "areYouSureYouWantToLogout": "هل أنت متأكد من أنك تريد تسجيل الخروج؟",
   "yesLogout": "نعم، تسجيل الخروج",
   "exit": "خروج",
-  "theme": "السمة",
-  "lightTheme": "فاتح",
-  "darkTheme": "داكن",
-  "systemTheme": "النظام",
   "verifyingRecoveryKey": "التحقق من مفتاح الاسترداد...",
   "recoveryKeyVerified": "تم التحقق من مفتاح الاسترداد",
   "recoveryKeySuccessBody": "رائع! مفتاح الاسترداد الخاص بك صالح. شكرا لك على التحقق.\n\nيرجى تذكر الاحتفاظ بنسخة احتياطية من مفتاح الاسترداد بشكل آمن.",
@@ -325,9 +318,6 @@
       }
     }
   },
-  "manualSort": "مخصّص",
-  "mostFrequentlyUsed": "مستخدم بكثرة",
-  "mostRecentlyUsed": "مستخدمة مؤخراً",
   "activeSessions": "الجلسات النشطة",
   "somethingWentWrongPleaseTryAgain": "حدث خطأ ما، يرجى المحاولة مرة أخرى",
   "thisWillLogYouOutOfThisDevice": "سيؤدي هذا إلى تسجيل خروجك من هذا الجهاز!",
@@ -360,7 +350,6 @@
   "sigInBackupReminder": "يرجى تصدير الرموز الخاصة بك للتأكد من أن لديك نسخة احتياطية يمكنك استعادتها منها.",
   "offlineModeWarning": "لقد اخترت المضي قدما بدون نسخ احتياطية. يرجى أخذ نسخ احتياطية يدوية للتأكد من سلامة الرموز الخاصة بك.",
   "showLargeIcons": "إظهار أيقونات كبيرة",
-  "compactMode": "الوضع المضغوط",
   "shouldHideCode": "إخفاء الرموز",
   "doubleTapToViewHiddenCode": "يمكنك النقر مرتين على أي عنصر لعرض الرمز",
   "focusOnSearchBar": "التركيز على البحث عند بدء التطبيق",
@@ -479,11 +468,5 @@
   "pinLock": "قفل رقم التعريف الشخصي",
   "enterPin": "أدخل رقم التعريف الشخصي",
   "setNewPin": "عين رقم تعريف شخصي جديد",
-  "importFailureDescNew": "تعذر إعراب الملف المنتقى.",
-  "duplicateCodes": "رموز مكررة",
-  "noDuplicates": "✨ لا تكرارات",
-  "youveNoDuplicateCodesThatCanBeCleared": "ليس لديك رموز مكررة يمكن مسحها",
-  "deselectAll": "ألغِ تحديد الكل",
-  "selectAll": "حدد الكل",
-  "deleteDuplicates": "احذف التكرار"
+  "importFailureDescNew": "تعذر إعراب الملف المنتقى."
 }

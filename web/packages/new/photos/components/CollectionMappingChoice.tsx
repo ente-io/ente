@@ -1,4 +1,4 @@
-import { SpacedRow } from "@/base/components/containers";
+import { SpaceBetweenFlex } from "@/base/components/containers";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import type { CollectionMapping } from "@/base/types/ipc";
@@ -36,10 +36,10 @@ export const CollectionMappingChoice: React.FC<
         fullWidth
         slotProps={{ paper: { sx: { maxWidth: "360px", padding: "12px" } } }}
     >
-        <SpacedRow sx={{ pr: "4px" }}>
+        <SpaceBetweenFlex sx={{ paddingInlineEnd: "4px" }}>
             <DialogTitle>{t("multi_folder_upload")}</DialogTitle>
             <DialogCloseIconButton {...{ onClose }} />
-        </SpacedRow>
+        </SpaceBetweenFlex>
 
         <DialogContent
             sx={{

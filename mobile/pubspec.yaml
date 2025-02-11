@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.9.95+995
+version: 0.9.94+994
 publish_to: none
 
 environment:
@@ -42,7 +42,7 @@ dependencies:
   dart_ui_isolate: ^1.1.1
   defer_pointer: ^0.0.2
   device_info_plus: ^9.0.3
-  dio: ^5.8.0+1
+  dio: ^4.0.6
   dots_indicator: ^2.0.0
   dotted_border: ^2.1.0
   dropdown_button2: ^2.0.0
@@ -130,7 +130,6 @@ dependencies:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2
   nanoid: ^1.0.0
-  native_dio_adapter: ^1.4.0
   native_video_player:
     git:
       url: https://github.com/ashilkn/native_video_player.git

@@ -7,20 +7,33 @@ import {
 } from "electron";
 import { allowWindowClose } from "../main";
 import { forceCheckForAppUpdates } from "./services/app-update";
+import autoLauncher from "./services/auto-launcher";
+import { openLogDirectory } from "./services/dir";
 import { userPreferences } from "./stores/user-preferences";
 
 /** Create and return the entries in the app's main menu bar */
-export const createApplicationMenu = (mainWindow: BrowserWindow) => {
+export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
     // The state of checkboxes
     //
     // Whenever the menu is redrawn the current value of these variables is used
     // to set the checked state for the various settings checkboxes.
+    let isAutoLaunchEnabled = await autoLauncher.isEnabled();
     let shouldHideDockIcon = !!userPreferences.get("hideDockIcon");
 
     const macOSOnly = (options: MenuItemConstructorOptions[]) =>
         process.platform == "darwin" ? options : [];
 
     const handleCheckForUpdates = () => forceCheckForAppUpdates(mainWindow);
+
+    const handleViewChangelog = () =>
+        void shell.openExternal(
+            "https://github.com/ente-io/ente/blob/main/desktop/CHANGELOG.md",
+        );
+
+    const toggleAutoLaunch = () => {
+        void autoLauncher.toggleAutoLaunch();
+        isAutoLaunchEnabled = !isAutoLaunchEnabled;
+    };
 
     const toggleHideDockIcon = () => {
         // Persist
@@ -31,6 +44,13 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
 
     const handleHelp = () =>
         void shell.openExternal("https://help.ente.io/photos/");
+
+    const handleSupport = () =>
+        void shell.openExternal("mailto:support@ente.io");
+
+    const handleBlog = () => void shell.openExternal("https://ente.io/blog/");
+
+    const handleViewLogs = () => void openLogDirectory();
 
     return Menu.buildFromTemplate([
         {
@@ -47,21 +67,31 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
                     label: "Check for Updates...",
                     click: handleCheckForUpdates,
                 },
+                {
+                    label: "View Changelog",
+                    click: handleViewChangelog,
+                },
                 { type: "separator" },
 
-                ...macOSOnly([
-                    {
-                        label: "Preferences",
-                        submenu: [
+                {
+                    label: "Preferences",
+                    submenu: [
+                        {
+                            label: "Open Ente on Startup",
+                            type: "checkbox",
+                            checked: isAutoLaunchEnabled,
+                            click: toggleAutoLaunch,
+                        },
+                        ...macOSOnly([
                             {
                                 label: "Hide Dock Icon",
                                 type: "checkbox",
                                 checked: shouldHideDockIcon,
                                 click: toggleHideDockIcon,
                             },
-                        ],
-                    },
-                ]),
+                        ]),
+                    ],
+                },
 
                 { type: "separator" },
                 ...macOSOnly([
@@ -139,6 +169,20 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
                     label: "Ente Help",
                     click: handleHelp,
                 },
+                { type: "separator" },
+                {
+                    label: "Support",
+                    click: handleSupport,
+                },
+                {
+                    label: "Product Updates",
+                    click: handleBlog,
+                },
+                { type: "separator" },
+                {
+                    label: "View Logs",
+                    click: handleViewLogs,
+                },
             ],
         },
     ]);
@@ -150,6 +194,7 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
  */
 export const createTrayContextMenu = (mainWindow: BrowserWindow) => {
     const handleOpen = () => {
+        mainWindow.maximize();
         mainWindow.show();
     };
 

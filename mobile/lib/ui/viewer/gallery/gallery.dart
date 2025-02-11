@@ -18,7 +18,6 @@ import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
-import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/hierarchical_search_util.dart";
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -126,63 +125,24 @@ class GalleryState extends State<Gallery> {
     _debouncer = Debouncer(
       widget.reloadDebounceTime,
       executionInterval: widget.reloadDebounceExecutionInterval,
-      leading: true,
     );
     _sortOrderAsc = widget.sortAsyncFn != null ? widget.sortAsyncFn!() : false;
     _itemScroller = ItemScrollController();
     if (widget.reloadEvent != null) {
       _reloadEventSubscription = widget.reloadEvent!.listen((event) async {
-        bool shouldReloadFromDB = true;
-        if (event.source == 'uploadCompleted') {
-          final Map<int, EnteFile> genIDToUploadedFiles = {};
-          for (int i = 0; i < event.updatedFiles.length; i++) {
-            if (event.updatedFiles[i].generatedID == null) {
-              shouldReloadFromDB = true;
-              break;
-            }
-            genIDToUploadedFiles[event.updatedFiles[i].generatedID!] =
-                event.updatedFiles[i];
-          }
-          for (int i = 0; i < _allGalleryFiles.length; i++) {
-            final file = _allGalleryFiles[i];
-            if (file.generatedID == null) {
-              continue;
-            }
-            final updateFile = genIDToUploadedFiles[file.generatedID!];
-            if (updateFile != null &&
-                updateFile.localID == file.localID &&
-                areFromSameDay(
-                  updateFile.creationTime ?? 0,
-                  file.creationTime ?? 0,
-                )) {
-              _allGalleryFiles[i] = updateFile;
-              genIDToUploadedFiles.remove(file.generatedID!);
-            }
-          }
-          shouldReloadFromDB = genIDToUploadedFiles.isNotEmpty;
-        }
-        if (!shouldReloadFromDB) {
-          final bool hasCalledSetState = _onFilesLoaded(_allGalleryFiles);
-          _logger.info(
-            'Skip softRefresh from DB, processed updated in memory with setStateReload $hasCalledSetState',
-          );
-          return;
-        }
-
         _debouncer.run(() async {
           // In soft refresh, setState is called for entire gallery only when
           // number of child change
           _logger.finest("Soft refresh all files on ${event.reason} ");
           final result = await _loadFiles();
-          final bool hasTriggeredSetState = _onFilesLoaded(result.files);
-          if (hasTriggeredSetState && kDebugMode) {
+          final bool hasReloaded = _onFilesLoaded(result.files);
+          if (hasReloaded && kDebugMode) {
             _logger.finest(
               "Reloaded gallery on soft refresh all files on ${event.reason}",
             );
           }
-          if (!hasTriggeredSetState && mounted) {
-            setState(() {});
-          }
+
+          setState(() {});
         });
       });
     }
@@ -247,9 +207,8 @@ class GalleryState extends State<Gallery> {
           _hasLoadedFiles = true;
           currentGroupedFiles = updatedGroupedFiles;
         });
-        return true;
       }
-      return false;
+      return true;
     } else {
       currentGroupedFiles = updatedGroupedFiles;
       return false;

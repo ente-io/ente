@@ -11131,20 +11131,20 @@ class S {
     );
   }
 
-  /// `Video streaming`
+  /// `Video Streaming`
   String get videoStreaming {
     return Intl.message(
-      'Video streaming',
+      'Video Streaming',
       name: 'videoStreaming',
       desc: '',
       args: [],
     );
   }
 
-  /// `Processing videos`
+  /// `Processing Videos`
   String get processingVideos {
     return Intl.message(
-      'Processing videos',
+      'Processing Videos',
       name: 'processingVideos',
       desc: '',
       args: [],
@@ -11156,66 +11156,6 @@ class S {
     return Intl.message(
       'Stream details',
       name: 'streamDetails',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Processing`
-  String get processing {
-    return Intl.message(
-      'Processing',
-      name: 'processing',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Queued`
-  String get queued {
-    return Intl.message(
-      'Queued',
-      name: 'queued',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Ineligible`
-  String get ineligible {
-    return Intl.message(
-      'Ineligible',
-      name: 'ineligible',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Failed`
-  String get failed {
-    return Intl.message(
-      'Failed',
-      name: 'failed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Play stream`
-  String get playStream {
-    return Intl.message(
-      'Play stream',
-      name: 'playStream',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Play original`
-  String get playOriginal {
-    return Intl.message(
-      'Play original',
-      name: 'playOriginal',
       desc: '',
       args: [],
     );

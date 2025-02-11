@@ -1,6 +1,5 @@
-import { EnteLogo } from "@/base/components/EnteLogo";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
-import { NavbarBase } from "@/base/components/Navbar";
+import { AppNavbarNormalFlow } from "@/base/components/Navbar";
 import {
     RowButton,
     RowButtonDivider,
@@ -117,9 +116,7 @@ const Page: React.FC = () => {
 
     return (
         <Stack sx={{ minHeight: "100svh" }}>
-            <NavbarBase>
-                <EnteLogo />
-            </NavbarBase>
+            <AppNavbarNormalFlow />
             <Stack
                 sx={{ alignSelf: "center", m: 3, maxWidth: "375px", gap: 3 }}
             >
