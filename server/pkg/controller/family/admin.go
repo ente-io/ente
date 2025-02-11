@@ -194,28 +194,40 @@ func (c *Controller) CloseFamily(ctx context.Context, adminID int64) error {
 func (c *Controller) ModifyMemberStorage(ctx context.Context, adminID int64, id uuid.UUID, storageLimit *int64) error {
 	familyAdminID, err := c.UserRepo.GetFamilyAdminID(adminID)
 	if err != nil {
-		stacktrace.Propagate(err, "Could not get family admin ID")
+		return stacktrace.Propagate(err, "Could not get family admin ID")
 	}
 
 	member, err := c.FamilyRepo.GetMemberById(ctx, id)
 	if err != nil {
-		stacktrace.Propagate(err, "Couldn't fetch Family Member")
+		return stacktrace.Propagate(err, "Couldn't fetch Family Member")
 	}
 
-	// get admin subscription in order to get the size of total storage quota
-	// available in that family. and let the user chose storage of outw of the whole
-	// storage quota or maximum limit.
+	// gets admin subscription in order to get the size of total storage quota
 	activeSub, err := c.BillingCtrl.GetActiveSubscription(adminID)
 	if err != nil {
-		stacktrace.Propagate(err, "couldn't get active subscription")
+		return stacktrace.Propagate(err, "couldn't get active subscription")
 	}
 
-	if adminID == *familyAdminID && id == member.ID {
-		if storageLimit != nil && *storageLimit > activeSub.Storage {
-			err := c.FamilyRepo.ModifyMemberStorage(ctx, adminID, member.ID, storageLimit)
-			if err != nil {
-				stacktrace.Propagate(err, "Couldn't Modify Members Storage")
+	if adminID == *familyAdminID {
+		if id == member.ID && member.Status == "ACCEPTED" && member.Status != "SELF" {
+			// Handle if the admin user tries reducing the storage Limit
+			// and the members Usage is more than the potential storage Limit
+			memberUsage, memUsageErr := c.UsageRepo.GetUsage(member.MemberUserID)
+			if memUsageErr != nil {
+				return stacktrace.Propagate(memUsageErr, "Couldn't find members storage usage")
 			}
+			if storageLimit != nil && *storageLimit < activeSub.Storage {
+				if *storageLimit > memberUsage {
+					err := c.FamilyRepo.ModifyMemberStorage(ctx, adminID, member.ID, storageLimit)
+					if err != nil {
+						return stacktrace.Propagate(err, "Cannot Modify Members Storage")
+					}
+				} else {
+					return stacktrace.Propagate(fmt.Errorf("storage reduction not allowed"), "Cannot reduce storage, current usage is more.")
+				}
+			}
+		} else {
+			return stacktrace.Propagate(fmt.Errorf("could not modify storage"), "user is either admin or not part of family")
 		}
 	}
 	return nil
