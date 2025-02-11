@@ -337,6 +337,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.9.2"
+  cronet_http:
+    dependency: transitive
+    description:
+      name: cronet_http
+      sha256: "3af9c4d57bf07ef4b307e77b22be4ad61bea19ee6ff65e62184863f3a09f1415"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.2"
   cross_file:
     dependency: "direct main"
     description:
@@ -361,6 +369,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  cupertino_http:
+    dependency: transitive
+    description:
+      name: cupertino_http
+      sha256: "6fcf79586ad872ddcd6004d55c8c2aab3cdf0337436e8f99837b1b6c30665d0c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -421,10 +437,18 @@ packages:
     dependency: "direct main"
     description:
       name: dio
-      sha256: "7d328c4d898a61efc3cd93655a0955858e29a0aa647f0f9e02d59b3bb275e2e8"
+      sha256: "253a18bbd4851fecba42f7343a1df3a9a4c1d31a2c1b37e221086b4fa8c8dbc9"
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.6"
+    version: "5.8.0+1"
+  dio_web_adapter:
+    dependency: transitive
+    description:
+      name: dio_web_adapter
+      sha256: e485c7a39ff2b384fa1d7e09b4e25f755804de8384358049124830b04fc4f93a
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   dots_indicator:
     dependency: "direct main"
     description:
@@ -1173,6 +1197,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  http_profile:
+    dependency: transitive
+    description:
+      name: http_profile
+      sha256: "7e679e355b09aaee2ab5010915c932cce3f2d1c11c3b2dc177891687014ffa78"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   image:
     dependency: "direct main"
     description:
@@ -1338,6 +1370,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  jni:
+    dependency: transitive
+    description:
+      name: jni
+      sha256: f377c585ea9c08d48b427dc2e03780af2889d1bb094440da853c6883c1acba4b
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.10.1"
   js:
     dependency: transitive
     description:
@@ -1702,6 +1742,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  native_dio_adapter:
+    dependency: "direct main"
+    description:
+      name: native_dio_adapter
+      sha256: "7420bc9517b2abe09810199a19924617b45690a44ecfb0616ac9babc11875c03"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.0"
   native_video_player:
     dependency: "direct main"
     description:
@@ -1735,6 +1783,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
+  objective_c:
+    dependency: transitive
+    description:
+      name: objective_c
+      sha256: "62e79ab8c3ed6f6a340ea50dd48d65898f5d70425d404f0d99411f6e56e04584"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.0"
   octo_image:
     dependency: transitive
     description:
