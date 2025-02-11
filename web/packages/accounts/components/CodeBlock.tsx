@@ -1,8 +1,10 @@
-import { CenteredFlex } from "@/base/components/containers";
-import { CopyButton } from "@/base/components/CopyButton";
+import { CenteredRow } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { Box, Typography } from "@mui/material";
-import React from "react";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import DoneIcon from "@mui/icons-material/Done";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { t } from "i18next";
+import React, { useState } from "react";
 
 interface CodeBlockProps {
     /**
@@ -20,9 +22,9 @@ interface CodeBlockProps {
 export const CodeBlock: React.FC<CodeBlockProps> = ({ code }) => {
     if (!code) {
         return (
-            <CenteredFlex sx={{ minHeight: "80px" }}>
+            <CenteredRow sx={{ minHeight: "80px" }}>
                 <ActivityIndicator />
-            </CenteredFlex>
+            </CenteredRow>
         );
     }
 
@@ -46,8 +48,35 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code }) => {
                 {code}
             </Typography>
             <Box sx={{ position: "absolute", top: 0, right: 0, mt: 1 }}>
-                <CopyButton color="accentContrastText" code={code} />
+                <CopyButton code={code} />
             </Box>
         </Box>
+    );
+};
+
+interface CopyButtonProps {
+    /**
+     * The code to copy when the button is clicked.
+     */
+    code: string;
+}
+
+export const CopyButton: React.FC<CopyButtonProps> = ({ code }) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleClick = () =>
+        void navigator.clipboard.writeText(code).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1000);
+        });
+
+    const Icon = copied ? DoneIcon : ContentCopyIcon;
+
+    return (
+        <Tooltip arrow open={copied} title={t("copied")}>
+            <IconButton onClick={handleClick}>
+                <Icon sx={{ color: "accent.contrastText" }} fontSize="small" />
+            </IconButton>
+        </Tooltip>
     );
 };

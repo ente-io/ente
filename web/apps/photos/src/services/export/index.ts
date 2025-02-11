@@ -5,11 +5,7 @@ import { downloadManager } from "@/gallery/services/download";
 import { writeStream } from "@/gallery/utils/native-stream";
 import type { Collection } from "@/media/collection";
 import { mergeMetadata, type EnteFile } from "@/media/file";
-import {
-    fileCreationPhotoDate,
-    fileLocation,
-    type Metadata,
-} from "@/media/file-metadata";
+import { fileLocation, type Metadata } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import {
@@ -1392,7 +1388,10 @@ const getGoogleLikeMetadataFile = (
     dateTimeFormatter: Intl.DateTimeFormat,
 ) => {
     const metadata: Metadata = file.metadata;
-    const creationTime = Math.floor(metadata.creationTime / 1e6);
+    const publicMagicMetadata = file.pubMagicMetadata?.data;
+    const creationTime = Math.floor(
+        (publicMagicMetadata?.editedTime ?? metadata.creationTime) / 1e6,
+    );
     const modificationTime = Math.floor(
         (metadata.modificationTime ?? metadata.creationTime) / 1e6,
     );
@@ -1400,9 +1399,7 @@ const getGoogleLikeMetadataFile = (
         title: fileExportName,
         creationTime: {
             timestamp: creationTime,
-            formatted: dateTimeFormatter.format(
-                fileCreationPhotoDate(file, file.pubMagicMetadata?.data),
-            ),
+            formatted: dateTimeFormatter.format(creationTime * 1000),
         },
         modificationTime: {
             timestamp: modificationTime,

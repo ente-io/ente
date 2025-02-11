@@ -82,11 +82,11 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
                 onClose();
             }}
         >
-            <DialogTitle sx={{ marginBlockStart: "4px" }}>{title}</DialogTitle>
+            <DialogTitle sx={{ mt: "4px" }}>{title}</DialogTitle>
             <DialogContent
-                style={{
+                sx={{
                     minWidth: "310px",
-                    paddingBlockStart: "6px",
+                    pt: "6px",
                     display: "flex",
                     flexDirection: "column",
                     ...(step == "running" ? { alignItems: "center" } : {}),
@@ -181,7 +181,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
                         name={"option"}
                         value={values.option}
                         onChange={handleChange}
-                        sx={{ paddingBlockStart: 1 }}
+                        sx={{ pt: 1 }}
                     >
                         <FormControlLabel
                             value={"date-time-original"}

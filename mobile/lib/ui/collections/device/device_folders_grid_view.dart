@@ -16,8 +16,8 @@ import "package:photos/utils/debouncer.dart";
 
 class DeviceFoldersGridView extends StatefulWidget {
   const DeviceFoldersGridView({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<DeviceFoldersGridView> createState() => _DeviceFoldersGridViewState();
@@ -31,10 +31,12 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
   final _debouncer = Debouncer(
     const Duration(seconds: 2),
     executionInterval: const Duration(seconds: 5),
+    leading: true,
   );
 
   @override
   void initState() {
+    super.initState();
     _backupFoldersUpdatedEvent =
         Bus.instance.on<BackupFoldersUpdatedEvent>().listen((event) {
       _loadReason = event.reason;
@@ -51,8 +53,6 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
         }
       });
     });
-
-    super.initState();
   }
 
   @override

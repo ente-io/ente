@@ -54,6 +54,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
   final _debouncer = Debouncer(
     const Duration(seconds: 2),
     executionInterval: const Duration(seconds: 5),
+    leading: true,
   );
 
   static const int _kOnEnteItemLimitCount = 10;

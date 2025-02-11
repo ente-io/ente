@@ -2,10 +2,7 @@ import {
     AccountsPageContents,
     AccountsPageTitle,
 } from "@/accounts/components/layouts/centered-paper";
-import {
-    SpaceBetweenFlex,
-    Stack100vhCenter,
-} from "@/base/components/containers";
+import { SpacedRow, Stack100vhCenter } from "@/base/components/containers";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import {
     LoadingIndicator,
@@ -13,7 +10,7 @@ import {
 } from "@/base/components/loaders";
 import type { ButtonishProps } from "@/base/components/mui";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
+import { NavbarBase } from "@/base/components/Navbar";
 import {
     OverflowMenu,
     OverflowMenuOption,
@@ -42,10 +39,7 @@ import {
 } from "@/new/photos/services/collection";
 import { sortFiles } from "@/new/photos/services/files";
 import { useAppContext } from "@/new/photos/types/context";
-import {
-    CenteredFlex,
-    FluidContainer,
-} from "@ente/shared/components/Container";
+import { CenteredFlex } from "@ente/shared/components/Container";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -518,7 +512,33 @@ export default function PublicCollectionGallery() {
                         getFolderSelectorInputProps,
                     }}
                 />
-                <SharedAlbumNavbar onAddPhotos={onAddPhotos} />
+                <NavbarBase
+                    sx={{
+                        mb: "16px",
+                        px: "24px",
+                        "@media (width < 720px)": { px: "4px" },
+                    }}
+                >
+                    {selected.count > 0 ? (
+                        <SelectedFileOptions
+                            downloadFilesHelper={downloadFilesHelper}
+                            clearSelection={clearSelection}
+                            count={selected.count}
+                        />
+                    ) : (
+                        <SpacedRow sx={{ flex: 1 }}>
+                            <EnteLogoLink href="https://ente.io">
+                                <EnteLogo height={15} />
+                            </EnteLogoLink>
+                            {onAddPhotos ? (
+                                <AddPhotosButton onClick={onAddPhotos} />
+                            ) : (
+                                <GoToEnte />
+                            )}
+                        </SpacedRow>
+                    )}
+                </NavbarBase>
+
                 <PhotoFrame
                     files={publicFiles}
                     syncWithRemote={syncWithRemote}
@@ -558,38 +578,10 @@ export default function PublicCollectionGallery() {
                     attributesList={filesDownloadProgressAttributesList}
                     setAttributesList={setFilesDownloadProgressAttributesList}
                 />
-                {selected.count > 0 && (
-                    <SelectedFileOptions
-                        downloadFilesHelper={downloadFilesHelper}
-                        clearSelection={clearSelection}
-                        count={selected.count}
-                    />
-                )}
             </FullScreenDropZone>
         </PublicCollectionGalleryContext.Provider>
     );
 }
-
-interface SharedAlbumNavbarProps {
-    /**
-     * If provided, then an "Add Photos" button will be shown in the navbar, and
-     * this function will be called when it is clicked.
-     */
-    onAddPhotos: (() => void) | undefined;
-}
-
-const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
-    onAddPhotos,
-}) => (
-    <NavbarBase>
-        <FluidContainer>
-            <EnteLogoLink href="https://ente.io">
-                <EnteLogo height={15} />
-            </EnteLogoLink>
-        </FluidContainer>
-        {onAddPhotos ? <AddPhotosButton onClick={onAddPhotos} /> : <GoToEnte />}
-    </NavbarBase>
-);
 
 const EnteLogoLink = styled("a")(({ theme }) => ({
     // Remove the excess space at the top.
@@ -662,27 +654,24 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     downloadFilesHelper,
     count,
     clearSelection,
-}) => {
-    return (
-        <SelectionBar>
-            <FluidContainer>
-                <IconButton onClick={clearSelection}>
-                    <CloseIcon />
-                </IconButton>
-                <Box sx={{ ml: 1.5 }}>
-                    {t("selected_count", { selected: count })}
-                </Box>
-            </FluidContainer>
-            <Stack direction="row" sx={{ gap: 2, mr: 2 }}>
-                <Tooltip title={t("download")}>
-                    <IconButton onClick={downloadFilesHelper}>
-                        <DownloadIcon />
-                    </IconButton>
-                </Tooltip>
-            </Stack>
-        </SelectionBar>
-    );
-};
+}) => (
+    <Stack
+        direction="row"
+        sx={{ flex: 1, gap: 2, alignItems: "center", mr: 1 }}
+    >
+        <IconButton onClick={clearSelection}>
+            <CloseIcon />
+        </IconButton>
+        <Typography sx={{ mr: "auto" }}>
+            {t("selected_count", { selected: count })}
+        </Typography>
+        <Tooltip title={t("download")}>
+            <IconButton onClick={downloadFilesHelper}>
+                <DownloadIcon />
+            </IconButton>
+        </Tooltip>
+    </Stack>
+);
 
 interface ListHeaderProps {
     publicCollection: Collection;
@@ -714,7 +703,7 @@ const ListHeader: React.FC<ListHeaderProps> = ({
 
     return (
         <GalleryItemsHeaderAdapter>
-            <SpaceBetweenFlex>
+            <SpacedRow>
                 <GalleryItemsSummary
                     name={publicCollection.name}
                     fileCount={publicFiles.length}
@@ -729,7 +718,7 @@ const ListHeader: React.FC<ListHeaderProps> = ({
                         </OverflowMenuOption>
                     </OverflowMenu>
                 )}
-            </SpaceBetweenFlex>
+            </SpacedRow>
         </GalleryItemsHeaderAdapter>
     );
 };

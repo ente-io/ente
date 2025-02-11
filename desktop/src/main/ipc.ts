@@ -24,6 +24,7 @@ import {
     updateAndRestart,
     updateOnNextRestart,
 } from "./services/app-update";
+import autoLauncher from "./services/auto-launcher";
 import {
     openDirectory,
     openLogDirectory,
@@ -116,6 +117,10 @@ export const attachIPCHandlers = () => {
     ipcMain.handle("setLastShownChangelogVersion", (_, version: number) =>
         setLastShownChangelogVersion(version),
     );
+
+    ipcMain.handle("isAutoLaunchEnabled", () => autoLauncher.isEnabled());
+
+    ipcMain.handle("toggleAutoLaunch", () => autoLauncher.toggleAutoLaunch());
 
     // - App update
 
