@@ -139,11 +139,13 @@ export class FileViewerPhotoSwipe {
             if (!file) assertionFailed();
 
             if (itemData) return itemData;
-            return {
-                src: `https://dummyimage.com/100/777/fff/?text=i${index}`,
-                width: 100,
-                height: 100,
-            };
+
+            // We don't have anything to show immediately, though in most cases
+            // a cached renderable thumbnail URL will be available shortly.
+            // Meanwhile return empty slide data: PhotoSwipe will not show
+            // anything in the image area but will otherwise render the
+            // surrounding UI properly.
+            return {};
         });
         pswp.on("close", () => {
             // The user did some action within the file viewer to close it. Let
@@ -181,6 +183,10 @@ export class FileViewerPhotoSwipe {
 
     async enqueueUpdates(index: number, file: EnteFile) {
         const thumbnailURL = await downloadManager.renderableThumbnailURL(file);
+        // We don't have the dimensions of the thumbnail. We could try to deduce
+        // something from the file's aspect ratio etc, but that's not needed:
+        // PhotoSwipe already correctly (for our purposes) handles just a source
+        // URL being present.
         this.itemDataByFileID.set(file.id, { src: thumbnailURL });
         this.pswp.refreshSlideContent(index);
     }
