@@ -1,14 +1,15 @@
+import "dart:developer";
 import "dart:io";
 
-import "package:logging/logging.dart";
 import "package:path/path.dart";
 import "package:path_provider/path_provider.dart";
+import "package:photos/db/remote/migration.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
-class RemoteDB {
-  final Logger _logger = Logger("RemoteDB");
-  static const _databaseName = "ente.remote.db";
+var devLog = log;
 
+class RemoteDB {
+  static const _databaseName = "remote.db";
   // only have a single app-wide reference to the database
   static Future<SqliteDatabase>? _sqliteAsyncDBFuture;
 
@@ -23,8 +24,9 @@ class RemoteDB {
     final Directory documentsDirectory =
         await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
-    _logger.info("DB path " + path);
+    devLog("DB path " + path);
     final database = SqliteDatabase(path: path);
+    await RemoteDBMigration.migrate(database);
     return database;
   }
 }
