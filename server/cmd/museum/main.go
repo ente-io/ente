@@ -293,6 +293,7 @@ func main() {
 		BillingCtrl:   billingController,
 		UserRepo:      userRepo,
 		UserCacheCtrl: userCacheCtrl,
+		UsageRepo:     usageRepo,
 	}
 
 	publicCollectionCtrl := &controller.PublicCollectionController{
