@@ -181,6 +181,15 @@ export class FileViewerPhotoSwipe {
 
             return itemData ?? {};
         });
+        pswp.on("contentLoad", (e) => {
+            console.log(e);
+            if (e.content.data.videoURL) {
+                const holderEl = e.content.slide.holderElement;
+                const vid = document.createElement("h1");
+                vid.innerText = "Test";
+                holderEl.appendChild(vid);
+            }
+        });
         pswp.on("close", () => {
             // The user did some action within the file viewer to close it. Let
             // our parent know that we have been closed.
@@ -261,7 +270,13 @@ export class FileViewerPhotoSwipe {
                 });
                 const videoURL = await livePhotoSourceURLs.video();
                 console.log(videoURL);
-                update({ html: livePhotoVideoHTML(videoURL) });
+                // update({ html: livePhotoVideoHTML(videoURL) });
+                update({
+                    src: imageURL,
+                    width: file.pubMagicMetadata?.data?.w,
+                    height: file.pubMagicMetadata?.data?.h,
+                    videoURL,
+                });
                 break;
             }
         }
