@@ -601,6 +601,7 @@ class PreviewVideoStore {
     final files = await FilesDB.instance.getAllFilesAfterDate(
       fileType: FileType.video,
       beginDate: cutoff,
+      userID: Configuration.instance.getUserID()!,
     );
 
     final previewIds = FileDataService.instance.previewIds;
