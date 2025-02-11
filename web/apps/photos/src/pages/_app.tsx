@@ -56,6 +56,7 @@ import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
 
 import "photoswipe/dist/photoswipe.css";
+// TODO(PS): Note, auto hide only works with the new CSS.
 // import "../../../../packages/new/photos/components/ps5/dist/photoswipe.css";
 
 import "styles/global.css";

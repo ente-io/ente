@@ -126,6 +126,19 @@ export class FileViewerPhotoSwipe {
      * start with the thumbnail but then also update this with the original etc.
      */
     private itemDataByFileID: Map<number, SlideData> = new Map();
+    /**
+     * An interval that invokes a periodic check of whether we should the hide
+     * controls if the user does not perform any pointer events for a while.
+     */
+    private autoHideCheckIntervalId: ReturnType<typeof setTimeout> | undefined;
+    /**
+     * The time the last activity occurred. Used in tandem with
+     * {@link autoHideCheckIntervalId} to implement the auto hiding of controls
+     * when the user stops moving the pointer for a while.
+     *
+     * This will be "hidden" if controls have already been hidden.
+     */
+    private lastActivityDate: Date | "hidden";
 
     constructor({
         files,
@@ -170,11 +183,14 @@ export class FileViewerPhotoSwipe {
             // TODO(PS): will we need this?
             mainClass: "our-extra-pswp-main-class",
         });
+
         // Provide data about slides to PhotoSwipe via callbacks
         // https://photoswipe.com/data-sources/#dynamically-generated-data
+
         pswp.addFilter("numItems", () => {
             return this.files.length;
         });
+
         pswp.addFilter("itemData", (_, index) => {
             const file = files[index];
 
@@ -203,8 +219,19 @@ export class FileViewerPhotoSwipe {
             log.debug(() => ["[ps]", { itemData, index, file, itemData }]);
             if (!file) assertionFailed();
 
+            this.lastActivityDate = new Date();
+
             return itemData ?? {};
         });
+
+        pswp.addFilter("preventPointerEvent", (originalResult) => {
+            // There was a pointer event. We don't care which one, we just use
+            // this as a hook to show UI again (if needed) and update our last
+            // activity date.
+            this.onPointerActivity();
+            return originalResult;
+        });
+
         pswp.on("contentLoad", (e) => {
             console.log("contentLoad", e);
             if (e.content.data.videoURL) {
@@ -226,16 +253,25 @@ export class FileViewerPhotoSwipe {
                     "position: absolute; left: 0; right: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;";
             }
         });
+
         pswp.on("close", () => {
-            // The user did some action within the file viewer to close it. Let
-            // our parent know that we have been closed.
+            // The user did some action within the file viewer to close it.
+            //
+            // Clear intervals.
+            clearIntervals();
+            // Let our parent know that we have been closed.
             onClose();
         });
+
         // Initializing PhotoSwipe adds it to the DOM as a dialog-like div with
         // the class "pswp".
         pswp.init();
 
         this.pswp = pswp;
+
+        this.autoHideCheckIntervalId = setInterval(() => {
+            this.autoHideIfInactive();
+        }, 1000);
     }
 
     /**
@@ -254,13 +290,42 @@ export class FileViewerPhotoSwipe {
         // closed internally (e.g. the user activated the close button within
         // the file viewer), then PhotoSwipe will ignore this extra close.
         this.pswp.close();
+        this.clearAutoHideIntervalIfNeeded();
     }
 
     updateFiles(files: EnteFile[]) {
         // TODO(PS)
     }
 
-    async enqueueUpdates(index: number, file: EnteFile) {
+    private clearAutoHideIntervalIfNeeded() {
+        if (this.autoHideCheckIntervalId) {
+            clearInterval(this.autoHideCheckIntervalId);
+            this.autoHideCheckIntervalId = undefined;
+        }
+    }
+
+    private onPointerActivity() {
+        if (this.lastActivityDate == "hidden") this.showUIControls();
+        this.lastActivityDate = new Date();
+    }
+
+    private autoHideIfInactive() {
+        if (this.lastActivityDate == "hidden") return;
+        if (Date.now() - this.lastActivityDate.getTime() > 3000) {
+            this.hideUIControls();
+            this.lastActivityDate = "hidden";
+        }
+    }
+
+    private showUIControls() {
+        this.pswp.element.classList.add("pswp--ui-visible");
+    }
+
+    private hideUIControls() {
+        this.pswp.element.classList.remove("pswp--ui-visible");
+    }
+
+    private async enqueueUpdates(index: number, file: EnteFile) {
         const update = (itemData: SlideData) => {
             this.itemDataByFileID.set(file.id, itemData);
             this.pswp.refreshSlideContent(index);
