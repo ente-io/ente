@@ -1,6 +1,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
+import { assertionFailed } from "@/base/assert";
+import log from "@/base/log";
+import { downloadManager } from "@/gallery/services/download";
 import type { EnteFile } from "@/media/file";
 
 // TODO(PS): WIP gallery using upstream photoswipe
@@ -19,6 +22,58 @@ let PhotoSwipe;
 if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
     PhotoSwipe = require("./ps5/dist/photoswipe.esm.js").default;
 }
+// TODO(PS):
+//import { type SlideData } from "./ps5/dist/types/slide/"
+type SlideData = {
+    /**
+     * thumbnail element
+     */
+    element?: HTMLElement | undefined;
+    /**
+     * image URL
+     */
+    src?: string | undefined;
+    /**
+     * image srcset
+     */
+    srcset?: string | undefined;
+    /**
+     * image width (deprecated)
+     */
+    w?: number | undefined;
+    /**
+     * image height (deprecated)
+     */
+    h?: number | undefined;
+    /**
+     * image width
+     */
+    width?: number | undefined;
+    /**
+     * image height
+     */
+    height?: number | undefined;
+    /**
+     * placeholder image URL that's displayed before large image is loaded
+     */
+    msrc?: string | undefined;
+    /**
+     * image alt text
+     */
+    alt?: string | undefined;
+    /**
+     * whether thumbnail is cropped client-side or not
+     */
+    thumbCropped?: boolean | undefined;
+    /**
+     * html content of a slide
+     */
+    html?: string | undefined;
+    /**
+     * slide type
+     */
+    type?: string | undefined;
+};
 
 interface FileViewerPhotoSwipeOptions {
     files: EnteFile[];
@@ -49,7 +104,8 @@ interface FileViewerPhotoSwipeOptions {
  * Documentation: https://photoswipe.com/.
  */
 export class FileViewerPhotoSwipe {
-    pswp: PhotoSwipe;
+    private pswp: PhotoSwipe;
+    private itemDataByFileID: Map<number, SlideData> = new Map();
 
     constructor({ files, initialIndex, onClose }: FileViewerPhotoSwipeOptions) {
         this.files = files;
@@ -67,13 +123,22 @@ export class FileViewerPhotoSwipe {
         // Provide data about slides to PhotoSwipe via callbacks
         // https://photoswipe.com/data-sources/#dynamically-generated-data
         pswp.addFilter("numItems", () => {
-            return files.length;
+            return this.files.length;
         });
         // const enqueueUpdates = index;
-        pswp.addFilter("itemData", (itemData, index) => {
+        pswp.addFilter("itemData", (_, index) => {
             const file = files[index];
-            console.log({ itemData, index, file });
 
+            let itemData: SlideData | undefined;
+            if (file) {
+                itemData = this.itemDataByFileID.get(file.id);
+                if (!itemData) this.enqueueUpdates(index, file);
+            }
+
+            log.debug(() => ["[ps]", { itemData, index, file, itemData }]);
+            if (!file) assertionFailed();
+
+            if (itemData) return itemData;
             return {
                 src: `https://dummyimage.com/100/777/fff/?text=i${index}`,
                 width: 100,
@@ -92,6 +157,12 @@ export class FileViewerPhotoSwipe {
         this.pswp = pswp;
     }
 
+    /**
+     * Close this instance of {@link FileViewerPhotoSwipe} if it hasn't itself
+     * initiated the close.
+     *
+     * This instance **cannot** be used after this function has been called.
+     */
     closeIfNeeded() {
         // Closing PhotoSwipe removes it from the DOM.
         //
@@ -102,10 +173,15 @@ export class FileViewerPhotoSwipe {
         // closed internally (e.g. the user activated the close button within
         // the file viewer), then PhotoSwipe will ignore this extra close.
         this.pswp.close();
-        this.pswp = undefined;
     }
 
     updateFiles(files: EnteFile[]) {
         // TODO(PS)
+    }
+
+    async enqueueUpdates(index: number, file: EnteFile) {
+        const thumbnailURL = await downloadManager.renderableThumbnailURL(file);
+        this.itemDataByFileID.set(file.id, { src: thumbnailURL });
+        this.pswp.refreshSlideContent(index);
     }
 }
