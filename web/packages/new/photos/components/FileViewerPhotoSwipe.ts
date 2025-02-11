@@ -143,6 +143,14 @@ export class FileViewerPhotoSwipe {
             // be zoomed into further (this is common when just the thumbnail
             // has been loaded).
             clickToCloseNonZoomable: false,
+            // Disable closing on background taps otherwise accidental closes
+            // are irritatingly easy.
+            bgClickAction: () => {
+                /* nop */
+            },
+            // The default (ctrl + zoom) is cumbersome, allow zooming just by
+            // using the wheel / trackpad zoom gesture.
+            wheelToZoom: true,
             // Set the index within files that we should open to. Subsequent
             // updates to the index will be tracked by PhotoSwipe internally.
             index: initialIndex,
