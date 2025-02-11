@@ -71,6 +71,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const pswpRef = useRef<PhotoSwipe | undefined>();
 
     useEffect(() => {
+        if (!open) return;
+
         const pswp = new PhotoSwipe({
             // Opaque background.
             bgOpacity: 1,
@@ -92,39 +94,24 @@ const FileViewer: React.FC<FileViewerProps> = ({
             };
         });
         pswp.on("close", () => {
-            console.log("pswp.on(close)")
+            console.log("pswp.on(close)");
             onClose();
         });
         pswpRef.current = pswp;
+        // Initializing PhotoSwipe adds it to the DOM as a "dialog" div
+        // with the class "pswp" (and others).
+        pswp.init();
 
         return () => {
-            if (pswpRef.current.isOpen) pswpRef.current.destroy();
+            // Closing PhotoSwipe removes it from the DOM.
+            //
+            // This will only have an effect if we're being closed externally.
+            pswpRef.current?.close();
             pswpRef.current = undefined;
         };
-    }, []);
-
-    console.log({ open, pswpIsOpen: pswpRef.current?.isOpen });
-
-    useEffect(() => {
-        const pswp = pswpRef.current!;
-        if (open) {
-            if (!pswp.isOpen) {
-                // Initializing PhotoSwipe adds it to the DOM as a "dialog" div
-                // with the class "pswp" (and others).
-                pswp.init();
-            }
-        } else {
-            if (pswp.isOpen) {
-                // Closing PhotoSwipe removes it from the DOM.
-                //
-                // We get to this particular point if we're being closed
-                // externally.
-                pswp.close();
-            }
-        }
     }, [open]);
 
-    const handleClose = () => {};
+    console.log({ open, pswpIsOpen: pswpRef.current?.isOpen });
 
     return (
         <Container>
