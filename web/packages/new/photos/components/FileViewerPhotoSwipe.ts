@@ -192,17 +192,29 @@ export class FileViewerPhotoSwipe {
     }
 
     async enqueueUpdates(index: number, file: EnteFile) {
+        const update = (itemData: SlideData) => {
+            this.itemDataByFileID.set(file.id, itemData);
+            this.pswp.refreshSlideContent(index);
+        };
+
         const thumbnailURL = await downloadManager.renderableThumbnailURL(file);
         // We don't have the dimensions of the thumbnail. We could try to deduce
         // something from the file's aspect ratio etc, but that's not needed:
         // PhotoSwipe already correctly (for our purposes) handles just a source
         // URL being present.
-        this.itemDataByFileID.set(file.id, { src: thumbnailURL });
-        this.pswp.refreshSlideContent(index);
+        update({ src: thumbnailURL });
 
         switch (file.metadata.fileType) {
-            case FileType.image:
+            case FileType.image: {
+                const sourceURLs =
+                    await downloadManager.renderableSourceURLs(file);
+                update({
+                    src: sourceURLs.url,
+                    width: file.pubMagicMetadata?.data?.w,
+                    height: file.pubMagicMetadata?.data?.h,
+                });
                 break;
+            }
 
             default:
                 break;
