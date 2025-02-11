@@ -80,9 +80,26 @@ type SlideData = {
 };
 
 interface FileViewerPhotoSwipeOptions {
+    /**
+     * The files that are being displayed in the context in which the file
+     * viewer was invoked.
+     */
     files: EnteFile[];
+    /**
+     * The index of the file that should be initially shown.
+     *
+     * Subsequently the user may navigate between files by using the controls
+     * provided within the file viewer itself.
+     */
     initialIndex: number;
+    /**
+     * Called when the file viewer is closed.
+     */
     onClose: () => void;
+    /**
+     * If true, then controls for downloading the file are not shown.
+     */
+    disableDownload?: boolean;
 }
 
 /**
@@ -108,11 +125,31 @@ interface FileViewerPhotoSwipeOptions {
  * Documentation: https://photoswipe.com/.
  */
 export class FileViewerPhotoSwipe {
+    /**
+     * The PhotoSwipe instance which we wrap.
+     */
     private pswp: PhotoSwipe;
+    /**
+     * The options with which we were initialized.
+     */
+    private opts: Pick<FileViewerPhotoSwipeOptions, "disableDownload">;
+    /**
+     * The best available SlideData for rendering the file with the given ID.
+     *
+     * If an entry does not exist for a particular fileID, then it is lazily
+     * added on demand. The same entry might get updated multiple times, as we
+     * start with the thumbnail but then also update this with the original etc.
+     */
     private itemDataByFileID: Map<number, SlideData> = new Map();
 
-    constructor({ files, initialIndex, onClose }: FileViewerPhotoSwipeOptions) {
+    constructor({
+        files,
+        initialIndex,
+        onClose,
+        disableDownload,
+    }: FileViewerPhotoSwipeOptions) {
         this.files = files;
+        this.opts = { disableDownload };
 
         const pswp = new PhotoSwipe({
             // Opaque background.
@@ -223,8 +260,9 @@ export class FileViewerPhotoSwipe {
                 {
                     const sourceURLs =
                         await downloadManager.renderableSourceURLs(file);
+                    const disableDownload = !!this.opts.disableDownload;
                     update({
-                        html: videoHTML(sourceURLs),
+                        html: videoHTML(sourceURLs, disableDownload),
                     });
                     break;
                 }
@@ -236,8 +274,9 @@ export class FileViewerPhotoSwipe {
     }
 }
 
-const videoHTML = ({ url }: RenderableSourceURLs) => `
-<video controls>
+const videoHTML = ({ url }: RenderableSourceURLs, disableDownload: boolean) => `
+<video controls ${disableDownload && "controlsList=nodownload"} oncontextmenu="return false;">
   <source src="${url}" />
+  Your browser does not support video playback.
 </video>
 `;
