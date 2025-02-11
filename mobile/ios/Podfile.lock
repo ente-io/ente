@@ -6,6 +6,9 @@ PODS:
   - connectivity_plus (0.0.1):
     - Flutter
     - FlutterMacOS
+  - cupertino_http (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - dart_ui_isolate (0.0.1):
     - Flutter
   - device_info_plus (0.0.1):
@@ -158,6 +161,8 @@ PODS:
   - nanopb/encode (3.30910.0)
   - native_video_player (1.0.0):
     - Flutter
+  - objective_c (0.0.1):
+    - Flutter
   - onnxruntime (0.0.1):
     - Flutter
     - onnxruntime-objc (= 1.18.0)
@@ -247,6 +252,7 @@ DEPENDENCIES:
   - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
   - battery_info (from `.symlinks/plugins/battery_info/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/darwin`)
+  - cupertino_http (from `.symlinks/plugins/cupertino_http/darwin`)
   - dart_ui_isolate (from `.symlinks/plugins/dart_ui_isolate/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - ffmpeg_kit_flutter_full_gpl (from `.symlinks/plugins/ffmpeg_kit_flutter_full_gpl/ios`)
@@ -278,6 +284,7 @@ DEPENDENCIES:
   - motionphoto (from `.symlinks/plugins/motionphoto/ios`)
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
   - native_video_player (from `.symlinks/plugins/native_video_player/ios`)
+  - objective_c (from `.symlinks/plugins/objective_c/ios`)
   - onnxruntime (from `.symlinks/plugins/onnxruntime/ios`)
   - open_mail_app (from `.symlinks/plugins/open_mail_app/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
@@ -331,6 +338,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/battery_info/ios"
   connectivity_plus:
     :path: ".symlinks/plugins/connectivity_plus/darwin"
+  cupertino_http:
+    :path: ".symlinks/plugins/cupertino_http/darwin"
   dart_ui_isolate:
     :path: ".symlinks/plugins/dart_ui_isolate/ios"
   device_info_plus:
@@ -393,6 +402,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/move_to_background/ios"
   native_video_player:
     :path: ".symlinks/plugins/native_video_player/ios"
+  objective_c:
+    :path: ".symlinks/plugins/objective_c/ios"
   onnxruntime:
     :path: ".symlinks/plugins/onnxruntime/ios"
   open_mail_app:
@@ -442,6 +453,7 @@ SPEC CHECKSUMS:
   background_fetch: 39f11371c0dce04b001c4bfd5e782bcccb0a85e2
   battery_info: 09f5c9ee65394f2291c8c6227bedff345b8a730c
   connectivity_plus: ddd7f30999e1faaef5967c23d5b6d503d10434db
+  cupertino_http: 947a233f40cfea55167a49f2facc18434ea117ba
   dart_ui_isolate: d5bcda83ca4b04f129d70eb90110b7a567aece14
   device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
   ffmpeg-kit-ios-full-gpl: 80adc341962e55ef709e36baa8ed9a70cf4ea62b
@@ -484,6 +496,7 @@ SPEC CHECKSUMS:
   move_to_background: 39a5b79b26d577b0372cbe8a8c55e7aa9fcd3a2d
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   native_video_player: d12af78a1a4a8cf09775a5177d5b392def6fd23c
+  objective_c: 77e887b5ba1827970907e10e832eec1683f3431d
   onnxruntime: e7c2ae44385191eaad5ae64c935a72debaddc997
   onnxruntime-c: a909204639a1f035f575127ac406f781ac797c9c
   onnxruntime-objc: b6fab0f1787aa6f7190c2013f03037df4718bd8b

@@ -108,7 +108,7 @@ class ReferralCodeWidget extends StatelessWidget {
           notifyParent?.call();
         } catch (e, s) {
           Logger("ReferralCodeWidget").severe("Failed to update code", e, s);
-          if (e is DioError) {
+          if (e is DioException) {
             if (e.response?.statusCode == 400) {
               await showInfoDialog(
                 context,
