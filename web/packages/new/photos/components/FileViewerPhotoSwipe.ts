@@ -5,7 +5,7 @@ import { assertionFailed } from "@/base/assert";
 import log from "@/base/log";
 import {
     downloadManager,
-    type RenderableSourceURLs,
+    type LivePhotoSourceURL,
 } from "@/gallery/services/download";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
@@ -151,7 +151,6 @@ export class FileViewerPhotoSwipe {
         pswp.addFilter("numItems", () => {
             return this.files.length;
         });
-        // const enqueueUpdates = index;
         pswp.addFilter("itemData", (_, index) => {
             const file = files[index];
 
@@ -245,21 +244,39 @@ export class FileViewerPhotoSwipe {
                 const sourceURLs =
                     await downloadManager.renderableSourceURLs(file);
                 const disableDownload = !!this.opts.disableDownload;
-                update({
-                    html: videoHTML(sourceURLs, disableDownload),
-                });
+                update({ html: videoHTML(sourceURLs.url, disableDownload) });
                 break;
             }
 
-            default:
+            default: {
+                const sourceURLs =
+                    await downloadManager.renderableSourceURLs(file);
+                const livePhotoSourceURLs =
+                    sourceURLs.url as LivePhotoSourceURL;
+                const imageURL = await livePhotoSourceURLs.image();
+                update({
+                    src: imageURL,
+                    width: file.pubMagicMetadata?.data?.w,
+                    height: file.pubMagicMetadata?.data?.h,
+                });
+                const videoURL = await livePhotoSourceURLs.video();
+                console.log(videoURL);
+                update({ html: livePhotoVideoHTML(videoURL) });
                 break;
+            }
         }
     }
 }
 
-const videoHTML = ({ url }: RenderableSourceURLs, disableDownload: boolean) => `
+const videoHTML = (url: string, disableDownload: boolean) => `
 <video controls ${disableDownload && "controlsList=nodownload"} oncontextmenu="return false;">
   <source src="${url}" />
   Your browser does not support video playback.
+</video>
+`;
+
+const livePhotoVideoHTML = (videoURL: string) => `
+<video autoplay loop muted oncontextmenu="return false;">
+  <source src="${videoURL}" />
 </video>
 `;
