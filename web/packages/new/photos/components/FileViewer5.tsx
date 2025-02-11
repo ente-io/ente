@@ -110,31 +110,10 @@ const FileViewer: React.FC<FileViewerProps> = ({
             // (e.g. if the user selects an album in the file info). If this
             // cleanup function is running because we were closed internally,
             // then the PhotoSwipe code will no-op this extra close.
-            pswpRef.current?.close();
-            console.log({
-                "pswpRef.current": pswpRef.current,
-                "pswpRef.current.isOpen": pswpRef.current.isOpen,
-                "pswpRef.current.opener": pswpRef.current.opener,
-                "pswpRef.current.opener.isOpen": pswpRef.current.opener.isOpen,
-                "pswpRef.current.opener.isClosed":
-                    pswpRef.current.opener.isClosed,
-            });
-            setTimeout(() => {
-                console.log({
-                    "pswpRef.current": pswpRef.current,
-                    "pswpRef.current.isOpen": pswpRef.current.isOpen,
-                    "pswpRef.current.opener": pswpRef.current.opener,
-                    "pswpRef.current.opener.isOpen":
-                        pswpRef.current.opener.isOpen,
-                    "pswpRef.current.opener.isClosed":
-                        pswpRef.current.opener.isClosed,
-                });
-            }, 1000);
+            pswpRef.current.close();
             pswpRef.current = undefined;
         };
     }, [open]);
-
-    console.log({ open, pswpIsOpen: pswpRef.current?.isOpen });
 
     return (
         <Container>

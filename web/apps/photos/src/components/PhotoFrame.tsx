@@ -235,22 +235,6 @@ const PhotoFrame = ({
         }
     }, [selected]);
 
-    console.log({ t: "PhotoFrame", open: open });
-
-    useEffect(() => {
-        if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
-            console.log({ t: "PhotoFrame UE", open: open5 });
-
-            setTimeout(() => {
-                setOpen5(false);
-            }, 5000);
-        }
-        return () => {
-            if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5)
-                console.log({ t: "PhotoFrame UE cleanup", open: open5 });
-        };
-    }, [open5]);
-
     if (!displayFiles) {
         return <div />;
     }
