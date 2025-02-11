@@ -5,6 +5,7 @@ import { assertionFailed } from "@/base/assert";
 import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
 import type { EnteFile } from "@/media/file";
+import { FileType } from "@/media/file-type";
 
 // TODO(PS): WIP gallery using upstream photoswipe
 //
@@ -132,20 +133,29 @@ export class FileViewerPhotoSwipe {
             let itemData: SlideData | undefined;
             if (file) {
                 itemData = this.itemDataByFileID.get(file.id);
-                if (!itemData) this.enqueueUpdates(index, file);
+                if (!itemData) {
+                    // We don't have anything to show immediately, though in
+                    // most cases a cached renderable thumbnail URL will be
+                    // available shortly.
+                    //
+                    // Meanwhile,
+                    //
+                    // 1. Return empty slide data; PhotoSwipe will not show
+                    //    anything in the image area but will otherwise render
+                    //    the surrounding UI properly.
+                    //
+                    // 2. Insert empty data so that we don't enqueue multiple
+                    //    updates.
+                    itemData = {};
+                    this.itemDataByFileID.set(file.id, itemData);
+                    this.enqueueUpdates(index, file);
+                }
             }
 
             log.debug(() => ["[ps]", { itemData, index, file, itemData }]);
             if (!file) assertionFailed();
 
-            if (itemData) return itemData;
-
-            // We don't have anything to show immediately, though in most cases
-            // a cached renderable thumbnail URL will be available shortly.
-            // Meanwhile return empty slide data: PhotoSwipe will not show
-            // anything in the image area but will otherwise render the
-            // surrounding UI properly.
-            return {};
+            return itemData ?? {};
         });
         pswp.on("close", () => {
             // The user did some action within the file viewer to close it. Let
@@ -189,5 +199,13 @@ export class FileViewerPhotoSwipe {
         // URL being present.
         this.itemDataByFileID.set(file.id, { src: thumbnailURL });
         this.pswp.refreshSlideContent(index);
+
+        switch (file.metadata.fileType) {
+            case FileType.image:
+                break;
+
+            default:
+                break;
+        }
     }
 }
