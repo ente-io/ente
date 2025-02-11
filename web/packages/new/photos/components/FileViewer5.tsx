@@ -94,19 +94,42 @@ const FileViewer: React.FC<FileViewerProps> = ({
             };
         });
         pswp.on("close", () => {
-            console.log("pswp.on(close)");
+            // The user did some action within the image viewer to close it. Let
+            // our parent component know that the image viewer is closing.
             onClose();
         });
         pswpRef.current = pswp;
-        // Initializing PhotoSwipe adds it to the DOM as a "dialog" div
-        // with the class "pswp" (and others).
+        // Initializing PhotoSwipe adds it to the DOM as a dialog-like div with
+        // the class "pswp".
         pswp.init();
 
         return () => {
             // Closing PhotoSwipe removes it from the DOM.
             //
-            // This will only have an effect if we're being closed externally.
+            // This will only have an effect if we're being closed externally
+            // (e.g. if the user selects an album in the file info). If this
+            // cleanup function is running because we were closed internally,
+            // then the PhotoSwipe code will no-op this extra close.
             pswpRef.current?.close();
+            console.log({
+                "pswpRef.current": pswpRef.current,
+                "pswpRef.current.isOpen": pswpRef.current.isOpen,
+                "pswpRef.current.opener": pswpRef.current.opener,
+                "pswpRef.current.opener.isOpen": pswpRef.current.opener.isOpen,
+                "pswpRef.current.opener.isClosed":
+                    pswpRef.current.opener.isClosed,
+            });
+            setTimeout(() => {
+                console.log({
+                    "pswpRef.current": pswpRef.current,
+                    "pswpRef.current.isOpen": pswpRef.current.isOpen,
+                    "pswpRef.current.opener": pswpRef.current.opener,
+                    "pswpRef.current.opener.isOpen":
+                        pswpRef.current.opener.isOpen,
+                    "pswpRef.current.opener.isClosed":
+                        pswpRef.current.opener.isClosed,
+                });
+            }, 1000);
             pswpRef.current = undefined;
         };
     }, [open]);
