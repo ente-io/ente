@@ -7,7 +7,7 @@ import {
 } from "@/gallery/services/download";
 import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
-import { FileViewer } from "@/new/photos/components/FileViewer";
+import { FileViewer } from "@/new/photos/components/PhotoViewer";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
 import { styled } from "@mui/material";
@@ -518,7 +518,8 @@ const PhotoFrame = ({
         <Container>
             {process.env.NEXT_PUBLIC_ENTE_WIP_PS5 && (
                 <FileViewer
-                    /* @ts-expect-error TODO(PS): test */
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    /* @ts-ignore TODO(PS): test */
                     open={open5}
                     onClose={handleClose}
                     files={files}
