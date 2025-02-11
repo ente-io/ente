@@ -1,5 +1,5 @@
 import { Notification } from "@/new/photos/components/Notification";
-import { aboveGalleryContentZ } from "@/new/photos/components/utils/z-index";
+import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
 import { useAppContext } from "@/new/photos/types/context";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
@@ -120,7 +120,7 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
                     horizontal="left"
                     sx={{
                         "&&": { bottom: `${index * 80 + 20}px` },
-                        zIndex: aboveGalleryContentZ,
+                        zIndex: aboveFileViewerContentZ,
                     }}
                     open={isFilesDownloadStarted(attributes)}
                     onClose={handleClose(attributes)}

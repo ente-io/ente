@@ -1,4 +1,3 @@
-import { CopyButton } from "@/base/components/CopyButton";
 import { LinkButtonUndecorated } from "@/base/components/LinkButton";
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { type ButtonishProps } from "@/base/components/mui";
@@ -20,6 +19,7 @@ import {
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
+import { CopyButton } from "@/new/photos/components/FileInfo";
 import { ChipButton } from "@/new/photos/components/mui/ChipButton";
 import { FilePeopleList } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
@@ -29,7 +29,7 @@ import {
 } from "@/new/photos/components/utils/dialog";
 import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import {
-    aboveGalleryContentZ,
+    aboveFileViewerContentZ,
     fileInfoDrawerZ,
 } from "@/new/photos/components/utils/z-index";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
@@ -259,9 +259,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             }
                             trailingButton={
                                 <CopyButton
-                                    code={openStreetMapLink(location)}
-                                    color="secondary"
                                     size="medium"
+                                    text={openStreetMapLink(location)}
                                 />
                             }
                         />
@@ -816,7 +815,7 @@ const FileNameEditDialog = ({
     };
     return (
         <TitledMiniDialog
-            sx={{ zIndex: aboveGalleryContentZ }}
+            sx={{ zIndex: aboveFileViewerContentZ }}
             open={isInEditMode}
             onClose={closeEditMode}
             title={t("rename_file")}
@@ -976,7 +975,7 @@ const RawExif: React.FC<RawExifProps> = ({
                 caption={fileName}
                 onRootClose={handleRootClose}
                 actionButton={
-                    <CopyButton code={JSON.stringify(tags)} color="secondary" />
+                    <CopyButton size="small" text={JSON.stringify(tags)} />
                 }
             />
             <Stack sx={{ gap: 2, py: 3, px: 1 }}>

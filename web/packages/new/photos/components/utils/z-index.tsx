@@ -33,7 +33,7 @@ export const fileInfoDrawerZ = photoSwipeZ + 1;
 
 /**
  * Dialogs (not necessarily always) need to be higher still so to ensure they
- * are visible above the drawer in case they are shown in response to some
- * action taken in the file info drawer.
+ * are visible above the file info drawer in case they are shown in response to
+ * some action taken in the file info drawer.
  */
-export const aboveGalleryContentZ = fileInfoDrawerZ + 1;
+export const aboveFileViewerContentZ = fileInfoDrawerZ + 1;

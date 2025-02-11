@@ -28,7 +28,7 @@ class MapView extends StatefulWidget {
   static const defaultMarkerSize = Size(75, 75);
 
   const MapView({
-    Key? key,
+    super.key,
     required this.updateVisibleImages,
     required this.imageMarkers,
     required this.controller,
@@ -42,7 +42,7 @@ class MapView extends StatefulWidget {
     this.onTap,
     this.interactiveFlags = InteractiveFlag.all,
     this.showControls = true,
-  }) : super(key: key);
+  });
 
   @override
   State<StatefulWidget> createState() => _MapViewState();

@@ -14,8 +14,6 @@ const latKey = "lat";
 const longKey = "long";
 const motionVideoIndexKey = "mvi";
 const noThumbKey = "noThumb";
-const dateTimeKey = 'dateTime';
-const offsetTimeKey = 'offsetTime';
 
 class MagicMetadata {
   // 0 -> visible
@@ -48,11 +46,6 @@ class PubMagicMetadata {
   double? lat;
   double? long;
 
-  // ISO 8601 datetime without timezone. This contains the date and time of the photo in the original tz
-  // where the photo was taken.
-  String? dateTime;
-  String? offsetTime;
-
   // Motion Video Index. Positive value (>0) indicates that the file is a motion
   // photo
   int? mvi;
@@ -81,8 +74,6 @@ class PubMagicMetadata {
     this.mvi,
     this.noThumb,
     this.mediaType,
-    this.dateTime,
-    this.offsetTime,
   });
 
   factory PubMagicMetadata.fromEncodedJson(String encodedJson) =>
@@ -105,8 +96,6 @@ class PubMagicMetadata {
       mvi: map[motionVideoIndexKey],
       noThumb: map[noThumbKey],
       mediaType: map[mediaTypeKey],
-      dateTime: map[dateTimeKey],
-      offsetTime: map[offsetTimeKey],
     );
   }
 

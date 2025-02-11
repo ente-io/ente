@@ -7,7 +7,7 @@ import "package:photos/ui/viewer/file/zoomable_live_image_new.dart";
 
 class FileWidget extends StatelessWidget {
   final EnteFile file;
-  final String? tagPrefix;
+  final String tagPrefix;
   final Function(bool)? shouldDisableScroll;
   final Function(bool)? playbackCallback;
   final BoxDecoration? backgroundDecoration;
@@ -18,7 +18,7 @@ class FileWidget extends StatelessWidget {
     this.autoPlay,
     this.shouldDisableScroll,
     this.playbackCallback,
-    this.tagPrefix,
+    required this.tagPrefix,
     this.backgroundDecoration,
     super.key,
   });

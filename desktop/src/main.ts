@@ -152,7 +152,7 @@ const main = () => {
             void mainWindow.loadURL(rendererURL);
 
             // Continue on with the rest of the startup sequence.
-            Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
+            Menu.setApplicationMenu(createApplicationMenu(mainWindow));
             setupTrayItem(mainWindow);
             setupAutoUpdater(mainWindow);
 
@@ -326,8 +326,6 @@ const attachProcessHandlers = () => {
  */
 const waitForRendererDevServer = () => wait(1000);
 
-const wipDesktopCustomTitlebar = process.env.ENTE_WIP_TITLEBAR == "1";
-
 /**
  * Create an return the {@link BrowserWindow} that will form our app's UI.
  *
@@ -364,12 +362,8 @@ const createMainWindow = () => {
         // do it (Step 2) unconditionally (i.e., on macOS too).
         //
         // https://www.electronjs.org/docs/latest/tutorial/custom-title-bar#create-a-custom-title-bar
-        ...(wipDesktopCustomTitlebar
-            ? {
-                  titleBarStyle: "hidden",
-                  titleBarOverlay: true,
-              }
-            : {}),
+        titleBarStyle: "hidden",
+        titleBarOverlay: true,
         // The color to show in the window until the web content gets loaded.
         // https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
         //
