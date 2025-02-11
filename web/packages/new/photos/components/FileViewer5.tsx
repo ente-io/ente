@@ -16,7 +16,7 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
 import type { EnteFile } from "@/media/file.js";
 import { Button, styled } from "@mui/material";
 import { useEffect, useRef } from "react";
-import PhotoSwipe from "./ps5/dist/photoswipe.esm.js";
+import { FileViewerPhotoSwipe } from "./FileViewerPhotoSwipe";
 
 interface FileViewerProps {
     /**
@@ -68,49 +68,23 @@ const FileViewer: React.FC<FileViewerProps> = ({
     files,
     index,
 }) => {
-    const pswpRef = useRef<PhotoSwipe | undefined>();
+    const pswpRef = useRef<FileViewerPhotoSwipe | undefined>();
 
     useEffect(() => {
-        if (!open) return;
+        if (!open) {
+            // The close state will be handled by the cleanup function.
+            return;
+        }
 
-        const pswp = new PhotoSwipe({
-            // Opaque background.
-            bgOpacity: 1,
-            // TODO(PS): padding option? for handling custom title bar.
-            // TODO(PS): will we need this?
-            mainClass: "our-extra-pswp-main-class",
-        });
-        // Provide data about slides to PhotoSwipe via callbacks
-        // https://photoswipe.com/data-sources/#dynamically-generated-data
-        pswp.addFilter("numItems", () => {
-            return 2;
-        });
-        pswp.addFilter("itemData", (itemData, index) => {
-            console.log({ itemData, index });
-            return {
-                src: `https://dummyimage.com/100/777/fff/?text=i${index}`,
-                width: 100,
-                height: 100,
-            };
-        });
-        pswp.on("close", () => {
-            // The user did some action within the image viewer to close it. Let
-            // our parent component know that the image viewer is closing.
-            onClose();
+        const pswp = new FileViewerPhotoSwipe({
+            files,
+            initialIndex: index,
+            onClose,
         });
         pswpRef.current = pswp;
-        // Initializing PhotoSwipe adds it to the DOM as a dialog-like div with
-        // the class "pswp".
-        pswp.init();
 
         return () => {
-            // Closing PhotoSwipe removes it from the DOM.
-            //
-            // This will only have an effect if we're being closed externally
-            // (e.g. if the user selects an album in the file info). If this
-            // cleanup function is running because we were closed internally,
-            // then the PhotoSwipe code will no-op this extra close.
-            pswpRef.current.close();
+            pswpRef.current?.closeIfNeeded();
             pswpRef.current = undefined;
         };
     }, [open]);
