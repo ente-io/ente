@@ -522,7 +522,7 @@ const PhotoFrame = ({
                     open={open5}
                     onClose={handleClose}
                     files={files}
-                    index={currentIndex}
+                    initialIndex={currentIndex}
                 />
             )}
             <AutoSizer>

@@ -9,6 +9,7 @@ import {
 } from "@/gallery/services/download";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
+import type { FileViewerProps } from "./FileViewer5";
 
 // TODO(PS): WIP gallery using upstream photoswipe
 //
@@ -79,28 +80,12 @@ type SlideData = {
     type?: string | undefined;
 };
 
-interface FileViewerPhotoSwipeOptions {
-    /**
-     * The files that are being displayed in the context in which the file
-     * viewer was invoked.
-     */
-    files: EnteFile[];
-    /**
-     * The index of the file that should be initially shown.
-     *
-     * Subsequently the user may navigate between files by using the controls
-     * provided within the file viewer itself.
-     */
-    initialIndex: number;
+type FileViewerPhotoSwipeOptions = FileViewerProps & {
     /**
      * Called when the file viewer is closed.
      */
     onClose: () => void;
-    /**
-     * If true, then controls for downloading the file are not shown.
-     */
-    disableDownload?: boolean;
-}
+};
 
 /**
  * A wrapper over {@link PhotoSwipe} to tailor its interface for use by our file
@@ -256,17 +241,15 @@ export class FileViewerPhotoSwipe {
                 break;
             }
 
-            case FileType.video:
-                {
-                    const sourceURLs =
-                        await downloadManager.renderableSourceURLs(file);
-                    const disableDownload = !!this.opts.disableDownload;
-                    update({
-                        html: videoHTML(sourceURLs, disableDownload),
-                    });
-                    break;
-                }
+            case FileType.video: {
+                const sourceURLs =
+                    await downloadManager.renderableSourceURLs(file);
+                const disableDownload = !!this.opts.disableDownload;
+                update({
+                    html: videoHTML(sourceURLs, disableDownload),
+                });
                 break;
+            }
 
             default:
                 break;

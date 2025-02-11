@@ -18,55 +18,42 @@ import { Button, styled } from "@mui/material";
 import { useEffect, useRef } from "react";
 import { FileViewerPhotoSwipe } from "./FileViewerPhotoSwipe";
 
-interface FileViewerProps {
+export interface FileViewerProps {
     /**
-     * The list of files that are currently being displayed.
+     * The list of files that are currently being displayed in the context in
+     * which the file viewer was invoked.
      *
-     * Although the file viewer itself is called on to display a particular file
-     * (specified by the {@link index} prop), the viewer is always used in the
-     * context of a an album, or search results, or some other arbitrary list of
-     * files. The {@link files} prop sets this underlying list of files.
+     * Although the file viewer is called on to display a particular file
+     * (specified by the {@link initialIndex} prop), the viewer is always used
+     * in the context of a an album, or search results, or some other arbitrary
+     * list of files. The {@link files} prop sets this underlying list of files.
      *
-     * The user can also navigate through them from within the viewer by using
-     * the arrow buttons.
+     * After the initial file has been shown, the user can navigate through the
+     * other files from within the viewer by using the arrow buttons.
      */
     files: EnteFile[];
     /**
-     * The index from within {@link files} that should be, or is, currently
-     * being displayed.
+     * The index of the file that should be initially shown.
      *
-     * It is set externally when the user activates a particular thumbnail in
-     * the gallery. It is set internally (by the file viewer itself) when the
-     * user scrolls through the files by using the arrow buttons.
+     * Subsequently the user may navigate between files by using the controls
+     * provided within the file viewer itself.
      */
-    index: number;
+    initialIndex: number;
+    /**
+     * If true then the viewer does not show controls for downloading the file.
+     */
+    disableDownload?: boolean;
 }
 
 /**
- * The {@link FileViewer} is our PhotoSwipe based image and video viewer.
- *
- * ---
- *
- * [Note: PhotoSwipe]
- *
- * PhotoSwipe is a library that behaves similarly to the OG "lightbox" image
- * gallery JavaScript component from the middle ages.
- *
- * We don't need the lightbox functionality since we already have our own
- * thumbnail list (the "gallery"), so we only use the "Core" PhotoSwipe module
- * as our image viewer component.
- *
- * When the user clicks on one of the thumbnails in our gallery, we make the
- * root PhotoSwipe component visible. Within the DOM this is a dialog that takes
- * up the entire viewport, and shows the image etc, and various controls.
- *
- * The documentation for PhotoSwipe is at https://photoswipe.com/.
+ * A PhotoSwipe based image and video viewer.
  */
 const FileViewer: React.FC<FileViewerProps> = ({
     open,
     onClose,
     files,
-    index,
+    initialIndex,
+    disableDownload,
 }) => {
     const pswpRef = useRef<FileViewerPhotoSwipe | undefined>();
 
@@ -78,8 +65,9 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
         const pswp = new FileViewerPhotoSwipe({
             files,
-            initialIndex: index,
+            initialIndex,
             onClose,
+            disableDownload,
         });
         pswpRef.current = pswp;
 
@@ -92,19 +80,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
     return (
         <Container>
             <Button>Test</Button>
-            <div id="test-gallery">
-                <a
-                    href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-2500.jpg"
-                    data-pswp-width="1669"
-                    data-pswp-height="2500"
-                    target="_blank"
-                >
-                    <img
-                        src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-200.jpg"
-                        alt=""
-                    />
-                </a>
-            </div>
         </Container>
     );
 };
