@@ -202,22 +202,21 @@ export class FileViewerPhotoSwipe {
         pswp.addFilter("itemData", (_, index) => {
             const file = files[index];
 
+            // We might not have anything to show immediately, though in most
+            // cases a cached renderable thumbnail URL will be available
+            // shortly.
+            //
+            // Meanwhile,
+            //
+            // 1. Return empty slide data; PhotoSwipe will not show anything in
+            //    the image area but will otherwise render UI controls properly.
+            //
+            // 2. Insert empty data so that we don't enqueue multiple updates.
+
             let itemData: SlideData | undefined;
             if (file) {
                 itemData = this.itemDataByFileID.get(file.id);
                 if (!itemData) {
-                    // We don't have anything to show immediately, though in
-                    // most cases a cached renderable thumbnail URL will be
-                    // available shortly.
-                    //
-                    // Meanwhile,
-                    //
-                    // 1. Return empty slide data; PhotoSwipe will not show
-                    //    anything in the image area but will otherwise render
-                    //    the surrounding UI properly.
-                    //
-                    // 2. Insert empty data so that we don't enqueue multiple
-                    //    updates.
                     itemData = {};
                     this.itemDataByFileID.set(file.id, itemData);
                     this.enqueueUpdates(index, file);
@@ -351,11 +350,18 @@ export class FileViewerPhotoSwipe {
         };
 
         const thumbnailURL = await downloadManager.renderableThumbnailURL(file);
-        // We don't have the dimensions of the thumbnail. We could try to deduce
-        // something from the file's aspect ratio etc, but that's not needed:
-        // PhotoSwipe already correctly (for our purposes) handles just a source
-        // URL being present.
-        update({ src: thumbnailURL });
+        const thumbnailURLWithDimensions = await new Promise((resolve) => {
+            let image = new Image();
+            image.onload = () => {
+                resolve({
+                    src: thumbnailURL,
+                    width: image.naturalWidth,
+                    height: image.naturalHeight,
+                });
+            };
+            image.src = thumbnailURL;
+        });
+        update(thumbnailURLWithDimensions);
 
         switch (file.metadata.fileType) {
             case FileType.image: {
