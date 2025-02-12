@@ -115,3 +115,12 @@ body {
     display: none;
 }
 }
+
+/*
+  Make the controllable video elements we render as custom PhotoSwipe content
+  take up the entire container.
+ */
+.pswp-ente video[controls] {
+    width: 100%;
+    height: 100%;
+}
