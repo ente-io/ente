@@ -11220,6 +11220,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Joining an album will make your email visible to its participants.`
+  String get joinAlbumConfirmationDialogBody {
+    return Intl.message(
+      'Joining an album will make your email visible to its participants.',
+      name: 'joinAlbumConfirmationDialogBody',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
