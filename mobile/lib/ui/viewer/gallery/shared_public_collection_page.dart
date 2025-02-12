@@ -151,27 +151,35 @@ class _SharedPublicCollectionPageState
   }
 
   Future<void> _joinAlbum() async {
-    final dialog = createProgressDialog(
+    final result = await showChoiceDialog(
       context,
-      S.of(context).pleaseWait,
-      isDismissible: true,
+      title: context.l10n.joinAlbum,
+      body: context.l10n.joinAlbumConfirmationDialogBody,
+      firstButtonLabel: context.l10n.join,
     );
-    await dialog.show();
-    try {
-      await RemoteSyncService.instance
-          .joinAndSyncCollection(context, widget.c.collection.id);
-      final c =
-          CollectionsService.instance.getCollectionByID(widget.c.collection.id);
-      await dialog.hide();
-      Navigator.of(context).pop();
-      await routeToPage(
+    if (result != null && result.action == ButtonAction.first) {
+      final dialog = createProgressDialog(
         context,
-        CollectionPage(CollectionWithThumbnail(c!, null)),
+        S.of(context).pleaseWait,
+        isDismissible: true,
       );
-    } catch (e, s) {
-      logger.severe("Failed to join collection", e, s);
-      await dialog.hide();
-      showToast(context, S.of(context).somethingWentWrong);
+      await dialog.show();
+      try {
+        await RemoteSyncService.instance
+            .joinAndSyncCollection(context, widget.c.collection.id);
+        final c = CollectionsService.instance
+            .getCollectionByID(widget.c.collection.id);
+        await dialog.hide();
+        Navigator.of(context).pop();
+        await routeToPage(
+          context,
+          CollectionPage(CollectionWithThumbnail(c!, null)),
+        );
+      } catch (e, s) {
+        logger.severe("Failed to join collection", e, s);
+        await dialog.hide();
+        showToast(context, S.of(context).somethingWentWrong);
+      }
     }
   }
 }
