@@ -16,6 +16,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/base/id.dart";
+import "package:photos/models/base_location.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/file/extensions/file_props.dart";
@@ -1207,15 +1208,15 @@ class SearchService {
     for (int i = 0; i < locationTagEntities.length; i++) {
       tagToItemsMap[locationTagEntities.elementAt(i)] = [];
     }
-    final Map<String, (List<EnteFile>, Location)> smallRadiusClusters = {};
+    final List<(List<EnteFile>, Location)> smallRadiusClusters = [];
     final Map<String, (List<EnteFile>, Location)> wideRadiusClusters = {};
     // Go through all files and cluster the ones not inside any location tag
     for (EnteFile file in allFiles) {
       if (!file.hasLocation ||
           file.uploadedFileID == null ||
           !file.isOwner ||
-          file.creationTime! > cutOffTime.microsecondsSinceEpoch ||
-          file.creationTime == null) {
+          file.creationTime == null ||
+          file.creationTime! > cutOffTime.microsecondsSinceEpoch) {
         continue;
       }
       // Check if the file is inside any location tag
@@ -1234,25 +1235,20 @@ class SearchService {
       if (!hasLocationTag) {
         // Small radius clustering for base locations
         bool foundSmallCluster = false;
-        for (final clusterID in smallRadiusClusters.keys) {
-          final clusterLocation = smallRadiusClusters[clusterID]!.$2;
+        for (final cluster in smallRadiusClusters) {
+          final clusterLocation = cluster.$2;
           if (isFileInsideLocationTag(
             clusterLocation,
             file.location!,
             0.6,
           )) {
-            smallRadiusClusters[clusterID]!.$1.add(file);
+            cluster.$1.add(file);
             foundSmallCluster = true;
             break;
           }
         }
         if (!foundSmallCluster) {
-          smallRadiusClusters[newAutoLocationID()] = (
-            [
-              file,
-            ],
-            file.location!
-          );
+          smallRadiusClusters.add(([file], file.location!));
         }
         // Wide radius clustering for trip locations
         bool foundWideCluster = false;
@@ -1280,10 +1276,10 @@ class SearchService {
     }
 
     // Identify base locations
-    final Map<String, (List<EnteFile>, Location, bool)> baseLocations = {};
-    for (final clusterID in smallRadiusClusters.keys) {
-      final files = smallRadiusClusters[clusterID]!.$1;
-      final location = smallRadiusClusters[clusterID]!.$2;
+    final List<BaseLocation> baseLocations = [];
+    for (final cluster in smallRadiusClusters) {
+      final files = cluster.$1;
+      final location = cluster.$2;
       // Check that the photos are distributed over a longer time range (3+ months)
       final creationTimes = <int>[];
       final Set<int> uniqueDays = {};
@@ -1309,12 +1305,12 @@ class SearchService {
       final daysRange = lastCreationTime.difference(firstCreationTime).inDays;
       if (uniqueDays.length < daysRange * 0.1) continue;
       // Check if it's a current or old base location
-      final bool current = lastCreationTime.isAfter(
+      final bool isCurrent = lastCreationTime.isAfter(
         DateTime.now().subtract(
           const Duration(days: 90),
         ),
       );
-      baseLocations[clusterID] = (files, location, current);
+      baseLocations.add(BaseLocation(files, location, isCurrent));
     }
 
     // Identify trip locations
@@ -1326,9 +1322,9 @@ class SearchService {
 
       // Check that it's at least 10km away from any base or tag location
       bool tooClose = false;
-      for (final baseLocation in baseLocations.values) {
+      for (final baseLocation in baseLocations) {
         if (isFileInsideLocationTag(
-          baseLocation.$2,
+          baseLocation.location,
           location,
           10.0,
         )) {
@@ -1442,20 +1438,18 @@ class SearchService {
     }
 
     // For now for testing let's just surface all base locations
-    for (final baseLocation in baseLocations.values) {
-      final files = baseLocation.$1;
-      final current = baseLocation.$3;
-      final name = "Base (${current ? 'current' : 'old'})";
+    for (final baseLocation in baseLocations) {
+      final name = "Base (${baseLocation.isCurrentBase ? 'current' : 'old'})";
       searchResults.add(
         GenericSearchResult(
           ResultType.event,
           name,
-          files,
+          baseLocation.files,
           hierarchicalSearchFilter: TopLevelGenericFilter(
             filterName: name,
             occurrence: kMostRelevantFilter,
             filterResultType: ResultType.event,
-            matchedUploadedIDs: filesToUploadedFileIDs(files),
+            matchedUploadedIDs: filesToUploadedFileIDs(baseLocation.files),
             filterIcon: Icons.event_outlined,
           ),
         ),
@@ -1512,12 +1506,15 @@ class SearchService {
             ),
           ),
         );
-        if (limit != null && searchResults.length >= limit) return searchResults;
+        if (limit != null && searchResults.length >= limit) {
+          return searchResults;
+        }
       }
     }
     // Otherwise, if no trips happened in the current month,
     // look for the earliest upcoming trip in another month that has 3+ trips.
-    else { // TODO lau: make sure the same upcoming trip isn't shown multiple times over multiple months
+    else {
+      // TODO lau: make sure the same upcoming trip isn't shown multiple times over multiple months
       final sortedUpcomingMonths =
           List<int>.generate(12, (i) => ((currentMonth + i) % 12) + 1);
       checkUpcomingMonths:
