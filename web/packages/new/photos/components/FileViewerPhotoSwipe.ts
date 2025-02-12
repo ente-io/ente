@@ -189,7 +189,7 @@ export class FileViewerPhotoSwipe {
             index: initialIndex,
             // TODO(PS): padding option? for handling custom title bar.
             // TODO(PS): will we need this?
-            mainClass: "our-extra-pswp-main-class",
+            mainClass: "pswp-ente",
         });
 
         // Provide data about slides to PhotoSwipe via callbacks
