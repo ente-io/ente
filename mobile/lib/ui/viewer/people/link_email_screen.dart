@@ -3,6 +3,7 @@ import "dart:async";
 import "package:email_validator/email_validator.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -247,7 +248,9 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
   List<User> _getContacts() {
     final usersEmailsToAviod =
         PersonService.instance.emailToPartialPersonDataMapCache.keys.toSet();
+    final ownerEmail = Configuration.instance.getEmail();
     final relevantUsers = UserService.instance.getRelevantContacts()
+      ..add(User(email: ownerEmail!))
       ..removeWhere(
         (user) => usersEmailsToAviod.contains(user.email),
       );

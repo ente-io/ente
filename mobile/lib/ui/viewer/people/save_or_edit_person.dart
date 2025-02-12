@@ -988,7 +988,9 @@ class _EmailSectionState extends State<_EmailSection> {
   List<User> _getContacts() {
     final usersEmailsToAviod =
         PersonService.instance.emailToPartialPersonDataMapCache.keys;
+    final ownerEmail = Configuration.instance.getEmail();
     final relevantUsers = UserService.instance.getRelevantContacts()
+      ..add(User(email: ownerEmail!))
       ..removeWhere(
         (user) => usersEmailsToAviod.contains(user.email),
       );
