@@ -58,7 +58,7 @@ export interface MiniDialogAttributes {
      *
      * Use this flag sparingly.
      */
-    disablePreemption?: boolean;
+    nonReplaceable?: boolean;
     /**
      * Customize the primary action button shown in the dialog.
      *

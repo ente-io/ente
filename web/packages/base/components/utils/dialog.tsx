@@ -17,13 +17,9 @@ export const useAttributedMiniDialog = () => {
 
     const showMiniDialog = useCallback(
         (newAttributes: MiniDialogAttributes) => {
-            setAttributes((attributes) => {
-                if (attributes?.disablePreemption) {
-                    // Don't replace a dialog that set the disablePreemption flag.
-                    return attributes;
-                }
-                return newAttributes;
-            });
+            setAttributes((attributes) =>
+                attributes?.nonReplaceable ? attributes : newAttributes,
+            );
             setOpen(true);
         },
         [],
