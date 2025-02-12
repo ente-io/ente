@@ -161,14 +161,8 @@ export class FileViewerPhotoSwipe {
             // The default imageClickAction is "zoom-or-close". When the image
             // is small and cannot be zoomed into further (which is common when
             // just the thumbnail has been loaded), this causes PhotoSwipe to
-            // close.
-            //
-            // This can be disabled by setting `clickToCloseNonZoomable` to
-            // false, but we also want to disable zooming into the thumbnails
-            // (it's not useful, and further, the user's zoom will be lost when
-            // the full res is loaded). Setting `imageClickAction` to "zoom"
-            // achieves both these ends.
-            imageClickAction: "zoom",
+            // close. Disable this behaviour.
+            clickToCloseNonZoomable: false,
             // The default `bgClickAction` is "close", but it is not always
             // apparent where the background is and where the controls are,
             // since everything is black, and so accidentally closing PhotoSwipe
