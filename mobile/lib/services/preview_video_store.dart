@@ -135,22 +135,6 @@ class PreviewVideoStore {
         }
       }
 
-      final fileSize = file.lengthSync();
-      FFProbeProps? props;
-
-      if (fileSize <= 10 * 1024 * 1024) {
-        props = await getVideoPropsAsync(file);
-        final videoData = List.from(props?.propData?["streams"] ?? [])
-            .firstWhereOrNull((e) => e["type"] == "video");
-
-        final codec = videoData["codec_name"]?.toString().toLowerCase();
-        final codecIsH264 = codec?.contains("h264") ?? false;
-        if (codecIsH264) {
-          _items.removeWhere((key, value) => value.file == enteFile);
-          Bus.instance.fire(PreviewUpdatedEvent(_items));
-          return;
-        }
-      }
       if (uploadingFileId >= 0) {
         _items[enteFile.uploadedFileID!] = PreviewItem(
           status: PreviewItemStatus.inQueue,
@@ -174,7 +158,8 @@ class PreviewVideoStore {
       );
       Bus.instance.fire(PreviewUpdatedEvent(_items));
 
-      props ??= await getVideoPropsAsync(file);
+      final props = await getVideoPropsAsync(file);
+      final fileSize = enteFile.fileSize ?? file.lengthSync();
 
       final videoData = List.from(props?.propData?["streams"] ?? [])
           .firstWhereOrNull((e) => e["type"] == "video");
@@ -213,7 +198,7 @@ class PreviewVideoStore {
           '-metadata:s:v:0 rotate=0 ' // Adjust metadata if needed
           '-c:v copy ' // Copy the original video codec
           '-c:a copy ' // Copy the original audio codec
-          '-f hls -hls_time 10 -hls_flags single_file '
+          '-f hls -hls_time 2 -hls_flags single_file '
           '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
           '$prefix/output.m3u8',
         );
@@ -230,7 +215,7 @@ class PreviewVideoStore {
           '-color_primaries bt709 -color_trc bt709 -colorspace bt709 ' // Set color profile to BT.709
           '-c:v libx264 -crf 21 -preset medium ' // Compress with CRF=21 using H.264
           '-c:a copy ' // Keep original audio
-          '-f hls -hls_time 10 -hls_flags single_file '
+          '-f hls -hls_time 2 -hls_flags single_file '
           '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
           '$prefix/output.m3u8',
         );
@@ -242,7 +227,7 @@ class PreviewVideoStore {
           '-metadata:s:v:0 rotate=0 '
           '-vf "scale=-2:720,fps=30" '
           '-c:v libx264 -b:v 2000k -preset medium '
-          '-c:a aac -b:a 128k -f hls -hls_time 10 -hls_flags single_file '
+          '-c:a aac -b:a 128k -f hls -hls_time 2 -hls_flags single_file '
           '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
           '$prefix/output.m3u8',
         );
@@ -255,7 +240,7 @@ class PreviewVideoStore {
         '-color_primaries bt709 -color_trc bt709 -colorspace bt709 '
         '-x264-params "colorprim=bt709:transfer=bt709:colormatrix=bt709" '
         '-c:v libx264 -b:v 2000k -preset medium '
-        '-c:a aac -b:a 128k -f hls -hls_time 10 -hls_flags single_file '
+        '-c:a aac -b:a 128k -f hls -hls_time 2 -hls_flags single_file '
         '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
         '$prefix/output.m3u8',
       );
@@ -610,11 +595,31 @@ class PreviewVideoStore {
         .toList();
 
     // set all video status to be in queue
-    for (final file in allFiles) {
-      _items[file.uploadedFileID!] = PreviewItem(
+    for (final enteFile in allFiles) {
+      final fileSize = enteFile.fileSize;
+      FFProbeProps? props;
+
+      if (fileSize != null && fileSize <= 10 * 1024 * 1024) {
+        final file = await getFile(enteFile, isOrigin: true);
+        if (file != null) {
+          props = await getVideoPropsAsync(file);
+          final videoData = List.from(props?.propData?["streams"] ?? [])
+              .firstWhereOrNull((e) => e["type"] == "video");
+
+          final codec = videoData["codec_name"]?.toString().toLowerCase();
+          final codecIsH264 = codec?.contains("h264") ?? false;
+
+          if (codecIsH264) {
+            _items.removeWhere((key, value) => value.file == enteFile);
+            Bus.instance.fire(PreviewUpdatedEvent(_items));
+            continue;
+          }
+        }
+      }
+      _items[enteFile.uploadedFileID!] = PreviewItem(
         status: PreviewItemStatus.inQueue,
-        file: file,
-        collectionID: file.collectionID ?? 0,
+        file: enteFile,
+        collectionID: enteFile.collectionID ?? 0,
       );
     }
     Bus.instance.fire(PreviewUpdatedEvent(_items));
