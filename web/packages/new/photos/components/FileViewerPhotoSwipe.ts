@@ -232,6 +232,10 @@ export class FileViewerPhotoSwipe {
             return itemData ?? {};
         });
 
+        pswp.addFilter("isContentZoomable", (originalResult, content) => {
+            return content.data.isContentZoomable ?? originalResult;
+        });
+
         pswp.addFilter("preventPointerEvent", (originalResult) => {
             // There was a pointer event. We don't care which one, we just use
             // this as a hook to show UI again (if needed) and update our last
@@ -350,7 +354,8 @@ export class FileViewerPhotoSwipe {
         };
 
         const thumbnailURL = await downloadManager.renderableThumbnailURL(file);
-        update(await augmentedWithDimensions(thumbnailURL));
+        const thumbnailData = await augmentedWithDimensions(thumbnailURL);
+        update({ ...thumbnailData, isContentZoomable: false });
 
         switch (file.metadata.fileType) {
             case FileType.image: {
