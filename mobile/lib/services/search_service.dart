@@ -1517,7 +1517,7 @@ class SearchService {
     }
     // Otherwise, if no trips happened in the current month,
     // look for the earliest upcoming trip in another month that has 3+ trips.
-    else {
+    else { // TODO lau: make sure the same upcoming trip isn't shown multiple times over multiple months
       final sortedUpcomingMonths =
           List<int>.generate(12, (i) => ((currentMonth + i) % 12) + 1);
       checkUpcomingMonths:
