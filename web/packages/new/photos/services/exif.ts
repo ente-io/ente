@@ -365,78 +365,18 @@ const parseIPTCDate = (
  * file, taking into account any orientation tags that are also present.
  */
 const parseDimensions = (tags: RawExifTags) => {
-    const wh = parseWidthAndHeight(tags);
-    if (!wh) return wh;
-
-    // The Orientation can be present in both Exif and XMP (as a TIFF tag).
-    //
-    // Prefer the Exif orientation, and fallback to the XMP only if it not
-    // present. This matches the behaviour of common tools, e.g.
-    // https://github.com/mattiasw/ExifReader/issues/27
-    //
-    // Both Exif and XMP use the same constants to mean the same things. Ref:
-    // - https://exiftool.org/TagNames/EXIF.html
-    // - https://exiftool.org/TagNames/XMP.html
-    //
-    //     1 = Horizontal (normal)
-    //     2 = Mirror horizontal
-    //     3 = Rotate 180
-    //     4 = Mirror vertical
-    //     5 = Mirror horizontal and rotate 270 CW
-    //     6 = Rotate 90 CW
-    //     7 = Mirror horizontal and rotate 90 CW
-    //     8 = Rotate 270 CW
-
-    let swap = false;
-
-    switch (tags.exif?.Orientation?.value) {
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-            swap = true;
-            break;
-        case undefined:
-            switch (tags.xmp?.Orientation?.value) {
-                case "5":
-                case "6":
-                case "7":
-                case "8":
-                    swap = true;
-            }
-            break;
-    }
-
-    return swap ? { width: wh.height, height: wh.width } : wh;
-};
-
-/**
- * Parse the width and height of the image from the metadata embedded in the
- * file.
- */
-const parseWidthAndHeight = (tags: RawExifTags) => {
     // Go through all possiblities in order, returning the first pair with both
     // the width and height defined, and non-zero.
+
     const pair = (w: number | undefined, h: number | undefined) =>
         w && h ? { width: w, height: h } : undefined;
 
-    return (
+    // 1. Use the width and height from the file itself (e.g. JPEG data).
+
+    let wh =
         pair(
-            tags.exif?.ImageWidth?.value,
-            /* The Exif spec calls it ImageLength, not ImageHeight. */
-            tags.exif?.ImageLength?.value,
-        ) ??
-        pair(
-            tags.exif?.PixelXDimension?.value,
-            tags.exif?.PixelYDimension?.value,
-        ) ??
-        pair(
-            parseXMPNum(tags.xmp?.ImageWidth),
-            parseXMPNum(tags.xmp?.ImageLength),
-        ) ??
-        pair(
-            parseXMPNum(tags.xmp?.PixelXDimension),
-            parseXMPNum(tags.xmp?.PixelYDimension),
+            tags.file?.["Image Width"]?.value,
+            tags.file?.["Image Height"]?.value,
         ) ??
         pair(
             tags.pngFile?.["Image Width"]?.value,
@@ -446,12 +386,83 @@ const parseWidthAndHeight = (tags: RawExifTags) => {
             tags.gif?.["Image Width"]?.value,
             tags.gif?.["Image Height"]?.value,
         ) ??
-        pair(tags.riff?.ImageWidth?.value, tags.riff?.ImageHeight?.value) ??
+        pair(tags.riff?.ImageWidth?.value, tags.riff?.ImageHeight?.value);
+    if (wh) {
+        return wh;
+    }
+
+    // 2. Exif dimensions, taking Orientation also into account if needed.
+
+    wh =
         pair(
-            tags.file?.["Image Width"]?.value,
-            tags.file?.["Image Height"]?.value,
-        )
-    );
+            tags.exif?.ImageWidth?.value,
+            /* The Exif spec calls it ImageLength, not ImageHeight. */
+            tags.exif?.ImageLength?.value,
+        ) ??
+        pair(
+            tags.exif?.PixelXDimension?.value,
+            tags.exif?.PixelYDimension?.value,
+        );
+    if (wh) {
+        // Exif Orientation tags can have the following values:
+        //
+        //     1 = Horizontal (normal)
+        //     2 = Mirror horizontal
+        //     3 = Rotate 180
+        //     4 = Mirror vertical
+        //     5 = Mirror horizontal and rotate 270 CW
+        //     6 = Rotate 90 CW
+        //     7 = Mirror horizontal and rotate 90 CW
+        //     8 = Rotate 270 CW
+        //
+        // Ref: https://exiftool.org/TagNames/EXIF.html
+
+        let swap = false;
+
+        switch (tags.exif?.Orientation?.value) {
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+                swap = true;
+                break;
+        }
+
+        return swap ? { width: wh.height, height: wh.width } : wh;
+    }
+
+    // 3. XMP dimensions, taking Orientation also into account if needed.
+
+    wh =
+        pair(
+            parseXMPNum(tags.xmp?.ImageWidth),
+            parseXMPNum(tags.xmp?.ImageLength),
+        ) ??
+        pair(
+            parseXMPNum(tags.xmp?.PixelXDimension),
+            parseXMPNum(tags.xmp?.PixelYDimension),
+        );
+
+    if (wh) {
+        // The Orientation present in XMP (as a TIFF tag) also uses the same
+        // constants as Exif above.
+        //
+        // Ref: https://exiftool.org/TagNames/XMP.html
+
+        let swap = false;
+
+        switch (tags.xmp?.Orientation?.value) {
+            case "5":
+            case "6":
+            case "7":
+            case "8":
+                swap = true;
+        }
+
+        return swap ? { width: wh.height, height: wh.width } : wh;
+    }
+
+    return undefined;
 };
 
 /**
