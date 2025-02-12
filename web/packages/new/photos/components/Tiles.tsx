@@ -201,9 +201,11 @@ export const LargeTileTextOverlay = styled(Overlay)`
     padding: 8px;
     color: white;
     background: linear-gradient(
-        0deg,
+        -10deg,
         rgba(0, 0, 0, 0.1) 0%,
-        rgba(0, 0, 0, 0.5) 86%
+        rgba(0, 0, 0, 0.2) 50%,
+        rgba(0, 0, 0, 0.4) 60%,
+        rgba(0, 0, 0, 0.6) 100%
     );
 `;
 
