@@ -350,28 +350,13 @@ export class FileViewerPhotoSwipe {
         };
 
         const thumbnailURL = await downloadManager.renderableThumbnailURL(file);
-        const thumbnailURLWithDimensions = await new Promise((resolve) => {
-            let image = new Image();
-            image.onload = () => {
-                resolve({
-                    src: thumbnailURL,
-                    width: image.naturalWidth,
-                    height: image.naturalHeight,
-                });
-            };
-            image.src = thumbnailURL;
-        });
-        update(thumbnailURLWithDimensions);
+        update(await augmentedWithDimensions(thumbnailURL));
 
         switch (file.metadata.fileType) {
             case FileType.image: {
                 const sourceURLs =
                     await downloadManager.renderableSourceURLs(file);
-                update({
-                    src: sourceURLs.url,
-                    width: file.pubMagicMetadata?.data?.w,
-                    height: file.pubMagicMetadata?.data?.h,
-                });
+                update(await augmentedWithDimensions(sourceURLs.url));
                 break;
             }
 
@@ -389,18 +374,13 @@ export class FileViewerPhotoSwipe {
                 const livePhotoSourceURLs =
                     sourceURLs.url as LivePhotoSourceURL;
                 const imageURL = await livePhotoSourceURLs.image();
-                update({
-                    src: imageURL,
-                    width: file.pubMagicMetadata?.data?.w,
-                    height: file.pubMagicMetadata?.data?.h,
-                });
+                const imageData = await augmentedWithDimensions(imageURL);
+                update(imageData);
                 const videoURL = await livePhotoSourceURLs.video();
                 console.log(videoURL);
                 // update({ html: livePhotoVideoHTML(videoURL) });
                 update({
-                    src: imageURL,
-                    width: file.pubMagicMetadata?.data?.w,
-                    height: file.pubMagicMetadata?.data?.h,
+                    ...imageData,
                     videoURL,
                 });
                 break;
@@ -421,3 +401,21 @@ const livePhotoVideoHTML = (videoURL: string) => `
   <source src="${videoURL}" />
 </video>
 `;
+
+/**
+ * Take a image URL, determine its dimensions using browser APIs, and return the URL
+ * and its dimensions in a form that can directly be passed to PhotoSwipe as
+ * {@link SlideData}.
+ */
+const augmentedWithDimensions = (imageURL: string): Promise<SlideData> =>
+    new Promise((resolve) => {
+        let image = new Image();
+        image.onload = () => {
+            resolve({
+                src: imageURL,
+                width: image.naturalWidth,
+                height: image.naturalHeight,
+            });
+        };
+        image.src = imageURL;
+    });
