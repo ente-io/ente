@@ -248,28 +248,36 @@ export class FileViewerPhotoSwipe {
             return originalResult;
         });
 
-        pswp.on("contentLoad", (e) => {
-            console.log("contentLoad", e);
-            // if (content.type == "video") {
-            // content.
-            // }
-            if (e.content.data.videoURL) {
-                const holderEl = e.content.slide.holderElement;
-                const vid = document.createElement("h1");
-                vid.innerText = "Test 1";
-                holderEl.appendChild(vid);
-            }
-        });
         pswp.on("contentAppend", (e) => {
             const containerEl = e.content.slide.container;
-            console.log("contentAppend", containerEl);
             if (e.content.data.videoURL) {
-                const vid = document.createElement("div");
-                vid.innerHTML = livePhotoVideoHTML(e.content.data.videoURL);
+                const img = e.content.element;
+                console.log(
+                    img,
+                    img.width,
+                    img.height,
+                    containerEl.width,
+                    containerEl.height,
+                );
+
+                const vidT = document.createElement("template");
+                vidT.innerHTML = livePhotoVideoHTML(
+                    e.content.data.videoURL,
+                ).trim();
+                const vid = vidT.content.firstChild;
                 // vid.innerText = "Test 2";
+                containerEl.style = "position: relative";
                 containerEl.appendChild(vid);
+                // vid.style = `position: absolute; width: ${img.width}px; height: ${img.height}px; top: 0, left: 0, z-index: 1; pointer-events: none;`;
+                // console.log(vid.style);
+                // vid.style = `position: absolute; width: 200px; height: 200px;
+                // top: 0, left: 0, z-index: 1; pointer-events: none;`;
                 vid.style =
-                    "position: absolute; left: 0; right: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;";
+                    //img.style +
+                    `width: 200px; height: 100px; ` +
+                    `; position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none;`;
+                // vid.style.width = img.width + "px";
+                // vid.style.height = img.height + "px";
             }
         });
 
@@ -394,12 +402,7 @@ export class FileViewerPhotoSwipe {
                 const imageData = await augmentedWithDimensions(imageURL);
                 update(imageData);
                 const videoURL = await livePhotoSourceURLs.video();
-                console.log(videoURL);
-                // update({ html: livePhotoVideoHTML(videoURL) });
-                update({
-                    ...imageData,
-                    videoURL,
-                });
+                update({ ...imageData, videoURL });
                 break;
             }
         }
