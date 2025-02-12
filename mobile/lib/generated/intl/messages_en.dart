@@ -1063,6 +1063,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Selected items will be removed from this album"),
         "join": MessageLookupByLibrary.simpleMessage("Join"),
         "joinAlbum": MessageLookupByLibrary.simpleMessage("Join album"),
+        "joinAlbumConfirmationDialogBody": MessageLookupByLibrary.simpleMessage(
+            "Joining an album will make your email visible to its participants."),
         "joinAlbumSubtext":
             MessageLookupByLibrary.simpleMessage("to view and add your photos"),
         "joinAlbumSubtextViewer": MessageLookupByLibrary.simpleMessage(
