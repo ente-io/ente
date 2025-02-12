@@ -24,7 +24,7 @@
         "photoswipe": "file:./thirdparty/photoswipe",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
-        "react-dropzone": "14.3.5",
+        "react-dropzone": "14.2.10",
         "react-select": "^5.10.0",
         "react-top-loading-bar": "^3.0.2",
         "react-virtualized-auto-sizer": "^1.0.25",
