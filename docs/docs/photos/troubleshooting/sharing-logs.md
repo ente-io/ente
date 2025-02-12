@@ -31,6 +31,15 @@ the logs just make the process a bit faster and easier.
 - Click on _Support_. This will open your email client where you can attach the
   logs in the email and describe the issue.
 
+## Desktop
+
+On the desktop app, you can also directly view the logs on your computer at the
+following locations:
+
+- macOS: `~/Library/Logs/ente/ente.log`
+- Linux: `~/.config/ente/logs/ente.log`
+- Windows: `%USERPROFILE%\AppData\Roaming\ente\logs\ente.log`
+
 ## Send email manually
 
 If _Report a bug_ or _Support_ doesn't automatically open your email client, you
