@@ -1209,7 +1209,7 @@ class SearchService {
       tagToItemsMap[locationTagEntities.elementAt(i)] = [];
     }
     final List<(List<EnteFile>, Location)> smallRadiusClusters = [];
-    final Map<String, (List<EnteFile>, Location)> wideRadiusClusters = {};
+    final List<(List<EnteFile>, Location)> wideRadiusClusters = [];
     // Go through all files and cluster the ones not inside any location tag
     for (EnteFile file in allFiles) {
       if (!file.hasLocation ||
@@ -1252,25 +1252,20 @@ class SearchService {
         }
         // Wide radius clustering for trip locations
         bool foundWideCluster = false;
-        for (final clusterID in wideRadiusClusters.keys) {
-          final clusterLocation = wideRadiusClusters[clusterID]!.$2;
+        for (final cluster in wideRadiusClusters) {
+          final clusterLocation = cluster.$2;
           if (isFileInsideLocationTag(
             clusterLocation,
             file.location!,
             100.0,
           )) {
-            wideRadiusClusters[clusterID]!.$1.add(file);
+            cluster.$1.add(file);
             foundWideCluster = true;
             break;
           }
         }
         if (!foundWideCluster) {
-          wideRadiusClusters[newAutoLocationID()] = (
-            [
-              file,
-            ],
-            file.location!
-          );
+          wideRadiusClusters.add(([file], file.location!));
         }
       }
     }
@@ -1316,10 +1311,9 @@ class SearchService {
     // Identify trip locations
     final Map<String, (List<EnteFile>, Location, int, int)> tripLocations = {};
     clusteredLocations:
-    for (final clusterID in wideRadiusClusters.keys) {
-      final files = wideRadiusClusters[clusterID]!.$1;
-      final location = wideRadiusClusters[clusterID]!.$2;
-
+    for (final cluster in wideRadiusClusters) {
+      final files = cluster.$1;
+      final location = cluster.$2;
       // Check that it's at least 10km away from any base or tag location
       bool tooClose = false;
       for (final baseLocation in baseLocations) {
