@@ -236,8 +236,8 @@ export class FileViewerPhotoSwipe {
             return itemData ?? {};
         });
 
-        pswp.addFilter("isContentZoomable", (originalResult, content) => {
-            return content.data.isContentZoomable ?? originalResult;
+        pswp.addFilter("isContentZoomable", (isZoomable, content) => {
+            return content.data.isContentZoomable ?? isZoomable;
         });
 
         pswp.addFilter("preventPointerEvent", (originalResult) => {
@@ -248,15 +248,11 @@ export class FileViewerPhotoSwipe {
             return originalResult;
         });
 
-        pswp.on("appendHeavy", (e) => {
-            // Do not append video elements on nearby slides.
-            if (e.slide.content.type == "html" && !e.slide.isActive) {
-                e.preventDefault();
-            }
-        });
-
         pswp.on("contentLoad", (e) => {
             console.log("contentLoad", e);
+            // if (content.type == "video") {
+            // content.
+            // }
             if (e.content.data.videoURL) {
                 const holderEl = e.content.slide.holderElement;
                 const vid = document.createElement("h1");
@@ -277,9 +273,14 @@ export class FileViewerPhotoSwipe {
             }
         });
 
+        pswp.on("contentDeactivate", (e) => {
+            // Pause the video tag (if any) for a slide when we move away from it.
+            const video = e.content?.element?.getElementsByTagName("video")[0];
+            video?.pause();
+        });
+
+        // The user did some action within the file viewer to close it.
         pswp.on("close", () => {
-            // The user did some action within the file viewer to close it.
-            //
             // Clear intervals.
             this.clearAutoHideIntervalIfNeeded();
             // Let our parent know that we have been closed.
