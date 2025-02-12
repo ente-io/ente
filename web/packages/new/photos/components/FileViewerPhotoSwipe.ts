@@ -248,6 +248,13 @@ export class FileViewerPhotoSwipe {
             return originalResult;
         });
 
+        pswp.on("appendHeavy", (e) => {
+            // Do not append video elements on nearby slides.
+            if (e.slide.content.type == "html" && !e.slide.isActive) {
+                e.preventDefault();
+            }
+        });
+
         pswp.on("contentLoad", (e) => {
             console.log("contentLoad", e);
             if (e.content.data.videoURL) {
