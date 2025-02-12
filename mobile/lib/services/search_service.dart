@@ -37,6 +37,7 @@ import "package:photos/models/search/hierarchical/magic_filter.dart";
 import "package:photos/models/search/hierarchical/top_level_generic_filter.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/models/trip_memory.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/filter/db_filters.dart";
@@ -1309,7 +1310,7 @@ class SearchService {
     }
 
     // Identify trip locations
-    final Map<String, (List<EnteFile>, Location, int, int)> tripLocations = {};
+    final Map<String, TripMemory> tripLocations = {};
     clusteredLocations:
     for (final cluster in wideRadiusClusters) {
       final files = cluster.$1;
@@ -1364,8 +1365,12 @@ class SearchService {
 
           // Check if current block is a valid trip (2-30 days)
           if (blockDuration >= 2 && blockDuration <= 30) {
-            tripLocations[newAutoLocationID()] =
-                (List.from(currentBlockFiles), location, blockStart, lastTime);
+            tripLocations[newAutoLocationID()] = TripMemory(
+              List.from(currentBlockFiles),
+              location,
+              blockStart,
+              lastTime,
+            );
           }
 
           // Start new block
@@ -1382,37 +1387,42 @@ class SearchService {
           .difference(DateTime.fromMicrosecondsSinceEpoch(blockStart))
           .inDays;
       if (lastBlockDuration >= 2 && lastBlockDuration <= 30) {
-        tripLocations[newAutoLocationID()] =
-            (List.from(currentBlockFiles), location, blockStart, lastTime);
+        tripLocations[newAutoLocationID()] = TripMemory(
+          List.from(currentBlockFiles),
+          location,
+          blockStart,
+          lastTime,
+        );
       }
     }
 
     // Check if any trip locations should be merged
-    final Map<String, (List<EnteFile>, int, int)> mergedTrips = {};
+    final Map<String, TripMemory> mergedTrips = {};
     for (final tripID in tripLocations.keys) {
       final trip = tripLocations[tripID]!;
       final tripFirstTime = DateTime.fromMicrosecondsSinceEpoch(
-        trip.$3,
+        trip.firstCreationTime,
       );
       final tripLastTime = DateTime.fromMicrosecondsSinceEpoch(
-        trip.$4,
+        trip.lastCreationTime,
       );
       bool merged = false;
       for (final otherTripID in mergedTrips.keys) {
         final otherTrip = mergedTrips[otherTripID]!;
         final otherTripFirstTime =
-            DateTime.fromMicrosecondsSinceEpoch(otherTrip.$2);
+            DateTime.fromMicrosecondsSinceEpoch(otherTrip.firstCreationTime);
         final otherTripLastTime =
-            DateTime.fromMicrosecondsSinceEpoch(otherTrip.$3);
+            DateTime.fromMicrosecondsSinceEpoch(otherTrip.lastCreationTime);
         if (tripFirstTime
                 .isBefore(otherTripLastTime.add(const Duration(days: 3))) &&
             tripLastTime.isAfter(
               otherTripFirstTime.subtract(const Duration(days: 3)),
             )) {
-          mergedTrips[otherTripID] = (
-            otherTrip.$1 + trip.$1,
-            min(otherTrip.$2, trip.$3),
-            max(otherTrip.$3, trip.$4),
+          mergedTrips[otherTripID] = TripMemory(
+            otherTrip.files + trip.files,
+            otherTrip.location,
+            min(otherTrip.firstCreationTime, trip.firstCreationTime),
+            max(otherTrip.lastCreationTime, trip.lastCreationTime),
           );
           _logger.finest('Merged two trip locations');
           merged = true;
@@ -1420,12 +1430,17 @@ class SearchService {
         }
       }
       if (merged) continue;
-      mergedTrips[tripID] = (trip.$1, trip.$3, trip.$4);
+      mergedTrips[tripID] = TripMemory(
+        trip.files,
+        trip.location,
+        trip.firstCreationTime,
+        trip.lastCreationTime,
+      );
     }
 
     // Remove too small trips
     for (final tripID in mergedTrips.keys.toList()) {
-      final filesAmount = mergedTrips[tripID]!.$1.length;
+      final filesAmount = mergedTrips[tripID]!.files.length;
       if (filesAmount < 20) {
         mergedTrips.remove(tripID);
       }
@@ -1452,11 +1467,10 @@ class SearchService {
 
     // For now we surface the two most recent trips of current month, and if none, the earliest upcoming redundant trip
     // Group the trips per month and then year
-    final Map<int, Map<int, List<(List<EnteFile>, int, int)>>>
-        tripsByMonthYear = {};
+    final Map<int, Map<int, List<TripMemory>>> tripsByMonthYear = {};
     for (final trip in mergedTrips.values) {
-      final int avgMicros = (trip.$2 + trip.$3) ~/ 2;
-      final tripDate = DateTime.fromMicrosecondsSinceEpoch(avgMicros);
+      final tripDate =
+          DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime);
       tripsByMonthYear
           .putIfAbsent(tripDate.month, () => {})
           .putIfAbsent(tripDate.year, () => [])
@@ -1464,28 +1478,29 @@ class SearchService {
     }
 
     // Flatten trips for the current month and annotate with their average date.
-    final List<(List<EnteFile>, int, int, DateTime)> currentMonthTrips = [];
+    final List<TripMemory> currentMonthTrips = [];
     if (tripsByMonthYear.containsKey(currentMonth)) {
       for (final trips in tripsByMonthYear[currentMonth]!.values) {
         for (final trip in trips) {
-          final int avgMicros = (trip.$2 + trip.$3) ~/ 2;
-          final tripDate = DateTime.fromMicrosecondsSinceEpoch(avgMicros);
-          currentMonthTrips.add((trip.$1, trip.$2, trip.$3, tripDate));
+          currentMonthTrips.add(trip);
         }
       }
     }
 
     // If there are past trips this month, show the one or two most recent ones.
     if (currentMonthTrips.isNotEmpty) {
-      currentMonthTrips.sort((a, b) => b.$4.compareTo(a.$4));
+      currentMonthTrips.sort(
+        (a, b) => b.averageCreationTime.compareTo(a.averageCreationTime),
+      );
       final tripsToShow = currentMonthTrips.take(2);
       for (final trip in tripsToShow) {
-        final year = trip.$4.year;
+        final year =
+            DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime).year;
         String name = "Trip in $year!";
         if (year == currentTime.year - 1) {
           name = "Last year's trip!";
         }
-        final photoSelection = await _bestSelection(trip.$1);
+        final photoSelection = await _bestSelection(trip.files);
         searchResults.add(
           GenericSearchResult(
             ResultType.event,
@@ -1495,7 +1510,7 @@ class SearchService {
               filterName: name,
               occurrence: kMostRelevantFilter,
               filterResultType: ResultType.event,
-              matchedUploadedIDs: filesToUploadedFileIDs(trip.$1),
+              matchedUploadedIDs: filesToUploadedFileIDs(photoSelection),
               filterIcon: Icons.event_outlined,
             ),
           ),
@@ -1514,24 +1529,26 @@ class SearchService {
       checkUpcomingMonths:
       for (final month in sortedUpcomingMonths) {
         if (tripsByMonthYear.containsKey(month)) {
-          final List<(List<EnteFile>, int, int, DateTime)> thatMonthTrips = [];
+          final List<TripMemory> thatMonthTrips = [];
           for (final trips in tripsByMonthYear[month]!.values) {
             for (final trip in trips) {
-              final int avgMicros = (trip.$2 + trip.$3) ~/ 2;
-              final tripDate = DateTime.fromMicrosecondsSinceEpoch(avgMicros);
-              thatMonthTrips.add((trip.$1, trip.$2, trip.$3, tripDate));
+              thatMonthTrips.add(trip);
             }
           }
           if (thatMonthTrips.length >= 3) {
             // take and use the third earliest trip
-            thatMonthTrips.sort((a, b) => a.$4.compareTo(b.$4));
+            thatMonthTrips.sort(
+              (a, b) => a.averageCreationTime.compareTo(b.averageCreationTime),
+            );
             final trip = thatMonthTrips[2];
-            final year = trip.$4.year;
+            final year =
+                DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime)
+                    .year;
             String name = "Trip in $year!";
             if (year == currentTime.year - 1) {
               name = "Last year's trip!";
             }
-            final photoSelection = await _bestSelection(trip.$1);
+            final photoSelection = await _bestSelection(trip.files);
             searchResults.add(
               GenericSearchResult(
                 ResultType.event,
@@ -1541,7 +1558,7 @@ class SearchService {
                   filterName: name,
                   occurrence: kMostRelevantFilter,
                   filterResultType: ResultType.event,
-                  matchedUploadedIDs: filesToUploadedFileIDs(trip.$1),
+                  matchedUploadedIDs: filesToUploadedFileIDs(photoSelection),
                   filterIcon: Icons.event_outlined,
                 ),
               ),
