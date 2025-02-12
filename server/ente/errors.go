@@ -95,11 +95,11 @@ var ErrLockUnavailable = errors.New("could not acquire lock")
 var ErrActiveLinkAlreadyExists = errors.New("Collection already has active public link")
 
 // ErrCannotModifyAdminStoragLimit is thrown when the admin is modifying their own storage limit
-var ErrCannotModifyAdminStoragLimit = errors.New("Cannot modify admin storage limit")
+var ErrCannotModifyAdminStoragLimit = errors.New("cannot modify admin storage limit")
 
 // ErrFailedReducingStorageLimit is thrown when the admin is setting storage limit lesser than
 // members pre-consumed storage
-var ErrFailedReducingStorageLimit = errors.New("Members Usage is more than potential storage limit")
+var ErrFailedReducingStorageLimit = errors.New("members usage is more than potential storage limit")
 
 // ErrNotImplemented indicates that the action that we tried to perform is not
 // available at this museum instance. e.g. this could be something that is not
