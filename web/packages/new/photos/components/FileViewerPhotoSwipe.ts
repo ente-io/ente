@@ -158,6 +158,10 @@ export class FileViewerPhotoSwipe {
         const pswp = new PhotoSwipe({
             // Opaque background.
             bgOpacity: 1,
+            // The default, "zoom", cannot be used since we're not animating
+            // from a thumbnail, so effectively "fade" is in effect anyway. Set
+            // it still, just for and explicitness and documentation.
+            showHideAnimationType: "fade",
             // The default imageClickAction is "zoom-or-close". When the image
             // is small and cannot be zoomed into further (which is common when
             // just the thumbnail has been loaded), this causes PhotoSwipe to
