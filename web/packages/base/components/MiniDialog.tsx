@@ -44,6 +44,22 @@ export interface MiniDialogAttributes {
      */
     nonClosable?: boolean;
     /**
+     * If `true`, then the dialog cannot be replaced by another dialog while it
+     * is being displayed.
+     *
+     * The app uses a single component to render mini dialogs, and it is
+     * possible that new dialog contents might preempt and replace contents in a
+     * dialog that is already being shown. Usually if such preemption is
+     * expected then both dialogs use differing mechanisms, but it can happen in
+     * rare unforeseen cases.
+     *
+     * This flag allow a dialog to indicate that it should not be preempted, as
+     * it contains some critical information.
+     *
+     * Use this flag sparingly.
+     */
+    nonReplaceable?: boolean;
+    /**
      * Customize the primary action button shown in the dialog.
      *
      * This is provided by boxes which serve as some sort of confirmation. If
