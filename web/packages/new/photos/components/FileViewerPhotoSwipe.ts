@@ -266,7 +266,7 @@ export class FileViewerPhotoSwipe {
             // The user did some action within the file viewer to close it.
             //
             // Clear intervals.
-            clearIntervals();
+            this.clearAutoHideIntervalIfNeeded();
             // Let our parent know that we have been closed.
             onClose();
         });
