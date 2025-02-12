@@ -194,7 +194,7 @@ func (c *Controller) CloseFamily(ctx context.Context, adminID int64) error {
 func (c *Controller) ModifyMemberStorage(ctx context.Context, adminID int64, id uuid.UUID, storageLimit *int64) error {
 	familyAdminID, err := c.UserRepo.GetFamilyAdminID(adminID)
 	if err != nil {
-		return stacktrace.Propagate(err, "Could not get family admin ID")
+		return stacktrace.Propagate(ente.ErrBadRequest, "Could not get family admin ID")
 	}
 
 	member, err := c.FamilyRepo.GetMemberById(ctx, id)
@@ -205,11 +205,11 @@ func (c *Controller) ModifyMemberStorage(ctx context.Context, adminID int64, id 
 	// gets admin subscription in order to get the size of total storage quota
 	activeSub, err := c.BillingCtrl.GetActiveSubscription(adminID)
 	if err != nil {
-		return stacktrace.Propagate(err, "couldn't get active subscription")
+		return stacktrace.Propagate(ente.ErrNoActiveSubscription, "couldn't get active subscription")
 	}
 
 	if storageLimit != nil && *storageLimit > activeSub.Storage {
-		return stacktrace.Propagate(fmt.Errorf("cannot set storage limit"), "potential storage limit is more than subscription storage")
+		return stacktrace.Propagate(ente.ErrStorageLimitExceeded, "potential storage limit is more than subscription storage")
 	}
 
 	// Handle if the admin user tries reducing the storage Limit
@@ -220,11 +220,11 @@ func (c *Controller) ModifyMemberStorage(ctx context.Context, adminID int64, id 
 	}
 
 	if adminID == *familyAdminID && member.IsAdmin {
-		return stacktrace.Propagate(fmt.Errorf("cannot modify storage"), "cannot modify admin storage limit")
+		return stacktrace.Propagate(ente.ErrCannotModifyAdminStoragLimit, "cannot modify admin storage limit")
 	}
 
 	if memberUsage > *storageLimit {
-		return stacktrace.Propagate(fmt.Errorf("storage reduction not allowed"), "Cannot reduce storage, current usage is more.")
+		return stacktrace.Propagate(ente.ErrFailedReducingStorageLimit, "Cannot reduce storage, current usage is more.")
 	}
 
 	if id == member.ID && member.Status == "ACCEPTED" {
@@ -233,7 +233,7 @@ func (c *Controller) ModifyMemberStorage(ctx context.Context, adminID int64, id 
 			return stacktrace.Propagate(err, "Cannot Modify Members Storage")
 		}
 	} else {
-		return stacktrace.Propagate(fmt.Errorf("could not modify storage"), "user is not a part of family")
+		return stacktrace.Propagate(ente.ErrBadRequest, "user is not a part of family")
 	}
 	return nil
 }
