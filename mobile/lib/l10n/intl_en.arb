@@ -1673,5 +1673,6 @@
   "ineligible": "Ineligible",
   "failed": "Failed",
   "playStream": "Play stream",
-  "playOriginal": "Play original"
+  "playOriginal": "Play original",
+  "joinAlbumConfirmationDialogBody" : "Joining an album will make your email visible to its participants."
 }
