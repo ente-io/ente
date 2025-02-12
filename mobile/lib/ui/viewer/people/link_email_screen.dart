@@ -246,13 +246,13 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
   }
 
   List<User> _getContacts() {
-    final usersEmailsToAviod =
+    final userEmailsToAviod =
         PersonService.instance.emailToPartialPersonDataMapCache.keys.toSet();
     final ownerEmail = Configuration.instance.getEmail();
     final relevantUsers = UserService.instance.getRelevantContacts()
       ..add(User(email: ownerEmail!))
       ..removeWhere(
-        (user) => usersEmailsToAviod.contains(user.email),
+        (user) => userEmailsToAviod.contains(user.email),
       );
 
     relevantUsers.sort(
