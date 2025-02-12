@@ -362,9 +362,59 @@ const parseIPTCDate = (
 
 /**
  * Parse the width and height of the image from the metadata embedded in the
- * file.
+ * file, taking into account any orientation tags that are also present.
  */
 const parseDimensions = (tags: RawExifTags) => {
+    const wh = parseWidthAndHeight(tags);
+    if (!wh) return wh;
+
+    // The Orientation can be present in both Exif and XMP (as a TIFF tag).
+    //
+    // Prefer the Exif orientation, and fallback to the XMP only if it not
+    // present. This matches the behaviour of common tools, e.g.
+    // https://github.com/mattiasw/ExifReader/issues/27
+    //
+    // Both Exif and XMP use the same constants to mean the same things. Ref:
+    // - https://exiftool.org/TagNames/EXIF.html
+    // - https://exiftool.org/TagNames/XMP.html
+    //
+    //     1 = Horizontal (normal)
+    //     2 = Mirror horizontal
+    //     3 = Rotate 180
+    //     4 = Mirror vertical
+    //     5 = Mirror horizontal and rotate 270 CW
+    //     6 = Rotate 90 CW
+    //     7 = Mirror horizontal and rotate 90 CW
+    //     8 = Rotate 270 CW
+
+    let swap = false;
+
+    switch (tags.exif?.Orientation?.value) {
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+            swap = true;
+            break;
+        case undefined:
+            switch (tags.xmp?.Orientation?.value) {
+                case "5":
+                case "6":
+                case "7":
+                case "8":
+                    swap = true;
+            }
+            break;
+    }
+
+    return swap ? { width: wh.height, height: wh.width } : wh;
+};
+
+/**
+ * Parse the width and height of the image from the metadata embedded in the
+ * file.
+ */
+const parseWidthAndHeight = (tags: RawExifTags) => {
     // Go through all possiblities in order, returning the first pair with both
     // the width and height defined, and non-zero.
     const pair = (w: number | undefined, h: number | undefined) =>
