@@ -58,6 +58,7 @@ jobs:
             - name: Notify Discord
               uses: sarisia/actions-status-discord@v1
               with:
+                  webhook: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
                   nodetail: true
                   title: "🏆 Internal release available for Photos"
                   description: "[Download](https://play.google.com/store/apps/details?id=io.ente.photos)"
