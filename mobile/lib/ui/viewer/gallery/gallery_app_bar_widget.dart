@@ -820,7 +820,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           "Cannot share empty collection of type $galleryType",
         );
       }
-      if (Configuration.instance.getUserID() == widget.collection!.owner!.id) {
+      if (Configuration.instance.getUserID() == widget.collection!.owner.id) {
         unawaited(
           routeToPage(
             context,

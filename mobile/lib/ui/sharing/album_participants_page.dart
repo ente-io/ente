@@ -64,11 +64,11 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
   @override
   Widget build(BuildContext context) {
     final isOwner =
-        widget.collection.owner?.id == Configuration.instance.getUserID();
+        widget.collection.owner.id == Configuration.instance.getUserID();
     final colorScheme = getEnteColorScheme(context);
     final currentUserID = Configuration.instance.getUserID()!;
     final int participants = 1 + widget.collection.getSharees().length;
-    final User owner = widget.collection.owner!;
+    final User owner = widget.collection.owner;
     if (owner.id == currentUserID && owner.email == "") {
       owner.email = Configuration.instance.getEmail()!;
     }
@@ -107,11 +107,9 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             captionedTextWidget: CaptionedTextWidget(
                               title: isOwner
                                   ? S.of(context).you
-                                  : widget.collection.owner != null
-                                      ? _nameIfAvailableElseEmail(
-                                          widget.collection.owner!,
-                                        )
-                                      : '',
+                                  : _nameIfAvailableElseEmail(
+                                      widget.collection.owner,
+                                    ),
                               makeTextBold: isOwner,
                             ),
                             leadingIconWidget: UserAvatarWidget(

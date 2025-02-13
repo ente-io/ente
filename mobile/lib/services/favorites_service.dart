@@ -230,7 +230,7 @@ class FavoritesService {
     if (_cachedFavoritesCollectionID == null) {
       final collections = _collectionsService.getActiveCollections();
       for (final collection in collections) {
-        if (collection.owner!.id == _config.getUserID() &&
+        if (collection.owner.id == _config.getUserID() &&
             collection.type == CollectionType.favorites) {
           _cachedFavoritesCollectionID = collection.id;
           return collection;

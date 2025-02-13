@@ -147,7 +147,7 @@ extension CollectionFileActions on CollectionActions {
         // Newly created collection might not be cached
         final Collection? c =
             CollectionsService.instance.getCollectionByID(collectionID);
-        if (c != null && c.owner!.id != currentUserID) {
+        if (c != null && c.owner.id != currentUserID) {
           if (!showProgressDialog) {
             dialog = createProgressDialog(
               context,

@@ -1311,34 +1311,30 @@ class UserService {
 
     for (final c in CollectionsService.instance.getActiveCollections()) {
       // Add collaborators and viewers of collections owned by user
-      if (c.owner?.id == ownerID) {
-        for (final User? u in c.sharees ?? []) {
-          if (u != null && u.id != null && u.email.isNotEmpty) {
+      if (c.owner.id == ownerID) {
+        for (final User u in c.sharees) {
+          if (u.id != null && u.email.isNotEmpty) {
             if (!existingEmails.contains(u.email)) {
               relevantUsers.add(u);
               existingEmails.add(u.email);
             }
           }
         }
-      } else if (c.owner?.id != null && c.owner!.email.isNotEmpty) {
+      } else if (c.owner.id != null && c.owner.email.isNotEmpty) {
         // Add owners of collections shared with user
-        if (!existingEmails.contains(c.owner!.email)) {
-          relevantUsers.add(c.owner!);
-          existingEmails.add(c.owner!.email);
+        if (!existingEmails.contains(c.owner.email)) {
+          relevantUsers.add(c.owner);
+          existingEmails.add(c.owner.email);
         }
         // Add collaborators of collections shared with user where user is a
         // viewer or a collaborator
-        for (final User? u in c.sharees ?? []) {
-          if (u != null &&
-              u.id != null &&
+        for (final User u in c.sharees) {
+          if (u.id != null &&
               u.email.isNotEmpty &&
               u.email == ownerEmail &&
               (u.isCollaborator || u.isViewer)) {
-            for (final User? u in c.sharees ?? []) {
-              if (u != null &&
-                  u.id != null &&
-                  u.email.isNotEmpty &&
-                  u.isCollaborator) {
+            for (final User u in c.sharees) {
+              if (u.id != null && u.email.isNotEmpty && u.isCollaborator) {
                 if (!existingEmails.contains(u.email)) {
                   relevantUsers.add(u);
                   existingEmails.add(u.email);
@@ -1392,32 +1388,28 @@ class UserService {
 
     for (final c in CollectionsService.instance.getActiveCollections()) {
       // Add collaborators and viewers of collections owned by user
-      if (c.owner?.id == ownerID) {
-        for (final User? u in c.sharees ?? []) {
-          if (u != null && u.id != null && u.email.isNotEmpty) {
+      if (c.owner.id == ownerID) {
+        for (final User u in c.sharees) {
+          if (u.id != null && u.email.isNotEmpty) {
             if (!emailIDs.contains(u.email)) {
               emailIDs.add(u.email);
             }
           }
         }
-      } else if (c.owner?.id != null && c.owner!.email.isNotEmpty) {
+      } else if (c.owner.id != null && c.owner.email.isNotEmpty) {
         // Add owners of collections shared with user
-        if (!emailIDs.contains(c.owner!.email)) {
-          emailIDs.add(c.owner!.email);
+        if (!emailIDs.contains(c.owner.email)) {
+          emailIDs.add(c.owner.email);
         }
         // Add collaborators of collections shared with user where user is a
         // viewer or a collaborator
-        for (final User? u in c.sharees ?? []) {
-          if (u != null &&
-              u.id != null &&
+        for (final User u in c.sharees) {
+          if (u.id != null &&
               u.email.isNotEmpty &&
               u.email == ownerEmail &&
               (u.isCollaborator || u.isViewer)) {
-            for (final User? u in c.sharees ?? []) {
-              if (u != null &&
-                  u.id != null &&
-                  u.email.isNotEmpty &&
-                  u.isCollaborator) {
+            for (final User u in c.sharees) {
+              if (u.id != null && u.email.isNotEmpty && u.isCollaborator) {
                 if (!emailIDs.contains(u.email)) {
                   emailIDs.add(u.email);
                 }

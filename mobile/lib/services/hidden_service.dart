@@ -32,7 +32,7 @@ extension HiddenService on CollectionsService {
     final int userID = config.getUserID()!;
     final allDefaultHidden = collectionIDToCollections.values
         .where(
-          (element) => element.isDefaultHidden() && element.owner!.id == userID,
+          (element) => element.isDefaultHidden() && element.owner.id == userID,
         )
         .toList();
 
@@ -101,7 +101,7 @@ extension HiddenService on CollectionsService {
         collectionIDToCollections.values.firstWhereOrNull(
       (element) =>
           element.type == CollectionType.uncategorized &&
-          element.owner!.id == userID,
+          element.owner.id == userID,
     );
     if (matchedCollection != null) {
       cachedUncategorizedCollection = matchedCollection;
@@ -166,7 +166,9 @@ extension HiddenService on CollectionsService {
       await dialog.hide();
     } on AssertionError catch (e) {
       await dialog.hide();
-      unawaited(showErrorDialog(context, S.of(context).oops, e.message as String));
+      unawaited(
+        showErrorDialog(context, S.of(context).oops, e.message as String),
+      );
       return false;
     } catch (e, s) {
       _logger.severe("Could not hide", e, s);

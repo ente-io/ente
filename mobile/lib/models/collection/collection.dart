@@ -8,7 +8,7 @@ import "package:photos/models/metadata/common_keys.dart";
 
 class Collection {
   final int id;
-  final User? owner;
+  final User owner;
   final String encryptedKey;
   final String? keyDecryptionNonce;
   @Deprecated("Use collectionName instead")
@@ -20,8 +20,8 @@ class Collection {
   final String? nameDecryptionNonce;
   final CollectionType type;
   final CollectionAttributes attributes;
-  final List<User?>? sharees;
-  final List<PublicURL?>? publicURLs;
+  final List<User> sharees;
+  final List<PublicURL> publicURLs;
   final int updationTime;
   final bool isDeleted;
 
@@ -95,12 +95,12 @@ class Collection {
 
   // hasLink returns true if there's any link attached to the collection
   // including expired links
-  bool get hasLink => publicURLs != null && publicURLs!.isNotEmpty;
+  bool get hasLink => publicURLs.isNotEmpty;
 
   bool get hasCover => (pubMagicMetadata.coverID ?? 0) > 0;
 
   // hasSharees returns true if the collection is shared with other ente users
-  bool get hasSharees => sharees != null && sharees!.isNotEmpty;
+  bool get hasSharees => sharees.isNotEmpty;
 
   bool get isPinned => (magicMetadata.order ?? 0) != 0;
 
@@ -121,52 +121,43 @@ class Collection {
   }
 
   List<User> getSharees() {
-    final List<User> result = [];
-    if (sharees == null) {
-      return result;
-    }
-    for (final User? u in sharees!) {
-      if (u != null) {
-        result.add(u);
-      }
-    }
-    return result;
+    return sharees;
   }
 
   bool isOwner(int userID) {
-    return (owner?.id ?? 0) == userID;
+    return (owner.id ?? -100) == userID;
   }
 
   bool isDownloadEnabledForPublicLink() {
-    if (publicURLs == null || publicURLs!.isEmpty) {
+    if (publicURLs.isEmpty) {
       return false;
     }
-    return publicURLs?.first?.enableDownload ?? true;
+    return publicURLs.first.enableDownload;
   }
 
   bool isCollectEnabledForPublicLink() {
-    if (publicURLs == null || publicURLs!.isEmpty) {
+    if (publicURLs.isEmpty) {
       return false;
     }
-    return publicURLs?.first?.enableCollect ?? false;
+    return publicURLs.first.enableCollect;
   }
 
   bool get isJoinEnabled {
-    if (publicURLs == null || publicURLs!.isEmpty) {
+    if (publicURLs.isEmpty) {
       return false;
     }
-    return publicURLs?.first?.enableJoin ?? false;
+    return publicURLs.first.enableJoin;
   }
 
   CollectionParticipantRole getRole(int userID) {
     if (isOwner(userID)) {
       return CollectionParticipantRole.owner;
     }
-    if (sharees == null) {
+    if (sharees.isEmpty) {
       return CollectionParticipantRole.unknown;
     }
-    for (final User? u in sharees!) {
-      if (u != null && u.id == userID) {
+    for (final User u in sharees) {
+      if (u.id == userID) {
         if (u.isViewer) {
           return CollectionParticipantRole.viewer;
         } else if (u.isCollaborator) {
@@ -185,8 +176,8 @@ class Collection {
   }
 
   void updateSharees(List<User> newSharees) {
-    sharees?.clear();
-    sharees?.addAll(newSharees);
+    sharees.clear();
+    sharees.addAll(newSharees);
   }
 
   static CollectionType typeFromString(String type) {

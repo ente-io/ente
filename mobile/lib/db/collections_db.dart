@@ -251,7 +251,7 @@ class CollectionsDB {
   Map<String, dynamic> _getRowForCollection(Collection collection) {
     final row = <String, dynamic>{};
     row[columnID] = collection.id;
-    row[columnOwner] = collection.owner!.toJson();
+    row[columnOwner] = collection.owner.toJson();
     row[columnEncryptedKey] = collection.encryptedKey;
     row[columnKeyDecryptionNonce] = collection.keyDecryptionNonce;
     row[columnName] = collection.name;
@@ -262,9 +262,9 @@ class CollectionsDB {
     row[columnPathDecryptionNonce] = collection.attributes.pathDecryptionNonce;
     row[columnVersion] = collection.attributes.version;
     row[columnSharees] =
-        json.encode(collection.sharees?.map((x) => x?.toMap()).toList());
+        json.encode(collection.sharees.map((x) => x.toMap()).toList());
     row[columnPublicURLs] =
-        json.encode(collection.publicURLs?.map((x) => x?.toMap()).toList());
+        json.encode(collection.publicURLs.map((x) => x.toMap()).toList());
     row[columnUpdationTime] = collection.updationTime;
     if (collection.isDeleted) {
       row[columnIsDeleted] = _sqlBoolTrue;

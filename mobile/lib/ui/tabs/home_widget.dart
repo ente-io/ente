@@ -275,7 +275,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       final existingCollection =
           CollectionsService.instance.getCollectionByID(collection.id);
 
-      if (collection.owner!.id! == Configuration.instance.getUserID() ||
+      if (collection.isOwner(Configuration.instance.getUserID() ?? -1) ||
           (existingCollection != null && !existingCollection.isDeleted)) {
         await routeToPage(
           context,
@@ -286,8 +286,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         return;
       }
       final dialog = createProgressDialog(context, "Loading...");
-      final publicUrl = collection.publicURLs![0];
-      if (!publicUrl!.enableDownload) {
+      final publicUrl = collection.publicURLs[0];
+      if (!publicUrl.enableDownload) {
         await showErrorDialog(
           context,
           context.l10n.canNotOpenTitle,
