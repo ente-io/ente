@@ -38,7 +38,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER) as User | undefined | null;
-        void migrateKVToken(user);
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
     }, []);

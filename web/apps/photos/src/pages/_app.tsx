@@ -34,8 +34,8 @@ import { AppContext } from "@/new/photos/types/context";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
     getData,
+    isLocalStorageAndIndexedDBMismatch,
     LS_KEYS,
-    migrateKVToken,
 } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import "@fontsource-variable/inter";
@@ -68,13 +68,21 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     const [watchFolderView, setWatchFolderView] = useState(false);
 
+    const logout = useCallback(() => void photosLogout(), []);
+
     useEffect(() => {
         const user = getData(LS_KEYS.USER) as User | undefined | null;
-        void migrateKVToken(user);
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
-        void runMigrations();
-    }, []);
+        void isLocalStorageAndIndexedDBMismatch().then((mismatch) => {
+            if (mismatch) {
+                log.error("Logging out (IndexedDB and local storage mismatch)");
+                return logout();
+            } else {
+                return runMigrations();
+            }
+        });
+    }, [logout]);
 
     useEffect(() => {
         const electron = globalThis.electron;
@@ -148,8 +156,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             showMiniDialog(genericErrorDialogAttributes());
         }, 0);
     }, []);
-
-    const logout = useCallback(() => void photosLogout(), []);
 
     const appContext = useMemo(
         () => ({

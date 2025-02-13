@@ -95,3 +95,20 @@ export const migrateKVToken = async (user: unknown) => {
             "The user's token was present in local storage but not in IndexedDB",
         );
 };
+
+/**
+ * Return true if the user's data is in local storage but not in IndexedDB.
+ *
+ * This acts a sanity check on IndexedDB by ensuring that if the user has a
+ * token in local storage, then it should also be present in IndexedDB.
+ */
+export const isLocalStorageAndIndexedDBMismatch = async () => {
+    const oldLSUser = getData(LS_KEYS.USER);
+    return (
+        oldLSUser &&
+        typeof oldLSUser == "object" &&
+        "token" in oldLSUser &&
+        typeof oldLSUser.token == "string" &&
+        !(await getKVS("token"))
+    );
+};
