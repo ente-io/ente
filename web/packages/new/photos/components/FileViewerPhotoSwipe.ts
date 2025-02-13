@@ -304,11 +304,19 @@ export class FileViewerPhotoSwipe {
         });
 
         // Add our custom UI elements to inside the PhotoSwipe dialog.
+        //
+        // API docs for registerElement:
+        // https://photoswipe.com/adding-ui-elements/#uiregisterelement-api
+        //
+        // The "order" prop is used to position items. Some landmarks:
+        // - counter: 5
+        // - zoom: 10
+        // - close: 20
         pswp.on("uiRegister", () => {
             pswp.ui.registerElement({
                 name: "info-button",
                 ariaLabel: "File info",
-                // order:
+                order: 15,
                 isButton: true,
                 html: "Info",
                 onClick: (e) => {
