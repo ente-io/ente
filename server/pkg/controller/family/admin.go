@@ -198,11 +198,11 @@ func (c *Controller) ModifyMemberStorage(ctx context.Context, actorUserID int64,
 	}
 
 	if member.AdminUserID != actorUserID {
-		return stacktrace.Propagate(ente.ErrBadRequest, "you do not have sufficient permission")
+		return stacktrace.Propagate(ente.ErrPermissionDenied, "you do not have sufficient permission")
 	}
 
 	if member.IsAdmin {
-		return stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to modify storage"), "cannot modify admin storage limit")
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage("can not limit admin storage"), "cannot modify admin storage limit")
 	}
 
 	if member.Status != ente.ACCEPTED && member.Status != ente.INVITED {
@@ -219,23 +219,24 @@ func (c *Controller) ModifyMemberStorage(ctx context.Context, actorUserID int64,
 		if *storageLimit > totalFamilyStorage {
 			return stacktrace.Propagate(ente.ErrStorageLimitExceeded, "potential storage limit is more than subscription storage")
 		}
+
+		// Handle if the admin user tries reducing the storage Limit
+		// and the members Usage is more than the potential storage Limit
+		memberUsage, memUsageErr := c.UsageRepo.GetUsage(member.MemberUserID)
+		if memUsageErr != nil {
+			return stacktrace.Propagate(memUsageErr, "Couldn't find members storage usage")
+		}
+
+		if memberUsage > *storageLimit {
+			return stacktrace.Propagate(ente.NewBadRequestWithMessage("Failed to reduce storage"), "User's current usage is more")
+		}
+
+		modifyStorageErr := c.FamilyRepo.ModifyMemberStorage(ctx, actorUserID, member.ID, storageLimit)
+		if modifyStorageErr != nil {
+			return stacktrace.Propagate(modifyStorageErr, "Failed to modify members storage")
+		}
 	}
 
-	// Handle if the admin user tries reducing the storage Limit
-	// and the members Usage is more than the potential storage Limit
-	memberUsage, memUsageErr := c.UsageRepo.GetUsage(member.MemberUserID)
-	if memUsageErr != nil {
-		return stacktrace.Propagate(memUsageErr, "Couldn't find members storage usage")
-	}
-
-	if memberUsage > *storageLimit {
-		return stacktrace.Propagate(ente.NewBadRequestWithMessage("Failed to reduce storage"), "User's current usage is more")
-	}
-
-	modifyStorageErr := c.FamilyRepo.ModifyMemberStorage(ctx, actorUserID, member.ID, storageLimit)
-	if modifyStorageErr != nil {
-		return stacktrace.Propagate(modifyStorageErr, "Failed to modify members storage")
-	}
 	return nil
 }
 
