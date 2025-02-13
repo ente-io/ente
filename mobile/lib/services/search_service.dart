@@ -1450,7 +1450,15 @@ class SearchService {
 
     // For now for testing let's just surface all base locations
     for (final baseLocation in baseLocations) {
-      final name = "Base (${baseLocation.isCurrentBase ? 'current' : 'old'})";
+      String name = "Base (${baseLocation.isCurrentBase ? 'current' : 'old'})";
+      final String? locationName = await _tryFindLocationName(
+        baseLocation.files,
+        base: true,
+      );
+      if (locationName != null) {
+        name =
+            "$locationName (Base, ${baseLocation.isCurrentBase ? 'current' : 'old'})";
+      }
       searchResults.add(
         GenericSearchResult(
           ResultType.event,
@@ -1849,7 +1857,8 @@ class SearchService {
     return ((dayOfYear - 1) ~/ 7) + 1;
   }
 
-  Future<String?> _tryFindLocationName(List<EnteFile> files) async {
+  Future<String?> _tryFindLocationName(List<EnteFile> files,
+      {bool base = false,}) async {
     final results = await locationService.getFilesInCity(files, '');
     final List<City> sortedByResultCount = results.keys.toList()
       ..sort((a, b) => results[b]!.length.compareTo(results[a]!.length));
@@ -1859,7 +1868,8 @@ class SearchService {
       return biggestPlace.city;
     }
     if (results.length > 2 &&
-        results.keys.map((city) => city.country).toSet().length == 1) {
+        results.keys.map((city) => city.country).toSet().length == 1 &&
+        !base) {
       return biggestPlace.country;
     }
     return null;
