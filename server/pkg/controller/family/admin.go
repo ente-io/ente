@@ -230,11 +230,11 @@ func (c *Controller) ModifyMemberStorage(ctx context.Context, actorUserID int64,
 		if memberUsage > *storageLimit {
 			return stacktrace.Propagate(ente.NewBadRequestWithMessage("Failed to reduce storage"), "User's current usage is more")
 		}
+	}
 
-		modifyStorageErr := c.FamilyRepo.ModifyMemberStorage(ctx, actorUserID, member.ID, storageLimit)
-		if modifyStorageErr != nil {
-			return stacktrace.Propagate(modifyStorageErr, "Failed to modify members storage")
-		}
+	modifyStorageErr := c.FamilyRepo.ModifyMemberStorage(ctx, actorUserID, member.ID, storageLimit)
+	if modifyStorageErr != nil {
+		return stacktrace.Propagate(modifyStorageErr, "Failed to modify members storage")
 	}
 
 	return nil
