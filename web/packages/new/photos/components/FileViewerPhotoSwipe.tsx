@@ -336,8 +336,14 @@ export class FileViewerPhotoSwipe {
                     inner: pathWithIDAndTransform,
                     outlineID: "pswp__icn-info",
                 },
-                onClick: (e) => {
-                    console.log("click", e);
+                onClick: (e, element, pswp) => {
+                    const file = this.files[pswp.currIndex];
+                    if (!file) {
+                        assertionFailed();
+                        return;
+                    }
+
+                    console.log("info", file);
                 },
             });
         });
