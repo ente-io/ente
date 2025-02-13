@@ -54,3 +54,11 @@ jobs:
                   packageName: io.ente.auth
                   releaseFiles: auth/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   track: internal
+
+            - name: Notify Discord
+              uses: sarisia/actions-status-discord@v1
+              with:
+                  nodetail: true
+                  title: "🏆 Internal release available for Auth"
+                  description: "[Download](https://play.google.com/store/apps/details?id=io.ente.auth)"
+                  color: 0x800080
