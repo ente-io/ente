@@ -1215,8 +1215,7 @@ class SearchService {
       if (!file.hasLocation ||
           file.uploadedFileID == null ||
           !file.isOwner ||
-          file.creationTime == null ||
-          file.creationTime! > cutOffTime.microsecondsSinceEpoch) {
+          file.creationTime == null) {
         continue;
       }
       // Check if the file is inside any location tag
@@ -1442,10 +1441,13 @@ class SearchService {
       );
     }
 
-    // Remove too small trips
+    // Remove too small and too recent trips
     final List<TripMemory> validTrips = [];
     for (final trip in mergedTrips) {
-      if (trip.files.length >= 20) validTrips.add(trip);
+      if (trip.files.length >= 20 &&
+          trip.averageCreationTime < cutOffTime.microsecondsSinceEpoch) {
+        validTrips.add(trip);
+      }
     }
 
     // For now for testing let's just surface all base locations
@@ -1857,8 +1859,10 @@ class SearchService {
     return ((dayOfYear - 1) ~/ 7) + 1;
   }
 
-  Future<String?> _tryFindLocationName(List<EnteFile> files,
-      {bool base = false,}) async {
+  Future<String?> _tryFindLocationName(
+    List<EnteFile> files, {
+    bool base = false,
+  }) async {
     final results = await locationService.getFilesInCity(files, '');
     final List<City> sortedByResultCount = results.keys.toList()
       ..sort((a, b) => results[b]!.length.compareTo(results[a]!.length));
