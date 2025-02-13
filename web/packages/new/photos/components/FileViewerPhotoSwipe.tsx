@@ -342,6 +342,15 @@ export class FileViewerPhotoSwipe {
             });
         });
 
+        // Modify the default UI elements.
+        pswp.addFilter("uiElement", (element, data) => {
+            if (element.name == "preloader") {
+                // TODO(PS): Left as an example. For now, this is customized in
+                // the CSS.
+            }
+            return element;
+        });
+
         // Initializing PhotoSwipe adds it to the DOM as a dialog-like div with
         // the class "pswp".
         pswp.init();
