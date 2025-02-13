@@ -257,7 +257,7 @@ class CollectionsDB {
     row[columnName] = collection.name;
     row[columnEncryptedName] = collection.encryptedName;
     row[columnNameDecryptionNonce] = collection.nameDecryptionNonce;
-    row[columnType] = Collection.typeToString(collection.type);
+    row[columnType] = typeToString(collection.type);
     row[columnEncryptedPath] = collection.attributes.encryptedPath;
     row[columnPathDecryptionNonce] = collection.attributes.pathDecryptionNonce;
     row[columnVersion] = collection.attributes.version;
@@ -290,7 +290,7 @@ class CollectionsDB {
       row[columnName],
       row[columnEncryptedName],
       row[columnNameDecryptionNonce],
-      Collection.typeFromString(row[columnType]),
+      typeFromString(row[columnType]),
       CollectionAttributes(
         encryptedPath: row[columnEncryptedPath],
         pathDecryptionNonce: row[columnPathDecryptionNonce],

@@ -180,38 +180,6 @@ class Collection {
     sharees.addAll(newSharees);
   }
 
-  static CollectionType typeFromString(String type) {
-    switch (type) {
-      case "folder":
-        return CollectionType.folder;
-      case "favorites":
-        return CollectionType.favorites;
-      case "uncategorized":
-        return CollectionType.uncategorized;
-      case "album":
-        return CollectionType.album;
-      case "unknown":
-        return CollectionType.unknown;
-    }
-    debugPrint("unexpected collection type $type");
-    return CollectionType.unknown;
-  }
-
-  static String typeToString(CollectionType type) {
-    switch (type) {
-      case CollectionType.folder:
-        return "folder";
-      case CollectionType.favorites:
-        return "favorites";
-      case CollectionType.album:
-        return "album";
-      case CollectionType.uncategorized:
-        return "uncategorized";
-      case CollectionType.unknown:
-        return "unknown";
-    }
-  }
-
   Collection copyWith({
     int? id,
     User? owner,
@@ -292,6 +260,38 @@ enum CollectionType {
   uncategorized,
   album,
   unknown,
+}
+
+CollectionType typeFromString(String type) {
+  switch (type) {
+    case "folder":
+      return CollectionType.folder;
+    case "favorites":
+      return CollectionType.favorites;
+    case "uncategorized":
+      return CollectionType.uncategorized;
+    case "album":
+      return CollectionType.album;
+    case "unknown":
+      return CollectionType.unknown;
+  }
+  debugPrint("unexpected collection type $type");
+  return CollectionType.unknown;
+}
+
+String typeToString(CollectionType type) {
+  switch (type) {
+    case CollectionType.folder:
+      return "folder";
+    case CollectionType.favorites:
+      return "favorites";
+    case CollectionType.album:
+      return "album";
+    case CollectionType.uncategorized:
+      return "uncategorized";
+    case CollectionType.unknown:
+      return "unknown";
+  }
 }
 
 extension CollectionTypeExtn on CollectionType {

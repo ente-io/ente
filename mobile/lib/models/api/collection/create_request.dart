@@ -45,7 +45,7 @@ class CreateRequest {
     map['keyDecryptionNonce'] = keyDecryptionNonce;
     map['encryptedName'] = encryptedName;
     map['nameDecryptionNonce'] = nameDecryptionNonce;
-    map['type'] = Collection.typeToString(type);
+    map['type'] = typeToString(type);
     if (attributes != null) {
       map['attributes'] = attributes!.toMap();
     }
