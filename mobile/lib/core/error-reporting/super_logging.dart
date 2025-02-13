@@ -18,6 +18,7 @@ import 'package:photos/core/error-reporting/tunneled_transport.dart';
 import "package:photos/core/errors.dart";
 import 'package:photos/models/typedefs.dart';
 import "package:photos/utils/device_info.dart";
+import "package:photos/utils/ram_check_util.dart";
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -202,6 +203,12 @@ class SuperLogging {
     unawaited(
       getDeviceName().then((name) {
         $.info("Device name: $name");
+      }),
+    );
+
+    unawaited(
+      checkDeviceTotalRAM().then((ram) {
+        if (ram != null) $.info("Device RAM: ${ram}MB");
       }),
     );
 
