@@ -72,7 +72,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   bool isCustomLimit = false;
   @override
   void initState() {
-    currentDeviceLimit = widget.collection.publicURLs!.first!.deviceLimit;
+    currentDeviceLimit = widget.collection.publicURLs.first.deviceLimit;
     initialDeviceLimit = currentDeviceLimit;
     if (!publicLinkDeviceLimits.contains(currentDeviceLimit)) {
       isCustomLimit = true;

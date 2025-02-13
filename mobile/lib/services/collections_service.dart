@@ -139,7 +139,7 @@ class CollectionsService {
         }
       }
       // remove reference for incoming collections when unshared/deleted
-      if (collection.isDeleted && ownerID != collection.owner?.id) {
+      if (collection.isDeleted && ownerID != collection.owner.id) {
         await _db.deleteCollection(collection.id);
       } else {
         // keep entry for deletedCollection as collectionKey may be used during
@@ -394,7 +394,7 @@ class CollectionsService {
     final List<Collection> collections =
         getCollectionsForUI(includedShared: true);
     for (final c in collections) {
-      if (c.owner!.id == Configuration.instance.getUserID()) {
+      if (c.owner.id == Configuration.instance.getUserID()) {
         if (c.hasSharees || c.hasLink && !c.isQuickLinkCollection()) {
           outgoing.add(c);
         } else if (c.isQuickLinkCollection()) {
@@ -472,8 +472,8 @@ class CollectionsService {
     if (collectionID != null) {
       final Collection? collection = getCollectionByID(collectionID);
       if (collection != null) {
-        if (collection.owner?.id == userID) {
-          _cachedUserIdToUser[userID] = collection.owner!;
+        if (collection.owner.id == userID) {
+          _cachedUserIdToUser[userID] = collection.owner;
         } else {
           final matchingUser = collection.getSharees().firstWhereOrNull(
                 (u) => u.id == userID,
@@ -698,7 +698,7 @@ class CollectionsService {
     );
     final encryptedKey = CryptoUtil.base642bin(collection.encryptedKey);
     Uint8List? collectionKey;
-    if (collection.owner?.id == _config.getUserID()) {
+    if (collection.owner.id == _config.getUserID()) {
       // If the collection is owned by the user, decrypt with the master key
       if (_config.getKey() == null) {
         // Possible during AppStore account migration, where SecureStorage
@@ -767,7 +767,7 @@ class CollectionsService {
   ) async {
     final int ownerID = Configuration.instance.getUserID()!;
     try {
-      if (collection.owner?.id != ownerID) {
+      if (collection.owner.id != ownerID) {
         throw AssertionError("cannot modify albums not owned by you");
       }
       // read the existing magic metadata and apply new updates to existing data
@@ -826,7 +826,7 @@ class CollectionsService {
   ) async {
     final int ownerID = Configuration.instance.getUserID()!;
     try {
-      if (collection.owner?.id != ownerID) {
+      if (collection.owner.id != ownerID) {
         throw AssertionError("cannot modify albums not owned by you");
       }
       // read the existing magic metadata and apply new updates to existing data
@@ -885,7 +885,7 @@ class CollectionsService {
   ) async {
     final int ownerID = Configuration.instance.getUserID()!;
     try {
-      if (collection.owner?.id == ownerID) {
+      if (collection.owner.id == ownerID) {
         throw AssertionError("cannot modify sharee settings for albums owned "
             "by you");
       }
@@ -952,7 +952,7 @@ class CollectionsService {
           "enableJoin": true,
         },
       );
-      collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
+      collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
       await _db.insert(List.from([collection]));
       _collectionIDToCollections[collection.id] = collection;
       Bus.instance.fire(
@@ -980,8 +980,8 @@ class CollectionsService {
         data: json.encode(prop),
       );
       // remove existing url information
-      collection.publicURLs?.clear();
-      collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
+      collection.publicURLs.clear();
+      collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
       await _db.insert(List.from([collection]));
       _collectionIDToCollections[collection.id] = collection;
       Bus.instance.fire(
@@ -1003,7 +1003,7 @@ class CollectionsService {
       await _enteDio.delete(
         "/collections/share-url/" + collection.id.toString(),
       );
-      collection.publicURLs?.clear();
+      collection.publicURLs.clear();
       await _db.insert(List.from([collection]));
       _collectionIDToCollections[collection.id] = collection;
       Bus.instance.fire(

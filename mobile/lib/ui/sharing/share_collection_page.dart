@@ -61,7 +61,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
 
   @override
   Widget build(BuildContext context) {
-    _sharees = widget.collection.sharees ?? [];
+    _sharees = widget.collection.sharees;
     final bool hasUrl = widget.collection.hasLink;
     final children = <Widget>[];
     children.add(
@@ -136,7 +136,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     }
 
     final bool hasExpired =
-        widget.collection.publicURLs?.firstOrNull?.isExpired ?? false;
+        widget.collection.publicURLs.firstOrNull?.isExpired ?? false;
     children.addAll([
       const SizedBox(
         height: 24,
@@ -166,7 +166,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           CollectionsService.instance.getCollectionKey(widget.collection.id),
         );
         final String url =
-            "${widget.collection.publicURLs!.first!.url}#$collectionKey";
+            "${widget.collection.publicURLs.first.url}#$collectionKey";
         children.addAll(
           [
             MenuItemWidget(

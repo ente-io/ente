@@ -287,8 +287,8 @@ class AlbumVerticalListWidget extends StatelessWidget {
         CollectionActions(CollectionsService.instance);
 
     if (collection.hasLink) {
-      if (collection.publicURLs!.first!.enableCollect) {
-        if (Configuration.instance.getUserID() == collection.owner!.id) {
+      if (collection.publicURLs.first.enableCollect) {
+        if (Configuration.instance.getUserID() == collection.owner.id) {
           unawaited(
             routeToPage(
               context,
@@ -334,7 +334,7 @@ class AlbumVerticalListWidget extends StatelessWidget {
         context,
         S.of(context).collaborativeLinkCreatedFor(collection.displayName),
       );
-      if (Configuration.instance.getUserID() == collection.owner!.id) {
+      if (Configuration.instance.getUserID() == collection.owner.id) {
         unawaited(
           routeToPage(
             context,
@@ -353,7 +353,7 @@ class AlbumVerticalListWidget extends StatelessWidget {
     BuildContext context,
     Collection collection,
   ) {
-    if (Configuration.instance.getUserID() == collection.owner!.id) {
+    if (Configuration.instance.getUserID() == collection.owner.id) {
       unawaited(
         routeToPage(
           context,

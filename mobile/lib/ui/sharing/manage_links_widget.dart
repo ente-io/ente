@@ -47,13 +47,13 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   @override
   Widget build(BuildContext context) {
     final isCollectEnabled =
-        widget.collection!.publicURLs?.firstOrNull?.enableCollect ?? false;
+        widget.collection!.publicURLs.firstOrNull?.enableCollect ?? false;
     final isDownloadEnabled =
-        widget.collection!.publicURLs?.firstOrNull?.enableDownload ?? true;
+        widget.collection!.publicURLs.firstOrNull?.enableDownload ?? true;
     final isPasswordEnabled =
-        widget.collection!.publicURLs?.firstOrNull?.passwordEnabled ?? false;
+        widget.collection!.publicURLs.firstOrNull?.passwordEnabled ?? false;
     final enteColorScheme = getEnteColorScheme(context);
-    final PublicURL url = widget.collection!.publicURLs!.firstOrNull!;
+    final PublicURL url = widget.collection!.publicURLs.firstOrNull!;
     final String collectionKey = Base58Encode(
       CollectionsService.instance.getCollectionKey(widget.collection!.id),
     );
