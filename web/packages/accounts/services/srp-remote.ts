@@ -1,3 +1,4 @@
+import { ensureOk, publicRequestHeaders } from "@/base/http";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { ApiError, CustomError } from "@ente/shared/error";
@@ -131,19 +132,15 @@ export const completeSRPSetup = async (
 };
 
 export const createSRPSession = async (srpUserID: string, srpA: string) => {
-    try {
-        const resp = await HTTPService.post(
-            await apiURL("/users/srp/create-session"),
-            {
-                srpUserID,
-                srpA,
-            },
-        );
-        return resp.data as CreateSRPSessionResponse;
-    } catch (e) {
-        log.error("createSRPSession failed", e);
-        throw e;
-    }
+    const res = await fetch(await apiURL("/users/srp/create-session"), {
+        method: "POST",
+        headers: publicRequestHeaders(),
+        body: JSON.stringify({ srpUserID, srpA }),
+    });
+    ensureOk(res);
+    const data = await res.json();
+    // TODO: Use zod
+    return data as CreateSRPSessionResponse;
 };
 
 export const verifySRPSession = async (
