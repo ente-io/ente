@@ -293,6 +293,7 @@ func main() {
 		BillingCtrl:   billingController,
 		UserRepo:      userRepo,
 		UserCacheCtrl: userCacheCtrl,
+		UsageRepo:     usageRepo,
 	}
 
 	publicCollectionCtrl := &controller.PublicCollectionController{
@@ -621,6 +622,7 @@ func main() {
 	familiesJwtAuthAPI.GET("/family/members", familyHandler.FetchMembers)
 	familiesJwtAuthAPI.DELETE("/family/remove-member/:id", familyHandler.RemoveMember)
 	familiesJwtAuthAPI.DELETE("/family/revoke-invite/:id", familyHandler.RevokeInvite)
+	familiesJwtAuthAPI.POST("/family/modify-storage", familyHandler.ModifyStorageLimit)
 
 	emergencyHandler := &api.EmergencyHandler{
 		Controller: emergencyCtrl,

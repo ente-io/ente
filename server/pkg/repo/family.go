@@ -196,6 +196,16 @@ func (repo *FamilyRepository) RemoveMember(ctx context.Context, adminID int64, m
 	return stacktrace.Propagate(tx.Commit(), "failed to commit")
 }
 
+// UpdateStorage is used to set Pre-existing Members Storage Limit.
+func (repo *FamilyRepository) ModifyMemberStorage(ctx context.Context, adminID int64, id uuid.UUID, storageLimit *int64) error {
+	_, err := repo.DB.Exec(`UPDATE families SET storage_limit=$1 where id=$2`, storageLimit, id)
+	if err != nil {
+		return stacktrace.Propagate(err, "Could not update Members Storage Limit")
+	}
+
+	return stacktrace.Propagate(err, "Failed to Modify Members Storage Limit")
+}
+
 // RevokeInvite revokes the invitation invite
 func (repo *FamilyRepository) RevokeInvite(ctx context.Context, adminID int64, memberID int64) error {
 	tx, err := repo.DB.BeginTx(ctx, nil)
