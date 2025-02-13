@@ -246,12 +246,12 @@ export class FileViewerPhotoSwipe {
             return content.data.isContentZoomable ?? isZoomable;
         });
 
-        pswp.addFilter("preventPointerEvent", (originalResult) => {
+        pswp.addFilter("preventPointerEvent", (preventPointerEvent) => {
             // There was a pointer event. We don't care which one, we just use
             // this as a hook to show the UI again (if needed), and update our
             // last activity date.
             this.onPointerActivity();
-            return originalResult;
+            return preventPointerEvent;
         });
 
         pswp.on("contentAppend", (e) => {
