@@ -588,7 +588,12 @@ class PreviewVideoStore {
     final previewIds = FileDataService.instance.previewIds;
     final allFiles = files
         .where((file) => previewIds?[file.uploadedFileID] == null)
-        .toList();
+        .sorted((a, b) {
+      // put higher duration videos first
+      final first = a.duration == null || a.duration! >= 20 * 60 * 60 ? 1 : 0;
+      final second = b.duration == null || b.duration! >= 20 * 60 * 60 ? 1 : 0;
+      return first.compareTo(second);
+    }).toList();
 
     // set all video status to be in queue
     for (final enteFile in allFiles) {
@@ -612,12 +617,14 @@ class PreviewVideoStore {
           }
         }
       }
+
       _items[enteFile.uploadedFileID!] = PreviewItem(
         status: PreviewItemStatus.inQueue,
         file: enteFile,
         collectionID: enteFile.collectionID ?? 0,
       );
     }
+
     Bus.instance.fire(PreviewUpdatedEvent(_items));
 
     final file = allFiles.first;
