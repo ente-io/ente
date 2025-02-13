@@ -590,8 +590,8 @@ class PreviewVideoStore {
         .where((file) => previewIds?[file.uploadedFileID] == null)
         .sorted((a, b) {
       // put higher duration videos last
-      final first = a.duration == null || a.duration! >= 10 * 60 * 60 ? 1 : 0;
-      final second = b.duration == null || b.duration! >= 10 * 60 * 60 ? 1 : 0;
+      final first = a.duration == null || a.duration! >= 10 * 60 ? 1 : 0;
+      final second = b.duration == null || b.duration! >= 10 * 60 ? 1 : 0;
       return first.compareTo(second);
     }).toList();
 
