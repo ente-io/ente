@@ -9,9 +9,9 @@ import {
 } from "@/gallery/services/download";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { renderToString } from "react-dom/server";
 import type { FileViewerProps } from "./FileViewer5";
+
+// import { renderToString } from "react-dom/server";
 
 // TODO(PS): WIP gallery using upstream photoswipe
 //
@@ -315,20 +315,21 @@ export class FileViewerPhotoSwipe {
         // - zoom: 10
         // - close: 20
         pswp.on("uiRegister", () => {
-            const html = <InfoOutlinedIcon />;
-            console.log(renderToString(html));
-            const path =
-                '<path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8"></path>';
-            const pathWithID =
-                '<path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8" id="pswp__icn-info"/>';
+            // const html = <InfoOutlinedIcon fontSize="32" />;
+            // console.log(renderToString(html));
+            // const path =
+            //     '<path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8"></path>';
+            const pathWithIDAndTransform =
+                '<path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8" transform="translate(3.5, 3.5)" id="pswp__icn-info" />';
             pswp.ui.registerElement({
-                name: "info-button",
-                ariaLabel: "File info",
+                name: "info",
+                title: "Info",
+                ariaLabel: "Info",
                 order: 15,
                 isButton: true,
                 html: {
                     isCustomSVG: true,
-                    inner: path,
+                    inner: pathWithIDAndTransform,
                     outlineID: "pswp__icn-info",
                 },
                 onClick: (e) => {
