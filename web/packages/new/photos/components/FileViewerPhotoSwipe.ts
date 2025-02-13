@@ -262,20 +262,36 @@ export class FileViewerPhotoSwipe {
             const containerEl = e.content.slide.container;
             containerEl.style = "position: relative";
             containerEl.appendChild(video);
-            video.style =
-                `width: 200px; height: 100px; ` +
-                `position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none;`;
+            video.style = `position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none;`;
+
+            video.style.width = img.style.width;
+            video.style.height = img.style.height;
+
+            console.log(
+                "contentAppend",
+                e.content,
+                e.content.slide.container,
+                video,
+                img.style.width,
+                img.style.height,
+            );
         });
 
         pswp.on("imageSizeChange", ({ content, width, height }) => {
             if (!content.data.livePhotoVideoURL) return;
-
             // This slide is displaying a live photo. Modify the size of the
             // video element to match that of the image.
 
-            const video = content?.element?.getElementsByTagName("video")[0];
+            const video =
+                content.slide.container.getElementsByTagName("video")[0];
+            console.log(
+                "imageSizeChange",
+                content,
+                content.slide.container,
+                video,
+            );
+
             if (!video) {
-                assertionFailed();
                 return;
             }
 
@@ -429,7 +445,7 @@ const createElementFromHTMLString = (htmlString: string) => {
     // Excess whitespace causes excess DOM nodes, causing our firstChild to not
     // be what we wanted them to be.
     template.innerHTML = htmlString.trim();
-    return vidT.content.firstChild;
+    return template.content.firstChild;
 };
 
 /**
