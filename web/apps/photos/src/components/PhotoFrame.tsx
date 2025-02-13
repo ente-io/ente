@@ -7,6 +7,7 @@ import {
 } from "@/gallery/services/download";
 import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
+import { FileViewer } from "@/new/photos/components/FileViewer";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
 import { styled } from "@mui/material";
@@ -122,7 +123,7 @@ export interface PhotoFrameProps {
 }
 
 /**
- * TODO: Rename me to FileListWithViewer
+ * TODO: Rename me to FileListWithViewer (or Gallery?)
  */
 const PhotoFrame = ({
     mode,
@@ -157,6 +158,10 @@ const PhotoFrame = ({
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
     const router = useRouter();
+
+    // const { show: showPhotoSwipe, props: photoSwipeVisibilityProps } =
+    //     useModalVisibility();
+    const [open5, setOpen5] = useState(false);
 
     const [displayFiles, setDisplayFiles] = useState<DisplayFile[] | undefined>(
         undefined,
@@ -254,15 +259,24 @@ const PhotoFrame = ({
         };
 
     const handleClose = (needUpdate) => {
-        setOpen(false);
-        needUpdate && syncWithRemote();
-        setIsPhotoSwipeOpen?.(false);
+        if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
+            setOpen5(false);
+        } else {
+            setOpen(false);
+            needUpdate && syncWithRemote();
+            setIsPhotoSwipeOpen?.(false);
+        }
     };
 
     const onThumbnailClick = (index: number) => () => {
         setCurrentIndex(index);
-        setOpen(true);
-        setIsPhotoSwipeOpen?.(true);
+        if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
+            // showPhotoSwipe();
+            setOpen5(true);
+        } else {
+            setOpen(true);
+            setIsPhotoSwipeOpen?.(true);
+        }
     };
 
     const handleSelect = handleSelectCreator(
@@ -502,6 +516,16 @@ const PhotoFrame = ({
 
     return (
         <Container>
+            {process.env.NEXT_PUBLIC_ENTE_WIP_PS5 && (
+                <FileViewer
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    /* @ts-ignore TODO(PS): test */
+                    open={open5}
+                    onClose={handleClose}
+                    files={files}
+                    initialIndex={currentIndex}
+                />
+            )}
             <AutoSizer>
                 {({ height, width }) => (
                     <PhotoList

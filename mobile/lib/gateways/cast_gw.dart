@@ -12,7 +12,7 @@ class CastGateway {
       );
       return response.data["publicKey"];
     } catch (e) {
-      if (e is DioError && e.response != null) {
+      if (e is DioException && e.response != null) {
         if (e.response!.statusCode == 404) {
           return null;
         } else if (e.response!.statusCode == 403) {

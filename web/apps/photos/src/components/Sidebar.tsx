@@ -576,7 +576,7 @@ const HelpSection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
         <>
             <RowButton
                 variant="secondary"
-                label={t("Help")}
+                label={t("help")}
                 onClick={showHelp}
             />
             <RowButton

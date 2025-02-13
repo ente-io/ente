@@ -36,6 +36,10 @@
       "title": "Amazon"
     },
     {
+      "title": "Ankama",
+      "slug": "ankama"
+    },
+    {
       "title": "Anycoin Direct",
       "slug": "anycoindirect"
     },
@@ -900,6 +904,10 @@
     },
     {
       "title": "Samsung"
+    },
+    {
+      "title": "Seafile",
+      "slug": "seafile"
     },
     {
       "title": "Sendgrid"
