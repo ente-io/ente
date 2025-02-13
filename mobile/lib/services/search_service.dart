@@ -1498,8 +1498,11 @@ class SearchService {
       for (final trip in tripsToShow) {
         final year =
             DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime).year;
+        final String? locationName = await _tryFindLocationName(trip.files);
         String name = "Trip in $year!";
-        if (year == currentTime.year - 1) {
+        if (locationName != null) {
+          name = "Trip to $locationName!";
+        } else if (year == currentTime.year - 1) {
           name = "Last year's trip!";
         }
         final photoSelection = await _bestSelection(trip.files);
@@ -1546,8 +1549,11 @@ class SearchService {
             final year =
                 DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime)
                     .year;
+            final String? locationName = await _tryFindLocationName(trip.files);
             String name = "Trip in $year!";
-            if (year == currentTime.year - 1) {
+            if (locationName != null) {
+              name = "Trip to $locationName!";
+            } else if (year == currentTime.year - 1) {
               name = "Last year's trip!";
             }
             final photoSelection = await _bestSelection(trip.files);
@@ -1841,6 +1847,22 @@ class SearchService {
     final int dayOfYear = int.parse(DateFormat('D').format(date));
     // Integer division by 7 and add 1 to start from week 1
     return ((dayOfYear - 1) ~/ 7) + 1;
+  }
+
+  Future<String?> _tryFindLocationName(List<EnteFile> files) async {
+    final results = await locationService.getFilesInCity(files, '');
+    final List<City> sortedByResultCount = results.keys.toList()
+      ..sort((a, b) => results[b]!.length.compareTo(results[a]!.length));
+    if (sortedByResultCount.isEmpty) return null;
+    final biggestPlace = sortedByResultCount.first;
+    if (results[biggestPlace]!.length > files.length / 2) {
+      return biggestPlace.city;
+    }
+    if (results.length > 2 &&
+        results.keys.map((city) => city.country).toSet().length == 1) {
+      return biggestPlace.country;
+    }
+    return null;
   }
 
   /// Returns the best selection of files from the given list.
