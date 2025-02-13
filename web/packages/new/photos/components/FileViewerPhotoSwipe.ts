@@ -303,6 +303,20 @@ export class FileViewerPhotoSwipe {
             onClose();
         });
 
+        // Add our custom UI elements to inside the PhotoSwipe dialog.
+        pswp.on("uiRegister", () => {
+            pswp.ui.registerElement({
+                name: "info-button",
+                ariaLabel: "File info",
+                // order:
+                isButton: true,
+                html: "Info",
+                onClick: (e) => {
+                    console.log("click", e);
+                },
+            });
+        });
+
         // Initializing PhotoSwipe adds it to the DOM as a dialog-like div with
         // the class "pswp".
         pswp.init();
@@ -355,7 +369,7 @@ export class FileViewerPhotoSwipe {
         if (this.lastActivityDate == "auto-hidden") return;
         if (Date.now() - this.lastActivityDate.getTime() > 3000) {
             if (this.areUIControlsVisible()) {
-                this.hideUIControls();
+                this.hideUIControlsIfNotFocused();
                 this.lastActivityDate = "auto-hidden";
             } else {
                 this.lastActivityDate = "already-hidden";
@@ -371,7 +385,21 @@ export class FileViewerPhotoSwipe {
         this.pswp.element.classList.add("pswp--ui-visible");
     }
 
-    private hideUIControls() {
+    private hideUIControlsIfNotFocused() {
+        // Check if the current keyboard focus is on any of the UI controls.
+        //
+        // By default, the pswp root element takes up the keyboard focus, so we
+        // check if the currently focused element is still the PhotoSwipe dialog
+        // (if so, this means we're not focused on a specific control).
+        const isDefaultFocus = document
+            .querySelector(":focus-visible")
+            ?.classList.contains("pswp");
+        if (!isDefaultFocus) {
+            // The user focused (e.g. via keyboard tabs) to a specific UI
+            // element. Skip auto hiding.
+            return;
+        }
+
         this.pswp.element.classList.remove("pswp--ui-visible");
     }
 
