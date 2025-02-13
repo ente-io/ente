@@ -238,6 +238,10 @@ export class FileViewerPhotoSwipe {
             return itemData ?? {};
         });
 
+        pswp.addFilter("isContentLoading", (isLoading, content) => {
+            return content.data.isContentLoading ?? isLoading;
+        });
+
         pswp.addFilter("isContentZoomable", (isZoomable, content) => {
             return content.data.isContentZoomable ?? isZoomable;
         });
@@ -433,7 +437,11 @@ export class FileViewerPhotoSwipe {
 
         const thumbnailURL = await downloadManager.renderableThumbnailURL(file);
         const thumbnailData = await augmentedWithDimensions(thumbnailURL);
-        update({ ...thumbnailData, isContentZoomable: false });
+        update({
+            ...thumbnailData,
+            isContentLoading: true,
+            isContentZoomable: false,
+        });
 
         switch (file.metadata.fileType) {
             case FileType.image: {
