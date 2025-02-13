@@ -193,6 +193,28 @@ class MLIndexingIsolate extends SuperIsolate {
     }
   }
 
+  /// WARNING: This method is only for debugging purposes. It should not be used in production.
+  Future<void> debugLoadSingleModel(MLModels model) {
+    return _initModelLock.synchronized(() async {
+      final modelInstance = model.model;
+      if (modelInstance.isInitialized) {
+        _logger.info("Model ${model.name} already loaded");
+        return;
+      }
+      final modelName = modelInstance.modelName;
+      final modelPath = await modelInstance.downloadModelSafe();
+      if (modelPath == null) {
+        _logger.severe("Could not download model, no wifi");
+        return;
+      }
+      final address = await runInIsolate(IsolateOperation.loadModel, {
+        "modelName": modelName,
+        "modelPath": modelPath,
+      }) as int;
+      modelInstance.storeSessionAddress(address);
+    });
+  }
+
   Future<void> cleanupLocalIndexingModels({bool delete = false}) async {
     if (!areModelsDownloaded) return;
     await _releaseModels();
