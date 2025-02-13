@@ -227,7 +227,7 @@ export class FileViewerPhotoSwipe {
                 }
             }
 
-            log.debug(() => ["[ps]", { itemData, index, file, itemData }]);
+            log.debug(() => ["[viewer]", { index, itemData, file }]);
             if (!file) assertionFailed();
 
             if (this.lastActivityDate != "already-hidden")
@@ -242,8 +242,8 @@ export class FileViewerPhotoSwipe {
 
         pswp.addFilter("preventPointerEvent", (originalResult) => {
             // There was a pointer event. We don't care which one, we just use
-            // this as a hook to show UI again (if needed) and update our last
-            // activity date.
+            // this as a hook to show the UI again (if needed), and update our
+            // last activity date.
             this.onPointerActivity();
             return originalResult;
         });
@@ -252,46 +252,36 @@ export class FileViewerPhotoSwipe {
             const videoURL = e.content.data.livePhotoVideoURL;
             if (!videoURL) return;
 
-            // This slide is displaying a live photo. Append a video element
-            // into the mix.
+            // This slide is displaying a live photo. Append a video element to
+            // show its video part.
 
             const img = e.content.element;
             const video = createElementFromHTMLString(
                 livePhotoVideoHTML(videoURL),
             );
-            const containerEl = e.content.slide.container;
-            containerEl.style = "position: relative";
-            containerEl.appendChild(video);
-            video.style = `position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none;`;
+            const container = e.content.slide.container;
+            container.style = "position: relative";
+            container.appendChild(video);
+            // Set z-index to 1 to keep it on top, and set pointer-events to
+            // none to pass the clicks through.
+            video.style =
+                "position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none;";
 
+            // Size it to the underlying image.
             video.style.width = img.style.width;
             video.style.height = img.style.height;
-
-            console.log(
-                "contentAppend",
-                e.content,
-                e.content.slide.container,
-                video,
-                img.style.width,
-                img.style.height,
-            );
         });
 
         pswp.on("imageSizeChange", ({ content, width, height }) => {
             if (!content.data.livePhotoVideoURL) return;
-            // This slide is displaying a live photo. Modify the size of the
+
+            // This slide is displaying a live photo. Resize the size of the
             // video element to match that of the image.
 
             const video =
                 content.slide.container.getElementsByTagName("video")[0];
-            console.log(
-                "imageSizeChange",
-                content,
-                content.slide.container,
-                video,
-            );
-
             if (!video) {
+                // We might have been called before "contentAppend".
                 return;
             }
 
@@ -427,6 +417,25 @@ export class FileViewerPhotoSwipe {
     }
 }
 
+/**
+ * Take a image URL, determine its dimensions using browser APIs, and return the URL
+ * and its dimensions in a form that can directly be passed to PhotoSwipe as
+ * {@link SlideData}.
+ */
+const augmentedWithDimensions = (imageURL: string): Promise<SlideData> =>
+    new Promise((resolve) => {
+        let image = new Image();
+        image.onload = () => {
+            resolve({
+                src: imageURL,
+                width: image.naturalWidth,
+                height: image.naturalHeight,
+            });
+        };
+        // TODO(PS): Handle imageElement.onerror
+        image.src = imageURL;
+    });
+
 const videoHTML = (url: string, disableDownload: boolean) => `
 <video controls ${disableDownload && "controlsList=nodownload"} oncontextmenu="return false;">
   <source src="${url}" />
@@ -447,22 +456,3 @@ const createElementFromHTMLString = (htmlString: string) => {
     template.innerHTML = htmlString.trim();
     return template.content.firstChild;
 };
-
-/**
- * Take a image URL, determine its dimensions using browser APIs, and return the URL
- * and its dimensions in a form that can directly be passed to PhotoSwipe as
- * {@link SlideData}.
- */
-const augmentedWithDimensions = (imageURL: string): Promise<SlideData> =>
-    new Promise((resolve) => {
-        let image = new Image();
-        image.onload = () => {
-            resolve({
-                src: imageURL,
-                width: image.naturalWidth,
-                height: image.naturalHeight,
-            });
-        };
-        // TODO(PS): Handle imageElement.onerror
-        image.src = imageURL;
-    });
