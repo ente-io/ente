@@ -1899,10 +1899,10 @@ class CollectionsService {
   }
 
   String _decryptCollectionPath(Collection collection) {
-    if (collection.decryptedPath != null &&
-        collection.decryptedPath!.isNotEmpty) {
+    final existingPath = collection.decryptedPath;
+    if (existingPath != null && existingPath!.isNotEmpty) {
       debugPrint("Using cached decrypted path for collection ${collection.id}");
-      return collection.decryptedPath!;
+      return existingPath!;
     } else {
       debugPrint(
         "Decrypting path for collection ${collection.id} from "
