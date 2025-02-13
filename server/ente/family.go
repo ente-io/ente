@@ -51,7 +51,7 @@ type FamilyMember struct {
 
 type ModifyMemberStorage struct {
 	ID           uuid.UUID `json:"id" binding:"required"`
-	StorageLimit *int64    `json:"storageLimit" binding:"required"`
+	StorageLimit *int64    `json:"storageLimit"`
 }
 
 type FamilyMemberResponse struct {
