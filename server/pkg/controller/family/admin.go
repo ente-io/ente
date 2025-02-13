@@ -192,18 +192,25 @@ func (c *Controller) CloseFamily(ctx context.Context, adminID int64) error {
 
 // ModifyMemberStorage allows admin user to update the storageLimit for a member in the family
 func (c *Controller) ModifyMemberStorage(ctx context.Context, adminID int64, id uuid.UUID, storageLimit *int64) error {
-	familyAdminID, err := c.UserRepo.GetFamilyAdminID(adminID)
-	if err != nil {
-		return stacktrace.Propagate(ente.ErrBadRequest, "Could not get family admin ID")
-	}
-
 	member, err := c.FamilyRepo.GetMemberById(ctx, id)
 	if err != nil {
 		return stacktrace.Propagate(err, "Couldn't fetch Family Member")
 	}
 
-	// gets admin subscription in order to get the size of total storage quota
-	activeSub, err := c.BillingCtrl.GetActiveSubscription(adminID)
+	if member.AdminUserID != adminID {
+		return stacktrace.Propagate(ente.ErrBadRequest, "you do not have sufficient permission")
+	}
+
+	if member.IsAdmin {
+		return stacktrace.Propagate(ente.ErrCannotModifyAdminStoragLimit, "cannot modify admin storage limit")
+	}
+
+	if member.Status != ente.ACCEPTED {
+		return stacktrace.Propagate(ente.ErrBadRequest, "user is not a part of family")
+	}
+
+	// gets admin subscription in order to get the size of total storage quota (including bonus)
+	activeSub, err := c.FetchMembersForAdminID(ctx, member.AdminUserID)
 	if err != nil {
 		return stacktrace.Propagate(ente.ErrNoActiveSubscription, "couldn't get active subscription")
 	}
@@ -219,21 +226,13 @@ func (c *Controller) ModifyMemberStorage(ctx context.Context, adminID int64, id 
 		return stacktrace.Propagate(memUsageErr, "Couldn't find members storage usage")
 	}
 
-	if adminID == *familyAdminID && member.IsAdmin {
-		return stacktrace.Propagate(ente.ErrCannotModifyAdminStoragLimit, "cannot modify admin storage limit")
-	}
-
 	if memberUsage > *storageLimit {
 		return stacktrace.Propagate(ente.ErrFailedReducingStorageLimit, "Cannot reduce storage, current usage is more.")
 	}
 
-	if id == member.ID && member.Status == "ACCEPTED" {
-		err := c.FamilyRepo.ModifyMemberStorage(ctx, adminID, member.ID, storageLimit)
-		if err != nil {
-			return stacktrace.Propagate(err, "Cannot Modify Members Storage")
-		}
-	} else {
-		return stacktrace.Propagate(ente.ErrBadRequest, "user is not a part of family")
+	modifyStorageErr := c.FamilyRepo.ModifyMemberStorage(ctx, adminID, member.ID, storageLimit)
+	if modifyStorageErr != nil {
+		return stacktrace.Propagate(modifyStorageErr, "Cannot Modify Members Storage")
 	}
 	return nil
 }
