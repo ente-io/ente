@@ -15,11 +15,7 @@ import {
 import { authTheme } from "@/base/components/utils/theme";
 import { logStartupBanner } from "@/base/log-web";
 import HTTPService from "@ente/shared/network/HTTPService";
-import {
-    LS_KEYS,
-    getData,
-    migrateKVToken,
-} from "@ente/shared/storage/localStorage";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import "@fontsource-variable/inter";
 import { CssBaseline } from "@mui/material";
@@ -38,7 +34,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER) as User | undefined | null;
-        void migrateKVToken(user);
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
     }, []);
