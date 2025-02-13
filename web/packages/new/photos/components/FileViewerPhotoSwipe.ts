@@ -249,36 +249,38 @@ export class FileViewerPhotoSwipe {
         });
 
         pswp.on("contentAppend", (e) => {
-            const containerEl = e.content.slide.container;
-            if (e.content.data.videoURL) {
-                const img = e.content.element;
-                console.log(
-                    img,
-                    img.width,
-                    img.height,
-                    containerEl.width,
-                    containerEl.height,
-                );
+            const videoURL = e.content.data.livePhotoVideoURL;
+            if (!videoURL) return;
 
-                const vidT = document.createElement("template");
-                vidT.innerHTML = livePhotoVideoHTML(
-                    e.content.data.videoURL,
-                ).trim();
-                const vid = vidT.content.firstChild;
-                // vid.innerText = "Test 2";
-                containerEl.style = "position: relative";
-                containerEl.appendChild(vid);
-                // vid.style = `position: absolute; width: ${img.width}px; height: ${img.height}px; top: 0, left: 0, z-index: 1; pointer-events: none;`;
-                // console.log(vid.style);
-                // vid.style = `position: absolute; width: 200px; height: 200px;
-                // top: 0, left: 0, z-index: 1; pointer-events: none;`;
-                vid.style =
-                    //img.style +
-                    `width: 200px; height: 100px; ` +
-                    `; position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none;`;
-                // vid.style.width = img.width + "px";
-                // vid.style.height = img.height + "px";
+            // This slide is displaying a live photo. Append a video element
+            // into the mix.
+
+            const img = e.content.element;
+            const video = createElementFromHTMLString(
+                livePhotoVideoHTML(videoURL),
+            );
+            const containerEl = e.content.slide.container;
+            containerEl.style = "position: relative";
+            containerEl.appendChild(video);
+            video.style =
+                `width: 200px; height: 100px; ` +
+                `position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none;`;
+        });
+
+        pswp.on("imageSizeChange", ({ content, width, height }) => {
+            if (!content.data.livePhotoVideoURL) return;
+
+            // This slide is displaying a live photo. Modify the size of the
+            // video element to match that of the image.
+
+            const video = content?.element?.getElementsByTagName("video")[0];
+            if (!video) {
+                assertionFailed();
+                return;
             }
+
+            video.style.width = `${width}px`;
+            video.style.height = `${height}px`;
         });
 
         pswp.on("contentDeactivate", (e) => {
@@ -401,8 +403,8 @@ export class FileViewerPhotoSwipe {
                 const imageURL = await livePhotoSourceURLs.image();
                 const imageData = await augmentedWithDimensions(imageURL);
                 update(imageData);
-                const videoURL = await livePhotoSourceURLs.video();
-                update({ ...imageData, videoURL });
+                const livePhotoVideoURL = await livePhotoSourceURLs.video();
+                update({ ...imageData, livePhotoVideoURL });
                 break;
             }
         }
@@ -422,6 +424,14 @@ const livePhotoVideoHTML = (videoURL: string) => `
 </video>
 `;
 
+const createElementFromHTMLString = (htmlString: string) => {
+    const template = document.createElement("template");
+    // Excess whitespace causes excess DOM nodes, causing our firstChild to not
+    // be what we wanted them to be.
+    template.innerHTML = htmlString.trim();
+    return vidT.content.firstChild;
+};
+
 /**
  * Take a image URL, determine its dimensions using browser APIs, and return the URL
  * and its dimensions in a form that can directly be passed to PhotoSwipe as
@@ -437,5 +447,6 @@ const augmentedWithDimensions = (imageURL: string): Promise<SlideData> =>
                 height: image.naturalHeight,
             });
         };
+        // TODO(PS): Handle imageElement.onerror
         image.src = imageURL;
     });
