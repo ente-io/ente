@@ -1499,11 +1499,11 @@ class SearchService {
         final year =
             DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime).year;
         final String? locationName = await _tryFindLocationName(trip.files);
-        String name = "Trip in $year!";
+        String name = "Trip in $year";
         if (locationName != null) {
-          name = "Trip to $locationName!";
+          name = "Trip to $locationName";
         } else if (year == currentTime.year - 1) {
-          name = "Last year's trip!";
+          name = "Last year's trip";
         }
         final photoSelection = await _bestSelection(trip.files);
         searchResults.add(
@@ -1550,11 +1550,11 @@ class SearchService {
                 DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime)
                     .year;
             final String? locationName = await _tryFindLocationName(trip.files);
-            String name = "Trip in $year!";
+            String name = "Trip in $year";
             if (locationName != null) {
-              name = "Trip to $locationName!";
+              name = "Trip to $locationName";
             } else if (year == currentTime.year - 1) {
-              name = "Last year's trip!";
+              name = "Last year's trip";
             }
             final photoSelection = await _bestSelection(trip.files);
             searchResults.add(
