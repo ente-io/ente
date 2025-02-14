@@ -93,9 +93,12 @@ interface CropBoxProps {
     height: number;
 }
 
-export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
-    props,
-) => {
+export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
+    open,
+    onClose,
+    file,
+    onSaveEditedCopy,
+}) => {
     const { showMiniDialog } = useBaseContext();
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -384,9 +387,8 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
             const ctx = canvasRef.current.getContext("2d");
             ctx.imageSmoothingEnabled = false;
             if (!fileURL) {
-                const srcURLs = await downloadManager.renderableSourceURLs(
-                    props.file,
-                );
+                const srcURLs =
+                    await downloadManager.renderableSourceURLs(file);
                 img.src = srcURLs.url as string;
                 setFileURL(srcURLs.url as string);
                 // The image editing works for images (not live photos or
@@ -447,13 +449,13 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
     };
 
     useEffect(() => {
-        if (!props.open || !props.file) return;
+        if (!open || !file) return;
         loadCanvas();
-    }, [props.open, props.file]);
+    }, [open, file]);
 
     const handleClose = () => {
         setFileURL(undefined);
-        props.onClose();
+        onClose();
     };
 
     const handleCloseWithConfirmation = () => {
@@ -464,13 +466,13 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
         }
     };
 
-    if (!props.open) {
+    if (!open) {
         return <></>;
     }
 
     const getEditedFile = async () => {
         const originalSizeCanvas = originalSizeCanvasRef.current!;
-        const originalFileName = props.file.metadata.title;
+        const originalFileName = file.metadata.title;
         return canvasToFile(originalSizeCanvas, originalFileName, mimeType);
     };
 
@@ -485,14 +487,10 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
         if (!canvasRef.current) return;
         try {
             const collections = await getLocalCollections();
-
             const collection = collections.find(
-                (c) => c.id === props.file.collectionID,
+                (c) => c.id == file.collectionID,
             );
-
-            const editedFile = await getEditedFile();
-
-            props.onSaveEditedCopy(editedFile, collection, props.file);
+            onSaveEditedCopy(await getEditedFile(), collection, file);
             setFileURL(undefined);
         } catch (e) {
             log.error("Error saving copy to ente", e);
