@@ -1011,9 +1011,9 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                 onSelectPerson={handleSelectPerson}
             />
             <ImageEditorOverlay
-                show={showImageEditorOverlay}
-                file={photoSwipe?.currItem as EnteFile}
+                open={showImageEditorOverlay}
                 onClose={handleCloseEditor}
+                file={photoSwipe?.currItem as EnteFile}
                 onSaveEditedCopy={handleSaveEditedCopy}
             />
         </>

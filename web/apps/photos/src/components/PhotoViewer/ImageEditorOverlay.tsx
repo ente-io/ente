@@ -7,6 +7,7 @@ import {
     RowButtonGroupTitle,
     RowSwitch,
 } from "@/base/components/RowButton";
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
@@ -55,10 +56,11 @@ import React, {
     type RefObject,
 } from "react";
 
-interface ImageEditorOverlayProps {
+type ImageEditorOverlayProps = ModalVisibilityProps & {
+    /**
+     * The (Ente) file to edit.
+     */
     file: EnteFile;
-    show: boolean;
-    onClose: () => void;
     /**
      * Called when the user activates the button to save a copy of the given
      * {@link enteFile} to their Ente account with the edits they have made.
@@ -73,7 +75,7 @@ interface ImageEditorOverlayProps {
         collection: Collection,
         enteFile: EnteFile,
     ) => void;
-}
+};
 
 const filterDefaultValues = {
     brightness: 100,
@@ -446,9 +448,9 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
     };
 
     useEffect(() => {
-        if (!props.show || !props.file) return;
+        if (!props.open || !props.file) return;
         loadCanvas();
-    }, [props.show, props.file]);
+    }, [props.open, props.file]);
 
     const handleClose = () => {
         setFileURL(undefined);
@@ -463,7 +465,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
         }
     };
 
-    if (!props.show) {
+    if (!props.open) {
         return <></>;
     }
 
