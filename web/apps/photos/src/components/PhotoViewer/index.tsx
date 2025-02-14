@@ -141,7 +141,8 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
     collectionNameMap,
     onSelectPerson,
 }) => {
-    const { showLoadingBar, hideLoadingBar } = useContext(AppContext);
+    const { showLoadingBar, hideLoadingBar, showMiniDialog } =
+        useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
@@ -971,6 +972,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                 closePhotoViewer={handleClose}
                 file={photoSwipe?.currItem as EnteFile}
                 exif={exif?.value}
+                showMiniDialog={showMiniDialog}
                 shouldDisableEdits={!isOwnFile}
                 allowMap={!publicCollectionGalleryContext.credentials}
                 showCollectionChips={

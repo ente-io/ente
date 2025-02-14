@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* TODO: Audit this file */
-/* eslint-disable */
 /* @ts-nocheck */
 
 import { LinkButtonUndecorated } from "@/base/components/LinkButton";
@@ -80,10 +81,11 @@ import {
 } from "@mui/material";
 import { Formik } from "formik";
 import { t } from "i18next";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as Yup from "yup";
 
 // Re-uses images from ~leaflet package.
+import type { AccountsContextT } from "@/accounts/types/context";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css";
 import "leaflet/dist/leaflet.css";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -99,11 +101,19 @@ export interface FileInfoExif {
 }
 
 export interface FileInfoProps {
+    /**
+     * The file whose information we are showing.
+     */
+    file: EnteFile | undefined;
     showInfo: boolean;
     handleCloseInfo: () => void;
     closePhotoViewer: () => void;
-    file: EnteFile | undefined;
     exif: FileInfoExif | undefined;
+    /**
+     * This is the same as the {@link showMiniDialog} prop in the top level
+     * {@link AppContext} of the app which we're currently being shown in.
+     */
+    showMiniDialog: AccountsContextT["showMiniDialog"];
     /**
      * TODO: Rename and flip to allowEdits.
      */
@@ -130,11 +140,12 @@ export interface FileInfoProps {
 }
 
 export const FileInfo: React.FC<FileInfoProps> = ({
+    file,
+    showMiniDialog,
     shouldDisableEdits,
     allowMap,
     showInfo,
     handleCloseInfo,
-    file,
     exif,
     scheduleUpdate,
     refreshPhotoswipe,
@@ -146,8 +157,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     onSelectPerson,
 }) => {
     const { mapEnabled } = useSettingsSnapshot();
-
-    const { showMiniDialog } = useContext(AppContext);
 
     const [exifInfo, setExifInfo] = useState<ExifInfo | undefined>();
     const { show: showRawExif, props: rawExifVisibilityProps } =
