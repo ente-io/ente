@@ -1,4 +1,5 @@
-/* TODO: Audit this file */
+/* TODO: Audit this file.
+   All the bangs shouldn't be needed with better types / restructuring. */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable react-hooks/exhaustive-deps */
@@ -161,10 +162,10 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
 
     const getCanvasBoundsOffsets = () => {
         const canvasBounds = {
-            height: canvasRef.current.height,
-            width: canvasRef.current.width,
+            height: canvasRef.current!.height,
+            width: canvasRef.current!.width,
         };
-        const parentBounds = parentRef.current.getBoundingClientRect();
+        const parentBounds = parentRef.current!.getBoundingClientRect();
 
         // calculate the offset created by centering the canvas in its parent
         const offsetX = (parentBounds.width - canvasBounds.width) / 2;
@@ -181,7 +182,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
     const handleDragStart: React.MouseEventHandler = (e) => {
         if (currentTab !== "crop") return;
 
-        const rect = cropBoxRef.current.getBoundingClientRect();
+        const rect = cropBoxRef.current!.getBoundingClientRect();
         const offsetX = e.pageX - rect.left - rect.width / 2;
         const offsetY = e.pageY - rect.top - rect.height / 2;
 
@@ -291,7 +292,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
             return;
         }
         try {
-            applyFilters([canvasRef.current, originalSizeCanvasRef.current]);
+            applyFilters([canvasRef.current, originalSizeCanvasRef.current!]);
             setColoursAdjusted(
                 brightness !== filterDefaultValues.brightness ||
                     contrast !== filterDefaultValues.contrast ||
@@ -315,7 +316,10 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
             for (const canvas of canvases) {
                 const blurSizeRatio =
                     Math.min(canvas.width, canvas.height) /
-                    Math.min(canvasRef.current.width, canvasRef.current.height);
+                    Math.min(
+                        canvasRef.current!.width,
+                        canvasRef.current!.height,
+                    );
                 const blurRadius = blurSizeRatio * blur;
                 const filterString = `brightness(${brightness}%) contrast(${contrast}%) blur(${blurRadius}px) saturate(${saturation}%) invert(${
                     invert ? 1 : 0
@@ -385,7 +389,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
             setCurrentRotationAngle(0);
 
             const img = new Image();
-            const ctx = canvasRef.current.getContext("2d");
+            const ctx = canvasRef.current.getContext("2d")!;
             ctx.imageSmoothingEnabled = false;
             if (!fileURL) {
                 const srcURLs =
@@ -404,23 +408,23 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                 img.onload = () => {
                     try {
                         const scale = Math.min(
-                            parentRef.current.clientWidth / img.width,
-                            parentRef.current.clientHeight / img.height,
+                            parentRef.current!.clientWidth / img.width,
+                            parentRef.current!.clientHeight / img.height,
                         );
                         setPreviewCanvasScale(scale);
 
                         const width = img.width * scale;
                         const height = img.height * scale;
-                        canvasRef.current.width = width;
-                        canvasRef.current.height = height;
+                        canvasRef.current!.width = width;
+                        canvasRef.current!.height = height;
 
                         ctx?.drawImage(img, 0, 0, width, height);
 
-                        originalSizeCanvasRef.current.width = img.width;
-                        originalSizeCanvasRef.current.height = img.height;
+                        originalSizeCanvasRef.current!.width = img.width;
+                        originalSizeCanvasRef.current!.height = img.height;
 
                         const oSCtx =
-                            originalSizeCanvasRef.current.getContext("2d");
+                            originalSizeCanvasRef.current!.getContext("2d");
 
                         oSCtx?.drawImage(img, 0, 0, img.width, img.height);
 
@@ -491,7 +495,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
             const collection = collections.find(
                 (c) => c.id == file.collectionID,
             );
-            onSaveEditedCopy(await getEditedFile(), collection, file);
+            onSaveEditedCopy(await getEditedFile(), collection!, file);
             setFileURL(undefined);
         } catch (e) {
             log.error("Error saving copy to ente", e);
@@ -509,7 +513,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
         setTransformationPerformed(true);
         cropRegionOfCanvas(canvasRef.current, x1, y1, x2, y2);
         cropRegionOfCanvas(
-            originalSizeCanvasRef.current,
+            originalSizeCanvasRef.current!,
             x1 / previewCanvasScale,
             y1 / previewCanvasScale,
             x2 / previewCanvasScale,
@@ -669,6 +673,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                     <Tabs
                         value={currentTab}
                         onChange={(_, value) => {
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                             setCurrentTab(value);
                         }}
                     >
@@ -792,7 +797,10 @@ const canvasToFile = async (
             break;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const blob = (await new Promise<Blob>((resolve) =>
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         canvas.toBlob(resolve, mimeType),
     ))!;
 
@@ -805,8 +813,8 @@ const canvasToFile = async (
 };
 
 interface CommonMenuProps {
-    canvasRef: RefObject<HTMLCanvasElement>;
-    originalSizeCanvasRef: RefObject<HTMLCanvasElement>;
+    canvasRef: RefObject<HTMLCanvasElement | null>;
+    originalSizeCanvasRef: RefObject<HTMLCanvasElement | null>;
     setTransformationPerformed: (v: boolean) => void;
     canvasLoading: boolean;
     setCanvasLoading: (v: boolean) => void;
@@ -816,7 +824,7 @@ interface CommonMenuProps {
 type CropMenuProps = CommonMenuProps & {
     previewScale: number;
     cropBoxProps: CropBoxProps;
-    cropBoxRef: RefObject<HTMLDivElement>;
+    cropBoxRef: RefObject<HTMLDivElement | null>;
     resetCropBox: () => void;
 };
 
@@ -850,7 +858,7 @@ const CropMenu: React.FC<CropMenuProps> = (props) => {
                         setTransformationPerformed(true);
                         cropRegionOfCanvas(canvasRef.current, x1, y1, x2, y2);
                         cropRegionOfCanvas(
-                            originalSizeCanvasRef.current,
+                            originalSizeCanvasRef.current!,
                             x1 / props.previewScale,
                             y1 / props.previewScale,
                             x2 / props.previewScale,
@@ -873,7 +881,7 @@ const cropRegionOfCanvas = (
     topLeftY: number,
     bottomRightX: number,
     bottomRightY: number,
-    scale: number = 1,
+    scale = 1,
 ) => {
     const context = canvas.getContext("2d");
     if (!context || !canvas) return;
@@ -1191,9 +1199,9 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
         (widthRatio: number, heightRatio: number) => () => {
             try {
                 setCanvasLoading(true);
-                cropCanvas(canvasRef.current, widthRatio, heightRatio);
+                cropCanvas(canvasRef.current!, widthRatio, heightRatio);
                 cropCanvas(
-                    originalSizeCanvasRef.current,
+                    originalSizeCanvasRef.current!,
                     widthRatio,
                     heightRatio,
                 );
@@ -1212,9 +1220,9 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
     const createRotationHandler = (rotation: "left" | "right") => () => {
         try {
             setCanvasLoading(true);
-            rotateCanvas(canvasRef.current, rotation === "left" ? -90 : 90);
+            rotateCanvas(canvasRef.current!, rotation === "left" ? -90 : 90);
             rotateCanvas(
-                originalSizeCanvasRef.current,
+                originalSizeCanvasRef.current!,
                 rotation === "left" ? -90 : 90,
             );
             setCanvasLoading(false);
@@ -1228,8 +1236,8 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
         (direction: "vertical" | "horizontal") => () => {
             try {
                 setCanvasLoading(true);
-                flipCanvas(canvasRef.current, direction);
-                flipCanvas(originalSizeCanvasRef.current, direction);
+                flipCanvas(canvasRef.current!, direction);
+                flipCanvas(originalSizeCanvasRef.current!, direction);
                 setCanvasLoading(false);
                 setTransformationPerformed(true);
             } catch (e) {
