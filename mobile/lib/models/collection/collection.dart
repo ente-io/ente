@@ -238,15 +238,13 @@ class Collection {
     final sharees = List<User>.from(
       (json.decode(map['sharees']) as List).map((x) => User.fromMap(x)),
     );
-    final List<PublicURL> publicURLs = map['public_urls'] == null
-        ? []
-        : List<PublicURL>.from(
-            (json.decode(map['public_urls']) as List)
-                .map((x) => PublicURL.fromMap(x)),
-          );
+    final List<PublicURL> publicURLs = List<PublicURL>.from(
+      (json.decode(map['public_urls']) as List)
+          .map((x) => PublicURL.fromMap(x)),
+    );
     return Collection(
       id: map['id'],
-      owner: User.fromMap(map['owner']),
+      owner: User.fromJson(map['owner']),
       encryptedKey: map['enc_key'],
       keyDecryptionNonce: map['enc_key_nonce'],
       name: map['name'],
@@ -255,36 +253,36 @@ class Collection {
       publicURLs: publicURLs,
       updationTime: map['updation_time'],
       localPath: map['local_path'],
-      isDeleted: map['isDeleted'] ?? false,
-      mMdEncodedJson: map['mmd_encoded_json'] ?? '{}',
-      mMdVersion: map['mmd_ver'] ?? 0,
-      mMdPubEncodedJson: map['pub_mmd_encoded_json'] ?? '{}',
-      mMbPubVersion: map['pub_mmd_ver'] ?? 0,
-      sharedMmdJson: map['shared_mmd_json'] ?? '{}',
-      sharedMmdVersion: map['shared_mmd_ver'] ?? 0,
+      isDeleted: (map['is_deleted'] as int) == 1,
+      mMdEncodedJson: map['mmd_encoded_json'],
+      mMdVersion: map['mmd_ver'],
+      mMdPubEncodedJson: map['pub_mmd_encoded_json'],
+      mMbPubVersion: map['pub_mmd_ver'],
+      sharedMmdJson: map['shared_mmd_json'],
+      sharedMmdVersion: map['shared_mmd_ver'],
     );
   }
 
-  static Map<String, dynamic> toRow(Collection c) {
-    return {
-      'id': c.id,
-      'owner': c.owner.toMap(),
-      'enc_key': c.encryptedKey,
-      'enc_key_nonce': c.keyDecryptionNonce,
-      'name': c.name,
-      'type': typeToString(c.type),
-      'sharees': json.encode(c.sharees.map((x) => x.toMap()).toList()),
-      'public_urls': json.encode(c.publicURLs.map((x) => x.toMap()).toList()),
-      'updation_time': c.updationTime,
-      'local_path': c.localPath,
-      'isDeleted': c.isDeleted,
-      'mmd_encoded_json': c.mMdEncodedJson,
-      'mmd_ver': c.mMdVersion,
-      'pub_mmd_encoded_json': c.mMdPubEncodedJson,
-      'pub_mmd_ver': c.mMbPubVersion,
-      'shared_mmd_json': c.sharedMmdJson,
-      'shared_mmd_ver': c.sharedMmdVersion,
-    };
+  List<Object?> rowValiues() {
+    return [
+      id,
+      owner.toJson(),
+      encryptedKey,
+      keyDecryptionNonce,
+      name,
+      typeToString(type),
+      localPath,
+      isDeleted ? 1 : 0,
+      updationTime,
+      json.encode(sharees.map((x) => x.toMap()).toList()),
+      json.encode(publicURLs.map((x) => x.toMap()).toList()),
+      mMdEncodedJson,
+      mMdVersion,
+      mMdPubEncodedJson,
+      mMbPubVersion,
+      sharedMmdJson,
+      sharedMmdVersion,
+    ];
   }
 }
 

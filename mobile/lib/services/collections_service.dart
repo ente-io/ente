@@ -16,6 +16,7 @@ import 'package:photos/core/network/network.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/db/remote/db.dart";
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -47,8 +48,8 @@ import "package:photos/utils/local_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CollectionsService {
-  static const _collectionSyncTimeKeyPrefix = "collection_sync_time_";
-  static const _collectionsSyncTimeKey = "collections_sync_time_x";
+  static const _collectionSyncTimeKeyPrefix = "collection_sync_time_x";
+  static const _collectionsSyncTimeKey = "collections_sync_time_xx";
 
   static const int kMaximumWriteAttempts = 5;
 
@@ -87,13 +88,25 @@ class CollectionsService {
 
   Future<void> init(SharedPreferences preferences) async {
     _prefs = preferences;
-    final collections = await _db.getAllCollections();
+    await remoteDB.init();
 
+    final collections = await _db.getAllCollections();
+    final List<Collection> collectionsToInsert = [];
     for (final collection in collections) {
       // using deprecated method because the path is stored in encrypted
       // format in the DB
-      _cacheCollectionAttributes(collection);
+      final r = _cacheCollectionAttributes(collection);
+      collectionsToInsert.add(r);
     }
+    await remoteDB.insertCollections(collectionsToInsert);
+    await _db.clearTable();
+    if (collectionsToInsert.isEmpty) {
+      final newColections = await remoteDB.getAllCollections();
+      for (final collection in newColections) {
+        _cacheLocalPathAndCollection(collection);
+      }
+    }
+
     Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       _collectionIDToNewestFileTime = null;
       if (event.collectionID != null) {
@@ -131,6 +144,7 @@ class CollectionsService {
     int maxUpdationTime = lastCollectionUpdationTime;
     final ownerID = _config.getUserID();
     bool shouldFireDeleteEvent = false;
+    final Set<int> toDelete = {};
     for (final collection in fetchedCollections) {
       if (collection.isDeleted) {
         await _filesDB.deleteCollection(collection.id);
@@ -141,7 +155,7 @@ class CollectionsService {
       }
       // remove reference for incoming collections when unshared/deleted
       if (collection.isDeleted && ownerID != collection.owner.id) {
-        await _db.deleteCollection(collection.id);
+        toDelete.add(collection.id);
       } else {
         // keep entry for deletedCollection as collectionKey may be used during
         // trash file decryption
@@ -158,6 +172,9 @@ class CollectionsService {
           source: "syncCollectionDeleted",
         ),
       );
+    }
+    if (toDelete.isNotEmpty) {
+      await remoteDB.deleteEntries(toDelete, RemoteTable.collections);
     }
     await _updateDB(updatedCollections);
     await _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
@@ -191,8 +208,12 @@ class CollectionsService {
   }
 
   Future<Map<int, int>> getCollectionIDsToBeSynced() async {
-    final idsToRemoveUpdateTimeMap =
-        await _db.getActiveIDsAndRemoteUpdateTime();
+    final idsToRemoveUpdateTimeMap = <int, int>{};
+    for (final collection in _collectionIDToCollections.values) {
+      if (!collection.isDeleted) {
+        idsToRemoveUpdateTimeMap[collection.id] = collection.updationTime;
+      }
+    }
     final result = <int, int>{};
     for (final MapEntry<int, int> e in idsToRemoveUpdateTimeMap.entries) {
       final int cid = e.key;
@@ -551,7 +572,9 @@ class CollectionsService {
       }
       _collectionIDToCollections[collectionID] =
           _collectionIDToCollections[collectionID]!.copyWith(sharees: sharees);
-      unawaited(_db.insert([_collectionIDToCollections[collectionID]!]));
+      unawaited(
+        _updateDB([_collectionIDToCollections[collectionID]!]),
+      );
       RemoteSyncService.instance.sync(silently: true).ignore();
       return sharees;
     } on DioException catch (e) {
@@ -577,7 +600,9 @@ class CollectionsService {
       }
       _collectionIDToCollections[collectionID] =
           _collectionIDToCollections[collectionID]!.copyWith(sharees: sharees);
-      unawaited(_db.insert([_collectionIDToCollections[collectionID]!]));
+      unawaited(
+        _updateDB([_collectionIDToCollections[collectionID]!]),
+      );
       RemoteSyncService.instance.sync(silently: true).ignore();
       return sharees;
     } catch (e) {
@@ -638,7 +663,7 @@ class CollectionsService {
       if (isBulkDelete) {
         final deletedCollection = collection.copyWith(isDeleted: true);
         _collectionIDToCollections[collection.id] = deletedCollection;
-        unawaited(_db.insert([deletedCollection]));
+        unawaited(_updateDB([deletedCollection]));
       } else {
         await _handleCollectionDeletion(collection);
       }
@@ -656,7 +681,7 @@ class CollectionsService {
   Future<void> _handleCollectionDeletion(Collection collection) async {
     await _filesDB.deleteCollection(collection.id);
     final deletedCollection = collection.copyWith(isDeleted: true);
-    unawaited(_db.insert([deletedCollection]));
+    unawaited(_updateDB([deletedCollection]));
     _collectionIDToCollections[collection.id] = deletedCollection;
     Bus.instance.fire(
       CollectionUpdatedEvent(
@@ -962,7 +987,7 @@ class CollectionsService {
         },
       );
       collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
-      await _db.insert(List.from([collection]));
+      await _updateDB(List.from([collection]));
       _collectionIDToCollections[collection.id] = collection;
       Bus.instance.fire(
         CollectionUpdatedEvent(collection.id, <EnteFile>[], "shareUrL"),
@@ -991,7 +1016,7 @@ class CollectionsService {
       // remove existing url information
       collection.publicURLs.clear();
       collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
-      await _db.insert(List.from([collection]));
+      await _updateDB(List.from([collection]));
       _collectionIDToCollections[collection.id] = collection;
       Bus.instance.fire(
         CollectionUpdatedEvent(collection.id, <EnteFile>[], "updateUrl"),
@@ -1013,7 +1038,7 @@ class CollectionsService {
         "/collections/share-url/" + collection.id.toString(),
       );
       collection.publicURLs.clear();
-      await _db.insert(List.from([collection]));
+      await _updateDB(List.from([collection]));
       _collectionIDToCollections[collection.id] = collection;
       Bus.instance.fire(
         CollectionUpdatedEvent(
@@ -1325,7 +1350,7 @@ class CollectionsService {
       assert(response.data != null);
       final collectionData = response.data["collection"];
       final collection = await _fromRemoteCollection(collectionData);
-      await _db.insert(List.from([collection]));
+      await _updateDB(List.from([collection]));
       _cacheLocalPathAndCollection(collection);
       return collection;
     } catch (e) {
@@ -1902,19 +1927,6 @@ class CollectionsService {
     });
   }
 
-  @Deprecated("Use _cacheLocalPathAndCollection instead")
-  CollectionV2 _cacheCollectionAttributes(CollectionV2 collection) {
-    final String decryptedName = _getDecryptedCollectionName(collection);
-    collection.setName(decryptedName);
-    if (collection.canLinkToDevicePath(_config.getUserID()!)) {
-      collection.decryptedPath = _decryptCollectionPath(collection);
-      _localPathToCollectionID[collection.decryptedPath!] = collection.id;
-    }
-    final Collection c = Collection.fromOldCollection(collection);
-    _collectionIDToCollections[collection.id] = c;
-    return collection;
-  }
-
   Collection _cacheLocalPathAndCollection(Collection collection) {
     assert(
       collection.name != null,
@@ -1925,6 +1937,23 @@ class CollectionsService {
     }
     _collectionIDToCollections[collection.id] = collection;
     return collection;
+  }
+
+  bool hasSyncedCollections() {
+    return _prefs.containsKey(_collectionsSyncTimeKey);
+  }
+
+  @Deprecated("Use _cacheLocalPathAndCollection instead")
+  Collection _cacheCollectionAttributes(CollectionV2 collection) {
+    final String decryptedName = _getDecryptedCollectionName(collection);
+    collection.setName(decryptedName);
+    if (collection.canLinkToDevicePath(_config.getUserID()!)) {
+      collection.decryptedPath = _decryptCollectionPath(collection);
+      _localPathToCollectionID[collection.decryptedPath!] = collection.id;
+    }
+    final Collection c = Collection.fromOldCollection(collection);
+    _collectionIDToCollections[collection.id] = c;
+    return c;
   }
 
   String _decryptCollectionPath(CollectionV2 collection) {
@@ -1948,10 +1977,6 @@ class CollectionsService {
         CryptoUtil.base642bin(collection.attributes.pathDecryptionNonce!),
       ),
     );
-  }
-
-  bool hasSyncedCollections() {
-    return _prefs.containsKey(_collectionsSyncTimeKey);
   }
 
   String _getDecryptedCollectionName(CollectionV2 collection) {
@@ -1990,7 +2015,7 @@ class CollectionsService {
       return;
     }
     try {
-      await _db.insert(collections);
+      await remoteDB.insertCollections(collections);
     } catch (e) {
       _logger.severe("Failed to update collections", e);
       if (attempt < kMaximumWriteAttempts) {

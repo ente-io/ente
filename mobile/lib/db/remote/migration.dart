@@ -1,6 +1,15 @@
 import "package:flutter/cupertino.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
+const collectionColumns =
+    'id, owner, enc_key, enc_key_nonce, name, type, local_path, '
+    'is_deleted, updation_time, sharees, public_urls, mmd_encoded_json, '
+    'mmd_ver, pub_mmd_encoded_json, pub_mmd_ver, shared_mmd_json, '
+    'shared_mmd_ver';
+
+String collectionValuePlaceHolder =
+    collectionColumns.split(',').map((_) => '?').join(',');
+
 class RemoteDBMigration {
   static const migrationScripts = [
     '''
@@ -12,31 +21,31 @@ class RemoteDBMigration {
       name TEXT NOT NULL,
       type TEXT NOT NULL,
       local_path TEXT,
-      is_deleted INTEGER NOT NULL
+      is_deleted INTEGER NOT NULL,
       updation_time INTEGER NOT NULL,
-      sharees TEXT NOT NULL DEFAULT [],
-      public_urls TEXT NOT NULL DEFAULT [],
-      mmd_encoded_json TEXT NOT NULL DEFAULT {},
+      sharees TEXT NOT NULL DEFAULT '[]',
+      public_urls TEXT NOT NULL DEFAULT '[]',
+      mmd_encoded_json TEXT NOT NULL DEFAULT '{}',
       mmd_ver INTEGER NOT NULL DEFAULT 0,
-      pub_mmd_encoded_json TEXT DEFAULT {}',
+      pub_mmd_encoded_json TEXT DEFAULT '{}',
       pub_mmd_ver INTEGER NOT NULL DEFAULT 0,
-      shared_mmd_json TEXT NOT NULL {},
-      shared_mmd_ver INTEGER NOT NULL DEFAULT 0,
-    )
-    ''',
-    '''
-    CREATE TABLE collection_files (
-      file_id INTEGER NOT NULL,
-      collection_id INTEGER NOT NULL,
-      PRIMARY KEY (file_id, collection_id)
-      enc_key TEXT NOT NULL,
-      enc_key_nonce TEXT NOT NULL,
-      is_deleted INTEGER NOT NULL
-      updated_at INTEGER NOT NULL,
-      created_at INTEGER NOT NULL DEFAULT 0,
-    )
+      shared_mmd_json TEXT NOT NULL DEFAULT '{}',
+      shared_mmd_ver INTEGER NOT NULL DEFAULT 0
+    );
     ''',
   ];
+  // '''
+  //   CREATE TABLE collection_files (
+  //     file_id INTEGER NOT NULL,
+  //     collection_id INTEGER NOT NULL,
+  //     PRIMARY KEY (file_id, collection_id)
+  //     enc_key TEXT NOT NULL,
+  //     enc_key_nonce TEXT NOT NULL,
+  //     is_deleted INTEGER NOT NULL
+  //     updated_at INTEGER NOT NULL,
+  //     created_at INTEGER NOT NULL DEFAULT 0,
+  //   )
+  //   ''',
 
   static Future<void> migrate(
     SqliteDatabase database,

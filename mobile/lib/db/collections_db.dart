@@ -10,6 +10,7 @@ import "package:photos/models/collection/collection_old.dart";
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 
+@Deprecated("Use remoteDB instead") 
 class CollectionsDB {
   static const _databaseName = "ente.collections.db";
   static const table = 'collections';

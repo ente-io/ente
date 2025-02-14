@@ -3,6 +3,7 @@ import "package:ente_cast/ente_cast.dart";
 import "package:ente_cast_normal/ente_cast_normal.dart";
 import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:package_info_plus/package_info_plus.dart";
+import "package:photos/db/remote/db.dart";
 import "package:photos/gateways/entity_gw.dart";
 import "package:photos/services/billing_service.dart";
 import "package:photos/services/entity_service.dart";
@@ -136,4 +137,10 @@ FaceRecognitionService? _faceRecognitionService;
 FaceRecognitionService get faceRecognitionService {
   _faceRecognitionService ??= FaceRecognitionService();
   return _faceRecognitionService!;
+}
+
+RemoteDB? _remoteDB;
+RemoteDB get remoteDB {
+  _remoteDB ??= RemoteDB();
+  return _remoteDB!;
 }
