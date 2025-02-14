@@ -88,6 +88,10 @@ type FileViewerPhotoSwipeOptions = FileViewerProps & {
      * Called when the file viewer is closed.
      */
     onClose: () => void;
+    /**
+     * Called when the user activates the info action on a file.
+     */
+    onViewInfo: (file: EnteFile) => void;
 };
 
 /**
@@ -151,8 +155,9 @@ export class FileViewerPhotoSwipe {
     constructor({
         files,
         initialIndex,
-        onClose,
         disableDownload,
+        onClose,
+        onViewInfo,
     }: FileViewerPhotoSwipeOptions) {
         this.files = files;
         this.opts = { disableDownload };
@@ -343,7 +348,7 @@ export class FileViewerPhotoSwipe {
                         return;
                     }
 
-                    console.log("info", file);
+                    onViewInfo(file);
                 },
             });
         });
