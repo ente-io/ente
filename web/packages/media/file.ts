@@ -66,11 +66,11 @@ export type EncryptedMagicMetadata = MagicMetadataCore<string>;
 
 export interface EncryptedEnteFile {
     /**
-     * The file's ID.
+     * The file's globally unique ID.
      *
-     * The file's ID is a integer assigned by remote that is unique across all
-     * files stored by an Ente instance. That is, the file ID is a global unique
-     * identifier for this {@link EnteFile}.
+     * The file's ID is a integer assigned by remote as the identifier for an
+     * {@link EnteFile} when it is created. It is globally unique across all
+     * files stored by an Ente instance, and is not scoped to the current user.
      */
     id: number;
     /**
