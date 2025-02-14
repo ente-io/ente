@@ -6,7 +6,13 @@ import type { PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
-import { shouldDisableCFUploadProxy } from "@/gallery/services/upload";
+import type { UploadItem } from "@/gallery/services/upload";
+import {
+    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
+    UPLOAD_RESULT,
+    shouldDisableCFUploadProxy,
+    type UploadPhase,
+} from "@/gallery/services/upload";
 import type { Collection } from "@/media/collection";
 import {
     decryptFile,
@@ -18,12 +24,6 @@ import { FileType } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { indexNewUpload } from "@/new/photos/services/ml";
-import type { UploadItem } from "@/new/photos/services/upload/types";
-import {
-    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
-    UPLOAD_RESULT,
-    type UploadPhase,
-} from "@/new/photos/services/upload/types";
 import { wait } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { Canceler } from "axios";

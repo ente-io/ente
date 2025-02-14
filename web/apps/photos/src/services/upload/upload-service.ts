@@ -10,6 +10,11 @@ import {
     getNonEmptyMagicMetadataProps,
     updateMagicMetadata,
 } from "@/gallery/services/magic-metadata";
+import type { UploadItem } from "@/gallery/services/upload";
+import {
+    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
+    UPLOAD_RESULT,
+} from "@/gallery/services/upload";
 import {
     detectFileTypeInfoFromChunk,
     isFileTypeNotSupportedError,
@@ -34,11 +39,6 @@ import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import { addToCollection } from "@/new/photos/services/collection";
 import { extractExif } from "@/new/photos/services/exif";
-import type { UploadItem } from "@/new/photos/services/upload/types";
-import {
-    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
-    UPLOAD_RESULT,
-} from "@/new/photos/services/upload/types";
 import { mergeUint8Arrays } from "@/utils/array";
 import { ensureInteger, ensureNumber } from "@/utils/ensure";
 import { CustomError, handleUploadError } from "@ente/shared/error";

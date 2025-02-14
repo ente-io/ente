@@ -4,6 +4,11 @@ import { useBaseContext } from "@/base/context";
 import { basename } from "@/base/file-name";
 import log from "@/base/log";
 import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
+import type {
+    FileAndPath,
+    UploadItem,
+    UploadPhase,
+} from "@/gallery/services/upload";
 import type { Collection } from "@/media/collection";
 import type { EnteFile } from "@/media/file";
 import { UploaderNameInput } from "@/new/albums/components/UploaderNameInput";
@@ -12,11 +17,6 @@ import type { CollectionSelectorAttributes } from "@/new/photos/components/Colle
 import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
 import { getLatestCollections } from "@/new/photos/services/collections";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
-import type {
-    FileAndPath,
-    UploadItem,
-    UploadPhase,
-} from "@/new/photos/services/upload/types";
 import { redirectToCustomerPortal } from "@/new/photos/services/user-details";
 import { usePhotosAppContext } from "@/new/photos/types/context";
 import { firstNonEmpty } from "@/utils/array";

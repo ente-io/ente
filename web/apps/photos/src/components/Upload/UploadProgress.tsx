@@ -1,9 +1,6 @@
 import { FilledIconButton } from "@/base/components/mui";
 import { useBaseContext } from "@/base/context";
-import {
-    UPLOAD_RESULT,
-    type UploadPhase,
-} from "@/new/photos/services/upload/types";
+import { UPLOAD_RESULT, type UploadPhase } from "@/gallery/services/upload";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
