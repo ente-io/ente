@@ -11,6 +11,8 @@ import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import type { FileViewerProps } from "./FileViewer5";
 
+// import { renderToString } from "react-dom/server";
+
 // TODO(PS): WIP gallery using upstream photoswipe
 //
 // Needs (not committed yet):
@@ -86,6 +88,10 @@ type FileViewerPhotoSwipeOptions = FileViewerProps & {
      * Called when the file viewer is closed.
      */
     onClose: () => void;
+    /**
+     * Called when the user activates the info action on a file.
+     */
+    onViewInfo: (file: EnteFile) => void;
 };
 
 /**
@@ -149,8 +155,9 @@ export class FileViewerPhotoSwipe {
     constructor({
         files,
         initialIndex,
-        onClose,
         disableDownload,
+        onClose,
+        onViewInfo,
     }: FileViewerPhotoSwipeOptions) {
         this.files = files;
         this.opts = { disableDownload };
@@ -158,6 +165,10 @@ export class FileViewerPhotoSwipe {
         const pswp = new PhotoSwipe({
             // Opaque background.
             bgOpacity: 1,
+            // The default, "zoom", cannot be used since we're not animating
+            // from a thumbnail, so effectively "fade" is in effect anyway. Set
+            // it still, just for and explicitness and documentation.
+            showHideAnimationType: "fade",
             // The default imageClickAction is "zoom-or-close". When the image
             // is small and cannot be zoomed into further (which is common when
             // just the thumbnail has been loaded), this causes PhotoSwipe to
@@ -189,7 +200,7 @@ export class FileViewerPhotoSwipe {
             index: initialIndex,
             // TODO(PS): padding option? for handling custom title bar.
             // TODO(PS): will we need this?
-            mainClass: "our-extra-pswp-main-class",
+            mainClass: "pswp-ente",
         });
 
         // Provide data about slides to PhotoSwipe via callbacks
@@ -202,29 +213,28 @@ export class FileViewerPhotoSwipe {
         pswp.addFilter("itemData", (_, index) => {
             const file = files[index];
 
+            // We might not have anything to show immediately, though in most
+            // cases a cached renderable thumbnail URL will be available
+            // shortly.
+            //
+            // Meanwhile,
+            //
+            // 1. Return empty slide data; PhotoSwipe will not show anything in
+            //    the image area but will otherwise render UI controls properly.
+            //
+            // 2. Insert empty data so that we don't enqueue multiple updates.
+
             let itemData: SlideData | undefined;
             if (file) {
                 itemData = this.itemDataByFileID.get(file.id);
                 if (!itemData) {
-                    // We don't have anything to show immediately, though in
-                    // most cases a cached renderable thumbnail URL will be
-                    // available shortly.
-                    //
-                    // Meanwhile,
-                    //
-                    // 1. Return empty slide data; PhotoSwipe will not show
-                    //    anything in the image area but will otherwise render
-                    //    the surrounding UI properly.
-                    //
-                    // 2. Insert empty data so that we don't enqueue multiple
-                    //    updates.
                     itemData = {};
                     this.itemDataByFileID.set(file.id, itemData);
                     this.enqueueUpdates(index, file);
                 }
             }
 
-            log.debug(() => ["[ps]", { itemData, index, file, itemData }]);
+            log.debug(() => ["[viewer]", { index, itemData, file }]);
             if (!file) assertionFailed();
 
             if (this.lastActivityDate != "already-hidden")
@@ -233,43 +243,123 @@ export class FileViewerPhotoSwipe {
             return itemData ?? {};
         });
 
-        pswp.addFilter("preventPointerEvent", (originalResult) => {
+        pswp.addFilter("isContentLoading", (isLoading, content) => {
+            return content.data.isContentLoading ?? isLoading;
+        });
+
+        pswp.addFilter("isContentZoomable", (isZoomable, content) => {
+            return content.data.isContentZoomable ?? isZoomable;
+        });
+
+        pswp.addFilter("preventPointerEvent", (preventPointerEvent) => {
             // There was a pointer event. We don't care which one, we just use
-            // this as a hook to show UI again (if needed) and update our last
-            // activity date.
+            // this as a hook to show the UI again (if needed), and update our
+            // last activity date.
             this.onPointerActivity();
-            return originalResult;
+            return preventPointerEvent;
         });
 
-        pswp.on("contentLoad", (e) => {
-            console.log("contentLoad", e);
-            if (e.content.data.videoURL) {
-                const holderEl = e.content.slide.holderElement;
-                const vid = document.createElement("h1");
-                vid.innerText = "Test 1";
-                holderEl.appendChild(vid);
-            }
-        });
         pswp.on("contentAppend", (e) => {
-            const containerEl = e.content.slide.container;
-            console.log("contentAppend", containerEl);
-            if (e.content.data.videoURL) {
-                const vid = document.createElement("div");
-                vid.innerHTML = livePhotoVideoHTML(e.content.data.videoURL);
-                // vid.innerText = "Test 2";
-                containerEl.appendChild(vid);
-                vid.style =
-                    "position: absolute; left: 0; right: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;";
-            }
+            const videoURL = e.content.data.livePhotoVideoURL;
+            if (!videoURL) return;
+
+            // This slide is displaying a live photo. Append a video element to
+            // show its video part.
+
+            const img = e.content.element;
+            const video = createElementFromHTMLString(
+                livePhotoVideoHTML(videoURL),
+            );
+            const container = e.content.slide.container;
+            container.style = "position: relative";
+            container.appendChild(video);
+            // Set z-index to 1 to keep it on top, and set pointer-events to
+            // none to pass the clicks through.
+            video.style =
+                "position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none;";
+
+            // Size it to the underlying image.
+            video.style.width = img.style.width;
+            video.style.height = img.style.height;
         });
 
+        pswp.on("imageSizeChange", ({ content, width, height }) => {
+            if (!content.data.livePhotoVideoURL) return;
+
+            // This slide is displaying a live photo. Resize the size of the
+            // video element to match that of the image.
+
+            const video =
+                content.slide.container.getElementsByTagName("video")[0];
+            if (!video) {
+                // We might have been called before "contentAppend".
+                return;
+            }
+
+            video.style.width = `${width}px`;
+            video.style.height = `${height}px`;
+        });
+
+        pswp.on("contentDeactivate", (e) => {
+            // Pause the video tag (if any) for a slide when we move away from it.
+            const video = e.content?.element?.getElementsByTagName("video")[0];
+            video?.pause();
+        });
+
+        // The user did some action within the file viewer to close it.
         pswp.on("close", () => {
-            // The user did some action within the file viewer to close it.
-            //
             // Clear intervals.
-            clearIntervals();
+            this.clearAutoHideIntervalIfNeeded();
             // Let our parent know that we have been closed.
             onClose();
+        });
+
+        // Add our custom UI elements to inside the PhotoSwipe dialog.
+        //
+        // API docs for registerElement:
+        // https://photoswipe.com/adding-ui-elements/#uiregisterelement-api
+        //
+        // The "order" prop is used to position items. Some landmarks:
+        // - counter: 5
+        // - zoom: 10
+        // - close: 20
+        pswp.on("uiRegister", () => {
+            // const html = <InfoOutlinedIcon fontSize="32" />;
+            // console.log(renderToString(html));
+            // const path =
+            //     '<path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8"></path>';
+            const pathWithIDAndTransform =
+                '<path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8" transform="translate(3.5, 3.5)" id="pswp__icn-info" />';
+            pswp.ui.registerElement({
+                name: "info",
+                title: "Info",
+                ariaLabel: "Info",
+                order: 15,
+                isButton: true,
+                html: {
+                    isCustomSVG: true,
+                    inner: pathWithIDAndTransform,
+                    outlineID: "pswp__icn-info",
+                },
+                onClick: (e, element, pswp) => {
+                    const file = this.files[pswp.currIndex];
+                    if (!file) {
+                        assertionFailed();
+                        return;
+                    }
+
+                    onViewInfo(file);
+                },
+            });
+        });
+
+        // Modify the default UI elements.
+        pswp.addFilter("uiElement", (element, data) => {
+            if (element.name == "preloader") {
+                // TODO(PS): Left as an example. For now, this is customized in
+                // the CSS.
+            }
+            return element;
         });
 
         // Initializing PhotoSwipe adds it to the DOM as a dialog-like div with
@@ -324,7 +414,7 @@ export class FileViewerPhotoSwipe {
         if (this.lastActivityDate == "auto-hidden") return;
         if (Date.now() - this.lastActivityDate.getTime() > 3000) {
             if (this.areUIControlsVisible()) {
-                this.hideUIControls();
+                this.hideUIControlsIfNotFocused();
                 this.lastActivityDate = "auto-hidden";
             } else {
                 this.lastActivityDate = "already-hidden";
@@ -340,8 +430,23 @@ export class FileViewerPhotoSwipe {
         this.pswp.element.classList.add("pswp--ui-visible");
     }
 
-    private hideUIControls() {
-        this.pswp.element.classList.remove("pswp--ui-visible");
+    private hideUIControlsIfNotFocused() {
+        // Check if the current keyboard focus is on any of the UI controls.
+        //
+        // By default, the pswp root element takes up the keyboard focus, so we
+        // check if the currently focused element is still the PhotoSwipe dialog
+        // (if so, this means we're not focused on a specific control).
+        const isDefaultFocus = document
+            .querySelector(":focus-visible")
+            ?.classList.contains("pswp");
+        if (!isDefaultFocus) {
+            // The user focused (e.g. via keyboard tabs) to a specific UI
+            // element. Skip auto hiding.
+            return;
+        }
+
+        // TODO(PS): Commented during testing
+        // this.pswp.element.classList.remove("pswp--ui-visible");
     }
 
     private async enqueueUpdates(index: number, file: EnteFile) {
@@ -351,21 +456,18 @@ export class FileViewerPhotoSwipe {
         };
 
         const thumbnailURL = await downloadManager.renderableThumbnailURL(file);
-        // We don't have the dimensions of the thumbnail. We could try to deduce
-        // something from the file's aspect ratio etc, but that's not needed:
-        // PhotoSwipe already correctly (for our purposes) handles just a source
-        // URL being present.
-        update({ src: thumbnailURL });
+        const thumbnailData = await augmentedWithDimensions(thumbnailURL);
+        update({
+            ...thumbnailData,
+            isContentLoading: true,
+            isContentZoomable: false,
+        });
 
         switch (file.metadata.fileType) {
             case FileType.image: {
                 const sourceURLs =
                     await downloadManager.renderableSourceURLs(file);
-                update({
-                    src: sourceURLs.url,
-                    width: file.pubMagicMetadata?.data?.w,
-                    height: file.pubMagicMetadata?.data?.h,
-                });
+                update(await augmentedWithDimensions(sourceURLs.url));
                 break;
             }
 
@@ -383,25 +485,34 @@ export class FileViewerPhotoSwipe {
                 const livePhotoSourceURLs =
                     sourceURLs.url as LivePhotoSourceURL;
                 const imageURL = await livePhotoSourceURLs.image();
-                update({
-                    src: imageURL,
-                    width: file.pubMagicMetadata?.data?.w,
-                    height: file.pubMagicMetadata?.data?.h,
-                });
-                const videoURL = await livePhotoSourceURLs.video();
-                console.log(videoURL);
-                // update({ html: livePhotoVideoHTML(videoURL) });
-                update({
-                    src: imageURL,
-                    width: file.pubMagicMetadata?.data?.w,
-                    height: file.pubMagicMetadata?.data?.h,
-                    videoURL,
-                });
+                const imageData = await augmentedWithDimensions(imageURL);
+                update(imageData);
+                const livePhotoVideoURL = await livePhotoSourceURLs.video();
+                update({ ...imageData, livePhotoVideoURL });
                 break;
             }
         }
     }
 }
+
+/**
+ * Take a image URL, determine its dimensions using browser APIs, and return the URL
+ * and its dimensions in a form that can directly be passed to PhotoSwipe as
+ * {@link SlideData}.
+ */
+const augmentedWithDimensions = (imageURL: string): Promise<SlideData> =>
+    new Promise((resolve) => {
+        let image = new Image();
+        image.onload = () => {
+            resolve({
+                src: imageURL,
+                width: image.naturalWidth,
+                height: image.naturalHeight,
+            });
+        };
+        // TODO(PS): Handle imageElement.onerror
+        image.src = imageURL;
+    });
 
 const videoHTML = (url: string, disableDownload: boolean) => `
 <video controls ${disableDownload && "controlsList=nodownload"} oncontextmenu="return false;">
@@ -415,3 +526,11 @@ const livePhotoVideoHTML = (videoURL: string) => `
   <source src="${videoURL}" />
 </video>
 `;
+
+const createElementFromHTMLString = (htmlString: string) => {
+    const template = document.createElement("template");
+    // Excess whitespace causes excess DOM nodes, causing our firstChild to not
+    // be what we wanted them to be.
+    template.innerHTML = htmlString.trim();
+    return template.content.firstChild;
+};

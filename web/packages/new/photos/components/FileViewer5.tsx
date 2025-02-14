@@ -15,7 +15,7 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
 
 import type { EnteFile } from "@/media/file.js";
 import { Button, styled } from "@mui/material";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { FileViewerPhotoSwipe } from "./FileViewerPhotoSwipe";
 
 export interface FileViewerProps {
@@ -57,6 +57,10 @@ const FileViewer: React.FC<FileViewerProps> = ({
 }) => {
     const pswpRef = useRef<FileViewerPhotoSwipe | undefined>();
 
+    const handleViewInfo = useCallback((file: EnteFile) => {
+        console.log("view-info", file);
+    }, []);
+
     useEffect(() => {
         if (!open) {
             // The close state will be handled by the cleanup function.
@@ -66,8 +70,9 @@ const FileViewer: React.FC<FileViewerProps> = ({
         const pswp = new FileViewerPhotoSwipe({
             files,
             initialIndex,
-            onClose,
             disableDownload,
+            onClose,
+            onViewInfo: handleViewInfo,
         });
         pswpRef.current = pswp;
 
