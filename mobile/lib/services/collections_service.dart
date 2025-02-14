@@ -1202,10 +1202,10 @@ class CollectionsService {
   }
 
   Future<Collection> _fromRemoteCollection(
-    Map<String, dynamic>? collectionData,
+    Map<String, dynamic> collectionData,
   ) async {
     final Collection collection = Collection.fromMap(collectionData);
-    if (collectionData != null && !collection.isDeleted) {
+    if (!collection.isDeleted) {
       final collectionKey =
           _getAndCacheDecryptedKey(collection, source: "fetchDecryptMeta");
       if (collectionData['magicMetadata'] != null) {
@@ -1900,9 +1900,9 @@ class CollectionsService {
 
   String _decryptCollectionPath(Collection collection) {
     final existingPath = collection.decryptedPath;
-    if (existingPath != null && existingPath!.isNotEmpty) {
+    if (existingPath != null && existingPath.isNotEmpty) {
       debugPrint("Using cached decrypted path for collection ${collection.id}");
-      return existingPath!;
+      return existingPath;
     } else {
       debugPrint(
         "Decrypting path for collection ${collection.id} from "
