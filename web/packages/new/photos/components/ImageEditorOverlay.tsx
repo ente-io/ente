@@ -320,32 +320,27 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                 const filterString = `brightness(${brightness}%) contrast(${contrast}%) blur(${blurRadius}px) saturate(${saturation}%) invert(${
                     invert ? 1 : 0
                 })`;
-                const context = canvas.getContext("2d");
-                context.imageSmoothingEnabled = false;
+                const ctx = canvas.getContext("2d")!;
+                ctx.imageSmoothingEnabled = false;
 
-                context.filter = filterString;
+                ctx.filter = filterString;
 
                 const image = new Image();
-                image.src = fileURL;
+                image.src = fileURL!;
 
                 await new Promise((resolve, reject) => {
                     image.onload = () => {
                         try {
-                            context.clearRect(
-                                0,
-                                0,
-                                canvas.width,
-                                canvas.height,
-                            );
-                            context.save();
-                            context.drawImage(
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            ctx.save();
+                            ctx.drawImage(
                                 image,
                                 0,
                                 0,
                                 canvas.width,
                                 canvas.height,
                             );
-                            context.restore();
+                            ctx.restore();
                             resolve(true);
                         } catch (e) {
                             reject(e);
