@@ -108,7 +108,6 @@ export interface FileInfoProps {
     file: EnteFile | undefined;
     showInfo: boolean;
     handleCloseInfo: () => void;
-    closePhotoViewer: () => void;
     exif: FileInfoExif | undefined;
     /**
      * This is the same as the {@link showMiniDialog} prop in the top level
@@ -153,7 +152,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     fileToCollectionsMap,
     collectionNameMap,
     showCollectionChips,
-    closePhotoViewer,
     onSelectCollection,
     onSelectPerson,
 }) => {
@@ -195,11 +193,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         return <></>;
     }
 
-    const onCollectionChipClick = (collectionID: number) => {
-        onSelectCollection(collectionID);
-        closePhotoViewer();
-    };
-
     const openEnableMapConfirmationDialog = () =>
         showMiniDialog(
             confirmEnableMapsDialogAttributes(() => updateMapEnabled(true)),
@@ -210,12 +203,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
             confirmDisableMapsDialogAttributes(() => updateMapEnabled(false)),
         );
 
-    const handleSelectFace = (annotatedFaceID: AnnotatedFaceID) => {
-        if (onSelectPerson) {
-            onSelectPerson(annotatedFaceID.personID);
-            closePhotoViewer();
-        }
-    };
+    const handleSelectFace = ({ personID }: AnnotatedFaceID) =>
+        onSelectPerson?.(personID);
 
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
@@ -340,7 +329,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                     <ChipButton
                                         key={collectionID}
                                         onClick={() =>
-                                            onCollectionChipClick(collectionID)
+                                            onSelectCollection(collectionID)
                                         }
                                     >
                                         {collectionNameMap.get(collectionID)}

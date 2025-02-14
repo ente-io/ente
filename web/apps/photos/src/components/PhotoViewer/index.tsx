@@ -722,6 +722,18 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
         }
     };
 
+    const handleSelectCollection = (collectionID: number) => {
+        galleryContext.onShowCollection(collectionID);
+        handleClose();
+    };
+
+    const handleSelectPerson = onSelectPerson
+        ? (personID: string) => {
+              onSelectPerson(personID);
+              handleClose();
+          }
+        : undefined;
+
     const handleForceConvert = () =>
         forceConvertItem(
             photoSwipe,
@@ -969,7 +981,6 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
             <FileInfo
                 showInfo={showInfo}
                 handleCloseInfo={handleCloseInfo}
-                closePhotoViewer={handleClose}
                 file={photoSwipe?.currItem as EnteFile}
                 exif={exif?.value}
                 showMiniDialog={showMiniDialog}
@@ -982,8 +993,8 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                 refreshPhotoswipe={refreshPhotoswipe}
                 fileToCollectionsMap={fileToCollectionsMap}
                 collectionNameMap={collectionNameMap}
-                onSelectCollection={galleryContext.onShowCollection}
-                onSelectPerson={onSelectPerson}
+                onSelectCollection={handleSelectCollection}
+                onSelectPerson={handleSelectPerson}
             />
             <ImageEditorOverlay
                 show={showImageEditorOverlay}
