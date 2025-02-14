@@ -27,7 +27,7 @@ import {
     isArchivedCollection,
     isPinnedCollection,
 } from "@/new/photos/services/magic-metadata";
-import { useAppContext } from "@/new/photos/types/context";
+import { usePhotosAppContext } from "@/new/photos/types/context";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
@@ -130,7 +130,8 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
     isActiveCollectionDownloadInProgress,
 }) => {
     const { showMiniDialog } = useBaseContext();
-    const { showLoadingBar, hideLoadingBar, onGenericError } = useAppContext();
+    const { showLoadingBar, hideLoadingBar, onGenericError } =
+        usePhotosAppContext();
     const { syncWithRemote } = useContext(GalleryContext);
     const overFlowMenuIconRef = useRef<SVGSVGElement>(null);
 

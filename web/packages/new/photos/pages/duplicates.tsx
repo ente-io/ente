@@ -54,10 +54,10 @@ import {
     removeSelectedDuplicateGroups,
     type DuplicateGroup,
 } from "../services/dedup";
-import { useAppContext } from "../types/context";
+import { usePhotosAppContext } from "../types/context";
 
 const Page: React.FC = () => {
-    const { onGenericError } = useAppContext();
+    const { onGenericError } = usePhotosAppContext();
 
     const [state, dispatch] = useReducer(dedupReducer, initialDedupState);
 

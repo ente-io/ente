@@ -18,7 +18,7 @@ import type {
     UploadPhase,
 } from "@/new/photos/services/upload/types";
 import { redirectToCustomerPortal } from "@/new/photos/services/user-details";
-import { useAppContext } from "@/new/photos/types/context";
+import { usePhotosAppContext } from "@/new/photos/types/context";
 import { firstNonEmpty } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
@@ -111,7 +111,7 @@ export default function Uploader({
 }: Props) {
     const { showMiniDialog } = useBaseContext();
     const { showNotification, onGenericError, watchFolderView } =
-        useAppContext();
+        usePhotosAppContext();
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,

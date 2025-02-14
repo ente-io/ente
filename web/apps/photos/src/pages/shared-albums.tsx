@@ -39,7 +39,7 @@ import {
     isHiddenCollection,
 } from "@/new/photos/services/collection";
 import { sortFiles } from "@/new/photos/services/files";
-import { useAppContext } from "@/new/photos/types/context";
+import { usePhotosAppContext } from "@/new/photos/types/context";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import SingleInputForm, {
     type SingleInputFormProps,
@@ -95,7 +95,7 @@ export default function PublicCollectionGallery() {
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const [errorMessage, setErrorMessage] = useState<string>(null);
     const { showMiniDialog } = useBaseContext();
-    const { showLoadingBar, hideLoadingBar } = useAppContext();
+    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const [isPasswordProtected, setIsPasswordProtected] =

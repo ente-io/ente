@@ -76,7 +76,7 @@ import {
     userDetailsAddOnBonuses,
     type UserDetails,
 } from "@/new/photos/services/user-details";
-import { AppContext, useAppContext } from "@/new/photos/types/context";
+import { usePhotosAppContext } from "@/new/photos/types/context";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import {
     FlexWrapper,
@@ -509,7 +509,7 @@ const UtilitySection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
     closeSidebar,
 }) => {
     const router = useRouter();
-    const { watchFolderView, setWatchFolderView } = useAppContext();
+    const { watchFolderView, setWatchFolderView } = usePhotosAppContext();
 
     const { show: showAccount, props: accountVisibilityProps } =
         useModalVisibility();
@@ -563,7 +563,7 @@ const UtilitySection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
 const HelpSection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
     closeSidebar,
 }) => {
-    const { showMiniDialog } = useContext(AppContext);
+    const { showMiniDialog } = useBaseContext();
     const { openExportModal } = useContext(GalleryContext);
 
     const { show: showHelp, props: helpVisibilityProps } = useModalVisibility();
@@ -596,7 +596,7 @@ const HelpSection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
 };
 
 const ExitSection: React.FC = () => {
-    const { logout, showMiniDialog } = useContext(AppContext);
+    const { logout, showMiniDialog } = useBaseContext();
 
     const handleLogout = () =>
         showMiniDialog({

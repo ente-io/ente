@@ -66,7 +66,7 @@ import {
     userDetailsSnapshot,
     verifyStripeSubscription,
 } from "@/new/photos/services/user-details";
-import { useAppContext } from "@/new/photos/types/context";
+import { usePhotosAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
@@ -180,7 +180,7 @@ export const GalleryContext = createContext<GalleryContextType>(
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
     const { showLoadingBar, hideLoadingBar, onGenericError, watchFolderView } =
-        useAppContext();
+        usePhotosAppContext();
 
     const isOffline = useIsOffline();
     const [state, dispatch] = useGalleryReducer();

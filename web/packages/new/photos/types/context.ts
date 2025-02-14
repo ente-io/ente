@@ -1,11 +1,10 @@
-import type { BaseContextT } from "@/base/context";
 import { type NotificationAttributes } from "@/new/photos/components/Notification";
 import { createContext, useContext } from "react";
 
 /**
  * The type of the React context available to all pages in the photos app.
  */
-export type AppContextT = BaseContextT & {
+export interface PhotosAppContextT {
     /**
      * Show the global activity indicator (a loading bar at the top of the
      * page).
@@ -26,17 +25,21 @@ export type AppContextT = BaseContextT & {
     onGenericError: (error: unknown) => void;
     watchFolderView: boolean;
     setWatchFolderView: (isOpen: boolean) => void;
-};
+}
 
 /**
- * The React {@link Context} available to all nodes in the React tree.
+ * The React {@link Context} available to all nodes in the React tree of photos
+ * app pages.
  */
-export const AppContext = createContext<AppContextT | undefined>(undefined);
+export const PhotosAppContext = createContext<PhotosAppContextT | undefined>(
+    undefined,
+);
 
 /**
- * Utility hook to get the photos {@link AppContextT}.
+ * Utility hook to get the photos {@link PhotosAppContextT}.
  *
  * This context is provided at the top level _app component for the photos app,
  * and thus is available to all React components in the Photos app's React tree.
  */
-export const useAppContext = (): AppContextT => useContext(AppContext)!;
+export const usePhotosAppContext = (): PhotosAppContextT =>
+    useContext(PhotosAppContext)!;

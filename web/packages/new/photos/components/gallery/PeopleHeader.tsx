@@ -59,7 +59,7 @@ import {
 import { t } from "i18next";
 import React, { useEffect, useReducer, useState } from "react";
 import type { FaceCluster } from "../../services/ml/cluster";
-import { useAppContext } from "../../types/context";
+import { usePhotosAppContext } from "../../types/context";
 import { DialogCloseIconButton } from "../mui/Dialog";
 import { SuggestionFaceList } from "../PeopleList";
 import {
@@ -547,7 +547,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     person,
 }) => {
     const { showMiniDialog } = useBaseContext();
-    const { onGenericError } = useAppContext();
+    const { onGenericError } = usePhotosAppContext();
 
     const [state, dispatch] = useReducer(
         suggestionsDialogReducer,
