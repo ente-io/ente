@@ -13,6 +13,7 @@ import {
     useSetupLogs,
 } from "@/base/components/utils/hooks-app";
 import { authTheme } from "@/base/components/utils/theme";
+import { BaseContext } from "@/base/context";
 import { logStartupBanner } from "@/base/log-web";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
@@ -42,6 +43,11 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         void accountLogout().then(() => window.location.replace("/"));
     }, []);
 
+    const baseContext = useMemo(
+        () => ({ showMiniDialog, logout }),
+        [showMiniDialog, logout],
+    );
+
     const appContext = useMemo(
         () => ({
             logout,
@@ -61,16 +67,20 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
                 <AttributedMiniDialog {...miniDialogProps} />
 
-                <AppContext.Provider value={appContext}>
-                    {!isI18nReady ? (
-                        <LoadingIndicator />
-                    ) : (
-                        <>
-                            {isChangingRoute && <TranslucentLoadingOverlay />}
-                            <Component {...pageProps} />
-                        </>
-                    )}
-                </AppContext.Provider>
+                <BaseContext value={baseContext}>
+                    <AppContext.Provider value={appContext}>
+                        {!isI18nReady ? (
+                            <LoadingIndicator />
+                        ) : (
+                            <>
+                                {isChangingRoute && (
+                                    <TranslucentLoadingOverlay />
+                                )}
+                                <Component {...pageProps} />
+                            </>
+                        )}
+                    </AppContext.Provider>
+                </BaseContext>
             </ThemeProvider>
         </>
     );
