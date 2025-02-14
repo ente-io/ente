@@ -12,6 +12,7 @@ import {
 } from "@/base/components/RowButton";
 import { SpacedRow } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
 import {
     NestedSidebarDrawer,
     SidebarDrawer,
@@ -34,7 +35,6 @@ import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
 import { downloadString } from "@/base/utils/web";
 import { DropdownInput } from "@/new/photos/components/DropdownInput";
-import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { MLSettings } from "@/new/photos/components/sidebar/MLSettings";
 import { TwoFactorSettings } from "@/new/photos/components/sidebar/TwoFactorSettings";
 import {

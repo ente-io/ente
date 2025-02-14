@@ -1,8 +1,8 @@
 import { SpacedRow } from "@/base/components/containers";
+import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { RowButton } from "@/base/components/RowButton";
 import { useIsTouchscreen } from "@/base/components/utils/hooks";
-import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import GoogleIcon from "@mui/icons-material/Google";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
