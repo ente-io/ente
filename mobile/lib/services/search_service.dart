@@ -1367,8 +1367,8 @@ class SearchService {
               TripMemory(
                 List.from(currentBlockFiles),
                 location,
-                blockStart,
-                lastTime,
+                firstCreationTime: blockStart,
+                lastCreationTime: lastTime,
               ),
             );
           }
@@ -1391,8 +1391,8 @@ class SearchService {
           TripMemory(
             List.from(currentBlockFiles),
             location,
-            blockStart,
-            lastTime,
+            firstCreationTime: blockStart,
+            lastCreationTime: lastTime,
           ),
         );
       }
@@ -1402,18 +1402,18 @@ class SearchService {
     final List<TripMemory> mergedTrips = [];
     for (final trip in tripLocations) {
       final tripFirstTime = DateTime.fromMicrosecondsSinceEpoch(
-        trip.firstCreationTime,
+        trip.firstCreationTime!,
       );
       final tripLastTime = DateTime.fromMicrosecondsSinceEpoch(
-        trip.lastCreationTime,
+        trip.lastCreationTime!,
       );
       bool merged = false;
       for (int idx = 0; idx < mergedTrips.length; idx++) {
         final otherTrip = mergedTrips[idx];
         final otherTripFirstTime =
-            DateTime.fromMicrosecondsSinceEpoch(otherTrip.firstCreationTime);
+            DateTime.fromMicrosecondsSinceEpoch(otherTrip.firstCreationTime!);
         final otherTripLastTime =
-            DateTime.fromMicrosecondsSinceEpoch(otherTrip.lastCreationTime);
+            DateTime.fromMicrosecondsSinceEpoch(otherTrip.lastCreationTime!);
         if (tripFirstTime
                 .isBefore(otherTripLastTime.add(const Duration(days: 3))) &&
             tripLastTime.isAfter(
@@ -1422,8 +1422,8 @@ class SearchService {
           mergedTrips[idx] = TripMemory(
             otherTrip.files + trip.files,
             otherTrip.location,
-            min(otherTrip.firstCreationTime, trip.firstCreationTime),
-            max(otherTrip.lastCreationTime, trip.lastCreationTime),
+            firstCreationTime: min(otherTrip.firstCreationTime!, trip.firstCreationTime!),
+            lastCreationTime: max(otherTrip.lastCreationTime!, trip.lastCreationTime!),
           );
           _logger.finest('Merged two trip locations');
           merged = true;
@@ -1435,8 +1435,8 @@ class SearchService {
         TripMemory(
           trip.files,
           trip.location,
-          trip.firstCreationTime,
-          trip.lastCreationTime,
+          firstCreationTime: trip.firstCreationTime,
+          lastCreationTime: trip.lastCreationTime,
         ),
       );
     }
@@ -1445,7 +1445,7 @@ class SearchService {
     final List<TripMemory> validTrips = [];
     for (final trip in mergedTrips) {
       if (trip.files.length >= 20 &&
-          trip.averageCreationTime < cutOffTime.microsecondsSinceEpoch) {
+          trip.averageCreationTime() < cutOffTime.microsecondsSinceEpoch) {
         validTrips.add(trip);
       }
     }
@@ -1482,7 +1482,7 @@ class SearchService {
     final Map<int, Map<int, List<TripMemory>>> tripsByMonthYear = {};
     for (final trip in validTrips) {
       final tripDate =
-          DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime);
+          DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime());
       tripsByMonthYear
           .putIfAbsent(tripDate.month, () => {})
           .putIfAbsent(tripDate.year, () => [])
@@ -1502,12 +1502,12 @@ class SearchService {
     // If there are past trips this month, show the one or two most recent ones.
     if (currentMonthTrips.isNotEmpty) {
       currentMonthTrips.sort(
-        (a, b) => b.averageCreationTime.compareTo(a.averageCreationTime),
+        (a, b) => b.averageCreationTime().compareTo(a.averageCreationTime()),
       );
       final tripsToShow = currentMonthTrips.take(2);
       for (final trip in tripsToShow) {
         final year =
-            DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime).year;
+            DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime()).year;
         final String? locationName = await _tryFindLocationName(trip.files);
         String name = "Trip in $year";
         if (locationName != null) {
@@ -1553,11 +1553,11 @@ class SearchService {
           if (thatMonthTrips.length >= 3) {
             // take and use the third earliest trip
             thatMonthTrips.sort(
-              (a, b) => a.averageCreationTime.compareTo(b.averageCreationTime),
+              (a, b) => a.averageCreationTime().compareTo(b.averageCreationTime()),
             );
             final trip = thatMonthTrips[2];
             final year =
-                DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime)
+                DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime())
                     .year;
             final String? locationName = await _tryFindLocationName(trip.files);
             String name = "Trip in $year";

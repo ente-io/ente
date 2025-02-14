@@ -1,22 +1,19 @@
 import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
+import "package:photos/models/smart_memory.dart";
 
-class TripMemory {
-  final List<EnteFile> files;
+class TripMemory extends SmartMemory {
   final Location location;
-  final int firstCreationTime;
-  final int lastCreationTime;
 
   TripMemory(
-    this.files,
-    this.location,
-    this.firstCreationTime,
-    this.lastCreationTime,
-  );
+    files,
+    this.location, {
+    super.firstCreationTime,
+    super.lastCreationTime,
+  }) : super(files, MemoryType.trips);
 
-  int get averageCreationTime => (firstCreationTime + lastCreationTime) ~/ 2;
-
-  TripMemory copyWith({
+  @override
+  SmartMemory copyWith({
     List<EnteFile>? files,
     Location? location,
     int? firstCreationTime,
@@ -25,8 +22,8 @@ class TripMemory {
     return TripMemory(
       files ?? this.files,
       location ?? this.location,
-      firstCreationTime ?? this.firstCreationTime,
-      lastCreationTime ?? this.lastCreationTime,
+      firstCreationTime: firstCreationTime ?? super.firstCreationTime,
+      lastCreationTime: lastCreationTime ?? super.lastCreationTime,
     );
   }
 }
