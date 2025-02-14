@@ -20,6 +20,7 @@ import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { ConfirmDeleteFileDialog } from "@/new/photos/components/FileViewer";
+import { ImageEditorOverlay } from "@/new/photos/components/ImageEditorOverlay";
 import { moveToTrash } from "@/new/photos/services/collection";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import { usePhotosAppContext } from "@/new/photos/types/context";
@@ -75,7 +76,6 @@ import {
     getFileFromURL,
 } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import { ImageEditorOverlay } from "./ImageEditorOverlay";
 
 export type PhotoViewerProps = Pick<
     PhotoFrameProps,

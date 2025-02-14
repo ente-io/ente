@@ -14,7 +14,7 @@ import log from "@/base/log";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { downloadManager } from "@/gallery/services/download";
 import type { Collection } from "@/media/collection";
-import { EnteFile } from "@/media/file";
+import type { EnteFile } from "@/media/file";
 import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
 import { getLocalCollections } from "@/new/photos/services/collections";
 import { CenteredFlex } from "@ente/shared/components/Container";
