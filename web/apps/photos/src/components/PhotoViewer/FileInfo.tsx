@@ -76,7 +76,6 @@ import {
 } from "@mui/material";
 import { Formik } from "formik";
 import { t } from "i18next";
-import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import * as Yup from "yup";
@@ -109,6 +108,11 @@ export interface FileInfoProps {
     collectionNameMap?: Map<number, string>;
     showCollectionChips: boolean;
     /**
+     * Called when the user selects a collection from among the collections that
+     * the file belongs to.
+     */
+    onSelectCollection: (collectionID: number) => void;
+    /**
      * Called when the user selects a person in the file info panel.
      */
     onSelectPerson?: ((personID: string) => void) | undefined;
@@ -126,12 +130,12 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     collectionNameMap,
     showCollectionChips,
     closePhotoViewer,
+    onSelectCollection,
     onSelectPerson,
 }) => {
     const { mapEnabled } = useSettingsSnapshot();
 
     const { showMiniDialog } = useContext(AppContext);
-    const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
     );
@@ -173,7 +177,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     }
 
     const onCollectionChipClick = (collectionID) => {
-        galleryContext.onShowCollection(collectionID);
+        onSelectCollection(collectionID);
         closePhotoViewer();
     };
 

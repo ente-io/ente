@@ -975,6 +975,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                 refreshPhotoswipe={refreshPhotoswipe}
                 fileToCollectionsMap={fileToCollectionsMap}
                 collectionNameMap={collectionNameMap}
+                onSelectCollection={galleryContext.onShowCollection}
                 onSelectPerson={onSelectPerson}
             />
             <ImageEditorOverlay
