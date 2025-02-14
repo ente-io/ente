@@ -798,7 +798,7 @@ class CollectionsService {
       );
       await _enteDio.put(
         "/collections/magic-metadata",
-        data: params,
+        data: params.toJson(),
       );
       // update the local information so that it's reflected on UI
       collection.mMdEncodedJson = jsonEncode(jsonToUpdate);
@@ -857,7 +857,7 @@ class CollectionsService {
       );
       await _enteDio.put(
         "/collections/public-magic-metadata",
-        data: params,
+        data: params.toJson(),
       );
       // update the local information so that it's reflected on UI
       collection.mMdPubEncodedJson = jsonEncode(jsonToUpdate);
@@ -917,7 +917,7 @@ class CollectionsService {
       );
       await _enteDio.put(
         "/collections/sharee-magic-metadata",
-        data: params,
+        data: params.toJson(),
       );
       // update the local information so that it's reflected on UI
       collection.sharedMmdJson = jsonEncode(jsonToUpdate);
