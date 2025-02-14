@@ -1,4 +1,9 @@
 import {
+    isArchivedCollection,
+    isArchivedFile,
+    isPinnedCollection,
+} from "@/gallery/services/magic-metadata";
+import {
     COLLECTION_ROLE,
     CollectionType,
     type Collection,
@@ -34,11 +39,6 @@ import {
     sortFiles,
     uniqueFilesByID,
 } from "../../services/files";
-import {
-    isArchivedCollection,
-    isArchivedFile,
-    isPinnedCollection,
-} from "../../services/magic-metadata";
 import type { PeopleState, Person } from "../../services/ml/people";
 import type { SearchSuggestion } from "../../services/search/types";
 import type { FamilyData } from "../../services/user-details";

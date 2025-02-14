@@ -3,11 +3,11 @@ import { assertionFailed } from "@/base/assert";
 import { isHTTP4xxError } from "@/base/http";
 import log from "@/base/log";
 import type { ElectronMLWorker } from "@/base/types/ipc";
+import type { UploadItem } from "@/gallery/services/upload";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { wait } from "@/utils/promise";
 import { expose, wrap } from "comlink";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
-import type { UploadItem } from "../upload/types";
 import {
     createImageBitmapAndData,
     fetchRenderableBlob,
