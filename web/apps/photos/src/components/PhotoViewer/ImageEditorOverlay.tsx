@@ -88,11 +88,11 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
     const originalSizeCanvasRef = useRef<HTMLCanvasElement | null>(null);
     const parentRef = useRef<HTMLDivElement | null>(null);
 
-    const [fileURL, setFileURL] = useState<string>("");
+    const [fileURL, setFileURL] = useState<string | undefined>(undefined);
     // The MIME type of the original file that we are editing.
     //
     // It should generally be present, but it is not guaranteed to be.
-    const [mimeType, setMIMEType] = useState<string | undefined>();
+    const [mimeType, setMIMEType] = useState<string | undefined>(undefined);
 
     const [currentRotationAngle, setCurrentRotationAngle] = useState(0);
 
@@ -438,7 +438,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
     }, [props.show, props.file]);
 
     const handleClose = () => {
-        setFileURL(null);
+        setFileURL(undefined);
         props.onClose();
     };
 
@@ -481,7 +481,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
             uploadManager.prepareForNewUpload();
             uploadManager.showUploadProgressDialog();
             uploadManager.uploadFile(editedFile, collection, props.file);
-            setFileURL(null);
+            setFileURL(undefined);
             props.onClose();
             props.closePhotoViewer();
         } catch (e) {
@@ -588,7 +588,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                 position: "relative",
                             }}
                         >
-                            {(fileURL === null || canvasLoading) && (
+                            {(!fileURL || canvasLoading) && (
                                 <CircularProgress />
                             )}
 
@@ -597,7 +597,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                 style={{
                                     objectFit: "contain",
                                     display:
-                                        fileURL === null || canvasLoading
+                                        !fileURL || canvasLoading
                                             ? "none"
                                             : "block",
                                     position: "absolute",
