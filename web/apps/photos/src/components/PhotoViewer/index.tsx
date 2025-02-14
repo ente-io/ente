@@ -22,7 +22,7 @@ import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { ConfirmDeleteFileDialog } from "@/new/photos/components/FileViewer";
 import { moveToTrash } from "@/new/photos/services/collection";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
-import { AppContext } from "@/new/photos/types/context";
+import { usePhotosAppContext } from "@/new/photos/types/context";
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -143,8 +143,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
     collectionNameMap,
     onSelectPerson,
 }) => {
-    const { showLoadingBar, hideLoadingBar, showMiniDialog } =
-        useContext(AppContext);
+    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
@@ -997,7 +996,6 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                 handleCloseInfo={handleCloseInfo}
                 file={photoSwipe?.currItem as EnteFile}
                 exif={exif?.value}
-                showMiniDialog={showMiniDialog}
                 shouldDisableEdits={!isOwnFile}
                 allowMap={!publicCollectionGalleryContext.credentials}
                 showCollectionChips={

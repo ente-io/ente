@@ -31,7 +31,7 @@ import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
 import { runMigrations } from "@/new/photos/services/migration";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
-import { AppContext } from "@/new/photos/types/context";
+import { PhotosAppContext } from "@/new/photos/types/context";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
     getData,
@@ -201,7 +201,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
             {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}
             <BaseContext value={baseContext}>
-                <AppContext.Provider value={appContext}>
+                <PhotosAppContext value={appContext}>
                     {!isI18nReady ? (
                         <LoadingIndicator />
                     ) : (
@@ -210,7 +210,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                             <Component {...pageProps} />
                         </>
                     )}
-                </AppContext.Provider>
+                </PhotosAppContext>
             </BaseContext>
         </ThemeProvider>
     );

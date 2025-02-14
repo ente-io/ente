@@ -3,15 +3,16 @@ import {
     TitledMiniDialog,
     type MiniDialogAttributes,
 } from "@/base/components/MiniDialog";
+import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
-import { AppContext } from "@/new/photos/types/context";
+import { usePhotosAppContext } from "@/new/photos/types/context";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface Iprops {
     open: boolean;
@@ -24,7 +25,8 @@ export default function AuthenticateUserModal({
     onClose,
     onAuthenticate,
 }: Iprops) {
-    const { showMiniDialog, onGenericError, logout } = useContext(AppContext);
+    const { logout, showMiniDialog } = useBaseContext();
+    const { onGenericError } = usePhotosAppContext();
     const [user, setUser] = useState<User>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
 

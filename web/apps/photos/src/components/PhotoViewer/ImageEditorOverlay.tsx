@@ -8,6 +8,7 @@ import {
     RowSwitch,
 } from "@/base/components/RowButton";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
@@ -16,7 +17,6 @@ import type { Collection } from "@/media/collection";
 import { EnteFile } from "@/media/file";
 import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
 import { getLocalCollections } from "@/new/photos/services/collections";
-import { AppContext } from "@/new/photos/types/context";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
@@ -48,7 +48,6 @@ import { t } from "i18next";
 import React, {
     forwardRef,
     Fragment,
-    useContext,
     useEffect,
     useRef,
     useState,
@@ -97,7 +96,7 @@ interface CropBoxProps {
 export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
     props,
 ) => {
-    const { showMiniDialog } = useContext(AppContext);
+    const { showMiniDialog } = useBaseContext();
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const originalSizeCanvasRef = useRef<HTMLCanvasElement | null>(null);

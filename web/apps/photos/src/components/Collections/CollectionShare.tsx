@@ -28,7 +28,7 @@ import { COLLECTION_ROLE, type CollectionUser } from "@/media/collection";
 import { PublicLinkCreated } from "@/new/photos/components/share/PublicLinkCreated";
 import { avatarTextColor } from "@/new/photos/services/avatar";
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
-import { AppContext } from "@/new/photos/types/context";
+import { usePhotosAppContext } from "@/new/photos/types/context";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import SingleInputForm, {
     type SingleInputFormProps,
@@ -812,7 +812,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     onRootClose,
     peopleCount,
 }) => {
-    const { showLoadingBar, hideLoadingBar } = useContext(AppContext);
+    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
     const galleryContext = useContext(GalleryContext);
 
     const [addParticipantView, setAddParticipantView] = useState(false);

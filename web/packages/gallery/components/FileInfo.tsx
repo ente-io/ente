@@ -13,7 +13,7 @@ import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { useModalVisibility } from "@/base/components/utils/modal";
-import type { BaseContextT } from "@/base/context";
+import { useBaseContext } from "@/base/context";
 import { haveWindow } from "@/base/env";
 import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
@@ -110,11 +110,6 @@ export interface FileInfoProps {
     handleCloseInfo: () => void;
     exif: FileInfoExif | undefined;
     /**
-     * This is the same as the {@link showMiniDialog} prop in the top level
-     * {@link AppContext} of the app which we're currently being shown in.
-     */
-    showMiniDialog: BaseContextT["showMiniDialog"];
-    /**
      * TODO: Rename and flip to allowEdits.
      */
     shouldDisableEdits: boolean;
@@ -141,7 +136,6 @@ export interface FileInfoProps {
 
 export const FileInfo: React.FC<FileInfoProps> = ({
     file,
-    showMiniDialog,
     shouldDisableEdits,
     allowMap,
     showInfo,
@@ -155,6 +149,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     onSelectCollection,
     onSelectPerson,
 }) => {
+    const { showMiniDialog } = useBaseContext();
+
     const { mapEnabled } = useSettingsSnapshot();
 
     const [exifInfo, setExifInfo] = useState<ExifInfo | undefined>();
@@ -916,6 +912,7 @@ const MapBox: React.FC<MapBoxProps> = ({
                 }
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mapEnabled]);
 
     return mapEnabled ? (
