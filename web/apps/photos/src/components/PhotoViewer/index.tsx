@@ -15,6 +15,7 @@ import {
     type FileInfoProps,
 } from "@/gallery/components/FileInfo";
 import { downloadManager } from "@/gallery/services/download";
+import type { Collection } from "@/media/collection";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
@@ -66,6 +67,7 @@ import {
     addToFavorites,
     removeFromFavorites,
 } from "services/collectionService";
+import uploadManager from "services/upload/uploadManager";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     copyFileToClipboard,
@@ -655,6 +657,18 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
         setShowImageEditorOverlay(false);
     };
 
+    const handleSaveEditedCopy = (
+        editedFile: File,
+        collection: Collection,
+        enteFile: EnteFile,
+    ) => {
+        uploadManager.prepareForNewUpload();
+        uploadManager.showUploadProgressDialog();
+        uploadManager.uploadFile(editedFile, collection, enteFile);
+        handleCloseEditor();
+        handleClose();
+    };
+
     const downloadFileHelper = async (file: EnteFile) => {
         if (
             file &&
@@ -1000,7 +1014,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                 show={showImageEditorOverlay}
                 file={photoSwipe?.currItem as EnteFile}
                 onClose={handleCloseEditor}
-                closePhotoViewer={handleClose}
+                onSaveEditedCopy={handleSaveEditedCopy}
             />
         </>
     );

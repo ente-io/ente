@@ -11,6 +11,7 @@ import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { downloadManager } from "@/gallery/services/download";
+import type { Collection } from "@/media/collection";
 import { EnteFile } from "@/media/file";
 import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
 import { getLocalCollections } from "@/new/photos/services/collections";
@@ -53,13 +54,25 @@ import React, {
     type Ref,
     type RefObject,
 } from "react";
-import uploadManager from "services/upload/uploadManager";
 
 interface ImageEditorOverlayProps {
     file: EnteFile;
     show: boolean;
     onClose: () => void;
-    closePhotoViewer: () => void;
+    /**
+     * Called when the user activates the button to save a copy of the given
+     * {@link enteFile} to their Ente account with the edits they have made.
+     *
+     * @param editedFile A Web {@link File} containing the edited contents.
+     * @param collection The collection to which the edited file should be
+     * added.
+     * @param enteFile The original {@link EnteFile}.
+     */
+    onSaveEditedCopy: (
+        editedFile: File,
+        collection: Collection,
+        enteFile: EnteFile,
+    ) => void;
 }
 
 const filterDefaultValues = {
@@ -478,12 +491,8 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
 
             const editedFile = await getEditedFile();
 
-            uploadManager.prepareForNewUpload();
-            uploadManager.showUploadProgressDialog();
-            uploadManager.uploadFile(editedFile, collection, props.file);
+            props.onSaveEditedCopy(editedFile, collection, props.file);
             setFileURL(undefined);
-            props.onClose();
-            props.closePhotoViewer();
         } catch (e) {
             log.error("Error saving copy to ente", e);
         }
