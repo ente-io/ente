@@ -3,6 +3,10 @@ import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { downloadManager } from "@/gallery/services/download";
+import {
+    updateFileMagicMetadata,
+    updateFilePublicMagicMetadata,
+} from "@/gallery/services/file";
 import { detectFileTypeInfo } from "@/gallery/utils/detect-type";
 import { writeStream } from "@/gallery/utils/native-stream";
 import {
@@ -30,10 +34,6 @@ import {
     addMultipleToFavorites,
     moveToHiddenCollection,
 } from "services/collectionService";
-import {
-    updateFileMagicMetadata,
-    updateFilePublicMagicMetadata,
-} from "services/fileService";
 import {
     SelectedState,
     SetFilesDownloadProgressAttributes,

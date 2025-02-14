@@ -1,7 +1,10 @@
+/* TODO: Audit this file */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+
 import { encryptMetadataJSON } from "@/base/crypto";
 import { apiURL } from "@/base/origins";
-import {
-    type EncryptedMagicMetadata,
+import type {
+    EncryptedMagicMetadata,
     EnteFile,
     FileWithUpdatedMagicMetadata,
     FileWithUpdatedPublicMagicMetadata,
@@ -14,7 +17,7 @@ export interface UpdateMagicMetadataRequest {
     magicMetadata: EncryptedMagicMetadata;
 }
 
-export interface BulkUpdateMagicMetadataRequest {
+interface BulkUpdateMagicMetadataRequest {
     metadataList: UpdateMagicMetadataRequest[];
 }
 
@@ -48,6 +51,7 @@ export const updateFileMagicMetadata = async (
     await HTTPService.put(
         await apiURL("/files/magic-metadata"),
         reqBody,
+        // @ts-ignore
         null,
         {
             "X-Auth-Token": token,
@@ -69,6 +73,7 @@ export const updateFilePublicMagicMetadata = async (
 ): Promise<EnteFile[]> => {
     const token = getToken();
     if (!token) {
+        // @ts-ignore
         return;
     }
     const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
@@ -94,6 +99,7 @@ export const updateFilePublicMagicMetadata = async (
     await HTTPService.put(
         await apiURL("/files/public-magic-metadata"),
         reqBody,
+        // @ts-ignore
         null,
         {
             "X-Auth-Token": token,
