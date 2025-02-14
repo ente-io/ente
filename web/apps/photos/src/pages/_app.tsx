@@ -16,6 +16,7 @@ import {
     useSetupLogs,
 } from "@/base/components/utils/hooks-app";
 import { photosTheme } from "@/base/components/utils/theme";
+import { BaseContext } from "@/base/context";
 import log from "@/base/log";
 import { logStartupBanner } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
@@ -157,6 +158,10 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         }, 0);
     }, []);
 
+    const baseContext = useMemo(
+        () => ({ showMiniDialog, logout }),
+        [showMiniDialog, logout],
+    );
     const appContext = useMemo(
         () => ({
             showLoadingBar,
@@ -197,16 +202,20 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <Notification {...notificationProps} />
 
                 {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}
-                <AppContext.Provider value={appContext}>
-                    {!isI18nReady ? (
-                        <LoadingIndicator />
-                    ) : (
-                        <>
-                            {isChangingRoute && <TranslucentLoadingOverlay />}
-                            <Component {...pageProps} />
-                        </>
-                    )}
-                </AppContext.Provider>
+                <BaseContext value={baseContext}>
+                    <AppContext.Provider value={appContext}>
+                        {!isI18nReady ? (
+                            <LoadingIndicator />
+                        ) : (
+                            <>
+                                {isChangingRoute && (
+                                    <TranslucentLoadingOverlay />
+                                )}
+                                <Component {...pageProps} />
+                            </>
+                        )}
+                    </AppContext.Provider>
+                </BaseContext>
             </ThemeProvider>
         </>
     );
