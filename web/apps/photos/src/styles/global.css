@@ -12,7 +12,7 @@ body {
     flex-direction: column;
     height: 100%;
 }
-@media DISABLED {
+
 .pswp__button--custom {
     width: 48px;
     height: 48px;
@@ -113,7 +113,6 @@ body {
 
 .pswp__caption--empty {
     display: none;
-}
 }
 
 /*
