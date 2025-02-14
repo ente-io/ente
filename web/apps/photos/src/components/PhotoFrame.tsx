@@ -112,8 +112,8 @@ export interface PhotoFrameProps {
     /** This will be set if mode is "people". */
     activePersonID?: string | undefined;
     enableDownload?: boolean;
-    fileToCollectionsMap: Map<number, number[]>;
-    collectionNameMap: Map<number, string>;
+    fileToCollectionsMap?: Map<number, number[]>;
+    collectionNameMap?: Map<number, string>;
     showAppDownloadBanner?: boolean;
     setIsPhotoSwipeOpen?: (value: boolean) => void;
     isInHiddenSection?: boolean;

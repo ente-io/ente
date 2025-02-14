@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* TODO: Audit this file */
@@ -319,7 +320,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         />
                     </InfoItem>
                 )}
-                {showCollectionChips && (
+                {showCollectionChips && collectionNameMap && (
                     <InfoItem icon={<FolderOutlinedIcon />}>
                         <Stack
                             direction="row"

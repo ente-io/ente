@@ -103,8 +103,8 @@ export type PhotoViewerProps = Pick<
     isInHiddenSection: boolean;
     enableDownload: boolean;
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
-    fileToCollectionsMap: Map<number, number[]>;
-    collectionNameMap: Map<number, string>;
+    fileToCollectionsMap?: Map<number, number[]>;
+    collectionNameMap?: Map<number, string>;
     onSelectPerson?: FileInfoProps["onSelectPerson"];
 };
 

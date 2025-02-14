@@ -546,8 +546,8 @@ export default function PublicCollectionGallery() {
                     selected={selected}
                     activeCollectionID={ALL_SECTION}
                     enableDownload={downloadEnabled}
-                    fileToCollectionsMap={null}
-                    collectionNameMap={null}
+                    fileToCollectionsMap={undefined}
+                    collectionNameMap={undefined}
                     setFilesDownloadProgressAttributesCreator={
                         setFilesDownloadProgressAttributesCreator
                     }
