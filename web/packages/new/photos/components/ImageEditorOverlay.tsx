@@ -946,7 +946,7 @@ const FreehandCropRegion = forwardRef(
                 {/* Top overlay */}
                 <CropOverlayRegionTemplate
                     // Height up to the top of the crop box.
-                    sx={{ top: 0, left: 0, right: 0, height: cropBox.y + "px" }}
+                    sx={{ top: 0, left: 0, right: 0, height: `${cropBox.y}px` }}
                 />
 
                 {/* Bottom overlay */}
@@ -964,25 +964,25 @@ const FreehandCropRegion = forwardRef(
                 {/* Left overlay */}
                 <CropOverlayRegionTemplate
                     sx={{
-                        top: cropBox.y + "px",
+                        top: `${cropBox.y}px`,
                         left: 0,
                         // Width up to the left side of the crop box.
-                        width: cropBox.x + "px",
+                        width: `${cropBox.x}px`,
                         // Same height as the crop box.
-                        height: cropBox.height + "px",
+                        height: `${cropBox.height}px`,
                     }}
                 />
 
                 {/* Right overlay */}
                 <CropOverlayRegionTemplate
                     sx={{
-                        top: cropBox.y + "px",
+                        top: `${cropBox.y}px`,
                         right: 0,
                         // Width from the right side of the crop box to the
                         // right side of the canvas.
                         width: `calc(100% - ${cropBox.x + cropBox.width}px)`,
                         // Same height as the crop box.
-                        height: cropBox.height + "px",
+                        height: `${cropBox.height}px`,
                     }}
                 />
 
@@ -990,10 +990,10 @@ const FreehandCropRegion = forwardRef(
                     style={{
                         display: "grid",
                         position: "absolute",
-                        left: cropBox.x + "px",
-                        top: cropBox.y + "px",
-                        width: cropBox.width + "px",
-                        height: cropBox.height + "px",
+                        left: `${cropBox.x}px`,
+                        top: `${cropBox.y}px`,
+                        width: `${cropBox.width}px`,
+                        height: `${cropBox.height}px`,
                         border: "1px solid white",
                         gridTemplateColumns: "1fr 1fr 1fr",
                         gridTemplateRows: "1fr 1fr 1fr",
