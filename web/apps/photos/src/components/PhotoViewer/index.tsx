@@ -9,6 +9,11 @@ import {
 } from "@/base/components/utils/modal";
 import { lowercaseExtension } from "@/base/file-name";
 import log from "@/base/log";
+import {
+    FileInfo,
+    type FileInfoExif,
+    type FileInfoProps,
+} from "@/gallery/components/FileInfo";
 import { downloadManager } from "@/gallery/services/download";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
@@ -68,7 +73,6 @@ import {
     getFileFromURL,
 } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import { FileInfo, type FileInfoExif, type FileInfoProps } from "./FileInfo";
 import { ImageEditorOverlay } from "./ImageEditorOverlay";
 
 export type PhotoViewerProps = Pick<

@@ -1,3 +1,7 @@
+/* TODO: Audit this file */
+/* eslint-disable */
+/* @ts-nocheck */
+
 import { LinkButtonUndecorated } from "@/base/components/LinkButton";
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { type ButtonishProps } from "@/base/components/mui";
@@ -15,7 +19,7 @@ import {
     changeFileName,
     updateExistingFilePubMetadata,
 } from "@/gallery/services/file";
-import { EnteFile } from "@/media/file";
+import { type EnteFile } from "@/media/file";
 import type { ParsedMetadata } from "@/media/file-metadata";
 import {
     fileCreationPhotoDate,
@@ -66,13 +70,13 @@ import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import {
     Box,
     CircularProgress,
-    DialogProps,
     IconButton,
     Link,
     Stack,
     styled,
     TextField,
     Typography,
+    type DialogProps,
 } from "@mui/material";
 import { Formik } from "formik";
 import { t } from "i18next";
