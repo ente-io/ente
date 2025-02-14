@@ -2,7 +2,13 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-/* TODO: Audit this file */
+/* TODO: Audit this file
+Plan of action:
+- Move common components into FileInfoComponents.tsx
+
+- Move the rest out to files in the apps themeselves: albums/SharedFileInfo
+  and photos/FileInfo to deal with the @/new/photos imports here.
+*/
 /* @ts-nocheck */
 
 import { LinkButtonUndecorated } from "@/base/components/LinkButton";
@@ -18,6 +24,7 @@ import { haveWindow } from "@/base/env";
 import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import type { Location } from "@/base/types";
+import { CopyButton } from "@/gallery/components/FileInfoComponents";
 import {
     changeCaption,
     changeFileName,
@@ -32,7 +39,6 @@ import {
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
-import { CopyButton } from "@/new/photos/components/FileInfo";
 import { ChipButton } from "@/new/photos/components/mui/ChipButton";
 import { FilePeopleList } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";

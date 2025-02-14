@@ -3,6 +3,7 @@
 
 import { encryptMetadataJSON } from "@/base/crypto";
 import { apiURL } from "@/base/origins";
+import { updateMagicMetadata } from "@/gallery/services/magic-metadata";
 import type {
     EncryptedMagicMetadata,
     EnteFile,
@@ -12,7 +13,6 @@ import type {
     FileWithUpdatedPublicMagicMetadata,
 } from "@/media/file";
 import { mergeMetadata } from "@/media/file";
-import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 

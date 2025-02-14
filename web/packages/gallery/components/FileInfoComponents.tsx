@@ -1,9 +1,9 @@
+import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DoneIcon from "@mui/icons-material/Done";
 import { IconButton, Tooltip, type SvgIconProps } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";
-import { aboveFileViewerContentZ } from "./utils/z-index";
 
 interface CopyButtonProps {
     /**

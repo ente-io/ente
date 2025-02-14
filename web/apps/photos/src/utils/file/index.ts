@@ -4,6 +4,10 @@ import { type Electron } from "@/base/types/ipc";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { downloadManager } from "@/gallery/services/download";
 import { updateFileMagicMetadata } from "@/gallery/services/file";
+import {
+    isArchivedFile,
+    updateMagicMetadata,
+} from "@/gallery/services/magic-metadata";
 import { detectFileTypeInfo } from "@/gallery/utils/detect-type";
 import { writeStream } from "@/gallery/utils/native-stream";
 import {
@@ -15,10 +19,6 @@ import { ItemVisibility } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { deleteFromTrash, moveToTrash } from "@/new/photos/services/collection";
-import {
-    isArchivedFile,
-    updateMagicMetadata,
-} from "@/new/photos/services/magic-metadata";
 import { safeFileName } from "@/new/photos/utils/native-fs";
 import { withTimeout } from "@/utils/promise";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";

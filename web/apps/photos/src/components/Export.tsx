@@ -7,12 +7,12 @@ import {
 } from "@/base/components/OverflowMenu";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import type { ButtonishProps } from "@/base/components/mui";
+import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import { EnteFile } from "@/media/file";
-import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { CustomError } from "@ente/shared/error";
 import FolderIcon from "@mui/icons-material/Folder";

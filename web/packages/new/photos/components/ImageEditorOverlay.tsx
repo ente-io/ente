@@ -1,3 +1,10 @@
+/* TODO: Audit this file.
+   All the bangs shouldn't be needed with better types / restructuring. */
+/* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
+
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import {
@@ -14,7 +21,7 @@ import log from "@/base/log";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { downloadManager } from "@/gallery/services/download";
 import type { Collection } from "@/media/collection";
-import { EnteFile } from "@/media/file";
+import type { EnteFile } from "@/media/file";
 import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
 import { getLocalCollections } from "@/new/photos/services/collections";
 import { CenteredFlex } from "@ente/shared/components/Container";
@@ -93,9 +100,12 @@ interface CropBoxProps {
     height: number;
 }
 
-export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
-    props,
-) => {
+export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
+    open,
+    onClose,
+    file,
+    onSaveEditedCopy,
+}) => {
     const { showMiniDialog } = useBaseContext();
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -152,10 +162,10 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
 
     const getCanvasBoundsOffsets = () => {
         const canvasBounds = {
-            height: canvasRef.current.height,
-            width: canvasRef.current.width,
+            height: canvasRef.current!.height,
+            width: canvasRef.current!.width,
         };
-        const parentBounds = parentRef.current.getBoundingClientRect();
+        const parentBounds = parentRef.current!.getBoundingClientRect();
 
         // calculate the offset created by centering the canvas in its parent
         const offsetX = (parentBounds.width - canvasBounds.width) / 2;
@@ -169,10 +179,10 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
         };
     };
 
-    const handleDragStart = (e) => {
+    const handleDragStart: React.MouseEventHandler = (e) => {
         if (currentTab !== "crop") return;
 
-        const rect = cropBoxRef.current.getBoundingClientRect();
+        const rect = cropBoxRef.current!.getBoundingClientRect();
         const offsetX = e.pageX - rect.left - rect.width / 2;
         const offsetY = e.pageY - rect.top - rect.height / 2;
 
@@ -203,7 +213,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
         setStartY(e.pageY - offsetY);
     };
 
-    const handleDrag = (e) => {
+    const handleDrag: React.MouseEventHandler = (e) => {
         if (!isDragging && !isGrowing) return;
 
         // d- variables are the delta change between start and now
@@ -255,7 +265,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
         }
     };
 
-    const handleDragEnd = () => {
+    const handleDragEnd: React.MouseEventHandler = () => {
         setStartX(0);
         setStartY(0);
 
@@ -282,7 +292,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
             return;
         }
         try {
-            applyFilters([canvasRef.current, originalSizeCanvasRef.current]);
+            applyFilters([canvasRef.current, originalSizeCanvasRef.current!]);
             setColoursAdjusted(
                 brightness !== filterDefaultValues.brightness ||
                     contrast !== filterDefaultValues.contrast ||
@@ -306,37 +316,35 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
             for (const canvas of canvases) {
                 const blurSizeRatio =
                     Math.min(canvas.width, canvas.height) /
-                    Math.min(canvasRef.current.width, canvasRef.current.height);
+                    Math.min(
+                        canvasRef.current!.width,
+                        canvasRef.current!.height,
+                    );
                 const blurRadius = blurSizeRatio * blur;
                 const filterString = `brightness(${brightness}%) contrast(${contrast}%) blur(${blurRadius}px) saturate(${saturation}%) invert(${
                     invert ? 1 : 0
                 })`;
-                const context = canvas.getContext("2d");
-                context.imageSmoothingEnabled = false;
+                const ctx = canvas.getContext("2d")!;
+                ctx.imageSmoothingEnabled = false;
 
-                context.filter = filterString;
+                ctx.filter = filterString;
 
                 const image = new Image();
-                image.src = fileURL;
+                image.src = fileURL!;
 
                 await new Promise((resolve, reject) => {
                     image.onload = () => {
                         try {
-                            context.clearRect(
-                                0,
-                                0,
-                                canvas.width,
-                                canvas.height,
-                            );
-                            context.save();
-                            context.drawImage(
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            ctx.save();
+                            ctx.drawImage(
                                 image,
                                 0,
                                 0,
                                 canvas.width,
                                 canvas.height,
                             );
-                            context.restore();
+                            ctx.restore();
                             resolve(true);
                         } catch (e) {
                             reject(e);
@@ -381,12 +389,11 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
             setCurrentRotationAngle(0);
 
             const img = new Image();
-            const ctx = canvasRef.current.getContext("2d");
+            const ctx = canvasRef.current.getContext("2d")!;
             ctx.imageSmoothingEnabled = false;
             if (!fileURL) {
-                const srcURLs = await downloadManager.renderableSourceURLs(
-                    props.file,
-                );
+                const srcURLs =
+                    await downloadManager.renderableSourceURLs(file);
                 img.src = srcURLs.url as string;
                 setFileURL(srcURLs.url as string);
                 // The image editing works for images (not live photos or
@@ -401,23 +408,23 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                 img.onload = () => {
                     try {
                         const scale = Math.min(
-                            parentRef.current.clientWidth / img.width,
-                            parentRef.current.clientHeight / img.height,
+                            parentRef.current!.clientWidth / img.width,
+                            parentRef.current!.clientHeight / img.height,
                         );
                         setPreviewCanvasScale(scale);
 
                         const width = img.width * scale;
                         const height = img.height * scale;
-                        canvasRef.current.width = width;
-                        canvasRef.current.height = height;
+                        canvasRef.current!.width = width;
+                        canvasRef.current!.height = height;
 
                         ctx?.drawImage(img, 0, 0, width, height);
 
-                        originalSizeCanvasRef.current.width = img.width;
-                        originalSizeCanvasRef.current.height = img.height;
+                        originalSizeCanvasRef.current!.width = img.width;
+                        originalSizeCanvasRef.current!.height = img.height;
 
                         const oSCtx =
-                            originalSizeCanvasRef.current.getContext("2d");
+                            originalSizeCanvasRef.current!.getContext("2d");
 
                         oSCtx?.drawImage(img, 0, 0, img.width, img.height);
 
@@ -447,13 +454,13 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
     };
 
     useEffect(() => {
-        if (!props.open || !props.file) return;
-        loadCanvas();
-    }, [props.open, props.file]);
+        if (!open || !file) return;
+        void loadCanvas();
+    }, [open, file]);
 
     const handleClose = () => {
         setFileURL(undefined);
-        props.onClose();
+        onClose();
     };
 
     const handleCloseWithConfirmation = () => {
@@ -464,13 +471,13 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
         }
     };
 
-    if (!props.open) {
+    if (!open) {
         return <></>;
     }
 
     const getEditedFile = async () => {
         const originalSizeCanvas = originalSizeCanvasRef.current!;
-        const originalFileName = props.file.metadata.title;
+        const originalFileName = file.metadata.title;
         return canvasToFile(originalSizeCanvas, originalFileName, mimeType);
     };
 
@@ -485,14 +492,10 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
         if (!canvasRef.current) return;
         try {
             const collections = await getLocalCollections();
-
             const collection = collections.find(
-                (c) => c.id === props.file.collectionID,
+                (c) => c.id == file.collectionID,
             );
-
-            const editedFile = await getEditedFile();
-
-            props.onSaveEditedCopy(editedFile, collection, props.file);
+            onSaveEditedCopy(await getEditedFile(), collection!, file);
             setFileURL(undefined);
         } catch (e) {
             log.error("Error saving copy to ente", e);
@@ -510,7 +513,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
         setTransformationPerformed(true);
         cropRegionOfCanvas(canvasRef.current, x1, y1, x2, y2);
         cropRegionOfCanvas(
-            originalSizeCanvasRef.current,
+            originalSizeCanvasRef.current!,
             x1 / previewCanvasScale,
             y1 / previewCanvasScale,
             x2 / previewCanvasScale,
@@ -568,7 +571,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                 <Stack
                     direction="row"
                     onMouseUp={handleDragEnd}
-                    onMouseMove={isDragging ? handleDrag : null}
+                    onMouseMove={isDragging ? handleDrag : undefined}
                     onMouseDown={handleDragStart}
                     sx={{
                         width: "100%",
@@ -670,6 +673,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                     <Tabs
                         value={currentTab}
                         onChange={(_, value) => {
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                             setCurrentTab(value);
                         }}
                     >
@@ -793,7 +797,10 @@ const canvasToFile = async (
             break;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const blob = (await new Promise<Blob>((resolve) =>
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         canvas.toBlob(resolve, mimeType),
     ))!;
 
@@ -806,8 +813,8 @@ const canvasToFile = async (
 };
 
 interface CommonMenuProps {
-    canvasRef: RefObject<HTMLCanvasElement>;
-    originalSizeCanvasRef: RefObject<HTMLCanvasElement>;
+    canvasRef: RefObject<HTMLCanvasElement | null>;
+    originalSizeCanvasRef: RefObject<HTMLCanvasElement | null>;
     setTransformationPerformed: (v: boolean) => void;
     canvasLoading: boolean;
     setCanvasLoading: (v: boolean) => void;
@@ -817,7 +824,7 @@ interface CommonMenuProps {
 type CropMenuProps = CommonMenuProps & {
     previewScale: number;
     cropBoxProps: CropBoxProps;
-    cropBoxRef: RefObject<HTMLDivElement>;
+    cropBoxRef: RefObject<HTMLDivElement | null>;
     resetCropBox: () => void;
 };
 
@@ -851,7 +858,7 @@ const CropMenu: React.FC<CropMenuProps> = (props) => {
                         setTransformationPerformed(true);
                         cropRegionOfCanvas(canvasRef.current, x1, y1, x2, y2);
                         cropRegionOfCanvas(
-                            originalSizeCanvasRef.current,
+                            originalSizeCanvasRef.current!,
                             x1 / props.previewScale,
                             y1 / props.previewScale,
                             x2 / props.previewScale,
@@ -874,7 +881,7 @@ const cropRegionOfCanvas = (
     topLeftY: number,
     bottomRightX: number,
     bottomRightY: number,
-    scale: number = 1,
+    scale = 1,
 ) => {
     const context = canvas.getContext("2d");
     if (!context || !canvas) return;
@@ -948,7 +955,7 @@ const FreehandCropRegion = forwardRef(
                 {/* Top overlay */}
                 <CropOverlayRegionTemplate
                     // Height up to the top of the crop box.
-                    sx={{ top: 0, left: 0, right: 0, height: cropBox.y + "px" }}
+                    sx={{ top: 0, left: 0, right: 0, height: `${cropBox.y}px` }}
                 />
 
                 {/* Bottom overlay */}
@@ -966,25 +973,25 @@ const FreehandCropRegion = forwardRef(
                 {/* Left overlay */}
                 <CropOverlayRegionTemplate
                     sx={{
-                        top: cropBox.y + "px",
+                        top: `${cropBox.y}px`,
                         left: 0,
                         // Width up to the left side of the crop box.
-                        width: cropBox.x + "px",
+                        width: `${cropBox.x}px`,
                         // Same height as the crop box.
-                        height: cropBox.height + "px",
+                        height: `${cropBox.height}px`,
                     }}
                 />
 
                 {/* Right overlay */}
                 <CropOverlayRegionTemplate
                     sx={{
-                        top: cropBox.y + "px",
+                        top: `${cropBox.y}px`,
                         right: 0,
                         // Width from the right side of the crop box to the
                         // right side of the canvas.
                         width: `calc(100% - ${cropBox.x + cropBox.width}px)`,
                         // Same height as the crop box.
-                        height: cropBox.height + "px",
+                        height: `${cropBox.height}px`,
                     }}
                 />
 
@@ -992,10 +999,10 @@ const FreehandCropRegion = forwardRef(
                     style={{
                         display: "grid",
                         position: "absolute",
-                        left: cropBox.x + "px",
-                        top: cropBox.y + "px",
-                        width: cropBox.width + "px",
-                        height: cropBox.height + "px",
+                        left: `${cropBox.x}px`,
+                        top: `${cropBox.y}px`,
+                        width: `${cropBox.width}px`,
+                        height: `${cropBox.height}px`,
                         border: "1px solid white",
                         gridTemplateColumns: "1fr 1fr 1fr",
                         gridTemplateRows: "1fr 1fr 1fr",
@@ -1192,9 +1199,9 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
         (widthRatio: number, heightRatio: number) => () => {
             try {
                 setCanvasLoading(true);
-                cropCanvas(canvasRef.current, widthRatio, heightRatio);
+                cropCanvas(canvasRef.current!, widthRatio, heightRatio);
                 cropCanvas(
-                    originalSizeCanvasRef.current,
+                    originalSizeCanvasRef.current!,
                     widthRatio,
                     heightRatio,
                 );
@@ -1213,9 +1220,9 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
     const createRotationHandler = (rotation: "left" | "right") => () => {
         try {
             setCanvasLoading(true);
-            rotateCanvas(canvasRef.current, rotation === "left" ? -90 : 90);
+            rotateCanvas(canvasRef.current!, rotation === "left" ? -90 : 90);
             rotateCanvas(
-                originalSizeCanvasRef.current,
+                originalSizeCanvasRef.current!,
                 rotation === "left" ? -90 : 90,
             );
             setCanvasLoading(false);
@@ -1229,8 +1236,8 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
         (direction: "vertical" | "horizontal") => () => {
             try {
                 setCanvasLoading(true);
-                flipCanvas(canvasRef.current, direction);
-                flipCanvas(originalSizeCanvasRef.current, direction);
+                flipCanvas(canvasRef.current!, direction);
+                flipCanvas(originalSizeCanvasRef.current!, direction);
                 setCanvasLoading(false);
                 setTransformationPerformed(true);
             } catch (e) {

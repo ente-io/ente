@@ -1,6 +1,7 @@
 import { ensureElectron } from "@/base/electron";
 import { joinPath } from "@/base/file-name";
 import log from "@/base/log";
+import { updateMagicMetadata } from "@/gallery/services/magic-metadata";
 import {
     COLLECTION_ROLE,
     type Collection,
@@ -26,7 +27,6 @@ import {
     getLocalCollections,
 } from "@/new/photos/services/collections";
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
-import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import { safeDirectoryName } from "@/new/photos/utils/native-fs";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";

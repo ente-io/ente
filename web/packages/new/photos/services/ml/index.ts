@@ -9,13 +9,13 @@ import log from "@/base/log";
 import { masterKeyFromSession } from "@/base/session-store";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import type { UploadItem } from "@/gallery/services/upload";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import { setSearchPeople } from "../search";
-import type { UploadItem } from "../upload/types";
 import {
     addUserEntity,
     pullUserEntities,
