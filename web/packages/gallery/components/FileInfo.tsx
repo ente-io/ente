@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
@@ -50,7 +51,6 @@ import {
     type AnnotatedFaceID,
 } from "@/new/photos/services/ml";
 import { updateMapEnabled } from "@/new/photos/services/settings";
-import { AppContext } from "@/new/photos/types/context";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import SingleInputForm, {
@@ -118,7 +118,7 @@ export interface FileInfoProps {
     /**
      * TODO: Rename and flip to allowEdits.
      */
-    shouldDisableEdits?: boolean;
+    shouldDisableEdits: boolean;
     /**
      * If `true`, an inline map will be shown (if the user has enabled it) using
      * the file's location.
@@ -195,7 +195,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         return <></>;
     }
 
-    const onCollectionChipClick = (collectionID) => {
+    const onCollectionChipClick = (collectionID: number) => {
         onSelectCollection(collectionID);
         closePhotoViewer();
     };
@@ -512,7 +512,7 @@ type EditButtonProps = ButtonishProps & {
 };
 
 const EditButton: React.FC<EditButtonProps> = ({ onClick, loading }) => (
-    <IconButton onClick={onClick} disabled={loading} color="secondary">
+    <IconButton onClick={onClick} disabled={!!loading} color="secondary">
         {!loading ? (
             <EditIcon />
         ) : (
@@ -555,6 +555,7 @@ function RenderCaption({
 
                 const updatedFile = await changeCaption(file, newCaption);
                 updateExistingFilePubMetadata(file, updatedFile);
+                // @ts-ignore
                 file.title = file.pubMagicMetadata.data.caption;
                 refreshPhotoswipe();
                 scheduleUpdate();
@@ -578,6 +579,7 @@ function RenderCaption({
     return (
         <Box sx={{ p: 1 }}>
             <Formik<RenderCaptionFormValues>
+                // @ts-ignore
                 initialValues={{ caption }}
                 validationSchema={Yup.object().shape({
                     caption: Yup.string().max(
@@ -786,7 +788,7 @@ const RenderFileName: React.FC<RenderFileNameProps> = ({
             <FileNameEditDialog
                 isInEditMode={isInEditMode}
                 closeEditMode={closeEditMode}
-                filename={fileName}
+                filename={fileName!}
                 extension={extension}
                 saveEdits={saveEdits}
             />
@@ -818,7 +820,15 @@ const getCaption = (file: EnteFile, exifInfo: ExifInfo | undefined) => {
     );
 };
 
-const FileNameEditDialog = ({
+interface FileNameEditDialogProps {
+    isInEditMode: boolean;
+    closeEditMode: () => void;
+    filename: string;
+    extension: string | undefined;
+    saveEdits: (name: string) => Promise<void>;
+}
+
+const FileNameEditDialog: React.FC<FileNameEditDialogProps> = ({
     isInEditMode,
     closeEditMode,
     filename,
@@ -899,12 +909,15 @@ const MapBox: React.FC<MapBoxProps> = ({
                 location.longitude,
             ];
             if (mapContainer && !mapContainer.hasChildNodes()) {
+                // @ts-ignore
                 const map = leaflet.map(mapContainer).setView(position, zoom);
+                // @ts-ignore
                 leaflet
                     .tileLayer(urlTemplate, {
                         attribution,
                     })
                     .addTo(map);
+                // @ts-ignore
                 leaflet.marker(position).addTo(map).openPopup();
             }
         } else {
@@ -981,8 +994,10 @@ const RawExif: React.FC<RawExifProps> = ({
                     tag &&
                     typeof tag == "object" &&
                     "description" in tag &&
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                     typeof tag.description == "string"
                 ) {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
                     description = tag.description;
                 }
                 return [key, namespace, tagName, description] as const;
