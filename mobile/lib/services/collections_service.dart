@@ -30,6 +30,7 @@ import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_file_item.dart';
 import 'package:photos/models/collection/collection_items.dart';
+import "package:photos/models/collection/collection_old.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/files_split.dart";
 import "package:photos/models/metadata/collection_magic.dart";
@@ -679,26 +680,34 @@ class CollectionsService {
         fetchCollectionByID(collectionID);
         throw AssertionError('collectionID $collectionID is not cached');
       }
-      _cachedKeys[collectionID] =
-          _getAndCacheDecryptedKey(collection, source: "getCollectionKey");
+      _cachedKeys[collectionID] = _getAndCacheDecryptedKey(
+        collection.id,
+        collection.isOwner(_config.getUserID()!),
+        encKey: collection.encryptedKey,
+        encKeyNonce: collection.keyDecryptionNonce,
+        source: "getCollectionKey",
+      );
     }
     return _cachedKeys[collectionID]!;
   }
 
   Uint8List _getAndCacheDecryptedKey(
-    Collection collection, {
+    int id,
+    bool isOwner, {
+    required String encKey,
+    required String encKeyNonce,
     String source = "",
   }) {
-    if (_cachedKeys.containsKey(collection.id)) {
-      return _cachedKeys[collection.id]!;
+    if (_cachedKeys.containsKey(id)) {
+      return _cachedKeys[id]!;
     }
     debugPrint(
-      "Compute collection decryption key for ${collection.id} source"
+      "Compute collection decryption key for $id source"
       " $source",
     );
-    final encryptedKey = CryptoUtil.base642bin(collection.encryptedKey);
+    final encryptedKey = CryptoUtil.base642bin(encKey);
     Uint8List? collectionKey;
-    if (collection.owner.id == _config.getUserID()) {
+    if (isOwner) {
       // If the collection is owned by the user, decrypt with the master key
       if (_config.getKey() == null) {
         // Possible during AppStore account migration, where SecureStorage
@@ -708,7 +717,7 @@ class CollectionsService {
       collectionKey = CryptoUtil.decryptSync(
         encryptedKey,
         _config.getKey()!,
-        CryptoUtil.base642bin(collection.keyDecryptionNonce!),
+        CryptoUtil.base642bin(encKeyNonce),
       );
     } else {
       // If owned by a different user, decrypt with the public key
@@ -718,7 +727,7 @@ class CollectionsService {
         _config.getSecretKey()!,
       );
     }
-    _cachedKeys[collection.id] = collectionKey;
+    _cachedKeys[id] = collectionKey;
     return collectionKey;
   }
 
@@ -730,7 +739,7 @@ class CollectionsService {
         await updateMagicMetadata(collection, {"subType": 0});
       }
       final encryptedName = CryptoUtil.encryptSync(
-        utf8.encode(newName) as Uint8List,
+        utf8.encode(newName),
         getCollectionKey(collection.id),
       );
       await _enteDio.post(
@@ -1060,7 +1069,7 @@ class CollectionsService {
       );
 
       final collectionData = response.data["collection"];
-      final Collection collection = Collection.fromMap(collectionData);
+      final CollectionV2 collection = CollectionV2.fromMap(collectionData);
       final Uint8List collectionKey =
           Uint8List.fromList(Base58Decode(albumKey));
 
@@ -1087,7 +1096,22 @@ class CollectionsService {
       }
 
       collection.setName(_getDecryptedCollectionName(collection));
-      return collection;
+      final Collection result = Collection(
+        id: collection.id,
+        owner: collection.owner,
+        name: collection.displayName,
+        type: collection.type,
+        updationTime: collection.updationTime,
+        encryptedKey: collection.encryptedKey,
+        keyDecryptionNonce: collection.keyDecryptionNonce!,
+        sharees: collection.sharees,
+        publicURLs: collection.publicURLs,
+        localPath: null,
+        isDeleted: collection.isDeleted,
+        mMbPubVersion: collection.mMbPubVersion,
+        mMdPubEncodedJson: collection.mMdPubEncodedJson ?? '{}',
+      );
+      return result;
     } catch (e, s) {
       _logger.warning(e, s);
       _logger.severe("Failed to fetch public collection");
@@ -1204,10 +1228,15 @@ class CollectionsService {
   Future<Collection> _fromRemoteCollection(
     Map<String, dynamic> collectionData,
   ) async {
-    final Collection collection = Collection.fromMap(collectionData);
+    final CollectionV2 collection = CollectionV2.fromMap(collectionData);
     if (!collection.isDeleted) {
-      final collectionKey =
-          _getAndCacheDecryptedKey(collection, source: "fetchDecryptMeta");
+      final collectionKey = _getAndCacheDecryptedKey(
+        collection.id,
+        collection.isOwner(_config.getUserID()!),
+        encKey: collection.encryptedKey,
+        encKeyNonce: collection.keyDecryptionNonce!,
+        source: "fetchDecryptMeta",
+      );
       if (collectionData['magicMetadata'] != null) {
         final utfEncodedMmd = await CryptoUtil.decryptChaCha(
           CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
@@ -1259,7 +1288,7 @@ class CollectionsService {
     if (collection.canLinkToDevicePath(_config.getUserID()!)) {
       collection.decryptedPath = (_decryptCollectionPath(collection));
     }
-    return collection;
+    return Collection.fromOldCollection(collection);
   }
 
   Collection? getCollectionByID(int collectionID) {
@@ -1874,31 +1903,31 @@ class CollectionsService {
   }
 
   @Deprecated("Use _cacheLocalPathAndCollection instead")
-  Collection _cacheCollectionAttributes(Collection collection) {
+  CollectionV2 _cacheCollectionAttributes(CollectionV2 collection) {
     final String decryptedName = _getDecryptedCollectionName(collection);
     collection.setName(decryptedName);
     if (collection.canLinkToDevicePath(_config.getUserID()!)) {
-      _localPathToCollectionID[_decryptCollectionPath(collection)] =
-          collection.id;
+      collection.decryptedPath = _decryptCollectionPath(collection);
+      _localPathToCollectionID[collection.decryptedPath!] = collection.id;
     }
-    _collectionIDToCollections[collection.id] = collection;
+    final Collection c = Collection.fromOldCollection(collection);
+    _collectionIDToCollections[collection.id] = c;
     return collection;
   }
 
   Collection _cacheLocalPathAndCollection(Collection collection) {
     assert(
-      collection.decryptedName != null,
+      collection.name != null,
       "decryptedName should be already set",
     );
-    if (collection.canLinkToDevicePath(_config.getUserID()!) &&
-        (collection.decryptedPath ?? '').isNotEmpty) {
-      _localPathToCollectionID[collection.decryptedPath!] = collection.id;
+    if (collection.canLinkToDevicePath(_config.getUserID()!)) {
+      _localPathToCollectionID[collection.localPath!] = collection.id;
     }
     _collectionIDToCollections[collection.id] = collection;
     return collection;
   }
 
-  String _decryptCollectionPath(Collection collection) {
+  String _decryptCollectionPath(CollectionV2 collection) {
     final existingPath = collection.decryptedPath;
     if (existingPath != null && existingPath.isNotEmpty) {
       debugPrint("Using cached decrypted path for collection ${collection.id}");
@@ -1925,7 +1954,7 @@ class CollectionsService {
     return _prefs.containsKey(_collectionsSyncTimeKey);
   }
 
-  String _getDecryptedCollectionName(Collection collection) {
+  String _getDecryptedCollectionName(CollectionV2 collection) {
     if (collection.isDeleted) {
       return "Deleted Album";
     }
@@ -1933,7 +1962,10 @@ class CollectionsService {
         collection.encryptedName!.isNotEmpty) {
       try {
         final collectionKey = _getAndCacheDecryptedKey(
-          collection,
+          collection.id,
+          collection.isOwner(_config.getUserID()!),
+          encKey: collection.encryptedKey,
+          encKeyNonce: collection.keyDecryptionNonce!,
           source: "Name",
         );
         final result = CryptoUtil.decryptSync(

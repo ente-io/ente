@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import "package:photos/models/api/collection/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
+import "package:photos/models/collection/collection_old.dart";
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 
@@ -192,6 +193,10 @@ class CollectionsDB {
   }
 
   Future<void> insert(List<Collection> collections) async {
+    throw UnimplementedError();
+  }
+
+  Future<void> insertOld(List<CollectionV2> collections) async {
     final db = await instance.database;
     var batch = db.batch();
     int batchCounter = 0;
@@ -211,10 +216,10 @@ class CollectionsDB {
     await batch.commit(noResult: true);
   }
 
-  Future<List<Collection>> getAllCollections() async {
+  Future<List<CollectionV2>> getAllCollections() async {
     final db = await instance.database;
     final rows = await db.query(table);
-    final collections = <Collection>[];
+    final collections = <CollectionV2>[];
     for (final row in rows) {
       collections.add(_convertToCollection(row));
     }
@@ -248,7 +253,7 @@ class CollectionsDB {
     );
   }
 
-  Map<String, dynamic> _getRowForCollection(Collection collection) {
+  Map<String, dynamic> _getRowForCollection(CollectionV2 collection) {
     final row = <String, dynamic>{};
     row[columnID] = collection.id;
     row[columnOwner] = collection.owner.toJson();
@@ -281,8 +286,8 @@ class CollectionsDB {
     return row;
   }
 
-  Collection _convertToCollection(Map<String, dynamic> row) {
-    final Collection result = Collection(
+  CollectionV2 _convertToCollection(Map<String, dynamic> row) {
+    final CollectionV2 result = CollectionV2(
       row[columnID],
       User.fromJson(row[columnOwner]),
       row[columnEncryptedKey],

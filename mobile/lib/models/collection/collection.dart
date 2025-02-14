@@ -3,6 +3,7 @@ import 'dart:core';
 import 'package:flutter/foundation.dart';
 import "package:photos/models/api/collection/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
+import "package:photos/models/collection/collection_old.dart";
 import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/models/metadata/common_keys.dart";
 
@@ -10,33 +11,17 @@ class Collection {
   final int id;
   final User owner;
   final String encryptedKey;
-  final String? keyDecryptionNonce;
-  @Deprecated("Use collectionName instead")
+  final String keyDecryptionNonce;
   String? name;
-
-  // encryptedName & nameDecryptionNonce will be null for collections
-  // created before we started encrypting collection name
-  final String? encryptedName;
-  final String? nameDecryptionNonce;
   final CollectionType type;
-  final CollectionAttributes attributes;
   final List<User> sharees;
   final List<PublicURL> publicURLs;
   final int updationTime;
   final bool isDeleted;
-
-  // In early days before public launch, we used to store collection name
-  // un-encrypted. decryptName will be value either decrypted value for
-  // encryptedName or name itself.
-  String? decryptedName;
-
-  // decryptedPath will be null for collections now owned by user, deleted
-  // collections, && collections which don't have a path. The path is used
-  // to map local on-device album on mobile to remote collection on ente.
-  String? decryptedPath;
-  String? mMdEncodedJson;
-  String? mMdPubEncodedJson;
-  String? sharedMmdJson;
+  final String? localPath;
+  String mMdEncodedJson;
+  String mMdPubEncodedJson;
+  String sharedMmdJson;
   int mMdVersion = 0;
   int mMbPubVersion = 0;
   int sharedMmdVersion = 0;
@@ -45,14 +30,13 @@ class Collection {
   ShareeMagicMetadata? _sharedMmd;
 
   CollectionMagicMetadata get magicMetadata =>
-      _mmd ?? CollectionMagicMetadata.fromEncodedJson(mMdEncodedJson ?? '{}');
+      _mmd ?? CollectionMagicMetadata.fromEncodedJson(mMdEncodedJson);
 
   CollectionPubMagicMetadata get pubMagicMetadata =>
-      _pubMmd ??
-      CollectionPubMagicMetadata.fromEncodedJson(mMdPubEncodedJson ?? '{}');
+      _pubMmd ?? CollectionPubMagicMetadata.fromEncodedJson(mMdPubEncodedJson);
 
   ShareeMagicMetadata get sharedMagicMetadata =>
-      _sharedMmd ?? ShareeMagicMetadata.fromEncodedJson(sharedMmdJson ?? '{}');
+      _sharedMmd ?? ShareeMagicMetadata.fromEncodedJson(sharedMmdJson);
 
   set magicMetadata(CollectionMagicMetadata? val) => _mmd = val;
 
@@ -60,29 +44,54 @@ class Collection {
 
   set sharedMagicMetadata(ShareeMagicMetadata? val) => _sharedMmd = val;
 
-  String get displayName => decryptedName ?? name ?? "Unnamed Album";
+  String get displayName =>
+      name ?? (isDeleted == true ? 'Delete album' : "Unnamed Album");
 
-  // set the value for both name and decryptedName till we finish migration
   void setName(String newName) {
     name = newName;
-    decryptedName = newName;
   }
 
-  Collection(
-    this.id,
-    this.owner,
-    this.encryptedKey,
-    this.keyDecryptionNonce,
-    this.name,
-    this.encryptedName,
-    this.nameDecryptionNonce,
-    this.type,
-    this.attributes,
-    this.sharees,
-    this.publicURLs,
-    this.updationTime, {
+  Collection({
+    required this.id,
+    required this.owner,
+    required this.encryptedKey,
+    required this.keyDecryptionNonce,
+    required this.name,
+    required this.type,
+    required this.sharees,
+    required this.publicURLs,
+    required this.updationTime,
+    required this.localPath,
     this.isDeleted = false,
+    this.mMdEncodedJson = '{}',
+    this.mMdPubEncodedJson = '{}',
+    this.sharedMmdJson = '{}',
+    this.mMdVersion = 0,
+    this.mMbPubVersion = 0,
+    this.sharedMmdVersion = 0,
   });
+
+  factory Collection.fromOldCollection(CollectionV2 collection) {
+    return Collection(
+      id: collection.id,
+      owner: collection.owner,
+      encryptedKey: collection.encryptedKey,
+      keyDecryptionNonce: collection.keyDecryptionNonce!,
+      name: collection.displayName,
+      type: collection.type,
+      sharees: collection.sharees,
+      publicURLs: collection.publicURLs,
+      updationTime: collection.updationTime,
+      localPath: collection.decryptedPath,
+      isDeleted: collection.isDeleted,
+      mMbPubVersion: collection.mMbPubVersion,
+      mMdPubEncodedJson: collection.mMdPubEncodedJson ?? '{}',
+      mMdVersion: collection.mMdVersion,
+      mMdEncodedJson: collection.mMdEncodedJson ?? '{}',
+      sharedMmdJson: collection.sharedMmdJson ?? '{}',
+      sharedMmdVersion: collection.sharedMmdVersion,
+    );
+  }
 
   bool isArchived() {
     return mMdVersion > 0 && magicMetadata.visibility == archiveVisibility;
@@ -172,7 +181,10 @@ class Collection {
   // device album based on path. The path is nothing but the name of the device
   // album.
   bool canLinkToDevicePath(int userID) {
-    return isOwner(userID) && !isDeleted && attributes.encryptedPath != null;
+    return isOwner(userID) &&
+        !isDeleted &&
+        localPath != null &&
+        localPath != '';
   }
 
   void updateSharees(List<User> newSharees) {
@@ -186,47 +198,42 @@ class Collection {
     String? encryptedKey,
     String? keyDecryptionNonce,
     String? name,
-    String? encryptedName,
-    String? nameDecryptionNonce,
     CollectionType? type,
-    CollectionAttributes? attributes,
     List<User>? sharees,
     List<PublicURL>? publicURLs,
     int? updationTime,
     bool? isDeleted,
+    String? localPath,
     String? mMdEncodedJson,
     int? mMdVersion,
-    String? decryptedName,
-    String? decryptedPath,
+    String? mMdPubEncodedJson,
+    int? mMbPubVersion,
+    String? sharedMmdJson,
+    int? sharedMmdVersion,
   }) {
     final Collection result = Collection(
-      id ?? this.id,
-      owner ?? this.owner,
-      encryptedKey ?? this.encryptedKey,
-      keyDecryptionNonce ?? this.keyDecryptionNonce,
-      name ?? this.name,
-      encryptedName ?? this.encryptedName,
-      nameDecryptionNonce ?? this.nameDecryptionNonce,
-      type ?? this.type,
-      attributes ?? this.attributes,
-      sharees ?? this.sharees,
-      publicURLs ?? this.publicURLs,
-      updationTime ?? this.updationTime,
+      id: id ?? this.id,
+      owner: owner ?? this.owner,
+      encryptedKey: encryptedKey ?? this.encryptedKey,
+      keyDecryptionNonce: keyDecryptionNonce ?? this.keyDecryptionNonce,
+      name: name ?? this.name,
+      type: type ?? this.type,
+      sharees: sharees ?? this.sharees,
+      publicURLs: publicURLs ?? this.publicURLs,
+      updationTime: updationTime ?? this.updationTime,
+      localPath: localPath ?? this.localPath,
       isDeleted: isDeleted ?? this.isDeleted,
+      mMdEncodedJson: mMdEncodedJson ?? this.mMdEncodedJson,
+      mMdVersion: mMdVersion ?? this.mMdVersion,
+      mMdPubEncodedJson: mMdPubEncodedJson ?? this.mMdPubEncodedJson,
+      mMbPubVersion: mMbPubVersion ?? this.mMbPubVersion,
+      sharedMmdJson: sharedMmdJson ?? this.sharedMmdJson,
+      sharedMmdVersion: sharedMmdVersion ?? this.sharedMmdVersion,
     );
-    result.mMdVersion = mMdVersion ?? this.mMdVersion;
-    result.mMdEncodedJson = mMdEncodedJson ?? this.mMdEncodedJson;
-    result.decryptedName = decryptedName ?? this.decryptedName;
-    result.decryptedPath = decryptedPath ?? this.decryptedPath;
-    result.mMbPubVersion = mMbPubVersion;
-    result.mMdPubEncodedJson = mMdPubEncodedJson;
-    result.sharedMmdVersion = sharedMmdVersion;
-    result.sharedMmdJson = sharedMmdJson;
     return result;
   }
 
   static Collection fromMap(Map<String, dynamic> map) {
-
     final sharees = (map['sharees'] == null || map['sharees'].length == 0)
         ? <User>[]
         : List<User>.from(map['sharees'].map((x) => User.fromMap(x)));
@@ -237,19 +244,23 @@ class Collection {
                 map['publicURLs'].map((x) => PublicURL.fromMap(x)),
               );
     return Collection(
-      map['id'],
-      User.fromMap(map['owner']),
-      map['encryptedKey'],
-      map['keyDecryptionNonce'],
-      map['name'],
-      map['encryptedName'],
-      map['nameDecryptionNonce'],
-      typeFromString(map['type']),
-      CollectionAttributes.fromMap(map['attributes']),
-      sharees,
-      publicURLs,
-      map['updationTime'],
+      id: map['id'],
+      owner: User.fromMap(map['owner']),
+      encryptedKey: map['encryptedKey'],
+      keyDecryptionNonce: map['keyDecryptionNonce'],
+      name: map['name'],
+      type: typeFromString(map['type']),
+      sharees: sharees,
+      publicURLs: publicURLs,
+      updationTime: map['updationTime'],
+      localPath: map['localPath'],
       isDeleted: map['isDeleted'] ?? false,
+      mMdEncodedJson: map['mMdEncodedJson'] ?? '{}',
+      mMdPubEncodedJson: map['mMdPubEncodedJson'] ?? '{}',
+      sharedMmdJson: map['sharedMmdJson'] ?? '{}',
+      mMdVersion: map['mMdVersion'] ?? 0,
+      mMbPubVersion: map['mMbPubVersion'] ?? 0,
+      sharedMmdVersion: map['sharedMmdVersion'] ?? 0,
     );
   }
 }
