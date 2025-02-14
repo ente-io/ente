@@ -1,10 +1,10 @@
-import type { AccountsContextT } from "@/base/context";
+import type { BaseContextT } from "@/base/context";
 import { createContext, useContext } from "react";
 
 /**
  * Properties available via {@link AppContext} to the Auth app's React tree.
  */
-type AppContextT = AccountsContextT;
+type AppContextT = BaseContextT;
 
 /** The React {@link Context} available to all pages. */
 export const AppContext = createContext<AppContextT | undefined>(undefined);

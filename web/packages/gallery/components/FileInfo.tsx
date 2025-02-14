@@ -13,7 +13,7 @@ import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { useModalVisibility } from "@/base/components/utils/modal";
-import type { AccountsContextT } from "@/base/context";
+import type { BaseContextT } from "@/base/context";
 import { haveWindow } from "@/base/env";
 import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
@@ -113,7 +113,7 @@ export interface FileInfoProps {
      * This is the same as the {@link showMiniDialog} prop in the top level
      * {@link AppContext} of the app which we're currently being shown in.
      */
-    showMiniDialog: AccountsContextT["showMiniDialog"];
+    showMiniDialog: BaseContextT["showMiniDialog"];
     /**
      * TODO: Rename and flip to allowEdits.
      */

@@ -1,11 +1,11 @@
-import type { AccountsContextT } from "@/base/context";
+import type { BaseContextT } from "@/base/context";
 import { type NotificationAttributes } from "@/new/photos/components/Notification";
 import { createContext, useContext } from "react";
 
 /**
  * The type of the React context available to all pages in the photos app.
  */
-export type AppContextT = AccountsContextT & {
+export type AppContextT = BaseContextT & {
     /**
      * Show the global activity indicator (a loading bar at the top of the
      * page).

@@ -1,4 +1,4 @@
-import type { AccountsContextT } from "@/base/context";
+import type { BaseContextT } from "@/base/context";
 
 /**
  * The default type for pages exposed by this package.
@@ -12,5 +12,5 @@ export interface PageProps {
      * Within this package we do not have access to the context object declared
      * with the app's code, so we need to take the context as a parameter.
      */
-    appContext: AccountsContextT;
+    appContext: BaseContextT;
 }

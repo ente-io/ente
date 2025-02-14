@@ -1,10 +1,10 @@
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 
 /**
- * Properties expected to be present in the AppContext types for pages that
- * defer to the pages provided by the accounts package.
+ * The type of the context expected to be present in the React tree for all apps
+ * that use the base package.
  */
-export interface AccountsContextT {
+export interface BaseContextT {
     /**
      * Perform the (possibly app specific) logout sequence.
      */

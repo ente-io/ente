@@ -11,7 +11,7 @@ import {
 } from "@/accounts/services/user";
 import { LinkButton } from "@/base/components/LinkButton";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
-import type { AccountsContextT } from "@/base/context";
+import type { BaseContextT } from "@/base/context";
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import log from "@/base/log";
@@ -38,7 +38,7 @@ const bip39 = require("bip39");
 bip39.setDefaultWordlist("english");
 
 export interface RecoverPageProps {
-    appContext: AccountsContextT;
+    appContext: BaseContextT;
     twoFactorType: TwoFactorType;
 }
 

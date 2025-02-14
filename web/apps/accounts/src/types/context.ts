@@ -1,10 +1,10 @@
-import type { AccountsContextT } from "@/base/context";
+import type { BaseContextT } from "@/base/context";
 import { createContext, useContext } from "react";
 
 /**
  * The type of the context for pages in the accounts app.
  */
-type AppContextT = Omit<AccountsContextT, "logout">;
+type AppContextT = Omit<BaseContextT, "logout">;
 
 /**
  * The React {@link Context} available to all nodes in the React tree.
