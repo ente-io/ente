@@ -1,3 +1,9 @@
+/* TODO: Audit this file */
+/* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
+
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import {
@@ -450,7 +456,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
 
     useEffect(() => {
         if (!open || !file) return;
-        loadCanvas();
+        void loadCanvas();
     }, [open, file]);
 
     const handleClose = () => {
