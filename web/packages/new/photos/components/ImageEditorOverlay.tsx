@@ -172,7 +172,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
         };
     };
 
-    const handleDragStart = (e) => {
+    const handleDragStart: React.MouseEventHandler = (e) => {
         if (currentTab !== "crop") return;
 
         const rect = cropBoxRef.current.getBoundingClientRect();
@@ -206,7 +206,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
         setStartY(e.pageY - offsetY);
     };
 
-    const handleDrag = (e) => {
+    const handleDrag: React.MouseEventHandler = (e) => {
         if (!isDragging && !isGrowing) return;
 
         // d- variables are the delta change between start and now
@@ -258,7 +258,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
         }
     };
 
-    const handleDragEnd = () => {
+    const handleDragEnd: React.MouseEventHandler = () => {
         setStartX(0);
         setStartY(0);
 
@@ -566,7 +566,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                 <Stack
                     direction="row"
                     onMouseUp={handleDragEnd}
-                    onMouseMove={isDragging ? handleDrag : null}
+                    onMouseMove={isDragging ? handleDrag : undefined}
                     onMouseDown={handleDragStart}
                     sx={{
                         width: "100%",
