@@ -10,6 +10,11 @@ import { haveWindow } from "@/base/env";
 import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import type { Location } from "@/base/types";
+import {
+    changeCaption,
+    changeFileName,
+    updateExistingFilePubMetadata,
+} from "@/gallery/services/file";
 import { EnteFile } from "@/media/file";
 import type { ParsedMetadata } from "@/media/file-metadata";
 import {
@@ -69,16 +74,10 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import type { DisplayFile } from "components/PhotoFrame";
 import { Formik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import {
-    changeCaption,
-    changeFileName,
-    updateExistingFilePubMetadata,
-} from "@/gallery/services/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import * as Yup from "yup";
 
@@ -511,7 +510,10 @@ function RenderCaption({
     shouldDisableEdits,
 }: {
     shouldDisableEdits: boolean;
-    file: DisplayFile;
+    /* TODO: This is DisplayFile, but that's meant to be deprecated */
+    file: EnteFile & {
+        title?: string;
+    };
     scheduleUpdate: () => void;
     refreshPhotoswipe: () => void;
 }) {
