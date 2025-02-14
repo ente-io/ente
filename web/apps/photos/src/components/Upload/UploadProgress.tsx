@@ -1,9 +1,9 @@
 import { FilledIconButton } from "@/base/components/mui";
+import { useBaseContext } from "@/base/context";
 import {
     UPLOAD_RESULT,
     type UploadPhase,
 } from "@/new/photos/services/upload/types";
-import { useAppContext } from "@/new/photos/types/context";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -67,7 +67,8 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
     finishedUploads,
     cancelUploads,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
+
     const [expanded, setExpanded] = useState(false);
 
     useEffect(() => {

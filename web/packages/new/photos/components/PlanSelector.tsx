@@ -6,6 +6,7 @@ import {
     genericRetriableErrorDialogAttributes,
 } from "@/base/components/utils/dialog";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
 import { useUserDetailsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { useWrapAsyncOperation } from "@/new/photos/components/utils/use-wrap-async";
@@ -111,7 +112,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
     onClose,
     setLoading,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const userDetails = useUserDetailsSnapshot();
 
@@ -717,7 +718,7 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
     subscription,
     hasAddOnBonus,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const confirmReactivation = () =>
         showMiniDialog({

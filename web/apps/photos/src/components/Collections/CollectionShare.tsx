@@ -15,6 +15,7 @@ import {
 } from "@/base/components/RowButton";
 import { Titlebar } from "@/base/components/Titlebar";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { appendCollectionKeyToShareURL } from "@/gallery/services/share";
@@ -27,7 +28,7 @@ import { COLLECTION_ROLE, type CollectionUser } from "@/media/collection";
 import { PublicLinkCreated } from "@/new/photos/components/share/PublicLinkCreated";
 import { avatarTextColor } from "@/new/photos/services/avatar";
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
-import { AppContext, useAppContext } from "@/new/photos/types/context";
+import { AppContext } from "@/new/photos/types/context";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import SingleInputForm, {
     type SingleInputFormProps,
@@ -1007,7 +1008,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
     selectedParticipant,
     collectionUnshare,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
     const galleryContext = useContext(GalleryContext);
 
     const handleRootClose = () => {
@@ -1710,7 +1711,7 @@ const ManageDownloadAccess: React.FC<ManageDownloadAccessProps> = ({
     updatePublicShareURLHelper,
     collection,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const handleFileDownloadSetting = () => {
         if (publicShareProp.enableDownload) {
@@ -1758,7 +1759,7 @@ const ManageLinkPassword: React.FC<ManageLinkPasswordProps> = ({
     publicShareProp,
     updatePublicShareURLHelper,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
     const [changePasswordView, setChangePasswordView] = useState(false);
 
     const closeConfigurePassword = () => setChangePasswordView(false);

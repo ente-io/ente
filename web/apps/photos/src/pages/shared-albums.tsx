@@ -19,6 +19,7 @@ import {
     useIsSmallWidth,
     useIsTouchscreen,
 } from "@/base/components/utils/hooks";
+import { useBaseContext } from "@/base/context";
 import { isHTTP401Error, PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
 import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
@@ -93,7 +94,8 @@ export default function PublicCollectionGallery() {
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const [errorMessage, setErrorMessage] = useState<string>(null);
-    const { showLoadingBar, hideLoadingBar, showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
+    const { showLoadingBar, hideLoadingBar } = useAppContext();
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const [isPasswordProtected, setIsPasswordProtected] =

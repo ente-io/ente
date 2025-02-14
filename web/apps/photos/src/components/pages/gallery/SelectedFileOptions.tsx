@@ -1,4 +1,5 @@
 import { SpacedRow } from "@/base/components/containers";
+import { useBaseContext } from "@/base/context";
 import type { Collection } from "@/media/collection";
 import type { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelector";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
@@ -7,7 +8,6 @@ import {
     ARCHIVE_SECTION,
     TRASH_SECTION,
 } from "@/new/photos/services/collection";
-import { useAppContext } from "@/new/photos/types/context";
 import ClockIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
 import ArchiveIcon from "@mui/icons-material/ArchiveOutlined";
@@ -71,7 +71,7 @@ const SelectedFileOptions = ({
     isInSearchMode,
     isInHiddenSection,
 }: Props) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const peopleMode = barMode == "people";
 

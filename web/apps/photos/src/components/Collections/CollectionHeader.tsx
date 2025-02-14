@@ -6,6 +6,7 @@ import {
     OverflowMenuOption,
 } from "@/base/components/OverflowMenu";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import type { Collection } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
 import {
@@ -128,8 +129,8 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
     setFilesDownloadProgressAttributesCreator,
     isActiveCollectionDownloadInProgress,
 }) => {
-    const { showLoadingBar, hideLoadingBar, onGenericError, showMiniDialog } =
-        useAppContext();
+    const { showMiniDialog } = useBaseContext();
+    const { showLoadingBar, hideLoadingBar, onGenericError } = useAppContext();
     const { syncWithRemote } = useContext(GalleryContext);
     const overFlowMenuIconRef = useRef<SVGSVGElement>(null);
 

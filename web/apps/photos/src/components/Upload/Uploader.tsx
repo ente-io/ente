@@ -1,5 +1,6 @@
 import { isDesktop } from "@/base/app";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import { basename } from "@/base/file-name";
 import log from "@/base/log";
 import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
@@ -108,12 +109,9 @@ export default function Uploader({
     showSessionExpiredMessage,
     ...props
 }: Props) {
-    const {
-        showMiniDialog,
-        showNotification,
-        onGenericError,
-        watchFolderView,
-    } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
+    const { showNotification, onGenericError, watchFolderView } =
+        useAppContext();
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,

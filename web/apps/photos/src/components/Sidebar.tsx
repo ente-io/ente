@@ -20,6 +20,7 @@ import {
 } from "@/base/components/mui/SidebarDrawer";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import { isDevBuild } from "@/base/env";
 import {
     getLocaleInUse,
@@ -354,7 +355,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
 };
 
 function MemberSubscriptionManage({ open, userDetails, onClose }) {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
     const fullScreen = useIsSmallWidth();
 
     const confirmLeaveFamily = () =>
@@ -648,7 +649,7 @@ const Account: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const router = useRouter();
 
@@ -908,7 +909,7 @@ const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const { mapEnabled } = useSettingsSnapshot();
 
@@ -1033,7 +1034,7 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const handleRootClose = () => {
         onClose();

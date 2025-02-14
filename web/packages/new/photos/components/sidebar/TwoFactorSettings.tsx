@@ -10,8 +10,8 @@ import {
     SidebarDrawerTitlebar,
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
+import { useBaseContext } from "@/base/context";
 import { disable2FA, get2FAStatus } from "@/new/photos/services/user";
-import { useAppContext } from "@/new/photos/types/context";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import LockIcon from "@mui/icons-material/Lock";
@@ -106,7 +106,7 @@ const SetupDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 };
 
 const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const confirmDisable = () =>
         showMiniDialog({

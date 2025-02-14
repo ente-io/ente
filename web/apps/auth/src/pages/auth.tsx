@@ -8,6 +8,7 @@ import {
     OverflowMenu,
     OverflowMenuOption,
 } from "@/base/components/OverflowMenu";
+import { useBaseContext } from "@/base/context";
 import { isHTTP401Error } from "@/base/http";
 import log from "@/base/log";
 import { masterKeyFromSessionIfLoggedIn } from "@/base/session-store";
@@ -28,10 +29,9 @@ import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
 import { generateOTPs, type Code } from "services/code";
 import { getAuthCodes } from "services/remote";
-import { useAppContext } from "types/context";
 
 const Page: React.FC = () => {
-    const { logout, showMiniDialog } = useAppContext();
+    const { showMiniDialog, logout } = useBaseContext();
 
     const router = useRouter();
     const [codes, setCodes] = useState<Code[]>([]);
@@ -131,7 +131,7 @@ const Page: React.FC = () => {
 export default Page;
 
 const AuthNavbar: React.FC = () => {
-    const { logout } = useAppContext();
+    const { logout } = useBaseContext();
 
     return (
         <NavbarBase
