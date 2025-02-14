@@ -7,6 +7,10 @@ import {
 } from "@/base/components/OverflowMenu";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
+import {
+    isArchivedCollection,
+    isPinnedCollection,
+} from "@/gallery/services/magic-metadata";
 import type { Collection } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
 import {
@@ -23,10 +27,6 @@ import type {
     CollectionSummaryType,
 } from "@/new/photos/services/collection/ui";
 import { clearLocalTrash, emptyTrash } from "@/new/photos/services/collections";
-import {
-    isArchivedCollection,
-    isPinnedCollection,
-} from "@/new/photos/services/magic-metadata";
 import { usePhotosAppContext } from "@/new/photos/types/context";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";

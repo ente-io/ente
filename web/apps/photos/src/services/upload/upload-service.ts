@@ -7,6 +7,10 @@ import type { PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
 import { extractVideoMetadata } from "@/gallery/services/ffmpeg";
 import {
+    getNonEmptyMagicMetadataProps,
+    updateMagicMetadata,
+} from "@/gallery/services/magic-metadata";
+import {
     detectFileTypeInfoFromChunk,
     isFileTypeNotSupportedError,
 } from "@/gallery/utils/detect-type";
@@ -30,10 +34,6 @@ import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import { addToCollection } from "@/new/photos/services/collection";
 import { extractExif } from "@/new/photos/services/exif";
-import {
-    getNonEmptyMagicMetadataProps,
-    updateMagicMetadata,
-} from "@/new/photos/services/magic-metadata";
 import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
