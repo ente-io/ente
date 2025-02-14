@@ -24,7 +24,6 @@ import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import React, { useCallback, useEffect, useMemo } from "react";
-import { AppContext } from "types/context";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
@@ -48,14 +47,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         [logout, showMiniDialog],
     );
 
-    const appContext = useMemo(
-        () => ({
-            logout,
-            showMiniDialog,
-        }),
-        [logout, showMiniDialog],
-    );
-
     const title = isI18nReady ? t("title_auth") : staticAppTitle;
 
     return (
@@ -65,16 +56,14 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             <AttributedMiniDialog {...miniDialogProps} />
 
             <BaseContext value={baseContext}>
-                <AppContext.Provider value={appContext}>
-                    {!isI18nReady ? (
-                        <LoadingIndicator />
-                    ) : (
-                        <>
-                            {isChangingRoute && <TranslucentLoadingOverlay />}
-                            <Component {...pageProps} />
-                        </>
-                    )}
-                </AppContext.Provider>
+                {!isI18nReady ? (
+                    <LoadingIndicator />
+                ) : (
+                    <>
+                        {isChangingRoute && <TranslucentLoadingOverlay />}
+                        <Component {...pageProps} />
+                    </>
+                )}
             </BaseContext>
         </ThemeProvider>
     );

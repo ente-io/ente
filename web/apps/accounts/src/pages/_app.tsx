@@ -13,7 +13,6 @@ import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import React, { useCallback, useMemo } from "react";
-import { AppContext } from "../types/context";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs({ disableDiskLogs: true });
@@ -33,7 +32,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         () => ({ logout, showMiniDialog }),
         [logout, showMiniDialog],
     );
-    const appContext = useMemo(() => ({ showMiniDialog }), [showMiniDialog]);
 
     const title = isI18nReady ? t("title_accounts") : staticAppTitle;
 
@@ -44,10 +42,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             <AttributedMiniDialog {...miniDialogProps} />
 
             <BaseContext value={baseContext}>
-                <AppContext.Provider value={appContext}>
-                    {!isI18nReady && <LoadingIndicator />}
-                    {isI18nReady && <Component {...pageProps} />}
-                </AppContext.Provider>
+                {!isI18nReady && <LoadingIndicator />}
+                {isI18nReady && <Component {...pageProps} />}
             </BaseContext>
         </ThemeProvider>
     );
