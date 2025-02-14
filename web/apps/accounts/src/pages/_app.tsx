@@ -38,21 +38,18 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const title = isI18nReady ? t("title_accounts") : staticAppTitle;
 
     return (
-        <>
+        <ThemeProvider theme={photosTheme}>
             <CustomHead {...{ title }} />
+            <CssBaseline enableColorScheme />
+            <AttributedMiniDialog {...miniDialogProps} />
 
-            <ThemeProvider theme={photosTheme}>
-                <CssBaseline enableColorScheme />
-                <AttributedMiniDialog {...miniDialogProps} />
-
-                <BaseContext value={baseContext}>
-                    <AppContext.Provider value={appContext}>
-                        {!isI18nReady && <LoadingIndicator />}
-                        {isI18nReady && <Component {...pageProps} />}
-                    </AppContext.Provider>
-                </BaseContext>
-            </ThemeProvider>
-        </>
+            <BaseContext value={baseContext}>
+                <AppContext.Provider value={appContext}>
+                    {!isI18nReady && <LoadingIndicator />}
+                    {isI18nReady && <Component {...pageProps} />}
+                </AppContext.Provider>
+            </BaseContext>
+        </ThemeProvider>
     );
 };
 

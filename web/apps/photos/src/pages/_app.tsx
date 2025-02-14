@@ -187,37 +187,32 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const title = isI18nReady ? t("title_photos") : staticAppTitle;
 
     return (
-        <>
+        <ThemeProvider theme={photosTheme}>
             <CustomHead {...{ title }} />
+            <CssBaseline enableColorScheme />
+            <ThemedLoadingBar ref={loadingBarRef} />
 
-            <ThemeProvider theme={photosTheme}>
-                <CssBaseline enableColorScheme />
-                <ThemedLoadingBar ref={loadingBarRef} />
+            <AttributedMiniDialog
+                sx={{ zIndex: aboveFileViewerContentZ }}
+                {...miniDialogProps}
+            />
 
-                <AttributedMiniDialog
-                    sx={{ zIndex: aboveFileViewerContentZ }}
-                    {...miniDialogProps}
-                />
+            <Notification {...notificationProps} />
 
-                <Notification {...notificationProps} />
-
-                {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}
-                <BaseContext value={baseContext}>
-                    <AppContext.Provider value={appContext}>
-                        {!isI18nReady ? (
-                            <LoadingIndicator />
-                        ) : (
-                            <>
-                                {isChangingRoute && (
-                                    <TranslucentLoadingOverlay />
-                                )}
-                                <Component {...pageProps} />
-                            </>
-                        )}
-                    </AppContext.Provider>
-                </BaseContext>
-            </ThemeProvider>
-        </>
+            {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}
+            <BaseContext value={baseContext}>
+                <AppContext.Provider value={appContext}>
+                    {!isI18nReady ? (
+                        <LoadingIndicator />
+                    ) : (
+                        <>
+                            {isChangingRoute && <TranslucentLoadingOverlay />}
+                            <Component {...pageProps} />
+                        </>
+                    )}
+                </AppContext.Provider>
+            </BaseContext>
+        </ThemeProvider>
     );
 };
 

@@ -10,15 +10,14 @@ import React from "react";
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs({ disableDiskLogs: true });
 
-    return (
-        <>
-            <CustomHead title={staticAppTitle} />
+    // We don't provide BaseContext. Nothing in the cast app needs it yet.
 
-            <ThemeProvider theme={castTheme}>
-                <CssBaseline enableColorScheme />
-                <Component {...pageProps} />
-            </ThemeProvider>
-        </>
+    return (
+        <ThemeProvider theme={castTheme}>
+            <CustomHead title={staticAppTitle} />
+            <CssBaseline enableColorScheme />
+            <Component {...pageProps} />
+        </ThemeProvider>
     );
 };
 

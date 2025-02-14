@@ -59,30 +59,24 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const title = isI18nReady ? t("title_auth") : staticAppTitle;
 
     return (
-        <>
+        <ThemeProvider theme={authTheme}>
             <CustomHead {...{ title }} />
+            <CssBaseline enableColorScheme />
+            <AttributedMiniDialog {...miniDialogProps} />
 
-            <ThemeProvider theme={authTheme}>
-                <CssBaseline enableColorScheme />
-
-                <AttributedMiniDialog {...miniDialogProps} />
-
-                <BaseContext value={baseContext}>
-                    <AppContext.Provider value={appContext}>
-                        {!isI18nReady ? (
-                            <LoadingIndicator />
-                        ) : (
-                            <>
-                                {isChangingRoute && (
-                                    <TranslucentLoadingOverlay />
-                                )}
-                                <Component {...pageProps} />
-                            </>
-                        )}
-                    </AppContext.Provider>
-                </BaseContext>
-            </ThemeProvider>
-        </>
+            <BaseContext value={baseContext}>
+                <AppContext.Provider value={appContext}>
+                    {!isI18nReady ? (
+                        <LoadingIndicator />
+                    ) : (
+                        <>
+                            {isChangingRoute && <TranslucentLoadingOverlay />}
+                            <Component {...pageProps} />
+                        </>
+                    )}
+                </AppContext.Provider>
+            </BaseContext>
+        </ThemeProvider>
     );
 };
 
