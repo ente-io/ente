@@ -77,7 +77,6 @@ import {
 import { Formik } from "formik";
 import { t } from "i18next";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import * as Yup from "yup";
 
 // Re-uses images from ~leaflet package.
@@ -101,7 +100,15 @@ export interface FileInfoProps {
     closePhotoViewer: () => void;
     file: EnteFile | undefined;
     exif: FileInfoExif | undefined;
+    /**
+     * TODO: Rename and flip to allowEdits.
+     */
     shouldDisableEdits?: boolean;
+    /**
+     * If `true`, an inline map will be shown (if the user has enabled it) using
+     * the file's location.
+     */
+    allowMap: boolean;
     scheduleUpdate: () => void;
     refreshPhotoswipe: () => void;
     fileToCollectionsMap?: Map<number, number[]>;
@@ -120,6 +127,7 @@ export interface FileInfoProps {
 
 export const FileInfo: React.FC<FileInfoProps> = ({
     shouldDisableEdits,
+    allowMap,
     showInfo,
     handleCloseInfo,
     file,
@@ -136,9 +144,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     const { mapEnabled } = useSettingsSnapshot();
 
     const { showMiniDialog } = useContext(AppContext);
-    const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext,
-    );
 
     const [exifInfo, setExifInfo] = useState<ExifInfo | undefined>();
     const { show: showRawExif, props: rawExifVisibilityProps } =
@@ -240,8 +245,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             icon={<LocationOnOutlinedIcon />}
                             title={t("location")}
                             caption={
-                                !mapEnabled ||
-                                publicCollectionGalleryContext.credentials ? (
+                                !mapEnabled || !allowMap ? (
                                     <Link
                                         href={openStreetMapLink(location)}
                                         target="_blank"
@@ -267,7 +271,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                 />
                             }
                         />
-                        {!publicCollectionGalleryContext.credentials && (
+                        {allowMap && (
                             <MapBox
                                 location={location}
                                 mapEnabled={mapEnabled}
