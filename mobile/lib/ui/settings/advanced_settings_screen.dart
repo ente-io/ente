@@ -117,28 +117,26 @@ class AdvancedSettingsScreen extends StatelessWidget {
                           },
                         ),
                       ),
-                      if (flagService.internalUser) ...[
-                        const SizedBox(height: 24),
-                        MenuItemWidget(
-                          captionedTextWidget: CaptionedTextWidget(
-                            title: S.of(context).videoStreaming,
-                          ),
-                          menuItemColor: colorScheme.fillFaint,
-                          singleBorderRadius: 8,
-                          alignCaptionedTextToLeft: true,
-                          trailingWidget: ToggleSwitchWidget(
-                            value: () => PreviewVideoStore
-                                .instance.isVideoStreamingEnabled,
-                            onChanged: () async {
-                              final isEnabled = PreviewVideoStore
-                                  .instance.isVideoStreamingEnabled;
-
-                              await PreviewVideoStore.instance
-                                  .setIsVideoStreamingEnabled(!isEnabled);
-                            },
-                          ),
+                      const SizedBox(height: 24),
+                      MenuItemWidget(
+                        captionedTextWidget: CaptionedTextWidget(
+                          title: S.of(context).videoStreaming,
                         ),
-                      ],
+                        menuItemColor: colorScheme.fillFaint,
+                        singleBorderRadius: 8,
+                        alignCaptionedTextToLeft: true,
+                        trailingWidget: ToggleSwitchWidget(
+                          value: () => PreviewVideoStore
+                              .instance.isVideoStreamingEnabled,
+                          onChanged: () async {
+                            final isEnabled = PreviewVideoStore
+                                .instance.isVideoStreamingEnabled;
+
+                            await PreviewVideoStore.instance
+                                .setIsVideoStreamingEnabled(!isEnabled);
+                          },
+                        ),
+                      ),
                       const SizedBox(
                         height: 24,
                       ),
