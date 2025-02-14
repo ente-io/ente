@@ -1,3 +1,1 @@
-import Page from "@/accounts/pages/two-factor/setup";
-
-export default Page;
+export { default } from "@/accounts/pages/two-factor/setup";
