@@ -1,6 +1,7 @@
 import { PAGES } from "@/accounts/constants/pages";
 import { verifyTwoFactor } from "@/accounts/services/user";
 import { LinkButton } from "@/base/components/LinkButton";
+import { useBaseContext } from "@/base/context";
 import { ApiError } from "@ente/shared/error";
 import {
     LS_KEYS,
@@ -23,10 +24,9 @@ import {
     type VerifyTwoFactorCallback,
 } from "../../components/two-factor/VerifyTwoFactor";
 import { unstashRedirect } from "../../services/redirect";
-import type { PageProps } from "../../types/page";
 
-const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { logout } = appContext;
+const Page: React.FC = () => {
+    const { logout } = useBaseContext();
 
     const [sessionID, setSessionID] = useState("");
 

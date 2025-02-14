@@ -31,7 +31,7 @@ import { generateOTPs, type Code } from "services/code";
 import { getAuthCodes } from "services/remote";
 
 const Page: React.FC = () => {
-    const { showMiniDialog, logout } = useBaseContext();
+    const { logout, showMiniDialog } = useBaseContext();
 
     const router = useRouter();
     const [codes, setCodes] = useState<Code[]>([]);
@@ -57,7 +57,7 @@ const Page: React.FC = () => {
             setHasFetched(true);
         };
         void fetchCodes();
-    }, [router, showMiniDialog, logout]);
+    }, [router, logout, showMiniDialog]);
 
     const lcSearch = searchTerm.toLowerCase();
     const filteredCodes = codes.filter(

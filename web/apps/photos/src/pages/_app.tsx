@@ -159,8 +159,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     }, []);
 
     const baseContext = useMemo(
-        () => ({ showMiniDialog, logout }),
-        [showMiniDialog, logout],
+        () => ({ logout, showMiniDialog }),
+        [logout, showMiniDialog],
     );
     const appContext = useMemo(
         () => ({

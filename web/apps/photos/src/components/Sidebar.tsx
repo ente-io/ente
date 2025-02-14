@@ -596,7 +596,7 @@ const HelpSection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
 };
 
 const ExitSection: React.FC = () => {
-    const { showMiniDialog, logout } = useContext(AppContext);
+    const { logout, showMiniDialog } = useContext(AppContext);
 
     const handleLogout = () =>
         showMiniDialog({

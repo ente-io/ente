@@ -47,7 +47,7 @@ export default function AuthenticateUserModal({
             // potentially transient issues.
             log.warn("Ignoring error when determining session validity", e);
         }
-    }, [showMiniDialog, logout]);
+    }, [logout, showMiniDialog]);
 
     useEffect(() => {
         const main = async () => {

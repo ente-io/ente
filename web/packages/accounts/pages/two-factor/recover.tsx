@@ -43,7 +43,7 @@ export interface RecoverPageProps {
 }
 
 const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
-    const { showMiniDialog, logout } = appContext;
+    const { logout, showMiniDialog } = appContext;
 
     const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] =
         useState<Omit<B64EncryptionResult, "key"> | null>(null);

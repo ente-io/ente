@@ -9,6 +9,10 @@ import { createContext, useContext } from "react";
  */
 export interface BaseContextT {
     /**
+     * Perform the (possibly app specific) logout sequence.
+     */
+    logout: () => void;
+    /**
      * Show a "mini dialog" with the given attributes.
      *
      * Mini dialogs (see {@link AttributedMiniDialog}) are meant for simple
@@ -16,10 +20,6 @@ export interface BaseContextT {
      * customized by providing appropriate {@link MiniDialogAttributes}.
      */
     showMiniDialog: (attributes: MiniDialogAttributes) => void;
-    /**
-     * Perform the (possibly app specific) logout sequence.
-     */
-    logout: () => void;
 }
 
 /**
