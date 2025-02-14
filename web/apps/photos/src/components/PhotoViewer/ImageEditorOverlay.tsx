@@ -7,14 +7,16 @@ import {
     RowButtonGroupTitle,
     RowSwitch,
 } from "@/base/components/RowButton";
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { downloadManager } from "@/gallery/services/download";
+import type { Collection } from "@/media/collection";
 import { EnteFile } from "@/media/file";
 import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
 import { getLocalCollections } from "@/new/photos/services/collections";
-import { AppContext } from "@/new/photos/types/context";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
@@ -46,21 +48,33 @@ import { t } from "i18next";
 import React, {
     forwardRef,
     Fragment,
-    useContext,
     useEffect,
     useRef,
     useState,
     type Ref,
     type RefObject,
 } from "react";
-import uploadManager from "services/upload/uploadManager";
 
-interface ImageEditorOverlayProps {
+type ImageEditorOverlayProps = ModalVisibilityProps & {
+    /**
+     * The (Ente) file to edit.
+     */
     file: EnteFile;
-    show: boolean;
-    onClose: () => void;
-    closePhotoViewer: () => void;
-}
+    /**
+     * Called when the user activates the button to save a copy of the given
+     * {@link enteFile} to their Ente account with the edits they have made.
+     *
+     * @param editedFile A Web {@link File} containing the edited contents.
+     * @param collection The collection to which the edited file should be
+     * added.
+     * @param enteFile The original {@link EnteFile}.
+     */
+    onSaveEditedCopy: (
+        editedFile: File,
+        collection: Collection,
+        enteFile: EnteFile,
+    ) => void;
+};
 
 const filterDefaultValues = {
     brightness: 100,
@@ -82,17 +96,17 @@ interface CropBoxProps {
 export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
     props,
 ) => {
-    const { showMiniDialog } = useContext(AppContext);
+    const { showMiniDialog } = useBaseContext();
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const originalSizeCanvasRef = useRef<HTMLCanvasElement | null>(null);
     const parentRef = useRef<HTMLDivElement | null>(null);
 
-    const [fileURL, setFileURL] = useState<string>("");
+    const [fileURL, setFileURL] = useState<string | undefined>(undefined);
     // The MIME type of the original file that we are editing.
     //
     // It should generally be present, but it is not guaranteed to be.
-    const [mimeType, setMIMEType] = useState<string | undefined>();
+    const [mimeType, setMIMEType] = useState<string | undefined>(undefined);
 
     const [currentRotationAngle, setCurrentRotationAngle] = useState(0);
 
@@ -433,12 +447,12 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
     };
 
     useEffect(() => {
-        if (!props.show || !props.file) return;
+        if (!props.open || !props.file) return;
         loadCanvas();
-    }, [props.show, props.file]);
+    }, [props.open, props.file]);
 
     const handleClose = () => {
-        setFileURL(null);
+        setFileURL(undefined);
         props.onClose();
     };
 
@@ -450,7 +464,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
         }
     };
 
-    if (!props.show) {
+    if (!props.open) {
         return <></>;
     }
 
@@ -478,12 +492,8 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
 
             const editedFile = await getEditedFile();
 
-            uploadManager.prepareForNewUpload();
-            uploadManager.showUploadProgressDialog();
-            uploadManager.uploadFile(editedFile, collection, props.file);
-            setFileURL(null);
-            props.onClose();
-            props.closePhotoViewer();
+            props.onSaveEditedCopy(editedFile, collection, props.file);
+            setFileURL(undefined);
         } catch (e) {
             log.error("Error saving copy to ente", e);
         }
@@ -588,7 +598,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                 position: "relative",
                             }}
                         >
-                            {(fileURL === null || canvasLoading) && (
+                            {(!fileURL || canvasLoading) && (
                                 <CircularProgress />
                             )}
 
@@ -597,7 +607,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                                 style={{
                                     objectFit: "contain",
                                     display:
-                                        fileURL === null || canvasLoading
+                                        !fileURL || canvasLoading
                                             ? "none"
                                             : "block",
                                     position: "absolute",

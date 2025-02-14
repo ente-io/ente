@@ -10,6 +10,7 @@ import { SingleInputDialog } from "@/base/components/SingleInputDialog";
 import { Titlebar } from "@/base/components/Titlebar";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
 import { formatDateTimeFull } from "@ente/shared/time/format";
@@ -28,10 +29,9 @@ import {
     renamePasskey,
     type Passkey,
 } from "services/passkey";
-import { useAppContext } from "../../types/context";
 
 const Page: React.FC = () => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const [token, setToken] = useState<string | undefined>();
     const [passkeys, setPasskeys] = useState<Passkey[]>([]);
@@ -252,7 +252,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
     passkey,
     onUpdateOrDeletePasskey,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const { show: showRenameDialog, props: renameDialogVisibilityProps } =
         useModalVisibility();

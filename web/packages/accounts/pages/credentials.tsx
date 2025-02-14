@@ -25,9 +25,9 @@ import {
 } from "@/accounts/services/srp";
 import type { SRPAttributes } from "@/accounts/services/srp-remote";
 import { getSRPAttributes } from "@/accounts/services/srp-remote";
-import type { PageProps } from "@/accounts/types/page";
 import { LinkButton } from "@/base/components/LinkButton";
 import { LoadingIndicator } from "@/base/components/loaders";
+import { useBaseContext } from "@/base/context";
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import { clearLocalStorage } from "@/base/local-storage";
@@ -64,8 +64,8 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 
-const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { logout, showMiniDialog } = appContext;
+const Page: React.FC = () => {
+    const { logout, showMiniDialog } = useBaseContext();
 
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
@@ -117,7 +117,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             // potentially transient issues.
             log.warn("Ignoring error when determining session validity", e);
         }
-    }, [showMiniDialog, logout]);
+    }, [logout, showMiniDialog]);
 
     useEffect(() => {
         const main = async () => {

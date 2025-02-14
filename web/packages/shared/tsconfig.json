@@ -3,12 +3,9 @@
     "compilerOptions": {
         /* Set the base directory from which to resolve bare module names. */
         "baseUrl": ".",
-        /* MUI doesn't work with exactOptionalPropertyTypes yet. */
-        "exactOptionalPropertyTypes": false,
 
-        /* Override tsconfig-next.json (TODO: Remove me) */
+        /* Override tsconfig-next.json (TODO: Remove all of us) */
         "verbatimModuleSyntax": false,
-        /* Override tsconfig-next.json (TODO: Remove me) */
         "noImplicitAny": false,
         "noUnusedLocals": false,
         "noUnusedParameters": false,

@@ -16,6 +16,7 @@ import {
     useSetupLogs,
 } from "@/base/components/utils/hooks-app";
 import { photosTheme } from "@/base/components/utils/theme";
+import { BaseContext } from "@/base/context";
 import log from "@/base/log";
 import { logStartupBanner } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
@@ -30,7 +31,7 @@ import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
 import { runMigrations } from "@/new/photos/services/migration";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
-import { AppContext } from "@/new/photos/types/context";
+import { PhotosAppContext } from "@/new/photos/types/context";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
     getData,
@@ -157,6 +158,10 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         }, 0);
     }, []);
 
+    const baseContext = useMemo(
+        () => ({ logout, showMiniDialog }),
+        [logout, showMiniDialog],
+    );
     const appContext = useMemo(
         () => ({
             showLoadingBar,
@@ -182,22 +187,21 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const title = isI18nReady ? t("title_photos") : staticAppTitle;
 
     return (
-        <>
+        <ThemeProvider theme={photosTheme}>
             <CustomHead {...{ title }} />
+            <CssBaseline enableColorScheme />
+            <ThemedLoadingBar ref={loadingBarRef} />
 
-            <ThemeProvider theme={photosTheme}>
-                <CssBaseline enableColorScheme />
-                <ThemedLoadingBar ref={loadingBarRef} />
+            <AttributedMiniDialog
+                sx={{ zIndex: aboveFileViewerContentZ }}
+                {...miniDialogProps}
+            />
 
-                <AttributedMiniDialog
-                    sx={{ zIndex: aboveFileViewerContentZ }}
-                    {...miniDialogProps}
-                />
+            <Notification {...notificationProps} />
 
-                <Notification {...notificationProps} />
-
-                {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}
-                <AppContext.Provider value={appContext}>
+            {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}
+            <BaseContext value={baseContext}>
+                <PhotosAppContext value={appContext}>
                     {!isI18nReady ? (
                         <LoadingIndicator />
                     ) : (
@@ -206,9 +210,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                             <Component {...pageProps} />
                         </>
                     )}
-                </AppContext.Provider>
-            </ThemeProvider>
-        </>
+                </PhotosAppContext>
+            </BaseContext>
+        </ThemeProvider>
     );
 };
 

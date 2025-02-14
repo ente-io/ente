@@ -19,6 +19,7 @@ import {
     useIsSmallWidth,
     useIsTouchscreen,
 } from "@/base/components/utils/hooks";
+import { useBaseContext } from "@/base/context";
 import { isHTTP401Error, PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
 import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
@@ -38,7 +39,7 @@ import {
     isHiddenCollection,
 } from "@/new/photos/services/collection";
 import { sortFiles } from "@/new/photos/services/files";
-import { useAppContext } from "@/new/photos/types/context";
+import { usePhotosAppContext } from "@/new/photos/types/context";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import SingleInputForm, {
     type SingleInputFormProps,
@@ -93,7 +94,8 @@ export default function PublicCollectionGallery() {
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const [errorMessage, setErrorMessage] = useState<string>(null);
-    const { showLoadingBar, hideLoadingBar, showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
+    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const [isPasswordProtected, setIsPasswordProtected] =
@@ -546,8 +548,8 @@ export default function PublicCollectionGallery() {
                     selected={selected}
                     activeCollectionID={ALL_SECTION}
                     enableDownload={downloadEnabled}
-                    fileToCollectionsMap={null}
-                    collectionNameMap={null}
+                    fileToCollectionsMap={undefined}
+                    collectionNameMap={undefined}
                     setFilesDownloadProgressAttributesCreator={
                         setFilesDownloadProgressAttributesCreator
                     }

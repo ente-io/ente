@@ -1,11 +1,18 @@
+/* TODO: Audit this file */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+
 import { encryptMetadataJSON } from "@/base/crypto";
 import { apiURL } from "@/base/origins";
-import {
-    type EncryptedMagicMetadata,
+import type {
+    EncryptedMagicMetadata,
     EnteFile,
+    FilePublicMagicMetadata,
+    FilePublicMagicMetadataProps,
     FileWithUpdatedMagicMetadata,
     FileWithUpdatedPublicMagicMetadata,
 } from "@/media/file";
+import { mergeMetadata } from "@/media/file";
+import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 
@@ -14,7 +21,7 @@ export interface UpdateMagicMetadataRequest {
     magicMetadata: EncryptedMagicMetadata;
 }
 
-export interface BulkUpdateMagicMetadataRequest {
+interface BulkUpdateMagicMetadataRequest {
     metadataList: UpdateMagicMetadataRequest[];
 }
 
@@ -48,6 +55,7 @@ export const updateFileMagicMetadata = async (
     await HTTPService.put(
         await apiURL("/files/magic-metadata"),
         reqBody,
+        // @ts-ignore
         null,
         {
             "X-Auth-Token": token,
@@ -69,6 +77,7 @@ export const updateFilePublicMagicMetadata = async (
 ): Promise<EnteFile[]> => {
     const token = getToken();
     if (!token) {
+        // @ts-ignore
         return;
     }
     const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
@@ -94,6 +103,7 @@ export const updateFilePublicMagicMetadata = async (
     await HTTPService.put(
         await apiURL("/files/public-magic-metadata"),
         reqBody,
+        // @ts-ignore
         null,
         {
             "X-Auth-Token": token,
@@ -109,3 +119,55 @@ export const updateFilePublicMagicMetadata = async (
         }),
     );
 };
+
+export async function changeFileName(
+    file: EnteFile,
+    editedName: string,
+): Promise<EnteFile> {
+    const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
+        editedName,
+    };
+
+    const updatedPublicMagicMetadata: FilePublicMagicMetadata =
+        await updateMagicMetadata(
+            updatedPublicMagicMetadataProps,
+            file.pubMagicMetadata,
+            file.key,
+        );
+    const updateResult = await updateFilePublicMagicMetadata([
+        { file, updatedPublicMagicMetadata },
+    ]);
+    // @ts-ignore
+    return updateResult[0];
+}
+
+export async function changeCaption(
+    file: EnteFile,
+    caption: string,
+): Promise<EnteFile> {
+    const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
+        caption,
+    };
+
+    const updatedPublicMagicMetadata: FilePublicMagicMetadata =
+        await updateMagicMetadata(
+            updatedPublicMagicMetadataProps,
+            file.pubMagicMetadata,
+            file.key,
+        );
+    const updateResult = await updateFilePublicMagicMetadata([
+        { file, updatedPublicMagicMetadata },
+    ]);
+    // @ts-ignore
+    return updateResult[0];
+}
+
+export function updateExistingFilePubMetadata(
+    existingFile: EnteFile,
+    updatedFile: EnteFile,
+) {
+    // @ts-ignore
+    existingFile.pubMagicMetadata = updatedFile.pubMagicMetadata;
+    // @ts-ignore
+    existingFile.metadata = mergeMetadata([existingFile])[0].metadata;
+}

@@ -13,6 +13,7 @@ import {
     useModalVisibility,
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
 import {
     addCGroup,
@@ -58,7 +59,7 @@ import {
 import { t } from "i18next";
 import React, { useEffect, useReducer, useState } from "react";
 import type { FaceCluster } from "../../services/ml/cluster";
-import { useAppContext } from "../../types/context";
+import { usePhotosAppContext } from "../../types/context";
 import { DialogCloseIconButton } from "../mui/Dialog";
 import { SuggestionFaceList } from "../PeopleList";
 import {
@@ -110,7 +111,7 @@ interface CGroupPersonHeaderProps {
 const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
     const cgroup = person.cgroup;
 
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const { show: showNameInput, props: nameInputVisibilityProps } =
         useModalVisibility();
@@ -225,7 +226,7 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
 }) => {
     const cluster = person.cluster;
 
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const { show: showAddPerson, props: addPersonVisibilityProps } =
         useModalVisibility();
@@ -545,7 +546,8 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     onClose,
     person,
 }) => {
-    const { showMiniDialog, onGenericError } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
+    const { onGenericError } = usePhotosAppContext();
 
     const [state, dispatch] = useReducer(
         suggestionsDialogReducer,

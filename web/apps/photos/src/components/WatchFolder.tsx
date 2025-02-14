@@ -9,12 +9,12 @@ import {
     useModalVisibility,
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import { ensureElectron } from "@/base/electron";
 import { basename, dirname } from "@/base/file-name";
 import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
 import { CollectionMappingChoice } from "@/new/photos/components/CollectionMappingChoice";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
-import { useAppContext } from "@/new/photos/types/context";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import DoNotDisturbOutlinedIcon from "@mui/icons-material/DoNotDisturbOutlined";
@@ -205,7 +205,7 @@ interface WatchEntryProps {
 }
 
 const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const confirmStopWatching = () => {
         showMiniDialog({

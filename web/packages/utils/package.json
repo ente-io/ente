@@ -2,9 +2,7 @@
     "name": "@/utils",
     "version": "0.0.0",
     "private": true,
-    "dependencies": {
-        "yup": "^1.6.1"
-    },
+    "dependencies": {},
     "devDependencies": {
         "@/build-config": "*"
     }

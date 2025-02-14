@@ -6,8 +6,8 @@ import {
 import { PAGES } from "@/accounts/constants/pages";
 import { appHomeRoute, stashRedirect } from "@/accounts/services/redirect";
 import { sendOTT } from "@/accounts/services/user";
-import type { PageProps } from "@/accounts/types/page";
 import { LinkButton } from "@/base/components/LinkButton";
+import { useBaseContext } from "@/base/context";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import SingleInputForm, {
@@ -29,8 +29,8 @@ const bip39 = require("bip39");
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
 
-const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { showMiniDialog } = appContext;
+const Page: React.FC = () => {
+    const { showMiniDialog } = useBaseContext();
 
     const [keyAttributes, setKeyAttributes] = useState<
         KeyAttributes | undefined

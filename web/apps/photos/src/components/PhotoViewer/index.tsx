@@ -9,14 +9,20 @@ import {
 } from "@/base/components/utils/modal";
 import { lowercaseExtension } from "@/base/file-name";
 import log from "@/base/log";
+import {
+    FileInfo,
+    type FileInfoExif,
+    type FileInfoProps,
+} from "@/gallery/components/FileInfo";
 import { downloadManager } from "@/gallery/services/download";
+import type { Collection } from "@/media/collection";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { ConfirmDeleteFileDialog } from "@/new/photos/components/FileViewer";
 import { moveToTrash } from "@/new/photos/services/collection";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
-import { AppContext } from "@/new/photos/types/context";
+import { usePhotosAppContext } from "@/new/photos/types/context";
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -61,6 +67,7 @@ import {
     addToFavorites,
     removeFromFavorites,
 } from "services/collectionService";
+import uploadManager from "services/upload/uploadManager";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     copyFileToClipboard,
@@ -68,7 +75,6 @@ import {
     getFileFromURL,
 } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import { FileInfo, type FileInfoExif, type FileInfoProps } from "./FileInfo";
 import { ImageEditorOverlay } from "./ImageEditorOverlay";
 
 export type PhotoViewerProps = Pick<
@@ -99,8 +105,8 @@ export type PhotoViewerProps = Pick<
     isInHiddenSection: boolean;
     enableDownload: boolean;
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
-    fileToCollectionsMap: Map<number, number[]>;
-    collectionNameMap: Map<number, string>;
+    fileToCollectionsMap?: Map<number, number[]>;
+    collectionNameMap?: Map<number, string>;
     onSelectPerson?: FileInfoProps["onSelectPerson"];
 };
 
@@ -137,8 +143,8 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
     collectionNameMap,
     onSelectPerson,
 }) => {
+    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
     const galleryContext = useContext(GalleryContext);
-    const { showLoadingBar, hideLoadingBar } = useContext(AppContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
     );
@@ -650,6 +656,18 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
         setShowImageEditorOverlay(false);
     };
 
+    const handleSaveEditedCopy = (
+        editedFile: File,
+        collection: Collection,
+        enteFile: EnteFile,
+    ) => {
+        uploadManager.prepareForNewUpload();
+        uploadManager.showUploadProgressDialog();
+        uploadManager.uploadFile(editedFile, collection, enteFile);
+        handleCloseEditor();
+        handleClose();
+    };
+
     const downloadFileHelper = async (file: EnteFile) => {
         if (
             file &&
@@ -716,6 +734,18 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
             );
         }
     };
+
+    const handleSelectCollection = (collectionID: number) => {
+        galleryContext.onShowCollection(collectionID);
+        handleClose();
+    };
+
+    const handleSelectPerson = onSelectPerson
+        ? (personID: string) => {
+              onSelectPerson(personID);
+              handleClose();
+          }
+        : undefined;
 
     const handleForceConvert = () =>
         forceConvertItem(
@@ -964,10 +994,10 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
             <FileInfo
                 showInfo={showInfo}
                 handleCloseInfo={handleCloseInfo}
-                closePhotoViewer={handleClose}
                 file={photoSwipe?.currItem as EnteFile}
                 exif={exif?.value}
                 shouldDisableEdits={!isOwnFile}
+                allowMap={!publicCollectionGalleryContext.credentials}
                 showCollectionChips={
                     !isTrashCollection && isOwnFile && !isInHiddenSection
                 }
@@ -975,13 +1005,14 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                 refreshPhotoswipe={refreshPhotoswipe}
                 fileToCollectionsMap={fileToCollectionsMap}
                 collectionNameMap={collectionNameMap}
-                onSelectPerson={onSelectPerson}
+                onSelectCollection={handleSelectCollection}
+                onSelectPerson={handleSelectPerson}
             />
             <ImageEditorOverlay
-                show={showImageEditorOverlay}
-                file={photoSwipe?.currItem as EnteFile}
+                open={showImageEditorOverlay}
                 onClose={handleCloseEditor}
-                closePhotoViewer={handleClose}
+                file={photoSwipe?.currItem as EnteFile}
+                onSaveEditedCopy={handleSaveEditedCopy}
             />
         </>
     );

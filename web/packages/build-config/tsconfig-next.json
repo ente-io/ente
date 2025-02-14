@@ -4,7 +4,9 @@
     "compilerOptions": {
         /* Next.js insists on adding these. Sigh. */
         "allowJs": true,
-        "incremental": true
+        "incremental": true,
+        /* MUI doesn't work with exactOptionalPropertyTypes yet. */
+        "exactOptionalPropertyTypes": false
     },
     /* Next.js insists on adding this, even though we don't need it. */
     "exclude": ["node_modules"]

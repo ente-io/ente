@@ -1,3 +1,10 @@
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* TODO: Audit this file */
+/* @ts-nocheck */
+
 import { LinkButtonUndecorated } from "@/base/components/LinkButton";
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { type ButtonishProps } from "@/base/components/mui";
@@ -6,11 +13,17 @@ import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import { haveWindow } from "@/base/env";
 import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import type { Location } from "@/base/types";
-import { EnteFile } from "@/media/file";
+import {
+    changeCaption,
+    changeFileName,
+    updateExistingFilePubMetadata,
+} from "@/gallery/services/file";
+import { type EnteFile } from "@/media/file";
 import type { ParsedMetadata } from "@/media/file-metadata";
 import {
     fileCreationPhotoDate,
@@ -39,7 +52,6 @@ import {
     type AnnotatedFaceID,
 } from "@/new/photos/services/ml";
 import { updateMapEnabled } from "@/new/photos/services/settings";
-import { AppContext } from "@/new/photos/types/context";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import SingleInputForm, {
@@ -61,25 +73,17 @@ import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import {
     Box,
     CircularProgress,
-    DialogProps,
     IconButton,
     Link,
     Stack,
     styled,
     TextField,
     Typography,
+    type DialogProps,
 } from "@mui/material";
-import type { DisplayFile } from "components/PhotoFrame";
 import { Formik } from "formik";
 import { t } from "i18next";
-import { GalleryContext } from "pages/gallery";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import {
-    changeCaption,
-    changeFileName,
-    updateExistingFilePubMetadata,
-} from "utils/file";
-import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as Yup from "yup";
 
 // Re-uses images from ~leaflet package.
@@ -98,17 +102,32 @@ export interface FileInfoExif {
 }
 
 export interface FileInfoProps {
+    /**
+     * The file whose information we are showing.
+     */
+    file: EnteFile | undefined;
     showInfo: boolean;
     handleCloseInfo: () => void;
-    closePhotoViewer: () => void;
-    file: EnteFile | undefined;
     exif: FileInfoExif | undefined;
-    shouldDisableEdits?: boolean;
+    /**
+     * TODO: Rename and flip to allowEdits.
+     */
+    shouldDisableEdits: boolean;
+    /**
+     * If `true`, an inline map will be shown (if the user has enabled it) using
+     * the file's location.
+     */
+    allowMap: boolean;
     scheduleUpdate: () => void;
     refreshPhotoswipe: () => void;
     fileToCollectionsMap?: Map<number, number[]>;
     collectionNameMap?: Map<number, string>;
     showCollectionChips: boolean;
+    /**
+     * Called when the user selects a collection from among the collections that
+     * the file belongs to.
+     */
+    onSelectCollection: (collectionID: number) => void;
     /**
      * Called when the user selects a person in the file info panel.
      */
@@ -116,26 +135,23 @@ export interface FileInfoProps {
 }
 
 export const FileInfo: React.FC<FileInfoProps> = ({
+    file,
     shouldDisableEdits,
+    allowMap,
     showInfo,
     handleCloseInfo,
-    file,
     exif,
     scheduleUpdate,
     refreshPhotoswipe,
     fileToCollectionsMap,
     collectionNameMap,
     showCollectionChips,
-    closePhotoViewer,
+    onSelectCollection,
     onSelectPerson,
 }) => {
-    const { mapEnabled } = useSettingsSnapshot();
+    const { showMiniDialog } = useBaseContext();
 
-    const { showMiniDialog } = useContext(AppContext);
-    const galleryContext = useContext(GalleryContext);
-    const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext,
-    );
+    const { mapEnabled } = useSettingsSnapshot();
 
     const [exifInfo, setExifInfo] = useState<ExifInfo | undefined>();
     const { show: showRawExif, props: rawExifVisibilityProps } =
@@ -173,11 +189,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         return <></>;
     }
 
-    const onCollectionChipClick = (collectionID) => {
-        galleryContext.onShowCollection(collectionID);
-        closePhotoViewer();
-    };
-
     const openEnableMapConfirmationDialog = () =>
         showMiniDialog(
             confirmEnableMapsDialogAttributes(() => updateMapEnabled(true)),
@@ -188,12 +199,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
             confirmDisableMapsDialogAttributes(() => updateMapEnabled(false)),
         );
 
-    const handleSelectFace = (annotatedFaceID: AnnotatedFaceID) => {
-        if (onSelectPerson) {
-            onSelectPerson(annotatedFaceID.personID);
-            closePhotoViewer();
-        }
-    };
+    const handleSelectFace = ({ personID }: AnnotatedFaceID) =>
+        onSelectPerson?.(personID);
 
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
@@ -237,8 +244,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             icon={<LocationOnOutlinedIcon />}
                             title={t("location")}
                             caption={
-                                !mapEnabled ||
-                                publicCollectionGalleryContext.credentials ? (
+                                !mapEnabled || !allowMap ? (
                                     <Link
                                         href={openStreetMapLink(location)}
                                         target="_blank"
@@ -264,7 +270,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                 />
                             }
                         />
-                        {!publicCollectionGalleryContext.credentials && (
+                        {allowMap && (
                             <MapBox
                                 location={location}
                                 mapEnabled={mapEnabled}
@@ -299,7 +305,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         />
                     </InfoItem>
                 )}
-                {showCollectionChips && (
+                {showCollectionChips && collectionNameMap && (
                     <InfoItem icon={<FolderOutlinedIcon />}>
                         <Stack
                             direction="row"
@@ -319,7 +325,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                     <ChipButton
                                         key={collectionID}
                                         onClick={() =>
-                                            onCollectionChipClick(collectionID)
+                                            onSelectCollection(collectionID)
                                         }
                                     >
                                         {collectionNameMap.get(collectionID)}
@@ -491,7 +497,7 @@ type EditButtonProps = ButtonishProps & {
 };
 
 const EditButton: React.FC<EditButtonProps> = ({ onClick, loading }) => (
-    <IconButton onClick={onClick} disabled={loading} color="secondary">
+    <IconButton onClick={onClick} disabled={!!loading} color="secondary">
         {!loading ? (
             <EditIcon />
         ) : (
@@ -511,7 +517,10 @@ function RenderCaption({
     shouldDisableEdits,
 }: {
     shouldDisableEdits: boolean;
-    file: DisplayFile;
+    /* TODO: This is DisplayFile, but that's meant to be deprecated */
+    file: EnteFile & {
+        title?: string;
+    };
     scheduleUpdate: () => void;
     refreshPhotoswipe: () => void;
 }) {
@@ -531,6 +540,7 @@ function RenderCaption({
 
                 const updatedFile = await changeCaption(file, newCaption);
                 updateExistingFilePubMetadata(file, updatedFile);
+                // @ts-ignore
                 file.title = file.pubMagicMetadata.data.caption;
                 refreshPhotoswipe();
                 scheduleUpdate();
@@ -554,6 +564,7 @@ function RenderCaption({
     return (
         <Box sx={{ p: 1 }}>
             <Formik<RenderCaptionFormValues>
+                // @ts-ignore
                 initialValues={{ caption }}
                 validationSchema={Yup.object().shape({
                     caption: Yup.string().max(
@@ -762,7 +773,7 @@ const RenderFileName: React.FC<RenderFileNameProps> = ({
             <FileNameEditDialog
                 isInEditMode={isInEditMode}
                 closeEditMode={closeEditMode}
-                filename={fileName}
+                filename={fileName!}
                 extension={extension}
                 saveEdits={saveEdits}
             />
@@ -794,7 +805,15 @@ const getCaption = (file: EnteFile, exifInfo: ExifInfo | undefined) => {
     );
 };
 
-const FileNameEditDialog = ({
+interface FileNameEditDialogProps {
+    isInEditMode: boolean;
+    closeEditMode: () => void;
+    filename: string;
+    extension: string | undefined;
+    saveEdits: (name: string) => Promise<void>;
+}
+
+const FileNameEditDialog: React.FC<FileNameEditDialogProps> = ({
     isInEditMode,
     closeEditMode,
     filename,
@@ -875,12 +894,15 @@ const MapBox: React.FC<MapBoxProps> = ({
                 location.longitude,
             ];
             if (mapContainer && !mapContainer.hasChildNodes()) {
+                // @ts-ignore
                 const map = leaflet.map(mapContainer).setView(position, zoom);
+                // @ts-ignore
                 leaflet
                     .tileLayer(urlTemplate, {
                         attribution,
                     })
                     .addTo(map);
+                // @ts-ignore
                 leaflet.marker(position).addTo(map).openPopup();
             }
         } else {
@@ -890,6 +912,7 @@ const MapBox: React.FC<MapBoxProps> = ({
                 }
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mapEnabled]);
 
     return mapEnabled ? (
@@ -957,8 +980,10 @@ const RawExif: React.FC<RawExifProps> = ({
                     tag &&
                     typeof tag == "object" &&
                     "description" in tag &&
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                     typeof tag.description == "string"
                 ) {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
                     description = tag.description;
                 }
                 return [key, namespace, tagName, description] as const;

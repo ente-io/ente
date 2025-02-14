@@ -6,6 +6,7 @@ import {
     SidebarDrawerTitlebar,
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
+import { useBaseContext } from "@/base/context";
 import { disableML, enableML, type MLStatus } from "@/new/photos/services/ml";
 import {
     Box,
@@ -22,7 +23,6 @@ import {
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { useAppContext } from "../../types/context";
 import { openURL } from "../../utils/web";
 import { useMLStatusSnapshot } from "../utils/use-snapshot";
 import { useWrapAsyncOperation } from "../utils/use-wrap-async";
@@ -240,7 +240,7 @@ interface ManageMLProps {
 }
 
 const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const { phase, nSyncedFiles, nTotalFiles } = mlStatus;
 

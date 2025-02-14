@@ -1,6 +1,7 @@
 import { encryptMetadataJSON, sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
+import { UpdateMagicMetadataRequest } from "@/gallery/services/file";
 import {
     Collection,
     CollectionMagicMetadata,
@@ -48,7 +49,6 @@ import {
     isQuickLinkCollection,
     isValidMoveTarget,
 } from "utils/collection";
-import { UpdateMagicMetadataRequest } from "./fileService";
 import { getPublicKey } from "./userService";
 
 const UNCATEGORIZED_COLLECTION_NAME = "Uncategorized";

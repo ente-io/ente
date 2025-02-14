@@ -9,9 +9,9 @@ import {
     removeTwoFactor,
     type TwoFactorType,
 } from "@/accounts/services/user";
-import type { AccountsContextT } from "@/accounts/types/context";
 import { LinkButton } from "@/base/components/LinkButton";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
+import { useBaseContext } from "@/base/context";
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import log from "@/base/log";
@@ -38,12 +38,11 @@ const bip39 = require("bip39");
 bip39.setDefaultWordlist("english");
 
 export interface RecoverPageProps {
-    appContext: AccountsContextT;
     twoFactorType: TwoFactorType;
 }
 
-const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
-    const { showMiniDialog, logout } = appContext;
+const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
+    const { logout, showMiniDialog } = useBaseContext();
 
     const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] =
         useState<Omit<B64EncryptionResult, "key"> | null>(null);

@@ -8,11 +8,11 @@ import {
 import { EllipsizedTypography } from "@/base/components/Typography";
 import type { ButtonishProps } from "@/base/components/mui";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import { EnteFile } from "@/media/file";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
-import { useAppContext } from "@/new/photos/types/context";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { CustomError } from "@ente/shared/error";
 import FolderIcon from "@mui/icons-material/Folder";
@@ -50,7 +50,7 @@ export const Export: React.FC<ExportProps> = ({
     onClose,
     collectionNameMap,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState("");
     const [continuousExport, setContinuousExport] = useState(false);

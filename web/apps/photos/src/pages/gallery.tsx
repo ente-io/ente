@@ -9,6 +9,7 @@ import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
 import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
 import { useFileInput } from "@/gallery/components/utils/use-file-input";
@@ -65,7 +66,7 @@ import {
     userDetailsSnapshot,
     verifyStripeSubscription,
 } from "@/new/photos/services/user-details";
-import { useAppContext } from "@/new/photos/types/context";
+import { usePhotosAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
@@ -177,14 +178,9 @@ export const GalleryContext = createContext<GalleryContextType>(
  *           Photo List           v
  */
 const Page: React.FC = () => {
-    const {
-        showLoadingBar,
-        hideLoadingBar,
-        showMiniDialog,
-        onGenericError,
-        watchFolderView,
-        logout,
-    } = useAppContext();
+    const { logout, showMiniDialog } = useBaseContext();
+    const { showLoadingBar, hideLoadingBar, onGenericError, watchFolderView } =
+        usePhotosAppContext();
 
     const isOffline = useIsOffline();
     const [state, dispatch] = useGalleryReducer();

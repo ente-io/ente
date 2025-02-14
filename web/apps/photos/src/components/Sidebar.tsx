@@ -20,6 +20,7 @@ import {
 } from "@/base/components/mui/SidebarDrawer";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import { isDevBuild } from "@/base/env";
 import {
     getLocaleInUse,
@@ -75,7 +76,7 @@ import {
     userDetailsAddOnBonuses,
     type UserDetails,
 } from "@/new/photos/services/user-details";
-import { AppContext, useAppContext } from "@/new/photos/types/context";
+import { usePhotosAppContext } from "@/new/photos/types/context";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import {
     FlexWrapper,
@@ -354,7 +355,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
 };
 
 function MemberSubscriptionManage({ open, userDetails, onClose }) {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
     const fullScreen = useIsSmallWidth();
 
     const confirmLeaveFamily = () =>
@@ -508,7 +509,7 @@ const UtilitySection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
     closeSidebar,
 }) => {
     const router = useRouter();
-    const { watchFolderView, setWatchFolderView } = useAppContext();
+    const { watchFolderView, setWatchFolderView } = usePhotosAppContext();
 
     const { show: showAccount, props: accountVisibilityProps } =
         useModalVisibility();
@@ -562,7 +563,7 @@ const UtilitySection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
 const HelpSection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
     closeSidebar,
 }) => {
-    const { showMiniDialog } = useContext(AppContext);
+    const { showMiniDialog } = useBaseContext();
     const { openExportModal } = useContext(GalleryContext);
 
     const { show: showHelp, props: helpVisibilityProps } = useModalVisibility();
@@ -595,7 +596,7 @@ const HelpSection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
 };
 
 const ExitSection: React.FC = () => {
-    const { showMiniDialog, logout } = useContext(AppContext);
+    const { logout, showMiniDialog } = useBaseContext();
 
     const handleLogout = () =>
         showMiniDialog({
@@ -648,7 +649,7 @@ const Account: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const router = useRouter();
 
@@ -908,7 +909,7 @@ const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const { mapEnabled } = useSettingsSnapshot();
 
@@ -1033,7 +1034,7 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const handleRootClose = () => {
         onClose();
