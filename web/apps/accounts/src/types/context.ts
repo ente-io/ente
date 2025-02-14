@@ -1,4 +1,4 @@
-import type { AccountsContextT } from "@/accounts/types/context";
+import type { AccountsContextT } from "@/base/context";
 import { createContext, useContext } from "react";
 
 /**

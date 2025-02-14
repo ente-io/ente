@@ -13,6 +13,7 @@ import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import type { AccountsContextT } from "@/base/context";
 import { haveWindow } from "@/base/env";
 import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
@@ -86,7 +87,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as Yup from "yup";
 
 // Re-uses images from ~leaflet package.
-import type { AccountsContextT } from "@/accounts/types/context";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css";
 import "leaflet/dist/leaflet.css";
 // eslint-disable-next-line @typescript-eslint/no-require-imports

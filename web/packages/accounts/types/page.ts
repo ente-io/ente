@@ -1,4 +1,4 @@
-import type { AccountsContextT } from "./context";
+import type { AccountsContextT } from "@/base/context";
 
 /**
  * The default type for pages exposed by this package.
