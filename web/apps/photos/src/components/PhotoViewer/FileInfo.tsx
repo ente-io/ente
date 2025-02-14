@@ -78,7 +78,7 @@ import {
     changeCaption,
     changeFileName,
     updateExistingFilePubMetadata,
-} from "utils/file";
+} from "@/gallery/services/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import * as Yup from "yup";
 

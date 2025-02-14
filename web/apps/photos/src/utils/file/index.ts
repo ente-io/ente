@@ -3,19 +3,13 @@ import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { downloadManager } from "@/gallery/services/download";
-import {
-    updateFileMagicMetadata,
-    updateFilePublicMagicMetadata,
-} from "@/gallery/services/file";
+import { updateFileMagicMetadata } from "@/gallery/services/file";
 import { detectFileTypeInfo } from "@/gallery/utils/detect-type";
 import { writeStream } from "@/gallery/utils/native-stream";
 import {
     EnteFile,
     FileMagicMetadataProps,
-    FilePublicMagicMetadata,
-    FilePublicMagicMetadataProps,
     FileWithUpdatedMagicMetadata,
-    mergeMetadata,
 } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
@@ -122,59 +116,11 @@ export async function changeFilesVisibility(
     return await updateFileMagicMetadata(fileWithUpdatedMagicMetadataList);
 }
 
-export async function changeFileName(
-    file: EnteFile,
-    editedName: string,
-): Promise<EnteFile> {
-    const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
-        editedName,
-    };
-
-    const updatedPublicMagicMetadata: FilePublicMagicMetadata =
-        await updateMagicMetadata(
-            updatedPublicMagicMetadataProps,
-            file.pubMagicMetadata,
-            file.key,
-        );
-    const updateResult = await updateFilePublicMagicMetadata([
-        { file, updatedPublicMagicMetadata },
-    ]);
-    return updateResult[0];
-}
-
-export async function changeCaption(
-    file: EnteFile,
-    caption: string,
-): Promise<EnteFile> {
-    const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
-        caption,
-    };
-
-    const updatedPublicMagicMetadata: FilePublicMagicMetadata =
-        await updateMagicMetadata(
-            updatedPublicMagicMetadataProps,
-            file.pubMagicMetadata,
-            file.key,
-        );
-    const updateResult = await updateFilePublicMagicMetadata([
-        { file, updatedPublicMagicMetadata },
-    ]);
-    return updateResult[0];
-}
-
 export function isSharedFile(user: User, file: EnteFile) {
     if (!user?.id || !file?.ownerID) {
         return false;
     }
     return file.ownerID !== user.id;
-}
-
-export function updateExistingFilePubMetadata(
-    existingFile: EnteFile,
-    updatedFile: EnteFile,
-) {
-    existingFile.pubMagicMetadata = updatedFile.pubMagicMetadata;
-    existingFile.metadata = mergeMetadata([existingFile])[0].metadata;
 }
 
 export async function getFileFromURL(fileURL: string, name: string) {
