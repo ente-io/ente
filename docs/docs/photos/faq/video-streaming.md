@@ -6,30 +6,58 @@ description:
 
 # Video Streaming
 
-## Mobile
+> [!NOTE]
+>
+> Video streaming is available in beta on mobile apps starting v0.9.98.
 
-### How to enable Video Streaming?
+### How to enable video streaming?
 
-- Open the Drawer.
-- In that Go to General -> Advanced
-- Switch on the Toggle for `Video Streaming`
+- Open Settings -> General -> Advanced
+- Switch on the toggle for `Video streaming`
 
-### What happens when I enable Video Streaming
+### What happens when I enable video streaming?
 
-It adds all the past 30 days videos to a queue and begin creation of a preview file for both local and remote videos.
+Enabling video streaming will start processing videos captured in the last 30
+days, generating streams for each. Both local and remote videos will be
+processed, so this may consume bandwidth for downloading of remote files and
+uploading of the generated streams.
 
-This may consume bandwidth for downloading of remote files and uploading of the generated preview files.
+### How can I view video streams?
 
-### What is the Preview file
+Settings -> Backup > Backup status will show details regarding the processing
+status for videos. Processed videos will have a green play button next to them.
+You can open these videos by tapping on them.
 
-The preview file is a HLS Encrypted video file with a .m3u8 playlist that will help us play the video with support of random seeking without downloading the complete video. Currently it converts video into 720p with 2mbps bitrate H.264 format.
+Processed videos will show a `Play stream` button, clicking which will load and
+play the stream.
 
-The preview video file (.ts) is single file which is AES encrypted whereas the playlist file (.m3u8) is encrypted using the ChaCha20 Encryption method so even we can't read the duration and number of chunks of the video file.
+Clicking on the `Info` icon within the original video will show details
+about the generated stream.
 
-### Will the previews consume space in my storage?
+### What is a stream?
 
-No, as of today we are not counting the preview files in your storage consumption, but this might change in future.
+Stream is an encrypted HLS file with an `.m3u8` playlist that helps play a video
+with support for seeking **without** downloading the full file.
+
+Currently it converts videos into `720p` with `2mbps` bitrate in `H.264` format.
+The generated stream is single blob (encrypted with AES) while the playlist file
+(`.m3u8`) is another blob (encrypted using XChaCha20).
+
+We cannot read the contents, duration or the number of chunks within the
+generated stream.
+
+### Will streams consume space in my storage?
+
+While this feature is in beta, we will not count the storage consumed by your
+streams against your storage quota. This may change in the future. If it does,
+we will provide an option to opt-in to one of the following:
+1. Original videos only
+2. Compressed streams only
+3. Both
 
 ### Something doesn't seem right, what to do?
 
-As Video Streaming is still in beta, some things might not working correctly. For that you can either use the #feedback channel in discord or send a ticket to support at ente.io with the relevant title and message regarding the issue.
+As video streaming is still in beta, some things might not work correctly.
+Please create a thread within the `#feedback` channel on
+[Discord](https://discord.com/channels/948937918347608085/1121126215995113552)
+or reach out to [support@ente.io](mailto:support@ente.io).
