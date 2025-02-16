@@ -209,6 +209,11 @@
       "title": "Bugzilla"
     },
     {
+      "title": "ButterflyMX",
+      "slug": "butterflymx",
+      "hex": "39008f"
+    },
+    {
       "title": "Bybit"
     },
     {
@@ -394,6 +399,10 @@
       "title": "ForUsAll"
     },
     {
+      "title": "FreeTaxUSA",
+      "slug": "freetaxusa"
+    },
+    {
       "title": "G2A"
     },
     {
@@ -577,6 +586,10 @@
     },
     {
       "title": "Letterboxd"
+    },
+    {
+      "title": "LinkedIn",
+      "slug": "linkedin"
     },
     {
       "title": "Linux.Do",
