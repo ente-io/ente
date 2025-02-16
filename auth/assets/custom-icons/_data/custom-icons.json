@@ -185,6 +185,10 @@
       ]
     },
     {
+      "title": "BookWyrm",
+      "slug": "bookwyrm"
+    },
+    {
       "title": "BorgBase",
       "slug": "borg_base",
       "altNames": [
