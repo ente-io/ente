@@ -301,8 +301,10 @@ export class FileViewerPhotoSwipe {
         });
 
         pswp.on("contentDeactivate", (e) => {
-            // Pause the video tag (if any) for a slide when we move away from it.
-            const video = e.content?.element?.getElementsByTagName("video")[0];
+            // Pause the video element (if any) on a slide when we move away
+            // from it.
+            const video =
+                e.content?.slide?.container?.getElementsByTagName("video")[0];
             video?.pause();
         });
 
