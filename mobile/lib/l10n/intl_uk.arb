@@ -960,6 +960,14 @@
   "syncStopped": "Синхронізацію зупинено",
   "syncProgress": "{completed} / {total} спогадів збережено",
   "uploadingMultipleMemories": "Збереження {count} спогадів...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "uploadingSingleMemory": "Зберігаємо 1 спогад...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
@@ -1386,7 +1394,7 @@
   "enableMachineLearningBanner": "Увімкніть машинне навчання для магічного пошуку та розпізнавання облич",
   "searchDiscoverEmptySection": "Зображення будуть показані тут після завершення оброблення та синхронізації",
   "searchPersonsEmptySection": "Люди будуть показані тут після завершення оброблення та синхронізації",
-  "viewersSuccessfullyAdded": "{count, plural, few {Додано {count} користувача} many {Додано {count} користувачів}=0 {Додано 0 користувачів} =1 {Додано 1 користувач} other {Додано {count} користувачів}}",
+  "viewersSuccessfullyAdded": "{count, plural, one {} few {Додано {count} користувача} many {Додано {count} користувачів}=0 {Додано 0 користувачів} =1 {Додано 1 користувач} other {Додано {count} користувачів}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1396,7 +1404,7 @@
     },
     "description": "Number of viewers that were successfully added to an album."
   },
-  "collaboratorsSuccessfullyAdded": "{count, plural, few {Додано {count} співаторів} many {Додано {count} співаторів}=0 {Додано 0 співавторів} =1 {Додано 1 співавтор} other {Додано {count} співавторів}}",
+  "collaboratorsSuccessfullyAdded": "{count, plural, one {} few {Додано {count} співаторів} many {Додано {count} співаторів}=0 {Додано 0 співавторів} =1 {Додано 1 співавтор} other {Додано {count} співавторів}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1471,7 +1479,7 @@
   },
   "currentlyRunning": "зараз працює",
   "ignored": "ігнорується",
-  "photosCount": "{count, plural, few {{count} фото} many {{count} фото}=0 {0 фото} =1 {1 фото} other {{count} фото}}",
+  "photosCount": "{count, plural, one {} few {{count} фото} many {{count} фото}=0 {0 фото} =1 {1 фото} other {{count} фото}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -1577,6 +1585,5 @@
   },
   "legacyInvite": "{email} запросив вас стати довіреною особою",
   "authToManageLegacy": "Авторизуйтесь, щоби керувати довіреними контактами",
-  "useDifferentPlayerInfo": "Виникли проблеми з відтворенням цього відео? Натисніть і утримуйте тут, щоб спробувати інший плеєр.",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "useDifferentPlayerInfo": "Виникли проблеми з відтворенням цього відео? Натисніть і утримуйте тут, щоб спробувати інший плеєр."
 }

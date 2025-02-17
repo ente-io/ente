@@ -1,6 +1,6 @@
 {
   "@@locale ": "en",
-  "enterYourEmailAddress": "Voer uw e-mailadres in",
+  "enterYourEmailAddress": "Voer je e-mailadres in",
   "accountWelcomeBack": "Welkom terug!",
   "emailAlreadyRegistered": "E-mail is al geregistreerd.",
   "emailNotRegistered": "E-mail niet geregistreerd.",
@@ -478,7 +478,7 @@
   "showMemories": "Toon herinneringen",
   "yearsAgo": "{count, plural, one{{count} jaar geleden} other{{count} jaar geleden}}",
   "backupSettings": "Back-up instellingen",
-  "backupStatus": "Back-upstatus",
+  "backupStatus": "Back-up status",
   "backupStatusDescription": "Items die zijn geback-upt, worden hier getoond",
   "backupOverMobileData": "Back-up maken via mobiele data",
   "backupVideos": "Back-up video's",
@@ -965,6 +965,14 @@
   "syncStopped": "Synchronisatie gestopt",
   "syncProgress": "{completed}/{total} herinneringen bewaard",
   "uploadingMultipleMemories": "{count} herinneringen veiligstellen...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "uploadingSingleMemory": "1 herinnering veiligstellen...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
@@ -1590,5 +1598,81 @@
   "joinAlbumSubtext": "om je foto's te bekijken en toe te voegen",
   "joinAlbumSubtextViewer": "om dit aan gedeelde albums toe te voegen",
   "join": "Deelnemen",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "linkEmail": "Link email",
+  "link": "Link",
+  "noEnteAccountExclamation": "Geen Ente account!",
+  "orPickFromYourContacts": "of kies uit je contacten",
+  "emailDoesNotHaveEnteAccount": "{email} heeft geen Ente account.",
+  "@emailDoesNotHaveEnteAccount": {
+    "description": "Shown when email doesn't have an Ente account",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountOwnerPersonAppbarTitle": "{title} (Ik)",
+  "@accountOwnerPersonAppbarTitle": {
+    "description": "Title of appbar for account owner person",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reassignMe": "\"Ik\" opnieuw toewijzen",
+  "me": "Ik",
+  "linkEmailToContactBannerCaption": "voor sneller delen",
+  "@linkEmailToContactBannerCaption": {
+    "description": "Caption for the 'Link email' title. It should be a continuation of the 'Link email' title. Just like how 'Link email' + 'for faster sharing' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "selectPersonToLink": "Kies persoon om te linken",
+  "linkPersonToEmail": "Link persoon aan {email}",
+  "@linkPersonToEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "linkPersonToEmailConfirmation": "Dit linkt {personName} aan {email}",
+  "@linkPersonToEmailConfirmation": {
+    "description": "Confirmation message when linking a person to an email",
+    "placeholders": {
+      "personName": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "selectYourFace": "Selecteer je gezicht",
+  "reassigningLoading": "Opnieuw toewijzen...",
+  "reassignedToName": "Toegewezen aan {name}",
+  "@reassignedToName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "saveChangesBeforeLeavingQuestion": "Wijzigingen opslaan voor verlaten?",
+  "dontSave": "Niet opslaan",
+  "thisIsMeExclamation": "Dit ben ik!",
+  "linkPerson": "Link persoon",
+  "linkPersonCaption": "voor een betere ervaring met delen",
+  "@linkPersonCaption": {
+    "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "videoStreaming": "Video streamen",
+  "processingVideos": "Video's verwerken",
+  "streamDetails": "Stream details",
+  "processing": "Verwerken",
+  "queued": "In wachtrij",
+  "ineligible": "Ongerechtigd",
+  "failed": "Mislukt",
+  "playStream": "Stream afspelen",
+  "playOriginal": "Origineel afspelen",
+  "joinAlbumConfirmationDialogBody": "Deelnemen aan een album maakt je e-mail zichtbaar voor de deelnemers."
 }

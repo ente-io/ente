@@ -1348,5 +1348,53 @@
   "linkEmail": "Susieti el. paštą",
   "link": "Susieti",
   "noEnteAccountExclamation": "Nėra „Ente“ paskyros!",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "orPickFromYourContacts": "arba pasirinkite iš savo kontaktų",
+  "accountOwnerPersonAppbarTitle": "{title} (Aš)",
+  "@accountOwnerPersonAppbarTitle": {
+    "description": "Title of appbar for account owner person",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "me": "Aš",
+  "linkPersonToEmailConfirmation": "Tai susies {personName} su {email}.",
+  "@linkPersonToEmailConfirmation": {
+    "description": "Confirmation message when linking a person to an email",
+    "placeholders": {
+      "personName": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "reassignedToName": "Perskirstė jus į {name}",
+  "@reassignedToName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "saveChangesBeforeLeavingQuestion": "Išsaugoti pakeitimus prieš išeinant?",
+  "dontSave": "Neišsaugoti",
+  "thisIsMeExclamation": "Tai aš!",
+  "linkPerson": "Susiekite asmenį,",
+  "linkPersonCaption": "kad geriau bendrintumėte patirtį",
+  "@linkPersonCaption": {
+    "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "videoStreaming": "Vaizdo įrašų srautinis perdavimas",
+  "processingVideos": "Apdorojami vaizdo įrašai",
+  "streamDetails": "Srautinio perdavimo išsami informacija",
+  "processing": "Apdorojama",
+  "queued": "Įtraukta eilėje",
+  "ineligible": "Netinkami",
+  "failed": "Nepavyko",
+  "playStream": "Leisti srautinį perdavimą",
+  "playOriginal": "Leisti originalą",
+  "joinAlbumConfirmationDialogBody": "Prisijungus prie albumo, jūsų el. paštas bus matomas jo dalyviams."
 }

@@ -965,6 +965,14 @@
   "syncStopped": "同步已停止",
   "syncProgress": "已保存的回忆 {completed}/共 {total}",
   "uploadingMultipleMemories": "正在保存 {count} 个回忆...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "uploadingSingleMemory": "正在保存 1 个回忆...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
@@ -1590,5 +1598,81 @@
   "joinAlbumSubtext": "来查看和添加您的照片",
   "joinAlbumSubtextViewer": "来将其添加到共享相册",
   "join": "加入",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "linkEmail": "链接邮箱",
+  "link": "链接",
+  "noEnteAccountExclamation": "没有 Ente 账户！",
+  "orPickFromYourContacts": "或从您的联系人中选择",
+  "emailDoesNotHaveEnteAccount": "{email} 没有 Ente 账户。",
+  "@emailDoesNotHaveEnteAccount": {
+    "description": "Shown when email doesn't have an Ente account",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountOwnerPersonAppbarTitle": "{title} (我)",
+  "@accountOwnerPersonAppbarTitle": {
+    "description": "Title of appbar for account owner person",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reassignMe": "重新分配“我”",
+  "me": "我",
+  "linkEmailToContactBannerCaption": "来实现更快的共享",
+  "@linkEmailToContactBannerCaption": {
+    "description": "Caption for the 'Link email' title. It should be a continuation of the 'Link email' title. Just like how 'Link email' + 'for faster sharing' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "selectPersonToLink": "选择要链接的人",
+  "linkPersonToEmail": "将人员链接到 {email}",
+  "@linkPersonToEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "linkPersonToEmailConfirmation": "这将会将 {personName} 链接到 {email}",
+  "@linkPersonToEmailConfirmation": {
+    "description": "Confirmation message when linking a person to an email",
+    "placeholders": {
+      "personName": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "selectYourFace": "选择你的脸",
+  "reassigningLoading": "正在重新分配...",
+  "reassignedToName": "已将您重新分配给 {name}",
+  "@reassignedToName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "saveChangesBeforeLeavingQuestion": "离开之前要保存更改吗？",
+  "dontSave": "不保存",
+  "thisIsMeExclamation": "这就是我！",
+  "linkPerson": "链接人员",
+  "linkPersonCaption": "来感受更好的共享体验",
+  "@linkPersonCaption": {
+    "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "videoStreaming": "影音流",
+  "processingVideos": "正在处理视频",
+  "streamDetails": "流详情",
+  "processing": "正在处理",
+  "queued": "已入列",
+  "ineligible": "不合格",
+  "failed": "失败",
+  "playStream": "播放流",
+  "playOriginal": "播放原内容",
+  "joinAlbumConfirmationDialogBody": "加入相册将使相册的参与者可以看到您的电子邮件地址。"
 }
