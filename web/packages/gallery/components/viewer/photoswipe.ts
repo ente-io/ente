@@ -142,7 +142,7 @@ export class FileViewerPhotoSwipe {
             // leave this at the default (true) and then swipe between slides
             // fast, or show MUI drawers etc.
             //
-            // See: [Note: Overjealous Chrome? Complicated ARIA?], but time with
+            // See: [Note: Overzealous Chrome? Complicated ARIA?], but time with
             // a different library.
             trapFocus: false,
             // Set the index within files that we should open to. Subsequent
