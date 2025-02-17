@@ -10,6 +10,7 @@ import {
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { t } from "i18next";
+import { FileViewerDataSource, type SlideData } from "./data-source";
 import type { FileViewerProps } from "./FileViewer";
 import { createPSRegisterElementIconHTML } from "./icons";
 
@@ -30,58 +31,6 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
     // TODO(PS): Comment me before merging into main.
     PhotoSwipe = require("./ps5/dist/photoswipe.esm.js").default;
 }
-// TODO(PS):
-//import { type SlideData } from "./ps5/dist/types/slide/"
-type SlideData = {
-    /**
-     * thumbnail element
-     */
-    element?: HTMLElement | undefined;
-    /**
-     * image URL
-     */
-    src?: string | undefined;
-    /**
-     * image srcset
-     */
-    srcset?: string | undefined;
-    /**
-     * image width (deprecated)
-     */
-    w?: number | undefined;
-    /**
-     * image height (deprecated)
-     */
-    h?: number | undefined;
-    /**
-     * image width
-     */
-    width?: number | undefined;
-    /**
-     * image height
-     */
-    height?: number | undefined;
-    /**
-     * placeholder image URL that's displayed before large image is loaded
-     */
-    msrc?: string | undefined;
-    /**
-     * image alt text
-     */
-    alt?: string | undefined;
-    /**
-     * whether thumbnail is cropped client-side or not
-     */
-    thumbCropped?: boolean | undefined;
-    /**
-     * html content of a slide
-     */
-    html?: string | undefined;
-    /**
-     * slide type
-     */
-    type?: string | undefined;
-};
 
 type FileViewerPhotoSwipeOptions = FileViewerProps & {
     /**
@@ -126,13 +75,12 @@ export class FileViewerPhotoSwipe {
      */
     private opts: Pick<FileViewerPhotoSwipeOptions, "disableDownload">;
     /**
-     * The best available SlideData for rendering the file with the given ID.
+     * Our data source.
      *
-     * If an entry does not exist for a particular fileID, then it is lazily
-     * added on demand. The same entry might get updated multiple times, as we
-     * start with the thumbnail but then also update this with the original etc.
+     * TODO(PS): Move this elsewhere, or merge with download manager.
      */
-    private itemDataByFileID: Map<number, SlideData> = new Map();
+    private dataSource: FileViewerDataSource;
+
     /**
      * An interval that invokes a periodic check of whether we should the hide
      * controls if the user does not perform any pointer events for a while.
@@ -161,6 +109,7 @@ export class FileViewerPhotoSwipe {
     }: FileViewerPhotoSwipeOptions) {
         this.files = files;
         this.opts = { disableDownload };
+        this.dataSource = new FileViewerDataSource();
 
         const pswp = new PhotoSwipe({
             // Opaque background.
