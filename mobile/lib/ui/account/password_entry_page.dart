@@ -10,7 +10,7 @@ import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/models/key_gen_result.dart";
+import "package:photos/models/api/user/key_gen_result.dart";
 import 'package:photos/services/user_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/account/recovery_key_page.dart';
