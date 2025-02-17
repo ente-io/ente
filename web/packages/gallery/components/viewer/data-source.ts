@@ -10,7 +10,7 @@ import { FileType } from "@/media/file-type";
 
 // TODO(PS):
 //import { type SlideData } from "./ps5/dist/types/slide/"
-export interface SlideData {
+interface SlideData {
     /**
      * image URL
      */
@@ -27,13 +27,16 @@ export interface SlideData {
      * html content of a slide
      */
     html?: string | undefined;
+}
 
+type ItemData = SlideData & {
     // Our props. TODO(PS) document if end up using these.
-
+    videoURL?: string;
+    livePhotoVideoURL?: string;
     isContentLoading?: boolean;
     isContentZoomable?: boolean;
     isFinal?: boolean;
-}
+};
 
 /**
  * A class that stores and serves data required by our custom PhotoSwipe
@@ -43,74 +46,83 @@ export interface SlideData {
  * can reuse the same cache for multiple displays of our file viewer.
  */
 export class FileViewerDataSource {
+    private itemDataByFileID = new Map<number, ItemData>();
+    private needsRefreshByFileID = new Map<number, () => void>();
+
     /**
-     * The best available SlideData for rendering the file with the given ID.
+     * Return the best available ItemData for rendering the given {@link file}.
      *
-     * If an entry does not exist for a particular fileID, then it is lazily
-     * added on demand, and updated as we keep getting better data (thumbnail,
+     * If an entry does not exist for a particular file, then it is lazily added
+     * on demand, and updated as we keep getting better data (thumbnail,
      * original) for the file.
+     *
+     * At each step, we call the provided callback so that file viewer can call
+     * us again to get the updated data.
+     *
+     * ---
+     *
+     * Detailed flow:
+     *
+     * If we already have the final data about the file, then this function will
+     * return it and do nothing subsequently.
+     *
+     * Otherwise, it will:
+     *
+     * 1. Return empty slide data; PhotoSwipe will not show anything in the
+     *    image area but will otherwise render UI controls properly (in most
+     *    cases a cached renderable thumbnail URL will be available shortly)
+     *
+     * 2. Insert empty data so that we don't enqueue multiple updates, and
+     *    return this empty data.
+     *
+     * Then it we start fetching data for the file.
+     *
+     * First it'll fetch the thumbnail. Once that is done, it'll update the data
+     * it has cached, and notify the caller (using the provided callback) so it
+     * can refresh the slide.
+     *
+     * Then it'll continue fetching the original.
+     *
+     * - For images and videos, this will be the single original.
+     *
+     * - For live photos, this will also be a two step process, first with the
+     *   original image, then again with the video component.
+     *
+     * At this point, the data for this file will be considered final, and
+     * subsequent calls for the same file will return this same value unless it
+     * is invalidated.
+     *
+     * If at any point an error occurs, we reset our cache so that the next time
+     * the data is requested we repeat the process instead of continuing to
+     * serve the incomplete result.
      */
-    private itemDataByFileID = new Map<number, SlideData>();
-
-    /**
-     *
-     * The {@link onUpdate} callback is invoked each time we have data about the
-     * given {@link file}.
-     *
-     * If we already have the final data about file, then {@link onUpdate} will
-     * be called once with this final {@link itemData}. Otherwise it'll be
-     * called multiple times.
-     *
-     * 1. First with empty itemData.
-     *
-     * 2. Then with the thumbnail data.
-     *
-     * 3. Then with the original. For live photos, this will happen twice, first
-     *    with the original image, then again with the video component.
-     *
-     * 4. At this point, the data for this file will be considered final, and
-     *    subsequent calls for the same file will return this same value unless
-     *    it is invalidated.
-     *
-     *   The same entry might get updated multiple times, as we start with the
-     * thumbnail but then also update this as we keep getting more of the
-     * original (e.g. for a live photo, it'll be updated once when we get the
-     * original image, and then again later once we get the original video).
-     *
-     * @param index
-     * @param file
-     * @param onUpdate Callback invoked each time we have data about the given
-     * {@link file}.
-     */
-    private async enqueueUpdates(
-        file: EnteFile,
-        onUpdate: (itemData: SlideData) => void,
-    ) {
-        const update = (itemData: SlideData) => {
-            this.itemDataByFileID.set(file.id, itemData);
-            onUpdate(itemData);
-        };
-
-        // We might not have anything to show immediately, though in most cases
-        // a cached renderable thumbnail URL will be available shortly.
-        //
-        // Meanwhile,
-        //
-        // 1. Return empty slide data; PhotoSwipe will not show anything in the
-        //    image area but will otherwise render UI controls properly.
-        //
-        // 2. Insert empty data so that we don't enqueue multiple updates.
-
-        const itemData = this.itemDataByFileID.get(file.id);
-            if (itemData) {
-                itemData = {};
-                this.itemDataByFileID.set(file.id, itemData);
-                this.enqueueUpdates(index, file);
+    itemDataForFile(file: EnteFile, needsRefresh: () => void) {
+        let itemData = this.itemDataByFileID.get(file.id);
+        if (itemData) {
+            if (!itemData.isFinal) {
+                // We assume that there is only one file viewer that is using us
+                // at a given point of time. This assumption is currently valid.
+                this.needsRefreshByFileID.set(file.id, needsRefresh);
             }
+        } else {
+            itemData = {};
+            this.itemDataByFileID.set(file.id, itemData);
+            this.needsRefreshByFileID.set(file.id, needsRefresh);
+            void this.enqueueUpdates(file);
         }
 
+        return itemData;
+    }
+
+    private async enqueueUpdates(file: EnteFile) {
+        const update = (itemData: ItemData) => {
+            this.itemDataByFileID.set(file.id, itemData);
+            this.needsRefreshByFileID.get(file.id)?.();
+        };
+
         const thumbnailURL = await downloadManager.renderableThumbnailURL(file);
-        const thumbnailData = await augmentedWithDimensions(thumbnailURL);
+        // TODO(PS):
+        const thumbnailData = await withDimensions(thumbnailURL!);
         update({
             ...thumbnailData,
             isContentLoading: true,
@@ -121,25 +133,29 @@ export class FileViewerDataSource {
             case FileType.image: {
                 const sourceURLs =
                     await downloadManager.renderableSourceURLs(file);
-                update(await augmentedWithDimensions(sourceURLs.url));
+                // TODO(PS):
+                update(await withDimensions(sourceURLs.url as string));
                 break;
             }
 
             case FileType.video: {
                 const sourceURLs =
                     await downloadManager.renderableSourceURLs(file);
-                const disableDownload = !!this.opts.disableDownload;
-                update({ html: videoHTML(sourceURLs.url, disableDownload) });
+                // const disableDownload = !!this.opts.disableDownload;
+                // update({ html: videoHTML(sourceURLs.url, disableDownload) });
+                // TODO(PS):
+                update({ videoURL: sourceURLs.url as string });
                 break;
             }
 
-            default: {
+            case FileType.livePhoto: {
                 const sourceURLs =
                     await downloadManager.renderableSourceURLs(file);
                 const livePhotoSourceURLs =
                     sourceURLs.url as LivePhotoSourceURL;
                 const imageURL = await livePhotoSourceURLs.image();
-                const imageData = await augmentedWithDimensions(imageURL);
+                // TODO(PS):
+                const imageData = await withDimensions(imageURL!);
                 update(imageData);
                 const livePhotoVideoURL = await livePhotoSourceURLs.video();
                 update({ ...imageData, livePhotoVideoURL });
@@ -152,9 +168,9 @@ export class FileViewerDataSource {
 /**
  * Take a image URL, determine its dimensions using browser APIs, and return the URL
  * and its dimensions in a form that can directly be passed to PhotoSwipe as
- * {@link SlideData}.
+ * {@link ItemData}.
  */
-const augmentedWithDimensions = (imageURL: string): Promise<SlideData> =>
+const withDimensions = (imageURL: string): Promise<ItemData> =>
     new Promise((resolve) => {
         const image = new Image();
         image.onload = () => {
