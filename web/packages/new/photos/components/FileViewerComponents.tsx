@@ -13,7 +13,9 @@ import { aboveFileViewerContentZ } from "./utils/z-index";
 import dynamic from "next/dynamic";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-const FV5 = dynamic(() => import("./FileViewer5"), { ssr: false });
+const FV5 = dynamic(() => import("@/gallery/components/viewer/FileViewer"), {
+    ssr: false,
+});
 const FVD = () => <></>;
 
 export const FileViewer: React.FC = (props) => {

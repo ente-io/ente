@@ -115,6 +115,12 @@ body {
     display: none;
 }
 
+.pswp-ente {
+    /* The default z-index for PhotoSwipe is 10k, way beyond everything else.
+      Give it a more moderate value so that MUI elements can be used with it. */
+    z-index: calc(var(--mui-zIndex-drawer) - 1);
+}
+
 /*
   Make the controllable video elements we render as custom PhotoSwipe content
   take up the entire container.
