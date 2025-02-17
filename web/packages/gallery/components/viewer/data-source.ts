@@ -35,7 +35,6 @@ type ItemData = SlideData & {
     livePhotoVideoURL?: string;
     isContentLoading?: boolean;
     isContentZoomable?: boolean;
-    isFinal?: boolean;
 };
 
 /**
@@ -98,16 +97,13 @@ export class FileViewerDataSource {
      */
     itemDataForFile(file: EnteFile, needsRefresh: () => void) {
         let itemData = this.itemDataByFileID.get(file.id);
-        if (itemData) {
-            if (!itemData.isFinal) {
-                // We assume that there is only one file viewer that is using us
-                // at a given point of time. This assumption is currently valid.
-                this.needsRefreshByFileID.set(file.id, needsRefresh);
-            }
-        } else {
+        // We assume that there is only one file viewer that is using us
+        // at a given point of time. This assumption is currently valid.
+        this.needsRefreshByFileID.set(file.id, needsRefresh);
+
+        if (!itemData) {
             itemData = {};
             this.itemDataByFileID.set(file.id, itemData);
-            this.needsRefreshByFileID.set(file.id, needsRefresh);
             void this.enqueueUpdates(file);
         }
 
@@ -134,7 +130,8 @@ export class FileViewerDataSource {
                 const sourceURLs =
                     await downloadManager.renderableSourceURLs(file);
                 // TODO(PS):
-                update(await withDimensions(sourceURLs.url as string));
+                const itemData = await withDimensions(sourceURLs.url as string);
+                update(itemData);
                 break;
             }
 
