@@ -37,6 +37,8 @@ class SmartMemoriesService {
   List<SmartMemory>? _cachedMemories;
   Future<List<SmartMemory>>? _future;
 
+  Vector? _clipTextVector;
+
   static const _calculationWindowDays = 14;
 
   // Singleton pattern
@@ -50,8 +52,9 @@ class SmartMemoriesService {
     _isInit = true;
 
     _memoriesDB.clearMemoriesSeenBeforeTime(
-        DateTime.now().microsecondsSinceEpoch - (_calculationWindowDays * microSecondsInDay),
-      );
+      DateTime.now().microsecondsSinceEpoch -
+          (_calculationWindowDays * microSecondsInDay),
+    );
     Bus.instance.on<FilesUpdatedEvent>().where((event) {
       return event.type == EventType.deletedFromEverywhere;
     }).listen((event) {
@@ -813,9 +816,8 @@ class SmartMemoriesService {
     // Get clip scores for each file
     const query =
         'Photo of a precious memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion';
-    // TODO: lau: optimize this later so we don't keep computing embedding
-    final textEmbedding = await MLComputer.instance.runClipText(query);
-    final textVector = Vector.fromList(textEmbedding);
+    _clipTextVector ??=
+        Vector.fromList(await MLComputer.instance.runClipText(query));
     const clipThreshold = 0.75;
     final fileToScore = <int, double>{};
     for (final mem in safeMemories) {
@@ -824,7 +826,7 @@ class SmartMemoriesService {
         fileToScore[mem.file.uploadedFileID!] = 0;
         continue;
       }
-      final score = clip.vector.dot(textVector);
+      final score = clip.vector.dot(_clipTextVector!);
       fileToScore[mem.file.uploadedFileID!] = score;
     }
 
