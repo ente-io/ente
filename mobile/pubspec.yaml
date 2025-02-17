@@ -30,8 +30,8 @@ dependencies:
   cached_network_image: ^3.0.0
   chewie:
     git:
-      url: https://github.com/ente-io/chewie.git
-      ref: forked_video_player_plus
+      url: https://github.com/prateekmedia/chewie.git
+      ref: latest-changes
   collection: # dart
   computer:
     git: "https://github.com/ente-io/computer.git"
@@ -142,7 +142,7 @@ dependencies:
       url: https://github.com/ente-io/onnxruntime.git
       ref: ios_only
   open_mail_app: ^0.4.5
-  package_info_plus: ^4.1.0
+  package_info_plus:
   page_transition: ^2.0.2
   panorama:
     git:

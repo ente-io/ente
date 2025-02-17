@@ -2,6 +2,7 @@ import 'dart:async';
 import "dart:io";
 
 import 'package:chewie/chewie.dart';
+// import 'package:chewie/src/notifiers/player_notifier.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import "package:fluttertoast/fluttertoast.dart";
@@ -22,6 +23,7 @@ import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import "package:photos/utils/wakelock_util.dart";
+// import "package:provider/provider.dart";
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -55,6 +57,8 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
   bool _isFileSwipeLocked = false;
   late final StreamSubscription<GuestViewEvent> _fileSwipeLockEventSubscription;
   File? previewFile;
+
+  bool initializedPlayerNotifier = false;
 
   @override
   void initState() {
@@ -237,9 +241,6 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
     _videoPlayerController!.addListener(() {
       if (_isPlaying != _videoPlayerController!.value.isPlaying) {
         _isPlaying = _videoPlayerController!.value.isPlaying;
-        if (widget.playbackCallback != null) {
-          widget.playbackCallback!(_isPlaying);
-        }
         unawaited(_keepScreenAliveOnPlaying(_isPlaying));
       }
     });
@@ -251,10 +252,13 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
       looping: true,
       allowMuting: true,
       allowFullScreen: false,
-      customControls: VideoControls(
-        file: widget.file,
-        onStreamChange: widget.onStreamChange,
-      ),
+      customControls: (hideStuff) {
+        widget.playbackCallback!(hideStuff);
+        return VideoControls(
+          file: widget.file,
+          onStreamChange: widget.onStreamChange,
+        );
+      },
     );
     return Container(
       color: Colors.black,

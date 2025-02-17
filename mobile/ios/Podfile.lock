@@ -450,12 +450,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/wakelock_plus/ios"
 
 SPEC CHECKSUMS:
-  background_fetch: 39f11371c0dce04b001c4bfd5e782bcccb0a85e2
-  battery_info: 09f5c9ee65394f2291c8c6227bedff345b8a730c
-  connectivity_plus: ddd7f30999e1faaef5967c23d5b6d503d10434db
-  cupertino_http: 947a233f40cfea55167a49f2facc18434ea117ba
-  dart_ui_isolate: d5bcda83ca4b04f129d70eb90110b7a567aece14
-  device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
+  background_fetch: 94b36ee293e82972852dba8ede1fbcd3bd3d9d57
+  battery_info: a06b00c06a39bc94c92beebf600f1810cb6c8c87
+  connectivity_plus: 3f6c9057f4cd64198dc826edfb0542892f825343
+  cupertino_http: 94ac07f5ff090b8effa6c5e2c47871d48ab7c86c
+  dart_ui_isolate: 46f6714abe6891313267153ef6f9748d8ecfcab1
+  device_info_plus: 335f3ce08d2e174b9fdc3db3db0f4e3b1f66bd89
   ffmpeg-kit-ios-full-gpl: 80adc341962e55ef709e36baa8ed9a70cf4ea62b
   ffmpeg_kit_flutter_full_gpl: ce18b888487c05c46ed252cd2e7956812f2e3bd1
   file_saver: 6cdbcddd690cb02b0c1a0c225b37cd805c2bf8b6
@@ -495,14 +495,14 @@ SPEC CHECKSUMS:
   motionphoto: 584b43031ead3060225cdff08fa49818879801d2
   move_to_background: 155f7bfbd34d43ad847cb630d2d2d87c17199710
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
-  native_video_player: d12af78a1a4a8cf09775a5177d5b392def6fd23c
-  objective_c: 77e887b5ba1827970907e10e832eec1683f3431d
-  onnxruntime: e7c2ae44385191eaad5ae64c935a72debaddc997
+  native_video_player: b65c58951ede2f93d103a25366bdebca95081265
+  objective_c: 89e720c30d716b036faf9c9684022048eee1eee2
+  onnxruntime: f9b296392c96c42882be020a59dbeac6310d81b2
   onnxruntime-c: a909204639a1f035f575127ac406f781ac797c9c
   onnxruntime-objc: b6fab0f1787aa6f7190c2013f03037df4718bd8b
   open_mail_app: 06d5a4162866388a92b1df3deb96e56be20cf45c
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
-  package_info_plus: 566e1b7a2f3900e4b0020914ad3fc051dcc95596
+  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   photo_manager: d2fbcc0f2d82458700ee6256a15018210a81d413
@@ -527,7 +527,7 @@ SPEC CHECKSUMS:
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
   video_thumbnail: b637e0ad5f588ca9945f6e2c927f73a69a661140
   volume_controller: ca1cde542ee70fad77d388f82e9616488110942b
-  wakelock_plus: 8c239121a007daa1d6759c6acdc507860273dd2f
+  wakelock_plus: 04623e3f525556020ebd4034310f20fe7fda8b49
 
 PODFILE CHECKSUM: 20e086e6008977d43a3d40260f3f9bffcac748dd
 
