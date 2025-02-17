@@ -18,12 +18,16 @@ class Memory {
     _seenTime = DateTime.now().microsecondsSinceEpoch;
   }
 
-  Memory.fromUnseenFile(this.file) : _seenTime = -1;
+  Memory.fromFile(this.file, Map<int, int>? seenTimes)
+      : _seenTime = seenTimes?[file.generatedID] ?? -1;
 
-  static List<Memory> fromFiles(List<EnteFile> files) {
+  static List<Memory> fromFiles(
+    List<EnteFile> files,
+    Map<int, int>? seenTimes,
+  ) {
     final memories = <Memory>[];
     for (final file in files) {
-      memories.add(Memory.fromUnseenFile(file));
+      memories.add(Memory.fromFile(file, seenTimes));
     }
     return memories;
   }

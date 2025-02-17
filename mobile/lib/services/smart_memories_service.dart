@@ -5,6 +5,7 @@ import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import "package:ml_linalg/vector.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/models/base_location.dart";
@@ -25,10 +26,12 @@ import "package:photos/services/search_service.dart";
 
 class SmartMemoriesService {
   final _logger = Logger("SmartMemoriesService");
+  final _memoriesDB = MemoriesDB.instance;
 
   bool _isInit = false;
 
   late Locale _locale;
+  late Map<int, int> _seenTimes;
 
   List<SmartMemory>? _cachedMemories;
   Future<List<SmartMemory>>? _future;
@@ -64,6 +67,24 @@ class SmartMemoriesService {
     _future = null;
   }
 
+  Future markMemoryAsSeen(Memory memory) async {
+    memory.markSeen();
+    await _memoriesDB.markMemoryAsSeen(
+      memory,
+      DateTime.now().microsecondsSinceEpoch,
+    );
+    if (_cachedMemories != null && memory.file.generatedID != null) {
+      final generatedID = memory.file.generatedID!;
+      for (final smartMemory in _cachedMemories!) {
+        for (final mem in smartMemory.memories) {
+          if (mem.file.generatedID == generatedID) {
+            mem.markSeen();
+          }
+        }
+      }
+    }
+  }
+
   Future<List<SmartMemory>> getMemories(int? limit) async {
     if (!MemoriesService.instance.showMemories) {
       return [];
@@ -85,6 +106,7 @@ class SmartMemoriesService {
       final allFiles = Set<EnteFile>.from(
         await SearchService.instance.getAllFilesForSearch(),
       );
+      _seenTimes = await _memoriesDB.getSeenTimes();
       _logger.finest("All files length: ${allFiles.length}");
 
       // Pause 10 seconds TODO: lau: remove this later
@@ -307,6 +329,7 @@ class SmartMemoriesService {
               TripMemory(
                 Memory.fromFiles(
                   currentBlockFiles,
+                  _seenTimes,
                 ), // TODO: lau: properly check last seen times
                 location,
                 firstCreationTime: blockStart,
@@ -331,7 +354,7 @@ class SmartMemoriesService {
       if (lastBlockDuration >= 2 && lastBlockDuration <= 30) {
         tripLocations.add(
           TripMemory(
-            Memory.fromFiles(currentBlockFiles),
+            Memory.fromFiles(currentBlockFiles, _seenTimes),
             location,
             firstCreationTime: blockStart,
             lastCreationTime: lastTime,
@@ -398,7 +421,7 @@ class SmartMemoriesService {
     for (final baseLocation in baseLocations) {
       String name = "Base (${baseLocation.isCurrentBase ? 'current' : 'old'})";
       final String? locationName = await _tryFindLocationName(
-        Memory.fromFiles(baseLocation.files),
+        Memory.fromFiles(baseLocation.files, _seenTimes),
         base: true,
       );
       if (locationName != null) {
@@ -407,7 +430,7 @@ class SmartMemoriesService {
       }
       memoryResults.add(
         TripMemory(
-          Memory.fromFiles(baseLocation.files),
+          Memory.fromFiles(baseLocation.files, _seenTimes),
           baseLocation.location,
           name: name,
         ),
@@ -544,7 +567,7 @@ class SmartMemoriesService {
       dayMonthYearGroups
           .putIfAbsent(dayMonth, () => {})
           .putIfAbsent(year, () => [])
-          .add(Memory.fromUnseenFile(file));
+          .add(Memory.fromFile(file, _seenTimes));
     }
 
     // Process each nearby day-month to find significant days
@@ -611,7 +634,7 @@ class SmartMemoriesService {
 
         currentWeekYearGroups
             .putIfAbsent(year, () => [])
-            .add(Memory.fromUnseenFile(file));
+            .add(Memory.fromFile(file, _seenTimes));
       }
 
       // Process the week and see if it's significant
@@ -675,7 +698,7 @@ class SmartMemoriesService {
 
       currentMonthYearGroups
           .putIfAbsent(year, () => [])
-          .add(Memory.fromUnseenFile(file));
+          .add(Memory.fromFile(file, _seenTimes));
     }
 
     // Add the largest two months plus the month through the years
