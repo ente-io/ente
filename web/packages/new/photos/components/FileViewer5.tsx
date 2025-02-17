@@ -14,9 +14,10 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
 }
 
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { FileInfo } from "@/gallery/components/FileInfo";
 import type { EnteFile } from "@/media/file.js";
 import { Button, styled } from "@mui/material";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FileViewerPhotoSwipe } from "./FileViewerPhotoSwipe";
 
 export interface FileViewerProps {
@@ -65,7 +66,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     // This is not guaranteed, or even intended, to be in sync with the active
     // file shown within the file viewer. All that this guarantees is this will
     // refer to the file on which the last user initiated action was performed.
-    const [activeFile, setActiveFile] = setState<EnteFile | undefined>(
+    const [activeFile, setActiveFile] = useState<EnteFile | undefined>(
         undefined,
     );
 
@@ -101,6 +102,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     return (
         <Container>
             <Button>Test</Button>
+            <FileInfo {...fileInfoVisibilityProps} file={activeFile} />
         </Container>
     );
 };

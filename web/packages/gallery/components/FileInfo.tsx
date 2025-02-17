@@ -18,7 +18,7 @@ import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
-import { useModalVisibility } from "@/base/components/utils/modal";
+import { useModalVisibility, type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { haveWindow } from "@/base/env";
 import { nameAndExtension } from "@/base/file-name";
@@ -107,13 +107,11 @@ export interface FileInfoExif {
     parsed: ParsedMetadata | undefined;
 }
 
-export interface FileInfoProps {
+export type FileInfoProps = ModalVisibilityProps & {
     /**
      * The file whose information we are showing.
      */
     file: EnteFile | undefined;
-    showInfo: boolean;
-    handleCloseInfo: () => void;
     exif: FileInfoExif | undefined;
     /**
      * TODO: Rename and flip to allowEdits.
@@ -141,11 +139,11 @@ export interface FileInfoProps {
 }
 
 export const FileInfo: React.FC<FileInfoProps> = ({
+    open,
+    onClose,
     file,
     shouldDisableEdits,
     allowMap,
-    showInfo,
-    handleCloseInfo,
     exif,
     scheduleUpdate,
     refreshPhotoswipe,
@@ -209,8 +207,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         onSelectPerson?.(personID);
 
     return (
-        <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
-            <Titlebar onClose={handleCloseInfo} title={t("info")} backIsClose />
+        <FileInfoSidebar open={open} onClose={onClose}>
+            <Titlebar onClose={onClose} title={t("info")} backIsClose />
             <Stack sx={{ pt: 1, pb: 3, gap: "20px" }}>
                 <RenderCaption
                     {...{
@@ -343,7 +341,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
             </Stack>
             <RawExif
                 {...rawExifVisibilityProps}
-                onInfoClose={handleCloseInfo}
+                onInfoClose={onClose}
                 tags={exif?.tags}
                 fileName={file.metadata.title}
             />

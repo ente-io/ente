@@ -992,8 +992,8 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                 onConfirm={handleDeleteFile}
             />
             <FileInfo
-                showInfo={showInfo}
-                handleCloseInfo={handleCloseInfo}
+                open={showInfo}
+                onClose={handleCloseInfo}
                 file={photoSwipe?.currItem as EnteFile}
                 exif={exif?.value}
                 shouldDisableEdits={!isOwnFile}
