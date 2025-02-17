@@ -195,6 +195,10 @@ export class FileViewerPhotoSwipe {
             // Taking a step back though, the PhotoSwipe viewport is fixed, so
             // we can just directly map wheel / trackpad scrolls to zooming.
             wheelToZoom: true,
+            // Chrome yells about incorrectly mixing focus and aria-hidden if we
+            // leave this at the default (true) and then swipe between slides
+            // fast, or show MUI drawers etc.
+            trapFocus: false,
             // Set the index within files that we should open to. Subsequent
             // updates to the index will be tracked by PhotoSwipe internally.
             index: initialIndex,
