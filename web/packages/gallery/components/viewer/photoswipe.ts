@@ -11,6 +11,7 @@ import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import type { FileViewerProps } from "./FileViewer";
 import { createPSRegisterElementIconHTML } from "./icons";
+import { t } from "i18next";
 
 // TODO(PS): WIP gallery using upstream photoswipe
 //
@@ -327,8 +328,7 @@ export class FileViewerPhotoSwipe {
         pswp.on("uiRegister", () => {
             pswp.ui.registerElement({
                 name: "info",
-                title: "Info",
-                ariaLabel: "Info",
+                title: t("info"),
                 order: 15,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("info"),
