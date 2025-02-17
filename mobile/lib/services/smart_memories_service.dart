@@ -4,7 +4,9 @@ import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import "package:ml_linalg/vector.dart";
+import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/events/files_updated_event.dart";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -40,7 +42,26 @@ class SmartMemoriesService {
     if (_isInit) return;
     _locale = Localizations.localeOf(context);
     _isInit = true;
+
+    Bus.instance.on<FilesUpdatedEvent>().where((event) {
+      return event.type == EventType.deletedFromEverywhere;
+    }).listen((event) {
+      if (_cachedMemories == null) return;
+      final generatedIDs = event.updatedFiles
+          .where((element) => element.generatedID != null)
+          .map((e) => e.generatedID!)
+          .toSet();
+      for (final memory in _cachedMemories!) {
+        memory.memories
+            .removeWhere((m) => generatedIDs.contains(m.file.generatedID));
+      }
+    });
     _logger.info("Smart memories service initialized");
+  }
+
+  void clearCache() {
+    _cachedMemories = null;
+    _future = null;
   }
 
   Future<List<SmartMemory>> getMemories(int? limit) async {
@@ -426,7 +447,8 @@ class SmartMemoriesService {
             DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime())
                 .year;
         final String? locationName = await _tryFindLocationName(trip.memories);
-        String name = "Trip in $year"; // TODO lau: extract strings for translation
+        String name =
+            "Trip in $year"; // TODO lau: extract strings for translation
         if (locationName != null) {
           name = "Trip to $locationName";
         } else if (year == currentTime.year - 1) {

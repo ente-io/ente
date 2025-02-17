@@ -29,6 +29,7 @@ import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/search_service.dart';
+import "package:photos/services/smart_memories_service.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
@@ -216,6 +217,7 @@ class Configuration {
       CollectionsService.instance.clearCache();
       FavoritesService.instance.clearCache();
       MemoriesService.instance.clearCache();
+      SmartMemoriesService.instance.clearCache();
       SearchService.instance.clearCache();
       PersonService.instance.clearCache();
       unawaited(HomeWidgetService.instance.clearHomeWidget());
