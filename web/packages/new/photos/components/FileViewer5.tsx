@@ -13,6 +13,7 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
     throw new Error("Whoa");
 }
 
+import { useModalVisibility } from "@/base/components/utils/modal";
 import type { EnteFile } from "@/media/file.js";
 import { Button, styled } from "@mui/material";
 import { useCallback, useEffect, useRef } from "react";
@@ -57,8 +58,23 @@ const FileViewer: React.FC<FileViewerProps> = ({
 }) => {
     const pswpRef = useRef<FileViewerPhotoSwipe | undefined>();
 
+    // Whenever we get a callback from our custom PhotoSwipe instance, we also
+    // get the active file on which that action was performed as an argument.
+    // Save it as a prop so that the rest of our React tree can use it.
+    //
+    // This is not guaranteed, or even intended, to be in sync with the active
+    // file shown within the file viewer. All that this guarantees is this will
+    // refer to the file on which the last user initiated action was performed.
+    const [activeFile, setActiveFile] = setState<EnteFile | undefined>(
+        undefined,
+    );
+
+    const { show: showFileInfo, props: fileInfoVisibilityProps } =
+        useModalVisibility();
+
     const handleViewInfo = useCallback((file: EnteFile) => {
-        console.log("view-info", file);
+        setActiveFile(file);
+        showFileInfo();
     }, []);
 
     useEffect(() => {
