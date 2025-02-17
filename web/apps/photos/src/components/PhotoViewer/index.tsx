@@ -19,7 +19,7 @@ import type { Collection } from "@/media/collection";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
-import { ConfirmDeleteFileDialog } from "@/new/photos/components/FileViewer";
+import { ConfirmDeleteFileDialog } from "@/new/photos/components/FileViewerComponents";
 import { ImageEditorOverlay } from "@/new/photos/components/ImageEditorOverlay";
 import { moveToTrash } from "@/new/photos/services/collection";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
