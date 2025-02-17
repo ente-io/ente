@@ -9,9 +9,9 @@ import {
 } from "@/gallery/services/download";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
+import { t } from "i18next";
 import type { FileViewerProps } from "./FileViewer";
 import { createPSRegisterElementIconHTML } from "./icons";
-import { t } from "i18next";
 
 // TODO(PS): WIP gallery using upstream photoswipe
 //
@@ -316,6 +316,9 @@ export class FileViewerPhotoSwipe {
             onClose();
         });
 
+        const withCurrentFile = (cb: (file: EnteFile) => void) => () =>
+            cb(this.files[this.pswp.currIndex]!);
+
         // Add our custom UI elements to inside the PhotoSwipe dialog.
         //
         // API docs for registerElement:
@@ -332,15 +335,7 @@ export class FileViewerPhotoSwipe {
                 order: 15,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("info"),
-                onClick: (e, element, pswp) => {
-                    const file = this.files[pswp.currIndex];
-                    if (!file) {
-                        assertionFailed();
-                        return;
-                    }
-
-                    onViewInfo(file);
-                },
+                onClick: withCurrentFile(onViewInfo),
             });
         });
 
