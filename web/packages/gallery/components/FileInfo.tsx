@@ -18,7 +18,10 @@ import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
-import { useModalVisibility, type ModalVisibilityProps } from "@/base/components/utils/modal";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { haveWindow } from "@/base/env";
 import { nameAndExtension } from "@/base/file-name";
@@ -136,7 +139,7 @@ export type FileInfoProps = ModalVisibilityProps & {
      * Called when the user selects a person in the file info panel.
      */
     onSelectPerson?: ((personID: string) => void) | undefined;
-}
+};
 
 export const FileInfo: React.FC<FileInfoProps> = ({
     open,
@@ -398,7 +401,16 @@ const parseExifInfo = (
 
 const FileInfoSidebar = styled(
     (props: Pick<DialogProps, "open" | "onClose" | "children">) => (
-        <SidebarDrawer {...props} anchor="right" />
+        <SidebarDrawer
+            {...props}
+            anchor="right"
+            // See: [Note: Overjealous Chrome? Complicated ARIA?], but this time
+            // with a different workaround.
+            //
+            // https://github.com/mui/material-ui/issues/43106#issuecomment-2514637251
+            disableRestoreFocus={true}
+            closeAfterTransition={true}
+        />
     ),
 )(({ theme }) => ({
     zIndex: fileInfoDrawerZ,

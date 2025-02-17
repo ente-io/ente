@@ -198,6 +198,9 @@ export class FileViewerPhotoSwipe {
             // Chrome yells about incorrectly mixing focus and aria-hidden if we
             // leave this at the default (true) and then swipe between slides
             // fast, or show MUI drawers etc.
+            //
+            // See: [Note: Overjealous Chrome? Complicated ARIA?], but time with
+            // a different library.
             trapFocus: false,
             // Set the index within files that we should open to. Subsequent
             // updates to the index will be tracked by PhotoSwipe internally.
