@@ -19,6 +19,7 @@ class MemoryCoverWidget extends StatefulWidget {
   static const aspectRatio = 0.68;
   static const horizontalPadding = 2.5;
   final double maxScaleOffsetX;
+  final String? title;
 
   const MemoryCoverWidget({
     required this.memories,
@@ -27,6 +28,7 @@ class MemoryCoverWidget extends StatefulWidget {
     required this.maxHeight,
     required this.maxWidth,
     required this.maxScaleOffsetX,
+    this.title,
     super.key,
   });
 
@@ -45,7 +47,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
 
     final widthOfScreen = MediaQuery.sizeOf(context).width;
     final index = _getNextMemoryIndex();
-    final title = _getTitle(widget.memories[index]);
+    final title = widget.title ?? _getTitle(widget.memories[index]);
     final memory = widget.memories[index];
     final isSeen = memory.isSeen();
     final brightness =

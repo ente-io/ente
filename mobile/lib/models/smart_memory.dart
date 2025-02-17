@@ -1,4 +1,4 @@
-import "package:photos/models/file/file.dart";
+import "package:photos/models/memory.dart";
 
 enum MemoryType {
   people,
@@ -8,14 +8,16 @@ enum MemoryType {
 }
 
 abstract class SmartMemory {
-  final List<EnteFile> files;
+  final List<Memory> memories;
   final MemoryType type;
+  String? name;
   int? firstCreationTime;
   int? lastCreationTime;
 
   SmartMemory(
-    this.files,
+    this.memories,
     this.type, {
+    this.name,
     this.firstCreationTime,
     this.lastCreationTime,
   });
@@ -24,9 +26,9 @@ abstract class SmartMemory {
     if (firstCreationTime != null && lastCreationTime != null) {
       return (firstCreationTime! + lastCreationTime!) ~/ 2;
     }
-    final List<int> creationTimes = files
-        .where((file) => file.creationTime != null)
-        .map((file) => file.creationTime!)
+    final List<int> creationTimes = memories
+        .where((memory) => memory.file.creationTime != null)
+        .map((memory) => memory.file.creationTime!)
         .toList();
     if (creationTimes.length < 2) {
       return creationTimes.isEmpty ? 0 : creationTimes.first;
@@ -38,7 +40,8 @@ abstract class SmartMemory {
   }
 
   SmartMemory copyWith({
-    List<EnteFile>? files,
+    List<Memory>? memories,
+    String? name,
     int? firstCreationTime,
     int? lastCreationTime,
   });

@@ -1,27 +1,30 @@
-import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
+import "package:photos/models/memory.dart";
 import "package:photos/models/smart_memory.dart";
 
 class TripMemory extends SmartMemory {
   final Location location;
 
   TripMemory(
-    files,
+    List<Memory> memories,
     this.location, {
+    super.name,
     super.firstCreationTime,
     super.lastCreationTime,
-  }) : super(files, MemoryType.trips);
+  }) : super(memories, MemoryType.trips);
 
   @override
-  SmartMemory copyWith({
-    List<EnteFile>? files,
+  TripMemory copyWith({
+    List<Memory>? memories,
     Location? location,
+    String? name,
     int? firstCreationTime,
     int? lastCreationTime,
   }) {
     return TripMemory(
-      files ?? this.files,
+      memories ?? super.memories,
       location ?? this.location,
+      name: name ?? super.name,
       firstCreationTime: firstCreationTime ?? super.firstCreationTime,
       lastCreationTime: lastCreationTime ?? super.lastCreationTime,
     );

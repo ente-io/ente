@@ -75,5 +75,7 @@ class FlagService {
 
   bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
 
+  bool get showSmartMemories => internalUser;
+
   String get castUrl => flags.castUrl;
 }
