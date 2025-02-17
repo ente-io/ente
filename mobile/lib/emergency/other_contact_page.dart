@@ -7,7 +7,7 @@ import "package:photos/emergency/model.dart";
 import "package:photos/emergency/recover_others_account.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/models/key_attributes.dart";
+import "package:photos/models/api/user/key_attributes.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
