@@ -249,6 +249,15 @@ export class FileViewerPhotoSwipe {
             video?.pause();
         });
 
+        pswp.on("contentActivate", (e) => {
+            // Undo the effect of a previous "contentDeactivate".
+            if (e.content?.slide.data?.livePhotoVideoURL) {
+                e.content?.slide?.container
+                    ?.getElementsByTagName("video")[0]
+                    ?.play();
+            }
+        });
+
         // The user did some action within the file viewer to close it.
         pswp.on("close", () => {
             // Clear intervals.

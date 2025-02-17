@@ -138,8 +138,6 @@ export class FileViewerDataSource {
             case FileType.video: {
                 const sourceURLs =
                     await downloadManager.renderableSourceURLs(file);
-                // const disableDownload = !!this.opts.disableDownload;
-                // update({ html: videoHTML(sourceURLs.url, disableDownload) });
                 // TODO(PS):
                 update({ videoURL: sourceURLs.url as string });
                 break;
