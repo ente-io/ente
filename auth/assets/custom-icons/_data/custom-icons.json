@@ -362,6 +362,14 @@
       "title": "Estateguru"
     },
     {
+      "title": "EVEOnline",
+      "slug": "eve_online",
+      "altNames": [
+        "EVE Online"
+      ],
+      "hex": "858585"
+    },
+    {
       "title": "Fastmail"
     },
     {
