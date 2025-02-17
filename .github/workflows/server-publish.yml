@@ -31,8 +31,8 @@ jobs:
                   enableBuildKit: true
                   multiPlatform: true
                   platform: linux/amd64,linux/arm64
-                  buildArgs: GIT_COMMIT=${{ inputs.commit }}
-                  tags: ${{ inputs.commit }}, latest
+                  buildArgs: GIT_COMMIT=${{ env.museum_commit }}
+                  tags: ${{ env.museum_commit }}, latest
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
 
