@@ -426,7 +426,7 @@ class SmartMemoriesService {
             DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime())
                 .year;
         final String? locationName = await _tryFindLocationName(trip.memories);
-        String name = "Trip in $year";
+        String name = "Trip in $year"; // TODO lau: extract strings for translation
         if (locationName != null) {
           name = "Trip to $locationName";
         } else if (year == currentTime.year - 1) {
