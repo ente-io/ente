@@ -43,19 +43,14 @@ class RemoteDB {
   Future<void> insertCollections(List<Collection> collections) async {
     if (collections.isEmpty) return;
     final stopwatch = Stopwatch()..start();
-    int inserted = 0;
     await Future.forEach(collections.slices(_batchInsertMaxCount),
         (slice) async {
-      debugPrint(
-        '$runtimeType insertCollections inserting slice of [${inserted + 1}, ${inserted + slice.length}] entries',
-      );
       final List<List<Object?>> values =
           slice.map((e) => e.rowValiues()).toList();
       await _sqliteDB.executeBatch(
         'INSERT OR REPLACE INTO collections ($collectionColumns) values($collectionValuePlaceHolder)',
         values,
       );
-      inserted += slice.length;
     });
     debugPrint(
       '$runtimeType insertCollections complete in ${stopwatch.elapsed.inMilliseconds}ms for ${collections.length} collections',
