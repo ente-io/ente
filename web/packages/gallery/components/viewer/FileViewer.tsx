@@ -18,7 +18,7 @@ import { FileInfo } from "@/gallery/components/FileInfo";
 import type { EnteFile } from "@/media/file.js";
 import { Button, styled } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { FileViewerPhotoSwipe } from "./FileViewerPhotoSwipe";
+import { FileViewerPhotoSwipe } from "./photoswipe";
 
 export interface FileViewerProps {
     /**

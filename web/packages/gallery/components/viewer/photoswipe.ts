@@ -9,7 +9,7 @@ import {
 } from "@/gallery/services/download";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
-import type { FileViewerProps } from "./FileViewer5";
+import type { FileViewerProps } from "./FileViewer";
 
 // import { renderToString } from "react-dom/server";
 
