@@ -4,6 +4,7 @@ import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import "package:ml_linalg/vector.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
@@ -36,6 +37,8 @@ class SmartMemoriesService {
   List<SmartMemory>? _cachedMemories;
   Future<List<SmartMemory>>? _future;
 
+  static const _calculationWindowDays = 14;
+
   // Singleton pattern
   SmartMemoriesService._privateConstructor();
   static final instance = SmartMemoriesService._privateConstructor();
@@ -46,6 +49,9 @@ class SmartMemoriesService {
     _locale = Localizations.localeOf(context);
     _isInit = true;
 
+    _memoriesDB.clearMemoriesSeenBeforeTime(
+        DateTime.now().microsecondsSinceEpoch - (_calculationWindowDays * microSecondsInDay),
+      );
     Bus.instance.on<FilesUpdatedEvent>().where((event) {
       return event.type == EventType.deletedFromEverywhere;
     }).listen((event) {
