@@ -730,7 +730,7 @@ class CollectionsService {
         await updateMagicMetadata(collection, {"subType": 0});
       }
       final encryptedName = CryptoUtil.encryptSync(
-        utf8.encode(newName) as Uint8List,
+        utf8.encode(newName),
         getCollectionKey(collection.id),
       );
       await _enteDio.post(
@@ -781,7 +781,7 @@ class CollectionsService {
 
       final key = getCollectionKey(collection.id);
       final encryptedMMd = await CryptoUtil.encryptChaCha(
-        utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+        utf8.encode(jsonEncode(jsonToUpdate)),
         key,
       );
       // for required field, the json validator on golang doesn't treat 0 as valid
@@ -840,7 +840,7 @@ class CollectionsService {
 
       final key = getCollectionKey(collection.id);
       final encryptedMMd = await CryptoUtil.encryptChaCha(
-        utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+        utf8.encode(jsonEncode(jsonToUpdate)),
         key,
       );
       // for required field, the json validator on golang doesn't treat 0 as valid
@@ -900,7 +900,7 @@ class CollectionsService {
 
       final key = getCollectionKey(collection.id);
       final encryptedMMd = await CryptoUtil.encryptChaCha(
-        utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+        utf8.encode(jsonEncode(jsonToUpdate)),
         key,
       );
       // for required field, the json validator on golang doesn't treat 0 as valid
@@ -1271,7 +1271,7 @@ class CollectionsService {
     final encryptedKeyData =
         CryptoUtil.encryptSync(collectionKey, _config.getKey()!);
     final encryptedName = CryptoUtil.encryptSync(
-      utf8.encode(albumName) as Uint8List,
+      utf8.encode(albumName),
       collectionKey,
     );
     final collection = await createAndCacheCollection(
@@ -1321,7 +1321,7 @@ class CollectionsService {
     final encryptedKeyData =
         CryptoUtil.encryptSync(collectionKey, _config.getKey()!);
     final encryptedPath =
-        CryptoUtil.encryptSync(utf8.encode(path) as Uint8List, collectionKey);
+        CryptoUtil.encryptSync(utf8.encode(path), collectionKey);
     final collection = await createAndCacheCollection(
       CreateRequest(
         encryptedKey: CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),

@@ -42,7 +42,7 @@ class ExtentsPageView extends StatefulWidget {
   /// child that could possibly be displayed in the page view, instead of just
   /// those children that are actually visible.
   ExtentsPageView({
-    Key? key,
+    super.key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
     required this.controller,
@@ -53,8 +53,7 @@ class ExtentsPageView extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.openDrawer,
   })  : childrenDelegate = SliverChildListDelegate(children),
-        extents = children.length,
-        super(key: key);
+        extents = children.length;
 
   /// Creates a scrollable list that works page by page using widgets that are
   /// created on demand.
@@ -73,7 +72,7 @@ class ExtentsPageView extends StatefulWidget {
   /// you are planning to change child order at a later time, consider using
   /// [PageView] or [PageView.custom].
   ExtentsPageView.builder({
-    Key? key,
+    super.key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
     required this.controller,
@@ -86,11 +85,10 @@ class ExtentsPageView extends StatefulWidget {
     this.openDrawer,
   })  : childrenDelegate =
             SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
-        extents = 0,
-        super(key: key);
+        extents = 0;
 
   ExtentsPageView.extents({
-    Key? key,
+    super.key,
     this.extents = 1,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
@@ -107,8 +105,7 @@ class ExtentsPageView extends StatefulWidget {
           childCount: itemCount,
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
-        ),
-        super(key: key);
+        );
 
   /// Creates a scrollable list that works page by page with a custom child
   /// model.
@@ -191,7 +188,7 @@ class ExtentsPageView extends StatefulWidget {
   /// ```
   /// {@end-tool}
   const ExtentsPageView.custom({
-    Key? key,
+    super.key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
     required this.controller,
@@ -201,8 +198,7 @@ class ExtentsPageView extends StatefulWidget {
     required this.childrenDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
     this.openDrawer,
-  })  : extents = 0,
-        super(key: key);
+  })  : extents = 0;
 
   /// The number of pages to build off screen.
   ///

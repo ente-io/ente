@@ -17,8 +17,8 @@ class NewAlbumIcon extends StatelessWidget {
     required this.icon,
     required this.iconButtonType,
     this.color,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

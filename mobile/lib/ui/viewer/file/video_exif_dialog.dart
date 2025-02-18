@@ -7,7 +7,7 @@ import "package:photos/theme/ente_theme.dart";
 class VideoExifDialog extends StatelessWidget {
   final FFProbeProps props;
 
-  const VideoExifDialog({Key? key, required this.props}) : super(key: key);
+  const VideoExifDialog({super.key, required this.props});
 
   @override
   Widget build(BuildContext context) {

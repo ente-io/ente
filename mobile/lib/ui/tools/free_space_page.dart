@@ -13,9 +13,9 @@ class FreeSpacePage extends StatefulWidget {
 
   const FreeSpacePage(
     this.status, {
-    Key? key,
+    super.key,
     this.clearSpaceForFolder = false,
-  }) : super(key: key);
+  });
 
   @override
   State<FreeSpacePage> createState() => _FreeSpacePageState();

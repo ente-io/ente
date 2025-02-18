@@ -28,7 +28,7 @@ class RecoveryKeyPage extends StatefulWidget {
   const RecoveryKeyPage(
     this.recoveryKey,
     this.doneText, {
-    Key? key,
+    super.key,
     this.showAppBar,
     this.onDone,
     this.isDismissible,
@@ -36,7 +36,7 @@ class RecoveryKeyPage extends StatefulWidget {
     this.text,
     this.subText,
     this.showProgressBar = false,
-  }) : super(key: key);
+  });
 
   @override
   State<RecoveryKeyPage> createState() => _RecoveryKeyPageState();

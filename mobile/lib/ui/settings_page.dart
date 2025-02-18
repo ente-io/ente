@@ -33,7 +33,7 @@ import "package:photos/utils/navigation_util.dart";
 class SettingsPage extends StatelessWidget {
   final ValueNotifier<String?> emailNotifier;
 
-  const SettingsPage({Key? key, required this.emailNotifier}) : super(key: key);
+  const SettingsPage({super.key, required this.emailNotifier});
 
   @override
   Widget build(BuildContext context) {

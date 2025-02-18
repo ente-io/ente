@@ -325,7 +325,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
       // decrypt the master key
       final kekSalt = CryptoUtil.getSaltToDeriveKey();
       final derivedKeyResult = await CryptoUtil.deriveSensitiveKey(
-        utf8.encode(password) as Uint8List,
+        utf8.encode(password),
         kekSalt,
       );
       final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);

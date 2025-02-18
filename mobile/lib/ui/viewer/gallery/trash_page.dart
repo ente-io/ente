@@ -126,7 +126,7 @@ class TrashPage extends StatelessWidget {
 }
 
 class BottomButtonsWidget extends StatelessWidget {
-  const BottomButtonsWidget({Key? key}) : super(key: key);
+  const BottomButtonsWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

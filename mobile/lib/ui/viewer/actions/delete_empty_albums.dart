@@ -13,7 +13,7 @@ import 'package:photos/ui/components/models/button_type.dart';
 
 class DeleteEmptyAlbums extends StatefulWidget {
   final List<Collection> collections;
-  const DeleteEmptyAlbums(this.collections, {Key? key}) : super(key: key);
+  const DeleteEmptyAlbums(this.collections, {super.key});
 
   @override
   State<DeleteEmptyAlbums> createState() => _DeleteEmptyAlbumsState();

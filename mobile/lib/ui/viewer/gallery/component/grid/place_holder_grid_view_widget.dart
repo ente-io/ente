@@ -8,8 +8,8 @@ class PlaceHolderGridViewWidget extends StatelessWidget {
   const PlaceHolderGridViewWidget(
     this.count,
     this.columns, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final int count, columns;
 

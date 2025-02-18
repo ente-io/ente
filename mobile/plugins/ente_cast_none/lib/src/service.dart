@@ -17,19 +17,16 @@ class CastServiceImpl extends CastService {
 
   @override
   Future<List<(String, Object)>> searchDevices() {
-    // TODO: implement searchDevices
     throw UnimplementedError();
   }
 
   @override
   Future<void> closeActiveCasts() {
-    // TODO: implement closeActiveCasts
     throw UnimplementedError();
   }
 
   @override
   Map<String, String> getActiveSessions() {
-    // TODO: implement getActiveSessions
     throw UnimplementedError();
   }
 }

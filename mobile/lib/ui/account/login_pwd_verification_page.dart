@@ -21,8 +21,7 @@ import "package:photos/utils/email_util.dart";
 class LoginPasswordVerificationPage extends StatefulWidget {
   final SrpAttributes srpAttributes;
 
-  const LoginPasswordVerificationPage({Key? key, required this.srpAttributes})
-      : super(key: key);
+  const LoginPasswordVerificationPage({super.key, required this.srpAttributes});
 
   @override
   State<LoginPasswordVerificationPage> createState() =>

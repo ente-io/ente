@@ -1,6 +1,5 @@
 import "dart:async";
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:ente_crypto/ente_crypto.dart';
@@ -216,7 +215,7 @@ extension HiddenService on CollectionsService {
     final encKey =
         CryptoUtil.encryptSync(uncategorizedCollectionKey, config.getKey()!);
     final encName = CryptoUtil.encryptSync(
-      utf8.encode("Uncategorized") as Uint8List,
+      utf8.encode("Uncategorized"),
       uncategorizedCollectionKey,
     );
     final collection = await createAndCacheCollection(
@@ -242,7 +241,7 @@ extension HiddenService on CollectionsService {
     final encryptedKeyData =
         CryptoUtil.encryptSync(collectionKey, config.getKey()!);
     final encryptedName = CryptoUtil.encryptSync(
-      utf8.encode(name) as Uint8List,
+      utf8.encode(name),
       collectionKey,
     );
     final jsonToUpdate = CollectionMagicMetadata(
@@ -251,7 +250,7 @@ extension HiddenService on CollectionsService {
     ).toJson();
     assert(jsonToUpdate.length == 2, "metadata should have two keys");
     final encryptedMMd = await CryptoUtil.encryptChaCha(
-      utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+      utf8.encode(jsonEncode(jsonToUpdate)),
       collectionKey,
     );
     final MetadataRequest metadataRequest = MetadataRequest(

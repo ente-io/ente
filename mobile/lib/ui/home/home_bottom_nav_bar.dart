@@ -12,8 +12,8 @@ class HomeBottomNavigationBar extends StatefulWidget {
   const HomeBottomNavigationBar(
     this.selectedFiles, {
     required this.selectedTabIndex,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final SelectedFiles selectedFiles;
   final int selectedTabIndex;
