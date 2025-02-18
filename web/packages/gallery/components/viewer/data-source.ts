@@ -168,14 +168,26 @@ export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
 };
 
 /**
- * Reset any failure reasons for the given {@link file}.
+ * Forget item data for the given {@link file} if its fetch had failed.
  *
- * This is called when the user moves away from a slide, so that when the come
- * back the next time, the entire process is retried.
+ * This is called when the user moves away from a slide so that we attempt a
+ * full retry when they come back the next time.
  */
-export const resetFailuresForFile = (file: EnteFile) => {
-    if (_state.itemDataByFileID.get(file.id)?.fetchFailed) {
-        _state.itemDataByFileID.delete(file.id);
+export const forgetFailedItemDataForFile = (file: EnteFile) =>
+    forgetFailedItemDataForFileID(file.id);
+
+/**
+ * Forget item data for the all files whose fetch had failed.
+ *
+ * This is called when the user closes the file viewer so that we attempt a full
+ * retry when they reopen the viewer the next time.
+ */
+export const forgetFailedItems = () =>
+    [..._state.itemDataByFileID.keys()].forEach(forgetFailedItemDataForFileID);
+
+const forgetFailedItemDataForFileID = (fileID: number) => {
+    if (_state.itemDataByFileID.get(fileID)?.fetchFailed) {
+        _state.itemDataByFileID.delete(fileID);
     }
 };
 

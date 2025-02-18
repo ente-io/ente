@@ -4,7 +4,11 @@
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { t } from "i18next";
-import { itemDataForFile, resetFailuresForFile } from "./data-source";
+import {
+    forgetFailedItemDataForFile,
+    forgetFailedItems,
+    itemDataForFile,
+} from "./data-source";
 import type { FileViewerProps } from "./FileViewer";
 import { createPSRegisterElementIconHTML } from "./icons";
 
@@ -254,7 +258,7 @@ export class FileViewerPhotoSwipe {
             //   more than 2 slides and then back, or if they reopen the viewer.
             //
             // See: [Note: File viewer error handling]
-            resetFailuresForFile(currentFile());
+            forgetFailedItemDataForFile(currentFile());
 
             // Pause the video element, if any, when we move away from the
             // slide.
@@ -273,10 +277,11 @@ export class FileViewerPhotoSwipe {
             }
         });
 
-        // The user did some action within the file viewer to close it.
-        pswp.on("close", () => {
-            // Clear intervals.
+        // The PhotoSwipe dialog has being closed and the animations have
+        // completed.
+        pswp.on("destroy", () => {
             this.clearAutoHideIntervalIfNeeded();
+            forgetFailedItems();
             // Let our parent know that we have been closed.
             onClose();
         });
@@ -295,6 +300,7 @@ export class FileViewerPhotoSwipe {
             pswp.ui.registerElement({
                 name: "error",
                 order: 6,
+                // TODO(PS): Change color?
                 html: createPSRegisterElementIconHTML("error"),
                 onInit: (errorElement, pswp) => {
                     pswp.on("change", () => {
@@ -353,7 +359,6 @@ export class FileViewerPhotoSwipe {
         // closed internally (e.g. the user activated the close button within
         // the file viewer), then PhotoSwipe will ignore this extra close.
         this.pswp.close();
-        this.clearAutoHideIntervalIfNeeded();
     }
 
     updateFiles(files: EnteFile[]) {
