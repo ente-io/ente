@@ -10,7 +10,12 @@ import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { ensureString } from "@/utils/ensure";
 // TODO(PS):
-import { extractRawExif, parseExif } from "@/new/photos/services/exif";
+import type { ParsedMetadata } from "@/media/file-metadata";
+import {
+    extractRawExif,
+    parseExif,
+    type RawExifTags,
+} from "@/new/photos/services/exif";
 
 /**
  * This is a subset of the fields expected by PhotoSwipe itself (see the
@@ -47,9 +52,13 @@ interface PhotoSwipeSlideData {
  */
 export type ItemData = PhotoSwipeSlideData & {
     /**
+     * The ID of the {@link EnteFile} whose data we are.
+     */
+    fileID: number;
+    /**
      * The {@link EnteFile} type of the file whose data we are.
      */
-    fileType?: FileType;
+    fileType: FileType;
     /**
      * The renderable object URL of the image associated with the file.
      *
@@ -95,6 +104,17 @@ export type ItemData = PhotoSwipeSlideData & {
 };
 
 /**
+ * Exif data for a file, in a form suitable for use by {@link FileInfo}.
+ *
+ * TODO(PS): Indicate missing exif (e.g. videos) better, both in the data type,
+ * and in the UI (e.g. by omitting the entire row).
+ */
+export interface FileInfoExif {
+    tags: RawExifTags | undefined;
+    parsed: ParsedMetadata | undefined;
+}
+
+/**
  * This module stores and serves data required by our custom PhotoSwipe
  * instance, effectively acting as an in-memory cache.
  *
@@ -113,6 +133,10 @@ class FileViewerDataSourceState {
      * available for a particular file (ID).
      */
     needsRefreshByFileID = new Map<number, () => void>();
+    /**
+     * The exif data we have for a particular file (ID).
+     */
+    fileInfoExifByFileID = new Map<number, FileInfoExif>();
 }
 
 /**
@@ -178,14 +202,17 @@ export const logoutFileViewerDataSource = () => {
  * to serve the incomplete result.
  */
 export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
-    let itemData = _state.itemDataByFileID.get(file.id);
+    const fileID = file.id;
+    const fileType = file.metadata.fileType;
+
+    let itemData = _state.itemDataByFileID.get(fileID);
 
     // We assume that there is only one file viewer that is using us at a given
     // point of time. This assumption is currently valid.
     _state.needsRefreshByFileID.set(file.id, needsRefresh);
 
     if (!itemData) {
-        itemData = { isContentLoading: true };
+        itemData = { fileID, fileType, isContentLoading: true };
         _state.itemDataByFileID.set(file.id, itemData);
         void enqueueUpdates(file);
     }
@@ -218,17 +245,19 @@ const forgetFailedItemDataForFileID = (fileID: number) => {
 };
 
 const enqueueUpdates = async (file: EnteFile) => {
+    const fileID = file.id;
     const fileType = file.metadata.fileType;
 
-    const update = (itemData: ItemData) => {
-        _state.itemDataByFileID.set(file.id, { ...itemData, fileType });
+    const update = (itemData: Partial<ItemData>) => {
+        _state.itemDataByFileID.set(file.id, { ...itemData, fileType, fileID });
         _state.needsRefreshByFileID.get(file.id)?.();
     };
 
     // Use the last best available data, but stop showing the loading indicator
     // and instead show the error indicator.
     const markFailed = () => {
-        const lastData = _state.itemDataByFileID.get(file.id) ?? {};
+        const lastData: Partial<ItemData> =
+            _state.itemDataByFileID.get(file.id) ?? {};
         delete lastData.isContentLoading;
         update({ ...lastData, fetchFailed: true });
     };
@@ -319,7 +348,7 @@ const enqueueUpdates = async (file: EnteFile) => {
  * and its dimensions in a form that can directly be passed to PhotoSwipe as
  * {@link ItemData}.
  */
-const withDimensions = (imageURL: string): Promise<ItemData> =>
+const withDimensions = (imageURL: string): Promise<Partial<ItemData>> =>
     new Promise((resolve, reject) => {
         const image = new Image();
         image.onload = () =>
@@ -333,31 +362,98 @@ const withDimensions = (imageURL: string): Promise<ItemData> =>
     });
 
 /**
- * Return the Exif data for the given {@link file}, caching it appropriately.
+ * Return the cached Exif data for the given {@link file}.
  *
  * The shape of the returned data is such that it can directly be used by the
  * {@link FileInfo} sidebar.
  *
- * @see {@link forgetExif}.
+ * Exif extraction is not too expensive, and takes around 10-200 ms usually, so
+ * this can be done preemptively. As soon as we get data for a particular item
+ * as the user swipes through the file viewer, we extract its exif data using
+ * {@link updateFileInfoExifIfNeeded}.
+ *
+ * Then, if the user were to open the file info sidebar for that particular file
+ * again, the associated exif data will be returned by this function. Since the
+ * happy path is for synchronous use in a React component, this function
+ * synchronously returns the cached value (and the callback is never invoked).
+ *
+ * In rare cases, it is possible that this function gets called before
+ * {@link updateFileInfoExifIfNeeded} has completed. In that case, it will
+ * trigger a parallel extraction. The function will synchronously return
+ * `undefined`, and then will call the provided callback once the extraction
+ * results are available.
  */
-export const exifForItemData = async (itemData: ItemData) => {
-    const { imageURL } = itemData;
+export const fileInfoExifForItemData = (
+    itemData: ItemData,
+    // cb: (exifData: FileInfoExif) => void,
+) => {
+    const exifData = _state.fileInfoExifByFileID.get(itemData.fileID);
+    if (exifData) return exifData;
 
-    if (!imageURL) {
-        // TODO(PS): This is a video. Use a placeholder.
-        return { tags: undefined, parsed: undefined };
-    }
+    return undefined;
+    // updateFileInfoExifIfNeeded()
+};
 
+//     // TODO(PS): This is a video. Use a placeholder.
+//     return { tags: undefined, parsed: undefined };
+// }
+
+//     const
+// };
+
+/**
+ * Update, if needed, the cached Exif data for with the given {@link itemData}.
+ *
+ * This function is expected to be called when an item is loaded as PhotoSwipe
+ * content. It can be safely called multiple times - it will ignore calls until
+ * the item has an associated {@link imageURL}, and it will also ignore calls
+ * that are made after exif data has already been extracted.
+ *
+ * If required, it will extract the exif data from the file, massage it to a
+ * form suitable for use by {@link FileInfo}, and stash it in its caches.
+ *
+ *
+ *
+ * @see {@link forgetExifForItemData}.
+ */
+export const updateFileInfoExifIfNeeded = async (itemData: ItemData) => {
+    const { fileID, fileType, imageURL } = itemData;
+
+    if (_state.fileInfoExifByFileID.has(fileID)) return;
+    if (fileType === FileType.video) return;
+    if (!imageURL) return;
+
+    let exifData: FileInfoExif;
     try {
-        console.time("exif");
         const blob = await (await fetch(imageURL)).blob();
         const file = new File([blob], "");
         const tags = await extractRawExif(file);
         const parsed = parseExif(tags);
-        console.timeEnd("exif");
-        return { tags, parsed };
+        exifData = { tags, parsed };
     } catch (e) {
         log.error("Failed to extract exif", e);
-        return { tags: undefined, parsed: undefined };
+        // Save the empty placeholder exif corresponding to the file, no point
+        // in unnecessarily retrying this, it will deterministically fail again.
+        exifData = createPlaceholderFileInfoExif();
     }
+
+    _state.fileInfoExifByFileID.set(fileID, exifData);
+
+    return exifData;
 };
+
+const createPlaceholderFileInfoExif = (): FileInfoExif => ({
+    tags: undefined,
+    parsed: undefined,
+});
+
+/**
+ * Clear any cached {@link FileInfoExif} for the given {@link ItemData}.
+ */
+export const forgetExifForItemData = ({ fileID }: ItemData) =>
+    _state.fileInfoExifByFileID.delete(fileID);
+
+/**
+ * Clear all cached {@link FileInfoExif}.
+ */
+export const forgetExif = () => _state.fileInfoExifByFileID.clear();

@@ -9,11 +9,8 @@ import {
 } from "@/base/components/utils/modal";
 import { lowercaseExtension } from "@/base/file-name";
 import log from "@/base/log";
-import {
-    FileInfo,
-    type FileInfoExif,
-    type FileInfoProps,
-} from "@/gallery/components/FileInfo";
+import { FileInfo, type FileInfoProps } from "@/gallery/components/FileInfo";
+import { type FileInfoExif } from "@/gallery/components/viewer/data-source";
 import { downloadManager } from "@/gallery/services/download";
 import type { Collection } from "@/media/collection";
 import { fileLogID, type EnteFile } from "@/media/file";

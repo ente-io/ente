@@ -6,10 +6,12 @@ import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { t } from "i18next";
 import {
-    exifForItemData,
+    forgetExif,
+    forgetExifForItemData,
     forgetFailedItemDataForFile,
     forgetFailedItems,
     itemDataForFile,
+    updateFileInfoExifIfNeeded,
 } from "./data-source";
 import type { FileViewerProps } from "./FileViewer";
 import { createPSRegisterElementIconHTML } from "./icons";
@@ -280,11 +282,25 @@ export class FileViewerPhotoSwipe {
             }
         });
 
+        pswp.on("loadComplete", (e) =>
+            updateFileInfoExifIfNeeded(e.content.data),
+        );
+
+        // pswp.on("change", (e) => {
+        //     const itemData = pswp.currSlide.content.data;
+        //     exifForItemData(itemData).then((data) =>
+        //         console.log("exif data", data),
+        //     );
+        // });
+
+        pswp.on("contentDestroy", (e) => forgetExifForItemData(e.content.data));
+
         // The PhotoSwipe dialog has being closed and the animations have
         // completed.
         pswp.on("destroy", () => {
             this.clearAutoHideIntervalIfNeeded();
             forgetFailedItems();
+            forgetExif();
             // Let our parent know that we have been closed.
             onClose();
         });
@@ -324,17 +340,6 @@ export class FileViewerPhotoSwipe {
                 html: createPSRegisterElementIconHTML("info"),
                 onClick: withCurrentFile(onViewInfo),
             });
-        });
-
-        pswp.on("loadComplete", (e) => {
-            console.log("xxx loadComplete", e);
-        });
-
-        pswp.on("change", (e) => {
-            const itemData = pswp.currSlide.content.data;
-            exifForItemData(itemData).then((data) =>
-                console.log("exif data", data),
-            );
         });
 
         // Modify the default UI elements.
