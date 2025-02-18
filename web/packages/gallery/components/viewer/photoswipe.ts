@@ -272,6 +272,44 @@ export class FileViewerPhotoSwipe {
         // - close: 20
         pswp.on("uiRegister", () => {
             pswp.ui.registerElement({
+                name: "error",
+                title: t("error"),
+                order: 6,
+                html: createPSRegisterElementIconHTML("error"),
+                onInit: (errorElement, pswp) => {
+                    let isVisible = false;
+
+                    const toggleIndicatorClass = (className, add) => {
+                        errorElement.classList.toggle(
+                            // Reuse preloading hide / show mechanism.
+                            "pswp__preloader--" + className,
+                            add,
+                        );
+                    };
+
+                    const setIndicatorVisibility = (visible) => {
+                        if (isVisible !== visible) {
+                            isVisible = visible;
+                            toggleIndicatorClass("active", visible);
+                        }
+                    };
+
+                    const updateErrorIndicatorVisibility = () => {
+                        console.log(
+                            "updateErrorIndicatorVisibility",
+                            pswp.currSlide.content,
+                        );
+                        if (pswp.currSlide.content.data.failureReason) {
+                            setIndicatorVisibility(true);
+                        } else {
+                            setIndicatorVisibility(false);
+                        }
+                    };
+
+                    pswp.on("change", updateErrorIndicatorVisibility);
+                },
+            });
+            pswp.ui.registerElement({
                 name: "info",
                 title: t("info"),
                 order: 15,
