@@ -177,8 +177,8 @@ export class FileViewerPhotoSwipe {
                 this.pswp.refreshSlideContent(index);
             });
 
-            const { videoURL, ...rest } = itemData;
-            if (videoURL) {
+            const { fileType, videoURL, ...rest } = itemData;
+            if (fileType === FileType.video && videoURL) {
                 const disableDownload = !!this.opts.disableDownload;
                 itemData = {
                     ...rest,

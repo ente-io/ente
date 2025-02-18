@@ -9,31 +9,43 @@ import {
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { ensureString } from "@/utils/ensure";
-// TODO:
+// TODO(PS):
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 
-// TODO(PS):
-//import { type SlideData } from "./ps5/dist/types/slide/"
-interface SlideData {
+/**
+ * This is a subset of the fields expected by PhotoSwipe itself (see the
+ * {@link SlideData} type exported by PhotoSwipe).
+ */
+interface PhotoSwipeSlideData {
     /**
-     * image URL
+     * The image URL expected by PhotoSwipe.
+     *
+     * This is set to the URL of the image that should be shown in the image
+     * viewer component provided by PhotoSwipe. It will be a renderable (i.e.,
+     * possibly converted) object URL obtained from the current "best" image we
+     * have: e.g. if all we have is the thumbnail, then this'll be an renderable
+     * object URL from the thumbnail. Then later when we fetch the original
+     * image, this'll be the renderable object URL derived from the original.
      */
     src?: string | undefined;
     /**
-     * image width
+     * The width (in pixels) of the {@link src} image.
      */
     width?: number | undefined;
     /**
-     * image height
+     * The height (in pixels) of the {@link src} image.
      */
     height?: number | undefined;
-    /**
-     * html content of a slide
-     */
-    html?: string | undefined;
 }
 
-type ItemData = SlideData & {
+/**
+ * The data returned by the flagship {@link itemDataForFile} function provided
+ * by the file viewer data source module.
+ *
+ * This is the minimal data expected by PhotoSwipe, plus some fields we use
+ * ourselves in the custom scaffolding we have around PhotoSwipe.
+ */
+export type ItemData = PhotoSwipeSlideData & {
     /**
      * The {@link EnteFile} type of the file whose data we are.
      */
@@ -329,13 +341,6 @@ const withDimensions = (imageURL: string): Promise<ItemData> =>
  * @see {@link forgetExif}.
  */
 export const exifForItemData = async (itemData: ItemData) => {
-    // Determine the (object) URL corresponding to the image portion, if any,
-    // associated with the given itemData.
-    //
-    // - For images, this will be the object URL of the renderable image itself.
-    // - For videos, this will not be defined.
-    // - For live photos, this will be the object URL of the image portion of
-    //   the live photo.
     const { imageURL } = itemData;
 
     if (!imageURL) {
