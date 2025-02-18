@@ -3,6 +3,7 @@
 
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
+import { FileType } from "@/media/file-type";
 import { t } from "i18next";
 import {
     exifForItemData,
@@ -210,7 +211,8 @@ export class FileViewerPhotoSwipe {
         });
 
         pswp.on("contentAppend", (e) => {
-            const videoURL = e.content.data.livePhotoVideoURL;
+            const { fileType, videoURL } = e.content.data;
+            if (fileType !== FileType.livePhoto) return;
             if (!videoURL) return;
 
             // This slide is displaying a live photo. Append a video element to
@@ -234,7 +236,7 @@ export class FileViewerPhotoSwipe {
         });
 
         pswp.on("imageSizeChange", ({ content, width, height }) => {
-            if (!content.data.livePhotoVideoURL) return;
+            if (content.data.fileType !== FileType.livePhoto) return;
 
             // This slide is displaying a live photo. Resize the size of the
             // video element to match that of the image.
@@ -271,7 +273,7 @@ export class FileViewerPhotoSwipe {
         pswp.on("contentActivate", (e) => {
             // Undo the effect of a previous "contentDeactivate" if it was
             // displaying a live photo.
-            if (e.content?.slide.data?.livePhotoVideoURL) {
+            if (e.content?.slide.data?.fileType === FileType.livePhoto) {
                 e.content?.slide?.container
                     ?.getElementsByTagName("video")[0]
                     ?.play();

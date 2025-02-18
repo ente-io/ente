@@ -35,15 +35,27 @@ interface SlideData {
 
 type ItemData = SlideData & {
     /**
-     * If the file is a video, then this will be set to a renderable URL of the
-     * original when it becomes available.
+     * The {@link EnteFile} type of the file whose data we are.
+     */
+    fileType?: FileType;
+    /**
+     * The renderable object URL of the image associated with the file.
+     *
+     * - For images, this will be the object URL of a renderable image.
+     * - For videos, this will not be defined.
+     * - For live photos, this will be a renderable object URL of the image
+     *   portion of the live photo.
+     */
+    imageURL?: string;
+    /**
+     * The renderable object URL of the video associated with the file.
+     *
+     * - For images, this will not be defined.
+     * - For videos, this will be the object URL of a renderable video.
+     * - For live photos, this will be a renderable object URL of the video
+     *   portion of the live photo.
      */
     videoURL?: string;
-    /**
-     * If the file is a live photo, then this will be set to a renderable URL of
-     * the original when it becomes available.
-     */
-    livePhotoVideoURL?: string;
     /**
      * `true` if we should indicate to the user that we're still fetching data
      * for this file.
@@ -194,8 +206,10 @@ const forgetFailedItemDataForFileID = (fileID: number) => {
 };
 
 const enqueueUpdates = async (file: EnteFile) => {
+    const fileType = file.metadata.fileType;
+
     const update = (itemData: ItemData) => {
-        _state.itemDataByFileID.set(file.id, itemData);
+        _state.itemDataByFileID.set(file.id, { ...itemData, fileType });
         _state.needsRefreshByFileID.get(file.id)?.();
     };
 
@@ -233,14 +247,13 @@ const enqueueUpdates = async (file: EnteFile) => {
     }
 
     try {
-        switch (file.metadata.fileType) {
+        switch (fileType) {
             case FileType.image: {
                 const sourceURLs =
                     await downloadManager.renderableSourceURLs(file);
-                const itemData = await withDimensions(
-                    ensureString(sourceURLs.url),
-                );
-                update(itemData);
+                const imageURL = ensureString(sourceURLs.url);
+                const itemData = await withDimensions(imageURL);
+                update({ ...itemData, imageURL });
                 break;
             }
 
@@ -260,8 +273,8 @@ const enqueueUpdates = async (file: EnteFile) => {
                 const imageURL = await livePhotoSourceURLs.image();
                 const imageData = await withDimensions(ensureString(imageURL));
                 update(imageData);
-                const livePhotoVideoURL = await livePhotoSourceURLs.video();
-                update({ ...imageData, livePhotoVideoURL });
+                const videoURL = await livePhotoSourceURLs.video();
+                update({ ...imageData, videoURL });
                 break;
             }
         }
@@ -323,16 +336,16 @@ export const exifForItemData = async (itemData: ItemData) => {
     // - For videos, this will not be defined.
     // - For live photos, this will be the object URL of the image portion of
     //   the live photo.
-    const { src: associatedImageURL } = itemData;
+    const { imageURL } = itemData;
 
-    if (!associatedImageURL) {
-        // This is a video. Use a placeholder.
+    if (!imageURL) {
+        // TODO(PS): This is a video. Use a placeholder.
         return { tags: undefined, parsed: undefined };
     }
 
     try {
         console.time("exif");
-        const blob = await (await fetch(associatedImageURL)).blob();
+        const blob = await (await fetch(imageURL)).blob();
         const file = new File([blob], "");
         const tags = await extractRawExif(file);
         const parsed = parseExif(tags);
