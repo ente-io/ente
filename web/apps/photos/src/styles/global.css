@@ -147,15 +147,12 @@ body {
     overflow: hidden;
     width: 50px;
     height: 60px;
-    /* "visibility" is used to toggle visibility, opacity is fixed to be similar
-       to that of the loading indicator when it is visible. */
-    opacity: 0.5;
+    /* Unlike the loading indicator, "display" is used to toggle visibility, and
+      the opacity is fixed to be similar to that of the counter. */
+    opacity: 0.85;
+    display: none;
 }
 
-.pswp-ente .pswp__error .pswp__icn {
-    visibility: hidden;
-}
-
-.pswp-ente .pswp__error--active .pswp__icn {
-    visibility: visible;
+.pswp-ente .pswp__error--active {
+    display: initial;
 }

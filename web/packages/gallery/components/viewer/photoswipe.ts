@@ -4,7 +4,7 @@
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { t } from "i18next";
-import { itemDataForFile } from "./data-source";
+import { itemDataForFile, resetFailuresForFile } from "./data-source";
 import type { FileViewerProps } from "./FileViewer";
 import { createPSRegisterElementIconHTML } from "./icons";
 
@@ -145,6 +145,11 @@ export class FileViewerPhotoSwipe {
             mainClass: "pswp-ente",
         });
 
+        // Helper routines to obtain the file at `currIndex`.
+        const currentFile = () => this.files[pswp.currIndex]!;
+        const withCurrentFile = (cb: (file: EnteFile) => void) => () =>
+            cb(currentFile());
+
         // Provide data about slides to PhotoSwipe via callbacks
         // https://photoswipe.com/data-sources/#dynamically-generated-data
 
@@ -234,15 +239,24 @@ export class FileViewerPhotoSwipe {
         });
 
         pswp.on("contentDeactivate", (e) => {
-            // Pause the video element (if any) on a slide when we move away
-            // from it.
+            // Reset failures, if any, for this file so that the fetch is tried
+            // again when we come back to it^.
+            //
+            // ^ Note that because of how the preloading works, this will have
+            //   an effect (i.e. the retry will happen) only if the user moves
+            //   more than 2 slides and then back, or if they reopen the viewer.
+            resetFailuresForFile(currentFile());
+
+            // Pause the video element, if any, when we move away from the
+            // slide.
             const video =
                 e.content?.slide?.container?.getElementsByTagName("video")[0];
             video?.pause();
         });
 
         pswp.on("contentActivate", (e) => {
-            // Undo the effect of a previous "contentDeactivate".
+            // Undo the effect of a previous "contentDeactivate" if it was
+            // displaying a live photo.
             if (e.content?.slide.data?.livePhotoVideoURL) {
                 e.content?.slide?.container
                     ?.getElementsByTagName("video")[0]
@@ -257,9 +271,6 @@ export class FileViewerPhotoSwipe {
             // Let our parent know that we have been closed.
             onClose();
         });
-
-        const withCurrentFile = (cb: (file: EnteFile) => void) => () =>
-            cb(this.files[this.pswp.currIndex]!);
 
         // Add our custom UI elements to inside the PhotoSwipe dialog.
         //
@@ -277,35 +288,12 @@ export class FileViewerPhotoSwipe {
                 order: 6,
                 html: createPSRegisterElementIconHTML("error"),
                 onInit: (errorElement, pswp) => {
-                    let isVisible = false;
-
-                    const toggleIndicatorClass = (className, add) => {
+                    pswp.on("change", () => {
                         errorElement.classList.toggle(
-                            "pswp__error--" + className,
-                            add,
+                            "pswp__error--active",
+                            !!pswp.currSlide.content.data.failureReason,
                         );
-                    };
-
-                    const setIndicatorVisibility = (visible) => {
-                        if (isVisible !== visible) {
-                            isVisible = visible;
-                            toggleIndicatorClass("active", visible);
-                        }
-                    };
-
-                    const updateErrorIndicatorVisibility = () => {
-                        console.log(
-                            "updateErrorIndicatorVisibility",
-                            pswp.currSlide.content,
-                        );
-                        if (!pswp.currSlide.content.data.failureReason) {
-                            setIndicatorVisibility(true);
-                        } else {
-                            setIndicatorVisibility(false);
-                        }
-                    };
-
-                    pswp.on("change", updateErrorIndicatorVisibility);
+                    });
                 },
             });
             pswp.ui.registerElement({
@@ -316,23 +304,6 @@ export class FileViewerPhotoSwipe {
                 html: createPSRegisterElementIconHTML("info"),
                 onClick: withCurrentFile(onViewInfo),
             });
-            // const counterIndicator2 = {
-            //     name: "counter-2",
-            //     order: 5,
-            //     html: '<div><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true" class="xxxpswp__icn"><path d="M20.5 14.3 17.1 18V10h-2.2v7.9l-3.4-3.6L10 16l6 6.1 6-6.1ZM23 23H9v2h14Z" /></svg></div>',
-
-            //     onInit: (counterElement, pswp) => {
-            //         pswp.on("change", () => {
-            //             counterElement.style.fill = "red";
-            //             // counterElement.innerText =
-            //             //     pswp.currIndex +
-            //             //     1 +
-            //             //     pswp.options.indexIndicatorSep +
-            //             //     pswp.getNumItems();
-            //         });
-            //     },
-            // };
-            // pswp.ui.registerElement(counterIndicator2);
         });
 
         // Modify the default UI elements.

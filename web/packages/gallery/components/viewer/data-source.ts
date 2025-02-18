@@ -154,7 +154,7 @@ export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
     // point of time. This assumption is currently valid.
     _state.needsRefreshByFileID.set(file.id, needsRefresh);
 
-    if (!itemData || itemData.failureReason) {
+    if (!itemData) {
         itemData = {};
         _state.itemDataByFileID.set(file.id, itemData);
         void enqueueUpdates(file);
@@ -163,24 +163,37 @@ export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
     return itemData;
 };
 
+/**
+ * Reset any failure reasons for the given {@link file}.
+ *
+ * This is called when the user moves away from a slide, so that when the come
+ * back the next time, the entire process is retried.
+ */
+export const resetFailuresForFile = (file: EnteFile) => {
+    if (_state.itemDataByFileID.get(file.id)?.failureReason) {
+        _state.itemDataByFileID.delete(file.id);
+    }
+};
+
 const enqueueUpdates = async (file: EnteFile) => {
     const update = (itemData: ItemData) => {
         _state.itemDataByFileID.set(file.id, itemData);
         _state.needsRefreshByFileID.get(file.id)?.();
     };
 
+    let thumbnailData: ItemData;
     try {
         const thumbnailURL = await downloadManager.renderableThumbnailURL(file);
         // TODO(PS):
-        const thumbnailData = await withDimensions(thumbnailURL!);
+        thumbnailData = await withDimensions(thumbnailURL!);
         update({
             ...thumbnailData,
             isContentLoading: true,
             isContentZoomable: false,
         });
     } catch (e) {
-        // If we can't even get the thumbnail, then a persistent (for now)
-        // network error is likely (download manager already has retries).
+        // If we can't even get the thumbnail, then a network error is likely
+        // (download manager already has retries).
         //
         // Notify the user of the error. The entire process will be retried when
         // they reopen the slide later.
@@ -189,33 +202,42 @@ const enqueueUpdates = async (file: EnteFile) => {
         return;
     }
 
-    switch (file.metadata.fileType) {
-        case FileType.image: {
-            const sourceURLs = await downloadManager.renderableSourceURLs(file);
-            // TODO(PS):
-            const itemData = await withDimensions(sourceURLs.url as string);
-            update(itemData);
-            break;
-        }
+    try {
+        switch (file.metadata.fileType) {
+            case FileType.image: {
+                const sourceURLs =
+                    await downloadManager.renderableSourceURLs(file);
+                // TODO(PS):
+                const itemData = await withDimensions(sourceURLs.url as string);
+                update(itemData);
+                break;
+            }
 
-        case FileType.video: {
-            const sourceURLs = await downloadManager.renderableSourceURLs(file);
-            // TODO(PS):
-            update({ videoURL: sourceURLs.url as string });
-            break;
-        }
+            case FileType.video: {
+                const sourceURLs =
+                    await downloadManager.renderableSourceURLs(file);
+                // TODO(PS):
+                update({ videoURL: sourceURLs.url as string });
+                break;
+            }
 
-        case FileType.livePhoto: {
-            const sourceURLs = await downloadManager.renderableSourceURLs(file);
-            const livePhotoSourceURLs = sourceURLs.url as LivePhotoSourceURL;
-            const imageURL = await livePhotoSourceURLs.image();
-            // TODO(PS):
-            const imageData = await withDimensions(imageURL!);
-            update(imageData);
-            const livePhotoVideoURL = await livePhotoSourceURLs.video();
-            update({ ...imageData, livePhotoVideoURL });
-            break;
+            case FileType.livePhoto: {
+                const sourceURLs =
+                    await downloadManager.renderableSourceURLs(file);
+                const livePhotoSourceURLs =
+                    sourceURLs.url as LivePhotoSourceURL;
+                const imageURL = await livePhotoSourceURLs.image();
+                // TODO(PS):
+                const imageData = await withDimensions(imageURL!);
+                update(imageData);
+                const livePhotoVideoURL = await livePhotoSourceURLs.video();
+                update({ ...imageData, livePhotoVideoURL });
+                break;
+            }
         }
+    } catch (e) {
+        log.error("Failed to show file", e);
+        update({ ...thumbnailData, failureReason: "other" });
     }
 };
 
