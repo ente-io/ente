@@ -217,6 +217,9 @@ class DownloadManager {
      *
      * The returned URL is actually an object URL, but it should not be revoked
      * since the download manager caches it for future use.
+     *
+     * If {@link cachedOnly} is false (the default), then this method will
+     * indicate errors by throwing but will never return `undefined`.
      */
     async renderableThumbnailURL(
         file: EnteFile,

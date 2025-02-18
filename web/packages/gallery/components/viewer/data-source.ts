@@ -155,7 +155,7 @@ export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
     _state.needsRefreshByFileID.set(file.id, needsRefresh);
 
     if (!itemData) {
-        itemData = {};
+        itemData = { isContentLoading: true };
         _state.itemDataByFileID.set(file.id, itemData);
         void enqueueUpdates(file);
     }
@@ -184,7 +184,9 @@ const enqueueUpdates = async (file: EnteFile) => {
     let thumbnailData: ItemData;
     try {
         const thumbnailURL = await downloadManager.renderableThumbnailURL(file);
-        // TODO(PS):
+        // While the types don't reflect it, it is safe to use the ! (null
+        // assertion) here since renderableThumbnailURL can throw but will not
+        // return undefined by default.
         thumbnailData = await withDimensions(thumbnailURL!);
         update({
             ...thumbnailData,
@@ -193,7 +195,8 @@ const enqueueUpdates = async (file: EnteFile) => {
         });
     } catch (e) {
         // If we can't even get the thumbnail, then a network error is likely
-        // (download manager already has retries).
+        // (download manager already has retries); in particular, it cannot be a
+        // format error since thumbnails are already standard JPEGs.
         //
         // Notify the user of the error. The entire process will be retried when
         // they reopen the slide later.
@@ -247,7 +250,7 @@ const enqueueUpdates = async (file: EnteFile) => {
  * {@link ItemData}.
  */
 const withDimensions = (imageURL: string): Promise<ItemData> =>
-    new Promise((resolve) => {
+    new Promise((resolve, reject) => {
         const image = new Image();
         image.onload = () => {
             resolve({
@@ -256,7 +259,6 @@ const withDimensions = (imageURL: string): Promise<ItemData> =>
                 height: image.naturalHeight,
             });
         };
-        // image.onerror = ()
-        // TODO(PS): Handle imageElement.onerror
+        image.onerror = reject;
         image.src = imageURL;
     });
