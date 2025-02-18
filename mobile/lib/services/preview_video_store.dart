@@ -127,7 +127,7 @@ class PreviewVideoStore {
         Bus.instance.fire(PreviewUpdatedEvent(_items));
         return;
       } catch (e, s) {
-        if (e is DioError && e.response?.statusCode == 404) {
+        if (e is DioException && e.response?.statusCode == 404) {
           _logger.info("No preview found for $enteFile");
         } else {
           _logger.warning("Failed to get playlist for $enteFile", e, s);

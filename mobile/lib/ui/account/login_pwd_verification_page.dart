@@ -1,9 +1,9 @@
 import "package:dio/dio.dart";
+import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
-import "package:photos/core/errors.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/user/srp.dart";
 import "package:photos/services/user_service.dart";

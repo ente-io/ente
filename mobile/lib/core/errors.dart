@@ -72,10 +72,6 @@ class InvalidStateError extends AssertionError {
   InvalidStateError(String message) : super(message);
 }
 
-class KeyDerivationError extends Error {}
-
-class LoginKeyDerivationError extends Error {}
-
 class SrpSetupNotCompleteError extends Error {}
 
 class SharingNotPermittedForFreeAccountsError extends Error {}

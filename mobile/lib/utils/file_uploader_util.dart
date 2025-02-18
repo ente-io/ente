@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import "package:archive/archive_io.dart";
 import "package:computer/computer.dart";
+import 'package:ente_crypto/ente_crypto.dart';
 import "package:exif/exif.dart";
 import 'package:logging/logging.dart';
 import "package:motion_photos/motion_photos.dart";
@@ -23,7 +24,6 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/location/location.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
-import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/exif_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:uuid/uuid.dart";
