@@ -142,18 +142,21 @@ body {
  is meant to occupy the same space. Only one of these will be shown at the same
  time, so it can also set the auto right margin.
  */
-.pswp-ente .pswp-ente__error-indicator {
+.pswp-ente .pswp__error {
     position: relative;
     overflow: hidden;
     width: 50px;
     height: 60px;
     margin-right: auto;
+    /* "visibility" is used to toggle visibility, opacity is fixed to be similar
+       to that of the loading indicator when it is visible. */
+    opacity: 0.6;
 }
 
-.pswp-ente .pswp-ente__error-indicator .pswp__icn {
+.pswp-ente .pswp__error .pswp__icn {
     visibility: hidden;
 }
 
-.pswp-ente .pswp-ente__error-indicator--active .pswp__icn {
+.pswp-ente .pswp__error--active .pswp__icn {
     visibility: visible;
 }

@@ -268,12 +268,12 @@ export class FileViewerPhotoSwipe {
         //
         // The "order" prop is used to position items. Some landmarks:
         // - counter: 5
+        // - preloader: 7
         // - zoom: 10
         // - close: 20
         pswp.on("uiRegister", () => {
             pswp.ui.registerElement({
                 name: "error",
-                title: t("error"),
                 order: 6,
                 html: createPSRegisterElementIconHTML("error"),
                 onInit: (errorElement, pswp) => {
@@ -281,8 +281,7 @@ export class FileViewerPhotoSwipe {
 
                     const toggleIndicatorClass = (className, add) => {
                         errorElement.classList.toggle(
-                            // Reuse preloading hide / show mechanism.
-                            "pswp__preloader--" + className,
+                            "pswp__error--" + className,
                             add,
                         );
                     };
@@ -299,7 +298,7 @@ export class FileViewerPhotoSwipe {
                             "updateErrorIndicatorVisibility",
                             pswp.currSlide.content,
                         );
-                        if (pswp.currSlide.content.data.failureReason) {
+                        if (!pswp.currSlide.content.data.failureReason) {
                             setIndicatorVisibility(true);
                         } else {
                             setIndicatorVisibility(false);
@@ -317,6 +316,23 @@ export class FileViewerPhotoSwipe {
                 html: createPSRegisterElementIconHTML("info"),
                 onClick: withCurrentFile(onViewInfo),
             });
+            // const counterIndicator2 = {
+            //     name: "counter-2",
+            //     order: 5,
+            //     html: '<div><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true" class="xxxpswp__icn"><path d="M20.5 14.3 17.1 18V10h-2.2v7.9l-3.4-3.6L10 16l6 6.1 6-6.1ZM23 23H9v2h14Z" /></svg></div>',
+
+            //     onInit: (counterElement, pswp) => {
+            //         pswp.on("change", () => {
+            //             counterElement.style.fill = "red";
+            //             // counterElement.innerText =
+            //             //     pswp.currIndex +
+            //             //     1 +
+            //             //     pswp.options.indexIndicatorSep +
+            //             //     pswp.getNumItems();
+            //         });
+            //     },
+            // };
+            // pswp.ui.registerElement(counterIndicator2);
         });
 
         // Modify the default UI elements.
