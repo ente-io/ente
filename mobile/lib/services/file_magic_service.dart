@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:ente_crypto/ente_crypto.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
@@ -16,7 +16,6 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/services/remote_sync_service.dart';
-import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/file_key.dart";
 
 class FileMagicService {
@@ -95,7 +94,7 @@ class FileMagicService {
 
         final fileKey = getFileKey(file);
         final encryptedMMd = await CryptoUtil.encryptChaCha(
-          utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+          utf8.encode(jsonEncode(jsonToUpdate)),
           fileKey,
         );
         params['metadataList'].add(
@@ -161,7 +160,7 @@ class FileMagicService {
 
           final fileKey = getFileKey(file);
           final encryptedMMd = await CryptoUtil.encryptChaCha(
-            utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+            utf8.encode(jsonEncode(jsonToUpdate)),
             fileKey,
           );
           params['metadataList'].add(

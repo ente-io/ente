@@ -26,7 +26,7 @@ import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class LandingPageWidget extends StatefulWidget {
-  const LandingPageWidget({Key? key}) : super(key: key);
+  const LandingPageWidget({super.key});
 
   @override
   State<LandingPageWidget> createState() => _LandingPageWidgetState();
@@ -317,8 +317,8 @@ class FeatureItemWidget extends StatelessWidget {
     this.featureTitleFirstLine,
     this.featureTitleSecondLine,
     this.subText, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

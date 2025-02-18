@@ -20,7 +20,7 @@ extension InvalidReasonExn on InvalidReason {
 class InvalidFileError extends ArgumentError {
   final InvalidReason reason;
 
-  InvalidFileError(String message, this.reason) : super(message);
+  InvalidFileError(String super.message, this.reason);
 
   @override
   String toString() {
@@ -63,18 +63,14 @@ class UnauthorizedError extends Error {}
 class RequestCancelledError extends Error {}
 
 class InvalidSyncStatusError extends AssertionError {
-  InvalidSyncStatusError(String message) : super(message);
+  InvalidSyncStatusError(String super.message);
 }
 
 class UnauthorizedEditError extends AssertionError {}
 
 class InvalidStateError extends AssertionError {
-  InvalidStateError(String message) : super(message);
+  InvalidStateError(String super.message);
 }
-
-class KeyDerivationError extends Error {}
-
-class LoginKeyDerivationError extends Error {}
 
 class SrpSetupNotCompleteError extends Error {}
 

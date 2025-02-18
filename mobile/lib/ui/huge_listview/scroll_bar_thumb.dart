@@ -21,8 +21,8 @@ class ScrollBarThumb extends StatelessWidget {
     this.onDragStart,
     this.onDragUpdate,
     this.onDragEnd, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -133,10 +133,10 @@ class SlideFadeTransition extends StatelessWidget {
   final Widget child;
 
   const SlideFadeTransition({
-    Key? key,
+    super.key,
     required this.animation,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

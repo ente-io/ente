@@ -2,8 +2,8 @@ import "dart:convert";
 import "dart:io";
 
 import "package:computer/computer.dart";
+import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/foundation.dart";
-import "package:photos/utils/crypto_util.dart";
 
 class ChaChaEncryptionResult {
   final String encData;

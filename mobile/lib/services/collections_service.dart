@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
+import 'package:ente_crypto/ente_crypto.dart';
 import "package:fast_base58/fast_base58.dart";
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
@@ -25,11 +26,11 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/extensions/list.dart';
 import 'package:photos/extensions/stop_watch.dart';
 import "package:photos/generated/l10n.dart";
+import 'package:photos/models/api/collection/collection_file_item.dart';
 import 'package:photos/models/api/collection/create_request.dart';
 import "package:photos/models/api/collection/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
-import 'package:photos/models/collection/collection_file_item.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/collection/collection_old.dart";
 import 'package:photos/models/file/file.dart';
@@ -41,7 +42,6 @@ import "package:photos/services/favorites_service.dart";
 import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
-import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/local_settings.dart";
@@ -815,7 +815,7 @@ class CollectionsService {
 
       final key = getCollectionKey(collection.id);
       final encryptedMMd = await CryptoUtil.encryptChaCha(
-        utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+        utf8.encode(jsonEncode(jsonToUpdate)),
         key,
       );
       // for required field, the json validator on golang doesn't treat 0 as valid
@@ -874,7 +874,7 @@ class CollectionsService {
 
       final key = getCollectionKey(collection.id);
       final encryptedMMd = await CryptoUtil.encryptChaCha(
-        utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+        utf8.encode(jsonEncode(jsonToUpdate)),
         key,
       );
       // for required field, the json validator on golang doesn't treat 0 as valid
@@ -934,7 +934,7 @@ class CollectionsService {
 
       final key = getCollectionKey(collection.id);
       final encryptedMMd = await CryptoUtil.encryptChaCha(
-        utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+        utf8.encode(jsonEncode(jsonToUpdate)),
         key,
       );
       // for required field, the json validator on golang doesn't treat 0 as valid
@@ -1325,7 +1325,7 @@ class CollectionsService {
     final encryptedKeyData =
         CryptoUtil.encryptSync(collectionKey, _config.getKey()!);
     final encryptedName = CryptoUtil.encryptSync(
-      utf8.encode(albumName) as Uint8List,
+      utf8.encode(albumName),
       collectionKey,
     );
     final collection = await createAndCacheCollection(
@@ -1375,7 +1375,7 @@ class CollectionsService {
     final encryptedKeyData =
         CryptoUtil.encryptSync(collectionKey, _config.getKey()!);
     final encryptedPath =
-        CryptoUtil.encryptSync(utf8.encode(path) as Uint8List, collectionKey);
+        CryptoUtil.encryptSync(utf8.encode(path), collectionKey);
     final collection = await createAndCacheCollection(
       CreateRequest(
         encryptedKey: CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),

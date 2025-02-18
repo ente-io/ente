@@ -1,27 +1,24 @@
 name: "Publish ghcr (server)"
 
 on:
-    # Run manually, providing it the commit.
-    #
-    # To obtain the commit from the currently deployed museum, do:
-    # curl -s https://api.ente.io/ping | jq -r '.id'
-    #
-    # See server/docs/publish.md for more details.
+    # Run automatically on 15th of every month, at 05:00 UTC.
+    schedule:
+        - cron: '0 5 15 * *'
+    # Run manually if needed to publish out of schedule.
     workflow_dispatch:
-        inputs:
-            commit:
-                description: "Commit to publish the image from"
-                type: string
-                required: true
 
 jobs:
     publish:
         runs-on: ubuntu-latest
         steps:
+            - name: Determine commit from prod museum
+              run: |
+                  echo "museum_commit=$(curl -s https://api.ente.io/ping | jq -r .id)" >> $GITHUB_ENV
+
             - name: Checkout code
               uses: actions/checkout@v4
               with:
-                  ref: ${{ inputs.commit }}
+                  ref: ${{ env.museum_commit }}
 
             - name: Build and push
               uses: mr-smithers-excellent/docker-build-push@v6
@@ -34,8 +31,8 @@ jobs:
                   enableBuildKit: true
                   multiPlatform: true
                   platform: linux/amd64,linux/arm64
-                  buildArgs: GIT_COMMIT=${{ inputs.commit }}
-                  tags: ${{ inputs.commit }}, latest
+                  buildArgs: GIT_COMMIT=${{ env.museum_commit }}
+                  tags: ${{ env.museum_commit }}, latest
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
 

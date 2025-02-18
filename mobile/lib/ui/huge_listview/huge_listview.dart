@@ -65,7 +65,7 @@ class HugeListView<T> extends StatefulWidget {
   final bool isScrollablePositionedList;
 
   const HugeListView({
-    Key? key,
+    super.key,
     this.controller,
     required this.startIndex,
     required this.totalCount,
@@ -83,7 +83,7 @@ class HugeListView<T> extends StatefulWidget {
     this.thumbPadding,
     this.disableScroll = false,
     this.isScrollablePositionedList = true,
-  }) : super(key: key);
+  });
 
   @override
   HugeListViewState<T> createState() => HugeListViewState<T>();

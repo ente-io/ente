@@ -4,6 +4,7 @@ import "dart:math";
 
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dio/dio.dart';
+import 'package:ente_crypto/ente_crypto.dart';
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -19,13 +20,13 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/account/two_factor.dart";
 import "package:photos/models/api/collection/user.dart";
+import 'package:photos/models/api/user/delete_account.dart';
+import 'package:photos/models/api/user/key_attributes.dart';
+import 'package:photos/models/api/user/key_gen_result.dart';
+import 'package:photos/models/api/user/sessions.dart';
+import 'package:photos/models/api/user/set_keys_request.dart';
+import 'package:photos/models/api/user/set_recovery_key_request.dart';
 import "package:photos/models/api/user/srp.dart";
-import 'package:photos/models/delete_account.dart';
-import 'package:photos/models/key_attributes.dart';
-import 'package:photos/models/key_gen_result.dart';
-import 'package:photos/models/sessions.dart';
-import 'package:photos/models/set_keys_request.dart';
-import 'package:photos/models/set_recovery_key_request.dart';
 import 'package:photos/models/user_details.dart';
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
@@ -40,7 +41,6 @@ import 'package:photos/ui/account/two_factor_recovery_page.dart';
 import 'package:photos/ui/account/two_factor_setup_page.dart';
 import "package:photos/ui/common/progress_dialog.dart";
 import "package:photos/ui/tabs/home_widget.dart";
-import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -695,7 +695,7 @@ class UserService {
     late Uint8List keyEncryptionKey;
     _logger.finest('Start deriving key');
     keyEncryptionKey = await CryptoUtil.deriveKey(
-      utf8.encode(userPassword) as Uint8List,
+      utf8.encode(userPassword),
       CryptoUtil.base642bin(srpAttributes.kekSalt),
       srpAttributes.memLimit,
       srpAttributes.opsLimit,

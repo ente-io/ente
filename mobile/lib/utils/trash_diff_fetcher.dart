@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:math';
 
 import "package:dio/dio.dart";
+import 'package:ente_crypto/ente_crypto.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/file/trash_file.dart';
 import "package:photos/models/metadata/file_magic.dart";
-import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/file_key.dart";
 
 class TrashDiffFetcher {

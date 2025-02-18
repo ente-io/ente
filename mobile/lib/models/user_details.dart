@@ -2,9 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import "package:photos/models/api/billing/subscription.dart";
 import "package:photos/models/api/storage_bonus/bonus.dart";
-import 'package:photos/models/file/file_type.dart';
-import 'package:photos/models/subscription.dart';
 
 class UserDetails {
   final String email;
@@ -214,20 +213,4 @@ class FamilyData {
 
   factory FamilyData.fromJson(String source) =>
       FamilyData.fromMap(json.decode(source));
-}
-
-class FilesCount {
-  final Map<FileType, int> filesCount;
-  FilesCount(this.filesCount);
-
-  int get total =>
-      images + videos + livePhotos + (filesCount[getInt(FileType.other)] ?? 0);
-
-  int get photos => images + livePhotos;
-
-  int get images => filesCount[FileType.image] ?? 0;
-
-  int get videos => filesCount[FileType.video] ?? 0;
-
-  int get livePhotos => filesCount[FileType.livePhoto] ?? 0;
 }

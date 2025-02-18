@@ -1,9 +1,9 @@
 import "package:dio/dio.dart";
+import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
-import "package:photos/core/errors.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/user/srp.dart";
 import "package:photos/services/user_service.dart";
@@ -21,8 +21,7 @@ import "package:photos/utils/email_util.dart";
 class LoginPasswordVerificationPage extends StatefulWidget {
   final SrpAttributes srpAttributes;
 
-  const LoginPasswordVerificationPage({Key? key, required this.srpAttributes})
-      : super(key: key);
+  const LoginPasswordVerificationPage({super.key, required this.srpAttributes});
 
   @override
   State<LoginPasswordVerificationPage> createState() =>

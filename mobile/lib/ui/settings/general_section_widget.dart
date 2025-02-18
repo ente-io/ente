@@ -18,7 +18,7 @@ import "package:photos/ui/settings/notification_settings_screen.dart";
 import 'package:photos/utils/navigation_util.dart';
 
 class GeneralSectionWidget extends StatelessWidget {
-  const GeneralSectionWidget({Key? key}) : super(key: key);
+  const GeneralSectionWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

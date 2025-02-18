@@ -127,7 +127,7 @@ class PreviewVideoStore {
         Bus.instance.fire(PreviewUpdatedEvent(_items));
         return;
       } catch (e, s) {
-        if (e is DioError && e.response?.statusCode == 404) {
+        if (e is DioException && e.response?.statusCode == 404) {
           _logger.info("No preview found for $enteFile");
         } else {
           _logger.warning("Failed to get playlist for $enteFile", e, s);
@@ -135,7 +135,15 @@ class PreviewVideoStore {
         }
       }
 
+      var (props, result) = await checkFileForPreviewCreation(enteFile);
+
+      if (result) {
+        return;
+      }
+
       if (uploadingFileId >= 0) {
+        if (uploadingFileId == enteFile.uploadedFileID) return;
+
         _items[enteFile.uploadedFileID!] = PreviewItem(
           status: PreviewItemStatus.inQueue,
           file: enteFile,
@@ -158,7 +166,7 @@ class PreviewVideoStore {
       );
       Bus.instance.fire(PreviewUpdatedEvent(_items));
 
-      final props = await getVideoPropsAsync(file);
+      props = await getVideoPropsAsync(file);
       final fileSize = enteFile.fileSize ?? file.lengthSync();
 
       final videoData = List.from(props?.propData?["streams"] ?? [])
@@ -571,6 +579,34 @@ class PreviewVideoStore {
     }
   }
 
+  Future<(FFProbeProps?, bool)> checkFileForPreviewCreation(
+    EnteFile enteFile,
+  ) async {
+    final fileSize = enteFile.fileSize;
+    FFProbeProps? props;
+
+    if (fileSize != null && fileSize <= 10 * 1024 * 1024) {
+      final file = await getFile(enteFile, isOrigin: true);
+      if (file != null) {
+        props = await getVideoPropsAsync(file);
+        final videoData = List.from(props?.propData?["streams"] ?? [])
+            .firstWhereOrNull((e) => e["type"] == "video");
+
+        final codec = videoData["codec_name"]?.toString().toLowerCase();
+        final codecIsH264 = codec?.contains("h264") ?? false;
+
+        if (codecIsH264) {
+          if (_items.containsKey(enteFile.uploadedFileID!)) {
+            _items.remove(enteFile.uploadedFileID!);
+            Bus.instance.fire(PreviewUpdatedEvent(_items));
+          }
+          return (props, true);
+        }
+      }
+    }
+    return (props, false);
+  }
+
   // get all files after cutoff date and add it to queue for preview creation
   // only run when video streaming is enabled
   Future<void> putFilesForPreviewCreation() async {
@@ -597,25 +633,11 @@ class PreviewVideoStore {
 
     // set all video status to be in queue
     for (final enteFile in allFiles) {
-      final fileSize = enteFile.fileSize;
-      FFProbeProps? props;
+      final (_, result) = await checkFileForPreviewCreation(enteFile);
 
-      if (fileSize != null && fileSize <= 10 * 1024 * 1024) {
-        final file = await getFile(enteFile, isOrigin: true);
-        if (file != null) {
-          props = await getVideoPropsAsync(file);
-          final videoData = List.from(props?.propData?["streams"] ?? [])
-              .firstWhereOrNull((e) => e["type"] == "video");
-
-          final codec = videoData["codec_name"]?.toString().toLowerCase();
-          final codecIsH264 = codec?.contains("h264") ?? false;
-
-          if (codecIsH264) {
-            _items.removeWhere((key, value) => value.file == enteFile);
-            Bus.instance.fire(PreviewUpdatedEvent(_items));
-            continue;
-          }
-        }
+      if (result) {
+        allFiles.remove(enteFile);
+        continue;
       }
 
       _items[enteFile.uploadedFileID!] = PreviewItem(

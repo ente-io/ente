@@ -24,10 +24,10 @@ class VerifyIdentifyDialog extends StatefulWidget {
   final bool self;
 
   VerifyIdentifyDialog({
-    Key? key,
+    super.key,
     required this.self,
     this.email = '',
-  }) : super(key: key) {
+  }) {
     if (!self && email.isEmpty) {
       throw ArgumentError("email cannot be empty when self is false");
     }

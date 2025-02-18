@@ -14,8 +14,8 @@ class AutoCastDialog extends StatefulWidget {
   final void Function(String) onConnect;
   AutoCastDialog(
     this.onConnect, {
-    Key? key,
-  }) : super(key: key) {}
+    super.key,
+  }) {}
 
   @override
   State<AutoCastDialog> createState() => _AutoCastDialogState();

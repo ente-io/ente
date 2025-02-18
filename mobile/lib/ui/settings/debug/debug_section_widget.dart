@@ -1,3 +1,4 @@
+import 'package:ente_crypto/ente_crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/service_locator.dart";
@@ -9,11 +10,10 @@ import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class DebugSectionWidget extends StatelessWidget {
-  const DebugSectionWidget({Key? key}) : super(key: key);
+  const DebugSectionWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

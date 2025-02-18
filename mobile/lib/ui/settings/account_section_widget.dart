@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:ente_crypto/ente_crypto.dart';
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:photos/emergency/emergency_page.dart";
@@ -16,13 +17,12 @@ import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import "package:photos/ui/payment/subscription.dart";
 import 'package:photos/ui/settings/common_settings.dart';
-import "package:photos/utils/crypto_util.dart";
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/navigation_util.dart";
 import "package:url_launcher/url_launcher_string.dart";
 
 class AccountSectionWidget extends StatelessWidget {
-  const AccountSectionWidget({Key? key}) : super(key: key);
+  const AccountSectionWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
