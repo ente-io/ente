@@ -378,15 +378,16 @@ const withDimensions = (imageURL: string): Promise<Partial<ItemData>> =>
  * as the user swipes through the file viewer, we extract its exif data using
  * {@link updateFileInfoExifIfNeeded}.
  *
- * Then, if the user were to open the file info sidebar for that particular file
- * again, the associated exif data will be returned by this function. Since the
- * happy path is for synchronous use in a React component, this function
- * synchronously returns the cached value (and the callback is never invoked).
+ * Then if the user were to open the file info sidebar for that particular file,
+ * the associated exif data will be returned by this function. Since the happy
+ * path is for synchronous use in a React component, this function synchronously
+ * returns the cached value (and the callback is never invoked).
  *
- * In rare cases, it is possible that this function gets called before
- * {@link updateFileInfoExifIfNeeded} has completed, the function will
- * synchronously return `undefined`, and then later call the provided
- * {@link observer} once the extraction results are available.
+ * The user can open the file info sidebar before the original has been fetched,
+ * so it is possible that this function gets called before
+ * {@link updateFileInfoExifIfNeeded} has completed. In such cases, this
+ * function will synchronously return `undefined`, and then later call the
+ * provided {@link observer} once the extraction results are available.
  */
 export const fileInfoExifForFile = (
     file: EnteFile,
@@ -409,9 +410,11 @@ export const fileInfoExifForFile = (
  * that are made after exif data has already been extracted.
  *
  * If required, it will extract the exif data from the file, massage it to a
- * form suitable for use by {@link FileInfo}, and stash it in its caches.
+ * form suitable for use by {@link FileInfo}, and stash it in its caches, and
+ * notify the most recent observer for that file attached via
+ * {@link fileInfoExifForFile}.
  *
- * @see {@link forgetExifForItemData}.
+ * See also {@link forgetExifForItemData}.
  */
 export const updateFileInfoExifIfNeeded = async (itemData: ItemData) => {
     const { fileID, fileType, imageURL } = itemData;

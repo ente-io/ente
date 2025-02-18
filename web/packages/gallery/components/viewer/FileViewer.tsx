@@ -112,7 +112,20 @@ const FileViewer: React.FC<FileViewerProps> = ({
             pswpRef.current?.closeIfNeeded();
             pswpRef.current = undefined;
         };
-        // TODO(PS): This is missing files, initialIndex, disableDownload,
+        // The hook is missing dependencies; this is intentional - we don't want
+        // to recreate the PhotoSwipe dialog when these dependencies change.
+        //
+        // - Updates to initialIndex can be safely ignored: they don't matter,
+        //   only their initial value at the time of open mattered.
+        //
+        // - Updates to disableDownload are not expected after open. We could've
+        //   also added it to the dependencies array, not adding it was a more
+        //   conservative choice to be on the safer side and trigger too few
+        //   instead of too many updates.
+        //
+        // - Updates to files matter, but these are conveyed separately.
+        //   TODO(PS):
+        //
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, onClose, handleViewInfo]);
 

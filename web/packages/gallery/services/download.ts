@@ -52,7 +52,7 @@ export interface LoadedLivePhotoSourceURL {
  */
 export interface RenderableSourceURLs {
     url: string | LivePhotoSourceURL | LoadedLivePhotoSourceURL;
-    originalImageURL: string | undefined;
+    originalImageURL?: string | undefined;
     type: "normal" | "livePhoto";
     /**
      * `true` if there is potential conversion that can still be applied.
