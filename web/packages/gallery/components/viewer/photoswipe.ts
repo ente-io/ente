@@ -298,9 +298,11 @@ export class FileViewerPhotoSwipe {
                 html: createPSRegisterElementIconHTML("error"),
                 onInit: (errorElement, pswp) => {
                     pswp.on("change", () => {
+                        const { fetchFailed, isContentLoading } =
+                            pswp.currSlide.content.data;
                         errorElement.classList.toggle(
                             "pswp__error--active",
-                            pswp.currSlide.content.data.fetchFailed,
+                            !!fetchFailed && !isContentLoading,
                         );
                     });
                 },
