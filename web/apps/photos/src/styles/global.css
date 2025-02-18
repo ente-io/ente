@@ -147,10 +147,9 @@ body {
     overflow: hidden;
     width: 50px;
     height: 60px;
-    margin-right: auto;
     /* "visibility" is used to toggle visibility, opacity is fixed to be similar
        to that of the loading indicator when it is visible. */
-    opacity: 0.6;
+    opacity: 0.5;
 }
 
 .pswp-ente .pswp__error .pswp__icn {
