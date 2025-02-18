@@ -596,8 +596,10 @@ class PreviewVideoStore {
         final codecIsH264 = codec?.contains("h264") ?? false;
 
         if (codecIsH264) {
-          _items.removeWhere((key, value) => value.file == enteFile);
-          Bus.instance.fire(PreviewUpdatedEvent(_items));
+          if (_items.containsKey(enteFile.uploadedFileID!)) {
+            _items.remove(enteFile.uploadedFileID!);
+            Bus.instance.fire(PreviewUpdatedEvent(_items));
+          }
           return (props, true);
         }
       }
@@ -634,6 +636,7 @@ class PreviewVideoStore {
       final (_, result) = await checkFileForPreviewCreation(enteFile);
 
       if (result) {
+        allFiles.remove(enteFile);
         continue;
       }
 
