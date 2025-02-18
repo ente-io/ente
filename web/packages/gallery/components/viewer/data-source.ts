@@ -30,10 +30,31 @@ interface SlideData {
 }
 
 type ItemData = SlideData & {
-    // Our props. TODO(PS) document if end up using these.
+    /**
+     * If the file is a video, then this will be set to a renderable URL of the
+     * original when it becomes available.
+     */
     videoURL?: string;
+    /**
+     * If the file is a live photo, then this will be set to a renderable URL of
+     * the original when it becomes available.
+     */
     livePhotoVideoURL?: string;
+    /**
+     * `true` if we should indicate to the user that we're still fetching data
+     * for this file.
+     *
+     * Note that this doesn't imply that the data is final. e.g. for a live
+     * photo, this will be not be set after we get the original image component,
+     * but the fetch for the video component might still be ongoing.
+     */
     isContentLoading?: boolean;
+    /**
+     * This will be explicitly set to `false` when we want to disable
+     * PhotoSwipe's built in image zoom.
+     *
+     * It is set while the thumbnail is loaded.
+     */
     isContentZoomable?: boolean;
 };
 
@@ -47,7 +68,14 @@ type ItemData = SlideData & {
  * This will be cleared on logout.
  */
 class FileViewerDataSourceState {
+    /**
+     * The best data we have for a particular file (ID).
+     */
     itemDataByFileID = new Map<number, ItemData>();
+    /**
+     * The latest callback registered for notifications of better data being
+     * available for a particular file (ID).
+     */
     needsRefreshByFileID = new Map<number, () => void>();
 }
 
@@ -87,10 +115,10 @@ export const logoutFileViewerDataSource = () => {
  *
  * 1. Return empty slide data; PhotoSwipe will not show anything in the image
  *    area but will otherwise render UI controls properly (in most cases a
- *    cached renderable thumbnail URL will be available shortly)
+ *    cached renderable thumbnail URL will be available shortly).
  *
- * 2. Insert empty data so that we don't enqueue multiple updates, and return
- *    this empty data.
+ * 2. Insert this empty data in its cache so that we don't enqueue multiple
+ *    updates.
  *
  * Then it we start fetching data for the file.
  *
@@ -102,19 +130,20 @@ export const logoutFileViewerDataSource = () => {
  *
  * - For images and videos, this will be the single original.
  *
- * - For live photos, this will also be a two step process, first with the
- *   original image, then again with the video component.
+ * - For live photos, this will also be a two step process, first fetching the
+ *   original image, then again the video component.
  *
  * At this point, the data for this file will be considered final, and
  * subsequent calls for the same file will return this same value unless it is
  * invalidated.
  *
- * If at any point an error occurs, we reset our cache so that the next time the
- * data is requested we repeat the process instead of continuing to serve the
- * incomplete result.
+ * If at any point an error occurs, we reset our cache for this file so that the
+ * next time the data is requested we repeat the process instead of continuing
+ * to serve the incomplete result.
  */
 export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
     let itemData = _state.itemDataByFileID.get(file.id);
+
     // We assume that there is only one file viewer that is using us at a given
     // point of time. This assumption is currently valid.
     _state.needsRefreshByFileID.set(file.id, needsRefresh);
