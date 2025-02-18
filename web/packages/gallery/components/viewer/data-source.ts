@@ -137,6 +137,11 @@ class FileViewerDataSourceState {
      * The exif data we have for a particular file (ID).
      */
     fileInfoExifByFileID = new Map<number, FileInfoExif>();
+    /**
+     * The latest callback registered for notifications of exif data being
+     * available for a particular file (ID).
+     */
+    exifObserverByFileID = new Map<number, (exif: FileInfoExif) => void>();
 }
 
 /**
@@ -378,28 +383,21 @@ const withDimensions = (imageURL: string): Promise<Partial<ItemData>> =>
  * synchronously returns the cached value (and the callback is never invoked).
  *
  * In rare cases, it is possible that this function gets called before
- * {@link updateFileInfoExifIfNeeded} has completed. In that case, it will
- * trigger a parallel extraction. The function will synchronously return
- * `undefined`, and then will call the provided callback once the extraction
- * results are available.
+ * {@link updateFileInfoExifIfNeeded} has completed, the function will
+ * synchronously return `undefined`, and then later call the provided
+ * {@link observer} once the extraction results are available.
  */
-export const fileInfoExifForItemData = (
-    itemData: ItemData,
-    // cb: (exifData: FileInfoExif) => void,
+export const fileInfoExifForFile = (
+    file: EnteFile,
+    observer: (exifData: FileInfoExif) => void,
 ) => {
-    const exifData = _state.fileInfoExifByFileID.get(itemData.fileID);
+    const fileID = file.id;
+    const exifData = _state.fileInfoExifByFileID.get(fileID);
     if (exifData) return exifData;
 
+    _state.exifObserverByFileID.set(fileID, observer);
     return undefined;
-    // updateFileInfoExifIfNeeded()
 };
-
-//     // TODO(PS): This is a video. Use a placeholder.
-//     return { tags: undefined, parsed: undefined };
-// }
-
-//     const
-// };
 
 /**
  * Update, if needed, the cached Exif data for with the given {@link itemData}.
@@ -412,34 +410,40 @@ export const fileInfoExifForItemData = (
  * If required, it will extract the exif data from the file, massage it to a
  * form suitable for use by {@link FileInfo}, and stash it in its caches.
  *
- *
- *
  * @see {@link forgetExifForItemData}.
  */
 export const updateFileInfoExifIfNeeded = async (itemData: ItemData) => {
     const { fileID, fileType, imageURL } = itemData;
 
+    // We already have it available.
     if (_state.fileInfoExifByFileID.has(fileID)) return;
-    if (fileType === FileType.video) return;
+
+    const updateNotifyAndReturn = (exifData: FileInfoExif) => {
+        _state.fileInfoExifByFileID.set(fileID, exifData);
+        _state.exifObserverByFileID.get(fileID)?.(exifData);
+        return exifData;
+    };
+
+    // For videos, insert a placeholder.
+    if (fileType === FileType.video) {
+        return updateNotifyAndReturn(createPlaceholderFileInfoExif());
+    }
+
+    // This is not a video, but the original image is not available yet.
     if (!imageURL) return;
 
-    let exifData: FileInfoExif;
     try {
         const blob = await (await fetch(imageURL)).blob();
         const file = new File([blob], "");
         const tags = await extractRawExif(file);
         const parsed = parseExif(tags);
-        exifData = { tags, parsed };
+        return updateNotifyAndReturn({ tags, parsed });
     } catch (e) {
         log.error("Failed to extract exif", e);
         // Save the empty placeholder exif corresponding to the file, no point
         // in unnecessarily retrying this, it will deterministically fail again.
-        exifData = createPlaceholderFileInfoExif();
+        return updateNotifyAndReturn(createPlaceholderFileInfoExif());
     }
-
-    _state.fileInfoExifByFileID.set(fileID, exifData);
-
-    return exifData;
 };
 
 const createPlaceholderFileInfoExif = (): FileInfoExif => ({
@@ -450,10 +454,15 @@ const createPlaceholderFileInfoExif = (): FileInfoExif => ({
 /**
  * Clear any cached {@link FileInfoExif} for the given {@link ItemData}.
  */
-export const forgetExifForItemData = ({ fileID }: ItemData) =>
+export const forgetExifForItemData = ({ fileID }: ItemData) => {
     _state.fileInfoExifByFileID.delete(fileID);
+    _state.exifObserverByFileID.delete(fileID);
+};
 
 /**
  * Clear all cached {@link FileInfoExif}.
  */
-export const forgetExif = () => _state.fileInfoExifByFileID.clear();
+export const forgetExif = () => {
+    _state.fileInfoExifByFileID.clear();
+    _state.exifObserverByFileID.clear();
+};
