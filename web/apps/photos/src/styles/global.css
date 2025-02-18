@@ -134,3 +134,26 @@ body {
 .pswp-ente .pswp__preloader--active .pswp__icn {
     opacity: 0.4;
 }
+
+/*
+ Error indicator on the file viewer.
+
+ It is styled similar to the loading indicator provided by PhotoSwipe since it
+ is meant to occupy the same space. Only one of these will be shown at the same
+ time, so it can also set the auto right margin.
+ */
+.pswp-ente .pswp-ente__error-indicator {
+    position: relative;
+    overflow: hidden;
+    width: 50px;
+    height: 60px;
+    margin-right: auto;
+}
+
+.pswp-ente .pswp-ente__error-indicator .pswp__icn {
+    visibility: hidden;
+}
+
+.pswp-ente .pswp-ente__error-indicator--active .pswp__icn {
+    visibility: visible;
+}
