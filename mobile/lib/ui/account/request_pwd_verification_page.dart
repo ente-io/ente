@@ -91,7 +91,7 @@ class _RequestPasswordVerificationPageState
           try {
             final attributes = Configuration.instance.getKeyAttributes()!;
             final Uint8List keyEncryptionKey = await CryptoUtil.deriveKey(
-              utf8.encode(_passwordController.text) as Uint8List,
+              utf8.encode(_passwordController.text),
               CryptoUtil.base642bin(attributes.kekSalt),
               attributes.memLimit!,
               attributes.opsLimit!,

@@ -7,7 +7,7 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 
 class SettingsTitleBarWidget extends StatelessWidget {
-  const SettingsTitleBarWidget({Key? key}) : super(key: key);
+  const SettingsTitleBarWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

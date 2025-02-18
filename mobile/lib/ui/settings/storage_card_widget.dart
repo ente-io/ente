@@ -14,7 +14,7 @@ import 'package:photos/ui/settings/storage_progress_widget.dart';
 import 'package:photos/utils/data_util.dart';
 
 class StorageCardWidget extends StatefulWidget {
-  const StorageCardWidget({Key? key}) : super(key: key);
+  const StorageCardWidget({super.key});
 
   @override
   State<StorageCardWidget> createState() => _StorageCardWidgetState();

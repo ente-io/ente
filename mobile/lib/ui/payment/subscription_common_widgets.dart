@@ -150,7 +150,7 @@ class AddOnBonusValidity extends StatelessWidget {
 class SubFaqWidget extends StatelessWidget {
   final bool isOnboarding;
 
-  const SubFaqWidget({Key? key, this.isOnboarding = false}) : super(key: key);
+  const SubFaqWidget({super.key, this.isOnboarding = false});
 
   @override
   Widget build(BuildContext context) {

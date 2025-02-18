@@ -342,7 +342,7 @@ Future<MetadataRequest> getPubMetadataRequest(
   file.pubMmdEncodedJson = jsonEncode(jsonToUpdate);
   file.pubMagicMetadata = PubMagicMetadata.fromJson(jsonToUpdate);
   final encryptedMMd = await CryptoUtil.encryptChaCha(
-    utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+    utf8.encode(jsonEncode(jsonToUpdate)),
     fileKey,
   );
   return MetadataRequest(

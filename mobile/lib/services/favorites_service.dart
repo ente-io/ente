@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:ente_crypto/ente_crypto.dart';
 import 'package:flutter/material.dart';
@@ -254,7 +253,7 @@ class FavoritesService {
     final encryptedKeyResult =
         CryptoUtil.encryptSync(favoriteCollectionKey, _config.getKey()!);
     final encName = CryptoUtil.encryptSync(
-      utf8.encode("Favorites") as Uint8List,
+      utf8.encode("Favorites"),
       favoriteCollectionKey,
     );
     final collection = await _collectionsService.createAndCacheCollection(

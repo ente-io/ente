@@ -242,7 +242,6 @@ class _VideoWidget extends StatefulWidget {
     this.controller,
     this.playbackCallback, {
     required this.isFromMemories,
-    this.onStreamChange,
   });
 
   @override

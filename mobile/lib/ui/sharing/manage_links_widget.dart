@@ -328,7 +328,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   Future<Map<String, dynamic>> _getEncryptedPassword(String pass) async {
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
     final result = await CryptoUtil.deriveInteractiveKey(
-      utf8.encode(pass) as Uint8List,
+      utf8.encode(pass),
       kekSalt,
     );
     return {

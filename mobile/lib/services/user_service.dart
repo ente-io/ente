@@ -695,7 +695,7 @@ class UserService {
     late Uint8List keyEncryptionKey;
     _logger.finest('Start deriving key');
     keyEncryptionKey = await CryptoUtil.deriveKey(
-      utf8.encode(userPassword) as Uint8List,
+      utf8.encode(userPassword),
       CryptoUtil.base642bin(srpAttributes.kekSalt),
       srpAttributes.memLimit,
       srpAttributes.opsLimit,

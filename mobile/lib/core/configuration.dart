@@ -248,7 +248,7 @@ class Configuration {
     // decrypt the master key
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
     final derivedKeyResult = await CryptoUtil.deriveSensitiveKey(
-      utf8.encode(password) as Uint8List,
+      utf8.encode(password),
       kekSalt,
     );
     final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
@@ -294,7 +294,7 @@ class Configuration {
     // decrypt the master key
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
     final derivedKeyResult = await CryptoUtil.deriveSensitiveKey(
-      utf8.encode(password) as Uint8List,
+      utf8.encode(password),
       kekSalt,
     );
     final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
@@ -332,7 +332,7 @@ class Configuration {
     // Derive key-encryption-key from the entered password and existing
     // mem and ops limits
     keyEncryptionKey ??= await CryptoUtil.deriveKey(
-      utf8.encode(password) as Uint8List,
+      utf8.encode(password),
       CryptoUtil.base642bin(attributes.kekSalt),
       attributes.memLimit!,
       attributes.opsLimit!,

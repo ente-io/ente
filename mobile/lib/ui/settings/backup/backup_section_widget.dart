@@ -12,7 +12,7 @@ import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class BackupSectionWidget extends StatefulWidget {
-  const BackupSectionWidget({Key? key}) : super(key: key);
+  const BackupSectionWidget({super.key});
 
   @override
   BackupSectionWidgetState createState() => BackupSectionWidgetState();

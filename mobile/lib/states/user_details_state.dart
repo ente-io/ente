@@ -11,8 +11,8 @@ class UserDetailsStateWidget extends StatefulWidget {
 
   const UserDetailsStateWidget({
     required this.child,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<UserDetailsStateWidget> createState() => UserDetailsStateWidgetState();
@@ -65,12 +65,12 @@ class InheritedUserDetails extends InheritedWidget {
   final bool isCached;
 
   const InheritedUserDetails({
-    Key? key,
-    required Widget child,
+    super.key,
+    required super.child,
     required this.userDetails,
     required this.isCached,
     required this.userDetailsState,
-  }) : super(key: key, child: child);
+  });
 
   static InheritedUserDetails? of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<InheritedUserDetails>();

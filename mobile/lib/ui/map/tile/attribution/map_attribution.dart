@@ -221,7 +221,7 @@ class MapAttributionWidgetState extends State<MapAttributionWidget> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: widget.popupBackgroundColor ??
-                          Theme.of(context).colorScheme.background,
+                          Theme.of(context).colorScheme.surface,
                       border: Border.all(width: 0, style: BorderStyle.none),
                       borderRadius: widget.popupBorderRadius ??
                           BorderRadius.only(

@@ -33,8 +33,8 @@ class PathStorageViewer extends StatefulWidget {
     this.removeTopRadius = false,
     this.removeBottomRadius = false,
     this.enableDoubleTapClear = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<PathStorageViewer> createState() => _PathStorageViewerState();
