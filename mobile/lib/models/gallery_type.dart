@@ -286,6 +286,10 @@ extension GalleyTypeExtension on GalleryType {
   bool showEditLocation() {
     return this != GalleryType.sharedCollection && this != GalleryType.cluster;
   }
+
+  bool showBulkEditTime() {
+    return this != GalleryType.sharedCollection && this != GalleryType.cluster;
+  }
 }
 
 extension GalleryAppBarExtn on GalleryType {
