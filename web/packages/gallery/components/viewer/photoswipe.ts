@@ -143,6 +143,13 @@ export class FileViewerPhotoSwipe {
             // TODO(PS): padding option? for handling custom title bar.
             // TODO(PS): will we need this?
             mainClass: "pswp-ente",
+            // Translated variants
+            closeTitle: t("close_key"),
+            zoomTitle: t("zoom_in_out_key") /* TODO(PS): Add "(scroll)" */,
+            arrowPrevTitle: t("previous_key"),
+            arrowNextTitle: t("next_key"),
+            // TODO(PS): Move to translations (unpreviewable_file_notification).
+            errorMsg: "This file could not be previewed",
         });
 
         // Helper routines to obtain the file at `currIndex`.
@@ -245,6 +252,8 @@ export class FileViewerPhotoSwipe {
             // ^ Note that because of how the preloading works, this will have
             //   an effect (i.e. the retry will happen) only if the user moves
             //   more than 2 slides and then back, or if they reopen the viewer.
+            //
+            // See: [Note: File viewer error handling]
             resetFailuresForFile(currentFile());
 
             // Pause the video element, if any, when we move away from the
@@ -291,7 +300,7 @@ export class FileViewerPhotoSwipe {
                     pswp.on("change", () => {
                         errorElement.classList.toggle(
                             "pswp__error--active",
-                            !!pswp.currSlide.content.data.failureReason,
+                            pswp.currSlide.content.data.fetchFailed,
                         );
                     });
                 },

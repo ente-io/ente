@@ -8,6 +8,7 @@ import {
 } from "@/gallery/services/download";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
+import { ensureString } from "@/utils/ensure";
 
 // TODO(PS):
 //import { type SlideData } from "./ps5/dist/types/slide/"
@@ -58,10 +59,13 @@ type ItemData = SlideData & {
      */
     isContentZoomable?: boolean;
     /**
-     * If the fetch has failed then this will be set, and set to a failure
-     * reason category that the UI can use to show the appropriate message.
+     * This will be `true` if the fetch for the file's data has failed.
+     *
+     * It is possible for this to be set in tandem with the content URLs also
+     * being set (e.g. if we were able to use the cached thumbnail, but the
+     * original file could not be fetched because of an network error).
      */
-    failureReason?: "other";
+    fetchFailed?: boolean;
 };
 
 /**
@@ -170,7 +174,7 @@ export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
  * back the next time, the entire process is retried.
  */
 export const resetFailuresForFile = (file: EnteFile) => {
-    if (_state.itemDataByFileID.get(file.id)?.failureReason) {
+    if (_state.itemDataByFileID.get(file.id)?.fetchFailed) {
         _state.itemDataByFileID.delete(file.id);
     }
 };
@@ -183,10 +187,10 @@ const enqueueUpdates = async (file: EnteFile) => {
 
     // Use the last best available data, but stop showing the loading indicator
     // and instead show the error indicator.
-    const updateFailureReason = (failureReason: ItemData["failureReason"]) => {
+    const markFailed = () => {
         const lastData = _state.itemDataByFileID.get(file.id) ?? {};
         delete lastData.isContentLoading;
-        update({ ...lastData, failureReason });
+        update({ ...lastData, fetchFailed: true });
     };
 
     try {
@@ -194,7 +198,7 @@ const enqueueUpdates = async (file: EnteFile) => {
         // While the types don't reflect it, it is safe to use the ! (null
         // assertion) here since renderableThumbnailURL can throw but will not
         // return undefined by default.
-        const thumbnailData = await withDimensions(thumbnailURL!);
+        const thumbnailData = await withDimensions(ensureString(thumbnailURL));
         update({
             ...thumbnailData,
             isContentLoading: true,
@@ -207,8 +211,10 @@ const enqueueUpdates = async (file: EnteFile) => {
         //
         // Notify the user of the error. The entire process will be retried when
         // they reopen the slide later.
-        log.error("Failed to show thumbnail", e);
-        updateFailureReason("other");
+        //
+        // See: [Note: File viewer error handling]
+        log.error("Failed to fetch thumbnail", e);
+        markFailed();
         return;
     }
 
@@ -217,8 +223,9 @@ const enqueueUpdates = async (file: EnteFile) => {
             case FileType.image: {
                 const sourceURLs =
                     await downloadManager.renderableSourceURLs(file);
-                // TODO(PS):
-                const itemData = await withDimensions(sourceURLs.url as string);
+                const itemData = await withDimensions(
+                    ensureString(sourceURLs.url),
+                );
                 update(itemData);
                 break;
             }
@@ -237,8 +244,7 @@ const enqueueUpdates = async (file: EnteFile) => {
                 const livePhotoSourceURLs =
                     sourceURLs.url as LivePhotoSourceURL;
                 const imageURL = await livePhotoSourceURLs.image();
-                // TODO(PS):
-                const imageData = await withDimensions(imageURL!);
+                const imageData = await withDimensions(ensureString(imageURL));
                 update(imageData);
                 const livePhotoVideoURL = await livePhotoSourceURLs.video();
                 update({ ...imageData, livePhotoVideoURL });
@@ -246,8 +252,26 @@ const enqueueUpdates = async (file: EnteFile) => {
             }
         }
     } catch (e) {
-        log.error("Failed to show file", e);
-        updateFailureReason("other");
+        // [Note: File viewer error handling]
+        //
+        // Generally, file downloads will fail because of two reasons: Network
+        // errors, or format errors.
+        //
+        // In the first case (network error), the `renderableSourceURLs` method
+        // above will throw. We will show an error indicator icon in the UI, but
+        // will keep showing the thumbnail.
+        //
+        // In the second case (format error), we'll get back a URL, but if a
+        // file conversion was needed but not possible (say, it is an
+        // unsupported format), we might have at our hands the original file's
+        // untouched URL, that the browser might not know how to render.
+        //
+        // In this case we won't get into an error state here, but PhotoSwipe
+        // will encounter an error when trying to render it, and it will show
+        // our customized error message ("This file could not be previewed"),
+        // but the user will still be able to download it.
+        log.error("Failed to fetch file", e);
+        markFailed();
     }
 };
 
@@ -259,13 +283,12 @@ const enqueueUpdates = async (file: EnteFile) => {
 const withDimensions = (imageURL: string): Promise<ItemData> =>
     new Promise((resolve, reject) => {
         const image = new Image();
-        image.onload = () => {
+        image.onload = () =>
             resolve({
                 src: imageURL,
                 width: image.naturalWidth,
                 height: image.naturalHeight,
             });
-        };
         image.onerror = reject;
         image.src = imageURL;
     });
