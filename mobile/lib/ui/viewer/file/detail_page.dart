@@ -65,7 +65,7 @@ class DetailPageConfiguration {
 class DetailPage extends StatefulWidget {
   final DetailPageConfiguration config;
 
-  const DetailPage(this.config, {key}) : super(key: key);
+  const DetailPage(this.config, {super.key});
 
   @override
   State<DetailPage> createState() => _DetailPageState();

@@ -49,8 +49,9 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
         FlutterMap(
           mapController: _mapController,
           options: MapOptions(
-            enableMultiFingerGestureRace: true,
-            zoom: 3,
+            interactionOptions:
+                const InteractionOptions(enableMultiFingerGestureRace: true),
+            initialZoom: 3,
             maxZoom: 18.0,
             minZoom: 2.8,
             onMapEvent: (p0) {
@@ -62,8 +63,8 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
             },
             onTap: (tapPosition, latlng) {
               final zoom = selectedLocation.value == null
-                  ? _mapController.zoom + 2.0
-                  : _mapController.zoom;
+                  ? _mapController.camera.zoom + 2.0
+                  : _mapController.camera.zoom;
               _mapController.move(latlng, zoom);
 
               selectedLocation.value = latlng;
@@ -138,8 +139,8 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                 icon: Icons.add,
                 onPressed: () {
                   _mapController.move(
-                    _mapController.center,
-                    _mapController.zoom + 1,
+                    _mapController.camera.center,
+                    _mapController.camera.zoom + 1,
                   );
                 },
                 heroTag: 'zoom-in',
@@ -149,8 +150,8 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                 icon: Icons.remove,
                 onPressed: () {
                   _mapController.move(
-                    _mapController.center,
-                    _mapController.zoom - 1,
+                    _mapController.camera.center,
+                    _mapController.camera.zoom - 1,
                   );
                 },
                 heroTag: 'zoom-out',
