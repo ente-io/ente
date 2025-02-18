@@ -9,6 +9,8 @@ import {
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { ensureString } from "@/utils/ensure";
+// TODO:
+import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 
 // TODO(PS):
 //import { type SlideData } from "./ps5/dist/types/slide/"
@@ -304,3 +306,40 @@ const withDimensions = (imageURL: string): Promise<ItemData> =>
         image.onerror = reject;
         image.src = imageURL;
     });
+
+/**
+ * Return the Exif data for the given {@link file}, caching it appropriately.
+ *
+ * The shape of the returned data is such that it can directly be used by the
+ * {@link FileInfo} sidebar.
+ *
+ * @see {@link forgetExif}.
+ */
+export const exifForItemData = async (itemData: ItemData) => {
+    // Determine the (object) URL corresponding to the image portion, if any,
+    // associated with the given itemData.
+    //
+    // - For images, this will be the object URL of the renderable image itself.
+    // - For videos, this will not be defined.
+    // - For live photos, this will be the object URL of the image portion of
+    //   the live photo.
+    const { src: associatedImageURL } = itemData;
+
+    if (!associatedImageURL) {
+        // This is a video. Use a placeholder.
+        return { tags: undefined, parsed: undefined };
+    }
+
+    try {
+        console.time("exif");
+        const blob = await (await fetch(associatedImageURL)).blob();
+        const file = new File([blob], "");
+        const tags = await extractRawExif(file);
+        const parsed = parseExif(tags);
+        console.timeEnd("exif");
+        return { tags, parsed };
+    } catch (e) {
+        log.error("Failed to extract exif", e);
+        return { tags: undefined, parsed: undefined };
+    }
+};

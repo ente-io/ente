@@ -5,6 +5,7 @@ import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { t } from "i18next";
 import {
+    exifForItemData,
     forgetFailedItemDataForFile,
     forgetFailedItems,
     itemDataForFile,
@@ -321,6 +322,17 @@ export class FileViewerPhotoSwipe {
                 html: createPSRegisterElementIconHTML("info"),
                 onClick: withCurrentFile(onViewInfo),
             });
+        });
+
+        pswp.on("loadComplete", (e) => {
+            console.log("xxx loadComplete", e);
+        });
+
+        pswp.on("change", (e) => {
+            const itemData = pswp.currSlide.content.data;
+            exifForItemData(itemData).then((data) =>
+                console.log("exif data", data),
+            );
         });
 
         // Modify the default UI elements.
