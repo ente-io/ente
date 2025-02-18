@@ -25,8 +25,8 @@
   "deleteReason4": "Meu motivo não está listado",
   "sendEmail": "Enviar e-mail",
   "deleteRequestSLAText": "Sua solicitação será revisada em até 72 horas.",
-  "deleteEmailRequest": "Por favor, envie um e-mail à <warning>account-deletion@ente.io</warning> do seu endereço de e-mail registrado.",
-  "entePhotosPerm": "Ente <i>precisa de sua permissão para</i> preservar suas fotos",
+  "deleteEmailRequest": "Por favor, envie um e-mail a <warning>account-deletion@ente.io</warning> do seu endereço de e-mail registrado.",
+  "entePhotosPerm": "Ente <i>precisa de permissão para</i> preservar suas fotos",
   "ok": "OK",
   "createAccount": "Criar conta",
   "createNewAccount": "Criar nova conta",
@@ -55,7 +55,7 @@
   "checkInboxAndSpamFolder": "Verifique sua caixa de entrada (e spam) para concluir a verificação",
   "tapToEnterCode": "Toque para inserir código",
   "resendEmail": "Reenviar e-mail",
-  "weHaveSendEmailTo": "Nós enviamos um e-mail à <green>{email}</green>",
+  "weHaveSendEmailTo": "Enviamos um e-mail à <green>{email}</green>",
   "@weHaveSendEmailTo": {
     "description": "Text to indicate that we have sent a mail to the user",
     "placeholders": {
@@ -965,6 +965,14 @@
   "syncStopped": "Sincronização interrompida",
   "syncProgress": "{completed}/{total} memórias preservadas",
   "uploadingMultipleMemories": "Preservando {count} memórias...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "uploadingSingleMemory": "Preservando 1 memória...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
@@ -1259,8 +1267,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Busque pessoas facilmente pelo nome",
-  "addViewers": "{count, plural, one {Adicionar visualizador} other {Adicionar visualizadores}}",
-  "addCollaborators": "{count, plural, one {Adicionar colaborador} other {Adicionar colaboradores}}",
+  "addViewers": "{count, plural, one {Adicionar visualizador} one {Adicionar visualizador} other {Adicionar visualizadores}}",
+  "addCollaborators": "{count, plural, one {Adicionar colaborador} one {Adicionar colaborador} other {Adicionar colaboradores}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Pressione um e-mail para verificar a criptografia ponta a ponta.",
   "developerSettingsWarning": "Deseja modificar as Opções de Desenvolvedor?",
   "developerSettings": "Opções de desenvolvedor",
@@ -1529,8 +1537,8 @@
   "removeYourselfAsTrustedContact": "Remover si mesmo dos contatos confiáveis",
   "legacy": "Legado",
   "legacyPageDesc": "O legado permite que contatos confiáveis acessem sua conta em sua ausência.",
-  "legacyPageDesc2": "Contatos confiáveis podem iniciar recuperação de conta, e se não for cancelado dentro de 30 dias, redefina sua senha e acesse sua conta.",
-  "legacyAccounts": "Contas legado",
+  "legacyPageDesc2": "Contatos confiáveis podem iniciar recuperação de conta. Se não cancelado dentro de 30 dias, redefina sua senha e acesse sua conta.",
+  "legacyAccounts": "Contas legadas",
   "trustedContacts": "Contatos confiáveis",
   "addTrustedContact": "Adicionar contato confiável",
   "removeInvite": "Remover convite",
@@ -1593,5 +1601,78 @@
   "linkEmail": "Vincular e-mail",
   "link": "Vincular",
   "noEnteAccountExclamation": "Nenhuma conta Ente!",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "orPickFromYourContacts": "ou escolher dos seus contatos",
+  "emailDoesNotHaveEnteAccount": "{email} não possui uma conta Ente.",
+  "@emailDoesNotHaveEnteAccount": {
+    "description": "Shown when email doesn't have an Ente account",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountOwnerPersonAppbarTitle": "{title} (Eu)",
+  "@accountOwnerPersonAppbarTitle": {
+    "description": "Title of appbar for account owner person",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reassignMe": "Reatribuir \"Eu\"",
+  "me": "Eu",
+  "linkEmailToContactBannerCaption": "para compartilhar rápido",
+  "@linkEmailToContactBannerCaption": {
+    "description": "Caption for the 'Link email' title. It should be a continuation of the 'Link email' title. Just like how 'Link email' + 'for faster sharing' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "selectPersonToLink": "Selecione a pessoa para vincular",
+  "linkPersonToEmail": "Vincular pessoa a {email}",
+  "@linkPersonToEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "linkPersonToEmailConfirmation": "Isso vinculará {personName} a {email}",
+  "@linkPersonToEmailConfirmation": {
+    "description": "Confirmation message when linking a person to an email",
+    "placeholders": {
+      "personName": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "selectYourFace": "Selecione seu rosto",
+  "reassigningLoading": "Reatribuindo...",
+  "reassignedToName": "Atribuído a {name}",
+  "@reassignedToName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "saveChangesBeforeLeavingQuestion": "Salvar mudanças antes de sair?",
+  "dontSave": "Não salvar",
+  "thisIsMeExclamation": "Este é você!",
+  "linkPerson": "Vincular pessoa",
+  "linkPersonCaption": "para melhor experiência de compartilhamento",
+  "@linkPersonCaption": {
+    "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "videoStreaming": "Transmissão de vídeo",
+  "processingVideos": "Processando vídeos",
+  "streamDetails": "Detalhes da transmissão",
+  "processing": "Processando",
+  "queued": "Na fila",
+  "ineligible": "Inelegível",
+  "failed": "Falhou",
+  "playStream": "Reproduzir transmissão",
+  "playOriginal": "Reproduzir original",
+  "joinAlbumConfirmationDialogBody": "Unir-se ao álbum fará que seu e-mail seja visível a todos do álbum."
 }

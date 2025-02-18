@@ -2,6 +2,8 @@
   "@@locale ": "en",
   "enterYourEmailAddress": "Ange din e-postadress",
   "accountWelcomeBack": "Välkommen tillbaka!",
+  "emailAlreadyRegistered": "E-postadress redan registrerad.",
+  "emailNotRegistered": "E-postadressen är inte registrerad.",
   "email": "E-post",
   "cancel": "Avbryt",
   "verify": "Bekräfta",
@@ -12,6 +14,7 @@
   "deleteAccountFeedbackPrompt": "Vi är ledsna att se dig lämna oss. Vänligen dela dina synpunkter för att hjälpa oss att förbättra.",
   "feedback": "Feedback",
   "kindlyHelpUsWithThisInformation": "Vänligen hjälp oss med denna information",
+  "confirmDeletePrompt": "Ja, jag vill permanent ta bort detta konto och data i alla appar.",
   "confirmAccountDeletion": "Bekräfta radering av konto",
   "deleteAccountPermanentlyButton": "Radera kontot permanent",
   "yourAccountHasBeenDeleted": "Ditt konto har raderats",
@@ -149,6 +152,7 @@
   "tryAgain": "Försök igen",
   "viewRecoveryKey": "Visa återställningsnyckel",
   "confirmRecoveryKey": "Bekräfta återställningsnyckel",
+  "recoveryKeyVerifyReason": "Din återställningsnyckel är det enda sättet att återställa dina foton om du glömmer ditt lösenord. Du hittar din återställningsnyckel i Inställningar > Säkerhet.\n\nAnge din återställningsnyckel här för att verifiera att du har sparat den ordentligt.",
   "confirmYourRecoveryKey": "Bekräfta din återställningsnyckel",
   "addViewer": "Lägg till bildvy",
   "addCollaborator": "Lägg till samarbetspartner",
@@ -183,6 +187,8 @@
   },
   "allowAddPhotosDescription": "Tillåt personer med länken att även lägga till foton i det delade albumet.",
   "passwordLock": "Lösenordskydd",
+  "canNotOpenTitle": "Kan inte öppna det här albumet",
+  "canNotOpenBody": "Tyvärr kan detta album inte öppnas i appen.",
   "disableDownloadWarningTitle": "Vänligen notera:",
   "disableDownloadWarningBody": "Besökare kan fortfarande ta skärmdumpar eller spara en kopia av dina foton med hjälp av externa verktyg",
   "allowDownloads": "Tillåt nedladdningar",
@@ -271,18 +277,74 @@
   "failedToApplyCode": "Det gick inte att använda koden",
   "enterReferralCode": "Ange hänvisningskod",
   "codeAppliedPageTitle": "Kod tillämpad",
+  "changeYourReferralCode": "Ändra din värvningskod",
   "change": "Ändra",
+  "unavailableReferralCode": "Tyvärr är denna kod inte tillgänglig.",
+  "codeChangeLimitReached": "Tyvärr, du har nått gränsen för kodändringar.",
   "onlyFamilyAdminCanChangeCode": "Kontakta {familyAdminEmail} för att ändra din kod.",
   "storageInGB": "{storageAmountInGB} GB",
   "claimed": "Nyttjad",
   "@claimed": {
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
+  "details": "Uppgifter",
+  "claimMore": "Begär mer!",
+  "theyAlsoGetXGb": "De får också {storageAmountInGB} GB",
+  "freeStorageOnReferralSuccess": "{storageAmountInGB} GB varje gång någon registrerar sig för en betalplan och tillämpar din kod",
+  "shareTextReferralCode": "Ente värvningskod: {referralCode} \n\nTillämpa den i Inställningar → Allmänt → Hänvisningar för att få {referralStorageInGB} GB gratis när du registrerar dig för en betalplan\n\nhttps://ente.io",
+  "claimFreeStorage": "Hämta kostnadsfri lagring",
   "inviteYourFriends": "Bjud in dina vänner",
+  "failedToFetchReferralDetails": "Det gick inte att hämta hänvisningsdetaljer. Försök igen senare.",
+  "referralStep1": "1. Ge denna kod till dina vänner",
+  "referralStep2": "2. De registrerar sig för en betalplan",
+  "referralStep3": "3. Ni får båda {storageInGB} GB* gratis",
+  "referralsAreCurrentlyPaused": "Hänvisningar är för närvarande pausade",
+  "youCanAtMaxDoubleYourStorage": "* Du kan max fördubbla ditt lagringsutrymme",
+  "claimedStorageSoFar": "{isFamilyMember, select, true {Din familj har begärt {storageAmountInGb} GB} false {{storageAmountInGb}} other {Du har begärt {storageAmountInGb} GB!}}",
+  "@claimedStorageSoFar": {
+    "placeholders": {
+      "isFamilyMember": {
+        "type": "String",
+        "example": "true"
+      },
+      "storageAmountInGb": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+  "faq": "Vanliga frågor och svar",
   "help": "Hjälp",
+  "oopsSomethingWentWrong": "Oj, något gick fel",
+  "peopleUsingYourCode": "Personer som använder din kod",
+  "eligible": "berättigad",
+  "total": "totalt",
+  "codeUsedByYou": "Kod som används av dig",
+  "freeStorageClaimed": "Gratis lagring begärd",
+  "freeStorageUsable": "Gratis lagringsutrymme som kan användas",
+  "usableReferralStorageInfo": "Användbart lagringsutrymme begränsas av din nuvarande plan. Överskrider du lagringsutrymmet kommer automatiskt att kunna använda det när du uppgraderar din plan.",
+  "removeFromAlbumTitle": "Ta bort från album?",
+  "removeFromAlbum": "Ta bort från album",
+  "itemsWillBeRemovedFromAlbum": "Valda objekt kommer att tas bort från detta album",
+  "removeShareItemsWarning": "Några av de objekt som du tar bort lades av andra personer, och du kommer att förlora tillgång till dem",
+  "addingToFavorites": "Lägger till bland favoriter...",
+  "removingFromFavorites": "Tar bort från favoriter...",
+  "sorryCouldNotAddToFavorites": "Tyvärr, kunde inte lägga till i favoriterna!",
+  "sorryCouldNotRemoveFromFavorites": "Tyvärr kunde inte ta bort från favoriter!",
+  "subscribeToEnableSharing": "Du behöver en aktiv betald prenumeration för att möjliggöra delning.",
   "subscribe": "Prenumerera",
+  "canOnlyRemoveFilesOwnedByYou": "Kan endast ta bort filer som ägs av dig",
+  "deleteSharedAlbum": "Radera delat album?",
   "deleteAlbum": "Radera album",
+  "deleteAlbumDialog": "Ta också bort foton (och videor) som finns i detta album från <bold>alla</bold> andra album som de är en del av?",
+  "deleteSharedAlbumDialogBody": "Albumet kommer att raderas för alla\n\nDu kommer att förlora åtkomst till delade foton i detta album som ägs av andra",
+  "yesRemove": "Ja, ta bort",
+  "creatingLink": "Skapar länk...",
+  "removeWithQuestionMark": "Ta bort?",
+  "removeParticipantBody": "{userEmail} kommer att tas bort från detta delade album\n\nAlla bilder som lagts till av dem kommer också att tas bort från albumet",
+  "keepPhotos": "Behåll foton",
   "deletePhotos": "Radera foton",
+  "inviteToEnte": "Bjud in till Ente",
   "trash": "Papperskorg",
   "photoSmallCase": "foto",
   "yesDelete": "Ja, radera",
@@ -295,10 +357,34 @@
   "discover_receipts": "Kvitton",
   "discover_notes": "Anteckningar",
   "status": "Status",
+  "clearIndexes": "Rensa index",
+  "selectFoldersForBackup": "Välj mappar för säkerhetskopiering",
+  "selectedFoldersWillBeEncryptedAndBackedUp": "Valda mappar kommer att krypteras och säkerhetskopieras",
+  "unselectAll": "Avmarkera alla",
+  "selectAll": "Markera allt",
   "skip": "Hoppa över",
+  "updatingFolderSelection": "Uppdaterar mappval...",
   "itemCount": "{count, plural, one{{count} objekt} other{{count} objekt}}",
   "deleteItemCount": "{count, plural, =1 {Radera {count} objekt} other {Radera {count} objekt}}",
+  "duplicateItemsGroup": "{count} filer, {formattedSize} vardera",
+  "@duplicateItemsGroup": {
+    "description": "Display the number of duplicate files and their size",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "12",
+        "type": "int"
+      },
+      "formattedSize": {
+        "example": "2.3 MB",
+        "type": "String"
+      }
+    }
+  },
+  "showMemories": "Visa minnen",
   "yearsAgo": "{count, plural, one{{count} år sedan} other{{count} år sedan}}",
+  "backupSettings": "Säkerhetskopieringsinställningar",
+  "backupStatus": "Säkerhetskopieringsstatus",
   "about": "Om",
   "terms": "Villkor",
   "account": "Konto",
@@ -368,6 +454,14 @@
   "theRecoveryKeyYouEnteredIsIncorrect": "Återställningsnyckeln du angav är felaktig",
   "twofactorAuthenticationHasBeenDisabled": "Tvåfaktorsautentisering har inaktiverats",
   "uploadingMultipleMemories": "Bevarar {count} minnen...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "uploadingSingleMemory": "Bevarar 1 minne...",
   "viewLogs": "Visa loggar",
   "copyEmailAddress": "Kopiera e-postadress",
@@ -445,6 +539,5 @@
   "sort": "Sortera",
   "newPerson": "Ny person",
   "addName": "Lägg till namn",
-  "add": "Lägg till",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "add": "Lägg till"
 }
