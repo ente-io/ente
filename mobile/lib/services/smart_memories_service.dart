@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:math" show min, max;
 
 import "package:flutter/material.dart";
@@ -9,6 +10,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/files_updated_event.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -31,7 +33,7 @@ class SmartMemoriesService {
 
   bool _isInit = false;
 
-  late Locale _locale;
+  Locale? _locale;
   late Map<int, int> _seenTimes;
 
   List<SmartMemory>? _cachedMemories;
@@ -46,14 +48,15 @@ class SmartMemoriesService {
   static final instance = SmartMemoriesService._privateConstructor();
   factory SmartMemoriesService() => instance;
 
-  void init(BuildContext context) {
+  Future<void> init() async {
     if (_isInit) return;
-    _locale = Localizations.localeOf(context);
-    _isInit = true;
+    _locale = await getLocale();
 
-    _memoriesDB.clearMemoriesSeenBeforeTime(
-      DateTime.now().microsecondsSinceEpoch -
-          (_calculationWindowDays * microSecondsInDay),
+    unawaited(
+      _memoriesDB.clearMemoriesSeenBeforeTime(
+        DateTime.now().microsecondsSinceEpoch -
+            (_calculationWindowDays * microSecondsInDay),
+      ),
     );
     Bus.instance.on<FilesUpdatedEvent>().where((event) {
       return event.type == EventType.deletedFromEverywhere;
@@ -68,6 +71,7 @@ class SmartMemoriesService {
             .removeWhere((m) => generatedIDs.contains(m.file.generatedID));
       }
     });
+    _isInit = true;
     _logger.info("Smart memories service initialized");
   }
 
@@ -111,6 +115,7 @@ class SmartMemoriesService {
   // One general method to get all memories, which calls on internal methods for each separate memory type
   Future<List<SmartMemory>> _calcMemories() async {
     try {
+      await init();
       final List<SmartMemory> memories = [];
       final allFiles = Set<EnteFile>.from(
         await SearchService.instance.getAllFilesForSearch(),
@@ -145,6 +150,7 @@ class SmartMemoriesService {
       // memories.addAll(fillerMemories);
       // _logger.finest("All files length: ${allFiles.length}");
 
+      _cachedMemories = memories;
       return memories;
     } catch (e, s) {
       _logger.severe("Error calculating smart memories", e, s);
@@ -611,7 +617,7 @@ class SmartMemoriesService {
           final date = DateTime(year, dayMonth ~/ 100, dayMonth % 100);
           final files = yearGroups[year]!;
           final photoSelection = await _bestSelection(files);
-          String name = DateFormat.yMMMd(_locale.languageCode).format(date);
+          String name = DateFormat.yMMMd(_locale?.languageCode).format(date);
           if (date.day == currentTime.day && date.month == currentTime.month) {
             name = "This day, ${currentTime.year - date.year} years back";
           }
@@ -726,7 +732,7 @@ class SmartMemoriesService {
           monthYearFiles,
           prefferedSize: monthSelectionSize,
         );
-        final monthName = DateFormat.MMMM(_locale.languageCode)
+        final monthName = DateFormat.MMMM(_locale?.languageCode)
             .format(DateTime(year, currentMonth));
         final name = monthName + ", ${currentTime.year - year} years back";
         memoryResult.add(
@@ -744,7 +750,7 @@ class SmartMemoriesService {
         .toList();
     final photoSelection =
         await _bestSelection(allPhotos, prefferedSize: monthSelectionSize);
-    final monthName = DateFormat.MMMM(_locale.languageCode)
+    final monthName = DateFormat.MMMM(_locale?.languageCode)
         .format(DateTime(currentTime.year, currentMonth));
     final name = monthName + " through the years";
     memoryResult.add(
