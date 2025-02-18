@@ -4,7 +4,7 @@
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { t } from "i18next";
-import { FileViewerDataSource } from "./data-source";
+import { itemDataForFile } from "./data-source";
 import type { FileViewerProps } from "./FileViewer";
 import { createPSRegisterElementIconHTML } from "./icons";
 
@@ -69,13 +69,6 @@ export class FileViewerPhotoSwipe {
      */
     private opts: Pick<FileViewerPhotoSwipeOptions, "disableDownload">;
     /**
-     * Our data source.
-     *
-     * TODO(PS): Move this elsewhere, or merge with download manager.
-     */
-    private dataSource: FileViewerDataSource;
-
-    /**
      * An interval that invokes a periodic check of whether we should the hide
      * controls if the user does not perform any pointer events for a while.
      */
@@ -103,7 +96,6 @@ export class FileViewerPhotoSwipe {
     }: FileViewerPhotoSwipeOptions) {
         this.files = files;
         this.opts = { disableDownload };
-        this.dataSource = new FileViewerDataSource();
 
         const pswp = new PhotoSwipe({
             // Opaque background.
@@ -163,7 +155,7 @@ export class FileViewerPhotoSwipe {
         pswp.addFilter("itemData", (_, index) => {
             const file = files[index]!;
 
-            let itemData = this.dataSource.itemDataForFile(file, () => {
+            let itemData = itemDataForFile(file, () => {
                 this.pswp.refreshSlideContent(index);
             });
 
