@@ -238,7 +238,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     ServiceLocator.instance
         .init(preferences, NetworkClient.instance.enteDio, packageInfo);
 
-    if (!isBackground && flagService.internalUser) {
+    if (!isBackground) {
       VideoPlayerMediaKit.ensureInitialized(iOS: true);
     }
 
