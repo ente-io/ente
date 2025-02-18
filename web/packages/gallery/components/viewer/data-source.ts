@@ -181,13 +181,20 @@ const enqueueUpdates = async (file: EnteFile) => {
         _state.needsRefreshByFileID.get(file.id)?.();
     };
 
-    let thumbnailData: ItemData;
+    // Use the last best available data, but stop showing the loading indicator
+    // and instead show the error indicator.
+    const updateFailureReason = (failureReason: ItemData["failureReason"]) => {
+        const lastData = _state.itemDataByFileID.get(file.id) ?? {};
+        delete lastData.isContentLoading;
+        update({ ...lastData, failureReason });
+    };
+
     try {
         const thumbnailURL = await downloadManager.renderableThumbnailURL(file);
         // While the types don't reflect it, it is safe to use the ! (null
         // assertion) here since renderableThumbnailURL can throw but will not
         // return undefined by default.
-        thumbnailData = await withDimensions(thumbnailURL!);
+        const thumbnailData = await withDimensions(thumbnailURL!);
         update({
             ...thumbnailData,
             isContentLoading: true,
@@ -201,7 +208,7 @@ const enqueueUpdates = async (file: EnteFile) => {
         // Notify the user of the error. The entire process will be retried when
         // they reopen the slide later.
         log.error("Failed to show thumbnail", e);
-        update({ failureReason: "other" });
+        updateFailureReason("other");
         return;
     }
 
@@ -240,7 +247,7 @@ const enqueueUpdates = async (file: EnteFile) => {
         }
     } catch (e) {
         log.error("Failed to show file", e);
-        update({ ...thumbnailData, failureReason: "other" });
+        updateFailureReason("other");
     }
 };
 
