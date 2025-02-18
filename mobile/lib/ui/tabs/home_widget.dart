@@ -2,6 +2,7 @@ import 'dart:async';
 import "dart:convert";
 import "dart:io";
 
+import "package:ente_crypto/ente_crypto.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -66,7 +67,6 @@ import "package:photos/ui/viewer/gallery/shared_public_collection_page.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
 import 'package:photos/ui/viewer/search_tab/search_tab.dart';
 import "package:photos/utils/collection_util.dart";
-import "package:ente_crypto/ente_crypto.dart";
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/diff_fetcher.dart";
 import "package:photos/utils/navigation_util.dart";
