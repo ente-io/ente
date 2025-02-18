@@ -1,16 +1,13 @@
-/* xeslint-disable */
-// x-@ts-nocheck
-
 import log from "@/base/log";
 import {
     downloadManager,
     type LivePhotoSourceURL,
 } from "@/gallery/services/download";
 import type { EnteFile } from "@/media/file";
+import type { ParsedMetadata } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { ensureString } from "@/utils/ensure";
 // TODO(PS):
-import type { ParsedMetadata } from "@/media/file-metadata";
 import {
     extractRawExif,
     parseExif,
@@ -26,11 +23,15 @@ interface PhotoSwipeSlideData {
      * The image URL expected by PhotoSwipe.
      *
      * This is set to the URL of the image that should be shown in the image
-     * viewer component provided by PhotoSwipe. It will be a renderable (i.e.,
-     * possibly converted) object URL obtained from the current "best" image we
-     * have: e.g. if all we have is the thumbnail, then this'll be an renderable
-     * object URL from the thumbnail. Then later when we fetch the original
-     * image, this'll be the renderable object URL derived from the original.
+     * viewer component provided by PhotoSwipe.
+     *
+     * It will be a renderable (i.e., possibly converted) object URL obtained
+     * from the current "best" image we have.
+     *
+     * For example, if all we have is the thumbnail, then this'll be an
+     * renderable object URL obtained from the thumbnail data. Then later when
+     * we fetch the original image, this'll be the renderable object URL derived
+     * from the original. But if it is a video, this will just be cleared.
      */
     src?: string | undefined;
     /**
