@@ -1,6 +1,7 @@
 /* xeslint-disable */
 // x-@ts-nocheck
 
+import log from "@/base/log";
 import {
     downloadManager,
     type LivePhotoSourceURL,
@@ -56,6 +57,11 @@ type ItemData = SlideData & {
      * It is set while the thumbnail is loaded.
      */
     isContentZoomable?: boolean;
+    /**
+     * If the fetch has failed then this will be set, and set to a failure
+     * reason category that the UI can use to show the appropriate message.
+     */
+    failureReason?: "other";
 };
 
 /**
@@ -148,7 +154,7 @@ export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
     // point of time. This assumption is currently valid.
     _state.needsRefreshByFileID.set(file.id, needsRefresh);
 
-    if (!itemData) {
+    if (!itemData || itemData.failureReason) {
         itemData = {};
         _state.itemDataByFileID.set(file.id, itemData);
         void enqueueUpdates(file);
@@ -163,14 +169,25 @@ const enqueueUpdates = async (file: EnteFile) => {
         _state.needsRefreshByFileID.get(file.id)?.();
     };
 
-    const thumbnailURL = await downloadManager.renderableThumbnailURL(file);
-    // TODO(PS):
-    const thumbnailData = await withDimensions(thumbnailURL!);
-    update({
-        ...thumbnailData,
-        isContentLoading: true,
-        isContentZoomable: false,
-    });
+    try {
+        const thumbnailURL = await downloadManager.renderableThumbnailURL(file);
+        // TODO(PS):
+        const thumbnailData = await withDimensions(thumbnailURL!);
+        update({
+            ...thumbnailData,
+            isContentLoading: true,
+            isContentZoomable: false,
+        });
+    } catch (e) {
+        // If we can't even get the thumbnail, then a persistent (for now)
+        // network error is likely (download manager already has retries).
+        //
+        // Notify the user of the error. The entire process will be retried when
+        // they reopen the slide later.
+        log.error("Failed to show thumbnail", e);
+        update({ failureReason: "other" });
+        return;
+    }
 
     switch (file.metadata.fileType) {
         case FileType.image: {
