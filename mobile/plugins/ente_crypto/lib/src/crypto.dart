@@ -2,12 +2,12 @@ import "dart:convert";
 import "dart:io";
 import 'dart:typed_data';
 
-import 'package:computer/computer.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
-import 'package:logging/logging.dart';
-import "package:photos/core/errors.dart";
-import 'package:photos/models/derived_key_result.dart';
-import 'package:photos/models/encryption_result.dart';
+import "package:computer/computer.dart";
+import "package:ente_crypto/src/models/derived_key_result.dart";
+import "package:ente_crypto/src/models/encryption_result.dart";
+import "package:ente_crypto/src/models/errors.dart";
+import "package:flutter_sodium/flutter_sodium.dart";
+import "package:logging/logging.dart";
 
 const int encryptionChunkSize = 4 * 1024 * 1024;
 final int decryptionChunkSize =

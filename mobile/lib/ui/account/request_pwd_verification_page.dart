@@ -1,13 +1,13 @@
 import "dart:convert";
 import "dart:typed_data";
 
+import "package:ente_crypto/ente_crypto.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/l10n/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/dynamic_fab.dart';
-import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/dialog_util.dart";
 
 typedef OnPasswordVerifiedFn = Future<void> Function(Uint8List bytes);

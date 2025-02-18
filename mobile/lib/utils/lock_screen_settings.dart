@@ -1,9 +1,9 @@
 import "dart:convert";
 
+import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:flutter_sodium/flutter_sodium.dart";
-import "package:photos/utils/crypto_util.dart";
 import "package:privacy_screen/privacy_screen.dart";
 import "package:shared_preferences/shared_preferences.dart";
 

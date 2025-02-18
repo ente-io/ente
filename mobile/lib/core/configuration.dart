@@ -3,6 +3,7 @@ import 'dart:convert';
 import "dart:io";
 
 import 'package:bip39/bip39.dart' as bip39;
+import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/services.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
@@ -30,7 +31,6 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync_service.dart';
-import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:photos/utils/validator_util.dart';

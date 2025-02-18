@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import "package:ente_crypto/ente_crypto.dart";
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
@@ -12,7 +13,6 @@ import "package:photos/models/api/entity/data.dart";
 import "package:photos/models/api/entity/key.dart";
 import "package:photos/models/api/entity/type.dart";
 import "package:photos/models/local_entity_data.dart";
-import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/gzip.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 

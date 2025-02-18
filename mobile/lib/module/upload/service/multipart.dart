@@ -1,17 +1,16 @@
 import "dart:io";
 
 import "package:dio/dio.dart";
+import "package:ente_crypto/ente_crypto.dart";
 import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/upload_locks_db.dart";
-import "package:photos/models/encryption_result.dart";
 import "package:photos/module/upload/model/multipart.dart";
 import "package:photos/module/upload/model/xml.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/utils/crypto_util.dart";
 
 class MultiPartUploader {
   final Dio _enteDio;
