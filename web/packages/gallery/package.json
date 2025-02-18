@@ -3,6 +3,8 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
+        "@/base": "*",
+        "@/utils": "*",
         "@ffmpeg/ffmpeg": "^0.12.10",
         "bs58": "^6.0.0"
     },

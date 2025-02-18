@@ -34,7 +34,6 @@ import {
     updateExistingFilePubMetadata,
 } from "@/gallery/services/file";
 import { type EnteFile } from "@/media/file";
-import type { ParsedMetadata } from "@/media/file-metadata";
 import {
     fileCreationPhotoDate,
     fileLocation,
@@ -94,6 +93,7 @@ import { Formik } from "formik";
 import { t } from "i18next";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as Yup from "yup";
+import type { FileInfoExif } from "./viewer/data-source";
 
 // Re-uses images from ~leaflet package.
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css";
@@ -104,11 +104,6 @@ const leaflet = haveWindow()
     ? // eslint-disable-next-line @typescript-eslint/no-require-imports
       (require("leaflet") as typeof import("leaflet"))
     : null;
-
-export interface FileInfoExif {
-    tags: RawExifTags | undefined;
-    parsed: ParsedMetadata | undefined;
-}
 
 export type FileInfoProps = ModalVisibilityProps & {
     /**

@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 
 // TODO(PS): WIP gallery using upstream photoswipe
@@ -13,14 +13,18 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
     throw new Error("Whoa");
 }
 
-import { useModalVisibility } from "@/base/components/utils/modal";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "@/base/components/utils/modal";
 import { FileInfo } from "@/gallery/components/FileInfo";
 import type { EnteFile } from "@/media/file.js";
 import { Button, styled } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { fileInfoExifForFile, type FileInfoExif } from "./data-source";
 import { FileViewerPhotoSwipe } from "./photoswipe";
 
-export interface FileViewerProps {
+export type FileViewerProps = ModalVisibilityProps & {
     /**
      * The list of files that are currently being displayed in the context in
      * which the file viewer was invoked.
@@ -45,7 +49,7 @@ export interface FileViewerProps {
      * If true then the viewer does not show controls for downloading the file.
      */
     disableDownload?: boolean;
-}
+};
 
 /**
  * A PhotoSwipe based image and video viewer.
@@ -69,14 +73,25 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const [activeFile, setActiveFile] = useState<EnteFile | undefined>(
         undefined,
     );
+    // With semantics similar to activeFile, this is the exif data associated
+    // with the activeFile, if any.
+    const [activeFileExif, setActiveFileExif] = useState<
+        FileInfoExif | undefined
+    >(undefined);
 
     const { show: showFileInfo, props: fileInfoVisibilityProps } =
         useModalVisibility();
 
-    const handleViewInfo = useCallback((file: EnteFile) => {
-        setActiveFile(file);
-        showFileInfo();
-    }, []);
+    const handleViewInfo = useCallback(
+        (file: EnteFile) => {
+            setActiveFile(file);
+            setActiveFileExif(
+                fileInfoExifForFile(file, (exif) => setActiveFileExif(exif)),
+            );
+            showFileInfo();
+        },
+        [showFileInfo],
+    );
 
     useEffect(() => {
         if (!open) {
@@ -97,12 +112,31 @@ const FileViewer: React.FC<FileViewerProps> = ({
             pswpRef.current?.closeIfNeeded();
             pswpRef.current = undefined;
         };
-    }, [open]);
+        // The hook is missing dependencies; this is intentional - we don't want
+        // to recreate the PhotoSwipe dialog when these dependencies change.
+        //
+        // - Updates to initialIndex can be safely ignored: they don't matter,
+        //   only their initial value at the time of open mattered.
+        //
+        // - Updates to disableDownload are not expected after open. We could've
+        //   also added it to the dependencies array, not adding it was a more
+        //   conservative choice to be on the safer side and trigger too few
+        //   instead of too many updates.
+        //
+        // - Updates to files matter, but these are conveyed separately.
+        //   TODO(PS):
+        //
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open, onClose, handleViewInfo]);
 
     return (
         <Container>
             <Button>Test</Button>
-            <FileInfo {...fileInfoVisibilityProps} file={activeFile} />
+            <FileInfo
+                {...fileInfoVisibilityProps}
+                file={activeFile}
+                exif={activeFileExif}
+            />
         </Container>
     );
 };

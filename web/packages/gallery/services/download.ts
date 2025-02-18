@@ -52,6 +52,7 @@ export interface LoadedLivePhotoSourceURL {
  */
 export interface RenderableSourceURLs {
     url: string | LivePhotoSourceURL | LoadedLivePhotoSourceURL;
+    originalImageURL?: string | undefined;
     type: "normal" | "livePhoto";
     /**
      * `true` if there is potential conversion that can still be applied.
@@ -217,6 +218,9 @@ class DownloadManager {
      *
      * The returned URL is actually an object URL, but it should not be revoked
      * since the download manager caches it for future use.
+     *
+     * If {@link cachedOnly} is false (the default), then this method will
+     * indicate errors by throwing but will never return `undefined`.
      */
     async renderableThumbnailURL(
         file: EnteFile,
@@ -542,6 +546,7 @@ const createRenderableSourceURLs = async (
             : undefined;
 
     let url: RenderableSourceURLs["url"] | undefined;
+    let originalImageURL: RenderableSourceURLs["originalImageURL"] | undefined;
     let type: RenderableSourceURLs["type"] = "normal";
     let mimeType: string | undefined;
     let canForceConvert = false;
@@ -552,6 +557,7 @@ const createRenderableSourceURLs = async (
             const convertedBlob = await renderableImageBlob(fileBlob, fileName);
             const convertedURL = existingOrNewObjectURL(convertedBlob);
             url = convertedURL;
+            originalImageURL = originalFileURL;
             mimeType = convertedBlob.type;
             break;
         }
@@ -588,6 +594,7 @@ const createRenderableSourceURLs = async (
     // @ts-ignore
     return {
         url: url!,
+        originalImageURL,
         type,
         mimeType,
         canForceConvert,
