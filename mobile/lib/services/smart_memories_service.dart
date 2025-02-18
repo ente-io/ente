@@ -39,9 +39,11 @@ class SmartMemoriesService {
   List<SmartMemory>? _cachedMemories;
   Future<List<SmartMemory>>? _future;
 
-  Vector? _clipTextVector;
+  Vector? _clipPositiveTextVector;
+  static const String clipPositiveQuery =
+      'Photo of a precious memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion';
 
-  static const _calculationWindowDays = 14;
+  static const int _calculationWindowDays = 14;
 
   // Singleton pattern
   SmartMemoriesService._privateConstructor();
@@ -71,6 +73,11 @@ class SmartMemoriesService {
             .removeWhere((m) => generatedIDs.contains(m.file.generatedID));
       }
     });
+    unawaited(
+      MLComputer.instance.runClipText(clipPositiveQuery).then((embedding) {
+        _clipPositiveTextVector ??= Vector.fromList(embedding);
+      }),
+    );
     _isInit = true;
     _logger.info("Smart memories service initialized");
   }
@@ -435,7 +442,7 @@ class SmartMemoriesService {
     // For now for testing let's just surface all base locations
     for (final baseLocation in baseLocations) {
       String name = "Base (${baseLocation.isCurrentBase ? 'current' : 'old'})";
-      final String? locationName = await _tryFindLocationName(
+      final String? locationName = _tryFindLocationName(
         Memory.fromFiles(baseLocation.files, _seenTimes),
         base: true,
       );
@@ -484,7 +491,7 @@ class SmartMemoriesService {
         final year =
             DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime())
                 .year;
-        final String? locationName = await _tryFindLocationName(trip.memories);
+        final String? locationName = _tryFindLocationName(trip.memories);
         String name =
             "Trip in $year"; // TODO lau: extract strings for translation
         if (locationName != null) {
@@ -530,7 +537,7 @@ class SmartMemoriesService {
                 DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime())
                     .year;
             final String? locationName =
-                await _tryFindLocationName(trip.memories);
+                _tryFindLocationName(trip.memories);
             String name = "Trip in $year";
             if (locationName != null) {
               name = "Trip to $locationName";
@@ -770,12 +777,12 @@ class SmartMemoriesService {
     return ((dayOfYear - 1) ~/ 7) + 1;
   }
 
-  Future<String?> _tryFindLocationName(
+  String? _tryFindLocationName(
     List<Memory> memories, {
     bool base = false,
-  }) async {
+  }) {
     final files = Memory.filesFromMemories(memories);
-    final results = await locationService.getFilesInCity(files, '');
+    final results = locationService.getFilesInCitySync(files);
     final List<City> sortedByResultCount = results.keys.toList()
       ..sort((a, b) => results[b]!.length.compareTo(results[a]!.length));
     if (sortedByResultCount.isEmpty) return null;
@@ -820,10 +827,6 @@ class SmartMemoriesService {
     }).toSet();
 
     // Get clip scores for each file
-    const query =
-        'Photo of a precious memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion';
-    _clipTextVector ??=
-        Vector.fromList(await MLComputer.instance.runClipText(query));
     const clipThreshold = 0.75;
     final fileToScore = <int, double>{};
     for (final mem in safeMemories) {
@@ -832,7 +835,7 @@ class SmartMemoriesService {
         fileToScore[mem.file.uploadedFileID!] = 0;
         continue;
       }
-      final score = clip.vector.dot(_clipTextVector!);
+      final score = clip.vector.dot(_clipPositiveTextVector!);
       fileToScore[mem.file.uploadedFileID!] = score;
     }
 
