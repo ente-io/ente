@@ -5,6 +5,7 @@ import { ensureElectron } from "@/base/electron";
 import { basename, nameAndExtension } from "@/base/file-name";
 import type { PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
+import { extractExif } from "@/gallery/services/exif";
 import { extractVideoMetadata } from "@/gallery/services/ffmpeg";
 import {
     getNonEmptyMagicMetadataProps,
@@ -38,7 +39,6 @@ import {
 import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import { addToCollection } from "@/new/photos/services/collection";
-import { extractExif } from "@/new/photos/services/exif";
 import { mergeUint8Arrays } from "@/utils/array";
 import { ensureInteger, ensureNumber } from "@/utils/ensure";
 import { CustomError, handleUploadError } from "@ente/shared/error";

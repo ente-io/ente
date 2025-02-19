@@ -24,6 +24,7 @@ import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import type { Location } from "@/base/types";
 import { CopyButton } from "@/gallery/components/FileInfoComponents";
+import { tagNumericValue, type RawExifTags } from "@/gallery/services/exif";
 import {
     changeCaption,
     changeFileName,
@@ -49,7 +50,6 @@ import {
     aboveFileViewerContentZ,
     fileInfoDrawerZ,
 } from "@/new/photos/components/utils/z-index";
-import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import {
     getAnnotatedFacesForFile,
     isMLEnabled,
