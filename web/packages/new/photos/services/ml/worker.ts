@@ -4,6 +4,7 @@ import { isHTTP4xxError } from "@/base/http";
 import log from "@/base/log";
 import { logUnhandledErrorsAndRejectionsInWorker } from "@/base/log-web";
 import type { ElectronMLWorker } from "@/base/types/ipc";
+import { isNetworkDownloadError } from "@/gallery/services/download";
 import type { UploadItem } from "@/gallery/services/upload";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { wait } from "@/utils/promise";
@@ -541,11 +542,16 @@ const index = async (
 
     // There is at least one ML data type that still needs to be indexed.
 
-    const renderableBlob = await fetchRenderableBlob(
-        file,
-        uploadItem,
-        electron,
-    );
+    let renderableBlob: Blob;
+    try {
+        renderableBlob = await fetchRenderableBlob(file, uploadItem, electron);
+    } catch (e) {
+        // Network errors are transient and shouldn't be marked.
+        //
+        // See: [Note: Transient and permanent indexing failures]
+        if (!isNetworkDownloadError(e)) await markIndexingFailed(fileID);
+        throw e;
+    }
 
     let image: ImageBitmapAndData;
     try {
@@ -557,7 +563,7 @@ const index = async (
         // reindexing attempt for failed files).
         //
         // See: [Note: Transient and permanent indexing failures]
-        await markIndexingFailed(file.id);
+        await markIndexingFailed(fileID);
         throw e;
     }
 
@@ -574,7 +580,7 @@ const index = async (
             ]);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
-            await markIndexingFailed(file.id);
+            await markIndexingFailed(fileID);
             throw e;
         }
 
@@ -615,7 +621,7 @@ const index = async (
             await putMLData(file, rawMLData);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
-            if (isHTTP4xxError(e)) await markIndexingFailed(file.id);
+            if (isHTTP4xxError(e)) await markIndexingFailed(fileID);
             throw e;
         }
 
