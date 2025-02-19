@@ -3,8 +3,10 @@ package user
 import (
 	"errors"
 	"fmt"
-	"github.com/ente-io/museum/pkg/repo/two_factor_recovery"
 	"strings"
+	"time"
+
+	"github.com/ente-io/museum/pkg/repo/two_factor_recovery"
 
 	cache2 "github.com/ente-io/museum/ente/cache"
 	"github.com/ente-io/museum/pkg/controller/discord"
@@ -17,6 +19,7 @@ import (
 	"github.com/ente-io/museum/pkg/repo/datacleanup"
 	"github.com/ente-io/museum/pkg/repo/passkey"
 	storageBonusRepo "github.com/ente-io/museum/pkg/repo/storagebonus"
+	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/billing"
 	"github.com/ente-io/museum/pkg/utils/crypto"
 	"github.com/ente-io/museum/pkg/utils/email"
@@ -367,4 +370,44 @@ func (c *UserController) createUser(email string, source *string) (int64, ente.S
 		_ = c.MailingListsController.Subscribe(email)
 	}()
 	return userID, subscription, nil
+}
+
+// Only for paid users, nudge them to share subscription with family
+func (c *UserController) GetPaidMembersWithoutFamily(ctx *gin.Context, userID int64, isSubscriptionCancelled bool) error {
+	app := auth.GetApp(ctx)
+	if app != "photo" {
+		return stacktrace.Propagate(ente.ErrInvalidApp, "app is not photos")
+	}
+
+	isUserOnPaidPlan, err := c.BillingRepo.IsUserOnPaidPlan(userID)
+	if err != nil {
+		return stacktrace.Propagate(ente.ErrBadRequest, "user is not on a paid plan")
+	}
+
+	isUserFamilyAdmin, err := c.UserRepo.GetFamilyAdminID(userID)
+	if err != nil {
+		return stacktrace.Propagate(ente.ErrBadRequest, "User is not admin of family")
+	}
+
+	subscriptionDate, subDateErr := c.BillingRepo.GetUserSubscriptionCreationDate(userID)
+	if subDateErr != nil {
+		return stacktrace.Propagate(err, "Could not find subscription date")
+	}
+
+	subscriptionDatePlus30Days := subscriptionDate.AddDate(0, 0, 30)
+	now := time.Now()
+
+	// set a time frame of 30 days and perform the checks inside that 30 day time frame
+	// to check if the user had changed
+	isIn30DayTimeFrame := now.After(subscriptionDate) && now.Before(subscriptionDatePlus30Days)
+	if isIn30DayTimeFrame {
+		if !isUserOnPaidPlan {
+			return stacktrace.Propagate(ente.ErrBadRequest, "User is not on a paid plan")
+		}
+		if userID == *isUserFamilyAdmin {
+			return stacktrace.Propagate(ente.ErrBadRequest, "User already has family on their plan")
+		}
+	}
+
+	return nil
 }
