@@ -12,7 +12,7 @@ import {
     extractRawExif,
     parseExif,
     type RawExifTags,
-} from "@/new/photos/services/exif";
+} from "@/gallery/services/exif";
 
 /**
  * This is a subset of the fields expected by PhotoSwipe itself (see the

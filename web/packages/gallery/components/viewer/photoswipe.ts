@@ -400,7 +400,7 @@ export class FileViewerPhotoSwipe {
     private autoHideIfInactive() {
         if (this.lastActivityDate == "already-hidden") return;
         if (this.lastActivityDate == "auto-hidden") return;
-        if (Date.now() - this.lastActivityDate.getTime() > 3000) {
+        if (Date.now() - this.lastActivityDate.getTime() > 5000 /* 5s */) {
             if (this.areUIControlsVisible()) {
                 this.hideUIControlsIfNotFocused();
                 this.lastActivityDate = "auto-hidden";
