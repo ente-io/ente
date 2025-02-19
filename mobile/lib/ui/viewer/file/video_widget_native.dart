@@ -210,10 +210,10 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                         behavior: HitTestBehavior.opaque,
                         onTap: () {
                           _showControls.value = !_showControls.value;
-                          _elTooltipController.hide();
                           if (widget.playbackCallback != null) {
                             widget.playbackCallback!(!_showControls.value);
                           }
+                          _elTooltipController.hide();
                         },
                         child: Container(
                           constraints: const BoxConstraints.expand(),

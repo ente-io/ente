@@ -15,9 +15,11 @@ class VideoControls extends StatefulWidget {
     super.key,
     required this.file,
     required this.onStreamChange,
+    required this.playbackCallback,
   });
   final EnteFile file;
   final void Function()? onStreamChange;
+  final void Function(bool)? playbackCallback;
 
   @override
   State<StatefulWidget> createState() {
@@ -186,6 +188,7 @@ class _VideoControlsState extends State<VideoControls> {
             _hideStuff = true;
           });
         }
+        widget.playbackCallback?.call(_hideStuff);
       },
       behavior: HitTestBehavior.opaque,
       child: AnimatedOpacity(
@@ -209,6 +212,7 @@ class _VideoControlsState extends State<VideoControls> {
       _hideStuff = false;
       _displayTapped = true;
     });
+    widget.playbackCallback?.call(_hideStuff);
   }
 
   Future<void> _initialize() async {
@@ -225,6 +229,7 @@ class _VideoControlsState extends State<VideoControls> {
         setState(() {
           _hideStuff = false;
         });
+        widget.playbackCallback?.call(_hideStuff);
       });
     }
   }
@@ -251,6 +256,7 @@ class _VideoControlsState extends State<VideoControls> {
           controller.play();
         }
       }
+      widget.playbackCallback?.call(_hideStuff);
     });
   }
 
@@ -259,6 +265,7 @@ class _VideoControlsState extends State<VideoControls> {
       setState(() {
         _hideStuff = true;
       });
+      widget.playbackCallback?.call(_hideStuff);
     });
   }
 

@@ -254,6 +254,7 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
       customControls: VideoControls(
         file: widget.file,
         onStreamChange: widget.onStreamChange,
+        playbackCallback: widget.playbackCallback,
       ),
     );
     return Container(
