@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* TODO: Audit this file
 Plan of action:
@@ -176,37 +175,32 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     const { mapEnabled } = useSettingsSnapshot();
 
-    const [exifInfo, setExifInfo] = useState<ExifInfo | undefined>();
-    const { show: showRawExif, props: rawExifVisibilityProps } =
-        useModalVisibility();
     const [annotatedFaces, setAnnotatedFaces] = useState<AnnotatedFaceID[]>([]);
 
-    const location = useMemo(() => {
-        if (file) {
-            const location = fileLocation(file);
-            if (location) return location;
-        }
-        return exif?.parsed?.location;
-    }, [file, exif]);
+    const { show: showRawExif, props: rawExifVisibilityProps } =
+        useModalVisibility();
+
+    const location = useMemo(
+        // Prefer the location in the EnteFile, then fall back to Exif.
+        () => (file ? fileLocation(file) : undefined) ?? exif?.parsed?.location,
+        [file, exif],
+    );
+
+    const annotatedExif = useMemo(() => annotateExif(exif), [exif]);
 
     useEffect(() => {
         if (!file) return;
 
         let didCancel = false;
 
-        void (async () => {
-            const result = await getAnnotatedFacesForFile(file);
-            !didCancel && setAnnotatedFaces(result);
-        })();
+        void getAnnotatedFacesForFile(file).then(
+            (faces) => !didCancel && setAnnotatedFaces(faces),
+        );
 
         return () => {
             didCancel = true;
         };
     }, [file]);
-
-    useEffect(() => {
-        setExifInfo(parseExifInfo(exif));
-    }, [exif]);
 
     const openEnableMapConfirmationDialog = () =>
         showMiniDialog(
@@ -238,15 +232,20 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     }}
                 />
                 <CreationTime {...{ file, allowEdits, scheduleUpdate }} />
-                <FileName {...{ file, exifInfo, allowEdits, scheduleUpdate }} />
+                <FileName
+                    {...{
+                        file,
+                        exifInfo: annotatedExif,
+                        allowEdits,
+                        scheduleUpdate,
+                    }}
+                />
 
-                {exifInfo?.takenOnDevice && (
+                {annotatedExif?.takenOnDevice && (
                     <InfoItem
                         icon={<CameraOutlinedIcon />}
-                        title={exifInfo?.takenOnDevice}
-                        caption={
-                            <BasicDeviceCamera {...{ parsedExif: exifInfo }} />
-                        }
+                        title={annotatedExif.takenOnDevice}
+                        caption={<BasicDeviceCamera {...{ annotatedExif }} />}
                     />
                 )}
 
@@ -337,7 +336,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                             collectionID,
                                         ),
                                     )
-                                    ?.map((collectionID) => (
+                                    .map((collectionID) => (
                                         <ChipButton
                                             key={collectionID}
                                             onClick={() =>
@@ -367,7 +366,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
  * Some immediate fields of interest, in the form that we want to display on the
  * info panel for a file.
  */
-type ExifInfo = Required<FileInfoExif> & {
+type AnnotatedExif = Required<FileInfoExif> & {
     resolution?: string;
     megaPixels?: string;
     takenOnDevice?: string;
@@ -376,13 +375,13 @@ type ExifInfo = Required<FileInfoExif> & {
     iso?: string;
 };
 
-const parseExifInfo = (
+const annotateExif = (
     fileInfoExif: FileInfoExif | undefined,
-): ExifInfo | undefined => {
+): AnnotatedExif | undefined => {
     if (!fileInfoExif || !fileInfoExif.tags || !fileInfoExif.parsed)
         return undefined;
 
-    const info: ExifInfo = { ...fileInfoExif };
+    const info: AnnotatedExif = { ...fileInfoExif };
 
     const { width, height } = fileInfoExif.parsed;
     if (width && height) {
@@ -407,6 +406,7 @@ const parseExifInfo = (
         if (exif.ISOSpeedRatings)
             info.iso = `ISO${tagNumericValue(exif.ISOSpeedRatings)}`;
     }
+
     return info;
 };
 
@@ -553,27 +553,23 @@ const Caption: React.FC<CaptionProps> = ({
     scheduleUpdate,
     refreshPhotoswipe,
 }) => {
-    const [caption, setCaption] = useState(
-        file?.pubMagicMetadata?.data.caption,
-    );
+    const [caption, setCaption] = useState(file.pubMagicMetadata?.data.caption);
 
     const [loading, setLoading] = useState(false);
 
     const saveEdits = async (newCaption: string) => {
         try {
-            if (file) {
-                if (caption === newCaption) {
-                    return;
-                }
-                setCaption(newCaption);
-
-                const updatedFile = await changeCaption(file, newCaption);
-                updateExistingFilePubMetadata(file, updatedFile);
-                // @ts-ignore
-                file.title = file.pubMagicMetadata.data.caption;
-                refreshPhotoswipe();
-                scheduleUpdate();
+            if (caption === newCaption) {
+                return;
             }
+            setCaption(newCaption);
+
+            const updatedFile = await changeCaption(file, newCaption);
+            updateExistingFilePubMetadata(file, updatedFile);
+            // @ts-ignore
+            file.title = file.pubMagicMetadata.data.caption;
+            refreshPhotoswipe();
+            scheduleUpdate();
         } catch (e) {
             log.error("failed to update caption", e);
         }
@@ -684,7 +680,7 @@ const CreationTime: React.FC<CreationTimeProps> = ({
     const saveEdits = async (pickedTime: ParsedMetadataDate) => {
         try {
             setLoading(true);
-            if (isInEditMode && file) {
+            if (isInEditMode) {
                 // [Note: Don't modify offsetTime when editing date via picker]
                 //
                 // Use the updated date time (both in its canonical dateTime
@@ -750,7 +746,7 @@ const CreationTime: React.FC<CreationTimeProps> = ({
 
 type FileNameProps = Pick<FileInfoProps, "allowEdits" | "scheduleUpdate"> & {
     file: EnteFile;
-    exifInfo: ExifInfo | undefined;
+    exifInfo: AnnotatedExif | undefined;
 };
 
 const FileName: React.FC<FileNameProps> = ({
@@ -772,7 +768,6 @@ const FileName: React.FC<FileNameProps> = ({
     }, [file]);
 
     const saveEdits = async (newFilename: string) => {
-        if (!file) return;
         if (fileName === newFilename) {
             closeEditMode();
             return;
@@ -811,7 +806,7 @@ const FileName: React.FC<FileNameProps> = ({
     );
 };
 
-const getCaption = (file: EnteFile, exifInfo: ExifInfo | undefined) => {
+const getCaption = (file: EnteFile, exifInfo: AnnotatedExif | undefined) => {
     const megaPixels = exifInfo?.megaPixels;
     const resolution = exifInfo?.resolution;
     const fileSize = file.info?.fileSize;
@@ -883,17 +878,15 @@ const FileNameEditDialog: React.FC<FileNameEditDialogProps> = ({
     );
 };
 
-const BasicDeviceCamera: React.FC<{ parsedExif: ExifInfo }> = ({
-    parsedExif,
-}) => {
-    return (
-        <FlexWrapper gap={1}>
-            <Box>{parsedExif.fNumber}</Box>
-            <Box>{parsedExif.exposureTime}</Box>
-            <Box>{parsedExif.iso}</Box>
-        </FlexWrapper>
-    );
-};
+const BasicDeviceCamera: React.FC<{ annotatedExif: AnnotatedExif }> = ({
+    annotatedExif,
+}) => (
+    <Stack direction="row" sx={{ gap: 1 }}>
+        <Box>{annotatedExif.fNumber}</Box>
+        <Box>{annotatedExif.exposureTime}</Box>
+        <Box>{annotatedExif.iso}</Box>
+    </Stack>
+);
 
 const openStreetMapLink = ({ latitude, longitude }: Location) =>
     `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=15/${latitude}/${longitude}`;
