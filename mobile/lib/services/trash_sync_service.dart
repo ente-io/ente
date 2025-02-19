@@ -13,8 +13,8 @@ import 'package:photos/models/api/collection/trash_item_request.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/ignored_file.dart';
+import 'package:photos/services/diff/trash_diff_fetcher.dart';
 import 'package:photos/services/ignored_files_service.dart';
-import 'package:photos/utils/trash_diff_fetcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TrashSyncService {
