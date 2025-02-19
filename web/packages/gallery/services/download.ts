@@ -277,6 +277,14 @@ class DownloadManager {
     };
 
     private async _downloadThumbnail(file: EnteFile) {
+        try {
+            return await this.__downloadThumbnail(file);
+        } catch (e) {
+            throw new NetworkDownloadError(e);
+        }
+    }
+
+    private async __downloadThumbnail(file: EnteFile) {
         if (this.publicAlbumsCredentials) {
             return publicAlbums_downloadThumbnail(
                 file,
@@ -521,6 +529,43 @@ class DownloadManager {
  * Singleton instance of {@link DownloadManager}.
  */
 export const downloadManager = new DownloadManager();
+
+/**
+ * A custom Error that is thrown if a download fails during network I/O.
+ *
+ * [Note: Identifying network related errors during download]
+ *
+ * We dealing with code that touches the network, we often don't specifically
+ * care about the specific error - there is a lot that can go wrong when a
+ * network is involved - but need to identify if an error was in the network
+ * related phase of an action, since these are usually transient and can be
+ * dealt with more softly than other errors.
+ *
+ * To that end, network related phases of download operations are wrapped in
+ * catches that intercept the error and wrap it in our custom
+ * {@link NetworkDownloadError} whose presence can be checked using the
+ * {@link isNetworkDownloadError} predicate.
+ */
+export class NetworkDownloadError extends Error {
+    error: unknown;
+
+    constructor(e: unknown) {
+        super(
+            `NetworkDownloadError: ${e instanceof Error ? e.message : String(e)}`,
+        );
+
+        // Cargo culted from
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#custom_error_types
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (Error.captureStackTrace)
+            Error.captureStackTrace(this, NetworkDownloadError);
+
+        this.error = e;
+    }
+}
+
+export const isNetworkDownloadError = (e: unknown) =>
+    e instanceof NetworkDownloadError;
 
 /**
  * Create and return a {@link RenderableSourceURLs} for the given {@link file},
