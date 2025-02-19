@@ -82,6 +82,7 @@ class PreviewVideoStore {
     Bus.instance.fire(VideoStreamingChanged());
 
     if (isVideoStreamingEnabled) {
+      await FileDataService.instance.syncFDStatus();
       _putFilesForPreviewCreation().ignore();
     } else {
       clearQueue();
