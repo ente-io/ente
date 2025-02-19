@@ -128,9 +128,8 @@ export type FileInfoProps = ModalVisibilityProps & {
      * If set, then a clickable chip will be shown for each collection that this
      * file is a part of.
      *
-     * Uses (and requires) {@link fileToCollectionsMap} and
-     * {@link collectionNameMap}, so both of those props should also be set for
-     * this to have an effect.
+     * Uses {@link fileCollectionIDs} and {@link allCollectionsNameByID}, so
+     * both of those props should also be set for this to have an effect.
      */
     showCollections?: boolean;
     /**
@@ -138,13 +137,13 @@ export type FileInfoProps = ModalVisibilityProps & {
      *
      * Used when {@link showCollections} is set.
      */
-    fileToCollectionsMap?: Map<number, number[]>;
+    fileCollectionIDs?: Map<number, number[]>;
     /**
      * A map from collection IDs to their name.
      *
      * Used when {@link showCollections} is set.
      */
-    collectionNameMap?: Map<number, string>;
+    allCollectionsNameByID?: Map<number, string>;
     scheduleUpdate: () => void;
     refreshPhotoswipe: () => void;
     /**
@@ -166,8 +165,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     allowEdits,
     allowMap,
     showCollections,
-    fileToCollectionsMap,
-    collectionNameMap,
+    fileCollectionIDs,
+    allCollectionsNameByID,
     scheduleUpdate,
     refreshPhotoswipe,
     onSelectCollection,
@@ -238,7 +237,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         refreshPhotoswipe,
                     }}
                 />
-
                 <CreationTime {...{ file, allowEdits, scheduleUpdate }} />
                 <FileName {...{ file, exifInfo, allowEdits, scheduleUpdate }} />
 
@@ -319,35 +317,41 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         />
                     </InfoItem>
                 )}
-                {showCollections && collectionNameMap && (
-                    <InfoItem icon={<FolderOutlinedIcon />}>
-                        <Stack
-                            direction="row"
-                            sx={{
-                                gap: 1,
-                                flexWrap: "wrap",
-                                justifyContent: "flex-start",
-                                alignItems: "flex-start",
-                            }}
-                        >
-                            {fileToCollectionsMap
-                                ?.get(file.id)
-                                ?.filter((collectionID) =>
-                                    collectionNameMap.has(collectionID),
-                                )
-                                ?.map((collectionID) => (
-                                    <ChipButton
-                                        key={collectionID}
-                                        onClick={() =>
-                                            onSelectCollection(collectionID)
-                                        }
-                                    >
-                                        {collectionNameMap.get(collectionID)}
-                                    </ChipButton>
-                                ))}
-                        </Stack>
-                    </InfoItem>
-                )}
+                {showCollections &&
+                    fileCollectionIDs &&
+                    allCollectionsNameByID && (
+                        <InfoItem icon={<FolderOutlinedIcon />}>
+                            <Stack
+                                direction="row"
+                                sx={{
+                                    gap: 1,
+                                    flexWrap: "wrap",
+                                    justifyContent: "flex-start",
+                                    alignItems: "flex-start",
+                                }}
+                            >
+                                {fileCollectionIDs
+                                    .get(file.id)
+                                    ?.filter((collectionID) =>
+                                        allCollectionsNameByID.has(
+                                            collectionID,
+                                        ),
+                                    )
+                                    ?.map((collectionID) => (
+                                        <ChipButton
+                                            key={collectionID}
+                                            onClick={() =>
+                                                onSelectCollection(collectionID)
+                                            }
+                                        >
+                                            {allCollectionsNameByID.get(
+                                                collectionID,
+                                            )}
+                                        </ChipButton>
+                                    ))}
+                            </Stack>
+                        </InfoItem>
+                    )}
             </Stack>
             <RawExif
                 {...rawExifVisibilityProps}

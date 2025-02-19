@@ -11,7 +11,7 @@ import ExportPendingList from "./ExportPendingList";
 
 interface Props {
     pendingExports: EnteFile[];
-    collectionNameMap: Map<number, string>;
+    allCollectionsNameByID: Map<number, string>;
     onHide: () => void;
     lastExportTime: number;
     /** Called when the user presses the "Resync" button. */
@@ -73,7 +73,7 @@ export default function ExportFinished(props: Props) {
             </DialogActions>
             <ExportPendingList
                 pendingExports={props.pendingExports}
-                collectionNameMap={props.collectionNameMap}
+                allCollectionsNameByID={props.allCollectionsNameByID}
                 isOpen={pendingFileListView}
                 onClose={closePendingFileList}
             />

@@ -102,8 +102,8 @@ export type PhotoViewerProps = Pick<
     isInHiddenSection: boolean;
     enableDownload: boolean;
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
-    fileToCollectionsMap?: Map<number, number[]>;
-    collectionNameMap?: Map<number, string>;
+    fileCollectionIDs?: Map<number, number[]>;
+    allCollectionsNameByID?: Map<number, string>;
     onSelectPerson?: FileInfoProps["onSelectPerson"];
 };
 
@@ -136,8 +136,8 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
     isInHiddenSection,
     enableDownload,
     setFilesDownloadProgressAttributesCreator,
-    fileToCollectionsMap,
-    collectionNameMap,
+    fileCollectionIDs,
+    allCollectionsNameByID,
     onSelectPerson,
 }) => {
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
@@ -998,8 +998,8 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                 showCollections={
                     !isTrashCollection && isOwnFile && !isInHiddenSection
                 }
-                fileToCollectionsMap={fileToCollectionsMap}
-                collectionNameMap={collectionNameMap}
+                fileCollectionIDs={fileCollectionIDs}
+                allCollectionsNameByID={allCollectionsNameByID}
                 scheduleUpdate={scheduleUpdate}
                 refreshPhotoswipe={refreshPhotoswipe}
                 onSelectCollection={handleSelectCollection}

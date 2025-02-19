@@ -1102,8 +1102,8 @@ const Page: React.FC = () => {
                         activeCollectionID={activeCollectionID}
                         activePersonID={activePerson?.id}
                         enableDownload={true}
-                        fileToCollectionsMap={state.fileCollectionIDs}
-                        collectionNameMap={state.allCollectionsNameByID}
+                        fileCollectionIDs={state.fileCollectionIDs}
+                        allCollectionsNameByID={state.allCollectionsNameByID}
                         showAppDownloadBanner={
                             files.length < 30 && !isInSearchMode
                         }
@@ -1119,7 +1119,7 @@ const Page: React.FC = () => {
                 )}
                 <Export
                     {...exportVisibilityProps}
-                    collectionNameMap={state.allCollectionsNameByID}
+                    allCollectionsNameByID={state.allCollectionsNameByID}
                 />
                 <AuthenticateUserModal
                     open={authenticateUserModalView}

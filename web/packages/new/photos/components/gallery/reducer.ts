@@ -195,14 +195,13 @@ export interface GalleryState {
      */
     favoriteFileIDs: Set<number>;
     /**
-     * User visible collection names indexed by collection IDs for fast lookup.
+     * A map from collection IDs to their user visible name.
      *
-     * This map will contain entries for all (both normal and hidden)
-     * collections.
+     * It will contain entries for all collections (both normal and hidden).
      */
     allCollectionsNameByID: Map<number, string>;
     /**
-     * A list of collection IDs to which a file belongs, indexed by file ID.
+     * A map from file IDs to the IDs of the collections that they're a part of.
      */
     fileCollectionIDs: Map<number, number[]>;
 
