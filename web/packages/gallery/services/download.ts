@@ -271,20 +271,14 @@ class DownloadManager {
     }
 
     private downloadThumbnail = async (file: EnteFile) => {
-        const encryptedData = await this._downloadThumbnail(file);
+        const encryptedData = await wrapErrors(() =>
+            this._downloadThumbnail(file),
+        );
         const decryptionHeader = file.thumbnail.decryptionHeader;
         return decryptThumbnail({ encryptedData, decryptionHeader }, file.key);
     };
 
     private async _downloadThumbnail(file: EnteFile) {
-        try {
-            return await this.__downloadThumbnail(file);
-        } catch (e) {
-            throw new NetworkDownloadError(e);
-        }
-    }
-
-    private async __downloadThumbnail(file: EnteFile) {
         if (this.publicAlbumsCredentials) {
             return publicAlbums_downloadThumbnail(
                 file,
@@ -393,7 +387,7 @@ class DownloadManager {
     ): Promise<ReadableStream<Uint8Array> | null> {
         log.info(`download attempted for file id ${file.id}`);
 
-        const res = await this._downloadFile(file);
+        const res = await wrapErrors(() => this._downloadFile(file));
 
         if (
             file.metadata.fileType === FileType.image ||
@@ -566,6 +560,15 @@ export class NetworkDownloadError extends Error {
 
 export const isNetworkDownloadError = (e: unknown) =>
     e instanceof NetworkDownloadError;
+
+/**
+ * A helper function to convert all rejections of the given promise {@link op}
+ * into {@link NetworkDownloadError}s.
+ */
+const wrapErrors = <T>(op: () => Promise<T>) =>
+    op().catch((e: unknown) => {
+        throw new NetworkDownloadError(e);
+    });
 
 /**
  * Create and return a {@link RenderableSourceURLs} for the given {@link file},
