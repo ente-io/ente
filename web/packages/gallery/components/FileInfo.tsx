@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* TODO: Audit this file
 Plan of action:
 - Move common components into FileInfoComponents.tsx
@@ -8,7 +6,6 @@ Plan of action:
 - Move the rest out to files in the apps themeselves: albums/SharedFileInfo
   and photos/FileInfo to deal with the @/new/photos imports here.
 */
-/* @ts-nocheck */
 
 import { LinkButtonUndecorated } from "@/base/components/LinkButton";
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
@@ -97,7 +94,7 @@ import type { FileInfoExif } from "./viewer/data-source";
 // Re-uses images from ~leaflet package.
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css";
 import "leaflet/dist/leaflet.css";
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unused-expressions
 haveWindow() && require("leaflet-defaulticon-compatibility");
 const leaflet = haveWindow()
     ? // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -482,9 +479,7 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
     >
         <InfoItemIconContainer>{icon}</InfoItemIconContainer>
         <Box sx={{ flex: 1, mt: "4px" }}>
-            {children ? (
-                children
-            ) : (
+            {children ?? (
                 <>
                     <Typography sx={{ wordBreak: "break-all" }}>
                         {title}
