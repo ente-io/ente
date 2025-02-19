@@ -89,9 +89,9 @@ class PreviewVideoStore {
   }
 
   void clearQueue() {
+    fileQueue.clear();
     _items.clear();
     Bus.instance.fire(PreviewUpdatedEvent(_items));
-    fileQueue.clear();
   }
 
   DateTime? get videoStreamingCutoff {
@@ -111,9 +111,10 @@ class PreviewVideoStore {
     }
 
     try {
-      if (!enteFile.isUploaded) return;
-      final file = await getFile(enteFile, isOrigin: true);
-      if (file == null) return;
+      if (!enteFile.isUploaded) {
+        _removeFile(enteFile);
+        return;
+      }
 
       try {
         // check if playlist already exist
@@ -123,8 +124,7 @@ class PreviewVideoStore {
         if (ctx != null && ctx.mounted) {
           showShortToast(ctx, 'Video preview already exists');
         }
-        _items.removeWhere((key, value) => value.file == enteFile);
-        Bus.instance.fire(PreviewUpdatedEvent(_items));
+        _removeFile(enteFile);
         return;
       } catch (e, s) {
         if (e is DioException && e.response?.statusCode == 404) {
@@ -137,8 +137,11 @@ class PreviewVideoStore {
       }
 
       // elimination case for <=10 MB with H.264
-      var (props, result) = await _checkFileForPreviewCreation(enteFile);
-      if (result) return;
+      var (props, result, file) = await _checkFileForPreviewCreation(enteFile);
+      if (result) {
+        _removeFile(enteFile);
+        return;
+      }
 
       // check if there is already a preview in processing
       if (uploadingFileId >= 0) {
@@ -167,6 +170,13 @@ class PreviewVideoStore {
         collectionID: enteFile.collectionID ?? 0,
       );
       Bus.instance.fire(PreviewUpdatedEvent(_items));
+
+      // get file
+      file ??= await getFile(enteFile, isOrigin: true);
+      if (file == null) {
+        _retryFile(enteFile, "Unable to fetch file");
+        return;
+      }
 
       // check metadata for bitrate, codec, color space
       props ??= await getVideoPropsAsync(file);
@@ -353,6 +363,11 @@ class PreviewVideoStore {
         await chunkAndUploadVideo(ctx, file);
       }
     }
+  }
+
+  void _removeFile(EnteFile enteFile) {
+    _items.remove(enteFile.uploadedFileID!);
+    Bus.instance.fire(PreviewUpdatedEvent(_items));
   }
 
   void _retryFile(EnteFile enteFile, Object error) {
@@ -595,37 +610,31 @@ class PreviewVideoStore {
     }
   }
 
-  Future<(FFProbeProps?, bool)> _checkFileForPreviewCreation(
+  Future<(FFProbeProps?, bool, File?)> _checkFileForPreviewCreation(
     EnteFile enteFile,
   ) async {
     final fileSize = enteFile.fileSize;
     FFProbeProps? props;
+    File? file;
+    bool result = false;
 
     try {
       final isFileUnder10MB = fileSize != null && fileSize <= 10 * 1024 * 1024;
       if (isFileUnder10MB) {
-        final file = await getFile(enteFile, isOrigin: true);
+        file = await getFile(enteFile, isOrigin: true);
         if (file != null) {
           props = await getVideoPropsAsync(file);
           final videoData = List.from(props?.propData?["streams"] ?? [])
               .firstWhereOrNull((e) => e["type"] == "video");
 
           final codec = videoData["codec_name"]?.toString().toLowerCase();
-          final codecIsH264 = codec?.contains("h264") ?? false;
-
-          if (codecIsH264) {
-            if (_items.containsKey(enteFile.uploadedFileID!)) {
-              _items.remove(enteFile.uploadedFileID!);
-              Bus.instance.fire(PreviewUpdatedEvent(_items));
-            }
-            return (props, true);
-          }
+          result = codec?.contains("h264") ?? false;
         }
       }
     } catch (e, sT) {
       _logger.warning("Failed to check props", e, sT);
     }
-    return (props, false);
+    return (props, result, file);
   }
 
   // generate stream for all files after cutoff date
@@ -645,16 +654,18 @@ class PreviewVideoStore {
     final allFiles = files
         .where((file) => previewIds?[file.uploadedFileID] == null)
         .sorted((a, b) {
-      // put higher duration videos last
-      final first = a.duration == null || a.duration! >= 10 * 60 ? 1 : 0;
-      final second = b.duration == null || b.duration! >= 10 * 60 ? 1 : 0;
+      // put higher duration videos last along with remote files
+      final first = (a.localID == null ? 2 : 0) +
+          (a.duration == null || a.duration! >= 10 * 60 ? 1 : 0);
+      final second = (b.localID == null ? 2 : 0) +
+          (b.duration == null || b.duration! >= 10 * 60 ? 1 : 0);
       return first.compareTo(second);
     }).toList();
 
     // set all video status to in queue
     for (final enteFile in allFiles) {
       // elimination case for <=10 MB with H.264
-      final (_, result) = await _checkFileForPreviewCreation(enteFile);
+      final (_, result, _) = await _checkFileForPreviewCreation(enteFile);
       if (result) {
         allFiles.remove(enteFile);
         continue;
