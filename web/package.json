@@ -21,13 +21,7 @@
         "dev:payments": "yarn workspace payments dev",
         "dev:photos": "yarn workspace photos next dev -p 3000",
         "lint": "concurrently --names 'prettier,eslint,tsc' \"yarn prettier --check --log-level warn .\" \"yarn workspaces run eslint\" \"yarn workspaces run tsc\"",
-        "lint-fix": "concurrently --names 'prettier,eslint,tsc' \"yarn prettier --write --log-level warn .\" \"yarn workspaces run eslint --fix\" \"yarn workspaces run tsc\"",
-        "preview": "yarn preview:photos",
-        "preview:accounts": "yarn build:accounts && python3 -m http.server -d apps/accounts/out 3001",
-        "preview:auth": "yarn build:auth && python3 -m http.server -d apps/auth/out 3000",
-        "preview:cast": "yarn build:cast && python3 -m http.server -d apps/accounts/out 3001",
-        "preview:payments": "yarn workspace payments preview",
-        "preview:photos": "yarn build:photos && python3 -m http.server -d apps/photos/out 3000"
+        "lint-fix": "concurrently --names 'prettier,eslint,tsc' \"yarn prettier --write --log-level warn .\" \"yarn workspaces run eslint --fix\" \"yarn workspaces run tsc\""
     },
     "devDependencies": {
         "concurrently": "^9.1.1",
