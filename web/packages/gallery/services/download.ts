@@ -393,7 +393,9 @@ class DownloadManager {
             file.metadata.fileType === FileType.image ||
             file.metadata.fileType === FileType.livePhoto
         ) {
-            const encryptedData = new Uint8Array(await res.arrayBuffer());
+            const encryptedData = new Uint8Array(
+                await wrapErrors(() => res.arrayBuffer()),
+            );
 
             const decrypted = await decryptStreamBytes(
                 {
@@ -433,7 +435,9 @@ class DownloadManager {
                 do {
                     // done is a boolean and value is an Uint8Array. When done
                     // is true value will be empty.
-                    const { done, value } = await reader.read();
+                    const { done, value } = await wrapErrors(() =>
+                        reader.read(),
+                    );
 
                     let data: Uint8Array;
                     if (done) {
