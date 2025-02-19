@@ -2,6 +2,7 @@ import { clientPackageName } from "@/base/app";
 import { assertionFailed } from "@/base/assert";
 import { isHTTP4xxError } from "@/base/http";
 import log from "@/base/log";
+import { logUnhandledErrorsAndRejectionsInWorker } from "@/base/log-web";
 import type { ElectronMLWorker } from "@/base/types/ipc";
 import type { UploadItem } from "@/gallery/services/upload";
 import { fileLogID, type EnteFile } from "@/media/file";
@@ -346,6 +347,8 @@ export class MLWorker {
 }
 
 expose(MLWorker);
+
+logUnhandledErrorsAndRejectionsInWorker();
 
 /**
  * Index the given batch of items.

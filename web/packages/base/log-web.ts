@@ -50,6 +50,26 @@ export const logUnhandledErrorsAndRejections = (attach: boolean) => {
     }
 };
 
+/**
+ * Attach handlers to log any unhandled exceptions and promise rejections in web
+ * workers.
+ *
+ * This is a variant of {@link logUnhandledErrorsAndRejections} that works in
+ * web workers. It should be called at the top level of the main worker script.
+ */
+export const logUnhandledErrorsAndRejectionsInWorker = () => {
+    const handleError = (event: ErrorEvent) => {
+        log.error("Unhandled error", event.error);
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+        log.error("Unhandled promise rejection", event.reason);
+    };
+
+    self.addEventListener("error", handleError);
+    self.addEventListener("unhandledrejection", handleUnhandledRejection);
+};
+
 interface LogEntry {
     timestamp: number;
     logLine: string;
