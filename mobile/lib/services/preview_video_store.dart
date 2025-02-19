@@ -58,10 +58,7 @@ class PreviewVideoStore {
   void init(SharedPreferences prefs) {
     _prefs = prefs;
 
-    Future.delayed(
-      const Duration(seconds: 10),
-      PreviewVideoStore.instance.putFilesForPreviewCreation,
-    );
+    Future.delayed(const Duration(seconds: 10), putFilesForPreviewCreation);
   }
 
   late final SharedPreferences _prefs;
@@ -585,24 +582,28 @@ class PreviewVideoStore {
     final fileSize = enteFile.fileSize;
     FFProbeProps? props;
 
-    if (fileSize != null && fileSize <= 10 * 1024 * 1024) {
-      final file = await getFile(enteFile, isOrigin: true);
-      if (file != null) {
-        props = await getVideoPropsAsync(file);
-        final videoData = List.from(props?.propData?["streams"] ?? [])
-            .firstWhereOrNull((e) => e["type"] == "video");
+    try {
+      if (fileSize != null && fileSize <= 10 * 1024 * 1024) {
+        final file = await getFile(enteFile, isOrigin: true);
+        if (file != null) {
+          props = await getVideoPropsAsync(file);
+          final videoData = List.from(props?.propData?["streams"] ?? [])
+              .firstWhereOrNull((e) => e["type"] == "video");
 
-        final codec = videoData["codec_name"]?.toString().toLowerCase();
-        final codecIsH264 = codec?.contains("h264") ?? false;
+          final codec = videoData["codec_name"]?.toString().toLowerCase();
+          final codecIsH264 = codec?.contains("h264") ?? false;
 
-        if (codecIsH264) {
-          if (_items.containsKey(enteFile.uploadedFileID!)) {
-            _items.remove(enteFile.uploadedFileID!);
-            Bus.instance.fire(PreviewUpdatedEvent(_items));
+          if (codecIsH264) {
+            if (_items.containsKey(enteFile.uploadedFileID!)) {
+              _items.remove(enteFile.uploadedFileID!);
+              Bus.instance.fire(PreviewUpdatedEvent(_items));
+            }
+            return (props, true);
           }
-          return (props, true);
         }
       }
+    } catch (e, sT) {
+      _logger.warning("Failed to check props", e, sT);
     }
     return (props, false);
   }
