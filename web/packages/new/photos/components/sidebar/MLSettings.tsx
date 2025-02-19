@@ -263,7 +263,7 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
     }
 
     // Show processed as percentages instead of potentially confusing counts.
-    const processed = `${Math.round((100 * nSyncedFiles) / nTotalFiles)}%`;
+    const processed = `${nTotalFiles ? Math.round((100 * nSyncedFiles) / nTotalFiles) : 100}%`;
 
     const confirmDisableML = () =>
         showMiniDialog({
