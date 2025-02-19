@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/ente-io/stacktrace"
 
@@ -56,6 +57,13 @@ func (repo *BillingRepository) GetSubscriptionForTransaction(transactionID strin
 	row := repo.DB.QueryRow(`SELECT subscription_id, user_id, product_id, storage, original_transaction_id, expiry_time, payment_provider, attributes FROM subscriptions WHERE original_transaction_id = $1 AND payment_provider = $2`, transactionID, paymentProvider)
 	err := row.Scan(&s.ID, &s.UserID, &s.ProductID, &s.Storage, &s.OriginalTransactionID, &s.ExpiryTime, &s.PaymentProvider, &s.Attributes)
 	return s, stacktrace.Propagate(err, "")
+}
+
+func (repo *BillingRepository) GetUserSubscriptionCreationDate(userID int64) (time.Time, error) {
+	var firstSubDate time.Time
+	err := repo.DB.QueryRow("SELECT MIN(created_at) from subscription_logs where user_id=$1", userID).Scan(&firstSubDate)
+
+	return firstSubDate, stacktrace.Propagate(err, "")
 }
 
 // UpdateTransactionIDOnDeletion just append `userID:` before original transaction id on account deletion.
