@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import "package:ml_linalg/vector.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/memories_db.dart";
@@ -18,12 +19,17 @@ import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/models/memory.dart";
+import "package:photos/models/ml/face/face.dart";
+import "package:photos/models/ml/face/person.dart";
+import "package:photos/models/people_memory.dart";
 import "package:photos/models/smart_memory.dart";
 import "package:photos/models/time_memory.dart";
 import "package:photos/models/trip_memory.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/location_service.dart";
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/memories_service.dart";
 import "package:photos/services/search_service.dart";
 
@@ -43,7 +49,12 @@ class SmartMemoriesService {
   static const String clipPositiveQuery =
       'Photo of a precious memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion';
 
+  final Map<PeopleActivity, Vector> _clipPeopleActivityVectors = {};
+
   static const int _calculationWindowDays = 14;
+
+  static const _clipSimilarImageThreshold = 0.75;
+  static const _clipActivityQueryThreshold = 0.20;
 
   // Singleton pattern
   SmartMemoriesService._privateConstructor();
@@ -78,6 +89,16 @@ class SmartMemoriesService {
         _clipPositiveTextVector ??= Vector.fromList(embedding);
       }),
     );
+    for (final peopleActivity in PeopleActivity.values) {
+      unawaited(
+        MLComputer.instance
+            .runClipText(activityQuery(peopleActivity))
+            .then((embedding) {
+          _clipPeopleActivityVectors[peopleActivity] =
+              Vector.fromList(embedding);
+        }),
+      );
+    }
     _isInit = true;
     _logger.info("Smart memories service initialized");
   }
@@ -133,11 +154,10 @@ class SmartMemoriesService {
       // Pause 10 seconds TODO: lau: remove this later
       await Future.delayed(const Duration(seconds: 10));
 
-      // // People memories TODO: lau: add people
-      // final peopleMemories = await _getPeopleResults(allFiles, limit);
-      // _deductUsedMemories(allFiles, peopleMemories);
-      // memories.addAll(peopleMemories);
-      // _logger.finest("All files length: ${allFiles.length}");
+      final peopleMemories = await _getPeopleResults(allFiles, null);
+      _deductUsedMemories(allFiles, peopleMemories);
+      memories.addAll(peopleMemories);
+      _logger.finest("All files length: ${allFiles.length}");
 
       // Trip memories
       final tripMemories = await _getTripsResults(allFiles, null);
@@ -174,6 +194,230 @@ class SmartMemoriesService {
       usedFiles.addAll(memory.memories.map((m) => m.file));
     }
     files.removeAll(usedFiles);
+  }
+
+  Future<List<PeopleMemory>> _getPeopleResults(
+    Iterable<EnteFile> allFiles,
+    int? limit, // TODO: lau: implement limit
+  ) async {
+    final List<PeopleMemory> memoryResults = [];
+    if (allFiles.isEmpty) return [];
+    final allFileIdsToFile = <int, EnteFile>{};
+    for (final file in allFiles) {
+      if (file.uploadedFileID != null) {
+        allFileIdsToFile[file.uploadedFileID!] = file;
+      }
+    }
+    final currentTime = DateTime.now().toLocal();
+
+    // Get ordered list of important people (all named, from most to least files)
+    final persons = await PersonService.instance.getPersons();
+    if (persons.length < 5) return []; // Stop if not enough named persons
+    final personIdToPerson = <String, PersonEntity>{};
+    final personIdToFaceIDs = <String, Set<String>>{};
+    final personIdToFileIDs = <String, Set<int>>{};
+    // final personIdToFaceIdToFace = <String, Map<String, Face>>{}; TODO: lau: try using relative face size as metric of importance
+    for (final person in persons) {
+      final personID = person.remoteID;
+      personIdToPerson[personID] = person;
+      personIdToFaceIDs[personID] = {};
+      personIdToFileIDs[personID] = {};
+      for (final cluster in person.data.assigned) {
+        if (cluster.faces.isEmpty) continue;
+        personIdToFaceIDs[personID]!.addAll(cluster.faces);
+        personIdToFileIDs[personID]!
+            .addAll(cluster.faces.map((faceID) => getFileIdFromFaceId(faceID)));
+      }
+    }
+    final List<String> orderedImportantPersonsID =
+        persons.map((p) => p.remoteID).toList();
+    orderedImportantPersonsID.sort((a, b) {
+      final aFaces = personIdToFaceIDs[a]!.length;
+      final bFaces = personIdToFaceIDs[b]!.length;
+      return bFaces.compareTo(aFaces);
+    });
+
+    // Check if the user has assignmed "me"
+    String? meID;
+    final currentUserEmail = Configuration.instance.getEmail();
+    for (final personEntity in persons) {
+      if (personEntity.data.email == currentUserEmail) {
+        meID = personEntity.remoteID;
+        break;
+      }
+    }
+    final bool isMeAssigned = meID != null;
+    Map<int, List<Face>>? meFilesToFaces;
+    if (isMeAssigned) {
+      final meFileIDs = personIdToFileIDs[meID]!;
+      meFilesToFaces = await MLDataDB.instance.getFacesForFileIDs(
+        meFileIDs,
+      );
+    }
+
+    // Loop through the people and find all memories
+    final Map<String, Map<PeopleMemoryType, PeopleMemory>> personToMemories =
+        {};
+    for (final personID in orderedImportantPersonsID) {
+      final personFileIDs = personIdToFileIDs[personID]!;
+      final personName = personIdToPerson[personID]!.data.name;
+      final Map<int, List<Face>> personFilesToFaces =
+          await MLDataDB.instance.getFacesForFileIDs(
+        personFileIDs,
+      );
+      // Inside people loop, check for spotlight
+      final spotlightFiles = <EnteFile>[];
+      for (final fileID in personFileIDs) {
+        final int personsPresent = personFilesToFaces[fileID]?.length ?? 10;
+        if (personsPresent > 2) continue;
+        final file = allFileIdsToFile[fileID];
+        if (file != null) {
+          spotlightFiles.add(file);
+        }
+      }
+      if (spotlightFiles.length > 5) {
+        String title = "Spotlight on $personName";
+        if (isMeAssigned && meID == personID) {
+          title = "Spotlight on yourself";
+        }
+        // TODO: lau: create selection on spotlightFiles on time, location and faces
+        final spotlightMemory = PeopleMemory(
+          spotlightFiles.map((f) => Memory.fromFile(f, _seenTimes)).toList(),
+          PeopleMemoryType.spotlight,
+          personID,
+          name: title,
+        );
+        personToMemories
+            .putIfAbsent(personID, () => {})
+            .putIfAbsent(PeopleMemoryType.spotlight, () => spotlightMemory);
+      }
+
+      // Inside people loop, check for youAndThem
+      if (isMeAssigned && meID != personID) {
+        final youAndThemFiles = <EnteFile>[];
+        for (final fileID in personFileIDs) {
+          final meFaces = meFilesToFaces![fileID];
+          final personFaces = personFilesToFaces[fileID] ?? [];
+          if (meFaces == null || personFaces.length != 2) continue;
+          final file = allFileIdsToFile[fileID];
+          if (file != null) {
+            youAndThemFiles.add(file);
+          }
+        }
+        if (youAndThemFiles.length > 5) {
+          final String title = "You and $personName";
+          // TODO: lau: create selection on youAndThemFiles on time and location
+          final youAndThemMemory = PeopleMemory(
+            youAndThemFiles.map((f) => Memory.fromFile(f, _seenTimes)).toList(),
+            PeopleMemoryType.youAndThem,
+            personID,
+            name: title,
+          );
+          personToMemories
+              .putIfAbsent(personID, () => {})
+              .putIfAbsent(PeopleMemoryType.spotlight, () => youAndThemMemory);
+        }
+      }
+
+      // Inside people loop, check for doingSomethingTogether
+      if (isMeAssigned && meID != personID) {
+        final fileIdToClip =
+            await MLDataDB.instance.getClipVectorsForFileIDs(personFileIDs);
+        final activityFiles = <EnteFile>[];
+        PeopleActivity lastActivity = PeopleActivity.values.first;
+        activityLoop:
+        for (final activity in PeopleActivity.values) {
+          activityFiles.clear();
+          lastActivity = activity;
+          final Vector? activityVector = _clipPeopleActivityVectors[activity];
+          if (activityVector == null) {
+            _logger.severe("No vector for activity $activity");
+            continue activityLoop;
+          }
+          for (final fileID in personFileIDs) {
+            final clipVector = fileIdToClip[fileID];
+            if (clipVector == null) continue;
+            final similarity = activityVector.dot(clipVector.vector);
+            if (similarity > _clipActivityQueryThreshold) {
+              final file = allFileIdsToFile[fileID];
+              if (file != null) {
+                activityFiles.add(file);
+              }
+            }
+          }
+          if (activityFiles.length > 5) break activityLoop;
+        }
+        if (activityFiles.length > 5) {
+          final String title = activityTitle(lastActivity, personName);
+          // TODO: lau: create selection on activityFiles on time and location
+          final activityMemory = PeopleMemory(
+            activityFiles.map((f) => Memory.fromFile(f, _seenTimes)).toList(),
+            PeopleMemoryType.doingSomethingTogether,
+            personID,
+            name: title,
+          );
+          personToMemories.putIfAbsent(personID, () => {}).putIfAbsent(
+                PeopleMemoryType.doingSomethingTogether,
+                () => activityMemory,
+              );
+        }
+      }
+
+      // Inside people loop, check for lastTimeYouSawThem
+      final lastTimeYouSawThemFiles = <EnteFile>[];
+      int lastCreationTime = 0;
+      bool longAgo = true;
+      fileLoop:
+      for (final fileID in personFileIDs) {
+        final file = allFileIdsToFile[fileID];
+        if (file != null && file.creationTime != null) {
+          final creationTime = file.creationTime!;
+          final creationDateTime =
+              DateTime.fromMicrosecondsSinceEpoch(creationTime);
+          if (currentTime.difference(creationDateTime).inDays < 365) {
+            longAgo = false;
+            break fileLoop;
+          }
+          if (creationTime > lastCreationTime) {
+            final lastDateTime =
+                DateTime.fromMicrosecondsSinceEpoch(lastCreationTime);
+            if (creationDateTime.difference(lastDateTime).inHours > 24) {
+              lastTimeYouSawThemFiles.clear();
+            }
+            lastCreationTime = creationTime;
+            lastTimeYouSawThemFiles.add(file);
+          }
+        }
+      }
+      if (longAgo && lastTimeYouSawThemFiles.length >= 5) {
+        final String title = "Last time with $personName";
+        final lastTimeMemory = PeopleMemory(
+          lastTimeYouSawThemFiles
+              .map((f) => Memory.fromFile(f, _seenTimes))
+              .toList(),
+          PeopleMemoryType.lastTimeYouSawThem,
+          personID,
+          name: title,
+        );
+        personToMemories.putIfAbsent(personID, () => {}).putIfAbsent(
+              PeopleMemoryType.lastTimeYouSawThem,
+              () => lastTimeMemory,
+            );
+      }
+    }
+
+    // Surface everything just for debug checking
+    for (final personID in personToMemories.keys) {
+      for (final memoryType in personToMemories[personID]!.keys) {
+        memoryResults.add(personToMemories[personID]![memoryType]!);
+      }
+    }
+
+    // Loop through the people and check if we should surface anything based on relevancy (bday, last met)
+
+    // Loop through the people (and memory types) and add the remaining memories (for this month only?)
+
+    return memoryResults;
   }
 
   Future<List<TripMemory>> _getTripsResults(
@@ -536,8 +780,7 @@ class SmartMemoriesService {
             final year =
                 DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime())
                     .year;
-            final String? locationName =
-                _tryFindLocationName(trip.memories);
+            final String? locationName = _tryFindLocationName(trip.memories);
             String name = "Trip in $year";
             if (locationName != null) {
               name = "Trip to $locationName";
@@ -827,7 +1070,6 @@ class SmartMemoriesService {
     }).toSet();
 
     // Get clip scores for each file
-    const clipThreshold = 0.75;
     final fileToScore = <int, double>{};
     for (final mem in safeMemories) {
       final clip = fileIdToClip[mem.file.uploadedFileID!];
@@ -883,7 +1125,7 @@ class SmartMemoriesService {
             final fClip = fileIdToClip[filteredMem.file.uploadedFileID!];
             if (fClip == null) continue;
             final similarity = clip.vector.dot(fClip.vector);
-            if (similarity > clipThreshold) {
+            if (similarity > _clipSimilarImageThreshold) {
               skipped++;
               continue filesLoop;
             }
@@ -941,7 +1183,7 @@ class SmartMemoriesService {
                 final fClip = fileIdToClip[filteredMem.file.uploadedFileID!];
                 if (fClip == null) continue;
                 final similarity = clip.vector.dot(fClip.vector);
-                if (similarity > clipThreshold) {
+                if (similarity > _clipSimilarImageThreshold) {
                   skipped++;
                   continue yearLoop;
                 }
