@@ -50,6 +50,31 @@ export const logUnhandledErrorsAndRejections = (attach: boolean) => {
     }
 };
 
+/**
+ * Attach handlers to log any unhandled exceptions and promise rejections in web
+ * workers.
+ *
+ * This is a variant of {@link logUnhandledErrorsAndRejections} that works in
+ * web workers. It should be called at the top level of the main worker script.
+ *
+ * Note: When I tested this, attaching the onerror handler to the worker outside
+ * the worker (e.g. when creating it in comlink-worker.ts) worked, but attaching
+ * the "unhandledrejection" event there did not work. Attaching them to `self`
+ * (the {@link WorkerGlobal}) worked.
+ */
+export const logUnhandledErrorsAndRejectionsInWorker = () => {
+    const handleError = (event: ErrorEvent) => {
+        log.error("Unhandled error", event.error);
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+        log.error("Unhandled promise rejection", event.reason);
+    };
+
+    self.addEventListener("error", handleError);
+    self.addEventListener("unhandledrejection", handleUnhandledRejection);
+};
+
 interface LogEntry {
     timestamp: number;
     logLine: string;
