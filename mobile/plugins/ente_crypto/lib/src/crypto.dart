@@ -308,6 +308,18 @@ class CryptoUtil {
     );
   }
 
+  static Uint8List decryptChaChaSync(
+    Uint8List source,
+    Uint8List key,
+    Uint8List header,
+  ) {
+    final args = <String, dynamic>{};
+    args["source"] = source;
+    args["key"] = key;
+    args["header"] = header;
+    return chachaDecryptData(args);
+  }
+
   // Encrypts the file at sourceFilePath, with the key (if provided) and a
   // randomly generated nonce using XChaCha20 (w Poly1305 MAC), and writes it
   // to the destinationFilePath.
