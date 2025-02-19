@@ -993,15 +993,15 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                 onClose={handleCloseInfo}
                 file={photoSwipe?.currItem as EnteFile}
                 exif={exif?.value}
-                shouldDisableEdits={!isOwnFile}
+                allowEdits={isOwnFile}
                 allowMap={!publicCollectionGalleryContext.credentials}
-                showCollectionChips={
+                showCollections={
                     !isTrashCollection && isOwnFile && !isInHiddenSection
                 }
-                scheduleUpdate={scheduleUpdate}
-                refreshPhotoswipe={refreshPhotoswipe}
                 fileToCollectionsMap={fileToCollectionsMap}
                 collectionNameMap={collectionNameMap}
+                scheduleUpdate={scheduleUpdate}
+                refreshPhotoswipe={refreshPhotoswipe}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
             />
