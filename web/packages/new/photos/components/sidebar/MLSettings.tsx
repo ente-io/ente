@@ -16,7 +16,6 @@ import {
     FormControlLabel,
     FormGroup,
     Link,
-    Paper,
     Stack,
     Typography,
 } from "@mui/material";
@@ -288,43 +287,42 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
                     />
                 </RowButtonGroup>
             </Stack>
-            <Paper variant="outlined">
-                <Stack>
-                    <Stack
-                        direction="row"
-                        sx={{
-                            gap: 2,
-                            px: 2,
-                            pt: 1,
-                            pb: 2,
-                            justifyContent: "space-between",
-                        }}
-                    >
-                        <Typography sx={{ color: "text.faint" }}>
-                            {t("indexing")}
-                        </Typography>
-                        <Typography>{status}</Typography>
-                    </Stack>
-                    <Divider sx={{ marginInlineStart: 2 }} />
-                    <Stack
-                        direction="row"
-                        sx={{
-                            gap: 2,
-                            px: 2,
-                            pt: 2,
-                            pb: 1,
-                            justifyContent: "space-between",
-                        }}
-                    >
-                        <Typography sx={{ color: "text.faint" }}>
-                            {t("processed")}
-                        </Typography>
-                        <Typography sx={{ textAlign: "right" }}>
-                            {processed}
-                        </Typography>
-                    </Stack>
+
+            <Stack>
+                <Stack
+                    direction="row"
+                    sx={{
+                        gap: 2,
+                        px: 2,
+                        pt: 1,
+                        pb: 2,
+                        justifyContent: "space-between",
+                    }}
+                >
+                    <Typography sx={{ color: "text.faint" }}>
+                        {t("indexing")}
+                    </Typography>
+                    <Typography>{status}</Typography>
                 </Stack>
-            </Paper>
+                <Divider sx={{ marginInline: 2 }} />
+                <Stack
+                    direction="row"
+                    sx={{
+                        gap: 2,
+                        px: 2,
+                        pt: 2,
+                        pb: 1,
+                        justifyContent: "space-between",
+                    }}
+                >
+                    <Typography sx={{ color: "text.faint" }}>
+                        {t("processed")}
+                    </Typography>
+                    <Typography sx={{ textAlign: "right" }}>
+                        {processed}
+                    </Typography>
+                </Stack>
+            </Stack>
         </Stack>
     );
 };
