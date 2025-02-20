@@ -120,6 +120,22 @@ dependencies:
     git:
       url: "https://github.com/ente-io/media_extension.git"
       ref: deeplink_fixes
+  media_kit:
+    git:
+      url: https://github.com/media-kit/media-kit
+      path: media_kit
+  media_kit_libs_ios_video:
+    git:
+      url: https://github.com/media-kit/media-kit
+      path: libs/ios/media_kit_libs_ios_video
+  media_kit_libs_video:
+    git:
+      url: https://github.com/media-kit/media-kit
+      path: libs/universal/media_kit_libs_video
+  media_kit_video:
+    git:
+      url: https://github.com/media-kit/media-kit
+      path: media_kit_video
   ml_linalg: ^13.11.31
   modal_bottom_sheet: ^3.0.0-pre
   motion_photos:
@@ -186,6 +202,11 @@ dependencies:
   video_editor:
     git:
       url: https://github.com/prateekmedia/video_editor.git
+  video_player:
+    git:
+      url: https://github.com/ente-io/packages.git
+      ref: android_video_roation_fix
+      path: packages/video_player/video_player/
   video_thumbnail: ^0.5.3
   visibility_detector: ^0.3.3
   wakelock_plus: ^1.1.1
@@ -200,32 +221,28 @@ dependency_overrides:
   # Newer flutter packages depends on ffi > 2.0.0 while flutter_sodium depends on ffi < 2.0.0
   ffi: 2.1.0
   intl: 0.18.1
+  js: ^0.6.7
   media_kit:
     git:
       url: https://github.com/media-kit/media-kit
       path: media_kit
-  media_kit_video:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: media_kit_video
-  media_kit_libs_video:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: libs/universal/media_kit_libs_video
   media_kit_libs_ios_video:
     git:
       url: https://github.com/media-kit/media-kit
       path: libs/ios/media_kit_libs_ios_video
+  media_kit_libs_video:
+    git:
+      url: https://github.com/media-kit/media-kit
+      path: libs/universal/media_kit_libs_video
+  media_kit_video:
+    git:
+      url: https://github.com/media-kit/media-kit
+      path: media_kit_video
   video_player:
     git:
       url: https://github.com/ente-io/packages.git
       ref: android_video_roation_fix
       path: packages/video_player/video_player/
-  video_player_media_kit:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: video_player_media_kit
-  js: ^0.6.7
   watcher: ^1.1.0
   win32: ^5.5.4
 
