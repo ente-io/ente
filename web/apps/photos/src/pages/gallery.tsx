@@ -88,7 +88,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Stack, Typography } from "@mui/material";
-import AuthenticateUserModal from "components/AuthenticateUser";
+import { AuthenticateUser } from "components/AuthenticateUser";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
@@ -138,8 +138,6 @@ const defaultGalleryContext: GalleryContextType = {
     syncWithRemote: () => null,
     setBlockingLoad: () => null,
     photoListHeader: null,
-    openExportModal: () => null,
-    authenticateUser: () => null,
     user: null,
     userIDToEmailMap: null,
     emailList: null,
@@ -207,25 +205,6 @@ const Page: React.FC = () => {
     const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
         useState<UploadTypeSelectorIntent>("upload");
 
-    const [authenticateUserModalView, setAuthenticateUserModalView] =
-        useState(false);
-
-    const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
-
-    const authenticateUser = (callback: () => void) => {
-        onAuthenticateCallback.current = callback;
-        setAuthenticateUserModalView(true);
-    };
-
-    const authenticateUser2 = () =>
-        new Promise<void>((resolve) => {
-            onAuthenticateCallback.current = resolve;
-            setAuthenticateUserModalView(true);
-        });
-
-    const closeAuthenticateUserModal = () =>
-        setAuthenticateUserModalView(false);
-
     // If the fix creation time dialog is being shown, then the list of files on
     // which it should act.
     const [fixCreationTimeFiles, setFixCreationTimeFiles] = useState<
@@ -260,6 +239,21 @@ const Page: React.FC = () => {
         useModalVisibility();
     const { show: showExport, props: exportVisibilityProps } =
         useModalVisibility();
+    const {
+        show: showAuthenticateUser,
+        props: authenticateUserVisibilityProps,
+    } = useModalVisibility();
+
+    const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
+
+    const authenticateUser = useCallback(
+        () =>
+            new Promise<void>((resolve) => {
+                onAuthenticateCallback.current = resolve;
+                showAuthenticateUser();
+            }),
+        [],
+    );
 
     // TODO: Temp
     const user = state.user;
@@ -457,7 +451,7 @@ const Page: React.FC = () => {
             planSelectorVisibilityProps.open ||
             fixCreationTimeVisibilityProps.open ||
             exportVisibilityProps.open ||
-            authenticateUserModalView ||
+            authenticateUserVisibilityProps.open ||
             isPhotoSwipeOpen ||
             !filteredFiles?.length ||
             !user
@@ -787,7 +781,7 @@ const Page: React.FC = () => {
     const openHiddenSection: GalleryContextType["openHiddenSection"] = (
         callback,
     ) => {
-        authenticateUser(() => {
+        authenticateUser().then(() => {
             dispatch({ type: "showHidden" });
             callback?.();
         });
@@ -827,8 +821,6 @@ const Page: React.FC = () => {
                 syncWithRemote,
                 setBlockingLoad,
                 photoListHeader,
-                openExportModal: showExport,
-                authenticateUser,
                 userIDToEmailMap,
                 user,
                 emailList,
@@ -1007,7 +999,7 @@ const Page: React.FC = () => {
                     {...{ collectionSummaries }}
                     onShowPlanSelector={showPlanSelector}
                     onShowExport={showExport}
-                    onAuthenticateUser={authenticateUser2}
+                    onAuthenticateUser={authenticateUser}
                 />
                 <WhatsNew {...whatsNewVisibilityProps} />
                 {!isInSearchMode &&
@@ -1063,10 +1055,9 @@ const Page: React.FC = () => {
                     {...exportVisibilityProps}
                     allCollectionsNameByID={state.allCollectionsNameByID}
                 />
-                <AuthenticateUserModal
-                    open={authenticateUserModalView}
-                    onClose={closeAuthenticateUserModal}
-                    onAuthenticate={onAuthenticateCallback.current}
+                <AuthenticateUser
+                    {...authenticateUserVisibilityProps}
+                    onAuthenticate={onAuthenticateCallback.current!}
                 />
             </FullScreenDropZone>
         </GalleryContext.Provider>
