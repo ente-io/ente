@@ -999,6 +999,7 @@ const Page: React.FC = () => {
                     {...sidebarVisibilityProps}
                     {...{ collectionSummaries }}
                     onShowPlanSelector={showPlanSelector}
+                    onShowExport={showExport}
                 />
                 <WhatsNew {...whatsNewVisibilityProps} />
                 {!isInSearchMode &&

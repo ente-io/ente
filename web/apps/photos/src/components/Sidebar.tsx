@@ -140,6 +140,10 @@ type SidebarProps = ModalVisibilityProps & {
      * Called when the plan selection modal should be shown.
      */
     onShowPlanSelector: () => void;
+    /**
+     * Called when the export dialog should be shown.
+     */
+    onShowExport: () => void;
 };
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -147,6 +151,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onClose,
     collectionSummaries,
     onShowPlanSelector,
+    onShowExport,
 }) => (
     <RootSidebarDrawer open={open} onClose={onClose}>
         <HeaderSection onCloseSidebar={onClose} />
@@ -157,7 +162,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 collectionSummaries={collectionSummaries}
             />
             <UtilitySection onCloseSidebar={onClose} />
-            <HelpSection onCloseSidebar={onClose} />
+            <HelpSection onCloseSidebar={onClose} {...{ onShowExport }} />
             <Divider sx={{ my: "2px" }} />
             <ExitSection />
             <InfoSection />
@@ -565,15 +570,19 @@ const UtilitySection: React.FC<SectionProps> = ({ onCloseSidebar }) => {
     );
 };
 
-const HelpSection: React.FC<SectionProps> = ({ onCloseSidebar }) => {
+type HelpSectionProps = SectionProps & Pick<SidebarProps, "onShowExport">;
+
+const HelpSection: React.FC<HelpSectionProps> = ({
+    onCloseSidebar,
+    onShowExport,
+}) => {
     const { showMiniDialog } = useBaseContext();
-    const { openExportModal } = useContext(GalleryContext);
 
     const { show: showHelp, props: helpVisibilityProps } = useModalVisibility();
 
     const handleExport = () =>
         isDesktop
-            ? openExportModal()
+            ? onShowExport()
             : showMiniDialog(downloadAppDialogAttributes());
 
     return (
