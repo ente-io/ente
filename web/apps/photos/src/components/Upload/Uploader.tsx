@@ -851,13 +851,33 @@ const Inputs: React.FC<InputsProps> = ({
     getFileSelectorInputProps,
     getFolderSelectorInputProps,
     getZipFileSelectorInputProps,
-}) => (
-    <>
-        <input {...getFileSelectorInputProps()} />
-        <input {...getFolderSelectorInputProps()} />
-        <input {...getZipFileSelectorInputProps()} />
-    </>
-);
+}) => {
+    const refFile = useRef(null);
+    const refFolder = useRef(null);
+    const refZip = useRef(null);
+
+    useEffect(() => {
+        const handleCancel = () => {
+            console.log("cancel");
+        };
+        [refFile, refFolder, refZip].map((ref) =>
+            ref.current?.addEventListener("cancel", handleCancel),
+        );
+        return () => {
+            [refFile, refFolder, refZip].map((ref) =>
+                ref.current?.removeEventListener("cancel", handleCancel),
+            );
+        };
+    }, []);
+
+    return (
+        <>
+            <input ref={refFile} {...getFileSelectorInputProps()} />
+            <input ref={refFolder} {...getFolderSelectorInputProps()} />
+            <input ref={refZip} {...getZipFileSelectorInputProps()} />
+        </>
+    );
+};
 
 const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {
     const fileAndPaths: FileAndPath[] = [];
