@@ -103,8 +103,7 @@ import GalleryEmptyState from "components/GalleryEmptyState";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import { Sidebar } from "components/Sidebar";
-import { type UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
-import Uploader from "components/Upload/Uploader";
+import { Upload, type UploadTypeSelectorIntent } from "components/Upload";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
@@ -997,7 +996,7 @@ const Page: React.FC = () => {
                     }}
                 />
 
-                <Uploader
+                <Upload
                     activeCollection={activeCollection}
                     syncWithRemote={syncWithRemote}
                     closeUploadTypeSelector={setUploadTypeSelectorView.bind(

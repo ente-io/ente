@@ -57,7 +57,7 @@ import {
 } from "components/FilesDownloadProgress";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import Uploader from "components/Upload/Uploader";
+import {Upload} from "components/Upload";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -536,7 +536,7 @@ export default function PublicCollectionGallery() {
                     selectable={downloadEnabled}
                 />
                 {blockingLoad && <TranslucentLoadingOverlay />}
-                <Uploader
+                <Upload
                     syncWithRemote={syncWithRemote}
                     uploadCollection={publicCollection}
                     setLoading={setBlockingLoad}
