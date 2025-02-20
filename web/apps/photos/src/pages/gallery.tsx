@@ -208,11 +208,6 @@ const Page: React.FC = () => {
     const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
         useState<UploadTypeSelectorIntent>("upload");
 
-    const [sidebarView, setSidebarView] = useState(false);
-
-    const closeSidebar = () => setSidebarView(false);
-    const openSidebar = () => setSidebarView(true);
-
     const [authenticateUserModalView, setAuthenticateUserModalView] =
         useState(false);
 
@@ -249,6 +244,8 @@ const Page: React.FC = () => {
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
 
+    const { show: showSidebar, props: sidebarVisibilityProps } =
+        useModalVisibility();
     const { show: showPlanSelector, props: planSelectorVisibilityProps } =
         useModalVisibility();
     const { show: showWhatsNew, props: whatsNewVisibilityProps } =
@@ -447,10 +444,10 @@ const Page: React.FC = () => {
         }
         // if any of the modals are open, don't select all
         if (
-            sidebarView ||
             uploadTypeSelectorView ||
             openCollectionSelector ||
             collectionNamerView ||
+            sidebarVisibilityProps.open ||
             planSelectorVisibilityProps.open ||
             fixCreationTimeVisibilityProps.open ||
             exportVisibilityProps.open ||
@@ -927,21 +924,19 @@ const Page: React.FC = () => {
                         />
                     ) : (
                         <NormalNavbarContents
-                            {...{
-                                openSidebar,
-                                openUploader,
-                                isInSearchMode,
-                                onShowSearchInput: () =>
-                                    dispatch({ type: "enterSearchMode" }),
-                                onSelectSearchOption: handleSelectSearchOption,
-                                onSelectPeople: () =>
-                                    dispatch({ type: "showPeople" }),
-                                onSelectPerson: (personID) =>
-                                    dispatch({
-                                        type: "showPerson",
-                                        personID,
-                                    }),
-                            }}
+                            {...{ isInSearchMode }}
+                            onSidebar={showSidebar}
+                            onUpload={openUploader}
+                            onShowSearchInput={() =>
+                                dispatch({ type: "enterSearchMode" })
+                            }
+                            onSelectSearchOption={handleSelectSearchOption}
+                            onSelectPeople={() =>
+                                dispatch({ type: "showPeople" })
+                            }
+                            onSelectPerson={(personID) =>
+                                dispatch({ type: "showPerson", personID })
+                            }
                         />
                     )}
                 </NavbarBase>
@@ -1002,9 +997,8 @@ const Page: React.FC = () => {
                     }}
                 />
                 <Sidebar
-                    collectionSummaries={collectionSummaries}
-                    sidebarView={sidebarView}
-                    closeSidebar={closeSidebar}
+                    {...sidebarVisibilityProps}
+                    {...{ collectionSummaries }}
                 />
                 <WhatsNew {...whatsNewVisibilityProps} />
                 {!isInSearchMode &&
@@ -1099,19 +1093,25 @@ const preloadImage = (imgBasePath: string) => {
 };
 
 type NormalNavbarContentsProps = SearchBarProps & {
-    openSidebar: () => void;
-    openUploader: () => void;
+    /**
+     * Called when the user activates the sidebar icon.
+     */
+    onSidebar: () => void;
+    /**
+     * Called when the user activates the upload button.
+     */
+    onUpload: () => void;
 };
 
 const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
-    openSidebar,
-    openUploader,
+    onSidebar,
+    onUpload,
     ...props
 }) => (
     <>
-        {!props.isInSearchMode && <SidebarButton onClick={openSidebar} />}
+        {!props.isInSearchMode && <SidebarButton onClick={onSidebar} />}
         <SearchBar {...props} />
-        {!props.isInSearchMode && <UploadButton onClick={openUploader} />}
+        {!props.isInSearchMode && <UploadButton onClick={onUpload} />}
     </>
 );
 

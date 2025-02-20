@@ -129,6 +129,12 @@ import { testUpload } from "../../tests/upload.test";
 import { SubscriptionCard } from "./SubscriptionCard";
 
 type SidebarProps = ModalVisibilityProps & {
+    /**
+     * The latest UI collections.
+     *
+     * These are used to obtain data about the uncategorized, hidden and other
+     * items shown in the shortcut section within the sidebar.
+     */
     collectionSummaries: CollectionSummaries;
 };
 
@@ -138,15 +144,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
     collectionSummaries,
 }) => (
     <RootSidebarDrawer open={open} onClose={onClose}>
-        <HeaderSection closeSidebar={onClose} />
-        <UserDetailsSection sidebarView={open} />
+        <HeaderSection onCloseSidebar={onClose} />
+        <UserDetailsSection sidebarOpen={open} />
         <Stack sx={{ gap: 0.5, mb: 3 }}>
             <ShortcutSection
-                closeSidebar={onClose}
+                onCloseSidebar={onClose}
                 collectionSummaries={collectionSummaries}
             />
-            <UtilitySection closeSidebar={onClose} />
-            <HelpSection closeSidebar={onClose} />
+            <UtilitySection onCloseSidebar={onClose} />
+            <HelpSection onCloseSidebar={onClose} />
             <Divider sx={{ my: "2px" }} />
             <ExitSection />
             <InfoSection />
@@ -160,31 +166,29 @@ const RootSidebarDrawer = styled(SidebarDrawer)(({ theme }) => ({
     },
 }));
 
-interface HeaderSectionProps {
-    closeSidebar: () => void;
+interface SectionProps {
+    onCloseSidebar: SidebarProps["onClose"];
 }
 
-const HeaderSection: React.FC<HeaderSectionProps> = ({ closeSidebar }) => {
-    return (
-        <SpacedRow sx={{ my: "4px 4px", pl: "12px" }}>
-            <EnteLogo />
-            <IconButton
-                aria-label={t("close")}
-                onClick={closeSidebar}
-                color="secondary"
-            >
-                <CloseIcon fontSize="small" />
-            </IconButton>
-        </SpacedRow>
-    );
-};
+const HeaderSection: React.FC<SectionProps> = ({ onCloseSidebar }) => (
+    <SpacedRow sx={{ my: "4px 4px", pl: "12px" }}>
+        <EnteLogo />
+        <IconButton
+            aria-label={t("close")}
+            onClick={onCloseSidebar}
+            color="secondary"
+        >
+            <CloseIcon fontSize="small" />
+        </IconButton>
+    </SpacedRow>
+);
 
 interface UserDetailsSectionProps {
-    sidebarView: boolean;
+    sidebarOpen: boolean;
 }
 
 const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
-    sidebarView,
+    sidebarOpen,
 }) => {
     const galleryContext = useContext(GalleryContext);
     const userDetails = useUserDetailsSnapshot();
@@ -197,8 +201,8 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
         setMemberSubscriptionManageView(false);
 
     useEffect(() => {
-        if (sidebarView) void syncUserDetails();
-    }, [sidebarView]);
+        if (sidebarOpen) void syncUserDetails();
+    }, [sidebarOpen]);
 
     const isNonAdminFamilyMember = useMemo(
         () =>
@@ -417,13 +421,12 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
     );
 }
 
-interface ShortcutSectionProps {
-    closeSidebar: () => void;
-    collectionSummaries: CollectionSummaries;
-}
+type ShortcutSectionProps = SectionProps & {
+    collectionSummaries: SidebarProps["collectionSummaries"];
+};
 
 const ShortcutSection: React.FC<ShortcutSectionProps> = ({
-    closeSidebar,
+    onCloseSidebar,
     collectionSummaries,
 }) => {
     const galleryContext = useContext(GalleryContext);
@@ -431,35 +434,31 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
         useState<number>();
 
     useEffect(() => {
-        const main = async () => {
-            const unCategorizedCollection = await getUncategorizedCollection();
-            if (unCategorizedCollection) {
-                setUncategorizedCollectionID(unCategorizedCollection.id);
-            } else {
-                setUncategorizedCollectionID(DUMMY_UNCATEGORIZED_COLLECTION);
-            }
-        };
-        main();
+        void getUncategorizedCollection().then((uncat) =>
+            setUncategorizedCollectionID(
+                uncat?.id ?? DUMMY_UNCATEGORIZED_COLLECTION,
+            ),
+        );
     }, []);
 
     const openUncategorizedSection = () => {
         galleryContext.setActiveCollectionID(uncategorizedCollectionId);
-        closeSidebar();
+        onCloseSidebar();
     };
 
     const openTrashSection = () => {
         galleryContext.setActiveCollectionID(TRASH_SECTION);
-        closeSidebar();
+        onCloseSidebar();
     };
 
     const openArchiveSection = () => {
         galleryContext.setActiveCollectionID(ARCHIVE_SECTION);
-        closeSidebar();
+        onCloseSidebar();
     };
 
     const openHiddenSection = () => {
         galleryContext.openHiddenSection(() => {
-            closeSidebar();
+            onCloseSidebar();
         });
     };
 
@@ -506,11 +505,10 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     );
 };
 
-const UtilitySection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
-    closeSidebar,
-}) => {
-    const router = useRouter();
+const UtilitySection: React.FC<SectionProps> = ({ onCloseSidebar }) => {
     const { watchFolderView, setWatchFolderView } = usePhotosAppContext();
+
+    const router = useRouter();
 
     const { show: showAccount, props: accountVisibilityProps } =
         useModalVisibility();
@@ -552,18 +550,16 @@ const UtilitySection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
                     onClose={handleCloseWatchFolder}
                 />
             )}
-            <Account {...accountVisibilityProps} onRootClose={closeSidebar} />
+            <Account {...accountVisibilityProps} onRootClose={onCloseSidebar} />
             <Preferences
                 {...preferencesVisibilityProps}
-                onRootClose={closeSidebar}
+                onRootClose={onCloseSidebar}
             />
         </>
     );
 };
 
-const HelpSection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
-    closeSidebar,
-}) => {
+const HelpSection: React.FC<SectionProps> = ({ onCloseSidebar }) => {
     const { showMiniDialog } = useBaseContext();
     const { openExportModal } = useContext(GalleryContext);
 
@@ -591,7 +587,7 @@ const HelpSection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
                 }
                 onClick={handleExport}
             />
-            <Help {...helpVisibilityProps} onRootClose={closeSidebar} />
+            <Help {...helpVisibilityProps} onRootClose={onCloseSidebar} />
         </>
     );
 };
