@@ -23,7 +23,6 @@ import { useBaseContext } from "@/base/context";
 import { isHTTP401Error, PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
 import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
-import { useFileInput } from "@/gallery/components/utils/use-file-input";
 import { downloadManager } from "@/gallery/services/download";
 import { extractCollectionKeyFromShareURL } from "@/gallery/services/share";
 import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
@@ -59,7 +58,6 @@ import {
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import Uploader from "components/Upload/Uploader";
-import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -125,20 +123,6 @@ export default function PublicCollectionGallery() {
         noClick: true,
         noKeyboard: true,
         disabled: shouldDisableDropzone,
-    });
-    const {
-        getInputProps: getFileSelectorInputProps,
-        openSelector: openFileSelector,
-        selectedFiles: fileSelectorFiles,
-    } = useFileInput({
-        directory: false,
-    });
-    const {
-        getInputProps: getFolderSelectorInputProps,
-        openSelector: openFolderSelector,
-        selectedFiles: folderSelectorFiles,
-    } = useFileInput({
-        directory: true,
     });
 
     const [
@@ -507,13 +491,7 @@ export default function PublicCollectionGallery() {
     return (
         <PublicCollectionGalleryContext.Provider value={context}>
             <FullScreenDropZone {...{ getDragAndDropRootProps }}>
-                <UploadSelectorInputs
-                    {...{
-                        getDragAndDropInputProps,
-                        getFileSelectorInputProps,
-                        getFolderSelectorInputProps,
-                    }}
-                />
+                <input {...getDragAndDropInputProps()} />
                 <NavbarBase
                     sx={{
                         mb: "16px",
@@ -570,10 +548,6 @@ export default function PublicCollectionGallery() {
                     uploadTypeSelectorIntent="collect"
                     {...{
                         dragAndDropFiles,
-                        openFileSelector,
-                        fileSelectorFiles,
-                        openFolderSelector,
-                        folderSelectorFiles,
                     }}
                 />
                 <FilesDownloadProgress

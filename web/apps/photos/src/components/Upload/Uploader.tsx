@@ -24,7 +24,6 @@ import { firstNonEmpty } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
-import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -213,6 +212,7 @@ export default function Uploader({
     } = useFileInput({
         directory: false,
     });
+
     const {
         getInputProps: getFolderSelectorInputProps,
         openSelector: openFolderSelector,
@@ -220,6 +220,7 @@ export default function Uploader({
     } = useFileInput({
         directory: true,
     });
+
     const {
         getInputProps: getZipFileSelectorInputProps,
         openSelector: openZipFileSelector,
@@ -713,7 +714,7 @@ export default function Uploader({
         } else if (type === PICKED_UPLOAD_TYPE.FOLDERS) {
             openFolderSelector();
         } else {
-            if (openZipFileSelector && electron) {
+            if (electron) {
                 openZipFileSelector();
             } else {
                 showMiniDialog(downloadAppDialogAttributes());
@@ -788,9 +789,8 @@ export default function Uploader({
 
     return (
         <>
-            <UploadSelectorInputs
+            <Inputs
                 {...{
-                    // getDragAndDropInputProps,
                     getFileSelectorInputProps,
                     getFolderSelectorInputProps,
                     getZipFileSelectorInputProps,
@@ -832,6 +832,32 @@ export default function Uploader({
         </>
     );
 }
+
+type GetInputProps = () => React.HTMLAttributes<HTMLInputElement>;
+
+interface InputsProps {
+    getFileSelectorInputProps: GetInputProps;
+    getFolderSelectorInputProps: GetInputProps;
+    getZipFileSelectorInputProps: GetInputProps;
+}
+
+/**
+ * Create a bunch of HTML inputs elements, one each for the given props.
+ *
+ * These hidden input element serve as the way for us to show various file /
+ * folder Selector dialogs and handle drag and drop inputs.
+ */
+const Inputs: React.FC<InputsProps> = ({
+    getFileSelectorInputProps,
+    getFolderSelectorInputProps,
+    getZipFileSelectorInputProps,
+}) => (
+    <>
+        <input {...getFileSelectorInputProps()} />
+        <input {...getFolderSelectorInputProps()} />
+        <input {...getZipFileSelectorInputProps()} />
+    </>
+);
 
 const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {
     const fileAndPaths: FileAndPath[] = [];
