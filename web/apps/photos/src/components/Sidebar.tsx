@@ -161,8 +161,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onCloseSidebar={onClose}
                 collectionSummaries={collectionSummaries}
             />
-            <UtilitySection onCloseSidebar={onClose} />
-            <HelpSection onCloseSidebar={onClose} {...{ onShowExport }} />
+            <UtilitySection onCloseSidebar={onClose} {...{ onShowExport }} />
             <Divider sx={{ my: "2px" }} />
             <ExitSection />
             <InfoSection />
@@ -516,10 +515,18 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     );
 };
 
-const UtilitySection: React.FC<SectionProps> = ({ onCloseSidebar }) => {
+type UtilitySectionProps = SectionProps & Pick<SidebarProps, "onShowExport">;
+
+const UtilitySection: React.FC<UtilitySectionProps> = ({
+    onCloseSidebar,
+    onShowExport,
+}) => {
+    const { showMiniDialog } = useBaseContext();
     const { watchFolderView, setWatchFolderView } = usePhotosAppContext();
 
     const router = useRouter();
+
+    const { show: showHelp, props: helpVisibilityProps } = useModalVisibility();
 
     const { show: showAccount, props: accountVisibilityProps } =
         useModalVisibility();
@@ -530,6 +537,11 @@ const UtilitySection: React.FC<SectionProps> = ({ onCloseSidebar }) => {
     const handleCloseWatchFolder = () => setWatchFolderView(false);
 
     const handleDeduplicate = () => router.push("/duplicates");
+
+    const handleExport = () =>
+        isDesktop
+            ? onShowExport()
+            : showMiniDialog(downloadAppDialogAttributes());
 
     return (
         <>
@@ -555,38 +567,6 @@ const UtilitySection: React.FC<SectionProps> = ({ onCloseSidebar }) => {
                 label={t("preferences")}
                 onClick={showPreferences}
             />
-            {isDesktop && (
-                <WatchFolder
-                    open={watchFolderView}
-                    onClose={handleCloseWatchFolder}
-                />
-            )}
-            <Account {...accountVisibilityProps} onRootClose={onCloseSidebar} />
-            <Preferences
-                {...preferencesVisibilityProps}
-                onRootClose={onCloseSidebar}
-            />
-        </>
-    );
-};
-
-type HelpSectionProps = SectionProps & Pick<SidebarProps, "onShowExport">;
-
-const HelpSection: React.FC<HelpSectionProps> = ({
-    onCloseSidebar,
-    onShowExport,
-}) => {
-    const { showMiniDialog } = useBaseContext();
-
-    const { show: showHelp, props: helpVisibilityProps } = useModalVisibility();
-
-    const handleExport = () =>
-        isDesktop
-            ? onShowExport()
-            : showMiniDialog(downloadAppDialogAttributes());
-
-    return (
-        <>
             <RowButton
                 variant="secondary"
                 label={t("help")}
@@ -603,6 +583,17 @@ const HelpSection: React.FC<HelpSectionProps> = ({
                 onClick={handleExport}
             />
             <Help {...helpVisibilityProps} onRootClose={onCloseSidebar} />
+            {isDesktop && (
+                <WatchFolder
+                    open={watchFolderView}
+                    onClose={handleCloseWatchFolder}
+                />
+            )}
+            <Account {...accountVisibilityProps} onRootClose={onCloseSidebar} />
+            <Preferences
+                {...preferencesVisibilityProps}
+                onRootClose={onCloseSidebar}
+            />
         </>
     );
 };
