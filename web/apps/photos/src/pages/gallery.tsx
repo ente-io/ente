@@ -216,6 +216,7 @@ const Page: React.FC = () => {
         onAuthenticateCallback.current = callback;
         setAuthenticateUserModalView(true);
     };
+
     const closeAuthenticateUserModal = () =>
         setAuthenticateUserModalView(false);
 

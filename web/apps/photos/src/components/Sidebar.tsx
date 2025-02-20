@@ -109,7 +109,7 @@ import {
     useColorScheme,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import DeleteAccountModal from "components/DeleteAccountModal";
+import DeleteAccountModal from "components/DeleteAccount";
 import { WatchFolder } from "components/WatchFolder";
 import { t } from "i18next";
 import { useRouter } from "next/router";
