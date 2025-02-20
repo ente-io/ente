@@ -136,16 +136,21 @@ type SidebarProps = ModalVisibilityProps & {
      * items shown in the shortcut section within the sidebar.
      */
     collectionSummaries: CollectionSummaries;
+    /**
+     * Called when the plan selection modal should be shown.
+     */
+    onShowPlanSelector: () => void;
 };
 
 export const Sidebar: React.FC<SidebarProps> = ({
     open,
     onClose,
     collectionSummaries,
+    onShowPlanSelector,
 }) => (
     <RootSidebarDrawer open={open} onClose={onClose}>
         <HeaderSection onCloseSidebar={onClose} />
-        <UserDetailsSection sidebarOpen={open} />
+        <UserDetailsSection sidebarOpen={open} {...{ onShowPlanSelector }} />
         <Stack sx={{ gap: 0.5, mb: 3 }}>
             <ShortcutSection
                 onCloseSidebar={onClose}
@@ -183,14 +188,14 @@ const HeaderSection: React.FC<SectionProps> = ({ onCloseSidebar }) => (
     </SpacedRow>
 );
 
-interface UserDetailsSectionProps {
+type UserDetailsSectionProps = Pick<SidebarProps, "onShowPlanSelector"> & {
     sidebarOpen: boolean;
-}
+};
 
 const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
     sidebarOpen,
+    onShowPlanSelector,
 }) => {
-    const galleryContext = useContext(GalleryContext);
     const userDetails = useUserDetailsSnapshot();
     const [memberSubscriptionManageView, setMemberSubscriptionManageView] =
         useState(false);
@@ -223,7 +228,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
             ) {
                 redirectToCustomerPortal();
             } else {
-                galleryContext.showPlanSelectorModal();
+                onShowPlanSelector();
             }
         }
     };
@@ -244,7 +249,9 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
                     onClick={handleSubscriptionCardClick}
                 />
                 {userDetails && (
-                    <SubscriptionStatus userDetails={userDetails} />
+                    <SubscriptionStatus
+                        {...{ userDetails, onShowPlanSelector }}
+                    />
                 )}
             </Box>
             {isNonAdminFamilyMember && (
@@ -258,15 +265,14 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
     );
 };
 
-interface SubscriptionStatusProps {
+type SubscriptionStatusProps = Pick<SidebarProps, "onShowPlanSelector"> & {
     userDetails: UserDetails;
-}
+};
 
 const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     userDetails,
+    onShowPlanSelector,
 }) => {
-    const { showPlanSelectorModal } = useContext(GalleryContext);
-
     const hasAMessage = useMemo(() => {
         if (isPartOfFamily(userDetails) && !isFamilyAdmin(userDetails)) {
             return false;
@@ -286,7 +292,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
 
             if (isSubscriptionActive(userDetails.subscription)) {
                 if (hasExceededStorageQuota(userDetails)) {
-                    showPlanSelectorModal();
+                    onShowPlanSelector();
                 }
             } else {
                 if (
@@ -295,7 +301,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
                 ) {
                     redirectToCustomerPortal();
                 } else {
-                    showPlanSelectorModal();
+                    onShowPlanSelector();
                 }
             }
         };

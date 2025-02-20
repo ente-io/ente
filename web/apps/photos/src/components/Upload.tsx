@@ -101,6 +101,10 @@ interface UploadProps {
      * @param file The newly uploaded file.
      */
     onUploadFile: (file: EnteFile) => void;
+    /**
+     * Called when the plan selection modal should be shown.
+     */
+    onShowPlanSelector: () => void;
     setCollections?: (cs: Collection[]) => void;
     isFirstUpload?: boolean;
     uploadTypeSelectorView: boolean;
@@ -120,6 +124,7 @@ export const Upload: React.FC<UploadProps> = ({
     isFirstUpload,
     dragAndDropFiles,
     onUploadFile,
+    onShowPlanSelector,
     showSessionExpiredMessage,
     ...props
 }) => {
@@ -725,7 +730,7 @@ export const Upload: React.FC<UploadProps> = ({
                     captionFirst: true,
                     caption: t("storage_quota_exceeded"),
                     title: t("upgrade_now"),
-                    onClick: galleryContext.showPlanSelectorModal,
+                    onClick: onShowPlanSelector,
                     startIcon: <DiscFullIcon />,
                 });
                 break;

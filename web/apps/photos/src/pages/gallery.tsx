@@ -133,7 +133,6 @@ import {
 import { FILE_OPS_TYPE, getSelectedFiles, handleFileOps } from "utils/file";
 
 const defaultGalleryContext: GalleryContextType = {
-    showPlanSelectorModal: () => null,
     setActiveCollectionID: () => null,
     onShowCollection: () => null,
     syncWithRemote: () => null,
@@ -812,7 +811,6 @@ const Page: React.FC = () => {
         <GalleryContext.Provider
             value={{
                 ...defaultGalleryContext,
-                showPlanSelectorModal: showPlanSelector,
                 setActiveCollectionID: handleSetActiveCollectionID,
                 onShowCollection: (id) =>
                     dispatch({
@@ -983,6 +981,7 @@ const Page: React.FC = () => {
                     onUploadFile={(file) =>
                         dispatch({ type: "uploadFile", file })
                     }
+                    onShowPlanSelector={showPlanSelector}
                     setCollections={(collections) =>
                         dispatch({ type: "setNormalCollections", collections })
                     }
@@ -999,6 +998,7 @@ const Page: React.FC = () => {
                 <Sidebar
                     {...sidebarVisibilityProps}
                     {...{ collectionSummaries }}
+                    onShowPlanSelector={showPlanSelector}
                 />
                 <WhatsNew {...whatsNewVisibilityProps} />
                 {!isInSearchMode &&

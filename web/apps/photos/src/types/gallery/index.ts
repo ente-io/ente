@@ -39,7 +39,6 @@ export interface MergedSourceURL {
 }
 
 export interface GalleryContextType {
-    showPlanSelectorModal: () => void;
     setActiveCollectionID: (collectionID: number) => void;
     /** Newer and almost equivalent alternative to setActiveCollectionID. */
     onShowCollection: (collectionID: number) => void;
