@@ -38,6 +38,7 @@ import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 import PermMediaOutlinedIcon from "@mui/icons-material/PermMediaOutlined";
 import {
     Box,
+    CircularProgress,
     Dialog,
     DialogTitle,
     Link,
@@ -851,6 +852,9 @@ export const Upload: React.FC<UploadProps> = ({
                 open={props.uploadTypeSelectorView}
                 onClose={props.closeUploadTypeSelector}
                 intent={props.uploadTypeSelectorIntent}
+                pendingUploadType={
+                    isInputPending ? selectedUploadType.current : undefined
+                }
                 onSelect={handleUploadTypeSelect}
             />
             <UploadProgress
@@ -1084,6 +1088,11 @@ type UploadTypeSelectorProps = ModalVisibilityProps & {
      */
     intent: UploadTypeSelectorIntent;
     /**
+     * If we're waiting on the user to select items using a previously activated
+     * file input, then this will be set to the type of that input.
+     */
+    pendingUploadType: UploadType | undefined;
+    /**
      * Called when the user selects one of the options.
      */
     onSelect: (type: UploadType) => void;
@@ -1102,6 +1111,7 @@ const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
     open,
     onClose,
     intent,
+    pendingUploadType,
     onSelect,
 }) => {
     const publicCollectionGalleryContext = useContext(
@@ -1138,18 +1148,21 @@ const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
                 },
             }}
         >
-            <UploadOptions {...{ intent, onSelect, onClose }} />
+            <UploadOptions
+                {...{ intent, pendingUploadType, onSelect, onClose }}
+            />
         </Dialog>
     );
 };
 
 type UploadOptionsProps = Pick<
     UploadTypeSelectorProps,
-    "onClose" | "intent" | "onSelect"
+    "onClose" | "intent" | "pendingUploadType" | "onSelect"
 >;
 
 const UploadOptions: React.FC<UploadOptionsProps> = ({
     intent,
+    pendingUploadType,
     onSelect,
     onClose,
 }) => {
@@ -1183,7 +1196,10 @@ const UploadOptions: React.FC<UploadOptionsProps> = ({
     };
 
     return !showTakeoutOptions ? (
-        <DefaultOptions {...{ intent, onClose }} onSelect={handleSelect} />
+        <DefaultOptions
+            {...{ intent, pendingUploadType, onClose }}
+            onSelect={handleSelect}
+        />
     ) : (
         <TakeoutOptions onSelect={handleSelect} onClose={handleTakeoutClose} />
     );
@@ -1191,6 +1207,7 @@ const UploadOptions: React.FC<UploadOptionsProps> = ({
 
 const DefaultOptions: React.FC<UploadOptionsProps> = ({
     intent,
+    pendingUploadType,
     onClose,
     onSelect,
 }) => {
@@ -1211,7 +1228,16 @@ const DefaultOptions: React.FC<UploadOptionsProps> = ({
                     {intent != "import" && (
                         <RowButton
                             startIcon={<ImageOutlinedIcon />}
-                            endIcon={<ChevronRightIcon />}
+                            endIcon={
+                                pendingUploadType == "files" ? (
+                                    <CircularProgress
+                                        // color="accent"
+                                        size={20}
+                                    />
+                                ) : (
+                                    <ChevronRightIcon />
+                                )
+                            }
                             label={t("file")}
                             onClick={() => onSelect("files")}
                         />
@@ -1246,47 +1272,43 @@ const DefaultOptions: React.FC<UploadOptionsProps> = ({
     );
 };
 
-const TakeoutOptions: React.FC<Omit<UploadOptionsProps, "intent">> = ({
-    onSelect,
-    onClose,
-}) => {
-    return (
-        <>
-            <SpacedRow>
-                <DialogTitle variant="h5">{t("google_takeout")}</DialogTitle>
-                <DialogCloseIconButton {...{ onClose }} />
-            </SpacedRow>
-            <Stack sx={{ padding: "18px 12px 20px 12px", gap: "16px" }}>
-                <Stack sx={{ gap: "8px" }}>
-                    <FocusVisibleButton
-                        color="accent"
-                        fullWidth
-                        onClick={() => onSelect("folders")}
-                    >
-                        {t("select_folder")}
+const TakeoutOptions: React.FC<
+    Pick<UploadOptionsProps, "onSelect" | "onClose">
+> = ({ onSelect, onClose }) => (
+    <>
+        <SpacedRow>
+            <DialogTitle variant="h5">{t("google_takeout")}</DialogTitle>
+            <DialogCloseIconButton {...{ onClose }} />
+        </SpacedRow>
+        <Stack sx={{ padding: "18px 12px 20px 12px", gap: "16px" }}>
+            <Stack sx={{ gap: "8px" }}>
+                <FocusVisibleButton
+                    color="accent"
+                    fullWidth
+                    onClick={() => onSelect("folders")}
+                >
+                    {t("select_folder")}
+                </FocusVisibleButton>
+                <FocusVisibleButton
+                    color="secondary"
+                    fullWidth
+                    onClick={() => onSelect("zips")}
+                >
+                    {t("select_zips")}
+                </FocusVisibleButton>
+                <Link
+                    href="https://help.ente.io/photos/migration/from-google-photos/"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    <FocusVisibleButton color="secondary" fullWidth>
+                        {t("faq")}
                     </FocusVisibleButton>
-                    <FocusVisibleButton
-                        color="secondary"
-                        fullWidth
-                        onClick={() => onSelect("zips")}
-                    >
-                        {t("select_zips")}
-                    </FocusVisibleButton>
-                    <Link
-                        href="https://help.ente.io/photos/migration/from-google-photos/"
-                        target="_blank"
-                        rel="noopener"
-                    >
-                        <FocusVisibleButton color="secondary" fullWidth>
-                            {t("faq")}
-                        </FocusVisibleButton>
-                    </Link>
-                </Stack>
-
-                <Typography variant="small" sx={{ color: "text.muted" }}>
-                    {t("takeout_hint")}
-                </Typography>
+                </Link>
             </Stack>
-        </>
-    );
-};
+            <Typography variant="small" sx={{ color: "text.muted" }}>
+                {t("takeout_hint")}
+            </Typography>
+        </Stack>
+    </>
+);
