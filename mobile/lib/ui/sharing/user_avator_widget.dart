@@ -80,7 +80,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
             );
             if (person != null) {
               _faceThumbnail =
-                  await PersonService.instance.getRecentFileOfPerson(person);
+                  await PersonService.instance.getThumbnailFileOfPerson(person);
             }
             return person?.remoteID;
           });
