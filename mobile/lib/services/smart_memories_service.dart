@@ -315,7 +315,7 @@ class SmartMemoriesService {
           );
           personToMemories
               .putIfAbsent(personID, () => {})
-              .putIfAbsent(PeopleMemoryType.spotlight, () => youAndThemMemory);
+              .putIfAbsent(PeopleMemoryType.youAndThem, () => youAndThemMemory);
         }
       }
 
