@@ -133,7 +133,7 @@ func (h *FamilyHandler) ModifyStorageLimit(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	c.JSON(http.StatusOK, nil)
+	c.Status(http.StatusOK)
 }
 
 // GetInviteInfo returns basic information about invitor/admin as long as the invite is valid
