@@ -26,8 +26,10 @@ import "package:photos/ui/viewer/file/preview_status_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/duration_to_seconds.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
+import "package:photos/utils/seconds_to_duration.dart";
 import "package:photos/utils/toast_util.dart";
 import "package:visibility_detector/visibility_detector.dart";
 
@@ -615,7 +617,7 @@ class _SeekBarAndDuration extends StatelessWidget {
                           _,
                         ) {
                           return Text(
-                            _secondsToDuration(
+                            secondsToDuration(
                               value,
                             ),
                             style: getEnteTextTheme(
@@ -630,9 +632,7 @@ class _SeekBarAndDuration extends StatelessWidget {
                     Expanded(
                       child: SeekBar(
                         controller!,
-                        _durationToSeconds(
-                          duration,
-                        ),
+                        durationToSeconds(duration),
                         isSeeking,
                       ),
                     ),
@@ -652,43 +652,6 @@ class _SeekBarAndDuration extends StatelessWidget {
         );
       },
     );
-  }
-
-  /// Returns the duration in the format "h:mm:ss" or "m:ss".
-  String _secondsToDuration(int totalSeconds) {
-    final hours = totalSeconds ~/ 3600;
-    final minutes = (totalSeconds % 3600) ~/ 60;
-    final seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-      return '${hours.toString().padLeft(1, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    } else {
-      return '${minutes.toString().padLeft(1, '0')}:${seconds.toString().padLeft(2, '0')}';
-    }
-  }
-
-  /// Returns the duration in seconds from the format "h:mm:ss" or "m:ss".
-  int? _durationToSeconds(String? duration) {
-    if (duration == null) {
-      return null;
-    }
-    final parts = duration.split(':');
-    int seconds = 0;
-
-    if (parts.length == 3) {
-      // Format: "h:mm:ss"
-      seconds += int.parse(parts[0]) * 3600; // Hours to seconds
-      seconds += int.parse(parts[1]) * 60; // Minutes to seconds
-      seconds += int.parse(parts[2]); // Seconds
-    } else if (parts.length == 2) {
-      // Format: "m:ss"
-      seconds += int.parse(parts[0]) * 60; // Minutes to seconds
-      seconds += int.parse(parts[1]); // Seconds
-    } else {
-      throw FormatException('Invalid duration format: $duration');
-    }
-
-    return seconds;
   }
 }
 

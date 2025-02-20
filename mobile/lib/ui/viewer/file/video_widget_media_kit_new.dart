@@ -20,6 +20,7 @@ import "package:photos/ui/viewer/file/preview_status_widget.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
+import "package:photos/utils/seconds_to_duration.dart";
 import "package:photos/utils/toast_util.dart";
 
 class VideoWidgetMediaKitNew extends StatefulWidget {
@@ -528,7 +529,7 @@ class _SeekBarAndDuration extends StatelessWidget {
                   );
                 }
                 return Text(
-                  _secondsToDuration(snapshot.data!.inSeconds),
+                  secondsToDuration(snapshot.data!.inSeconds),
                   style: getEnteTextTheme(
                     context,
                   ).mini.copyWith(
