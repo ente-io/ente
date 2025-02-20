@@ -6,9 +6,13 @@ import type { DropzoneState } from "react-dropzone";
 
 interface FullScreenDropZoneProps {
     /**
+     * The `getInputProps` function returned by a call to {@link useDropzone}.
+     */
+    getInputProps: DropzoneState["getInputProps"];
+    /**
      * The `getRootProps` function returned by a call to {@link useDropzone}.
      */
-    getDragAndDropRootProps: DropzoneState["getRootProps"];
+    getRootProps: DropzoneState["getRootProps"];
     /**
      * Optional override to the message show to the user when a drag is in
      * progress.
@@ -33,7 +37,7 @@ interface FullScreenDropZoneProps {
  */
 export const FullScreenDropZone: React.FC<
     React.PropsWithChildren<FullScreenDropZoneProps>
-> = ({ getDragAndDropRootProps, message, children }) => {
+> = ({ getInputProps, getRootProps, message, children }) => {
     const [isDragActive, setIsDragActive] = useState(false);
 
     const onDragEnter = useCallback(() => setIsDragActive(true), []);
@@ -50,10 +54,8 @@ export const FullScreenDropZone: React.FC<
 
     return (
         <>
-            <Stack
-                sx={{ flex: 1 }}
-                {...getDragAndDropRootProps({ onDragEnter })}
-            >
+            <input {...getInputProps()} />
+            <Stack sx={{ flex: 1 }} {...getRootProps({ onDragEnter })}>
                 {isDragActive && (
                     <DropZoneOverlay
                         onDrop={onDragLeave}

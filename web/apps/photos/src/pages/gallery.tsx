@@ -861,15 +861,14 @@ const Page: React.FC = () => {
             }}
         >
             <FullScreenDropZone
-                {...{ getDragAndDropRootProps }}
+                getInputProps={getDragAndDropInputProps}
+                getRootProps={getDragAndDropRootProps}
                 message={
                     watchFolderView
                         ? t("watch_folder_dropzone_hint")
                         : undefined
                 }
             >
-                <input {...getDragAndDropInputProps()} />
-
                 {blockingLoad && <TranslucentLoadingOverlay />}
                 <PlanSelector
                     {...planSelectorVisibilityProps}

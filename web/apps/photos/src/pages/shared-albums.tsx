@@ -490,8 +490,10 @@ export default function PublicCollectionGallery() {
 
     return (
         <PublicCollectionGalleryContext.Provider value={context}>
-            <FullScreenDropZone {...{ getDragAndDropRootProps }}>
-                <input {...getDragAndDropInputProps()} />
+            <FullScreenDropZone
+                getInputProps={getDragAndDropInputProps}
+                getRootProps={getDragAndDropRootProps}
+            >
                 <NavbarBase
                     sx={{
                         mb: "16px",
