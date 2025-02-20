@@ -88,7 +88,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Stack, Typography } from "@mui/material";
-import AuthenticateUserModal from "components/AuthenticateUserModal";
+import { AuthenticateUser } from "components/AuthenticateUser";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
@@ -133,14 +133,10 @@ import {
 import { FILE_OPS_TYPE, getSelectedFiles, handleFileOps } from "utils/file";
 
 const defaultGalleryContext: GalleryContextType = {
-    showPlanSelectorModal: () => null,
     setActiveCollectionID: () => null,
-    onShowCollection: () => null,
     syncWithRemote: () => null,
     setBlockingLoad: () => null,
     photoListHeader: null,
-    openExportModal: () => null,
-    authenticateUser: () => null,
     user: null,
     userIDToEmailMap: null,
     emailList: null,
@@ -208,23 +204,6 @@ const Page: React.FC = () => {
     const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
         useState<UploadTypeSelectorIntent>("upload");
 
-    const [sidebarView, setSidebarView] = useState(false);
-
-    const closeSidebar = () => setSidebarView(false);
-    const openSidebar = () => setSidebarView(true);
-
-    const [authenticateUserModalView, setAuthenticateUserModalView] =
-        useState(false);
-
-    const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
-
-    const authenticateUser = (callback: () => void) => {
-        onAuthenticateCallback.current = callback;
-        setAuthenticateUserModalView(true);
-    };
-    const closeAuthenticateUserModal = () =>
-        setAuthenticateUserModalView(false);
-
     // If the fix creation time dialog is being shown, then the list of files on
     // which it should act.
     const [fixCreationTimeFiles, setFixCreationTimeFiles] = useState<
@@ -249,6 +228,8 @@ const Page: React.FC = () => {
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
 
+    const { show: showSidebar, props: sidebarVisibilityProps } =
+        useModalVisibility();
     const { show: showPlanSelector, props: planSelectorVisibilityProps } =
         useModalVisibility();
     const { show: showWhatsNew, props: whatsNewVisibilityProps } =
@@ -257,6 +238,21 @@ const Page: React.FC = () => {
         useModalVisibility();
     const { show: showExport, props: exportVisibilityProps } =
         useModalVisibility();
+    const {
+        show: showAuthenticateUser,
+        props: authenticateUserVisibilityProps,
+    } = useModalVisibility();
+
+    const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
+
+    const authenticateUser = useCallback(
+        () =>
+            new Promise<void>((resolve) => {
+                onAuthenticateCallback.current = resolve;
+                showAuthenticateUser();
+            }),
+        [],
+    );
 
     // TODO: Temp
     const user = state.user;
@@ -447,14 +443,14 @@ const Page: React.FC = () => {
         }
         // if any of the modals are open, don't select all
         if (
-            sidebarView ||
             uploadTypeSelectorView ||
             openCollectionSelector ||
             collectionNamerView ||
+            sidebarVisibilityProps.open ||
             planSelectorVisibilityProps.open ||
             fixCreationTimeVisibilityProps.open ||
             exportVisibilityProps.open ||
-            authenticateUserModalView ||
+            authenticateUserVisibilityProps.open ||
             isPhotoSwipeOpen ||
             !filteredFiles?.length ||
             !user
@@ -784,7 +780,7 @@ const Page: React.FC = () => {
     const openHiddenSection: GalleryContextType["openHiddenSection"] = (
         callback,
     ) => {
-        authenticateUser(() => {
+        authenticateUser().then(() => {
             dispatch({ type: "showHidden" });
             callback?.();
         });
@@ -815,18 +811,10 @@ const Page: React.FC = () => {
         <GalleryContext.Provider
             value={{
                 ...defaultGalleryContext,
-                showPlanSelectorModal: showPlanSelector,
                 setActiveCollectionID: handleSetActiveCollectionID,
-                onShowCollection: (id) =>
-                    dispatch({
-                        type: "showNormalOrHiddenCollectionSummary",
-                        collectionSummaryID: id,
-                    }),
                 syncWithRemote,
                 setBlockingLoad,
                 photoListHeader,
-                openExportModal: showExport,
-                authenticateUser,
                 userIDToEmailMap,
                 user,
                 emailList,
@@ -927,21 +915,19 @@ const Page: React.FC = () => {
                         />
                     ) : (
                         <NormalNavbarContents
-                            {...{
-                                openSidebar,
-                                openUploader,
-                                isInSearchMode,
-                                onShowSearchInput: () =>
-                                    dispatch({ type: "enterSearchMode" }),
-                                onSelectSearchOption: handleSelectSearchOption,
-                                onSelectPeople: () =>
-                                    dispatch({ type: "showPeople" }),
-                                onSelectPerson: (personID) =>
-                                    dispatch({
-                                        type: "showPerson",
-                                        personID,
-                                    }),
-                            }}
+                            {...{ isInSearchMode }}
+                            onSidebar={showSidebar}
+                            onUpload={openUploader}
+                            onShowSearchInput={() =>
+                                dispatch({ type: "enterSearchMode" })
+                            }
+                            onSelectSearchOption={handleSelectSearchOption}
+                            onSelectPeople={() =>
+                                dispatch({ type: "showPeople" })
+                            }
+                            onSelectPerson={(personID) =>
+                                dispatch({ type: "showPerson", personID })
+                            }
                         />
                     )}
                 </NavbarBase>
@@ -988,6 +974,7 @@ const Page: React.FC = () => {
                     onUploadFile={(file) =>
                         dispatch({ type: "uploadFile", file })
                     }
+                    onShowPlanSelector={showPlanSelector}
                     setCollections={(collections) =>
                         dispatch({ type: "setNormalCollections", collections })
                     }
@@ -1002,9 +989,11 @@ const Page: React.FC = () => {
                     }}
                 />
                 <Sidebar
-                    collectionSummaries={collectionSummaries}
-                    sidebarView={sidebarView}
-                    closeSidebar={closeSidebar}
+                    {...sidebarVisibilityProps}
+                    {...{ collectionSummaries }}
+                    onShowPlanSelector={showPlanSelector}
+                    onShowExport={showExport}
+                    onAuthenticateUser={authenticateUser}
                 />
                 <WhatsNew {...whatsNewVisibilityProps} />
                 {!isInSearchMode &&
@@ -1051,6 +1040,12 @@ const Page: React.FC = () => {
                             setFilesDownloadProgressAttributesCreator
                         }
                         selectable={true}
+                        onSelectCollection={(collectionID) =>
+                            dispatch({
+                                type: "showNormalOrHiddenCollectionSummary",
+                                collectionSummaryID: collectionID,
+                            })
+                        }
                         onSelectPerson={(personID) => {
                             dispatch({ type: "showPerson", personID });
                         }}
@@ -1060,10 +1055,9 @@ const Page: React.FC = () => {
                     {...exportVisibilityProps}
                     allCollectionsNameByID={state.allCollectionsNameByID}
                 />
-                <AuthenticateUserModal
-                    open={authenticateUserModalView}
-                    onClose={closeAuthenticateUserModal}
-                    onAuthenticate={onAuthenticateCallback.current}
+                <AuthenticateUser
+                    {...authenticateUserVisibilityProps}
+                    onAuthenticate={onAuthenticateCallback.current!}
                 />
             </FullScreenDropZone>
         </GalleryContext.Provider>
@@ -1099,19 +1093,25 @@ const preloadImage = (imgBasePath: string) => {
 };
 
 type NormalNavbarContentsProps = SearchBarProps & {
-    openSidebar: () => void;
-    openUploader: () => void;
+    /**
+     * Called when the user activates the sidebar icon.
+     */
+    onSidebar: () => void;
+    /**
+     * Called when the user activates the upload button.
+     */
+    onUpload: () => void;
 };
 
 const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
-    openSidebar,
-    openUploader,
+    onSidebar,
+    onUpload,
     ...props
 }) => (
     <>
-        {!props.isInSearchMode && <SidebarButton onClick={openSidebar} />}
+        {!props.isInSearchMode && <SidebarButton onClick={onSidebar} />}
         <SearchBar {...props} />
-        {!props.isInSearchMode && <UploadButton onClick={openUploader} />}
+        {!props.isInSearchMode && <UploadButton onClick={onUpload} />}
     </>
 );
 

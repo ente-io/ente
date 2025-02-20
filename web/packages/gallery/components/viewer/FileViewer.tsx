@@ -17,39 +17,48 @@ import {
     useModalVisibility,
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
-import { FileInfo } from "@/gallery/components/FileInfo";
+import { FileInfo, type FileInfoProps } from "@/gallery/components/FileInfo";
 import type { EnteFile } from "@/media/file.js";
 import { Button, styled } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fileInfoExifForFile, type FileInfoExif } from "./data-source";
 import { FileViewerPhotoSwipe } from "./photoswipe";
 
-export type FileViewerProps = ModalVisibilityProps & {
-    /**
-     * The list of files that are currently being displayed in the context in
-     * which the file viewer was invoked.
-     *
-     * Although the file viewer is called on to display a particular file
-     * (specified by the {@link initialIndex} prop), the viewer is always used
-     * in the context of a an album, or search results, or some other arbitrary
-     * list of files. The {@link files} prop sets this underlying list of files.
-     *
-     * After the initial file has been shown, the user can navigate through the
-     * other files from within the viewer by using the arrow buttons.
-     */
-    files: EnteFile[];
-    /**
-     * The index of the file that should be initially shown.
-     *
-     * Subsequently the user may navigate between files by using the controls
-     * provided within the file viewer itself.
-     */
-    initialIndex: number;
-    /**
-     * If true then the viewer does not show controls for downloading the file.
-     */
-    disableDownload?: boolean;
-};
+export type FileViewerProps = ModalVisibilityProps &
+    Pick<
+        FileInfoProps,
+        | "fileCollectionIDs"
+        | "allCollectionsNameByID"
+        | "onSelectCollection"
+        | "onSelectPerson"
+    > & {
+        /**
+         * The list of files that are currently being displayed in the context
+         * in which the file viewer was invoked.
+         *
+         * Although the file viewer is called on to display a particular file
+         * (specified by the {@link initialIndex} prop), the viewer is always
+         * used in the context of a an album, or search results, or some other
+         * arbitrary list of files. The {@link files} prop sets this underlying
+         * list of files.
+         *
+         * After the initial file has been shown, the user can navigate through
+         * the other files from within the viewer by using the arrow buttons.
+         */
+        files: EnteFile[];
+        /**
+         * The index of the file that should be initially shown.
+         *
+         * Subsequently the user may navigate between files by using the
+         * controls provided within the file viewer itself.
+         */
+        initialIndex: number;
+        /**
+         * If true then the viewer does not show controls for downloading the
+         * file.
+         */
+        disableDownload?: boolean;
+    };
 
 /**
  * A PhotoSwipe based image and video viewer.
@@ -60,6 +69,10 @@ const FileViewer: React.FC<FileViewerProps> = ({
     files,
     initialIndex,
     disableDownload,
+    fileCollectionIDs,
+    allCollectionsNameByID,
+    onSelectCollection,
+    onSelectPerson,
 }) => {
     const pswpRef = useRef<FileViewerPhotoSwipe | undefined>();
 
@@ -92,6 +105,18 @@ const FileViewer: React.FC<FileViewerProps> = ({
         },
         [showFileInfo],
     );
+
+    const handleSelectCollection = (collectionID: number) => {
+        onSelectCollection(collectionID);
+        onClose();
+    };
+
+    const handleSelectPerson = onSelectPerson
+        ? (personID: string) => {
+              onSelectPerson(personID);
+              onClose();
+          }
+        : undefined;
 
     useEffect(() => {
         if (!open) {
@@ -136,6 +161,9 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 {...fileInfoVisibilityProps}
                 file={activeFile}
                 exif={activeFileExif}
+                onSelectCollection={handleSelectCollection}
+                onSelectPerson={handleSelectPerson}
+                {...{ fileCollectionIDs, allCollectionsNameByID }}
             />
         </Container>
     );
