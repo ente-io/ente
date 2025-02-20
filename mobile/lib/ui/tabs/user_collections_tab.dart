@@ -32,7 +32,7 @@ import 'package:photos/utils/local_settings.dart';
 import "package:photos/utils/navigation_util.dart";
 
 class UserCollectionsTab extends StatefulWidget {
-  const UserCollectionsTab({Key? key}) : super(key: key);
+  const UserCollectionsTab({super.key});
 
   @override
   State<UserCollectionsTab> createState() => _UserCollectionsTabState();

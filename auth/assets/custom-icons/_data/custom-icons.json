@@ -36,8 +36,17 @@
       "title": "Amazon"
     },
     {
+      "title": "Ankama",
+      "slug": "ankama"
+    },
+    {
       "title": "Anycoin Direct",
       "slug": "anycoindirect"
+    },
+     {
+      "title": "Aruba",
+      "slug": "aruba",
+      "hex": "ef8a33"
     },
     {
       "title": "AscendEX"
@@ -298,6 +307,9 @@
       "title": "Discourse"
     },
     {
+      "title": "Deloitte"
+    },
+    {
       "title": "DMarket"
     },
     {
@@ -353,6 +365,14 @@
       "title": "Estateguru"
     },
     {
+      "title": "EVEOnline",
+      "slug": "eve_online",
+      "altNames": [
+        "EVE Online"
+      ],
+      "hex": "858585"
+    },
+    {
       "title": "Fastmail"
     },
     {
@@ -378,6 +398,10 @@
     },
     {
       "title": "G2A"
+    },
+    {
+      "title": "Gate.io",
+      "slug": "gateio.svg"
     },
     {
       "title": "GitHub"
@@ -761,6 +785,11 @@
         "欧易"
       ]
     },
+     {
+      "title": "OnShape",
+      "slug": "onshape",
+      "hex": "7abb5e"
+    },
     {
       "title": "Parqet",
       "slug": "parqet"
@@ -858,6 +887,11 @@
       "title": "RealMe",
       "slug": "realme"
     },
+     {
+      "title": "RealVNC",
+      "slug": "realvnc",
+      "hex": "488aec"
+    },
     {
       "title": "Registro br",
       "slug": "registro_br",
@@ -900,6 +934,10 @@
     },
     {
       "title": "Samsung"
+    },
+    {
+      "title": "Seafile",
+      "slug": "seafile"
     },
     {
       "title": "Sendgrid"

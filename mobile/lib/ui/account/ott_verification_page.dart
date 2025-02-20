@@ -18,8 +18,8 @@ class OTTVerificationPage extends StatefulWidget {
     this.isChangeEmail = false,
     this.isCreateAccountScreen = false,
     this.isResetPasswordScreen = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<OTTVerificationPage> createState() => _OTTVerificationPageState();

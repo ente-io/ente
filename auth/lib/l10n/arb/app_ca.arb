@@ -88,6 +88,8 @@
   "useRecoveryKey": "Usa la clau de recuperació",
   "incorrectPasswordTitle": "Contrasenya incorrecta",
   "welcomeBack": "Benvingut de nou!",
+  "emailAlreadyRegistered": "El correu electrònic ja està registrat.",
+  "emailNotRegistered": "El correu electrònic no està registrat.",
   "madeWithLoveAtPrefix": "fet amb ❤️ a ",
   "supportDevs": "Subscriu-te a <bold-green>ente</bold-green> per donar-nos suport",
   "supportDiscount": "Usa el codi de descompte \"AUTH\" per obtenir un 10% de descompte el primer any",
@@ -502,5 +504,13 @@
   "deselectAll": "Desselecciona-ho tot",
   "selectAll": "Seleccionar-ho tot",
   "deleteDuplicates": "Elimina duplicats",
-  "plainHTML": "HTML pla"
+  "plainHTML": "HTML pla",
+  "tellUsWhatYouThink": "Digueu-nos què us sembla",
+  "dropReview": "Deixa una ressenya a l'App/Play Store",
+  "supportEnte": "Donar suport a <bold-green>ente</bold-green>",
+  "giveUsAStarOnGithub": "Dona'ns una estrella a Github",
+  "free5GB": "5 GB gratuïts a <bold-green>ente</bold-green> Photos",
+  "loginWithAuthAccount": "Inicieu sessió amb el vostre compte Auth",
+  "freeStorageOffer": "10% de descompte a <bold-green>ente</bold-green> photos",
+  "freeStorageOfferDescription": "Utilitzeu el codi \"AUTH\" per obtenir un 10% de descompte el primer any"
 }

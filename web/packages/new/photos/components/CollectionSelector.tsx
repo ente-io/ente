@@ -1,4 +1,5 @@
 import { SpacedRow } from "@/base/components/containers";
+import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import type { Collection } from "@/media/collection";
 import {
@@ -24,7 +25,6 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import { DialogCloseIconButton } from "./mui/Dialog";
 
 export type CollectionSelectorAction =
     | "upload"

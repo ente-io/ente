@@ -362,8 +362,18 @@ const createMainWindow = () => {
         // do it (Step 2) unconditionally (i.e., on macOS too).
         //
         // https://www.electronjs.org/docs/latest/tutorial/custom-title-bar#create-a-custom-title-bar
+        //
+        // Note that by default on Windows, the color of the WCO title bar
+        // overlay (three buttons - minimize, maximize, close - on the top
+        // right) is static, and unlike Linux, doesn't adapt to the theme /
+        // content. Explicitly choosing a dark background, while it won't work
+        // always (if the user's theme is light), is better than picking a light
+        // background since the main image viewer is always dark.
         titleBarStyle: "hidden",
-        titleBarOverlay: true,
+        titleBarOverlay:
+            process.platform == "win32"
+                ? { color: "black", symbolColor: "#cdcdcd" }
+                : true,
         // The color to show in the window until the web content gets loaded.
         // https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
         //

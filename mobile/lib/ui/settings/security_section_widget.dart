@@ -1,6 +1,7 @@
 import 'dart:async';
 import "dart:typed_data";
 
+import 'package:ente_crypto/ente_crypto.dart';
 import 'package:flutter/material.dart';
 import "package:local_auth/local_auth.dart";
 import "package:logging/logging.dart";
@@ -24,13 +25,12 @@ import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import "package:photos/ui/settings/lock_screen/lock_screen_options.dart";
 import "package:photos/utils/auth_util.dart";
-import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/toast_util.dart";
 
 class SecuritySectionWidget extends StatefulWidget {
-  const SecuritySectionWidget({Key? key}) : super(key: key);
+  const SecuritySectionWidget({super.key});
 
   @override
   State<SecuritySectionWidget> createState() => _SecuritySectionWidgetState();

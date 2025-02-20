@@ -14,9 +14,9 @@ class WebPage extends StatefulWidget {
   const WebPage(
     this.title,
     this.url, {
-    Key? key,
+    super.key,
     this.canOpenInBrowser = false,
-  }) : super(key: key);
+  });
 
   @override
   State<WebPage> createState() => _WebPageState();

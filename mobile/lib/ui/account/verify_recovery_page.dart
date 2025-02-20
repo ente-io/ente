@@ -1,5 +1,6 @@
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dio/dio.dart';
+import 'package:ente_crypto/ente_crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
@@ -13,12 +14,11 @@ import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
-import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class VerifyRecoveryPage extends StatefulWidget {
-  const VerifyRecoveryPage({Key? key}) : super(key: key);
+  const VerifyRecoveryPage({super.key});
 
   @override
   State<VerifyRecoveryPage> createState() => _VerifyRecoveryPageState();
@@ -43,7 +43,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           await userRemoteFlagService.markRecoveryVerificationAsDone();
         } catch (e) {
           await dialog.hide();
-          if (e is DioError && e.type == DioErrorType.other) {
+          if (e is DioException && e.type == DioExceptionType.connectionError) {
             await showErrorDialog(
               context,
               S.of(context).noInternetConnection,

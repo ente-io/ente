@@ -1,3 +1,4 @@
+import { logUnhandledErrorsAndRejectionsInWorker } from "@/base/log-web";
 import { wait } from "@/utils/promise";
 import { expose } from "comlink";
 import HeicConvert from "heic-convert";
@@ -18,6 +19,8 @@ export class HEICConvertWorker {
 }
 
 expose(HEICConvertWorker);
+
+logUnhandledErrorsAndRejectionsInWorker();
 
 const heicToJPEG = async (heicBlob: Blob): Promise<Blob> => {
     const buffer = new Uint8Array(await heicBlob.arrayBuffer());

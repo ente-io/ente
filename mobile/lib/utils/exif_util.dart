@@ -47,7 +47,7 @@ Future<Map<String, IfdTag>> getExif(EnteFile file) async {
   }
 }
 
-Future<Map<String, IfdTag>?> getExifFromSourceFile(File originFile) async {
+Future<Map<String, IfdTag>?> tryExifFromFile(File originFile) async {
   try {
     final exif = await readExifAsync(originFile);
     return exif;
@@ -125,7 +125,25 @@ bool? checkPanoramaFromEXIF(File? file, Map<String, IfdTag>? exifData) {
   return element?.printable == "6";
 }
 
-Future<DateTime?> getCreationTimeFromEXIF(
+class ParsedExifDateTime {
+  late final DateTime? time;
+  late final String? dateTime;
+  late final String? offsetTime;
+  ParsedExifDateTime(DateTime this.time, String? dateTime, this.offsetTime) {
+    if (dateTime != null && dateTime.endsWith('Z')) {
+      this.dateTime = dateTime.substring(0, dateTime.length - 1);
+    } else {
+      this.dateTime = dateTime;
+    }
+  }
+
+  @override
+  String toString() {
+    return "ParsedExifDateTime{time: $time, dateTime: $dateTime, offsetTime: $offsetTime}";
+  }
+}
+
+Future<ParsedExifDateTime?> tryParseExifDateTime(
   File? file,
   Map<String, IfdTag>? exifData,
 ) async {
@@ -137,46 +155,55 @@ Future<DateTime?> getCreationTimeFromEXIF(
         : exif.containsKey(kImageDateTime)
             ? exif[kImageDateTime]!.printable
             : null;
-    if (exifTime != null && exifTime != kEmptyExifDateTime) {
-      String? exifOffsetTime;
-      for (final key in kExifOffSetKeys) {
-        if (exif.containsKey(key)) {
-          exifOffsetTime = exif[key]!.printable;
-          break;
-        }
-      }
-      return getDateTimeInDeviceTimezone(exifTime, exifOffsetTime);
+    if (exifTime == null || exifTime == kEmptyExifDateTime) {
+      return null;
     }
+    String? exifOffsetTime;
+    for (final key in kExifOffSetKeys) {
+      if (exif.containsKey(key)) {
+        exifOffsetTime = exif[key]!.printable;
+        break;
+      }
+    }
+    return getDateTimeInDeviceTimezone(exifTime, exifOffsetTime);
   } catch (e) {
     _logger.severe("failed to getCreationTimeFromEXIF", e);
   }
   return null;
 }
 
-DateTime getDateTimeInDeviceTimezone(String exifTime, String? offsetString) {
-  final DateTime result = DateFormat(kExifDateTimePattern).parse(exifTime);
-  if (offsetString == null) {
-    return result;
+ParsedExifDateTime getDateTimeInDeviceTimezone(
+  String exifTime,
+  String? offsetString,
+) {
+  final hasOffset = (offsetString ?? '') != '';
+  final DateTime result =
+      DateFormat(kExifDateTimePattern).parse(exifTime, hasOffset);
+  if (hasOffset && offsetString!.toUpperCase() != "Z") {
+    try {
+      final List<String> splitHHMM = offsetString.split(":");
+      final int offsetHours = int.parse(splitHHMM[0]);
+      final int offsetMinutes =
+          int.parse(splitHHMM[1]) * (offsetHours.isNegative ? -1 : 1);
+      // Adjust the date for the offset to get the photo's correct UTC time
+      final photoUtcDate =
+          result.add(Duration(hours: -offsetHours, minutes: -offsetMinutes));
+      // Convert the UTC time to the device's local time
+      final deviceLocalTime = photoUtcDate.toLocal();
+      return ParsedExifDateTime(
+        deviceLocalTime,
+        result.toIso8601String(),
+        offsetString,
+      );
+    } catch (e, s) {
+      _logger.severe("offset parsing failed $exifTime &&  $offsetString", e, s);
+    }
   }
-  try {
-    final List<String> splitHHMM = offsetString.split(":");
-    // Parse the offset from the photo's time zone
-    final int offsetHours = int.parse(splitHHMM[0]);
-    final int offsetMinutes =
-        int.parse(splitHHMM[1]) * (offsetHours.isNegative ? -1 : 1);
-    // Adjust the date for the offset to get the photo's correct UTC time
-    final photoUtcDate =
-        result.add(Duration(hours: -offsetHours, minutes: -offsetMinutes));
-    // Getting the current device's time zone offset from UTC
-    final now = DateTime.now();
-    final localOffset = now.timeZoneOffset;
-    // Adjusting the photo's UTC time to the device's local time
-    final deviceLocalTime = photoUtcDate.add(localOffset);
-    return deviceLocalTime;
-  } catch (e, s) {
-    _logger.severe("tz offset adjust failed $offsetString", e, s);
-  }
-  return result;
+  return ParsedExifDateTime(
+    result,
+    result.toIso8601String(),
+    (offsetString ?? '').toUpperCase() == 'Z' ? 'Z' : null,
+  );
 }
 
 Location? locationFromExif(Map<String, IfdTag> exif) {

@@ -11,20 +11,15 @@ interface CustomHeadProps {
  *
  * This assumes the existence of `public/images/favicon.png`.
  */
-export const CustomHead: React.FC<CustomHeadProps> = ({ title }) => {
-    return (
-        <Head>
-            <title>{title}</title>
-            <link rel="icon" href="/images/favicon.png" type="image/png" />
-            <meta
-                name="description"
-                content="Ente - end-to-end encrypted cloud with open-source apps"
-            />
-            <meta
-                name="viewport"
-                content="width=device-width, initial-scale=1"
-            />
-            <meta name="referrer" content="strict-origin-when-cross-origin" />
-        </Head>
-    );
-};
+export const CustomHead: React.FC<CustomHeadProps> = ({ title }) => (
+    <Head>
+        <title>{title}</title>
+        <link rel="icon" href="/images/favicon.png" type="image/png" />
+        <meta
+            name="description"
+            content="Ente - end-to-end encrypted cloud with open-source apps"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="referrer" content="strict-origin-when-cross-origin" />
+    </Head>
+);

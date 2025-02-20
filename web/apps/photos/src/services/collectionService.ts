@@ -1,6 +1,8 @@
 import { encryptMetadataJSON, sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
+import { UpdateMagicMetadataRequest } from "@/gallery/services/file";
+import { updateMagicMetadata } from "@/gallery/services/magic-metadata";
 import {
     Collection,
     CollectionMagicMetadata,
@@ -35,7 +37,6 @@ import {
     groupFilesByCollectionID,
     sortFiles,
 } from "@/new/photos/services/files";
-import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import type { FamilyData } from "@/new/photos/services/user-details";
 import { batch } from "@/utils/array";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -48,7 +49,6 @@ import {
     isQuickLinkCollection,
     isValidMoveTarget,
 } from "utils/collection";
-import { UpdateMagicMetadataRequest } from "./fileService";
 import { getPublicKey } from "./userService";
 
 const UNCATEGORIZED_COLLECTION_NAME = "Uncategorized";

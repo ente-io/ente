@@ -363,8 +363,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
   List<User> _getSuggestedUser() {
     final Set<String> existingEmails = {};
-    for (final User? u in widget.collection.sharees ?? []) {
-      if (u != null && u.id != null && u.email.isNotEmpty) {
+    for (final User u in widget.collection.sharees) {
+      if (u.id != null && u.email.isNotEmpty) {
         existingEmails.add(u.email);
       }
     }

@@ -47,12 +47,6 @@ Future<void> share(
       pathFutures.add(
         getFile(file, isOrigin: true).then((fetchedFile) => fetchedFile?.path),
       );
-      if (file.fileType == FileType.livePhoto) {
-        pathFutures.add(
-          getFile(file, liveVideo: true)
-              .then((fetchedFile) => fetchedFile?.path),
-        );
-      }
     }
     final paths = await Future.wait(pathFutures);
     await dialog.hide();
@@ -165,9 +159,9 @@ Future<List<EnteFile>> convertIncomingSharedMediaToFile(
     enteFile.fileType =
         media.type == SharedMediaType.image ? FileType.image : FileType.video;
     if (enteFile.fileType == FileType.image) {
-      final exifTime = await getCreationTimeFromEXIF(ioFile, null);
-      if (exifTime != null) {
-        enteFile.creationTime = exifTime.microsecondsSinceEpoch;
+      final dateResult = await tryParseExifDateTime(ioFile, null);
+      if (dateResult != null && dateResult.time != null) {
+        enteFile.creationTime = dateResult.time!.microsecondsSinceEpoch;
       }
     } else if (enteFile.fileType == FileType.video) {
       enteFile.duration = (media.duration ?? 0) ~/ 1000;

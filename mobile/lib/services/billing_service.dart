@@ -8,8 +8,8 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/errors.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/billing_plan.dart';
-import 'package:photos/models/subscription.dart';
+import 'package:photos/models/api/billing/billing_plan.dart';
+import 'package:photos/models/api/billing/subscription.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/web_page.dart';
@@ -92,7 +92,7 @@ class BillingService {
         },
       );
       return Subscription.fromMap(response.data["subscription"]);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null && e.response!.statusCode == 409) {
         throw SubscriptionAlreadyClaimedError();
       } else {
@@ -109,7 +109,7 @@ class BillingService {
       final response = await _enteDio.get("/billing/subscription");
       final subscription = Subscription.fromMap(response.data["subscription"]);
       return subscription;
-    } on DioError catch (e, s) {
+    } on DioException catch (e, s) {
       _logger.severe(e, s);
       rethrow;
     }
@@ -121,7 +121,7 @@ class BillingService {
           await _enteDio.post("/billing/stripe/cancel-subscription");
       final subscription = Subscription.fromMap(response.data["subscription"]);
       return subscription;
-    } on DioError catch (e, s) {
+    } on DioException catch (e, s) {
       _logger.severe(e, s);
       rethrow;
     }
@@ -133,7 +133,7 @@ class BillingService {
           await _enteDio.post("/billing/stripe/activate-subscription");
       final subscription = Subscription.fromMap(response.data["subscription"]);
       return subscription;
-    } on DioError catch (e, s) {
+    } on DioException catch (e, s) {
       _logger.severe(e, s);
       rethrow;
     }
@@ -150,7 +150,7 @@ class BillingService {
         },
       );
       return response.data["url"];
-    } on DioError catch (e, s) {
+    } on DioException catch (e, s) {
       _logger.severe(e, s);
       rethrow;
     }

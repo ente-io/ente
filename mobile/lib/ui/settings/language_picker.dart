@@ -18,8 +18,8 @@ class LanguageSelectorPage extends StatelessWidget {
     this.supportedLocales,
     this.onLocaleChanged,
     this.currentLocale, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -78,8 +78,8 @@ class ItemsWidget extends StatefulWidget {
     this.supportedLocales,
     this.onLocaleChanged,
     this.currentLocale, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<ItemsWidget> createState() => _ItemsWidgetState();

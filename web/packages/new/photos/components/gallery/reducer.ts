@@ -1,4 +1,9 @@
 import {
+    isArchivedCollection,
+    isArchivedFile,
+    isPinnedCollection,
+} from "@/gallery/services/magic-metadata";
+import {
     COLLECTION_ROLE,
     CollectionType,
     type Collection,
@@ -34,11 +39,6 @@ import {
     sortFiles,
     uniqueFilesByID,
 } from "../../services/files";
-import {
-    isArchivedCollection,
-    isArchivedFile,
-    isPinnedCollection,
-} from "../../services/magic-metadata";
 import type { PeopleState, Person } from "../../services/ml/people";
 import type { SearchSuggestion } from "../../services/search/types";
 import type { FamilyData } from "../../services/user-details";
@@ -195,14 +195,13 @@ export interface GalleryState {
      */
     favoriteFileIDs: Set<number>;
     /**
-     * User visible collection names indexed by collection IDs for fast lookup.
+     * A map from collection IDs to their user visible name.
      *
-     * This map will contain entries for all (both normal and hidden)
-     * collections.
+     * It will contain entries for all collections (both normal and hidden).
      */
-    allCollectionNameByID: Map<number, string>;
+    allCollectionsNameByID: Map<number, string>;
     /**
-     * A list of collection IDs to which a file belongs, indexed by file ID.
+     * A map from file IDs to the IDs of the collections that they're a part of.
      */
     fileCollectionIDs: Map<number, number[]>;
 
@@ -420,7 +419,7 @@ const initialGalleryState: GalleryState = {
     hiddenFileIDs: new Set(),
     archivedFileIDs: new Set(),
     favoriteFileIDs: new Set(),
-    allCollectionNameByID: new Map(),
+    allCollectionsNameByID: new Map(),
     fileCollectionIDs: new Map(),
     collectionSummaries: new Map(),
     hiddenCollectionSummaries: new Map(),
@@ -481,7 +480,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     action.files,
                     state.unsyncedFavoriteUpdates,
                 ),
-                allCollectionNameByID: createCollectionNameByID(
+                allCollectionsNameByID: createCollectionNameByID(
                     action.allCollections,
                 ),
                 fileCollectionIDs: createFileCollectionIDs(action.files),
@@ -539,7 +538,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.files,
                     state.unsyncedFavoriteUpdates,
                 ),
-                allCollectionNameByID: createCollectionNameByID(
+                allCollectionsNameByID: createCollectionNameByID(
                     collections.concat(state.hiddenCollections),
                 ),
                 collectionSummaries,
@@ -608,7 +607,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.files,
                     state.unsyncedFavoriteUpdates,
                 ),
-                allCollectionNameByID: createCollectionNameByID(
+                allCollectionsNameByID: createCollectionNameByID(
                     collections.concat(hiddenCollections),
                 ),
                 collectionSummaries,

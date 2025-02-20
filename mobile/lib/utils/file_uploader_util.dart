@@ -6,6 +6,8 @@ import 'dart:ui' as ui;
 
 import "package:archive/archive_io.dart";
 import "package:computer/computer.dart";
+import 'package:ente_crypto/ente_crypto.dart';
+import "package:exif/exif.dart";
 import 'package:logging/logging.dart';
 import "package:motion_photos/motion_photos.dart";
 import 'package:motionphoto/motionphoto.dart';
@@ -22,7 +24,6 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/location/location.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
-import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/exif_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:uuid/uuid.dart";
@@ -44,6 +45,8 @@ class MediaUploadData {
   // For iOS, this value will be always null.
   final int? motionPhotoStartIndex;
 
+  final Map<String, IfdTag>? exifData;
+
   bool? isPanorama;
 
   MediaUploadData(
@@ -55,6 +58,7 @@ class MediaUploadData {
     this.width,
     this.motionPhotoStartIndex,
     this.isPanorama,
+    this.exifData,
   });
 }
 
@@ -69,20 +73,27 @@ class FileHashData {
   FileHashData(this.fileHash, {this.zipHash});
 }
 
-Future<MediaUploadData> getUploadDataFromEnteFile(EnteFile file) async {
+Future<MediaUploadData> getUploadDataFromEnteFile(
+  EnteFile file, {
+  bool parseExif = false,
+}) async {
   if (file.isSharedMediaToAppSandbox) {
-    return await _getMediaUploadDataFromAppCache(file);
+    return await _getMediaUploadDataFromAppCache(file, parseExif);
   } else {
-    return await _getMediaUploadDataFromAssetFile(file);
+    return await _getMediaUploadDataFromAssetFile(file, parseExif);
   }
 }
 
-Future<MediaUploadData> _getMediaUploadDataFromAssetFile(EnteFile file) async {
+Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
+  EnteFile file,
+  bool parseExif,
+) async {
   File? sourceFile;
   Uint8List? thumbnailData;
   bool isDeleted;
   String? zipHash;
   String fileHash;
+  Map<String, IfdTag>? exifData;
 
   // The timeouts are to safeguard against https://github.com/CaiJingLong/flutter_photo_manager/issues/467
   final asset = await file.getAsset
@@ -115,8 +126,11 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(EnteFile file) async {
       InvalidReason.sourceFileMissing,
     );
   }
+  if (parseExif) {
+    exifData = await tryExifFromFile(sourceFile);
+  }
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
-  await _decorateEnteFileData(file, asset, sourceFile);
+  await _decorateEnteFileData(file, asset, sourceFile, exifData);
   fileHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
 
   if (file.fileType == FileType.livePhoto && Platform.isIOS) {
@@ -177,6 +191,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(EnteFile file) async {
     height: h,
     width: w,
     motionPhotoStartIndex: motionPhotoStartingIndex,
+    exifData: exifData,
   );
 }
 
@@ -284,6 +299,7 @@ Future<void> _decorateEnteFileData(
   EnteFile file,
   AssetEntity asset,
   File sourceFile,
+  Map<String, IfdTag>? exifData,
 ) async {
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
   if (file.location == null ||
@@ -296,6 +312,13 @@ Future<void> _decorateEnteFileData(
     final FFProbeProps? props = await getVideoPropsAsync(sourceFile);
     if (props != null && props.location != null) {
       file.location = props.location;
+    }
+  }
+  if (Platform.isAndroid && exifData != null) {
+    //Fix for missing location data in lower android versions.
+    final Location? exifLocation = locationFromExif(exifData);
+    if (Location.isValidLocation(exifLocation)) {
+      file.location = exifLocation;
     }
   }
   if (file.title == null || file.title!.isEmpty) {
@@ -319,7 +342,7 @@ Future<MetadataRequest> getPubMetadataRequest(
   file.pubMmdEncodedJson = jsonEncode(jsonToUpdate);
   file.pubMagicMetadata = PubMagicMetadata.fromJson(jsonToUpdate);
   final encryptedMMd = await CryptoUtil.encryptChaCha(
-    utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+    utf8.encode(jsonEncode(jsonToUpdate)),
     fileKey,
   );
   return MetadataRequest(
@@ -330,9 +353,13 @@ Future<MetadataRequest> getPubMetadataRequest(
   );
 }
 
-Future<MediaUploadData> _getMediaUploadDataFromAppCache(EnteFile file) async {
+Future<MediaUploadData> _getMediaUploadDataFromAppCache(
+  EnteFile file,
+  bool parseExif,
+) async {
   File sourceFile;
   Uint8List? thumbnailData;
+  Map<String, IfdTag>? exifData;
   const bool isDeleted = false;
   final localPath = getSharedMediaFilePath(file);
   sourceFile = File(localPath);
@@ -350,6 +377,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(EnteFile file) async {
     Map<String, int>? dimensions;
     if (file.fileType == FileType.image) {
       dimensions = await getImageHeightAndWith(imagePath: localPath);
+      exifData = await tryExifFromFile(sourceFile);
     } else if (thumbnailData != null) {
       // the thumbnail null check is to ensure that we are able to generate thum
       // for video, we need to use the thumbnail data with any max width/height
@@ -368,6 +396,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(EnteFile file) async {
       FileHashData(fileHash),
       height: dimensions?['height'],
       width: dimensions?['width'],
+      exifData: exifData,
     );
   } catch (e, s) {
     _logger.warning("failed to generate thumbnail", e, s);

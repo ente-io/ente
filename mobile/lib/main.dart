@@ -4,6 +4,7 @@ import 'dart:io';
 import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:background_fetch/background_fetch.dart';
 import "package:computer/computer.dart";
+import 'package:ente_crypto/ente_crypto.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +48,6 @@ import "package:photos/services/sync_service.dart";
 import "package:photos/services/user_service.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
-import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
@@ -238,8 +238,8 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     ServiceLocator.instance
         .init(preferences, NetworkClient.instance.enteDio, packageInfo);
 
-    if (!isBackground && flagService.internalUser) {
-      VideoPlayerMediaKit.ensureInitialized(iOS: true);
+    if (!isBackground) {
+      VideoPlayerMediaKit.ensureInitialized(iOS: true, android: true);
     }
 
     _logger.info("UserService init $tlog");

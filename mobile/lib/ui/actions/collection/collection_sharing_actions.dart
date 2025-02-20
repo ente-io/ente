@@ -340,7 +340,7 @@ class CollectionActions {
   ) async {
     final textTheme = getEnteTextTheme(bContext);
     final currentUserID = Configuration.instance.getUserID()!;
-    if (collection.owner!.id != currentUserID) {
+    if (collection.owner.id != currentUserID) {
       throw AssertionError("Can not delete album owned by others");
     }
     if (collection.hasSharees) {
@@ -495,7 +495,7 @@ class CollectionActions {
     bool isHidden = false,
   }) async {
     final int currentUserID = Configuration.instance.getUserID()!;
-    final isCollectionOwner = collection.owner!.id == currentUserID;
+    final isCollectionOwner = collection.owner.id == currentUserID;
     final FilesSplit split = FilesSplit.split(
       files,
       Configuration.instance.getUserID()!,
@@ -631,7 +631,7 @@ class CollectionActions {
     if (targetCollection == null ||
         (CollectionType.uncategorized == targetCollection.type ||
             targetCollection.type == CollectionType.favorites) ||
-        targetCollection.owner!.id != userID) {
+        targetCollection.owner.id != userID) {
       return false;
     }
     return true;

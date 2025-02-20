@@ -21,15 +21,15 @@ class CreationTimeItem extends StatefulWidget {
 class _CreationTimeItemState extends State<CreationTimeItem> {
   @override
   Widget build(BuildContext context) {
-    final dateTime =
-        DateTime.fromMicrosecondsSinceEpoch(widget.file.creationTime!);
+    final dateTime = DateTime.fromMicrosecondsSinceEpoch(
+      widget.file.creationTime!,
+      isUtc: true,
+    ).toLocal();
     return InfoItemWidget(
       key: const ValueKey("Creation time"),
       leadingIcon: Icons.calendar_today_outlined,
       title: DateFormat.yMMMEd(Localizations.localeOf(context).languageCode)
-          .format(
-        DateTime.fromMicrosecondsSinceEpoch(widget.file.creationTime!),
-      ),
+          .format(dateTime),
       subtitleSection: Future.value([
         Text(
           getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,

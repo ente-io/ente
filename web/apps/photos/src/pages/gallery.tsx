@@ -9,9 +9,9 @@ import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
 import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
-import { useFileInput } from "@/gallery/components/utils/use-file-input";
 import { type Collection } from "@/media/collection";
 import { mergeMetadata, type EnteFile } from "@/media/file";
 import {
@@ -65,7 +65,7 @@ import {
     userDetailsSnapshot,
     verifyStripeSubscription,
 } from "@/new/photos/services/user-details";
-import { useAppContext } from "@/new/photos/types/context";
+import { usePhotosAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
@@ -103,21 +103,12 @@ import GalleryEmptyState from "components/GalleryEmptyState";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import { Sidebar } from "components/Sidebar";
-import { type UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
-import Uploader from "components/Upload/Uploader";
-import { UploadSelectorInputs } from "components/UploadSelectorInputs";
+import { Upload, type UploadTypeSelectorIntent } from "components/Upload";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
-import {
-    createContext,
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
-import { useDropzone } from "react-dropzone";
+import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import {
     constructEmailList,
@@ -177,14 +168,9 @@ export const GalleryContext = createContext<GalleryContextType>(
  *           Photo List           v
  */
 const Page: React.FC = () => {
-    const {
-        showLoadingBar,
-        hideLoadingBar,
-        showMiniDialog,
-        onGenericError,
-        watchFolderView,
-        logout,
-    } = useAppContext();
+    const { logout, showMiniDialog } = useBaseContext();
+    const { showLoadingBar, hideLoadingBar, onGenericError, watchFolderView } =
+        usePhotosAppContext();
 
     const isOffline = useIsOffline();
     const [state, dispatch] = useGalleryReducer();
@@ -201,42 +187,10 @@ const Page: React.FC = () => {
         useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
+    const [dragAndDropFiles, setDragAndDropFiles] = useState<FileWithPath[]>(
+        [],
+    );
     const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
-
-    const {
-        // A function to call to get the props we should apply to the container,
-        getRootProps: getDragAndDropRootProps,
-        // ... the props we should apply to the <input> element,
-        getInputProps: getDragAndDropInputProps,
-        // ... and the files that we got.
-        acceptedFiles: dragAndDropFilesReadOnly,
-    } = useDropzone({
-        noClick: true,
-        noKeyboard: true,
-        disabled: shouldDisableDropzone,
-    });
-    const {
-        getInputProps: getFileSelectorInputProps,
-        openSelector: openFileSelector,
-        selectedFiles: fileSelectorFiles,
-    } = useFileInput({
-        directory: false,
-    });
-    const {
-        getInputProps: getFolderSelectorInputProps,
-        openSelector: openFolderSelector,
-        selectedFiles: folderSelectorFiles,
-    } = useFileInput({
-        directory: true,
-    });
-    const {
-        getInputProps: getZipFileSelectorInputProps,
-        openSelector: openZipFileSelector,
-        selectedFiles: fileSelectorZipFiles,
-    } = useFileInput({
-        directory: false,
-        accept: ".zip",
-    });
 
     const syncInProgress = useRef(false);
     const syncInterval = useRef<ReturnType<typeof setInterval> | undefined>(
@@ -557,12 +511,6 @@ const Page: React.FC = () => {
             clearSelection,
         };
     }, [selectAll, clearSelection]);
-
-    // Create a regular array from the readonly array returned by dropzone.
-    const dragAndDropFiles = useMemo(
-        () => [...dragAndDropFilesReadOnly],
-        [dragAndDropFilesReadOnly],
-    );
 
     const showSessionExpiredDialog = () =>
         showMiniDialog(sessionExpiredDialogAttributes(logout));
@@ -889,21 +837,14 @@ const Page: React.FC = () => {
             }}
         >
             <FullScreenDropZone
-                {...{ getDragAndDropRootProps }}
                 message={
                     watchFolderView
                         ? t("watch_folder_dropzone_hint")
                         : undefined
                 }
+                disabled={shouldDisableDropzone}
+                onDrop={setDragAndDropFiles}
             >
-                <UploadSelectorInputs
-                    {...{
-                        getDragAndDropInputProps,
-                        getFileSelectorInputProps,
-                        getFolderSelectorInputProps,
-                        getZipFileSelectorInputProps,
-                    }}
-                />
                 {blockingLoad && <TranslucentLoadingOverlay />}
                 <PlanSelector
                     {...planSelectorVisibilityProps}
@@ -1032,7 +973,7 @@ const Page: React.FC = () => {
                     }}
                 />
 
-                <Uploader
+                <Upload
                     activeCollection={activeCollection}
                     syncWithRemote={syncWithRemote}
                     closeUploadTypeSelector={setUploadTypeSelectorView.bind(
@@ -1056,12 +997,6 @@ const Page: React.FC = () => {
                     showSessionExpiredMessage={showSessionExpiredDialog}
                     {...{
                         dragAndDropFiles,
-                        openFileSelector,
-                        fileSelectorFiles,
-                        openFolderSelector,
-                        folderSelectorFiles,
-                        openZipFileSelector,
-                        fileSelectorZipFiles,
                         uploadTypeSelectorIntent,
                         uploadTypeSelectorView,
                     }}
@@ -1106,8 +1041,8 @@ const Page: React.FC = () => {
                         activeCollectionID={activeCollectionID}
                         activePersonID={activePerson?.id}
                         enableDownload={true}
-                        fileToCollectionsMap={state.fileCollectionIDs}
-                        collectionNameMap={state.allCollectionNameByID}
+                        fileCollectionIDs={state.fileCollectionIDs}
+                        allCollectionsNameByID={state.allCollectionsNameByID}
                         showAppDownloadBanner={
                             files.length < 30 && !isInSearchMode
                         }
@@ -1123,7 +1058,7 @@ const Page: React.FC = () => {
                 )}
                 <Export
                     {...exportVisibilityProps}
-                    collectionNameMap={state.allCollectionNameByID}
+                    allCollectionsNameByID={state.allCollectionsNameByID}
                 />
                 <AuthenticateUserModal
                     open={authenticateUserModalView}

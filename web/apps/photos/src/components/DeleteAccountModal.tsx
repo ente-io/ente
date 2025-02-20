@@ -2,12 +2,14 @@ import { assertionFailed } from "@/base/assert";
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import { sharedCryptoWorker } from "@/base/crypto";
 import {
     DropdownInput,
     type DropdownOption,
 } from "@/new/photos/components/DropdownInput";
-import { AppContext } from "@/new/photos/types/context";
+import { usePhotosAppContext } from "@/new/photos/types/context";
 import { initiateEmail } from "@/new/photos/utils/web";
 import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import { getActualKey } from "@ente/shared/user";
@@ -28,18 +30,17 @@ import { Trans } from "react-i18next";
 import { deleteAccount, getAccountDeleteChallenge } from "services/userService";
 import * as Yup from "yup";
 
-interface Iprops {
-    onClose: () => void;
-    open: boolean;
-}
-
 interface FormValues {
     reason: string;
     feedback: string;
 }
 
-const DeleteAccountModal = ({ open, onClose }: Iprops) => {
-    const { showMiniDialog, onGenericError, logout } = useContext(AppContext);
+const DeleteAccountModal: React.FC<ModalVisibilityProps> = ({
+    open,
+    onClose,
+}) => {
+    const { logout, showMiniDialog } = useBaseContext();
+    const { onGenericError } = usePhotosAppContext();
     const { authenticateUser } = useContext(GalleryContext);
 
     const [loading, setLoading] = useState(false);

@@ -293,6 +293,7 @@ func main() {
 		BillingCtrl:   billingController,
 		UserRepo:      userRepo,
 		UserCacheCtrl: userCacheCtrl,
+		UsageRepo:     usageRepo,
 	}
 
 	publicCollectionCtrl := &controller.PublicCollectionController{
@@ -621,6 +622,7 @@ func main() {
 	familiesJwtAuthAPI.GET("/family/members", familyHandler.FetchMembers)
 	familiesJwtAuthAPI.DELETE("/family/remove-member/:id", familyHandler.RemoveMember)
 	familiesJwtAuthAPI.DELETE("/family/revoke-invite/:id", familyHandler.RevokeInvite)
+	familiesJwtAuthAPI.POST("/family/modify-storage", familyHandler.ModifyStorageLimit)
 
 	emergencyHandler := &api.EmergencyHandler{
 		Controller: emergencyCtrl,
@@ -943,7 +945,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 		}
 	})
 
-	schedule(c, "@every 10m", func() {
+	schedule(c, "@every 8m", func() {
 		fileController.CleanupDeletedFiles()
 	})
 	schedule(c, "@every 101s", func() {

@@ -15,6 +15,7 @@ import "package:photos/db/ml/db.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
+import "package:photos/models/base_location.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/file/extensions/file_props.dart";
@@ -35,6 +36,7 @@ import "package:photos/models/search/hierarchical/magic_filter.dart";
 import "package:photos/models/search/hierarchical/top_level_generic_filter.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/models/trip_memory.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/filter/db_filters.dart";
@@ -1189,11 +1191,413 @@ class SearchService {
     return searchResults;
   }
 
+  Future<List<GenericSearchResult>> getTripsResults(
+    BuildContext context,
+    int? limit,
+  ) async {
+    final List<GenericSearchResult> searchResults = [];
+    final allFiles = await getAllFilesForSearch();
+    final Iterable<LocalEntity<LocationTag>> locationTagEntities =
+        (await locationService.getLocationTags());
+    if (allFiles.isEmpty) return [];
+    final currentTime = DateTime.now().toLocal();
+    final currentMonth = currentTime.month;
+    final cutOffTime = currentTime.subtract(const Duration(days: 365));
+
+    final Map<LocalEntity<LocationTag>, List<EnteFile>> tagToItemsMap = {};
+    for (int i = 0; i < locationTagEntities.length; i++) {
+      tagToItemsMap[locationTagEntities.elementAt(i)] = [];
+    }
+    final List<(List<EnteFile>, Location)> smallRadiusClusters = [];
+    final List<(List<EnteFile>, Location)> wideRadiusClusters = [];
+    // Go through all files and cluster the ones not inside any location tag
+    for (EnteFile file in allFiles) {
+      if (!file.hasLocation ||
+          file.uploadedFileID == null ||
+          !file.isOwner ||
+          file.creationTime == null) {
+        continue;
+      }
+      // Check if the file is inside any location tag
+      bool hasLocationTag = false;
+      for (LocalEntity<LocationTag> tag in tagToItemsMap.keys) {
+        if (isFileInsideLocationTag(
+          tag.item.centerPoint,
+          file.location!,
+          tag.item.radius,
+        )) {
+          hasLocationTag = true;
+          tagToItemsMap[tag]!.add(file);
+        }
+      }
+      // Cluster the files not inside any location tag (incremental clustering)
+      if (!hasLocationTag) {
+        // Small radius clustering for base locations
+        bool foundSmallCluster = false;
+        for (final cluster in smallRadiusClusters) {
+          final clusterLocation = cluster.$2;
+          if (isFileInsideLocationTag(
+            clusterLocation,
+            file.location!,
+            0.6,
+          )) {
+            cluster.$1.add(file);
+            foundSmallCluster = true;
+            break;
+          }
+        }
+        if (!foundSmallCluster) {
+          smallRadiusClusters.add(([file], file.location!));
+        }
+        // Wide radius clustering for trip locations
+        bool foundWideCluster = false;
+        for (final cluster in wideRadiusClusters) {
+          final clusterLocation = cluster.$2;
+          if (isFileInsideLocationTag(
+            clusterLocation,
+            file.location!,
+            100.0,
+          )) {
+            cluster.$1.add(file);
+            foundWideCluster = true;
+            break;
+          }
+        }
+        if (!foundWideCluster) {
+          wideRadiusClusters.add(([file], file.location!));
+        }
+      }
+    }
+
+    // Identify base locations
+    final List<BaseLocation> baseLocations = [];
+    for (final cluster in smallRadiusClusters) {
+      final files = cluster.$1;
+      final location = cluster.$2;
+      // Check that the photos are distributed over a longer time range (3+ months)
+      final creationTimes = <int>[];
+      final Set<int> uniqueDays = {};
+      for (final file in files) {
+        creationTimes.add(file.creationTime!);
+        final date = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+        final dayStamp =
+            DateTime(date.year, date.month, date.day).microsecondsSinceEpoch;
+        uniqueDays.add(dayStamp);
+      }
+      creationTimes.sort();
+      if (creationTimes.length < 10) continue;
+      final firstCreationTime = DateTime.fromMicrosecondsSinceEpoch(
+        creationTimes.first,
+      );
+      final lastCreationTime = DateTime.fromMicrosecondsSinceEpoch(
+        creationTimes.last,
+      );
+      if (lastCreationTime.difference(firstCreationTime).inDays < 90) {
+        continue;
+      }
+      // Check for a minimum average number of days photos are clicked in range
+      final daysRange = lastCreationTime.difference(firstCreationTime).inDays;
+      if (uniqueDays.length < daysRange * 0.1) continue;
+      // Check if it's a current or old base location
+      final bool isCurrent = lastCreationTime.isAfter(
+        DateTime.now().subtract(
+          const Duration(days: 90),
+        ),
+      );
+      baseLocations.add(BaseLocation(files, location, isCurrent));
+    }
+
+    // Identify trip locations
+    final List<TripMemory> tripLocations = [];
+    clusteredLocations:
+    for (final cluster in wideRadiusClusters) {
+      final files = cluster.$1;
+      final location = cluster.$2;
+      // Check that it's at least 10km away from any base or tag location
+      bool tooClose = false;
+      for (final baseLocation in baseLocations) {
+        if (isFileInsideLocationTag(
+          baseLocation.location,
+          location,
+          10.0,
+        )) {
+          tooClose = true;
+          break;
+        }
+      }
+      for (final tag in tagToItemsMap.keys) {
+        if (isFileInsideLocationTag(
+          tag.item.centerPoint,
+          location,
+          10.0,
+        )) {
+          tooClose = true;
+          break;
+        }
+      }
+      if (tooClose) continue clusteredLocations;
+
+      // Check that the photos are distributed over a short time range (2-30 days) or multiple short time ranges only
+      files.sort((a, b) => a.creationTime!.compareTo(b.creationTime!));
+      // Find distinct time blocks (potential trips)
+      List<EnteFile> currentBlockFiles = [files.first];
+      int blockStart = files.first.creationTime!;
+      int lastTime = files.first.creationTime!;
+      DateTime lastDateTime = DateTime.fromMicrosecondsSinceEpoch(lastTime);
+
+      for (int i = 1; i < files.length; i++) {
+        final currentFile = files[i];
+        final currentTime = currentFile.creationTime!;
+        final gap = DateTime.fromMicrosecondsSinceEpoch(currentTime)
+            .difference(lastDateTime)
+            .inDays;
+
+        // If gap is too large, end current block and check if it's a valid trip
+        if (gap > 15) {
+          // 10 days gap to separate trips. If gap is small, it's likely not a trip
+          if (gap < 90) continue clusteredLocations;
+
+          final blockDuration = lastDateTime
+              .difference(DateTime.fromMicrosecondsSinceEpoch(blockStart))
+              .inDays;
+
+          // Check if current block is a valid trip (2-30 days)
+          if (blockDuration >= 2 && blockDuration <= 30) {
+            tripLocations.add(
+              TripMemory(
+                List.from(currentBlockFiles),
+                location,
+                blockStart,
+                lastTime,
+              ),
+            );
+          }
+
+          // Start new block
+          currentBlockFiles = [];
+          blockStart = currentTime;
+        }
+
+        currentBlockFiles.add(currentFile);
+        lastTime = currentTime;
+        lastDateTime = DateTime.fromMicrosecondsSinceEpoch(lastTime);
+      }
+      // Check final block
+      final lastBlockDuration = lastDateTime
+          .difference(DateTime.fromMicrosecondsSinceEpoch(blockStart))
+          .inDays;
+      if (lastBlockDuration >= 2 && lastBlockDuration <= 30) {
+        tripLocations.add(
+          TripMemory(
+            List.from(currentBlockFiles),
+            location,
+            blockStart,
+            lastTime,
+          ),
+        );
+      }
+    }
+
+    // Check if any trip locations should be merged
+    final List<TripMemory> mergedTrips = [];
+    for (final trip in tripLocations) {
+      final tripFirstTime = DateTime.fromMicrosecondsSinceEpoch(
+        trip.firstCreationTime,
+      );
+      final tripLastTime = DateTime.fromMicrosecondsSinceEpoch(
+        trip.lastCreationTime,
+      );
+      bool merged = false;
+      for (int idx = 0; idx < mergedTrips.length; idx++) {
+        final otherTrip = mergedTrips[idx];
+        final otherTripFirstTime =
+            DateTime.fromMicrosecondsSinceEpoch(otherTrip.firstCreationTime);
+        final otherTripLastTime =
+            DateTime.fromMicrosecondsSinceEpoch(otherTrip.lastCreationTime);
+        if (tripFirstTime
+                .isBefore(otherTripLastTime.add(const Duration(days: 3))) &&
+            tripLastTime.isAfter(
+              otherTripFirstTime.subtract(const Duration(days: 3)),
+            )) {
+          mergedTrips[idx] = TripMemory(
+            otherTrip.files + trip.files,
+            otherTrip.location,
+            min(otherTrip.firstCreationTime, trip.firstCreationTime),
+            max(otherTrip.lastCreationTime, trip.lastCreationTime),
+          );
+          _logger.finest('Merged two trip locations');
+          merged = true;
+          break;
+        }
+      }
+      if (merged) continue;
+      mergedTrips.add(
+        TripMemory(
+          trip.files,
+          trip.location,
+          trip.firstCreationTime,
+          trip.lastCreationTime,
+        ),
+      );
+    }
+
+    // Remove too small and too recent trips
+    final List<TripMemory> validTrips = [];
+    for (final trip in mergedTrips) {
+      if (trip.files.length >= 20 &&
+          trip.averageCreationTime < cutOffTime.microsecondsSinceEpoch) {
+        validTrips.add(trip);
+      }
+    }
+
+    // For now for testing let's just surface all base locations
+    for (final baseLocation in baseLocations) {
+      String name = "Base (${baseLocation.isCurrentBase ? 'current' : 'old'})";
+      final String? locationName = await _tryFindLocationName(
+        baseLocation.files,
+        base: true,
+      );
+      if (locationName != null) {
+        name =
+            "$locationName (Base, ${baseLocation.isCurrentBase ? 'current' : 'old'})";
+      }
+      searchResults.add(
+        GenericSearchResult(
+          ResultType.event,
+          name,
+          baseLocation.files,
+          hierarchicalSearchFilter: TopLevelGenericFilter(
+            filterName: name,
+            occurrence: kMostRelevantFilter,
+            filterResultType: ResultType.event,
+            matchedUploadedIDs: filesToUploadedFileIDs(baseLocation.files),
+            filterIcon: Icons.event_outlined,
+          ),
+        ),
+      );
+    }
+
+    // For now we surface the two most recent trips of current month, and if none, the earliest upcoming redundant trip
+    // Group the trips per month and then year
+    final Map<int, Map<int, List<TripMemory>>> tripsByMonthYear = {};
+    for (final trip in validTrips) {
+      final tripDate =
+          DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime);
+      tripsByMonthYear
+          .putIfAbsent(tripDate.month, () => {})
+          .putIfAbsent(tripDate.year, () => [])
+          .add(trip);
+    }
+
+    // Flatten trips for the current month and annotate with their average date.
+    final List<TripMemory> currentMonthTrips = [];
+    if (tripsByMonthYear.containsKey(currentMonth)) {
+      for (final trips in tripsByMonthYear[currentMonth]!.values) {
+        for (final trip in trips) {
+          currentMonthTrips.add(trip);
+        }
+      }
+    }
+
+    // If there are past trips this month, show the one or two most recent ones.
+    if (currentMonthTrips.isNotEmpty) {
+      currentMonthTrips.sort(
+        (a, b) => b.averageCreationTime.compareTo(a.averageCreationTime),
+      );
+      final tripsToShow = currentMonthTrips.take(2);
+      for (final trip in tripsToShow) {
+        final year =
+            DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime).year;
+        final String? locationName = await _tryFindLocationName(trip.files);
+        String name = "Trip in $year";
+        if (locationName != null) {
+          name = "Trip to $locationName";
+        } else if (year == currentTime.year - 1) {
+          name = "Last year's trip";
+        }
+        final photoSelection = await _bestSelection(trip.files);
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.event,
+            name,
+            photoSelection,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: name,
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.event,
+              matchedUploadedIDs: filesToUploadedFileIDs(photoSelection),
+              filterIcon: Icons.event_outlined,
+            ),
+          ),
+        );
+        if (limit != null && searchResults.length >= limit) {
+          return searchResults;
+        }
+      }
+    }
+    // Otherwise, if no trips happened in the current month,
+    // look for the earliest upcoming trip in another month that has 3+ trips.
+    else {
+      // TODO lau: make sure the same upcoming trip isn't shown multiple times over multiple months
+      final sortedUpcomingMonths =
+          List<int>.generate(12, (i) => ((currentMonth + i) % 12) + 1);
+      checkUpcomingMonths:
+      for (final month in sortedUpcomingMonths) {
+        if (tripsByMonthYear.containsKey(month)) {
+          final List<TripMemory> thatMonthTrips = [];
+          for (final trips in tripsByMonthYear[month]!.values) {
+            for (final trip in trips) {
+              thatMonthTrips.add(trip);
+            }
+          }
+          if (thatMonthTrips.length >= 3) {
+            // take and use the third earliest trip
+            thatMonthTrips.sort(
+              (a, b) => a.averageCreationTime.compareTo(b.averageCreationTime),
+            );
+            final trip = thatMonthTrips[2];
+            final year =
+                DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime)
+                    .year;
+            final String? locationName = await _tryFindLocationName(trip.files);
+            String name = "Trip in $year";
+            if (locationName != null) {
+              name = "Trip to $locationName";
+            } else if (year == currentTime.year - 1) {
+              name = "Last year's trip";
+            }
+            final photoSelection = await _bestSelection(trip.files);
+            searchResults.add(
+              GenericSearchResult(
+                ResultType.event,
+                name,
+                photoSelection,
+                hierarchicalSearchFilter: TopLevelGenericFilter(
+                  filterName: name,
+                  occurrence: kMostRelevantFilter,
+                  filterResultType: ResultType.event,
+                  matchedUploadedIDs: filesToUploadedFileIDs(photoSelection),
+                  filterIcon: Icons.event_outlined,
+                ),
+              ),
+            );
+            break checkUpcomingMonths;
+          }
+        }
+      }
+    }
+    return searchResults;
+  }
+
   Future<List<GenericSearchResult>> onThisDayOrWeekResults(
     BuildContext context,
     int? limit,
   ) async {
     final List<GenericSearchResult> searchResults = [];
+    final trips = await getTripsResults(context, limit);
+    if (trips.isNotEmpty) {
+      searchResults.addAll(trips);
+    }
     final allFiles = await getAllFilesForSearch();
     if (allFiles.isEmpty) return [];
 
@@ -1453,6 +1857,26 @@ class SearchService {
     final int dayOfYear = int.parse(DateFormat('D').format(date));
     // Integer division by 7 and add 1 to start from week 1
     return ((dayOfYear - 1) ~/ 7) + 1;
+  }
+
+  Future<String?> _tryFindLocationName(
+    List<EnteFile> files, {
+    bool base = false,
+  }) async {
+    final results = await locationService.getFilesInCity(files, '');
+    final List<City> sortedByResultCount = results.keys.toList()
+      ..sort((a, b) => results[b]!.length.compareTo(results[a]!.length));
+    if (sortedByResultCount.isEmpty) return null;
+    final biggestPlace = sortedByResultCount.first;
+    if (results[biggestPlace]!.length > files.length / 2) {
+      return biggestPlace.city;
+    }
+    if (results.length > 2 &&
+        results.keys.map((city) => city.country).toSet().length == 1 &&
+        !base) {
+      return biggestPlace.country;
+    }
+    return null;
   }
 
   /// Returns the best selection of files from the given list.

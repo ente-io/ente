@@ -38,7 +38,7 @@ export function VerifyTwoFactor(props: Props) {
         } catch (e) {
             resetForm();
             const message = e instanceof Error ? e.message : "";
-            setFieldError("otp", `${t("generic_error_retry")} ${message}`);
+            setFieldError("otp", `${t("generic_error_retry")} (${message})`);
             // Workaround (toggling shouldAutoFocus) to reset the focus back to
             // the first input field in case of errors.
             // https://github.com/devfolioco/react-otp-input/issues/420

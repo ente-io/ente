@@ -8,7 +8,7 @@ import 'package:logging/logging.dart';
 import "package:photos/core/constants.dart";
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/subscription.dart';
+import 'package:photos/models/api/billing/subscription.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
@@ -20,8 +20,7 @@ class PaymentWebPage extends StatefulWidget {
   final String? planId;
   final String? actionType;
 
-  const PaymentWebPage({Key? key, this.planId, this.actionType})
-      : super(key: key);
+  const PaymentWebPage({super.key, this.planId, this.actionType});
 
   @override
   State<StatefulWidget> createState() => _PaymentWebPageState();

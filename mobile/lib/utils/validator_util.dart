@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:logging/logging.dart';
-import 'package:photos/models/key_attributes.dart';
+import 'package:photos/models/api/user/key_attributes.dart';
 
 Logger _logger = Logger("Validator");
 
@@ -33,7 +33,7 @@ void validatePreVerificationStateCheck(
   }
   // check password encoding issues
   try {
-    final Uint8List passwordL = utf8.encode(password!) as Uint8List;
+    final Uint8List passwordL = utf8.encode(password!);
     try {
       utf8.decode(passwordL);
     } catch (e) {

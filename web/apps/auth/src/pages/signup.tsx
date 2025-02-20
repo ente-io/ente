@@ -1,3 +1,1 @@
-import Page from "@/accounts/pages/signup";
-
-export default Page;
+export { default } from "@/accounts/pages/signup";

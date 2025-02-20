@@ -6,7 +6,6 @@ import 'dart:ui' as ui show Image;
 
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart' show decodeImageFromList;
 import "package:flutter_image_compress/flutter_image_compress.dart";
 import 'package:image_editor/image_editor.dart';
 import 'package:logging/logging.dart';

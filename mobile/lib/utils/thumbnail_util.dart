@@ -4,6 +4,7 @@ import 'dart:io';
 import "dart:typed_data";
 
 import 'package:dio/dio.dart';
+import 'package:ente_crypto/ente_crypto.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
@@ -13,7 +14,6 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/services/collections_service.dart";
-import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/file_key.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -192,7 +192,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
           .data;
     }
   } catch (e) {
-    if (e is DioError && CancelToken.isCancel(e)) {
+    if (e is DioException && CancelToken.isCancel(e)) {
       return;
     }
     rethrow;

@@ -88,6 +88,8 @@
   "useRecoveryKey": "Wiederherstellungsschlüssel verwenden",
   "incorrectPasswordTitle": "Falsches Passwort",
   "welcomeBack": "Willkommen zurück!",
+  "emailAlreadyRegistered": "E-Mail ist bereits registriert.",
+  "emailNotRegistered": "E-Mail-Adresse nicht registriert.",
   "madeWithLoveAtPrefix": "gemacht mit ❤️ bei ",
   "supportDevs": "Bei <bold-green>ente</bold-green> registrieren, um das Projekt zu unterstützen",
   "supportDiscount": "Benutzen Sie den Rabattcode \"AUTH\" für 10 % Rabatt im ersten Jahr",
@@ -255,6 +257,8 @@
   "areYouSureYouWantToLogout": "Sind sie sicher, dass sie sich ausloggen möchten?",
   "yesLogout": "Ja ausloggen",
   "exit": "Schließen",
+  "theme": "Theme",
+  "systemTheme": "System",
   "verifyingRecoveryKey": "Verifiziere Wiederherstellungsschlüssel...",
   "recoveryKeyVerified": "Wiederherstellungsschlüssel verifiziert",
   "recoveryKeySuccessBody": "Großartig! Ihr Wiederherstellungsschlüssel ist gültig. Vielen Dank für die Verifizierung.\n\nBitte denken sie daran, dass sie ihren Wiederherstellungsschlüssel sicher aufbewahren.",
@@ -325,6 +329,7 @@
       }
     }
   },
+  "manualSort": "Benutzerdefiniert",
   "activeSessions": "Aktive Sitzungen",
   "somethingWentWrongPleaseTryAgain": "Ein Fehler ist aufgetreten, bitte versuche es erneut",
   "thisWillLogYouOutOfThisDevice": "Dadurch wirst du von diesem Gerät abgemeldet!",
@@ -478,5 +483,9 @@
   "setNewPin": "Neue PIN festlegen",
   "importFailureDescNew": "Die ausgewählte Datei konnte nicht verarbeitet werden.",
   "appLockNotEnabled": "App-Sperre nicht aktiviert",
-  "appLockNotEnabledDescription": "Bitte aktivieren Sie die App-Sperre über Security > App-Sperre"
+  "appLockNotEnabledDescription": "Bitte aktivieren Sie die App-Sperre über Security > App-Sperre",
+  "duplicateCodes": "Doppelte Codes",
+  "noDuplicates": "✨ Keine Duplikate",
+  "deselectAll": "Alle abwählen",
+  "selectAll": "Alles auswählen"
 }

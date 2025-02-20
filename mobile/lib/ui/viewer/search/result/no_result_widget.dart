@@ -7,7 +7,7 @@ import "package:photos/states/all_sections_examples_state.dart";
 import "package:photos/theme/ente_theme.dart";
 
 class NoResultWidget extends StatefulWidget {
-  const NoResultWidget({Key? key}) : super(key: key);
+  const NoResultWidget({super.key});
 
   @override
   State<NoResultWidget> createState() => _NoResultWidgetState();

@@ -114,3 +114,44 @@ body {
 .pswp__caption--empty {
     display: none;
 }
+
+.pswp-ente {
+    /* The default z-index for PhotoSwipe is 10k, way beyond everything else.
+      Give it a more moderate value so that MUI elements can be used with it. */
+    z-index: calc(var(--mui-zIndex-drawer) - 1);
+}
+
+/*
+  Make the controllable video elements we render as custom PhotoSwipe content
+  take up the entire container.
+ */
+.pswp-ente video[controls] {
+    width: 100%;
+    height: 100%;
+}
+
+.pswp-ente .pswp__preloader--active .pswp__icn {
+    opacity: 0.4;
+}
+
+/*
+ Error indicator on the file viewer.
+
+ It is styled similar to the loading indicator provided by PhotoSwipe since it
+ is meant to occupy the same space. Only one of these will be shown at the same
+ time, so it can also set the auto right margin.
+ */
+.pswp-ente .pswp__error {
+    position: relative;
+    overflow: hidden;
+    width: 50px;
+    height: 60px;
+    /* Unlike the loading indicator, "display" is used to toggle visibility, and
+      the opacity is fixed to be similar to that of the counter. */
+    opacity: 0.85;
+    display: none;
+}
+
+.pswp-ente .pswp__error--active {
+    display: initial;
+}

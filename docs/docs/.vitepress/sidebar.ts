@@ -138,6 +138,10 @@ export const sidebar = [
                         text: "Machine Learning",
                         link: "/photos/faq/machine-learning",
                     },
+                    {
+                        text: "Video Streaming",
+                        link: "/photos/faq/video-streaming",
+                    },
                 ],
             },
             {

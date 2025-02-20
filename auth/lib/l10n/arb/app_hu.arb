@@ -504,5 +504,13 @@
   "deselectAll": "Összes kijelölés megszüntetése",
   "selectAll": "Összes kijelölése",
   "deleteDuplicates": "Ismétlődések törlése",
-  "plainHTML": "Sima HTML kód"
+  "plainHTML": "Sima HTML kód",
+  "tellUsWhatYouThink": "Mondja el mit gondol",
+  "dropReview": "Írjon véleményt az App/Play Store-ban",
+  "supportEnte": "Támogassa <bold-green>ente <bold-green>",
+  "giveUsAStarOnGithub": "Adj nekünk egy csillagot a Githubon",
+  "free5GB": "5GB ingyen <bold-green>ente <bold-green> Photos",
+  "loginWithAuthAccount": "Jelentkezzen be Auth fiókjával",
+  "freeStorageOffer": "10% kedvezmény on <bold-green>ente<bold-green> photos",
+  "freeStorageOfferDescription": "Használja az \"AUTH\" kódot, hogy 10% kedvezményt kapjon az első évben"
 }

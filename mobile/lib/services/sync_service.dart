@@ -133,11 +133,11 @@ class SyncService {
         ),
       );
     } catch (e) {
-      if (e is DioError) {
-        if (e.type == DioErrorType.connectTimeout ||
-            e.type == DioErrorType.sendTimeout ||
-            e.type == DioErrorType.receiveTimeout ||
-            e.type == DioErrorType.other) {
+      if (e is DioException) {
+        if (e.type == DioExceptionType.connectionTimeout ||
+            e.type == DioExceptionType.sendTimeout ||
+            e.type == DioExceptionType.receiveTimeout ||
+            e.type == DioExceptionType.unknown) {
           Bus.instance.fire(
             SyncStatusUpdate(
               SyncStatus.paused,

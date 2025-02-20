@@ -4,10 +4,10 @@ import { CenteredFill, CenteredRow } from "@/base/components/containers";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
 import { albumsAppOrigin, customAPIHost } from "@/base/origins";
 import { DevSettings } from "@/new/photos/components/DevSettings";
-import { useAppContext } from "@/new/photos/types/context";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { saveKeyInSessionStore } from "@ente/shared/crypto/helpers";
 import localForage from "@ente/shared/storage/localForage";
@@ -21,7 +21,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 
 const Page: React.FC = () => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(true);

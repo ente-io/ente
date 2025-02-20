@@ -65,7 +65,7 @@ class DetailPageConfiguration {
 class DetailPage extends StatefulWidget {
   final DetailPageConfiguration config;
 
-  const DetailPage(this.config, {key}) : super(key: key);
+  const DetailPage(this.config, {super.key});
 
   @override
   State<DetailPage> createState() => _DetailPageState();
@@ -156,7 +156,6 @@ class _DetailPageState extends State<DetailPage> {
               return FileAppBar(
                 _files![selectedIndex],
                 _onFileRemoved,
-                100,
                 widget.config.mode == DetailPageMode.full,
                 enableFullScreenNotifier: _enableFullScreenNotifier,
               );

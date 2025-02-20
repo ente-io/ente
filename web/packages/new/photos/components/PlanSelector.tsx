@@ -6,6 +6,7 @@ import {
     genericRetriableErrorDialogAttributes,
 } from "@/base/components/utils/dialog";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
 import { useUserDetailsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { useWrapAsyncOperation } from "@/new/photos/components/utils/use-wrap-async";
@@ -32,7 +33,6 @@ import {
     redirectToPaymentsApp,
     userDetailsAddOnBonuses,
 } from "@/new/photos/services/user-details";
-import { useAppContext } from "@/new/photos/types/context";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { openURL } from "@/new/photos/utils/web";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -57,6 +57,7 @@ import Typography from "@mui/material/Typography";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
+import { usePhotosAppContext } from "../types/context";
 
 type PlanSelectorProps = ModalVisibilityProps & {
     setLoading: (loading: boolean) => void;
@@ -111,7 +112,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
     onClose,
     setLoading,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const userDetails = useUserDetailsSnapshot();
 
@@ -681,7 +682,7 @@ function ManageSubscription({
     subscription,
     hasAddOnBonus,
 }: ManageSubscriptionProps) {
-    const { onGenericError } = useAppContext();
+    const { onGenericError } = usePhotosAppContext();
 
     const openFamilyPortal = async () => {
         setLoading(true);
@@ -717,7 +718,7 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
     subscription,
     hasAddOnBonus,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const confirmReactivation = () =>
         showMiniDialog({

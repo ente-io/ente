@@ -34,14 +34,6 @@ that can be then deployed to any web server.
 There is one `yarn build:foo` for each app, e.g. `yarn build:auth`. The output
 will be placed in `apps/<foo>/out`, e.g. `apps/auth/out`.
 
-### yarn preview:\*
-
-Build a production export and start a local web server to serve it. This uses
-Python's built in web server, and is okay for quick testing but should not be
-used in production.
-
-The ports are the same as that for `yarn dev:*`
-
 ### lint, lint-fix
 
 Use `yarn lint` to check that your code formatting is as expected, and that

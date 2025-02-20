@@ -43,8 +43,8 @@ class LazyGroupGallery extends StatefulWidget {
     this.logTag = "",
     this.photoGridSize = photoGridSizeDefault,
     this.limitSelectionToOne = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<LazyGroupGallery> createState() => _LazyGroupGalleryState();

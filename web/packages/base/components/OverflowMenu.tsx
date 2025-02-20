@@ -59,7 +59,7 @@ export const OverflowMenu: React.FC<
         [],
     );
     return (
-        <OverflowMenuContext.Provider value={context}>
+        <OverflowMenuContext value={context}>
             <IconButton
                 onClick={(event) => setAnchorEl(event.currentTarget)}
                 aria-controls={anchorEl ? ariaID : undefined}
@@ -85,7 +85,7 @@ export const OverflowMenu: React.FC<
             >
                 {children}
             </Menu>
-        </OverflowMenuContext.Provider>
+        </OverflowMenuContext>
     );
 };
 

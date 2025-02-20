@@ -541,6 +541,8 @@ const components: Components = {
 
     MuiDialog: {
         defaultProps: {
+            // [Note: Overzealous Chrome? Complicated ARIA?]
+            //
             // This is required to prevent console errors about aria-hiding a
             // focused button when the dialog is closed.
             //

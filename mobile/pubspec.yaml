@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.9.98+999
+version: 0.9.99+1002
 publish_to: none
 
 environment:
@@ -31,7 +31,7 @@ dependencies:
   chewie:
     git:
       url: https://github.com/ente-io/chewie.git
-      ref: forked_video_player_plus
+      ref: mybranched
   collection: # dart
   computer:
     git: "https://github.com/ente-io/computer.git"
@@ -42,7 +42,7 @@ dependencies:
   dart_ui_isolate: ^1.1.1
   defer_pointer: ^0.0.2
   device_info_plus: ^9.0.3
-  dio: ^4.0.6
+  dio: ^5.8.0+1
   dots_indicator: ^2.0.0
   dotted_border: ^2.1.0
   dropdown_button2: ^2.0.0
@@ -53,6 +53,8 @@ dependencies:
     path: plugins/ente_cast
   ente_cast_normal:
     path: plugins/ente_cast_normal
+  ente_crypto:
+    path: plugins/ente_crypto
   ente_feature_flag:
     path: plugins/ente_feature_flag
   equatable: ^2.0.5
@@ -111,7 +113,7 @@ dependencies:
   local_auth: ^2.1.5
   local_auth_android:
   local_auth_ios:
-  logging: ^1.0.1
+  logging: ^1.3.0
   lottie: ^1.2.2
   maps_launcher: ^2.2.1
   media_extension:
@@ -130,6 +132,7 @@ dependencies:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2
   nanoid: ^1.0.0
+  native_dio_adapter: ^1.4.0
   native_video_player:
     git:
       url: https://github.com/ashilkn/native_video_player.git
@@ -141,7 +144,7 @@ dependencies:
       url: https://github.com/ente-io/onnxruntime.git
       ref: ios_only
   open_mail_app: ^0.4.5
-  package_info_plus: ^4.1.0
+  package_info_plus: ^8.2.1
   page_transition: ^2.0.2
   panorama:
     git:

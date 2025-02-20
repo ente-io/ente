@@ -44,9 +44,7 @@ class DeviceFolderVerticalGridView extends StatelessWidget {
 }
 
 class _DeviceFolderVerticalGridViewBody extends StatefulWidget {
-  const _DeviceFolderVerticalGridViewBody({
-    Key? key,
-  }) : super(key: key);
+  const _DeviceFolderVerticalGridViewBody();
 
   @override
   State<_DeviceFolderVerticalGridViewBody> createState() =>

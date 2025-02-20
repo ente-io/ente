@@ -38,8 +38,8 @@
   </branding>
 
   <releases>
-    <release version="1.7.8" date="2025-01-13">
-      <url type="details">https://github.com/ente-io/photos-desktop/releases/tag/v1.7.8</url>
+    <release version="1.7" date="2025-01-13">
+      <url type="details">https://github.com/ente-io/photos-desktop/releases</url>
     </release>
   </releases>
 </component>

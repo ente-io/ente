@@ -4,6 +4,7 @@ import "dart:math";
 
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dio/dio.dart';
+import 'package:ente_crypto/ente_crypto.dart';
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -19,13 +20,13 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/account/two_factor.dart";
 import "package:photos/models/api/collection/user.dart";
+import 'package:photos/models/api/user/delete_account.dart';
+import 'package:photos/models/api/user/key_attributes.dart';
+import 'package:photos/models/api/user/key_gen_result.dart';
+import 'package:photos/models/api/user/sessions.dart';
+import 'package:photos/models/api/user/set_keys_request.dart';
+import 'package:photos/models/api/user/set_recovery_key_request.dart';
 import "package:photos/models/api/user/srp.dart";
-import 'package:photos/models/delete_account.dart';
-import 'package:photos/models/key_attributes.dart';
-import 'package:photos/models/key_gen_result.dart';
-import 'package:photos/models/sessions.dart';
-import 'package:photos/models/set_keys_request.dart';
-import 'package:photos/models/set_recovery_key_request.dart';
 import 'package:photos/models/user_details.dart';
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
@@ -40,7 +41,6 @@ import 'package:photos/ui/account/two_factor_recovery_page.dart';
 import 'package:photos/ui/account/two_factor_setup_page.dart';
 import "package:photos/ui/common/progress_dialog.dart";
 import "package:photos/ui/tabs/home_widget.dart";
-import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -124,7 +124,7 @@ class UserService {
       } else {
         throw Exception("send-ott action failed, non-200");
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       await dialog.hide();
       _logger.info(e);
       final String? enteErrCode = e.response?.data["code"];
@@ -185,7 +185,7 @@ class UserService {
       );
       final publicKey = response.data["publicKey"];
       return publicKey;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null && e.response?.statusCode == 404) {
         return null;
       }
@@ -221,7 +221,7 @@ class UserService {
         }
       }
       return userDetails;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       _logger.info(e);
       rethrow;
     }
@@ -231,7 +231,7 @@ class UserService {
     try {
       final response = await _enteDio.get("/users/sessions");
       return Sessions.fromMap(response.data);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       _logger.info(e);
       rethrow;
     }
@@ -245,7 +245,7 @@ class UserService {
           "token": token,
         },
       );
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       _logger.info(e);
       rethrow;
     }
@@ -254,7 +254,7 @@ class UserService {
   Future<void> leaveFamilyPlan() async {
     try {
       await _enteDio.delete("/family/leave");
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       _logger.warning('failed to leave family plan', e);
       rethrow;
     }
@@ -271,7 +271,7 @@ class UserService {
       }
     } catch (e) {
       // check if token is already invalid
-      if (e is DioError && e.response?.statusCode == 401) {
+      if (e is DioException && e.response?.statusCode == 401) {
         await Configuration.instance.logout();
         Navigator.of(context).popUntil((route) => route.isFirst);
         return;
@@ -342,7 +342,7 @@ class UserService {
         },
       );
       return response.data;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null) {
         if (e.response!.statusCode == 404 || e.response!.statusCode == 410) {
           throw PassKeySessionExpiredError();
@@ -460,7 +460,7 @@ class UserService {
         // should never reach here
         throw Exception("unexpected response during email verification");
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       _logger.info(e);
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 410) {
@@ -532,7 +532,7 @@ class UserService {
         S.of(context).oops,
         S.of(context).verificationFailedPleaseTryAgain,
       );
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 403) {
         // ignore: unawaited_futures
@@ -592,7 +592,7 @@ class UserService {
       } else {
         throw Exception("get-srp-attributes action failed");
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null && e.response!.statusCode == 404) {
         throw SrpSetupNotCompleteError();
       }
@@ -695,7 +695,7 @@ class UserService {
     late Uint8List keyEncryptionKey;
     _logger.finest('Start deriving key');
     keyEncryptionKey = await CryptoUtil.deriveKey(
-      utf8.encode(userPassword) as Uint8List,
+      utf8.encode(userPassword),
       CryptoUtil.base642bin(srpAttributes.kekSalt),
       srpAttributes.memLimit,
       srpAttributes.opsLimit,
@@ -865,7 +865,7 @@ class UserService {
           (route) => route.isFirst,
         );
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       await dialog.hide();
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
@@ -932,7 +932,7 @@ class UserService {
           (route) => route.isFirst,
         );
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       await dialog.hide();
       _logger.severe('error while recovery 2fa', e);
       if (e.response != null && e.response!.statusCode == 404) {
@@ -1031,7 +1031,7 @@ class UserService {
           (route) => route.isFirst,
         );
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       await dialog.hide();
       _logger.severe("error during recovery", e);
       if (e.response != null && e.response!.statusCode == 404) {
@@ -1126,7 +1126,7 @@ class UserService {
     } catch (e, s) {
       await dialog.hide();
       _logger.severe(e, s);
-      if (e is DioError) {
+      if (e is DioException) {
         if (e.response != null && e.response!.statusCode == 401) {
           // ignore: unawaited_futures
           showErrorDialog(
@@ -1311,34 +1311,30 @@ class UserService {
 
     for (final c in CollectionsService.instance.getActiveCollections()) {
       // Add collaborators and viewers of collections owned by user
-      if (c.owner?.id == ownerID) {
-        for (final User? u in c.sharees ?? []) {
-          if (u != null && u.id != null && u.email.isNotEmpty) {
+      if (c.owner.id == ownerID) {
+        for (final User u in c.sharees) {
+          if (u.id != null && u.email.isNotEmpty) {
             if (!existingEmails.contains(u.email)) {
               relevantUsers.add(u);
               existingEmails.add(u.email);
             }
           }
         }
-      } else if (c.owner?.id != null && c.owner!.email.isNotEmpty) {
+      } else if (c.owner.id != null && c.owner.email.isNotEmpty) {
         // Add owners of collections shared with user
-        if (!existingEmails.contains(c.owner!.email)) {
-          relevantUsers.add(c.owner!);
-          existingEmails.add(c.owner!.email);
+        if (!existingEmails.contains(c.owner.email)) {
+          relevantUsers.add(c.owner);
+          existingEmails.add(c.owner.email);
         }
         // Add collaborators of collections shared with user where user is a
         // viewer or a collaborator
-        for (final User? u in c.sharees ?? []) {
-          if (u != null &&
-              u.id != null &&
+        for (final User u in c.sharees) {
+          if (u.id != null &&
               u.email.isNotEmpty &&
               u.email == ownerEmail &&
               (u.isCollaborator || u.isViewer)) {
-            for (final User? u in c.sharees ?? []) {
-              if (u != null &&
-                  u.id != null &&
-                  u.email.isNotEmpty &&
-                  u.isCollaborator) {
+            for (final User u in c.sharees) {
+              if (u.id != null && u.email.isNotEmpty && u.isCollaborator) {
                 if (!existingEmails.contains(u.email)) {
                   relevantUsers.add(u);
                   existingEmails.add(u.email);
@@ -1392,32 +1388,28 @@ class UserService {
 
     for (final c in CollectionsService.instance.getActiveCollections()) {
       // Add collaborators and viewers of collections owned by user
-      if (c.owner?.id == ownerID) {
-        for (final User? u in c.sharees ?? []) {
-          if (u != null && u.id != null && u.email.isNotEmpty) {
+      if (c.owner.id == ownerID) {
+        for (final User u in c.sharees) {
+          if (u.id != null && u.email.isNotEmpty) {
             if (!emailIDs.contains(u.email)) {
               emailIDs.add(u.email);
             }
           }
         }
-      } else if (c.owner?.id != null && c.owner!.email.isNotEmpty) {
+      } else if (c.owner.id != null && c.owner.email.isNotEmpty) {
         // Add owners of collections shared with user
-        if (!emailIDs.contains(c.owner!.email)) {
-          emailIDs.add(c.owner!.email);
+        if (!emailIDs.contains(c.owner.email)) {
+          emailIDs.add(c.owner.email);
         }
         // Add collaborators of collections shared with user where user is a
         // viewer or a collaborator
-        for (final User? u in c.sharees ?? []) {
-          if (u != null &&
-              u.id != null &&
+        for (final User u in c.sharees) {
+          if (u.id != null &&
               u.email.isNotEmpty &&
               u.email == ownerEmail &&
               (u.isCollaborator || u.isViewer)) {
-            for (final User? u in c.sharees ?? []) {
-              if (u != null &&
-                  u.id != null &&
-                  u.email.isNotEmpty &&
-                  u.isCollaborator) {
+            for (final User u in c.sharees) {
+              if (u.id != null && u.email.isNotEmpty && u.isCollaborator) {
                 if (!emailIDs.contains(u.email)) {
                   emailIDs.add(u.email);
                 }
