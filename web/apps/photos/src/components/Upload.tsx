@@ -103,8 +103,11 @@ interface UploadProps {
     onUploadFile: (file: EnteFile) => void;
     /**
      * Called when the plan selection modal should be shown.
+     *
+     * It is optional because {@link Upload} is also used by the public albums
+     * app, where the scenario requiring this will not arise.
      */
-    onShowPlanSelector: () => void;
+    onShowPlanSelector?: () => void;
     setCollections?: (cs: Collection[]) => void;
     isFirstUpload?: boolean;
     uploadTypeSelectorView: boolean;
