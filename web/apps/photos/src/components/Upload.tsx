@@ -228,35 +228,61 @@ export const Upload: React.FC<UploadProps> = ({
     const uploaderNameRef = useRef<string>(null);
     const isDragAndDrop = useRef(false);
 
+    /**
+     * `true` if we've activated one hidden {@link Inputs} that allow the user
+     * to select items, and haven't heard back from the browser as to the
+     * selection (or cancellation).
+     *
+     * [Note: Showing an activity indicator during upload item selection]
+     *
+     * When selecting a large number of items (100K+), the browser can take
+     * significant time (10s+) before it hands back control to us. The
+     * {@link isInputPending} state tracks this intermediate state, and we use
+     * it to show an activity indicator to let that the user know that their
+     * selection is still being processed.
+     */
+    const [isInputPending, setIsInputPending] = useState(false);
+
+    /**
+     * Files that were selected by the user in the last activation of one of the
+     * hidden {@link Inputs}.
+     */
+    const [selectedInputFiles, setSelectedInputFiles] = useState<File[]>([]);
+
+    const handleInputSelect = useCallback((files: File[]) => {
+        setIsInputPending(false);
+        setSelectedInputFiles(files);
+    }, []);
+
     const handleInputCancel = useCallback(() => {
-        console.log("cancel");
+        setIsInputPending(false);
     }, []);
 
     const {
         getInputProps: getFileSelectorInputProps,
         openSelector: openFileSelector,
-        selectedFiles: fileSelectorFiles,
     } = useFileInput({
         directory: false,
+        onSelect: handleInputSelect,
         onCancel: handleInputCancel,
     });
 
     const {
         getInputProps: getFolderSelectorInputProps,
         openSelector: openFolderSelector,
-        selectedFiles: folderSelectorFiles,
     } = useFileInput({
         directory: true,
+        onSelect: handleInputSelect,
         onCancel: handleInputCancel,
     });
 
     const {
         getInputProps: getZipFileSelectorInputProps,
         openSelector: openZipFileSelector,
-        selectedFiles: fileSelectorZipFiles,
     } = useFileInput({
         directory: false,
         accept: ".zip",
+        onSelect: handleInputSelect,
         onCancel: handleInputCancel,
     });
 
@@ -346,15 +372,9 @@ export const Upload: React.FC<UploadProps> = ({
 
         switch (selectedUploadType.current) {
             case "files":
-                files = fileSelectorFiles;
-                break;
-
             case "folders":
-                files = folderSelectorFiles;
-                break;
-
             case "zips":
-                files = fileSelectorZipFiles;
+                files = selectedInputFiles;
                 break;
 
             default:
@@ -373,12 +393,7 @@ export const Upload: React.FC<UploadProps> = ({
         } else {
             setWebFiles(files);
         }
-    }, [
-        dragAndDropFiles,
-        fileSelectorFiles,
-        folderSelectorFiles,
-        fileSelectorZipFiles,
-    ]);
+    }, [selectedInputFiles, dragAndDropFiles]);
 
     // Trigger an upload when any of the dependencies change.
     useEffect(() => {
@@ -739,6 +754,7 @@ export const Upload: React.FC<UploadProps> = ({
 
     const handleUploadTypeSelect = (type: UploadType) => {
         selectedUploadType.current = type;
+        setIsInputPending(true);
         switch (type) {
             case "files":
                 openFileSelector();

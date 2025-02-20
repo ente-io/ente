@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 interface UseFileInputParams {
     /**
@@ -14,6 +14,17 @@ interface UseFileInputParams {
      * https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept).
      */
     accept?: string;
+    /**
+     * A callback that is invoked when the user selects files.
+     *
+     * It will be passed the list of {@link File}s that the user selected.
+     *
+     * This will be a list even if the user selected directories - in that case,
+     * it will be the recursive list of files within this directory.
+     *
+     * If the user selected no items, then {@link onCancel} will be invoked.
+     */
+    onSelect: (selectedFiles: File[]) => void;
     /**
      * A callback that is invoked when the user cancels on the file / directory
      * dialog.
@@ -33,13 +44,6 @@ interface UseFileInputResult {
      * A function that can be called to open the select file / directory dialog.
      */
     openSelector: () => void;
-    /**
-     * The list of {@link File}s that the user selected.
-     *
-     * This will be a list even if the user selected directories - in that case,
-     * it will be the recursive list of files within this directory.
-     */
-    selectedFiles: File[];
 }
 
 /**
@@ -55,9 +59,9 @@ interface UseFileInputResult {
 export const useFileInput = ({
     directory,
     accept,
+    onSelect,
     onCancel,
 }: UseFileInputParams): UseFileInputResult => {
-    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const inputRef = useRef<HTMLInputElement | undefined>(undefined);
 
     useEffect(() => {
@@ -80,7 +84,11 @@ export const useFileInput = ({
         event,
     ) => {
         const files = event.target.files;
-        if (files) setSelectedFiles([...files]);
+        if (files?.length) {
+            onSelect([...files]);
+        } else {
+            onCancel();
+        }
     };
 
     // [Note: webkitRelativePath]
@@ -111,5 +119,5 @@ export const useFileInput = ({
         [directoryOpts, accept, handleChange],
     );
 
-    return { getInputProps, openSelector, selectedFiles };
+    return { getInputProps, openSelector };
 };
