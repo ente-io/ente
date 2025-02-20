@@ -1,4 +1,5 @@
 import { HTTPError } from "@/base/http";
+import { logUnhandledErrorsAndRejectionsInWorker } from "@/base/log-web";
 import type { Location } from "@/base/types";
 import type { Collection } from "@/media/collection";
 import type { EnteFile } from "@/media/file";
@@ -112,6 +113,8 @@ export class SearchWorker {
 }
 
 expose(SearchWorker);
+
+logUnhandledErrorsAndRejectionsInWorker();
 
 /**
  * @param s The normalized form of {@link searchString}.

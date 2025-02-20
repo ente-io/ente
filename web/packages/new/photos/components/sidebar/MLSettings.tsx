@@ -304,7 +304,7 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
                     </Typography>
                     <Typography>{status}</Typography>
                 </Stack>
-                <Divider sx={{ marginInline: 2 }} />
+                <Divider sx={{ mx: 1.5 }} />
                 <Stack
                     direction="row"
                     sx={{

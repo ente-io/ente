@@ -271,7 +271,9 @@ class DownloadManager {
     }
 
     private downloadThumbnail = async (file: EnteFile) => {
-        const encryptedData = await this._downloadThumbnail(file);
+        const encryptedData = await wrapErrors(() =>
+            this._downloadThumbnail(file),
+        );
         const decryptionHeader = file.thumbnail.decryptionHeader;
         return decryptThumbnail({ encryptedData, decryptionHeader }, file.key);
     };
@@ -385,13 +387,15 @@ class DownloadManager {
     ): Promise<ReadableStream<Uint8Array> | null> {
         log.info(`download attempted for file id ${file.id}`);
 
-        const res = await this._downloadFile(file);
+        const res = await wrapErrors(() => this._downloadFile(file));
 
         if (
             file.metadata.fileType === FileType.image ||
             file.metadata.fileType === FileType.livePhoto
         ) {
-            const encryptedData = new Uint8Array(await res.arrayBuffer());
+            const encryptedData = new Uint8Array(
+                await wrapErrors(() => res.arrayBuffer()),
+            );
 
             const decrypted = await decryptStreamBytes(
                 {
@@ -431,7 +435,9 @@ class DownloadManager {
                 do {
                     // done is a boolean and value is an Uint8Array. When done
                     // is true value will be empty.
-                    const { done, value } = await reader.read();
+                    const { done, value } = await wrapErrors(() =>
+                        reader.read(),
+                    );
 
                     let data: Uint8Array;
                     if (done) {
@@ -521,6 +527,52 @@ class DownloadManager {
  * Singleton instance of {@link DownloadManager}.
  */
 export const downloadManager = new DownloadManager();
+
+/**
+ * A custom Error that is thrown if a download fails during network I/O.
+ *
+ * [Note: Identifying network related errors during download]
+ *
+ * We dealing with code that touches the network, we often don't specifically
+ * care about the specific error - there is a lot that can go wrong when a
+ * network is involved - but need to identify if an error was in the network
+ * related phase of an action, since these are usually transient and can be
+ * dealt with more softly than other errors.
+ *
+ * To that end, network related phases of download operations are wrapped in
+ * catches that intercept the error and wrap it in our custom
+ * {@link NetworkDownloadError} whose presence can be checked using the
+ * {@link isNetworkDownloadError} predicate.
+ */
+export class NetworkDownloadError extends Error {
+    error: unknown;
+
+    constructor(e: unknown) {
+        super(
+            `NetworkDownloadError: ${e instanceof Error ? e.message : String(e)}`,
+        );
+
+        // Cargo culted from
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#custom_error_types
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (Error.captureStackTrace)
+            Error.captureStackTrace(this, NetworkDownloadError);
+
+        this.error = e;
+    }
+}
+
+export const isNetworkDownloadError = (e: unknown) =>
+    e instanceof NetworkDownloadError;
+
+/**
+ * A helper function to convert all rejections of the given promise {@link op}
+ * into {@link NetworkDownloadError}s.
+ */
+const wrapErrors = <T>(op: () => Promise<T>) =>
+    op().catch((e: unknown) => {
+        throw new NetworkDownloadError(e);
+    });
 
 /**
  * Create and return a {@link RenderableSourceURLs} for the given {@link file},

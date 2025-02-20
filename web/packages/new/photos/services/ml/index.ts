@@ -336,7 +336,7 @@ export const mlSync = async () => {
     //
 
     // Fetch indexes, or index locally if needed.
-    await (await worker()).index();
+    await worker().then((w) => w.index());
 
     await updateClustersAndPeople();
 

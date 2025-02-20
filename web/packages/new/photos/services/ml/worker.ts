@@ -2,7 +2,9 @@ import { clientPackageName } from "@/base/app";
 import { assertionFailed } from "@/base/assert";
 import { isHTTP4xxError } from "@/base/http";
 import log from "@/base/log";
+import { logUnhandledErrorsAndRejectionsInWorker } from "@/base/log-web";
 import type { ElectronMLWorker } from "@/base/types/ipc";
+import { isNetworkDownloadError } from "@/gallery/services/download";
 import type { UploadItem } from "@/gallery/services/upload";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { wait } from "@/utils/promise";
@@ -347,6 +349,8 @@ export class MLWorker {
 
 expose(MLWorker);
 
+logUnhandledErrorsAndRejectionsInWorker();
+
 /**
  * Index the given batch of items.
  *
@@ -370,7 +374,7 @@ const indexNextBatch = async (
     }
 
     // Keep track if any of the items failed.
-    let allSuccess = true;
+    let failureCount = 0;
 
     // Index up to 4 items simultaneously.
     const tasks = new Array<Promise<void> | undefined>(4).fill(undefined);
@@ -386,8 +390,10 @@ const indexNextBatch = async (
                         .then(() => {
                             tasks[j] = undefined;
                         })
-                        .catch(() => {
-                            allSuccess = false;
+                        .catch((e: unknown) => {
+                            const f = fileLogID(item.file);
+                            log.error(`Failed to index ${f}`, e);
+                            failureCount++;
                             tasks[j] = undefined;
                         }))(items[i++]!, j);
             }
@@ -411,8 +417,14 @@ const indexNextBatch = async (
     // Clear any cached CLIP indexes, since now we might have new ones.
     clearCachedCLIPIndexes();
 
+    log.info(
+        failureCount > 0
+            ? `Indexed ${items.length - failureCount} files (${failureCount} failed)`
+            : `Indexed ${items.length} files`,
+    );
+
     // Return true if nothing failed.
-    return allSuccess;
+    return failureCount == 0;
 };
 
 /**
@@ -521,25 +533,25 @@ const index = async (
     // and return.
 
     if (existingFaceIndex && existingCLIPIndex) {
-        try {
-            await saveIndexes(
-                { fileID, ...existingFaceIndex },
-                { fileID, ...existingCLIPIndex },
-            );
-        } catch (e) {
-            log.error(`Failed to save indexes for ${f}`, e);
-            throw e;
-        }
+        await saveIndexes(
+            { fileID, ...existingFaceIndex },
+            { fileID, ...existingCLIPIndex },
+        );
         return;
     }
 
     // There is at least one ML data type that still needs to be indexed.
 
-    const renderableBlob = await fetchRenderableBlob(
-        file,
-        uploadItem,
-        electron,
-    );
+    let renderableBlob: Blob;
+    try {
+        renderableBlob = await fetchRenderableBlob(file, uploadItem, electron);
+    } catch (e) {
+        // Network errors are transient and shouldn't be marked.
+        //
+        // See: [Note: Transient and permanent indexing failures]
+        if (!isNetworkDownloadError(e)) await markIndexingFailed(fileID);
+        throw e;
+    }
 
     let image: ImageBitmapAndData;
     try {
@@ -551,8 +563,7 @@ const index = async (
         // reindexing attempt for failed files).
         //
         // See: [Note: Transient and permanent indexing failures]
-        log.error(`Failed to get image data for indexing ${f}`, e);
-        await markIndexingFailed(file.id);
+        await markIndexingFailed(fileID);
         throw e;
     }
 
@@ -569,8 +580,7 @@ const index = async (
             ]);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
-            log.error(`Failed to index ${f}`, e);
-            await markIndexingFailed(file.id);
+            await markIndexingFailed(fileID);
             throw e;
         }
 
@@ -611,33 +621,21 @@ const index = async (
             await putMLData(file, rawMLData);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
-            log.error(`Failed to put ML data for ${f}`, e);
-            if (isHTTP4xxError(e)) await markIndexingFailed(file.id);
+            if (isHTTP4xxError(e)) await markIndexingFailed(fileID);
             throw e;
         }
 
-        try {
-            await saveIndexes(
-                { fileID, ...faceIndex },
-                { fileID, ...clipIndex },
-            );
-        } catch (e) {
-            // Not sure if DB failures should be considered permanent or
-            // transient. There isn't a known case where writing to the local
-            // indexedDB should systematically fail. It could fail if there was
-            // no space on device, but that's eminently retriable.
-            log.error(`Failed to save indexes for ${f}`, e);
-            throw e;
-        }
+        await saveIndexes({ fileID, ...faceIndex }, { fileID, ...clipIndex });
 
         // This step, saving face crops, is conceptually not part of the
         // indexing pipeline; we just do it here since we have already have the
-        // ImageBitmap at hand. Ignore errors that happen during this since it
-        // does not impact the generated face index.
+        // ImageBitmap at hand.
         if (!existingFaceIndex) {
             try {
                 await saveFaceCrops(image.bitmap, faceIndex);
             } catch (e) {
+                // Ignore errors that happen during this since it does not
+                // impact the generated face index.
                 log.error(`Failed to save face crops for ${f}`, e);
             }
         }
