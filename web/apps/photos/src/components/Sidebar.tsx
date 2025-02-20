@@ -109,7 +109,7 @@ import {
     useColorScheme,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import DeleteAccountModal from "components/DeleteAccount";
+import { DeleteAccount } from "components/DeleteAccount";
 import { WatchFolder } from "components/WatchFolder";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -144,6 +144,13 @@ type SidebarProps = ModalVisibilityProps & {
      * Called when the export dialog should be shown.
      */
     onShowExport: () => void;
+    /**
+     * Called when the user should be authenticated again.
+     *
+     * This will be invoked before sensitive actions, and the action will only
+     * proceed if the promise returned by this function is fulfilled.
+     */
+    onAuthenticateUser: () => Promise<void>;
 };
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -152,6 +159,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     collectionSummaries,
     onShowPlanSelector,
     onShowExport,
+    onAuthenticateUser,
 }) => (
     <RootSidebarDrawer open={open} onClose={onClose}>
         <HeaderSection onCloseSidebar={onClose} />
@@ -161,7 +169,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onCloseSidebar={onClose}
                 collectionSummaries={collectionSummaries}
             />
-            <UtilitySection onCloseSidebar={onClose} {...{ onShowExport }} />
+            <UtilitySection
+                onCloseSidebar={onClose}
+                {...{ onShowExport, onAuthenticateUser }}
+            />
             <Divider sx={{ my: "2px" }} />
             <ExitSection />
             <InfoSection />
@@ -515,11 +526,13 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     );
 };
 
-type UtilitySectionProps = SectionProps & Pick<SidebarProps, "onShowExport">;
+type UtilitySectionProps = SectionProps &
+    Pick<SidebarProps, "onShowExport" | "onAuthenticateUser">;
 
 const UtilitySection: React.FC<UtilitySectionProps> = ({
     onCloseSidebar,
     onShowExport,
+    onAuthenticateUser,
 }) => {
     const { showMiniDialog } = useBaseContext();
     const { watchFolderView, setWatchFolderView } = usePhotosAppContext();
@@ -589,7 +602,11 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
                     onClose={handleCloseWatchFolder}
                 />
             )}
-            <Account {...accountVisibilityProps} onRootClose={onCloseSidebar} />
+            <Account
+                {...accountVisibilityProps}
+                onRootClose={onCloseSidebar}
+                {...{ onAuthenticateUser }}
+            />
             <Preferences
                 {...preferencesVisibilityProps}
                 onRootClose={onCloseSidebar}
@@ -647,10 +664,13 @@ const InfoSection: React.FC = () => {
     );
 };
 
-const Account: React.FC<NestedSidebarDrawerVisibilityProps> = ({
+type AccountProps = NestedSidebarDrawerVisibilityProps &
+    Pick<SidebarProps, "onAuthenticateUser">;
+const Account: React.FC<AccountProps> = ({
     open,
     onClose,
     onRootClose,
+    onAuthenticateUser,
 }) => {
     const { showMiniDialog } = useBaseContext();
 
@@ -735,7 +755,10 @@ const Account: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 {...twoFactorVisibilityProps}
                 onRootClose={onRootClose}
             />
-            <DeleteAccountModal {...deleteAccountVisibilityProps} />
+            <DeleteAccount
+                {...deleteAccountVisibilityProps}
+                {...{ onAuthenticateUser }}
+            />
         </NestedSidebarDrawer>
     );
 };

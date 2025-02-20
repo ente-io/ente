@@ -217,6 +217,12 @@ const Page: React.FC = () => {
         setAuthenticateUserModalView(true);
     };
 
+    const authenticateUser2 = () =>
+        new Promise<void>((resolve) => {
+            onAuthenticateCallback.current = resolve;
+            setAuthenticateUserModalView(true);
+        });
+
     const closeAuthenticateUserModal = () =>
         setAuthenticateUserModalView(false);
 
@@ -1001,6 +1007,7 @@ const Page: React.FC = () => {
                     {...{ collectionSummaries }}
                     onShowPlanSelector={showPlanSelector}
                     onShowExport={showExport}
+                    onAuthenticateUser={authenticateUser2}
                 />
                 <WhatsNew {...whatsNewVisibilityProps} />
                 {!isInSearchMode &&
