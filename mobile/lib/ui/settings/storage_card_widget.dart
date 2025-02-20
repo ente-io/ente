@@ -24,6 +24,8 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
   late Image _background;
   final _logger = Logger((_StorageCardWidgetState).toString());
   final ValueNotifier<bool> _isStorageCardPressed = ValueNotifier(false);
+  int? familyMemberStorageLimit;
+  bool showFamilyBreakup = false;
 
   @override
   void initState() {
@@ -119,9 +121,18 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
   Widget _userDetails(UserDetails userDetails) {
     const hundredMBinBytes = 107374182;
     const oneTBinBytes = 1073741824000;
+    showFamilyBreakup = userDetails.isPartOfFamily();
+    if (showFamilyBreakup) {
+      familyMemberStorageLimit = userDetails.familyMemberStorageLimit();
+      showFamilyBreakup = familyMemberStorageLimit == null;
+    }
 
-    final usedStorageInBytes = userDetails.getFamilyOrPersonalUsage();
-    final totalStorageInBytes = userDetails.getTotalStorage();
+    final usedStorageInBytes = familyMemberStorageLimit != null
+        ? userDetails.usage
+        : userDetails.getFamilyOrPersonalUsage();
+    final totalStorageInBytes = familyMemberStorageLimit != null
+        ? familyMemberStorageLimit!
+        : userDetails.getTotalStorage();
     final freeStorageInBytes = totalStorageInBytes - usedStorageInBytes;
 
     final isMobileScreenSmall =
@@ -212,20 +223,19 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                         Color.fromRGBO(255, 255, 255, 0.2), //hardcoded in figma
                     fractionOfStorage: 1,
                   ),
-                  userDetails.isPartOfFamily()
+                  showFamilyBreakup
                       ? StorageProgressWidget(
                           color: strokeBaseDark,
                           fractionOfStorage:
-                              ((userDetails.getFamilyOrPersonalUsage()) /
-                                  userDetails.getTotalStorage()),
+                              ((usedStorageInBytes) / totalStorageInBytes),
                         )
                       : const SizedBox.shrink(),
                   StorageProgressWidget(
-                    color: userDetails.isPartOfFamily()
+                    color: showFamilyBreakup
                         ? getEnteColorScheme(context).primary300
                         : strokeBaseDark,
                     fractionOfStorage:
-                        (userDetails.usage / userDetails.getTotalStorage()),
+                        (userDetails.usage / totalStorageInBytes),
                   ),
                 ],
               ),
@@ -234,7 +244,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  userDetails.isPartOfFamily()
+                  showFamilyBreakup
                       ? Row(
                           children: [
                             Container(
@@ -272,7 +282,9 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                         )
                       : const SizedBox.shrink(),
                   Text(
-                    S.of(context).availableStorageSpace(freeSpace, freeSpaceUnit),
+                    S
+                        .of(context)
+                        .availableStorageSpace(freeSpace, freeSpaceUnit),
                     style: getEnteTextTheme(context)
                         .mini
                         .copyWith(color: textFaintDark),

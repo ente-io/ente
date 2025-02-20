@@ -61,6 +61,15 @@ class UserDetails {
         storageBonus;
   }
 
+  int? familyMemberStorageLimit() {
+    if (isPartOfFamily()) {
+      final FamilyMember currentUserMember = familyData!.members!
+          .firstWhere((element) => element.email.trim() == email.trim());
+      return currentUserMember.storageLimit;
+    }
+    return null;
+  }
+
   // This is the total storage for which user has paid for.
   int getPlanPlusAddonStorage() {
     return (isPartOfFamily() ? familyData!.storage : subscription.storage) +
@@ -190,6 +199,10 @@ class FamilyData {
 
   int getTotalUsage() {
     return members!.map((e) => e.usage).toList().sum;
+  }
+
+  FamilyMember? getMemberByID(String id) {
+    return members!.firstWhereOrNull((element) => element.id == id);
   }
 
   static fromMap(Map<String, dynamic>? map) {
