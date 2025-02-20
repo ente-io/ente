@@ -23,12 +23,11 @@ import { useBaseContext } from "@/base/context";
 import { isHTTP401Error, PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
 import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
-import { useFileInput } from "@/gallery/components/utils/use-file-input";
 import { downloadManager } from "@/gallery/services/download";
 import { extractCollectionKeyFromShareURL } from "@/gallery/services/share";
 import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
 import type { Collection } from "@/media/collection";
-import { type EnteFile, mergeMetadata } from "@/media/file";
+import { mergeMetadata, type EnteFile } from "@/media/file";
 import { verifyPublicAlbumPassword } from "@/new/albums/services/publicCollection";
 import {
     GalleryItemsHeaderAdapter,
@@ -58,12 +57,11 @@ import {
 } from "components/FilesDownloadProgress";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import Uploader from "components/Upload/Uploader";
-import { UploadSelectorInputs } from "components/UploadSelectorInputs";
+import { Upload } from "components/Upload";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useDropzone } from "react-dropzone";
+import { type FileWithPath } from "react-dropzone";
 import {
     getLocalPublicCollection,
     getLocalPublicCollectionPassword,
@@ -110,35 +108,14 @@ export default function PublicCollectionGallery() {
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
+    const [dragAndDropFiles, setDragAndDropFiles] = useState<FileWithPath[]>(
+        [],
+    );
     const [selected, setSelected] = useState<SelectedState>({
         ownCount: 0,
         count: 0,
         collectionID: 0,
         context: undefined,
-    });
-
-    const {
-        getRootProps: getDragAndDropRootProps,
-        getInputProps: getDragAndDropInputProps,
-        acceptedFiles: dragAndDropFilesReadOnly,
-    } = useDropzone({
-        noClick: true,
-        noKeyboard: true,
-        disabled: shouldDisableDropzone,
-    });
-    const {
-        getInputProps: getFileSelectorInputProps,
-        openSelector: openFileSelector,
-        selectedFiles: fileSelectorFiles,
-    } = useFileInput({
-        directory: false,
-    });
-    const {
-        getInputProps: getFolderSelectorInputProps,
-        openSelector: openFolderSelector,
-        selectedFiles: folderSelectorFiles,
-    } = useFileInput({
-        directory: true,
     });
 
     const [
@@ -178,12 +155,6 @@ export default function PublicCollectionGallery() {
             });
             return updater;
         };
-
-    // Create a regular array from the readonly array returned by dropzone.
-    const dragAndDropFiles = useMemo(
-        () => [...dragAndDropFilesReadOnly],
-        [dragAndDropFilesReadOnly],
-    );
 
     const onAddPhotos = useMemo(() => {
         return publicCollection?.publicURLs?.[0]?.enableCollect
@@ -506,14 +477,10 @@ export default function PublicCollectionGallery() {
 
     return (
         <PublicCollectionGalleryContext.Provider value={context}>
-            <FullScreenDropZone {...{ getDragAndDropRootProps }}>
-                <UploadSelectorInputs
-                    {...{
-                        getDragAndDropInputProps,
-                        getFileSelectorInputProps,
-                        getFolderSelectorInputProps,
-                    }}
-                />
+            <FullScreenDropZone
+                disabled={shouldDisableDropzone}
+                onDrop={setDragAndDropFiles}
+            >
                 <NavbarBase
                     sx={{
                         mb: "16px",
@@ -556,7 +523,7 @@ export default function PublicCollectionGallery() {
                     selectable={downloadEnabled}
                 />
                 {blockingLoad && <TranslucentLoadingOverlay />}
-                <Uploader
+                <Upload
                     syncWithRemote={syncWithRemote}
                     uploadCollection={publicCollection}
                     setLoading={setBlockingLoad}
@@ -570,10 +537,6 @@ export default function PublicCollectionGallery() {
                     uploadTypeSelectorIntent="collect"
                     {...{
                         dragAndDropFiles,
-                        openFileSelector,
-                        fileSelectorFiles,
-                        openFolderSelector,
-                        folderSelectorFiles,
                     }}
                 />
                 <FilesDownloadProgress
