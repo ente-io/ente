@@ -50,6 +50,7 @@ export const FullScreenDropZone: React.FC<
         noKeyboard: true,
         disabled,
         onDrop(acceptedFiles) {
+            setIsDropPending(false);
             // Invoked the `onDrop` callback only if there is at least 1 file.
             if (acceptedFiles.length) {
                 // Create a regular array from the readonly array returned by
@@ -60,33 +61,46 @@ export const FullScreenDropZone: React.FC<
     });
 
     const [isDragActive, setIsDragActive] = useState(false);
+    const [isDropPending, setIsDropPending] = useState(false);
 
-    const onDragEnter = useCallback(() => setIsDragActive(true), []);
-    const onDragLeave = useCallback(() => setIsDragActive(false), []);
+    const handleDragEnter = useCallback(() => {
+        setIsDropPending(true);
+        setIsDragActive(true);
+    }, []);
+
+    const handleDragLeave = useCallback(() => {
+        setIsDropPending(false);
+        setIsDragActive(false);
+    }, []);
 
     useEffect(() => {
         const handleKeydown = (event: KeyboardEvent) => {
-            if (event.code == "Escape") onDragLeave();
+            if (event.code == "Escape" && !isDropPending) handleDragLeave();
         };
 
         window.addEventListener("keydown", handleKeydown);
         return () => window.removeEventListener("keydown", handleKeydown);
-    }, [onDragLeave]);
+    }, [isDropPending, handleDragLeave]);
 
     return (
         <>
             <input {...getInputProps()} />
-            <Stack sx={{ flex: 1 }} {...getRootProps({ onDragEnter })}>
-                {isDragActive && (
+            <Stack
+                sx={{ flex: 1 }}
+                {...getRootProps({ onDragEnter: handleDragEnter })}
+            >
+                {(isDragActive || isDropPending) && (
                     <DropZoneOverlay
-                        onDrop={onDragLeave}
-                        onDragLeave={onDragLeave}
+                        onDrop={handleDragLeave}
+                        onDragLeave={handleDragLeave}
                     >
-                        <CloseButton onClick={onDragLeave}>
+                        <CloseButton onClick={handleDragLeave}>
                             <CloseIcon />
                         </CloseButton>
                         <Typography variant="h3">
-                            {message ?? t("upload_dropzone_hint")}
+                            {isDropPending
+                                ? "Processing..."
+                                : (message ?? t("upload_dropzone_hint"))}
                         </Typography>
                     </DropZoneOverlay>
                 )}
