@@ -4,7 +4,10 @@ import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButt
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { RowButton } from "@/base/components/RowButton";
 import { useIsTouchscreen } from "@/base/components/utils/hooks";
-import { useModalVisibility } from "@/base/components/utils/modal";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { basename } from "@/base/file-name";
 import log from "@/base/log";
@@ -73,12 +76,6 @@ import { UploadProgress } from "./UploadProgress";
 
 export type UploadTypeSelectorIntent = "upload" | "import" | "collect";
 
-enum PICKED_UPLOAD_TYPE {
-    FILES = "files",
-    FOLDERS = "folders",
-    ZIPS = "zips",
-}
-
 interface UploadProps {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     closeUploadTypeSelector: () => void;
@@ -111,6 +108,8 @@ interface UploadProps {
     uploadTypeSelectorIntent: UploadTypeSelectorIntent;
     activeCollection?: Collection;
 }
+
+type UploadType = "files" | "folders" | "zips";
 
 /**
  * Top level component that houses the infrastructure for handling uploads.
@@ -148,7 +147,7 @@ export const Upload: React.FC<UploadProps> = ({
     const [openCollectionMappingChoice, setOpenCollectionMappingChoice] =
         useState(false);
     const [importSuggestion, setImportSuggestion] = useState<ImportSuggestion>(
-        DEFAULT_IMPORT_SUGGESTION,
+        defaultImportSuggestion,
     );
     const {
         show: showUploaderNameInput,
@@ -222,7 +221,7 @@ export const Upload: React.FC<UploadProps> = ({
      * This is set to thue user's choice when the user chooses one of the
      * predefined type to upload from the upload type selector dialog
      */
-    const pickedUploadType = useRef<PICKED_UPLOAD_TYPE>(null);
+    const selectedUploadType = useRef<UploadType | undefined>(undefined);
 
     const currentUploadPromise = useRef<Promise<void> | undefined>(undefined);
     const uploadRunning = useRef(false);
@@ -345,16 +344,16 @@ export const Upload: React.FC<UploadProps> = ({
         let files: File[];
         isDragAndDrop.current = false;
 
-        switch (pickedUploadType.current) {
-            case PICKED_UPLOAD_TYPE.FILES:
+        switch (selectedUploadType.current) {
+            case "files":
                 files = fileSelectorFiles;
                 break;
 
-            case PICKED_UPLOAD_TYPE.FOLDERS:
+            case "folders":
                 files = folderSelectorFiles;
                 break;
 
-            case PICKED_UPLOAD_TYPE.ZIPS:
+            case "zips":
                 files = fileSelectorZipFiles;
                 break;
 
@@ -442,7 +441,7 @@ export const Upload: React.FC<UploadProps> = ({
         }
 
         const importSuggestion = getImportSuggestion(
-            pickedUploadType.current,
+            selectedUploadType.current,
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             prunedItemAndPaths.map(([_, p]) => p),
         );
@@ -451,8 +450,8 @@ export const Upload: React.FC<UploadProps> = ({
         log.debug(() => ["Upload request", uploadItemsAndPaths.current]);
         log.debug(() => ["Import suggestion", importSuggestion]);
 
-        const _pickedUploadType = pickedUploadType.current;
-        pickedUploadType.current = null;
+        const _selectedUploadType = selectedUploadType.current;
+        selectedUploadType.current = null;
         props.setLoading(false);
 
         (async () => {
@@ -481,7 +480,7 @@ export const Upload: React.FC<UploadProps> = ({
                 return;
             }
 
-            if (electron && _pickedUploadType === PICKED_UPLOAD_TYPE.ZIPS) {
+            if (electron && _selectedUploadType == "zips") {
                 uploadFilesToNewCollections("parent");
                 return;
             }
@@ -738,24 +737,24 @@ export const Upload: React.FC<UploadProps> = ({
         uploadManager.cancelRunningUpload();
     };
 
-    const handleUpload = (type: PICKED_UPLOAD_TYPE) => {
-        pickedUploadType.current = type;
-        if (type === PICKED_UPLOAD_TYPE.FILES) {
-            openFileSelector();
-        } else if (type === PICKED_UPLOAD_TYPE.FOLDERS) {
-            openFolderSelector();
-        } else {
-            if (electron) {
-                openZipFileSelector();
-            } else {
-                showMiniDialog(downloadAppDialogAttributes());
-            }
+    const handleUploadTypeSelect = (type: UploadType) => {
+        selectedUploadType.current = type;
+        switch (type) {
+            case "files":
+                openFileSelector();
+                break;
+            case "folders":
+                openFolderSelector();
+                break;
+            case "zips":
+                if (electron) {
+                    openZipFileSelector();
+                } else {
+                    showMiniDialog(downloadAppDialogAttributes());
+                }
+                break;
         }
     };
-
-    const handleFileUpload = () => handleUpload(PICKED_UPLOAD_TYPE.FILES);
-    const handleFolderUpload = () => handleUpload(PICKED_UPLOAD_TYPE.FOLDERS);
-    const handleZipUpload = () => handleUpload(PICKED_UPLOAD_TYPE.ZIPS);
 
     const handlePublicUpload = async (
         uploaderName: string,
@@ -836,9 +835,7 @@ export const Upload: React.FC<UploadProps> = ({
                 open={props.uploadTypeSelectorView}
                 onClose={props.closeUploadTypeSelector}
                 intent={props.uploadTypeSelectorIntent}
-                uploadFiles={handleFileUpload}
-                uploadFolders={handleFolderUpload}
-                uploadGoogleTakeoutZips={handleZipUpload}
+                onSelect={handleUploadTypeSelect}
             />
             <UploadProgress
                 open={uploadProgressView}
@@ -933,25 +930,29 @@ const pathLikeForWebFile = (file: File): string =>
         file.name,
     ])!;
 
-// This is used to prompt the user the make upload strategy choice
+/**
+ * This is used to prompt the user the make upload strategy choice.
+ *
+ * This is derived from the items that the user selected.
+ */
 interface ImportSuggestion {
     rootFolderName: string;
     hasNestedFolders: boolean;
     hasRootLevelFileWithFolder: boolean;
 }
 
-const DEFAULT_IMPORT_SUGGESTION: ImportSuggestion = {
+const defaultImportSuggestion: ImportSuggestion = {
     rootFolderName: "",
     hasNestedFolders: false,
     hasRootLevelFileWithFolder: false,
 };
 
 function getImportSuggestion(
-    uploadType: PICKED_UPLOAD_TYPE,
+    uploadType: UploadType,
     paths: string[],
 ): ImportSuggestion {
-    if (isDesktop && uploadType === PICKED_UPLOAD_TYPE.FILES) {
-        return DEFAULT_IMPORT_SUGGESTION;
+    if (isDesktop && uploadType == "files") {
+        return defaultImportSuggestion;
     }
 
     const separatorCounts = new Map(
@@ -981,6 +982,7 @@ function getImportSuggestion(
             );
         }
     }
+
     return {
         rootFolderName: commonPathPrefix || null,
         hasNestedFolders: firstFileFolder !== lastFileFolder,
@@ -1060,17 +1062,16 @@ const setPendingUploads = async (
     await electron.setPendingUploads({ collectionName, filePaths, zipItems });
 };
 
-interface UploadTypeSelectorProps {
-    /** If `true`, then the selector is shown. */
-    open: boolean;
-    /** Callback to indicate that the selector should be closed. */
-    onClose: () => void;
-    /** The particular context / scenario in which this upload is occuring. */
+type UploadTypeSelectorProps = ModalVisibilityProps & {
+    /**
+     * The particular context / scenario in which this upload is occuring.
+     */
     intent: UploadTypeSelectorIntent;
-    uploadFiles: () => void;
-    uploadFolders: () => void;
-    uploadGoogleTakeoutZips: () => void;
-}
+    /**
+     * Called when the user selects one of the options.
+     */
+    onSelect: (type: UploadType) => void;
+};
 
 /**
  * Request the user to specify which type of file / folder / zip it is that they
@@ -1085,9 +1086,7 @@ const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
     open,
     onClose,
     intent,
-    uploadFiles,
-    uploadFolders,
-    uploadGoogleTakeoutZips,
+    onSelect,
 }) => {
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
@@ -1103,28 +1102,15 @@ const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
             directlyShowUploadFiles &&
             publicCollectionGalleryContext.credentials
         ) {
-            uploadFiles();
+            onSelect("files");
             onClose();
         }
     }, [open]);
 
-    const handleSelect = (option: UploadOptionType) => {
-        switch (option) {
-            case "files":
-                uploadFiles();
-                break;
-            case "folders":
-                uploadFolders();
-                break;
-            case "zips":
-                uploadGoogleTakeoutZips();
-                break;
-        }
-    };
-
     return (
         <Dialog
             open={open}
+            onClose={onClose}
             fullWidth
             slotProps={{
                 paper: {
@@ -1135,26 +1121,16 @@ const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
                     }),
                 },
             }}
-            onClose={onClose}
         >
-            <UploadOptions
-                intent={intent}
-                onSelect={handleSelect}
-                onClose={onClose}
-            />
+            <UploadOptions {...{ intent, onSelect, onClose }} />
         </Dialog>
     );
 };
 
-type UploadOptionType = "files" | "folders" | "zips";
-
-interface UploadOptionsProps {
-    intent: UploadTypeSelectorIntent;
-    /** Called when the user selects one of the provided options. */
-    onSelect: (option: UploadOptionType) => void;
-    /** Called when the dialog should be closed. */
-    onClose: () => void;
-}
+type UploadOptionsProps = Pick<
+    UploadTypeSelectorProps,
+    "onClose" | "intent" | "onSelect"
+>;
 
 const UploadOptions: React.FC<UploadOptionsProps> = ({
     intent,
@@ -1174,7 +1150,7 @@ const UploadOptions: React.FC<UploadOptionsProps> = ({
 
     const handleTakeoutClose = () => setShowTakeoutOptions(false);
 
-    const handleSelect = (option: UploadOptionType) => {
+    const handleSelect = (option: UploadType) => {
         switch (option) {
             case "files":
                 onSelect("files");
