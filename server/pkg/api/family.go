@@ -131,6 +131,7 @@ func (h *FamilyHandler) ModifyStorageLimit(c *gin.Context) {
 	err := h.Controller.ModifyMemberStorage(c, auth.GetUserID(c.Request.Header), request.ID, request.StorageLimit)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
 	}
 	c.JSON(http.StatusOK, nil)
 }
