@@ -107,15 +107,8 @@ import { Upload, type UploadTypeSelectorIntent } from "components/Upload";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
-import {
-    createContext,
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
-import { useDropzone } from "react-dropzone";
+import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import {
     constructEmailList,
@@ -195,19 +188,9 @@ const Page: React.FC = () => {
     const [collectionNamerView, setCollectionNamerView] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
     const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
-
-    const {
-        // A function to call to get the props we should apply to the container,
-        getRootProps: getDragAndDropRootProps,
-        // ... the props we should apply to the <input> element,
-        getInputProps: getDragAndDropInputProps,
-        // ... and the files that we got.
-        acceptedFiles: dragAndDropFilesReadOnly,
-    } = useDropzone({
-        noClick: true,
-        noKeyboard: true,
-        disabled: shouldDisableDropzone,
-    });
+    const [dragAndDropFiles, setDragAndDropFiles] = useState<FileWithPath[]>(
+        [],
+    );
 
     const syncInProgress = useRef(false);
     const syncInterval = useRef<ReturnType<typeof setInterval> | undefined>(
@@ -528,12 +511,6 @@ const Page: React.FC = () => {
             clearSelection,
         };
     }, [selectAll, clearSelection]);
-
-    // Create a regular array from the readonly array returned by dropzone.
-    const dragAndDropFiles = useMemo(
-        () => [...dragAndDropFilesReadOnly],
-        [dragAndDropFilesReadOnly],
-    );
 
     const showSessionExpiredDialog = () =>
         showMiniDialog(sessionExpiredDialogAttributes(logout));
@@ -860,13 +837,13 @@ const Page: React.FC = () => {
             }}
         >
             <FullScreenDropZone
-                getInputProps={getDragAndDropInputProps}
-                getRootProps={getDragAndDropRootProps}
                 message={
                     watchFolderView
                         ? t("watch_folder_dropzone_hint")
                         : undefined
                 }
+                disabled={shouldDisableDropzone}
+                onDrop={setDragAndDropFiles}
             >
                 {blockingLoad && <TranslucentLoadingOverlay />}
                 <PlanSelector

@@ -2,17 +2,9 @@ import CloseIcon from "@mui/icons-material/Close";
 import { IconButton, Stack, styled, Typography } from "@mui/material";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
-import type { DropzoneState } from "react-dropzone";
+import { type FileWithPath, useDropzone } from "react-dropzone";
 
 interface FullScreenDropZoneProps {
-    /**
-     * The `getInputProps` function returned by a call to {@link useDropzone}.
-     */
-    getInputProps: DropzoneState["getInputProps"];
-    /**
-     * The `getRootProps` function returned by a call to {@link useDropzone}.
-     */
-    getRootProps: DropzoneState["getRootProps"];
     /**
      * Optional override to the message show to the user when a drag is in
      * progress.
@@ -20,6 +12,16 @@ interface FullScreenDropZoneProps {
      * Default: t("upload_dropzone_hint")
      */
     message?: string;
+    /**
+     * If `true`, then drag and drop functionality is disabled.
+     */
+    disabled?: boolean;
+    /**
+     * Callback invoked when the user drags and drops files.
+     *
+     * It will only be called if there is at least one file in {@link files}.
+     */
+    onDrop: (files: FileWithPath[]) => void;
 }
 
 /**
@@ -37,7 +39,26 @@ interface FullScreenDropZoneProps {
  */
 export const FullScreenDropZone: React.FC<
     React.PropsWithChildren<FullScreenDropZoneProps>
-> = ({ getInputProps, getRootProps, message, children }) => {
+> = ({ message, disabled, onDrop, children }) => {
+    const {
+        // A function to call to get the props we should apply to the container,
+        getRootProps,
+        // ... the props we should apply to the <input> element,
+        getInputProps,
+    } = useDropzone({
+        noClick: true,
+        noKeyboard: true,
+        disabled,
+        onDrop(acceptedFiles) {
+            // Invoked the `onDrop` callback only if there is at least 1 file.
+            if (acceptedFiles.length) {
+                // Create a regular array from the readonly array returned by
+                // dropzone.
+                onDrop([...acceptedFiles]);
+            }
+        },
+    });
+
     const [isDragActive, setIsDragActive] = useState(false);
 
     const onDragEnter = useCallback(() => setIsDragActive(true), []);
