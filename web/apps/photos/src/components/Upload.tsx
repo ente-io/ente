@@ -44,6 +44,7 @@ import {
     Link,
     Stack,
     Typography,
+    type DialogProps,
 } from "@mui/material";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
@@ -1133,10 +1134,22 @@ const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
         }
     }, [open]);
 
+    const handleClose: DialogProps["onClose"] = (_, reason) => {
+        // Disable backdrop clicks and esc keypresses if a selection is pending
+        // processing so that the user doesn't inadvertently close the dialog.
+        if (
+            pendingUploadType &&
+            (reason == "backdropClick" || reason == "escapeKeyDown")
+        ) {
+            return;
+        }
+        onClose();
+    };
+
     return (
         <Dialog
             open={open}
-            onClose={onClose}
+            onClose={handleClose}
             fullWidth
             slotProps={{
                 paper: {
