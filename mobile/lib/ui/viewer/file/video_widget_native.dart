@@ -24,12 +24,11 @@ import "package:photos/ui/viewer/file/native_video_player_controls/play_pause_bu
 import "package:photos/ui/viewer/file/native_video_player_controls/seek_bar.dart";
 import "package:photos/ui/viewer/file/preview_status_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/duration_to_seconds.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/seconds_to_duration.dart";
 import "package:photos/utils/toast_util.dart";
 import "package:visibility_detector/visibility_detector.dart";
 
@@ -617,9 +616,7 @@ class _SeekBarAndDuration extends StatelessWidget {
                           _,
                         ) {
                           return Text(
-                            secondsToDuration(
-                              value,
-                            ),
+                            secondsToDuration(value),
                             style: getEnteTextTheme(
                               context,
                             ).mini.copyWith(
@@ -638,9 +635,7 @@ class _SeekBarAndDuration extends StatelessWidget {
                     ),
                     Text(
                       duration ?? "0:00",
-                      style: getEnteTextTheme(
-                        context,
-                      ).mini.copyWith(
+                      style: getEnteTextTheme(context).mini.copyWith(
                             color: textBaseDark,
                           ),
                     ),

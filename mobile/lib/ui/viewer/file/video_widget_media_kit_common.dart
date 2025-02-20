@@ -6,8 +6,8 @@ import "package:photos/models/file/file.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/preview_status_widget.dart";
+import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/debouncer.dart";
-import "package:photos/utils/seconds_to_duration.dart";
 
 class VideoWidget extends StatefulWidget {
   final EnteFile file;
