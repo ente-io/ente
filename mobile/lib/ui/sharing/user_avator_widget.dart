@@ -117,18 +117,25 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                   if (snapshot.hasData) {
                     final personID = snapshot.data as String;
                     return ClipOval(
-                      child: PersonFaceWidget(
-                        _faceThumbnail!,
-                        personId: personID,
-                        onErrorCallback: () {
-                          if (mounted) {
-                            setState(() {
-                              _personID = null;
-                              _faceThumbnail = null;
-                            });
-                          }
-                        },
-                      ),
+                      child: _faceThumbnail == null
+                          ? _FirstLetterCircularAvatar(
+                              user: widget.user,
+                              currentUserID: widget.currentUserID,
+                              thumbnailView: widget.thumbnailView,
+                              type: widget.type,
+                            )
+                          : PersonFaceWidget(
+                              _faceThumbnail!,
+                              personId: personID,
+                              onErrorCallback: () {
+                                if (mounted) {
+                                  setState(() {
+                                    _personID = null;
+                                    _faceThumbnail = null;
+                                  });
+                                }
+                              },
+                            ),
                     );
                   } else if (snapshot.hasError) {
                     _logger.severe("Error loading personID", snapshot.error);

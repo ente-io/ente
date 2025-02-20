@@ -484,7 +484,7 @@ class PersonService {
     }
   }
 
-  Future<EnteFile> getThumbnailFileOfPerson(
+  Future<EnteFile?> getThumbnailFileOfPerson(
     PersonEntity person,
   ) async {
     if (person.data.hasAvatar()) {
@@ -516,10 +516,10 @@ class PersonService {
       }
     }
     if (resultFile == null) {
-      debugPrint(
+      logger.warning(
         "Person ${kDebugMode ? person.data.name : person.remoteID} has no files",
       );
-      return EnteFile();
+      return null;
     }
     return resultFile;
   }
