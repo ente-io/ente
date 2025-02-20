@@ -1,7 +1,7 @@
 type GetInputProps = () => React.HTMLAttributes<HTMLInputElement>;
 
 interface UploadSelectorInputsProps {
-    getDragAndDropInputProps: GetInputProps;
+    // getDragAndDropInputProps: GetInputProps;
     getFileSelectorInputProps: GetInputProps;
     getFolderSelectorInputProps: GetInputProps;
     getZipFileSelectorInputProps?: GetInputProps;
@@ -14,14 +14,14 @@ interface UploadSelectorInputsProps {
  * folder Selector dialogs and handle drag and drop inputs.
  */
 export const UploadSelectorInputs: React.FC<UploadSelectorInputsProps> = ({
-    getDragAndDropInputProps,
+    // getDragAndDropInputProps,
     getFileSelectorInputProps,
     getFolderSelectorInputProps,
     getZipFileSelectorInputProps,
 }) => {
     return (
         <>
-            <input {...getDragAndDropInputProps()} />
+            {/* <input {...getDragAndDropInputProps()} /> */}
             <input {...getFileSelectorInputProps()} />
             <input {...getFolderSelectorInputProps()} />
             {getZipFileSelectorInputProps && (

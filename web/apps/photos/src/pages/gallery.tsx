@@ -12,7 +12,6 @@ import { useModalVisibility } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
 import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
-import { useFileInput } from "@/gallery/components/utils/use-file-input";
 import { type Collection } from "@/media/collection";
 import { mergeMetadata, type EnteFile } from "@/media/file";
 import {
@@ -106,7 +105,6 @@ import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import { Sidebar } from "components/Sidebar";
 import { type UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
 import Uploader from "components/Upload/Uploader";
-import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
@@ -210,28 +208,6 @@ const Page: React.FC = () => {
         noClick: true,
         noKeyboard: true,
         disabled: shouldDisableDropzone,
-    });
-    const {
-        getInputProps: getFileSelectorInputProps,
-        openSelector: openFileSelector,
-        selectedFiles: fileSelectorFiles,
-    } = useFileInput({
-        directory: false,
-    });
-    const {
-        getInputProps: getFolderSelectorInputProps,
-        openSelector: openFolderSelector,
-        selectedFiles: folderSelectorFiles,
-    } = useFileInput({
-        directory: true,
-    });
-    const {
-        getInputProps: getZipFileSelectorInputProps,
-        openSelector: openZipFileSelector,
-        selectedFiles: fileSelectorZipFiles,
-    } = useFileInput({
-        directory: false,
-        accept: ".zip",
     });
 
     const syncInProgress = useRef(false);
@@ -892,14 +868,8 @@ const Page: React.FC = () => {
                         : undefined
                 }
             >
-                <UploadSelectorInputs
-                    {...{
-                        getDragAndDropInputProps,
-                        getFileSelectorInputProps,
-                        getFolderSelectorInputProps,
-                        getZipFileSelectorInputProps,
-                    }}
-                />
+                <input {...getDragAndDropInputProps()} />
+
                 {blockingLoad && <TranslucentLoadingOverlay />}
                 <PlanSelector
                     {...planSelectorVisibilityProps}
@@ -1052,12 +1022,6 @@ const Page: React.FC = () => {
                     showSessionExpiredMessage={showSessionExpiredDialog}
                     {...{
                         dragAndDropFiles,
-                        openFileSelector,
-                        fileSelectorFiles,
-                        openFolderSelector,
-                        folderSelectorFiles,
-                        openZipFileSelector,
-                        fileSelectorZipFiles,
                         uploadTypeSelectorIntent,
                         uploadTypeSelectorView,
                     }}

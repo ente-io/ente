@@ -4,6 +4,7 @@ import { useBaseContext } from "@/base/context";
 import { basename } from "@/base/file-name";
 import log from "@/base/log";
 import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
+import { useFileInput } from "@/gallery/components/utils/use-file-input";
 import type {
     FileAndPath,
     UploadItem,
@@ -23,6 +24,7 @@ import { firstNonEmpty } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
+import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -85,12 +87,6 @@ interface Props {
     uploadTypeSelectorView: boolean;
     showSessionExpiredMessage: () => void;
     dragAndDropFiles: File[];
-    openFileSelector: () => void;
-    fileSelectorFiles: File[];
-    openFolderSelector: () => void;
-    folderSelectorFiles: File[];
-    openZipFileSelector?: () => void;
-    fileSelectorZipFiles?: File[];
     uploadCollection?: Collection;
     uploadTypeSelectorIntent: UploadTypeSelectorIntent;
     activeCollection?: Collection;
@@ -99,12 +95,6 @@ interface Props {
 export default function Uploader({
     isFirstUpload,
     dragAndDropFiles,
-    openFileSelector,
-    fileSelectorFiles,
-    openFolderSelector,
-    folderSelectorFiles,
-    openZipFileSelector,
-    fileSelectorZipFiles,
     onUploadFile,
     showSessionExpiredMessage,
     ...props
@@ -215,6 +205,29 @@ export default function Uploader({
     const uploadRunning = useRef(false);
     const uploaderNameRef = useRef<string>(null);
     const isDragAndDrop = useRef(false);
+
+    const {
+        getInputProps: getFileSelectorInputProps,
+        openSelector: openFileSelector,
+        selectedFiles: fileSelectorFiles,
+    } = useFileInput({
+        directory: false,
+    });
+    const {
+        getInputProps: getFolderSelectorInputProps,
+        openSelector: openFolderSelector,
+        selectedFiles: folderSelectorFiles,
+    } = useFileInput({
+        directory: true,
+    });
+    const {
+        getInputProps: getZipFileSelectorInputProps,
+        openSelector: openZipFileSelector,
+        selectedFiles: fileSelectorZipFiles,
+    } = useFileInput({
+        directory: false,
+        accept: ".zip",
+    });
 
     const electron = globalThis.electron;
 
@@ -775,6 +788,14 @@ export default function Uploader({
 
     return (
         <>
+            <UploadSelectorInputs
+                {...{
+                    // getDragAndDropInputProps,
+                    getFileSelectorInputProps,
+                    getFolderSelectorInputProps,
+                    getZipFileSelectorInputProps,
+                }}
+            />
             <CollectionMappingChoice
                 open={openCollectionMappingChoice}
                 onClose={handleCollectionMappingChoiceClose}

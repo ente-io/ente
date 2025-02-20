@@ -49,19 +49,27 @@ export const FullScreenDropZone: React.FC<
     }, [onDragLeave]);
 
     return (
-        <Stack sx={{ flex: 1 }} {...getDragAndDropRootProps({ onDragEnter })}>
-            {isDragActive && (
-                <DropZoneOverlay onDrop={onDragLeave} onDragLeave={onDragLeave}>
-                    <CloseButton onClick={onDragLeave}>
-                        <CloseIcon />
-                    </CloseButton>
-                    <Typography variant="h3">
-                        {message ?? t("upload_dropzone_hint")}
-                    </Typography>
-                </DropZoneOverlay>
-            )}
-            {children}
-        </Stack>
+        <>
+            <Stack
+                sx={{ flex: 1 }}
+                {...getDragAndDropRootProps({ onDragEnter })}
+            >
+                {isDragActive && (
+                    <DropZoneOverlay
+                        onDrop={onDragLeave}
+                        onDragLeave={onDragLeave}
+                    >
+                        <CloseButton onClick={onDragLeave}>
+                            <CloseIcon />
+                        </CloseButton>
+                        <Typography variant="h3">
+                            {message ?? t("upload_dropzone_hint")}
+                        </Typography>
+                    </DropZoneOverlay>
+                )}
+                {children}
+            </Stack>
+        </>
     );
 };
 
