@@ -106,12 +106,14 @@ class FamilyMember {
   final int usage;
   final String id;
   final bool isAdmin;
+  final int? storageLimit;
 
   FamilyMember(
     this.email,
     this.usage,
     this.id,
     this.isAdmin,
+    this.storageLimit,
   );
 
   factory FamilyMember.fromMap(Map<String, dynamic> map) {
@@ -120,6 +122,7 @@ class FamilyMember {
       map['usage'] as int,
       map['id'] as String,
       map['isAdmin'] as bool,
+      map['storageLimit'] as int?,
     );
   }
 
@@ -129,6 +132,7 @@ class FamilyMember {
       'usage': usage,
       'id': id,
       'isAdmin': isAdmin,
+      'storageLimit': storageLimit,
     };
   }
 
