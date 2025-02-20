@@ -1230,10 +1230,7 @@ const DefaultOptions: React.FC<UploadOptionsProps> = ({
                             startIcon={<ImageOutlinedIcon />}
                             endIcon={
                                 pendingUploadType == "files" ? (
-                                    <CircularProgress
-                                        // color="accent"
-                                        size={20}
-                                    />
+                                    <PendingIndicator />
                                 ) : (
                                     <ChevronRightIcon />
                                 )
@@ -1244,7 +1241,13 @@ const DefaultOptions: React.FC<UploadOptionsProps> = ({
                     )}
                     <RowButton
                         startIcon={<PermMediaOutlinedIcon />}
-                        endIcon={<ChevronRightIcon />}
+                        endIcon={
+                            pendingUploadType == "folders" ? (
+                                <PendingIndicator />
+                            ) : (
+                                <ChevronRightIcon />
+                            )
+                        }
                         label={t("folder")}
                         onClick={() => onSelect("folders")}
                     />
@@ -1271,6 +1274,10 @@ const DefaultOptions: React.FC<UploadOptionsProps> = ({
         </>
     );
 };
+
+const PendingIndicator = () => (
+    <CircularProgress size={18} sx={{ color: "stroke.muted" }} />
+);
 
 const TakeoutOptions: React.FC<
     Pick<UploadOptionsProps, "onSelect" | "onClose">
