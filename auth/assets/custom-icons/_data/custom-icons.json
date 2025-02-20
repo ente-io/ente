@@ -209,6 +209,10 @@
       "title": "Bugzilla"
     },
     {
+      "title": "ButterflyMX",
+      "slug": "butterflymx"
+    },
+    {
       "title": "Bybit"
     },
     {
@@ -395,6 +399,10 @@
     },
     {
       "title": "ForUsAll"
+    },
+    {
+      "title": "FreeTaxUSA",
+      "slug": "freetaxusa"
     },
     {
       "title": "G2A"
