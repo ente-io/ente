@@ -391,7 +391,7 @@ class SmartMemoriesService {
           }
         }
       }
-      if (longAgo && lastTimeYouSawThemFiles.length >= 5 && meID != personID) {
+      if (longAgo && lastTimeYouSawThemFiles.length >= 2 && meID != personID) {
         final String title = "Last time with $personName";
         final lastTimeMemory = PeopleMemory(
           lastTimeYouSawThemFiles
