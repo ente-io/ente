@@ -17,10 +17,10 @@ abstract class SmartMemory {
   SmartMemory(
     this.memories,
     this.type, {
-    this.name,
+    name,
     this.firstCreationTime,
     this.lastCreationTime,
-  });
+  }) : name = name != null ? name + "(I)" : null;
 
   int averageCreationTime() {
     if (firstCreationTime != null && lastCreationTime != null) {
