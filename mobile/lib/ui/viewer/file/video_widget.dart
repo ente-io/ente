@@ -7,8 +7,8 @@ import "package:photos/events/use_media_kit_for_video.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/preview_video_store.dart";
-import "package:photos/ui/viewer/file/preview_video_widget.dart";
 import "package:photos/ui/viewer/file/video_widget_media_kit_new.dart";
+import "package:photos/ui/viewer/file/video_widget_media_kit_preview.dart";
 import "package:photos/ui/viewer/file/video_widget_native.dart";
 
 class VideoWidget extends StatefulWidget {
@@ -60,7 +60,7 @@ class _VideoWidgetState extends State<VideoWidget> {
                     ?.containsKey(widget.file.uploadedFileID!) ??
                 false);
     if (isPreviewVideoPlayable && selectPreviewForPlay) {
-      return PreviewVideoWidget(
+      return VideoWidgetMediaKitPreview(
         widget.file,
         tagPrefix: widget.tagPrefix,
         playbackCallback: widget.playbackCallback,

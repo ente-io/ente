@@ -144,8 +144,6 @@ PODS:
     - Flutter
   - media_kit_libs_ios_video (1.0.4):
     - Flutter
-  - media_kit_native_event_loop (1.0.0):
-    - Flutter
   - media_kit_video (0.0.1):
     - Flutter
   - motion_sensors (0.0.1):
@@ -188,8 +186,6 @@ PODS:
     - Flutter
   - PromisesObjC (2.4.0)
   - receive_sharing_intent (1.8.0):
-    - Flutter
-  - screen_brightness_ios (0.1.0):
     - Flutter
   - SDWebImage (5.20.0):
     - SDWebImage/Core (= 5.20.0)
@@ -278,7 +274,6 @@ DEPENDENCIES:
   - maps_launcher (from `.symlinks/plugins/maps_launcher/ios`)
   - media_extension (from `.symlinks/plugins/media_extension/ios`)
   - media_kit_libs_ios_video (from `.symlinks/plugins/media_kit_libs_ios_video/ios`)
-  - media_kit_native_event_loop (from `.symlinks/plugins/media_kit_native_event_loop/ios`)
   - media_kit_video (from `.symlinks/plugins/media_kit_video/ios`)
   - motion_sensors (from `.symlinks/plugins/motion_sensors/ios`)
   - motionphoto (from `.symlinks/plugins/motionphoto/ios`)
@@ -293,7 +288,6 @@ DEPENDENCIES:
   - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
   - privacy_screen (from `.symlinks/plugins/privacy_screen/ios`)
   - receive_sharing_intent (from `.symlinks/plugins/receive_sharing_intent/ios`)
-  - screen_brightness_ios (from `.symlinks/plugins/screen_brightness_ios/ios`)
   - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
@@ -390,8 +384,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/media_extension/ios"
   media_kit_libs_ios_video:
     :path: ".symlinks/plugins/media_kit_libs_ios_video/ios"
-  media_kit_native_event_loop:
-    :path: ".symlinks/plugins/media_kit_native_event_loop/ios"
   media_kit_video:
     :path: ".symlinks/plugins/media_kit_video/ios"
   motion_sensors:
@@ -420,8 +412,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/privacy_screen/ios"
   receive_sharing_intent:
     :path: ".symlinks/plugins/receive_sharing_intent/ios"
-  screen_brightness_ios:
-    :path: ".symlinks/plugins/screen_brightness_ios/ios"
   sentry_flutter:
     :path: ".symlinks/plugins/sentry_flutter/ios"
   share_plus:
@@ -472,7 +462,7 @@ SPEC CHECKSUMS:
   flutter_inappwebview_ios: b89ba3482b96fb25e00c967aae065701b66e9b99
   flutter_local_notifications: ad39620c743ea4c15127860f4b5641649a988100
   flutter_native_splash: 35ddbc7228eafcb3969dcc5f1fbbe27c1145a4f0
-  flutter_secure_storage: 2c2ff13db9e0a5647389bff88b0ecac56e3f3418
+  flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
   flutter_sodium: 152647449ba89a157fd48d7e293dcd6d29c6ab0e
   fluttertoast: 76fea30fcf04176325f6864c87306927bd7d2038
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
@@ -489,7 +479,6 @@ SPEC CHECKSUMS:
   maps_launcher: edf829809ba9e894d70e569bab11c16352dedb45
   media_extension: a1fec16ee9c8241a6aef9613578ebf097d6c5e64
   media_kit_libs_ios_video: 5a18affdb97d1f5d466dc79988b13eff6c5e2854
-  media_kit_native_event_loop: 5fba1a849a6c87a34985f1e178a0de5bd444a0cf
   media_kit_video: 1746e198cb697d1ffb734b1d05ec429d1fcd1474
   motion_sensors: 741e702c17467b9569a92165dda8d4d88c6167f1
   motionphoto: 584b43031ead3060225cdff08fa49818879801d2
@@ -509,7 +498,6 @@ SPEC CHECKSUMS:
   privacy_screen: 3159a541f5d3a31bea916cfd4e58f9dc722b3fd4
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   receive_sharing_intent: f6a12b7e8f7ed745f61c982de8a65de88db44a44
-  screen_brightness_ios: 5ed898fa50fa82a26171c086ca5e28228f932576
   SDWebImage: 73c6079366fea25fa4bb9640d5fb58f0893facd8
   SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
   Sentry: f8374b5415bc38dfb5645941b3ae31230fbeae57
@@ -526,7 +514,7 @@ SPEC CHECKSUMS:
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
   video_thumbnail: b637e0ad5f588ca9945f6e2c927f73a69a661140
-  volume_controller: ca1cde542ee70fad77d388f82e9616488110942b
+  volume_controller: 3657a1f65bedb98fa41ff7dc5793537919f31b12
   wakelock_plus: 04623e3f525556020ebd4034310f20fe7fda8b49
 
 PODFILE CHECKSUM: 20e086e6008977d43a3d40260f3f9bffcac748dd

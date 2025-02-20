@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.9.99+1002
+version: 0.9.99+1003
 publish_to: none
 
 environment:
@@ -90,7 +90,7 @@ dependencies:
   flutter_map_marker_cluster: ^1.3.6
   flutter_native_splash: ^2.2.0+1
   flutter_password_strength: ^0.1.6
-  flutter_secure_storage: ^8.0.0
+  flutter_secure_storage: ^9.2.4
   flutter_sodium: ^0.2.0
   flutter_staggered_grid_view: ^0.6.2
   flutter_svg: ^2.0.10+1
@@ -120,10 +120,22 @@ dependencies:
     git:
       url: "https://github.com/ente-io/media_extension.git"
       ref: deeplink_fixes
-  media_kit: ^1.1.10+1
-  media_kit_libs_ios_video: ^1.1.4
-  media_kit_libs_video: ^1.0.4
-  media_kit_video: ^1.2.4
+  media_kit:
+    git:
+      url: https://github.com/media-kit/media-kit
+      path: media_kit
+  media_kit_libs_ios_video:
+    git:
+      url: https://github.com/media-kit/media-kit
+      path: libs/ios/media_kit_libs_ios_video
+  media_kit_libs_video:
+    git:
+      url: https://github.com/media-kit/media-kit
+      path: libs/universal/media_kit_libs_video
+  media_kit_video:
+    git:
+      url: https://github.com/media-kit/media-kit
+      path: media_kit_video
   ml_linalg: ^13.11.31
   modal_bottom_sheet: ^3.0.0-pre
   motion_photos:
@@ -195,7 +207,6 @@ dependencies:
       url: https://github.com/ente-io/packages.git
       ref: android_video_roation_fix
       path: packages/video_player/video_player/
-  video_player_media_kit: ^1.0.5
   video_thumbnail: ^0.5.3
   visibility_detector: ^0.3.3
   wakelock_plus: ^1.1.1
@@ -210,6 +221,23 @@ dependency_overrides:
   # Newer flutter packages depends on ffi > 2.0.0 while flutter_sodium depends on ffi < 2.0.0
   ffi: 2.1.0
   intl: 0.18.1
+  js: ^0.6.7
+  media_kit:
+    git:
+      url: https://github.com/media-kit/media-kit
+      path: media_kit
+  media_kit_libs_ios_video:
+    git:
+      url: https://github.com/media-kit/media-kit
+      path: libs/ios/media_kit_libs_ios_video
+  media_kit_libs_video:
+    git:
+      url: https://github.com/media-kit/media-kit
+      path: libs/universal/media_kit_libs_video
+  media_kit_video:
+    git:
+      url: https://github.com/media-kit/media-kit
+      path: media_kit_video
   video_player:
     git:
       url: https://github.com/ente-io/packages.git
