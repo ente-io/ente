@@ -9,24 +9,40 @@ enum PeopleMemoryType {
 }
 
 enum PeopleActivity {
-  celebration,
-  // hiking,
-  // feast,
-  // selfies,
-  // sports
+  party,
+  hiking,
+  feast,
+  selfies,
+  sports
 }
 
 String activityQuery(PeopleActivity activity) {
   switch (activity) {
-    case PeopleActivity.celebration:
+    case PeopleActivity.party:
       return "Photo of people celebrating together";
+    case PeopleActivity.hiking:
+      return "Photo of people hiking together in nature";
+    case PeopleActivity.feast:
+      return "Photo of people having a big feast together";
+    case PeopleActivity.selfies:
+      return "Happy and nostalgic selfie with people";
+    case PeopleActivity.sports:
+      return "Photo of people joyfully playing sports together";
   }
 }
 
 String activityTitle(PeopleActivity activity, String personName) {
   switch (activity) {
-    case PeopleActivity.celebration:
-      return "Celebrations with $personName";
+    case PeopleActivity.party:
+      return "Party with $personName";
+    case PeopleActivity.hiking:
+      return "Hiking with $personName";
+    case PeopleActivity.feast:
+      return "Feasting with $personName";
+    case PeopleActivity.selfies:
+      return "Selfies with $personName";
+    case PeopleActivity.sports:
+      return "Sports with $personName";
   }
 }
 
