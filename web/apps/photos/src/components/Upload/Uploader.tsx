@@ -26,7 +26,7 @@ import DiscFullIcon from "@mui/icons-material/DiscFull";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import {
     getPublicCollectionUID,
@@ -205,12 +205,17 @@ export default function Uploader({
     const uploaderNameRef = useRef<string>(null);
     const isDragAndDrop = useRef(false);
 
+    const handleInputCancel = useCallback(() => {
+        console.log("cancel");
+    }, []);
+
     const {
         getInputProps: getFileSelectorInputProps,
         openSelector: openFileSelector,
         selectedFiles: fileSelectorFiles,
     } = useFileInput({
         directory: false,
+        onCancel: handleInputCancel,
     });
 
     const {
@@ -219,6 +224,7 @@ export default function Uploader({
         selectedFiles: folderSelectorFiles,
     } = useFileInput({
         directory: true,
+        onCancel: handleInputCancel,
     });
 
     const {
@@ -228,6 +234,7 @@ export default function Uploader({
     } = useFileInput({
         directory: false,
         accept: ".zip",
+        onCancel: handleInputCancel,
     });
 
     const electron = globalThis.electron;
@@ -851,33 +858,13 @@ const Inputs: React.FC<InputsProps> = ({
     getFileSelectorInputProps,
     getFolderSelectorInputProps,
     getZipFileSelectorInputProps,
-}) => {
-    const refFile = useRef(null);
-    const refFolder = useRef(null);
-    const refZip = useRef(null);
-
-    useEffect(() => {
-        const handleCancel = () => {
-            console.log("cancel");
-        };
-        [refFile, refFolder, refZip].map((ref) =>
-            ref.current?.addEventListener("cancel", handleCancel),
-        );
-        return () => {
-            [refFile, refFolder, refZip].map((ref) =>
-                ref.current?.removeEventListener("cancel", handleCancel),
-            );
-        };
-    }, []);
-
-    return (
-        <>
-            <input ref={refFile} {...getFileSelectorInputProps()} />
-            <input ref={refFolder} {...getFolderSelectorInputProps()} />
-            <input ref={refZip} {...getZipFileSelectorInputProps()} />
-        </>
-    );
-};
+}) => (
+    <>
+        <input {...getFileSelectorInputProps()} />
+        <input {...getFolderSelectorInputProps()} />
+        <input {...getZipFileSelectorInputProps()} />
+    </>
+);
 
 const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {
     const fileAndPaths: FileAndPath[] = [];

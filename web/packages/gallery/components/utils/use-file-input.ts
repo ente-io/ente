@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface UseFileInputParams {
     /**
@@ -14,6 +14,11 @@ interface UseFileInputParams {
      * https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept).
      */
     accept?: string;
+    /**
+     * A callback that is invoked when the user cancels on the file / directory
+     * dialog.
+     */
+    onCancel: () => void;
 }
 
 interface UseFileInputResult {
@@ -50,15 +55,25 @@ interface UseFileInputResult {
 export const useFileInput = ({
     directory,
     accept,
+    onCancel,
 }: UseFileInputParams): UseFileInputResult => {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const inputRef = useRef<HTMLInputElement | undefined>(undefined);
 
+    useEffect(() => {
+        // React (as of 19) doesn't support attaching the onCancel event handler
+        // via props, so do it using its ref.
+        //
+        // https://github.com/facebook/react/issues/27858
+        inputRef.current!.addEventListener("cancel", onCancel);
+        return () => {
+            inputRef.current!.removeEventListener("cancel", onCancel);
+        };
+    }, [onCancel]);
+
     const openSelector = useCallback(() => {
-        if (inputRef.current) {
-            inputRef.current.value = "";
-            inputRef.current.click();
-        }
+        inputRef.current!.value = "";
+        inputRef.current!.click();
     }, []);
 
     const handleChange: React.ChangeEventHandler<HTMLInputElement> = (
