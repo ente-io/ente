@@ -54,7 +54,7 @@ class SmartMemoriesService {
   static const int _calculationWindowDays = 14;
 
   static const _clipSimilarImageThreshold = 0.75;
-  static const _clipActivityQueryThreshold = 0.225;
+  static const _clipActivityQueryThreshold = 0.25;
 
   // Singleton pattern
   SmartMemoriesService._privateConstructor();
