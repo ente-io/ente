@@ -134,7 +134,6 @@ import { FILE_OPS_TYPE, getSelectedFiles, handleFileOps } from "utils/file";
 
 const defaultGalleryContext: GalleryContextType = {
     setActiveCollectionID: () => null,
-    onShowCollection: () => null,
     syncWithRemote: () => null,
     setBlockingLoad: () => null,
     photoListHeader: null,
@@ -813,11 +812,6 @@ const Page: React.FC = () => {
             value={{
                 ...defaultGalleryContext,
                 setActiveCollectionID: handleSetActiveCollectionID,
-                onShowCollection: (id) =>
-                    dispatch({
-                        type: "showNormalOrHiddenCollectionSummary",
-                        collectionSummaryID: id,
-                    }),
                 syncWithRemote,
                 setBlockingLoad,
                 photoListHeader,
@@ -1046,6 +1040,12 @@ const Page: React.FC = () => {
                             setFilesDownloadProgressAttributesCreator
                         }
                         selectable={true}
+                        onSelectCollection={(collectionID) =>
+                            dispatch({
+                                type: "showNormalOrHiddenCollectionSummary",
+                                collectionSummaryID: collectionID,
+                            })
+                        }
                         onSelectPerson={(personID) => {
                             dispatch({ type: "showPerson", personID });
                         }}
