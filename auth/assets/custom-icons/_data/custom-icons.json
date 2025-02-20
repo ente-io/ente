@@ -397,6 +397,10 @@
       "title": "G2A"
     },
     {
+      "title": "Gate.io",
+      "slug": "gateio.svg"
+    },
+    {
       "title": "GitHub"
     },
     {
@@ -1212,9 +1216,4 @@
       "title": "Zoom"
     }
   ]
-},
- {
-    "title": "Gate.io",
-    "slug": "gateio.svg"
-  }
-]
+}
