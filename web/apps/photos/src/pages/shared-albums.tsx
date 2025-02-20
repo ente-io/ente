@@ -27,7 +27,7 @@ import { downloadManager } from "@/gallery/services/download";
 import { extractCollectionKeyFromShareURL } from "@/gallery/services/share";
 import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
 import type { Collection } from "@/media/collection";
-import { type EnteFile, mergeMetadata } from "@/media/file";
+import { mergeMetadata, type EnteFile } from "@/media/file";
 import { verifyPublicAlbumPassword } from "@/new/albums/services/publicCollection";
 import {
     GalleryItemsHeaderAdapter,
@@ -57,11 +57,11 @@ import {
 } from "components/FilesDownloadProgress";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import {Upload} from "components/Upload";
+import { Upload } from "components/Upload";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useDropzone } from "react-dropzone";
+import { type FileWithPath } from "react-dropzone";
 import {
     getLocalPublicCollection,
     getLocalPublicCollectionPassword,
@@ -108,21 +108,14 @@ export default function PublicCollectionGallery() {
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
+    const [dragAndDropFiles, setDragAndDropFiles] = useState<FileWithPath[]>(
+        [],
+    );
     const [selected, setSelected] = useState<SelectedState>({
         ownCount: 0,
         count: 0,
         collectionID: 0,
         context: undefined,
-    });
-
-    const {
-        getRootProps: getDragAndDropRootProps,
-        getInputProps: getDragAndDropInputProps,
-        acceptedFiles: dragAndDropFilesReadOnly,
-    } = useDropzone({
-        noClick: true,
-        noKeyboard: true,
-        disabled: shouldDisableDropzone,
     });
 
     const [
@@ -162,12 +155,6 @@ export default function PublicCollectionGallery() {
             });
             return updater;
         };
-
-    // Create a regular array from the readonly array returned by dropzone.
-    const dragAndDropFiles = useMemo(
-        () => [...dragAndDropFilesReadOnly],
-        [dragAndDropFilesReadOnly],
-    );
 
     const onAddPhotos = useMemo(() => {
         return publicCollection?.publicURLs?.[0]?.enableCollect
@@ -491,8 +478,8 @@ export default function PublicCollectionGallery() {
     return (
         <PublicCollectionGalleryContext.Provider value={context}>
             <FullScreenDropZone
-                getInputProps={getDragAndDropInputProps}
-                getRootProps={getDragAndDropRootProps}
+                disabled={shouldDisableDropzone}
+                onDrop={setDragAndDropFiles}
             >
                 <NavbarBase
                     sx={{

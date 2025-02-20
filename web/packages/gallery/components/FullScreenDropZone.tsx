@@ -1,3 +1,4 @@
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton, Stack, styled, Typography } from "@mui/material";
 import { t } from "i18next";
@@ -64,12 +65,15 @@ export const FullScreenDropZone: React.FC<
     const [isDropPending, setIsDropPending] = useState(false);
 
     const handleDragEnter = useCallback(() => {
-        setIsDropPending(true);
         setIsDragActive(true);
     }, []);
 
+    const handleOverlayDrop = useCallback(() => {
+        setIsDropPending(true);
+        setIsDragActive(false);
+    }, []);
+
     const handleDragLeave = useCallback(() => {
-        setIsDropPending(false);
         setIsDragActive(false);
     }, []);
 
@@ -91,16 +95,21 @@ export const FullScreenDropZone: React.FC<
             >
                 {(isDragActive || isDropPending) && (
                     <DropZoneOverlay
-                        onDrop={handleDragLeave}
+                        onDrop={handleOverlayDrop}
                         onDragLeave={handleDragLeave}
                     >
-                        <CloseButton onClick={handleDragLeave}>
+                        <CloseButton
+                            disabled={isDropPending}
+                            onClick={handleDragLeave}
+                        >
                             <CloseIcon />
                         </CloseButton>
                         <Typography variant="h3">
-                            {isDropPending
-                                ? "Processing..."
-                                : (message ?? t("upload_dropzone_hint"))}
+                            {isDropPending ? (
+                                <ActivityIndicator />
+                            ) : (
+                                (message ?? t("upload_dropzone_hint"))
+                            )}
                         </Typography>
                     </DropZoneOverlay>
                 )}
@@ -125,6 +134,7 @@ const DropZoneOverlay = styled(Stack)(
     border-style: solid;
     border-color: ${theme.vars.palette.accent.light};
     background-color: ${theme.vars.palette.backdrop.base};
+    backdrop-filter: blur(10px);
     z-index: 2000; /* aboveFileViewerContentZ + delta */
 `,
 );

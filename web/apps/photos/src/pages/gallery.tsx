@@ -187,10 +187,10 @@ const Page: React.FC = () => {
         useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
-    const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
     const [dragAndDropFiles, setDragAndDropFiles] = useState<FileWithPath[]>(
         [],
     );
+    const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
 
     const syncInProgress = useRef(false);
     const syncInterval = useRef<ReturnType<typeof setInterval> | undefined>(
