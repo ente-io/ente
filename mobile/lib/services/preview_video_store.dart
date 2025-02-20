@@ -73,11 +73,13 @@ class PreviewVideoStore {
 
   Future<void> setIsVideoStreamingEnabled(bool value) async {
     final oneMonthBack = DateTime.now().subtract(const Duration(days: 30));
-    await _prefs.setBool(_videoStreamingEnabled, value);
-    await _prefs.setInt(
-      _videoStreamingCutoff,
-      oneMonthBack.millisecondsSinceEpoch,
-    );
+    _prefs.setBool(_videoStreamingEnabled, value).ignore();
+    _prefs
+        .setInt(
+          _videoStreamingCutoff,
+          oneMonthBack.millisecondsSinceEpoch,
+        )
+        .ignore();
     Bus.instance.fire(VideoStreamingChanged());
 
     if (isVideoStreamingEnabled) {
@@ -663,23 +665,24 @@ class PreviewVideoStore {
     }).toList();
 
     // set all video status to in queue
-    for (final enteFile in allFiles) {
+    final n = allFiles.length;
+    for (int i = 0; i < n; i++) {
+      final enteFile = allFiles[i];
       // elimination case for <=10 MB with H.264
       final (_, result, _) = await _checkFileForPreviewCreation(enteFile);
       if (result) {
-        allFiles.remove(enteFile);
-        continue;
+        allFiles.removeAt(i);
+      } else {
+        _items[enteFile.uploadedFileID!] = PreviewItem(
+          status: PreviewItemStatus.inQueue,
+          file: enteFile,
+          collectionID: enteFile.collectionID ?? 0,
+        );
       }
-
-      _items[enteFile.uploadedFileID!] = PreviewItem(
-        status: PreviewItemStatus.inQueue,
-        file: enteFile,
-        collectionID: enteFile.collectionID ?? 0,
-      );
     }
     Bus.instance.fire(PreviewUpdatedEvent(_items));
 
-    _logger.info("[init] Processing ${_items.length} items for streaming");
+    _logger.info("[init] Processing ${allFiles.length} items for streaming");
 
     // take first file and put it for stream generation
     final file = allFiles.removeAt(0);
