@@ -3,7 +3,6 @@
 import 'dart:async';
 
 import "package:chewie/chewie.dart";
-import "package:chewie/src/helpers/utils.dart";
 import "package:chewie/src/notifiers/index.dart";
 import 'package:flutter/material.dart';
 import "package:photos/models/file/file.dart";
@@ -12,6 +11,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/preview_status_widget.dart";
 import "package:photos/ui/viewer/file/video_control/custom_progress_bar.dart";
+import "package:photos/utils/seconds_to_duration.dart";
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
@@ -155,7 +155,7 @@ class _VideoControlsState extends State<VideoControls>
       duration: const Duration(milliseconds: 300),
       child: Container(
         height: 40,
-        margin: const EdgeInsets.only(bottom: 60),
+        margin: const EdgeInsets.only(bottom: 60, left: 8, right: 8),
         child: Container(
           padding: const EdgeInsets.fromLTRB(
             16,
@@ -176,7 +176,7 @@ class _VideoControlsState extends State<VideoControls>
           child: Row(
             children: [
               Text(
-                formatDuration(_latestValue.position),
+                secondsToDuration(_latestValue.position.inSeconds),
                 style: getEnteTextTheme(
                   context,
                 ).mini.copyWith(
@@ -189,9 +189,7 @@ class _VideoControlsState extends State<VideoControls>
               ),
               const SizedBox(width: 16),
               Text(
-                formatDuration(
-                  _latestValue.duration,
-                ),
+                secondsToDuration(_latestValue.duration.inSeconds),
                 style: getEnteTextTheme(
                   context,
                 ).mini.copyWith(
@@ -221,8 +219,6 @@ class _VideoControlsState extends State<VideoControls>
             _cancelAndRestartTimer();
           }
         } else {
-          _playPause();
-
           setState(() {
             notifier.hideStuff = true;
           });
@@ -231,8 +227,7 @@ class _VideoControlsState extends State<VideoControls>
       },
       child: Container(
         alignment: Alignment.center,
-        color: Colors
-            .transparent, // The Gesture Detector doesn't expand to the full size of the container without this; Not sure why!
+        color: Colors.transparent,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -292,7 +287,6 @@ class _VideoControlsState extends State<VideoControls>
     setState(() {
       if (controller.value.isPlaying) {
         notifier.hideStuff = false;
-        widget.playbackCallback?.call(notifier.hideStuff);
         _hideTimer?.cancel();
         controller.pause();
       } else {
@@ -309,6 +303,7 @@ class _VideoControlsState extends State<VideoControls>
           controller.play();
         }
       }
+      widget.playbackCallback?.call(notifier.hideStuff);
     });
   }
 
@@ -319,8 +314,8 @@ class _VideoControlsState extends State<VideoControls>
     _hideTimer = Timer(hideControlsTimer, () {
       setState(() {
         notifier.hideStuff = true;
-        widget.playbackCallback?.call(notifier.hideStuff);
       });
+      widget.playbackCallback?.call(notifier.hideStuff);
     });
   }
 
