@@ -265,7 +265,7 @@ class SmartMemoriesService {
           await MLDataDB.instance.getFacesForFileIDs(
         personFileIDs,
       );
-      // Inside people loop, check for spotlight
+      // Inside people loop, check for spotlight (Most likely every person will have a spotlight)
       final spotlightFiles = <EnteFile>[];
       for (final fileID in personFileIDs) {
         final int personsPresent = personFilesToFaces[fileID]?.length ?? 10;
