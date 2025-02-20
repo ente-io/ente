@@ -61,7 +61,8 @@ class _LinkContactToPersonSelectionPageState
             (person.data.isHidden || person.data.isIgnored)) {
           continue;
         }
-        final file = await PersonService.instance.getRecentFileOfPerson(person);
+        final file =
+            await PersonService.instance.getThumbnailFileOfPerson(person);
         result.add(PersonEntityWithThumbnailFile(person, file));
       }
       return result;
@@ -70,6 +71,7 @@ class _LinkContactToPersonSelectionPageState
 
   @override
   Widget build(BuildContext context) {
+    _logger.info("Building LinkContactToPersonSelectionPage");
     final smallFontSize = getEnteTextTheme(context).small.fontSize!;
     final textScaleFactor =
         MediaQuery.textScalerOf(context).scale(smallFontSize) / smallFontSize;
@@ -88,6 +90,10 @@ class _LinkContactToPersonSelectionPageState
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: EnteLoadingWidget());
           } else if (snapshot.hasError) {
+            _logger.severe(
+              "Failed to load _personEntitiesWithThumnailFile",
+              snapshot.error,
+            );
             return const Center(child: Icon(Icons.error_outline_rounded));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text(S.of(context).noResultsFound + '.'));
@@ -229,7 +235,8 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
             (person.data.isHidden || person.data.isIgnored)) {
           continue;
         }
-        final file = await PersonService.instance.getRecentFileOfPerson(person);
+        final file =
+            await PersonService.instance.getThumbnailFileOfPerson(person);
         result.add(PersonEntityWithThumbnailFile(person, file));
       }
       return result;
@@ -238,6 +245,7 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    _logger.info("Building ReassignMeSelectionPage");
     final smallFontSize = getEnteTextTheme(context).small.fontSize!;
     final textScaleFactor =
         MediaQuery.textScalerOf(context).scale(smallFontSize) / smallFontSize;
@@ -256,6 +264,10 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: EnteLoadingWidget());
           } else if (snapshot.hasError) {
+            _logger.severe(
+              "Failed to load _personEntitiesWithThumnailFile",
+              snapshot.error,
+            );
             return const Center(child: Icon(Icons.error_outline_rounded));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text(S.of(context).noResultsFound + '.'));
