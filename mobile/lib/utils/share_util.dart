@@ -47,12 +47,6 @@ Future<void> share(
       pathFutures.add(
         getFile(file, isOrigin: true).then((fetchedFile) => fetchedFile?.path),
       );
-      if (file.fileType == FileType.livePhoto) {
-        pathFutures.add(
-          getFile(file, liveVideo: true)
-              .then((fetchedFile) => fetchedFile?.path),
-        );
-      }
     }
     final paths = await Future.wait(pathFutures);
     await dialog.hide();
