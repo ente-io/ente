@@ -2,9 +2,9 @@ import "package:photos/models/memory.dart";
 import "package:photos/models/smart_memory.dart";
 
 enum PeopleMemoryType {
-  spotlight,
   youAndThem,
   doingSomethingTogether,
+  spotlight,
   lastTimeYouSawThem,
 }
 
