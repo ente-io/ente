@@ -20,7 +20,10 @@ import {
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
-import { useModalVisibility } from "@/base/components/utils/modal";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { isDevBuild } from "@/base/env";
 import {
@@ -125,27 +128,25 @@ import exportService from "services/export";
 import { testUpload } from "../../tests/upload.test";
 import { SubscriptionCard } from "./SubscriptionCard";
 
-interface SidebarProps {
+type SidebarProps = ModalVisibilityProps & {
     collectionSummaries: CollectionSummaries;
-    sidebarView: boolean;
-    closeSidebar: () => void;
-}
+};
 
 export const Sidebar: React.FC<SidebarProps> = ({
+    open,
+    onClose,
     collectionSummaries,
-    sidebarView,
-    closeSidebar,
 }) => (
-    <RootSidebarDrawer open={sidebarView} onClose={closeSidebar}>
-        <HeaderSection closeSidebar={closeSidebar} />
-        <UserDetailsSection sidebarView={sidebarView} />
+    <RootSidebarDrawer open={open} onClose={onClose}>
+        <HeaderSection closeSidebar={onClose} />
+        <UserDetailsSection sidebarView={open} />
         <Stack sx={{ gap: 0.5, mb: 3 }}>
             <ShortcutSection
-                closeSidebar={closeSidebar}
+                closeSidebar={onClose}
                 collectionSummaries={collectionSummaries}
             />
-            <UtilitySection closeSidebar={closeSidebar} />
-            <HelpSection closeSidebar={closeSidebar} />
+            <UtilitySection closeSidebar={onClose} />
+            <HelpSection closeSidebar={onClose} />
             <Divider sx={{ my: "2px" }} />
             <ExitSection />
             <InfoSection />
