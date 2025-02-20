@@ -378,13 +378,15 @@ class SmartMemoriesService {
             longAgo = false;
             break fileLoop;
           }
-          if (creationTime > lastCreationTime) {
+          if (creationTime > lastCreationTime - microSecondsInDay) {
             final lastDateTime =
                 DateTime.fromMicrosecondsSinceEpoch(lastCreationTime);
             if (creationDateTime.difference(lastDateTime).inHours > 24) {
               lastTimeYouSawThemFiles.clear();
             }
-            lastCreationTime = creationTime;
+            if (creationTime > lastCreationTime) {
+              lastCreationTime = creationTime;
+            }
             lastTimeYouSawThemFiles.add(file);
           }
         }
