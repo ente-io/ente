@@ -239,7 +239,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
         .init(preferences, NetworkClient.instance.enteDio, packageInfo);
 
     if (!isBackground) {
-      VideoPlayerMediaKit.ensureInitialized(iOS: true);
+      VideoPlayerMediaKit.ensureInitialized(iOS: true, android: true);
     }
 
     _logger.info("UserService init $tlog");

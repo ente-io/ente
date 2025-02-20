@@ -244,6 +244,7 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
       }
     });
     _chewieController = ChewieController(
+      progressIndicatorDelay: const Duration(milliseconds: 200),
       videoPlayerController: _videoPlayerController!,
       aspectRatio: _videoPlayerController!.value.aspectRatio,
       autoPlay: widget.autoPlay!,
@@ -254,6 +255,7 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
       customControls: VideoControls(
         file: widget.file,
         onStreamChange: widget.onStreamChange,
+        playbackCallback: widget.playbackCallback,
       ),
     );
     return Container(

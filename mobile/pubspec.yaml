@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.9.99+999
+version: 0.9.99+1002
 publish_to: none
 
 environment:
@@ -31,7 +31,7 @@ dependencies:
   chewie:
     git:
       url: https://github.com/ente-io/chewie.git
-      ref: forked_video_player_plus
+      ref: mybranched
   collection: # dart
   computer:
     git: "https://github.com/ente-io/computer.git"
@@ -144,7 +144,7 @@ dependencies:
       url: https://github.com/ente-io/onnxruntime.git
       ref: ios_only
   open_mail_app: ^0.4.5
-  package_info_plus: ^4.1.0
+  package_info_plus: ^8.2.1
   page_transition: ^2.0.2
   panorama:
     git:
