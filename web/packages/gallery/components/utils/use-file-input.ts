@@ -71,7 +71,8 @@ export const useFileInput = ({
         // https://github.com/facebook/react/issues/27858
         inputRef.current!.addEventListener("cancel", onCancel);
         return () => {
-            inputRef.current!.removeEventListener("cancel", onCancel);
+            // Use optional chaining to avoid spurious errors during HMR.
+            inputRef.current?.removeEventListener("cancel", onCancel);
         };
     }, [onCancel]);
 
