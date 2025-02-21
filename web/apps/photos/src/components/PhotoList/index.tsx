@@ -828,9 +828,7 @@ export function PhotoList({
         console.timeEnd("c2");
         console.time("c3");
 
-        filesOnADay.forEach((file) => {
-            handleSelect(file)(isDateSelected);
-        });
+        handleSelect(filesOnADay)(isDateSelected);
 
         console.timeEnd("c3");
     };

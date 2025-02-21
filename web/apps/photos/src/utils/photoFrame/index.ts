@@ -143,7 +143,7 @@ export const handleSelectCreatorMulti =
         activeCollectionID: number,
         activePersonID: string | undefined,
     ) =>
-    ({ id, ownerID }: { id: number; ownerID: number }) =>
+    (files: { id: number; ownerID: number }[]) =>
     (checked: boolean) => {
         setSelected((selected) => {
             if (!mode) {
@@ -224,35 +224,30 @@ export const handleSelectCreatorMulti =
                   ? { mode, personID: activePersonID! }
                   : { mode, collectionID: activeCollectionID! };
 
-            const handleCounterChange = (count: number) => {
-                if (selected[id] === checked) {
-                    return count;
-                }
-                if (checked) {
-                    return count + 1;
-                } else {
-                    return count - 1;
-                }
-            };
+            const newSelected = { ...selected };
+            let newCount = selected.count;
+            let newOwnCount = selected.ownCount;
 
-            const handleAllCounterChange = () => {
-                if (ownerID === userID) {
-                    return {
-                        ownCount: handleCounterChange(selected.ownCount),
-                        count: handleCounterChange(selected.count),
-                    };
-                } else {
-                    return {
-                        count: handleCounterChange(selected.count),
-                    };
+            if (checked) {
+                for (const file of files) {
+                    newSelected[file.id] = true;
+                    newCount++;
+                    if (file.ownerID === userID) newOwnCount++;
                 }
-            };
+            } else {
+                for (const file of files) {
+                    newSelected[file.id] = false;
+                    newCount--;
+                    if (file.ownerID === userID) newOwnCount--;
+                }
+            }
+
             return {
-                ...selected,
-                [id]: checked,
+                ...newSelected,
+                count: newCount,
+                ownCount: newOwnCount,
                 collectionID: activeCollectionID,
                 context: newContext,
-                ...handleAllCounterChange(),
             };
         });
     };
