@@ -34,6 +34,8 @@ export type FileViewerProps = ModalVisibilityProps & {
      *
      * - If we're running in the context of the public albums app, then this
      *   should not be set.
+     *
+     * See: [Note: Gallery children can assume user]
      */
     user?: LocalUser;
     /**
