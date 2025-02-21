@@ -742,8 +742,6 @@ export function PhotoList({
         // Nothing to do here if nothing is selected.
         if (!galleryContext.selectedFile) return;
 
-        console.time("t6");
-
         const notSelectedFiles = (displayFiles ?? []).filter(
             (item) => !galleryContext.selectedFile[item.id],
         );
@@ -762,8 +760,6 @@ export function PhotoList({
         ); // to get file's date which were manually selected
 
         setCheckedTimelineDateStrings((prev) => {
-            console.time("s1");
-
             const checked = new Set(prev);
             // Uncheck the "Select all" checkbox if any of the files on the date
             // is unselected.
@@ -771,26 +767,8 @@ export function PhotoList({
             // Check the "Select all" checkbox if all of the files on a date are
             // selected.
             localSelectedDates.forEach((date) => checked.add(date));
-            console.timeEnd("s1");
-
             return checked;
         });
-        // unselectedDates.forEach((date) => {
-        //     setCheckedDates((prev) => ({
-        //         ...prev,
-        //         [date]: false,
-        //     }));
-        // });
-
-        // localSelectedDates.forEach((date) => {
-        //     setCheckedDates((prev) => ({
-        //         ...prev,
-        //         [date]: true,
-        //     }));
-
-        // });
-
-        console.timeEnd("t6");
     }, [galleryContext.selectedFile]);
 
     const handleSelect = handleSelectCreatorMulti(
@@ -802,9 +780,6 @@ export function PhotoList({
     );
 
     const onChangeSelectAllCheckBox = (date: string) => {
-        console.time("c1");
-
-        // const dates = { ...checkedDates, [date]: !checkedDates[date] };
         const next = new Set(checkedTimelineDateStrings);
         let isDateSelected: boolean;
         if (!next.has(date)) {
@@ -814,23 +789,13 @@ export function PhotoList({
             next.delete(date);
             isDateSelected = false;
         }
-        // const isDateSelected = !checkedDates[date];
-
-        // setCheckedDates(dates);
         setCheckedTimelineDateStrings(next);
-        console.timeEnd("c1");
-        console.time("c2");
 
         const filesOnADay = displayFiles?.filter(
             (item) => item.timelineDateString === date,
         ); // all files on a checked/unchecked day
 
-        console.timeEnd("c2");
-        console.time("c3");
-
         handleSelect(filesOnADay)(isDateSelected);
-
-        console.timeEnd("c3");
     };
 
     const renderListItem = (
@@ -850,7 +815,6 @@ export function PhotoList({
                                     <Checkbox
                                         key={item.date}
                                         name={item.date}
-                                        // checked={!!checkedDates[item.date]}
                                         checked={checkedTimelineDateStrings.has(
                                             item.date,
                                         )}
@@ -872,7 +836,6 @@ export function PhotoList({
                             <Checkbox
                                 key={listItem.date}
                                 name={listItem.date}
-                                // checked={!!checkedDates[listItem.date]}
                                 checked={checkedTimelineDateStrings.has(
                                     listItem.date,
                                 )}
