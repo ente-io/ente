@@ -1,4 +1,5 @@
 import log from "@/base/log";
+import type { FileInfoProps } from "@/gallery/components/FileInfo";
 import {
     downloadManager,
     type LivePhotoSourceURL,
@@ -11,7 +12,7 @@ import { FileViewer } from "@/new/photos/components/FileViewerComponents";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
 import { styled } from "@mui/material";
-import { PhotoViewer, type PhotoViewerProps } from "components/PhotoViewer";
+import { PhotoViewer } from "components/PhotoViewer";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import PhotoSwipe from "photoswipe";
@@ -67,7 +68,13 @@ export type DisplayFile = EnteFile & {
     canForceConvert?: boolean;
 };
 
-export interface PhotoFrameProps {
+export type PhotoFrameProps = Pick<
+    FileInfoProps,
+    | "fileCollectionIDs"
+    | "allCollectionsNameByID"
+    | "onSelectCollection"
+    | "onSelectPerson"
+> & {
     mode?: GalleryBarMode;
     /**
      * This is an experimental prop, to see if we can merge the separate
@@ -112,15 +119,12 @@ export interface PhotoFrameProps {
     /** This will be set if mode is "people". */
     activePersonID?: string | undefined;
     enableDownload?: boolean;
-    fileCollectionIDs?: Map<number, number[]>;
-    allCollectionsNameByID?: Map<number, string>;
     showAppDownloadBanner?: boolean;
     setIsPhotoSwipeOpen?: (value: boolean) => void;
     isInHiddenSection?: boolean;
     setFilesDownloadProgressAttributesCreator?: SetFilesDownloadProgressAttributesCreator;
     selectable?: boolean;
-    onSelectPerson?: PhotoViewerProps["onSelectPerson"];
-}
+};
 
 /**
  * TODO: Rename me to FileListWithViewer (or Gallery?)
@@ -145,6 +149,7 @@ const PhotoFrame = ({
     isInHiddenSection,
     setFilesDownloadProgressAttributesCreator,
     selectable,
+    onSelectCollection,
     onSelectPerson,
 }: PhotoFrameProps) => {
     const [open, setOpen] = useState(false);
@@ -524,6 +529,12 @@ const PhotoFrame = ({
                     onClose={handleClose}
                     files={files}
                     initialIndex={currentIndex}
+                    {...{
+                        fileCollectionIDs,
+                        allCollectionsNameByID,
+                        onSelectCollection,
+                        onSelectPerson,
+                    }}
                 />
             )}
             <AutoSizer>
@@ -555,9 +566,10 @@ const PhotoFrame = ({
                     favoriteFileIDs,
                     markUnsyncedFavoriteUpdate,
                     markTempDeleted,
-                    allCollectionsNameByID,
-                    fileCollectionIDs,
                     setFilesDownloadProgressAttributesCreator,
+                    fileCollectionIDs,
+                    allCollectionsNameByID,
+                    onSelectCollection,
                     onSelectPerson,
                 }}
             />

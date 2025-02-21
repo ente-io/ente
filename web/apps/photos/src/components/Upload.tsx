@@ -1,9 +1,18 @@
 import { isDesktop } from "@/base/app";
-import { useModalVisibility } from "@/base/components/utils/modal";
+import { SpacedRow } from "@/base/components/containers";
+import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { RowButton } from "@/base/components/RowButton";
+import { useIsTouchscreen } from "@/base/components/utils/hooks";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { basename } from "@/base/file-name";
 import log from "@/base/log";
 import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
+import { useFileInput } from "@/gallery/components/utils/use-file-input";
 import type {
     FileAndPath,
     UploadItem,
@@ -21,11 +30,31 @@ import { redirectToCustomerPortal } from "@/new/photos/services/user-details";
 import { usePhotosAppContext } from "@/new/photos/types/context";
 import { firstNonEmpty } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
+import GoogleIcon from "@mui/icons-material/Google";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
+import PermMediaOutlinedIcon from "@mui/icons-material/PermMediaOutlined";
+import {
+    Box,
+    CircularProgress,
+    Dialog,
+    DialogTitle,
+    Link,
+    Stack,
+    Typography,
+    type DialogProps,
+} from "@mui/material";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import { useContext, useEffect, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 import { Trans } from "react-i18next";
 import {
     getPublicCollectionUID,
@@ -44,20 +73,12 @@ import watcher from "services/watch";
 import { SetLoading } from "types/gallery";
 import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
+import { SetCollectionNamerAttributes } from "./Collections/CollectionNamer";
 import { UploadProgress } from "./UploadProgress";
-import {
-    UploadTypeSelector,
-    type UploadTypeSelectorIntent,
-} from "./UploadTypeSelector";
 
-enum PICKED_UPLOAD_TYPE {
-    FILES = "files",
-    FOLDERS = "folders",
-    ZIPS = "zips",
-}
+export type UploadTypeSelectorIntent = "upload" | "import" | "collect";
 
-interface Props {
+interface UploadProps {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     closeUploadTypeSelector: () => void;
     /**
@@ -80,35 +101,36 @@ interface Props {
      * @param file The newly uploaded file.
      */
     onUploadFile: (file: EnteFile) => void;
+    /**
+     * Called when the plan selection modal should be shown.
+     *
+     * It is optional because {@link Upload} is also used by the public albums
+     * app, where the scenario requiring this will not arise.
+     */
+    onShowPlanSelector?: () => void;
     setCollections?: (cs: Collection[]) => void;
     isFirstUpload?: boolean;
     uploadTypeSelectorView: boolean;
     showSessionExpiredMessage: () => void;
     dragAndDropFiles: File[];
-    openFileSelector: () => void;
-    fileSelectorFiles: File[];
-    openFolderSelector: () => void;
-    folderSelectorFiles: File[];
-    openZipFileSelector?: () => void;
-    fileSelectorZipFiles?: File[];
     uploadCollection?: Collection;
     uploadTypeSelectorIntent: UploadTypeSelectorIntent;
     activeCollection?: Collection;
 }
 
-export default function Uploader({
+type UploadType = "files" | "folders" | "zips";
+
+/**
+ * Top level component that houses the infrastructure for handling uploads.
+ */
+export const Upload: React.FC<UploadProps> = ({
     isFirstUpload,
     dragAndDropFiles,
-    openFileSelector,
-    fileSelectorFiles,
-    openFolderSelector,
-    folderSelectorFiles,
-    openZipFileSelector,
-    fileSelectorZipFiles,
     onUploadFile,
+    onShowPlanSelector,
     showSessionExpiredMessage,
     ...props
-}: Props) {
+}) => {
     const { showMiniDialog } = useBaseContext();
     const { showNotification, onGenericError, watchFolderView } =
         usePhotosAppContext();
@@ -135,7 +157,7 @@ export default function Uploader({
     const [openCollectionMappingChoice, setOpenCollectionMappingChoice] =
         useState(false);
     const [importSuggestion, setImportSuggestion] = useState<ImportSuggestion>(
-        DEFAULT_IMPORT_SUGGESTION,
+        defaultImportSuggestion,
     );
     const {
         show: showUploaderNameInput,
@@ -209,12 +231,70 @@ export default function Uploader({
      * This is set to thue user's choice when the user chooses one of the
      * predefined type to upload from the upload type selector dialog
      */
-    const pickedUploadType = useRef<PICKED_UPLOAD_TYPE>(null);
+    const selectedUploadType = useRef<UploadType | undefined>(undefined);
 
     const currentUploadPromise = useRef<Promise<void> | undefined>(undefined);
     const uploadRunning = useRef(false);
     const uploaderNameRef = useRef<string>(null);
     const isDragAndDrop = useRef(false);
+
+    /**
+     * `true` if we've activated one hidden {@link Inputs} that allow the user
+     * to select items, and haven't heard back from the browser as to the
+     * selection (or cancellation).
+     *
+     * [Note: Showing an activity indicator during upload item selection]
+     *
+     * When selecting a large number of items (100K+), the browser can take
+     * significant time (10s+) before it hands back control to us. The
+     * {@link isInputPending} state tracks this intermediate state, and we use
+     * it to show an activity indicator to let that the user know that their
+     * selection is still being processed.
+     */
+    const [isInputPending, setIsInputPending] = useState(false);
+
+    /**
+     * Files that were selected by the user in the last activation of one of the
+     * hidden {@link Inputs}.
+     */
+    const [selectedInputFiles, setSelectedInputFiles] = useState<File[]>([]);
+
+    const handleInputSelect = useCallback((files: File[]) => {
+        setIsInputPending(false);
+        setSelectedInputFiles(files);
+    }, []);
+
+    const handleInputCancel = useCallback(() => {
+        setIsInputPending(false);
+    }, []);
+
+    const {
+        getInputProps: getFileSelectorInputProps,
+        openSelector: openFileSelector,
+    } = useFileInput({
+        directory: false,
+        onSelect: handleInputSelect,
+        onCancel: handleInputCancel,
+    });
+
+    const {
+        getInputProps: getFolderSelectorInputProps,
+        openSelector: openFolderSelector,
+    } = useFileInput({
+        directory: true,
+        onSelect: handleInputSelect,
+        onCancel: handleInputCancel,
+    });
+
+    const {
+        getInputProps: getZipFileSelectorInputProps,
+        openSelector: openZipFileSelector,
+    } = useFileInput({
+        directory: false,
+        accept: ".zip",
+        onSelect: handleInputSelect,
+        onCancel: handleInputCancel,
+    });
 
     const electron = globalThis.electron;
 
@@ -300,17 +380,11 @@ export default function Uploader({
         let files: File[];
         isDragAndDrop.current = false;
 
-        switch (pickedUploadType.current) {
-            case PICKED_UPLOAD_TYPE.FILES:
-                files = fileSelectorFiles;
-                break;
-
-            case PICKED_UPLOAD_TYPE.FOLDERS:
-                files = folderSelectorFiles;
-                break;
-
-            case PICKED_UPLOAD_TYPE.ZIPS:
-                files = fileSelectorZipFiles;
+        switch (selectedUploadType.current) {
+            case "files":
+            case "folders":
+            case "zips":
+                files = selectedInputFiles;
                 break;
 
             default:
@@ -329,12 +403,7 @@ export default function Uploader({
         } else {
             setWebFiles(files);
         }
-    }, [
-        dragAndDropFiles,
-        fileSelectorFiles,
-        folderSelectorFiles,
-        fileSelectorZipFiles,
-    ]);
+    }, [selectedInputFiles, dragAndDropFiles]);
 
     // Trigger an upload when any of the dependencies change.
     useEffect(() => {
@@ -397,7 +466,7 @@ export default function Uploader({
         }
 
         const importSuggestion = getImportSuggestion(
-            pickedUploadType.current,
+            selectedUploadType.current,
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             prunedItemAndPaths.map(([_, p]) => p),
         );
@@ -406,8 +475,8 @@ export default function Uploader({
         log.debug(() => ["Upload request", uploadItemsAndPaths.current]);
         log.debug(() => ["Import suggestion", importSuggestion]);
 
-        const _pickedUploadType = pickedUploadType.current;
-        pickedUploadType.current = null;
+        const _selectedUploadType = selectedUploadType.current;
+        selectedUploadType.current = null;
         props.setLoading(false);
 
         (async () => {
@@ -436,7 +505,7 @@ export default function Uploader({
                 return;
             }
 
-            if (electron && _pickedUploadType === PICKED_UPLOAD_TYPE.ZIPS) {
+            if (electron && _selectedUploadType == "zips") {
                 uploadFilesToNewCollections("parent");
                 return;
             }
@@ -664,7 +733,7 @@ export default function Uploader({
                     captionFirst: true,
                     caption: t("storage_quota_exceeded"),
                     title: t("upgrade_now"),
-                    onClick: galleryContext.showPlanSelectorModal,
+                    onClick: onShowPlanSelector,
                     startIcon: <DiscFullIcon />,
                 });
                 break;
@@ -693,24 +762,25 @@ export default function Uploader({
         uploadManager.cancelRunningUpload();
     };
 
-    const handleUpload = (type: PICKED_UPLOAD_TYPE) => {
-        pickedUploadType.current = type;
-        if (type === PICKED_UPLOAD_TYPE.FILES) {
-            openFileSelector();
-        } else if (type === PICKED_UPLOAD_TYPE.FOLDERS) {
-            openFolderSelector();
-        } else {
-            if (openZipFileSelector && electron) {
-                openZipFileSelector();
-            } else {
-                showMiniDialog(downloadAppDialogAttributes());
-            }
+    const handleUploadTypeSelect = (type: UploadType) => {
+        selectedUploadType.current = type;
+        setIsInputPending(true);
+        switch (type) {
+            case "files":
+                openFileSelector();
+                break;
+            case "folders":
+                openFolderSelector();
+                break;
+            case "zips":
+                if (electron) {
+                    openZipFileSelector();
+                } else {
+                    showMiniDialog(downloadAppDialogAttributes());
+                }
+                break;
         }
     };
-
-    const handleFileUpload = () => handleUpload(PICKED_UPLOAD_TYPE.FILES);
-    const handleFolderUpload = () => handleUpload(PICKED_UPLOAD_TYPE.FOLDERS);
-    const handleZipUpload = () => handleUpload(PICKED_UPLOAD_TYPE.ZIPS);
 
     const handlePublicUpload = async (
         uploaderName: string,
@@ -775,6 +845,13 @@ export default function Uploader({
 
     return (
         <>
+            <Inputs
+                {...{
+                    getFileSelectorInputProps,
+                    getFolderSelectorInputProps,
+                    getZipFileSelectorInputProps,
+                }}
+            />
             <CollectionMappingChoice
                 open={openCollectionMappingChoice}
                 onClose={handleCollectionMappingChoiceClose}
@@ -784,9 +861,10 @@ export default function Uploader({
                 open={props.uploadTypeSelectorView}
                 onClose={props.closeUploadTypeSelector}
                 intent={props.uploadTypeSelectorIntent}
-                uploadFiles={handleFileUpload}
-                uploadFolders={handleFolderUpload}
-                uploadGoogleTakeoutZips={handleZipUpload}
+                pendingUploadType={
+                    isInputPending ? selectedUploadType.current : undefined
+                }
+                onSelect={handleUploadTypeSelect}
             />
             <UploadProgress
                 open={uploadProgressView}
@@ -810,7 +888,33 @@ export default function Uploader({
             />
         </>
     );
+};
+
+type GetInputProps = () => React.HTMLAttributes<HTMLInputElement>;
+
+interface InputsProps {
+    getFileSelectorInputProps: GetInputProps;
+    getFolderSelectorInputProps: GetInputProps;
+    getZipFileSelectorInputProps: GetInputProps;
 }
+
+/**
+ * Create a bunch of HTML inputs elements, one each for the given props.
+ *
+ * These hidden input element serve as the way for us to show various file /
+ * folder Selector dialogs and handle drag and drop inputs.
+ */
+const Inputs: React.FC<InputsProps> = ({
+    getFileSelectorInputProps,
+    getFolderSelectorInputProps,
+    getZipFileSelectorInputProps,
+}) => (
+    <>
+        <input {...getFileSelectorInputProps()} />
+        <input {...getFolderSelectorInputProps()} />
+        <input {...getZipFileSelectorInputProps()} />
+    </>
+);
 
 const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {
     const fileAndPaths: FileAndPath[] = [];
@@ -855,25 +959,29 @@ const pathLikeForWebFile = (file: File): string =>
         file.name,
     ])!;
 
-// This is used to prompt the user the make upload strategy choice
+/**
+ * This is used to prompt the user the make upload strategy choice.
+ *
+ * This is derived from the items that the user selected.
+ */
 interface ImportSuggestion {
     rootFolderName: string;
     hasNestedFolders: boolean;
     hasRootLevelFileWithFolder: boolean;
 }
 
-const DEFAULT_IMPORT_SUGGESTION: ImportSuggestion = {
+const defaultImportSuggestion: ImportSuggestion = {
     rootFolderName: "",
     hasNestedFolders: false,
     hasRootLevelFileWithFolder: false,
 };
 
 function getImportSuggestion(
-    uploadType: PICKED_UPLOAD_TYPE,
+    uploadType: UploadType,
     paths: string[],
 ): ImportSuggestion {
-    if (isDesktop && uploadType === PICKED_UPLOAD_TYPE.FILES) {
-        return DEFAULT_IMPORT_SUGGESTION;
+    if (isDesktop && uploadType == "files") {
+        return defaultImportSuggestion;
     }
 
     const separatorCounts = new Map(
@@ -903,6 +1011,7 @@ function getImportSuggestion(
             );
         }
     }
+
     return {
         rootFolderName: commonPathPrefix || null,
         hasNestedFolders: firstFileFolder !== lastFileFolder,
@@ -946,7 +1055,7 @@ const groupFilesBasedOnParentFolder = (
     return result;
 };
 
-export const setPendingUploads = async (
+const setPendingUploads = async (
     electron: Electron,
     collections: Collection[],
     uploadItems: UploadItem[],
@@ -981,3 +1090,253 @@ export const setPendingUploads = async (
 
     await electron.setPendingUploads({ collectionName, filePaths, zipItems });
 };
+
+type UploadTypeSelectorProps = ModalVisibilityProps & {
+    /**
+     * The particular context / scenario in which this upload is occuring.
+     */
+    intent: UploadTypeSelectorIntent;
+    /**
+     * If we're waiting on the user to select items using a previously activated
+     * file input, then this will be set to the type of that input.
+     */
+    pendingUploadType: UploadType | undefined;
+    /**
+     * Called when the user selects one of the options.
+     */
+    onSelect: (type: UploadType) => void;
+};
+
+/**
+ * Request the user to specify which type of file / folder / zip it is that they
+ * wish to upload.
+ *
+ * This selector (and the "Upload" button) is functionally redundant, the user
+ * can just drag and drop any of these into the app to directly initiate the
+ * upload. But having an explicit easy to reach button is also necessary for new
+ * users, or for cases where drag-and-drop might not be appropriate.
+ */
+const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
+    open,
+    onClose,
+    intent,
+    pendingUploadType,
+    onSelect,
+}) => {
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext,
+    );
+
+    // Directly show the file selector for the public albums app on likely
+    // mobile devices.
+    const directlyShowUploadFiles = useIsTouchscreen();
+
+    useEffect(() => {
+        if (
+            open &&
+            directlyShowUploadFiles &&
+            publicCollectionGalleryContext.credentials
+        ) {
+            onSelect("files");
+            onClose();
+        }
+    }, [open]);
+
+    const handleClose: DialogProps["onClose"] = (_, reason) => {
+        // Disable backdrop clicks and esc keypresses if a selection is pending
+        // processing so that the user doesn't inadvertently close the dialog.
+        if (
+            pendingUploadType &&
+            (reason == "backdropClick" || reason == "escapeKeyDown")
+        ) {
+            return;
+        }
+        onClose();
+    };
+
+    return (
+        <Dialog
+            open={open}
+            onClose={handleClose}
+            fullWidth
+            slotProps={{
+                paper: {
+                    sx: (theme) => ({
+                        maxWidth: "375px",
+                        p: 1,
+                        [theme.breakpoints.down(360)]: { p: 0 },
+                    }),
+                },
+            }}
+        >
+            <UploadOptions
+                {...{ intent, pendingUploadType, onSelect, onClose }}
+            />
+        </Dialog>
+    );
+};
+
+type UploadOptionsProps = Pick<
+    UploadTypeSelectorProps,
+    "onClose" | "intent" | "pendingUploadType" | "onSelect"
+>;
+
+const UploadOptions: React.FC<UploadOptionsProps> = ({
+    intent,
+    pendingUploadType,
+    onSelect,
+    onClose,
+}) => {
+    // [Note: Dialog state remains preseved on reopening]
+    //
+    // Keep dialog content specific state here, in a separate component, so that
+    // this state is not tied to the lifetime of the dialog.
+    //
+    // If we don't do this, then a MUI dialog retains whatever it was doing when
+    // it was last closed. Sometimes that is desirable, but sometimes not, and
+    // in the latter cases moving the instance specific state to a child works.
+
+    const [showTakeoutOptions, setShowTakeoutOptions] = useState(false);
+
+    const handleTakeoutClose = () => setShowTakeoutOptions(false);
+
+    const handleSelect = (option: UploadType) => {
+        switch (option) {
+            case "files":
+                onSelect("files");
+                break;
+            case "folders":
+                onSelect("folders");
+                break;
+            case "zips":
+                !showTakeoutOptions
+                    ? setShowTakeoutOptions(true)
+                    : onSelect("zips");
+                break;
+        }
+    };
+
+    return !showTakeoutOptions ? (
+        <DefaultOptions
+            {...{ intent, pendingUploadType, onClose }}
+            onSelect={handleSelect}
+        />
+    ) : (
+        <TakeoutOptions onSelect={handleSelect} onClose={handleTakeoutClose} />
+    );
+};
+
+const DefaultOptions: React.FC<UploadOptionsProps> = ({
+    intent,
+    pendingUploadType,
+    onClose,
+    onSelect,
+}) => {
+    return (
+        <>
+            <SpacedRow>
+                <DialogTitle variant="h5">
+                    {intent == "collect"
+                        ? t("select_photos")
+                        : intent == "import"
+                          ? t("import")
+                          : t("upload")}
+                </DialogTitle>
+                <DialogCloseIconButton {...{ onClose }} />
+            </SpacedRow>
+            <Box sx={{ p: "12px", pt: "16px" }}>
+                <Stack sx={{ gap: 0.5 }}>
+                    {intent != "import" && (
+                        <RowButton
+                            startIcon={<ImageOutlinedIcon />}
+                            endIcon={
+                                pendingUploadType == "files" ? (
+                                    <PendingIndicator />
+                                ) : (
+                                    <ChevronRightIcon />
+                                )
+                            }
+                            label={t("file")}
+                            onClick={() => onSelect("files")}
+                        />
+                    )}
+                    <RowButton
+                        startIcon={<PermMediaOutlinedIcon />}
+                        endIcon={
+                            pendingUploadType == "folders" ? (
+                                <PendingIndicator />
+                            ) : (
+                                <ChevronRightIcon />
+                            )
+                        }
+                        label={t("folder")}
+                        onClick={() => onSelect("folders")}
+                    />
+                    {intent !== "collect" && (
+                        <RowButton
+                            startIcon={<GoogleIcon />}
+                            endIcon={<ChevronRightIcon />}
+                            label={t("google_takeout")}
+                            onClick={() => onSelect("zips")}
+                        />
+                    )}
+                </Stack>
+                <Typography
+                    sx={{
+                        color: "text.muted",
+                        p: "12px",
+                        pt: "24px",
+                        textAlign: "center",
+                    }}
+                >
+                    {t("drag_and_drop_hint")}
+                </Typography>
+            </Box>
+        </>
+    );
+};
+
+const PendingIndicator = () => (
+    <CircularProgress size={18} sx={{ color: "stroke.muted" }} />
+);
+
+const TakeoutOptions: React.FC<
+    Pick<UploadOptionsProps, "onSelect" | "onClose">
+> = ({ onSelect, onClose }) => (
+    <>
+        <SpacedRow>
+            <DialogTitle variant="h5">{t("google_takeout")}</DialogTitle>
+            <DialogCloseIconButton {...{ onClose }} />
+        </SpacedRow>
+        <Stack sx={{ padding: "18px 12px 20px 12px", gap: "16px" }}>
+            <Stack sx={{ gap: "8px" }}>
+                <FocusVisibleButton
+                    color="accent"
+                    fullWidth
+                    onClick={() => onSelect("folders")}
+                >
+                    {t("select_folder")}
+                </FocusVisibleButton>
+                <FocusVisibleButton
+                    color="secondary"
+                    fullWidth
+                    onClick={() => onSelect("zips")}
+                >
+                    {t("select_zips")}
+                </FocusVisibleButton>
+                <Link
+                    href="https://help.ente.io/photos/migration/from-google-photos/"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    <FocusVisibleButton color="secondary" fullWidth>
+                        {t("faq")}
+                    </FocusVisibleButton>
+                </Link>
+            </Stack>
+            <Typography variant="small" sx={{ color: "text.muted" }}>
+                {t("takeout_hint")}
+            </Typography>
+        </Stack>
+    </>
+);

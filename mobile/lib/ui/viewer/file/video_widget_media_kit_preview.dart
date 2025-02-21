@@ -1,7 +1,7 @@
 import "dart:async";
-import "dart:io";
 
 import "package:flutter/material.dart";
+import "package:fluttertoast/fluttertoast.dart";
 import "package:logging/logging.dart";
 import "package:media_kit/media_kit.dart";
 import "package:media_kit_video/media_kit_video.dart";
@@ -9,27 +9,27 @@ import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/pause_video_event.dart";
-import "package:photos/generated/l10n.dart";
-import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/services/files_service.dart";
+import "package:photos/service_locator.dart";
+import "package:photos/services/filedata/filedata_service.dart";
+import "package:photos/services/preview_video_store.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/video_widget_media_kit_common.dart"
     as common;
-import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/data_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/toast_util.dart";
 
-class VideoWidgetMediaKitNew extends StatefulWidget {
+class VideoWidgetMediaKitPreview extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
   final bool isFromMemories;
   final void Function() onStreamChange;
 
-  const VideoWidgetMediaKitNew(
+  const VideoWidgetMediaKitPreview(
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
@@ -39,10 +39,11 @@ class VideoWidgetMediaKitNew extends StatefulWidget {
   });
 
   @override
-  State<VideoWidgetMediaKitNew> createState() => _VideoWidgetMediaKitNewState();
+  State<VideoWidgetMediaKitPreview> createState() =>
+      _VideoWidgetMediaKitPreviewState();
 }
 
-class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
+class _VideoWidgetMediaKitPreviewState extends State<VideoWidgetMediaKitPreview>
     with WidgetsBindingObserver {
   final Logger _logger = Logger("VideoWidgetMediaKitNew");
   late final player = Player();
@@ -61,33 +62,7 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
     );
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    if (widget.file.isRemoteFile) {
-      _loadNetworkVideo();
-      _setFileSizeIfNull();
-    } else if (widget.file.isSharedMediaToAppSandbox) {
-      final localFile = File(getSharedMediaFilePath(widget.file));
-      if (localFile.existsSync()) {
-        _setVideoController(localFile.path);
-      } else if (widget.file.uploadedFileID != null) {
-        _loadNetworkVideo();
-      }
-    } else {
-      widget.file.getAsset.then((asset) async {
-        if (asset == null || !(await asset.exists)) {
-          if (widget.file.uploadedFileID != null) {
-            _loadNetworkVideo();
-          }
-        } else {
-          // ignore: unawaited_futures
-          asset.getMediaUrl().then((url) {
-            _setVideoController(
-              url ??
-                  'https://user-images.githubusercontent.com/28951144/229373695-22f88f13-d18f-4288-9bf1-c3e078d83722.mp4',
-            );
-          });
-        }
-      });
-    }
+    _checkForPreview();
 
     pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
       player.pause();
@@ -98,6 +73,36 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
         _isGuestView = event.isGuestView;
       });
     });
+  }
+
+  Future<void> _checkForPreview() async {
+    widget.playbackCallback?.call(false);
+    final data = await PreviewVideoStore.instance
+        .getPlaylist(widget.file)
+        .onError((error, stackTrace) {
+      if (!mounted) return;
+      _logger.warning("Failed to download preview video", error, stackTrace);
+      Fluttertoast.showToast(msg: "Failed to download preview!");
+      return null;
+    });
+    if (!mounted) return;
+    if (data != null) {
+      if (flagService.internalUser) {
+        final d =
+            FileDataService.instance.previewIds?[widget.file.uploadedFileID!];
+        if (d != null && widget.file.fileSize != null) {
+          // show toast with human readable size
+          final size = formatBytes(widget.file.fileSize!);
+          showToast(
+            context,
+            "[i] Preview OG Size ($size), previewSize: ${formatBytes(d.objectSize)}",
+          );
+        } else {
+          showShortToast(context, "Playing preview");
+        }
+      }
+      _setVideoController(data.preview.path);
+    }
   }
 
   @override
@@ -153,46 +158,6 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
               ),
       ),
     );
-  }
-
-  void _loadNetworkVideo() {
-    getFileFromServer(
-      widget.file,
-      progressCallback: (count, total) {
-        if (!mounted) {
-          return;
-        }
-        _progressNotifier.value = count / (widget.file.fileSize ?? total);
-        if (_progressNotifier.value == 1) {
-          if (mounted) {
-            showShortToast(context, S.of(context).decryptingVideo);
-          }
-        }
-      },
-    ).then((file) {
-      if (file != null) {
-        _setVideoController(file.path);
-      }
-    }).onError((error, stackTrace) {
-      showErrorDialog(
-        context,
-        S.of(context).error,
-        S.of(context).failedToDownloadVideo,
-      );
-    });
-  }
-
-  void _setFileSizeIfNull() {
-    if (widget.file.fileSize == null && widget.file.canEditMetaInfo) {
-      FilesService.instance
-          .getFileSize(widget.file.uploadedFileID!)
-          .then((value) {
-        widget.file.fileSize = value;
-        if (mounted) {
-          setState(() {});
-        }
-      });
-    }
   }
 
   void _setVideoController(String url) {

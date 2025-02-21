@@ -24,8 +24,7 @@ import {
 } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
-import { GalleryContext } from "pages/gallery";
-import React, { useContext, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import { deleteAccount, getAccountDeleteChallenge } from "services/userService";
 import * as Yup from "yup";
@@ -35,13 +34,23 @@ interface FormValues {
     feedback: string;
 }
 
-const DeleteAccountModal: React.FC<ModalVisibilityProps> = ({
+type DeleteAccountProps = ModalVisibilityProps & {
+    /**
+     * Called when the user should be authenticated again.
+     *
+     * Account deletion only proceeds if the promise returned by this function
+     * is fulfilled.
+     */
+    onAuthenticateUser: () => Promise<void>;
+};
+
+export const DeleteAccount: React.FC<DeleteAccountProps> = ({
     open,
     onClose,
+    onAuthenticateUser,
 }) => {
     const { logout, showMiniDialog } = useBaseContext();
     const { onGenericError } = usePhotosAppContext();
-    const { authenticateUser } = useContext(GalleryContext);
 
     const [loading, setLoading] = useState(false);
     const deleteAccountChallenge = useRef<string | undefined>(undefined);
@@ -76,7 +85,7 @@ const DeleteAccountModal: React.FC<ModalVisibilityProps> = ({
             deleteAccountChallenge.current =
                 deleteChallengeResponse.encryptedChallenge;
             if (deleteChallengeResponse.allowDelete) {
-                authenticateUser(confirmAccountDeletion);
+                onAuthenticateUser().then(confirmAccountDeletion);
             } else {
                 askToMailForDeletion();
             }
@@ -212,8 +221,6 @@ const DeleteAccountModal: React.FC<ModalVisibilityProps> = ({
         </TitledMiniDialog>
     );
 };
-
-export default DeleteAccountModal;
 
 /**
  * All of these must have a corresponding localized string nested under the

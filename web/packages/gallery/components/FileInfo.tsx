@@ -124,8 +124,9 @@ export type FileInfoProps = ModalVisibilityProps & {
      * If set, then a clickable chip will be shown for each collection that this
      * file is a part of.
      *
-     * Uses {@link fileCollectionIDs} and {@link allCollectionsNameByID}, so
-     * both of those props should also be set for this to have an effect.
+     * Uses {@link fileCollectionIDs}, {@link allCollectionsNameByID} and
+     * {@link onSelectCollection}, so all of those props should also be set for
+     * this to have an effect.
      */
     showCollections?: boolean;
     /**
@@ -146,11 +147,11 @@ export type FileInfoProps = ModalVisibilityProps & {
      * Called when the user selects a collection from among the collections that
      * the file belongs to.
      */
-    onSelectCollection: (collectionID: number) => void;
+    onSelectCollection?: (collectionID: number) => void;
     /**
      * Called when the user selects a person in the file info panel.
      */
-    onSelectPerson?: ((personID: string) => void) | undefined;
+    onSelectPerson?: (personID: string) => void;
 };
 
 export const FileInfo: React.FC<FileInfoProps> = ({
@@ -315,7 +316,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 )}
                 {showCollections &&
                     fileCollectionIDs &&
-                    allCollectionsNameByID && (
+                    allCollectionsNameByID &&
+                    onSelectCollection && (
                         <InfoItem icon={<FolderOutlinedIcon />}>
                             <Stack
                                 direction="row"

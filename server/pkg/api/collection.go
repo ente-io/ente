@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller/collections"
 	"net/http"
 	"strconv"
 
@@ -18,7 +19,7 @@ import (
 
 // CollectionHandler exposes request handlers for all collection related requests
 type CollectionHandler struct {
-	Controller *controller.CollectionController
+	Controller *collections.CollectionController
 }
 
 // Create creates a collection
@@ -64,25 +65,7 @@ func (h *CollectionHandler) GetCollectionByID(c *gin.Context) {
 // Deprecated: Remove once rps goes to 0.
 // Get returns the list of collections accessible to a user.
 func (h *CollectionHandler) Get(c *gin.Context) {
-	userID := auth.GetUserID(c.Request.Header)
-	sinceTime, _ := strconv.ParseInt(c.Query("sinceTime"), 10, 64)
-
-	app := auth.GetApp(c)
-
-	// TODO: Compute both with a single query
-	ownedCollections, err := h.Controller.GetOwned(userID, sinceTime, app)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, "Failed to get owned collections"))
-		return
-	}
-	sharedCollections, err := h.Controller.GetSharedWith(userID, sinceTime, app)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, "Failed to get shared collections"))
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"collections": append(ownedCollections, sharedCollections...),
-	})
+	h.GetV2(c)
 }
 
 // GetV2 returns the list of collections accessible to a user
