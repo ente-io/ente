@@ -530,14 +530,14 @@
         "tb": "TB"
     },
     "stop": "Stabdyti",
-    "export_progress": "<a>{{progress.success, number}} / {{progress.total, number}}</a> sinchronizuoti elementai",
+    "sync_continuously": "Sinchronizuoti nuolat",
+    "export_starting": "Pradedamas eksportavimas...",
     "preparing": "Ruošiama...",
     "renaming_album_folders": "Pervadinami albumų aplankai...",
     "trashing_deleted_files": "Ištuštiniami ištrinti failai...",
     "trashing_deleted_albums": "Ištuštiniami ištrinti albumai...",
-    "sync_continuously": "Sinchronizuoti nuolat",
+    "export_progress": "<a>{{progress.success, number}} / {{progress.total, number}}</a> sinchronizuoti elementai",
     "pending_items": "Laukiami elementai",
-    "export_starting": "Pradedamas eksportavimas...",
     "delete_account_reason_label": "Kokia yra pagrindinė priežastis, dėl kurios ištrinate savo paskyrą?",
     "delete_account_reason_placeholder": "Pasirinkite priežastį",
     "delete_reason": {

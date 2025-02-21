@@ -530,14 +530,14 @@
         "tb": "TB"
     },
     "stop": "Stoppen",
-    "export_progress": "<a>{{progress.success}} / {{progress.total}}</a> bestanden geëxporteerd",
+    "sync_continuously": "Continue synchroniseren",
+    "export_starting": "Exporteren begonnen...",
     "preparing": "Voorbereiden...",
     "renaming_album_folders": "Albumnamen hernoemen...",
     "trashing_deleted_files": "Verwijderde bestanden naar prullenbak...",
     "trashing_deleted_albums": "Verwijderde albums naar prullenbak...",
-    "sync_continuously": "Continue synchroniseren",
+    "export_progress": "<a>{{progress.success}} / {{progress.total}}</a> bestanden geëxporteerd",
     "pending_items": "Bestanden in behandeling",
-    "export_starting": "Exporteren begonnen...",
     "delete_account_reason_label": "Wat is de belangrijkste reden waarom je jouw account verwijdert?",
     "delete_account_reason_placeholder": "Kies een reden",
     "delete_reason": {

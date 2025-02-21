@@ -530,14 +530,14 @@
         "tb": "TB"
     },
     "stop": "停止",
-    "export_progress": "<a>{{progress.success}} / {{progress.total}}</a> 个文件已导出",
+    "sync_continuously": "持续同步",
+    "export_starting": "导出开始...",
     "preparing": "准备中...",
     "renaming_album_folders": "正在重命名相册文件夹...",
     "trashing_deleted_files": "正在回收删除的文件...",
     "trashing_deleted_albums": "正在回收已删除的相册...",
-    "sync_continuously": "持续同步",
+    "export_progress": "<a>{{progress.success}} / {{progress.total}}</a> 个文件已导出",
     "pending_items": "待处理的项目",
-    "export_starting": "导出开始...",
     "delete_account_reason_label": "您删除账户的主要原因是什么？",
     "delete_account_reason_placeholder": "选择一个原因",
     "delete_reason": {

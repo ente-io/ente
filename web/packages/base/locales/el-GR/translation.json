@@ -530,14 +530,14 @@
         "tb": "TB"
     },
     "stop": "Διακοπή",
-    "export_progress": "",
+    "sync_continuously": "Συνεχής συγχρονισμός",
+    "export_starting": "Έναρξη εξαγωγής...",
     "preparing": "Προετοιμασία...",
     "renaming_album_folders": "Μετονομασία φακέλων άλμπουμ...",
     "trashing_deleted_files": "",
     "trashing_deleted_albums": "",
-    "sync_continuously": "Συνεχής συγχρονισμός",
+    "export_progress": "",
     "pending_items": "Εκκρεμή αντικείμενα",
-    "export_starting": "Έναρξη εξαγωγής...",
     "delete_account_reason_label": "Ποιος είναι ο κύριος λόγος που διαγράφετε το λογαριασμό σας;",
     "delete_account_reason_placeholder": "Επιλέξτε ένα λόγο",
     "delete_reason": {
