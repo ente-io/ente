@@ -743,21 +743,36 @@ export function PhotoList({
         // Nothing to do here if nothing is selected.
         if (!galleryContext.selectedFile) return;
 
-        const notSelectedFiles = displayFiles?.filter(
+        console.time("t0");
+        const datedDisplayFiles = displayFiles?.map((item) => ({
+            ...item,
+            date: getDate(item),
+        }));
+        console.timeEnd("t0");
+        console.time("t1");
+        const notSelectedFiles = datedDisplayFiles?.filter(
             (item) => !galleryContext.selectedFile[item.id],
         );
-        const unselectedDates = [
-            ...new Set(notSelectedFiles?.map((item) => getDate(item))), // to get file's date which were manually unselected
-        ];
+        console.timeEnd("t1");
+        console.time("t2");
+        const unselectedDates = new Set(
+            notSelectedFiles?.map((item) => item.date),
+        ); // to get file's date which were manually unselected
 
-        const localSelectedFiles = displayFiles.filter(
+        console.timeEnd("t2");
+        console.time("t3");
+        const localSelectedFiles = datedDisplayFiles.filter(
             // to get files which were manually selected
-            (item) => !unselectedDates.includes(getDate(item)),
+            (item) => !unselectedDates.has(item.date),
         );
+        console.timeEnd("t3");
+        console.time("t4");
 
         const localSelectedDates = [
-            ...new Set(localSelectedFiles?.map((item) => getDate(item))),
+            ...new Set(localSelectedFiles?.map((item) => item.date)),
         ]; // to get file's date which were manually selected
+        console.timeEnd("t4");
+        console.time("t5");
 
         unselectedDates.forEach((date) => {
             setCheckedDates((prev) => ({
@@ -765,6 +780,8 @@ export function PhotoList({
                 [date]: false,
             })); // To uncheck select all checkbox if any of the file on the date is unselected
         });
+        console.timeEnd("t5");
+        console.time("t6");
 
         localSelectedDates.map((date) => {
             setCheckedDates((prev) => ({
@@ -772,6 +789,15 @@ export function PhotoList({
                 [date]: true,
             }));
             // To check select all checkbox if all of the files on the date is selected manually
+        });
+
+        console.timeEnd("t6");
+
+        console.log({
+            notSelectedFiles,
+            localSelectedFiles,
+            localSelectedDates,
+            unselectedDatesLen: unselectedDates.size,
         });
     }, [galleryContext.selectedFile]);
 
