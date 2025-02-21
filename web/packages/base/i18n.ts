@@ -134,6 +134,8 @@ export const setupI18n = async () => {
         // Value is an epoch microsecond so that we can directly pass the
         // timestamps we get from our API responses. The formatter expects
         // milliseconds, so divide by 1000.
+        //
+        // See [Note: Remote timestamps are epoch microseconds].
         return (val) => formatter.format(val / 1000);
     });
 };

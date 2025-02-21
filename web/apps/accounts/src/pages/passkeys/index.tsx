@@ -293,9 +293,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                             onRootClose={onClose}
                         />
                         <CreatedAtEntry>
-                            {formattedDateTime(
-                                new Date(passkey.createdAt / 1000),
-                            )}
+                            {formattedDateTime(passkey.createdAt)}
                         </CreatedAtEntry>
                         <RowButtonGroup>
                             <RowButton

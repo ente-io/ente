@@ -53,9 +53,24 @@ export const formattedTime = (date: Date) => _timeFormat.format(date);
  * Example:
  * - If within year: "Fri, 21 Feb at 11:51 AM".
  * - Otherwise: "Fri, 21 Feb 2025 at 11:51 AM"
+ *
+ * @param dateOrEpochMicroseconds A JavaScript Date or a numeric epoch
+ * microseconds value.
+ *
+ * As a convenience, this function can be either be directly passed a JavaScript
+ * date, or it can be given the raw epoch microseconds value and it'll convert
+ * internally.
+ *
+ * See: [Note: Remote timestamps are epoch microseconds]
  */
-export const formattedDateTime = (date: Date) =>
+export const formattedDateTime = (dateOrEpochMicroseconds: Date | number) =>
+    _formattedDateTime(toDate(dateOrEpochMicroseconds));
+
+const _formattedDateTime = (date: Date) =>
     [formattedDate(date), t("at"), formattedTime(date)].join(" ");
+
+const toDate = (dm: Date | number) =>
+    typeof dm == "number" ? new Date(dm / 1000) : dm;
 
 let _relativeTimeFormat: Intl.RelativeTimeFormat | undefined;
 
