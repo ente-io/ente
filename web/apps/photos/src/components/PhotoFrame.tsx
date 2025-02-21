@@ -1,3 +1,5 @@
+import { isSameDay } from "@/base/date";
+import { formattedDate } from "@/base/i18n-date";
 import log from "@/base/log";
 import type { FileInfoProps } from "@/gallery/components/FileInfo";
 import {
@@ -13,6 +15,7 @@ import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
 import { styled } from "@mui/material";
 import { PhotoViewer } from "components/PhotoViewer";
+import { t } from "i18next";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import PhotoSwipe from "photoswipe";
@@ -66,6 +69,18 @@ export type DisplayFile = EnteFile & {
     isSourceLoaded?: boolean;
     conversionFailed?: boolean;
     canForceConvert?: boolean;
+    /**
+     * [Note: Timeline date string]
+     *
+     * The timeline date string is a formatted date string under which a
+     * particular file should be grouped in the gallery listing. e.g. "Today",
+     * "Yesterday", "Fri, 21 Feb" etc.
+     *
+     * All files which have the same timelineDateString will be grouped under a
+     * single section in the gallery listing, prefixed by the timelineDateString
+     * itself, and a checkbox to select all files on that date.
+     */
+    timelineDateString?: string;
 };
 
 export type PhotoFrameProps = Pick<
@@ -178,6 +193,7 @@ const PhotoFrame = ({
             w: window.innerWidth,
             h: window.innerHeight,
             title: file.pubMagicMetadata?.data.caption,
+            timelineDateString: fileTimelineDateString(file),
         }));
         setDisplayFiles(result);
         setFetching({});
@@ -287,6 +303,7 @@ const PhotoFrame = ({
     const handleSelect = handleSelectCreator(
         setSelected,
         mode,
+        galleryContext.user?.id,
         activeCollectionID,
         activePersonID,
         setRangeStart,
@@ -313,16 +330,9 @@ const PhotoFrame = ({
                 (index - i) * direction > 0;
                 i += direction
             ) {
-                handleSelect(
-                    displayFiles[i].id,
-                    displayFiles[i].ownerID === galleryContext.user?.id,
-                )(!checked);
+                handleSelect(displayFiles[i])(!checked);
             }
-            handleSelect(
-                displayFiles[index].id,
-                displayFiles[index].ownerID === galleryContext.user?.id,
-                index,
-            )(!checked);
+            handleSelect(displayFiles[index], index)(!checked);
         }
     };
 
@@ -337,11 +347,7 @@ const PhotoFrame = ({
             updateURL={updateThumbURL(index)}
             onClick={onThumbnailClick(index)}
             selectable={selectable}
-            onSelect={handleSelect(
-                item.id,
-                item.ownerID === galleryContext.user?.id,
-                index,
-            )}
+            onSelect={handleSelect(item, index)}
             selected={
                 (!mode
                     ? selected.collectionID === activeCollectionID
@@ -663,4 +669,16 @@ const updateDisplayFileSource = (
         log.error(`unknown file type - ${file.metadata.fileType}`);
         file.src = url as string;
     }
+};
+
+/**
+ * See: [Note: Timeline date string]
+ */
+const fileTimelineDateString = (item: EnteFile) => {
+    const date = new Date(item.metadata.creationTime / 1000);
+    return isSameDay(date, new Date())
+        ? t("TODAY")
+        : isSameDay(date, new Date(Date.now() - 24 * 60 * 60 * 1000))
+          ? t("YESTERDAY")
+          : formattedDate(date);
 };
