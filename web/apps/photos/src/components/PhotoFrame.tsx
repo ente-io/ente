@@ -533,6 +533,7 @@ const PhotoFrame = ({
                     /* @ts-ignore TODO(PS): test */
                     open={open5}
                     onClose={handleClose}
+                    user={galleryContext.user ?? undefined}
                     files={files}
                     initialIndex={currentIndex}
                     {...{

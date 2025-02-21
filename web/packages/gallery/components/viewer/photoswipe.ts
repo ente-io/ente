@@ -34,16 +34,34 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
     // PhotoSwipe = require("./ps5/dist/photoswipe.esm.js").default;
 }
 
-type FileViewerPhotoSwipeOptions = FileViewerProps & {
+type FileViewerPhotoSwipeOptions = {
     /**
      * Called when the file viewer is closed.
      */
     onClose: () => void;
     /**
+     * Called whenever the slide changes to obtain the derived data for the file
+     * that is about to be displayed.
+     */
+    onAnnotate: (file: EnteFile) => FileViewerFileAnnotation;
+    /**
      * Called when the user activates the info action on a file.
      */
     onViewInfo: (file: EnteFile) => void;
-};
+} & Pick<FileViewerProps, "files" | "initialIndex" | "disableDownload">;
+
+/**
+ * Derived data for a file that is needed to display the file viewer controls
+ * etc associated with the file.
+ *
+ * This is recomputed each time the slide changes.
+ */
+interface FileViewerFileAnnotation {
+    /**
+     * `true` if this file is owned by the logged in user (if any).
+     */
+    isOwnFile: boolean;
+}
 
 /**
  * A wrapper over {@link PhotoSwipe} to tailor its interface for use by our file
@@ -94,12 +112,19 @@ export class FileViewerPhotoSwipe {
      * - "auto-hidden" if controls were hidden by us because of inactivity.
      */
     private lastActivityDate: Date | "auto-hidden" | "already-hidden";
+    /**
+     * Derived data about the currently displayed file.
+     *
+     * This is recomputed each time the slide changes.
+     */
+    // private activeFileAnnotation;
 
     constructor({
         files,
         initialIndex,
         disableDownload,
         onClose,
+        onAnnotate,
         onViewInfo,
     }: FileViewerPhotoSwipeOptions) {
         this.files = files;
