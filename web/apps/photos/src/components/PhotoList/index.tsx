@@ -761,20 +761,20 @@ export function PhotoList({
         console.timeEnd("t1");
         console.time("t2");
         const unselectedDates = new Set(
-            notSelectedFiles?.map((item) => item.date),
+            notSelectedFiles?.map((item) => item.timelineDateString),
         ); // to get file's date which were manually unselected
 
         console.timeEnd("t2");
         console.time("t3");
         const localSelectedFiles = datedDisplayFiles.filter(
             // to get files which were manually selected
-            (item) => !unselectedDates.has(item.date),
+            (item) => !unselectedDates.has(item.timelineDateString),
         );
         console.timeEnd("t3");
         console.time("t4");
 
         const localSelectedDates = [
-            ...new Set(localSelectedFiles?.map((item) => item.date)),
+            ...new Set(localSelectedFiles?.map((item) => item.timelineDateString)),
         ]; // to get file's date which were manually selected
         console.timeEnd("t4");
         console.time("t5");
