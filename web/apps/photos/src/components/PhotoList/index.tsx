@@ -185,7 +185,9 @@ const NothingContainer = styled(ListItemContainer)`
 type Props = Pick<PhotoFrameProps, "mode" | "modePlus"> & {
     height: number;
     width: number;
-    displayFiles: EnteFile[];
+    displayFiles: (EnteFile & {
+        timelineDateString?: string;
+    })[];
     showAppDownloadBanner: boolean;
     getThumbnail: (
         file: EnteFile,
@@ -432,9 +434,12 @@ export function PhotoList({
             ) {
                 currentDate = item.metadata.creationTime / 1000;
 
+                const a = _getDate(currentDate);
+                const b = item.timelineDateString;
+                if (a !== b) console.error("mismatch", a, b);
                 timeStampList.push({
                     itemType: ITEM_TYPE.TIME,
-                    date: _getDate(currentDate),
+                    date: b,
                     id: currentDate.toString(),
                 });
                 timeStampList.push({
@@ -737,10 +742,17 @@ export function PhotoList({
         if (!galleryContext.selectedFile) return;
 
         console.time("t0");
-        const datedDisplayFiles = displayFiles?.map((item) => ({
-            ...item,
-            date: getDate(item),
-        }));
+        const datedDisplayFiles = displayFiles?.map((item) => {
+            const a = getDate(item);
+            const b = item.timelineDateString;
+            if (a !== b) console.error("mismatch", a, b);
+
+            return {
+                ...item,
+                date: a,
+            };
+        });
+
         console.timeEnd("t0");
         console.time("t1");
         const notSelectedFiles = datedDisplayFiles?.filter(

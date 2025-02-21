@@ -1,3 +1,4 @@
+import { formattedDate } from "@/base/i18n-date";
 import log from "@/base/log";
 import type { FileInfoProps } from "@/gallery/components/FileInfo";
 import {
@@ -13,6 +14,7 @@ import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
 import { styled } from "@mui/material";
 import { PhotoViewer } from "components/PhotoViewer";
+import { t } from "i18next";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import PhotoSwipe from "photoswipe";
@@ -66,6 +68,11 @@ export type DisplayFile = EnteFile & {
     isSourceLoaded?: boolean;
     conversionFailed?: boolean;
     canForceConvert?: boolean;
+    /**
+     * The formatted date string under which this file should be grouped in the
+     * gallery listing.
+     */
+    timelineDateString?: string;
 };
 
 export type PhotoFrameProps = Pick<
@@ -178,6 +185,7 @@ const PhotoFrame = ({
             w: window.innerWidth,
             h: window.innerHeight,
             title: file.pubMagicMetadata?.data.caption,
+            timelineDateString: fileTimelineDateString(file),
         }));
         setDisplayFiles(result);
         setFetching({});
@@ -664,3 +672,19 @@ const updateDisplayFileSource = (
         file.src = url as string;
     }
 };
+
+const A_DAY = 24 * 60 * 60 * 1000;
+
+const fileTimelineDateString = (item: EnteFile) => {
+    const date = new Date(item.metadata.creationTime / 1000);
+    return isSameDay(date, new Date())
+        ? t("TODAY")
+        : isSameDay(date, new Date(Date.now() - A_DAY))
+          ? t("YESTERDAY")
+          : formattedDate(date);
+};
+
+const isSameDay = (first: Date, second: Date) =>
+    first.getFullYear() === second.getFullYear() &&
+    first.getMonth() === second.getMonth() &&
+    first.getDate() === second.getDate();
