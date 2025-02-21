@@ -1,5 +1,5 @@
 import { assertionFailed } from "@/base/assert";
-import { formattedDate } from "@/base/i18n-date";
+import { isSameDay } from "@/base/date";
 import { EnteFile } from "@/media/file";
 import {
     GAP_BTW_TILES,
@@ -434,12 +434,9 @@ export function PhotoList({
             ) {
                 currentDate = item.metadata.creationTime / 1000;
 
-                const a = _getDate(currentDate);
-                const b = item.timelineDateString;
-                if (a !== b) console.error("mismatch", a, b);
                 timeStampList.push({
                     itemType: ITEM_TYPE.TIME,
-                    date: b,
+                    date: item.timelineDateString,
                     id: currentDate.toString(),
                 });
                 timeStampList.push({
@@ -741,43 +738,24 @@ export function PhotoList({
         // Nothing to do here if nothing is selected.
         if (!galleryContext.selectedFile) return;
 
-        console.time("t0");
-        // const datedDisplayFiles = displayFiles?.map((item) => {
-        //     // const a = getDate(item);
-        //     const b = item.timelineDateString;
-        //     // if (a !== b) console.error("mismatch", a, b);
+        console.time("t6");
 
-        //     return {
-        //         ...item,
-        //         date: b,
-        //     };
-        // });
-
-        console.timeEnd("t0");
-        console.time("t1");
-        const notSelectedFiles = displayFiles?.filter(
+        const notSelectedFiles = (displayFiles ?? []).filter(
             (item) => !galleryContext.selectedFile[item.id],
         );
-        console.timeEnd("t1");
-        console.time("t2");
+
         const unselectedDates = new Set(
-            notSelectedFiles?.map((item) => item.timelineDateString),
+            notSelectedFiles.map((item) => item.timelineDateString),
         ); // to get file's date which were manually unselected
 
-        console.timeEnd("t2");
-        console.time("t3");
-        const localSelectedFiles = displayFiles.filter(
+        const localSelectedFiles = (displayFiles ?? []).filter(
             // to get files which were manually selected
             (item) => !unselectedDates.has(item.timelineDateString),
         );
-        console.timeEnd("t3");
-        console.time("t4");
 
-        const localSelectedDates = [
-            ...new Set(localSelectedFiles?.map((item) => item.timelineDateString)),
-        ]; // to get file's date which were manually selected
-        console.timeEnd("t4");
-        console.time("t5");
+        const localSelectedDates = new Set(
+            localSelectedFiles.map((item) => item.timelineDateString),
+        ); // to get file's date which were manually selected
 
         unselectedDates.forEach((date) => {
             setCheckedDates((prev) => ({
@@ -785,10 +763,8 @@ export function PhotoList({
                 [date]: false,
             })); // To uncheck select all checkbox if any of the file on the date is unselected
         });
-        console.timeEnd("t5");
-        console.time("t6");
 
-        localSelectedDates.map((date) => {
+        localSelectedDates.forEach((date) => {
             setCheckedDates((prev) => ({
                 ...prev,
                 [date]: true,
@@ -797,13 +773,6 @@ export function PhotoList({
         });
 
         console.timeEnd("t6");
-
-        console.log({
-            notSelectedFiles,
-            localSelectedFiles,
-            localSelectedDates,
-            unselectedDatesLen: unselectedDates.size,
-        });
     }, [galleryContext.selectedFile]);
 
     const handleSelect = handleSelectCreator(
@@ -949,24 +918,3 @@ export function PhotoList({
         </List>
     );
 }
-
-const A_DAY = 24 * 60 * 60 * 1000;
-
-const getDate = (item: EnteFile) => {
-    const currentDate = item.metadata.creationTime / 1000;
-    return _getDate(currentDate);
-};
-
-const _getDate = (currentDate: number) => {
-    const date = new Date(currentDate);
-    return isSameDay(date, new Date())
-        ? t("TODAY")
-        : isSameDay(date, new Date(Date.now() - A_DAY))
-          ? t("YESTERDAY")
-          : formattedDate(date);
-};
-
-const isSameDay = (first: Date, second: Date) =>
-    first.getFullYear() === second.getFullYear() &&
-    first.getMonth() === second.getMonth() &&
-    first.getDate() === second.getDate();

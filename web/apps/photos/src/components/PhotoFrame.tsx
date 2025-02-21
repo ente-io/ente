@@ -1,3 +1,4 @@
+import { isSameDay } from "@/base/date";
 import { formattedDate } from "@/base/i18n-date";
 import log from "@/base/log";
 import type { FileInfoProps } from "@/gallery/components/FileInfo";
@@ -673,18 +674,11 @@ const updateDisplayFileSource = (
     }
 };
 
-const A_DAY = 24 * 60 * 60 * 1000;
-
 const fileTimelineDateString = (item: EnteFile) => {
     const date = new Date(item.metadata.creationTime / 1000);
     return isSameDay(date, new Date())
         ? t("TODAY")
-        : isSameDay(date, new Date(Date.now() - A_DAY))
+        : isSameDay(date, new Date(Date.now() - 24 * 60 * 60 * 1000))
           ? t("YESTERDAY")
           : formattedDate(date);
 };
-
-const isSameDay = (first: Date, second: Date) =>
-    first.getFullYear() === second.getFullYear() &&
-    first.getMonth() === second.getMonth() &&
-    first.getDate() === second.getDate();
