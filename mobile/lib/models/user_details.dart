@@ -61,11 +61,13 @@ class UserDetails {
         storageBonus;
   }
 
+  // return the member storage limit if user is part of family and the admin
+  // has set the storage limit for the user.
   int? familyMemberStorageLimit() {
     if (isPartOfFamily()) {
-      final FamilyMember currentUserMember = familyData!.members!
-          .firstWhere((element) => element.email.trim() == email.trim());
-      return currentUserMember.storageLimit;
+      final FamilyMember? currentUserMember = familyData!.members!
+          .firstWhereOrNull((element) => element.email.trim() == email.trim());
+      return currentUserMember?.storageLimit;
     }
     return null;
   }
