@@ -86,15 +86,19 @@ export const handleSelectCreatorMulti =
 
             if (checked) {
                 for (const file of files) {
-                    newSelected[file.id] = true;
-                    newCount++;
-                    if (file.ownerID === userID) newOwnCount++;
+                    if (!newSelected[file.id]) {
+                        newSelected[file.id] = true;
+                        newCount++;
+                        if (file.ownerID === userID) newOwnCount++;
+                    }
                 }
             } else {
                 for (const file of files) {
-                    newSelected[file.id] = false;
-                    newCount--;
-                    if (file.ownerID === userID) newOwnCount--;
+                    if (newSelected[file.id]) {
+                        newSelected[file.id] = false;
+                        newCount--;
+                        if (file.ownerID === userID) newOwnCount--;
+                    }
                 }
             }
 
