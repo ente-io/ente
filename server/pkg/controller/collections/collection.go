@@ -1,9 +1,10 @@
-package controller
+package collections
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller"
 	"runtime/debug"
 	"strings"
 
@@ -32,10 +33,10 @@ const (
 
 // CollectionController encapsulates logic that deals with collections
 type CollectionController struct {
-	PublicCollectionCtrl *PublicCollectionController
+	PublicCollectionCtrl *controller.PublicCollectionController
 	EmailCtrl            *email.EmailNotificationController
 	AccessCtrl           access.Controller
-	BillingCtrl          *BillingController
+	BillingCtrl          *controller.BillingController
 	CollectionRepo       *repo.CollectionRepository
 	UserRepo             *repo.UserRepository
 	FileRepo             *repo.FileRepository
