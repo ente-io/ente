@@ -37,7 +37,7 @@ export default function ExportFinished(props: Props) {
                 <Stack sx={{ pr: 2 }}>
                     <SpaceBetweenFlex minHeight={"48px"}>
                         <Typography sx={{ color: "text.muted" }}>
-                            {t("PENDING_ITEMS")}
+                            {t("pending_items")}
                         </Typography>
                         {props.pendingExports.length ? (
                             <LinkButton onClick={openPendingFileList}>

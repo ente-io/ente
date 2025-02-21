@@ -36,25 +36,25 @@ export default function ExportInProgress(props: Props) {
                 <VerticallyCentered>
                     <Typography sx={{ mb: 1.5 }}>
                         {props.exportStage === ExportStage.STARTING ? (
-                            t("EXPORT_STARTING")
+                            t("export_starting")
                         ) : props.exportStage === ExportStage.MIGRATION ? (
-                            t("MIGRATING_EXPORT")
+                            t("preparing")
                         ) : props.exportStage ===
                           ExportStage.RENAMING_COLLECTION_FOLDERS ? (
-                            t("RENAMING_COLLECTION_FOLDERS")
+                            t("renaming_album_folders")
                         ) : props.exportStage ===
                           ExportStage.TRASHING_DELETED_FILES ? (
-                            t("TRASHING_DELETED_FILES")
+                            t("trashing_deleted_files")
                         ) : props.exportStage ===
                           ExportStage.TRASHING_DELETED_COLLECTIONS ? (
-                            t("TRASHING_DELETED_COLLECTIONS")
+                            t("trashing_deleted_albums")
                         ) : (
                             <Typography
                                 component="span"
                                 sx={{ color: "text.muted" }}
                             >
                                 <Trans
-                                    i18nKey={"EXPORT_PROGRESS"}
+                                    i18nKey={"export_progress"}
                                     components={{
                                         a: (
                                             <Typography
