@@ -40,6 +40,6 @@ function formatTime(date: number | Date) {
 //     return [formatDateFull(dateTime), t("at"), formatTime(dateTime)].join(" ");
 // }
 
-export function formatDateTime(dateTime: number | Date): string {
+function formatDateTime(dateTime: number | Date): string {
     return [formatDate(dateTime), t("at"), formatTime(dateTime)].join(" ");
 }

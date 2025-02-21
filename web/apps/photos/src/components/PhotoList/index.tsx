@@ -1,4 +1,5 @@
 import { assertionFailed } from "@/base/assert";
+import { formattedDate } from "@/base/i18n-date";
 import { EnteFile } from "@/media/file";
 import {
     GAP_BTW_TILES,
@@ -7,7 +8,6 @@ import {
     MIN_COLUMNS,
 } from "@/new/photos/components/PhotoList";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import { formatDate } from "@ente/shared/time/format";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
 import type { PhotoFrameProps } from "components/PhotoFrame";
 import { t } from "i18next";
@@ -946,19 +946,15 @@ const getDate = (item: EnteFile) => {
 };
 
 const _getDate = (currentDate: number) => {
-    const date = isSameDay(new Date(currentDate), new Date())
+    const date = new Date(currentDate);
+    return isSameDay(date, new Date())
         ? t("TODAY")
-        : isSameDay(new Date(currentDate), new Date(Date.now() - A_DAY))
+        : isSameDay(date, new Date(Date.now() - A_DAY))
           ? t("YESTERDAY")
-          : formatDate(currentDate);
-
-    return date;
+          : formattedDate(date);
 };
 
-const isSameDay = (first: Date, second: Date) => {
-    return (
-        first.getFullYear() === second.getFullYear() &&
-        first.getMonth() === second.getMonth() &&
-        first.getDate() === second.getDate()
-    );
-};
+const isSameDay = (first: Date, second: Date) =>
+    first.getFullYear() === second.getFullYear() &&
+    first.getMonth() === second.getMonth() &&
+    first.getDate() === second.getDate();
