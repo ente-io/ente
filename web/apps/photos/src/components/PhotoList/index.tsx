@@ -20,7 +20,7 @@ import {
     ListChildComponentProps,
     areEqual,
 } from "react-window";
-import { handleSelectCreator } from "utils/photoFrame";
+import { handleSelectCreatorMulti } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export const DATE_CONTAINER_HEIGHT = 48;
@@ -793,7 +793,7 @@ export function PhotoList({
         console.timeEnd("t6");
     }, [galleryContext.selectedFile]);
 
-    const handleSelect = handleSelectCreator(
+    const handleSelect = handleSelectCreatorMulti(
         galleryContext.setSelectedFiles,
         mode,
         galleryContext?.user?.id,
