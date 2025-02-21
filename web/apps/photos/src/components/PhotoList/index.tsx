@@ -273,7 +273,11 @@ export function PhotoList({
     const shouldRefresh = useRef(false);
     const listRef = useRef(null);
 
-    const [checkedDates, setCheckedDates] = useState({});
+    // Timeline date strings for which all photos have been selected.
+    //
+    // See: [Note: Timeline date string]
+    const [checkedTimelineDateStrings, setCheckedTimelineDateStrings] =
+        useState(new Set());
 
     const fittableColumns = getFractionFittableColumns(width);
     let columns = Math.floor(fittableColumns);
@@ -757,20 +761,34 @@ export function PhotoList({
             localSelectedFiles.map((item) => item.timelineDateString),
         ); // to get file's date which were manually selected
 
-        unselectedDates.forEach((date) => {
-            setCheckedDates((prev) => ({
-                ...prev,
-                [date]: false,
-            })); // To uncheck select all checkbox if any of the file on the date is unselected
-        });
+        setCheckedTimelineDateStrings((prev) => {
+            console.time("s1");
 
-        localSelectedDates.forEach((date) => {
-            setCheckedDates((prev) => ({
-                ...prev,
-                [date]: true,
-            }));
-            // To check select all checkbox if all of the files on the date is selected manually
+            const checked = new Set(prev);
+            // Uncheck the "Select all" checkbox if any of the files on the date
+            // is unselected.
+            unselectedDates.forEach((date) => checked.delete(date));
+            // Check the "Select all" checkbox if all of the files on a date are
+            // selected.
+            localSelectedDates.forEach((date) => checked.add(date));
+            console.timeEnd("s1");
+
+            return checked;
         });
+        // unselectedDates.forEach((date) => {
+        //     setCheckedDates((prev) => ({
+        //         ...prev,
+        //         [date]: false,
+        //     }));
+        // });
+
+        // localSelectedDates.forEach((date) => {
+        //     setCheckedDates((prev) => ({
+        //         ...prev,
+        //         [date]: true,
+        //     }));
+
+        // });
 
         console.timeEnd("t6");
     }, [galleryContext.selectedFile]);
@@ -783,14 +801,31 @@ export function PhotoList({
     );
 
     const onChangeSelectAllCheckBox = (date: string) => {
-        const dates = { ...checkedDates, [date]: !checkedDates[date] };
-        const isDateSelected = !checkedDates[date];
+        console.time("c1");
 
-        setCheckedDates(dates);
+        // const dates = { ...checkedDates, [date]: !checkedDates[date] };
+        const next = new Set(checkedTimelineDateStrings);
+        let isDateSelected: boolean;
+        if (!next.has(date)) {
+            next.add(date);
+            isDateSelected = true;
+        } else {
+            next.delete(date);
+            isDateSelected = false;
+        }
+        // const isDateSelected = !checkedDates[date];
+
+        // setCheckedDates(dates);
+        setCheckedTimelineDateStrings(next);
+        console.timeEnd("c1");
+        console.time("c2");
 
         const filesOnADay = displayFiles?.filter(
             (item) => item.timelineDateString === date,
         ); // all files on a checked/unchecked day
+
+        console.timeEnd("c2");
+        console.time("c3");
 
         filesOnADay.forEach((file) => {
             handleSelect(
@@ -798,6 +833,8 @@ export function PhotoList({
                 file.ownerID === galleryContext?.user?.id,
             )(isDateSelected);
         });
+
+        console.timeEnd("c3");
     };
 
     const renderListItem = (
@@ -817,7 +854,10 @@ export function PhotoList({
                                     <Checkbox
                                         key={item.date}
                                         name={item.date}
-                                        checked={!!checkedDates[item.date]}
+                                        // checked={!!checkedDates[item.date]}
+                                        checked={checkedTimelineDateStrings.has(
+                                            item.date,
+                                        )}
                                         onChange={() =>
                                             onChangeSelectAllCheckBox(item.date)
                                         }
@@ -836,7 +876,10 @@ export function PhotoList({
                             <Checkbox
                                 key={listItem.date}
                                 name={listItem.date}
-                                checked={!!checkedDates[listItem.date]}
+                                // checked={!!checkedDates[listItem.date]}
+                                checked={checkedTimelineDateStrings.has(
+                                    listItem.date,
+                                )}
                                 onChange={() =>
                                     onChangeSelectAllCheckBox(listItem.date)
                                 }

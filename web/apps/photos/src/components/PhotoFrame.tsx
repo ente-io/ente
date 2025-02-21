@@ -70,8 +70,15 @@ export type DisplayFile = EnteFile & {
     conversionFailed?: boolean;
     canForceConvert?: boolean;
     /**
-     * The formatted date string under which this file should be grouped in the
-     * gallery listing.
+     * [Note: Timeline date string]
+     *
+     * The timeline date string is a formatted date string under which a
+     * particular file should be grouped in the gallery listing. e.g. "Today",
+     * "Yesterday", "Fri, 21 Feb" etc.
+     *
+     * All files which have the same timelineDateString will be grouped under a
+     * single section in the gallery listing, prefixed by the timelineDateString
+     * itself, and a checkbox to select all files on that date.
      */
     timelineDateString?: string;
 };
@@ -674,6 +681,9 @@ const updateDisplayFileSource = (
     }
 };
 
+/**
+ * See: [Note: Timeline date string]
+ */
 const fileTimelineDateString = (item: EnteFile) => {
     const date = new Date(item.metadata.creationTime / 1000);
     return isSameDay(date, new Date())
