@@ -13,8 +13,8 @@ allprojects {
         }
     }
     ext {
-        compileSdkVersion   = 34
-        targetSdkVersion    = 34
+        compileSdkVersion   = 35
+        targetSdkVersion    = 35
         appCompatVersion    = "1.7.0"
     }
 }
