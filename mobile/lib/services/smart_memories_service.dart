@@ -269,7 +269,7 @@ class SmartMemoriesService {
       final spotlightFiles = <EnteFile>[];
       for (final fileID in personFileIDs) {
         final int personsPresent = personFilesToFaces[fileID]?.length ?? 10;
-        if (personsPresent > 2) continue;
+        if (personsPresent > 1) continue;
         final file = allFileIdsToFile[fileID];
         if (file != null) {
           spotlightFiles.add(file);
