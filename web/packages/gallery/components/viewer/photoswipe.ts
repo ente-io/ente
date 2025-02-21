@@ -47,20 +47,32 @@ type FileViewerPhotoSwipeOptions = {
     /**
      * Called when the user activates the info action on a file.
      */
-    onViewInfo: (file: EnteFile) => void;
+    onViewInfo: (annotatedFile: FileViewerAnnotatedFile) => void;
 } & Pick<FileViewerProps, "files" | "initialIndex" | "disableDownload">;
 
 /**
  * Derived data for a file that is needed to display the file viewer controls
  * etc associated with the file.
  *
- * This is recomputed each time the slide changes.
+ * This is recomputed on-demand each time the slide changes.
  */
-interface FileViewerFileAnnotation {
+export interface FileViewerFileAnnotation {
+    /**
+     * The id of the file whose annotation this is.
+     */
+    fileID: number;
     /**
      * `true` if this file is owned by the logged in user (if any).
      */
     isOwnFile: boolean;
+}
+
+/**
+ * A file and its annotation, in a nice cosy box.
+ */
+export interface FileViewerAnnotatedFile {
+    file: EnteFile;
+    annotation: FileViewerFileAnnotation;
 }
 
 /**
@@ -115,9 +127,14 @@ export class FileViewerPhotoSwipe {
     /**
      * Derived data about the currently displayed file.
      *
-     * This is recomputed each time the slide changes.
+     * This is recomputed on-demand (by using the {@link onAnnotate} callback)
+     * each time the slide changes, and cached until the next slide change.
+     *
+     * Instead of accessing this property directly, code should funnel through
+     * the `activeFileAnnotation` helper function defined in the constructor
+     * scope.
      */
-    // private activeFileAnnotation;
+    private activeFileAnnotation: FileViewerFileAnnotation | undefined;
 
     constructor({
         files,
@@ -129,6 +146,7 @@ export class FileViewerPhotoSwipe {
     }: FileViewerPhotoSwipeOptions) {
         this.files = files;
         this.opts = { disableDownload };
+        this.lastActivityDate = new Date();
 
         const pswp = new PhotoSwipe({
             // Opaque background.
@@ -185,10 +203,35 @@ export class FileViewerPhotoSwipe {
             errorMsg: "This file could not be previewed",
         });
 
+        this.pswp = pswp;
+
         // Helper routines to obtain the file at `currIndex`.
+
         const currentFile = () => this.files[pswp.currIndex]!;
-        const withCurrentFile = (cb: (file: EnteFile) => void) => () =>
-            cb(currentFile());
+
+        const currentAnnotatedFile = () => {
+            const file = currentFile();
+            let annotation = this.activeFileAnnotation;
+            if (annotation?.fileID != file.id) {
+                annotation = onAnnotate(file);
+                this.activeFileAnnotation = annotation;
+            }
+            return {
+                file,
+                // The above condition implies that annotation can never be
+                // undefined, but it doesn't seem to be enough to convince
+                // TypeScript. Writing the condition in a more unnatural way
+                // `(annotation && annotation?.fileID == file.id)` works, but
+                // instead we use a non-null assertion here.
+                annotation: annotation!,
+            };
+        };
+
+        const currentFileAnnotation = () => currentAnnotatedFile().annotation;
+
+        const withCurrentAnnotatedFile =
+            (cb: (af: AnnotatedFile) => void) => () =>
+                cb(currentFileAnnotation());
 
         // Provide data about slides to PhotoSwipe via callbacks
         // https://photoswipe.com/data-sources/#dynamically-generated-data
@@ -363,7 +406,7 @@ export class FileViewerPhotoSwipe {
                 order: 15,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("info"),
-                onClick: withCurrentFile(onViewInfo),
+                onClick: withCurrentAnnotatedFile(onViewInfo),
             });
         });
 
@@ -379,8 +422,6 @@ export class FileViewerPhotoSwipe {
         // Initializing PhotoSwipe adds it to the DOM as a dialog-like div with
         // the class "pswp".
         pswp.init();
-
-        this.pswp = pswp;
 
         this.autoHideCheckIntervalId = setInterval(() => {
             this.autoHideIfInactive();

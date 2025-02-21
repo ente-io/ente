@@ -23,7 +23,10 @@ import type { EnteFile } from "@/media/file.js";
 import { Button, styled } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fileInfoExifForFile, type FileInfoExif } from "./data-source";
-import { FileViewerPhotoSwipe } from "./photoswipe";
+import {
+    FileViewerPhotoSwipe,
+    type FileViewerAnnotatedFile,
+} from "./photoswipe";
 
 export type FileViewerProps = ModalVisibilityProps & {
     /**
@@ -76,6 +79,7 @@ export type FileViewerProps = ModalVisibilityProps & {
 const FileViewer: React.FC<FileViewerProps> = ({
     open,
     onClose,
+    user,
     files,
     initialIndex,
     disableDownload,
@@ -93,11 +97,11 @@ const FileViewer: React.FC<FileViewerProps> = ({
     // This is not guaranteed, or even intended, to be in sync with the active
     // file shown within the file viewer. All that this guarantees is this will
     // refer to the file on which the last user initiated action was performed.
-    const [activeFile, setActiveFile] = useState<EnteFile | undefined>(
-        undefined,
-    );
+    const [activeAnnotatedFile, setActiveAnnotatedFile] = useState<
+        FileViewerAnnotatedFile | undefined
+    >(undefined);
     // With semantics similar to activeFile, this is the exif data associated
-    // with the activeFile, if any.
+    // with the activeAnnotatedFile, if any.
     const [activeFileExif, setActiveFileExif] = useState<
         FileInfoExif | undefined
     >(undefined);
@@ -105,11 +109,22 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const { show: showFileInfo, props: fileInfoVisibilityProps } =
         useModalVisibility();
 
-    const handleViewInfo = useCallback(
+    const handleAnnotate = useCallback(
         (file: EnteFile) => {
-            setActiveFile(file);
+            const fileID = file.id;
+            const isOwnFile = file.ownerID == user?.id;
+            return { fileID, isOwnFile };
+        },
+        [user],
+    );
+
+    const handleViewInfo = useCallback(
+        (annotatedFile: FileViewerAnnotatedFile) => {
+            setActiveAnnotatedFile(annotatedFile);
             setActiveFileExif(
-                fileInfoExifForFile(file, (exif) => setActiveFileExif(exif)),
+                fileInfoExifForFile(annotatedFile.file, (exif) =>
+                    setActiveFileExif(exif),
+                ),
             );
             showFileInfo();
         },
@@ -139,6 +154,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             initialIndex,
             disableDownload,
             onClose,
+            onAnnotate: handleAnnotate,
             onViewInfo: handleViewInfo,
         });
         pswpRef.current = pswp;
@@ -169,7 +185,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             <Button>Test</Button>
             <FileInfo
                 {...fileInfoVisibilityProps}
-                file={activeFile}
+                file={activeAnnotatedFile.file}
                 exif={activeFileExif}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
