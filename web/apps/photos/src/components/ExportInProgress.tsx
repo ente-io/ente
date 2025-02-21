@@ -104,7 +104,7 @@ export default function ExportInProgress(props: Props) {
                     color="critical"
                     onClick={props.stopExport}
                 >
-                    {t("STOP_EXPORT")}
+                    {t("stop")}
                 </FocusVisibleButton>
             </DialogActions>
         </>

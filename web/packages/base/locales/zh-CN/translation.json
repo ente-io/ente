@@ -529,7 +529,7 @@
         "gb": "GB",
         "tb": "TB"
     },
-    "STOP_EXPORT": "停止",
+    "stop": "停止",
     "EXPORT_PROGRESS": "<a>{{progress.success}} / {{progress.total}}</a> 个文件已导出",
     "MIGRATING_EXPORT": "准备中...",
     "RENAMING_COLLECTION_FOLDERS": "正在重命名相册文件夹...",

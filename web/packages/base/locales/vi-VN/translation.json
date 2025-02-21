@@ -529,7 +529,7 @@
         "gb": "GB",
         "tb": "TB"
     },
-    "STOP_EXPORT": "Dừng",
+    "stop": "Dừng",
     "EXPORT_PROGRESS": "<a>{{progress.success, number}} / {{progress.total, number}}</a> mục đã đồng bộ",
     "MIGRATING_EXPORT": "Đang chuẩn bị...",
     "RENAMING_COLLECTION_FOLDERS": "Đang đổi tên thư mục album...",

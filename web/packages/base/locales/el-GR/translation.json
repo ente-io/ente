@@ -529,7 +529,7 @@
         "gb": "GB",
         "tb": "TB"
     },
-    "STOP_EXPORT": "Διακοπή",
+    "stop": "Διακοπή",
     "EXPORT_PROGRESS": "",
     "MIGRATING_EXPORT": "Προετοιμασία...",
     "RENAMING_COLLECTION_FOLDERS": "Μετονομασία φακέλων άλμπουμ...",

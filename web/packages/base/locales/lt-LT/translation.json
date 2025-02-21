@@ -529,7 +529,7 @@
         "gb": "GB",
         "tb": "TB"
     },
-    "STOP_EXPORT": "Stabdyti",
+    "stop": "Stabdyti",
     "EXPORT_PROGRESS": "<a>{{progress.success, number}} / {{progress.total, number}}</a> sinchronizuoti elementai",
     "MIGRATING_EXPORT": "Ruošiama...",
     "RENAMING_COLLECTION_FOLDERS": "Pervadinami albumų aplankai...",

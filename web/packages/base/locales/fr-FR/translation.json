@@ -529,7 +529,7 @@
         "gb": "Go",
         "tb": "To"
     },
-    "STOP_EXPORT": "Stop",
+    "stop": "Stop",
     "EXPORT_PROGRESS": "<a>{{progress.success}} / {{progress.total}}</a> fichiers exportés",
     "MIGRATING_EXPORT": "Préparations...",
     "RENAMING_COLLECTION_FOLDERS": "Renommage des dossiers de l'album en cours...",

@@ -529,7 +529,7 @@
         "gb": "GB",
         "tb": "TB"
     },
-    "STOP_EXPORT": "Stop",
+    "stop": "Stop",
     "EXPORT_PROGRESS": "<a>{{progress.success, number}} / {{progress.total, number}}</a> items synced",
     "MIGRATING_EXPORT": "Preparing...",
     "RENAMING_COLLECTION_FOLDERS": "Renaming album folders...",

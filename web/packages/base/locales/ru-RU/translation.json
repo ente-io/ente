@@ -529,7 +529,7 @@
         "gb": "Гб",
         "tb": "Терабайт"
     },
-    "STOP_EXPORT": "Остановка",
+    "stop": "Остановка",
     "EXPORT_PROGRESS": "<a>{{progress.success, number}} / {{progress.total, number}}</a> синхронизированные элементы",
     "MIGRATING_EXPORT": "Подготовка...",
     "RENAMING_COLLECTION_FOLDERS": "Переименование папок альбомов...",

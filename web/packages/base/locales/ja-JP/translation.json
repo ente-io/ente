@@ -529,7 +529,7 @@
         "gb": "GB",
         "tb": "TB"
     },
-    "STOP_EXPORT": "中止",
+    "stop": "中止",
     "EXPORT_PROGRESS": "",
     "MIGRATING_EXPORT": "準備しています…",
     "RENAMING_COLLECTION_FOLDERS": "",

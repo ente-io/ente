@@ -529,7 +529,7 @@
         "gb": "ГБ",
         "tb": "ТБ"
     },
-    "STOP_EXPORT": "Зупинити",
+    "stop": "Зупинити",
     "EXPORT_PROGRESS": "<a>{{progress.success, number}} / {{progress.total, number}}</a> елементів синхронізовано",
     "MIGRATING_EXPORT": "Підготування...",
     "RENAMING_COLLECTION_FOLDERS": "Перейменування тек альбомів...",

@@ -529,7 +529,7 @@
         "gb": "GB",
         "tb": "TB"
     },
-    "STOP_EXPORT": "Hentikan",
+    "stop": "Hentikan",
     "EXPORT_PROGRESS": "<a>{{progress.success, number}} / {{progress.total, number}}</a> item tersinkron",
     "MIGRATING_EXPORT": "Menyiapkan...",
     "RENAMING_COLLECTION_FOLDERS": "",
