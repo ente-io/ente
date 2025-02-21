@@ -325,18 +325,26 @@ Future<bool> deleteLocalFiles(
   BuildContext context,
   List<String> localIDs,
 ) async {
+  final files =
+      await FilesDB.instance.getLocalFiles(localIDs, dedupeByLocalID: true);
   final List<String> deletedIDs = [];
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
+  final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
+
   try {
-    for (String id in localIDs) {
-      if (id.startsWith(oldSharedMediaIdentifier) ||
-          id.startsWith(sharedMediaIdentifier)) {
-        localSharedMediaIDs.add(id);
+    for (final file in files) {
+      if (!(await _localFileExist(file))) {
+        _logger.warning("Already deleted " + file.toString());
+        alreadyDeletedIDs.add(file.localID!);
+      } else if (file.localID!.startsWith(oldSharedMediaIdentifier) ||
+          file.localID!.startsWith(sharedMediaIdentifier)) {
+        localSharedMediaIDs.add(file.localID!);
       } else {
-        localAssetIDs.add(id);
+        localAssetIDs.add(file.localID!);
       }
     }
+    deletedIDs.addAll(alreadyDeletedIDs);
     deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
 
     final bool shouldDeleteInBatches =
