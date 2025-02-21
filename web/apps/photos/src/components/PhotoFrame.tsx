@@ -303,6 +303,7 @@ const PhotoFrame = ({
     const handleSelect = handleSelectCreator(
         setSelected,
         mode,
+        galleryContext.user?.id,
         activeCollectionID,
         activePersonID,
         setRangeStart,
@@ -329,16 +330,9 @@ const PhotoFrame = ({
                 (index - i) * direction > 0;
                 i += direction
             ) {
-                handleSelect(
-                    displayFiles[i].id,
-                    displayFiles[i].ownerID === galleryContext.user?.id,
-                )(!checked);
+                handleSelect(displayFiles[i])(!checked);
             }
-            handleSelect(
-                displayFiles[index].id,
-                displayFiles[index].ownerID === galleryContext.user?.id,
-                index,
-            )(!checked);
+            handleSelect(displayFiles[index], index)(!checked);
         }
     };
 
@@ -353,11 +347,7 @@ const PhotoFrame = ({
             updateURL={updateThumbURL(index)}
             onClick={onThumbnailClick(index)}
             selectable={selectable}
-            onSelect={handleSelect(
-                item.id,
-                item.ownerID === galleryContext.user?.id,
-                index,
-            )}
+            onSelect={handleSelect(item, index)}
             selected={
                 (!mode
                     ? selected.collectionID === activeCollectionID

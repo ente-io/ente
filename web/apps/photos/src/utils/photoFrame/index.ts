@@ -6,11 +6,12 @@ export const handleSelectCreator =
     (
         setSelected: SetSelectedState,
         mode: GalleryBarMode | undefined,
+        userID: number | undefined,
         activeCollectionID: number,
         activePersonID: string | undefined,
         setRangeStart?,
     ) =>
-    (id: number, isOwnFile: boolean, index?: number) =>
+    ({ id, ownerID }: { id: number; ownerID: number }, index?: number) =>
     (checked: boolean) => {
         if (typeof index !== "undefined") {
             if (checked) {
@@ -110,7 +111,7 @@ export const handleSelectCreator =
             };
 
             const handleAllCounterChange = () => {
-                if (isOwnFile) {
+                if (ownerID === userID) {
                     return {
                         ownCount: handleCounterChange(selected.ownCount),
                         count: handleCounterChange(selected.count),

@@ -796,6 +796,7 @@ export function PhotoList({
     const handleSelect = handleSelectCreator(
         galleryContext.setSelectedFiles,
         mode,
+        galleryContext?.user?.id,
         activeCollectionID,
         activePersonID,
     );
@@ -828,10 +829,7 @@ export function PhotoList({
         console.time("c3");
 
         filesOnADay.forEach((file) => {
-            handleSelect(
-                file.id,
-                file.ownerID === galleryContext?.user?.id,
-            )(isDateSelected);
+            handleSelect(file)(isDateSelected);
         });
 
         console.timeEnd("c3");
