@@ -1,9 +1,9 @@
 import { LinkButton } from "@/base/components/LinkButton";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { formattedNumber } from "@/base/i18n";
+import { formattedDateTime } from "@/base/i18n-date";
 import { EnteFile } from "@/media/file";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
-import { formatDateTime } from "@ente/shared/time/format";
 import { DialogActions, DialogContent, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";
@@ -19,6 +19,8 @@ interface Props {
 }
 
 export default function ExportFinished(props: Props) {
+    const { lastExportTime } = props;
+
     const [pendingFileListView, setPendingFileListView] =
         useState<boolean>(false);
 
@@ -52,8 +54,8 @@ export default function ExportFinished(props: Props) {
                             {t("last_export_time")}
                         </Typography>
                         <Typography>
-                            {props.lastExportTime
-                                ? formatDateTime(props.lastExportTime)
+                            {lastExportTime
+                                ? formattedDateTime(new Date(lastExportTime))
                                 : t("never")}
                         </Typography>
                     </SpaceBetweenFlex>
