@@ -586,6 +586,13 @@
       "title": "Letterboxd"
     },
     {
+      "title": "LinkedIn",
+      "slug": "linkedin",
+      "altNames": [
+        "Linked In"
+      ]
+    },
+    {
       "title": "Linux.Do",
       "slug": "linux_do",
       "altNames": [
