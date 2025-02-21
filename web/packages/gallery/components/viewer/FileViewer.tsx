@@ -17,6 +17,7 @@ import {
     useModalVisibility,
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
+import type { LocalUser } from "@/base/local-user";
 import { FileInfo, type FileInfoProps } from "@/gallery/components/FileInfo";
 import type { EnteFile } from "@/media/file.js";
 import { Button, styled } from "@mui/material";
@@ -24,41 +25,48 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { fileInfoExifForFile, type FileInfoExif } from "./data-source";
 import { FileViewerPhotoSwipe } from "./photoswipe";
 
-export type FileViewerProps = ModalVisibilityProps &
-    Pick<
+export type FileViewerProps = ModalVisibilityProps & {
+    /**
+     * The currently logged in user, if any.
+     *
+     * - If we're running in the context of the photos app, then this should be
+     *   set to the currently logged in user.
+     *
+     * - If we're running in the context of the public albums app, then this
+     *   should not be set.
+     */
+    user?: LocalUser;
+    /**
+     * The list of files that are currently being displayed in the context in
+     * which the file viewer was invoked.
+     *
+     * Although the file viewer is called on to display a particular file
+     * (specified by the {@link initialIndex} prop), the viewer is always used
+     * in the context of a an album, or search results, or some other arbitrary
+     * list of files. The {@link files} prop sets this underlying list of files.
+     *
+     * After the initial file has been shown, the user can navigate through the
+     * other files from within the viewer by using the arrow buttons.
+     */
+    files: EnteFile[];
+    /**
+     * The index of the file that should be initially shown.
+     *
+     * Subsequently the user may navigate between files by using the controls
+     * provided within the file viewer itself.
+     */
+    initialIndex: number;
+    /**
+     * If true then the viewer does not show controls for downloading the file.
+     */
+    disableDownload?: boolean;
+} & Pick<
         FileInfoProps,
         | "fileCollectionIDs"
         | "allCollectionsNameByID"
         | "onSelectCollection"
         | "onSelectPerson"
-    > & {
-        /**
-         * The list of files that are currently being displayed in the context
-         * in which the file viewer was invoked.
-         *
-         * Although the file viewer is called on to display a particular file
-         * (specified by the {@link initialIndex} prop), the viewer is always
-         * used in the context of a an album, or search results, or some other
-         * arbitrary list of files. The {@link files} prop sets this underlying
-         * list of files.
-         *
-         * After the initial file has been shown, the user can navigate through
-         * the other files from within the viewer by using the arrow buttons.
-         */
-        files: EnteFile[];
-        /**
-         * The index of the file that should be initially shown.
-         *
-         * Subsequently the user may navigate between files by using the
-         * controls provided within the file viewer itself.
-         */
-        initialIndex: number;
-        /**
-         * If true then the viewer does not show controls for downloading the
-         * file.
-         */
-        disableDownload?: boolean;
-    };
+    >;
 
 /**
  * A PhotoSwipe based image and video viewer.
