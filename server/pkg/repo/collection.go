@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"strconv"
-	"strings"
 	t "time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -100,54 +99,6 @@ func (repo *CollectionRepository) GetCollectionByType(userID int64, collectionTy
 		c.NameDecryptionNonce = nameDecryptionNonce.String
 	}
 	return c, nil
-}
-
-// GetCollectionsOwnedByUser returns the list of collections that a user owns
-// todo: refactor this method
-func (repo *CollectionRepository) GetCollectionsOwnedByUser(userID int64, updationTime int64, app ente.App) ([]ente.Collection, error) {
-	rows, err := repo.DB.Query(`
-		SELECT collections.collection_id, collections.owner_id, collections.encrypted_key, collections.key_decryption_nonce, collections.name, collections.encrypted_name, collections.name_decryption_nonce, collections.type, collections.app, collections.attributes, collections.updation_time, collections.is_deleted, collections.magic_metadata, collections.pub_magic_metadata
-		FROM collections
-		WHERE collections.owner_id = $1 AND collections.updation_time > $2 AND app = $3`, userID, updationTime, strings.ToLower(string(app)))
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "")
-	}
-	defer rows.Close()
-	collectionIDs := make([]int64, 0)
-	collections := make([]ente.Collection, 0)
-	result := make([]ente.Collection, 0)
-	for rows.Next() {
-		var c ente.Collection
-		var name, encryptedName, nameDecryptionNonce sql.NullString
-		if err := rows.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata); err != nil {
-			return collections, stacktrace.Propagate(err, "")
-		}
-		if name.Valid && len(name.String) > 0 {
-			c.Name = name.String
-		} else {
-			c.EncryptedName = encryptedName.String
-			c.NameDecryptionNonce = nameDecryptionNonce.String
-		}
-		// TODO: Pull this information in the previous query
-		sharees, err := repo.GetSharees(c.ID)
-		if err != nil {
-			return collections, stacktrace.Propagate(err, "")
-		}
-		c.Sharees = sharees
-		collections = append(collections, c)
-		collectionIDs = append(collectionIDs, c.ID)
-	}
-
-	urlMap, err := repo.PublicCollectionRepo.GetCollectionToActivePublicURLMap(context.Background(), collectionIDs)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed to get publicURL info")
-	}
-	for _, c := range collections {
-		c.PublicURLs = urlMap[c.ID]
-		result = append(result, c)
-	}
-
-	return result, nil
 }
 
 func (repo *CollectionRepository) GetCollectionsOwnedByUserV2(userID int64, updationTime int64, app ente.App) ([]ente.Collection, error) {
