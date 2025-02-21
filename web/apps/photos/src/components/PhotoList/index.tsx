@@ -743,13 +743,13 @@ export function PhotoList({
 
         console.time("t0");
         const datedDisplayFiles = displayFiles?.map((item) => {
-            const a = getDate(item);
+            // const a = getDate(item);
             const b = item.timelineDateString;
-            if (a !== b) console.error("mismatch", a, b);
+            // if (a !== b) console.error("mismatch", a, b);
 
             return {
                 ...item,
-                date: a,
+                date: b,
             };
         });
 
