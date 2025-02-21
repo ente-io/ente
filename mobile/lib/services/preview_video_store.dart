@@ -665,21 +665,29 @@ class PreviewVideoStore {
     }).toList();
 
     // set all video status to in queue
-    final n = allFiles.length;
-    for (int i = 0; i < n; i++) {
+    var n = allFiles.length, i = 0;
+    while (i < n) {
       final enteFile = allFiles[i];
       // elimination case for <=10 MB with H.264
       final (_, result, _) = await _checkFileForPreviewCreation(enteFile);
       if (result) {
         allFiles.removeAt(i);
-      } else {
-        _items[enteFile.uploadedFileID!] = PreviewItem(
-          status: PreviewItemStatus.inQueue,
-          file: enteFile,
-          collectionID: enteFile.collectionID ?? 0,
-        );
+        n--;
+        continue;
       }
+      _items[enteFile.uploadedFileID!] = PreviewItem(
+        status: PreviewItemStatus.inQueue,
+        file: enteFile,
+        collectionID: enteFile.collectionID ?? 0,
+      );
+      i++;
     }
+
+    if (allFiles.isEmpty) {
+      _logger.info("[init] No preview to cache");
+      return;
+    }
+
     Bus.instance.fire(PreviewUpdatedEvent(_items));
 
     _logger.info("[init] Processing ${allFiles.length} items for streaming");
