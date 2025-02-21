@@ -6,6 +6,45 @@
  */
 import i18n from "i18next";
 
+const _dateFormat = new Intl.DateTimeFormat(i18n.language, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+});
+
+const _dateWithoutYearFormat = new Intl.DateTimeFormat(i18n.language, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+});
+
+const _timeFormat = new Intl.DateTimeFormat(i18n.language, {
+    timeStyle: "short",
+});
+
+/**
+ * Return a locale aware formatted date from the given {@link Date}.
+ *
+ * Example: "Fri, 21 Feb 2025"
+ */
+export const formattedDate = (date: Date) => _dateFormat.format(date);
+
+/**
+ * A variant of {@link formattedDate} that omits the year.
+ *
+ * Example: "Fri, 21 Feb"
+ */
+export const formattedDateWithoutYear = (date: Date) =>
+    _dateWithoutYearFormat.format(date);
+
+/**
+ * Return a locale aware formatted time from the given {@link Date}.
+ *
+ * Example: "11:51 AM"
+ */
+export const formattedTime = (date: Date) => _timeFormat.format(date);
+
 let _relativeTimeFormat: Intl.RelativeTimeFormat | undefined;
 
 export const formattedDateRelative = (date: Date) => {
