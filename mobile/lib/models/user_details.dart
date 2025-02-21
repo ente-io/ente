@@ -51,6 +51,10 @@ class UserDetails {
   }
 
   int getFreeStorage() {
+    final int? memberLimit = familyMemberStorageLimit();
+    if (memberLimit != null) {
+      return max(memberLimit - usage, 0);
+    }
     return max(getTotalStorage() - getFamilyOrPersonalUsage(), 0);
   }
 
