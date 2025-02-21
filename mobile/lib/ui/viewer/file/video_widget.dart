@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:fluttertoast/fluttertoast.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/stream_switched_event.dart";
 import "package:photos/events/use_media_kit_for_video.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
@@ -39,10 +40,8 @@ class _VideoWidgetState extends State<VideoWidget> {
       useMediaKitForVideoSubscription;
   late bool selectPreviewForPlay = widget.file.localID == null;
   File? preview;
-  final player1 = GlobalKey();
-  final player2 = GlobalKey();
-  final player3 = GlobalKey();
-  final player4 = GlobalKey();
+  final nativePlayerKey = GlobalKey();
+  final mediaKitKey = GlobalKey();
 
   bool isPreviewLoadable = true;
 
@@ -106,81 +105,74 @@ class _VideoWidgetState extends State<VideoWidget> {
         (FileDataService.instance.previewIds
                 ?.containsKey(widget.file.uploadedFileID!) ??
             false);
-    if (isPreviewVideoPlayable && selectPreviewForPlay) {
-      if (preview == null) {
-        return Center(
-          child: Container(
-            width: 48,
-            height: 48,
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              color: Colors.black.withOpacity(0.3),
-              border: Border.all(
-                color: strokeFaintDark,
-                width: 1,
-              ),
-            ),
-            child: const EnteLoadingWidget(
-              size: 32,
-              color: fillBaseDark,
-              padding: 0,
+    final playPreview = isPreviewVideoPlayable && selectPreviewForPlay;
+    if (playPreview && preview == null) {
+      return Center(
+        child: Container(
+          width: 48,
+          height: 48,
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            color: Colors.black.withOpacity(0.3),
+            border: Border.all(
+              color: strokeFaintDark,
+              width: 1,
             ),
           ),
-        );
-      }
-      if (Platform.isAndroid) {
-        return VideoWidgetNative(
-          widget.file,
-          key: player1,
-          preview: preview,
-          tagPrefix: widget.tagPrefix,
-          playbackCallback: widget.playbackCallback,
-          onStreamChange: () {
-            setState(() {
-              selectPreviewForPlay = false;
-            });
-          },
-        );
-      }
-      return VideoWidgetMediaKitNew(
-        widget.file,
-        key: player2,
-        preview: preview,
-        tagPrefix: widget.tagPrefix,
-        playbackCallback: widget.playbackCallback,
-        onStreamChange: () {
-          setState(() {
-            selectPreviewForPlay = false;
-          });
-        },
+          child: const EnteLoadingWidget(
+            size: 32,
+            color: fillBaseDark,
+            padding: 0,
+          ),
+        ),
       );
     }
 
-    if (useNativeVideoPlayer) {
+    if (useNativeVideoPlayer && !playPreview ||
+        playPreview && Platform.isAndroid) {
       return VideoWidgetNative(
         widget.file,
-        key: player3,
+        key: nativePlayerKey,
         tagPrefix: widget.tagPrefix,
         playbackCallback: widget.playbackCallback,
+        preview: preview,
+        selectedPreview: playPreview,
         onStreamChange: () {
           setState(() {
-            selectPreviewForPlay = true;
-          });
-        },
-      );
-    } else {
-      return VideoWidgetMediaKitNew(
-        widget.file,
-        key: player4,
-        tagPrefix: widget.tagPrefix,
-        playbackCallback: widget.playbackCallback,
-        onStreamChange: () {
-          setState(() {
-            selectPreviewForPlay = true;
+            selectPreviewForPlay = !selectPreviewForPlay;
+            Bus.instance.fire(
+              StreamSwitchedEvent(
+                selectPreviewForPlay,
+                Platform.isAndroid
+                    ? PlayerType.nativeVideoPlayer
+                    : PlayerType.mediaKit,
+              ),
+            );
           });
         },
       );
     }
+    return VideoWidgetMediaKitNew(
+      widget.file,
+      key: mediaKitKey,
+      tagPrefix: widget.tagPrefix,
+      playbackCallback: widget.playbackCallback,
+      preview: preview,
+      selectedPreview: playPreview,
+      onStreamChange: () {
+        setState(() {
+          selectPreviewForPlay = !selectPreviewForPlay;
+          Bus.instance.fire(
+            StreamSwitchedEvent(
+              selectPreviewForPlay,
+              Platform.isAndroid
+                  ? PlayerType.nativeVideoPlayer
+                  : PlayerType.mediaKit,
+            ),
+          );
+        });
+      },
+    );
   }
 }

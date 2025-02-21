@@ -10,6 +10,7 @@ import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/pause_video_event.dart";
+import "package:photos/events/stream_switched_event.dart";
 import "package:photos/events/use_media_kit_for_video.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
@@ -39,6 +40,7 @@ class VideoWidgetNative extends StatefulWidget {
   final bool isFromMemories;
   final void Function()? onStreamChange;
   final File? preview;
+  final bool selectedPreview;
 
   const VideoWidgetNative(
     this.file, {
@@ -48,6 +50,7 @@ class VideoWidgetNative extends StatefulWidget {
     required this.onStreamChange,
     super.key,
     this.preview,
+    required this.selectedPreview,
   });
 
   @override
@@ -74,6 +77,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   final _debouncer = Debouncer(const Duration(milliseconds: 2000));
   final _elTooltipController = ElTooltipController();
   StreamSubscription<PlaybackEvent>? _subscription;
+  StreamSubscription<StreamSwitchedEvent>? _streamSwitchedSubscription;
   int position = 0;
 
   @override
@@ -83,9 +87,39 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     );
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    if (widget.preview != null) {
-      _setFilePathForNativePlayer(widget.preview!.path);
-    } else if (widget.file.isRemoteFile) {
+
+    if (widget.selectedPreview) {
+      loadPreview();
+    } else {
+      loadOriginal();
+    }
+
+    pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
+      _controller?.pause();
+    });
+    _guestViewEventSubscription =
+        Bus.instance.on<GuestViewEvent>().listen((event) {
+      setState(() {
+        _isGuestView = event.isGuestView;
+      });
+    });
+    _streamSwitchedSubscription =
+        Bus.instance.on<StreamSwitchedEvent>().listen((event) {
+      if (event.type != PlayerType.nativeVideoPlayer) return;
+      if (event.selectedPreview) {
+        loadPreview();
+      } else {
+        loadOriginal();
+      }
+    });
+  }
+
+  void loadPreview() {
+    _setFilePathForNativePlayer(widget.preview!.path);
+  }
+
+  void loadOriginal() {
+    if (widget.file.isRemoteFile) {
       _loadNetworkVideo();
       _setFileSizeIfNull();
     } else if (widget.file.isSharedMediaToAppSandbox) {
@@ -112,16 +146,6 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         }
       });
     }
-
-    pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
-      _controller?.pause();
-    });
-    _guestViewEventSubscription =
-        Bus.instance.on<GuestViewEvent>().listen((event) {
-      setState(() {
-        _isGuestView = event.isGuestView;
-      });
-    });
   }
 
   @override
@@ -150,6 +174,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         );
       }
     }
+    _streamSwitchedSubscription?.cancel();
     _guestViewEventSubscription.cancel();
     pauseVideoSubscription.cancel();
     removeCallBack(widget.file);
@@ -162,6 +187,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _isSeeking.dispose();
     _debouncer.cancelDebounceTimer();
     _elTooltipController.dispose();
+    _controller?.dispose();
+    _controller = null;
     super.dispose();
   }
 
@@ -289,7 +316,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                     return PreviewStatusWidget(
                                       showControls: value,
                                       file: widget.file,
-                                      isPreviewPlayer: widget.preview != null,
+                                      isPreviewPlayer: widget.selectedPreview,
                                       onStreamChange: widget.onStreamChange,
                                     );
                                   },
