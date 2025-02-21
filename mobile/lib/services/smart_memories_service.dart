@@ -280,9 +280,11 @@ class SmartMemoriesService {
         if (isMeAssigned && meID == personID) {
           title = "Spotlight on yourself";
         }
-        // TODO: lau: create selection on spotlightFiles on time, location and faces
-        final spotlightMemory = PeopleMemory(
+        final selectSpotlightMemories = await _bestSelectionPeople(
           spotlightFiles.map((f) => Memory.fromFile(f, _seenTimes)).toList(),
+        );
+        final spotlightMemory = PeopleMemory(
+          selectSpotlightMemories,
           PeopleMemoryType.spotlight,
           personID,
           name: title,
@@ -306,9 +308,11 @@ class SmartMemoriesService {
         }
         if (youAndThemFiles.length > 5) {
           final String title = "You and $personName";
-          // TODO: lau: create selection on youAndThemFiles on time and location
-          final youAndThemMemory = PeopleMemory(
+          final selectYouAndThemMemories = await _bestSelectionPeople(
             youAndThemFiles.map((f) => Memory.fromFile(f, _seenTimes)).toList(),
+          );
+          final youAndThemMemory = PeopleMemory(
+            selectYouAndThemMemories,
             PeopleMemoryType.youAndThem,
             personID,
             name: title,
@@ -349,9 +353,11 @@ class SmartMemoriesService {
         }
         if (activityFiles.length > 5) {
           final String title = activityTitle(lastActivity, personName);
-          // TODO: lau: create selection on activityFiles on time and location
-          final activityMemory = PeopleMemory(
+          final selectActivityMemories = await _bestSelectionPeople(
             activityFiles.map((f) => Memory.fromFile(f, _seenTimes)).toList(),
+          );
+          final activityMemory = PeopleMemory(
+            selectActivityMemories,
             PeopleMemoryType.doingSomethingTogether,
             personID,
             name: title,
@@ -1045,14 +1051,131 @@ class SmartMemoriesService {
     return null;
   }
 
-  /// Returns the best selection of files from the given list.
+  /// Creates a curated selection of memories for the People memories.
+  /// The selection is based on the following things:
+  /// - Distribution of photos over time
+  /// - Nostalgia score of photos
+  /// - Distribution of photos over locations
+  Future<List<Memory>> _bestSelectionPeople(
+    List<Memory> memories, {
+    int? prefferedSize,
+  }) async {
+    try {
+      final fileCount = memories.length;
+      final int targetSize = prefferedSize ?? 10;
+      if (fileCount <= targetSize) return memories;
+      final safeMemories = memories
+          .where((memory) => memory.file.uploadedFileID != null)
+          .toList();
+
+      // Sort by time
+      final sortedTimeMemories = <Memory>[];
+      for (final memory in safeMemories) {
+        if (memory.file.creationTime != null) {
+          sortedTimeMemories.add(memory);
+        }
+      }
+      sortedTimeMemories.sort(
+        (a, b) => a.file.creationTime!.compareTo(b.file.creationTime!),
+      );
+      if (sortedTimeMemories.length < targetSize) return sortedTimeMemories;
+
+      // Divide into 10 time buckets distributing all memories as evenly as possible.
+      final int total = sortedTimeMemories.length;
+      final int numBuckets = targetSize;
+      final int quotient = total ~/ numBuckets;
+      final int remainder = total % numBuckets;
+      final List<List<Memory>> timeBuckets = [];
+      int offset = 0;
+      for (int i = 0; i < numBuckets; i++) {
+        final int bucketSize = quotient + (i < remainder ? 1 : 0);
+        timeBuckets.add(sortedTimeMemories.sublist(offset, offset + bucketSize));
+        offset += bucketSize;
+      }
+
+      final finalSelection = <Memory>[];
+      bucketLoop:
+      for (final bucket in timeBuckets) {
+        // Get X% most nostalgic photos
+        final nostalgiaScores = <int, double>{};
+        final bucketFileIDs = bucket
+            .map((memory) => memory.file.uploadedFileID!)
+            .toSet()
+            .toList();
+        final bucketFileIdToClip =
+            await MLDataDB.instance.getClipVectorsForFileIDs(bucketFileIDs);
+        for (final mem in bucket) {
+          final fileID = mem.file.uploadedFileID!;
+          final clip = bucketFileIdToClip[fileID];
+          if (clip == null) {
+            nostalgiaScores[fileID] = 0;
+            continue;
+          }
+          final score = clip.vector.dot(_clipPositiveTextVector!);
+          nostalgiaScores[fileID] = score;
+        }
+        final sortedNostalgia = bucket
+          ..sort(
+            (a, b) => nostalgiaScores[b.file.uploadedFileID!]!
+                .compareTo(nostalgiaScores[a.file.uploadedFileID!]!),
+          );
+        final mostNostalgic = sortedNostalgia
+            .take((max(bucket.length * 0.3, 1)).toInt())
+            .toList();
+
+        if (mostNostalgic.isEmpty) {
+          _logger.severe('No nostalgic photos in bucket');
+        }
+
+        // If no selection yet, take the most nostalgic photo
+        if (finalSelection.isEmpty) {
+          finalSelection.add(mostNostalgic.first);
+          continue bucketLoop;
+        }
+
+        // From nostalgic selection, take the photo furthest away from all currently selected ones
+        double globalMaxMinDistance = 0;
+        int farthestDistanceIdx = 0;
+        for (var i = 0; i < mostNostalgic.length; i++) {
+          final mem = mostNostalgic[i];
+          double minDistance = double.infinity;
+          for (final selected in finalSelection) {
+            if (selected.file.location == null || mem.file.location == null) {
+              continue;
+            }
+            final distance =
+                calculateDistance(mem.file.location!, selected.file.location!);
+            if (distance < minDistance) {
+              minDistance = distance;
+            }
+          }
+          if (minDistance > globalMaxMinDistance) {
+            globalMaxMinDistance = minDistance;
+            farthestDistanceIdx = i;
+          }
+        }
+        finalSelection.add(mostNostalgic[farthestDistanceIdx]);
+      }
+
+      finalSelection
+          .sort((a, b) => b.file.creationTime!.compareTo(a.file.creationTime!));
+
+      _logger.finest(
+          'People memories selection done, returning ${finalSelection.length} memories',);
+      return finalSelection;
+    } catch (e, s) {
+      _logger.severe('Error in _bestSelectionPeople', e, s);
+      return [];
+    }
+  }
+
+  /// Returns the best selection of files from the given list, for time and trip memories.
   /// Makes sure that the selection is not more than [prefferedSize] or 10 files,
   /// and that each year of the original list is represented.
   Future<List<Memory>> _bestSelection(
     List<Memory> memories, {
     int? prefferedSize,
   }) async {
-    // final files = Memory.filesFromMemories(memories);
     final fileCount = memories.length;
     int targetSize = prefferedSize ?? 10;
     if (fileCount <= targetSize) return memories;
