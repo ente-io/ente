@@ -1,3 +1,4 @@
+import ModeIcon from "@mui/icons-material/Mode";
 import {
     Button,
     CircularProgress,
@@ -14,6 +15,7 @@ import { useEffect, useState } from "react";
 import { getEmail, getToken } from "../App";
 import { apiOrigin } from "../services/support";
 import CloseFamily from "./CloseFamily";
+import EditDialog from "./EditStorage";
 
 interface FamilyMember {
     id: string;
@@ -34,8 +36,11 @@ interface UserData {
 const FamilyTableComponent: React.FC = () => {
     const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
     const [closeFamilyOpen, setCloseFamilyOpen] = useState(false);
+    const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [editDialog, setEditDialog] = useState(false);
+    const [memID, selectedMemID] = useState<string>("");
 
     useEffect(() => {
         const fetchData = async () => {
@@ -54,9 +59,7 @@ const FamilyTableComponent: React.FC = () => {
                     throw new Error("Network response was not ok");
                 }
                 const userData = (await response.json()) as UserData; // Typecast to UserData interface
-                const members: FamilyMember[] =
-                    userData.details.familyData.members;
-                setFamilyMembers(members);
+                setFamilyMembers(userData.details.familyData.members);
             } catch (error) {
                 console.error("Error fetching family data:", error);
                 setError("No family data");
@@ -69,8 +72,6 @@ const FamilyTableComponent: React.FC = () => {
             console.error("Fetch data error:", error),
         );
     }, []);
-
-    console.log(familyMembers);
 
     const formatBytesToGB = (bytesValue: number): string => {
         const valueInGB = (bytesValue / (1024 * 1024 * 1024)).toFixed(2);
@@ -90,6 +91,13 @@ const FamilyTableComponent: React.FC = () => {
         handleOpenCloseFamily();
     };
 
+    const handleEditDialog = () => {
+        familyMembers.forEach((member) => {
+            selectedMemID(member.id);
+        });
+        setOpen(true);
+        setEditDialog(true);
+    };
     if (loading) {
         return <CircularProgress />;
     }
@@ -129,6 +137,9 @@ const FamilyTableComponent: React.FC = () => {
                             <TableCell>
                                 <b>Storage Limit</b>
                             </TableCell>
+                            <TableCell>
+                                <b> </b>
+                            </TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -159,7 +170,27 @@ const FamilyTableComponent: React.FC = () => {
                                 <TableCell>
                                     {formatBytesToGB(member.usage)}
                                 </TableCell>
-                                <TableCell>{formatBytesToGB(member.storageLimit)}</TableCell>
+                                <TableCell>
+                                    {formatBytesToGB(member.storageLimit)}
+                                </TableCell>
+                                {(member.status === "ADMIN" || member.status === "SELF" ) ? (
+                                    <span></span>
+                                ) : <TableCell>
+                                <div
+                                    onClick={handleEditDialog}
+                                    style={{
+                                        marginLeft: "8px",
+                                        cursor: "pointer",
+                                    }}
+                                >
+                                    <ModeIcon />
+                                    <EditDialog
+                                        open={editDialog}
+                                        setOpen={setEditDialog}
+                                        memberID={member.id}
+                                    ></EditDialog>
+                                </div>
+                            </TableCell>}
                             </TableRow>
                         ))}
                     </TableBody>
