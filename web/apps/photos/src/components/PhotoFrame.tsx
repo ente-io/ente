@@ -533,6 +533,7 @@ const PhotoFrame = ({
                     /* @ts-ignore TODO(PS): test */
                     open={open5}
                     onClose={handleClose}
+                    user={galleryContext.user ?? undefined}
                     files={files}
                     initialIndex={currentIndex}
                     {...{
@@ -677,8 +678,8 @@ const updateDisplayFileSource = (
 const fileTimelineDateString = (item: EnteFile) => {
     const date = new Date(item.metadata.creationTime / 1000);
     return isSameDay(date, new Date())
-        ? t("TODAY")
+        ? t("today")
         : isSameDay(date, new Date(Date.now() - 24 * 60 * 60 * 1000))
-          ? t("YESTERDAY")
+          ? t("yesterday")
           : formattedDate(date);
 };

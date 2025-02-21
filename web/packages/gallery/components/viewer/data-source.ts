@@ -3,16 +3,15 @@ import {
     downloadManager,
     type LivePhotoSourceURL,
 } from "@/gallery/services/download";
-import type { EnteFile } from "@/media/file";
-import type { ParsedMetadata } from "@/media/file-metadata";
-import { FileType } from "@/media/file-type";
-import { ensureString } from "@/utils/ensure";
-// TODO(PS):
 import {
     extractRawExif,
     parseExif,
     type RawExifTags,
 } from "@/gallery/services/exif";
+import type { EnteFile } from "@/media/file";
+import type { ParsedMetadata } from "@/media/file-metadata";
+import { FileType } from "@/media/file-type";
+import { ensureString } from "@/utils/ensure";
 
 /**
  * This is a subset of the fields expected by PhotoSwipe itself (see the
