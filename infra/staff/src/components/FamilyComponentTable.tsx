@@ -20,6 +20,7 @@ interface FamilyMember {
     email: string;
     status: string;
     usage: number;
+    storageLimit: number;
 }
 
 interface UserData {
@@ -69,9 +70,11 @@ const FamilyTableComponent: React.FC = () => {
         );
     }, []);
 
-    const formatUsageToGB = (usage: number): string => {
-        const usageInGB = (usage / (1024 * 1024 * 1024)).toFixed(2);
-        return `${usageInGB} GB`;
+    console.log(familyMembers);
+
+    const formatBytesToGB = (bytesValue: number): string => {
+        const valueInGB = (bytesValue / (1024 * 1024 * 1024)).toFixed(2);
+        return `${valueInGB} GB`;
     };
 
     const handleOpenCloseFamily = () => {
@@ -112,6 +115,9 @@ const FamilyTableComponent: React.FC = () => {
                     <TableHead>
                         <TableRow>
                             <TableCell>
+                                <b>ID</b>
+                            </TableCell>
+                            <TableCell>
                                 <b>User</b>
                             </TableCell>
                             <TableCell>
@@ -121,13 +127,14 @@ const FamilyTableComponent: React.FC = () => {
                                 <b>Usage</b>
                             </TableCell>
                             <TableCell>
-                                <b>ID</b>
+                                <b>Storage Limit</b>
                             </TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {familyMembers.map((member) => (
                             <TableRow key={member.id}>
+                                <TableCell>{member.id}</TableCell>
                                 <TableCell>{member.email}</TableCell>
                                 <TableCell>
                                     <span
@@ -150,9 +157,9 @@ const FamilyTableComponent: React.FC = () => {
                                     </span>
                                 </TableCell>
                                 <TableCell>
-                                    {formatUsageToGB(member.usage)}
+                                    {formatBytesToGB(member.usage)}
                                 </TableCell>
-                                <TableCell>{member.id}</TableCell>
+                                <TableCell>{formatBytesToGB(member.storageLimit)}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
