@@ -434,14 +434,7 @@ export function PhotoList({
 
                 timeStampList.push({
                     itemType: ITEM_TYPE.TIME,
-                    date: isSameDay(new Date(currentDate), new Date())
-                        ? t("TODAY")
-                        : isSameDay(
-                                new Date(currentDate),
-                                new Date(Date.now() - A_DAY),
-                            )
-                          ? t("YESTERDAY")
-                          : formatDate(currentDate),
+                    date: _getDate(currentDate),
                     id: currentDate.toString(),
                 });
                 timeStampList.push({
@@ -949,6 +942,10 @@ const A_DAY = 24 * 60 * 60 * 1000;
 
 const getDate = (item: EnteFile) => {
     const currentDate = item.metadata.creationTime / 1000;
+    return _getDate(currentDate);
+};
+
+const _getDate = (currentDate: number) => {
     const date = isSameDay(new Date(currentDate), new Date())
         ? t("TODAY")
         : isSameDay(new Date(currentDate), new Date(Date.now() - A_DAY))
