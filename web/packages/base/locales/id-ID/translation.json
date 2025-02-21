@@ -530,14 +530,14 @@
         "tb": "TB"
     },
     "stop": "Hentikan",
-    "export_progress": "<a>{{progress.success, number}} / {{progress.total, number}}</a> item tersinkron",
+    "sync_continuously": "",
+    "export_starting": "",
     "preparing": "Menyiapkan...",
     "renaming_album_folders": "",
     "trashing_deleted_files": "",
     "trashing_deleted_albums": "",
-    "sync_continuously": "",
+    "export_progress": "<a>{{progress.success, number}} / {{progress.total, number}}</a> item tersinkron",
     "pending_items": "",
-    "export_starting": "",
     "delete_account_reason_label": "",
     "delete_account_reason_placeholder": "",
     "delete_reason": {

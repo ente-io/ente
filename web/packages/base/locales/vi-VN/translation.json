@@ -530,14 +530,14 @@
         "tb": "TB"
     },
     "stop": "Dừng",
-    "export_progress": "<a>{{progress.success, number}} / {{progress.total, number}}</a> mục đã đồng bộ",
+    "sync_continuously": "Đồng bộ liên tục",
+    "export_starting": "Xuất bắt đầu...",
     "preparing": "Đang chuẩn bị...",
     "renaming_album_folders": "Đang đổi tên thư mục album...",
     "trashing_deleted_files": "Đang xóa tệp đã xóa...",
     "trashing_deleted_albums": "Đang xóa album đã xóa...",
-    "sync_continuously": "Đồng bộ liên tục",
+    "export_progress": "<a>{{progress.success, number}} / {{progress.total, number}}</a> mục đã đồng bộ",
     "pending_items": "Mục đang chờ",
-    "export_starting": "Xuất bắt đầu...",
     "delete_account_reason_label": "Lý do chính bạn xóa tài khoản là gì?",
     "delete_account_reason_placeholder": "Chọn một lý do",
     "delete_reason": {

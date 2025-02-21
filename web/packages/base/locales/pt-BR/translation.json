@@ -530,14 +530,14 @@
         "tb": "TB"
     },
     "stop": "Parar",
-    "export_progress": "<a>{{progress.success, number}} / {{progress.total, number}}</a> itens sincronizados",
+    "sync_continuously": "Sincronizar continuamente",
+    "export_starting": "Iniciando a exportação...",
     "preparing": "Preparando...",
     "renaming_album_folders": "Renomeando pastas do álbum...",
     "trashing_deleted_files": "Descartando arquivos excluídos...",
     "trashing_deleted_albums": "Descartando álbuns excluídos...",
-    "sync_continuously": "Sincronizar continuamente",
+    "export_progress": "<a>{{progress.success, number}} / {{progress.total, number}}</a> itens sincronizados",
     "pending_items": "Itens pendentes",
-    "export_starting": "Iniciando a exportação...",
     "delete_account_reason_label": "Qual é o principal motivo para você excluir sua conta?",
     "delete_account_reason_placeholder": "Selecione um motivo",
     "delete_reason": {

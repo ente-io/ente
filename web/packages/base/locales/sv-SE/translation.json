@@ -530,14 +530,14 @@
         "tb": "TB"
     },
     "stop": "",
-    "export_progress": "",
+    "sync_continuously": "",
+    "export_starting": "",
     "preparing": "",
     "renaming_album_folders": "",
     "trashing_deleted_files": "",
     "trashing_deleted_albums": "",
-    "sync_continuously": "",
+    "export_progress": "",
     "pending_items": "",
-    "export_starting": "",
     "delete_account_reason_label": "",
     "delete_account_reason_placeholder": "",
     "delete_reason": {

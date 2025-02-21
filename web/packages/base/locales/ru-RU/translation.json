@@ -530,14 +530,14 @@
         "tb": "Терабайт"
     },
     "stop": "Остановка",
-    "export_progress": "<a>{{progress.success, number}} / {{progress.total, number}}</a> синхронизированные элементы",
+    "sync_continuously": "Непрерывная синхронизация",
+    "export_starting": "Запуск экспорта...",
     "preparing": "Подготовка...",
     "renaming_album_folders": "Переименование папок альбомов...",
     "trashing_deleted_files": "Очистка удаленных файлов...",
     "trashing_deleted_albums": "Очистка удаленных альбомов...",
-    "sync_continuously": "Непрерывная синхронизация",
+    "export_progress": "<a>{{progress.success, number}} / {{progress.total, number}}</a> синхронизированные элементы",
     "pending_items": "Отложенные пункты",
-    "export_starting": "Запуск экспорта...",
     "delete_account_reason_label": "Какова основная причина, по которой вы удаляете свою учетную запись?",
     "delete_account_reason_placeholder": "Выберите причину",
     "delete_reason": {
