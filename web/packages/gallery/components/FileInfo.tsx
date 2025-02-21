@@ -21,6 +21,7 @@ import {
 import { useBaseContext } from "@/base/context";
 import { haveWindow } from "@/base/env";
 import { nameAndExtension } from "@/base/file-name";
+import { formattedDate, formattedTime } from "@/base/i18n-date";
 import log from "@/base/log";
 import type { Location } from "@/base/types";
 import { CopyButton } from "@/gallery/components/FileInfoComponents";
@@ -62,7 +63,6 @@ import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
-import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlinedIcon from "@mui/icons-material/CameraOutlined";
 import CloseIcon from "@mui/icons-material/Close";
@@ -480,24 +480,22 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
         sx={{ alignItems: "flex-start", flex: 1, gap: "12px" }}
     >
         <InfoItemIconContainer>{icon}</InfoItemIconContainer>
-        <Box sx={{ flex: 1, mt: "4px" }}>
-            {children ?? (
-                <>
-                    <Typography sx={{ wordBreak: "break-all" }}>
-                        {title}
-                    </Typography>
-                    <Typography
-                        variant="small"
-                        {...(typeof caption == "string"
-                            ? {}
-                            : { component: "div" })}
-                        sx={{ color: "text.muted" }}
-                    >
-                        {caption}
-                    </Typography>
-                </>
-            )}
-        </Box>
+        {children ? (
+            <Box sx={{ flex: 1, mt: "4px" }}>{children}</Box>
+        ) : (
+            <Stack sx={{ flex: 1, mt: "4px", gap: "4px" }}>
+                <Typography sx={{ wordBreak: "break-all" }}>{title}</Typography>
+                <Typography
+                    variant="small"
+                    {...(typeof caption == "string"
+                        ? {}
+                        : { component: "div" })}
+                    sx={{ color: "text.muted" }}
+                >
+                    {caption}
+                </Typography>
+            </Stack>
+        )}
         {trailingButton}
     </Stack>
 );
@@ -717,8 +715,8 @@ const CreationTime: React.FC<CreationTimeProps> = ({
             <FlexWrapper>
                 <InfoItem
                     icon={<CalendarTodayIcon />}
-                    title={formatDate(originalDate)}
-                    caption={formatTime(originalDate)}
+                    title={formattedDate(originalDate)}
+                    caption={formattedTime(originalDate)}
                     trailingButton={
                         allowEdits && (
                             <EditButton

@@ -59,7 +59,7 @@ const ExportPendingList = (props: Iprops) => {
             open={props.isOpen}
             onClose={props.onClose}
             paperMaxWidth="444px"
-            title={t("PENDING_ITEMS")}
+            title={t("pending_items")}
         >
             <ItemList
                 maxHeight={240}

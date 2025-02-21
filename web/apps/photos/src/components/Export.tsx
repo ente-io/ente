@@ -270,7 +270,7 @@ function ContinuousExport({ continuousExport, toggleContinuousExport }) {
     return (
         <SpaceBetweenFlex minHeight={"48px"}>
             <Typography sx={{ color: "text.muted" }}>
-                {t("CONTINUOUS_EXPORT")}
+                {t("sync_continuously")}
             </Typography>
             <Box>
                 <EnteSwitch

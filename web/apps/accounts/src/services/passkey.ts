@@ -36,7 +36,7 @@ const Passkey = z.object({
      */
     friendlyName: z.string(),
     /**
-     * Epoch milliseconds when this passkey was created.
+     * Epoch microseconds when this passkey was created.
      */
     createdAt: z.number(),
 });

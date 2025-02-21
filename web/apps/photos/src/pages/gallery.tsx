@@ -434,15 +434,20 @@ const Page: React.FC = () => {
     }, [state.isRecomputingSearchResults, state.pendingSearchSuggestions]);
 
     const selectAll = (e: KeyboardEvent) => {
-        // ignore ctrl/cmd + a if the user is typing in a text field
+        // Ignore CTRL/CMD + a if the user is typing in a text field.
         if (
             e.target instanceof HTMLInputElement ||
             e.target instanceof HTMLTextAreaElement
         ) {
             return;
         }
-        // if any of the modals are open, don't select all
+        // Ignore select all if:
         if (
+            // - We haven't fetched the user yet;
+            !user ||
+            // - There is nothing to select;
+            !filteredFiles?.length ||
+            // - Any of the modals are open.
             uploadTypeSelectorView ||
             openCollectionSelector ||
             collectionNamerView ||
@@ -451,13 +456,15 @@ const Page: React.FC = () => {
             fixCreationTimeVisibilityProps.open ||
             exportVisibilityProps.open ||
             authenticateUserVisibilityProps.open ||
-            isPhotoSwipeOpen ||
-            !filteredFiles?.length ||
-            !user
+            isPhotoSwipeOpen
         ) {
             return;
         }
+
+        // Prevent the browser's default select all handling.
         e.preventDefault();
+
+        // Create a selection with everything based on the current context.
         const selected = {
             ownCount: 0,
             count: 0,
@@ -804,6 +811,8 @@ const Page: React.FC = () => {
 
     if (!user) {
         // Don't render until we dispatch "mount" with the logged in user.
+        //
+        // Tag: [Note: Gallery children can assume user]
         return <div></div>;
     }
 
