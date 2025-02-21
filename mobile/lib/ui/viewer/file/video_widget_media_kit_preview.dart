@@ -148,6 +148,7 @@ class _VideoWidgetMediaKitPreviewState extends State<VideoWidgetMediaKitPreview>
                 widget.playbackCallback,
                 isFromMemories: widget.isFromMemories,
                 onStreamChange: widget.onStreamChange,
+                isPreviewPlayer: true,
               )
             : const Center(
                 child: EnteLoadingWidget(
