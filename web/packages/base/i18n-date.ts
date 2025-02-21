@@ -26,17 +26,18 @@ const _timeFormat = new Intl.DateTimeFormat(i18n.language, {
 /**
  * Return a locale aware formatted date from the given {@link Date}.
  *
- * Example: "Fri, 21 Feb 2025"
- */
-export const formattedDate = (date: Date) => _dateFormat.format(date);
-
-/**
- * A variant of {@link formattedDate} that omits the year.
+ * The behaviour depends upon whether the given {@link date} falls within the
+ * current calendar year.
  *
- * Example: "Fri, 21 Feb"
+ * - For dates in the current year, year is omitted. Example: "Fri, 21 Feb"
+ *
+ * - Otherwise, the year is included. Example: "Fri, 21 Feb 2025"
  */
-export const formattedDateWithoutYear = (date: Date) =>
-    _dateWithoutYearFormat.format(date);
+export const formattedDate = (date: Date) =>
+    (isSameYear(date) ? _dateWithoutYearFormat : _dateFormat).format(date);
+
+const isSameYear = (date: Date) =>
+    new Date().getFullYear() === date.getFullYear();
 
 /**
  * Return a locale aware formatted time from the given {@link Date}.
