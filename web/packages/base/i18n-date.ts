@@ -4,7 +4,7 @@
  * Note that we rely on the current behaviour of a full reload on changing the
  * language. See: [Note: Changing locale causes a full reload].
  */
-import i18n from "i18next";
+import i18n, { t } from "i18next";
 
 const _dateFormat = new Intl.DateTimeFormat(i18n.language, {
     weekday: "short",
@@ -45,6 +45,17 @@ const isSameYear = (date: Date) =>
  * Example: "11:51 AM"
  */
 export const formattedTime = (date: Date) => _timeFormat.format(date);
+
+/**
+ * Return a locale aware formatted date and time from the given {@link Date},
+ * using the year omission behavior as documented in {@link formattedDate}.
+ *
+ * Example:
+ * - If within year: "Fri, 21 Feb at 11:51 AM".
+ * - Otherwise: "Fri, 21 Feb 2025 at 11:51 AM"
+ */
+export const formattedDateTime = (date: Date) =>
+    [formattedDate(date), t("at"), formattedTime(date)].join(" ");
 
 let _relativeTimeFormat: Intl.RelativeTimeFormat | undefined;
 

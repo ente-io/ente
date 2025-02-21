@@ -11,9 +11,9 @@ import { Titlebar } from "@/base/components/Titlebar";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
+import { formattedDateTime } from "@/base/i18n-date";
 import log from "@/base/log";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
-import { formatDateTimeFull } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -293,7 +293,9 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                             onRootClose={onClose}
                         />
                         <CreatedAtEntry>
-                            {formatDateTimeFull(passkey.createdAt / 1000)}
+                            {formattedDateTime(
+                                new Date(passkey.createdAt / 1000),
+                            )}
                         </CreatedAtEntry>
                         <RowButtonGroup>
                             <RowButton

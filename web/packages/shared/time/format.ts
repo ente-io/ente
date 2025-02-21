@@ -36,9 +36,9 @@ function formatTime(date: number | Date) {
     return timeFormatter.format(date).toUpperCase();
 }
 
-export function formatDateTimeFull(dateTime: number | Date): string {
-    return [formatDateFull(dateTime), t("at"), formatTime(dateTime)].join(" ");
-}
+// function formatDateTimeFull(dateTime: number | Date): string {
+//     return [formatDateFull(dateTime), t("at"), formatTime(dateTime)].join(" ");
+// }
 
 export function formatDateTime(dateTime: number | Date): string {
     return [formatDate(dateTime), t("at"), formatTime(dateTime)].join(" ");
