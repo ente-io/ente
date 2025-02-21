@@ -47,7 +47,7 @@ class SmartMemoriesService {
 
   Vector? _clipPositiveTextVector;
   static const String clipPositiveQuery =
-      'Photo of a precious memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion';
+      'Photo of a precious and nostalgic memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion';
 
   final Map<PeopleActivity, Vector> _clipPeopleActivityVectors = {};
 
