@@ -24,6 +24,8 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
     const Duration(milliseconds: 100),
     executionInterval: const Duration(milliseconds: 325),
   );
+  StreamSubscription<void>? _eventsSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -33,11 +35,8 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
       value: 0,
     );
 
-    widget.controller.onPlaybackStatusChanged.addListener(
-      _onPlaybackStatusChanged,
-    );
-    widget.controller.onPlaybackPositionChanged.addListener(
-      _onPlaybackPositionChanged,
+    _eventsSubscription = widget.controller.events.listen(
+      _listen,
     );
 
     _startMovingSeekbar();
@@ -45,13 +44,8 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
+    _eventsSubscription?.cancel();
     _animationController.dispose();
-    widget.controller.onPlaybackStatusChanged.removeListener(
-      _onPlaybackStatusChanged,
-    );
-    widget.controller.onPlaybackPositionChanged.removeListener(
-      _onPlaybackPositionChanged,
-    );
     _debouncer.cancelDebounceTimer();
     super.dispose();
   }
@@ -103,7 +97,8 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
   void _seekTo(double value) {
     _debouncer.run(() async {
       unawaited(
-        widget.controller.seekTo((value * widget.duration!).round()),
+        widget.controller
+            .seekTo((Duration(seconds: (value * widget.duration!).round()))),
       );
     });
   }
@@ -133,19 +128,33 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
     });
   }
 
+  void _listen(PlaybackEvent playerData) {
+    switch (playerData) {
+      case PlaybackStatusChangedEvent():
+        // Emitted when playback status changes (playing, paused, or stopped)
+        _onPlaybackStatusChanged();
+        break;
+      case PlaybackPositionChangedEvent():
+        // Emitted when playback position changes
+        _onPlaybackPositionChanged();
+        break;
+      default:
+    }
+  }
+
   void _onPlaybackStatusChanged() {
-    if (widget.controller.playbackInfo?.status == PlaybackStatus.paused) {
+    if (widget.controller.playbackStatus == PlaybackStatus.paused) {
       _animationController.stop();
     }
   }
 
   void _onPlaybackPositionChanged() async {
-    if (widget.controller.playbackInfo?.status == PlaybackStatus.paused ||
-        (widget.controller.playbackInfo?.status == PlaybackStatus.stopped &&
-            widget.controller.playbackInfo?.positionFraction != 0)) {
+    if (widget.controller.playbackStatus == PlaybackStatus.paused ||
+        (widget.controller.playbackStatus == PlaybackStatus.stopped &&
+            widget.controller.playbackPosition.inSeconds != 0)) {
       return;
     }
-    final target = widget.controller.playbackInfo?.positionFraction ?? 0;
+    final target = widget.controller.playbackPosition.inMilliseconds;
 
     //To immediately set the position to 0 when the video ends
     if (_prevPositionFraction == 1.0 && target == 0.0) {
@@ -164,22 +173,26 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
       await Future.delayed(const Duration(milliseconds: 450));
     }
 
+    final duration = widget.controller.videoInfo?.durationInMilliseconds;
+    final double fractionTarget =
+        duration == null || duration <= 0 ? 0 : target / duration;
+
     if (widget.duration != null) {
       unawaited(
         _animationController.animateTo(
-          target + (1 / widget.duration!),
+          fractionTarget + (1 / widget.duration!),
           duration: const Duration(seconds: 1),
         ),
       );
     } else {
       unawaited(
         _animationController.animateTo(
-          target,
+          fractionTarget,
           duration: const Duration(seconds: 1),
         ),
       );
     }
 
-    _prevPositionFraction = target;
+    _prevPositionFraction = fractionTarget;
   }
 }

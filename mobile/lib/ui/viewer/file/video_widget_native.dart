@@ -38,6 +38,8 @@ class VideoWidgetNative extends StatefulWidget {
   final Function(bool)? playbackCallback;
   final bool isFromMemories;
   final void Function()? onStreamChange;
+  final File? preview;
+
   const VideoWidgetNative(
     this.file, {
     this.tagPrefix,
@@ -45,6 +47,7 @@ class VideoWidgetNative extends StatefulWidget {
     this.isFromMemories = false,
     required this.onStreamChange,
     super.key,
+    this.preview,
   });
 
   @override
@@ -70,6 +73,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   final _isSeeking = ValueNotifier(false);
   final _debouncer = Debouncer(const Duration(milliseconds: 2000));
   final _elTooltipController = ElTooltipController();
+  StreamSubscription<PlaybackEvent>? _subscription;
+  int position = 0;
 
   @override
   void initState() {
@@ -78,7 +83,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     );
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    if (widget.file.isRemoteFile) {
+    if (widget.preview != null) {
+      _setFilePathForNativePlayer(widget.preview!.path);
+    } else if (widget.file.isRemoteFile) {
       _loadNetworkVideo();
       _setFileSizeIfNull();
     } else if (widget.file.isSharedMediaToAppSandbox) {
@@ -120,7 +127,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) {
-      if (_controller?.playbackInfo?.status == PlaybackStatus.playing) {
+      if (_controller?.playbackStatus == PlaybackStatus.playing) {
         _controller?.pause();
       }
     }
@@ -148,11 +155,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     removeCallBack(widget.file);
     _progressNotifier.dispose();
     WidgetsBinding.instance.removeObserver(this);
-    _controller?.onPlaybackEnded.removeListener(_onPlaybackEnded);
-    _controller?.onPlaybackReady.removeListener(_onPlaybackReady);
-    _controller?.onError.removeListener(_onError);
-    _controller?.onPlaybackStatusChanged
-        .removeListener(_onPlaybackStatusChanged);
+    _subscription?.cancel();
     _isPlaybackReady.dispose();
     _showControls.dispose();
     _isSeeking.removeListener(_seekListener);
@@ -286,6 +289,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                     return PreviewStatusWidget(
                                       showControls: value,
                                       file: widget.file,
+                                      isPreviewPlayer: widget.preview != null,
                                       onStreamChange: widget.onStreamChange,
                                     );
                                   },
@@ -306,6 +310,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                             duration: duration,
                                             showControls: _showControls,
                                             isSeeking: _isSeeking,
+                                            position: position,
                                           )
                                         : const SizedBox();
                                   },
@@ -332,17 +337,15 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       );
       _controller = controller;
 
-      controller.onError.addListener(_onError);
-      controller.onPlaybackEnded.addListener(_onPlaybackEnded);
-      controller.onPlaybackReady.addListener(_onPlaybackReady);
-      controller.onPlaybackStatusChanged.addListener(_onPlaybackStatusChanged);
+      _subscription = controller.events.listen(_listen);
+
       _isSeeking.addListener(_seekListener);
 
-      final videoSource = await VideoSource.init(
+      final videoSource = VideoSource(
         path: _filePath!,
         type: VideoSourceType.file,
       );
-      await controller.loadVideoSource(videoSource);
+      await controller.loadVideo(videoSource);
     } catch (e) {
       _logger.severe(
         "Error initializing native video player controller for file gen id: ${widget.file.generatedID}",
@@ -351,13 +354,34 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     }
   }
 
+  void _listen(PlaybackEvent event) {
+    switch (event) {
+      case PlaybackStatusChangedEvent():
+        _onPlaybackStatusChanged();
+      case PlaybackReadyEvent():
+        _onPlaybackReady();
+        break;
+      case PlaybackPositionChangedEvent():
+        position = event.positionInMilliseconds;
+        setState(() {});
+        break;
+      case PlaybackEndedEvent():
+        _onPlaybackEnded();
+        break;
+      case PlaybackErrorEvent():
+        _onError(event.errorMessage);
+        break;
+      default:
+    }
+  }
+
   void _seekListener() {
     if (!_isSeeking.value &&
-        _controller?.playbackInfo?.status == PlaybackStatus.playing) {
+        _controller?.playbackStatus == PlaybackStatus.playing) {
       _debouncer.run(() async {
         if (mounted) {
           if (_isSeeking.value ||
-              _controller?.playbackInfo?.status != PlaybackStatus.playing) {
+              _controller?.playbackStatus != PlaybackStatus.playing) {
             return;
           }
           _showControls.value = false;
@@ -370,15 +394,17 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   }
 
   void _onPlaybackStatusChanged() {
-    if (_isSeeking.value || _controller?.playbackInfo?.positionFraction == 1) {
+    if (_isSeeking.value ||
+        _controller?.playbackPosition.inMilliseconds ==
+            _controller?.videoInfo?.durationInMilliseconds) {
       return;
     }
-    if (_controller!.playbackInfo?.status == PlaybackStatus.playing) {
+    if (_controller!.playbackStatus == PlaybackStatus.playing) {
       if (mounted) {
         _debouncer.run(() async {
           if (mounted) {
             if (_isSeeking.value ||
-                _controller!.playbackInfo?.status != PlaybackStatus.playing) {
+                _controller!.playbackStatus != PlaybackStatus.playing) {
               return;
             }
             _showControls.value = false;
@@ -395,12 +421,12 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     }
   }
 
-  void _onError() {
+  void _onError(String errorMessage) {
     //This doesn't work all the time
     _logger.severe(
       "Error in native video player controller for file gen id: ${widget.file.generatedID}",
     );
-    _logger.severe(_controller!.onError.value);
+    _logger.severe(errorMessage);
     Bus.instance.fire(UseMediaKitForVideo());
   }
 
@@ -555,12 +581,14 @@ class _SeekBarAndDuration extends StatelessWidget {
   final String? duration;
   final ValueNotifier<bool> showControls;
   final ValueNotifier<bool> isSeeking;
+  final int position;
 
   const _SeekBarAndDuration({
     required this.controller,
     required this.duration,
     required this.showControls,
     required this.isSeeking,
+    required this.position,
   });
 
   @override
@@ -608,22 +636,13 @@ class _SeekBarAndDuration extends StatelessWidget {
                         seconds: 5,
                       ),
                       curve: Curves.easeInOut,
-                      child: ValueListenableBuilder(
-                        valueListenable: controller!.onPlaybackPositionChanged,
-                        builder: (
-                          BuildContext context,
-                          int value,
-                          _,
-                        ) {
-                          return Text(
-                            secondsToDuration(value),
-                            style: getEnteTextTheme(
-                              context,
-                            ).mini.copyWith(
-                                  color: textBaseDark,
-                                ),
-                          );
-                        },
+                      child: Text(
+                        secondsToDuration(position ~/ 1000),
+                        style: getEnteTextTheme(
+                          context,
+                        ).mini.copyWith(
+                              color: textBaseDark,
+                            ),
                       ),
                     ),
                     Expanded(

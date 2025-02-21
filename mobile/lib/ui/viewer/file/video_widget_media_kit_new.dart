@@ -28,6 +28,7 @@ class VideoWidgetMediaKitNew extends StatefulWidget {
   final Function(bool)? playbackCallback;
   final bool isFromMemories;
   final void Function() onStreamChange;
+  final File? preview;
 
   const VideoWidgetMediaKitNew(
     this.file, {
@@ -35,6 +36,7 @@ class VideoWidgetMediaKitNew extends StatefulWidget {
     this.playbackCallback,
     this.isFromMemories = false,
     required this.onStreamChange,
+    this.preview,
     super.key,
   });
 
@@ -61,7 +63,9 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
     );
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    if (widget.file.isRemoteFile) {
+    if (widget.preview != null) {
+      _setVideoController(widget.preview!.path);
+    } else if (widget.file.isRemoteFile) {
       _loadNetworkVideo();
       _setFileSizeIfNull();
     } else if (widget.file.isSharedMediaToAppSandbox) {
@@ -143,7 +147,7 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
                 widget.playbackCallback,
                 isFromMemories: widget.isFromMemories,
                 onStreamChange: widget.onStreamChange,
-                isPreviewPlayer: false,
+                isPreviewPlayer: widget.preview != null,
               )
             : const Center(
                 child: EnteLoadingWidget(

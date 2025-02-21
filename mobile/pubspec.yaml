@@ -145,10 +145,7 @@ dependencies:
   move_to_background: ^1.0.2
   nanoid: ^1.0.0
   native_dio_adapter: ^1.4.0
-  native_video_player:
-    git:
-      url: https://github.com/ashilkn/native_video_player.git
-      ref: notify_if_video_isnt_playable
+  native_video_player: ^3.0.0-dev.3
   onnx_dart:
     path: plugins/onnx_dart
   onnxruntime:
