@@ -144,7 +144,7 @@ class _VideoWidgetState extends State<VideoWidget> {
             Bus.instance.fire(
               StreamSwitchedEvent(
                 selectPreviewForPlay,
-                Platform.isAndroid
+                Platform.isAndroid && useNativeVideoPlayer
                     ? PlayerType.nativeVideoPlayer
                     : PlayerType.mediaKit,
               ),
