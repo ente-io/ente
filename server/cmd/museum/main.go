@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	b64 "encoding/base64"
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller/collections"
 	"net/http"
 	"os"
 	"os/signal"
@@ -305,7 +306,7 @@ func main() {
 		JwtSecret:             jwtSecretBytes,
 	}
 
-	collectionController := &controller.CollectionController{
+	collectionController := &collections.CollectionController{
 		CollectionRepo:       collectionRepo,
 		EmailCtrl:            emailNotificationCtrl,
 		AccessCtrl:           accessCtrl,

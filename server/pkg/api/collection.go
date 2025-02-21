@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller/collections"
 	"net/http"
 	"strconv"
 
@@ -18,7 +19,7 @@ import (
 
 // CollectionHandler exposes request handlers for all collection related requests
 type CollectionHandler struct {
-	Controller *controller.CollectionController
+	Controller *collections.CollectionController
 }
 
 // Create creates a collection
