@@ -8,6 +8,7 @@ import 'package:ente_auth/utils/package_info_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:fk_user_agent/fk_user_agent.dart';
 import 'package:flutter/foundation.dart';
+import 'package:native_dio_adapter/native_dio_adapter.dart';
 import 'package:uuid/uuid.dart';
 
 int kConnectTimeout = 15000;
@@ -50,6 +51,10 @@ class Network {
         },
       ),
     );
+
+    _dio.httpClientAdapter = NativeAdapter();
+    _enteDio.httpClientAdapter = NativeAdapter();
+
     _setupInterceptors(endpoint);
 
     Bus.instance.on<EndpointUpdatedEvent>().listen((event) {

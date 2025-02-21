@@ -113,12 +113,12 @@ String parseErrorForUI(
         if (dioError.response?.data["code"] != null) {
           errorInfo = "Reason: ${dioError.response!.data["code"]}";
         } else {
-          errorInfo = "Reason: ${dioError.response!.data}";
+          errorInfo = "Reason: ${dioError.response!.data.toString()}";
         }
-      } else if (dioError.type == DioExceptionType.unknown) {
-        errorInfo = "Reason: $dioError.error";
+      } else if (dioError.type == DioExceptionType.badCertificate) {
+        errorInfo = "Reason: ${dioError.error.toString()}";
       } else {
-        errorInfo = "Reason: $dioError.type";
+        errorInfo = "Reason: ${dioError.type.toString()}";
       }
     } else {
       if (kDebugMode) {
