@@ -742,20 +742,20 @@ export function PhotoList({
         if (!galleryContext.selectedFile) return;
 
         console.time("t0");
-        const datedDisplayFiles = displayFiles?.map((item) => {
-            // const a = getDate(item);
-            const b = item.timelineDateString;
-            // if (a !== b) console.error("mismatch", a, b);
+        // const datedDisplayFiles = displayFiles?.map((item) => {
+        //     // const a = getDate(item);
+        //     const b = item.timelineDateString;
+        //     // if (a !== b) console.error("mismatch", a, b);
 
-            return {
-                ...item,
-                date: b,
-            };
-        });
+        //     return {
+        //         ...item,
+        //         date: b,
+        //     };
+        // });
 
         console.timeEnd("t0");
         console.time("t1");
-        const notSelectedFiles = datedDisplayFiles?.filter(
+        const notSelectedFiles = displayFiles?.filter(
             (item) => !galleryContext.selectedFile[item.id],
         );
         console.timeEnd("t1");
@@ -766,7 +766,7 @@ export function PhotoList({
 
         console.timeEnd("t2");
         console.time("t3");
-        const localSelectedFiles = datedDisplayFiles.filter(
+        const localSelectedFiles = displayFiles.filter(
             // to get files which were manually selected
             (item) => !unselectedDates.has(item.timelineDateString),
         );
@@ -820,7 +820,7 @@ export function PhotoList({
         setCheckedDates(dates);
 
         const filesOnADay = displayFiles?.filter(
-            (item) => getDate(item) === date,
+            (item) => item.timelineDateString === date,
         ); // all files on a checked/unchecked day
 
         filesOnADay.forEach((file) => {
