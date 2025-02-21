@@ -28,25 +28,25 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    compileSdkVersion 35
-    ndkVersion "26.0.10792818"
+    namespace = "io.ente.photos"
+    compileSdk = 35
+    ndkVersion = flutter.ndkVersion
 
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
-    lintOptions {
-        disable 'InvalidPackage'
-        warningsAsErrors false
-        checkReleaseBuilds false
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
     }
 
     defaultConfig {
-        applicationId "io.ente.photos"
-        minSdkVersion 26
-        targetSdkVersion 35
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
+        applicationId = "io.ente.photos"
+        minSdk = 26
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
         consumerProguardFiles 'proguard-rules.pro'
@@ -115,14 +115,14 @@ rootProject.allprojects {
                 if (details.requested.group == 'com.github.bumptech.glide'
                         && details.requested.name.contains('glide')) {
                     details.useVersion "4.15.1"
-                }
             }
+          }
         }
     }
 }
 
 flutter {
-    source '../..'
+    source = "../.."
 }
 
 dependencies {
