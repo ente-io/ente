@@ -29,9 +29,9 @@ const _timeFormat = new Intl.DateTimeFormat(i18n.language, {
  * The behaviour depends upon whether the given {@link date} falls within the
  * current calendar year.
  *
- * - For dates in the current year, year is omitted. Example: "Fri, 21 Feb"
+ * - For dates in the current year, year is omitted, e.g, "Fri, 21 Feb".
  *
- * - Otherwise, the year is included. Example: "Fri, 21 Feb 2025"
+ * - Otherwise, the year is included, e.g., "Fri, 21 Feb 2025".
  */
 export const formattedDate = (date: Date) =>
     (isSameYear(date) ? _dateWithoutYearFormat : _dateFormat).format(date);

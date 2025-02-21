@@ -32,7 +32,7 @@ export function formatDate(date: number | Date) {
         .join(" ");
 }
 
-export function formatTime(date: number | Date) {
+function formatTime(date: number | Date) {
     return timeFormatter.format(date).toUpperCase();
 }
 
