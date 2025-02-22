@@ -2,6 +2,5 @@
   "@@locale ": "en",
   "askDeleteReason": "Jaký je váš hlavní důvod, proč mažete svůj účet?",
   "incorrectRecoveryKeyBody": "",
-  "checkInboxAndSpamFolder": "Zkontrolujte prosím svou doručenou poštu (a spam) pro dokončení ověření",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "checkInboxAndSpamFolder": "Zkontrolujte prosím svou doručenou poštu (a spam) pro dokončení ověření"
 }
