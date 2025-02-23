@@ -649,12 +649,11 @@ packages:
   file_saver:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "01b2e6b6fe520cfa5d2d91342ccbfbaefa8f6482"
-      url: "https://github.com/jesims/file_saver.git"
-    source: git
-    version: "0.2.9"
+      name: file_saver
+      sha256: "017a127de686af2d2fbbd64afea97052d95f2a0f87d19d25b87e097407bf9c1e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.14"
   file_selector_linux:
     dependency: transitive
     description:
@@ -1865,7 +1864,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "68500a743d824108b236febe4cbd10a1b82c16b1"
+      resolved-ref: "83740bf55dac38a0be01c863609cf900c4d1aab1"
       url: "https://github.com/ente-io/open-mail-app-flutter.git"
     source: git
     version: "0.4.4"
@@ -2194,10 +2193,11 @@ packages:
   receive_sharing_intent:
     dependency: "direct main"
     description:
-      name: receive_sharing_intent
-      sha256: ec76056e4d258ad708e76d85591d933678625318e411564dcb9059048ca3a593
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "2cea396843cd3ab1b5ec4334be4233864637874e"
+      url: "https://github.com/KasemJaffer/receive_sharing_intent.git"
+    source: git
     version: "1.8.1"
   rxdart:
     dependency: transitive
@@ -3010,13 +3010,13 @@ packages:
     source: hosted
     version: "0.0.3"
   win32:
-    dependency: "direct overridden"
+    dependency: "direct main"
     description:
       name: win32
-      sha256: b89e6e24d1454e149ab20fbb225af58660f0c0bf4475544650700d8e2da54aef
+      sha256: daf97c9d80197ed7b619040e86c8ab9a9dad285e7671ee7390f9180cc828a51e
       url: "https://pub.dev"
     source: hosted
-    version: "5.11.0"
+    version: "5.10.1"
   win32_registry:
     dependency: transitive
     description:
