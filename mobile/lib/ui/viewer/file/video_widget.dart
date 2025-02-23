@@ -65,6 +65,9 @@ class _VideoWidgetState extends State<VideoWidget> {
   }
 
   Future<void> _checkForPreview() async {
+    if (!PreviewVideoStore.instance.isVideoStreamingEnabled) {
+      return;
+    }
     widget.playbackCallback?.call(false);
     final data = await PreviewVideoStore.instance
         .getPlaylist(widget.file)
