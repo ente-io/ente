@@ -197,7 +197,7 @@ func (repo *FamilyRepository) RemoveMember(ctx context.Context, adminID int64, m
 }
 
 // UpdateStorage is used to set Pre-existing Members Storage Limit.
-func (repo *FamilyRepository) ModifyMemberStorage(ctx context.Context, adminID int64, id uuid.UUID, storageLimit *int64) error {
+func (repo *FamilyRepository) ModifyMemberStorage(ctx context.Context, id uuid.UUID, storageLimit *int64) error {
 	_, err := repo.DB.Exec(`UPDATE families SET storage_limit=$1 where id=$2`, storageLimit, id)
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not update Members Storage Limit")

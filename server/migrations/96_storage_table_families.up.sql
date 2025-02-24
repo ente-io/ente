@@ -1,2 +1,2 @@
 ALTER TABLE families
-ADD COLUMN storage_limit BIGINT;
+ADD COLUMN storage_limit BIGINT NULL;

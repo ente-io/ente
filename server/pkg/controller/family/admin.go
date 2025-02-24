@@ -232,7 +232,7 @@ func (c *Controller) ModifyMemberStorage(ctx context.Context, actorUserID int64,
 		}
 	}
 
-	modifyStorageErr := c.FamilyRepo.ModifyMemberStorage(ctx, actorUserID, member.ID, storageLimit)
+	modifyStorageErr := c.FamilyRepo.ModifyMemberStorage(ctx, member.ID, storageLimit)
 	if modifyStorageErr != nil {
 		return stacktrace.Propagate(modifyStorageErr, "Failed to modify members storage")
 	}
