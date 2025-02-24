@@ -42,7 +42,7 @@ func (h *FamilyHandler) InviteMember(c *gin.Context) {
 		return
 	}
 
-	err := h.Controller.InviteMember(c, auth.GetUserID(c.Request.Header), request.Email, request.StorageLimit)
+	err := h.Controller.InviteMember(c, auth.GetUserID(c.Request.Header), request.Email)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
