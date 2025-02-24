@@ -1,4 +1,5 @@
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
+import log from "@/base/log";
 import {
     CenteredFlex,
     VerticallyCentered,
@@ -8,10 +9,6 @@ import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import React, { useState } from "react";
 import OtpInput from "react-otp-input";
-
-interface FormValues {
-    otp: string;
-}
 
 interface Verify2FACodeFormProps {
     /**
@@ -40,6 +37,10 @@ interface Verify2FACodeFormProps {
     submitButtonText: string;
 }
 
+interface FormValues {
+    otp: string;
+}
+
 /**
  * A form that can be used to ask the user to fill in a 6 digit OTP that their
  * authenticator app is providing them with.
@@ -62,9 +63,9 @@ export const Verify2FACodeForm: React.FC<Verify2FACodeFormProps> = ({
             setWaiting(false);
             onSuccess();
         } catch (e) {
+            log.error("Failed to submit 2FA code", e);
             resetForm();
-            const message = e instanceof Error ? e.message : "";
-            setFieldError("otp", `${t("generic_error_retry")} (${message})`);
+            setFieldError("otp", t("generic_error"));
             // Workaround (toggling shouldAutoFocus) to reset the focus back to
             // the first input field in case of errors.
             // https://github.com/devfolioco/react-otp-input/issues/420
@@ -82,6 +83,7 @@ export const Verify2FACodeForm: React.FC<Verify2FACodeFormProps> = ({
                 triggerSubmit(otp);
             }
         };
+
     return (
         <Formik<FormValues>
             initialValues={{ otp: "" }}
