@@ -2,6 +2,9 @@
 
 ## v1.7.10 (Unreleased)
 
+- Speed up selection for large libraries.
+- Support Japanese translations.
+- Fix video thumbnail generation on drag and drop.
 - .
 
 ## v1.7.9

@@ -1,4 +1,4 @@
-package controller
+package collections
 
 import (
 	"github.com/ente-io/museum/ente"

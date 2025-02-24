@@ -5,6 +5,7 @@ import (
 	entity "github.com/ente-io/museum/ente/cast"
 	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/controller/cast"
+	"github.com/ente-io/museum/pkg/controller/collections"
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
@@ -16,7 +17,7 @@ import (
 // CastHandler exposes request handlers for publicly accessible collections
 type CastHandler struct {
 	FileCtrl       *controller.FileController
-	CollectionCtrl *controller.CollectionController
+	CollectionCtrl *collections.CollectionController
 	Ctrl           *cast.Controller
 }
 

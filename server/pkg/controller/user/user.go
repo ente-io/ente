@@ -3,6 +3,7 @@ package user
 import (
 	"errors"
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller/collections"
 	"github.com/ente-io/museum/pkg/repo/two_factor_recovery"
 	"strings"
 
@@ -38,7 +39,7 @@ type UserController struct {
 	FileRepo               *repo.FileRepository
 	CollectionRepo         *repo.CollectionRepository
 	DataCleanupRepo        *datacleanup.Repository
-	CollectionCtrl         *controller.CollectionController
+	CollectionCtrl         *collections.CollectionController
 	BillingRepo            *repo.BillingRepository
 	BillingController      *controller.BillingController
 	FamilyController       *family.Controller
@@ -101,7 +102,7 @@ func NewUserController(
 	passkeyRepo *passkey.Repository,
 	storageBonusRepo *storageBonusRepo.Repository,
 	fileRepo *repo.FileRepository,
-	collectionController *controller.CollectionController,
+	collectionController *collections.CollectionController,
 	collectionRepo *repo.CollectionRepository,
 	dataCleanupRepository *datacleanup.Repository,
 	billingRepo *repo.BillingRepository,

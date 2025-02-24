@@ -24,6 +24,7 @@ import "package:photos/ui/viewer/file/native_video_player_controls/play_pause_bu
 import "package:photos/ui/viewer/file/native_video_player_controls/seek_bar.dart";
 import "package:photos/ui/viewer/file/preview_status_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/exif_util.dart";
@@ -210,10 +211,10 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                         behavior: HitTestBehavior.opaque,
                         onTap: () {
                           _showControls.value = !_showControls.value;
-                          _elTooltipController.hide();
                           if (widget.playbackCallback != null) {
                             widget.playbackCallback!(!_showControls.value);
                           }
+                          _elTooltipController.hide();
                         },
                         child: Container(
                           constraints: const BoxConstraints.expand(),
@@ -615,9 +616,7 @@ class _SeekBarAndDuration extends StatelessWidget {
                           _,
                         ) {
                           return Text(
-                            _secondsToDuration(
-                              value,
-                            ),
+                            secondsToDuration(value),
                             style: getEnteTextTheme(
                               context,
                             ).mini.copyWith(
@@ -630,17 +629,13 @@ class _SeekBarAndDuration extends StatelessWidget {
                     Expanded(
                       child: SeekBar(
                         controller!,
-                        _durationToSeconds(
-                          duration,
-                        ),
+                        durationToSeconds(duration),
                         isSeeking,
                       ),
                     ),
                     Text(
                       duration ?? "0:00",
-                      style: getEnteTextTheme(
-                        context,
-                      ).mini.copyWith(
+                      style: getEnteTextTheme(context).mini.copyWith(
                             color: textBaseDark,
                           ),
                     ),
@@ -652,43 +647,6 @@ class _SeekBarAndDuration extends StatelessWidget {
         );
       },
     );
-  }
-
-  /// Returns the duration in the format "h:mm:ss" or "m:ss".
-  String _secondsToDuration(int totalSeconds) {
-    final hours = totalSeconds ~/ 3600;
-    final minutes = (totalSeconds % 3600) ~/ 60;
-    final seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-      return '${hours.toString().padLeft(1, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    } else {
-      return '${minutes.toString().padLeft(1, '0')}:${seconds.toString().padLeft(2, '0')}';
-    }
-  }
-
-  /// Returns the duration in seconds from the format "h:mm:ss" or "m:ss".
-  int? _durationToSeconds(String? duration) {
-    if (duration == null) {
-      return null;
-    }
-    final parts = duration.split(':');
-    int seconds = 0;
-
-    if (parts.length == 3) {
-      // Format: "h:mm:ss"
-      seconds += int.parse(parts[0]) * 3600; // Hours to seconds
-      seconds += int.parse(parts[1]) * 60; // Minutes to seconds
-      seconds += int.parse(parts[2]); // Seconds
-    } else if (parts.length == 2) {
-      // Format: "m:ss"
-      seconds += int.parse(parts[0]) * 60; // Minutes to seconds
-      seconds += int.parse(parts[1]); // Seconds
-    } else {
-      throw FormatException('Invalid duration format: $duration');
-    }
-
-    return seconds;
   }
 }
 

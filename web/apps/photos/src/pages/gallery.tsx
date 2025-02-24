@@ -12,7 +12,6 @@ import { useModalVisibility } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
 import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
-import { useFileInput } from "@/gallery/components/utils/use-file-input";
 import { type Collection } from "@/media/collection";
 import { mergeMetadata, type EnteFile } from "@/media/file";
 import {
@@ -89,7 +88,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Stack, Typography } from "@mui/material";
-import AuthenticateUserModal from "components/AuthenticateUserModal";
+import { AuthenticateUser } from "components/AuthenticateUser";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
@@ -104,21 +103,12 @@ import GalleryEmptyState from "components/GalleryEmptyState";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import { Sidebar } from "components/Sidebar";
-import { type UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
-import Uploader from "components/Upload/Uploader";
-import { UploadSelectorInputs } from "components/UploadSelectorInputs";
+import { Upload, type UploadTypeSelectorIntent } from "components/Upload";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
-import {
-    createContext,
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
-import { useDropzone } from "react-dropzone";
+import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import {
     constructEmailList,
@@ -143,14 +133,10 @@ import {
 import { FILE_OPS_TYPE, getSelectedFiles, handleFileOps } from "utils/file";
 
 const defaultGalleryContext: GalleryContextType = {
-    showPlanSelectorModal: () => null,
     setActiveCollectionID: () => null,
-    onShowCollection: () => null,
     syncWithRemote: () => null,
     setBlockingLoad: () => null,
     photoListHeader: null,
-    openExportModal: () => null,
-    authenticateUser: () => null,
     user: null,
     userIDToEmailMap: null,
     emailList: null,
@@ -197,42 +183,10 @@ const Page: React.FC = () => {
         useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
+    const [dragAndDropFiles, setDragAndDropFiles] = useState<FileWithPath[]>(
+        [],
+    );
     const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
-
-    const {
-        // A function to call to get the props we should apply to the container,
-        getRootProps: getDragAndDropRootProps,
-        // ... the props we should apply to the <input> element,
-        getInputProps: getDragAndDropInputProps,
-        // ... and the files that we got.
-        acceptedFiles: dragAndDropFilesReadOnly,
-    } = useDropzone({
-        noClick: true,
-        noKeyboard: true,
-        disabled: shouldDisableDropzone,
-    });
-    const {
-        getInputProps: getFileSelectorInputProps,
-        openSelector: openFileSelector,
-        selectedFiles: fileSelectorFiles,
-    } = useFileInput({
-        directory: false,
-    });
-    const {
-        getInputProps: getFolderSelectorInputProps,
-        openSelector: openFolderSelector,
-        selectedFiles: folderSelectorFiles,
-    } = useFileInput({
-        directory: true,
-    });
-    const {
-        getInputProps: getZipFileSelectorInputProps,
-        openSelector: openZipFileSelector,
-        selectedFiles: fileSelectorZipFiles,
-    } = useFileInput({
-        directory: false,
-        accept: ".zip",
-    });
 
     const syncInProgress = useRef(false);
     const syncInterval = useRef<ReturnType<typeof setInterval> | undefined>(
@@ -249,23 +203,6 @@ const Page: React.FC = () => {
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
         useState<UploadTypeSelectorIntent>("upload");
-
-    const [sidebarView, setSidebarView] = useState(false);
-
-    const closeSidebar = () => setSidebarView(false);
-    const openSidebar = () => setSidebarView(true);
-
-    const [authenticateUserModalView, setAuthenticateUserModalView] =
-        useState(false);
-
-    const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
-
-    const authenticateUser = (callback: () => void) => {
-        onAuthenticateCallback.current = callback;
-        setAuthenticateUserModalView(true);
-    };
-    const closeAuthenticateUserModal = () =>
-        setAuthenticateUserModalView(false);
 
     // If the fix creation time dialog is being shown, then the list of files on
     // which it should act.
@@ -291,6 +228,8 @@ const Page: React.FC = () => {
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
 
+    const { show: showSidebar, props: sidebarVisibilityProps } =
+        useModalVisibility();
     const { show: showPlanSelector, props: planSelectorVisibilityProps } =
         useModalVisibility();
     const { show: showWhatsNew, props: whatsNewVisibilityProps } =
@@ -299,6 +238,21 @@ const Page: React.FC = () => {
         useModalVisibility();
     const { show: showExport, props: exportVisibilityProps } =
         useModalVisibility();
+    const {
+        show: showAuthenticateUser,
+        props: authenticateUserVisibilityProps,
+    } = useModalVisibility();
+
+    const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
+
+    const authenticateUser = useCallback(
+        () =>
+            new Promise<void>((resolve) => {
+                onAuthenticateCallback.current = resolve;
+                showAuthenticateUser();
+            }),
+        [],
+    );
 
     // TODO: Temp
     const user = state.user;
@@ -480,30 +434,37 @@ const Page: React.FC = () => {
     }, [state.isRecomputingSearchResults, state.pendingSearchSuggestions]);
 
     const selectAll = (e: KeyboardEvent) => {
-        // ignore ctrl/cmd + a if the user is typing in a text field
+        // Ignore CTRL/CMD + a if the user is typing in a text field.
         if (
             e.target instanceof HTMLInputElement ||
             e.target instanceof HTMLTextAreaElement
         ) {
             return;
         }
-        // if any of the modals are open, don't select all
+        // Ignore select all if:
         if (
-            sidebarView ||
+            // - We haven't fetched the user yet;
+            !user ||
+            // - There is nothing to select;
+            !filteredFiles?.length ||
+            // - Any of the modals are open.
             uploadTypeSelectorView ||
             openCollectionSelector ||
             collectionNamerView ||
+            sidebarVisibilityProps.open ||
             planSelectorVisibilityProps.open ||
             fixCreationTimeVisibilityProps.open ||
             exportVisibilityProps.open ||
-            authenticateUserModalView ||
-            isPhotoSwipeOpen ||
-            !filteredFiles?.length ||
-            !user
+            authenticateUserVisibilityProps.open ||
+            isPhotoSwipeOpen
         ) {
             return;
         }
+
+        // Prevent the browser's default select all handling.
         e.preventDefault();
+
+        // Create a selection with everything based on the current context.
         const selected = {
             ownCount: 0,
             count: 0,
@@ -553,12 +514,6 @@ const Page: React.FC = () => {
             clearSelection,
         };
     }, [selectAll, clearSelection]);
-
-    // Create a regular array from the readonly array returned by dropzone.
-    const dragAndDropFiles = useMemo(
-        () => [...dragAndDropFilesReadOnly],
-        [dragAndDropFilesReadOnly],
-    );
 
     const showSessionExpiredDialog = () =>
         showMiniDialog(sessionExpiredDialogAttributes(logout));
@@ -832,7 +787,7 @@ const Page: React.FC = () => {
     const openHiddenSection: GalleryContextType["openHiddenSection"] = (
         callback,
     ) => {
-        authenticateUser(() => {
+        authenticateUser().then(() => {
             dispatch({ type: "showHidden" });
             callback?.();
         });
@@ -856,6 +811,8 @@ const Page: React.FC = () => {
 
     if (!user) {
         // Don't render until we dispatch "mount" with the logged in user.
+        //
+        // Tag: [Note: Gallery children can assume user]
         return <div></div>;
     }
 
@@ -863,18 +820,10 @@ const Page: React.FC = () => {
         <GalleryContext.Provider
             value={{
                 ...defaultGalleryContext,
-                showPlanSelectorModal: showPlanSelector,
                 setActiveCollectionID: handleSetActiveCollectionID,
-                onShowCollection: (id) =>
-                    dispatch({
-                        type: "showNormalOrHiddenCollectionSummary",
-                        collectionSummaryID: id,
-                    }),
                 syncWithRemote,
                 setBlockingLoad,
                 photoListHeader,
-                openExportModal: showExport,
-                authenticateUser,
                 userIDToEmailMap,
                 user,
                 emailList,
@@ -885,21 +834,14 @@ const Page: React.FC = () => {
             }}
         >
             <FullScreenDropZone
-                {...{ getDragAndDropRootProps }}
                 message={
                     watchFolderView
                         ? t("watch_folder_dropzone_hint")
                         : undefined
                 }
+                disabled={shouldDisableDropzone}
+                onDrop={setDragAndDropFiles}
             >
-                <UploadSelectorInputs
-                    {...{
-                        getDragAndDropInputProps,
-                        getFileSelectorInputProps,
-                        getFolderSelectorInputProps,
-                        getZipFileSelectorInputProps,
-                    }}
-                />
                 {blockingLoad && <TranslucentLoadingOverlay />}
                 <PlanSelector
                     {...planSelectorVisibilityProps}
@@ -982,21 +924,19 @@ const Page: React.FC = () => {
                         />
                     ) : (
                         <NormalNavbarContents
-                            {...{
-                                openSidebar,
-                                openUploader,
-                                isInSearchMode,
-                                onShowSearchInput: () =>
-                                    dispatch({ type: "enterSearchMode" }),
-                                onSelectSearchOption: handleSelectSearchOption,
-                                onSelectPeople: () =>
-                                    dispatch({ type: "showPeople" }),
-                                onSelectPerson: (personID) =>
-                                    dispatch({
-                                        type: "showPerson",
-                                        personID,
-                                    }),
-                            }}
+                            {...{ isInSearchMode }}
+                            onSidebar={showSidebar}
+                            onUpload={openUploader}
+                            onShowSearchInput={() =>
+                                dispatch({ type: "enterSearchMode" })
+                            }
+                            onSelectSearchOption={handleSelectSearchOption}
+                            onSelectPeople={() =>
+                                dispatch({ type: "showPeople" })
+                            }
+                            onSelectPerson={(personID) =>
+                                dispatch({ type: "showPerson", personID })
+                            }
                         />
                     )}
                 </NavbarBase>
@@ -1028,7 +968,7 @@ const Page: React.FC = () => {
                     }}
                 />
 
-                <Uploader
+                <Upload
                     activeCollection={activeCollection}
                     syncWithRemote={syncWithRemote}
                     closeUploadTypeSelector={setUploadTypeSelectorView.bind(
@@ -1043,6 +983,7 @@ const Page: React.FC = () => {
                     onUploadFile={(file) =>
                         dispatch({ type: "uploadFile", file })
                     }
+                    onShowPlanSelector={showPlanSelector}
                     setCollections={(collections) =>
                         dispatch({ type: "setNormalCollections", collections })
                     }
@@ -1052,20 +993,16 @@ const Page: React.FC = () => {
                     showSessionExpiredMessage={showSessionExpiredDialog}
                     {...{
                         dragAndDropFiles,
-                        openFileSelector,
-                        fileSelectorFiles,
-                        openFolderSelector,
-                        folderSelectorFiles,
-                        openZipFileSelector,
-                        fileSelectorZipFiles,
                         uploadTypeSelectorIntent,
                         uploadTypeSelectorView,
                     }}
                 />
                 <Sidebar
-                    collectionSummaries={collectionSummaries}
-                    sidebarView={sidebarView}
-                    closeSidebar={closeSidebar}
+                    {...sidebarVisibilityProps}
+                    {...{ collectionSummaries }}
+                    onShowPlanSelector={showPlanSelector}
+                    onShowExport={showExport}
+                    onAuthenticateUser={authenticateUser}
                 />
                 <WhatsNew {...whatsNewVisibilityProps} />
                 {!isInSearchMode &&
@@ -1102,8 +1039,8 @@ const Page: React.FC = () => {
                         activeCollectionID={activeCollectionID}
                         activePersonID={activePerson?.id}
                         enableDownload={true}
-                        fileToCollectionsMap={state.fileCollectionIDs}
-                        collectionNameMap={state.allCollectionNameByID}
+                        fileCollectionIDs={state.fileCollectionIDs}
+                        allCollectionsNameByID={state.allCollectionsNameByID}
                         showAppDownloadBanner={
                             files.length < 30 && !isInSearchMode
                         }
@@ -1112,6 +1049,12 @@ const Page: React.FC = () => {
                             setFilesDownloadProgressAttributesCreator
                         }
                         selectable={true}
+                        onSelectCollection={(collectionID) =>
+                            dispatch({
+                                type: "showNormalOrHiddenCollectionSummary",
+                                collectionSummaryID: collectionID,
+                            })
+                        }
                         onSelectPerson={(personID) => {
                             dispatch({ type: "showPerson", personID });
                         }}
@@ -1119,12 +1062,11 @@ const Page: React.FC = () => {
                 )}
                 <Export
                     {...exportVisibilityProps}
-                    collectionNameMap={state.allCollectionNameByID}
+                    allCollectionsNameByID={state.allCollectionsNameByID}
                 />
-                <AuthenticateUserModal
-                    open={authenticateUserModalView}
-                    onClose={closeAuthenticateUserModal}
-                    onAuthenticate={onAuthenticateCallback.current}
+                <AuthenticateUser
+                    {...authenticateUserVisibilityProps}
+                    onAuthenticate={onAuthenticateCallback.current!}
                 />
             </FullScreenDropZone>
         </GalleryContext.Provider>
@@ -1160,19 +1102,25 @@ const preloadImage = (imgBasePath: string) => {
 };
 
 type NormalNavbarContentsProps = SearchBarProps & {
-    openSidebar: () => void;
-    openUploader: () => void;
+    /**
+     * Called when the user activates the sidebar icon.
+     */
+    onSidebar: () => void;
+    /**
+     * Called when the user activates the upload button.
+     */
+    onUpload: () => void;
 };
 
 const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
-    openSidebar,
-    openUploader,
+    onSidebar,
+    onUpload,
     ...props
 }) => (
     <>
-        {!props.isInSearchMode && <SidebarButton onClick={openSidebar} />}
+        {!props.isInSearchMode && <SidebarButton onClick={onSidebar} />}
         <SearchBar {...props} />
-        {!props.isInSearchMode && <UploadButton onClick={openUploader} />}
+        {!props.isInSearchMode && <UploadButton onClick={onUpload} />}
     </>
 );
 

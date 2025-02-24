@@ -216,3 +216,40 @@ bool isNumeric(String? s) {
   }
   return double.tryParse(s) != null;
 }
+
+/// Returns the duration in seconds from the format "h:mm:ss" or "m:ss".
+int? durationToSeconds(String? duration) {
+  if (duration == null) {
+    return null;
+  }
+  final parts = duration.split(':');
+  int seconds = 0;
+
+  if (parts.length == 3) {
+    // Format: "h:mm:ss"
+    seconds += int.parse(parts[0]) * 3600; // Hours to seconds
+    seconds += int.parse(parts[1]) * 60; // Minutes to seconds
+    seconds += int.parse(parts[2]); // Seconds
+  } else if (parts.length == 2) {
+    // Format: "m:ss"
+    seconds += int.parse(parts[0]) * 60; // Minutes to seconds
+    seconds += int.parse(parts[1]); // Seconds
+  } else {
+    throw FormatException('Invalid duration format: $duration');
+  }
+
+  return seconds;
+}
+
+/// Returns the duration in the format "h:mm:ss" or "m:ss".
+String secondsToDuration(int totalSeconds) {
+  final hours = totalSeconds ~/ 3600;
+  final minutes = (totalSeconds % 3600) ~/ 60;
+  final seconds = totalSeconds % 60;
+
+  if (hours > 0) {
+    return '${hours.toString().padLeft(1, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  } else {
+    return '${minutes.toString().padLeft(1, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+}

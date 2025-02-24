@@ -9,12 +9,10 @@ import {
 } from "@/base/components/utils/modal";
 import { lowercaseExtension } from "@/base/file-name";
 import log from "@/base/log";
-import {
-    FileInfo,
-    type FileInfoExif,
-    type FileInfoProps,
-} from "@/gallery/components/FileInfo";
+import { FileInfo } from "@/gallery/components/FileInfo";
+import { type FileInfoExif } from "@/gallery/components/viewer/data-source";
 import { downloadManager } from "@/gallery/services/download";
+import { extractRawExif, parseExif } from "@/gallery/services/exif";
 import type { Collection } from "@/media/collection";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
@@ -22,7 +20,6 @@ import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { ConfirmDeleteFileDialog } from "@/new/photos/components/FileViewerComponents";
 import { ImageEditorOverlay } from "@/new/photos/components/ImageEditorOverlay";
 import { moveToTrash } from "@/new/photos/services/collection";
-import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import { usePhotosAppContext } from "@/new/photos/types/context";
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -79,7 +76,13 @@ import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export type PhotoViewerProps = Pick<
     PhotoFrameProps,
-    "favoriteFileIDs" | "markUnsyncedFavoriteUpdate" | "markTempDeleted"
+    | "favoriteFileIDs"
+    | "markUnsyncedFavoriteUpdate"
+    | "markTempDeleted"
+    | "fileCollectionIDs"
+    | "allCollectionsNameByID"
+    | "onSelectCollection"
+    | "onSelectPerson"
 > & {
     /**
      * The PhotoViewer is shown when this is `true`.
@@ -105,9 +108,6 @@ export type PhotoViewerProps = Pick<
     isInHiddenSection: boolean;
     enableDownload: boolean;
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
-    fileToCollectionsMap?: Map<number, number[]>;
-    collectionNameMap?: Map<number, string>;
-    onSelectPerson?: FileInfoProps["onSelectPerson"];
 };
 
 /**
@@ -139,8 +139,9 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
     isInHiddenSection,
     enableDownload,
     setFilesDownloadProgressAttributesCreator,
-    fileToCollectionsMap,
-    collectionNameMap,
+    fileCollectionIDs,
+    allCollectionsNameByID,
+    onSelectCollection,
     onSelectPerson,
 }) => {
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
@@ -736,7 +737,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
     };
 
     const handleSelectCollection = (collectionID: number) => {
-        galleryContext.onShowCollection(collectionID);
+        onSelectCollection(collectionID);
         handleClose();
     };
 
@@ -996,15 +997,15 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                 onClose={handleCloseInfo}
                 file={photoSwipe?.currItem as EnteFile}
                 exif={exif?.value}
-                shouldDisableEdits={!isOwnFile}
+                allowEdits={isOwnFile}
                 allowMap={!publicCollectionGalleryContext.credentials}
-                showCollectionChips={
+                showCollections={
                     !isTrashCollection && isOwnFile && !isInHiddenSection
                 }
+                fileCollectionIDs={fileCollectionIDs}
+                allCollectionsNameByID={allCollectionsNameByID}
                 scheduleUpdate={scheduleUpdate}
                 refreshPhotoswipe={refreshPhotoswipe}
-                fileToCollectionsMap={fileToCollectionsMap}
-                collectionNameMap={collectionNameMap}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
             />

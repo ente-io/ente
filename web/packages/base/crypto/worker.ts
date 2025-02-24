@@ -1,3 +1,4 @@
+import { logUnhandledErrorsAndRejectionsInWorker } from "@/base/log-web";
 import { expose } from "comlink";
 import type { StateAddress } from "libsodium-wrappers-sumo";
 import * as ei from "./ente-impl";
@@ -98,3 +99,5 @@ export class CryptoWorker {
 }
 
 expose(CryptoWorker);
+
+logUnhandledErrorsAndRejectionsInWorker();

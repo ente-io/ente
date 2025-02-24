@@ -3,8 +3,16 @@
 
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
+import { FileType } from "@/media/file-type";
 import { t } from "i18next";
-import { FileViewerDataSource } from "./data-source";
+import {
+    forgetExif,
+    forgetExifForItemData,
+    forgetFailedItemDataForFile,
+    forgetFailedItems,
+    itemDataForFile,
+    updateFileInfoExifIfNeeded,
+} from "./data-source";
 import type { FileViewerProps } from "./FileViewer";
 import { createPSRegisterElementIconHTML } from "./icons";
 
@@ -26,16 +34,46 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
     // PhotoSwipe = require("./ps5/dist/photoswipe.esm.js").default;
 }
 
-type FileViewerPhotoSwipeOptions = FileViewerProps & {
+type FileViewerPhotoSwipeOptions = {
     /**
      * Called when the file viewer is closed.
      */
     onClose: () => void;
     /**
+     * Called whenever the slide changes to obtain the derived data for the file
+     * that is about to be displayed.
+     */
+    onAnnotate: (file: EnteFile) => FileViewerFileAnnotation;
+    /**
      * Called when the user activates the info action on a file.
      */
-    onViewInfo: (file: EnteFile) => void;
-};
+    onViewInfo: (annotatedFile: FileViewerAnnotatedFile) => void;
+} & Pick<FileViewerProps, "files" | "initialIndex" | "disableDownload">;
+
+/**
+ * Derived data for a file that is needed to display the file viewer controls
+ * etc associated with the file.
+ *
+ * This is recomputed on-demand each time the slide changes.
+ */
+export interface FileViewerFileAnnotation {
+    /**
+     * The id of the file whose annotation this is.
+     */
+    fileID: number;
+    /**
+     * `true` if this file is owned by the logged in user (if any).
+     */
+    isOwnFile: boolean;
+}
+
+/**
+ * A file and its annotation, in a nice cosy box.
+ */
+export interface FileViewerAnnotatedFile {
+    file: EnteFile;
+    annotation: FileViewerFileAnnotation;
+}
 
 /**
  * A wrapper over {@link PhotoSwipe} to tailor its interface for use by our file
@@ -69,13 +107,6 @@ export class FileViewerPhotoSwipe {
      */
     private opts: Pick<FileViewerPhotoSwipeOptions, "disableDownload">;
     /**
-     * Our data source.
-     *
-     * TODO(PS): Move this elsewhere, or merge with download manager.
-     */
-    private dataSource: FileViewerDataSource;
-
-    /**
      * An interval that invokes a periodic check of whether we should the hide
      * controls if the user does not perform any pointer events for a while.
      */
@@ -93,17 +124,29 @@ export class FileViewerPhotoSwipe {
      * - "auto-hidden" if controls were hidden by us because of inactivity.
      */
     private lastActivityDate: Date | "auto-hidden" | "already-hidden";
+    /**
+     * Derived data about the currently displayed file.
+     *
+     * This is recomputed on-demand (by using the {@link onAnnotate} callback)
+     * each time the slide changes, and cached until the next slide change.
+     *
+     * Instead of accessing this property directly, code should funnel through
+     * the `activeFileAnnotation` helper function defined in the constructor
+     * scope.
+     */
+    private activeFileAnnotation: FileViewerFileAnnotation | undefined;
 
     constructor({
         files,
         initialIndex,
         disableDownload,
         onClose,
+        onAnnotate,
         onViewInfo,
     }: FileViewerPhotoSwipeOptions) {
         this.files = files;
         this.opts = { disableDownload };
-        this.dataSource = new FileViewerDataSource();
+        this.lastActivityDate = new Date();
 
         const pswp = new PhotoSwipe({
             // Opaque background.
@@ -151,7 +194,44 @@ export class FileViewerPhotoSwipe {
             // TODO(PS): padding option? for handling custom title bar.
             // TODO(PS): will we need this?
             mainClass: "pswp-ente",
+            // Translated variants
+            closeTitle: t("close_key"),
+            zoomTitle: t("zoom_in_out_key") /* TODO(PS): Add "(scroll)" */,
+            arrowPrevTitle: t("previous_key"),
+            arrowNextTitle: t("next_key"),
+            // TODO(PS): Move to translations (unpreviewable_file_notification).
+            errorMsg: "This file could not be previewed",
         });
+
+        this.pswp = pswp;
+
+        // Helper routines to obtain the file at `currIndex`.
+
+        const currentFile = () => this.files[pswp.currIndex]!;
+
+        const currentAnnotatedFile = () => {
+            const file = currentFile();
+            let annotation = this.activeFileAnnotation;
+            if (annotation?.fileID != file.id) {
+                annotation = onAnnotate(file);
+                this.activeFileAnnotation = annotation;
+            }
+            return {
+                file,
+                // The above condition implies that annotation can never be
+                // undefined, but it doesn't seem to be enough to convince
+                // TypeScript. Writing the condition in a more unnatural way
+                // `(annotation && annotation?.fileID == file.id)` works, but
+                // instead we use a non-null assertion here.
+                annotation: annotation!,
+            };
+        };
+
+        const currentFileAnnotation = () => currentAnnotatedFile().annotation;
+
+        const withCurrentAnnotatedFile =
+            (cb: (af: AnnotatedFile) => void) => () =>
+                cb(currentFileAnnotation());
 
         // Provide data about slides to PhotoSwipe via callbacks
         // https://photoswipe.com/data-sources/#dynamically-generated-data
@@ -163,12 +243,12 @@ export class FileViewerPhotoSwipe {
         pswp.addFilter("itemData", (_, index) => {
             const file = files[index]!;
 
-            let itemData = this.dataSource.itemDataForFile(file, () => {
+            let itemData = itemDataForFile(file, () => {
                 this.pswp.refreshSlideContent(index);
             });
 
-            const { videoURL, ...rest } = itemData;
-            if (videoURL) {
+            const { fileType, videoURL, ...rest } = itemData;
+            if (fileType === FileType.video && videoURL) {
                 const disableDownload = !!this.opts.disableDownload;
                 itemData = {
                     ...rest,
@@ -201,7 +281,8 @@ export class FileViewerPhotoSwipe {
         });
 
         pswp.on("contentAppend", (e) => {
-            const videoURL = e.content.data.livePhotoVideoURL;
+            const { fileType, videoURL } = e.content.data;
+            if (fileType !== FileType.livePhoto) return;
             if (!videoURL) return;
 
             // This slide is displaying a live photo. Append a video element to
@@ -225,7 +306,7 @@ export class FileViewerPhotoSwipe {
         });
 
         pswp.on("imageSizeChange", ({ content, width, height }) => {
-            if (!content.data.livePhotoVideoURL) return;
+            if (content.data.fileType !== FileType.livePhoto) return;
 
             // This slide is displaying a live photo. Resize the size of the
             // video element to match that of the image.
@@ -242,32 +323,55 @@ export class FileViewerPhotoSwipe {
         });
 
         pswp.on("contentDeactivate", (e) => {
-            // Pause the video element (if any) on a slide when we move away
-            // from it.
+            // Reset failures, if any, for this file so that the fetch is tried
+            // again when we come back to it^.
+            //
+            // ^ Note that because of how the preloading works, this will have
+            //   an effect (i.e. the retry will happen) only if the user moves
+            //   more than 2 slides and then back, or if they reopen the viewer.
+            //
+            // See: [Note: File viewer error handling]
+            forgetFailedItemDataForFile(currentFile());
+
+            // Pause the video element, if any, when we move away from the
+            // slide.
             const video =
                 e.content?.slide?.container?.getElementsByTagName("video")[0];
             video?.pause();
         });
 
         pswp.on("contentActivate", (e) => {
-            // Undo the effect of a previous "contentDeactivate".
-            if (e.content?.slide.data?.livePhotoVideoURL) {
+            // Undo the effect of a previous "contentDeactivate" if it was
+            // displaying a live photo.
+            if (e.content?.slide.data?.fileType === FileType.livePhoto) {
                 e.content?.slide?.container
                     ?.getElementsByTagName("video")[0]
                     ?.play();
             }
         });
 
-        // The user did some action within the file viewer to close it.
-        pswp.on("close", () => {
-            // Clear intervals.
+        pswp.on("loadComplete", (e) =>
+            updateFileInfoExifIfNeeded(e.content.data),
+        );
+
+        // pswp.on("change", (e) => {
+        //     const itemData = pswp.currSlide.content.data;
+        //     exifForItemData(itemData).then((data) =>
+        //         console.log("exif data", data),
+        //     );
+        // });
+
+        pswp.on("contentDestroy", (e) => forgetExifForItemData(e.content.data));
+
+        // The PhotoSwipe dialog has being closed and the animations have
+        // completed.
+        pswp.on("destroy", () => {
             this.clearAutoHideIntervalIfNeeded();
+            forgetFailedItems();
+            forgetExif();
             // Let our parent know that we have been closed.
             onClose();
         });
-
-        const withCurrentFile = (cb: (file: EnteFile) => void) => () =>
-            cb(this.files[this.pswp.currIndex]!);
 
         // Add our custom UI elements to inside the PhotoSwipe dialog.
         //
@@ -276,16 +380,33 @@ export class FileViewerPhotoSwipe {
         //
         // The "order" prop is used to position items. Some landmarks:
         // - counter: 5
+        // - preloader: 7
         // - zoom: 10
         // - close: 20
         pswp.on("uiRegister", () => {
+            pswp.ui.registerElement({
+                name: "error",
+                order: 6,
+                // TODO(PS): Change color?
+                html: createPSRegisterElementIconHTML("error"),
+                onInit: (errorElement, pswp) => {
+                    pswp.on("change", () => {
+                        const { fetchFailed, isContentLoading } =
+                            pswp.currSlide.content.data;
+                        errorElement.classList.toggle(
+                            "pswp__error--active",
+                            !!fetchFailed && !isContentLoading,
+                        );
+                    });
+                },
+            });
             pswp.ui.registerElement({
                 name: "info",
                 title: t("info"),
                 order: 15,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("info"),
-                onClick: withCurrentFile(onViewInfo),
+                onClick: withCurrentAnnotatedFile(onViewInfo),
             });
         });
 
@@ -301,8 +422,6 @@ export class FileViewerPhotoSwipe {
         // Initializing PhotoSwipe adds it to the DOM as a dialog-like div with
         // the class "pswp".
         pswp.init();
-
-        this.pswp = pswp;
 
         this.autoHideCheckIntervalId = setInterval(() => {
             this.autoHideIfInactive();
@@ -325,7 +444,6 @@ export class FileViewerPhotoSwipe {
         // closed internally (e.g. the user activated the close button within
         // the file viewer), then PhotoSwipe will ignore this extra close.
         this.pswp.close();
-        this.clearAutoHideIntervalIfNeeded();
     }
 
     updateFiles(files: EnteFile[]) {
@@ -348,7 +466,7 @@ export class FileViewerPhotoSwipe {
     private autoHideIfInactive() {
         if (this.lastActivityDate == "already-hidden") return;
         if (this.lastActivityDate == "auto-hidden") return;
-        if (Date.now() - this.lastActivityDate.getTime() > 3000) {
+        if (Date.now() - this.lastActivityDate.getTime() > 5000 /* 5s */) {
             if (this.areUIControlsVisible()) {
                 this.hideUIControlsIfNotFocused();
                 this.lastActivityDate = "auto-hidden";
