@@ -1,10 +1,6 @@
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import log from "@/base/log";
-import {
-    CenteredFlex,
-    VerticallyCentered,
-} from "@ente/shared/components/Container";
-import { Box, styled, Typography } from "@mui/material";
+import { Stack, styled, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useState } from "react";
@@ -85,41 +81,36 @@ export const Verify2FACodeForm: React.FC<Verify2FACodeFormProps> = ({
         };
 
     return (
-        <VerticallyCentered>
-            <form onSubmit={handleSubmit}>
-                <Typography variant="small" sx={{ mb: 2, color: "text.muted" }}>
+        <form onSubmit={handleSubmit}>
+            <Stack sx={{ gap: 3, textAlign: "center" }}>
+                <Typography variant="small" sx={{ color: "text.muted" }}>
                     {t("enter_two_factor_otp")}
                 </Typography>
-                <Box sx={{ my: 2 }}>
-                    <OtpInput
-                        containerStyle={{ justifyContent: "center" }}
-                        shouldAutoFocus={shouldAutoFocus}
-                        value={values.otp}
-                        onChange={onChange(handleChange("otp"), submitForm)}
-                        numInputs={6}
-                        renderSeparator={<span>-</span>}
-                        renderInput={(props) => <IndividualInput {...props} />}
-                    />
-                    {errors.otp && (
-                        <CenteredFlex sx={{ mt: 1 }}>
-                            <InvalidInputMessage>
-                                {t("incorrect_code")}
-                            </InvalidInputMessage>
-                        </CenteredFlex>
-                    )}
-                </Box>
+                <OtpInput
+                    containerStyle={{ justifyContent: "center" }}
+                    shouldAutoFocus={shouldAutoFocus}
+                    value={values.otp}
+                    onChange={onChange(handleChange("otp"), submitForm)}
+                    numInputs={6}
+                    renderSeparator={<span>-</span>}
+                    renderInput={(props) => <IndividualInput {...props} />}
+                />
+                {errors.otp && (
+                    <Typography variant="mini" sx={{ color: "critical.main" }}>
+                        {t("incorrect_code")}
+                    </Typography>
+                )}
                 <LoadingButton
                     type="submit"
                     color="accent"
                     fullWidth
-                    sx={{ my: 4 }}
                     loading={waiting}
                     disabled={values.otp.length < 6}
                 >
                     {submitButtonText}
                 </LoadingButton>
-            </form>
-        </VerticallyCentered>
+            </Stack>
+        </form>
     );
 };
 
@@ -140,12 +131,4 @@ const IndividualInput = styled("input")(
         width: 32px !important;
     }
 `,
-);
-
-const InvalidInputMessage: React.FC<React.PropsWithChildren> = ({
-    children,
-}) => (
-    <Typography variant="mini" sx={{ color: "critical.main" }}>
-        {children}
-    </Typography>
 );
