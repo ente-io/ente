@@ -538,6 +538,7 @@ func main() {
 	//lint:ignore SA1019 Deprecated API will be removed in the future
 	privateAPI.GET("/collections", collectionHandler.Get)
 	privateAPI.GET("/collections/v2", collectionHandler.GetV2)
+	privateAPI.GET("/collections/v3", collectionHandler.GetWithLimit)
 	privateAPI.POST("/collections/share", collectionHandler.Share)
 	privateAPI.POST("/collections/join-link", collectionHandler.JoinLink)
 	privateAPI.POST("/collections/share-url", collectionHandler.ShareURL)

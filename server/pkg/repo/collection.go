@@ -101,8 +101,8 @@ func (repo *CollectionRepository) GetCollectionByType(userID int64, collectionTy
 	return c, nil
 }
 
-func (repo *CollectionRepository) GetCollectionsOwnedByUserV2(userID int64, updationTime int64, app ente.App) ([]ente.Collection, error) {
-	rows, err := repo.DB.Query(`
+func (repo *CollectionRepository) GetCollectionsOwnedByUserV2(userID int64, updationTime int64, app ente.App, limit *int64) ([]ente.Collection, error) {
+	query := `
 		SELECT 
 c.collection_id, c.owner_id, c.encrypted_key,c.key_decryption_nonce, c.name, c.encrypted_name, c.name_decryption_nonce, c.type, c.app, c.attributes, c.updation_time, c.is_deleted, c.magic_metadata, c.pub_magic_metadata,
 users.user_id, users.encrypted_email, users.email_decryption_nonce, cs.role_type,
@@ -114,7 +114,14 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
     ON (cs.to_user_id = users.user_id AND users.encrypted_email IS NOT NULL)
     LEFT JOIN public_collection_tokens pct
     ON (pct.collection_id = c.collection_id and pct.is_disabled=FALSE)
-    WHERE c.owner_id = $1 AND c.updation_time > $2 and c.app = $3`, userID, updationTime, string(app))
+    WHERE c.owner_id = $1 AND c.updation_time > $2 and c.app = $3`
+	args := []interface{}{userID, updationTime, string(app)}
+
+	if limit != nil {
+		query += "order by c.updation_time ASC LIMIT $4"
+		args = append(args, *limit)
+	}
+	rows, err := repo.DB.Query(query, args...)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
@@ -192,14 +199,21 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 
 // GetCollectionsSharedWithUser returns the list of collections that are shared
 // with a user
-func (repo *CollectionRepository) GetCollectionsSharedWithUser(userID int64, updationTime int64, app ente.App) ([]ente.Collection, error) {
-	rows, err := repo.DB.Query(`
+func (repo *CollectionRepository) GetCollectionsSharedWithUser(userID int64, updationTime int64, app ente.App, limit *int64) ([]ente.Collection, error) {
+	query := `
 		SELECT collections.collection_id, collections.owner_id, users.encrypted_email, users.email_decryption_nonce, collection_shares.encrypted_key, collections.name, collections.encrypted_name, collections.name_decryption_nonce, collections.type, collections.app, collections.pub_magic_metadata, collection_shares.magic_metadata, collections.updation_time, collection_shares.is_deleted
 		FROM collections
 		INNER JOIN users
 			ON collections.owner_id = users.user_id
 		INNER JOIN collection_shares
-			ON collections.collection_id = collection_shares.collection_id AND collection_shares.to_user_id = $1 AND (collection_shares.updation_time > $2 OR collections.updation_time > $2) AND users.encrypted_email IS NOT NULL AND app = $3`, userID, updationTime, string(app))
+			ON collections.collection_id = collection_shares.collection_id AND collection_shares.to_user_id = $1 AND (collection_shares.updation_time > $2 OR collections.updation_time > $2) AND users.encrypted_email IS NOT NULL AND app = $3`
+	args := []interface{}{userID, updationTime, string(app)}
+	if limit != nil {
+		query += " LIMIT $4"
+		args = append(args, *limit)
+	}
+
+	rows, err := repo.DB.Query(query, args...)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
