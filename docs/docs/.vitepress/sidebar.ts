@@ -268,6 +268,10 @@ export const sidebar = [
                         link: "/self-hosting/guides/standalone-ente",
                     },
                     {
+                        text: "Ente via Tailscale (Community)",
+                        link: "/self-hosting/guides/Tailscale.md",
+                    },
+                    {
                         text: "Configure CLI for Self Hosted Instance",
                         link: "/self-hosting/guides/selfhost-cli",
                     },
