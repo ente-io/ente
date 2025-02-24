@@ -57,17 +57,25 @@ const FamilyMember = z.object({
      */
     email: z.string(),
     /**
+     * `true` if this is the admin.
+     *
+     * This field will not be sent for invited members until they accept.
+     */
+    isAdmin: z.boolean().nullish().transform(nullToUndefined),
+    /**
      * Storage used by the family member.
      *
      * This field will not be present for invited members until they accept.
      */
     usage: z.number().nullish().transform(nullToUndefined),
     /**
-     * `true` if this is the admin.
+     * Storage limit allocated to the family member.
      *
-     * This field will not be sent for invited members until they accept.
+     * This field will not be present unless the admin for the family plan has
+     * configured a member specific limit, in which case this will be the limit
+     * (in bytes) specifying the storage which this member can use.
      */
-    isAdmin: z.boolean().nullish().transform(nullToUndefined),
+    storageLimit: z.number().nullish().transform(nullToUndefined),
 });
 
 type FamilyMember = z.infer<typeof FamilyMember>;
@@ -483,6 +491,14 @@ export const isPartOfFamilyWithOtherMembers = (userDetails: UserDetails) =>
  */
 export const isFamilyAdmin = (userDetails: UserDetails) =>
     userDetails.email == familyAdminEmail(userDetails);
+
+/**
+ * Return the member specific storage limit for the user (represented by the
+ * given {@link userDetails}).
+ */
+export const familyMemberStorageLimit = (userDetails: UserDetails) =>
+    userDetails.familyData?.members.find((m) => m.email == userDetails.email)
+        ?.storageLimit;
 
 /**
  * Return the email of the admin for the family plan, if any, that the user

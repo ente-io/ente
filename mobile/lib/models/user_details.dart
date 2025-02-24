@@ -51,6 +51,10 @@ class UserDetails {
   }
 
   int getFreeStorage() {
+    final int? memberLimit = familyMemberStorageLimit();
+    if (memberLimit != null) {
+      return max(memberLimit - usage, 0);
+    }
     return max(getTotalStorage() - getFamilyOrPersonalUsage(), 0);
   }
 
@@ -59,6 +63,17 @@ class UserDetails {
   int getTotalStorage() {
     return (isPartOfFamily() ? familyData!.storage : subscription.storage) +
         storageBonus;
+  }
+
+  // return the member storage limit if user is part of family and the admin
+  // has set the storage limit for the user.
+  int? familyMemberStorageLimit() {
+    if (isPartOfFamily()) {
+      final FamilyMember? currentUserMember = familyData!.members!
+          .firstWhereOrNull((element) => element.email.trim() == email.trim());
+      return currentUserMember?.storageLimit;
+    }
+    return null;
   }
 
   // This is the total storage for which user has paid for.
@@ -106,12 +121,14 @@ class FamilyMember {
   final int usage;
   final String id;
   final bool isAdmin;
+  final int? storageLimit;
 
   FamilyMember(
     this.email,
     this.usage,
     this.id,
     this.isAdmin,
+    this.storageLimit,
   );
 
   factory FamilyMember.fromMap(Map<String, dynamic> map) {
@@ -120,6 +137,7 @@ class FamilyMember {
       map['usage'] as int,
       map['id'] as String,
       map['isAdmin'] as bool,
+      map['storageLimit'] as int?,
     );
   }
 
@@ -129,6 +147,7 @@ class FamilyMember {
       'usage': usage,
       'id': id,
       'isAdmin': isAdmin,
+      'storageLimit': storageLimit,
     };
   }
 
@@ -186,6 +205,10 @@ class FamilyData {
 
   int getTotalUsage() {
     return members!.map((e) => e.usage).toList().sum;
+  }
+
+  FamilyMember? getMemberByID(String id) {
+    return members!.firstWhereOrNull((element) => element.id == id);
   }
 
   static fromMap(Map<String, dynamic>? map) {

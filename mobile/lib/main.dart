@@ -52,7 +52,6 @@ import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
-import "package:video_player_media_kit/video_player_media_kit.dart";
 
 final _logger = Logger("main");
 
@@ -237,10 +236,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
 
     ServiceLocator.instance
         .init(preferences, NetworkClient.instance.enteDio, packageInfo);
-
-    if (!isBackground) {
-      VideoPlayerMediaKit.ensureInitialized(iOS: true, android: true);
-    }
 
     _logger.info("UserService init $tlog");
     await UserService.instance.init();

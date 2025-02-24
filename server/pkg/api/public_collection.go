@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller/collections"
 	"net/http"
 	"strconv"
 
@@ -19,7 +20,7 @@ import (
 type PublicCollectionHandler struct {
 	Controller             *controller.PublicCollectionController
 	FileCtrl               *controller.FileController
-	CollectionCtrl         *controller.CollectionController
+	CollectionCtrl         *collections.CollectionController
 	StorageBonusController *storagebonus.Controller
 }
 
