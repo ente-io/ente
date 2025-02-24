@@ -5,7 +5,7 @@ import {
     VerticallyCentered,
 } from "@ente/shared/components/Container";
 import { Box, styled, Typography } from "@mui/material";
-import { Formik, type FormikHelpers } from "formik";
+import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useState } from "react";
 import OtpInput from "react-otp-input";
@@ -37,10 +37,6 @@ interface Verify2FACodeFormProps {
     submitButtonText: string;
 }
 
-interface FormValues {
-    otp: string;
-}
-
 /**
  * A form that can be used to ask the user to fill in a 6 digit OTP that their
  * authenticator app is providing them with.
@@ -53,27 +49,31 @@ export const Verify2FACodeForm: React.FC<Verify2FACodeFormProps> = ({
     const [waiting, setWaiting] = useState(false);
     const [shouldAutoFocus, setShouldAutoFocus] = useState(true);
 
-    const submitForm = async (
-        { otp }: FormValues,
-        { setFieldError, resetForm }: FormikHelpers<FormValues>,
-    ) => {
-        try {
-            setWaiting(true);
-            await onSubmit(otp);
+    const formik = useFormik<{ otp: string }>({
+        initialValues: { otp: "" },
+        validateOnBlur: false,
+        validateOnChange: false,
+        onSubmit: async ({ otp }, { setFieldError, resetForm }) => {
+            try {
+                setWaiting(true);
+                await onSubmit(otp);
+                setWaiting(false);
+                onSuccess();
+            } catch (e) {
+                log.error("Failed to submit 2FA code", e);
+                resetForm();
+                setFieldError("otp", t("generic_error"));
+                // Workaround (toggling shouldAutoFocus) to reset the focus back to
+                // the first input field in case of errors.
+                // https://github.com/devfolioco/react-otp-input/issues/420
+                setShouldAutoFocus(false);
+                setTimeout(() => setShouldAutoFocus(true), 100);
+            }
             setWaiting(false);
-            onSuccess();
-        } catch (e) {
-            log.error("Failed to submit 2FA code", e);
-            resetForm();
-            setFieldError("otp", t("generic_error"));
-            // Workaround (toggling shouldAutoFocus) to reset the focus back to
-            // the first input field in case of errors.
-            // https://github.com/devfolioco/react-otp-input/issues/420
-            setShouldAutoFocus(false);
-            setTimeout(() => setShouldAutoFocus(true), 100);
-        }
-        setWaiting(false);
-    };
+        },
+    });
+
+    const { values, errors, handleChange, handleSubmit, submitForm } = formik;
 
     const onChange =
         // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
@@ -85,58 +85,41 @@ export const Verify2FACodeForm: React.FC<Verify2FACodeFormProps> = ({
         };
 
     return (
-        <Formik<FormValues>
-            initialValues={{ otp: "" }}
-            validateOnChange={false}
-            validateOnBlur={false}
-            onSubmit={submitForm}
-        >
-            {({ values, errors, handleChange, handleSubmit, submitForm }) => (
-                <VerticallyCentered>
-                    <form noValidate onSubmit={handleSubmit}>
-                        <Typography
-                            variant="small"
-                            sx={{ mb: 2, color: "text.muted" }}
-                        >
-                            {t("enter_two_factor_otp")}
-                        </Typography>
-                        <Box sx={{ my: 2 }}>
-                            <OtpInput
-                                containerStyle={{ justifyContent: "center" }}
-                                shouldAutoFocus={shouldAutoFocus}
-                                value={values.otp}
-                                onChange={onChange(
-                                    handleChange("otp"),
-                                    submitForm,
-                                )}
-                                numInputs={6}
-                                renderSeparator={<span>-</span>}
-                                renderInput={(props) => (
-                                    <IndividualInput {...props} />
-                                )}
-                            />
-                            {errors.otp && (
-                                <CenteredFlex sx={{ mt: 1 }}>
-                                    <InvalidInputMessage>
-                                        {t("incorrect_code")}
-                                    </InvalidInputMessage>
-                                </CenteredFlex>
-                            )}
-                        </Box>
-                        <LoadingButton
-                            type="submit"
-                            color="accent"
-                            fullWidth
-                            sx={{ my: 4 }}
-                            loading={waiting}
-                            disabled={values.otp.length < 6}
-                        >
-                            {submitButtonText}
-                        </LoadingButton>
-                    </form>
-                </VerticallyCentered>
-            )}
-        </Formik>
+        <VerticallyCentered>
+            <form onSubmit={handleSubmit}>
+                <Typography variant="small" sx={{ mb: 2, color: "text.muted" }}>
+                    {t("enter_two_factor_otp")}
+                </Typography>
+                <Box sx={{ my: 2 }}>
+                    <OtpInput
+                        containerStyle={{ justifyContent: "center" }}
+                        shouldAutoFocus={shouldAutoFocus}
+                        value={values.otp}
+                        onChange={onChange(handleChange("otp"), submitForm)}
+                        numInputs={6}
+                        renderSeparator={<span>-</span>}
+                        renderInput={(props) => <IndividualInput {...props} />}
+                    />
+                    {errors.otp && (
+                        <CenteredFlex sx={{ mt: 1 }}>
+                            <InvalidInputMessage>
+                                {t("incorrect_code")}
+                            </InvalidInputMessage>
+                        </CenteredFlex>
+                    )}
+                </Box>
+                <LoadingButton
+                    type="submit"
+                    color="accent"
+                    fullWidth
+                    sx={{ my: 4 }}
+                    loading={waiting}
+                    disabled={values.otp.length < 6}
+                >
+                    {submitButtonText}
+                </LoadingButton>
+            </form>
+        </VerticallyCentered>
     );
 };
 
