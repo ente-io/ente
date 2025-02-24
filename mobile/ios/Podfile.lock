@@ -5,7 +5,6 @@ PODS:
     - Flutter
   - connectivity_plus (0.0.1):
     - Flutter
-    - FlutterMacOS
   - cupertino_http (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -22,31 +21,31 @@ PODS:
     - Flutter
   - file_saver (0.0.1):
     - Flutter
-  - Firebase/CoreOnly (11.2.0):
-    - FirebaseCore (= 11.2.0)
-  - Firebase/Messaging (11.2.0):
+  - Firebase/CoreOnly (11.8.0):
+    - FirebaseCore (~> 11.8.0)
+  - Firebase/Messaging (11.8.0):
     - Firebase/CoreOnly
-    - FirebaseMessaging (~> 11.2.0)
-  - firebase_core (3.6.0):
-    - Firebase/CoreOnly (= 11.2.0)
+    - FirebaseMessaging (~> 11.8.0)
+  - firebase_core (3.12.0):
+    - Firebase/CoreOnly (= 11.8.0)
     - Flutter
-  - firebase_messaging (15.1.3):
-    - Firebase/Messaging (= 11.2.0)
+  - firebase_messaging (15.2.3):
+    - Firebase/Messaging (= 11.8.0)
     - firebase_core
     - Flutter
-  - FirebaseCore (11.2.0):
-    - FirebaseCoreInternal (~> 11.0)
+  - FirebaseCore (11.8.1):
+    - FirebaseCoreInternal (~> 11.8.0)
     - GoogleUtilities/Environment (~> 8.0)
     - GoogleUtilities/Logger (~> 8.0)
-  - FirebaseCoreInternal (11.6.0):
+  - FirebaseCoreInternal (11.8.0):
     - "GoogleUtilities/NSData+zlib (~> 8.0)"
-  - FirebaseInstallations (11.4.0):
-    - FirebaseCore (~> 11.0)
+  - FirebaseInstallations (11.8.0):
+    - FirebaseCore (~> 11.8.0)
     - GoogleUtilities/Environment (~> 8.0)
     - GoogleUtilities/UserDefaults (~> 8.0)
     - PromisesObjC (~> 2.4)
-  - FirebaseMessaging (11.2.0):
-    - FirebaseCore (~> 11.0)
+  - FirebaseMessaging (11.8.0):
+    - FirebaseCore (~> 11.8.0)
     - FirebaseInstallations (~> 11.0)
     - GoogleDataTransport (~> 10.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 8.0)
@@ -57,7 +56,7 @@ PODS:
   - Flutter (1.0.0)
   - flutter_email_sender (0.0.1):
     - Flutter
-  - flutter_image_compress (1.0.0):
+  - flutter_image_compress_common (1.0.0):
     - Flutter
     - Mantle
     - SDWebImage
@@ -71,7 +70,7 @@ PODS:
     - OrderedSet (~> 6.0.3)
   - flutter_local_notifications (0.0.1):
     - Flutter
-  - flutter_native_splash (0.0.1):
+  - flutter_native_splash (2.4.3):
     - Flutter
   - flutter_secure_storage (6.0.0):
     - Flutter
@@ -79,7 +78,6 @@ PODS:
     - Flutter
   - fluttertoast (0.0.2):
     - Flutter
-    - Toast
   - GoogleDataTransport (10.1.0):
     - nanopb (~> 3.30910.0)
     - PromisesObjC (~> 2.4)
@@ -118,17 +116,17 @@ PODS:
     - FlutterMacOS
   - integration_test (0.0.1):
     - Flutter
-  - libwebp (1.3.2):
-    - libwebp/demux (= 1.3.2)
-    - libwebp/mux (= 1.3.2)
-    - libwebp/sharpyuv (= 1.3.2)
-    - libwebp/webp (= 1.3.2)
-  - libwebp/demux (1.3.2):
+  - libwebp (1.5.0):
+    - libwebp/demux (= 1.5.0)
+    - libwebp/mux (= 1.5.0)
+    - libwebp/sharpyuv (= 1.5.0)
+    - libwebp/webp (= 1.5.0)
+  - libwebp/demux (1.5.0):
     - libwebp/webp
-  - libwebp/mux (1.3.2):
+  - libwebp/mux (1.5.0):
     - libwebp/demux
-  - libwebp/sharpyuv (1.3.2)
-  - libwebp/webp (1.3.2):
+  - libwebp/sharpyuv (1.5.0)
+  - libwebp/webp (1.5.0):
     - libwebp/sharpyuv
   - local_auth_darwin (0.0.1):
     - Flutter
@@ -185,19 +183,19 @@ PODS:
   - privacy_screen (0.0.1):
     - Flutter
   - PromisesObjC (2.4.0)
-  - receive_sharing_intent (1.8.0):
+  - receive_sharing_intent (1.8.1):
     - Flutter
-  - SDWebImage (5.20.0):
-    - SDWebImage/Core (= 5.20.0)
-  - SDWebImage/Core (5.20.0)
+  - SDWebImage (5.21.0):
+    - SDWebImage/Core (= 5.21.0)
+  - SDWebImage/Core (5.21.0)
   - SDWebImageWebPCoder (0.14.6):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
-  - Sentry/HybridSDK (8.36.0)
-  - sentry_flutter (8.9.0):
+  - Sentry/HybridSDK (8.44.0)
+  - sentry_flutter (8.13.2):
     - Flutter
     - FlutterMacOS
-    - Sentry/HybridSDK (= 8.36.0)
+    - Sentry/HybridSDK (= 8.44.0)
   - share_plus (0.0.1):
     - Flutter
   - shared_preferences_foundation (0.0.1):
@@ -206,28 +204,28 @@ PODS:
   - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
-  - "sqlite3 (3.46.1+1)":
-    - "sqlite3/common (= 3.46.1+1)"
-  - "sqlite3/common (3.46.1+1)"
-  - "sqlite3/dbstatvtab (3.46.1+1)":
+  - sqlite3 (3.49.1):
+    - sqlite3/common (= 3.49.1)
+  - sqlite3/common (3.49.1)
+  - sqlite3/dbstatvtab (3.49.1):
     - sqlite3/common
-  - "sqlite3/fts5 (3.46.1+1)":
+  - sqlite3/fts5 (3.49.1):
     - sqlite3/common
-  - "sqlite3/perf-threadsafe (3.46.1+1)":
+  - sqlite3/perf-threadsafe (3.49.1):
     - sqlite3/common
-  - "sqlite3/rtree (3.46.1+1)":
+  - sqlite3/rtree (3.49.1):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
-    - "sqlite3 (~> 3.46.0+1)"
+    - FlutterMacOS
+    - sqlite3 (~> 3.49.0)
     - sqlite3/dbstatvtab
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
   - system_info_plus (0.0.1):
     - Flutter
-  - Toast (4.1.1)
-  - ua_client_hints (1.4.0):
+  - ua_client_hints (1.4.1):
     - Flutter
   - uni_links (0.0.1):
     - Flutter
@@ -247,7 +245,7 @@ PODS:
 DEPENDENCIES:
   - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
   - battery_info (from `.symlinks/plugins/battery_info/ios`)
-  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/darwin`)
+  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - cupertino_http (from `.symlinks/plugins/cupertino_http/darwin`)
   - dart_ui_isolate (from `.symlinks/plugins/dart_ui_isolate/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
@@ -257,7 +255,7 @@ DEPENDENCIES:
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Flutter`)
   - flutter_email_sender (from `.symlinks/plugins/flutter_email_sender/ios`)
-  - flutter_image_compress (from `.symlinks/plugins/flutter_image_compress/ios`)
+  - flutter_image_compress_common (from `.symlinks/plugins/flutter_image_compress_common/ios`)
   - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
@@ -292,7 +290,7 @@ DEPENDENCIES:
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
-  - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
+  - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/darwin`)
   - system_info_plus (from `.symlinks/plugins/system_info_plus/ios`)
   - ua_client_hints (from `.symlinks/plugins/ua_client_hints/ios`)
   - uni_links (from `.symlinks/plugins/uni_links/ios`)
@@ -323,7 +321,6 @@ SPEC REPOS:
     - SDWebImageWebPCoder
     - Sentry
     - sqlite3
-    - Toast
 
 EXTERNAL SOURCES:
   background_fetch:
@@ -331,7 +328,7 @@ EXTERNAL SOURCES:
   battery_info:
     :path: ".symlinks/plugins/battery_info/ios"
   connectivity_plus:
-    :path: ".symlinks/plugins/connectivity_plus/darwin"
+    :path: ".symlinks/plugins/connectivity_plus/ios"
   cupertino_http:
     :path: ".symlinks/plugins/cupertino_http/darwin"
   dart_ui_isolate:
@@ -350,8 +347,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_email_sender:
     :path: ".symlinks/plugins/flutter_email_sender/ios"
-  flutter_image_compress:
-    :path: ".symlinks/plugins/flutter_image_compress/ios"
+  flutter_image_compress_common:
+    :path: ".symlinks/plugins/flutter_image_compress_common/ios"
   flutter_inappwebview_ios:
     :path: ".symlinks/plugins/flutter_inappwebview_ios/ios"
   flutter_local_notifications:
@@ -421,7 +418,7 @@ EXTERNAL SOURCES:
   sqflite_darwin:
     :path: ".symlinks/plugins/sqflite_darwin/darwin"
   sqlite3_flutter_libs:
-    :path: ".symlinks/plugins/sqlite3_flutter_libs/ios"
+    :path: ".symlinks/plugins/sqlite3_flutter_libs/darwin"
   system_info_plus:
     :path: ".symlinks/plugins/system_info_plus/ios"
   ua_client_hints:
@@ -441,55 +438,55 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   background_fetch: 94b36ee293e82972852dba8ede1fbcd3bd3d9d57
-  battery_info: a06b00c06a39bc94c92beebf600f1810cb6c8c87
-  connectivity_plus: 3f6c9057f4cd64198dc826edfb0542892f825343
+  battery_info: 83f3aae7be2fccefab1d2bf06b8aa96f11c8bcdd
+  connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
   cupertino_http: 94ac07f5ff090b8effa6c5e2c47871d48ab7c86c
   dart_ui_isolate: 46f6714abe6891313267153ef6f9748d8ecfcab1
   device_info_plus: 335f3ce08d2e174b9fdc3db3db0f4e3b1f66bd89
   ffmpeg-kit-ios-full-gpl: 80adc341962e55ef709e36baa8ed9a70cf4ea62b
   ffmpeg_kit_flutter_full_gpl: ce18b888487c05c46ed252cd2e7956812f2e3bd1
   file_saver: 6cdbcddd690cb02b0c1a0c225b37cd805c2bf8b6
-  Firebase: 98e6bf5278170668a7983e12971a66b2cd57fc8c
-  firebase_core: 085320ddfaacb80d1a96eac3a87857afcc150db1
-  firebase_messaging: d398edc15fe825f832836e74f6ac61e8cd2f3ad3
-  FirebaseCore: a282032ae9295c795714ded2ec9c522fc237f8da
-  FirebaseCoreInternal: d98ab91e2d80a56d7b246856a8885443b302c0c2
-  FirebaseInstallations: 6ef4a1c7eb2a61ee1f74727d7f6ce2e72acf1414
-  FirebaseMessaging: c9ec7b90c399c7a6100297e9d16f8a27fc7f7152
+  Firebase: d80354ed7f6df5f9aca55e9eb47cc4b634735eaf
+  firebase_core: 6cbed78b4f298ed103a9fd034e6dbc846320480f
+  firebase_messaging: 5e0adf2eb18b0ee59aa0c109314c091a0497ecac
+  FirebaseCore: 99fe0c4b44a39f37d99e6404e02009d2db5d718d
+  FirebaseCoreInternal: df24ce5af28864660ecbd13596fc8dd3a8c34629
+  FirebaseInstallations: 6c963bd2a86aca0481eef4f48f5a4df783ae5917
+  FirebaseMessaging: 487b634ccdf6f7b7ff180fdcb2a9935490f764e8
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_email_sender: cd533cdc7ea5eda6fabb2c7f78521c71207778a4
-  flutter_image_compress: 4b058288a81f76e5e80340af37c709abafff34c4
+  flutter_email_sender: aa1e9772696691d02cd91fea829856c11efb8e58
+  flutter_image_compress_common: 1697a328fd72bfb335507c6bca1a65fa5ad87df1
   flutter_inappwebview_ios: b89ba3482b96fb25e00c967aae065701b66e9b99
   flutter_local_notifications: ad39620c743ea4c15127860f4b5641649a988100
-  flutter_native_splash: 35ddbc7228eafcb3969dcc5f1fbbe27c1145a4f0
+  flutter_native_splash: 6cad9122ea0fad137d23137dd14b937f3e90b145
   flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
-  flutter_sodium: 152647449ba89a157fd48d7e293dcd6d29c6ab0e
-  fluttertoast: 76fea30fcf04176325f6864c87306927bd7d2038
+  flutter_sodium: 7e4621538491834eba53bd524547854bcbbd6987
+  fluttertoast: 2c67e14dce98bbdb200df9e1acf610d7a6264ea1
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
   home_widget: f169fc41fd807b4d46ab6615dc44d62adbf9f64f
   image_editor_common: 3de87e7c4804f4ae24c8f8a998362b98c105cac1
   image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
-  in_app_purchase_storekit: e126ef1b89e4a9fdf07e28f005f82632b4609437
+  in_app_purchase_storekit: d1a48cb0f8b29dbf5f85f782f5dd79b21b90a5e6
   integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
-  libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
+  libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
   local_auth_darwin: 553ce4f9b16d3fdfeafce9cf042e7c9f77c1c391
   local_auth_ios: f7a1841beef3151d140a967c2e46f30637cdf451
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
   maps_launcher: edf829809ba9e894d70e569bab11c16352dedb45
-  media_extension: a1fec16ee9c8241a6aef9613578ebf097d6c5e64
+  media_extension: 671e2567880d96c95c65c9a82ccceed8f2e309fd
   media_kit_libs_ios_video: 5a18affdb97d1f5d466dc79988b13eff6c5e2854
   media_kit_video: 1746e198cb697d1ffb734b1d05ec429d1fcd1474
   motion_sensors: 741e702c17467b9569a92165dda8d4d88c6167f1
-  motionphoto: 584b43031ead3060225cdff08fa49818879801d2
-  move_to_background: 155f7bfbd34d43ad847cb630d2d2d87c17199710
+  motionphoto: 23e2aeb5c6380112f69468d71f970fa7438e5ed1
+  move_to_background: 7e3467dd2a1d1013e98c9c1cb93fd53cd7ef9d84
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   native_video_player: e363dd14f6a498ad8a8f7e6486a0db046ad19f13
   objective_c: 89e720c30d716b036faf9c9684022048eee1eee2
   onnxruntime: f9b296392c96c42882be020a59dbeac6310d81b2
   onnxruntime-c: a909204639a1f035f575127ac406f781ac797c9c
   onnxruntime-objc: b6fab0f1787aa6f7190c2013f03037df4718bd8b
-  open_mail_app: 06d5a4162866388a92b1df3deb96e56be20cf45c
+  open_mail_app: 7314a609e88eed22d53671279e189af7a0ab0f11
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
@@ -497,23 +494,22 @@ SPEC CHECKSUMS:
   photo_manager: d2fbcc0f2d82458700ee6256a15018210a81d413
   privacy_screen: 3159a541f5d3a31bea916cfd4e58f9dc722b3fd4
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  receive_sharing_intent: f6a12b7e8f7ed745f61c982de8a65de88db44a44
-  SDWebImage: 73c6079366fea25fa4bb9640d5fb58f0893facd8
+  receive_sharing_intent: 222384f00ffe7e952bbfabaa9e3967cb87e5fe00
+  SDWebImage: f84b0feeb08d2d11e6a9b843cb06d75ebf5b8868
   SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
-  Sentry: f8374b5415bc38dfb5645941b3ae31230fbeae57
-  sentry_flutter: 0a211008f52553ba5dd81ceb71f48d78f0f1f6ab
-  share_plus: 011d6fb4f9d2576b83179a3a5c5e323202cdabcf
+  Sentry: 0f9bc9adfc0b960e7f3bb5ec67e9a3d8193f3bdb
+  sentry_flutter: f4a0466dc8855998ffd59378ec33507c7dc32d7b
+  share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
-  sqflite_darwin: 44bb54cc302bff1fbe5752293aba1820b157cf1c
-  sqlite3: 0bb0e6389d824e40296f531b858a2a0b71c0d2fb
-  sqlite3_flutter_libs: 9379996d65aa23dcda7585a5b58766cebe0aa042
+  sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
+  sqlite3: fc1400008a9b3525f5914ed715a5d1af0b8f4983
+  sqlite3_flutter_libs: 3c323550ef3b928bc0aa9513c841e45a7d242832
   system_info_plus: 555ce7047fbbf29154726db942ae785c29211740
-  Toast: 1f5ea13423a1e6674c4abdac5be53587ae481c4e
-  ua_client_hints: 0b48eae1134283f5b131ee0871fa878377f07a01
-  uni_links: ed8c961e47ed9ce42b6d91e1de8049e38a4b3152
+  ua_client_hints: 92fe0d139619b73ec9fcb46cc7e079a26178f586
+  uni_links: f191d616c4db8750f74c72c988e79a83dd297fac
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
-  video_thumbnail: b637e0ad5f588ca9945f6e2c927f73a69a661140
+  video_thumbnail: 584ccfa55d8fd2f3d5507218b0a18d84c839c620
   volume_controller: 3657a1f65bedb98fa41ff7dc5793537919f31b12
   wakelock_plus: 04623e3f525556020ebd4034310f20fe7fda8b49
 

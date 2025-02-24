@@ -2893,7 +2893,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "61e72616a0c9e3f380eaeff08a20ae5ea7c57e84"
+      resolved-ref: ba086b927621434d1bbd73eeffbe7504d7abebfa
       url: "https://github.com/ente-io/video_thumbnail_fork.git"
     source: git
     version: "0.5.3"
@@ -2942,7 +2942,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "28095979c82b377509098e757873ed88d2df09b1"
+      resolved-ref: a1c96618483ace4596af085891f04a4d463725b4
       url: "https://github.com/ente-io/wallpaper_manager_fork.git"
     source: git
     version: "0.0.2"
