@@ -7,7 +7,6 @@ import { CenteredFill } from "@/base/components/containers";
 import { LinkButton } from "@/base/components/LinkButton";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { VerticallyCentered } from "@ente/shared/components/Container";
 import { encryptWithRecoveryKey } from "@ente/shared/crypto/helpers";
 import { getData, LS_KEYS, setLSUser } from "@ente/shared/storage/localStorage";
 import { Paper, Stack, styled, Typography } from "@mui/material";
@@ -155,14 +154,16 @@ const SetupQRMode: React.FC<SetupQRModeProps> = ({
 );
 
 const QRCode = styled("img")(`
-    height: 200px;
     width: 200px;
+    height: 200px;
 `);
 
-const LoadingQRCode = styled(VerticallyCentered)(
+const LoadingQRCode = styled(Stack)(
     ({ theme }) => `
     width: 200px;
-    aspect-ratio:1;
+    height: 200px;
     border: 1px solid ${theme.vars.palette.stroke.muted};
-    `,
+    align-items: center;
+    justify-content: center;
+   `,
 );
