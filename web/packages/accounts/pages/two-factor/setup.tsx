@@ -28,15 +28,14 @@ const Page: React.FC = () => {
     }, []);
 
     const handleSubmit = useCallback(async (otp: string) => {
-        const recoveryEncryptedTwoFactorSecret = await encryptWithRecoveryKey(
-            twoFactorSecret!.secretCode,
-        );
+        const {
+            encryptedData: encryptedTwoFactorSecret,
+            nonce: twoFactorSecretDecryptionNonce,
+        } = await encryptWithRecoveryKey(twoFactorSecret!.secretCode);
         await enableTwoFactor({
             code: otp,
-            encryptedTwoFactorSecret:
-                recoveryEncryptedTwoFactorSecret.encryptedData,
-            twoFactorSecretDecryptionNonce:
-                recoveryEncryptedTwoFactorSecret.nonce,
+            encryptedTwoFactorSecret,
+            twoFactorSecretDecryptionNonce,
         });
         await setLSUser({
             ...getData(LS_KEYS.USER),

@@ -116,7 +116,7 @@ export const encryptWithRecoveryKey = async (data: string) => {
     const cryptoWorker = await sharedCryptoWorker();
     const hexRecoveryKey = await getRecoveryKey();
     const recoveryKey = await cryptoWorker.fromHex(hexRecoveryKey);
-    return cryptoWorker.encryptToB64(data, recoveryKey);
+    return cryptoWorker.encryptBoxB64(data, recoveryKey);
 };
 
 export const getRecoveryKey = async () => {
