@@ -36,13 +36,21 @@ export const Verify2FACodeForm: React.FC<Verify2FACodeFormProps> = ({
 }) => {
     const [shouldAutoFocus, setShouldAutoFocus] = useState(true);
 
-    const formik = useFormik<{ otp: string }>({
+    const {
+        values,
+        errors,
+        handleChange,
+        handleSubmit,
+        submitForm,
+        isSubmitting,
+    } = useFormik<{ otp: string }>({
         initialValues: { otp: "" },
         validateOnBlur: false,
         validateOnChange: false,
         onSubmit: async ({ otp }, { setFieldError, resetForm }) => {
             try {
                 await onSubmit(otp);
+                resetForm(); // Prevent resubmission via the useEffect.
             } catch (e) {
                 log.error("Failed to submit 2FA code", e);
                 resetForm();
@@ -61,23 +69,6 @@ export const Verify2FACodeForm: React.FC<Verify2FACodeFormProps> = ({
         },
     });
 
-    const {
-        values,
-        errors,
-        handleChange,
-        handleSubmit,
-        submitForm,
-        isSubmitting,
-    } = formik;
-
-    // const onChange =
-    //     // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-    //     (callback: Function, triggerSubmit: Function) => (otp: string) => {
-    //         callback(otp);
-    //         if (otp.length === 6) {
-    //             triggerSubmit(otp);
-    //         }
-    //     };
     useEffect(() => {
         if (values.otp.length == 6 && !isSubmitting) void submitForm();
     }, [values, isSubmitting]);
