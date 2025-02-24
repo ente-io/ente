@@ -94,7 +94,7 @@ const Instructions: React.FC<InstructionsProps> = ({ twoFactorSecret }) => {
     const [setupMode, setSetupMode] = useState<"qr" | "manual">("qr");
 
     return (
-        <VerticallyCentered sx={{ mb: 3, gap: 1 }}>
+        <Stack sx={{ gap: 3, alignItems: "center" }}>
             {setupMode == "qr" ? (
                 <SetupQRMode
                     twoFactorSecret={twoFactorSecret}
@@ -106,7 +106,7 @@ const Instructions: React.FC<InstructionsProps> = ({ twoFactorSecret }) => {
                     onChangeMode={() => setSetupMode("qr")}
                 />
             )}
-        </VerticallyCentered>
+        </Stack>
     );
 };
 
@@ -119,13 +119,13 @@ const SetupManualMode: React.FC<SetupManualModeProps> = ({
     twoFactorSecret,
     onChangeMode,
 }) => (
-    <Stack sx={{ gap: 3 }}>
-        <Typography sx={{ color: "text.muted" }}>
+    <>
+        <Typography sx={{ color: "text.muted", textAlign: "center", px: 2 }}>
             {t("two_factor_manual_entry_message")}
         </Typography>
         <CodeBlock code={twoFactorSecret?.secretCode} />
         <LinkButton onClick={onChangeMode}>{t("scan_qr_title")}</LinkButton>
-    </Stack>
+    </>
 );
 
 interface SetupQRModeProps {
@@ -138,7 +138,7 @@ const SetupQRMode: React.FC<SetupQRModeProps> = ({
     onChangeMode,
 }) => (
     <>
-        <Typography sx={{ color: "text.muted" }}>
+        <Typography sx={{ color: "text.muted", textAlign: "center" }}>
             {t("two_factor_qr_help")}
         </Typography>
         {!twoFactorSecret ? (
@@ -154,19 +154,15 @@ const SetupQRMode: React.FC<SetupQRModeProps> = ({
     </>
 );
 
-const QRCode = styled("img")(
-    ({ theme }) => `
+const QRCode = styled("img")(`
     height: 200px;
     width: 200px;
-    margin: ${theme.spacing(2)};
-`,
-);
+`);
 
 const LoadingQRCode = styled(VerticallyCentered)(
     ({ theme }) => `
     width: 200px;
     aspect-ratio:1;
     border: 1px solid ${theme.vars.palette.stroke.muted};
-    margin: ${theme.spacing(2)};
     `,
 );
