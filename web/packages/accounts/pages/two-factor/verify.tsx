@@ -3,7 +3,7 @@ import { PAGES } from "@/accounts/constants/pages";
 import { verifyTwoFactor } from "@/accounts/services/user";
 import { LinkButton } from "@/base/components/LinkButton";
 import { useBaseContext } from "@/base/context";
-import { ApiError } from "@ente/shared/error";
+import { HTTPError } from "@/base/http";
 import {
     LS_KEYS,
     getData,
@@ -11,7 +11,6 @@ import {
     setLSUser,
 } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
-import { HttpStatusCode } from "axios";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -56,11 +55,7 @@ const Page: React.FC = () => {
             setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes!);
             await router.push(unstashRedirect() ?? PAGES.CREDENTIALS);
         } catch (e) {
-            if (
-                e instanceof ApiError &&
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-                e.httpStatusCode === HttpStatusCode.NotFound
-            ) {
+            if (e instanceof HTTPError && e.res.status == 404) {
                 logout();
             } else {
                 throw e;
