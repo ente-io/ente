@@ -57,7 +57,7 @@ func (c *Controller) CreateFamily(ctx context.Context, adminUserID int64) error 
 }
 
 // InviteMember invites a user to join the family plan of admin User
-func (c *Controller) InviteMember(ctx *gin.Context, adminUserID int64, email string) error {
+func (c *Controller) InviteMember(ctx *gin.Context, adminUserID int64, email string, storageLimit *int64) error {
 	err := c.BillingCtrl.IsActivePayingSubscriber(adminUserID)
 	if err != nil {
 		return stacktrace.Propagate(ente.ErrNoActiveSubscription, "you must be on a paid plan")
@@ -114,7 +114,7 @@ func (c *Controller) InviteMember(ctx *gin.Context, adminUserID int64, email str
 		return stacktrace.Propagate(err, "")
 	}
 
-	activeInviteToken, err := c.FamilyRepo.AddMemberInvite(ctx, adminUserID, potentialMemberUser.ID, inviteToken)
+	activeInviteToken, err := c.FamilyRepo.AddMemberInvite(ctx, adminUserID, potentialMemberUser.ID, inviteToken, storageLimit)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}

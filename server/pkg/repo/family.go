@@ -90,16 +90,16 @@ func (repo *FamilyRepository) CloseFamily(ctx context.Context, adminID int64) er
 
 // AddMemberInvite inserts a family invitation entry for this given pair of admin & member and return the active inviteToken
 // which can be used to accept the invite
-func (repo *FamilyRepository) AddMemberInvite(ctx context.Context, adminID int64, memberID int64, inviteToken string) (string, error) {
+func (repo *FamilyRepository) AddMemberInvite(ctx context.Context, adminID int64, memberID int64, inviteToken string, storageLimit *int64) (string, error) {
 	if adminID == memberID {
 		return "", stacktrace.Propagate(errors.New("memberID and adminID can not be same"), "")
 	}
 	// on conflict, we should not change the status from 'ACCEPTED' to `INVITED`.
 	// Also, the token should not be updated if the user is already in `INVITED` state.
-	_, err := repo.DB.ExecContext(ctx, `INSERT INTO families(id, admin_id, member_id, status, token) 
-			VALUES($1, $2, $3, $4, $5) ON CONFLICT (admin_id,member_id) 
-			    DO UPDATE SET(status, token) = ($4, $5) WHERE  NOT (families.status = ANY($6))`,
-		uuid.New(), adminID, memberID, ente.INVITED, inviteToken, pq.Array([]ente.MemberStatus{ente.INVITED, ente.ACCEPTED}))
+	_, err := repo.DB.ExecContext(ctx, `INSERT INTO families(id, admin_id, member_id, status, token, storage_limit) 
+			VALUES($1, $2, $3, $4, $5, $6) ON CONFLICT (admin_id,member_id) 
+			    DO UPDATE SET(status, token) = ($4, $5) WHERE  NOT (families.status = ANY($7))`,
+		uuid.New(), adminID, memberID, ente.INVITED, inviteToken, storageLimit, pq.Array([]ente.MemberStatus{ente.INVITED, ente.ACCEPTED}))
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
@@ -202,6 +202,7 @@ func (repo *FamilyRepository) ModifyMemberStorage(ctx context.Context, id uuid.U
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not update Members Storage Limit")
 	}
+
 	return stacktrace.Propagate(err, "Failed to Modify Members Storage Limit")
 }
 
