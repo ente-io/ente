@@ -315,6 +315,20 @@ export const updateAssumingLocalFiles = async (
 };
 
 /**
+ * Remove all "failed" file status entries so that we again attempt to index
+ * those files the next time indexing happens.
+ */
+export const resetFailedFileStatuses = async () => {
+    const db = await mlDB();
+    const tx = db.transaction("file-status", "readwrite");
+    const ids = await tx.store
+        .index("status")
+        .getAllKeys(IDBKeyRange.only("failed"));
+
+    await Promise.all([ids.map((id) => tx.store.delete(id)), tx.done].flat());
+};
+
+/**
  * Return the count of files that can be, and that have been, indexed.
  *
  * These counts are mutually exclusive. Thus the total number of files that are
