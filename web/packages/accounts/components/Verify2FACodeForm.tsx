@@ -14,19 +14,11 @@ interface Verify2FACodeFormProps {
      * 1. The fill-in all the required 6 digits, or
      * 2. They press the "Enable" button.
      *
-     * The form will stay in a waiting state until this callback returns.
+     * The form will stay in a submitting state until this callback returns.
      *
      * @param otp The OTP that the user entered.
      */
     onSubmit: (otp: string) => Promise<void>;
-    /**
-     * Called when the process was completed successfully.
-     *
-     * This will be called immediately after onSubmit fulfills, but having two
-     * separate callbacks allows the form to indicate the success state in the
-     * interim.
-     */
-    onSuccess: () => void;
     /**
      * The label for the submit button.
      */
@@ -39,10 +31,8 @@ interface Verify2FACodeFormProps {
  */
 export const Verify2FACodeForm: React.FC<Verify2FACodeFormProps> = ({
     onSubmit,
-    onSuccess,
     submitButtonText,
 }) => {
-    const [waiting, setWaiting] = useState(false);
     const [shouldAutoFocus, setShouldAutoFocus] = useState(true);
 
     const formik = useFormik<{ otp: string }>({
@@ -51,25 +41,28 @@ export const Verify2FACodeForm: React.FC<Verify2FACodeFormProps> = ({
         validateOnChange: false,
         onSubmit: async ({ otp }, { setFieldError, resetForm }) => {
             try {
-                setWaiting(true);
                 await onSubmit(otp);
-                setWaiting(false);
-                onSuccess();
             } catch (e) {
                 log.error("Failed to submit 2FA code", e);
                 resetForm();
                 setFieldError("otp", t("generic_error"));
-                // Workaround (toggling shouldAutoFocus) to reset the focus back to
-                // the first input field in case of errors.
+                // Workaround (toggling shouldAutoFocus) to reset the focus back
+                // to the first input field in case of errors.
                 // https://github.com/devfolioco/react-otp-input/issues/420
                 setShouldAutoFocus(false);
                 setTimeout(() => setShouldAutoFocus(true), 100);
             }
-            setWaiting(false);
         },
     });
 
-    const { values, errors, handleChange, handleSubmit, submitForm } = formik;
+    const {
+        values,
+        errors,
+        handleChange,
+        handleSubmit,
+        submitForm,
+        isSubmitting,
+    } = formik;
 
     const onChange =
         // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
@@ -104,7 +97,7 @@ export const Verify2FACodeForm: React.FC<Verify2FACodeFormProps> = ({
                     type="submit"
                     color="accent"
                     fullWidth
-                    loading={waiting}
+                    loading={isSubmitting}
                     disabled={values.otp.length < 6}
                 >
                     {submitButtonText}

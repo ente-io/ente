@@ -12,7 +12,7 @@ import { getData, LS_KEYS, setLSUser } from "@ente/shared/storage/localStorage";
 import { Paper, Stack, styled, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const Page: React.FC = () => {
     const [twoFactorSecret, setTwoFactorSecret] = useState<
@@ -22,11 +22,10 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        if (twoFactorSecret) return; // HMR
         void setupTwoFactor().then(setTwoFactorSecret);
     }, []);
 
-    const handleSubmit = useCallback(async (otp: string) => {
+    const handleSubmit = async (otp: string) => {
         const {
             encryptedData: encryptedTwoFactorSecret,
             nonce: twoFactorSecretDecryptionNonce,
@@ -40,11 +39,8 @@ const Page: React.FC = () => {
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: true,
         });
-    }, []);
-
-    const handleSuccess = useCallback(() => {
         void router.push(appHomeRoute);
-    }, [router]);
+    };
 
     return (
         <Stack sx={{ minHeight: "100svh" }}>
@@ -56,7 +52,6 @@ const Page: React.FC = () => {
                     <Instructions twoFactorSecret={twoFactorSecret} />
                     <Verify2FACodeForm
                         onSubmit={handleSubmit}
-                        onSuccess={handleSuccess}
                         submitButtonText={t("enable")}
                     />
                     <Stack sx={{ alignItems: "center" }}>
