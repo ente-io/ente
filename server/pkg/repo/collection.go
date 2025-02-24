@@ -118,7 +118,7 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 	args := []interface{}{userID, updationTime, string(app)}
 
 	if limit != nil {
-		query += "order by c.updation_time ASC LIMIT $4"
+		query += " ORDER BY c.updation_time ASC LIMIT $4"
 		args = append(args, *limit)
 	}
 	rows, err := repo.DB.Query(query, args...)
@@ -209,7 +209,7 @@ func (repo *CollectionRepository) GetCollectionsSharedWithUser(userID int64, upd
 			ON collections.collection_id = collection_shares.collection_id AND collection_shares.to_user_id = $1 AND (collection_shares.updation_time > $2 OR collections.updation_time > $2) AND users.encrypted_email IS NOT NULL AND app = $3`
 	args := []interface{}{userID, updationTime, string(app)}
 	if limit != nil {
-		query += " LIMIT $4"
+		query += " ORDER BY collections.updation_time ASC LIMIT $4"
 		args = append(args, *limit)
 	}
 
