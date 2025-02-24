@@ -1,12 +1,11 @@
 ---
 title: Metadata
-description: Handling of metadata, in particular creation dates, in Ente Photos
+description: Handling of metadata in Ente Photos
 ---
 
 # Metadata
 
-This document describes Ente's handling of metadata, in particular photo
-creation dates.
+This document describes Ente's handling of metadata
 
 ## Import
 
@@ -46,7 +45,7 @@ importing that folder into Ente**. This way, we will be able to always correctly
 map, for example, `flower.jpeg` and `flower.json` and show the same date for
 `flower.jpeg` that you would've seen within Google Photos.
 
-### Screenshots
+### File name
 
 In case the photo does not have a date in the Exif data (and it is not a Google
 takeout), for example, for screenshots or Whatsapp forwards, Ente will still try
@@ -56,6 +55,28 @@ and deduce the correct date for the file from the name of the file.
 >
 > This process works great most of the time, but it is inherently based on
 > heuristics and is not exact.
+
+If we are unable to decipher the creation time from these 3 sources, we will set
+the upload time as the photo's creation time.
+
+## Modifications
+
+Ente supports modifications to the following metadata:
+- File name
+- Date & time
+- Location
+
+The first two options are available on both mobile and desktop, while the
+ability to update location is only available within our mobile apps.
+
+### Bulk modifications
+
+You can bulk-edit creation time of photos from our desktop app, by
+multi-selecting items and selecting the "Fix time" option from the action bar.
+
+You can bulk-edit location coordinates of photos from our mobile app, by
+multi-selecting items and selecting the "Edit location" option from the action
+bar.
 
 ## Export
 
