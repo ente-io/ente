@@ -33,6 +33,7 @@ export const supportedLocales = [
     "lt-LT" /* Lithuanian */,
     "uk-UA" /* Ukrainian */,
     "vi-VN" /* Vietnamese */,
+    "ja-JP" /* Japanese */
 ] as const;
 
 /** The type of {@link supportedLocales}. */
@@ -192,6 +193,8 @@ const closestSupportedLocale = (
             return "uk-UA";
         } else if (ls.startsWith("vi")) {
             return "vi-VN";
+        } else if (ls.startsWith("ja")) {
+            return "ja-JP";
         }
     }
 
