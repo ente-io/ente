@@ -39,10 +39,12 @@ export interface TwoFactorVerificationResponse {
     token?: string;
 }
 
-export interface TwoFactorSecret {
-    secretCode: string;
-    qrCode: string;
-}
+const TwoFactorSecret = z.object({
+    secretCode: z.string(),
+    qrCode: z.string(),
+});
+
+export type TwoFactorSecret = z.infer<typeof TwoFactorSecret>;
 
 export interface TwoFactorRecoveryResponse {
     encryptedSecret: string;
