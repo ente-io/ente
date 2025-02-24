@@ -4,7 +4,6 @@ import { enableTwoFactor, setupTwoFactor } from "@/accounts/services/user";
 import { CenteredFill } from "@/base/components/containers";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import log from "@/base/log";
 import {
     CenteredFlex,
     VerticallyCentered,
@@ -29,18 +28,8 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        if (twoFactorSecret) {
-            return;
-        }
-        const main = async () => {
-            try {
-                const twoFactorSecret = await setupTwoFactor();
-                setTwoFactorSecret(twoFactorSecret);
-            } catch (e) {
-                log.error("failed to get two factor setup code", e);
-            }
-        };
-        void main();
+        if (twoFactorSecret) return; // HMR
+        void setupTwoFactor().then(setTwoFactorSecret);
     }, []);
 
     const onSubmit: VerifyTwoFactorCallback = async (
