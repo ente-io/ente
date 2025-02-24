@@ -130,9 +130,8 @@ func (h *FamilyHandler) ModifyStorageLimit(c *gin.Context) {
 	err := h.Controller.ModifyMemberStorage(c, auth.GetUserID(c.Request.Header), request.ID, request.StorageLimit)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
-		return // Add missing return statement
 	}
-	c.JSON(http.StatusOK, gin.H{"success": true})
+	c.Status(http.StatusOK)
 }
 
 // GetInviteInfo returns basic information about invitor/admin as long as the invite is valid
