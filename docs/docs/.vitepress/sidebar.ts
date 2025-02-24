@@ -135,11 +135,11 @@ export const sidebar = [
                         link: "/photos/faq/hidden-and-archive",
                     },
                     {
-                        text: "Machine Learning",
-                        link: "/photos/faq/machine-learning",
+                        text: "Face recognition",
+                        link: "/photos/faq/face-recognition",
                     },
                     {
-                        text: "Video Streaming",
+                        text: "Video streaming",
                         link: "/photos/faq/video-streaming",
                     },
                 ],
