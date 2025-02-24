@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	gTime "time"
 
 	"github.com/ente-io/museum/pkg/controller/discord"
 	"github.com/ente-io/museum/pkg/utils/network"
@@ -806,14 +807,23 @@ func (c *FileController) getPreSignedURLForDC(objectKey string, dc string) (stri
 
 func (c *FileController) sizeOf(objectKey string) (int64, error) {
 	s3Client := c.S3Config.GetHotS3Client()
-	head, err := s3Client.HeadObject(&s3.HeadObjectInput{
-		Key:    &objectKey,
-		Bucket: c.S3Config.GetHotBucket(),
-	})
-	if err != nil {
-		return -1, stacktrace.Propagate(err, "")
+	bucket := c.S3Config.GetHotBucket()
+	var head *s3.HeadObjectOutput
+	var err error
+	// Retry twice with a delay of 500ms and 1000ms
+	for i := 0; i < 3; i++ {
+		head, err = s3Client.HeadObject(&s3.HeadObjectInput{
+			Key:    &objectKey,
+			Bucket: bucket,
+		})
+		if err == nil {
+			return *head.ContentLength, nil
+		}
+		if i < 2 {
+			gTime.Sleep(gTime.Duration(500*(i+1)) * gTime.Millisecond)
+		}
 	}
-	return *head.ContentLength, nil
+	return -1, stacktrace.Propagate(err, "")
 }
 
 func (c *FileController) onDuplicateObjectDetected(ctx *gin.Context, file ente.File, existing ente.File, hotDC string) (ente.File, error) {
