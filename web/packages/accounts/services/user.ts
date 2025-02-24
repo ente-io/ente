@@ -294,16 +294,17 @@ export const changeEmail = async (email: string, ott: string) => {
     );
 };
 
+/**
+ * Start the two factor setup process by fetching a secret code (and the
+ * corresponding QR code) from remote.
+ */
 export const setupTwoFactor = async () => {
-    const resp = await HTTPService.post(
-        await apiURL("/users/two-factor/setup"),
-        null,
-        undefined,
-        {
-            "X-Auth-Token": getToken(),
-        },
-    );
-    return resp.data as TwoFactorSecret;
+    const res = await fetch(await apiURL("/users/two-factor/setup"), {
+        method: "POST",
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return TwoFactorSecret.parse(await res.json());
 };
 
 export const enableTwoFactor = async (
