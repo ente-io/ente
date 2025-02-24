@@ -8,6 +8,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/stream_switched_event.dart";
 import "package:photos/events/use_media_kit_for_video.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/preview_video_store.dart";
@@ -39,7 +40,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   late final StreamSubscription<UseMediaKitForVideo>
       useMediaKitForVideoSubscription;
   late bool selectPreviewForPlay = widget.file.localID == null;
-  File? preview;
+  PlaylistData? playlistData;
   final nativePlayerKey = GlobalKey();
   final mediaKitKey = GlobalKey();
 
@@ -65,7 +66,11 @@ class _VideoWidgetState extends State<VideoWidget> {
   }
 
   Future<void> _checkForPreview() async {
-    if (!PreviewVideoStore.instance.isVideoStreamingEnabled) {
+    final isPreviewAvailable = FileDataService.instance.previewIds
+            ?.containsKey(widget.file.uploadedFileID) ??
+        false;
+    if (!PreviewVideoStore.instance.isVideoStreamingEnabled ||
+        !isPreviewAvailable) {
       return;
     }
     widget.playbackCallback?.call(false);
@@ -87,13 +92,12 @@ class _VideoWidgetState extends State<VideoWidget> {
           final size = formatBytes(widget.file.fileSize!);
           showToast(
             context,
+            gravity: ToastGravity.TOP,
             "[i] Preview OG Size ($size), previewSize: ${formatBytes(d.objectSize)}",
           );
-        } else {
-          showShortToast(context, "Playing preview");
         }
       }
-      preview = data.preview;
+      playlistData = data;
     } else {
       isPreviewLoadable = false;
     }
@@ -109,7 +113,7 @@ class _VideoWidgetState extends State<VideoWidget> {
                 ?.containsKey(widget.file.uploadedFileID!) ??
             false);
     final playPreview = isPreviewVideoPlayable && selectPreviewForPlay;
-    if (playPreview && preview == null) {
+    if (playPreview && playlistData == null) {
       return Center(
         child: Container(
           width: 48,
@@ -139,7 +143,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         key: nativePlayerKey,
         tagPrefix: widget.tagPrefix,
         playbackCallback: widget.playbackCallback,
-        preview: preview,
+        playlistData: playlistData,
         selectedPreview: playPreview,
         onStreamChange: () {
           setState(() {
@@ -161,7 +165,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       key: mediaKitKey,
       tagPrefix: widget.tagPrefix,
       playbackCallback: widget.playbackCallback,
-      preview: preview,
+      preview: playlistData?.preview,
       selectedPreview: playPreview,
       onStreamChange: () {
         setState(() {

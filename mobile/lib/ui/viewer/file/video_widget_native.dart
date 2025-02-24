@@ -15,6 +15,7 @@ import "package:photos/events/use_media_kit_for_video.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/theme/colors.dart";
@@ -39,7 +40,7 @@ class VideoWidgetNative extends StatefulWidget {
   final Function(bool)? playbackCallback;
   final bool isFromMemories;
   final void Function()? onStreamChange;
-  final File? preview;
+  final PlaylistData? playlistData;
   final bool selectedPreview;
 
   const VideoWidgetNative(
@@ -49,7 +50,7 @@ class VideoWidgetNative extends StatefulWidget {
     this.isFromMemories = false,
     required this.onStreamChange,
     super.key,
-    this.preview,
+    this.playlistData,
     required this.selectedPreview,
   });
 
@@ -115,7 +116,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   }
 
   void loadPreview() {
-    _setFilePathForNativePlayer(widget.preview!.path);
+    _setFilePathForNativePlayer(widget.playlistData!.preview.path);
   }
 
   void loadOriginal() {
@@ -421,9 +422,12 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   }
 
   void _onPlaybackStatusChanged() {
+    final duration = widget.file.duration != null
+        ? widget.file.duration! * 1000
+        : _controller?.videoInfo?.durationInMilliseconds;
+
     if (_isSeeking.value ||
-        _controller?.playbackPosition.inMilliseconds ==
-            _controller?.videoInfo?.durationInMilliseconds) {
+        _controller?.playbackPosition.inMilliseconds == duration) {
       return;
     }
     if (_controller!.playbackStatus == PlaybackStatus.playing) {
@@ -458,14 +462,16 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   }
 
   Future<void> _onPlaybackReady() async {
+    if (_isPlaybackReady.value) return;
     await _controller!.play();
     unawaited(_controller!.setVolume(1));
     _isPlaybackReady.value = true;
   }
 
-  void _onPlaybackEnded() {
+  void _onPlaybackEnded() async {
+    await _controller?.stop();
     if (localSettings.shouldLoopVideo()) {
-      _controller?.play();
+      await _controller?.play();
     }
   }
 
@@ -581,6 +587,16 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   }
 
   Future<void> _setAspectRatioFromVideoProps() async {
+    if (widget.playlistData != null && widget.selectedPreview) {
+      aspectRatio = widget.playlistData!.width! / widget.playlistData!.height!;
+      if (widget.file.duration != null &&
+          (duration == "0:00" || duration == null)) {
+        duration = secondsToDuration(widget.file.duration!);
+      }
+      _logger.info("Getting aspect ratio from preview video");
+      return;
+    }
+    if (aspectRatio != 1) return;
     final videoProps = await getVideoPropsAsync(File(_filePath!));
     if (videoProps != null) {
       duration = videoProps.propData?["duration"];

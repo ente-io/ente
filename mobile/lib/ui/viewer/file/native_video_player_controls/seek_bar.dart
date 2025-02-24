@@ -2,7 +2,6 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:native_video_player/native_video_player.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/debouncer.dart";
@@ -19,7 +18,6 @@ class SeekBar extends StatefulWidget {
 
 class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
   late final AnimationController _animationController;
-  double _prevPositionFraction = 0.0;
   final _debouncer = Debouncer(
     const Duration(milliseconds: 100),
     executionInterval: const Duration(milliseconds: 325),
@@ -79,7 +77,7 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
               });
               _seekTo(value);
             },
-            divisions: 4500,
+            divisions: widget.duration ?? 4500,
             onChangeEnd: (value) {
               setState(() {
                 _animationController.value = value;
@@ -138,6 +136,8 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
         // Emitted when playback position changes
         _onPlaybackPositionChanged();
         break;
+      case PlaybackEndedEvent():
+        _animationController.value = 0;
       default:
     }
   }
@@ -155,16 +155,6 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
       return;
     }
     final target = widget.controller.playbackPosition.inMilliseconds;
-
-    //To immediately set the position to 0 when the video ends
-    if (_prevPositionFraction == 1.0 && target == 0.0) {
-      setState(() {
-        _animationController.value = 0;
-      });
-      if (!localSettings.shouldLoopVideo()) {
-        return;
-      }
-    }
 
     //There is a slight delay (around 350 ms) for the event being listened to
     //by this listener on the next target (target that comes after 0). Adding
@@ -192,7 +182,5 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
         ),
       );
     }
-
-    _prevPositionFraction = fractionTarget;
   }
 }
