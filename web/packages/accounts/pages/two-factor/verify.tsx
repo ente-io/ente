@@ -1,3 +1,4 @@
+import { Verify2FACodeForm } from "@/accounts/components/Verify2FACodeForm";
 import { PAGES } from "@/accounts/constants/pages";
 import { verifyTwoFactor } from "@/accounts/services/user";
 import { LinkButton } from "@/base/components/LinkButton";
@@ -13,16 +14,12 @@ import type { User } from "@ente/shared/user/types";
 import { HttpStatusCode } from "axios";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
     AccountsPageContents,
     AccountsPageFooter,
     AccountsPageTitle,
 } from "../../components/layouts/centered-paper";
-import {
-    VerifyTwoFactor,
-    type VerifyTwoFactorCallback,
-} from "../../components/two-factor/VerifyTwoFactor";
 import { unstashRedirect } from "../../services/redirect";
 
 const Page: React.FC = () => {
@@ -46,35 +43,45 @@ const Page: React.FC = () => {
         }
     }, []);
 
-    const onSubmit: VerifyTwoFactorCallback = async (otp) => {
-        try {
-            const resp = await verifyTwoFactor(otp, sessionID);
-            const { keyAttributes, encryptedToken, token, id } = resp;
-            await setLSUser({
-                ...getData(LS_KEYS.USER),
-                token,
-                encryptedToken,
-                id,
-            });
-            setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes!);
-            void router.push(unstashRedirect() ?? PAGES.CREDENTIALS);
-        } catch (e) {
-            if (
-                e instanceof ApiError &&
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-                e.httpStatusCode === HttpStatusCode.NotFound
-            ) {
-                logout();
-            } else {
-                throw e;
+    const handleSubmit = useCallback(
+        async (otp: string) => {
+            try {
+                const resp = await verifyTwoFactor(otp, sessionID);
+                const { keyAttributes, encryptedToken, token, id } = resp;
+                await setLSUser({
+                    ...getData(LS_KEYS.USER),
+                    token,
+                    encryptedToken,
+                    id,
+                });
+                setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes!);
+            } catch (e) {
+                if (
+                    e instanceof ApiError &&
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+                    e.httpStatusCode === HttpStatusCode.NotFound
+                ) {
+                    logout();
+                } else {
+                    throw e;
+                }
             }
-        }
-    };
+        },
+        [logout],
+    );
+
+    const handleSuccess = useCallback(() => {
+        void router.push(unstashRedirect() ?? PAGES.CREDENTIALS);
+    }, [router]);
 
     return (
         <AccountsPageContents>
             <AccountsPageTitle>{t("two_factor")}</AccountsPageTitle>
-            <VerifyTwoFactor onSubmit={onSubmit} buttonText={t("verify")} />
+            <Verify2FACodeForm
+                onSubmit={handleSubmit}
+                onSuccess={handleSuccess}
+                submitButtonText={t("verify")}
+            />
             <AccountsPageFooter>
                 <LinkButton
                     onClick={() => router.push(PAGES.TWO_FACTOR_RECOVER)}
