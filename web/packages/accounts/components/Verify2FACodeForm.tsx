@@ -4,7 +4,7 @@ import log from "@/base/log";
 import { Stack, styled, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import { t } from "i18next";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import OtpInput from "react-otp-input";
 
 interface Verify2FACodeFormProps {
@@ -70,14 +70,17 @@ export const Verify2FACodeForm: React.FC<Verify2FACodeFormProps> = ({
         isSubmitting,
     } = formik;
 
-    const onChange =
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-        (callback: Function, triggerSubmit: Function) => (otp: string) => {
-            callback(otp);
-            if (otp.length === 6) {
-                triggerSubmit(otp);
-            }
-        };
+    // const onChange =
+    //     // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+    //     (callback: Function, triggerSubmit: Function) => (otp: string) => {
+    //         callback(otp);
+    //         if (otp.length === 6) {
+    //             triggerSubmit(otp);
+    //         }
+    //     };
+    useEffect(() => {
+        if (values.otp.length == 6) void submitForm();
+    }, [values]);
 
     return (
         <form onSubmit={handleSubmit}>
@@ -89,7 +92,7 @@ export const Verify2FACodeForm: React.FC<Verify2FACodeFormProps> = ({
                     containerStyle={{ justifyContent: "center" }}
                     shouldAutoFocus={shouldAutoFocus}
                     value={values.otp}
-                    onChange={onChange(handleChange("otp"), submitForm)}
+                    onChange={handleChange("otp")}
                     numInputs={6}
                     renderSeparator={<span>-</span>}
                     renderInput={(props) => <IndividualInput {...props} />}
