@@ -13,6 +13,7 @@ import "package:photos/events/stream_switched_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
@@ -95,12 +96,10 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
   }
 
   void loadPreview() {
-    print("[vwmkn] PREVIEW");
     _setVideoController(widget.preview!.path);
   }
 
   void loadOriginal() {
-    print("[vwmkn] ORIGINAL");
     if (widget.file.isRemoteFile) {
       _loadNetworkVideo();
       _setFileSizeIfNull();
@@ -231,7 +230,11 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
     if (mounted) {
       setState(() {
         if (controller == null) {
-          player.setPlaylistMode(PlaylistMode.single);
+          player.setPlaylistMode(
+            localSettings.shouldLoopVideo()
+                ? PlaylistMode.single
+                : PlaylistMode.none,
+          );
           controller = VideoController(player);
         }
         player.open(Media(url), play: _isAppInFG);
