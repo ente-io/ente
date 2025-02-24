@@ -1,5 +1,5 @@
 ---
-title: Self Hosting with Tailscale
+title: Self Hosting with Tailscale (Community)
 description: Guides for self-hosting Ente Photos and/or Ente Auth with Tailscale
 ---
 # Guide
