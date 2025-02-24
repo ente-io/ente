@@ -33,7 +33,7 @@ export const supportedLocales = [
     "lt-LT" /* Lithuanian */,
     "uk-UA" /* Ukrainian */,
     "vi-VN" /* Vietnamese */,
-    "ja-JP" /* Japanese */
+    "ja-JP" /* Japanese */,
 ] as const;
 
 /** The type of {@link supportedLocales}. */
