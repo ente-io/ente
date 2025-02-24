@@ -1,4 +1,5 @@
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
+import { isHTTP401Error } from "@/base/http";
 import log from "@/base/log";
 import { Stack, styled, Typography } from "@mui/material";
 import { useFormik } from "formik";
@@ -45,7 +46,12 @@ export const Verify2FACodeForm: React.FC<Verify2FACodeFormProps> = ({
             } catch (e) {
                 log.error("Failed to submit 2FA code", e);
                 resetForm();
-                setFieldError("otp", t("generic_error"));
+                setFieldError(
+                    "otp",
+                    isHTTP401Error(e)
+                        ? t("incorrect_code")
+                        : t("generic_error"),
+                );
                 // Workaround (toggling shouldAutoFocus) to reset the focus back
                 // to the first input field in case of errors.
                 // https://github.com/devfolioco/react-otp-input/issues/420
@@ -90,7 +96,7 @@ export const Verify2FACodeForm: React.FC<Verify2FACodeFormProps> = ({
                 />
                 {errors.otp && (
                     <Typography variant="mini" sx={{ color: "critical.main" }}>
-                        {t("incorrect_code")}
+                        {errors.otp}
                     </Typography>
                 )}
                 <LoadingButton
