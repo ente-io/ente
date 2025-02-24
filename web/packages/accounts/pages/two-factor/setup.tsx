@@ -31,7 +31,13 @@ const Page: React.FC = () => {
         const recoveryEncryptedTwoFactorSecret = await encryptWithRecoveryKey(
             twoFactorSecret!.secretCode,
         );
-        await enableTwoFactor(otp, recoveryEncryptedTwoFactorSecret);
+        await enableTwoFactor({
+            code: otp,
+            encryptedTwoFactorSecret:
+                recoveryEncryptedTwoFactorSecret.encryptedData,
+            twoFactorSecretDecryptionNonce:
+                recoveryEncryptedTwoFactorSecret.nonce,
+        });
         await setLSUser({
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: true,

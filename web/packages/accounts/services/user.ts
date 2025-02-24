@@ -1,4 +1,3 @@
-import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import {
     authenticatedRequestHeaders,
     ensureOk,
@@ -307,25 +306,24 @@ export const setupTwoFactor = async () => {
     return TwoFactorSecret.parse(await res.json());
 };
 
-export const enableTwoFactor = async (
-    code: string,
-    recoveryEncryptedTwoFactorSecret: B64EncryptionResult,
-) => {
-    await HTTPService.post(
-        await apiURL("/users/two-factor/enable"),
-        {
-            code,
-            encryptedTwoFactorSecret:
-                recoveryEncryptedTwoFactorSecret.encryptedData,
-            twoFactorSecretDecryptionNonce:
-                recoveryEncryptedTwoFactorSecret.nonce,
-        },
-        undefined,
-        {
-            "X-Auth-Token": getToken(),
-        },
+interface EnableTwoFactorRequest {
+    code: string;
+    encryptedTwoFactorSecret: string;
+    twoFactorSecretDecryptionNonce: string;
+}
+
+/**
+ * Enable two factor for the user by providing the 2FA code and the encrypted
+ * secret from a previous call to {@link setupTwoFactor}.
+ */
+export const enableTwoFactor = async (req: EnableTwoFactorRequest) =>
+    ensureOk(
+        await fetch(await apiURL("/users/two-factor/enable"), {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(req),
+        }),
     );
-};
 
 export const setRecoveryKey = async (token: string, recoveryKey: RecoveryKey) =>
     HTTPService.put(
