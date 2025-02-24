@@ -39,7 +39,7 @@ const Page: React.FC = () => {
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: true,
         });
-        void router.push(appHomeRoute);
+        await router.push(appHomeRoute);
     };
 
     return (

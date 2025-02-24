@@ -54,7 +54,7 @@ const Page: React.FC = () => {
                 id,
             });
             setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes!);
-            void router.push(unstashRedirect() ?? PAGES.CREDENTIALS);
+            await router.push(unstashRedirect() ?? PAGES.CREDENTIALS);
         } catch (e) {
             if (
                 e instanceof ApiError &&
