@@ -107,20 +107,43 @@ func (c *FileController) validateFileCreateOrUpdateReq(userID int64, file ente.F
 	return nil
 }
 
+type sizeResult struct {
+	size int64
+	err  error
+}
+
 // Create adds an entry for a file in the respective tables
 func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, userAgent string, app ente.App) (ente.File, error) {
+	fileChan := make(chan sizeResult)
+	thumbChan := make(chan sizeResult)
+	go func() {
+		size, err := c.sizeOf(file.File.ObjectKey)
+		fileChan <- sizeResult{size, err}
+	}()
+	go func() {
+		size, err := c.sizeOf(file.Thumbnail.ObjectKey)
+		thumbChan <- sizeResult{size, err}
+	}()
 	err := c.validateFileCreateOrUpdateReq(userID, file)
 	if err != nil {
 		return file, stacktrace.Propagate(err, "")
 	}
+	// Receive results from both operations
+	fileResult := <-fileChan
+	thumbResult := <-thumbChan
+
 	hotDC := c.S3Config.GetHotDataCenter()
-	// sizeOf will do also HEAD check to ensure that the object exists in the
-	// current hot DC
-	fileSize, err := c.sizeOf(file.File.ObjectKey)
-	if err != nil {
+
+	if fileResult.err != nil {
 		log.Error("Could not find size of file: " + file.File.ObjectKey)
-		return file, stacktrace.Propagate(err, "")
+		return file, stacktrace.Propagate(fileResult.err, "")
 	}
+	if thumbResult.err != nil {
+		log.Error("Could not find size of thumbnail: " + file.Thumbnail.ObjectKey)
+		return file, stacktrace.Propagate(thumbResult.err, "")
+	}
+	fileSize := fileResult.size
+	thumbnailSize := thumbResult.size
 	if fileSize > MaxFileSize {
 		return file, stacktrace.Propagate(ente.ErrFileTooLarge, "")
 	}
@@ -128,7 +151,6 @@ func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, 
 		return file, stacktrace.Propagate(ente.ErrBadRequest, "mismatch in file size")
 	}
 	file.File.Size = fileSize
-	thumbnailSize, err := c.sizeOf(file.Thumbnail.ObjectKey)
 	if err != nil {
 		log.Error("Could not find size of thumbnail: " + file.Thumbnail.ObjectKey)
 		return file, stacktrace.Propagate(err, "")
