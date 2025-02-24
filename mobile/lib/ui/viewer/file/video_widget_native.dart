@@ -311,6 +311,13 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
+                                if (!widget.selectedPreview)
+                                  _VideoDescriptionAndSwitchToMediaKitButton(
+                                    file: widget.file,
+                                    showControls: _showControls,
+                                    elTooltipController: _elTooltipController,
+                                    controller: _controller,
+                                  ),
                                 ValueListenableBuilder(
                                   valueListenable: _showControls,
                                   builder: (context, value, _) {
@@ -321,12 +328,6 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                       onStreamChange: widget.onStreamChange,
                                     );
                                   },
-                                ),
-                                _VideoDescriptionAndSwitchToMediaKitButton(
-                                  file: widget.file,
-                                  showControls: _showControls,
-                                  elTooltipController: _elTooltipController,
-                                  controller: _controller,
                                 ),
                                 ValueListenableBuilder(
                                   valueListenable: _isPlaybackReady,
