@@ -60,7 +60,6 @@ import {
 import { t } from "i18next";
 import React, { useEffect, useReducer, useState } from "react";
 import type { FaceCluster } from "../../services/ml/cluster";
-import { usePhotosAppContext } from "../../types/context";
 import { SuggestionFaceList } from "../PeopleList";
 import {
     ItemCard,
@@ -546,8 +545,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     onClose,
     person,
 }) => {
-    const { showMiniDialog } = useBaseContext();
-    const { onGenericError } = usePhotosAppContext();
+    const { showMiniDialog, onGenericError } = useBaseContext();
 
     const [state, dispatch] = useReducer(
         suggestionsDialogReducer,

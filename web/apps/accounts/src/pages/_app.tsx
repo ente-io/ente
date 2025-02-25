@@ -6,7 +6,7 @@ import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
 import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
 import { photosTheme } from "@/base/components/utils/theme";
-import { BaseContext } from "@/base/context";
+import { BaseContext, deriveBaseContext } from "@/base/context";
 import "@fontsource-variable/inter";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
@@ -29,7 +29,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     }, []);
 
     const baseContext = useMemo(
-        () => ({ logout, showMiniDialog }),
+        () => deriveBaseContext({ logout, showMiniDialog }),
         [logout, showMiniDialog],
     );
 
