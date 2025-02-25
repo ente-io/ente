@@ -686,6 +686,13 @@ class PreviewVideoStore {
     try {
       failureFiles = await UploadLocksDB.instance.getStreamUploadError();
       _failureFiles = {...failureFiles.keys};
+
+      // handle case when failures are already previewed
+      for (final failure in _failureFiles) {
+        if (previews.containsKey(failure)) {
+          UploadLocksDB.instance.deleteStreamUploadErrorEntry(failure).ignore();
+        }
+      }
     } catch (_) {}
 
     final files = await FilesDB.instance.getAllFilesAfterDate(
@@ -738,12 +745,11 @@ class PreviewVideoStore {
       i++;
     }
 
+    Bus.instance.fire(PreviewUpdatedEvent(_items));
     if (allFiles.isEmpty) {
       _logger.info("[init] No preview to cache");
       return;
     }
-
-    Bus.instance.fire(PreviewUpdatedEvent(_items));
 
     _logger.info("[init] Processing ${allFiles.length} items for streaming");
 
