@@ -59,7 +59,7 @@ const Page: React.FC = () => {
         } else {
             setKeyAttributes(keyAttributes);
         }
-    }, []);
+    }, [router]);
 
     const recover: SingleInputFormProps["callback"] = async (
         recoveryKey: string,

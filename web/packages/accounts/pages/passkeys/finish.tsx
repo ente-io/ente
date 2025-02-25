@@ -33,7 +33,7 @@ const Page: React.FC = () => {
         void saveCredentialsAndNavigateTo(passkeySessionID, response).then(
             (slug: string) => router.push(slug),
         );
-    }, []);
+    }, [router]);
 
     return <LoadingIndicator />;
 };

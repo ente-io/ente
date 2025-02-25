@@ -65,7 +65,7 @@ const Page: React.FC = () => {
             setToken(user.token);
             setLoading(false);
         }
-    }, []);
+    }, [router]);
 
     const onSubmit: SetPasswordFormProps["callback"] = async (
         passphrase,

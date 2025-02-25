@@ -199,9 +199,10 @@ const Page: React.FC = () => {
             }
         };
         void main();
+        // TODO: validateSession is a dependency, but add that only after we've
+        // wrapped items from the callback (like logout) in useCallback too.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-    // TODO: ^ validateSession is a dependency, but add that only after we've
-    // wrapped items from the callback (like logout) in useCallback too.
 
     const getKeyAttributes: VerifyMasterPasswordFormProps["getKeyAttributes"] =
         async (kek: string) => {

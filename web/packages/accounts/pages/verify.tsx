@@ -74,7 +74,7 @@ const Page: React.FC = () => {
             }
         };
         void main();
-    }, []);
+    }, [router]);
 
     const onSubmit: SingleInputFormProps["callback"] = async (
         ott,

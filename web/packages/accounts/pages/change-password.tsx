@@ -50,7 +50,7 @@ const Page: React.FC = () => {
         } else {
             setToken(user.token);
         }
-    }, []);
+    }, [router]);
 
     const onSubmit: SetPasswordFormProps["callback"] = async (
         passphrase,

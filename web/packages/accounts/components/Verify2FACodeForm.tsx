@@ -71,7 +71,7 @@ export const Verify2FACodeForm: React.FC<Verify2FACodeFormProps> = ({
 
     useEffect(() => {
         if (values.otp.length == 6 && !isSubmitting) void submitForm();
-    }, [values, isSubmitting]);
+    }, [values, isSubmitting, submitForm]);
 
     return (
         <form onSubmit={handleSubmit}>
