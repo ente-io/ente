@@ -4,6 +4,7 @@ import "dart:developer";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
@@ -483,37 +484,48 @@ class PersonService {
     }
   }
 
-  Future<EnteFile> getRecentFileOfPerson(
+  Future<EnteFile?> getThumbnailFileOfPerson(
     PersonEntity person,
   ) async {
-    final clustersToFiles =
-        await SearchService.instance.getClusterFilesForPersonID(
-      person.remoteID,
-    );
-    int? avatarFileID;
-    if (person.data.hasAvatar()) {
-      avatarFileID = tryGetFileIdFromFaceId(person.data.avatarFaceID!);
-    }
-    EnteFile? resultFile;
-    // iterate over all clusters and get the first file
-    for (final clusterFiles in clustersToFiles.values) {
-      for (final file in clusterFiles) {
-        if (avatarFileID != null && file.uploadedFileID! == avatarFileID) {
-          resultFile = file;
-          break;
-        }
-        resultFile ??= file;
-        if (resultFile.creationTime! < file.creationTime!) {
-          resultFile = file;
+    try {
+      if (person.data.hasAvatar()) {
+        final avatarFileID = tryGetFileIdFromFaceId(person.data.avatarFaceID!);
+        if (avatarFileID != null) {
+          final file = (await FilesDB.instance
+              .getFileIDToFileFromIDs([avatarFileID]))[avatarFileID];
+          if (file != null) {
+            return file;
+          } else {
+            logger.severe("Avatar File not found for face ${person.data}");
+          }
         }
       }
-    }
-    if (resultFile == null) {
-      debugPrint(
-        "Person ${kDebugMode ? person.data.name : person.remoteID} has no files",
+
+      final clustersToFiles =
+          await SearchService.instance.getClusterFilesForPersonID(
+        person.remoteID,
       );
-      return EnteFile();
+
+      EnteFile? resultFile;
+      // iterate over all clusters and get the first file
+      for (final clusterFiles in clustersToFiles.values) {
+        for (final file in clusterFiles) {
+          resultFile ??= file;
+          if (resultFile.creationTime! < file.creationTime!) {
+            resultFile = file;
+          }
+        }
+      }
+      if (resultFile == null) {
+        logger.warning(
+          "Person ${kDebugMode ? person.data.name : person.remoteID} has no files",
+        );
+        return null;
+      }
+      return resultFile;
+    } catch (e, s) {
+      logger.severe("Error in getThumbnailFileOfPerson", e, s);
+      return null;
     }
-    return resultFile;
   }
 }
