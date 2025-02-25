@@ -50,5 +50,5 @@ end-to-end encrypted security that we use for syncing your photos.
 Note that the desktop app does not currently support modifying the face
 groupings, that is only supported by the mobile app.
 
-For more information on how to use Machine Learning please check out
-[the FAQ](../faq/machine-learning).
+For more information on how to use Machine Learning for face recognition please
+check out [the FAQ](../faq/face-recognition).

@@ -1,10 +1,10 @@
 ---
-title: Machine Learning FAQ
+title: Face recognition
 description:
-    Frequently asked questions about several features of Ente's ML suite
+    Frequently asked questions about Ente's face recognition
 ---
 
-# Machine Learning
+# Face recognition
 
 ## Can I merge or de-merge persons recognized by the app?
 
@@ -19,7 +19,7 @@ instead of typing the name again, tap on the already given name that should now
 be listed.
 
 De-merging a certain grouping can be done by going to the person, pressing
-`review suggestions` and then the top right `history icon`. Now press on the
+`Review suggestions` and then the top right `History icon`. Now press on the
 `minus icon` beside the group you want to de-merge.
 
 ### Desktop
@@ -28,6 +28,16 @@ Similarly, on desktop you can use the "Add a name" button to merge people by
 selecting an existing person, and use the "Review suggestions" sheet to de-merge
 previously merged persons (click the top right history icon on the suggestion
 sheet to see the previous merges, and if necessary, undo them).
+
+## How can I remove an incorrectly grouped face from a person?
+
+On our mobile app, open up the person from the People section, click on the
+three dots to open up overflow menu, and click on Edit. Now you will be
+presented with the list of all photos that were merged to create this person.
+
+You can click on the merged photos and select the photos you think are
+incorrectly grouped (by long-pressing on them) and select "Remove" from the
+action bar that pops up to remove any incorrect faces.
 
 ## How do I change the cover for a recognized person?
 
