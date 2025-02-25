@@ -51,10 +51,10 @@ export const useSecondFactorChoiceIfNeeded = () => {
             // ID will be in a V2 attribute during a transient migration period.
             //
             // Note the use of || instead of ?? since _twoFactorSessionIDV1 will
-            // be an empty string, not undefined, if it is unset. We might need
-            // to add a `xxx-eslint-disable
-            // @typescript-eslint/prefer-nullish-coalescing` here too later.
+            // be an empty string, not undefined, if it is unset. This is
+            // intentional, so disable the eslint rule too.
             const _twoFactorSessionID =
+                // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
                 _twoFactorSessionIDV1 || _twoFactorSessionIDV2;
 
             let passkeySessionID: string | undefined;
