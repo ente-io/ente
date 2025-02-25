@@ -34,7 +34,7 @@ const hundredMBInBytes = 100 * 1024 * 1024
 // uploaded or not. If size is not passed, it validates if current usage is less than subscription storage.
 func (c *UsageController) CanUploadFile(ctx context.Context, userID int64, size *int64, app ente.App) error {
 	// check if size is nil or less than 100 MB
-	if app != ente.Locker && size == nil || *size < hundredMBInBytes {
+	if app != ente.Locker && (size == nil || *size < hundredMBInBytes) {
 		c.mu.Lock()
 		canUpload, ok := c.UploadResultCache[userID]
 		c.mu.Unlock()
@@ -155,6 +155,5 @@ func (c *UsageController) canUploadFile(ctx context.Context, userID int64, size 
 
 		}
 	}
-
 	return nil
 }
