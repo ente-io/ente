@@ -663,6 +663,8 @@ const CreationTime: React.FC<CreationTimeProps> = ({
     allowEdits,
     scheduleUpdate,
 }) => {
+    const { onGenericError } = useBaseContext();
+
     const [loading, setLoading] = useState(false);
     const [isInEditMode, setIsInEditMode] = useState(false);
 
@@ -705,7 +707,7 @@ const CreationTime: React.FC<CreationTimeProps> = ({
                 scheduleUpdate();
             }
         } catch (e) {
-            log.error("failed to update creationTime", e);
+            onGenericError(e);
         } finally {
             closeEditMode();
             setLoading(false);
