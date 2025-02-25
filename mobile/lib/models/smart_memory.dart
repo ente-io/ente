@@ -22,7 +22,7 @@ MemoryType memoryTypeFromString(String type) {
   }
 }
 
-abstract class SmartMemory {
+class SmartMemory {
   final List<Memory> memories;
   final MemoryType type;
   String? name;
@@ -33,13 +33,14 @@ abstract class SmartMemory {
   int? lastDateToShow;
   // TODO: lau: actually use this in calculated filters
 
-
   SmartMemory(
     this.memories,
     this.type, {
     name,
     this.firstCreationTime,
     this.lastCreationTime,
+    this.firstDateToShow,
+    this.lastDateToShow,
   }) : name = name != null ? name + "(I)" : null;
   // TODO: lau: remove (I) from name when opening up the feature flag
 
@@ -59,11 +60,4 @@ abstract class SmartMemory {
     lastCreationTime ??= creationTimes.last;
     return (firstCreationTime! + lastCreationTime!) ~/ 2;
   }
-
-  SmartMemory copyWith({
-    List<Memory>? memories,
-    String? name,
-    int? firstCreationTime,
-    int? lastCreationTime,
-  });
 }

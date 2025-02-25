@@ -6,8 +6,8 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/memories_setting_changed.dart";
 import 'package:photos/models/memory.dart';
 import "package:photos/models/smart_memory.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/memories_service.dart';
-import "package:photos/services/smart_memories_service.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/home/memories/memory_cover_widget.dart';
 
@@ -57,11 +57,11 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     if (!MemoriesService.instance.showMemories) {
       return const SizedBox.shrink();
     }
-    if (SmartMemoriesService.instance.enableSmartMemories) {
+    if (memoriesCacheService.enableSmartMemories) {
       return FutureBuilder<List<SmartMemory>>(
-        future: SmartMemoriesService.instance.getMemories(
+        future: memoriesCacheService.getMemories(
           null,
-        ), // This is where I should hook in my feature flag [showSmartMemories]
+        ),
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data!.isEmpty) {
             return const SizedBox.shrink();

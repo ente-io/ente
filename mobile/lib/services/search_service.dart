@@ -1194,7 +1194,7 @@ class SearchService {
     BuildContext context,
     int? limit,
   ) async {
-    final memories = await SmartMemoriesService.instance.getMemories(limit);
+    final memories = await memoriesCacheService.getMemories(limit);
     final searchResults = <GenericSearchResult>[];
     for (final memory in memories) {
       final name = memory.name ?? "memory";

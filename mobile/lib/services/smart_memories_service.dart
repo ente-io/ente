@@ -7,10 +7,8 @@ import "package:logging/logging.dart";
 import "package:ml_linalg/vector.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
-import "package:photos/core/event_bus.dart";
 import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
-import "package:photos/events/files_updated_event.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/file/extensions/file_props.dart";
@@ -30,7 +28,6 @@ import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
-import "package:photos/services/memories_service.dart";
 import "package:photos/services/search_service.dart";
 
 class SmartMemoriesService {
@@ -42,16 +39,11 @@ class SmartMemoriesService {
   Locale? _locale;
   late Map<int, int> _seenTimes;
 
-  List<SmartMemory>? _cachedMemories;
-  Future<List<SmartMemory>>? _future;
-
   Vector? _clipPositiveTextVector;
   static const String clipPositiveQuery =
       'Photo of a precious and nostalgic memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion';
 
   final Map<PeopleActivity, Vector> _clipPeopleActivityVectors = {};
-
-  static const int _calculationWindowDays = 14;
 
   static const _clipSimilarImageThreshold = 0.75;
   static const _clipActivityQueryThreshold = 0.25;
@@ -65,25 +57,6 @@ class SmartMemoriesService {
     if (_isInit) return;
     _locale = await getLocale();
 
-    unawaited(
-      _memoriesDB.clearMemoriesSeenBeforeTime(
-        DateTime.now().microsecondsSinceEpoch -
-            (_calculationWindowDays * microSecondsInDay),
-      ),
-    );
-    Bus.instance.on<FilesUpdatedEvent>().where((event) {
-      return event.type == EventType.deletedFromEverywhere;
-    }).listen((event) {
-      if (_cachedMemories == null) return;
-      final generatedIDs = event.updatedFiles
-          .where((element) => element.generatedID != null)
-          .map((e) => e.generatedID!)
-          .toSet();
-      for (final memory in _cachedMemories!) {
-        memory.memories
-            .removeWhere((m) => generatedIDs.contains(m.file.generatedID));
-      }
-    });
     unawaited(
       MLComputer.instance.runClipText(clipPositiveQuery).then((embedding) {
         _clipPositiveTextVector ??= Vector.fromList(embedding);
@@ -103,47 +76,8 @@ class SmartMemoriesService {
     _logger.info("Smart memories service initialized");
   }
 
-  bool get enableSmartMemories => flagService.showSmartMemories;
-
-  void clearCache() {
-    _cachedMemories = null;
-    _future = null;
-  }
-
-  Future markMemoryAsSeen(Memory memory) async {
-    memory.markSeen();
-    await _memoriesDB.markMemoryAsSeen(
-      memory,
-      DateTime.now().microsecondsSinceEpoch,
-    );
-    if (_cachedMemories != null && memory.file.generatedID != null) {
-      final generatedID = memory.file.generatedID!;
-      for (final smartMemory in _cachedMemories!) {
-        for (final mem in smartMemory.memories) {
-          if (mem.file.generatedID == generatedID) {
-            mem.markSeen();
-          }
-        }
-      }
-    }
-  }
-
-  Future<List<SmartMemory>> getMemories(int? limit) async {
-    if (!MemoriesService.instance.showMemories) {
-      return [];
-    }
-    if (_cachedMemories != null) {
-      return _cachedMemories!;
-    }
-    if (_future != null) {
-      return _future!;
-    }
-    _future = _calcMemories();
-    return _future!;
-  }
-
   // One general method to get all memories, which calls on internal methods for each separate memory type
-  Future<List<SmartMemory>> _calcMemories() async {
+  Future<List<SmartMemory>> calcMemories() async {
     try {
       await init();
       final List<SmartMemory> memories = [];
@@ -178,8 +112,6 @@ class SmartMemoriesService {
       // _deductUsedMemories(allFiles, fillerMemories);
       // memories.addAll(fillerMemories);
       // _logger.finest("All files length: ${allFiles.length}");
-
-      _cachedMemories = memories;
       return memories;
     } catch (e, s) {
       _logger.severe("Error calculating smart memories", e, s);
