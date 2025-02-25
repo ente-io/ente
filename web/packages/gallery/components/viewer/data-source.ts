@@ -1,15 +1,11 @@
 import log from "@/base/log";
+import type { FileInfoExif } from "@/gallery/components/FileInfo";
 import {
     downloadManager,
     type LivePhotoSourceURL,
 } from "@/gallery/services/download";
-import {
-    extractRawExif,
-    parseExif,
-    type RawExifTags,
-} from "@/gallery/services/exif";
+import { extractRawExif, parseExif } from "@/gallery/services/exif";
 import type { EnteFile } from "@/media/file";
-import type { ParsedMetadata } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { ensureString } from "@/utils/ensure";
 
@@ -102,17 +98,6 @@ export type ItemData = PhotoSwipeSlideData & {
      */
     fetchFailed?: boolean;
 };
-
-/**
- * Exif data for a file, in a form suitable for use by {@link FileInfo}.
- *
- * TODO(PS): Indicate missing exif (e.g. videos) better, both in the data type,
- * and in the UI (e.g. by omitting the entire row).
- */
-export interface FileInfoExif {
-    tags: RawExifTags | undefined;
-    parsed: ParsedMetadata | undefined;
-}
 
 /**
  * This module stores and serves data required by our custom PhotoSwipe

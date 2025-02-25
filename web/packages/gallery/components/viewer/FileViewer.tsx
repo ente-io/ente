@@ -18,11 +18,15 @@ import {
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
 import type { LocalUser } from "@/base/local-user";
-import { FileInfo, type FileInfoProps } from "@/gallery/components/FileInfo";
+import {
+    FileInfo,
+    type FileInfoExif,
+    type FileInfoProps,
+} from "@/gallery/components/FileInfo";
 import type { EnteFile } from "@/media/file.js";
 import { Button, styled } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fileInfoExifForFile, type FileInfoExif } from "./data-source";
+import { fileInfoExifForFile } from "./data-source";
 import {
     FileViewerPhotoSwipe,
     type FileViewerAnnotatedFile,
