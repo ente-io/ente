@@ -714,29 +714,24 @@ const CreationTime: React.FC<CreationTimeProps> = ({
 
     return (
         <>
-            <FlexWrapper>
-                <InfoItem
-                    icon={<CalendarTodayIcon />}
-                    title={formattedDate(originalDate)}
-                    caption={formattedTime(originalDate)}
-                    trailingButton={
-                        allowEdits && (
-                            <EditButton
-                                onClick={openEditMode}
-                                loading={loading}
-                            />
-                        )
-                    }
+            <InfoItem
+                icon={<CalendarTodayIcon />}
+                title={formattedDate(originalDate)}
+                caption={formattedTime(originalDate)}
+                trailingButton={
+                    allowEdits && (
+                        <EditButton onClick={openEditMode} loading={loading} />
+                    )
+                }
+            />
+            {isInEditMode && (
+                <PhotoDateTimePicker
+                    initialValue={originalDate}
+                    disabled={loading}
+                    onAccept={saveEdits}
+                    onClose={closeEditMode}
                 />
-                {isInEditMode && (
-                    <PhotoDateTimePicker
-                        initialValue={originalDate}
-                        disabled={loading}
-                        onAccept={saveEdits}
-                        onClose={closeEditMode}
-                    />
-                )}
-            </FlexWrapper>
+            )}
         </>
     );
 };
