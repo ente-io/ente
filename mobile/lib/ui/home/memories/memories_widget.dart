@@ -58,7 +58,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     if (!MemoriesService.instance.showMemories) {
       return const SizedBox.shrink();
     }
-    if (flagService.showSmartMemories) {
+    if (SmartMemoriesService.instance.enableSmartMemories) {
       return FutureBuilder<List<SmartMemory>>(
         future: SmartMemoriesService.instance.getMemories(
           null,

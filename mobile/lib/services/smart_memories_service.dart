@@ -103,6 +103,8 @@ class SmartMemoriesService {
     _logger.info("Smart memories service initialized");
   }
 
+  bool get enableSmartMemories => flagService.showSmartMemories;
+
   void clearCache() {
     _cachedMemories = null;
     _future = null;
