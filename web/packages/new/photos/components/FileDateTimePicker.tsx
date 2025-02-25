@@ -8,7 +8,7 @@ import dayjs, { Dayjs } from "dayjs";
 import React, { useState } from "react";
 import { aboveFileViewerContentZ } from "./utils/z-index";
 
-interface PhotoDateTimePickerProps {
+interface FileDateTimePickerProps {
     /**
      * The initial date to preselect in the date/time picker.
      *
@@ -45,7 +45,7 @@ interface PhotoDateTimePickerProps {
  * UTC offset. For more discussion of the caveats and nuances around this, see
  * [Note: Photos are always in local date/time].
  */
-export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
+export const FileDateTimePicker: React.FC<FileDateTimePickerProps> = ({
     initialValue,
     disabled,
     onAccept,

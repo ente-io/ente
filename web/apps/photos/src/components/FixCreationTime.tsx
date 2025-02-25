@@ -11,7 +11,7 @@ import {
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
-import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
+import { FileDateTimePicker } from "@/new/photos/components/FileDateTimePicker";
 import {
     Dialog,
     DialogContent,
@@ -205,7 +205,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
                         />
                     </RadioGroup>
                     {values.option == "custom" && (
-                        <PhotoDateTimePicker
+                        <FileDateTimePicker
                             onAccept={(customDate) =>
                                 setValues({ option: "custom", customDate })
                             }
