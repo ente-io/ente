@@ -6,7 +6,6 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/memories_setting_changed.dart";
 import 'package:photos/models/memory.dart';
 import "package:photos/models/smart_memory.dart";
-import "package:photos/service_locator.dart";
 import 'package:photos/services/memories_service.dart';
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/ui/common/loading_widget.dart";

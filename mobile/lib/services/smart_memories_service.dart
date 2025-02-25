@@ -1091,7 +1091,8 @@ class SmartMemoriesService {
       int offset = 0;
       for (int i = 0; i < numBuckets; i++) {
         final int bucketSize = quotient + (i < remainder ? 1 : 0);
-        timeBuckets.add(sortedTimeMemories.sublist(offset, offset + bucketSize));
+        timeBuckets
+            .add(sortedTimeMemories.sublist(offset, offset + bucketSize));
         offset += bucketSize;
       }
 
@@ -1163,7 +1164,8 @@ class SmartMemoriesService {
           .sort((a, b) => b.file.creationTime!.compareTo(a.file.creationTime!));
 
       _logger.finest(
-          'People memories selection done, returning ${finalSelection.length} memories',);
+        'People memories selection done, returning ${finalSelection.length} memories',
+      );
       return finalSelection;
     } catch (e, s) {
       _logger.severe('Error in _bestSelectionPeople', e, s);

@@ -8,13 +8,22 @@ enum PeopleMemoryType {
   lastTimeYouSawThem,
 }
 
-enum PeopleActivity {
-  party,
-  hiking,
-  feast,
-  selfies,
-  sports
+PeopleMemoryType peopleMemoryTypeFromString(String type) {
+  switch (type) {
+    case "youAndThem":
+      return PeopleMemoryType.youAndThem;
+    case "doingSomethingTogether":
+      return PeopleMemoryType.doingSomethingTogether;
+    case "spotlight":
+      return PeopleMemoryType.spotlight;
+    case "lastTimeYouSawThem":
+      return PeopleMemoryType.lastTimeYouSawThem;
+    default:
+      throw ArgumentError("Invalid people memory type: $type");
+  }
 }
+
+enum PeopleActivity { party, hiking, feast, selfies, sports }
 
 String activityQuery(PeopleActivity activity) {
   switch (activity) {
