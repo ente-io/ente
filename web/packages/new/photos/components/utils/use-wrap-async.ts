@@ -1,3 +1,4 @@
+import { useBaseContext } from "@/base/context";
 import { useCallback } from "react";
 import { usePhotosAppContext } from "../../types/context";
 
@@ -19,8 +20,8 @@ import { usePhotosAppContext } from "../../types/context";
 export const useWrapAsyncOperation = <T extends unknown[]>(
     f: (...args: T) => Promise<void>,
 ) => {
-    const { showLoadingBar, hideLoadingBar, onGenericError } =
-        usePhotosAppContext();
+    const { onGenericError } = useBaseContext();
+    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
     return useCallback(
         async (...args: T) => {
             showLoadingBar();
