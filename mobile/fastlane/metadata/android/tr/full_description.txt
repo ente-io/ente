@@ -1,6 +1,6 @@
-ente, fotoğraflarınızı ve videolarınızı yedeklemek ve paylaşmak için basit bir uygulamadır.
+ente, fotoğraflarınızı ve videolarınızı yedekleyip paylaşmanızı sağlayan kullanimi kolay bir uygulamadır.
 
-Google Fotoğraflar'a gizlilik dostu bir alternatif arıyorsanız doğru yere geldiniz. Ente ile uçtan uca şifrelenmiş olarak (e2ee) saklanırlar. Bu, onları yalnızca sizin görebileceğiniz anlamına gelir.
+Anılarınızı saklamak için gizlilik dostu bir alternatif arıyorsanız, doğru yere geldiniz. Ente ile uçtan uca şifrelenmiş olarak (e2ee) saklanırlar. Bu, onları yalnızca sizin görebileceğiniz anlamına gelir.
 
 Android, iOS, web ve masaüstünde açık kaynaklı uygulamalarımız var ve fotoğraflarınız bunların tümü arasında uçtan uca şifrelenmiş (e2ee) şekilde sorunsuz bir şekilde senkronize edilecek.
 
