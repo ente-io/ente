@@ -112,3 +112,7 @@ https://github.com/ente-io/ente/tree/main/cli#readme.
 
 Currently, the Ente mobile app allows you to see a map view of all the albums by
 clicking on "Your map" under "Locations" on the search screen.
+
+## How to reset my password if I lost it?
+
+On the login page, enter your email and click on Forgot Password. Then, enter your recovery key and create a new password.
