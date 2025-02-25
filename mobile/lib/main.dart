@@ -40,6 +40,7 @@ import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import 'package:photos/services/memories_service.dart';
 import "package:photos/services/notification_service.dart";
+import "package:photos/services/preview_video_store.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
@@ -280,6 +281,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       });
     }
     _logger.info("PushService/HomeWidget done $tlog");
+    PreviewVideoStore.instance.init(preferences);
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
     await PersonService.init(

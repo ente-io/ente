@@ -18,11 +18,9 @@ import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file/file_type.dart';
-import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/files_service.dart";
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/notification_service.dart';
-import "package:photos/services/preview_video_store.dart";
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -88,9 +86,6 @@ class SyncService {
     _existingSync = Completer<bool>();
     bool successful = false;
     try {
-      FileDataService.instance.syncFDStatus().then((_) {
-        PreviewVideoStore.instance.init(_prefs);
-      }).ignore();
       await _doSync();
       if (_lastSyncStatusEvent != null &&
           _lastSyncStatusEvent!.status !=

@@ -59,10 +59,6 @@ class PreviewVideoStore {
 
   void init(SharedPreferences prefs) {
     _prefs = prefs;
-
-    if (!initSuccess) {
-      _putFilesForPreviewCreation();
-    }
   }
 
   late final SharedPreferences _prefs;
@@ -699,5 +695,11 @@ class PreviewVideoStore {
     fileQueue.addAll(allFiles);
     initSuccess = true;
     await chunkAndUploadVideo(null, file);
+  }
+
+  void queueFiles() {
+    if (!initSuccess) {
+      _putFilesForPreviewCreation();
+    }
   }
 }
