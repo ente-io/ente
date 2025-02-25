@@ -97,7 +97,7 @@ func (c *FileController) validateFileCreateOrUpdateReq(userID int64, file ente.F
 			return stacktrace.Propagate(ente.ErrPermissionDenied, "collection doesn't belong to user")
 		}
 		if collection.IsDeleted {
-			return stacktrace.Propagate(ente.ErrNotFound, "collection has been deleted")
+			return stacktrace.Propagate(ente.ErrCollectionDeleted, "collection has been deleted")
 		}
 		if file.OwnerID != userID {
 			return stacktrace.Propagate(ente.ErrPermissionDenied, "file ownerID doesn't match with userID")
@@ -136,11 +136,11 @@ func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, 
 
 	if fileResult.err != nil {
 		log.Error("Could not find size of file: " + file.File.ObjectKey)
-		return file, stacktrace.Propagate(fileResult.err, "")
+		return file, stacktrace.Propagate(ente.ErrObjSizeFetchFailed, fileResult.err.Error())
 	}
 	if thumbResult.err != nil {
 		log.Error("Could not find size of thumbnail: " + file.Thumbnail.ObjectKey)
-		return file, stacktrace.Propagate(thumbResult.err, "")
+		return file, stacktrace.Propagate(ente.ErrObjSizeFetchFailed, thumbResult.err.Error())
 	}
 	fileSize := fileResult.size
 	thumbnailSize := thumbResult.size
