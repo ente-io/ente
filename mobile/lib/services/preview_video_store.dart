@@ -20,6 +20,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/core/network/network.dart";
 import 'package:photos/db/files_db.dart';
+import "package:photos/db/upload_locks_db.dart";
 import "package:photos/events/preview_updated_event.dart";
 import "package:photos/events/video_streaming_changed.dart";
 import "package:photos/models/base/id.dart";
@@ -34,12 +35,16 @@ import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/gzip.dart";
+import "package:photos/utils/network_util.dart";
 import "package:photos/utils/toast_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
+
+const _maxRetryCount = 3;
 
 class PreviewVideoStore {
   final LinkedHashMap<int, PreviewItem> _items = LinkedHashMap();
   LinkedHashMap<int, PreviewItem> get previews => _items;
+  late Set<int> _failureFiles;
 
   bool initSuccess = false;
 
@@ -110,9 +115,11 @@ class PreviewVideoStore {
       return;
     }
 
+    Object? error;
+    bool removeFile = false;
     try {
       if (!enteFile.isUploaded) {
-        _removeFile(enteFile);
+        removeFile = true;
         return;
       }
 
@@ -124,14 +131,14 @@ class PreviewVideoStore {
         if (ctx != null && ctx.mounted) {
           showShortToast(ctx, 'Video preview already exists');
         }
-        _removeFile(enteFile);
+        removeFile = true;
         return;
       } catch (e, s) {
         if (e is DioException && e.response?.statusCode == 404) {
           _logger.info("No preview found for $enteFile");
         } else {
           _logger.warning("Failed to get playlist for $enteFile", e, s);
-          _retryFile(enteFile, e);
+          error = e;
           return;
         }
       }
@@ -139,7 +146,7 @@ class PreviewVideoStore {
       // elimination case for <=10 MB with H.264
       var (props, result, file) = await _checkFileForPreviewCreation(enteFile);
       if (result) {
-        _removeFile(enteFile);
+        removeFile = true;
         return;
       }
 
@@ -174,7 +181,7 @@ class PreviewVideoStore {
       // get file
       file ??= await getFile(enteFile, isOrigin: true);
       if (file == null) {
-        _retryFile(enteFile, "Unable to fetch file");
+        error = "Unable to fetch file";
         return;
       }
 
@@ -270,8 +277,6 @@ class PreviewVideoStore {
 
       final returnCode = await session.getReturnCode();
 
-      String? error;
-
       if (ReturnCode.isSuccess(returnCode)) {
         try {
           _items[enteFile.uploadedFileID!] = PreviewItem(
@@ -346,11 +351,18 @@ class PreviewVideoStore {
           retryCount: _items[enteFile.uploadedFileID!]!.retryCount,
           collectionID: enteFile.collectionID ?? 0,
         );
-      } else {
-        _retryFile(enteFile, error);
+        _removeFromLocks(enteFile).ignore();
+        Bus.instance.fire(PreviewUpdatedEvent(_items));
       }
-      Bus.instance.fire(PreviewUpdatedEvent(_items));
     } finally {
+      if (error != null) {
+        _retryFile(enteFile, error);
+        Bus.instance.fire(PreviewUpdatedEvent(_items));
+      } else if (removeFile) {
+        _removeFile(enteFile);
+        _removeFromLocks(enteFile).ignore();
+        Bus.instance.fire(PreviewUpdatedEvent(_items));
+      }
       // reset uploading status if this was getting processed
       if (uploadingFileId == enteFile.uploadedFileID!) {
         uploadingFileId = -1;
@@ -365,13 +377,23 @@ class PreviewVideoStore {
     }
   }
 
+  Future<void> _removeFromLocks(EnteFile enteFile) async {
+    final bool isFailurePresent =
+        _failureFiles.contains(enteFile.uploadedFileID!);
+
+    if (isFailurePresent) {
+      await UploadLocksDB.instance
+          .deleteStreamUploadErrorEntry(enteFile.uploadedFileID!);
+      _failureFiles.remove(enteFile.uploadedFileID!);
+    }
+  }
+
   void _removeFile(EnteFile enteFile) {
     _items.remove(enteFile.uploadedFileID!);
-    Bus.instance.fire(PreviewUpdatedEvent(_items));
   }
 
   void _retryFile(EnteFile enteFile, Object error) {
-    if (_items[enteFile.uploadedFileID!]!.retryCount < 3) {
+    if (_items[enteFile.uploadedFileID!]!.retryCount < _maxRetryCount) {
       _items[enteFile.uploadedFileID!] = PreviewItem(
         status: PreviewItemStatus.retry,
         file: enteFile,
@@ -387,6 +409,22 @@ class PreviewVideoStore {
         collectionID: enteFile.collectionID ?? 0,
         error: error,
       );
+
+      final bool isFailurePresent =
+          _failureFiles.contains(enteFile.uploadedFileID!);
+
+      if (isFailurePresent) {
+        UploadLocksDB.instance.updateStreamStatus(
+          enteFile.uploadedFileID!,
+          error.toString(),
+        );
+      } else {
+        UploadLocksDB.instance.createStreamEntry(
+          enteFile.uploadedFileID!,
+          error.toString(),
+        );
+        _failureFiles.add(enteFile.uploadedFileID!);
+      }
     }
   }
 
@@ -639,10 +677,16 @@ class PreviewVideoStore {
 
   // generate stream for all files after cutoff date
   Future<void> _putFilesForPreviewCreation() async {
-    if (!isVideoStreamingEnabled) return;
+    if (!isVideoStreamingEnabled || !await canUseHighBandwidth()) return;
 
     final cutoff = videoStreamingCutoff;
     if (cutoff == null) return;
+
+    Map<int, String> failureFiles = {};
+    try {
+      failureFiles = await UploadLocksDB.instance.getStreamUploadError();
+      _failureFiles = {...failureFiles.keys};
+    } catch (_) {}
 
     final files = await FilesDB.instance.getAllFilesAfterDate(
       fileType: FileType.video,
@@ -668,16 +712,29 @@ class PreviewVideoStore {
       final enteFile = allFiles[i];
       // elimination case for <=10 MB with H.264
       final (_, result, _) = await _checkFileForPreviewCreation(enteFile);
-      if (result) {
+      final isFailure = _failureFiles.contains(enteFile.uploadedFileID!);
+
+      if (isFailure) {
+        _items[enteFile.uploadedFileID!] = PreviewItem(
+          status: PreviewItemStatus.failed,
+          file: enteFile,
+          collectionID: enteFile.collectionID ?? 0,
+          retryCount: _maxRetryCount,
+          error: failureFiles[enteFile.uploadedFileID!],
+        );
+      }
+      if (result || isFailure) {
         allFiles.removeAt(i);
         n--;
         continue;
       }
+
       _items[enteFile.uploadedFileID!] = PreviewItem(
         status: PreviewItemStatus.inQueue,
         file: enteFile,
         collectionID: enteFile.collectionID ?? 0,
       );
+
       i++;
     }
 
