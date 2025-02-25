@@ -238,7 +238,11 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     <InfoItem
                         icon={<CameraOutlinedIcon />}
                         title={annotatedExif.takenOnDevice}
-                        caption={<BasicDeviceCamera {...{ annotatedExif }} />}
+                        caption={createMultipartCaption(
+                            annotatedExif.fNumber,
+                            annotatedExif.exposureTime,
+                            annotatedExif.iso,
+                        )}
                     />
                 )}
 
@@ -763,18 +767,26 @@ const FileName: React.FC<FileNameProps> = ({
         scheduleUpdate();
     };
 
+    const icon =
+        file.metadata.fileType === FileType.video ? (
+            <VideocamOutlinedIcon />
+        ) : (
+            <PhotoOutlinedIcon />
+        );
+
+    const fileSize = file.info?.fileSize;
+    const caption = createMultipartCaption(
+        annotatedExif?.megaPixels,
+        annotatedExif?.resolution,
+        fileSize ? formattedByteSize(fileSize) : undefined,
+    );
+
     return (
         <>
             <InfoItem
-                icon={
-                    file.metadata.fileType === FileType.video ? (
-                        <VideocamOutlinedIcon />
-                    ) : (
-                        <PhotoOutlinedIcon />
-                    )
-                }
+                icon={icon}
                 title={[fileName, extension].join(".")}
-                caption={getCaption(file, annotatedExif)}
+                caption={caption}
                 trailingButton={
                     allowEdits && <EditButton onClick={openEditMode} />
                 }
@@ -790,29 +802,17 @@ const FileName: React.FC<FileNameProps> = ({
     );
 };
 
-const getCaption = (file: EnteFile, exifInfo: AnnotatedExif | undefined) => {
-    const megaPixels = exifInfo?.megaPixels;
-    const resolution = exifInfo?.resolution;
-    const fileSize = file.info?.fileSize;
-
-    const captionParts = [];
-    if (megaPixels) {
-        captionParts.push(megaPixels);
-    }
-    if (resolution) {
-        captionParts.push(resolution);
-    }
-    if (fileSize) {
-        captionParts.push(formattedByteSize(fileSize));
-    }
-    return (
-        <FlexWrapper gap={1}>
-            {captionParts.map((caption) => (
-                <Box key={caption}> {caption}</Box>
-            ))}
-        </FlexWrapper>
-    );
-};
+const createMultipartCaption = (
+    p1: string | undefined,
+    p2: string | undefined,
+    p3: string | undefined,
+) => (
+    <Stack direction="row" sx={{ gap: 1 }}>
+        {p1 && <div>{p1}</div>}
+        {p2 && <div>{p2}</div>}
+        {p3 && <div>{p3}</div>}
+    </Stack>
+);
 
 interface FileNameEditDialogProps {
     isInEditMode: boolean;
@@ -861,16 +861,6 @@ const FileNameEditDialog: React.FC<FileNameEditDialogProps> = ({
         </TitledMiniDialog>
     );
 };
-
-const BasicDeviceCamera: React.FC<{ annotatedExif: AnnotatedExif }> = ({
-    annotatedExif,
-}) => (
-    <Stack direction="row" sx={{ gap: 1 }}>
-        <Box>{annotatedExif.fNumber}</Box>
-        <Box>{annotatedExif.exposureTime}</Box>
-        <Box>{annotatedExif.iso}</Box>
-    </Stack>
-);
 
 const openStreetMapLink = ({ latitude, longitude }: Location) =>
     `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=15/${latitude}/${longitude}`;
