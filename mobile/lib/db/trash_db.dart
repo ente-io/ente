@@ -101,20 +101,6 @@ class TrashDB {
     await db.delete(tableName);
   }
 
-  // getRecentlyTrashedFile returns the file which was trashed recently
-  Future<TrashFile?> getRecentlyTrashedFile() async {
-    final db = await instance.database;
-    final rows = await db.query(
-      tableName,
-      orderBy: '$columnTrashDeleteBy DESC',
-      limit: 1,
-    );
-    if (rows.isEmpty) {
-      return null;
-    }
-    return _getTrashFromRow(rows[0]);
-  }
-
   Future<int> count() async {
     final db = await instance.database;
     final count = Sqflite.firstIntValue(
@@ -153,15 +139,6 @@ class TrashDB {
           " took " +
           duration.inMilliseconds.toString() +
           "ms.",
-    );
-  }
-
-  Future<int> insert(TrashFile trash) async {
-    final db = await instance.database;
-    return db.insert(
-      tableName,
-      _getRowForTrash(trash),
-      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
