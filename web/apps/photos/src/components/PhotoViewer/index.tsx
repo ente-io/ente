@@ -391,7 +391,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
         const extension = lowercaseExtension(file.metadata.title);
         // Assume it is supported.
         let isSupported = true;
-        if (needsJPEGConversion(extension)) {
+        if (extension && needsJPEGConversion(extension)) {
             // See if the file is on the whitelist of extensions that we know
             // will not be directly renderable.
             if (!isDesktop) {

@@ -2,8 +2,7 @@ import { assertionFailed } from "@/base/assert";
 import { newID } from "@/base/id";
 import { ensureLocalUser } from "@/base/local-user";
 import type { EnteFile } from "@/media/file";
-import { metadataHash } from "@/media/file-metadata";
-import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
+import { filePublicMagicMetadata, metadataHash } from "@/media/file-metadata";
 import {
     addToCollection,
     createCollectionNameByID,
@@ -310,7 +309,7 @@ const duplicateGroupItemToRetain = (duplicateGroup: DuplicateGroup) => {
     const itemsWithCaption: DuplicateGroup["items"] = [];
     const itemsWithOtherEdits: DuplicateGroup["items"] = [];
     for (const item of duplicateGroup.items) {
-        const pubMM = getPublicMagicMetadataSync(item.file);
+        const pubMM = filePublicMagicMetadata(item.file);
         if (!pubMM) continue;
         if (pubMM.caption) itemsWithCaption.push(item);
         if (pubMM.editedName ?? pubMM.editedTime)
