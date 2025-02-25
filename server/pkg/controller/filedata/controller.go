@@ -199,10 +199,6 @@ func (c *Controller) GetFilesData(ctx *gin.Context, req fileData.GetFilesData) (
 			})
 		}
 	}
-	if len(errFileIds) > 5 {
-		log.WithField("errFileIds", errFileIds).Error("Failed to fetch metadata for some files")
-		return nil, stacktrace.Propagate(errors.New("failed to fetch metadata for some files"), "")
-	}
 
 	return &fileData.GetFilesDataResponse{
 		Data:                fetchedEmbeddings,
