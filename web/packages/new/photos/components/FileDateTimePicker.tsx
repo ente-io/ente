@@ -16,18 +16,16 @@ interface FileDateTimePickerProps {
      */
     initialValue?: Date;
     /**
-     * If true, then the picker shows provided date/time but doesn't allow
-     * editing it.
-     */
-    disabled?: boolean;
-    /**
      * Callback invoked when the user makes and confirms a date/time.
      */
     onAccept: (date: ParsedMetadataDate) => void;
     /**
      * Optional callback invoked when the picker has been closed.
+     *
+     * > Note: This is only informational, for the caller to update their state.
+     * > The picker has already been closed at this point.
      */
-    onClose?: () => void;
+    onDidClose?: () => void;
 }
 
 /**
@@ -47,9 +45,8 @@ interface FileDateTimePickerProps {
  */
 export const FileDateTimePicker: React.FC<FileDateTimePickerProps> = ({
     initialValue,
-    disabled,
     onAccept,
-    onClose,
+    onDidClose,
 }) => {
     const [open, setOpen] = useState(true);
     const [value, setValue] = useState<Dayjs | null>(dayjs(initialValue));
@@ -61,8 +58,9 @@ export const FileDateTimePicker: React.FC<FileDateTimePickerProps> = ({
     };
 
     const handleClose = () => {
+        console.log("handleClose");
         setOpen(false);
-        onClose?.();
+        onDidClose?.();
     };
 
     return (
@@ -73,7 +71,6 @@ export const FileDateTimePicker: React.FC<FileDateTimePickerProps> = ({
                 open={open}
                 onClose={handleClose}
                 onOpen={() => setOpen(true)}
-                disabled={disabled}
                 disableFuture={true}
                 /* The dialog grows too big on the default portrait mode with
                    our theme customizations. So we instead use the landscape
