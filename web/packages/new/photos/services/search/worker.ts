@@ -3,9 +3,12 @@ import { logUnhandledErrorsAndRejectionsInWorker } from "@/base/log-web";
 import type { Location } from "@/base/types";
 import type { Collection } from "@/media/collection";
 import type { EnteFile } from "@/media/file";
-import { fileCreationPhotoDate, fileLocation } from "@/media/file-metadata";
+import {
+    fileCreationPhotoDate,
+    fileLocation,
+    filePublicMagicMetadata,
+} from "@/media/file-metadata";
 import { nullToUndefined } from "@/utils/transform";
-import { filePublicMagicMetadata } from "@ente/shared/file-metadata";
 import type { Component } from "chrono-node";
 import * as chrono from "chrono-node";
 import { expose } from "comlink";
