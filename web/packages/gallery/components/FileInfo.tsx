@@ -665,11 +665,8 @@ const CreationTime: React.FC<CreationTimeProps> = ({
 }) => {
     const { onGenericError } = useBaseContext();
 
-    const [loading, setLoading] = useState(false);
-    const [isInEditMode, setIsInEditMode] = useState(false);
-
-    const openEditMode = () => setIsInEditMode(true);
-    const closeEditMode = () => setIsInEditMode(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     const originalDate = fileCreationPhotoDate(
         file,
@@ -677,9 +674,13 @@ const CreationTime: React.FC<CreationTimeProps> = ({
     );
 
     const saveEdits = async (pickedTime: ParsedMetadataDate) => {
-        try {
-            setLoading(true);
-            if (isInEditMode) {
+        setIsEditing(false);
+        setIsSaving(true);
+
+        const { dateTime, timestamp: editedTime } = pickedTime;
+        if (editedTime != originalDate.getTime()) {
+            // If not same as before.
+            try {
                 // [Note: Don't modify offsetTime when editing date via picker]
                 //
                 // Use the updated date time (both in its canonical dateTime
@@ -692,26 +693,18 @@ const CreationTime: React.FC<CreationTimeProps> = ({
                 // editor, we can provide functionality for the user to edit the
                 // associated offset, but right now it is not even surfaced, so
                 // don't also potentially overwrite it.
-                const { dateTime, timestamp } = pickedTime;
-                if (timestamp == originalDate.getTime()) {
-                    // Same as before.
-                    closeEditMode();
-                    return;
-                }
-
                 await updateRemotePublicMagicMetadata(file, {
                     dateTime,
-                    editedTime: timestamp,
+                    editedTime,
                 });
 
                 scheduleUpdate();
+            } catch (e) {
+                onGenericError(e);
             }
-        } catch (e) {
-            onGenericError(e);
-        } finally {
-            closeEditMode();
-            setLoading(false);
         }
+
+        setIsSaving(false);
     };
 
     return (
@@ -722,16 +715,18 @@ const CreationTime: React.FC<CreationTimeProps> = ({
                 caption={formattedTime(originalDate)}
                 trailingButton={
                     allowEdits && (
-                        <EditButton onClick={openEditMode} loading={loading} />
+                        <EditButton
+                            onClick={() => setIsEditing(true)}
+                            loading={isSaving}
+                        />
                     )
                 }
             />
-            {isInEditMode && (
+            {isEditing && (
                 <FileDateTimePicker
                     initialValue={originalDate}
-                    disabled={loading}
                     onAccept={saveEdits}
-                    onClose={closeEditMode}
+                    onDidClose={() => setIsEditing(false)}
                 />
             )}
         </>
