@@ -104,27 +104,27 @@ func (c *Controller) InsertOrUpdateMetadata(ctx *gin.Context, req *fileData.PutF
 		Client:           network.GetClientInfo(ctx),
 	}
 	// Start a goroutine to handle the upload and insert operations
-	go func() {
-		logger := log.WithField("objectKey", objectKey).WithField("fileID", req.FileID).WithField("type", req.Type)
-		size, uploadErr := c.uploadObject(obj, objectKey, bucketID)
-		if uploadErr != nil {
-			logger.WithError(uploadErr).Error("upload failed")
-			return
-		}
+	//go func() {
+	logger := log.WithField("objectKey", objectKey).WithField("fileID", req.FileID).WithField("type", req.Type)
+	size, uploadErr := c.uploadObject(obj, objectKey, bucketID)
+	if uploadErr != nil {
+		logger.WithError(uploadErr).Error("upload failed")
+		return uploadErr
+	}
 
-		row := fileData.Row{
-			FileID:       req.FileID,
-			Type:         req.Type,
-			UserID:       fileOwnerID,
-			Size:         size,
-			LatestBucket: bucketID,
-		}
-		dbInsertErr := c.Repo.InsertOrUpdate(context.Background(), row)
-		if dbInsertErr != nil {
-			logger.WithError(dbInsertErr).Error("insert or update failed")
-			return
-		}
-	}()
+	row := fileData.Row{
+		FileID:       req.FileID,
+		Type:         req.Type,
+		UserID:       fileOwnerID,
+		Size:         size,
+		LatestBucket: bucketID,
+	}
+	dbInsertErr := c.Repo.InsertOrUpdate(context.Background(), row)
+	if dbInsertErr != nil {
+		logger.WithError(dbInsertErr).Error("insert or update failed")
+		return uploadErr
+	}
+	//}()
 	return nil
 }
 
@@ -198,6 +198,10 @@ func (c *Controller) GetFilesData(ctx *gin.Context, req fileData.GetFilesData) (
 				DecryptionHeader: obj.s3MetaObject.DecryptionHeader,
 			})
 		}
+	}
+	if len(errFileIds) > 5 {
+		log.WithField("errFileIds", errFileIds).Error("Failed to fetch metadata for some files")
+		return nil, stacktrace.Propagate(errors.New("failed to fetch metadata for some files"), "")
 	}
 
 	return &fileData.GetFilesDataResponse{
