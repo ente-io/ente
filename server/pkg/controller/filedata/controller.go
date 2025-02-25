@@ -222,6 +222,13 @@ func (c *Controller) getS3FileMetadataParallel(dbRows []fileData.Row) ([]bulkS3M
 			defer wg.Done()
 			defer func() { <-globalFileFetchSemaphore }() // Release back to global semaphore
 			dc := row.LatestBucket
+			// :todo:neeraj make it configurable
+			// treat b6 as preferred bucket for reading
+			if dc == "b5" {
+				if array.StringInList("b6", row.ReplicatedBuckets) {
+					dc = "b6"
+				}
+			}
 			s3FileMetadata, err := c.fetchS3FileMetadata(context.Background(), row, dc)
 			if err != nil {
 				log.WithField("bucket", dc).
