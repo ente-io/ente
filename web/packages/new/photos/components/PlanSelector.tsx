@@ -57,7 +57,6 @@ import Typography from "@mui/material/Typography";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { usePhotosAppContext } from "../types/context";
 
 type PlanSelectorProps = ModalVisibilityProps & {
     setLoading: (loading: boolean) => void;
@@ -682,7 +681,7 @@ function ManageSubscription({
     subscription,
     hasAddOnBonus,
 }: ManageSubscriptionProps) {
-    const { onGenericError } = usePhotosAppContext();
+    const { onGenericError } = useBaseContext();
 
     const openFamilyPortal = async () => {
         setLoading(true);
