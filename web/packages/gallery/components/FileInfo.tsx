@@ -601,51 +601,50 @@ const Caption: React.FC<CaptionProps> = ({
     }
 
     return (
-        <Box sx={{ p: 1 }}>
-            <form noValidate onSubmit={handleSubmit}>
-                <TextField
-                    hiddenLabel
-                    fullWidth
-                    id="caption"
-                    name="caption"
-                    type="text"
-                    multiline
-                    placeholder={t("caption_placeholder")}
-                    value={values.caption}
-                    onChange={handleChange("caption")}
-                    error={Boolean(errors.caption)}
-                    helperText={errors.caption}
-                    disabled={!allowEdits || isSaving}
-                />
-                {values.caption !== caption && (
-                    <FlexWrapper justifyContent={"flex-end"}>
-                        <IconButton type="submit" disabled={isSaving}>
-                            {isSaving ? (
-                                <CircularProgress
-                                    size={"18px"}
-                                    color="inherit"
-                                />
-                            ) : (
-                                <DoneIcon />
-                            )}
-                        </IconButton>
-                        <IconButton
-                            onClick={() =>
-                                resetForm({
-                                    values: { caption: caption ?? "" },
-                                    touched: { caption: false },
-                                })
-                            }
-                            disabled={isSaving}
-                        >
-                            <CloseIcon />
-                        </IconButton>
-                    </FlexWrapper>
-                )}
-            </form>
-        </Box>
+        <CaptionForm noValidate onSubmit={handleSubmit}>
+            <TextField
+                hiddenLabel
+                fullWidth
+                id="caption"
+                name="caption"
+                type="text"
+                multiline
+                placeholder={t("caption_placeholder")}
+                value={values.caption}
+                onChange={handleChange("caption")}
+                error={Boolean(errors.caption)}
+                helperText={errors.caption}
+                disabled={!allowEdits || isSaving}
+            />
+            {values.caption !== caption && (
+                <FlexWrapper justifyContent={"flex-end"}>
+                    <IconButton type="submit" disabled={isSaving}>
+                        {isSaving ? (
+                            <CircularProgress size={"18px"} color="inherit" />
+                        ) : (
+                            <DoneIcon />
+                        )}
+                    </IconButton>
+                    <IconButton
+                        onClick={() =>
+                            resetForm({
+                                values: { caption: caption ?? "" },
+                                touched: { caption: false },
+                            })
+                        }
+                        disabled={isSaving}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </FlexWrapper>
+            )}
+        </CaptionForm>
     );
 };
+
+const CaptionForm = styled("form")(({ theme }) => ({
+    padding: theme.spacing(1),
+}));
 
 type CreationTimeProps = Pick<
     FileInfoProps,
