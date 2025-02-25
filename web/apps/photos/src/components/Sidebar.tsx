@@ -903,6 +903,8 @@ const localeName = (locale: SupportedLocale) => {
             return "Українська";
         case "vi-VN":
             return "Tiếng Việt";
+        case "ja-JP":
+            return "日本語";
     }
 };
 

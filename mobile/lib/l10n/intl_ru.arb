@@ -1462,6 +1462,5 @@
   "removeInvite": "Удалить приглашение",
   "recoveryWarning": "Доверенный контакт пытается получить доступ к вашей учетной записи",
   "rejectRecovery": "Отклонить восстановление",
-  "recoveryInitiated": "Восстановление запущено",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "recoveryInitiated": "Восстановление запущено"
 }

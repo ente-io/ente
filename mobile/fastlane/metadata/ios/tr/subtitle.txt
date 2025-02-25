@@ -1,1 +1,1 @@
-Şifrelenmiş depolama sistemi
+Ente - şifrelenmiş depolama sistemi

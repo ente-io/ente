@@ -73,18 +73,47 @@ func (h *CollectionHandler) GetV2(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
 	sinceTime, _ := strconv.ParseInt(c.Query("sinceTime"), 10, 64)
 	app := auth.GetApp(c)
-	ownedCollections, err := h.Controller.GetOwnedV2(userID, sinceTime, app)
+	ownedCollections, err := h.Controller.GetOwnedV2(userID, sinceTime, app, nil)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Failed to get owned collections"))
 		return
 	}
-	sharedCollections, err := h.Controller.GetSharedWith(userID, sinceTime, app)
+	sharedCollections, err := h.Controller.GetSharedWith(userID, sinceTime, app, nil)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Failed to get shared collections"))
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"collections": append(ownedCollections, sharedCollections...),
+	})
+}
+
+// GetWithLimit returns owned and shared collections accessible to a user
+func (h *CollectionHandler) GetWithLimit(c *gin.Context) {
+	userID := auth.GetUserID(c.Request.Header)
+	sinceTime, _ := strconv.ParseInt(c.Query("sinceTime"), 10, 64)
+	sharedSinceTime, _ := strconv.ParseInt(c.Query("sharedSinceTime"), 10, 64)
+	limit := int64(1000)
+	if c.Query("limit") != "" {
+		limit, _ = strconv.ParseInt(c.Query("limit"), 10, 64)
+		if limit > 1000 {
+			limit = 1000
+		}
+	}
+	app := auth.GetApp(c)
+	ownedCollections, err := h.Controller.GetOwnedV2(userID, sinceTime, app, &limit)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "Failed to get owned collections"))
+		return
+	}
+	sharedCollections, err := h.Controller.GetSharedWith(userID, sharedSinceTime, app, &limit)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "Failed to get shared collections"))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"owned":  ownedCollections,
+		"shared": sharedCollections,
 	})
 }
 

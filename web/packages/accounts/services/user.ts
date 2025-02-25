@@ -1,4 +1,3 @@
-import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import {
     authenticatedRequestHeaders,
     ensureOk,
@@ -39,10 +38,12 @@ export interface TwoFactorVerificationResponse {
     token?: string;
 }
 
-export interface TwoFactorSecret {
-    secretCode: string;
-    qrCode: string;
-}
+const TwoFactorSecret = z.object({
+    secretCode: z.string(),
+    qrCode: z.string(),
+});
+
+export type TwoFactorSecret = z.infer<typeof TwoFactorSecret>;
 
 export interface TwoFactorRecoveryResponse {
     encryptedSecret: string;
@@ -235,14 +236,15 @@ export const remoteLogoutIfNeeded = async () => {
 };
 
 export const verifyTwoFactor = async (code: string, sessionID: string) => {
-    const resp = await HTTPService.post(
-        await apiURL("/users/two-factor/verify"),
-        {
-            code,
-            sessionID,
-        },
-    );
-    return resp.data as UserVerificationResponse;
+    const res = await fetch(await apiURL("/users/two-factor/verify"), {
+        method: "POST",
+        headers: publicRequestHeaders(),
+        body: JSON.stringify({ code, sessionID }),
+    });
+    ensureOk(res);
+    const json = await res.json();
+    // TODO: Use zod here
+    return json as UserVerificationResponse;
 };
 
 /** The type of the second factor we're trying to act on */
@@ -292,37 +294,37 @@ export const changeEmail = async (email: string, ott: string) => {
     );
 };
 
+/**
+ * Start the two factor setup process by fetching a secret code (and the
+ * corresponding QR code) from remote.
+ */
 export const setupTwoFactor = async () => {
-    const resp = await HTTPService.post(
-        await apiURL("/users/two-factor/setup"),
-        null,
-        undefined,
-        {
-            "X-Auth-Token": getToken(),
-        },
-    );
-    return resp.data as TwoFactorSecret;
+    const res = await fetch(await apiURL("/users/two-factor/setup"), {
+        method: "POST",
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return TwoFactorSecret.parse(await res.json());
 };
 
-export const enableTwoFactor = async (
-    code: string,
-    recoveryEncryptedTwoFactorSecret: B64EncryptionResult,
-) => {
-    await HTTPService.post(
-        await apiURL("/users/two-factor/enable"),
-        {
-            code,
-            encryptedTwoFactorSecret:
-                recoveryEncryptedTwoFactorSecret.encryptedData,
-            twoFactorSecretDecryptionNonce:
-                recoveryEncryptedTwoFactorSecret.nonce,
-        },
-        undefined,
-        {
-            "X-Auth-Token": getToken(),
-        },
+interface EnableTwoFactorRequest {
+    code: string;
+    encryptedTwoFactorSecret: string;
+    twoFactorSecretDecryptionNonce: string;
+}
+
+/**
+ * Enable two factor for the user by providing the 2FA code and the encrypted
+ * secret from a previous call to {@link setupTwoFactor}.
+ */
+export const enableTwoFactor = async (req: EnableTwoFactorRequest) =>
+    ensureOk(
+        await fetch(await apiURL("/users/two-factor/enable"), {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(req),
+        }),
     );
-};
 
 export const setRecoveryKey = async (token: string, recoveryKey: RecoveryKey) =>
     HTTPService.put(
