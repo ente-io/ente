@@ -6,6 +6,7 @@ import "package:flutter/foundation.dart";
 import "package:path/path.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/db/remote/migration.dart";
+import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
@@ -54,6 +55,52 @@ class RemoteDB {
     });
     debugPrint(
       '$runtimeType insertCollections complete in ${stopwatch.elapsed.inMilliseconds}ms for ${collections.length} collections',
+    );
+  }
+
+  Future<void> insertCollectionFilesDiff(
+    List<CollectionFileItem> collections,
+  ) async {
+    if (collections.isEmpty) return;
+    final stopwatch = Stopwatch()..start();
+    await Future.forEach(collections.slices(_batchInsertMaxCount),
+        (slice) async {
+      final List<List<Object?>> values = slice
+          .map(
+            (e) => [
+              e.collectionID,
+              e.fileID,
+              e.encFileKey,
+              e.encFileKeyNonce,
+              e.createdAt,
+              e.updatedAt,
+              e.isDeleted ? 1 : 0,
+            ],
+          )
+          .toList();
+      await _sqliteDB.executeBatch(
+        'INSERT OR REPLACE INTO collection_files ($collectionFilesColumns) values(?, ?, ?, ?, ?, ?, ?)',
+        values,
+      );
+    });
+    debugPrint(
+      '$runtimeType insertCollectionFilesDiff complete in ${stopwatch.elapsed.inMilliseconds}ms for ${collections.length}',
+    );
+  }
+
+  Future<void> deleteCollectionFilesDiff(
+    List<CollectionFileItem> items,
+  ) async {
+    if (items.isEmpty) return;
+    final int collectionID = items.first.collectionID;
+    final stopwatch = Stopwatch()..start();
+    await Future.forEach(items.slices(_batchInsertMaxCount), (slice) async {
+      await _sqliteDB.execute(
+        'DELETE FROM collection_files WHERE file_id IN (${slice.map((e) => e.fileID).join(',')}) AND collection_id = $collectionID',
+      );
+    });
+    debugPrint(
+      '$runtimeType deleteCollectionFilesDiff complete in ${stopwatch.elapsed.inMilliseconds}ms for ${items.length}',
     );
   }
 
