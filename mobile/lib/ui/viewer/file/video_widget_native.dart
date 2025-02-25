@@ -588,6 +588,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   }
 
   Future<void> _setAspectRatioFromVideoProps() async {
+    if (aspectRatio != null && duration != null) return;
+
     if (widget.playlistData != null && widget.selectedPreview) {
       aspectRatio = widget.playlistData!.width! / widget.playlistData!.height!;
       if (widget.file.duration != null &&
@@ -597,7 +599,6 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       _logger.info("Getting aspect ratio from preview video");
       return;
     }
-    if (aspectRatio != 1) return;
     final videoProps = await getVideoPropsAsync(File(_filePath!));
     if (videoProps != null) {
       duration = videoProps.propData?["duration"];
