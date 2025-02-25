@@ -90,8 +90,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ഇവിടൊന്നും കാണ്മാനില്ല! 👀"),
         "ok": MessageLookupByLibrary.simpleMessage("ശരി"),
         "oops": MessageLookupByLibrary.simpleMessage("അയ്യോ"),
-        "orPickFromYourContacts":
-            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "password": MessageLookupByLibrary.simpleMessage("സങ്കേതക്കുറി"),
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("ദയവായി വീണ്ടും ശ്രമിക്കുക"),
