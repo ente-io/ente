@@ -188,8 +188,8 @@ dependencies:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
   screenshot: ^3.0.0
   scrollable_positioned_list: ^0.3.5
-  sentry: ^8.0.0
-  sentry_flutter: ^8.0.0
+  sentry: ^8.13.2
+  sentry_flutter: ^8.13.2
   share_plus: ^10.0.2
   shared_preferences: ^2.0.5
   simple_cluster: ^0.3.0
