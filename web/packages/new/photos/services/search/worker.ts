@@ -5,7 +5,7 @@ import type { Collection } from "@/media/collection";
 import type { EnteFile } from "@/media/file";
 import { fileCreationPhotoDate, fileLocation } from "@/media/file-metadata";
 import { nullToUndefined } from "@/utils/transform";
-import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
+import { filePublicMagicMetadata } from "@ente/shared/file-metadata";
 import type { Component } from "chrono-node";
 import * as chrono from "chrono-node";
 import { expose } from "comlink";
@@ -383,7 +383,7 @@ const isMatchingFile = (file: EnteFile, suggestion: SearchSuggestion) => {
         case "date":
             return isDateComponentsMatch(
                 suggestion.dateComponents,
-                fileCreationPhotoDate(file, getPublicMagicMetadataSync(file)),
+                fileCreationPhotoDate(file, filePublicMagicMetadata(file)),
             );
 
         case "location": {

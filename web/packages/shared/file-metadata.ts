@@ -15,9 +15,10 @@ import {
  * We are not expected to be in a scenario where the file gets to the UI without
  * having its public magic metadata decrypted, so this function is a sanity
  * check and should be a no-op in usually. On debug builds it'll throw if it
- * finds its assumptions broken.
+ * finds its assumptions broken. Once the types have been refactored this entire
+ * backup code-path can be removed, and this should become a trivial accessor.
  */
-export const getPublicMagicMetadataSync = (file: EnteFile) => {
+export const filePublicMagicMetadata = (file: EnteFile) => {
     if (!file.pubMagicMetadata) return undefined;
     if (typeof file.pubMagicMetadata.data == "string") {
         if (isDevBuild)

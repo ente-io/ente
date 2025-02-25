@@ -62,7 +62,7 @@ import { FlexWrapper } from "@ente/shared/components/Container";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
-import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
+import { filePublicMagicMetadata } from "@ente/shared/file-metadata";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlinedIcon from "@mui/icons-material/CameraOutlined";
 import CloseIcon from "@mui/icons-material/Close";
@@ -669,7 +669,7 @@ const CreationTime: React.FC<CreationTimeProps> = ({
     const openEditMode = () => setIsInEditMode(true);
     const closeEditMode = () => setIsInEditMode(false);
 
-    const publicMagicMetadata = getPublicMagicMetadataSync(file);
+    const publicMagicMetadata = filePublicMagicMetadata(file);
     const originalDate = fileCreationPhotoDate(file, publicMagicMetadata);
 
     const saveEdits = async (pickedTime: ParsedMetadataDate) => {
