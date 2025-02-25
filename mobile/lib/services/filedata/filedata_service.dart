@@ -29,6 +29,12 @@ class FileDataService {
     _prefs = prefs;
   }
 
+  void appendPreview(int id) {
+    if (previewIds?.containsKey(id) ?? false) return;
+    previewIds ??= {};
+    previewIds?[id] = PreviewInfo(objectId: "dummy", objectSize: 0);
+  }
+
   Future<void> putFileData(EnteFile file, FileDataEntity data) async {
     data.validate();
     final ChaChaEncryptionResult encryptionResult = await gzipAndEncryptJson(

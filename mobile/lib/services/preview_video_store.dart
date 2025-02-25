@@ -41,6 +41,8 @@ class PreviewVideoStore {
   final LinkedHashMap<int, PreviewItem> _items = LinkedHashMap();
   LinkedHashMap<int, PreviewItem> get previews => _items;
 
+  bool initSuccess = false;
+
   PreviewVideoStore._privateConstructor();
 
   static final PreviewVideoStore instance =
@@ -58,9 +60,9 @@ class PreviewVideoStore {
   void init(SharedPreferences prefs) {
     _prefs = prefs;
 
-    FileDataService.instance.syncFDStatus().then(
-          (_) => _putFilesForPreviewCreation(),
-        );
+    if (!initSuccess) {
+      _putFilesForPreviewCreation();
+    }
   }
 
   late final SharedPreferences _prefs;
@@ -340,7 +342,7 @@ class PreviewVideoStore {
 
       if (error == null) {
         // update previewIds
-        FileDataService.instance.syncFDStatus().ignore();
+        FileDataService.instance.appendPreview(enteFile.uploadedFileID!);
 
         _items[enteFile.uploadedFileID!] = PreviewItem(
           status: PreviewItemStatus.uploaded,
@@ -695,6 +697,7 @@ class PreviewVideoStore {
     // take first file and put it for stream generation
     final file = allFiles.removeAt(0);
     fileQueue.addAll(allFiles);
+    initSuccess = true;
     await chunkAndUploadVideo(null, file);
   }
 }
