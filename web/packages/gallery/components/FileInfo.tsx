@@ -43,7 +43,6 @@ import {
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { FileDateTimePicker } from "@/new/photos/components/FileDateTimePicker";
-import { ChipButton } from "@/new/photos/components/mui/ChipButton";
 import { FilePeopleList } from "@/new/photos/components/PeopleList";
 import {
     confirmDisableMapsDialogAttributes,
@@ -77,6 +76,7 @@ import TextSnippetOutlinedIcon from "@mui/icons-material/TextSnippetOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import {
     Box,
+    Button,
     CircularProgress,
     IconButton,
     Link,
@@ -84,6 +84,7 @@ import {
     styled,
     TextField,
     Typography,
+    type ButtonProps,
     type DialogProps,
 } from "@mui/material";
 import { Formik } from "formik";
@@ -1045,3 +1046,10 @@ const ExifItem = styled("div")`
     flex-direction: column;
     gap: 4px;
 `;
+
+const ChipButton = styled((props: ButtonProps) => (
+    <Button color="secondary" {...props} />
+))(({ theme }) => ({
+    ...theme.typography.small,
+    padding: "8px",
+}));
