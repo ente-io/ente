@@ -59,7 +59,7 @@ func New(repo *fileDataRepo.Repository,
 	fileRepo *repo.FileRepository,
 	collectionRepo *repo.CollectionRepository,
 ) *Controller {
-	embeddingDcs := []string{s3Config.GetHotBackblazeDC(), s3Config.GetHotWasabiDC(), s3Config.GetWasabiDerivedDC(), s3Config.GetDerivedStorageDataCenter(), "b5"}
+	embeddingDcs := []string{s3Config.GetHotBackblazeDC(), s3Config.GetHotWasabiDC(), s3Config.GetWasabiDerivedDC(), s3Config.GetDerivedStorageDataCenter(), "b5", "b6"}
 	cache := make(map[string]*s3manager.Downloader, len(embeddingDcs))
 	for i := range embeddingDcs {
 		s3Client := s3Config.GetS3Client(embeddingDcs[i])
