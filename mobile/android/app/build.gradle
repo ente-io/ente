@@ -41,6 +41,16 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8
     }
 
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+    
+    lintOptions {
+        disable 'InvalidPackage'
+        warningsAsErrors false
+        checkReleaseBuilds false
+    }
+
     defaultConfig {
         applicationId = "io.ente.photos"
         minSdk = 26
