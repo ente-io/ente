@@ -40,9 +40,9 @@ import {
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
+import { FileDateTimePicker } from "@/new/photos/components/FileDateTimePicker";
 import { ChipButton } from "@/new/photos/components/mui/ChipButton";
 import { FilePeopleList } from "@/new/photos/components/PeopleList";
-import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import {
     confirmDisableMapsDialogAttributes,
     confirmEnableMapsDialogAttributes,
@@ -725,7 +725,7 @@ const CreationTime: React.FC<CreationTimeProps> = ({
                 }
             />
             {isInEditMode && (
-                <PhotoDateTimePicker
+                <FileDateTimePicker
                     initialValue={originalDate}
                     disabled={loading}
                     onAccept={saveEdits}
