@@ -12,7 +12,7 @@ import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
-import React, { useCallback, useMemo } from "react";
+import React, { useMemo } from "react";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs({ disableDiskLogs: true });
@@ -20,13 +20,11 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const isI18nReady = useSetupI18n();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
 
-    const logout = useCallback(() => {
-        // No code in the accounts app is currently expected to reach a code
-        // path where they would need to "logout". In any case, the accounts app
-        // doesn't store any user specific persistent state that'd need to be
-        // cleared, so there really isn't anything to do here.
-        assertionFailed();
-    }, []);
+    // No code in the accounts app is currently expected to reach a code path
+    // where they would need to "logout". Also, the accounts app doesn't store
+    // any user specific persistent state that'd need to be cleared, so there
+    // really isn't anything to do here even if we needed to.
+    const logout = assertionFailed;
 
     const baseContext = useMemo(
         () => deriveBaseContext({ logout, showMiniDialog }),
