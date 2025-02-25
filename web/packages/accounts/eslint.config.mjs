@@ -8,7 +8,6 @@ export default [
              * "This rule requires the `strictNullChecks` compiler option to be
              * turned on to function correctly"
              */
-            "@typescript-eslint/prefer-nullish-coalescing": "off",
             "@typescript-eslint/no-unnecessary-condition": "off",
             "@typescript-eslint/no-unsafe-assignment": "off",
             "@typescript-eslint/no-explicit-any": "off",
