@@ -559,17 +559,20 @@ const Caption: React.FC<CaptionProps> = ({
     scheduleUpdate,
     refreshPhotoswipe,
 }) => {
+    const { onGenericError } = useBaseContext();
+
     const [caption, setCaption] = useState(file.pubMagicMetadata?.data.caption);
+    const [isSaving, setIsSaving] = useState(false);
 
-    const [loading, setLoading] = useState(false);
+    const onSubmit = async (values: CaptionFormValues) => {
+        const newCaption = values.caption;
+        if (caption == newCaption) {
+            return;
+        }
 
-    const saveEdits = async (newCaption: string) => {
+        setIsSaving(true);
+        setCaption(newCaption);
         try {
-            if (caption === newCaption) {
-                return;
-            }
-            setCaption(newCaption);
-
             const updatedFile = await changeCaption(file, newCaption);
             updateExistingFilePubMetadata(file, updatedFile);
             // @ts-ignore
@@ -577,17 +580,9 @@ const Caption: React.FC<CaptionProps> = ({
             refreshPhotoswipe();
             scheduleUpdate();
         } catch (e) {
-            log.error("failed to update caption", e);
+            onGenericError(e);
         }
-    };
-
-    const onSubmit = async (values: CaptionFormValues) => {
-        try {
-            setLoading(true);
-            await saveEdits(values.caption);
-        } finally {
-            setLoading(false);
-        }
+        setIsSaving(false);
     };
 
     if (!caption?.length && !allowEdits) {
@@ -628,12 +623,12 @@ const Caption: React.FC<CaptionProps> = ({
                             onChange={handleChange("caption")}
                             error={Boolean(errors.caption)}
                             helperText={errors.caption}
-                            disabled={!allowEdits || loading}
+                            disabled={!allowEdits || isSaving}
                         />
                         {values.caption !== caption && (
                             <FlexWrapper justifyContent={"flex-end"}>
-                                <IconButton type="submit" disabled={loading}>
-                                    {loading ? (
+                                <IconButton type="submit" disabled={isSaving}>
+                                    {isSaving ? (
                                         <CircularProgress
                                             size={"18px"}
                                             color="inherit"
@@ -649,7 +644,7 @@ const Caption: React.FC<CaptionProps> = ({
                                             touched: { caption: false },
                                         })
                                     }
-                                    disabled={loading}
+                                    disabled={isSaving}
                                 >
                                     <CloseIcon />
                                 </IconButton>
@@ -686,35 +681,35 @@ const CreationTime: React.FC<CreationTimeProps> = ({
 
     const saveEdits = async (pickedTime: ParsedMetadataDate) => {
         setIsEditing(false);
-        setIsSaving(true);
 
         const { dateTime, timestamp: editedTime } = pickedTime;
-        if (editedTime != originalDate.getTime()) {
-            // If not same as before.
-            try {
-                // [Note: Don't modify offsetTime when editing date via picker]
-                //
-                // Use the updated date time (both in its canonical dateTime
-                // form, and also as in the epoch timestamp), but don't use the
-                // offset.
-                //
-                // The offset here will be the offset of the computer where this
-                // user is making this edit, not the offset of the place where
-                // the photo was taken. In a future iteration of the date time
-                // editor, we can provide functionality for the user to edit the
-                // associated offset, but right now it is not even surfaced, so
-                // don't also potentially overwrite it.
-                await updateRemotePublicMagicMetadata(file, {
-                    dateTime,
-                    editedTime,
-                });
-
-                scheduleUpdate();
-            } catch (e) {
-                onGenericError(e);
-            }
+        if (editedTime == originalDate.getTime()) {
+            // Same as before.
+            return;
         }
 
+        setIsSaving(true);
+        try {
+            // [Note: Don't modify offsetTime when editing date via picker]
+            //
+            // Use the updated date time (both in its canonical dateTime form,
+            // and also as in the epoch timestamp), but don't use the offset.
+            //
+            // The offset here will be the offset of the computer where this
+            // user is making this edit, not the offset of the place where the
+            // photo was taken. In a future iteration of the date time editor,
+            // we can provide functionality for the user to edit the associated
+            // offset, but right now it is not even surfaced, so don't also
+            // potentially overwrite it.
+            await updateRemotePublicMagicMetadata(file, {
+                dateTime,
+                editedTime,
+            });
+
+            scheduleUpdate();
+        } catch (e) {
+            onGenericError(e);
+        }
         setIsSaving(false);
     };
 
