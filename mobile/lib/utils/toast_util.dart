@@ -11,6 +11,8 @@ void showToast(
   String message, {
   toastLength = Toast.LENGTH_LONG,
   int iosLongToastLengthInSec = 2,
+  ToastGravity gravity = ToastGravity.BOTTOM,
+  EasyLoadingToastPosition position = EasyLoadingToastPosition.bottom,
 }) async {
   if (Platform.isAndroid) {
     await Fluttertoast.cancel();
@@ -18,7 +20,7 @@ void showToast(
       Fluttertoast.showToast(
         msg: message,
         toastLength: toastLength,
-        gravity: ToastGravity.BOTTOM,
+        gravity: gravity,
         timeInSecForIosWeb: 1,
         backgroundColor: Theme.of(context).colorScheme.toastBackgroundColor,
         textColor: Theme.of(context).colorScheme.toastTextColor,
@@ -39,7 +41,7 @@ void showToast(
           seconds:
               (toastLength == Toast.LENGTH_LONG ? iosLongToastLengthInSec : 1),
         ),
-        toastPosition: EasyLoadingToastPosition.bottom,
+        toastPosition: position,
         dismissOnTap: false,
       ),
     );

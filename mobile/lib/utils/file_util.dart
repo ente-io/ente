@@ -254,7 +254,7 @@ Future<_LivePhoto?> _downloadLivePhoto(
             if (compressResult == null) {
               throw Exception("Failed to compress file");
             } else {
-              imageConvertedFile = compressResult;
+              imageConvertedFile = File(compressResult.path);
             }
           }
           imageFileCache = await DefaultCacheManager().putFile(
@@ -316,7 +316,7 @@ Future<File?> _downloadAndCache(
       if (compressResult == null) {
         throw Exception("Failed to convert heic to jpg");
       } else {
-        outputFile = compressResult;
+        outputFile = File(compressResult.path);
       }
       await decryptedFile.delete();
     }

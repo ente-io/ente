@@ -15,6 +15,7 @@ class VideoWidget extends StatefulWidget {
   final Function(bool)? playbackCallback;
   final bool isFromMemories;
   final void Function() onStreamChange;
+  final bool isPreviewPlayer;
 
   const VideoWidget(
     this.file,
@@ -24,6 +25,7 @@ class VideoWidget extends StatefulWidget {
     required this.isFromMemories,
     // ignore: unused_element
     required this.onStreamChange,
+    required this.isPreviewPlayer,
   });
 
   @override
@@ -152,7 +154,7 @@ class _VideoWidgetState extends State<VideoWidget> {
                               PreviewStatusWidget(
                                 showControls: value,
                                 file: widget.file,
-                                isPreviewPlayer: true,
+                                isPreviewPlayer: widget.isPreviewPlayer,
                                 onStreamChange: widget.onStreamChange,
                               ),
                               SeekBarAndDuration(

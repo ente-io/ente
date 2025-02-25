@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import "package:media_kit/media_kit.dart";
 import "package:media_kit_video/media_kit_video.dart";
 import 'package:motion_photos/motion_photos.dart';
+import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -202,6 +203,7 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
           ).ignore();
         }
         return motionPhoto.getMotionVideoFile(
+          await getTemporaryDirectory(),
           index: index,
         );
       } else if (_enteFile.isMotionPhoto && _enteFile.canEditMetaInfo) {

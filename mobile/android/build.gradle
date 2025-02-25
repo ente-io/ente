@@ -13,17 +13,17 @@ allprojects {
         }
     }
     ext {
-        compileSdkVersion   = 34
-        targetSdkVersion    = 34
+        compileSdkVersion   = 35
+        targetSdkVersion    = 35
         appCompatVersion    = "1.7.0"
     }
 }
 
-rootProject.buildDir = '../build'
+rootProject.buildDir = "../build"
 
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-    project.evaluationDependsOn(':app')
+    project.evaluationDependsOn(":app")
 }
 
 tasks.register("clean", Delete) {
