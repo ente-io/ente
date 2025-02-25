@@ -1185,12 +1185,15 @@ class FileUploader {
       file.metadataDecryptionHeader = metadataDecryptionHeader;
       return file;
     } on DioException catch (e) {
-      if (e.response?.statusCode == 413) {
+      final int statusCode = e.response?.statusCode ?? -1;
+      if (statusCode == 413) {
         throw FileTooLargeForPlanError();
-      } else if (e.response?.statusCode == 426) {
+      } else if (statusCode == 426) {
         _onStorageLimitExceeded();
-      } else if (attempt < kMaximumUploadAttempts) {
-        _logger.info("Upload file failed, will retry in 3 seconds");
+      } else if (attempt < kMaximumUploadAttempts && statusCode == -1) {
+        // retry when DioException contains no response/status code
+        _logger
+            .info("Upload file (${file.tag}) failed, will retry in 3 seconds");
         await Future.delayed(const Duration(seconds: 3));
         return _uploadFile(
           file,
@@ -1209,6 +1212,8 @@ class FileUploader {
           attempt: attempt + 1,
           pubMetadata: pubMetadata,
         );
+      } else {
+        _logger.severe("Failed to upload file ${file.tag}", e);
       }
       rethrow;
     }
@@ -1253,10 +1258,12 @@ class FileUploader {
       file.metadataDecryptionHeader = metadataDecryptionHeader;
       return file;
     } on DioException catch (e) {
-      if (e.response?.statusCode == 426) {
+      final int statusCode = e.response?.statusCode ?? -1;
+      if (statusCode == 426) {
         _onStorageLimitExceeded();
-      } else if (attempt < kMaximumUploadAttempts) {
-        _logger.info("Update file failed, will retry in 3 seconds");
+      } else if (attempt < kMaximumUploadAttempts && statusCode == -1) {
+        _logger
+            .info("Update file (${file.tag}) failed, will retry in 3 seconds");
         await Future.delayed(const Duration(seconds: 3));
         return _updateFile(
           file,
@@ -1270,6 +1277,8 @@ class FileUploader {
           metadataDecryptionHeader,
           attempt: attempt + 1,
         );
+      } else {
+        _logger.severe("Failed to update file ${file.tag}", e);
       }
       rethrow;
     }
