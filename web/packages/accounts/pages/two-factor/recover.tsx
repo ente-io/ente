@@ -92,6 +92,8 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
             }
         };
         void main();
+        // TODO:
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const recover: SingleInputFormProps["callback"] = async (
