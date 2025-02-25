@@ -10,3 +10,9 @@ automatically deleted from Trash after 30 days. You can manaully select photos
 to permanently delete or completely empty the trash if you wish.
 
 Items in trash are included in your used storage calculation.
+
+## Recovery
+
+If you have deleted items accidentally, you can recover them from Trash by
+selecting these items, and clicking the "Restore" button on the action bar that
+pops up.

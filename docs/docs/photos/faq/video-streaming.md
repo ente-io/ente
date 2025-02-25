@@ -1,10 +1,10 @@
 ---
-title: Video Streaming FAQ
+title: Video streaming FAQ
 description:
-    Frequently asked questions about Ente's Video Streaming feature
+    Frequently asked questions about Ente's video streaming feature
 ---
 
-# Video Streaming
+# Video streaming
 
 > [!NOTE]
 >
@@ -31,8 +31,8 @@ You can open these videos by tapping on them.
 Processed videos will show a `Play stream` button, clicking which will load and
 play the stream.
 
-Clicking on the `Info` icon within the original video will show details
-about the generated stream.
+Clicking on the `Info` icon within the original video will show details about
+the generated stream.
 
 ### What is a stream?
 

@@ -505,5 +505,10 @@
   "selectAll": "Pasirinkti viską",
   "deleteDuplicates": "Ištrinti dublikatus",
   "plainHTML": "Grynasis HTML",
+  "tellUsWhatYouThink": "Pasakykite mums, ką manote",
+  "giveUsAStarOnGithub": "Suteikite mums žvaigždutę platformoje „Github“",
+  "free5GB": "5 GB nemokami programai „<bold-green>ente</bold-green>“ nuotraukos",
+  "loginWithAuthAccount": "Prisijungti su jūsų „Auth“ paskyra",
+  "freeStorageOffer": "10 % nuolaida programai „<bold-green>ente</bold-green>“ nuotraukos",
   "freeStorageOfferDescription": "Naudokite kodą „AUTH“, kad gautumėte 10 % nuolaida pirmiesiems metams. "
 }
