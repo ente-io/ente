@@ -31,6 +31,7 @@ import {
     changeFileName,
     updateExistingFilePubMetadata,
 } from "@/gallery/services/file";
+import { formattedByteSize } from "@/gallery/utils/units";
 import { type EnteFile } from "@/media/file";
 import {
     fileCreationPhotoDate,
@@ -59,7 +60,6 @@ import {
     type AnnotatedFaceID,
 } from "@/new/photos/services/ml";
 import { updateMapEnabled } from "@/new/photos/services/settings";
-import { formattedByteSize } from "@/new/photos/utils/units";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import SingleInputForm, {
     type SingleInputFormProps,

@@ -8,6 +8,7 @@ import {
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
+import { bytesInGB, formattedStorageByteSize } from "@/gallery/utils/units";
 import { useUserDetailsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { useWrapAsyncOperation } from "@/new/photos/components/utils/use-wrap-async";
 import type {
@@ -33,7 +34,6 @@ import {
     redirectToPaymentsApp,
     userDetailsAddOnBonuses,
 } from "@/new/photos/services/user-details";
-import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { openURL } from "@/new/photos/utils/web";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";

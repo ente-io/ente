@@ -1,5 +1,6 @@
 import { Overlay } from "@/base/components/containers";
 import type { ButtonishProps } from "@/base/components/mui";
+import { bytesInGB, formattedStorageByteSize } from "@/gallery/utils/units";
 import { UnstyledButton } from "@/new/photos/components/UnstyledButton";
 import type { UserDetails } from "@/new/photos/services/user-details";
 import {
@@ -7,7 +8,6 @@ import {
     familyUsage,
     isPartOfFamilyWithOtherMembers,
 } from "@/new/photos/services/user-details";
-import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CircleIcon from "@mui/icons-material/Circle";
 import {
