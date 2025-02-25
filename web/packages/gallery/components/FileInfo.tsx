@@ -87,7 +87,7 @@ import {
     type ButtonProps,
     type DialogProps,
 } from "@mui/material";
-import { Formik } from "formik";
+import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as Yup from "yup";
@@ -540,7 +540,7 @@ const EditButton: React.FC<EditButtonProps> = ({ onClick, loading }) => (
 );
 
 interface CaptionFormValues {
-    caption: string;
+    caption: string | undefined;
 }
 
 type CaptionProps = Pick<
@@ -566,6 +566,7 @@ const Caption: React.FC<CaptionProps> = ({
 
     const onSubmit = async (values: CaptionFormValues) => {
         const newCaption = values.caption;
+        if (!newCaption) return;
         if (caption == newCaption) {
             return;
         }
@@ -585,74 +586,63 @@ const Caption: React.FC<CaptionProps> = ({
         setIsSaving(false);
     };
 
+    const { values, errors, handleChange, handleSubmit, resetForm } =
+        useFormik<CaptionFormValues>({
+            initialValues: { caption },
+            validationSchema: Yup.object().shape({
+                caption: Yup.string().max(5000, t("caption_character_limit")),
+            }),
+            validateOnBlur: false,
+            onSubmit,
+        });
+
     if (!caption?.length && !allowEdits) {
         return <></>;
     }
 
     return (
         <Box sx={{ p: 1 }}>
-            <Formik<CaptionFormValues>
-                // @ts-ignore
-                initialValues={{ caption }}
-                validationSchema={Yup.object().shape({
-                    caption: Yup.string().max(
-                        5000,
-                        t("caption_character_limit"),
-                    ),
-                })}
-                validateOnBlur={false}
-                onSubmit={onSubmit}
-            >
-                {({
-                    values,
-                    errors,
-                    handleChange,
-                    handleSubmit,
-                    resetForm,
-                }) => (
-                    <form noValidate onSubmit={handleSubmit}>
-                        <TextField
-                            hiddenLabel
-                            fullWidth
-                            id="caption"
-                            name="caption"
-                            type="text"
-                            multiline
-                            placeholder={t("caption_placeholder")}
-                            value={values.caption}
-                            onChange={handleChange("caption")}
-                            error={Boolean(errors.caption)}
-                            helperText={errors.caption}
-                            disabled={!allowEdits || isSaving}
-                        />
-                        {values.caption !== caption && (
-                            <FlexWrapper justifyContent={"flex-end"}>
-                                <IconButton type="submit" disabled={isSaving}>
-                                    {isSaving ? (
-                                        <CircularProgress
-                                            size={"18px"}
-                                            color="inherit"
-                                        />
-                                    ) : (
-                                        <DoneIcon />
-                                    )}
-                                </IconButton>
-                                <IconButton
-                                    onClick={() =>
-                                        resetForm({
-                                            values: { caption: caption ?? "" },
-                                            touched: { caption: false },
-                                        })
-                                    }
-                                    disabled={isSaving}
-                                >
-                                    <CloseIcon />
-                                </IconButton>
-                            </FlexWrapper>
-                        )}
-                    </form>
+            <form noValidate onSubmit={handleSubmit}>
+                <TextField
+                    hiddenLabel
+                    fullWidth
+                    id="caption"
+                    name="caption"
+                    type="text"
+                    multiline
+                    placeholder={t("caption_placeholder")}
+                    value={values.caption}
+                    onChange={handleChange("caption")}
+                    error={Boolean(errors.caption)}
+                    helperText={errors.caption}
+                    disabled={!allowEdits || isSaving}
+                />
+                {values.caption !== caption && (
+                    <FlexWrapper justifyContent={"flex-end"}>
+                        <IconButton type="submit" disabled={isSaving}>
+                            {isSaving ? (
+                                <CircularProgress
+                                    size={"18px"}
+                                    color="inherit"
+                                />
+                            ) : (
+                                <DoneIcon />
+                            )}
+                        </IconButton>
+                        <IconButton
+                            onClick={() =>
+                                resetForm({
+                                    values: { caption: caption ?? "" },
+                                    touched: { caption: false },
+                                })
+                            }
+                            disabled={isSaving}
+                        >
+                            <CloseIcon />
+                        </IconButton>
+                    </FlexWrapper>
                 )}
-            </Formik>
+            </form>
         </Box>
     );
 };
