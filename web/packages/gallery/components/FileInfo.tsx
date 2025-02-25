@@ -231,12 +231,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 />
                 <CreationTime {...{ file, allowEdits, scheduleUpdate }} />
                 <FileName
-                    {...{
-                        file,
-                        exifInfo: annotatedExif,
-                        allowEdits,
-                        scheduleUpdate,
-                    }}
+                    {...{ file, annotatedExif, allowEdits, scheduleUpdate }}
                 />
 
                 {annotatedExif?.takenOnDevice && (
@@ -735,12 +730,12 @@ const CreationTime: React.FC<CreationTimeProps> = ({
 
 type FileNameProps = Pick<FileInfoProps, "allowEdits" | "scheduleUpdate"> & {
     file: EnteFile;
-    exifInfo: AnnotatedExif | undefined;
+    annotatedExif: AnnotatedExif | undefined;
 };
 
 const FileName: React.FC<FileNameProps> = ({
     file,
-    exifInfo,
+    annotatedExif,
     allowEdits,
     scheduleUpdate,
 }) => {
@@ -779,7 +774,7 @@ const FileName: React.FC<FileNameProps> = ({
                     )
                 }
                 title={[fileName, extension].join(".")}
-                caption={getCaption(file, exifInfo)}
+                caption={getCaption(file, annotatedExif)}
                 trailingButton={
                     allowEdits && <EditButton onClick={openEditMode} />
                 }
