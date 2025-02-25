@@ -8,6 +8,7 @@ import {
     OverflowMenuOption,
 } from "@/base/components/OverflowMenu";
 import { Ellipsized2LineTypography } from "@/base/components/Typography";
+import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -54,10 +55,9 @@ import {
     removeSelectedDuplicateGroups,
     type DuplicateGroup,
 } from "../services/dedup";
-import { usePhotosAppContext } from "../types/context";
 
 const Page: React.FC = () => {
-    const { onGenericError } = usePhotosAppContext();
+    const { onGenericError } = useBaseContext();
 
     const [state, dispatch] = useReducer(dedupReducer, initialDedupState);
 

@@ -129,9 +129,8 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
     setFilesDownloadProgressAttributesCreator,
     isActiveCollectionDownloadInProgress,
 }) => {
-    const { showMiniDialog } = useBaseContext();
-    const { showLoadingBar, hideLoadingBar, onGenericError } =
-        usePhotosAppContext();
+    const { showMiniDialog, onGenericError } = useBaseContext();
+    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
     const { syncWithRemote } = useContext(GalleryContext);
     const overFlowMenuIconRef = useRef<SVGSVGElement>(null);
 

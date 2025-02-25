@@ -6,7 +6,6 @@ import {
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
-import { usePhotosAppContext } from "@/new/photos/types/context";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";
@@ -33,8 +32,7 @@ export const AuthenticateUser: React.FC<AuthenticateUserProps> = ({
     onClose,
     onAuthenticate,
 }) => {
-    const { logout, showMiniDialog } = useBaseContext();
-    const { onGenericError } = usePhotosAppContext();
+    const { logout, showMiniDialog, onGenericError } = useBaseContext();
     const [user, setUser] = useState<User>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
 

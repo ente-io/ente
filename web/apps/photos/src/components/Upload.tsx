@@ -131,9 +131,8 @@ export const Upload: React.FC<UploadProps> = ({
     showSessionExpiredMessage,
     ...props
 }) => {
-    const { showMiniDialog } = useBaseContext();
-    const { showNotification, onGenericError, watchFolderView } =
-        usePhotosAppContext();
+    const { showMiniDialog, onGenericError } = useBaseContext();
+    const { showNotification, watchFolderView } = usePhotosAppContext();
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
