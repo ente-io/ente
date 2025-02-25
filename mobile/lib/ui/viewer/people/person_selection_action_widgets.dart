@@ -94,6 +94,7 @@ class _LinkContactToPersonSelectionPageState
             _logger.severe(
               "Failed to load _personEntitiesWithThumnailFile",
               snapshot.error,
+              snapshot.stackTrace,
             );
             return const Center(child: Icon(Icons.error_outline_rounded));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {

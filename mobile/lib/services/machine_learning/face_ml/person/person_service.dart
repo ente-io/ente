@@ -487,40 +487,45 @@ class PersonService {
   Future<EnteFile?> getThumbnailFileOfPerson(
     PersonEntity person,
   ) async {
-    if (person.data.hasAvatar()) {
-      final avatarFileID = tryGetFileIdFromFaceId(person.data.avatarFaceID!);
-      if (avatarFileID != null) {
-        final file = (await FilesDB.instance
-            .getFileIDToFileFromIDs([avatarFileID]))[avatarFileID];
-        if (file != null) {
-          return file;
-        } else {
-          logger.severe("Avatar File not found for face ${person.data}");
+    try {
+      if (person.data.hasAvatar()) {
+        final avatarFileID = tryGetFileIdFromFaceId(person.data.avatarFaceID!);
+        if (avatarFileID != null) {
+          final file = (await FilesDB.instance
+              .getFileIDToFileFromIDs([avatarFileID]))[avatarFileID];
+          if (file != null) {
+            return file;
+          } else {
+            logger.severe("Avatar File not found for face ${person.data}");
+          }
         }
       }
-    }
 
-    final clustersToFiles =
-        await SearchService.instance.getClusterFilesForPersonID(
-      person.remoteID,
-    );
-
-    EnteFile? resultFile;
-    // iterate over all clusters and get the first file
-    for (final clusterFiles in clustersToFiles.values) {
-      for (final file in clusterFiles) {
-        resultFile ??= file;
-        if (resultFile.creationTime! < file.creationTime!) {
-          resultFile = file;
-        }
-      }
-    }
-    if (resultFile == null) {
-      logger.warning(
-        "Person ${kDebugMode ? person.data.name : person.remoteID} has no files",
+      final clustersToFiles =
+          await SearchService.instance.getClusterFilesForPersonID(
+        person.remoteID,
       );
+
+      EnteFile? resultFile;
+      // iterate over all clusters and get the first file
+      for (final clusterFiles in clustersToFiles.values) {
+        for (final file in clusterFiles) {
+          resultFile ??= file;
+          if (resultFile.creationTime! < file.creationTime!) {
+            resultFile = file;
+          }
+        }
+      }
+      if (resultFile == null) {
+        logger.warning(
+          "Person ${kDebugMode ? person.data.name : person.remoteID} has no files",
+        );
+        return null;
+      }
+      return resultFile;
+    } catch (e, s) {
+      logger.severe("Error in getThumbnailFileOfPerson", e, s);
       return null;
     }
-    return resultFile;
   }
 }
