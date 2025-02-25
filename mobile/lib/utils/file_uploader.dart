@@ -751,6 +751,11 @@ class FileUploader {
       if (SyncService.instance.shouldStopSync()) {
         throw SyncStopRequestedError();
       }
+      final stillLocked = await _uploadLocks.isLocked(lockKey, _processType.toString());
+      if (!stillLocked) {
+        _logger.warning('file ${file.tag} report paused is missing');
+        throw LockFreedError();
+      }
 
       EnteFile remoteFile;
       if (isUpdatedFile) {
