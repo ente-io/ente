@@ -141,7 +141,7 @@ func (c *Controller) GetFileData(ctx *gin.Context, req fileData.GetFileData) (*f
 		return nil, stacktrace.Propagate(err, "")
 	}
 	if len(doRows) == 0 || doRows[0].IsDeleted {
-		return nil, stacktrace.Propagate(ente.ErrNotFound, "")
+		return nil, stacktrace.Propagate(&ente.ErrNotFoundError, "")
 	}
 	s3MetaObject, err := c.fetchS3FileMetadata(context.Background(), doRows[0], doRows[0].LatestBucket)
 	if err != nil {

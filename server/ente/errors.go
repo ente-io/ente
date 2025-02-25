@@ -24,6 +24,12 @@ var ErrIncorrectTOTP = errors.New("incorrect TOTP")
 // ErrNotFound is returned when the requested resource was not found
 var ErrNotFound = errors.New("not found")
 
+var ErrCollectionDeleted = &ApiError{
+	Code:           "COLLECTION_DELETED",
+	Message:        "",
+	HttpStatusCode: http.StatusNotFound,
+}
+
 var ErrFileLimitReached = errors.New("file limit reached")
 
 // ErrBadRequest is returned when a bad request is encountered
@@ -151,6 +157,12 @@ var ErrNotFoundError = ApiError{
 	Code:           NotFoundError,
 	Message:        "",
 	HttpStatusCode: http.StatusNotFound,
+}
+
+var ErrObjSizeFetchFailed = &ApiError{
+	Code:           "OBJECT_SIZE_FETCH_FAILED",
+	Message:        "",
+	HttpStatusCode: http.StatusServiceUnavailable,
 }
 
 var ErrUserNotFound = &ApiError{
